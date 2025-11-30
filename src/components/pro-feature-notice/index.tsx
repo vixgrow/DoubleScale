@@ -18,12 +18,14 @@ interface ProFeatureNoticeProps {
 	featureName: string;
 	description?: string;
 	upgradeUrl?: string;
+	features?: string[];
 }
 
 export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
 	upgradeUrl = config.getUrlQuillCRMPro(),
+	features = [],
 }) => {
 	return (
 		<div className="qcrm-pro-feature-notice">
@@ -44,37 +46,19 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							{description}
 						</p>
 					)}
-					<div className="qcrm-pro-feature-notice__features">
-						<h3>{__('Pro Features Include:', 'quillcrm')}</h3>
-						<ul>
-							<li>
-								<AlertCircle size={16} />
-								{__(
-									'Advanced Sales Pipeline Management',
-									'quillcrm'
-								)}
-							</li>
-							<li>
-								<AlertCircle size={16} />
-								{__('Deal Tracking & Analytics', 'quillcrm')}
-							</li>
-							<li>
-								<AlertCircle size={16} />
-								{__('Activity Timeline & Notes', 'quillcrm')}
-							</li>
-							<li>
-								<AlertCircle size={16} />
-								{__('Custom Pipeline Stages', 'quillcrm')}
-							</li>
-							<li>
-								<AlertCircle size={16} />
-								{__(
-									'Deal Automation Triggers & Actions',
-									'quillcrm'
-								)}
-							</li>
-						</ul>
-					</div>
+					{features.length > 0 && (
+						<div className="qcrm-pro-feature-notice__features">
+							<h3>{__('Pro Features Include:', 'quillcrm')}</h3>
+							<ul>
+								{features.map((feature) => (
+									<li key={feature}>
+										<AlertCircle size={16} />
+										{feature}
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
 					<div className="qcrm-pro-feature-notice__actions">
 						<a
 							href={upgradeUrl}

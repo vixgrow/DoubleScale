@@ -29,6 +29,7 @@ import {
 	LoadingSpinner,
 } from '@quillcrm/components';
 import { useImportContext } from '../contexts';
+import ConfigAPI from '@quillcrm/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 
@@ -103,6 +104,16 @@ const CsvUpload: React.FC = () => {
 				};
 				dispatch({ type: 'SET_FILE_DATA', payload: typedResponse });
 				updateValues('file_name', typedResponse.file_name);
+
+				// Set sourceData from importer fields for CSV
+				const importers = ConfigAPI.getImporters();
+				const csvImporter = importers['csv'];
+				if (csvImporter && csvImporter.fields) {
+					dispatch({
+						type: 'SET_SOURCE_DATA',
+						payload: csvImporter.fields,
+					});
+				}
 			}, 100);
 		} catch (error) {
 			console.error('Upload error:', error);

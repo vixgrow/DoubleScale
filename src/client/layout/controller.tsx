@@ -1,7 +1,12 @@
 /**
  * QuillCRM dependencies
  */
-import { registerAdminPage } from '@quillcrm/navigation';
+import {
+	registerAdminPage,
+	useNavigate,
+	useParams,
+	getToLink,
+} from '@quillcrm/navigation';
 
 /**
  * WordPress dependencies
@@ -24,8 +29,6 @@ import Tags from '../pages/contacts/tags';
 // import CustomFields from '../pages/custom-fields'; // Moved to Pro
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
-import Forms from '../pages/forms';
-import Form from '../pages/form';
 // import LinkTriggers from '../pages/link-triggers'; // Moved to Pro
 // import LinkTrigger from '../pages/link-trigger'; // Moved to Pro
 import Integrations from '../pages/intergrations';
@@ -71,12 +74,20 @@ import GetStart from '../pages/get-start';
 
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const navigate = useNavigate();
+	const params = useParams();
+
+	// Navigation helper for Pro components
+	const handleNavigate = (path: string) => navigate(getToLink(path));
 
 	const handleBackToDashboard = () => {
 		const ajaxUrl = (window as Window & { ajaxurl?: string }).ajaxurl ?? '';
 
 		if (ajaxUrl.includes('admin-ajax.php')) {
-			window.location.href = ajaxUrl.replace('admin-ajax.php', 'index.php');
+			window.location.href = ajaxUrl.replace(
+				'admin-ajax.php',
+				'index.php'
+			);
 			return;
 		}
 
@@ -211,7 +222,7 @@ export const Controller = ({ page }) => {
 					</div>
 				</div>
 			</div>
-			<page.component />
+			<page.component navigate={handleNavigate} params={params} />
 		</motion.div>
 	);
 };
@@ -229,7 +240,7 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('start', {
@@ -245,7 +256,7 @@ registerAdminPage('contact', {
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('lists', {
@@ -266,7 +277,15 @@ registerAdminPage('tags', {
 // Custom Fields page registration - now handled by Pro plugin
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
-	component: () => <div>{__('Custom Fields is a Pro feature', 'quillcrm')}</div>,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Custom Fields', 'quillcrm')}
+			description={__(
+				'Custom Fields is a Pro feature. Please upgrade to the Pro plan to access this feature.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -316,11 +335,18 @@ registerAdminPage('sales-pipeline', {
 				'Manage your sales pipeline, track deals through stages, and close more sales with QuillCRM Pro.',
 				'quillcrm'
 			)}
+			features={[
+				__('Advanced Sales Pipeline Management', 'quillcrm'),
+				__('Deal Tracking & Analytics', 'quillcrm'),
+				__('Activity Timeline & Notes', 'quillcrm'),
+				__('Custom Pipeline Stages', 'quillcrm'),
+				__('Deal Automation Triggers & Actions', 'quillcrm'),
+			]}
 		/>
 	), // Pro plugin overrides with actual pipeline
 	label: __('Pipelines', 'quillcrm'),
 	icon: <PiplelinesIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('automations', {
@@ -347,7 +373,15 @@ registerAdminPage('automation-reports', {
 
 registerAdminPage('forms', {
 	path: 'forms',
-	component: () => <Forms />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Forms', 'quillcrm')}
+			description={__(
+				'Create and manage forms to capture leads and grow your contact list with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Forms', 'quillcrm'),
 	icon: <FormsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -355,7 +389,15 @@ registerAdminPage('forms', {
 
 registerAdminPage('form', {
 	path: 'forms/:id/:tab?',
-	component: () => <Form />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Form', 'quillcrm')}
+			description={__(
+				'Create and manage a form to capture leads and grow your contact list with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Form', 'quillcrm'),
 	hidden: true,
 });
@@ -428,7 +470,7 @@ registerAdminPage('analytics-and-reports', {
 	component: () => <AnalyticsAndReports />,
 	label: __('Analytics', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('deals-analytics', {
@@ -460,7 +502,7 @@ registerAdminPage('my-reports', {
 	component: () => <AnalyticsAndReports defaultTab="my-reports" />,
 	label: __('My Reports', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_sales_rep'],
 });
 
 // Wrapper components for analytics pages that need dashboard data

@@ -148,9 +148,11 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 						className="flex items-center space-x-2"
 					>
 						<span>
-							{source === 'csv'
-								? __('Next', 'quillcrm')
-								: __('Import Contacts', 'quillcrm')}
+							{isFetching
+								? __('Loading...', 'quillcrm')
+								: source === 'csv'
+									? __('Next', 'quillcrm')
+									: __('Import Contacts', 'quillcrm')}
 						</span>
 						<ArrowRight className="w-4 h-4" />
 					</Button>

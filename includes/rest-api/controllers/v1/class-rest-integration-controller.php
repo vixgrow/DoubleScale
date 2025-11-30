@@ -128,6 +128,11 @@ class REST_Integration_Controller extends REST_Controller {
 	 */
 	public function validate_item_settings( $value, $request, $param ) {
 		try {
+			// Allow empty settings for disconnection
+			if ( empty( $value ) ) {
+				return true;
+			}
+
 			$slug              = $request->get_param( 'slug' );
 			$integration       = Integrations_Manager::instance()->get_integration( $slug );
 			$attributes_schema = $integration->rest_controller->get_settings_schema();

@@ -319,47 +319,24 @@ export const getFilteredRulesGroups = () => {
 };
 
 /**
- * Get filtered goals (excluding disabled groups)
- * @returns Filtered goals object
+ * Get filtered goals (including disabled groups for UI display)
+ * @returns Goals object (including disabled groups)
  */
 export const getFilteredGoals = () => {
 	const allGoals = ConfigAPI.getAutomationGoals();
-	const filteredGoals: any = {};
-
-	Object.keys(allGoals).forEach((sourceKey) => {
-		const source = allGoals[sourceKey];
-		const filteredGroups: any = {};
-
-		Object.keys(source.groups).forEach((groupKey) => {
-			const group = source.groups[groupKey];
-			// Filter out disabled groups
-			if (!group.is_disabled) {
-				filteredGroups[groupKey] = group;
-			}
-		});
-
-		// Only include source if it has groups
-		if (Object.keys(filteredGroups).length > 0) {
-			filteredGoals[sourceKey] = {
-				...source,
-				groups: filteredGroups
-			};
-		}
-	});
-
-	return filteredGoals;
+	return allGoals;
 };
 
 /**
- * Get filtered goals by trigger (excluding disabled groups and groups not matching the trigger)
+ * Get filtered goals by trigger (including disabled groups, but excluding groups not matching the trigger)
  * @param triggerSlug - Trigger slug to filter by
- * @returns Filtered goals object
+ * @returns Filtered goals object (including disabled groups for UI display)
  */
 export const getFilteredGoalsByTrigger = (triggerSlug?: string) => {
 	const allGoals = ConfigAPI.getAutomationGoals();
 
 	if (!triggerSlug) {
-		return getFilteredGoals();
+		return allGoals;
 	}
 
 	const filteredGoals: any = {};
@@ -371,13 +348,9 @@ export const getFilteredGoalsByTrigger = (triggerSlug?: string) => {
 		Object.keys(source.groups).forEach((groupKey) => {
 			const group = source.groups[groupKey];
 
-			// Filter out disabled groups
-			if (group.is_disabled) {
-				return;
-			}
-
 			// Include group if it has no triggers property (available for all)
 			// or if the triggers array includes the current trigger
+			// NOTE: We don't filter out disabled groups - they will be shown as disabled in the UI
 			if (!group.triggers || group.triggers.includes(triggerSlug)) {
 				filteredGroups[groupKey] = group;
 			}

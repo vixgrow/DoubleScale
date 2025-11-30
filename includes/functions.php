@@ -333,3 +333,28 @@ function quillcrm_get_contact_meta( $contact_id, $meta_key = '', $single = false
 function quillcrm_delete_contact_meta( $contact_id, $meta_key, $meta_value = '' ) {
 	return delete_metadata( 'contact', $contact_id, $meta_key, $meta_value );
 }
+
+
+/**
+ * Get meta arguments from database
+ *
+ * @param int $meta_id Meta ID
+ * @return array|false
+ */
+function quillcrm_get_meta_args( $meta_id ) {
+	global $wpdb;
+
+	$meta = $wpdb->get_row(
+		$wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
+			$meta_id
+		),
+		ARRAY_A
+	);
+
+	if ( ! $meta || empty( $meta['value'] ) ) {
+		return false;
+	}
+
+	return maybe_unserialize( $meta['value'] );
+}

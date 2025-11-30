@@ -115,7 +115,9 @@ class Integration extends Integration_Abstract {
 	}
 }
 
-// Register the stub integration in free plugin
-// Pro plugin will override this registration
-Integrations_Manager::instance()->register( new Integration() );
+// Register the stub integration in free plugin ONLY if Pro is not active
+// Pro plugin will register the real Twilio integration instead
+if ( ! class_exists( 'QuillCRM_Pro\Automations\Integrations\Twilio\Integration' ) ) {
+	Integrations_Manager::instance()->register( new Integration() );
+}
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Mailchimp Rest Controller
  *
@@ -16,11 +17,13 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Mailchimp Rest Controller
  */
 class REST_Controller extends REST_Integration_Controller {
+
 
 	/**
 	 * Register the routes for the objects of the controller.
@@ -28,7 +31,7 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		parent::register_routes();
+		 parent::register_routes();
 
 		register_rest_route(
 			$this->namespace,
@@ -49,35 +52,35 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @return array
 	 */
 	public function get_settings_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'api_key' => array(
-					'label'       => __( 'API Key', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'list_id' => array(
-					'label'       => __( 'List ID', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'has_options' => true,
-					'endpoint'    => 'lists',
-					'conditions'  => array(
-						'api_key' => array(
-							'operator' => '!=',
-							'value'    => '',
-						),
-					),
-				),
-			),
-		);
+		 return array(
+			 'type'       => 'object',
+			 'properties' => array(
+				 'api_key' => array(
+					 'label'       => __( 'API Key', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'list_id' => array(
+					 'label'       => __( 'List ID', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+					 'has_options' => true,
+					 'endpoint'    => 'lists',
+					 'conditions'  => array(
+						 'api_key' => array(
+							 'operator' => '!=',
+							 'value'    => '',
+						 ),
+					 ),
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -109,6 +112,6 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_list_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

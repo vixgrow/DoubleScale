@@ -85,47 +85,60 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 					<div>
 						{isFetching && <Skeleton className="h-40 w-full" />}
 
-						{/* Integration-based importers: Show credentials first (step 1) */}
-						{importer &&
-							[
-								'mailerlite',
-								'activecampaign',
-								'hubspot',
-								'pipedrive',
-								'gohighlevel',
-							].includes(source) &&
-							importer.credentials &&
-							Object.keys(importer.credentials || {}).length >
-								0 &&
-							!importing &&
-							!isFetching &&
-							currentStep === 1 && (
-								<div>
-									<h3 className="text-lg font-semibold mb-4">
-										{__(
-											'Step 1: Enter API Credentials',
-											'quillcrm'
-										)}
-									</h3>
-									<ApiCredentials importer={importer} />
-								</div>
-							)}
+					{/* Integration-based importers: Show credentials first (step 1) */}
+					{importer &&
+						[
+							'mailerlite',
+							'activecampaign',
+							'hubspot',
+							'pipedrive',
+							'gohighlevel',
+						].includes(source) &&
+						importer.credentials &&
+						Object.keys(importer.credentials || {}).length >
+							0 &&
+						!importing &&
+						!isFetching &&
+						currentStep === 1 && (
+							<div>
+								<h3 className="text-lg font-semibold mb-4">
+									{__(
+										'Step 1: Enter API Credentials',
+										'quillcrm'
+									)}
+								</h3>
+								<ApiCredentials importer={importer} />
+							</div>
+						)}
 
-						{/* Other importers: Show field mapping directly */}
-						{!importing &&
-							!isFetching &&
-							![
-								'mailerlite',
-								'activecampaign',
-								'hubspot',
-								'pipedrive',
-								'gohighlevel',
-							].includes(source) && (
-								<div className="space-y-6">
-									<FieldMapping importer={importer} />
-									<ContactProfile />
-								</div>
-							)}
+					{/* FluentCRM and FunnelKit: Show field mapping with lists/tags after data loads */}
+					{!importing &&
+						!isFetching &&
+						['fluentcrm', 'wpfunnelkit'].includes(source) &&
+						sourceData && (
+							<div className="space-y-6">
+								<FieldMapping importer={importer} />
+								<ContactProfile />
+							</div>
+						)}
+
+					{/* Other importers: Show field mapping directly */}
+					{!importing &&
+						!isFetching &&
+						![
+							'mailerlite',
+							'activecampaign',
+							'hubspot',
+							'pipedrive',
+							'gohighlevel',
+							'fluentcrm',
+							'wpfunnelkit',
+						].includes(source) && (
+							<div className="space-y-6">
+								<FieldMapping importer={importer} />
+								<ContactProfile />
+							</div>
+						)}
 					</div>
 				)}
 

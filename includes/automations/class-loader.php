@@ -26,6 +26,7 @@ final class Loader {
 
 
 
+
 	/**
 	 * Class Instance.
 	 *
@@ -59,29 +60,7 @@ final class Loader {
 		add_action( 'quillcrm_loaded', array( $this, 'load_hooks' ) );
 	}
 
-	/**
-	 * Get meta arguments from database
-	 *
-	 * @param int $meta_id Meta ID
-	 * @return array|false
-	 */
-	private function get_meta_args( $meta_id ) {
-		global $wpdb;
 
-		$meta = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
-				$meta_id
-			),
-			ARRAY_A
-		);
-
-		if ( ! $meta || empty( $meta['value'] ) ) {
-			return false;
-		}
-
-		return maybe_unserialize( $meta['value'] );
-	}
 
 	/**
 	 * Load Hooks
@@ -126,7 +105,7 @@ final class Loader {
 		try {
 			// if this below condition is true this meaning i get args from meta_id from database and automation is integer from that meta_id
 			if ( is_numeric( $automation ) && $step_id == null && $automation_contact_id == null ) {
-				$args = $this->get_meta_args( $automation );
+				$args = quillcrm_get_meta_args( $automation );
 				if ( $args && count( $args ) >= 3 ) {
 					list($automation, $parent_step_id, $step_id, $automation_contact_id) = $args;
 				} else {

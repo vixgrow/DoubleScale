@@ -38,12 +38,12 @@ class Process {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Builder $query Query
-	 * @param array   $filters Filters
+	 * @param Builder $query Query builder instance
+	 * @param array   $filters Filters array
 	 *
 	 * @return void
 	 */
-	public function __construct( $query, $filters = array() ) {
+	public function __construct( Builder $query, array $filters = array() ) {
 		$this->filters = $filters;
 		$this->query   = $query;
 	}
@@ -70,16 +70,47 @@ class Process {
 	 *
 	 * @param array $filter Filter
 	 *
-	 * @return void
+	 * @return Builder Query builder (never null)
 	 */
 	public function add_filter( $filter ) {
+		// Validate filter structure
+		if ( ! isset( $filter['filter'] ) ) {
+			quillcrm_get_logger()->warning(
+				'Invalid filter structure - missing filter key',
+				array(
+					'filter'  => $filter,
+					'context' => 'contact_filters_process',
+				)
+			);
+			return $this->query;
+		}
+
 		$filter_class = Filters_Manager::instance()->get_filter( $filter['filter'] );
 
 		if ( ! $filter_class ) {
-			return;
+			quillcrm_get_logger()->warning(
+				'Filter class not found',
+				array(
+					'filter_type' => $filter['filter'],
+					'context'     => 'contact_filters_process',
+				)
+			);
+			return $this->query;
 		}
 
 		$query = $filter_class->apply( $this->query, $filter );
+
+		// Safety check: ensure apply() returned a valid query
+		if ( ! $query instanceof Builder ) {
+			quillcrm_get_logger()->error(
+				'Filter apply() did not return a valid query builder',
+				array(
+					'filter_type' => $filter['filter'],
+					'context'     => 'contact_filters_process',
+				)
+			);
+			return $this->query;
+		}
 
 		return $query;
 	}

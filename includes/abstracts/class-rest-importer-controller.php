@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Importer REST Controller
  * This class is responsible for handling the Importer REST API
@@ -17,11 +18,13 @@ use WP_REST_Server;
 use Exception;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Abstracts\Importer;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Rest Importer Controller
  */
 class REST_Importer_Controller extends REST_Controller {
+
 
 	/**
 	 * Importer.
@@ -76,7 +79,7 @@ class REST_Importer_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -89,6 +92,6 @@ class REST_Importer_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

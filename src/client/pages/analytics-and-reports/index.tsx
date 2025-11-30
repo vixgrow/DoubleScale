@@ -14,13 +14,14 @@ import { useDashboardData } from '../home/use-analytics';
 import CartAnalytics from '../home/cart-analytics';
 import { ProFeatureNotice } from '@quillcrm/components';
 
-
 interface AnalyticsAndReportsProps {
 	defaultTab?: string;
 }
 
-const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab }) => {
-	const { isDealOwner } = useCapabilities();
+const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
+	defaultTab,
+}) => {
+	const { isSalesRep } = useCapabilities();
 	const { data } = useDashboardData();
 
 	// Render content based on defaultTab prop
@@ -89,7 +90,7 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 				return data ? <CartAnalytics dashboardData={data} /> : null;
 			default:
 				// Default view for analytics-and-reports main page
-				if (isDealOwner()) {
+				if (isSalesRep()) {
 					return applyFilters(
 						'quillcrm_analytics_my_reports_content',
 						<ProFeatureNotice
@@ -109,13 +110,9 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 		}
 	};
 
-
-
 	return (
 		<>
-			<div className="space-y-6">
-				{renderContent()}
-			</div>
+			<div className="space-y-6">{renderContent()}</div>
 		</>
 	);
 };

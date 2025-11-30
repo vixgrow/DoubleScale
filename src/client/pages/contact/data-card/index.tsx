@@ -33,13 +33,14 @@ import {
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 const DataCard: React.FC = () => {
 	const { contact } = useContactContext();
 	const isEddActive = ConfigAPI.isEddActive();
 	const isWooActive = ConfigAPI.isWoocommerceActive();
 	const lmsActive = ConfigAPI.isLmsActive();
-
+	const isCrmManager = useCapabilities().isCrmManager();
 	if (!contact) {
 		return null;
 	}
@@ -67,11 +68,15 @@ const DataCard: React.FC = () => {
 		// { value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
-		{
-			value: 'automation',
-			label: 'Automation',
-			icon: <AutomationsIcon width={24} height={24} />,
-		},
+		...(isCrmManager
+			? [
+					{
+						value: 'automation',
+						label: 'Automation',
+						icon: <AutomationsIcon width={24} height={24} />,
+					},
+				]
+			: []),
 	];
 
 	// Conditionally add Purchase History tab

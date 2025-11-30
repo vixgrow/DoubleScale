@@ -175,6 +175,7 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							value={toEmail || contact?.email || ''}
 							onChange={(value) => setToEmail(value)}
 							type="text"
+							disabled={true}
 						/>
 						<Field
 							label={__('Subject', 'quillcrm')}

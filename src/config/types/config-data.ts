@@ -33,7 +33,7 @@ export type ConfigData = Record<string, unknown> & {
 
 export type UserCapabilities = {
 	quillcrm_crm_manager: boolean;
-	quillcrm_deal_owner: boolean;
+	quillcrm_sales_rep: boolean;
 };
 
 export type DefaultStage = {

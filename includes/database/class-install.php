@@ -26,7 +26,6 @@ use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Tracking_Table;
 use QuillCRM\Database\Migrations\Messages_Table;
-use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 // use QuillCRM\Database\Migrations\Link_Triggers_Table; // Moved to Pro
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
@@ -37,6 +36,30 @@ use QuillCRM\User_Roles\User_Roles;
  * Install class
  */
 class Install {
+
+	/**
+	 * Init
+	 *
+	 * @since 1.0.0
+	 */
+	public static function init() {
+		 add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+	}
+
+	/**
+	 * Check QuillCRM version and run the updater if required.
+	 *
+	 * This check is done on all requests and runs if the versions do not match.
+	 */
+	public static function check_version() {
+		$current_version = get_option( 'quillcrm_version' );
+		$plugin_version  = QUILLCRM_VERSION;
+
+		if ( version_compare( $current_version, $plugin_version, '<' ) ) {
+			self::install();
+			do_action( 'quillcrm_updated' );
+		}
+	}
 
 	/**
 	 * Multisite activation
@@ -79,8 +102,6 @@ class Install {
 		}
 	}
 
-
-
 	/**
 	 * Install
 	 *
@@ -110,7 +131,6 @@ class Install {
 				'task_meta'                    => Task_Meta_Table::class,
 				'tracking'                     => Tracking_Table::class,
 				'messages'                     => Messages_Table::class,
-				'forms'                        => Forms_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
@@ -133,5 +153,15 @@ class Install {
 		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		delete_transient( 'quillcrm_installing' );
 		User_Roles::add_roles_and_capabilities();
+		self::update_quillcrm_version();
+	}
+
+	/**
+	 * Update QuillCRM version to current.
+	 *
+	 * @since 1.0.0
+	 */
+	private static function update_quillcrm_version() {
+		 update_option( 'quillcrm_version', QUILLCRM_VERSION );
 	}
 }

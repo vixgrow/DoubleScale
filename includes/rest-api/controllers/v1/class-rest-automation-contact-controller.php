@@ -27,6 +27,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -278,7 +279,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function create_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
 	}
 
 	/**
@@ -289,7 +290,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
 	}
 
 	/**
@@ -300,7 +301,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function update_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
 	}
 
 	/**
@@ -311,6 +312,6 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
 	}
 }

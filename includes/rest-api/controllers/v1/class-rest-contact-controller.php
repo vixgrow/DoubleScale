@@ -555,15 +555,42 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'status'     => array(
-					 'description'  => __( 'Status of the contact.', 'quillcrm' ),
+				 'status'          => array(
+					 'description'  => __( 'Global status of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'unverified' ),
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'created_at' => array(
+				 'email_status'    => array(
+					 'description'  => __( 'Email subscription status.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'default'      => 'subscribed',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'sms_status'      => array(
+					 'description'  => __( 'SMS subscription status.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'default'      => 'subscribed',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'whatsapp_status' => array(
+					 'description'  => __( 'WhatsApp subscription status.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'default'      => 'subscribed',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'created_at'      => array(
 					 'type'        => 'string',
 					 'description' => 'Created at',
 					 'context'     => array( 'view', 'edit', 'embed' ),
@@ -1303,17 +1330,20 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	protected function prepare_contact( $request ) {
 		$contact = array(
-			'first_name' => $request->get_param( 'first_name' ),
-			'last_name'  => $request->get_param( 'last_name' ),
-			'email'      => $request->get_param( 'email' ),
-			'phone'      => $request->get_param( 'phone' ),
-			'address_1'  => $request->get_param( 'address_1' ),
-			'address_2'  => $request->get_param( 'address_2' ),
-			'city'       => $request->get_param( 'city' ),
-			'state'      => $request->get_param( 'state' ),
-			'country'    => $request->get_param( 'country' ),
-			'zip'        => $request->get_param( 'zip' ),
-			'status'     => $request->get_param( 'status' ),
+			'first_name'       => $request->get_param( 'first_name' ),
+			'last_name'        => $request->get_param( 'last_name' ),
+			'email'            => $request->get_param( 'email' ),
+			'phone'            => $request->get_param( 'phone' ),
+			'address_1'        => $request->get_param( 'address_1' ),
+			'address_2'        => $request->get_param( 'address_2' ),
+			'city'             => $request->get_param( 'city' ),
+			'state'            => $request->get_param( 'state' ),
+			'country'          => $request->get_param( 'country' ),
+			'zip'              => $request->get_param( 'zip' ),
+			'status'           => $request->get_param( 'status' ),
+			'email_status'     => $request->get_param( 'email_status' ),
+			'sms_status'       => $request->get_param( 'sms_status' ),
+			'whatsapp_status'  => $request->get_param( 'whatsapp_status' ),
 		);
 
 		foreach ( $contact as $key => $value ) {

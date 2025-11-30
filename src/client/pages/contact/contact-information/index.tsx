@@ -39,6 +39,11 @@ const getContactInitials = (firstName?: string, lastName?: string): string => {
 	return first + last || '?';
 };
 
+// Helper function to format channel status label
+const getChannelStatusLabel = (channel: string, status: string): string => {
+	return `${channel}_${status}`;
+};
+
 const ContactInformation: React.FC = () => {
 	const { contact, setContact, updateContact, emailAnalytics, showNotice } =
 		useContactContext();
@@ -145,10 +150,10 @@ const ContactInformation: React.FC = () => {
 						</AvatarFallback>
 					</Avatar>
 					<div className="w-full">
-						<div className="flex justify-between items-start gap-2">
-							<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
-								{fullName}
-							</CardTitle>
+						<CardTitle className="text-xl font-semibold break-words mb-2">
+							{fullName}
+						</CardTitle>
+						<div className="flex flex-wrap gap-2 mb-2">
 							<Select
 								value={contact.status}
 								onValueChange={(value) => {
@@ -160,7 +165,7 @@ const ContactInformation: React.FC = () => {
 								}}
 							>
 								<SelectTrigger
-									className={`w-[120px] h-8 ${getStatusClasses(contact.status)}`}
+									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.status)}`}
 								>
 									<SelectValue
 										placeholder={__(
@@ -181,6 +186,58 @@ const ContactInformation: React.FC = () => {
 									</SelectItem>
 									<SelectItem value="bounced" className='cursor-pointer'>
 										{__('Bounced', 'quillcrm')}
+									</SelectItem>
+								</SelectContent>
+							</Select>
+							<Select
+								value={contact.email_status}
+								onValueChange={(value) => {
+									setContact({
+										...contact,
+										email_status: value,
+									});
+									updateContact({ email_status: value });
+								}}
+							>
+								<SelectTrigger
+									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.email_status)}`}
+								>
+									<div className="text-xs">
+										{getChannelStatusLabel('email', contact.email_status)}
+									</div>
+								</SelectTrigger>
+								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
+									<SelectItem value="subscribed" className='cursor-pointer'>
+										email_subscribed
+									</SelectItem>
+									<SelectItem value="unsubscribed" className='cursor-pointer'>
+										email_unsubscribed
+									</SelectItem>
+								</SelectContent>
+							</Select>
+							<Select
+								value={contact.sms_status}
+								onValueChange={(value) => {
+									setContact({
+										...contact,
+										sms_status: value,
+									});
+									updateContact({ sms_status: value });
+								}}
+							>
+								<SelectTrigger
+									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.sms_status)}`}
+								>
+									<div className="text-xs">
+										{getChannelStatusLabel('sms', contact.sms_status)}
+									</div>
+								</SelectTrigger>
+								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
+									<SelectItem value="subscribed" className='cursor-pointer'>
+										sms_subscribed
+									</SelectItem>
+									<SelectItem value="unsubscribed" className='cursor-pointer'>
+										sms_unsubscribed
 									</SelectItem>
 								</SelectContent>
 							</Select>

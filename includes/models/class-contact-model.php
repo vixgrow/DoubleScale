@@ -72,6 +72,9 @@ class Contact_Model extends Model {
 		'zip',
 		'source',
 		'status',
+		'email_status',
+		'sms_status',
+		'whatsapp_status',
 		'created_at',
 		'updated_at',
 	);
@@ -377,6 +380,180 @@ class Contact_Model extends Model {
 	 */
 	public static function get_by_hash_id( $hash_id ) {
 		return self::where( 'hash_id', $hash_id )->first();
+	}
+
+	/**
+	 * Check if contact is subscribed to a specific channel
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $channel Channel name (email, sms, whatsapp)
+	 * @return bool True if subscribed
+	 */
+	public function is_subscribed_to_channel( $channel ) {
+		// Validate channel
+		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			return false;
+		}
+
+		// Check global status first (hierarchical logic)
+		if ( in_array( $this->status, array( 'bounced', 'blocked' ), true ) ) {
+			return false;
+		}
+
+		// Check channel-specific status
+		$status_field = $channel . '_status';
+		$status_value = $this->getAttribute( $status_field );
+
+		// Handle NULL gracefully (shouldn't happen with NOT NULL constraint, but defensive)
+		if ( is_null( $status_value ) ) {
+			return true; // Default to subscribed
+		}
+
+		return 'subscribed' === $status_value;
+	}
+
+	/**
+	 * Unsubscribe from specific channel
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $channel Channel name (email, sms, whatsapp)
+	 * @param string $reason Optional reason
+	 * @return bool Success
+	 */
+	public function unsubscribe_from_channel( $channel, $reason = '' ) {
+		// Validate channel
+		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			return false;
+		}
+
+		$status_field = $channel . '_status';
+
+		// Check if already unsubscribed
+		if ( 'unsubscribed' === $this->getAttribute( $status_field ) ) {
+			return true; // Already unsubscribed
+		}
+
+		// Update channel status
+		$this->$status_field = 'unsubscribed';
+
+		// Check if all channels are now unsubscribed BEFORE saving
+		if ( $this->are_all_channels_unsubscribed() ) {
+			$this->status = 'unsubscribed';
+		}
+
+		// Single save
+		$this->save();
+
+		// Create system note
+		$channel_labels = array(
+			'email'    => __( 'emails', 'quillcrm' ),
+			'sms'      => __( 'SMS messages', 'quillcrm' ),
+			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
+		);
+
+		$channel_label = $channel_labels[ $channel ] ?? $channel;
+		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
+
+		if ( ! empty( $reason ) ) {
+			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'quillcrm' ), $reason );
+		}
+
+		$this->notes()->create(
+			array(
+				'title' => __( 'Unsubscribed', 'quillcrm' ),
+				'type'  => 'system',
+				'note'  => $note_text,
+			)
+		);
+
+		// Fire channel-specific action
+		do_action( "quillcrm_{$channel}_unsubscribed", $this );
+
+		return true;
+	}
+
+	/**
+	 * Subscribe to specific channel
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $channel Channel name (email, sms, whatsapp)
+	 * @return bool Success
+	 */
+	public function subscribe_to_channel( $channel ) {
+		// Validate channel
+		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			return false;
+		}
+
+		$status_field = $channel . '_status';
+
+		// Check if already subscribed
+		if ( 'subscribed' === $this->getAttribute( $status_field ) ) {
+			return true; // Already subscribed
+		}
+
+		// Update channel status
+		$this->$status_field = 'subscribed';
+
+		// Update global status if it was unsubscribed
+		if ( 'unsubscribed' === $this->status ) {
+			$this->status = 'subscribed';
+		}
+
+		$this->save();
+
+		// Create system note
+		$channel_labels = array(
+			'email'    => __( 'emails', 'quillcrm' ),
+			'sms'      => __( 'SMS messages', 'quillcrm' ),
+			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
+		);
+
+		$channel_label = $channel_labels[ $channel ] ?? $channel;
+
+		$this->notes()->create(
+			array(
+				'title' => __( 'Subscribed', 'quillcrm' ),
+				'type'  => 'system',
+				'note'  => sprintf( __( 'Contact subscribed to %s.', 'quillcrm' ), $channel_label ),
+			)
+		);
+
+		// Fire channel-specific action
+		do_action( "quillcrm_{$channel}_subscribed", $this );
+
+		return true;
+	}
+
+	/**
+	 * Check if all channels are unsubscribed
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return bool True if all channels unsubscribed
+	 */
+	protected function are_all_channels_unsubscribed() {
+		return 'unsubscribed' === $this->getAttribute( 'email_status' )
+			&& 'unsubscribed' === $this->getAttribute( 'sms_status' )
+			&& 'unsubscribed' === $this->getAttribute( 'whatsapp_status' );
+	}
+
+	/**
+	 * Get channel subscription statuses
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return array Channel statuses
+	 */
+	public function get_channel_subscriptions() {
+		return array(
+			'email'    => $this->getAttribute( 'email_status' ),
+			'sms'      => $this->getAttribute( 'sms_status' ),
+			'whatsapp' => $this->getAttribute( 'whatsapp_status' ),
+		);
 	}
 
 	/**

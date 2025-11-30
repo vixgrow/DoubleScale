@@ -39,7 +39,6 @@ class CheckoutFormHandler {
         this.checkoutForm = this.findCheckoutForm();
         if (this.checkoutForm) {
             this.attachEventListeners();
-            this.attachPageLeaveListeners();
             this.maybeAddGDPRConsent();
         } else if (this.retryCount < this.maxRetries) {
             this.retryCount++;
@@ -97,18 +96,6 @@ class CheckoutFormHandler {
         }
     }
 
-    attachPageLeaveListeners() {
-        // Save when user closes/leaves the page
-        window.addEventListener('beforeunload', () => {
-            this.saveAbandonedCartImmediate();
-        });
-
-        // For mobile browsers (especially iOS Safari)
-        window.addEventListener('pagehide', () => {
-            this.saveAbandonedCartImmediate();
-        });
-    }
-
     debouncedChangeHandler(e) {
         const input = e.target;
         const key = input.dataset.quillcrmFieldKey;
@@ -153,58 +140,6 @@ class CheckoutFormHandler {
                 console.error('Error saving abandoned cart:', err);
                 this.isLoading = false;
             });
-    }
-
-    saveAbandonedCartImmediate() {
-        // Capture current field values first
-        this.captureCurrentFieldValues();
-
-        if (!this.isEmailFilled()) return;
-
-        // Cancel any pending debounced save
-        clearTimeout(this.saveTimeout);
-
-        const { ajax_url, nonce } = this.quillcrmAbandonedCart;
-
-        // Use sendBeacon for reliable delivery when page is closing
-        // Falls back to synchronous fetch if sendBeacon is not available
-        const data = new URLSearchParams({
-            action: 'quillcrm_save_abandoned_cart',
-            nonce,
-            fields: JSON.stringify(this.fieldsValues)
-        });
-
-        if (navigator.sendBeacon) {
-            // sendBeacon is the best way to send data when page is unloading
-            const formData = new FormData();
-            formData.append('action', 'quillcrm_save_abandoned_cart');
-            formData.append('nonce', nonce);
-            formData.append('fields', JSON.stringify(this.fieldsValues));
-            navigator.sendBeacon(ajax_url, data);
-            console.log('Abandoned cart saved on page leave (sendBeacon)');
-        } else {
-            // Fallback to synchronous fetch
-            fetch(ajax_url, {
-                method: 'POST',
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: data,
-                keepalive: true // Allows request to continue even after page unload
-            });
-            console.log('Abandoned cart saved on page leave (fetch)');
-        }
-    }
-
-    captureCurrentFieldValues() {
-        // Capture all field values at this moment (in case user typed but didn't blur)
-        Object.keys(this.checkoutFields).forEach(key => {
-            for (const selector of this.checkoutFields[key]) {
-                const input = document.querySelector(selector);
-                if (input && input.value) {
-                    this.fieldsValues[key] = input.value;
-                    break;
-                }
-            }
-        });
     }
 }
 

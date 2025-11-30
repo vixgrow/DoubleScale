@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Tasks
  *
@@ -106,8 +105,7 @@ class Tasks {
 	 *
 	 * @param string $hook Hook name.
 	 * @param array  ...$args Args passed to hook.
-	 *
-	 * @return integer|false
+	 * @return void
 	 */
 	public function enqueue_sync( $hook, ...$args ) {
 		do_action( "{$this->group}_$hook", ...$args );
@@ -157,14 +155,38 @@ class Tasks {
 	 * @return integer|false
 	 */
 	public function schedule_recurring( $timestamp, $interval, $hook, ...$args ) {
-		// add args meta.
-		$meta_id = $this->add_meta( "{$this->group}_$hook", $args );
-		if ( ! $meta_id ) {
-			return false;
+		global $wpdb;
+		$full_hook = "{$this->group}_$hook";
+
+		// Check if meta already exists for this recurring task.
+		$existing_meta_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->prefix}quillcrm_task_meta
+				WHERE hook = %s
+				AND group_slug = %s
+				ORDER BY ID DESC
+				LIMIT 1",
+				$full_hook,
+				$this->group
+			)
+		);
+
+		if ( $existing_meta_id ) {
+			// Reuse existing meta for recurring tasks.
+			$meta_id = $existing_meta_id;
+
+			// Update the args in case they changed.
+			$this->update_meta( $meta_id, array( 'value' => maybe_serialize( $args ) ), '%s' );
+		} else {
+			// Create new meta only if none exists (first-time scheduling).
+			$meta_id = $this->add_meta( $full_hook, $args );
+			if ( ! $meta_id ) {
+				return false;
+			}
 		}
 
 		// the action id isn't single, so we won't assign it to the meta.
-		return as_schedule_recurring_action( $timestamp, $interval, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, true );
+		return as_schedule_recurring_action( $timestamp, $interval, $full_hook, compact( 'meta_id' ), $this->group, true );
 	}
 
 	/**
@@ -259,6 +281,90 @@ class Tasks {
 		return (bool) $wpdb->delete(
 			"{$wpdb->prefix}quillcrm_task_meta",
 			$where
+		);
+	}
+
+	/**
+	 * Update heartbeat timestamp after task execution
+	 *
+	 * This method records when a task last ran successfully,
+	 * enabling health monitoring and overdue detection.
+	 *
+	 * Uses standard SQL with subquery for database portability.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hook Hook name (without group prefix).
+	 * @return bool Success.
+	 */
+	public function update_heartbeat( $hook ) {
+		global $wpdb;
+
+		$full_hook    = "{$this->group}_$hook";
+		$current_time = current_time( 'mysql' );
+
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}quillcrm_task_meta
+				SET last_run = %s
+				WHERE ID = (
+					SELECT ID FROM (
+						SELECT ID
+						FROM {$wpdb->prefix}quillcrm_task_meta
+						WHERE hook = %s
+						AND group_slug = %s
+						ORDER BY ID DESC
+						LIMIT 1
+					) AS tmp
+				)",
+				$current_time,
+				$full_hook,
+				$this->group
+			)
+		);
+
+		// Log failure for debugging.
+		if ( false === $result ) {
+			quillcrm_get_logger()->warning(
+				'Failed to update heartbeat timestamp',
+				array(
+					'hook'  => $full_hook,
+					'group' => $this->group,
+					'error' => $wpdb->last_error,
+				)
+			);
+		}
+
+		return (bool) $result;
+	}
+
+	/**
+	 * Get heartbeat status for a hook
+	 *
+	 * Returns last run time for monitoring task health.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hook Hook name (without group prefix).
+	 * @return array|null Heartbeat data with last_run.
+	 */
+	public function get_heartbeat_status( $hook ) {
+		global $wpdb;
+
+		$full_hook = "{$this->group}_$hook";
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT last_run
+				FROM {$wpdb->prefix}quillcrm_task_meta
+				WHERE hook = %s
+				AND group_slug = %s
+				ORDER BY ID DESC
+				LIMIT 1",
+				$full_hook,
+				$this->group
+			),
+			ARRAY_A
 		);
 	}
 }

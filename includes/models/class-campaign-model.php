@@ -87,7 +87,7 @@ class Campaign_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'settings' => 'array',
+		// Note: 'settings' conversion handled by getSettingsAttribute/setSettingsAttribute accessors
 		// Note: 'type' conversion handled by getTypeAttribute/setTypeAttribute accessors
 	);
 
@@ -301,6 +301,53 @@ class Campaign_Model extends Model {
 		// Convert string to integer for database storage
 		$integer_value            = Campaign_Channel::to_integer( $value );
 		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
+	}
+
+	/**
+	 * Get settings attribute accessor
+	 * Ensures settings is never null, returns empty array instead
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $value JSON string or null from database
+	 * @return array
+	 */
+	public function getSettingsAttribute( $value ) {
+		// If settings is null, return empty array
+		if ( is_null( $value ) ) {
+			return array();
+		}
+
+		// Parse JSON to array
+		$decoded = json_decode( $value, true );
+
+		// If decoding failed or result is null, return empty array
+		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	/**
+	 * Set settings attribute mutator
+	 * Converts array to JSON string for database storage
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array|string|null $value Settings data
+	 */
+	public function setSettingsAttribute( $value ) {
+		// If already a string (JSON), store directly
+		if ( is_string( $value ) ) {
+			$this->attributes['settings'] = $value;
+			return;
+		}
+
+		// If null or not an array, store empty JSON object
+		if ( ! is_array( $value ) ) {
+			$this->attributes['settings'] = '{}';
+			return;
+		}
+
+		// Convert array to JSON string
+		$this->attributes['settings'] = json_encode( $value );
 	}
 
 	/**
@@ -538,6 +585,19 @@ class Campaign_Model extends Model {
 		if ( ! empty( $filters ) ) {
 			$contact_filters = new Contact_Filters_Process( $query, $filters );
 			$query           = $contact_filters->filter();
+
+			// Safety check: ensure filter() returned a valid query
+			if ( ! $query ) {
+				quillcrm_get_logger()->error(
+					'Contact filters returned null query',
+					array(
+						'campaign_id' => $campaign->id,
+						'filters'     => $filters,
+						'context'     => 'campaign_get_contacts_count',
+					)
+				);
+				return 0;
+			}
 		}
 
 		return $query->count();

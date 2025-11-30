@@ -40,11 +40,12 @@ import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
+import SystemSettings from './system';
 // import CustomFields from '../custom-fields'; // Moved to Pro
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -214,6 +215,8 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'managers':
 				return <Managers />;
+			case 'system':
+				return <SystemSettings />;
 			case 'currencies':
 				return (
 					<CurrenciesSettings
@@ -284,6 +287,11 @@ const SettingsPage: React.FC = () => {
 			value: 'currencies',
 			label: 'Currencies',
 			icon: <CurrencyIcon />,
+		},
+		{
+			value: 'system',
+			label: 'System',
+			icon: <ToolsIcon width={24} height={24} />,
 		},
 		{
 			value: 'managers',

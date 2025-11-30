@@ -105,6 +105,23 @@ abstract class Abstract_Send_Message extends Action {
 			$channel_name = $this->get_channel_name();
 			$channel_type = $this->get_channel_type();
 
+			// Check if contact is subscribed to this channel
+			if ( ! $contact->is_subscribed_to_channel( $channel_type ) ) {
+				quillcrm_get_logger()->info(
+					"Skipping {$channel_name} automation action - contact unsubscribed from {$channel_type}",
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'code'          => "send_{$channel_type}_unsubscribed",
+					)
+				);
+				return array(
+					'success' => false,
+					'message' => sprintf( __( 'Contact unsubscribed from %s', 'quillcrm' ), $channel_name ),
+					'code'    => 'contact_unsubscribed',
+				);
+			}
+
 			// 1. Validate recipient
 			$recipient_error = $this->validate_recipient( $contact );
 			if ( $recipient_error ) {

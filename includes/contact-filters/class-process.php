@@ -70,13 +70,18 @@ class Process {
 	 *
 	 * @param array $filter Filter
 	 *
-	 * @return void
+	 * @return Builder
 	 */
 	public function add_filter( $filter ) {
+		// Check if filter key exists
+		if ( ! isset( $filter['filter'] ) ) {
+			return $this->query;
+		}
+
 		$filter_class = Filters_Manager::instance()->get_filter( $filter['filter'] );
 
 		if ( ! $filter_class ) {
-			return;
+			return $this->query;
 		}
 
 		$query = $filter_class->apply( $this->query, $filter );

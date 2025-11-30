@@ -585,6 +585,19 @@ class Campaign_Model extends Model {
 		if ( ! empty( $filters ) ) {
 			$contact_filters = new Contact_Filters_Process( $query, $filters );
 			$query           = $contact_filters->filter();
+
+			// Safety check: ensure filter() returned a valid query
+			if ( ! $query ) {
+				quillcrm_get_logger()->error(
+					'Contact filters returned null query',
+					array(
+						'campaign_id' => $campaign->id,
+						'filters'     => $filters,
+						'context'     => 'campaign_get_contacts_count',
+					)
+				);
+				return 0;
+			}
 		}
 
 		return $query->count();

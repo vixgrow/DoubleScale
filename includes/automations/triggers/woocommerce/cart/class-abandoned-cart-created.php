@@ -22,7 +22,6 @@ use QuillCRM\QuillCRM;
  */
 class Abandoned_Cart_Created extends Trigger {
 
-
 	/**
 	 * Trigger Name
 	 *

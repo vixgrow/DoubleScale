@@ -94,6 +94,7 @@ const SendWhatsAppDialog: React.FC<SendWhatsAppDialogProps> = ({
 						value={toPhone || contact?.phone || ''}
 						onChange={(value) => setToPhone(value)}
 						type="text"
+						disabled={true}
 					/>
 					<div>
 						<Field

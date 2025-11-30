@@ -139,20 +139,21 @@ const SourceSelector: React.FC = () => {
 			return;
 		}
 
+		// Reset source data when changing sources to trigger fresh fetch
+		dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+		dispatch({ type: 'SET_IS_FETCHING', payload: false });
 		dispatch({ type: 'SET_SOURCE', payload: newSource });
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+		dispatch({ type: 'SET_VALUES', payload: {} });
+		dispatch({ type: 'SET_CREDENTIALS', payload: {} });
 
 		if (newSource !== 'csv') {
 			dispatch({ type: 'SET_FILE_DATA', payload: null });
-			dispatch({
-				type: 'SET_VALUES',
-				payload: { ...state.values, file_name: '' },
-			});
 		}
 	};
 
 	return (
-		<Card className="p-6 shadow-none rounded-[20px]">
+		<Card className="p-6 shadow-none rounded-[20px] flex flex-col h-full">
 			<CardHeader className="mb-6 p-0">
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
 					{__('Import From', 'quillcrm')}
@@ -165,7 +166,7 @@ const SourceSelector: React.FC = () => {
 				</CardDescription>
 			</CardHeader>
 
-			<CardContent className="p-0 space-y-3">
+			<CardContent className="p-0 space-y-3 overflow-y-auto max-h-[calc(100vh-220px)]">
 				{sources.map((s) => {
 					const isSelected = source === s.value;
 					const isLocked = importing && !isSelected;

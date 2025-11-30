@@ -94,6 +94,7 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 						value={toPhone || contact?.phone || ''}
 						onChange={(value) => setToPhone(value)}
 						type="text"
+						disabled={true}
 					/>
 					<div>
 						<Field

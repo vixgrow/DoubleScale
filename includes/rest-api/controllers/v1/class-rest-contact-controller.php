@@ -39,6 +39,9 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  */
 class REST_Contact_Controller extends REST_Controller {
 
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -229,7 +232,7 @@ class REST_Contact_Controller extends REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_automation_contacts' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'permission_callback' => array( $this, 'get_automation_contacts_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
@@ -638,7 +641,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_lms_courses_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -799,7 +802,6 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 
 			return new WP_REST_Response( $result, 200 );
-
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -1016,8 +1018,15 @@ class REST_Contact_Controller extends REST_Controller {
 
 			// Apply campaign type filter (email/phone availability)
 			if ( $campaign_type ) {
+				// Convert campaign_type to integer format
+				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
+				if ( is_numeric( $campaign_type ) ) {
+					$campaign_type_int = (int) $campaign_type;
+				} else {
+					$campaign_type_int = Campaign_Channel::to_integer( $campaign_type );
+				}
 				$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type );
+				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
 			}
 
 			// Apply keyword search AFTER filters (search within filtered results)
@@ -1025,9 +1034,9 @@ class REST_Contact_Controller extends REST_Controller {
 				$contacts = $contacts->where(
 					function ( $query ) use ( $keywords ) {
 						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
-						->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
-						->orWhere( 'email', 'like', '%' . $keywords . '%' )
-						->orWhere( 'phone', 'like', '%' . $keywords . '%' );
+							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
+							->orWhere( 'email', 'like', '%' . $keywords . '%' )
+							->orWhere( 'phone', 'like', '%' . $keywords . '%' );
 					}
 				);
 			}
@@ -1155,19 +1164,19 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_item( $request ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
-		$contact    = Contact_Model::find( $contact_id );
+			$contact    = Contact_Model::find( $contact_id );
 
-		if ( ! $contact ) {
-			return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
-		}
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
 
-		// Load relationships - custom_fields only if Pro plugin is active
-		$contact->load( array( 'lists', 'tags' ) );
-		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
-			$contact->load( 'custom_fields' );
-		}
+			// Load relationships - custom_fields only if Pro plugin is active
+			$contact->load( array( 'lists', 'tags' ) );
+			if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+				$contact->load( 'custom_fields' );
+			}
 
-		return new WP_REST_Response( $contact, 200 );
+			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -1209,18 +1218,18 @@ class REST_Contact_Controller extends REST_Controller {
 				return $sync_custom_fields;
 			}
 
-		$sync_notes = $this->sync_notes( $request, $contact );
-		if ( is_wp_error( $sync_notes ) ) {
-			return $sync_notes;
-		}
+			$sync_notes = $this->sync_notes( $request, $contact );
+			if ( is_wp_error( $sync_notes ) ) {
+				return $sync_notes;
+			}
 
-		// Load relationships - custom_fields only if Pro plugin is active
-		$contact->load( array( 'lists', 'tags' ) );
-		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
-			$contact->load( 'custom_fields' );
-		}
+			// Load relationships - custom_fields only if Pro plugin is active
+			$contact->load( array( 'lists', 'tags' ) );
+			if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+				$contact->load( 'custom_fields' );
+			}
 
-		return new WP_REST_Response( $contact, 200 );
+			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -1832,7 +1841,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
 	}
 
 	/**
@@ -1897,7 +1906,20 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_sales_rep_access();
+	}
+
+	/**
+	 * Check if a given request has access to get automation contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function get_automation_contacts_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -1990,5 +2012,4 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_purchase_history_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
-
 }

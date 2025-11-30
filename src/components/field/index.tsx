@@ -76,6 +76,7 @@ interface FieldProps {
 	max?: number;
 	className?: string;
 	tooltip?: string;
+	disabled?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -99,6 +100,7 @@ const Field: React.FC<FieldProps> = ({
 	max,
 	className,
 	tooltip,
+	disabled,
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -284,7 +286,8 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500',
+						disabled && 'bg-gray-100 cursor-not-allowed opacity-70'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -292,6 +295,7 @@ const Field: React.FC<FieldProps> = ({
 					placeholder={placeholder}
 					min={type === 'number' ? 0 : undefined}
 					max={type === 'number' && max ? max : undefined}
+					disabled={disabled}
 				/>
 			);
 			break;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Abandoned_Cart
  *
@@ -19,6 +20,7 @@ use QuillCRM\Models\Contact_Model;
  * Abandoned Cart Class.
  */
 class Abandoned_Cart {
+
 
 	/**
 	 * Settings.
@@ -59,7 +61,7 @@ class Abandoned_Cart {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->settings = Settings::get( 'cart', array() );
+		 $this->settings = Settings::get( 'cart', array() );
 		if ( ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			return;
 		}
@@ -84,7 +86,7 @@ class Abandoned_Cart {
 
 		add_action(
 			'init',
-			function() {
+			function () {
 				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'check_lost_carts' ) );
 				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'check_cooling_off' ) );
 				QuillCRM::instance()->abandoned_cart_tasks->register_callback( 'mark_cart_recoverable', array( $this, 'mark_cart_recoverable' ) );
@@ -154,14 +156,33 @@ class Abandoned_Cart {
 			return;
 		}
 
-		// Get session.
+		// Try to get session from cookie first.
 		$session = $this->get_session();
-		if ( empty( $session ) ) {
-			return;
+
+		// Fallback: Try to get from WC session.
+		if ( empty( $session ) && WC()->session ) {
+			$session = WC()->session->get( 'quillcrm_cart_hash' );
 		}
 
-		// Get the abandoned cart.
-		$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
+		$abandoned_cart = null;
+
+		// Try to get abandoned cart by hash key.
+		if ( ! empty( $session ) ) {
+			$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
+		}
+
+		// Fallback: Try to find by email if hash key method failed.
+		if ( empty( $abandoned_cart ) ) {
+			$email = $order->get_billing_email();
+			if ( ! empty( $email ) ) {
+				$abandoned_cart = Abandoned_Cart_Model::where( 'email', $email )
+					->where( 'status', 'pending' )
+					->orderBy( 'id', 'DESC' )
+					->first();
+			}
+		}
+
+		// If still no abandoned cart found, return.
 		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
@@ -202,6 +223,8 @@ class Abandoned_Cart {
 
 		// Clear the session.
 		$this->clear_session();
+
+		do_action( 'quillcrm_abandoned_cart_recovered', $abandoned_cart );
 	}
 
 	/**
@@ -230,9 +253,15 @@ class Abandoned_Cart {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $cart_id Cart ID.
+	 * @param string $meta_id Meta ID.
 	 */
-	public function mark_cart_recoverable( $cart_id ) {
+	public function mark_cart_recoverable( $meta_id ) {
+		$meta = quillcrm_get_meta_args( $meta_id );
+		if ( empty( $meta ) ) {
+			return;
+		}
+
+		$cart_id        = $meta[0] ?? 0;
 		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
 
 		if ( empty( $abandoned_cart ) ) {
@@ -405,7 +434,6 @@ class Abandoned_Cart {
 		try {
 			WC()->customer->set_props( $fields );
 		} catch ( Error $e ) {
-
 		}
 
 		// Add new session.
@@ -421,7 +449,7 @@ class Abandoned_Cart {
 	 * @since 1.0.0
 	 */
 	public function enqueue_scripts() {
-		// check if the current page is the checkout page.
+		 // check if the current page is the checkout page.
 		if ( ! is_checkout() ) {
 			return;
 		}
@@ -550,7 +578,7 @@ class Abandoned_Cart {
 	 * @since 1.0.0
 	 */
 	public function save_abandoned_cart() {
-		// Verify the nonce.
+		 // Verify the nonce.
 		check_ajax_referer( 'quillcrm_abandoned_cart', 'nonce' );
 
 		// Check if the cart is skipped.
@@ -692,7 +720,7 @@ class Abandoned_Cart {
 	 * @return string
 	 */
 	public function get_session() {
-		return sanitize_text_field( $_COOKIE['quillcrm_abandoned_cart'] ?? '' );
+		 return sanitize_text_field( $_COOKIE['quillcrm_abandoned_cart'] ?? '' );
 	}
 
 	/**
@@ -706,8 +734,13 @@ class Abandoned_Cart {
 		if ( empty( $hash_key ) ) {
 			return;
 		}
-		// Save the hash key in the cookie.
-		setcookie( 'quillcrm_abandoned_cart', $hash_key, time() + 3600 );
+		// Save the hash key in the cookie with proper path and domain.
+		setcookie( 'quillcrm_abandoned_cart', $hash_key, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
+
+		// Also store in WC session as fallback.
+		if ( WC()->session ) {
+			WC()->session->set( 'quillcrm_cart_hash', $hash_key );
+		}
 	}
 
 	/**
@@ -719,7 +752,12 @@ class Abandoned_Cart {
 	 */
 	public function clear_session() {
 		// Clear the hash key from the cookie.
-		setcookie( 'quillcrm_abandoned_cart', '', time() - 3600 );
+		setcookie( 'quillcrm_abandoned_cart', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
+
+		// Also clear from WC session.
+		if ( WC()->session ) {
+			WC()->session->set( 'quillcrm_cart_hash', null );
+		}
 	}
 
 	/**
@@ -728,7 +766,7 @@ class Abandoned_Cart {
 	 * @since 1.0.0
 	 */
 	public function set_skip_session() {
-		setcookie( 'quillcrm_abandoned_cart_skip', '1', time() + ( 86400 * 7 ), COOKIEPATH, COOKIE_DOMAIN );
+		setcookie( 'quillcrm_abandoned_cart_skip', '1', time() + ( 86400 * 7 ), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
 	}
 
 	/**

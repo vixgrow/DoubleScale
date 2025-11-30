@@ -16,14 +16,25 @@ import { CampaignModalStep } from '@quillcrm/client';
 interface EmptyCampaignListProps {
 	setStep: (step: CampaignModalStep) => void;
 	campaignChannel?: string;
+	onCreateClick?: () => void; // Optional custom handler for create button
 }
 
-const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ 
+const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 	setStep,
-	campaignChannel = 'email'
+	campaignChannel = 'email',
+	onCreateClick
 }) => {
 	// Capitalize first letter for display
 	const channelName = campaignChannel.charAt(0).toUpperCase() + campaignChannel.slice(1);
+
+	// Handle create button click
+	const handleCreateClick = () => {
+		if (onCreateClick) {
+			onCreateClick();
+		} else {
+			setStep('campaign-types');
+		}
+	};
 	
 	const stepThreeContent = {
 		email: __('You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!', 'quillcrm'),
@@ -72,7 +83,7 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 						</li>
 					</ol>
 					<div className="flex gap-4 items-center">
-						<Button onClick={() => setStep('campaign-types')}>
+						<Button onClick={handleCreateClick}>
 							{__('Create Campaign', 'quillcrm')}
 						</Button>
 						<Button variant="secondaryDeepBlue">

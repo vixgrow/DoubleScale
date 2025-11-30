@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Integration REST Controller
  * This class is responsible for handling the Integration REST API
@@ -17,11 +18,13 @@ use WP_REST_Server;
 use Exception;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Abstracts\Integration;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Rest Integration Controller
  */
 class REST_Integration_Controller extends REST_Controller {
+
 
 	/**
 	 * Integration.
@@ -85,7 +88,7 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_settings_schema() {
-		return array();
+		 return array();
 	}
 
 	/**
@@ -96,21 +99,21 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'integration',
-			'type'       => 'object',
-			'properties' => array(
-				'settings' => array(
-					'description' => __( 'Integration Settings', 'quillcrm' ),
-					'type'        => 'object',
-					'required'    => true,
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'validate_item_settings' ),
-					),
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'integration',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'settings' => array(
+					 'description' => __( 'Integration Settings', 'quillcrm' ),
+					 'type'        => 'object',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'validate_callback' => array( $this, 'validate_item_settings' ),
+					 ),
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -215,7 +218,7 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -228,6 +231,6 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

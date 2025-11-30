@@ -12,6 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { AutomationContact } from '@quillcrm/client';
 import { Button } from '@quillcrm/components/ui/button';
 import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import { getTriggerLabel } from '../../../../../utils';
 
 interface ColumnsProps {
 	onViewJourney: (automationContact: AutomationContact) => void;
@@ -21,12 +22,20 @@ interface ColumnsProps {
 export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 	const columns: ColumnDef<AutomationContact>[] = [
 		{
-			accessorKey: 'automation_id',
+			accessorKey: 'automation',
 			header: __('Automation Name', 'quillcrm'),
 			cell: ({ row }) => {
 				// The API loads the automation relationship, but it's not in the type
 				const automation = (row.original as any).automation;
 				return automation?.name || `#${row.original.automation_id}`;
+			},
+		},
+		{
+			accessorKey: 'trigger',
+			header: __('Trigger', 'quillcrm'),
+			cell: ({ row }) => {
+				const automation = (row.original as any).automation;
+				return getTriggerLabel(automation);
 			},
 		},
 		{

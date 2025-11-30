@@ -38,6 +38,30 @@ use QuillCRM\User_Roles\User_Roles;
 class Install {
 
 	/**
+	 * Init
+	 *
+	 * @since 1.0.0
+	 */
+	public static function init() {
+		 add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+	}
+
+	/**
+	 * Check QuillCRM version and run the updater if required.
+	 *
+	 * This check is done on all requests and runs if the versions do not match.
+	 */
+	public static function check_version() {
+		$current_version = get_option( 'quillcrm_version' );
+		$plugin_version  = QUILLCRM_VERSION;
+
+		if ( version_compare( $current_version, $plugin_version, '<' ) ) {
+			self::install();
+			do_action( 'quillcrm_updated' );
+		}
+	}
+
+	/**
 	 * Multisite activation
 	 *
 	 * Activates the plugin on all sites in a multisite network
@@ -77,8 +101,6 @@ class Install {
 			restore_current_blog();
 		}
 	}
-
-
 
 	/**
 	 * Install
@@ -131,5 +153,15 @@ class Install {
 		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		delete_transient( 'quillcrm_installing' );
 		User_Roles::add_roles_and_capabilities();
+		self::update_quillcrm_version();
+	}
+
+	/**
+	 * Update QuillCRM version to current.
+	 *
+	 * @since 1.0.0
+	 */
+	private static function update_quillcrm_version() {
+		 update_option( 'quillcrm_version', QUILLCRM_VERSION );
 	}
 }

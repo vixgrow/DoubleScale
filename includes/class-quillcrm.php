@@ -45,6 +45,7 @@ use QuillCRM\User_Roles\User_Roles;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 // use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
 // use QuillCRM\Message_Providers\Twilio_Message_Provider; // Moved to Pro
+use QuillCRM\Database\Install;
 
 
 /**
@@ -54,6 +55,7 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
  * @since 1.0.0
  */
 final class QuillCRM {
+
 
 
 
@@ -255,6 +257,7 @@ final class QuillCRM {
 		Email_Sequences_Manager::instance();
 		User_Roles::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro
+		Install::init();
 	}
 
 	/**

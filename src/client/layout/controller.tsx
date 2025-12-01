@@ -13,6 +13,7 @@ import {
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External Dependencies
@@ -67,11 +68,20 @@ import SequencesMail from '../pages/email-sequences/sequences-mail';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
+import { Button } from '@/components/ui/button';
+import { RocketIcon } from '@quillcrm/components';
+import config from '@/config';
 
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const navigate = useNavigate();
 	const params = useParams();
+
+	// Check if Pro is active
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
+	) as boolean;
 
 	// Navigation helper for Pro components
 	const handleNavigate = (path: string) => navigate(getToLink(path));
@@ -205,6 +215,18 @@ export const Controller = ({ page }) => {
 					{__('Back to WordPress Dashboard', 'quillcrm')}
 				</div>
 				<div className="flex items-center gap-3 justify-end w-1/2">
+				{!isProActive && (
+					
+							<a
+								href={config.getUrlQuillCRMPro()}
+								target="_blank"
+								rel="noopener noreferrer"
+								className='border border-[#458DC7] text-[#458DC7] text-base px-3 py-2 rounded-lg flex items-center gap-2 mr-3'
+							>
+								<RocketIcon />
+								{__('Upgrade to Pro', 'quillcrm')}
+							</a>
+					)}
 					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 						{avatarUrl ? (
 							<AvatarImage src={avatarUrl} alt={displayName} />
@@ -216,6 +238,7 @@ export const Controller = ({ page }) => {
 					<div className="text-lg font-semibold text-[#333333]">
 						{displayName}
 					</div>
+					
 				</div>
 			</div>
 			<page.component navigate={handleNavigate} params={params} />

@@ -271,7 +271,7 @@ const ContactInformation: React.FC = () => {
 
 							<div className="my-3">
 								{contact.email && (
-									<div className="flex gap-2 items-start min-w-0">
+									<div className="flex gap-2 items-center min-w-0">
 										<div className="flex-shrink-0">
 											<ProcessingEmailsIcon
 												width={24}

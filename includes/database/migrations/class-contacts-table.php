@@ -44,7 +44,6 @@ class Contacts_Table extends Migration {
 			state VARCHAR(255),
 			country VARCHAR(255),
 			zip VARCHAR(255),
-			status VARCHAR(255) DEFAULT "subscribed",
 			email_status VARCHAR(50) NOT NULL DEFAULT "subscribed",
 			sms_status VARCHAR(50) NOT NULL DEFAULT "subscribed",
 			whatsapp_status VARCHAR(50) NOT NULL DEFAULT "subscribed",
@@ -53,7 +52,6 @@ class Contacts_Table extends Migration {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
 			UNIQUE KEY  (email),
-			KEY status (status),
 			KEY email_status (email_status),
 			KEY sms_status (sms_status),
 			KEY whatsapp_status (whatsapp_status)';

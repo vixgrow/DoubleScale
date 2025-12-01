@@ -59,18 +59,12 @@ class Campaign_Contact_Filter {
 			return Contact_Model::whereRaw( '1 = 0' );
 		}
 
-		// Get excluded global statuses (INCLUDING 'unsubscribed')
-		$excluded_statuses = apply_filters(
-			'quillcrm_campaign_excluded_statuses',
-			array( 'bounced', 'blocked', 'unsubscribed' )
-		);
-
 		// Determine channel-specific status field
 		$channel_status_field = $type . '_status';
 
-		// Start query - check BOTH global status AND channel status
-		$query = Contact_Model::whereNotIn( 'status', $excluded_statuses )
-			->where( $channel_status_field, 'subscribed' );
+		// Start query - only check channel-specific status
+		// Only 'subscribed' contacts can receive messages
+		$query = Contact_Model::where( $channel_status_field, 'subscribed' );
 
 		// Apply type-specific filtering (email/phone availability)
 		$query = $this->apply_campaign_type_filter( $query, $type );

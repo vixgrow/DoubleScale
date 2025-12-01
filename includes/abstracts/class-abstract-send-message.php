@@ -136,22 +136,8 @@ abstract class Abstract_Send_Message extends Action {
 				return $recipient_error;
 			}
 
-			// 2. Check if contact is subscribed (only send to subscribed contacts)
-			if ( $contact->status !== 'subscribed' ) {
-				quillcrm_get_logger()->info(
-					"Send {$channel_name} action: Contact is not subscribed (status: {$contact->status})",
-					array(
-						'automation_id'  => $automation->id,
-						'contact_id'     => $contact->id,
-						'contact_status' => $contact->status,
-						'code'           => "send_{$channel_type}_not_subscribed",
-					)
-				);
-				return array(
-					'status'  => 'skipped',
-					'message' => "Contact is not subscribed (status: {$contact->status})",
-				);
-			}
+			// 2. Channel subscription check already handled above by is_subscribed_to_channel()
+			// No additional global status check needed since global status field was removed
 
 			// 3. Get template from step settings (already created and validated by model event)
 			$template_ids = $step->get_setting( 'template_ids', array() );

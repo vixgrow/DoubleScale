@@ -71,7 +71,6 @@ class Contact_Model extends Model {
 		'country',
 		'zip',
 		'source',
-		'status',
 		'email_status',
 		'sms_status',
 		'whatsapp_status',
@@ -392,12 +391,7 @@ class Contact_Model extends Model {
 	 */
 	public function is_subscribed_to_channel( $channel ) {
 		// Validate channel
-		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
-			return false;
-		}
-
-		// Check global status first (hierarchical logic)
-		if ( in_array( $this->status, array( 'bounced', 'blocked' ), true ) ) {
+		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
 			return false;
 		}
 
@@ -408,6 +402,19 @@ class Contact_Model extends Model {
 		// Handle NULL gracefully (shouldn't happen with NOT NULL constraint, but defensive)
 		if ( is_null( $status_value ) ) {
 			return true; // Default to subscribed
+		}
+
+		// All channels: 'blocked', 'unsubscribed' = not subscribed
+		$excluded_statuses = array( 'blocked', 'unsubscribed' );
+
+		// Email-only statuses: 'bounced', 'unverified'
+		if ( 'email' === $channel ) {
+			$excluded_statuses[] = 'bounced';
+			$excluded_statuses[] = 'unverified';
+		}
+
+		if ( in_array( $status_value, $excluded_statuses, true ) ) {
+			return false;
 		}
 
 		return 'subscribed' === $status_value;
@@ -424,7 +431,7 @@ class Contact_Model extends Model {
 	 */
 	public function unsubscribe_from_channel( $channel, $reason = '' ) {
 		// Validate channel
-		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
 			return false;
 		}
 
@@ -438,22 +445,11 @@ class Contact_Model extends Model {
 		// Update channel status
 		$this->$status_field = 'unsubscribed';
 
-		// Check if all channels are now unsubscribed BEFORE saving
-		if ( $this->are_all_channels_unsubscribed() ) {
-			$this->status = 'unsubscribed';
-		}
-
-		// Single save
+		// Save changes
 		$this->save();
 
 		// Create system note
-		$channel_labels = array(
-			'email'    => __( 'emails', 'quillcrm' ),
-			'sms'      => __( 'SMS messages', 'quillcrm' ),
-			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
-		);
-
-		$channel_label = $channel_labels[ $channel ] ?? $channel;
+		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
 
 		if ( ! empty( $reason ) ) {
@@ -484,7 +480,7 @@ class Contact_Model extends Model {
 	 */
 	public function subscribe_to_channel( $channel ) {
 		// Validate channel
-		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
 			return false;
 		}
 
@@ -498,21 +494,11 @@ class Contact_Model extends Model {
 		// Update channel status
 		$this->$status_field = 'subscribed';
 
-		// Update global status if it was unsubscribed
-		if ( 'unsubscribed' === $this->status ) {
-			$this->status = 'subscribed';
-		}
-
+		// Save changes
 		$this->save();
 
 		// Create system note
-		$channel_labels = array(
-			'email'    => __( 'emails', 'quillcrm' ),
-			'sms'      => __( 'SMS messages', 'quillcrm' ),
-			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
-		);
-
-		$channel_label = $channel_labels[ $channel ] ?? $channel;
+		$channel_label = self::get_channel_label( $channel );
 
 		$this->notes()->create(
 			array(
@@ -529,19 +515,6 @@ class Contact_Model extends Model {
 	}
 
 	/**
-	 * Check if all channels are unsubscribed
-	 *
-	 * @since 1.1.0
-	 *
-	 * @return bool True if all channels unsubscribed
-	 */
-	protected function are_all_channels_unsubscribed() {
-		return 'unsubscribed' === $this->getAttribute( 'email_status' )
-			&& 'unsubscribed' === $this->getAttribute( 'sms_status' )
-			&& 'unsubscribed' === $this->getAttribute( 'whatsapp_status' );
-	}
-
-	/**
 	 * Get channel subscription statuses
 	 *
 	 * @since 1.1.0
@@ -554,6 +527,35 @@ class Contact_Model extends Model {
 			'sms'      => $this->getAttribute( 'sms_status' ),
 			'whatsapp' => $this->getAttribute( 'whatsapp_status' ),
 		);
+	}
+
+	/**
+	 * Get localized channel label
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $channel Channel name (email, sms, whatsapp).
+	 * @return string Localized channel label
+	 */
+	public static function get_channel_label( $channel ) {
+		$labels = array(
+			'email'    => __( 'emails', 'quillcrm' ),
+			'sms'      => __( 'SMS messages', 'quillcrm' ),
+			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
+		);
+
+		return $labels[ $channel ] ?? __( 'communications', 'quillcrm' );
+	}
+
+	/**
+	 * Get list of valid channels
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return array Valid channel identifiers
+	 */
+	public static function get_valid_channels() {
+		return array( 'email', 'sms', 'whatsapp' );
 	}
 
 	/**

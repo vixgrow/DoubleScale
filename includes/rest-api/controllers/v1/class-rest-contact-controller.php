@@ -555,18 +555,10 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'status'          => array(
-					 'description'  => __( 'Global status of the contact.', 'quillcrm' ),
-					 'type'         => 'string',
-					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'unverified' ),
-					 'args_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
 				 'email_status'    => array(
 					 'description'  => __( 'Email subscription status.', 'quillcrm' ),
 					 'type'         => 'string',
-					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified' ),
 					 'default'      => 'subscribed',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
@@ -575,7 +567,7 @@ class REST_Contact_Controller extends REST_Controller {
 				 'sms_status'      => array(
 					 'description'  => __( 'SMS subscription status.', 'quillcrm' ),
 					 'type'         => 'string',
-					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					 'default'      => 'subscribed',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
@@ -584,7 +576,7 @@ class REST_Contact_Controller extends REST_Controller {
 				 'whatsapp_status' => array(
 					 'description'  => __( 'WhatsApp subscription status.', 'quillcrm' ),
 					 'type'         => 'string',
-					 'enum'         => array( 'subscribed', 'unsubscribed' ),
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					 'default'      => 'subscribed',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
@@ -1340,7 +1332,6 @@ class REST_Contact_Controller extends REST_Controller {
 			'state'            => $request->get_param( 'state' ),
 			'country'          => $request->get_param( 'country' ),
 			'zip'              => $request->get_param( 'zip' ),
-			'status'           => $request->get_param( 'status' ),
 			'email_status'     => $request->get_param( 'email_status' ),
 			'sms_status'       => $request->get_param( 'sms_status' ),
 			'whatsapp_status'  => $request->get_param( 'whatsapp_status' ),

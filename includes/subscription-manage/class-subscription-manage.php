@@ -216,13 +216,7 @@ class Subscription_Manage {
 			// Unsubscribe from specific channel using Contact Model method
 			$contact->unsubscribe_from_channel( $channel, $reason );
 
-			$channel_labels = array(
-				'email'    => __( 'emails', 'quillcrm' ),
-				'sms'      => __( 'SMS messages', 'quillcrm' ),
-				'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
-			);
-
-			$channel_label = $channel_labels[ $channel ] ?? __( 'communications', 'quillcrm' );
+			$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
 
 			wp_send_json_success(
 				array(
@@ -270,13 +264,7 @@ class Subscription_Manage {
 	 * @return string
 	 */
 	public function get_unsubscribe_message( $channel = 'email' ) {
-		$channel_labels = array(
-			'email'    => __( 'emails', 'quillcrm' ),
-			'sms'      => __( 'SMS messages', 'quillcrm' ),
-			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
-		);
-
-		$channel_label = $channel_labels[ $channel ] ?? __( 'communications', 'quillcrm' );
+		$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
 
 		ob_start();
 		echo $this->get_head();
@@ -301,13 +289,7 @@ class Subscription_Manage {
 	 * @return string
 	 */
 	public function get_unsubscribe_form( $contact, $channel = 'email' ) {
-		$channel_labels = array(
-			'email'    => __( 'emails', 'quillcrm' ),
-			'sms'      => __( 'SMS messages', 'quillcrm' ),
-			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
-		);
-
-		$channel_label = $channel_labels[ $channel ] ?? __( 'communications', 'quillcrm' );
+		$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
 
 		ob_start();
 		echo $this->get_head();

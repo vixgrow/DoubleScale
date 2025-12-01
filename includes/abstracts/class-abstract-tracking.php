@@ -431,14 +431,8 @@ abstract class Abstract_Tracking
 
 			$contact = $campaign_record->contact;
 			if ($contact) {
-				$contact->status = 'unsubscribed';
-				$contact->save();
-
-				// quillcrm_get_logger()->info("{$this->channel} unsubscribe processed", [
-				// 	'contact_id' => $contact->id,
-				// 	'campaign_record_id' => $campaign_record->id,
-				// 	'code' => "{$this->channel}_unsubscribe"
-				// ]);
+				// Use Contact Model method for channel-specific unsubscribe
+				$contact->unsubscribe_from_channel( $this->channel, 'link_click' );
 
 				// Trigger unsubscribe automation
 				do_action("quillcrm_{$this->channel}_unsubscribed", $contact, $campaign_record);

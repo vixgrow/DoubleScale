@@ -199,7 +199,10 @@ class Subscription_Manage {
 	public function unsubscribe_ajax() {
 		check_ajax_referer( 'quillcrm-unsubscribe', 'nonce' );
 
-		$id = sanitize_text_field( $_POST['id'] );
+		$id      = sanitize_text_field( $_POST['id'] ?? '' );
+		$channel = sanitize_text_field( $_POST['channel'] ?? 'email' );
+		$reason  = sanitize_text_field( $_POST['reason'] ?? 'other' );
+
 		if ( ! $id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quillcrm' ) ) );
 		}
@@ -210,18 +213,19 @@ class Subscription_Manage {
 				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quillcrm' ) ) );
 			}
 
-			$reason          = sanitize_text_field( $_POST['reason'] ) ?? 'other';
-			$contact->status = 'unsubscribed';
-			$contact->save();
-			$contact->notes()->create(
+			// Unsubscribe from specific channel using Contact Model method
+			$contact->unsubscribe_from_channel( $channel, $reason );
+
+			$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
+
+			wp_send_json_success(
 				array(
-					'title' => __( 'Unsubscribed', 'quillcrm' ),
-					'type'  => 'system',
-					'note'  => sprintf( __( 'Contact unsubscribed from the email list. Reason: %s', 'quillcrm' ), $reason ),
+					'message' => sprintf(
+						__( 'You are successfully unsubscribed from %s.', 'quillcrm' ),
+						$channel_label
+					),
 				)
 			);
-
-			wp_send_json_success( array( 'message' => __( 'You are successfully unsubscribed from the email list.', 'quillcrm' ) ) );
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
@@ -236,30 +240,38 @@ class Subscription_Manage {
 		}
 
 		$id      = sanitize_text_field( $_GET['id'] );
+		$channel = isset( $_GET['channel'] ) ? sanitize_text_field( $_GET['channel'] ) : 'email';
+
 		$contact = Contact_Model::get_by_hash_id( $id );
 		if ( ! $contact ) {
 			return;
 		}
 
-		if ( 'unsubscribed' === $contact->status ) {
-			echo $this->get_unsubscribe_message();
+		// Check if already unsubscribed from this channel
+		if ( ! $contact->is_subscribed_to_channel( $channel ) ) {
+			echo $this->get_unsubscribe_message( $channel );
 			exit;
 		}
 
-		echo $this->get_unsubscribe_form( $contact );
+		echo $this->get_unsubscribe_form( $contact, $channel );
 		exit;
 	}
 
 	/**
 	 * Get Unsubscribe Message
+	 *
+	 * @param string $channel Channel.
+	 * @return string
 	 */
-	public function get_unsubscribe_message() {
+	public function get_unsubscribe_message( $channel = 'email' ) {
+		$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
+
 		ob_start();
 		echo $this->get_head();
 		?>
 		<div class="quillcrm-unsubscribe-message-container">
 			<div class="quillcrm-unsubscribe-message">
-				<p><?php _e( 'You have already unsubscribed.', 'quillcrm' ); ?></p>
+				<p><?php echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'quillcrm' ), $channel_label ); ?></p>
 				<a href="<?php echo home_url(); ?>"><?php _e( 'Go to Home', 'quillcrm' ); ?></a>
 			</div>
 		</div>
@@ -271,38 +283,49 @@ class Subscription_Manage {
 	/**
 	 * Get Unsubscribe Form
 	 *
-	 * @param Contact_Model $contact Contact ID.
+	 * @param Contact_Model $contact Contact.
+	 * @param string        $channel Channel (email, sms, whatsapp).
 	 *
 	 * @return string
 	 */
-	public function get_unsubscribe_form( $contact ) {
+	public function get_unsubscribe_form( $contact, $channel = 'email' ) {
+		$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
+
 		ob_start();
 		echo $this->get_head();
 		?>
 		<div class="quillcrm-unsubscribe-form-container">
 			<div class="quillcrm-unsubscribe-form-wrapper">
-				<h3><?php _e( 'Unsubscribe', 'quillcrm' ); ?></h3>
+				<h3><?php echo sprintf( esc_html__( 'Unsubscribe from %s', 'quillcrm' ), $channel_label ); ?></h3>
 				<form id="quillcrm-unsubscribe-form">
 					<input type="hidden" name="id" value="<?php echo esc_attr( $contact->hash_id ); ?>">
+					<input type="hidden" name="channel" value="<?php echo esc_attr( $channel ); ?>">
 					<input type="hidden" name="nonce" value="<?php echo wp_create_nonce( 'quillcrm-unsubscribe' ); ?>">
 					<input type="hidden" name="action" value="quillcrm_unsubscribe">
 					<div class="quillcrm-form-item">
-						<label for="email"><?php _e( 'Email', 'quillcrm' ); ?></label>
-						<input type="email" name="email" value="<?php echo esc_attr( $this->hide_contact_email( $contact->email ) ); ?>" disabled>
+						<label for="contact_info">
+							<?php echo 'email' === $channel ? __( 'Email', 'quillcrm' ) : __( 'Phone', 'quillcrm' ); ?>
+						</label>
+						<input
+							type="text"
+							name="contact_info"
+							value="<?php echo esc_attr( $this->hide_contact_info( $contact, $channel ) ); ?>"
+							disabled
+						>
 					</div>
 					<div class="quillcrm-form-item">
-						<label for="name"><?php _e( 'Reason', 'quillcrm' ); ?></label>
+						<label for="reason"><?php _e( 'Reason', 'quillcrm' ); ?></label>
 						<div class="quillcrm-form-radio-group">
 							<label>
 								<input type="radio" name="reason" value="spam">
-								<?php _e( 'I consider these emails to be spam.', 'quillcrm' ); ?>
+								<?php echo sprintf( __( 'I consider these %s to be spam.', 'quillcrm' ), $channel_label ); ?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="not-interested">
-								<?php _e( 'I am no longer interested in these emails.', 'quillcrm' ); ?>
+								<?php echo sprintf( __( 'I am no longer interested in these %s.', 'quillcrm' ), $channel_label ); ?>
 							</label>
 							<label>
-								<input type="radio" name="reason" value="other">
+								<input type="radio" name="reason" value="other" checked>
 								<?php _e( 'Other', 'quillcrm' ); ?>
 							</label>
 						</div>
@@ -314,6 +337,27 @@ class Subscription_Manage {
 		<?php
 		echo $this->get_footer();
 		return ob_get_clean();
+	}
+
+	/**
+	 * Hide contact info (email or phone)
+	 *
+	 * @param Contact_Model $contact Contact.
+	 * @param string        $channel Channel.
+	 *
+	 * @return string
+	 */
+	public function hide_contact_info( $contact, $channel ) {
+		if ( 'email' === $channel ) {
+			return $this->hide_contact_email( $contact->email );
+		} else {
+			// Hide phone number
+			$phone = $contact->phone ?? '';
+			if ( strlen( $phone ) > 6 ) {
+				return substr( $phone, 0, 3 ) . str_repeat( '*', strlen( $phone ) - 6 ) . substr( $phone, -3 );
+			}
+			return $phone;
+		}
 	}
 
 	/**

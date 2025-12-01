@@ -40,7 +40,9 @@ export type Contact = {
 	state: string;
 	country: string;
 	zip: string;
-	status: string;
+	email_status: string;
+	sms_status: string;
+	whatsapp_status: string;
 	source: string;
 	created_at: string;
 	updated_at: string;

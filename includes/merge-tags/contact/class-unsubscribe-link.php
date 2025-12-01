@@ -39,7 +39,7 @@ class Unsubscribe_Link extends Merge_Tag {
 	 *
 	 * @var string
 	 */
-	public $description = 'Unsubscribe Link';
+	public $description = 'Channel-specific unsubscribe link';
 
 	/**
 	 * Merge Tag Group
@@ -68,10 +68,14 @@ class Unsubscribe_Link extends Merge_Tag {
 			return '#';
 		}
 
+		// Get channel from filter context (set by campaign processing)
+		$channel = apply_filters( 'quillcrm_current_channel_context', 'email' );
+
 		$hash_id = $contact->hash_id;
 		$args    = array(
 			'quillcrm-unsubscribe' => '1',
 			'id'                   => $hash_id,
+			'channel'              => $channel,
 		);
 		$link    = add_query_arg( $args, home_url() );
 

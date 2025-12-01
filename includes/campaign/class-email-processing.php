@@ -52,6 +52,15 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Get channel context for merge tags
+	 *
+	 * @return string
+	 */
+	public function get_channel_context() {
+		return 'email';
+	}
+
+	/**
 	 * Get recipient field from contact
 	 *
 	 * @param Contact_Model $contact
@@ -88,9 +97,15 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		// Pass footer_html so it gets injected before </body> tag
 		$message = $this->render_builder_content( $message, $contact, $footer_html );
 
+		// Set channel context for merge tags
+		add_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );
+
 		// Process merge tags in both body and footer (if footer was injected)
 		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
 		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+		// Remove filter to prevent pollution
+		remove_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		// Add click tracking to URLs in the message (if tracking class supports it)
 		$tracking_class = $this->get_tracking_class();

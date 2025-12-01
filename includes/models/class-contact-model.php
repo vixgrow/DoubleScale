@@ -216,7 +216,7 @@ class Contact_Model extends Model {
 		if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
 			return null;
 		}
-		
+
 		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
 		if ( $custom_field ) {
 			return $custom_field->pivot->value ?? '';
@@ -332,7 +332,7 @@ class Contact_Model extends Model {
 		$size  = 96; // Default avatar size
 
 		// Get the user ID if this email belongs to a WordPress user
-		$user = get_user_by( 'email', $email );
+		$user    = get_user_by( 'email', $email );
 		$user_id = $user ? $user->ID : 0;
 
 		// Use get_avatar_url() with email and size
@@ -564,7 +564,7 @@ class Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 // Use global flag to prevent multiple event registrations
+		// Use global flag to prevent multiple event registrations
 		global $quillcrm_contact_events_registered;
 
 		parent::boot();
@@ -584,5 +584,15 @@ class Contact_Model extends Model {
 		$model_name = static::class;
 		$instance   = new static();
 		$instance->registerEventsOnDispatcher( $dispatcher, $model_name );
+
+		// When WooCommerce is active, always eager load orders to avoid N+1 queries.
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			static::addGlobalScope(
+				'withOrders',
+				function ( $query ) {
+					$query->with( 'orders' );
+				}
+			);
+		}
 	}
 }

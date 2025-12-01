@@ -13,6 +13,7 @@ import {
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External Dependencies
@@ -72,10 +73,44 @@ import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
 import GetStart from '../pages/get-start';
 
+const useOnboardingRedirect = () => {
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const checkBusinessSettings = async () => {
+			try {
+				const settings: any = await apiFetch({
+					path: '/qc/v1/settings',
+				});
+				const business = settings?.business || {};
+
+				const hasBusinessData =
+					Boolean(business.business_name) ||
+					Boolean(business.business_address) ||
+					Boolean(business.business_logo);
+
+				const isOnStart = globalThis.location?.hash?.includes('/start');
+
+				if (!hasBusinessData && !isOnStart) {
+					navigate(getToLink('start'));
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error('Failed to check business settings', error);
+			}
+		};
+
+		void checkBusinessSettings();
+	}, [navigate]);
+};
+
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const navigate = useNavigate();
 	const params = useParams();
+
+	// Global onboarding redirect based on business settings.
+	useOnboardingRedirect();
 
 	// Navigation helper for Pro components
 	const handleNavigate = (path: string) => navigate(getToLink(path));
@@ -245,10 +280,11 @@ registerAdminPage('contacts', {
 
 registerAdminPage('start', {
 	path: 'start',
-	component: () => <GetStart/>,
-	label: __('Contacts', 'quillcrm'),
-	icon: <ContactsIcon />,
+	component: () => <GetStart />,
+	label: __('Get Started', 'quillcrm'),
+	icon: <DashboardIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('contact', {

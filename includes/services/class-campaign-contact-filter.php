@@ -117,8 +117,16 @@ class Campaign_Contact_Filter {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function apply_campaign_type_filter( $query, $type ) {
+		// Ensure type is in integer format (handles both string and int input)
+		$channel_int = Campaign_Channel::ensure_integer( $type );
+
+		// If invalid channel, return query unchanged
+		if ( null === $channel_int ) {
+			return $query;
+		}
+
 		// Use Campaign_Channel to determine recipient field (DRY principle)
-		$recipient_field = Campaign_Channel::get_recipient_field( $type );
+		$recipient_field = Campaign_Channel::get_recipient_field( $channel_int );
 
 		$query->whereNotNull( $recipient_field )
 			  ->where( $recipient_field, '!=', '' );

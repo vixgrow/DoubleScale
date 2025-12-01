@@ -1035,17 +1035,28 @@ class REST_Contact_Controller extends REST_Controller {
 				$contacts = $contacts->where( 'status', 'subscribed' );
 			}
 
-			// Apply campaign type filter (email/phone availability)
+			// Apply campaign type filter (email/phone availability + channel status)
 			if ( $campaign_type ) {
-				// Convert campaign_type to integer format
+				// Convert campaign_type to integer format for processing
 				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
 				if ( is_numeric( $campaign_type ) ) {
 					$campaign_type_int = (int) $campaign_type;
 				} else {
 					$campaign_type_int = Campaign_Channel::to_integer( $campaign_type );
 				}
-				$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
+
+				// Convert back to string for channel status field lookup
+				$campaign_type_string = Campaign_Channel::to_string( $campaign_type_int );
+
+				if ( $campaign_type_string ) {
+					// Apply channel-specific status filter (e.g., sms_status = 'subscribed')
+					$channel_status_field = $campaign_type_string . '_status';
+					$contacts             = $contacts->where( $channel_status_field, 'subscribed' );
+
+					// Apply recipient field filter (phone/email availability)
+					$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+					$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
+				}
 			}
 
 			// Apply keyword search AFTER filters (search within filtered results)

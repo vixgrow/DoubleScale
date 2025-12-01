@@ -14,7 +14,6 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,29 @@ import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
 import { UserRound, Mail, MessageSquare } from 'lucide-react';
 import PhoneIcon from '@/components/icons/phone';
+
+// Constants
+const DROPDOWN_Z_INDEX = 'z-[150000]'; // High z-index to appear above modals
+
+// Type definitions
+type ChannelType = 'email' | 'sms';
+type EmailStatus =
+	| 'subscribed'
+	| 'unsubscribed'
+	| 'bounced'
+	| 'blocked'
+	| 'unverified';
+type SmsStatus = 'subscribed' | 'unsubscribed' | 'blocked';
+
+// Status options for each channel
+const EMAIL_STATUSES: EmailStatus[] = [
+	'subscribed',
+	'unsubscribed',
+	'bounced',
+	'blocked',
+	'unverified',
+];
+const SMS_STATUSES: SmsStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {
@@ -69,6 +91,65 @@ const getChannelDisplayLabel = (channel: string): string => {
 	};
 
 	return channels[channel] || channel;
+};
+
+// Helper function to get status styling classes
+const getStatusClasses = (status: string): string => {
+	switch (status?.toLowerCase()) {
+		case 'subscribed':
+			return 'border-[#16A34A] text-[#16A34A] bg-[#EFFFF5]';
+		case 'unsubscribed':
+			return 'border-[#1C1D22] text-[#1C1D22] bg-[#FFF2E2]';
+		case 'bounced':
+			return 'border-[#5570F1] text-[#5570F1] bg-[#5570F129]';
+		case 'unverified':
+			return 'border-[#CC5F5F] text-[#CC5F5F] bg-[#F57E7729]';
+		case 'blocked':
+			return 'border-gray-600 text-gray-600 bg-gray-100';
+		default:
+			return 'border-gray-600 text-gray-600 bg-gray-100';
+	}
+};
+
+// Reusable StatusSelect component
+interface StatusSelectProps {
+	channel: ChannelType;
+	value: string;
+	onChange: (value: string) => void;
+	statuses: readonly string[];
+}
+
+const StatusSelect: React.FC<StatusSelectProps> = ({
+	channel,
+	value,
+	onChange,
+	statuses,
+}) => {
+	return (
+		<Select value={value} onValueChange={onChange}>
+			<SelectTrigger className={`w-fit h-10 ${getStatusClasses(value)}`}>
+				<div className="flex items-center gap-1">
+					{getChannelDisplayLabel(channel)}:{' '}
+					{getChannelStatusLabel(channel, value)}
+				</div>
+			</SelectTrigger>
+			<SelectContent
+				position="popper"
+				sideOffset={5}
+				className={DROPDOWN_Z_INDEX}
+			>
+				{statuses.map((status) => (
+					<SelectItem
+						key={status}
+						value={status}
+						className="cursor-pointer"
+					>
+						{getChannelStatusLabel(channel, status)}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+	);
 };
 
 const ContactInformation: React.FC = () => {
@@ -118,6 +199,24 @@ const ContactInformation: React.FC = () => {
 		}
 	};
 
+	const handleEmailStatusChange = (value: string) => {
+		if (!contact) return;
+		setContact({
+			...contact,
+			email_status: value,
+		});
+		updateContact({ email_status: value });
+	};
+
+	const handleSmsStatusChange = (value: string) => {
+		if (!contact) return;
+		setContact({
+			...contact,
+			sms_status: value,
+		});
+		updateContact({ sms_status: value });
+	};
+
 	if (!contact) {
 		return (
 			<Card className="flex-1 bg-[#F8F8F8] shadow-none">
@@ -135,6 +234,7 @@ const ContactInformation: React.FC = () => {
 		contact.email;
 
 	const initials = getContactInitials(contact.first_name, contact.last_name);
+	// TODO: Add avatar_url to Contact type definition
 	const avatarUrl = (contact as any).avatar_url;
 
 	// Calculate email analytics
@@ -144,22 +244,6 @@ const ContactInformation: React.FC = () => {
 
 	const openRate = emailAnalytics?.open_rate?.toFixed(1) || '0.0';
 	const clickRate = emailAnalytics?.click_rate?.toFixed(1) || '0.0';
-
-	// Get status colors
-	const getStatusClasses = (status: string) => {
-		switch (status?.toLowerCase()) {
-			case 'subscribed':
-				return 'border-[#16A34A] text-[#16A34A] bg-[#EFFFF5]';
-			case 'unsubscribed':
-				return 'border-[#1C1D22] text-[#1C1D22] bg-[#FFF2E2]';
-			case 'bounced':
-				return 'border-[#5570F1] text-[#5570F1] bg-[#5570F129]';
-			case 'unverified':
-				return 'border-[#CC5F5F] text-[#CC5F5F] bg-[#F57E7729]';
-			default:
-				return 'border-gray-600 text-gray-600 bg-gray-100';
-		}
-	};
 
 	return (
 		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
@@ -189,9 +273,18 @@ const ContactInformation: React.FC = () => {
 								{contact.email && (
 									<div className="flex gap-2 items-start min-w-0">
 										<div className="flex-shrink-0">
-											<ProcessingEmailsIcon width={24} height={24} />
+											<ProcessingEmailsIcon
+												width={24}
+												height={24}
+											/>
 										</div>
-										<span className="text-base font-medium break-words min-w-0" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+										<span
+											className="text-base font-medium break-words min-w-0"
+											style={{
+												overflowWrap: 'anywhere',
+												wordBreak: 'break-word',
+											}}
+										>
 											{contact.email}
 										</span>
 									</div>
@@ -218,9 +311,9 @@ const ContactInformation: React.FC = () => {
 											: optInSent
 												? __('Email Sent', 'quillcrm')
 												: __(
-													'Send Opt-in Email',
-													'quillcrm'
-												)}
+														'Send Opt-in Email',
+														'quillcrm'
+													)}
 									</Button>
 								</div>
 							)}
@@ -253,122 +346,18 @@ const ContactInformation: React.FC = () => {
 						</div>
 					</div>
 					<div className="flex gap-5 items-center mt-4">
-						<Select
+						<StatusSelect
+							channel="email"
 							value={contact.email_status}
-							onValueChange={(value) => {
-								setContact({
-									...contact,
-									email_status: value,
-								});
-								updateContact({ email_status: value });
-							}}
-						>
-							<SelectTrigger
-								className={`w-fit h-10 ${getStatusClasses(contact.email_status)}`}
-							>
-								<div className="flex items-center gap-1">
-									{getChannelDisplayLabel('email')}:{' '}
-									{getChannelStatusLabel(
-										'email',
-										contact.email_status
-									)}
-								</div>
-							</SelectTrigger>
-							<SelectContent
-								position="popper"
-								sideOffset={5}
-								className="z-[150000]"
-							>
-								<SelectItem
-									value="subscribed"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel(
-										'email',
-										'subscribed'
-									)}
-								</SelectItem>
-								<SelectItem
-									value="unsubscribed"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel(
-										'email',
-										'unsubscribed'
-									)}
-								</SelectItem>
-								<SelectItem
-									value="bounced"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel('email', 'bounced')}
-								</SelectItem>
-								<SelectItem
-									value="blocked"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel('email', 'blocked')}
-								</SelectItem>
-								<SelectItem
-									value="unverified"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel(
-										'email',
-										'unverified'
-									)}
-								</SelectItem>
-							</SelectContent>
-						</Select>
-						<Select
+							onChange={handleEmailStatusChange}
+							statuses={EMAIL_STATUSES}
+						/>
+						<StatusSelect
+							channel="sms"
 							value={contact.sms_status}
-							onValueChange={(value) => {
-								setContact({
-									...contact,
-									sms_status: value,
-								});
-								updateContact({ sms_status: value });
-							}}
-						>
-							<SelectTrigger
-								className={`w-fit h-10 ${getStatusClasses(contact.sms_status)}`}
-							>
-								<div className="flex items-center gap-1">
-									{getChannelDisplayLabel('sms')}:{' '}
-									{getChannelStatusLabel(
-										'sms',
-										contact.sms_status
-									)}
-								</div>
-							</SelectTrigger>
-							<SelectContent
-								position="popper"
-								sideOffset={5}
-								className="z-[150000]"
-							>
-								<SelectItem
-									value="subscribed"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel('sms', 'subscribed')}
-								</SelectItem>
-								<SelectItem
-									value="unsubscribed"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel(
-										'sms',
-										'unsubscribed'
-									)}
-								</SelectItem>
-								<SelectItem
-									value="blocked"
-									className="cursor-pointer"
-								>
-									{getChannelStatusLabel('sms', 'blocked')}
-								</SelectItem>
-							</SelectContent>
-						</Select>
+							onChange={handleSmsStatusChange}
+							statuses={SMS_STATUSES}
+						/>
 					</div>
 				</div>
 			</CardHeader>

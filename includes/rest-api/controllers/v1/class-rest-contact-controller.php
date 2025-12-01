@@ -555,15 +555,34 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'status'     => array(
-					 'description'  => __( 'Status of the contact.', 'quillcrm' ),
+				 'email_status'    => array(
+					 'description'  => __( 'Email subscription status.', 'quillcrm' ),
 					 'type'         => 'string',
-					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'unverified' ),
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified' ),
+					 'default'      => 'subscribed',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'created_at' => array(
+				 'sms_status'      => array(
+					 'description'  => __( 'SMS subscription status.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
+					 'default'      => 'subscribed',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'whatsapp_status' => array(
+					 'description'  => __( 'WhatsApp subscription status.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
+					 'default'      => 'subscribed',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'created_at'      => array(
 					 'type'        => 'string',
 					 'description' => 'Created at',
 					 'context'     => array( 'view', 'edit', 'embed' ),
@@ -1016,17 +1035,28 @@ class REST_Contact_Controller extends REST_Controller {
 				$contacts = $contacts->where( 'status', 'subscribed' );
 			}
 
-			// Apply campaign type filter (email/phone availability)
+			// Apply campaign type filter (email/phone availability + channel status)
 			if ( $campaign_type ) {
-				// Convert campaign_type to integer format
+				// Convert campaign_type to integer format for processing
 				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
 				if ( is_numeric( $campaign_type ) ) {
 					$campaign_type_int = (int) $campaign_type;
 				} else {
 					$campaign_type_int = Campaign_Channel::to_integer( $campaign_type );
 				}
-				$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
+
+				// Convert back to string for channel status field lookup
+				$campaign_type_string = Campaign_Channel::to_string( $campaign_type_int );
+
+				if ( $campaign_type_string ) {
+					// Apply channel-specific status filter (e.g., sms_status = 'subscribed')
+					$channel_status_field = $campaign_type_string . '_status';
+					$contacts             = $contacts->where( $channel_status_field, 'subscribed' );
+
+					// Apply recipient field filter (phone/email availability)
+					$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+					$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
+				}
 			}
 
 			// Apply keyword search AFTER filters (search within filtered results)
@@ -1303,17 +1333,19 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	protected function prepare_contact( $request ) {
 		$contact = array(
-			'first_name' => $request->get_param( 'first_name' ),
-			'last_name'  => $request->get_param( 'last_name' ),
-			'email'      => $request->get_param( 'email' ),
-			'phone'      => $request->get_param( 'phone' ),
-			'address_1'  => $request->get_param( 'address_1' ),
-			'address_2'  => $request->get_param( 'address_2' ),
-			'city'       => $request->get_param( 'city' ),
-			'state'      => $request->get_param( 'state' ),
-			'country'    => $request->get_param( 'country' ),
-			'zip'        => $request->get_param( 'zip' ),
-			'status'     => $request->get_param( 'status' ),
+			'first_name'       => $request->get_param( 'first_name' ),
+			'last_name'        => $request->get_param( 'last_name' ),
+			'email'            => $request->get_param( 'email' ),
+			'phone'            => $request->get_param( 'phone' ),
+			'address_1'        => $request->get_param( 'address_1' ),
+			'address_2'        => $request->get_param( 'address_2' ),
+			'city'             => $request->get_param( 'city' ),
+			'state'            => $request->get_param( 'state' ),
+			'country'          => $request->get_param( 'country' ),
+			'zip'              => $request->get_param( 'zip' ),
+			'email_status'     => $request->get_param( 'email_status' ),
+			'sms_status'       => $request->get_param( 'sms_status' ),
+			'whatsapp_status'  => $request->get_param( 'whatsapp_status' ),
 		);
 
 		foreach ( $contact as $key => $value ) {

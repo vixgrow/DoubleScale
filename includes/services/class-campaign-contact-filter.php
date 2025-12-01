@@ -53,11 +53,18 @@ class Campaign_Contact_Filter {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function get_filtered_contacts( $type, $filters = array() ) {
-		// Get excluded statuses (bounced contacts should never receive campaigns)
-		$excluded_statuses = apply_filters( 'quillcrm_campaign_excluded_statuses', array( 'bounced', 'unsubscribed' ) );
+		// VALIDATE channel type first
+		if ( ! in_array( $type, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			// Return empty query for invalid channel
+			return Contact_Model::whereRaw( '1 = 0' );
+		}
 
-		$query = Contact_Model::where( 'status', 'subscribed' )
-							  ->whereNotIn( 'status', $excluded_statuses );
+		// Determine channel-specific status field
+		$channel_status_field = $type . '_status';
+
+		// Start query - only check channel-specific status
+		// Only 'subscribed' contacts can receive messages
+		$query = Contact_Model::where( $channel_status_field, 'subscribed' );
 
 		// Apply type-specific filtering (email/phone availability)
 		$query = $this->apply_campaign_type_filter( $query, $type );
@@ -110,8 +117,16 @@ class Campaign_Contact_Filter {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function apply_campaign_type_filter( $query, $type ) {
+		// Ensure type is in integer format (handles both string and int input)
+		$channel_int = Campaign_Channel::ensure_integer( $type );
+
+		// If invalid channel, return query unchanged
+		if ( null === $channel_int ) {
+			return $query;
+		}
+
 		// Use Campaign_Channel to determine recipient field (DRY principle)
-		$recipient_field = Campaign_Channel::get_recipient_field( $type );
+		$recipient_field = Campaign_Channel::get_recipient_field( $channel_int );
 
 		$query->whereNotNull( $recipient_field )
 			  ->where( $recipient_field, '!=', '' );

@@ -31,7 +31,8 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { DeleteIcon, EditIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@quillcrm/components';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
@@ -114,7 +115,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 							onClick={onEdit}
 							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 						>
-							<EditIcon />
+							<EditHeaderIcon/>
 							<span>{editLabel}</span>
 						</DropdownMenuItem>
 					)}

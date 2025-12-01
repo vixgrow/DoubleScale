@@ -26,6 +26,7 @@ import {
 	ClickRateIcon,
 	ContactTotalEmailsIcon,
 	OpenRateIcon,
+	ProcessingEmailsIcon,
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
@@ -37,11 +38,22 @@ const DROPDOWN_Z_INDEX = 'z-[150000]'; // High z-index to appear above modals
 
 // Type definitions
 type ChannelType = 'email' | 'sms';
-type EmailStatus = 'subscribed' | 'unsubscribed' | 'bounced' | 'blocked' | 'unverified';
+type EmailStatus =
+	| 'subscribed'
+	| 'unsubscribed'
+	| 'bounced'
+	| 'blocked'
+	| 'unverified';
 type SmsStatus = 'subscribed' | 'unsubscribed' | 'blocked';
 
 // Status options for each channel
-const EMAIL_STATUSES: EmailStatus[] = ['subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified'];
+const EMAIL_STATUSES: EmailStatus[] = [
+	'subscribed',
+	'unsubscribed',
+	'bounced',
+	'blocked',
+	'unverified',
+];
 const SMS_STATUSES: SmsStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
 
 // Helper function to generate contact initials
@@ -99,15 +111,6 @@ const getStatusClasses = (status: string): string => {
 	}
 };
 
-// Get channel icon component
-const getChannelIcon = (channel: ChannelType) => {
-	return channel === 'email' ? (
-		<Mail className="w-3 h-3" />
-	) : (
-		<MessageSquare className="w-3 h-3" />
-	);
-};
-
 // Reusable StatusSelect component
 interface StatusSelectProps {
 	channel: ChannelType;
@@ -116,18 +119,31 @@ interface StatusSelectProps {
 	statuses: readonly string[];
 }
 
-const StatusSelect: React.FC<StatusSelectProps> = ({ channel, value, onChange, statuses }) => {
+const StatusSelect: React.FC<StatusSelectProps> = ({
+	channel,
+	value,
+	onChange,
+	statuses,
+}) => {
 	return (
 		<Select value={value} onValueChange={onChange}>
-			<SelectTrigger className={`w-auto h-7 text-xs px-3 ${getStatusClasses(value)}`}>
-				<div className="text-xs flex items-center gap-1">
-					{getChannelIcon(channel)}
-					{getChannelDisplayLabel(channel)}: {getChannelStatusLabel(channel, value)}
+			<SelectTrigger className={`w-fit h-10 ${getStatusClasses(value)}`}>
+				<div className="flex items-center gap-1">
+					{getChannelDisplayLabel(channel)}:{' '}
+					{getChannelStatusLabel(channel, value)}
 				</div>
 			</SelectTrigger>
-			<SelectContent position="popper" sideOffset={5} className={DROPDOWN_Z_INDEX}>
+			<SelectContent
+				position="popper"
+				sideOffset={5}
+				className={DROPDOWN_Z_INDEX}
+			>
 				{statuses.map((status) => (
-					<SelectItem key={status} value={status} className="cursor-pointer">
+					<SelectItem
+						key={status}
+						value={status}
+						className="cursor-pointer"
+					>
 						{getChannelStatusLabel(channel, status)}
 					</SelectItem>
 				))}
@@ -166,7 +182,8 @@ const ContactInformation: React.FC = () => {
 			}
 		} catch (error: any) {
 			// Show error notification
-			const errorMessage = error.message || __('Failed to send opt-in email', 'quillcrm');
+			const errorMessage =
+				error.message || __('Failed to send opt-in email', 'quillcrm');
 			if (showNotice) {
 				showNotice({
 					type: 'error',
@@ -231,88 +248,116 @@ const ContactInformation: React.FC = () => {
 	return (
 		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
 			<CardHeader>
-				<div className="flex items-center gap-4 border-b pb-4">
-					<Avatar className="w-28 h-28 border">
-						{avatarUrl ? (
-							<AvatarImage
-								src={avatarUrl}
-								alt={fullName}
-								className="rounded-full"
-							/>
-						) : null}
-						<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
-							{initials || <UserRound className="w-12 h-12" />}
-						</AvatarFallback>
-					</Avatar>
-					<div className="w-full">
-						<CardTitle className="text-xl font-semibold break-words mb-2">
-							{fullName}
-						</CardTitle>
-						<div className="flex flex-wrap gap-2 mb-2">
-							<StatusSelect
-								channel="email"
-								value={contact.email_status}
-								onChange={handleEmailStatusChange}
-								statuses={EMAIL_STATUSES}
-							/>
-							<StatusSelect
-								channel="sms"
-								value={contact.sms_status}
-								onChange={handleSmsStatusChange}
-								statuses={SMS_STATUSES}
-							/>
-						</div>
-						<div className="mt-2">
-							{contact.email && (
-								<span className="text-base font-medium">
-									{contact.email}
+				<div className="border-b pb-4">
+					<div className="flex items-center gap-4">
+						<Avatar className="w-28 h-28 border">
+							{avatarUrl ? (
+								<AvatarImage
+									src={avatarUrl}
+									alt={fullName}
+									className="rounded-full"
+								/>
+							) : null}
+							<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
+								{initials || (
+									<UserRound className="w-12 h-12" />
+								)}
+							</AvatarFallback>
+						</Avatar>
+						<div className="w-full min-w-0">
+							<CardTitle className="text-xl font-semibold break-words mb-2">
+								{fullName}
+							</CardTitle>
+
+							<div className="my-3">
+								{contact.email && (
+									<div className="flex gap-2 items-center min-w-0">
+										<div className="flex-shrink-0">
+											<ProcessingEmailsIcon
+												width={24}
+												height={24}
+											/>
+										</div>
+										<span
+											className="text-base font-medium break-words min-w-0"
+											style={{
+												overflowWrap: 'anywhere',
+												wordBreak: 'break-word',
+											}}
+										>
+											{contact.email}
+										</span>
+									</div>
+								)}
+							</div>
+							{contact.phone && (
+								<span className="text-base font-medium text-[#CB5301] flex gap-2 items-center">
+									<PhoneIcon />
+									{contact.phone}
 								</span>
 							)}
+							{contact.email_status === 'unverified' && (
+								<div className="mt-3">
+									<Button
+										size="sm"
+										variant="outline"
+										className="h-7 text-xs gap-1"
+										disabled={isSendingOptIn || optInSent}
+										onClick={sendOptInEmail}
+									>
+										<Mail className="w-3 h-3" />
+										{isSendingOptIn
+											? __('Sending...', 'quillcrm')
+											: optInSent
+												? __('Email Sent', 'quillcrm')
+												: __(
+														'Send Opt-in Email',
+														'quillcrm'
+													)}
+									</Button>
+								</div>
+							)}
+							<div className="mt-3 flex items-center gap-3">
+								<div className="flex gap-1 items-center border-r pr-3">
+									<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
+										<ContactTotalEmailsIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{totalEmails}
+									</span>
+								</div>
+								<div className="flex gap-1 items-center border-r pr-3">
+									<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
+										<OpenRateIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{openRate}%
+									</span>
+								</div>
+								<div className="flex gap-1 items-center">
+									<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
+										<ClickRateIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{clickRate}%
+									</span>
+								</div>
+							</div>
 						</div>
-						{contact.email_status === 'unverified' && (
-							<div className="mt-2">
-								<Button
-									size="sm"
-									variant="outline"
-									className="h-7 text-xs gap-1"
-									disabled={isSendingOptIn || optInSent}
-									onClick={sendOptInEmail}
-								>
-									<Mail className="w-3 h-3" />
-									{isSendingOptIn
-										? __('Sending...', 'quillcrm')
-										: optInSent
-											? __('Email Sent', 'quillcrm')
-											: __('Send Opt-in Email', 'quillcrm')}
-								</Button>
-							</div>
-						)}
-						<div className="mt-2 flex items-center gap-3">
-							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
-									<ContactTotalEmailsIcon />
-								</div>
-								<span className="text-primary text-base font-semibold">
-									{totalEmails}
-								</span>
-							</div>
-							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
-									<OpenRateIcon />
-								</div>
-								<span className="text-primary text-base font-semibold">
-									{openRate}%
-								</span>
-							</div>
-							<div className="flex gap-1 items-center">
-								<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
-									<ClickRateIcon />
-								</div>
-								<span className="text-primary text-base font-semibold">
-									{clickRate}%
-								</span>
-							</div>
-						</div>
+					</div>
+					<div className="flex gap-5 items-center mt-4">
+						<StatusSelect
+							channel="email"
+							value={contact.email_status}
+							onChange={handleEmailStatusChange}
+							statuses={EMAIL_STATUSES}
+						/>
+						<StatusSelect
+							channel="sms"
+							value={contact.sms_status}
+							onChange={handleSmsStatusChange}
+							statuses={SMS_STATUSES}
+						/>
 					</div>
 				</div>
 			</CardHeader>

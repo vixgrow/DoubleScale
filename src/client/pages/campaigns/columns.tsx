@@ -81,6 +81,32 @@ const getCommonColumns = ({
 				column,
 				header: __('Campaign Name', 'quillcrm'),
 			}),
+		cell: ({ row }) => {
+			const campaign = row.original;
+			const name = row.getValue('name') as string;
+			const status = campaign.status;
+
+			// Determine target tab based on status
+			let targetTab = 'overview';
+			if (status === CAMPAIGN_STATUS.DRAFT) {
+				targetTab = 'template';
+			} else if (status === CAMPAIGN_STATUS.SCHEDULED) {
+				targetTab = 'view';
+			}
+
+			return (
+				<button
+					onClick={() => {
+						navigate(
+							getToLink(`campaigns/${campaign.id}/${targetTab}`)
+						);
+					}}
+					className="text-left hover:underline cursor-pointer"
+				>
+					{name}
+				</button>
+			);
+		},
 	};
 
 	const statusColumn: ColumnDef<Campaign> = {
@@ -178,7 +204,7 @@ const getCommonColumns = ({
 										);
 									}}
 								>
-									<EditHeaderIcon/>
+									<EditHeaderIcon />
 									{__('Edit', 'quillcrm')}
 								</DropdownMenuItem>
 							)}

@@ -62,6 +62,38 @@ class REST_Settings_Controller extends REST_Controller {
 			)
 		);
 
+		// Cron status endpoint
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/cron-status",
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_cron_status' ),
+				'permission_callback' => array( $this, 'get_permissions_check' ),
+			)
+		);
+
+		// Run cron manually endpoint
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/run-cron",
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'run_cron_manually' ),
+				'permission_callback' => array( $this, 'update_permissions_check' ),
+				'args'                => array(
+					'hook' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => function ( $param ) {
+							return is_string( $param ) && ! empty( $param );
+						},
+					),
+				),
+			)
+		);
+
 		// Note: Bounce webhooks endpoint moved to Pro plugin (REST_Settings_Controller_Pro)
 	}
 
@@ -551,5 +583,277 @@ class REST_Settings_Controller extends REST_Controller {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get cron job status
+	 *
+	 * Returns status information about all scheduled cron jobs including
+	 * last run time, next scheduled time, and server configuration.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_cron_status( $request ) {
+		$events = array();
+
+		// Email campaigns (every 60 seconds).
+		$campaigns_tasks = \QuillCRM\QuillCRM::instance()->campaigns_tasks;
+		$email_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_campaigns' );
+
+		$last_run = $email_heartbeat['last_run'] ?? null;
+
+		// Calculate next_scheduled on-the-fly.
+		if ( $last_run ) {
+			$next_run = strtotime( $last_run ) + 60;
+		} else {
+			$next_run = as_next_scheduled_action( 'quillcrm_campaigns_quillcrm_email_campaigns' );
+		}
+
+		if ( ! $next_run || true === $next_run ) {
+			$next_run = time() + 60;
+		}
+
+		$events[] = array(
+			'hook'       => 'quillcrm_campaigns_quillcrm_email_campaigns',
+			'is_overdue' => $this->is_task_overdue( $last_run, 90 ), // 90 seconds threshold.
+			'human_name' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
+			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+			'interval'   => 60,
+		);
+
+		// SMS campaigns (every 60 seconds) - Pro only.
+		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+			$sms_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_sms_campaigns' );
+			$last_run      = $sms_heartbeat['last_run'] ?? null;
+
+			// Calculate next_scheduled on-the-fly.
+			if ( $last_run ) {
+				$next_run = strtotime( $last_run ) + 60;
+			} else {
+				$next_run = as_next_scheduled_action( 'quillcrm_campaigns_quillcrm_sms_campaigns' );
+			}
+
+			if ( ! $next_run || true === $next_run ) {
+				$next_run = time() + 60;
+			}
+
+			$events[] = array(
+				'hook'       => 'quillcrm_campaigns_quillcrm_sms_campaigns',
+				'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+				'human_name' => __( 'Scheduled SMS Sending Tasks', 'quillcrm' ),
+				'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+				'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+				'interval'   => 60,
+			);
+		}
+
+		// Email sequences - Not shipping in this version.
+		// $sequences_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_sequences' );
+		// $next_run = isset( $sequences_heartbeat['next_scheduled'] ) ? strtotime( $sequences_heartbeat['next_scheduled'] ) : time() + 60;
+		// $last_run = $sequences_heartbeat['last_run'] ?? null;
+		//
+		// $events[] = array(
+		// 'hook'       => 'quillcrm_campaigns_quillcrm_email_sequences',
+		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+		// 'human_name' => __( 'Scheduled Email Processing', 'quillcrm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'interval'   => 60,
+		// 'run_count'  => $sequences_heartbeat['run_count'] ?? 0,
+		// );
+
+		// WhatsApp campaigns - Not shipping in this version.
+		// if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+		// $whatsapp_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_whatsapp_campaigns' );
+		// $next_run = isset( $whatsapp_heartbeat['next_scheduled'] ) ? strtotime( $whatsapp_heartbeat['next_scheduled'] ) : time() + 60;
+		// $last_run = $whatsapp_heartbeat['last_run'] ?? null;
+		//
+		// $events[] = array(
+		// 'hook'       => 'quillcrm_campaigns_quillcrm_whatsapp_campaigns',
+		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+		// 'human_name' => __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'interval'   => 60,
+		// 'run_count'  => $whatsapp_heartbeat['run_count'] ?? 0,
+		// );
+		// }
+
+		// Daily tasks.
+		$daily_tasks      = \QuillCRM\QuillCRM::instance()->daily_tasks;
+		$daily3_heartbeat = $daily_tasks->get_heartbeat_status( 'quillcrm_daily3' );
+		$last_run         = $daily3_heartbeat['last_run'] ?? null;
+
+		// Calculate next_scheduled on-the-fly.
+		if ( $last_run ) {
+			$next_run = strtotime( $last_run ) + DAY_IN_SECONDS;
+		} else {
+			$next_run = as_next_scheduled_action( 'quillcrm_daily_quillcrm_daily3' );
+		}
+
+		if ( ! $next_run || true === $next_run ) {
+			$next_run = time() + DAY_IN_SECONDS;
+		}
+
+		$events[] = array(
+			'hook'       => 'quillcrm_daily_quillcrm_daily3',
+			'is_overdue' => $this->is_task_overdue( $last_run, 90000 ), // ~25 hours threshold.
+			'human_name' => __( 'Scheduled Automation Tasks', 'quillcrm' ),
+			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+			'interval'   => DAY_IN_SECONDS,
+		);
+
+		// Server information
+		$memory_limit = $this->get_memory_limit_in_mb();
+		$memory_usage = memory_get_usage( true ) / 1024 / 1024;
+		$usage_percent = ( $memory_usage / $memory_limit ) * 100;
+
+		$has_server_cron = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+		$site_url = site_url();
+		$cron_url = add_query_arg( 'doing_wp_cron', '', $site_url . '/wp-cron.php' );
+
+		return new WP_REST_Response(
+			array(
+				'cron_events' => $events,
+				'server'      => array(
+					'memory_limit'       => $memory_limit . 'MB',
+					'usage_percent'      => round( $usage_percent, 2 ),
+					'max_execution_time' => ini_get( 'max_execution_time' ) . ' seconds',
+					'has_server_cron'    => $has_server_cron,
+					'cron_url'           => $cron_url,
+					'site_path'          => ABSPATH,
+				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Check if task is overdue
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|null $last_run Last run timestamp.
+	 * @param int         $threshold Seconds threshold.
+	 * @return bool
+	 */
+	private function is_task_overdue( $last_run, $threshold ) {
+		if ( ! $last_run ) {
+			return false; // Never ran, not overdue yet
+		}
+
+		$last_run_timestamp = strtotime( $last_run );
+		if ( ! $last_run_timestamp ) {
+			return false; // Invalid datetime format
+		}
+
+		$time_since_last_run = time() - $last_run_timestamp;
+
+		return $time_since_last_run > $threshold;
+	}
+
+	/**
+	 * Get memory limit in MB
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int Memory limit in megabytes.
+	 */
+	private function get_memory_limit_in_mb() {
+		$memory_limit = ini_get( 'memory_limit' );
+
+		if ( preg_match( '/^(\d+)(.)$/', $memory_limit, $matches ) ) {
+			if ( 'G' === $matches[2] ) {
+				return $matches[1] * 1024;
+			} elseif ( 'M' === $matches[2] ) {
+				return $matches[1];
+			} elseif ( 'K' === $matches[2] ) {
+				return $matches[1] / 1024;
+			}
+		}
+
+		return 128; // Default fallback
+	}
+
+	/**
+	 * Manually run a cron job
+	 *
+	 * Triggers a scheduled task immediately for debugging or manual execution.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function run_cron_manually( $request ) {
+		$hook = $request->get_param( 'hook' );
+
+		// Whitelist of allowed hooks.
+		$valid_hooks = array(
+			'quillcrm_campaigns_quillcrm_email_campaigns' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
+			'quillcrm_daily_quillcrm_daily3'              => __( 'Scheduled Automation Tasks', 'quillcrm' ),
+			'quillcrm_daily_quillcrm_daily4'              => __( 'Daily Cleanup Tasks', 'quillcrm' ),
+		);
+
+		// Add Pro hooks if Pro plugin is active.
+		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+			$valid_hooks['quillcrm_campaigns_quillcrm_sms_campaigns'] = __( 'Scheduled SMS Sending Tasks', 'quillcrm' );
+			// WhatsApp not shipping in this version.
+			// $valid_hooks['quillcrm_campaigns_quillcrm_whatsapp_campaigns'] = __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' );
+		}
+
+		// Email sequences not shipping in this version.
+		// $valid_hooks['quillcrm_campaigns_quillcrm_email_sequences'] = __( 'Scheduled Email Processing', 'quillcrm' );
+
+		if ( ! isset( $valid_hooks[ $hook ] ) ) {
+			return new WP_Error(
+				'invalid_hook',
+				__( 'The provided hook name is not valid', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Trigger the action immediately
+		try {
+			do_action( $hook );
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'cron_execution_failed',
+				sprintf(
+					/* translators: %s: error message */
+					__( 'Failed to run task: %s', 'quillcrm' ),
+					$e->getMessage()
+				),
+				array( 'status' => 500 )
+			);
+		} catch ( \Throwable $e ) {
+			// Catch PHP 7+ errors as well
+			return new WP_Error(
+				'cron_execution_failed',
+				sprintf(
+					/* translators: %s: error message */
+					__( 'Failed to run task: %s', 'quillcrm' ),
+					$e->getMessage()
+				),
+				array( 'status' => 500 )
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => sprintf(
+					/* translators: %s: task name */
+					__( 'Successfully ran %s', 'quillcrm' ),
+					$valid_hooks[ $hook ]
+				),
+			),
+			200
+		);
 	}
 }

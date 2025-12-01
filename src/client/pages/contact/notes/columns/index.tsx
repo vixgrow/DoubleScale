@@ -11,7 +11,8 @@ import { ColumnDef } from '@tanstack/react-table';
  */
 import type { Note } from '@quillcrm/client';
 import { Button } from '@quillcrm/components/ui/button';
-import { EditIcon, DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@quillcrm/components';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface ColumnsProps {
 	onEdit: (note: Note) => void;
@@ -65,7 +66,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 						className="bg-transparent border-none shadow-none p-0 text-muted-foreground hover:bg-transparent hover:text-primary/80"
 						onClick={() => onEdit(row.original)}
 					>
-						<EditIcon />
+						<EditHeaderIcon/>
 					</Button>
 					<Button
 						size="sm"

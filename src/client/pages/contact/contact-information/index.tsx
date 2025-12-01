@@ -31,6 +31,7 @@ import {
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
 import { UserRound, Mail, MessageSquare } from 'lucide-react';
+import PhoneIcon from '@/components/icons/phone';
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {

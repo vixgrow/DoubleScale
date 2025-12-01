@@ -103,9 +103,9 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 	onStepSelection,
 	disabled = false,
 }) => {
-	const isConditionLockedByDefault = applyFilters(
-		'quillcrm_automation_condition_locked',
-		true
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
 	) as boolean;
 
 	const [showProModal, setShowProModal] = useState(false);
@@ -146,8 +146,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 						<div className="flex flex-col gap-5">
 							{map(defaultTypesOptions, (type, key) => {
 								const isConditionLocked =
-									key === 'condition' &&
-									isConditionLockedByDefault;
+									key === 'condition' && !isProActive;
 								return (
 									<Card
 										key={key}

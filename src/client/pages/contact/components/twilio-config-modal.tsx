@@ -107,8 +107,8 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogOverlay className="z-[1700000]" />
-			<DialogContent className="max-w-2xl z-[1700000]">
+			<DialogOverlay className="z-[1800000]" />
+			<DialogContent className="max-w-2xl z-[1800001]" removePortal={true}>
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Settings className="w-5 h-5" />

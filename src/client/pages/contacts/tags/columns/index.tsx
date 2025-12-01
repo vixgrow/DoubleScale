@@ -12,9 +12,10 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import type { Tag as ContactTag } from '@quillcrm/client';
-import { EditIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell } from '@quillcrm/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 const selectionColumn: ColumnDef<ContactTag> = {
 	id: 'select',
@@ -116,7 +117,7 @@ export const useTagsColumns = ({
 					variant="ghost"
 					className="p-0"
 				>
-					<EditIcon />
+					<EditHeaderIcon/>
 					{__('Edit', 'quillcrm')}
 				</Button>
 			),

@@ -12,7 +12,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { CRMUser } from '../../../../services/user-management';
 import { Button } from '@/components/ui/button';
 import { ManagerRoleLabels } from '../components/types';
-import { DeleteIcon, EditIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@quillcrm/components';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface ManagerColumnsProps {
     onEdit: (managerId: number) => void;
@@ -69,7 +70,7 @@ export const getManagerColumns = ({
                         className="border-none bg-transparent text-[#09090B] p-0 shadow-none hover:bg-transparent"
                         title={__('Edit role', 'quillcrm')}
                     >
-                        <EditIcon />
+                        <EditHeaderIcon/>
                     </Button>
                     <Button
                         size="sm"

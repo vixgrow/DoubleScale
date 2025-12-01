@@ -35,24 +35,21 @@ ChartJS.register(
  * Internal dependencies
  */
 import type { DashboardData } from '@quillcrm/client';
-import ConfigAPI from '@quillcrm/config';
 import { DashboardCards } from './dashboard-cards';
 import { RecentContactsList } from '../recent-contacts-list';
 import { ContactAnalyticsChart } from '../contacts-chart';
 import { RecentAutomationsTable } from './recent-automations';
 import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
-import { CartsChart } from '../cart-chart';
 import { UserDashboardShimmer } from './UserDashboardShimmer';
-import { useContactAnalytics, useCartAnalytics } from '../use-analytics';
+import { useContactAnalytics } from '../use-analytics';
+// import { applyFilters } from '@wordpress/hooks'; // Uncomment when cart analytics is enabled
 
 interface UserDashboardProps {
 	dashboardData: DashboardData;
 }
 
 const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
-	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
-
 	// Use separate hooks for contact and cart analytics with their own state
 	const {
 		data: contactsData,
@@ -66,19 +63,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 		refetch: refetchContacts,
 	} = useContactAnalytics();
 
-	const {
-		data: cartsData,
-		loading: cartsLoading,
-		interval: cartsInterval,
-		startDate: cartsStartDate,
-		endDate: cartsEndDate,
-		setInterval: setCartsInterval,
-		setStartDate: setCartsStartDate,
-		setEndDate: setCartsEndDate,
-		refetch: refetchCarts,
-	} = useCartAnalytics();
-
-	if (!contactsData || !cartsData) {
+	if (!contactsData) {
 		return <UserDashboardShimmer />;
 	}
 
@@ -96,11 +81,14 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 					onIntervalChange={setContactsInterval}
 					onChangeFromDate={setContactsStartDate}
 					onChangeToDate={setContactsEndDate}
+					onSubmit={refetchContacts}
 				/>
 			</div>
 
 			<div className="flex gap-5">
-				<RecentAutomationsTable automations={dashboardData.top_automations} />
+				<RecentAutomationsTable
+					automations={dashboardData.top_automations}
+				/>
 				<QuickLinks />
 			</div>
 

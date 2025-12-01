@@ -84,9 +84,9 @@ const Campaign: React.FC = () => {
 		}
 	}, [campaign, tab, id, navigate, currentStep]);
 
-	// Save current step when tab changes
+	// Save current step when tab changes (only for draft campaigns)
 	useEffect(() => {
-		if (campaign && tab && tab !== currentStep) {
+		if (campaign && tab && tab !== currentStep && campaign.status === 'draft') {
 			saveCampaignStep(tab);
 		}
 	}, [tab, campaign, currentStep, saveCampaignStep]);
@@ -146,7 +146,7 @@ const Campaign: React.FC = () => {
 		campaign &&
 		((campaign.status === 'schedule' && tab === 'overview') ||
 			(campaign.status === 'draft' && tab === 'overview') ||
-			['processing', 'completed', 'resending'].includes(campaign.status));
+			['processing', 'completed', 'resending', 'failed', 'inactive'].includes(campaign.status));
 
 	// Show loading state with appropriate shimmer
 	if (loading) {

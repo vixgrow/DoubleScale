@@ -11,10 +11,12 @@ import {
 
 export default function BreadcrumbComponent({
 	items,
+	handleNavigate,
 }: {
 	items: { label: string; href?: string }[];
+	handleNavigate?: (href: string) => void;
 }) {
-	const navigate = useNavigate();
+	const navigate = handleNavigate ? handleNavigate : useNavigate();
 	return (
 		<Breadcrumb>
 			<BreadcrumbList>
@@ -33,7 +35,15 @@ export default function BreadcrumbComponent({
 									<div
 										className="cursor-pointer"
 										onClick={() =>
-											navigate(getToLink(item.href ?? ''))
+											handleNavigate
+												? handleNavigate(
+														item.href ?? ''
+													)
+												: navigate(
+														getToLink(
+															item.href ?? ''
+														)
+													)
 										}
 									>
 										{item.label}

@@ -10,7 +10,8 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { List as ContactList } from '@quillcrm/client';
-import { EditIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell } from '@quillcrm/components';
+import EditHeaderIcon from '@/components/icons/edit-header';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
 
@@ -114,7 +115,7 @@ export const getListColumns = ({
 					variant="ghost"
 					className="p-0"
 				>
-					<EditIcon />
+					<EditHeaderIcon/>
 					{__('Edit', 'quillcrm')}
 				</Button>
 			),

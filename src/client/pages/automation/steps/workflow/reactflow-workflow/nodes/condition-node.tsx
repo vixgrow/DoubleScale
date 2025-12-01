@@ -50,9 +50,9 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const isConditionLockedByDefault = applyFilters(
-		'quillcrm_automation_condition_locked',
-		true
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
 	) as boolean;
 
 	// Check if condition is configured - a condition is configured if it has rules
@@ -83,12 +83,12 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 				style={{
 					color: hasWarning
 						? '#f59e0b'
-						: isConditionLockedByDefault
+						: !isProActive
 							? '#ff4d4f'
 							: 'inherit',
 				}}
 			>
-				{isConditionLockedByDefault
+				{!isProActive
 					? __('This is a PRO Feature', 'quillcrm')
 					: __('Configured', 'quillcrm')}
 			</span>
@@ -127,7 +127,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		</div>
 	) : (
 		<span className="qcrm-reactflow-condition__not-configured">
-			{isConditionLockedByDefault
+			{!isProActive
 				? __('This is a PRO Feature', 'quillcrm')
 				: __('Not Configured', 'quillcrm')}
 		</span>

@@ -51,9 +51,9 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const closeNotice = () => setNotice(null);
 
-	const isConditionLockedByDefault = applyFilters(
-		'quillcrm_automation_condition_locked',
-		true
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
 	) as boolean;
 
 	const [showProConditionModal, setShowProConditionModal] = useState(false);
@@ -72,16 +72,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 	// Show Pro modal when condition step is clicked and it's locked
 	useEffect(() => {
-		if (
-			currentStep &&
-			currentStep.type === 'condition' &&
-			isConditionLockedByDefault
-		) {
+		if (currentStep && currentStep.type === 'condition' && !isProActive) {
 			setShowProConditionModal(true);
 			// Close the current step to prevent sidebar from showing
 			setCurrentStep(null);
 		}
-	}, [currentStep, isConditionLockedByDefault]);
+	}, [currentStep, isProActive]);
 
 	// Only show sidebar for trigger, configured steps, unconfigured goals, or delay steps
 	// Exclude conditions and end_automation (they don't need configuration)
@@ -291,7 +287,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
-						visible={!isConditionLockedByDefault}
+						visible={!isProActive}
 						onClose={() => setCurrentStep(null)}
 					/>
 				),

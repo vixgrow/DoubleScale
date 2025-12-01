@@ -37,10 +37,8 @@ import Template from '../pages/template';
 import Automations from '../pages/automations';
 import Automation from '../pages/automation';
 import AutomationReports from '../pages/automation-reports';
-import AbandonedCartsList from '../pages/abandond-carts';
 import Setting from '../pages/settings';
 import Dashboard from '../pages/home';
-import CartAnalysis from '../pages/home/cart-analytics';
 import ContactAnalytics from '../pages/home/contacts-analytics';
 import EmailAnalytics from '../pages/home/emails-analytics';
 import { useDashboardData } from '../pages/home/use-analytics';
@@ -66,7 +64,6 @@ import {
 import EmailSequences from '../pages/email-sequences';
 import { User as UserIcon } from 'lucide-react';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
-import { Button } from '@quillcrm/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -451,14 +448,23 @@ registerAdminPage('template', {
 
 registerAdminPage('abandoned-carts', {
 	path: 'abandoned-carts',
-	component: () => <AbandonedCartsList />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Abandoned Carts', 'quillcrm')}
+			description={__(
+				'Abandoned Carts is a Pro feature. Please upgrade to the Pro plan to access this feature.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Abandoned Carts', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('analytics-and-reports', {
 	path: 'analytics-and-reports',
-	component: () => <AnalyticsAndReports />,
+	component: (props) => <AnalyticsAndReports {...props} />,
 	label: __('Analytics', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
@@ -466,7 +472,7 @@ registerAdminPage('analytics-and-reports', {
 
 registerAdminPage('deals-analytics', {
 	path: 'deals-analytics',
-	component: () => <AnalyticsAndReports defaultTab="deals" />,
+	component: (props) => <AnalyticsAndReports {...props} defaultTab="deals" />,
 	label: __('Deals Analytics', 'quillcrm'),
 	hidden: true,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -474,7 +480,9 @@ registerAdminPage('deals-analytics', {
 
 registerAdminPage('sales-rep-analytics', {
 	path: 'sales-rep-analytics',
-	component: () => <AnalyticsAndReports defaultTab="sales-rep" />,
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="sales-rep" />
+	),
 	label: __('Sales Rep Analytics', 'quillcrm'),
 	hidden: true,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -482,7 +490,9 @@ registerAdminPage('sales-rep-analytics', {
 
 registerAdminPage('pipeline-analytics', {
 	path: 'pipeline-analytics',
-	component: () => <AnalyticsAndReports defaultTab="pipeline-analysis" />,
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="pipeline-analysis" />
+	),
 	label: __('Pipeline Analytics', 'quillcrm'),
 	hidden: true,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -490,17 +500,23 @@ registerAdminPage('pipeline-analytics', {
 
 registerAdminPage('my-reports', {
 	path: 'my-reports',
-	component: () => <AnalyticsAndReports defaultTab="my-reports" />,
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="my-reports" />
+	),
 	label: __('My Reports', 'quillcrm'),
 	hidden: true,
 	requiredCapability: ['quillcrm_sales_rep'],
 });
 
-// Wrapper components for analytics pages that need dashboard data
-const CartAnalyticsWrapper = () => {
-	const { data } = useDashboardData();
-	return data ? <CartAnalysis dashboardData={data} /> : null;
-};
+registerAdminPage('cart-analytics', {
+	path: 'cart-analytics',
+	component: (props) => (
+		<AnalyticsAndReports {...props} defaultTab="cart-analytics" />
+	),
+	label: __('Cart Analytics', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
 
 const ContactAnalyticsWrapper = () => {
 	const { data } = useDashboardData();
@@ -511,14 +527,6 @@ const EmailAnalyticsWrapper = () => {
 	const { data } = useDashboardData();
 	return data ? <EmailAnalytics dashboardData={data} /> : null;
 };
-
-registerAdminPage('cart-analytics', {
-	path: 'cart-analytics',
-	component: () => <CartAnalyticsWrapper />,
-	label: __('Cart Analytics', 'quillcrm'),
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
 
 registerAdminPage('contacts-analytics', {
 	path: 'contacts-analytics',

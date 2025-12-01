@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import { PageHeader, PageTabs } from '@quillcrm/components';
+import { PageHeader } from '@quillcrm/components';
 import UserDashboard from './user-dashboard';
 import ContactsAnalytics from './contacts-analytics';
 import EmailAnalytics from './emails-analytics';

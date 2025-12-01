@@ -58,7 +58,10 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 						</div>
 					</div> */}
 
-					<div className="qcrm-pro-modal__action mt-4">
+					<div className="qcrm-pro-modal__action mt-4 flex gap-4 items-center">
+						<Button variant="outline" className='flex-1 border-[#458DC7] text-[#458DC7]'>
+						{__('Try a Free demo', 'quillcrm')}
+						</Button>
 						<Button
 							onClick={() => {
 								window.open(upgradeUrl, '_blank');

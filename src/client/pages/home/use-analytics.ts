@@ -18,7 +18,6 @@ import dayjs from 'dayjs';
 import type {
 	DashboardData,
 	ContactAnalytics,
-	CartAnalytics,
 	EmailsAnalytics,
 } from '@quillcrm/client';
 
@@ -98,54 +97,6 @@ export const useContactAnalytics = () => {
 		setStartDate,
 		setEndDate,
 		refetch: fetchContactAnalytics,
-	};
-};
-
-// Cart analytics hook
-export const useCartAnalytics = () => {
-	const [data, setData] = useState<CartAnalytics | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [interval, setInterval] = useState<string>('today');
-	const [startDate, setStartDate] = useState<Date>(new Date());
-	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
-
-	const fetchCartAnalytics = useCallback(async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/abandoned-carts/analytics', {
-					interval,
-					start_date: dayjs(startDate).format('YYYY-MM-DD'),
-					end_date: dayjs(endDate).format('YYYY-MM-DD'),
-				}),
-			})) as CartAnalytics;
-
-			setData(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	}, [interval, startDate, endDate, createNotice]);
-
-	useEffect(() => {
-		fetchCartAnalytics();
-	}, [fetchCartAnalytics]);
-
-	return {
-		data,
-		loading,
-		interval,
-		startDate,
-		endDate,
-		setInterval,
-		setStartDate,
-		setEndDate,
-		refetch: fetchCartAnalytics,
 	};
 };
 

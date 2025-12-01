@@ -11,15 +11,18 @@ import { useCapabilities } from '../../../hooks/use-capabilities';
 import ContactAnalytics from '../home/contacts-analytics';
 import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';
-import CartAnalytics from '../home/cart-analytics';
 import { ProFeatureNotice } from '@quillcrm/components';
 
 interface AnalyticsAndReportsProps {
 	defaultTab?: string;
+	navigate?: (path: string) => void;
+	params?: Record<string, string>;
 }
 
 const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 	defaultTab,
+	navigate,
+	params,
 }) => {
 	const { isSalesRep } = useCapabilities();
 	const { data } = useDashboardData();
@@ -82,12 +85,26 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 						)}
 					/>
 				);
+			case 'cart-analytics':
+				return data
+					? applyFilters(
+							'quillcrm_analytics_cart_content',
+							<ProFeatureNotice
+								featureName={__('Cart Analytics', 'quillcrm')}
+								description={__(
+									'Analyze cart performance, conversion rates, and sales metrics across your pipeline.',
+									'quillcrm'
+								)}
+							/>,
+							data,
+							navigate,
+							params
+						)
+					: null;
 			case 'contacts-analytics':
 				return data ? <ContactAnalytics dashboardData={data} /> : null;
 			case 'emails-analytics':
 				return data ? <EmailAnalytics dashboardData={data} /> : null;
-			case 'Cart-analytics':
-				return data ? <CartAnalytics dashboardData={data} /> : null;
 			default:
 				// Default view for analytics-and-reports main page
 				if (isSalesRep()) {

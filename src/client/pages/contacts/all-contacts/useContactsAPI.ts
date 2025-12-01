@@ -22,7 +22,11 @@ interface ContactPayload {
 	last_name: string;
 }
 
-export const useContactsAPI = () => {
+interface UseContactsAPIOptions {
+	readonly openDialogOnCreate?: boolean;
+}
+
+export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 	const {
 		page,
 		perPage,
@@ -43,6 +47,8 @@ export const useContactsAPI = () => {
 		openContactDialog,
 		setHasRecords,
 	} = useContactsContext();
+
+	const { openDialogOnCreate = true } = options || {};
 
 	const fetchContacts = async () => {
 		setLoading(true);
@@ -95,8 +101,10 @@ export const useContactsAPI = () => {
 				__('Contact created successfully', 'quillcrm')
 			);
 
-			// Open the contact dialog with the newly created contact
-			openContactDialog(response.id.toString());
+			// Open the contact dialog with the newly created contact (configurable)
+			if (openDialogOnCreate) {
+				openContactDialog(response.id.toString());
+			}
 
 			// Refresh contacts list
 			fetchContacts();

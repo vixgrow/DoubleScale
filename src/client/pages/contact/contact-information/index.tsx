@@ -287,7 +287,7 @@ const ContactInformation: React.FC = () => {
 							}}
 						>
 							<SelectTrigger
-								className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.sms_status)}`}
+								className={`w-[120px] h-8 ${getStatusClasses(contact.sms_status)}`}
 							>
 								<div className="text-xs">
 									{getChannelStatusLabel(

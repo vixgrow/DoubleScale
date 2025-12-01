@@ -21,10 +21,6 @@ use QuillCRM\Managers\Forms_Manager;
 final class Triggers_Manager {
 
 
-
-
-
-
 	/**
 	 * Registed triggers
 	 *
@@ -166,10 +162,10 @@ final class Triggers_Manager {
 						 'label'    => __( 'Contact', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
-					 // 'link_triggers' => array( // Moved to Pro
-						 // 'label'    => __( 'Link Triggers', 'quillcrm' ),
-						 // 'triggers' => array(),
-					 // ),
+					 'link_triggers' => array(
+						 'label'    => __( 'Link Triggers', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
 					 'webhooks'      => array(
 						 'label'    => __( 'Webhooks', 'quillcrm' ),
 						 'triggers' => array(),

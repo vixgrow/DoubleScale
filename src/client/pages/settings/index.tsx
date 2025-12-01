@@ -30,6 +30,8 @@ import {
 	ToolsIcon,
 	TotalSMSIcon,
 	ManagerIcon,
+	LicenseIcon,
+	BadConnectionIcon,
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
@@ -39,13 +41,21 @@ import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import CurrenciesSettings from './currencies';
 import SystemSettings from './system';
+import License from './license';
 // import CustomFields from '../custom-fields'; // Moved to Pro
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -64,6 +74,8 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
+	const [isLicenseActivated, setIsLicenseActivated] = useState<boolean>(false);
+	const [showDeactivateDialog, setShowDeactivateDialog] = useState<boolean>(false);
 
 	const fetchSettings = async () => {
 		try {
@@ -137,6 +149,7 @@ const SettingsPage: React.FC = () => {
 			JSON.stringify(originalSettingsRef.current)
 		);
 	}, [settings, saveCounter]);
+
 
 	useEffect(() => {
 		fetchSettings();
@@ -224,6 +237,8 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
+			case 'license':
+				return <License isActivated={isLicenseActivated} />;
 			case 'custom_fields':
 				const CustomFieldsComponent = applyFilters(
 					'quillcrm_settings_custom_fields_settings',
@@ -289,6 +304,11 @@ const SettingsPage: React.FC = () => {
 			icon: <CurrencyIcon />,
 		},
 		{
+			value: 'license',
+			label: 'License',
+			icon: <LicenseIcon />,
+		},
+		{
 			value: 'system',
 			label: 'System',
 			icon: <ToolsIcon width={24} height={24} />,
@@ -327,24 +347,53 @@ const SettingsPage: React.FC = () => {
 			value,
 			children: (
 				<Card
-					className={`flex shadow-none flex-col mt-4 ${
-						TABS_WITHOUT_SAVE_BUTTON.has(value)
+					className={`flex shadow-none flex-col mt-4 ${value === 'license'
+						? 'bg-[#F8F8F8]'
+						: TABS_WITHOUT_SAVE_BUTTON.has(value)
 							? 'bg-white'
 							: 'bg-[#F8F8F8]'
-					}`}
+						}`}
 				>
 					<CardContent
-						className={`flex-1 ${
-							value === 'custom_fields'
-								? 'px-6 py-0 pb-6'
-								: TABS_WITHOUT_SAVE_BUTTON.has(value)
-									? 'px-6 py-6'
-									: 'p-6'
-						}`}
+						className={`flex-1 ${value === 'custom_fields'
+							? 'px-6 py-0 pb-6'
+							: TABS_WITHOUT_SAVE_BUTTON.has(value)
+								? 'px-6 py-6'
+								: 'p-6'
+							}`}
 					>
 						{content}
 					</CardContent>
-					{!TABS_WITHOUT_SAVE_BUTTON.has(value) && (
+					{value === 'license' ? (
+						<CardFooter className={`border-t bg-white rounded-b-xl p-4 mt-auto ${!isLicenseActivated ? 'justify-end' : 'justify-between'}`}>
+							{!isLicenseActivated ? (
+								<Button
+									onClick={() => setIsLicenseActivated(true)}
+									className="min-w-[120px] rounded-lg px-0"
+									variant="gradient"
+								>
+									{__('Activate License', 'quillcrm')}
+								</Button>
+							) : (
+								<>
+									<Button
+										onClick={() => setShowDeactivateDialog(true)}
+										className="min-w-[120px] rounded-lg px-0 text-destructive border-destructive"
+										variant="outline"
+									>
+										{__('Deactivate', 'quillcrm')}
+									</Button>
+									<Button
+										onClick={() => { }}
+										className="min-w-[120px] rounded-lg px-0"
+										variant="gradient"
+									>
+										{__('Update', 'quillcrm')}
+									</Button>
+								</>
+							)}
+						</CardFooter>
+					) : !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
 						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 							<Button
 								onClick={updateSettings}
@@ -357,7 +406,7 @@ const SettingsPage: React.FC = () => {
 									: __('Save Settings', 'quillcrm')}
 							</Button>
 						</CardFooter>
-					)}
+					) : null}
 				</Card>
 			),
 		};
@@ -387,6 +436,43 @@ const SettingsPage: React.FC = () => {
 				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"
 				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
 			/>
+
+			{/* Deactivate License Confirmation Dialog */}
+			<Dialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
+				<DialogContent className="max-w-[38rem] p-8">
+					<DialogHeader>
+						<div className="flex flex-col items-center justify-center gap-6">
+							<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FAEADF] text-[#CB5301]">
+								<BadConnectionIcon />
+							</div>
+							<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
+								{__('Are you sure you want to deactivate this license ?', 'quillcrm')}
+							</DialogTitle>
+						</div>
+					</DialogHeader>
+					<DialogFooter className="flex gap-2 mt-4">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setShowDeactivateDialog(false)}
+							className="flex-1 border-[#374151] text-[#374151] rounded-lg"
+						>
+							{__('Cancel', 'quillcrm')}
+						</Button>
+						<Button
+							type="button"
+							variant="destructive"
+							onClick={() => {
+								setIsLicenseActivated(false);
+								setShowDeactivateDialog(false);
+							}}
+							className="flex-1 rounded-lg"
+						>
+							{__('Yes', 'quillcrm')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 };

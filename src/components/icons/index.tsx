@@ -209,3 +209,4 @@ export { default as UnknownBlockIcon } from './unknown-block';
 export { default as WordPressIcon } from './wordpress';
 export { default as ManagerIcon } from './manager';
 export { default as RocketIcon } from './rocket';
+export { default as PhoneIcon } from './phone';

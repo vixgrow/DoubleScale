@@ -27,10 +27,12 @@ import {
 	ClickRateIcon,
 	ContactTotalEmailsIcon,
 	OpenRateIcon,
+	ProcessingEmailsIcon,
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
 import { UserRound, Mail } from 'lucide-react';
+import PhoneIcon from '@/components/icons/phone';
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {
@@ -69,7 +71,8 @@ const ContactInformation: React.FC = () => {
 			}
 		} catch (error: any) {
 			// Show error notification
-			const errorMessage = error.message || __('Failed to send opt-in email', 'quillcrm');
+			const errorMessage =
+				error.message || __('Failed to send opt-in email', 'quillcrm');
 			if (showNotice) {
 				showNotice({
 					type: 'error',
@@ -145,55 +148,27 @@ const ContactInformation: React.FC = () => {
 						</AvatarFallback>
 					</Avatar>
 					<div className="w-full">
-						<div className="flex justify-between items-start gap-2">
-							<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
-								{fullName}
-							</CardTitle>
-							<Select
-								value={contact.status}
-								onValueChange={(value) => {
-									setContact({
-										...contact,
-										status: value,
-									});
-									updateContact({ status: value });
-								}}
-							>
-								<SelectTrigger
-									className={`w-[120px] h-8 ${getStatusClasses(contact.status)}`}
-								>
-									<SelectValue
-										placeholder={__(
-											'Select status',
-											'quillcrm'
-										)}
-									/>
-								</SelectTrigger>
-								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
-									<SelectItem value="unverified" className='cursor-pointer'>
-										{__('Unverified', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="subscribed" className='cursor-pointer'>
-										{__('Subscribed', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="unsubscribed" className='cursor-pointer'>
-										{__('Unsubscribed', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="bounced" className='cursor-pointer'>
-										{__('Bounced', 'quillcrm')}
-									</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-						<div className="mt-2">
+						<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
+							{fullName}
+						</CardTitle>
+						<div className="my-3">
 							{contact.email && (
-								<span className="text-base font-medium">
+								<span className="text-base font-medium flex items-center gap-2">
+									<ProcessingEmailsIcon
+										width={24}
+										height={24}
+									/>{' '}
 									{contact.email}
 								</span>
 							)}
 						</div>
+						{contact.phone && (
+							<span className="text-base font-medium flex items-center gap-2 text-[#CB5301]">
+								<PhoneIcon /> {contact.phone}
+							</span>
+						)}
 						{contact.status === 'unverified' && (
-							<div className="mt-2">
+							<div className="mt-3">
 								<Button
 									size="sm"
 									variant="outline"
@@ -206,11 +181,14 @@ const ContactInformation: React.FC = () => {
 										? __('Sending...', 'quillcrm')
 										: optInSent
 											? __('Email Sent', 'quillcrm')
-											: __('Send Opt-in Email', 'quillcrm')}
+											: __(
+													'Send Opt-in Email',
+													'quillcrm'
+												)}
 								</Button>
 							</div>
 						)}
-						<div className="mt-2 flex items-center gap-3">
+						<div className="mt-3 flex items-center gap-3">
 							<div className="flex gap-1 items-center border-r pr-3">
 								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
 									<ContactTotalEmailsIcon />
@@ -237,6 +215,56 @@ const ContactInformation: React.FC = () => {
 							</div>
 						</div>
 					</div>
+				</div>
+				<div className="flex gap-5 items-center">
+					<Select
+						value={contact.status}
+						onValueChange={(value) => {
+							setContact({
+								...contact,
+								status: value,
+							});
+							updateContact({ status: value });
+						}}
+					>
+						<SelectTrigger
+							className={`w-[120px] h-8 ${getStatusClasses(contact.status)}`}
+						>
+							<SelectValue
+								placeholder={__('Select status', 'quillcrm')}
+							/>
+						</SelectTrigger>
+						<SelectContent
+							position="popper"
+							sideOffset={5}
+							className="z-[150000]"
+						>
+							<SelectItem
+								value="unverified"
+								className="cursor-pointer"
+							>
+								{__('Unverified', 'quillcrm')}
+							</SelectItem>
+							<SelectItem
+								value="subscribed"
+								className="cursor-pointer"
+							>
+								{__('Subscribed', 'quillcrm')}
+							</SelectItem>
+							<SelectItem
+								value="unsubscribed"
+								className="cursor-pointer"
+							>
+								{__('Unsubscribed', 'quillcrm')}
+							</SelectItem>
+							<SelectItem
+								value="bounced"
+								className="cursor-pointer"
+							>
+								{__('Bounced', 'quillcrm')}
+							</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-5">

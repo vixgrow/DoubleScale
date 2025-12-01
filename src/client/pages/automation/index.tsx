@@ -252,7 +252,10 @@ const Automation: React.FC = () => {
 
 										{/* Left section - Title */}
 										<div className="flex items-center gap-2">
-											<span className="text-base text-normal text-[#667085]">
+											<span
+												className="text-base text-normal text-[#667085] cursor-pointer hover:text-[#1E3A8A] transition-colors"
+												onClick={() => navigate(getToLink('automations'))}
+											>
 												{__(
 													'Create Automation',
 													'quillcrm'

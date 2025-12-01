@@ -134,137 +134,144 @@ const ContactInformation: React.FC = () => {
 	return (
 		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
 			<CardHeader>
-				<div className="flex items-center gap-4 border-b pb-4">
-					<Avatar className="w-28 h-28 border">
-						{avatarUrl ? (
-							<AvatarImage
-								src={avatarUrl}
-								alt={fullName}
-								className="rounded-full"
-							/>
-						) : null}
-						<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
-							{initials || <UserRound className="w-12 h-12" />}
-						</AvatarFallback>
-					</Avatar>
-					<div className="w-full">
-						<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
-							{fullName}
-						</CardTitle>
-						<div className="my-3">
-							{contact.email && (
-								<span className="text-base font-medium flex items-center gap-2">
-									<ProcessingEmailsIcon
-										width={24}
-										height={24}
-									/>{' '}
-									{contact.email}
+				<div className="border-b pb-4">
+					<div className="flex items-center gap-4">
+						<Avatar className="w-28 h-28 border">
+							{avatarUrl ? (
+								<AvatarImage
+									src={avatarUrl}
+									alt={fullName}
+									className="rounded-full"
+								/>
+							) : null}
+							<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
+								{initials || (
+									<UserRound className="w-12 h-12" />
+								)}
+							</AvatarFallback>
+						</Avatar>
+						<div className="w-full">
+							<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
+								{fullName}
+							</CardTitle>
+							<div className="my-3">
+								{contact.email && (
+									<span className="text-base font-medium flex items-center gap-2">
+										<ProcessingEmailsIcon
+											width={24}
+											height={24}
+										/>{' '}
+										{contact.email}
+									</span>
+								)}
+							</div>
+							{contact.phone && (
+								<span className="text-base font-medium flex items-center gap-2 text-[#CB5301]">
+									<PhoneIcon /> {contact.phone}
 								</span>
 							)}
-						</div>
-						{contact.phone && (
-							<span className="text-base font-medium flex items-center gap-2 text-[#CB5301]">
-								<PhoneIcon /> {contact.phone}
-							</span>
-						)}
-						{contact.status === 'unverified' && (
-							<div className="mt-3">
-								<Button
-									size="sm"
-									variant="outline"
-									className="h-7 text-xs gap-1"
-									disabled={isSendingOptIn || optInSent}
-									onClick={sendOptInEmail}
-								>
-									<Mail className="w-3 h-3" />
-									{isSendingOptIn
-										? __('Sending...', 'quillcrm')
-										: optInSent
-											? __('Email Sent', 'quillcrm')
-											: __(
-													'Send Opt-in Email',
-													'quillcrm'
-												)}
-								</Button>
-							</div>
-						)}
-						<div className="mt-3 flex items-center gap-3">
-							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
-									<ContactTotalEmailsIcon />
+							{contact.status === 'unverified' && (
+								<div className="mt-3">
+									<Button
+										size="sm"
+										variant="outline"
+										className="h-7 text-xs gap-1"
+										disabled={isSendingOptIn || optInSent}
+										onClick={sendOptInEmail}
+									>
+										<Mail className="w-3 h-3" />
+										{isSendingOptIn
+											? __('Sending...', 'quillcrm')
+											: optInSent
+												? __('Email Sent', 'quillcrm')
+												: __(
+														'Send Opt-in Email',
+														'quillcrm'
+													)}
+									</Button>
 								</div>
-								<span className="text-primary text-base font-semibold">
-									{totalEmails}
-								</span>
-							</div>
-							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
-									<OpenRateIcon />
+							)}
+							<div className="mt-3 flex items-center gap-3">
+								<div className="flex gap-1 items-center border-r pr-3">
+									<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
+										<ContactTotalEmailsIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{totalEmails}
+									</span>
 								</div>
-								<span className="text-primary text-base font-semibold">
-									{openRate}%
-								</span>
-							</div>
-							<div className="flex gap-1 items-center">
-								<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
-									<ClickRateIcon />
+								<div className="flex gap-1 items-center border-r pr-3">
+									<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
+										<OpenRateIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{openRate}%
+									</span>
 								</div>
-								<span className="text-primary text-base font-semibold">
-									{clickRate}%
-								</span>
+								<div className="flex gap-1 items-center">
+									<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
+										<ClickRateIcon />
+									</div>
+									<span className="text-primary text-base font-semibold">
+										{clickRate}%
+									</span>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<div className="flex gap-5 items-center">
-					<Select
-						value={contact.status}
-						onValueChange={(value) => {
-							setContact({
-								...contact,
-								status: value,
-							});
-							updateContact({ status: value });
-						}}
-					>
-						<SelectTrigger
-							className={`w-[120px] h-8 ${getStatusClasses(contact.status)}`}
+					<div className="flex gap-5 items-center mt-4">
+						<Select
+							value={contact.status}
+							onValueChange={(value) => {
+								setContact({
+									...contact,
+									status: value,
+								});
+								updateContact({ status: value });
+							}}
 						>
-							<SelectValue
-								placeholder={__('Select status', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent
-							position="popper"
-							sideOffset={5}
-							className="z-[150000]"
-						>
-							<SelectItem
-								value="unverified"
-								className="cursor-pointer"
+							<SelectTrigger
+								className={`w-[120px] h-8 ${getStatusClasses(contact.status)}`}
 							>
-								{__('Unverified', 'quillcrm')}
-							</SelectItem>
-							<SelectItem
-								value="subscribed"
-								className="cursor-pointer"
+								<SelectValue
+									placeholder={__(
+										'Select status',
+										'quillcrm'
+									)}
+								/>
+							</SelectTrigger>
+							<SelectContent
+								position="popper"
+								sideOffset={5}
+								className="z-[150000]"
 							>
-								{__('Subscribed', 'quillcrm')}
-							</SelectItem>
-							<SelectItem
-								value="unsubscribed"
-								className="cursor-pointer"
-							>
-								{__('Unsubscribed', 'quillcrm')}
-							</SelectItem>
-							<SelectItem
-								value="bounced"
-								className="cursor-pointer"
-							>
-								{__('Bounced', 'quillcrm')}
-							</SelectItem>
-						</SelectContent>
-					</Select>
+								<SelectItem
+									value="unverified"
+									className="cursor-pointer"
+								>
+									{__('Unverified', 'quillcrm')}
+								</SelectItem>
+								<SelectItem
+									value="subscribed"
+									className="cursor-pointer"
+								>
+									{__('Subscribed', 'quillcrm')}
+								</SelectItem>
+								<SelectItem
+									value="unsubscribed"
+									className="cursor-pointer"
+								>
+									{__('Unsubscribed', 'quillcrm')}
+								</SelectItem>
+								<SelectItem
+									value="bounced"
+									className="cursor-pointer"
+								>
+									{__('Bounced', 'quillcrm')}
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-5">

@@ -25,7 +25,6 @@ import {
 	ABSplitIcon,
 	CopyIcon,
 	DeleteIcon,
-	EditIcon,
 	FallbackCell,
 	FormattedDateCell,
 	ProcessingEmailsIcon,
@@ -35,6 +34,7 @@ import {
 	ViewOutlinedIcon,
 } from '@quillcrm/components';
 import { getToLink } from '@quillcrm/navigation';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 // Add interface for column props
 interface ColumnProps {
@@ -178,7 +178,7 @@ const getCommonColumns = ({
 										);
 									}}
 								>
-									<EditIcon />
+									<EditHeaderIcon/>
 									{__('Edit', 'quillcrm')}
 								</DropdownMenuItem>
 							)}

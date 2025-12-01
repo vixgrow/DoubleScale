@@ -29,7 +29,8 @@ import {
 	AlertDialogOverlay,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DeleteIcon, EditIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@quillcrm/components';
+import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface NodeContextMenuProps {
 	onEdit?: () => void;
@@ -87,7 +88,7 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 				>
 					{onEdit && (
 						<DropdownMenuItem onSelect={handleEdit} className="pointer-events-auto cursor-pointer hover:bg-gray-100">
-							<EditIcon />
+							<EditHeaderIcon/>
 							{__('Edit', 'quillcrm')}
 						</DropdownMenuItem>
 					)}

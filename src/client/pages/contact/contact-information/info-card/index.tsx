@@ -19,7 +19,6 @@ import { Button } from '@quillcrm/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useContactContext } from '../../state/context';
 import {
-	EditIcon,
 	OutlinedCustomFieldsIcon,
 	ProFeatureNotice,
 } from '@quillcrm/components';

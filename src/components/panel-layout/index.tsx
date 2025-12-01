@@ -22,6 +22,7 @@ interface PanelLayoutProps {
 	isLoading?: boolean;
 	children: React.ReactNode;
 	type?: string;
+	handleNavigate?: (href: string) => void;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -38,6 +39,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	isLoading = false,
 	children,
 	type,
+	handleNavigate,
 }) => {
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
@@ -54,7 +56,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 				}
 			>
 				<div className="flex justify-between items-center">
-					<Breadcrumb items={items} />
+					<Breadcrumb items={items} handleNavigate={handleNavigate} />
 
 					{panelbtns.map((btn, index) => (
 						<div key={index} className="mx-2">

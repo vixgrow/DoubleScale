@@ -30,7 +30,7 @@ import {
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import { UserRound, Mail } from 'lucide-react';
+import { UserRound, Mail, MessageSquare } from 'lucide-react';
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {
@@ -41,7 +41,32 @@ const getContactInitials = (firstName?: string, lastName?: string): string => {
 
 // Helper function to format channel status label
 const getChannelStatusLabel = (channel: string, status: string): string => {
-	return `${channel}_${status}`;
+	const labels: Record<string, Record<string, string>> = {
+		email: {
+			subscribed: __('Subscribed', 'quillcrm'),
+			unsubscribed: __('Unsubscribed', 'quillcrm'),
+			bounced: __('Bounced', 'quillcrm'),
+			blocked: __('Blocked', 'quillcrm'),
+			unverified: __('Unverified', 'quillcrm'),
+		},
+		sms: {
+			subscribed: __('Subscribed', 'quillcrm'),
+			unsubscribed: __('Unsubscribed', 'quillcrm'),
+			blocked: __('Blocked', 'quillcrm'),
+		},
+	};
+
+	return labels[channel]?.[status] || `${channel}_${status}`;
+};
+
+// Helper function to get channel display label
+const getChannelDisplayLabel = (channel: string): string => {
+	const channels: Record<string, string> = {
+		email: __('Email', 'quillcrm'),
+		sms: __('SMS', 'quillcrm'),
+	};
+
+	return channels[channel] || channel;
 };
 
 const ContactInformation: React.FC = () => {
@@ -155,34 +180,39 @@ const ContactInformation: React.FC = () => {
 						</CardTitle>
 						<div className="flex flex-wrap gap-2 mb-2">
 							<Select
-								value={contact.status}
+								value={contact.email_status}
 								onValueChange={(value) => {
 									setContact({
 										...contact,
-										status: value,
+										email_status: value,
 									});
-									updateContact({ status: value });
+									updateContact({ email_status: value });
 								}}
 							>
 								<SelectTrigger
-									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.status)}`}
+									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.email_status)}`}
 								>
-									<div className="text-xs">
-										{getChannelStatusLabel('email', contact.status)}
+									<div className="text-xs flex items-center gap-1">
+										<Mail className="w-3 h-3" />
+										{getChannelDisplayLabel('email')}:{' '}
+										{getChannelStatusLabel('email', contact.email_status)}
 									</div>
 								</SelectTrigger>
 								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
-									<SelectItem value="unverified" className='cursor-pointer'>
-										email_unverified
-									</SelectItem>
 									<SelectItem value="subscribed" className='cursor-pointer'>
-										email_subscribed
+										{getChannelStatusLabel('email', 'subscribed')}
 									</SelectItem>
 									<SelectItem value="unsubscribed" className='cursor-pointer'>
-										email_unsubscribed
+										{getChannelStatusLabel('email', 'unsubscribed')}
 									</SelectItem>
 									<SelectItem value="bounced" className='cursor-pointer'>
-										email_bounced
+										{getChannelStatusLabel('email', 'bounced')}
+									</SelectItem>
+									<SelectItem value="blocked" className='cursor-pointer'>
+										{getChannelStatusLabel('email', 'blocked')}
+									</SelectItem>
+									<SelectItem value="unverified" className='cursor-pointer'>
+										{getChannelStatusLabel('email', 'unverified')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -199,16 +229,21 @@ const ContactInformation: React.FC = () => {
 								<SelectTrigger
 									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.sms_status)}`}
 								>
-									<div className="text-xs">
+									<div className="text-xs flex items-center gap-1">
+										<MessageSquare className="w-3 h-3" />
+										{getChannelDisplayLabel('sms')}:{' '}
 										{getChannelStatusLabel('sms', contact.sms_status)}
 									</div>
 								</SelectTrigger>
 								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
 									<SelectItem value="subscribed" className='cursor-pointer'>
-										sms_subscribed
+										{getChannelStatusLabel('sms', 'subscribed')}
 									</SelectItem>
 									<SelectItem value="unsubscribed" className='cursor-pointer'>
-										sms_unsubscribed
+										{getChannelStatusLabel('sms', 'unsubscribed')}
+									</SelectItem>
+									<SelectItem value="blocked" className='cursor-pointer'>
+										{getChannelStatusLabel('sms', 'blocked')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -220,7 +255,7 @@ const ContactInformation: React.FC = () => {
 								</span>
 							)}
 						</div>
-						{contact.status === 'unverified' && (
+						{contact.email_status === 'unverified' && (
 							<div className="mt-2">
 								<Button
 									size="sm"

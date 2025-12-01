@@ -164,14 +164,26 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 */
 	protected function send_via_provider( $provider, $to, $body, $subject, $contact ) {
 		try {
-			// Get global email settings
+			// Get current WordPress user to use as sender
+			$current_user = wp_get_current_user();
+
+			// Get global email settings as fallback
 			$email_settings = Settings::get( 'email', array() );
 
 			// Setup Emails class
-			$emails               = new Emails();
-			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+			$emails = new Emails();
+
+			// Use current user's email as sender (if available), otherwise use global settings
+			if ( $current_user && $current_user->ID && is_email( $current_user->user_email ) ) {
+				$emails->from_name    = $current_user->display_name ?: $current_user->user_login;
+				$emails->from_address = $current_user->user_email;
+				$emails->reply_to     = $current_user->user_email;
+			} else {
+				// Fallback to global settings
+				$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+				$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
+				$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+			}
 
 			// Send the email
 			$result = $emails->send( $to, $subject, $body );

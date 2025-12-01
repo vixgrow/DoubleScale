@@ -75,7 +75,7 @@ export const CreateContactModal: React.FC = () => {
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-4">
+				<div className="qcrm-fields space-y-5">
 					<Field
 						label={__('First Name', 'quillcrm')}
 						placeholder={__('Enter First Name', 'quillcrm')}
@@ -100,6 +100,19 @@ export const CreateContactModal: React.FC = () => {
 						type="text"
 						placeholder={__('Enter Last Name', 'quillcrm')}
 					/>
+					
+					<Field
+						label={__('Email', 'quillcrm')}
+						value={contactForm.email}
+						onChange={(value) =>
+							setContactForm((prev) => ({
+								...prev,
+								email: value,
+							}))
+						}
+						type="email"
+						placeholder={__('Enter Email', 'quillcrm')}
+					/>
 					<Field
 						label={__('Phone', 'quillcrm')}
 						value={contactForm.phone}
@@ -115,18 +128,6 @@ export const CreateContactModal: React.FC = () => {
 						}}
 						type="tel"
 						placeholder={__('Enter Phone Number', 'quillcrm')}
-					/>
-					<Field
-						label={__('Email', 'quillcrm')}
-						value={contactForm.email}
-						onChange={(value) =>
-							setContactForm((prev) => ({
-								...prev,
-								email: value,
-							}))
-						}
-						type="email"
-						placeholder={__('Enter Email', 'quillcrm')}
 					/>
 				</div>
 

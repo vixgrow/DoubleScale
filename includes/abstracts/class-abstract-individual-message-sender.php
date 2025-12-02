@@ -118,6 +118,17 @@ abstract class Abstract_Individual_Message_Sender {
 			// Create tracking entry
 			$tracking_entry = $this->create_tracking_entry( $contact, $to );
 
+			// Capture merge tags for individual messages
+			$combined_content = ( $subject ?? '' ) . ' ' . $body;
+			$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
+			if ( ! empty( $merge_tag_keys ) ) {
+				\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+					$tracking_entry->id,
+					$merge_tag_keys,
+					$contact
+				);
+			}
+
 			// Process message (merge tags + click tracking)
 			$processed_subject = $subject ? Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact ) : null;
 			$processed_body    = $this->process_message( $body, $contact, $tracking_entry );

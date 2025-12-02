@@ -16,6 +16,7 @@ use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Merge_Tags\Forms\Forms_Field_Backend;
 use QuillCRM\Merge_Tags\Forms\Forms_Metadata_BackEnd;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Merge Tag Manager
@@ -287,5 +288,56 @@ final class Merge_Tags_Manager {
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Extract merge tags keys
+	 *
+	 * @param string $content Content.
+	 * @return array Array of merge tag keys found in content
+	 */
+	public function extract_merge_tag_keys( $content ) {
+		$merge_tag_keys = array();
+
+		// Simple regex to find all merge tags
+		preg_match_all( '/{{(.*?):(.*?)}}/', $content, $matches, PREG_SET_ORDER );
+
+		foreach ( $matches as $match ) {
+			$group          = $match[1];
+			$slug           = $match[2];
+			$slug_parts     = explode( ' ', $slug );
+			$merge_tag_slug = $slug_parts[0];
+			$full_tag       = "{$group}:{$merge_tag_slug}";
+
+			// Store unique keys only
+			if ( ! in_array( $full_tag, $merge_tag_keys ) ) {
+				$merge_tag_keys[] = $full_tag;
+			}
+		}
+
+		return $merge_tag_keys;
+	}
+
+	/**
+	 * Get values for specific merge tag keys using contact
+	 *
+	 * @param array         $merge_tag_keys Array of merge tag keys to get values for
+	 * @param \QuillCRM\Models\Contact_Model $contact Contact to get values for
+	 * @return array Array of merge tag keys and their values
+	 */
+	public function get_merge_tag_values_for_keys( $merge_tag_keys, $contact ) {
+		$merge_tags = array();
+
+		foreach ( $merge_tag_keys as $tag_key ) {
+			list( $group, $slug ) = explode( ':', $tag_key, 2 );
+
+			$merge_tag = $this->get_merge_tag( $group, $slug );
+			if ( $merge_tag ) {
+				$value                  = $merge_tag->get_tag_value( $contact, $slug );
+				$merge_tags[ $tag_key ] = $value;
+			}
+		}
+
+		return $merge_tags;
 	}
 }

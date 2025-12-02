@@ -14,6 +14,8 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
+use QuillCRM\Models\Message_Model;
+use QuillCRM\Models\Tracking_Meta_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
@@ -21,14 +23,14 @@ use QuillCRM\Constants\Campaign_Channel;
 /**
  * Tracking_Model class
  */
-class Tracking_Model extends Model
-{
+class Tracking_Model extends Model {
+
 
 	/**
 	 * Communication channel modes for tracking
 	 */
-	const MODE_EMAIL = 1;
-	const MODE_SMS = 2;
+	const MODE_EMAIL    = 1;
+	const MODE_SMS      = 2;
 	const MODE_WHATSAPP = 3;
 
 	/**
@@ -83,13 +85,13 @@ class Tracking_Model extends Model
 	 * @var array
 	 */
 	protected $casts = array(
-		'opened' => 'boolean',
-		'clicked' => 'boolean',
-		'mode' => 'integer',
+		'opened'      => 'boolean',
+		'clicked'     => 'boolean',
+		'mode'        => 'integer',
 		'source_type' => 'integer',
-		'source_id' => 'integer',
-		'step_id' => 'integer',
-		'status' => 'integer',
+		'source_id'   => 'integer',
+		'step_id'     => 'integer',
+		'status'      => 'integer',
 	);
 
 	/**
@@ -119,9 +121,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function campaign()
-	{
-		return $this->belongsTo(Campaign_Model::class, 'source_id');
+	public function campaign() {
+		return $this->belongsTo( Campaign_Model::class, 'source_id' );
 	}
 
 	/**
@@ -131,9 +132,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function contact()
-	{
-		return $this->belongsTo(Contact_Model::class, 'contact_id');
+	public function contact() {
+		 return $this->belongsTo( Contact_Model::class, 'contact_id' );
 	}
 
 	/**
@@ -143,9 +143,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function template()
-	{
-		return $this->belongsTo(Template_Model::class, 'template_id');
+	public function template() {
+		return $this->belongsTo( Template_Model::class, 'template_id' );
 	}
 
 	/**
@@ -155,9 +154,19 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
 	 */
-	public function message()
-	{
-		return $this->hasOne(Message_Model::class, 'tracking_id');
+	public function message() {
+		 return $this->hasOne( Message_Model::class, 'tracking_id' );
+	}
+
+	/**
+	 * Tracking meta relationship (for merge tag values)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 */
+	public function tracking_meta() {
+		return $this->hasOne( Tracking_Meta_Model::class, 'tracking_id' );
 	}
 
 	/**
@@ -169,9 +178,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return object
 	 */
-	public static function get_by_hash_key($hash_key)
-	{
-		return self::where('hash_key', $hash_key)->firstOrFail();
+	public static function get_by_hash_key( $hash_key ) {
+		return self::where( 'hash_key', $hash_key )->firstOrFail();
 	}
 
 	/**
@@ -180,9 +188,8 @@ class Tracking_Model extends Model
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeEmails($query)
-	{
-		return $query->where('mode', self::MODE_EMAIL);
+	public function scopeEmails( $query ) {
+		return $query->where( 'mode', self::MODE_EMAIL );
 	}
 
 	/**
@@ -191,9 +198,8 @@ class Tracking_Model extends Model
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeSms($query)
-	{
-		return $query->where('mode', self::MODE_SMS);
+	public function scopeSms( $query ) {
+		return $query->where( 'mode', self::MODE_SMS );
 	}
 
 	/**
@@ -202,9 +208,8 @@ class Tracking_Model extends Model
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeWhatsapp($query)
-	{
-		return $query->where('mode', self::MODE_WHATSAPP);
+	public function scopeWhatsapp( $query ) {
+		return $query->where( 'mode', self::MODE_WHATSAPP );
 	}
 
 	/**
@@ -213,9 +218,8 @@ class Tracking_Model extends Model
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeFromCampaign($query)
-	{
-		return $query->where('source_type', Message_Source_Types::CAMPAIGN);
+	public function scopeFromCampaign( $query ) {
+		return $query->where( 'source_type', Message_Source_Types::CAMPAIGN );
 	}
 
 	/**
@@ -224,9 +228,8 @@ class Tracking_Model extends Model
 	 * @param \Illuminate\Database\Eloquent\Builder $query
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeFromAutomation($query)
-	{
-		return $query->where('source_type', Message_Source_Types::AUTOMATION);
+	public function scopeFromAutomation( $query ) {
+		return $query->where( 'source_type', Message_Source_Types::AUTOMATION );
 	}
 
 
@@ -234,25 +237,23 @@ class Tracking_Model extends Model
 	 * Scope: Messages by source type
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query
-	 * @param int $source_type
+	 * @param int                                   $source_type
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeBySourceType($query, $source_type)
-	{
-		return $query->where('source_type', $source_type);
+	public function scopeBySourceType( $query, $source_type ) {
+		return $query->where( 'source_type', $source_type );
 	}
 
 	/**
 	 * Scope: Messages by source
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query
-	 * @param int $source_type
-	 * @param int $source_id
+	 * @param int                                   $source_type
+	 * @param int                                   $source_id
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeBySource($query, $source_type, $source_id)
-	{
-		return $query->where('source_type', $source_type)->where('source_id', $source_id);
+	public function scopeBySource( $query, $source_type, $source_id ) {
+		return $query->where( 'source_type', $source_type )->where( 'source_id', $source_id );
 	}
 
 	/**
@@ -261,12 +262,11 @@ class Tracking_Model extends Model
 	 * @since 1.0.0
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query
-	 * @param int $step_id
+	 * @param int                                   $step_id
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeByStep($query, $step_id)
-	{
-		return $query->where('step_id', $step_id);
+	public function scopeByStep( $query, $step_id ) {
+		return $query->where( 'step_id', $step_id );
 	}
 
 	/**
@@ -274,8 +274,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_email()
-	{
+	public function is_email() {
 		return $this->mode === self::MODE_EMAIL;
 	}
 
@@ -284,8 +283,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_sms()
-	{
+	public function is_sms() {
 		return $this->mode === self::MODE_SMS;
 	}
 
@@ -294,9 +292,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_whatsapp()
-	{
-		return $this->mode === self::MODE_WHATSAPP;
+	public function is_whatsapp() {
+		 return $this->mode === self::MODE_WHATSAPP;
 	}
 
 	/**
@@ -304,8 +301,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_opened()
-	{
+	public function is_opened() {
 		return $this->is_email() && $this->opened == 1;
 	}
 
@@ -314,8 +310,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_clicked()
-	{
+	public function is_clicked() {
 		return $this->clicked == 1;
 	}
 
@@ -324,9 +319,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return string
 	 */
-	public function get_source_type_label()
-	{
-		return Message_Source_Types::get_type_label($this->source_type);
+	public function get_source_type_label() {
+		return Message_Source_Types::get_type_label( $this->source_type );
 	}
 
 	/**
@@ -334,8 +328,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_from_campaign()
-	{
+	public function is_from_campaign() {
 		return $this->source_type === Message_Source_Types::CAMPAIGN;
 	}
 
@@ -344,8 +337,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_from_automation()
-	{
+	public function is_from_automation() {
 		return $this->source_type === Message_Source_Types::AUTOMATION;
 	}
 
@@ -354,9 +346,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function automation()
-	{
-		return $this->belongsTo(Automation_Model::class, 'source_id');
+	public function automation() {
+		return $this->belongsTo( Automation_Model::class, 'source_id' );
 	}
 
 	/**
@@ -366,9 +357,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function step()
-	{
-		return $this->belongsTo(Automation_Step_Model::class, 'step_id');
+	public function step() {
+		return $this->belongsTo( Automation_Step_Model::class, 'step_id' );
 	}
 
 
@@ -377,10 +367,9 @@ class Tracking_Model extends Model
 	 *
 	 * @return Campaign_Model|null
 	 */
-	public function get_campaign()
-	{
-		if ($this->source_type === Message_Source_Types::CAMPAIGN) {
-			return Campaign_Model::find($this->source_id);
+	public function get_campaign() {
+		if ( $this->source_type === Message_Source_Types::CAMPAIGN ) {
+			return Campaign_Model::find( $this->source_id );
 		}
 		return null;
 	}
@@ -390,10 +379,9 @@ class Tracking_Model extends Model
 	 *
 	 * @return Automation_Model|null
 	 */
-	public function get_automation()
-	{
-		if ($this->source_type === Message_Source_Types::AUTOMATION) {
-			return Automation_Model::find($this->source_id);
+	public function get_automation() {
+		if ( $this->source_type === Message_Source_Types::AUTOMATION ) {
+			return Automation_Model::find( $this->source_id );
 		}
 		return null;
 	}
@@ -405,10 +393,9 @@ class Tracking_Model extends Model
 	 *
 	 * @return Automation_Step_Model|null
 	 */
-	public function get_step()
-	{
-		if ($this->source_type === Message_Source_Types::AUTOMATION && $this->step_id) {
-			return Automation_Step_Model::find($this->step_id);
+	public function get_step() {
+		if ( $this->source_type === Message_Source_Types::AUTOMATION && $this->step_id ) {
+			return Automation_Step_Model::find( $this->step_id );
 		}
 		return null;
 	}
@@ -420,10 +407,9 @@ class Tracking_Model extends Model
 	 * @param int $source_id Source ID (campaign_id, automation_id, etc.)
 	 * @return void
 	 */
-	public function set_source($source_type, $source_id = 0)
-	{
+	public function set_source( $source_type, $source_id = 0 ) {
 		$this->source_type = $source_type;
-		$this->source_id = $source_id;
+		$this->source_id   = $source_id;
 	}
 
 	/**
@@ -431,8 +417,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_failed()
-	{
+	public function is_failed() {
 		return $this->status === Tracking_Status::FAILED;
 	}
 
@@ -441,9 +426,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_sent()
-	{
-		return $this->status === Tracking_Status::SENT;
+	public function is_sent() {
+		 return $this->status === Tracking_Status::SENT;
 	}
 
 	/**
@@ -451,8 +435,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_pending()
-	{
+	public function is_pending() {
 		return $this->status === Tracking_Status::PENDING;
 	}
 
@@ -461,8 +444,7 @@ class Tracking_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_delivered()
-	{
+	public function is_delivered() {
 		return $this->status === Tracking_Status::DELIVERED;
 	}
 
@@ -472,9 +454,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return string
 	 */
-	public function getStatusNameAttribute()
-	{
-		return Tracking_Status::get_name($this->status);
+	public function getStatusNameAttribute() {
+		return Tracking_Status::get_name( $this->status );
 	}
 
 	/**
@@ -482,9 +463,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return string
 	 */
-	public function getStatusSlugAttribute()
-	{
-		return Tracking_Status::get_slug($this->status);
+	public function getStatusSlugAttribute() {
+		return Tracking_Status::get_slug( $this->status );
 	}
 
 	/**
@@ -492,9 +472,8 @@ class Tracking_Model extends Model
 	 *
 	 * @return string
 	 */
-	public function getStatusClassAttribute()
-	{
-		return Tracking_Status::get_status_class($this->status);
+	public function getStatusClassAttribute() {
+		 return Tracking_Status::get_status_class( $this->status );
 	}
 
 
@@ -506,45 +485,43 @@ class Tracking_Model extends Model
 	 *
 	 * @return array
 	 */
-	public static function get_campaign_stats($campaign_id, $mode = null)
-	{
+	public static function get_campaign_stats( $campaign_id, $mode = null ) {
 		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-		
-		if ($mode) {
-			$channel = Campaign_Channel::from_mode($mode);
-			if ($channel) {
-				return $analytics->get_campaign_stats($channel, $campaign_id);
+
+		if ( $mode ) {
+			$channel = Campaign_Channel::from_mode( $mode );
+			if ( $channel ) {
+				return $analytics->get_campaign_stats( $channel, $campaign_id );
 			}
 		}
-		
+
 		// Return combined stats for all modes
-		$stats = [];
-		foreach (Campaign_Channel::get_all() as $channel) {
-			$stats[$channel] = $analytics->get_campaign_stats($channel, $campaign_id);
+		$stats = array();
+		foreach ( Campaign_Channel::get_all() as $channel ) {
+			$stats[ $channel ] = $analytics->get_campaign_stats( $channel, $campaign_id );
 		}
-		
+
 		return $stats;
 	}
 
 	/**
 	 * Boot method for model events
 	 */
-	public static function boot()
-	{
-		parent::boot();
+	public static function boot() {
+		 parent::boot();
 
 		// Update campaign message counts when message status changes
 		static::saved(
-			function ($message) {
+			function ( $message ) {
 				// Trigger campaign count recalculation based on mode
-				$mode_actions = [
-					self::MODE_EMAIL => 'quillcrm_campaign_email_status_changed',
-					self::MODE_SMS => 'quillcrm_campaign_sms_status_changed',
-					self::MODE_WHATSAPP => 'quillcrm_campaign_whatsapp_status_changed'
-				];
-				
-				if (isset($mode_actions[$message->mode])) {
-					do_action($mode_actions[$message->mode], $message);
+				$mode_actions = array(
+					self::MODE_EMAIL    => 'quillcrm_campaign_email_status_changed',
+					self::MODE_SMS      => 'quillcrm_campaign_sms_status_changed',
+					self::MODE_WHATSAPP => 'quillcrm_campaign_whatsapp_status_changed',
+				);
+
+				if ( isset( $mode_actions[ $message->mode ] ) ) {
+					do_action( $mode_actions[ $message->mode ], $message );
 				}
 			}
 		);

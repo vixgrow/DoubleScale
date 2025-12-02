@@ -34,6 +34,13 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	protected $channel = Campaign_Channel::STR_EMAIL;
 
 	/**
+	 * Cached merge tag keys for current template
+	 *
+	 * @var array|null
+	 */
+	private $template_merge_tag_keys = null;
+
+	/**
 	 * Add hooks
 	 *
 	 * @return void
@@ -89,6 +96,21 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
 
+		// STEP 1: Extract merge tag keys if not already cached
+		if ( is_null( $this->template_merge_tag_keys ) ) {
+			$combined_content              = $subject . ' ' . $message;
+			$this->template_merge_tag_keys = \QuillCRM\Managers\Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
+		}
+
+		// STEP 2: Capture merge tag values for this contact using pre-extracted keys
+		if ( ! empty( $this->template_merge_tag_keys ) ) {
+			\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$campaign_message->id,
+				$this->template_merge_tag_keys,
+				$contact
+			);
+		}
+
 		// Prepare footer HTML before rendering (for builder emails only)
 		// Footer contains merge tags that will be processed after rendering
 		$footer_html = $this->prepare_footer_html( $message, $contact, $campaign_message );
@@ -142,7 +164,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 */
 	private function prepare_footer_html( $message, Contact_Model $contact, Tracking_Model $campaign_message ) {
 		// Check if message is builder format (JSON)
-		$decoded = json_decode( $message, true );
+		$decoded          = json_decode( $message, true );
 		$is_builder_email = ( json_last_error() === JSON_ERROR_NONE && isset( $decoded['type'] ) && $decoded['type'] === 'builder' );
 
 		// Only prepare footer for builder emails
@@ -151,8 +173,8 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			quillcrm_get_logger()->debug(
 				'Skipping footer preparation - not a builder email',
 				array(
-					'source' => 'email-campaign-processing',
-					'is_json' => ( json_last_error() === JSON_ERROR_NONE ),
+					'source'   => 'email-campaign-processing',
+					'is_json'  => ( json_last_error() === JSON_ERROR_NONE ),
 					'has_type' => isset( $decoded['type'] ),
 				)
 			);
@@ -188,14 +210,14 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		quillcrm_get_logger()->debug(
 			'Prepared footer for builder email',
 			array(
-				'source'                     => 'email-campaign-processing',
-				'footer_source'              => $footer_source,
-				'footer_length'              => strlen( $footer_html ),
-				'email_footer_length'        => strlen( $email_footer ),
-				'has_unsubscribe_merge_tag'  => ( strpos( $email_footer, '{{contact:unsubscribe_link}}' ) !== false ),
-				'campaign_settings_empty'    => empty( $this->settings['email_footer'] ),
-				'global_settings_empty'      => empty( $global_settings['email_footer'] ),
-				'email_footer_preview'       => substr( $email_footer, 0, 100 ),
+				'source'                    => 'email-campaign-processing',
+				'footer_source'             => $footer_source,
+				'footer_length'             => strlen( $footer_html ),
+				'email_footer_length'       => strlen( $email_footer ),
+				'has_unsubscribe_merge_tag' => ( strpos( $email_footer, '{{contact:unsubscribe_link}}' ) !== false ),
+				'campaign_settings_empty'   => empty( $this->settings['email_footer'] ),
+				'global_settings_empty'     => empty( $global_settings['email_footer'] ),
+				'email_footer_preview'      => substr( $email_footer, 0, 100 ),
 			)
 		);
 
@@ -252,10 +274,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				quillcrm_get_logger()->debug(
 					'Builder email detected - footer should already be injected',
 					array(
-						'source'            => 'email-campaign-processing',
-						'contact_id'        => $contact->id,
-						'body_length'       => strlen( $message_data['body'] ),
-						'has_email_footer'  => ( strpos( $message_data['body'], '<!-- Email Footer -->' ) !== false ),
+						'source'             => 'email-campaign-processing',
+						'contact_id'         => $contact->id,
+						'body_length'        => strlen( $message_data['body'] ),
+						'has_email_footer'   => ( strpos( $message_data['body'], '<!-- Email Footer -->' ) !== false ),
 						'has_tracking_pixel' => ( strpos( $message_data['body'], 'quillcrm=email_open' ) !== false ),
 					)
 				);

@@ -73,6 +73,7 @@ import { Button } from '@/components/ui/button';
 import { RocketIcon } from '@quillcrm/components';
 import config from '@/config';
 import GetStart from '../pages/get-start';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
@@ -116,8 +117,10 @@ export const Controller = ({ page }) => {
 		false
 	) as boolean;
 
-	// Global onboarding redirect based on business settings.
-	useOnboardingRedirect();
+	const { isCrmManager } = useCapabilities();
+	if (isCrmManager()) {
+		useOnboardingRedirect();
+	}
 
 	// Navigation helper for Pro components
 	const handleNavigate = (path: string) => navigate(getToLink(path));

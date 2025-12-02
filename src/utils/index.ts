@@ -557,3 +557,32 @@ export const getGoalWarningMessage = (step: any): string => {
 export const getAutomationWarnings = (automation: any): any[] => {
 	return automation?._warnings || [];
 };
+
+type ApiErrorShape = {
+	message?: string;
+	data?: {
+		message?: string;
+	};
+};
+
+export const getApiErrorMessage = (
+	error: unknown,
+	fallback: string
+): string => {
+	const typed = error as ApiErrorShape | undefined;
+
+	return (
+		typed?.message ||
+		typed?.data?.message ||
+		fallback
+	);
+};
+
+export const generateSlug = (name: string): string => {
+	return name
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/[\s_-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+};

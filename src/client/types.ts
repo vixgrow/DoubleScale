@@ -650,6 +650,7 @@ export type Settings = {
 	business: {
 		business_name: string;
 		business_address: string;
+		business_logo?: string;
 	};
 	email: {
 		from_name: string;

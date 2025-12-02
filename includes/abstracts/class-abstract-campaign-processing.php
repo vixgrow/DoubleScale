@@ -38,6 +38,13 @@ abstract class Abstract_Campaign_Processing {
 	protected $channel;
 
 	/**
+	 * Cached merge tag keys for current template
+	 *
+	 * @var array|null
+	 */
+	private $template_merge_tag_keys = null;
+
+	/**
 	 * Start time
 	 *
 	 * @var int
@@ -452,14 +459,14 @@ abstract class Abstract_Campaign_Processing {
 							$subQuery->where( 'status', 'schedule' )
 								->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
 						}
-				);
-		}
-	)
+					);
+			}
+		)
 		// Convert string to integer for database query (DB boundary)
 		->where( 'type', Campaign_Channel::to_integer( $this->channel ) )
 		->orderBy( 'updated_at', 'asc' )
 		->first();
-}
+	}
 
 	/**
 	 * Process individual campaign
@@ -562,12 +569,12 @@ abstract class Abstract_Campaign_Processing {
 			// Get recipient field (email or phone)
 			$recipient = $this->get_recipient( $contact );
 			if ( empty( $recipient ) ) {
-			$this->contact_filter->log_skipped_contact(
-				$contact->id,
-				$campaign->id,
-				$this->channel,
-				$this->channel === Campaign_Channel::STR_EMAIL ? 'no email' : 'no phone number'
-			);
+				$this->contact_filter->log_skipped_contact(
+					$contact->id,
+					$campaign->id,
+					$this->channel,
+					$this->channel === Campaign_Channel::STR_EMAIL ? 'no email' : 'no phone number'
+				);
 				// Increment offset for skipped contact to avoid reprocessing
 				update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 				return true; // Count as processed to avoid infinite loop
@@ -768,6 +775,21 @@ abstract class Abstract_Campaign_Processing {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// STEP 1: Extract merge tag keys if not already cached
+		if ( is_null( $this->template_merge_tag_keys ) ) {
+			$combined_content              = $subject . ' ' . $message;
+			$this->template_merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
+		}
+
+		// STEP 2: Capture merge tag values for this contact using pre-extracted keys
+		if ( ! empty( $this->template_merge_tag_keys ) ) {
+			\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$campaign_message->id,
+				$this->template_merge_tag_keys,
+				$contact
+			);
+		}
 
 		// Check if the message is in builder JSON format and render it to HTML
 		$message = $this->render_builder_content( $message, $contact );
@@ -1059,7 +1081,7 @@ abstract class Abstract_Campaign_Processing {
 	protected function handle_resending() {
 		// Convert string to integer for database query (DB boundary)
 		$type_int = Campaign_Channel::to_integer( $this->channel );
-		
+
 		$resending_campaign = Campaign_Model::where( 'status', 'resending' )
 			->where( 'type', $type_int )
 			->orderBy( 'updated_at', 'asc' )
@@ -1133,14 +1155,14 @@ abstract class Abstract_Campaign_Processing {
 	 * Helper method to resend a single tracking message
 	 *
 	 * @param Campaign_Model $campaign
-	 * @param Contact_Model $contact
+	 * @param Contact_Model  $contact
 	 * @param Tracking_Model $message
 	 * @return void
 	 */
 	public function resend_single_message( $campaign, $contact, $message ) {
 		$message->status = Tracking_Status::SCHEDULED;
 		$message->save();
-		
+
 		// Channel is already a string
 		$channel_string = $this->channel;
 		QuillCRM::instance()->campaigns_tasks->enqueue_sync(

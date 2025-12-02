@@ -23,6 +23,7 @@ use QuillCRM\Database\Migrations\Lists_Table;
 use QuillCRM\Database\Migrations\Tags_Table;
 use QuillCRM\Database\Migrations\Campaigns_Table;
 use QuillCRM\Database\Migrations\Templates_Table;
+use QuillCRM\Database\Migrations\Tracking_Meta_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Tracking_Table;
 use QuillCRM\Database\Migrations\Messages_Table;
@@ -135,6 +136,7 @@ class Install {
 				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
 				'logs'                         => Logs_Table::class,
+				'tracking_meta'                => Tracking_Meta_Table::class,
 				// Pipeline, Link Triggers, and Custom Fields tables moved to Pro plugin
 			)
 		);

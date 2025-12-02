@@ -123,6 +123,10 @@ class REST_Settings_Controller extends REST_Controller {
 							'type'    => 'string',
 							'default' => '',
 						),
+						'business_logo'    => array(
+							'type'    => 'string',
+							'default' => '',
+						),
 					),
 				),
 				'email'           => array(
@@ -709,13 +713,13 @@ class REST_Settings_Controller extends REST_Controller {
 		);
 
 		// Server information
-		$memory_limit = $this->get_memory_limit_in_mb();
-		$memory_usage = memory_get_usage( true ) / 1024 / 1024;
+		$memory_limit  = $this->get_memory_limit_in_mb();
+		$memory_usage  = memory_get_usage( true ) / 1024 / 1024;
 		$usage_percent = ( $memory_usage / $memory_limit ) * 100;
 
 		$has_server_cron = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
-		$site_url = site_url();
-		$cron_url = add_query_arg( 'doing_wp_cron', '', $site_url . '/wp-cron.php' );
+		$site_url        = site_url();
+		$cron_url        = add_query_arg( 'doing_wp_cron', '', $site_url . '/wp-cron.php' );
 
 		return new WP_REST_Response(
 			array(

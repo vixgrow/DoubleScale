@@ -801,6 +801,9 @@ class REST_Contact_Controller extends REST_Controller {
 						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );
 						}, // Include message content for individual messages
+						'tracking_meta' => function ( $query ) {
+							$query->select( 'id', 'tracking_id', 'merge_tags', 'sections_ids' );
+						}, // Include merge tag values for historical rendering
 					)
 				)
 				->orderBy( 'created_at', 'desc' );

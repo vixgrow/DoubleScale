@@ -21,6 +21,7 @@ import RecommendedPluginIcon from '@quillcrm/components/icons/recommended-plugin
 import QuillBookingIcon from '@quillcrm/components/icons/quillBooking';
 import OptionalPluginIcon from '@quillcrm/components/icons/optional-icon';
 import ButtonComponent from '../component/button';
+import { Input } from '../../../../components/ui/input';
 
 interface Plugin {
 	id: string;
@@ -152,6 +153,7 @@ export default function PluginComplete({
 		useState<Plugin[]>(OptionalPlugins);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [isProcessing, setIsProcessing] = useState<string | null>(null);
+	const [email, setEmail] = useState('');
 
 	// Check plugin status on mount
 	useEffect(() => {
@@ -434,6 +436,31 @@ export default function PluginComplete({
 					</AccordionItem>
 				</Accordion>
 			)}
+
+			<div className=" bg-[#DEE1E6] w-full h-[1px]"></div>
+
+			{/* Email Subscription */}
+
+			<div className=" !p-0 !m-0">
+				<label className="text-base leading-6 text-[#09090B] block mb-[2px]">
+					{__('Email Address', 'quillcrm')}
+				</label>
+
+				<Input
+					type="email"
+					placeholder={__('Email Address', 'quillcrm')}
+					value={email}
+					onChange={(e) => setEmail(e.target.value)}
+					className="w-full border !border-[#DEE1E6] rounded-lg h-12 py-[5px] px-4 !m-0"
+				/>
+
+				<p className="text-xs text-[#CB5301] font-semibold leading-[26px] !m-0">
+					{__(
+						'We will send marketing tips and advanced usage of Quill CRM',
+						'quillcrm'
+					)}
+				</p>
+			</div>
 
 			<div className="flex justify-between pt-8">
 				<div className="flex gap-2">

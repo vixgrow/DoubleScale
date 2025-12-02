@@ -571,7 +571,7 @@ registerAdminPage('my-reports', {
 	),
 	label: __('My Reports', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_sales_rep', 'quillcrm_crm_manager'],
 });
 
 registerAdminPage('cart-analytics', {

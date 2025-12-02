@@ -112,7 +112,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
 					if (isSalesRep()) {
-						// Deal owners see only their reports
+						// Sales reps see only their reports
 						navItem.subMenu = [
 							{
 								path: 'my-reports',
@@ -120,7 +120,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							},
 						];
 					} else {
-						// Build submenu with all analytics (deal analytics will show Pro notice in free version)
+						// Non-sales reps see all analytics including My Reports
 						const submenu = [
 							{
 								path: 'deals-analytics',
@@ -133,6 +133,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'pipeline-analytics',
 								label: __('Pipeline Analytics', 'quillcrm'),
+							},
+							{
+								path: 'my-reports',
+								label: __('My Reports', 'quillcrm'),
 							},
 							{
 								path: 'emails-analytics',

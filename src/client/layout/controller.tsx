@@ -13,6 +13,7 @@ import {
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
@@ -71,6 +72,38 @@ import type { User } from '@/services/user-service';
 import { Button } from '@/components/ui/button';
 import { RocketIcon } from '@quillcrm/components';
 import config from '@/config';
+import GetStart from '../pages/get-start';
+
+const useOnboardingRedirect = () => {
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const checkBusinessSettings = async () => {
+			try {
+				const settings: any = await apiFetch({
+					path: '/qc/v1/settings',
+				});
+				const business = settings?.business || {};
+
+				const hasBusinessData =
+					Boolean(business.business_name) ||
+					Boolean(business.business_address) ||
+					Boolean(business.business_logo);
+
+				const isOnStart = globalThis.location?.hash?.includes('/start');
+
+				if (!hasBusinessData && !isOnStart) {
+					navigate(getToLink('start'));
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error('Failed to check business settings', error);
+			}
+		};
+
+		void checkBusinessSettings();
+	}, [navigate]);
+};
 
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -82,6 +115,9 @@ export const Controller = ({ page }) => {
 		'quillcrm_is_pro_active',
 		false
 	) as boolean;
+
+	// Global onboarding redirect based on business settings.
+	useOnboardingRedirect();
 
 	// Navigation helper for Pro components
 	const handleNavigate = (path: string) => navigate(getToLink(path));
@@ -215,17 +251,16 @@ export const Controller = ({ page }) => {
 					{__('Back to WordPress Dashboard', 'quillcrm')}
 				</div>
 				<div className="flex items-center gap-3 justify-end w-1/2">
-				{!isProActive && (
-					
-							<a
-								href={config.getUrlQuillCRMPro()}
-								target="_blank"
-								rel="noopener noreferrer"
-								className='border border-[#458DC7] text-[#458DC7] text-base px-3 py-2 rounded-lg flex items-center gap-2 mr-3'
-							>
-								<RocketIcon />
-								{__('Upgrade to Pro', 'quillcrm')}
-							</a>
+					{!isProActive && (
+						<a
+							href={config.getUrlQuillCRMPro()}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="border border-[#458DC7] text-[#458DC7] text-base px-3 py-2 rounded-lg flex items-center gap-2 mr-3"
+						>
+							<RocketIcon />
+							{__('Upgrade to Pro', 'quillcrm')}
+						</a>
 					)}
 					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 						{avatarUrl ? (
@@ -238,7 +273,6 @@ export const Controller = ({ page }) => {
 					<div className="text-lg font-semibold text-[#333333]">
 						{displayName}
 					</div>
-					
 				</div>
 			</div>
 			<page.component navigate={handleNavigate} params={params} />
@@ -260,6 +294,15 @@ registerAdminPage('contacts', {
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+});
+
+registerAdminPage('start', {
+	path: 'start',
+	component: () => <GetStart />,
+	label: __('Get Started', 'quillcrm'),
+	icon: <DashboardIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('contact', {

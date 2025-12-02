@@ -85,7 +85,17 @@ class Settings {
 	 */
 	public static function update_many( $new_settings ) {
 		$old_settings = self::get_all();
-		$settings     = array_replace( $old_settings, $new_settings );
+
+		// Ensure both old and new settings are arrays to avoid type errors.
+		if ( ! is_array( $old_settings ) ) {
+			$old_settings = array();
+		}
+
+		if ( ! is_array( $new_settings ) ) {
+			$new_settings = array();
+		}
+
+		$settings = array_replace( $old_settings, $new_settings );
 		return self::update_all( $settings );
 	}
 

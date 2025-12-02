@@ -76,6 +76,7 @@ const configData: ConfigData = {
 	quillsmtpInfo: {
 		configured: false,
 	},
+	currency: 'USD',
 	urlQuillCRMPro: '',
 };
 
@@ -653,6 +654,26 @@ export const setUrlQuillCRMPro = (data: ConfigData) => (value: string) => {
 	data.urlQuillCRMPro = value;
 };
 
+/**
+ * Gets global currency code
+ *
+ * @param data - configuration data
+ * @returns Currency code (e.g., 'USD', 'EUR')
+ */
+export const getCurrency = (data: ConfigData): string => {
+	return data.currency;
+};
+
+/**
+ * Sets global currency code
+ *
+ * @param data - configuration data
+ * @param value the currency code to set
+ */
+export const setCurrency = (data: ConfigData) => (value: string) => {
+	data.currency = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -707,6 +728,8 @@ export interface ConfigApi {
 	setDealPriorities: (value: DealPriority[]) => void;
 	getQuillSMTPInfo: () => QuillSMTPInfo;
 	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
+	getCurrency: () => string;
+	setCurrency: (value: string) => void;
 	getUrlQuillCRMPro: () => string;
 	setUrlQuillCRMPro: (value: string) => void;
 }
@@ -765,6 +788,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setDealPriorities = setDealPriorities(data);
 	configApi.getQuillSMTPInfo = () => getQuillSMTPInfo(data);
 	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
+	configApi.getCurrency = () => getCurrency(data);
+	configApi.setCurrency = setCurrency(data);
 	configApi.getUrlQuillCRMPro = () => getUrlQuillCRMPro(data);
 	configApi.setUrlQuillCRMPro = setUrlQuillCRMPro(data);
 	return configApi;

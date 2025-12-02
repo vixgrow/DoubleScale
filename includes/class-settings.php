@@ -157,4 +157,16 @@ class Settings {
 		return 'Thank you for confirming your subscription!';
 	}
 
+	/**
+	 * Get global currency setting
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Currency code (e.g., 'USD', 'EUR')
+	 */
+	public static function get_currency() {
+		$currency_settings = self::get( 'currency', array() );
+		return isset( $currency_settings['currency'] ) ? $currency_settings['currency'] : 'USD';
+	}
+
 }

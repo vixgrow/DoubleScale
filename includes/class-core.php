@@ -90,6 +90,7 @@ class Core {
 					? 'qcrm.config.setDealPriorities( ' . wp_json_encode( \QuillCRM_Pro\Managers\Deal_Manager::instance()->get_deal_priorities() ) . ');'
 					: 'qcrm.config.setDealPriorities( [] );' ) .
 				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');' .
+				'qcrm.config.setCurrency( "' . Settings::get_currency() . '" );' .
 				'qcrm.config.setUrlQuillCRMPro( "' . $url_quillcrm_pro . '" );'
 		);
 	}

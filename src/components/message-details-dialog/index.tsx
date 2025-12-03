@@ -73,14 +73,17 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 
 			if (templateId) {
 				try {
-					// Try to render via API endpoint with contact for merge tags
+					// Try to render via API endpoint with stored merge tag values for historical accuracy
 					// Pass preview=true to strip tracking elements (prevents admin views from counting as opens)
-					const contactId = campaignEmail?.contact_id || campaignEmail?.contact?.id;
+					const contactId =
+						campaignEmail?.contact_id || campaignEmail?.contact?.id;
+					const trackingId = campaignEmail?.id; // Use the tracking record ID
 					const response: any = await apiFetch({
 						path: `/qc/v1/templates/${templateId}/render`,
 						method: 'POST',
 						data: {
 							...(contactId ? { contact_id: contactId } : {}),
+							...(trackingId ? { tracking_id: trackingId } : {}),
 							preview: true,
 						},
 					});
@@ -183,4 +186,3 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 };
 
 export default MessageDetailsDialog;
-

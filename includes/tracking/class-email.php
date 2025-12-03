@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Tracking;
 
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 
 /**
@@ -70,8 +70,8 @@ class Email {
 			}
 
 			$hash_key = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
-			$tracking_entry = Tracking_Model::where( 'hash_key', $hash_key )
-				->where( 'mode', Tracking_Model::MODE_EMAIL )
+			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
+				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
 
 			if ( ! $tracking_entry ) {
@@ -125,8 +125,8 @@ class Email {
 			}
 
 			$hash_key = sanitize_text_field( $_GET['hash_key'] );
-			$tracking_entry = Tracking_Model::where( 'hash_key', $hash_key )
-				->where( 'mode', Tracking_Model::MODE_EMAIL )
+			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
+				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
 
 			if ( ! $tracking_entry ) {

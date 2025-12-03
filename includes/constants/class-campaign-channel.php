@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Constants;
 
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 
 /**
  * Campaign_Channel class
@@ -205,7 +205,7 @@ class Campaign_Channel {
 	}
 
 	/**
-	 * Convert channel type to Tracking_Model mode constant
+	 * Convert channel type to Communication_Tracking_Model mode constant
 	 *
 	 * Since both use the same integer values, this is now a direct mapping.
 	 * Kept for backward compatibility with existing code.
@@ -222,7 +222,7 @@ class Campaign_Channel {
 	}
 
 	/**
-	 * Convert Tracking_Model mode constant to channel type
+	 * Convert Communication_Tracking_Model mode constant to channel type
 	 *
 	 * Since both use the same integer values, this is now a direct mapping.
 	 * Kept for backward compatibility with existing code.

@@ -14,7 +14,7 @@ namespace QuillCRM\Automations\Actions;
 use QuillCRM\Abstracts\Abstract_Send_Message;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Campaign\Email_Processing;
 
 /**
@@ -83,7 +83,7 @@ class Send_Email extends Abstract_Send_Message {
 	 * @return int
 	 */
 	protected function get_tracking_mode() {
-		return Tracking_Model::MODE_EMAIL;
+		return Communication_Tracking_Model::MODE_EMAIL;
 	}
 
 	/**

@@ -262,6 +262,7 @@ final class Merge_Tags_Manager {
 
 	/**
 	 * Process Merge Tags
+	 * Context-aware processing that uses stored values when tracking context is available
 	 *
 	 * @since 1.0.0
 	 *
@@ -271,6 +272,15 @@ final class Merge_Tags_Manager {
 	 * @return string
 	 */
 	public function process_merge_tags( $content, $contact ) {
+		// Check if contact has tracking context - if so, use stored values
+		if ( $contact && method_exists( $contact, 'has_tracking_context' ) && $contact->has_tracking_context() ) {
+			$tracking_context = $contact->get_tracking_context();
+			error_log( "QuillCRM: Contact has tracking context: {$tracking_context}" );
+			return $this->process_merge_tags_with_stored_values( $content, $tracking_context );
+		}
+
+		// Fall back to fresh processing for previews and non-tracking contexts
+		error_log( "QuillCRM: Using fresh merge tag processing - no tracking context" );
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
 			function ( $matches ) use ( $contact ) {
@@ -288,6 +298,29 @@ final class Merge_Tags_Manager {
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Process merge tags using stored values from communication tracking meta
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $content Content with merge tags
+	 * @param int    $tracking_id Communication tracking ID
+	 *
+	 * @return string Content with merge tags replaced by stored values
+	 */
+	private function process_merge_tags_with_stored_values( $content, $tracking_id ) {
+		// Debug: Log that we're using stored values
+		error_log( "QuillCRM: Using stored merge tag values for tracking ID: {$tracking_id}" );
+		
+		// Use the Communication_Tracking_Meta_Model to render with stored values
+		$result = \QuillCRM\Models\Communication_Tracking_Meta_Model::render_with_stored_values( $tracking_id, $content );
+		
+		// Debug: Log the result
+		error_log( "QuillCRM: Stored values result length: " . strlen( $result ) );
+		
+		return $result;
 	}
 
 	/**

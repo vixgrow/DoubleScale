@@ -15,7 +15,7 @@ namespace QuillCRM\Managers;
 use Exception;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Constants\Message_Source_Types;
@@ -412,10 +412,10 @@ final class Email_Sequences_Manager {
 				'id',
 				function ( $sub ) use ( $sequence ) {
 					$sub->select( 'contact_id' )
-						->from( ( new Tracking_Model )->getTable() )
+						->from( ( new Communication_Tracking_Model )->getTable() )
 						->where( 'source_id', $sequence->id )
 						->where( 'source_type', Message_Source_Types::CAMPAIGN )
-						->where( 'mode', Tracking_Model::MODE_EMAIL );
+						->where( 'mode', Communication_Tracking_Model::MODE_EMAIL );
 				}
 			)
 			->get();
@@ -446,7 +446,7 @@ final class Email_Sequences_Manager {
 			$campaign_message_data = array(
 				'contact_id'  => $contact->id,
 				'template_id' => $template_id,
-				'mode'        => Tracking_Model::MODE_EMAIL,
+				'mode'        => Communication_Tracking_Model::MODE_EMAIL,
 				'source_type' => Message_Source_Types::CAMPAIGN,
 				'source_id'   => $sequence->id,
 				'recipient'   => $contact->email,
@@ -454,7 +454,7 @@ final class Email_Sequences_Manager {
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 
-			$campaign_message = Tracking_Model::create( $campaign_message_data );
+			$campaign_message = Communication_Tracking_Model::create( $campaign_message_data );
 
 			// Process and send the email
 			$this->email_processor->process_campaign_message( $sequence, $contact, $campaign_message );

@@ -10,7 +10,7 @@
 namespace QuillCRM\Emails;
 
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Settings;
@@ -25,11 +25,11 @@ class Email_Tracking_Helper {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string         $body Email body.
-	 * @param Tracking_Model $tracking_entry Tracking entry.
+	 * @param string                       $body Email body.
+	 * @param Communication_Tracking_Model $tracking_entry Tracking entry.
 	 * @return string Email with tracking pixel only
 	 */
-	public static function add_tracking_pixel( $body, Tracking_Model $tracking_entry ) {
+	public static function add_tracking_pixel( $body, Communication_Tracking_Model $tracking_entry ) {
 		$tracking_pixel = sprintf(
 			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" alt="" />',
 			home_url( '?quillcrm=email_open&hash_key=' . $tracking_entry->hash_key )
@@ -41,13 +41,13 @@ class Email_Tracking_Helper {
 	/**
 	 * Add tracking pixel and footer to email body
 	 *
-	 * @param string         $body Email body.
-	 * @param Tracking_Model $tracking_entry Tracking entry.
-	 * @param Contact_Model  $contact Contact model.
-	 * @param array          $settings Optional email settings.
+	 * @param string                       $body Email body.
+	 * @param Communication_Tracking_Model $tracking_entry Tracking entry.
+	 * @param Contact_Model                $contact Contact model.
+	 * @param array                        $settings Optional email settings.
 	 * @return string Complete email with footer
 	 */
-	public static function add_footer_and_tracking( $body, Tracking_Model $tracking_entry, Contact_Model $contact, $settings = array() ) {
+	public static function add_footer_and_tracking( $body, Communication_Tracking_Model $tracking_entry, Contact_Model $contact, $settings = array() ) {
 		// Add tracking pixel
 		$body_with_tracking = self::add_tracking_pixel( $body, $tracking_entry );
 

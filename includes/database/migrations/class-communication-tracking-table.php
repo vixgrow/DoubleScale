@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Tracking_Table
+ * Class Communication_Tracking_Table
  * Unified table for tracking message delivery, opens, clicks across all channels
  *
  * @since 1.0.0
@@ -10,10 +10,10 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Tracking Table class
+ * Communication_Tracking_Table class
  */
-class Tracking_Table extends Migration
-{
+class Communication_Tracking_Table extends Migration {
+
 
 	/**
 	 * Table name
@@ -22,7 +22,7 @@ class Tracking_Table extends Migration
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'tracking';
+	public $table_name = 'communication_tracking';
 
 	/**
 	 * Get query
@@ -31,30 +31,29 @@ class Tracking_Table extends Migration
 	 *
 	 * @return string
 	 */
-	public function get_query()
-	{
-	/**
-	 * Unified Tracking Table Fields:
-	 *
-	 * id: BIGINT(20) NOT NULL AUTO_INCREMENT
-	 * contact_id: BIGINT(20) NOT NULL
-	 * template_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'NULL for individual messages'
-	 * hash_key: VARCHAR(255) NOT NULL
-	 * mode: TINYINT(1) NOT NULL COMMENT '1=Email, 2=SMS, 3=WhatsApp'
-	 * source_type: TINYINT(2) NOT NULL DEFAULT 1 COMMENT '1=Campaign, 2=Automation, 3=Individual'
-	 * source_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'ID of the source (campaign_id or automation_id, NULL for individual)'
-	 * step_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'Automation step ID (NULL for campaigns/individual)'
-	 * author_id: BIGINT(20) UNSIGNED DEFAULT 0 COMMENT 'User ID who sent the message (for individual sends)'
-	 * recipient: VARCHAR(255) NOT NULL COMMENT 'Email address or phone number'
-	 * opened: TINYINT(1) DEFAULT 0 COMMENT 'Only for emails'
-	 * clicked: TINYINT(1) DEFAULT 0
-	 * status: TINYINT(2) UNSIGNED NOT NULL DEFAULT 1 COMMENT '1=Pending, 2=Sent, 3=Failed, 4=Delivered, 5=Scheduled'
-	 * sent_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	 * opened_at: TIMESTAMP COMMENT 'Only for emails'
-	 * clicked_at: TIMESTAMP
-	 * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	 * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-	 */
+	public function get_query() {
+		/**
+		  * Unified Communication Tracking Table Fields:
+		  *
+		  * id: BIGINT(20) NOT NULL AUTO_INCREMENT
+		  * contact_id: BIGINT(20) NOT NULL
+		  * template_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'NULL for individual messages'
+		  * hash_key: VARCHAR(255) NOT NULL
+		  * mode: TINYINT(1) NOT NULL COMMENT '1=Email, 2=SMS, 3=WhatsApp'
+		  * source_type: TINYINT(2) NOT NULL DEFAULT 1 COMMENT '1=Campaign, 2=Automation, 3=Individual'
+		  * source_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'ID of the source (campaign_id or automation_id, NULL for individual)'
+		  * step_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'Automation step ID (NULL for campaigns/individual)'
+		  * author_id: BIGINT(20) UNSIGNED DEFAULT 0 COMMENT 'User ID who sent the message (for individual sends)'
+		  * recipient: VARCHAR(255) NOT NULL COMMENT 'Email address or phone number'
+		  * opened: TINYINT(1) DEFAULT 0 COMMENT 'Only for emails'
+		  * clicked: TINYINT(1) DEFAULT 0
+		  * status: TINYINT(2) UNSIGNED NOT NULL DEFAULT 1 COMMENT '1=Pending, 2=Sent, 3=Failed, 4=Delivered, 5=Scheduled'
+		  * sent_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		  * opened_at: TIMESTAMP COMMENT 'Only for emails'
+		  * clicked_at: TIMESTAMP
+		  * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		  * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		  */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             activity_id BIGINT(20) NULL COMMENT "FK to activities table - links tracking to activity",
             contact_id BIGINT(20) NOT NULL,
@@ -93,3 +92,4 @@ class Tracking_Table extends Migration
 		return $query;
 	}
 }
+

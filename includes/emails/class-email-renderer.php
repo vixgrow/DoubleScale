@@ -47,14 +47,23 @@ class Email_Renderer {
 	 *
 	 * @param int                                         $template_id Template ID
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
+	 * @param int|null                                    $tracking_id Optional tracking ID for stored merge tag values
 	 * @return string HTML output
 	 */
-	public function render_template( $template_id, $contact = null ) {
+	public function render_template( $template_id, $contact = null, $tracking_id = null ) {
 		// Use the Template_Model to fetch the template
 		$template = Template_Model::find( $template_id );
 
 		if ( ! $template ) {
 			return '';
+		}
+
+		// Set tracking context on contact if tracking_id is provided
+		if ( $tracking_id && $contact && method_exists( $contact, 'set_tracking_context' ) ) {
+			error_log( "QuillCRM: Setting tracking context {$tracking_id} on contact {$contact->id}" );
+			$contact->set_tracking_context( $tracking_id );
+		} else {
+			error_log( "QuillCRM: Not setting tracking context - tracking_id: {$tracking_id}, contact: " . ( $contact ? $contact->id : 'null' ) );
 		}
 
 		// Parse the JSON content
@@ -579,6 +588,27 @@ class Email_Renderer {
 		}
 
 		return array();
+	}
+
+	/**
+	 * Render template with tracking context
+	 * Convenience method that automatically sets tracking context and renders
+	 *
+	 * @param int                                         $template_id Template ID
+	 * @param int                                         $tracking_id Communication tracking ID
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model (optional, will be fetched from tracking if not provided)
+	 * @return string HTML output
+	 */
+	public function render_template_with_tracking( $template_id, $tracking_id, $contact = null ) {
+		// If no contact provided, try to get it from the tracking record
+		if ( ! $contact ) {
+			$tracking = \QuillCRM\Models\Communication_Tracking_Model::find( $tracking_id );
+			if ( $tracking && $tracking->contact ) {
+				$contact = $tracking->contact;
+			}
+		}
+
+		return $this->render_template( $template_id, $contact, $tracking_id );
 	}
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tracking Model
+ * Communication Tracking Model
  * Tracks message delivery, opens, clicks across all channels and sources
  *
  * @since 1.0.0
@@ -15,15 +15,15 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Activity_Model;
-use QuillCRM\Models\Tracking_Meta_Model;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
 
 /**
- * Tracking_Model class
+ * Communication_Tracking_Model class
  */
-class Tracking_Model extends Model {
+class Communication_Tracking_Model extends Model {
 
 
 	/**
@@ -40,7 +40,7 @@ class Tracking_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 */
-	protected $table = 'quillcrm_tracking';
+	protected $table = 'quillcrm_communication_tracking';
 
 	/**
 	 * Primary key
@@ -160,14 +160,14 @@ class Tracking_Model extends Model {
 	}
 
 	/**
-	 * Tracking meta relationship (for merge tag values)
+	 * Communication tracking meta relationship (for merge tag values)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function tracking_meta() {
-		return $this->hasOne( Tracking_Meta_Model::class, 'tracking_id' );
+	public function communication_tracking_meta() {
+		return $this->hasMany( Communication_Tracking_Meta_Model::class, 'communication_tracking_id' );
 	}
 
 	/**
@@ -526,5 +526,46 @@ class Tracking_Model extends Model {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Get contact with tracking context set
+	 * Returns the associated contact with this tracking record's context set for merge tags
+	 *
+	 * @return Contact_Model|null Contact with tracking context set
+	 */
+	public function get_contact_with_tracking_context() {
+		if ( ! $this->contact ) {
+			return null;
+		}
+
+		// Set tracking context on the contact
+		return $this->contact->set_tracking_context( $this->id );
+	}
+
+	/**
+	 * Render original content using stored merge tag values
+	 * Convenience method to render any content with this tracking record's stored values
+	 *
+	 * @param string $content Content with merge tags to render
+	 * @return string Rendered content with stored merge tag values
+	 */
+	public function render_original_content( $content ) {
+		return Communication_Tracking_Meta_Model::render_with_stored_values( $this->id, $content );
+	}
+
+	/**
+	 * Render the original template as it was sent
+	 * Uses stored merge tag values to show historical accuracy
+	 *
+	 * @return string Rendered HTML of the original email
+	 */
+	public function render_original_template() {
+		if ( ! $this->template_id ) {
+			return '';
+		}
+
+		$renderer = new \QuillCRM\Emails\Email_Renderer();
+		return $renderer->render_template_with_tracking( $this->template_id, $this->id, $this->contact );
 	}
 }

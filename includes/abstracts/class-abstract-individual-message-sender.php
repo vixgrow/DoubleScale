@@ -16,7 +16,7 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Activity_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
@@ -139,9 +139,9 @@ abstract class Abstract_Individual_Message_Sender {
 
 			// Capture merge tags for individual messages
 			$combined_content = ( $subject ?? '' ) . ' ' . $body;
-			$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
+			$merge_tag_keys   = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
 			if ( ! empty( $merge_tag_keys ) ) {
-				\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+				\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 					$tracking_entry->id,
 					$merge_tag_keys,
 					$contact
@@ -213,10 +213,10 @@ abstract class Abstract_Individual_Message_Sender {
 	 * @param Contact_Model $contact     Contact model
 	 * @param string        $recipient   Recipient (email or phone)
 	 * @param int           $activity_id Activity ID to link to
-	 * @return Tracking_Model
+	 * @return Communication_Tracking_Model
 	 */
 	protected function create_tracking_entry( $contact, $recipient, $activity_id ) {
-		return Tracking_Model::create(
+		return Communication_Tracking_Model::create(
 			array(
 				'activity_id' => $activity_id, // LINK TO ACTIVITY
 				'contact_id'  => $contact->id,
@@ -239,7 +239,7 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @param string         $message        Raw message content
 	 * @param Contact_Model  $contact        Contact for merge tags
-	 * @param Tracking_Model $tracking_entry Tracking record
+	 * @param Communication_Tracking_Model $tracking_entry Tracking record
 	 * @return string Processed message
 	 */
 	protected function process_message( $message, $contact, $tracking_entry ) {
@@ -295,7 +295,7 @@ abstract class Abstract_Individual_Message_Sender {
 	 * @since 1.0.0
 	 *
 	 * @param array                                           $result         Provider result
-	 * @param Tracking_Model                                  $tracking_entry Tracking record
+	 * @param Communication_Tracking_Model                                  $tracking_entry Tracking record
 	 * @param Activity_Model                                  $activity       Activity record
 	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider       Provider instance
 	 * @param Contact_Model                                   $contact        Contact model
@@ -358,7 +358,7 @@ abstract class Abstract_Individual_Message_Sender {
 	 * @since 1.0.0
 	 *
 	 * @param \Exception          $e              Exception that occurred
-	 * @param Tracking_Model|null $tracking_entry Tracking record (if created)
+	 * @param Communication_Tracking_Model|null $tracking_entry Tracking record (if created)
 	 * @param Activity_Model|null $activity       Activity record (if created)
 	 * @param int|null            $contact_id     Contact ID (if available)
 	 * @return WP_Error

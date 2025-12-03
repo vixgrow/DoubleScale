@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Models\Communication_Tracking_Model;
 
 /**
  * Template_Model class
@@ -197,7 +198,7 @@ class Template_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function tracking_records() {
-		return $this->hasMany( Tracking_Model::class, 'template_id' );
+		return $this->hasMany( Communication_Tracking_Model::class, 'template_id' );
 	}
 
 	/**
@@ -222,7 +223,7 @@ class Template_Model extends Model {
 	 * @return bool True if template has been used in any sent message
 	 */
 	public static function is_used_in_tracking( $template_id ) {
-		return Tracking_Model::where( 'template_id', $template_id )->exists();
+		return Communication_Tracking_Model::where( 'template_id', $template_id )->exists();
 	}
 
 	/**

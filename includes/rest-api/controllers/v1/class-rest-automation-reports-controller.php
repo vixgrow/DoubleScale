@@ -21,7 +21,7 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Tracking_Status;
 
 /**
@@ -530,7 +530,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 		global $wpdb;
 
 		// Use raw SQL for better performance
-		$table_name = $wpdb->prefix . 'quillcrm_tracking';
+		$table_name = $wpdb->prefix . 'quillcrm_communication_tracking';
 		
 		$metrics = $wpdb->get_row(
 			$wpdb->prepare(
@@ -548,7 +548,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				Tracking_Status::FAILED,
 				Tracking_Status::PENDING,
 				$step_id,
-				Tracking_Model::MODE_EMAIL
+				Communication_Tracking_Model::MODE_EMAIL
 			),
 			ARRAY_A
 		);

@@ -17,7 +17,7 @@ use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Contact_Note_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
@@ -93,6 +93,14 @@ class Contact_Model extends Model {
 	 * @var array
 	 */
 	protected $appends = array( 'avatar_url' );
+
+	/**
+	 * Tracking context for merge tags
+	 * When set, merge tags will use stored values from communication_tracking_meta
+	 *
+	 * @var int|null
+	 */
+	protected $tracking_context_id = null;
 
 	/**
 	 * Rules
@@ -179,7 +187,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function campaign_emails() {
-		 return $this->hasMany( Tracking_Model::class, 'contact_id', 'id' )->emails();
+		 return $this->hasMany( Communication_Tracking_Model::class, 'contact_id', 'id' )->emails();
 	}
 
 	/**
@@ -773,5 +781,45 @@ class Contact_Model extends Model {
 				}
 			);
 		}
+	}
+
+	/**
+	 * Set tracking context for merge tags processing
+	 * When set, merge tags will use stored values from communication_tracking_meta
+	 *
+	 * @param int $tracking_id Communication tracking ID
+	 * @return self
+	 */
+	public function set_tracking_context( $tracking_id ) {
+		$this->tracking_context_id = $tracking_id;
+		return $this;
+	}
+
+	/**
+	 * Get current tracking context
+	 *
+	 * @return int|null Communication tracking ID or null if not set
+	 */
+	public function get_tracking_context() {
+		return $this->tracking_context_id;
+	}
+
+	/**
+	 * Check if contact has tracking context set
+	 *
+	 * @return bool
+	 */
+	public function has_tracking_context() {
+		return ! is_null( $this->tracking_context_id );
+	}
+
+	/**
+	 * Clear tracking context
+	 *
+	 * @return self
+	 */
+	public function clear_tracking_context() {
+		$this->tracking_context_id = null;
+		return $this;
 	}
 }

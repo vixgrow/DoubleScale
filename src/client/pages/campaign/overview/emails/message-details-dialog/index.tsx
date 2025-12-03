@@ -96,13 +96,13 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 		// Subject (Email only)
 		if (
 			campaignType === CAMPAIGN_CHANNEL.EMAIL &&
-			(campaignEmail.template?.subject || campaignEmail.message?.subject)
+			(campaignEmail.template?.subject || campaignEmail.activity?.data?.subject)
 		) {
 			fields.push({
 				label: __('Subject', 'quillcrm'),
 				value:
 					campaignEmail.template?.subject ||
-					campaignEmail.message?.subject ||
+					campaignEmail.activity?.data?.subject ||
 					__('No Subject', 'quillcrm'),
 			});
 		}
@@ -292,7 +292,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 
 	const messageContent =
 		campaignEmail?.template?.body ||
-		campaignEmail?.message?.body ||
+		campaignEmail?.activity?.data?.body ||
 		__('No content available', 'quillcrm');
 
 	return (

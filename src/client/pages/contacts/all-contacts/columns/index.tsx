@@ -161,7 +161,19 @@ export const useContactsColumns = () => {
 				</div>
 			),
 			cell: ({ row }) => {
-				const status = row.original.status || '-';
+				const contact = row.original as any;
+
+				// Determine overall status: subscribed if ANY channel is subscribed
+				const emailStatus = contact.email_status || '';
+				const smsStatus = contact.sms_status || '';
+				const whatsappStatus = contact.whatsapp_status || '';
+
+				const isSubscribed =
+					emailStatus.toLowerCase() === 'subscribed' ||
+					smsStatus.toLowerCase() === 'subscribed' ||
+					whatsappStatus.toLowerCase() === 'subscribed';
+
+				const status = isSubscribed ? 'subscribed' : 'unsubscribed';
 				let statusClasses = '';
 
 				switch (status.toLowerCase()) {

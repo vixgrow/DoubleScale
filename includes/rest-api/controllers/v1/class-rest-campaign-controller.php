@@ -21,7 +21,7 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 // use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 // use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
@@ -751,7 +751,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			}
 
 			// Get tracking entry
-			$tracking = Tracking_Model::find( $message_id );
+			$tracking = Communication_Tracking_Model::find( $message_id );
 			if ( ! $tracking ) {
 				return new WP_Error(
 					'message_not_found',
@@ -853,14 +853,28 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			$page        = $request->get_param( 'page' ) ?: 1;
 			$keywords    = $request->get_param( 'keywords' ) ?: '';
 
+			// Get campaign to determine channel type
+			$campaign = Campaign_Model::find( $campaign_id );
+			if ( ! $campaign ) {
+				return new WP_Error( 'not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Determine which status column to check based on campaign type
+			$status_column = 'email_status'; // Default to email
+			if ( $campaign->is_sms_campaign() ) {
+				$status_column = 'sms_status';
+			} elseif ( $campaign->is_whatsapp_campaign() ) {
+				$status_column = 'whatsapp_status';
+			}
+
 			// Get tracking records for this campaign
-			$query = Tracking_Model::where( 'source_type', Message_Source_Types::CAMPAIGN )
+			$query = Communication_Tracking_Model::where( 'source_type', Message_Source_Types::CAMPAIGN )
 				->where( 'source_id', $campaign_id )
 				->whereHas(
 					'contact',
-					function ( $q ) use ( $keywords ) {
-						// Only get contacts who are currently unsubscribed
-						$q->where( 'status', 'unsubscribed' );
+					function ( $q ) use ( $keywords, $status_column ) {
+						// Only get contacts who are currently unsubscribed for the campaign's channel
+						$q->where( $status_column, 'unsubscribed' );
 
 						// Apply keyword search if provided
 						if ( ! empty( $keywords ) ) {

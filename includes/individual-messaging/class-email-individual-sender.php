@@ -12,7 +12,7 @@ namespace QuillCRM\Individual_Messaging;
 use WP_Error;
 use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Tracking\Email as Email_Tracking;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
@@ -59,7 +59,7 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return int Tracking mode constant
 	 */
 	protected function get_tracking_mode() {
-		return Tracking_Model::MODE_EMAIL;
+		return Communication_Tracking_Model::MODE_EMAIL;
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 *
 	 * @param string         $message Raw message content
 	 * @param Contact_Model  $contact Contact for merge tags
-	 * @param Tracking_Model $tracking_entry Tracking record
+	 * @param Communication_Tracking_Model $tracking_entry Tracking record
 	 * @return string Processed message
 	 */
 	protected function process_message( $message, $contact, $tracking_entry ) {

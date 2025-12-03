@@ -24,6 +24,7 @@ export type MessageChannel = 'email' | 'sms' | 'whatsapp';
 interface BaseMessageData {
 	to: string;
 	body: string;
+	deal_id?: number; // Optional: Pass when sending from deal context for activity linking
 }
 
 /**
@@ -128,7 +129,7 @@ const validatePhoneData = (data: MessageData): string | null => {
  *   }
  * });
  *
- * // Send email
+ * // Send email from contact details (no deal context)
  * await sendMessage({
  *   to: 'user@example.com',
  *   subject: 'Hello',
@@ -138,7 +139,22 @@ const validatePhoneData = (data: MessageData): string | null => {
  * // Send SMS
  * await sendMessage({
  *   to: '+1234567890',
- *   body: 'SMS message'
+ *   body: 'SMS message',
+ * });
+ *
+ * // Send email from deal modal (with deal context)
+ * await sendMessage({
+ *   to: 'user@example.com',
+ *   subject: 'Follow-up',
+ *   body: '<p>Deal follow-up</p>',
+ *   deal_id: 42 // Links activity to deal #42
+ * });
+ *
+ * // Send SMS from deal modal (with deal context)
+ * await sendMessage({
+ *   to: '+1234567890',
+ *   body: 'SMS message',
+ *   deal_id: 42 // Optional: link to deal
  * });
  * ```
  */
@@ -204,6 +220,11 @@ export const useSendMessage = ({
 			// Add subject for email
 			if (channel === 'email' && 'subject' in data) {
 				payload.subject = data.subject;
+			}
+
+			// Add deal_id if provided (for context-aware activity linking)
+			if (data.deal_id) {
+				payload.deal_id = data.deal_id;
 			}
 
 			// Send message via API

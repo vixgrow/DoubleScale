@@ -12,6 +12,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 
 /**
  * Automation_Model class
@@ -132,7 +133,7 @@ class Automation_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function messages() {
-		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
+		return $this->hasMany( Communication_Tracking_Model::class, 'source_id', 'id' )
 			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::AUTOMATION );
 	}
 

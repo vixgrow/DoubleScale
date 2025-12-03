@@ -72,7 +72,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 										{index + 1}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{email.message?.subject}
+										{email.template?.subject || email.activity?.data?.subject || __('No Subject', 'quillcrm')}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										{format(

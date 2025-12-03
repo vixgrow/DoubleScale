@@ -133,7 +133,7 @@ const WhatsAppDetails: React.FC<WhatsAppDetailsProps> = ({
 							</div>
 							<div className="p-4 bg-green-50 rounded-md text-sm whitespace-pre-wrap">
 								{whatsappMessage.template?.body ||
-									whatsappMessage.message?.body ||
+									whatsappMessage.activity?.data?.body ||
 									''}
 							</div>
 						</div>

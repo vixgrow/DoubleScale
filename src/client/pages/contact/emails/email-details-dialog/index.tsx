@@ -45,13 +45,13 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 				value: (() => {
 					// Try template subject first (for campaign emails)
 					const templateSubject = campaignEmail.template?.subject;
-					// Then try message subject (for individual emails)
-					const messageSubject = campaignEmail.message?.subject;
+					// Then try activity subject (for individual emails)
+					const activitySubject = campaignEmail.activity?.data?.subject;
 					
 					// Return the first non-empty value
 					return (
 						(templateSubject && templateSubject.trim()) ||
-						(messageSubject && messageSubject.trim()) ||
+						(activitySubject && activitySubject.trim()) ||
 						__('No Subject', 'quillcrm')
 					);
 				})(),
@@ -140,7 +140,7 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 
 	const messageContent =
 		campaignEmail?.template?.body ||
-		campaignEmail?.message?.body ||
+		campaignEmail?.activity?.data?.body ||
 		__('No content available', 'quillcrm');
 
 	return (

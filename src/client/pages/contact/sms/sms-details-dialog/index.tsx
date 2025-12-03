@@ -121,7 +121,7 @@ const SMSDetails: React.FC<SMSDetailsProps> = ({ smsMessage, onClose }) => {
 							</div>
 							<div className="p-4 bg-gray-50 rounded-md text-sm whitespace-pre-wrap">
 								{smsMessage.template?.body ||
-									smsMessage.message?.body ||
+									smsMessage.activity?.data?.body ||
 									''}
 							</div>
 						</div>

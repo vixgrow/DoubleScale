@@ -56,6 +56,7 @@ class Tracking_Table extends Migration
 	 * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
+            activity_id BIGINT(20) NULL COMMENT "FK to activities table - links tracking to activity",
             contact_id BIGINT(20) NOT NULL,
             template_id BIGINT(20) NULL DEFAULT NULL COMMENT "NULL for individual messages",
             hash_key VARCHAR(255) NOT NULL,
@@ -75,6 +76,7 @@ class Tracking_Table extends Migration
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
+            KEY activity_id (activity_id),
             KEY contact_id (contact_id),
             KEY template_id (template_id),
             KEY hash_key (hash_key),

@@ -3,8 +3,8 @@
  * Abstract Individual Message Sender
  * Base class for individual message sending (SMS, WhatsApp, Email)
  *
- * Follows the same architectural pattern as Abstract_Messaging_Campaign_Controller
- * for consistency across the codebase.
+ * REFACTORED: Activity is now the PRIMARY record, tracking is supplementary
+ * Activities are created FIRST, then tracking links to them via activity_id
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -17,7 +17,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Models\Message_Model;
+use QuillCRM\Models\Activity_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Managers\Merge_Tags_Manager;
@@ -41,6 +41,15 @@ abstract class Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	abstract protected function get_channel_type();
+
+	/**
+	 * Get activity type - must be implemented by child classes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Activity type (email_sent, sms_sent, whatsapp_sent)
+	 */
+	abstract protected function get_activity_type();
 
 	/**
 	 * Get tracking mode constant - must be implemented by child classes
@@ -73,6 +82,12 @@ abstract class Abstract_Individual_Message_Sender {
 	/**
 	 * Send individual message (common logic for all channels)
 	 *
+	 * NEW FLOW:
+	 * 1. Create Activity (primary record) FIRST
+	 * 2. Create Tracking (supplementary data) linked to activity
+	 * 3. Process and send message
+	 * 4. Update records with results
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request object
@@ -84,6 +99,7 @@ abstract class Abstract_Individual_Message_Sender {
 			$to         = $request->get_param( 'to' );
 			$body       = $request->get_param( 'body' ) ?? $request->get_param( 'message' ); // Support both 'body' and 'message'
 			$subject    = $request->get_param( 'subject' ) ?? null; // Email-only (null for SMS/WhatsApp)
+			$deal_id    = $request->get_param( 'deal_id' ) ?? null; // Context-aware: set if sent from deal modal
 			$channel    = $this->get_channel_type();
 
 			// Validate contact exists
@@ -115,8 +131,11 @@ abstract class Abstract_Individual_Message_Sender {
 				}
 			}
 
-			// Create tracking entry
-			$tracking_entry = $this->create_tracking_entry( $contact, $to );
+			// STEP 1: Create ACTIVITY first (primary record)
+			$activity = $this->create_activity( $contact, $to, $subject, $body, $deal_id );
+
+			// STEP 2: Create TRACKING second (supplementary data, links to activity)
+			$tracking_entry = $this->create_tracking_entry( $contact, $to, $activity->id );
 
 			// Capture merge tags for individual messages
 			$combined_content = ( $subject ?? '' ) . ' ' . $body;
@@ -133,12 +152,17 @@ abstract class Abstract_Individual_Message_Sender {
 			$processed_subject = $subject ? Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact ) : null;
 			$processed_body    = $this->process_message( $body, $contact, $tracking_entry );
 
-			// Create message record (store original content for audit trail)
-			$message_record = Message_Model::create(
+			// Update activity with processed content
+			$activity->update(
 				array(
-					'tracking_id' => $tracking_entry->id,
-					'subject'     => $processed_subject,
-					'body'        => $processed_body,
+					'data' => array_merge(
+						$activity->data ?? array(),
+						array(
+							'subject' => $processed_subject,
+							'body'    => $processed_body,
+							'to'      => $to,
+						)
+					),
 				)
 			);
 
@@ -146,25 +170,55 @@ abstract class Abstract_Individual_Message_Sender {
 			$result = $this->send_via_provider( $provider, $to, $processed_body, $processed_subject, $contact );
 
 			// Handle result
-			return $this->handle_result( $result, $tracking_entry, $message_record, $provider, $contact, $to );
+			return $this->handle_result( $result, $tracking_entry, $activity, $provider, $contact, $to );
 
 		} catch ( \Exception $e ) {
-			return $this->handle_error( $e, $tracking_entry ?? null, $message_record ?? null, $contact_id ?? null );
+			return $this->handle_error( $e, $tracking_entry ?? null, $activity ?? null, $contact_id ?? null );
 		}
 	}
 
 	/**
-	 * Create tracking entry
+	 * Create activity record (primary record)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Contact_Model $contact Contact model
-	 * @param string        $recipient Recipient (email or phone)
+	 * @param Contact_Model $contact    Contact model
+	 * @param string        $recipient  Recipient (email or phone)
+	 * @param string|null   $subject    Subject (email only)
+	 * @param string        $body       Message body
+	 * @param int|null      $deal_id    Deal ID (context-aware: set if sent from deal modal)
+	 * @return Activity_Model
+	 */
+	protected function create_activity( $contact, $recipient, $subject, $body, $deal_id = null ) {
+		return Activity_Model::create(
+			array(
+				'contact_id'    => $contact->id,
+				'deal_id'       => $deal_id, // SET if sent from deal modal, NULL if from contact details
+				'activity_type' => $this->get_activity_type(),
+				'data'          => array(
+					'subject' => $subject,
+					'body'    => $body,
+					'to'      => $recipient,
+				),
+				'user_id'       => get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Create tracking entry (supplementary data, links to activity)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Contact_Model $contact     Contact model
+	 * @param string        $recipient   Recipient (email or phone)
+	 * @param int           $activity_id Activity ID to link to
 	 * @return Tracking_Model
 	 */
-	protected function create_tracking_entry( $contact, $recipient ) {
+	protected function create_tracking_entry( $contact, $recipient, $activity_id ) {
 		return Tracking_Model::create(
 			array(
+				'activity_id' => $activity_id, // LINK TO ACTIVITY
 				'contact_id'  => $contact->id,
 				'template_id' => null, // No template for individual messages
 				'hash_key'    => \QuillCRM\Utils::generate_hash_key(),
@@ -183,8 +237,8 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string         $message Raw message content
-	 * @param Contact_Model  $contact Contact for merge tags
+	 * @param string         $message        Raw message content
+	 * @param Contact_Model  $contact        Contact for merge tags
 	 * @param Tracking_Model $tracking_entry Tracking record
 	 * @return string Processed message
 	 */
@@ -207,10 +261,10 @@ abstract class Abstract_Individual_Message_Sender {
 	 * @since 1.0.0
 	 *
 	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider Provider instance
-	 * @param string                                          $to Recipient
-	 * @param string                                          $body Processed message body
-	 * @param string|null                                     $subject Processed subject (email only)
-	 * @param Contact_Model                                   $contact Contact model
+	 * @param string                                          $to       Recipient
+	 * @param string                                          $body     Processed message body
+	 * @param string|null                                     $subject  Processed subject (email only)
+	 * @param Contact_Model                                   $contact  Contact model
 	 * @return array Provider result
 	 */
 	protected function send_via_provider( $provider, $to, $body, $subject, $contact ) {
@@ -240,15 +294,15 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array                                           $result Provider result
+	 * @param array                                           $result         Provider result
 	 * @param Tracking_Model                                  $tracking_entry Tracking record
-	 * @param Message_Model                                   $message_record Message content record
-	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider Provider instance
-	 * @param Contact_Model                                   $contact Contact model
-	 * @param string                                          $to Recipient
+	 * @param Activity_Model                                  $activity       Activity record
+	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider       Provider instance
+	 * @param Contact_Model                                   $contact        Contact model
+	 * @param string                                          $to             Recipient
 	 * @return WP_REST_Response|WP_Error
 	 */
-	protected function handle_result( $result, $tracking_entry, $message_record, $provider, $contact, $to ) {
+	protected function handle_result( $result, $tracking_entry, $activity, $provider, $contact, $to ) {
 		// Validate send result
 		if ( ! isset( $result['success'] ) || ! $result['success'] ) {
 			$error_message = $result['error'] ?? sprintf( '%s sending failed', ucfirst( $this->get_channel_type() ) );
@@ -273,8 +327,8 @@ abstract class Abstract_Individual_Message_Sender {
 			),
 			array(
 				'contact_id'  => $contact->id,
+				'activity_id' => $activity->id,
 				'tracking_id' => $tracking_entry->id,
-				'message_id'  => $message_record->id,
 				'author_id'   => get_current_user_id(),
 				'recipient'   => $to,
 				'channel'     => $this->get_channel_type(),
@@ -291,8 +345,8 @@ abstract class Abstract_Individual_Message_Sender {
 					__( '%s sent successfully', 'quillcrm' ),
 					ucfirst( $this->get_channel_type() )
 				),
+				'activity_id' => $activity->id,
 				'tracking_id' => $tracking_entry->id,
-				'message_id'  => $message_record->id,
 			),
 			200
 		);
@@ -303,13 +357,13 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param \Exception          $e Exception that occurred
+	 * @param \Exception          $e              Exception that occurred
 	 * @param Tracking_Model|null $tracking_entry Tracking record (if created)
-	 * @param Message_Model|null  $message_record Message record (if created)
-	 * @param int|null            $contact_id Contact ID (if available)
+	 * @param Activity_Model|null $activity       Activity record (if created)
+	 * @param int|null            $contact_id     Contact ID (if available)
 	 * @return WP_Error
 	 */
-	protected function handle_error( $e, $tracking_entry, $message_record, $contact_id ) {
+	protected function handle_error( $e, $tracking_entry, $activity, $contact_id ) {
 		// Update tracking status to failed
 		if ( $tracking_entry ) {
 			$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
@@ -325,12 +379,11 @@ abstract class Abstract_Individual_Message_Sender {
 				'error'       => $e->getMessage(),
 				'contact_id'  => $contact_id,
 				'channel'     => $this->get_channel_type(),
+				'activity_id' => $activity->id ?? null,
 				'tracking_id' => $tracking_entry->id ?? null,
-				'message_id'  => $message_record->id ?? null,
 			)
 		);
 
 		return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 	}
 }
-

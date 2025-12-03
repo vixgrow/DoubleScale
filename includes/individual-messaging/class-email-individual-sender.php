@@ -41,6 +41,17 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	}
 
 	/**
+	 * Get activity type
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Activity type
+	 */
+	protected function get_activity_type() {
+		return 'email_sent';
+	}
+
+	/**
 	 * Get tracking mode
 	 *
 	 * @since 1.0.0

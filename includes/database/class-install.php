@@ -26,7 +26,7 @@ use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Tracking_Meta_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Tracking_Table;
-use QuillCRM\Database\Migrations\Messages_Table;
+use QuillCRM\Database\Migrations\Activities_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 // use QuillCRM\Database\Migrations\Link_Triggers_Table; // Moved to Pro
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
@@ -130,8 +130,8 @@ class Install {
 				'automation_steps'             => Automation_Steps_Table::class,
 				'automation_contacts'          => Automation_Contacts_Table::class,
 				'task_meta'                    => Task_Meta_Table::class,
+				'activities'                   => Activities_Table::class,
 				'tracking'                     => Tracking_Table::class,
-				'messages'                     => Messages_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,

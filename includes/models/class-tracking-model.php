@@ -14,7 +14,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
-use QuillCRM\Models\Message_Model;
+use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Tracking_Meta_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
@@ -59,6 +59,7 @@ class Tracking_Model extends Model {
 	 * @since 1.0.0
 	 */
 	protected $fillable = array(
+		'activity_id',    // FK to activities table
 		'contact_id',     // Who received the message
 		'template_id',    // Template used
 		'hash_key',       // Unique tracking hash
@@ -148,14 +149,14 @@ class Tracking_Model extends Model {
 	}
 
 	/**
-	 * Message relationship (for individual messages)
+	 * Activity relationship (tracking belongs to activity)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function message() {
-		 return $this->hasOne( Message_Model::class, 'tracking_id' );
+	public function activity() {
+		return $this->belongsTo( Activity_Model::class, 'activity_id' );
 	}
 
 	/**

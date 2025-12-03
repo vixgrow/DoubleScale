@@ -6,10 +6,17 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
+import { HelpCircle } from 'lucide-react';
 /**
  * internal dependencies
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Field } from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 
@@ -37,8 +44,23 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 	return (
 		<Card className="shadow-none rounded-2xl">
 			<CardHeader>
-				<CardTitle className="text-2xl font-normal text-[#09090B]">
-					{__('Contact Profile', 'quillcrm')}
+				<CardTitle className="text-2xl font-normal text-[#09090B] flex items-center gap-2">
+					<span>{__('Contact Profile', 'quillcrm')}</span>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<HelpCircle className="w-5 h-5 text-gray-400 cursor-help" />
+							</TooltipTrigger>
+							<TooltipContent className="z-[160000] bg-gray-100 border-none max-w-xs text-gray-600 text-sm">
+								<p>
+									{__(
+										'Contact Profile settings help you organize and manage imported contacts efficiently. Assign contacts to lists for targeted campaigns, add tags for segmentation, set their subscription status, and control how duplicate contacts are handled. These settings ensure your contacts are properly categorized from the moment they enter your CRM.',
+										'quillcrm'
+									)}
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
 					{__(
@@ -61,6 +83,10 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 							})
 						}
 						required={false}
+						tooltip={__(
+							'Automatically add all imported contacts to specific lists. This helps organize contacts by source or campaign for targeted email marketing.',
+							'quillcrm'
+						)}
 					/>
 					<Field
 						label={__('Assign to Tags', 'quillcrm')}
@@ -73,6 +99,10 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 							})
 						}
 						required={false}
+						tooltip={__(
+							'Tag all imported contacts with specific labels. Tags help categorize and segment contacts for better filtering and automation.',
+							'quillcrm'
+						)}
 					/>
 				</div>
 
@@ -90,6 +120,10 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 							}
 							options={statusOptions}
 							required={false}
+							tooltip={__(
+								'Set the subscription status for imported contacts. Subscribed contacts can receive emails, while unsubscribed or bounced contacts will be excluded from campaigns.',
+								'quillcrm'
+							)}
 						/>
 					)}
 
@@ -104,6 +138,10 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 								})
 							}
 							required={false}
+							tooltip={__(
+								'When enabled, existing contacts with matching emails will be updated with new data. When disabled, duplicate contacts will be skipped during import.',
+								'quillcrm'
+							)}
 						/>
 						<div className="text-[#09090B] font-normal text-base">
 							{__('Update Existing Contacts', 'quillcrm')}

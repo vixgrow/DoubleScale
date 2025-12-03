@@ -80,6 +80,7 @@ export type Importer = {
 
 export type ImporterField = {
 	label: string;
+	tooltip?: string;
 	type: string;
 	options: {
 		key: string;

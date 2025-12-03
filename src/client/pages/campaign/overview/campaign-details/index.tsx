@@ -49,9 +49,6 @@ const CampaignDetails: React.FC = () => {
 						const response: any = await apiFetch({
 							path: `/qc/v1/templates/${template.id}/render`,
 							method: 'POST',
-							data: {
-								preview: true, // Strip tracking elements for admin preview
-							},
 						});
 
 						if (response?.html) {
@@ -120,7 +117,12 @@ const CampaignDetails: React.FC = () => {
 								{__('Subject', 'quillcrm')}
 							</span>
 							<p className="text-base font-semibold text-[#09090B]">
-								{(campaign.settings.templates[0].settings as { subject: string }).subject}
+								{
+									(
+										campaign.settings.templates[0]
+											.settings as { subject: string }
+									).subject
+								}
 							</p>
 						</div>
 					)}
@@ -191,9 +193,12 @@ const CampaignDetails: React.FC = () => {
 									<div className="flex items-center justify-center">
 										<SMSDevice
 											body={
-												typeof template.body === 'string'
+												typeof template.body ===
+												'string'
 													? template.body
-													: JSON.stringify(template.body)
+													: JSON.stringify(
+															template.body
+														)
 											}
 											className="bg-transparent border-none py-0 sm:p-0"
 										/>
@@ -233,13 +238,13 @@ const CampaignDetails: React.FC = () => {
 						subtitle={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __(
-									'Create an email template to get started with your campaign.',
-									'quillcrm'
-								)
+										'Create an email template to get started with your campaign.',
+										'quillcrm'
+									)
 								: __(
-									'Create a template to get started with your campaign.',
-									'quillcrm'
-								)
+										'Create a template to get started with your campaign.',
+										'quillcrm'
+									)
 						}
 						onClick={() => {
 							navigate(

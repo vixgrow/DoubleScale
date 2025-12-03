@@ -12,7 +12,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
@@ -134,7 +134,7 @@ class Campaign_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function messages() {
-		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
+		return $this->hasMany( Communication_Tracking_Model::class, 'source_id', 'id' )
 			->where( 'source_type', Message_Source_Types::CAMPAIGN );
 	}
 
@@ -149,9 +149,9 @@ class Campaign_Model extends Model {
 	public function messages_with_contacts() {
 		global $wpdb;
 		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
-		$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+		$tracking_table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
-		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
+		return $this->hasMany( Communication_Tracking_Model::class, 'source_id', 'id' )
 			->where( 'source_type', Message_Source_Types::CAMPAIGN )
 			->whereExists(
 				function ( $query ) use ( $contacts_table, $tracking_table ) {

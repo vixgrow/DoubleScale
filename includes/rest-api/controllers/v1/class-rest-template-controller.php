@@ -13,6 +13,7 @@ namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -118,20 +119,25 @@ class REST_Template_Controller extends REST_Controller {
 					'callback'            => array( $this, 'render_template' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'merge_tags' => array(
+						'merge_tags'  => array(
 							'description' => __( 'Merge tags to use in the template', 'quillcrm' ),
 							'type'        => 'object',
 							'default'     => array(),
 						),
-						'contact_id' => array(
+						'contact_id'  => array(
 							'description' => __( 'Contact ID to use for merge tags', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => null,
 						),
-						'preview'    => array(
-							'description' => __( 'Whether this is a preview render (strips tracking elements)', 'quillcrm' ),
+						'tracking_id' => array(
+							'description' => __( 'Communication tracking ID to use stored merge tag values', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => null,
+						),
+						'preview'     => array(
+							'description' => __( 'Whether this is a preview render (strips tracking elements). If not provided, auto-detected based on context: true when no contact_id/tracking_id, false otherwise.', 'quillcrm' ),
 							'type'        => 'boolean',
-							'default'     => false,
+							'default'     => null,
 						),
 					),
 				),
@@ -816,7 +822,8 @@ class REST_Template_Controller extends REST_Controller {
 		$template_id = (int) $request->get_param( 'id' );
 		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
 		$contact_id  = $request->get_param( 'contact_id' );
-		$is_preview  = $request->get_param( 'preview' ) ?? false;
+		$tracking_id = $request->get_param( 'tracking_id' );
+		$explicit_preview = $request->get_param( 'preview' );
 
 		// Get contact - prioritize contact_id parameter, then extract from merge_tags
 		$contact = null;
@@ -832,8 +839,29 @@ class REST_Template_Controller extends REST_Controller {
 			}
 		}
 
+		// Auto-detect tracking context if contact_id is provided but tracking_id is not
+		if ( ! $tracking_id && $contact_id ) {
+			$tracking_id = $this->find_tracking_id_for_contact( $contact_id );
+		}
+
+		// Smart preview detection logic
+		// 1. If preview parameter is explicitly provided, use that value (backward compatibility)
+		// 2. If no contact_id and no tracking_id → auto-enable preview mode (template preview)
+		// 3. If contact_id provided → normal processing (fresh or stored based on tracking context)
+		if ( ! is_null( $explicit_preview ) ) {
+			// Explicit preview parameter takes precedence
+			$is_preview = (bool) $explicit_preview;
+		} elseif ( empty( $contact_id ) && empty( $tracking_id ) ) {
+			// No contact or tracking context = template preview mode
+			$is_preview = true;
+		} else {
+			// Contact provided = normal processing (not preview)
+			$is_preview = false;
+		}
+
+		// Use standard Email_Renderer with tracking context (automatically handles stored values)
 		$renderer = new Email_Renderer();
-		$html     = $renderer->render_template( $template_id, $contact );
+		$html     = $renderer->render_template( $template_id, $contact, $tracking_id );
 
 		if ( empty( $html ) ) {
 			return new WP_Error(
@@ -854,6 +882,25 @@ class REST_Template_Controller extends REST_Controller {
 				'html' => $html,
 			)
 		);
+	}
+
+	/**
+	 * Find the most recent tracking ID for a contact and template combination
+	 * This enables automatic detection of tracking context for historical rendering
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $contact_id Contact ID
+	 *
+	 * @return int|null Tracking ID or null if not found
+	 */
+	private function find_tracking_id_for_contact( $contact_id ) {
+		// Find the most recent tracking record for this contact
+		$tracking = \QuillCRM\Models\Communication_Tracking_Model::where( 'contact_id', $contact_id )
+			->orderBy( 'created_at', 'desc' )
+			->first();
+
+		return $tracking ? $tracking->id : null;
 	}
 
 	/**

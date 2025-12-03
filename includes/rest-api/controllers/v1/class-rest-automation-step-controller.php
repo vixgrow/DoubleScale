@@ -18,7 +18,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Managers\Actions_Manager;
 
@@ -493,9 +493,9 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			// Get all analytics in a single optimized query with JOIN to contacts table.
 			global $wpdb;
 			$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
-			$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+			$tracking_table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
-			$analytics_raw = Tracking_Model::byStep( $step_id )
+			$analytics_raw = Communication_Tracking_Model::byStep( $step_id )
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"

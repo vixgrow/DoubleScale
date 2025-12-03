@@ -12,7 +12,7 @@ namespace QuillCRM\Abstracts;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
@@ -168,10 +168,10 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param array          $message_data Prepared message data
 	 * @param Contact_Model  $contact Contact model
-	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
-	protected function send_via_provider( $message_data, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	protected function send_via_provider( $message_data, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		try {
 			// Get message provider
 			$provider = $this->get_message_provider();
@@ -232,11 +232,11 @@ abstract class Abstract_Campaign_Processing {
 	 * @since 1.0.0
 	 *
 	 * @param array          $result API result
-	 * @param Tracking_Model $campaign_message Campaign message record
+	 * @param Communication_Tracking_Model $campaign_message Campaign message record
 	 * @param Contact_Model  $contact Contact model
 	 * @return array Processed result
 	 */
-	protected function handle_provider_response( $result, Tracking_Model $campaign_message, Contact_Model $contact ) {
+	protected function handle_provider_response( $result, Communication_Tracking_Model $campaign_message, Contact_Model $contact ) {
 		// Store provider's message ID in tracking record for webhook processing
 		if ( is_array( $result ) && isset( $result['success'] ) && $result['success'] && isset( $result['message_id'] ) ) {
 			$campaign_message->external_id = $result['message_id']; // Store provider message ID
@@ -331,7 +331,7 @@ abstract class Abstract_Campaign_Processing {
 	/**
 	 * Get campaign message mode - must be implemented by child classes
 	 *
-	 * @return int Tracking_Model mode constant
+	 * @return int Communication_Tracking_Model mode constant
 	 */
 	abstract protected function get_message_mode();
 
@@ -348,10 +348,10 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param array          $message_data Prepared message data
 	 * @param Contact_Model  $contact Contact model
-	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
-	abstract protected function send_message( $message_data, Contact_Model $contact, Tracking_Model $campaign_message);
+	abstract protected function send_message( $message_data, Contact_Model $contact, Communication_Tracking_Model $campaign_message);
 
 	/**
 	 * Get tracking class - must be implemented by child classes
@@ -618,7 +618,7 @@ abstract class Abstract_Campaign_Processing {
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 
-			$campaign_message = Tracking_Model::create( $campaign_message_data );
+			$campaign_message = Communication_Tracking_Model::create( $campaign_message_data );
 
 			// Update last contact offset
 			update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
@@ -659,10 +659,10 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $campaign_message
+	 * @param Communication_Tracking_Model $campaign_message
 	 * @return void
 	 */
-	public function process_campaign_message( Campaign_Model $campaign, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	public function process_campaign_message( Campaign_Model $campaign, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		// Check if memory limit is reached
 		if ( Utils::is_memory_limit_reached() ) {
 			// Track retry attempts using transients to prevent infinite requeue loop
@@ -768,10 +768,10 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param \QuillCRM\Models\Template_Model $template
 	 * @param Contact_Model                   $contact
-	 * @param Tracking_Model                  $campaign_message
+	 * @param Communication_Tracking_Model                  $campaign_message
 	 * @return array Prepared message data
 	 */
-	protected function prepare_message_content( $template, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( $template, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
@@ -784,7 +784,7 @@ abstract class Abstract_Campaign_Processing {
 
 		// STEP 2: Capture merge tag values for this contact using pre-extracted keys
 		if ( ! empty( $this->template_merge_tag_keys ) ) {
-			\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+			\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 				$campaign_message->id,
 				$this->template_merge_tag_keys,
 				$contact
@@ -906,11 +906,11 @@ abstract class Abstract_Campaign_Processing {
 	/**
 	 * Handle send result - unified logic for all types
 	 *
-	 * @param Tracking_Model $campaign_message
+	 * @param Communication_Tracking_Model $campaign_message
 	 * @param array          $result Send result
 	 * @return void
 	 */
-	protected function handle_send_result( Tracking_Model $campaign_message, $result ) {
+	protected function handle_send_result( Communication_Tracking_Model $campaign_message, $result ) {
 		if ( $result && $result['success'] ) {
 			$campaign_message->status  = Tracking_Status::SENT;
 			$campaign_message->sent_at = current_time( 'mysql' );
@@ -974,7 +974,7 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $campaign_message
+	 * @param Communication_Tracking_Model $campaign_message
 	 * @return void
 	 */
 	protected function log_provider_connection_error( $campaign, $contact, $campaign_message ) {
@@ -996,7 +996,7 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $campaign_message
+	 * @param Communication_Tracking_Model $campaign_message
 	 * @return void
 	 */
 	protected function log_campaign_processing_result( $campaign, $contact, $campaign_message ) {
@@ -1016,7 +1016,7 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $campaign_message
+	 * @param Communication_Tracking_Model $campaign_message
 	 * @param \Exception     $exception
 	 * @return void
 	 */
@@ -1156,7 +1156,7 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $message
+	 * @param Communication_Tracking_Model $message
 	 * @return void
 	 */
 	public function resend_single_message( $campaign, $contact, $message ) {

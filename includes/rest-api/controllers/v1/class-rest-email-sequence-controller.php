@@ -6,7 +6,7 @@ use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Managers\Email_Sequences_Manager;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -373,7 +373,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			$email_sequence['sent_rate']  = round( ( $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100 ), 2 );
 			$email_sequence['open_rate']  = round( ( $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
 			$email_sequence['click_rate'] = round( ( $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
-			$contacts                     = Tracking_Model::where( 'source_id', $email_sequence_id )
+			$contacts                     = Communication_Tracking_Model::where( 'source_id', $email_sequence_id )
 				->where( 'source_type', Message_Source_Types::CAMPAIGN )
 				->get();
 			$email_sequence['recipients'] = $contacts->map(

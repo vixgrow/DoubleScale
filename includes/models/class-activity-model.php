@@ -10,6 +10,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 
 /**
  * Activity_Model class
@@ -99,7 +100,7 @@ class Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
 	 */
 	public function tracking() {
-		return $this->hasOne( Tracking_Model::class, 'activity_id' );
+		return $this->hasOne( Communication_Tracking_Model::class, 'activity_id' );
 	}
 
 	/**

@@ -10,7 +10,7 @@
 namespace QuillCRM\Services;
 
 use QuillCRM\Utils;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
@@ -58,7 +58,7 @@ class Campaign_Analytics {
 		if ( is_string( $type ) ) {
 			$type = Campaign_Channel::ensure_integer( $type );
 			if ( null === $type ) {
-				throw new \InvalidArgumentException( "Unsupported campaign type string" );
+				throw new \InvalidArgumentException( 'Unsupported campaign type string' );
 			}
 		}
 
@@ -66,11 +66,11 @@ class Campaign_Analytics {
 			case Campaign_Channel::CHANNEL_EMAIL:
 			case Campaign_Channel::CHANNEL_EMAIL_SEQUENCE:
 			case Campaign_Channel::CHANNEL_SEQUENCE_MAIL:
-				return Tracking_Model::emails();
+				return Communication_Tracking_Model::emails();
 			case Campaign_Channel::CHANNEL_SMS:
-				return Tracking_Model::sms();
+				return Communication_Tracking_Model::sms();
 			case Campaign_Channel::CHANNEL_WHATSAPP:
-				return Tracking_Model::whatsapp();
+				return Communication_Tracking_Model::whatsapp();
 			default:
 				throw new \InvalidArgumentException( "Unsupported campaign type: {$type}" );
 		}
@@ -93,7 +93,7 @@ class Campaign_Analytics {
 	public function get_analytics( $type, $interval = 'last_30_days', $start_date = '', $end_date = '' ) {
 		// Ensure we have a string type for the response key
 		$channel_string = is_string( $type ) ? $type : Campaign_Channel::to_string( $type );
-		
+
 		$query = $this->get_model_query( $type );
 
 		// Filter to only include campaign messages (not automations or individual)
@@ -257,7 +257,7 @@ class Campaign_Analytics {
 
 		// Get table names for JOIN
 		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
-		$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+		$tracking_table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
 		// Build base query with all common filters
 		$base_query = $this->get_model_query( $type );
@@ -276,7 +276,7 @@ class Campaign_Analytics {
 		// Optimized: Single query per type with aggregate functions, including unsubscribe tracking
 		// Convert string to integer for comparison (get_model_query already validated the type)
 		$type_int = is_string( $type ) ? Campaign_Channel::to_integer( $type ) : $type;
-		
+
 		if ( $type_int === Campaign_Channel::CHANNEL_EMAIL || $type_int === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type_int === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )

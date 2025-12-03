@@ -125,9 +125,6 @@ const renderTemplateBody = async (
 			const response: any = await apiFetch({
 				path: `/qc/v1/templates/${template.id}/render`,
 				method: 'POST',
-				data: {
-					preview: true, // Strip tracking elements for admin preview
-				},
 			});
 
 			if (response?.html) {
@@ -290,7 +287,11 @@ const View: React.FC = () => {
 											: CAMPAIGN_CHANNEL.EMAIL
 									)
 								}
-								nextLabel={campaign?.type === CAMPAIGN_CHANNEL.EMAIL ? __('Send Test Email', 'quillcrm') : __('Send Test SMS', 'quillcrm')}
+								nextLabel={
+									campaign?.type === CAMPAIGN_CHANNEL.EMAIL
+										? __('Send Test Email', 'quillcrm')
+										: __('Send Test SMS', 'quillcrm')
+								}
 							>
 								<div className="space-y-6">
 									<CampaignSettingsCard
@@ -374,14 +375,22 @@ const View: React.FC = () => {
 				<DialogContent className="sm:max-w-xl z-[1700000]">
 					<DialogHeader>
 						<CustomDialogHeader
-							title={dialogChannel === CAMPAIGN_CHANNEL.SMS ? __('Send Test SMS', 'quillcrm') : __('Send Test Email', 'quillcrm')}
-							subtitle={dialogChannel === CAMPAIGN_CHANNEL.SMS ? __(
-								'Who do you want to test your SMS with?',
-								'quillcrm'
-							) : __(
-								'Who do you want to test your email with?',
-								'quillcrm'
-							)}
+							title={
+								dialogChannel === CAMPAIGN_CHANNEL.SMS
+									? __('Send Test SMS', 'quillcrm')
+									: __('Send Test Email', 'quillcrm')
+							}
+							subtitle={
+								dialogChannel === CAMPAIGN_CHANNEL.SMS
+									? __(
+											'Who do you want to test your SMS with?',
+											'quillcrm'
+										)
+									: __(
+											'Who do you want to test your email with?',
+											'quillcrm'
+										)
+							}
 							icon={<GradientLinkIcon />}
 						/>
 					</DialogHeader>

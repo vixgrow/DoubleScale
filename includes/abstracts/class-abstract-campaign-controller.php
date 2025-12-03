@@ -21,7 +21,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Services\Campaign_Analytics;
 use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Constants\Tracking_Status;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Campaign_Channel;
 
 /**
@@ -73,20 +73,20 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	protected function get_campaign_message_query( $campaign_id ) {
 		if ( ! $this->channel ) {
-			return Tracking_Model::query()
+			return Communication_Tracking_Model::query()
 				->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
 				->where( 'source_id', $campaign_id );
 		}
 
 		$mode_map = array(
-			'email'    => Tracking_Model::MODE_EMAIL,
-			'sms'      => Tracking_Model::MODE_SMS,
-			'whatsapp' => Tracking_Model::MODE_WHATSAPP,
+			'email'    => Communication_Tracking_Model::MODE_EMAIL,
+			'sms'      => Communication_Tracking_Model::MODE_SMS,
+			'whatsapp' => Communication_Tracking_Model::MODE_WHATSAPP,
 		);
 
-		$mode = $mode_map[ $this->channel ] ?? Tracking_Model::MODE_EMAIL;
+		$mode = $mode_map[ $this->channel ] ?? Communication_Tracking_Model::MODE_EMAIL;
 
-		return Tracking_Model::query()
+		return Communication_Tracking_Model::query()
 			->where( 'mode', $mode )
 			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
 			->where( 'source_id', $campaign_id );

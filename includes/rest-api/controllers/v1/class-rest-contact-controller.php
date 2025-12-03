@@ -23,7 +23,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
@@ -771,7 +771,7 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_messages( $request ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
-			$mode       = $request->get_param( 'mode' ) ?: Tracking_Model::MODE_EMAIL; // Default to email (1)
+			$mode       = $request->get_param( 'mode' ) ?: Communication_Tracking_Model::MODE_EMAIL; // Default to email (1)
 			$per_page   = $request->get_param( 'per_page' ) ?: 25;
 			$page       = $request->get_param( 'page' ) ?: 1;
 
@@ -788,7 +788,7 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			// Get ALL messages (campaigns + individual) for this channel
-			$messages_query = Tracking_Model::where( 'contact_id', $contact_id )
+			$messages_query = Communication_Tracking_Model::where( 'contact_id', $contact_id )
 				->where( 'mode', $tracking_mode )
 				->with(
 					array(
@@ -801,8 +801,8 @@ class REST_Contact_Controller extends REST_Controller {
 						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );
 						}, // Include message content for individual messages
-						'tracking_meta' => function ( $query ) {
-							$query->select( 'id', 'tracking_id', 'merge_tags', 'sections_ids' );
+						'communication_tracking_meta' => function ( $query ) {
+							$query->select( 'id', 'communication_tracking_id', 'meta_key', 'meta_value' );
 						}, // Include merge tag values for historical rendering
 					)
 				)
@@ -840,7 +840,7 @@ class REST_Contact_Controller extends REST_Controller {
 		// If it's already an integer, validate it directly
 		if ( is_int( $mode ) || ctype_digit( (string) $mode ) ) {
 			$mode_int    = (int) $mode;
-			$valid_modes = array( Tracking_Model::MODE_EMAIL, Tracking_Model::MODE_SMS, Tracking_Model::MODE_WHATSAPP );
+			$valid_modes = array( Communication_Tracking_Model::MODE_EMAIL, Communication_Tracking_Model::MODE_SMS, Communication_Tracking_Model::MODE_WHATSAPP );
 
 			if ( in_array( $mode_int, $valid_modes, true ) ) {
 				return $mode_int;
@@ -855,9 +855,9 @@ class REST_Contact_Controller extends REST_Controller {
 
 		// Map string modes to tracking mode constants
 		$mode_map = array(
-			Campaign_Channel::STR_EMAIL    => Tracking_Model::MODE_EMAIL,
-			Campaign_Channel::STR_SMS      => Tracking_Model::MODE_SMS,
-			Campaign_Channel::STR_WHATSAPP => Tracking_Model::MODE_WHATSAPP,
+			Campaign_Channel::STR_EMAIL    => Communication_Tracking_Model::MODE_EMAIL,
+			Campaign_Channel::STR_SMS      => Communication_Tracking_Model::MODE_SMS,
+			Campaign_Channel::STR_WHATSAPP => Communication_Tracking_Model::MODE_WHATSAPP,
 		);
 
 		if ( ! isset( $mode_map[ $mode ] ) ) {
@@ -884,7 +884,7 @@ class REST_Contact_Controller extends REST_Controller {
 		global $wpdb;
 
 		// Single query to get all statistics at once
-		$table = $wpdb->prefix . 'quillcrm_tracking';
+		$table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
 		// Build query based on mode
 		if ( $mode === Campaign_Channel::STR_EMAIL ) {

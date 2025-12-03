@@ -11,7 +11,7 @@ namespace QuillCRM\Campaign;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
@@ -55,7 +55,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return int
 	 */
 	protected function get_message_mode() {
-		return Tracking_Model::MODE_EMAIL;
+		return Communication_Tracking_Model::MODE_EMAIL;
 	}
 
 	/**
@@ -88,10 +88,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @param Template_Model $template Template model
 	 * @param Contact_Model  $contact Contact model
-	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Message data array with subject, body, recipient, hash_key
 	 */
-	protected function prepare_message_content( $template, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( $template, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
@@ -104,7 +104,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 		// STEP 2: Capture merge tag values for this contact using pre-extracted keys
 		if ( ! empty( $this->template_merge_tag_keys ) ) {
-			\QuillCRM\Models\Tracking_Meta_Model::capture_merge_tags_from_keys(
+			\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 				$campaign_message->id,
 				$this->template_merge_tag_keys,
 				$contact
@@ -159,10 +159,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @param string         $message Original message content (JSON for builder, HTML for legacy)
 	 * @param Contact_Model  $contact Contact model
-	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return string Footer HTML with tracking pixel (or empty if not builder email)
 	 */
-	private function prepare_footer_html( $message, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	private function prepare_footer_html( $message, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		// Check if message is builder format (JSON)
 		$decoded          = json_decode( $message, true );
 		$is_builder_email = ( json_last_error() === JSON_ERROR_NONE && isset( $decoded['type'] ) && $decoded['type'] === 'builder' );
@@ -232,10 +232,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @param array          $message_data Prepared message data
 	 * @param Contact_Model  $contact Contact model
-	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
-	protected function send_message( $message_data, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	protected function send_message( $message_data, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
 		$template = null;
 		$emails   = null;
 

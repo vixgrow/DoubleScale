@@ -22,7 +22,7 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Campaign_Model;
-use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
@@ -52,7 +52,7 @@ abstract class Abstract_Send_Message extends Action {
 	/**
 	 * Get the tracking mode constant
 	 *
-	 * @return int Tracking_Model::MODE_EMAIL, MODE_SMS, or MODE_WHATSAPP
+	 * @return int Communication_Tracking_Model::MODE_EMAIL, MODE_SMS, or MODE_WHATSAPP
 	 */
 	abstract protected function get_tracking_mode();
 
@@ -173,7 +173,7 @@ abstract class Abstract_Send_Message extends Action {
 
 		// 4. Create tracking record BEFORE sending (critical for analytics)
 		try {
-			$tracking = Tracking_Model::create(
+			$tracking = Communication_Tracking_Model::create(
 				array(
 					'contact_id'  => $contact->id,
 					'template_id' => $template->id,
@@ -268,7 +268,7 @@ abstract class Abstract_Send_Message extends Action {
 				)
 			);
 			// Try to fetch the tracking record manually as fallback
-			$tracking = Tracking_Model::find( $tracking_id );
+			$tracking = Communication_Tracking_Model::find( $tracking_id );
 			if ( ! $tracking ) {
 				throw new \Exception( "Tracking record {$tracking_id} not found after send" );
 			}

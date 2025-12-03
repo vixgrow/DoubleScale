@@ -64,6 +64,7 @@ class Communication_Tracking_Model extends Model {
 		'template_id',    // Template used
 		'hash_key',       // Unique tracking hash
 		'mode',           // Email/SMS/WhatsApp
+		'direction',      // outbound/inbound - message direction
 		'source_type',    // Campaign/Automation/Manual
 		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
 		'step_id',        // Automation step ID (NULL for campaigns/individual)
@@ -211,6 +212,26 @@ class Communication_Tracking_Model extends Model {
 	 */
 	public function scopeWhatsapp( $query ) {
 		return $query->where( 'mode', self::MODE_WHATSAPP );
+	}
+
+	/**
+	 * Scope: Outbound messages only
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeOutbound( $query ) {
+		return $query->where( 'direction', 'outbound' );
+	}
+
+	/**
+	 * Scope: Inbound messages only
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeInbound( $query ) {
+		return $query->where( 'direction', 'inbound' );
 	}
 
 	/**

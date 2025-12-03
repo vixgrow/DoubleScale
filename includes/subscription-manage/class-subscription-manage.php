@@ -134,11 +134,16 @@ class Subscription_Manage {
 		$contact->status = 'subscribed';
 		$contact->save();
 
-		$contact->notes()->create(
+		\QuillCRM\Models\Activity_Model::create(
 			array(
-				'title' => __( 'Subscribed', 'quillcrm' ),
-				'type'  => 'system',
-				'note'  => __( 'Contact subscribed to the email list.', 'quillcrm' ),
+				'contact_id'    => $contact->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'Subscribed', 'quillcrm' ),
+					'type'  => 'system',
+					'note'  => __( 'Contact subscribed to the email list.', 'quillcrm' ),
+				),
+				'user_id'       => null,
 			)
 		);
 

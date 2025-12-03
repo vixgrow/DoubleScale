@@ -14,7 +14,7 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
-use QuillCRM\Models\Contact_Note_Model;
+use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
@@ -236,14 +236,35 @@ class Contact_Model extends Model {
 	}
 
 	/**
-	 * Get the contact notes
+	 * Get the contact notes (from activities table)
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function notes() {
-		return $this->hasMany( Contact_Note_Model::class, 'contact_id', 'id' );
+		return $this->hasMany( Activity_Model::class, 'contact_id', 'id' )->where( 'activity_type', 'note' );
+	}
+
+	/**
+	 * Get notes attribute - transforms activity models to note format for serialization
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function getNotesAttribute() {
+		// Check if notes relationship is loaded
+		if ( ! $this->relationLoaded( 'notes' ) ) {
+			return array();
+		}
+
+		// Transform activities to note format
+		return $this->getRelation( 'notes' )->map(
+			function ( $activity ) {
+				return $activity->to_note_format();
+			}
+		)->values()->toArray();
 	}
 
 	/**
@@ -464,11 +485,16 @@ class Contact_Model extends Model {
 			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'quillcrm' ), $reason );
 		}
 
-		$this->notes()->create(
+		Activity_Model::create(
 			array(
-				'title' => __( 'Unsubscribed', 'quillcrm' ),
-				'type'  => 'system',
-				'note'  => $note_text,
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'Unsubscribed', 'quillcrm' ),
+					'type'  => 'system',
+					'note'  => $note_text,
+				),
+				'user_id'       => get_current_user_id() ?: null,
 			)
 		);
 
@@ -508,11 +534,16 @@ class Contact_Model extends Model {
 		// Create system note
 		$channel_label = self::get_channel_label( $channel );
 
-		$this->notes()->create(
+		Activity_Model::create(
 			array(
-				'title' => __( 'Subscribed', 'quillcrm' ),
-				'type'  => 'system',
-				'note'  => sprintf( __( 'Contact subscribed to %s.', 'quillcrm' ), $channel_label ),
+				'contact_id'    => $this->id,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title' => __( 'Subscribed', 'quillcrm' ),
+					'type'  => 'system',
+					'note'  => sprintf( __( 'Contact subscribed to %s.', 'quillcrm' ), $channel_label ),
+				),
+				'user_id'       => get_current_user_id() ?: null,
 			)
 		);
 
@@ -719,7 +750,10 @@ class Contact_Model extends Model {
 		$dispatcher->listen(
 			"eloquent.deleting: {$model_name}",
 			function ( $contact ) {
-				$contact->notes()->delete();
+				// Delete note activities for this contact
+				Activity_Model::where( 'contact_id', $contact->id )
+					->where( 'activity_type', 'note' )
+					->delete();
 				$contact->automation_contacts()->delete();
 			}
 		);

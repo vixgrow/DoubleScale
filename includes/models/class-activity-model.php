@@ -166,6 +166,17 @@ class Activity_Model extends Model {
 	}
 
 	/**
+	 * Scope: Only notes
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeNotes( $query ) {
+		return $query->where( 'activity_type', 'note' );
+	}
+
+	/**
 	 * Get subject from data JSON
 	 *
 	 * @since 1.0.0
@@ -262,5 +273,77 @@ class Activity_Model extends Model {
 	 */
 	public function has_tracking() {
 		return $this->tracking()->exists();
+	}
+
+	/**
+	 * Check if activity is a note
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_note() {
+		return $this->activity_type === 'note';
+	}
+
+	/**
+	 * Get note title from data JSON
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_title() {
+		if ( ! is_array( $this->data ) ) {
+			return null;
+		}
+		return $this->data['title'] ?? null;
+	}
+
+	/**
+	 * Get note content from data JSON
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_note() {
+		if ( ! is_array( $this->data ) ) {
+			return null;
+		}
+		return $this->data['note'] ?? null;
+	}
+
+	/**
+	 * Get note type from data JSON
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_type() {
+		if ( ! is_array( $this->data ) ) {
+			return null;
+		}
+		return $this->data['type'] ?? null;
+	}
+
+	/**
+	 * Transform activity to note format for API response
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function to_note_format() {
+		return array(
+			'id'         => $this->id,
+			'contact_id' => $this->contact_id,
+			'title'      => $this->get_title(),
+			'type'       => $this->get_type(),
+			'note'       => $this->get_note(),
+			'created_at' => $this->created_at,
+			'updated_at' => $this->updated_at,
+		);
 	}
 }

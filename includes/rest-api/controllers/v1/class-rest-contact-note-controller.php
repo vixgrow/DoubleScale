@@ -17,7 +17,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Models\Contact_Note_Model;
+use QuillCRM\Models\Activity_Model;
 
 /**
  * Contact_Note_Controller class
@@ -151,7 +151,14 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$notes = Contact_Note_Model::all();
+			$activities = Activity_Model::notes()->get();
+
+			// Transform activities to note format
+			$notes = $activities->map(
+				function ( $activity ) {
+					return $activity->to_note_format();
+				}
+			)->values();
 
 			return new WP_REST_Response( $notes, 200 );
 		} catch ( \Exception $e ) {
@@ -170,14 +177,14 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 */
 	public function get_item( $request ) {
 		try {
-			$note_id = $request->get_param( 'id' );
-			$note    = Contact_Note_Model::find( $note_id );
+			$note_id  = $request->get_param( 'id' );
+			$activity = Activity_Model::notes()->find( $note_id );
 
-			if ( ! $note ) {
+			if ( ! $activity ) {
 				return new WP_Error( 'rest_contact_note_error', __( 'Contact note not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			return new WP_REST_Response( $note, 200 );
+			return new WP_REST_Response( $activity->to_note_format(), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_contact_note_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -200,9 +207,21 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 				return new WP_Error( 'rest_contact_note_error', __( 'Contact ID is required.', 'quillcrm' ), array( 'status' => 400 ) );
 			}
 
-			$note = Contact_Note_Model::create( $note_data );
+			// Create activity with note data stored in JSON
+			$activity = Activity_Model::create(
+				array(
+					'contact_id'    => $note_data['contact_id'],
+					'activity_type' => 'note',
+					'data'          => array(
+						'title' => $note_data['title'] ?? '',
+						'type'  => $note_data['type'] ?? 'note',
+						'note'  => $note_data['note'] ?? '',
+					),
+					'user_id'       => get_current_user_id() ?: null,
+				)
+			);
 
-			return new WP_REST_Response( $note, 201 );
+			return new WP_REST_Response( $activity->to_note_format(), 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_contact_note_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -219,17 +238,35 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 */
 	public function update_item( $request ) {
 		try {
-			$note_id = $request->get_param( 'id' );
-			$note    = Contact_Note_Model::find( $note_id );
+			$note_id  = $request->get_param( 'id' );
+			$activity = Activity_Model::notes()->find( $note_id );
 
-			if ( ! $note ) {
+			if ( ! $activity ) {
 				return new WP_Error( 'rest_contact_note_error', __( 'Contact note not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
 			$note_data = $this->prepare_note( $request );
-			$note->update( $note_data );
 
-			return new WP_REST_Response( $note, 200 );
+			// Update the data JSON with new note values
+			$current_data = $activity->data ?? array();
+			if ( isset( $note_data['title'] ) ) {
+				$current_data['title'] = $note_data['title'];
+			}
+			if ( isset( $note_data['type'] ) ) {
+				$current_data['type'] = $note_data['type'];
+			}
+			if ( isset( $note_data['note'] ) ) {
+				$current_data['note'] = $note_data['note'];
+			}
+
+			// Update activity
+			$activity->data = $current_data;
+			if ( isset( $note_data['contact_id'] ) ) {
+				$activity->contact_id = $note_data['contact_id'];
+			}
+			$activity->save();
+
+			return new WP_REST_Response( $activity->to_note_format(), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_contact_note_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -246,14 +283,14 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 */
 	public function delete_item( $request ) {
 		try {
-			$note_id = $request->get_param( 'id' );
-			$note    = Contact_Note_Model::find( $note_id );
+			$note_id  = $request->get_param( 'id' );
+			$activity = Activity_Model::notes()->find( $note_id );
 
-			if ( ! $note ) {
+			if ( ! $activity ) {
 				return new WP_Error( 'rest_contact_note_error', __( 'Contact note not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			$note->delete();
+			$activity->delete();
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {

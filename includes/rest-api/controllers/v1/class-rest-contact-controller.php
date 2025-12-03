@@ -24,6 +24,7 @@ use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
+use QuillCRM\Models\Activity_Model;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
@@ -479,26 +480,26 @@ class REST_Contact_Controller extends REST_Controller {
 			 'title'      => 'contact',
 			 'type'       => 'object',
 			 'properties' => array(
-				 'id'         => array(
+				 'id'              => array(
 					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
-				 'first_name' => array(
+				 'first_name'      => array(
 					 'description'  => __( 'First name of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'last_name'  => array(
+				 'last_name'       => array(
 					 'description'  => __( 'Last name of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'email'      => array(
+				 'email'           => array(
 					 'description'  => __( 'Email of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'required'     => true,
@@ -506,49 +507,49 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_email',
 					 ),
 				 ),
-				 'phone'      => array(
+				 'phone'           => array(
 					 'description'  => __( 'Phone number of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'address_1'  => array(
+				 'address_1'       => array(
 					 'description'  => __( 'Address line 1 of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'address_2'  => array(
+				 'address_2'       => array(
 					 'description'  => __( 'Address line 2 of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'city'       => array(
+				 'city'            => array(
 					 'description'  => __( 'City of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'state'      => array(
+				 'state'           => array(
 					 'description'  => __( 'State of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'country'    => array(
+				 'country'         => array(
 					 'description'  => __( 'Country of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'zip'        => array(
+				 'zip'             => array(
 					 'description'  => __( 'Zip code of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
@@ -588,7 +589,7 @@ class REST_Contact_Controller extends REST_Controller {
 					 'context'     => array( 'view', 'edit', 'embed' ),
 					 'readonly'    => true,
 				 ),
-				 'updated_at' => array(
+				 'updated_at'      => array(
 					 'type'        => 'string',
 					 'description' => 'Updated at',
 					 'context'     => array( 'view', 'edit', 'embed' ),
@@ -792,13 +793,13 @@ class REST_Contact_Controller extends REST_Controller {
 				->where( 'mode', $tracking_mode )
 				->with(
 					array(
-						'campaign' => function ( $query ) {
+						'campaign'                    => function ( $query ) {
 							$query->select( 'id', 'name', 'type' );
 						},
-						'template' => function ( $query ) {
+						'template'                    => function ( $query ) {
 							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
-						'activity' => function ( $query ) {
+						'activity'                    => function ( $query ) {
 							$query->select( 'id', 'contact_id', 'deal_id', 'activity_type', 'data', 'created_at' );
 						}, // Include activity content for individual messages (email_sent, sms_sent, whatsapp_sent)
 						'communication_tracking_meta' => function ( $query ) {
@@ -1286,11 +1287,25 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$notes    = $contact->notes()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$activities = Activity_Model::notes()
+				->forContact( $contact_id )
+				->orderBy( 'created_at', 'desc' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $notes, 200 );
+			// Transform the paginated data to note format
+			$notes_data = collect( $activities->items() )->map(
+				function ( $activity ) {
+					return $activity->to_note_format();
+				}
+			)->values()->toArray();
+
+			// Build paginated response matching the expected format
+			$paginated_array         = $activities->toArray();
+			$paginated_array['data'] = $notes_data;
+
+			return new WP_REST_Response( $paginated_array, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -1336,19 +1351,19 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	protected function prepare_contact( $request ) {
 		$contact = array(
-			'first_name'       => $request->get_param( 'first_name' ),
-			'last_name'        => $request->get_param( 'last_name' ),
-			'email'            => $request->get_param( 'email' ),
-			'phone'            => $request->get_param( 'phone' ),
-			'address_1'        => $request->get_param( 'address_1' ),
-			'address_2'        => $request->get_param( 'address_2' ),
-			'city'             => $request->get_param( 'city' ),
-			'state'            => $request->get_param( 'state' ),
-			'country'          => $request->get_param( 'country' ),
-			'zip'              => $request->get_param( 'zip' ),
-			'email_status'     => $request->get_param( 'email_status' ),
-			'sms_status'       => $request->get_param( 'sms_status' ),
-			'whatsapp_status'  => $request->get_param( 'whatsapp_status' ),
+			'first_name'      => $request->get_param( 'first_name' ),
+			'last_name'       => $request->get_param( 'last_name' ),
+			'email'           => $request->get_param( 'email' ),
+			'phone'           => $request->get_param( 'phone' ),
+			'address_1'       => $request->get_param( 'address_1' ),
+			'address_2'       => $request->get_param( 'address_2' ),
+			'city'            => $request->get_param( 'city' ),
+			'state'           => $request->get_param( 'state' ),
+			'country'         => $request->get_param( 'country' ),
+			'zip'             => $request->get_param( 'zip' ),
+			'email_status'    => $request->get_param( 'email_status' ),
+			'sms_status'      => $request->get_param( 'sms_status' ),
+			'whatsapp_status' => $request->get_param( 'whatsapp_status' ),
 		);
 
 		foreach ( $contact as $key => $value ) {
@@ -1501,16 +1516,20 @@ class REST_Contact_Controller extends REST_Controller {
 		try {
 			$notes = $request->get_param( 'notes' );
 			if ( $notes ) {
-				$notes     = $notes;
-				$notes_arr = array();
-
 				foreach ( $notes as $note ) {
-					$notes_arr[] = array(
-						'note' => sanitize_text_field( $note['text'] ),
+					Activity_Model::create(
+						array(
+							'contact_id'    => $contact->id,
+							'activity_type' => 'note',
+							'data'          => array(
+								'title' => sanitize_text_field( $note['title'] ?? '' ),
+								'type'  => sanitize_text_field( $note['type'] ?? 'note' ),
+								'note'  => sanitize_text_field( $note['text'] ?? '' ),
+							),
+							'user_id'       => get_current_user_id() ?: null,
+						)
 					);
 				}
-
-				$contact->notes()->createMany( $notes_arr );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

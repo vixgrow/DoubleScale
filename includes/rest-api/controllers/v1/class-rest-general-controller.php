@@ -95,7 +95,7 @@ class REST_General_Controller extends REST_Controller {
 		}
 
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
+		$recent_unsubscribed_contacts = Contact_Model::where( 'email_status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_automations              = Automation_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_emails                = Communication_Tracking_Model::emails()->with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();

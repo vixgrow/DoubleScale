@@ -572,13 +572,21 @@ class Campaign_Model extends Model {
 	 */
 	private function get_contacts_count( $campaign ) {
 		$filters = $campaign->get_setting( 'filters', array() );
-		$query   = Contact_Model::where( 'status', 'subscribed' );
+		$query   = Contact_Model::query();
 
-		// Apply type-specific filtering
+		// Apply type-specific filtering with channel-specific status
 		if ( $campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail() ) {
-			$query->whereNotNull( 'email' )->where( 'email', '!=', '' );
-		} elseif ( $campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign() ) {
-			$query->whereNotNull( 'phone' )->where( 'phone', '!=', '' );
+			$query->where( 'email_status', 'subscribed' )
+				->whereNotNull( 'email' )
+				->where( 'email', '!=', '' );
+		} elseif ( $campaign->is_sms_campaign() ) {
+			$query->where( 'sms_status', 'subscribed' )
+				->whereNotNull( 'phone' )
+				->where( 'phone', '!=', '' );
+		} elseif ( $campaign->is_whatsapp_campaign() ) {
+			$query->where( 'whatsapp_status', 'subscribed' )
+				->whereNotNull( 'phone' )
+				->where( 'phone', '!=', '' );
 		}
 
 		// Apply custom filters if provided

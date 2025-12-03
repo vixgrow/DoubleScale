@@ -432,6 +432,7 @@ export type LinkTriggers = LinkTrigger[];
 export type CustomTemplate = {
 	id: number;
 	name: string;
+	subject?: string; // Email subject (for campaign emails)
 	body: string;
 	settings: {
 		// Common settings
@@ -556,12 +557,18 @@ export type TrackedMessage = {
 	updated_at: string;
 	contact: Contact;
 	template?: CustomTemplate | null; // Optional for individual messages
-	message?: {
+	activity?: {
 		id: number;
-		tracking_id: number;
-		subject: string | null;
-		body: string;
-	} | null; // Message content for individual messages
+		contact_id: number;
+		deal_id: number | null;
+		activity_type: string;
+		data: {
+			subject?: string;
+			body?: string;
+			[key: string]: any;
+		};
+		created_at: string;
+	} | null; // Activity for individual messages (unified activities model)
 	campaign?: Partial<Campaign>;
 	unsubscribe_reason?: string; // Extracted from contact notes
 };

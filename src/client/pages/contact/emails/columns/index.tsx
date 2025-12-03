@@ -31,13 +31,13 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 			cell: ({ row }) => {
 				// Try template subject first (for campaign emails)
 				const templateSubject = row.original.template?.subject;
-				// Then try message subject (for individual emails)
-				const messageSubject = row.original.message?.subject;
-				
+				// Then try activity subject (for individual emails)
+				const activitySubject = row.original.activity?.data?.subject;
+
 				// Return the first non-empty value
 				return (
 					(templateSubject && templateSubject.trim()) ||
-					(messageSubject && messageSubject.trim()) ||
+					(activitySubject && activitySubject.trim()) ||
 					__('No Subject', 'quillcrm')
 				);
 			},

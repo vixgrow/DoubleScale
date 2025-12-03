@@ -15,11 +15,12 @@ import { useState } from 'react';
 import { NoticeMessage } from '@/client/types';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
+import { Loader2 } from 'lucide-react';
 
 // Mock Icons (replace with your actual icons)
 
 
-export function AddContactDialog({ open, onClose, onSubmit}) {
+export function AddContactDialog({ open, onClose, onSubmit, isLoading = false }) {
   // const [notice, setNotice] = useState<NoticeMessage | null>(null);
   const {
     register,
@@ -30,11 +31,9 @@ export function AddContactDialog({ open, onClose, onSubmit}) {
     defaultValues: { firstName: '', lastName: '', email: '' },
   });
 
-  const handleFormSubmit = (data) => {
-    onSubmit?.(data);
-    
-    onClose();
-    reset();
+  const handleFormSubmit = async (data) => {
+    await onSubmit?.(data);
+    // Don't close or reset here - let the parent handle it after successful creation
   };
 
   const handleCancel = () => {
@@ -46,8 +45,8 @@ export function AddContactDialog({ open, onClose, onSubmit}) {
   const onFormSubmit = handleSubmit(handleFormSubmit);
 
   return (
-    <Dialog open={open} onOpenChange={(value) => !value && handleCancel()}>
-      <DialogContent className="sm:max-w-lg">
+    <Dialog open={open} onOpenChange={(value) => !value && !isLoading && handleCancel()}>
+      <DialogContent className="sm:max-w-lg" onPointerDownOutside={(e) => isLoading && e.preventDefault()} onEscapeKeyDown={(e) => isLoading && e.preventDefault()}>
         <DialogHeader>
           <DialogTitle asChild>
             <CustomDialogHeader
@@ -110,16 +109,24 @@ export function AddContactDialog({ open, onClose, onSubmit}) {
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-          <Button
-  onClick={onFormSubmit}
-  variant="ghost"
-  className="h-12 p-[10px] text-white"
-  style={{
-    background: "linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%)",
-  }}
->
-  Submit
-</Button>
+            <Button
+              onClick={onFormSubmit}
+              disabled={isLoading}
+              variant="ghost"
+              className="h-12 p-[10px] text-white disabled:opacity-50"
+              style={{
+                background: "linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%)",
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {__('Creating...', 'quillcrm')}
+                </>
+              ) : (
+                __('Submit', 'quillcrm')
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>

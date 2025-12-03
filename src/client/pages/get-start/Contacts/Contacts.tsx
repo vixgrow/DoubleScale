@@ -39,6 +39,7 @@ interface ContactFormData {
 // Component داخلي يستخدم الـ Context
 function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [isCreating, setIsCreating] = useState(false);
 	const { importModalVisible, setImportModalVisible } = useContactsContext();
 	const { fetchContacts, createContact } = useContactsAPI({
 		openDialogOnCreate: false,
@@ -46,6 +47,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const handleContactSubmit = async (data: ContactFormData) => {
+		setIsCreating(true);
 		try {
 			// Map form data to API payload format (camelCase to snake_case)
 			const contactPayload = {
@@ -57,9 +59,6 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 			// Use existing createContact method which handles success/error notifications
 			await createContact(contactPayload);
 
-			// Close dialog after successful creation
-			setDialogOpen(false);
-
 			// Refresh contacts list
 			await fetchContacts();
 
@@ -68,6 +67,9 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 				type: 'success',
 				message: __('Contact created successfully', 'quillcrm'),
 			});
+
+			// Close dialog after successful creation
+			setDialogOpen(false);
 		} catch (error: any) {
 			// Surface an error notice in the onboarding flow as well
 			createNotice({
@@ -76,6 +78,8 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 					error?.message ||
 					__('Failed to create contact', 'quillcrm'),
 			});
+		} finally {
+			setIsCreating(false);
 		}
 	};
 
@@ -162,6 +166,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 				open={dialogOpen}
 				onClose={handleDialogClose}
 				onSubmit={handleContactSubmit}
+				isLoading={isCreating}
 			/>
 
 			<ImportModal

@@ -32,10 +32,7 @@ import { Controller } from './controller';
 import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@quillcrm/components';
-import {
-	SidebarProvider,
-	SidebarTrigger,
-} from '@quillcrm/components/ui/sidebar';
+import { SidebarProvider } from '@quillcrm/components/ui/sidebar';
 
 const Notices: React.FC = () => {
 	const { notices } = useSelect((select) => ({
@@ -79,6 +76,28 @@ export const Layout = (props) => {
 		// Clear the callback when closing
 		setMergeTagCallback(null);
 	};
+
+	// Check if this is the get started page - render full page without layout
+	if (props.page.path === 'start') {
+		return (
+			<SlotFillProvider>
+				<Notices />
+				<MergeTagsModal
+					visible={mergeTagsVisible}
+					onClose={handleCloseMergeTags}
+					onInsertTag={mergeTagCallback || undefined}
+					triggerId={formContext?.triggerId}
+					formId={formContext?.formId}
+					automationId={formContext?.automationId}
+				/>
+				<div className="w-full min-h-screen bg-background p-6 box-border">
+					<ProtectedRoute page={props.page}>
+						<props.page.component />
+					</ProtectedRoute>
+				</div>
+			</SlotFillProvider>
+		);
+	}
 
 	return (
 		<SlotFillProvider>

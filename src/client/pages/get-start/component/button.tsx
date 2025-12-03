@@ -18,13 +18,21 @@ export default function ButtonComponent({
 		<Button
 			onClick={onClick}
 			disabled={disabled}
-			className={`rounded-[8px] leading-7 ${
+			variant={
+				type === 'go' 
+					? 'default' 
+					: type === 'no' 
+						? 'ghost' 
+						: 'outline'
+			}
+			size="lg"
+			className={`rounded-lg ${
 				type === 'go'
-					? 'bg-[#1E3A8A]  py-3 px-4 color-[#FFF] text-lg '
+					? 'bg-primary hover:bg-primary/90 text-primary-foreground'
 					: type === 'no'
-						? ' text-[#1E3A8A] hover:bg-transparent !shadow-none text-lg border-0 bg-0 outline-none'
-						: ' border border-[#458DC7] !bg-transparent text-[#458DC7] text-lg font-medium'
-			} `}
+						? 'text-primary hover:bg-transparent shadow-none border-0'
+						: 'border-primary text-primary bg-transparent hover:bg-primary/5'
+			}`}
 		>
 			{children}
 		</Button>

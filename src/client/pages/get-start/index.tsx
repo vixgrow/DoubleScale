@@ -63,11 +63,11 @@ export default function GetStart() {
         alert('Redirecting to dashboard...');
       };
   return (
-    <div className="min-h-screen flex flex-col gap-8 ">
-    {/* Sticky Header with Tabs */}
-    <div className="sticky top-0 z-50 bg-white ">
+    <div className="min-h-screen flex flex-col gap-8">
+      {/* Sticky Header with Progress Steps */}
+      <div className="sticky top-0 z-50 bg-background">
         {/* Progress Steps */}
-        <div className=" border flex items-center justify-between p-6 border-[#458DC7] rounded-[20px]"  style={{'background':'rgba(227, 238, 255, 0.60)'}}>
+        <div className="border border-primary/30 flex items-center justify-between p-6 rounded-xl bg-primary/5 backdrop-blur-sm">
           {steps.map((step, index) => (
             <StepIndicator
               key={step.number}
@@ -76,14 +76,13 @@ export default function GetStart() {
               label={step.label}
               icon={step.icon}
               isLast={index === steps.length - 1}
-              
             />
           ))}
         </div>
-      {/* </div> */}
-    </div>
-    {/* contact */}
-    <div className=" p-12  rounded-[32px] border border-[#DEE1E6] bg-[#FFF] shadow-[0_1px_8px_0_rgba(25,33,61,0.06)]" >
+      </div>
+      
+      {/* Main Content */}
+      <div className="flex-1 p-12 rounded-2xl border border-border bg-card shadow-lg">
         {currentStep === 1 &&(
           <WelcomePage onNext={handleNext} onSkip={handleSkip} />
         )}

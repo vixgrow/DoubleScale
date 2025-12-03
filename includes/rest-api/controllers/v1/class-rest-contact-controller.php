@@ -1035,7 +1035,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			// Apply subscription filter
 			if ( $subscribed ) {
-				$contacts = $contacts->where( 'status', 'subscribed' );
+				$contacts = $contacts->where( 'email_status', 'subscribed' );
 			}
 
 			// Apply campaign type filter (email/phone availability + channel status)
@@ -1540,8 +1540,8 @@ class REST_Contact_Controller extends REST_Controller {
 			$dates              = Utils::get_dates_between_dates( $start_date, $end_date );
 			$type               = $dates['type'] ?? 'hour';
 			$total_contacts     = Contact_Model::count();
-			$total_subscribed   = Contact_Model::where( 'status', 'subscribed' )->count();
-			$total_unsubscribed = Contact_Model::where( 'status', 'unsubscribed' )->count();
+			$total_subscribed   = Contact_Model::where( 'email_status', 'subscribed' )->count();
+			$total_unsubscribed = Contact_Model::where( 'email_status', 'unsubscribed' )->count();
 			$contacts           = array();
 
 			foreach ( $dates['dates'] as $date ) {

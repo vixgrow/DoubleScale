@@ -278,7 +278,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		foreach ( $email_sequences as $email_sequence ) {
 			$email_count                      = $email_sequence->sequences_mail()->count();
 			$email_sequence->email_count      = $email_count;
-			$email_sequence->subscriber_count = Contact_Model::whereIn( 'id', $email_sequence->settings['contact_ids'] ?? array() )->where( 'status', 'subscribed' )->count() . __( ' Subscribers', 'quillcrm' );
+			$email_sequence->subscriber_count = Contact_Model::whereIn( 'id', $email_sequence->settings['contact_ids'] ?? array() )->where( 'email_status', 'subscribed' )->count() . __( ' Subscribers', 'quillcrm' );
 		}
 		return new WP_REST_Response( $email_sequences->toArray() + array( 'total_count' => $total_count ), 200 );
 	}

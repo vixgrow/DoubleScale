@@ -569,12 +569,6 @@ export type TrackedMessage = {
 		};
 		created_at: string;
 	} | null; // Activity for individual messages (unified activities model)
-	message?: {
-		id: number;
-		tracking_id: number;
-		subject: string | null;
-		body: string;
-	} | null; // Legacy: Message content for individual messages (deprecated, use activity)
 	campaign?: Partial<Campaign>;
 	unsubscribe_reason?: string; // Extracted from contact notes
 };

@@ -798,9 +798,9 @@ class REST_Contact_Controller extends REST_Controller {
 						'template' => function ( $query ) {
 							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
-						'message'  => function ( $query ) {
-							$query->select( 'id', 'tracking_id', 'subject', 'body' );
-						}, // Include message content for individual messages
+						'activity' => function ( $query ) {
+							$query->select( 'id', 'contact_id', 'deal_id', 'activity_type', 'data', 'created_at' );
+						}, // Include activity content for individual messages (email_sent, sms_sent, whatsapp_sent)
 						'tracking_meta' => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'merge_tags', 'sections_ids' );
 						}, // Include merge tag values for historical rendering

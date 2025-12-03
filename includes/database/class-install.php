@@ -17,6 +17,7 @@ use QuillCRM\Database\Migrations\Automations_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Notes_Table;
+use QuillCRM\Database\Migrations\Contact_Unsubscribes_Table;
 use QuillCRM\Database\Migrations\Contact_Meta_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
 use QuillCRM\Database\Migrations\Lists_Table;
@@ -124,6 +125,7 @@ class Install {
 				'lists'                        => Lists_Table::class,
 				'tags'                         => Tags_Table::class,
 				'contact_notes'                => Contact_Notes_Table::class,
+				'contact_unsubscribes'         => Contact_Unsubscribes_Table::class,
 				'campaigns'                    => Campaigns_Table::class,
 				'templates'                    => Templates_Table::class,
 				'automations'                  => Automations_Table::class,

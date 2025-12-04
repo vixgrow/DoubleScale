@@ -11,6 +11,7 @@ namespace QuillCRM\Services;
 
 use QuillCRM\Utils;
 use QuillCRM\Models\Communication_Tracking_Model;
+use QuillCRM\Models\Contact_Unsubscribe_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
@@ -283,55 +284,94 @@ class Campaign_Analytics {
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.opened = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_opened,
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN contacts.email_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
-				"
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_clicked
+				'
 				)
 				->first();
 
-			$stats['opened']       = (int) $result->total_opened;
-			$stats['clicked']      = (int) $result->total_clicked;
-			$stats['unsubscribed'] = (int) $result->unsubscribed;
-			$stats                 = $this->calculate_email_rates( $stats );
+			$stats['opened']  = (int) $result->total_opened;
+			$stats['clicked'] = (int) $result->total_clicked;
+			
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
+			
+			$stats = $this->calculate_email_rates( $stats );
 
 		} elseif ( $type_int === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query
-				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . " THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN contacts.sms_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
-				"
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered
+				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->total_clicked;
-			$stats['delivered']    = (int) $result->delivered;
-			$stats['unsubscribed'] = (int) $result->unsubscribed;
-			$stats                 = $this->calculate_sms_rates( $stats );
+			$stats['clicked']   = (int) $result->total_clicked;
+			$stats['delivered'] = (int) $result->delivered;
+			
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
+			
+			$stats = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type_int === Campaign_Channel::CHANNEL_WHATSAPP ) {
 			$result = $base_query
-				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . " THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::READ . " THEN 1 ELSE 0 END) as total_read,
-					SUM(CASE WHEN contacts.whatsapp_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
-				"
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as total_read
+				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->total_clicked;
-			$stats['delivered']    = (int) $result->delivered;
-			$stats['read']         = (int) $result->total_read;
-			$stats['unsubscribed'] = (int) $result->unsubscribed;
-			$stats                 = $this->calculate_whatsapp_rates( $stats );
+			$stats['clicked']   = (int) $result->total_clicked;
+			$stats['delivered'] = (int) $result->delivered;
+			$stats['read']      = (int) $result->total_read;
+			
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
+			
+			$stats = $this->calculate_whatsapp_rates( $stats );
 		}
 
 		return $stats;
+	}
+
+	/**
+	 * Get unsubscribe count from dedicated contact_unsubscribes table
+	 *
+	 * @param int $campaign_id Campaign ID
+	 * @param int $mode        Mode integer (1=Email, 2=SMS, 3=WhatsApp)
+	 *
+	 * @return int Unsubscribe count
+	 */
+	protected function get_unsubscribe_count( $campaign_id, $mode ) {
+		if ( ! $campaign_id || ! $mode ) {
+			return 0;
+		}
+
+		try {
+			$count = Contact_Unsubscribe_Model::forCampaign( $campaign_id )
+				->forMode( $mode )
+				->count();
+
+			return (int) $count;
+		} catch ( \Exception $e ) {
+			// Log error but return 0 instead of breaking
+			if ( function_exists( 'quillcrm_get_logger' ) ) {
+				quillcrm_get_logger()->error(
+					'Failed to get unsubscribe count',
+					array(
+						'campaign_id' => $campaign_id,
+						'mode'        => $mode,
+						'error'       => $e->getMessage(),
+					)
+				);
+			}
+			return 0;
+		}
 	}
 
 	/**

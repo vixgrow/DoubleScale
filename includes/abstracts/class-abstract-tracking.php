@@ -13,6 +13,8 @@ use QuillCRM\Utils;
 use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Models\Contact_Unsubscribe_Model;
 
 defined('ABSPATH') || exit;
 
@@ -431,8 +433,18 @@ abstract class Abstract_Tracking
 
 			$contact = $campaign_record->contact;
 			if ($contact) {
-				// Use Contact Model method for channel-specific unsubscribe
-				$contact->unsubscribe_from_channel( $this->channel, 'link_click' );
+				// Use mode directly from tracking record (integer)
+				$mode = $campaign_record->mode; // 1=Email, 2=SMS, 3=WhatsApp
+				$source_type = $campaign_record->source_type; // 1=Campaign, 2=Automation
+				$source_id = $campaign_record->source_id;
+
+				// Unsubscribe using mode
+				$contact->unsubscribe_from_mode(
+					$mode,
+					'link_click',
+					$source_type,
+					$source_id
+				);
 
 				// Trigger unsubscribe automation
 				do_action("quillcrm_{$this->channel}_unsubscribed", $contact, $campaign_record);

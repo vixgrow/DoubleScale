@@ -10,18 +10,29 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Constants\Message_Source_Types;
 
 /**
  * Contact_Unsubscribe_Model class
+ * 
+ * Tracks contact unsubscribe events with source attribution
+ * Uses integer constants matching Communication_Tracking_Model
  */
 class Contact_Unsubscribe_Model extends Model {
 
 	/**
-	 * Source type constants
+	 * Mode constants (matching Communication_Tracking_Model)
 	 */
-	const SOURCE_CAMPAIGN   = 'campaign';
-	const SOURCE_AUTOMATION = 'automation';
-	const SOURCE_MANUAL     = 'manual';
+	const MODE_EMAIL    = 1;
+	const MODE_SMS      = 2;
+	const MODE_WHATSAPP = 3;
+
+	/**
+	 * Source type constants (matching Message_Source_Types)
+	 * Note: Only CAMPAIGN and AUTOMATION - Individual messages don't have unsubscribe links
+	 */
+	const SOURCE_CAMPAIGN   = Message_Source_Types::CAMPAIGN;   // 1
+	const SOURCE_AUTOMATION = Message_Source_Types::AUTOMATION; // 2
 
 	/**
 	 * Table name
@@ -50,7 +61,7 @@ class Contact_Unsubscribe_Model extends Model {
 	 */
 	protected $fillable = array(
 		'contact_id',
-		'channel',
+		'mode',
 		'reason',
 		'source_type',
 		'source_id',
@@ -75,7 +86,7 @@ class Contact_Unsubscribe_Model extends Model {
 	 */
 	public $rules = array(
 		'contact_id' => 'required|integer',
-		'channel'    => 'required|in:email,sms,whatsapp',
+		'mode'       => 'required|integer|in:1,2,3',
 	);
 
 	/**
@@ -87,8 +98,9 @@ class Contact_Unsubscribe_Model extends Model {
 	 */
 	public $messages = array(
 		'contact_id.required' => 'Contact ID is required.',
-		'channel.required'    => 'Channel is required.',
-		'channel.in'          => 'Invalid channel type.',
+		'mode.required'       => 'Mode is required.',
+		'mode.integer'        => 'Mode must be an integer.',
+		'mode.in'             => 'Invalid mode type. Must be 1 (Email), 2 (SMS), or 3 (WhatsApp).',
 	);
 
 	/**
@@ -103,15 +115,15 @@ class Contact_Unsubscribe_Model extends Model {
 	}
 
 	/**
-	 * Scope: Filter by channel
+	 * Scope: Filter by mode
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query
-	 * @param string                                $channel
+	 * @param string                                $mode
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeForChannel( $query, $channel ) {
-		return $query->where( 'channel', $channel );
+	public function scopeForMode( $query, $mode ) {
+		return $query->where( 'mode', $mode );
 	}
 
 	/**
@@ -184,18 +196,18 @@ class Contact_Unsubscribe_Model extends Model {
 	 * @since 1.0.0
 	 *
 	 * @param int         $contact_id  Contact ID
-	 * @param string      $channel     Channel (email, sms, whatsapp)
+	 * @param string      $mode     mode (email, sms, whatsapp)
 	 * @param string      $reason      Reason for unsubscribe
-	 * @param string|null $source_type Source type (campaign, automation, manual)
+	 * @param string|null $source_type Source type (campaign, automation)
 	 * @param int|null    $source_id   Source ID (campaign or automation ID)
 	 *
 	 * @return Contact_Unsubscribe_Model
 	 */
-	public static function record_unsubscribe( $contact_id, $channel, $reason = '', $source_type = null, $source_id = null ) {
+	public static function record_unsubscribe( $contact_id, $mode, $reason = '', $source_type = null, $source_id = null ) {
 		return self::create(
 			array(
 				'contact_id'  => $contact_id,
-				'channel'     => $channel,
+				'mode'        => $mode,
 				'reason'      => $reason,
 				'source_type' => $source_type,
 				'source_id'   => $source_id,
@@ -215,7 +227,6 @@ class Contact_Unsubscribe_Model extends Model {
 		return array(
 			self::SOURCE_CAMPAIGN,
 			self::SOURCE_AUTOMATION,
-			self::SOURCE_MANUAL,
 		);
 	}
 

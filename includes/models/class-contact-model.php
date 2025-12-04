@@ -20,6 +20,7 @@ use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
+use QuillCRM\Models\Contact_Unsubscribe_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
 // use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Utils;
@@ -247,6 +248,17 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get unsubscribes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function unsubscribes() {
+		return $this->hasMany( Contact_Unsubscribe_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
 	 * Get notes attribute - transforms activity models to note format for serialization
 	 *
 	 * @since 1.0.0
@@ -450,34 +462,65 @@ class Contact_Model extends Model {
 	}
 
 	/**
-	 * Unsubscribe from specific channel
+	 * Unsubscribe from specific mode
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param string $channel Channel name (email, sms, whatsapp)
-	 * @param string $reason Optional reason
+	 * @param int      $mode        Mode integer (1=Email, 2=SMS, 3=WhatsApp)
+	 * @param string   $reason      Optional reason
+	 * @param int|null $source_type Source type integer (1=Campaign, 2=Automation)
+	 * @param int|null $source_id   Campaign ID or Automation ID
 	 * @return bool Success
 	 */
-	public function unsubscribe_from_channel( $channel, $reason = '' ) {
-		// Validate channel
-		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
+	public function unsubscribe_from_mode( $mode, $reason = '', $source_type = null, $source_id = null ) {
+		// Map mode to channel for status field
+		$channel_map = array(
+			1 => 'email',
+			2 => 'sms',
+			3 => 'whatsapp',
+		);
+		
+		if ( ! isset( $channel_map[ $mode ] ) ) {
 			return false;
 		}
-
+		
+		$channel = $channel_map[ $mode ];
 		$status_field = $channel . '_status';
 
 		// Check if already unsubscribed
 		if ( 'unsubscribed' === $this->getAttribute( $status_field ) ) {
-			return true; // Already unsubscribed
+			return true;
 		}
 
-		// Update channel status
+		// Update status
 		$this->$status_field = 'unsubscribed';
-
-		// Save changes
 		$this->save();
 
-		// Create system note
+		// Record unsubscribe in dedicated table
+		try {
+			Contact_Unsubscribe_Model::record_unsubscribe(
+				$this->id,
+				$mode,
+				$reason,
+				$source_type,
+				$source_id
+			);
+		} catch ( \Exception $e ) {
+			if ( function_exists( 'quillcrm_get_logger' ) ) {
+				quillcrm_get_logger()->error(
+					'Failed to record unsubscribe',
+					array(
+						'contact_id'  => $this->id,
+						'mode'        => $mode,
+						'error'       => $e->getMessage(),
+						'source_type' => $source_type,
+						'source_id'   => $source_id,
+					)
+				);
+			}
+		}
+
+		// Create system note (dual-write for backward compatibility)
 		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
 
@@ -498,7 +541,7 @@ class Contact_Model extends Model {
 			)
 		);
 
-		// Fire channel-specific action
+		// Fire action
 		do_action( "quillcrm_{$channel}_unsubscribed", $this );
 
 		return true;

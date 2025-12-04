@@ -329,20 +329,11 @@ class REST_Settings_Controller extends REST_Controller {
 			return $validation_result;
 		}
 
-		// Collect warnings (non-blocking validation issues)
-		$warnings = $this->collect_warnings( $settings );
-
 		// Sanitize settings
 		$settings = $this->sanitize_settings( $settings );
 
 		Settings::update_many( $settings );
-
-		$response = array( 'success' => true );
-		if ( ! empty( $warnings ) ) {
-			$response['warnings'] = $warnings;
-		}
-
-		return new WP_REST_Response( $response, 200 );
+		return new WP_REST_Response( array( 'success' => true ), 200 );
 	}
 
 	/**
@@ -391,7 +382,12 @@ class REST_Settings_Controller extends REST_Controller {
 					array( 'status' => 400 )
 				);
 			}
-			// Note: QuillSMTP connection validation moved to collect_warnings() for non-blocking behavior
+
+			// Validate QuillSMTP connection for from_email
+			$connection_validation = $this->validate_quillsmtp_connection( $email['from_email'] );
+			if ( is_wp_error( $connection_validation ) ) {
+				return $connection_validation;
+			}
 		}
 
 		// Validate reply_to
@@ -451,53 +447,39 @@ class REST_Settings_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Collect warnings for settings (non-blocking validation issues)
+	 * Validate QuillSMTP connection for an email address
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $settings Settings to check.
-	 * @return array Array of warning messages.
+	 * @param string $email Email address to validate.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
 	 */
-	private function collect_warnings( $settings ) {
-		$warnings = array();
-
-		// Check QuillSMTP connection for from_email
-		if ( isset( $settings['email']['from_email'] ) && ! empty( $settings['email']['from_email'] ) ) {
-			$email_warning = $this->check_quillsmtp_connection( $settings['email']['from_email'] );
-			if ( $email_warning ) {
-				$warnings[] = $email_warning;
-			}
-		}
-
-		return $warnings;
-	}
-
-	/**
-	 * Check QuillSMTP connection for an email address (non-blocking)
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $email Email address to check.
-	 * @return string|null Warning message if there's an issue, null otherwise.
-	 */
-	private function check_quillsmtp_connection( $email ) {
+	private function validate_quillsmtp_connection( $email ) {
 		// Check if QuillSMTP is available
 		if ( ! class_exists( '\QuillSMTP\Settings' ) ) {
-			return __( 'Warning: QuillSMTP plugin is not active. Emails may not be sent properly. Please install and activate QuillSMTP to ensure reliable email delivery.', 'quillcrm' );
+			return new WP_Error(
+				'quillsmtp_not_active',
+				__( 'QuillSMTP plugin is not active. Please install and activate QuillSMTP to configure email settings.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
 		}
 
 		// Check if the email has a connection configured
 		$connection_id = \QuillSMTP\Settings::get_connection_by_from_email( $email );
 
 		if ( empty( $connection_id ) ) {
-			return sprintf(
-				/* translators: %s: email address */
-				__( 'Warning: No QuillSMTP connection configured for: %s. Emails may not be sent properly. Please configure an SMTP connection in QuillSMTP settings for reliable email delivery.', 'quillcrm' ),
-				$email
+			return new WP_Error(
+				'no_smtp_connection',
+				sprintf(
+					/* translators: %s: email address */
+					__( 'No QuillSMTP connection configured for: %s. Please configure an SMTP connection in QuillSMTP settings before saving this email address.', 'quillcrm' ),
+					$email
+				),
+				array( 'status' => 400 )
 			);
 		}
 
-		return null;
+		return true;
 	}
 
 	/**

@@ -101,28 +101,20 @@ const SettingsPage: React.FC = () => {
 	const updateSettings = async () => {
 		setIsUpdating(true);
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/settings',
 				method: 'POST',
 				data: settings,
-			}) as { success: boolean; warnings?: string[] };
+			});
 
 			// Update the original settings ref after successful save
 			originalSettingsRef.current = JSON.parse(JSON.stringify(settings));
 			setSaveCounter((prev) => prev + 1);
 
-			// Check if there are warnings in the response
-			if (response.warnings && response.warnings.length > 0) {
-				setNotice({
-					type: 'warning',
-					message: response.warnings.join(' '),
-				});
-			} else {
-				setNotice({
-					type: 'success',
-					message: __('Settings updated successfully', 'quillcrm'),
-				});
-			}
+			setNotice({
+				type: 'success',
+				message: __('Settings updated successfully', 'quillcrm'),
+			});
 		} catch (error) {
 			setNotice({
 				type: 'error',

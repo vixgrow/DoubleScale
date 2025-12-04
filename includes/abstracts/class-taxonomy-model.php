@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 
 class Taxonomy_Model extends Model {
 
+
 	/**
 	 * Table name
 	 *
@@ -128,7 +129,6 @@ class Taxonomy_Model extends Model {
 	 * @throws \Exception
 	 */
 	public function save( array $options = array() ) {
-		xdebug_break();
 		$dispatcher = static::getEventDispatcher();
 		$model_name = static::class;
 		$event_name = "eloquent.creating: {$model_name}";
@@ -197,7 +197,7 @@ class Taxonomy_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		// Get the event dispatcher
 		$dispatcher = static::getEventDispatcher();

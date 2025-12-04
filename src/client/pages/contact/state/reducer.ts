@@ -7,7 +7,6 @@ import { combineReducers } from '@wordpress/data';
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import { omit } from 'lodash';
 
 /**
  * Internal dependencies
@@ -55,7 +54,9 @@ const notes: Reducer<Note[], NoteAction> = (state = [], action) => {
 		case DELETE_NOTE:
 			return state.filter((note) => note.id !== action.note.id);
 		case UPDATE_NOTE:
-			return omit(state, action.note.id);
+			return state.map((note) =>
+				note.id === action.note.id ? action.note : note
+			);
 		default:
 			return state;
 	}

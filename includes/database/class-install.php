@@ -16,7 +16,7 @@ use QuillCRM\Database\Migrations\Automation_Steps_Table;
 use QuillCRM\Database\Migrations\Automations_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
-use QuillCRM\Database\Migrations\Contact_Notes_Table;
+// Contact_Notes_Table removed - notes now use unified activities table
 use QuillCRM\Database\Migrations\Contact_Unsubscribes_Table;
 use QuillCRM\Database\Migrations\Contact_Meta_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
@@ -124,7 +124,7 @@ class Install {
 				'contact_tag_relationship'     => Contact_Tag_Relationship_Table::class,
 				'lists'                        => Lists_Table::class,
 				'tags'                         => Tags_Table::class,
-				'contact_notes'                => Contact_Notes_Table::class,
+				// 'contact_notes' removed - notes now use unified activities table
 				'contact_unsubscribes'         => Contact_Unsubscribes_Table::class,
 				'campaigns'                    => Campaigns_Table::class,
 				'templates'                    => Templates_Table::class,

@@ -655,9 +655,10 @@ class Campaign_Model extends Model {
 	 */
 	private function assign_campaign_stats( $campaign, $stats ) {
 		// Common stats for all campaign types
-		$campaign->sent_count    = $stats['sent'] ?? 0;
-		$campaign->failed_count  = $stats['failed'] ?? 0;
-		$campaign->clicked_count = $stats['clicked'] ?? 0;
+		$campaign->sent_count        = $stats['sent'] ?? 0;
+		$campaign->failed_count      = $stats['failed'] ?? 0;
+		$campaign->clicked_count     = $stats['clicked'] ?? 0;
+		$campaign->unsubscribed_count = $stats['unsubscribed'] ?? 0;
 
 		// Type-specific stats
 		if ( $campaign->is_email_campaign() ) {

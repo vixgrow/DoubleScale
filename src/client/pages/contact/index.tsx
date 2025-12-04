@@ -250,7 +250,7 @@ const Contact: React.FC<ContactProps> = ({
 							)}
 							<div className="flex gap-5">
 								<ContactInformation />
-								<DataCard />
+								<DataCard navigate={navigate} />
 							</div>
 						</div>
 					</Provider>

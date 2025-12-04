@@ -93,13 +93,11 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
             if (selectedNote) {
                 // Update existing note
                 const response = (await apiFetch({
-                    path: `/qc/v1/contact-notes/${selectedNote.id}`,
-                    method: 'PUT',
+                    path: `/qc/v1/activities/${selectedNote.id}`,
+                    method: 'PATCH',
                     data: {
                         title,
-                        note,
-                        type : 'note',
-                        contact_id,
+                        content: note,
                     },
                 })) as Note;
 
@@ -108,12 +106,11 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
             } else {
                 // Create new note
                 const response = (await apiFetch({
-                    path: `/qc/v1/contact-notes`,
+                    path: `/qc/v1/activities/notes`,
                     method: 'POST',
                     data: {
                         title,
-                        note,
-                        type : 'note',
+                        content: note,
                         contact_id,
                     },
                 })) as Note;

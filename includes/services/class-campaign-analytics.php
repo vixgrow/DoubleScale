@@ -292,8 +292,8 @@ class Campaign_Analytics {
 			$stats['opened']  = (int) $result->total_opened;
 			$stats['clicked'] = (int) $result->total_clicked;
 			
-			// Get unsubscribe count from dedicated table
-			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, 'email' );
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
 			
 			$stats = $this->calculate_email_rates( $stats );
 
@@ -310,8 +310,8 @@ class Campaign_Analytics {
 			$stats['clicked']   = (int) $result->total_clicked;
 			$stats['delivered'] = (int) $result->delivered;
 			
-			// Get unsubscribe count from dedicated table
-			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, 'sms' );
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
 			
 			$stats = $this->calculate_sms_rates( $stats );
 
@@ -330,8 +330,8 @@ class Campaign_Analytics {
 			$stats['delivered'] = (int) $result->delivered;
 			$stats['read']      = (int) $result->total_read;
 			
-			// Get unsubscribe count from dedicated table
-			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, 'whatsapp' );
+			// Get unsubscribe count from dedicated table (use mode integer)
+			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
 			
 			$stats = $this->calculate_whatsapp_rates( $stats );
 		}
@@ -342,8 +342,8 @@ class Campaign_Analytics {
 	/**
 	 * Get unsubscribe count from dedicated contact_unsubscribes table
 	 *
-	 * @param int    $campaign_id Campaign ID
-	 * @param string $mode Channel mode (email, sms, whatsapp)
+	 * @param int $campaign_id Campaign ID
+	 * @param int $mode        Mode integer (1=Email, 2=SMS, 3=WhatsApp)
 	 *
 	 * @return int Unsubscribe count
 	 */

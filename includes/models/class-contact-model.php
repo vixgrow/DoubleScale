@@ -462,52 +462,56 @@ class Contact_Model extends Model {
 	}
 
 	/**
-	 * Unsubscribe from specific channel
+	 * Unsubscribe from specific mode
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param string      $channel     Channel name (email, sms, whatsapp)
-	 * @param string      $reason      Optional reason
-	 * @param string|null $source_type Source type (campaign, automation)
-	 * @param int|null    $source_id   Campaign ID or Automation ID
+	 * @param int      $mode        Mode integer (1=Email, 2=SMS, 3=WhatsApp)
+	 * @param string   $reason      Optional reason
+	 * @param int|null $source_type Source type integer (1=Campaign, 2=Automation)
+	 * @param int|null $source_id   Campaign ID or Automation ID
 	 * @return bool Success
 	 */
-	public function unsubscribe_from_channel( $channel, $reason = '', $source_type = null, $source_id = null ) {
-		// Validate channel
-		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
+	public function unsubscribe_from_mode( $mode, $reason = '', $source_type = null, $source_id = null ) {
+		// Map mode to channel for status field
+		$channel_map = array(
+			1 => 'email',
+			2 => 'sms',
+			3 => 'whatsapp',
+		);
+		
+		if ( ! isset( $channel_map[ $mode ] ) ) {
 			return false;
 		}
-
+		
+		$channel = $channel_map[ $mode ];
 		$status_field = $channel . '_status';
 
 		// Check if already unsubscribed
 		if ( 'unsubscribed' === $this->getAttribute( $status_field ) ) {
-			return true; // Already unsubscribed
+			return true;
 		}
 
-		// Update channel status
+		// Update status
 		$this->$status_field = 'unsubscribed';
-
-		// Save changes
 		$this->save();
 
 		// Record unsubscribe in dedicated table
 		try {
 			Contact_Unsubscribe_Model::record_unsubscribe(
 				$this->id,
-				$channel,
+				$mode,
 				$reason,
 				$source_type,
 				$source_id
 			);
 		} catch ( \Exception $e ) {
-			// Log error but don't break the flow
 			if ( function_exists( 'quillcrm_get_logger' ) ) {
 				quillcrm_get_logger()->error(
 					'Failed to record unsubscribe',
 					array(
 						'contact_id'  => $this->id,
-						'channel'     => $channel,
+						'mode'        => $mode,
 						'error'       => $e->getMessage(),
 						'source_type' => $source_type,
 						'source_id'   => $source_id,
@@ -537,7 +541,7 @@ class Contact_Model extends Model {
 			)
 		);
 
-		// Fire channel-specific action
+		// Fire action
 		do_action( "quillcrm_{$channel}_unsubscribed", $this );
 
 		return true;

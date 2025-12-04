@@ -860,12 +860,12 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				return new WP_Error( 'not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			// Determine mode based on campaign type
-			$mode = 'email'; // Default to email
+			// Determine mode integer based on campaign type
+			$mode = 1; // Default to email
 			if ( $campaign->is_sms_campaign() ) {
-				$mode = 'sms';
+				$mode = 2;
 			} elseif ( $campaign->is_whatsapp_campaign() ) {
-				$mode = 'whatsapp';
+				$mode = 3;
 			}
 
 			// Query unsubscribes table for this campaign

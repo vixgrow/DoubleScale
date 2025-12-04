@@ -36,17 +36,17 @@ class Contact_Unsubscribes_Table extends Migration {
 		 *
 		 * id: BIGINT(20) NOT NULL AUTO_INCREMENT
 		 * contact_id: BIGINT(20) NOT NULL - FK to contacts
-		 * mode: VARCHAR(20) NOT NULL - mode type (email, sms, whatsapp)
+		 * mode: TINYINT(1) NOT NULL - Mode type (1=Email, 2=SMS, 3=WhatsApp)
 		 * reason: TEXT NULL - Reason for unsubscribe
-		 * source_type: VARCHAR(20) NULL - Source type (campaign, automation)
+		 * source_type: TINYINT(2) NULL - Source type (1=Campaign, 2=Automation, 3=Individual)
 		 * source_id: BIGINT(20) NULL - Campaign ID or Automation ID depending on source_type
 		 * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
 			contact_id BIGINT(20) NOT NULL COMMENT "FK to contacts",
-			mode VARCHAR(20) NOT NULL COMMENT "mode type: email, sms, whatsapp",
+			mode TINYINT(1) NOT NULL COMMENT "1=Email, 2=SMS, 3=WhatsApp",
 			reason TEXT NULL COMMENT "Reason for unsubscribe",
-			source_type VARCHAR(20) NULL COMMENT "Source type: campaign, automation",
+			source_type TINYINT(2) NULL COMMENT "1=Campaign, 2=Automation",
 			source_id BIGINT(20) NULL COMMENT "Campaign ID or Automation ID depending on source_type",
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

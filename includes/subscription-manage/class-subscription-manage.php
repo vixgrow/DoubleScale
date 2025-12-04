@@ -221,8 +221,16 @@ class Subscription_Manage {
 			// Try to find the most recent tracking record for source context
 			$source_type = null;
 			$source_id   = null;
+			$mode        = null;
 			
-			$mode = $this->get_mode_from_channel( $channel );
+			// Map channel to mode
+			$mode_map = array(
+				'email'    => 1,
+				'sms'      => 2,
+				'whatsapp' => 3,
+			);
+			$mode = $mode_map[ $channel ] ?? null;
+			
 			if ( $mode ) {
 				$recent_tracking = \QuillCRM\Models\Communication_Tracking_Model::where( 'contact_id', $contact->id )
 					->where( 'mode', $mode )
@@ -230,13 +238,13 @@ class Subscription_Manage {
 					->first();
 				
 				if ( $recent_tracking && $recent_tracking->source_type && $recent_tracking->source_id ) {
-					$source_type = $this->map_source_type_to_string( $recent_tracking->source_type );
+					$source_type = $recent_tracking->source_type; // 1=Campaign, 2=Automation
 					$source_id   = $recent_tracking->source_id;
 				}
 			}
 
-			// Unsubscribe from specific channel using Contact Model method
-			$contact->unsubscribe_from_channel( $channel, $reason, $source_type, $source_id );
+			// Unsubscribe using mode
+			$contact->unsubscribe_from_mode( $mode, $reason, $source_type, $source_id );
 
 			$channel_label = \QuillCRM\Models\Contact_Model::get_channel_label( $channel );
 
@@ -250,42 +258,6 @@ class Subscription_Manage {
 			);
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
-		}
-	}
-
-	/**
-	 * Map channel name to tracking mode
-	 *
-	 * @param string $channel Channel name (email, sms, whatsapp)
-	 * @return int|null Mode constant or null
-	 */
-	private function get_mode_from_channel( $channel ) {
-		switch ( $channel ) {
-			case 'email':
-				return \QuillCRM\Models\Communication_Tracking_Model::MODE_EMAIL;
-			case 'sms':
-				return \QuillCRM\Models\Communication_Tracking_Model::MODE_SMS;
-			case 'whatsapp':
-				return \QuillCRM\Models\Communication_Tracking_Model::MODE_WHATSAPP;
-			default:
-				return null;
-		}
-	}
-
-	/**
-	 * Map numeric source type to string for unsubscribes table
-	 *
-	 * @param int $numeric_type Source type from tracking
-	 * @return string|null
-	 */
-	private function map_source_type_to_string( $numeric_type ) {
-		switch ( $numeric_type ) {
-			case \QuillCRM\Constants\Message_Source_Types::CAMPAIGN:
-				return \QuillCRM\Models\Contact_Unsubscribe_Model::SOURCE_CAMPAIGN;
-			case \QuillCRM\Constants\Message_Source_Types::AUTOMATION:
-				return \QuillCRM\Models\Contact_Unsubscribe_Model::SOURCE_AUTOMATION;
-			default:
-				return null;
 		}
 	}
 

@@ -10,17 +10,29 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Constants\Message_Source_Types;
 
 /**
  * Contact_Unsubscribe_Model class
+ * 
+ * Tracks contact unsubscribe events with source attribution
+ * Uses integer constants matching Communication_Tracking_Model
  */
 class Contact_Unsubscribe_Model extends Model {
 
 	/**
-	 * Source type constants
+	 * Mode constants (matching Communication_Tracking_Model)
 	 */
-	const SOURCE_CAMPAIGN   = 'campaign';
-	const SOURCE_AUTOMATION = 'automation';
+	const MODE_EMAIL    = 1;
+	const MODE_SMS      = 2;
+	const MODE_WHATSAPP = 3;
+
+	/**
+	 * Source type constants (matching Message_Source_Types)
+	 * Note: Only CAMPAIGN and AUTOMATION - Individual messages don't have unsubscribe links
+	 */
+	const SOURCE_CAMPAIGN   = Message_Source_Types::CAMPAIGN;   // 1
+	const SOURCE_AUTOMATION = Message_Source_Types::AUTOMATION; // 2
 
 	/**
 	 * Table name
@@ -74,7 +86,7 @@ class Contact_Unsubscribe_Model extends Model {
 	 */
 	public $rules = array(
 		'contact_id' => 'required|integer',
-		'mode'       => 'required|in:email,sms,whatsapp',
+		'mode'       => 'required|integer|in:1,2,3',
 	);
 
 	/**
@@ -87,7 +99,8 @@ class Contact_Unsubscribe_Model extends Model {
 	public $messages = array(
 		'contact_id.required' => 'Contact ID is required.',
 		'mode.required'       => 'Mode is required.',
-		'mode.in'             => 'Invalid mode type.',
+		'mode.integer'        => 'Mode must be an integer.',
+		'mode.in'             => 'Invalid mode type. Must be 1 (Email), 2 (SMS), or 3 (WhatsApp).',
 	);
 
 	/**

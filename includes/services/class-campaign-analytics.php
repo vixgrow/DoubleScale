@@ -284,7 +284,7 @@ class Campaign_Analytics {
 					"
 					SUM(CASE WHEN {$tracking_table}.opened = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_opened,
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
+					SUM(CASE WHEN contacts.email_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
 				"
 				)
 				->first();
@@ -300,9 +300,9 @@ class Campaign_Analytics {
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
-				'
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . " THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN contacts.sms_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
+				"
 				)
 				->first();
 
@@ -317,10 +317,10 @@ class Campaign_Analytics {
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
-					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as total_read,
-					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
-				'
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . " THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::READ . " THEN 1 ELSE 0 END) as total_read,
+					SUM(CASE WHEN contacts.whatsapp_status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
+				"
 				)
 				->first();
 

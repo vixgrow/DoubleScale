@@ -74,10 +74,10 @@ class Change_Status extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$new_status = $step->get_setting( 'new_status', 'unverified' );
 		$contact    = $automation_contact->contact;
-		if ( $contact->status === $new_status ) {
+		if ( $contact->email_status === $new_status ) {
 			return true;
 		}
-		$contact->status = $new_status;
+		$contact->email_status = $new_status;
 		$contact->save();
 
 		return true;

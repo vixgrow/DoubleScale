@@ -131,7 +131,7 @@ class Subscription_Manage {
 			return;
 		}
 
-		$contact->status = 'subscribed';
+		$contact->email_status = 'subscribed';
 		$contact->save();
 
 		\QuillCRM\Models\Activity_Model::create(

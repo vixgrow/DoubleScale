@@ -13,6 +13,8 @@ use QuillCRM\Utils;
 use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Models\Contact_Unsubscribe_Model;
 
 defined('ABSPATH') || exit;
 
@@ -431,8 +433,19 @@ abstract class Abstract_Tracking
 
 			$contact = $campaign_record->contact;
 			if ($contact) {
+				// Extract source information from tracking record
+				// source_type: 1=Campaign, 2=Automation, 3=Individual
+				// source_id: The campaign_id or automation_id
+				$source_type_string = $this->map_source_type_to_string($campaign_record->source_type);
+				$source_id = $campaign_record->source_id; // This is the campaign or automation ID
+
 				// Use Contact Model method for channel-specific unsubscribe
-				$contact->unsubscribe_from_channel( $this->channel, 'link_click' );
+				$contact->unsubscribe_from_channel(
+					$this->channel,
+					'link_click',
+					$source_type_string,
+					$source_id
+				);
 
 				// Trigger unsubscribe automation
 				do_action("quillcrm_{$this->channel}_unsubscribed", $contact, $campaign_record);
@@ -449,6 +462,23 @@ abstract class Abstract_Tracking
 				'error' => $e->getMessage(),
 				'code' => "{$this->channel}_unsubscribe_error"
 			]);
+		}
+	}
+
+	/**
+	 * Map numeric source type to string for unsubscribes table
+	 *
+	 * @param int $numeric_type Source type from tracking (1=Campaign, 2=Automation, 3=Individual)
+	 * @return string|null 'campaign', 'automation', or null
+	 */
+	protected function map_source_type_to_string($numeric_type) {
+		switch ($numeric_type) {
+			case Message_Source_Types::CAMPAIGN:
+				return Contact_Unsubscribe_Model::SOURCE_CAMPAIGN;
+			case Message_Source_Types::AUTOMATION:
+				return Contact_Unsubscribe_Model::SOURCE_AUTOMATION;
+			default:
+				return null; // Individual sends don't track source
 		}
 	}
 

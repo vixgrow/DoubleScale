@@ -862,7 +862,7 @@ export interface DataTableConfig<TData> {
 }
 
 export type NoticeMessage = {
-	type: 'success' | 'error';
+	type: 'success' | 'error' | 'warning';
 	message: string;
 };
 

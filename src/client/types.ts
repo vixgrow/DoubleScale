@@ -21,9 +21,12 @@ export type Tag = {
 
 export type Note = {
 	id: number;
+	contact_id?: number;
+	deal_id?: number | null;
 	title: string;
 	type: string;
 	note: string;
+	user_id?: number;
 	created_at: string;
 	updated_at: string;
 };

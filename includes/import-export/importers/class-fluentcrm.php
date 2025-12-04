@@ -1,4 +1,5 @@
 <?php
+
 /**
  * FluentCRM Importer
  *
@@ -17,6 +18,8 @@ use QuillCRM\Abstracts\Importer;
  * FluentCRM Importer class
  */
 class FluentCRM extends Importer {
+
+
 
 	/**
 	 * Name
@@ -52,7 +55,7 @@ class FluentCRM extends Importer {
 	 * Run importer
 	 */
 	public function run() {
-		global $wpdb;
+		 global $wpdb;
 
 		$table_name  = $wpdb->prefix . 'fc_subscribers';
 		$pivot_table = $wpdb->prefix . 'fc_subscriber_pivot';
@@ -162,13 +165,15 @@ class FluentCRM extends Importer {
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'quillcrm' ),
+				'label'   => __( 'Lists Mapping', 'quillcrm' ),
 				'options' => $this->get_lists(),
+				'tooltip' => __( 'Map FluentCRM lists to QuillCRM lists. For each FluentCRM list, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM lists to add contacts to (useful for renaming or consolidating lists), or 2) "Auto Create" - Automatically create a new QuillCRM list with the same name as the FluentCRM list (useful for preserving your original list structure). Contacts will only be added to lists they belonged to in FluentCRM.', 'quillcrm' ),
 			),
 			'tags_mapping'  => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags', 'quillcrm' ),
+				'label'   => __( 'Tags Mapping', 'quillcrm' ),
 				'options' => $this->get_tags(),
+				'tooltip' => __( 'Map FluentCRM tags to QuillCRM tags. For each FluentCRM tag, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM tags to apply to contacts (useful for renaming or consolidating tags), or 2) "Auto Create" - Automatically create a new QuillCRM tag with the same name as the FluentCRM tag (useful for preserving your original tag structure). Contacts will only receive tags they had in FluentCRM.', 'quillcrm' ),
 			),
 		);
 	}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class List_Model
  * This class is responsible for handling the list model
@@ -127,24 +128,32 @@ class List_Model extends Model {
 	 * @throws \Exception
 	 */
 	public function save( array $options = array() ) {
-		$search = static::get_by_name( $this->name );
+		if ( ! $this->exists ) {
+			$dispatcher = static::getEventDispatcher();
+			$model_name = static::class;
+			$event_name = "eloquent.creating: {$model_name}";
+			$listeners  = $dispatcher->getListeners( $event_name );
 
-		if ( $search && $search->id !== $this->id ) {
-			throw new \Exception( __( 'List name already exists', 'quillcrm' ) );
+			// If no listeners, re-register events on current dispatcher
+			if ( count( $listeners ) === 0 ) {
+				$this->registerEventsOnDispatcher( $dispatcher, $model_name );
+			}
 		}
 
 		return parent::save( $options );
 	}
 
 	/**
-	 * Automatically add slug when creating a list using the name and boot method
+	 * Register events on a specific dispatcher
 	 *
-	 * @since 1.0.0
+	 * @param object $dispatcher Event dispatcher instance
+	 * @param string $model_name Model class name
+	 * @return void
 	 */
-	public static function boot() {
-		parent::boot();
-
-		static::creating(
+	private function registerEventsOnDispatcher( $dispatcher, $model_name ) {
+		// Creating event
+		$dispatcher->listen(
+			"eloquent.creating: {$model_name}",
 			function ( $list ) {
 				$originalSlug = $slug = Str::slug( $list->name );
 				$count        = 1;
@@ -157,26 +166,50 @@ class List_Model extends Model {
 			}
 		);
 
-		static::saving(
+		// Saving event
+		$dispatcher->listen(
+			"eloquent.saving: {$model_name}",
 			function ( $list ) {
-				if ( isset( $list->contacts_count ) ) {
-					unset( $list->contacts_count );
-				}
+				unset( $list->contacts_count );
 			}
 		);
 
-		// When deleting a list, delete all relationships.
-		static::deleting(
+		// Deleting event
+		$dispatcher->listen(
+			"eloquent.deleting: {$model_name}",
 			function ( $list ) {
 				$list->contacts()->detach();
 			}
 		);
 
-		// Attach contacts count to the list.
-		static::retrieved(
-			function ( $list ) {
-				$list->contacts_count = $list->contacts()->count();
-			}
-		);
+		// Retrieved event (if WooCommerce is active)
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			$dispatcher->listen(
+				"eloquent.retrieved: {$model_name}",
+				function ( $list ) {
+					$list->contacts_count = $list->contacts()->count();
+				}
+			);
+		}
+	}
+
+	/**
+	 * Automatically add slug when creating a list using the name and boot method
+	 *
+	 * @since 1.0.0
+	 */
+	public static function boot() {
+		 parent::boot();
+
+		// Get the event dispatcher
+		$dispatcher = static::getEventDispatcher();
+		if ( ! $dispatcher ) {
+			return;
+		}
+
+		// Register events directly with the dispatcher
+		$model_name = static::class;
+		$instance   = new static();
+		$instance->registerEventsOnDispatcher( $dispatcher, $model_name );
 	}
 }

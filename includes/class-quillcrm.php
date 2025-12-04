@@ -43,8 +43,7 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
 use QuillCRM\User_Roles\User_Roles;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
-// use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
-// use QuillCRM\Message_Providers\Twilio_Message_Provider; // Moved to Pro
+use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\Database\Install;
 
 
@@ -253,7 +252,7 @@ final class QuillCRM {
 		Custom_Metabox::get_instance();
 		Email_Builder::instance();
 		GoHighLevel_OAuth::init();
-		// Pipeline, Deal, and Activity managers moved to Pro plugin
+		Activity_Manager::instance();
 		Email_Sequences_Manager::instance();
 		User_Roles::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro

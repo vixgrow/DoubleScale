@@ -781,7 +781,7 @@ class Contact_Model extends Model {
 		$dispatcher->listen(
 			"eloquent.saved: {$model_name}",
 			function ( $contact ) {
-				if ( $contact->status == 'unsubscribed' ) {
+				if ( $contact->email_status === 'unsubscribed' ) {
 					do_action( 'quillcrm_contact_unsubscribed', $contact );
 				} else {
 					do_action( 'quillcrm_contact_subscribed', $contact );

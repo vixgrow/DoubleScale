@@ -13,7 +13,7 @@ namespace QuillCRM\REST_API;
 use QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_List_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Tag_Controller;
-use QuillCRM\REST_API\Controllers\V1\Rest_Contact_Note_Controller;
+use QuillCRM\Rest_Api\Controllers\V1\REST_Activity_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Template_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Controller;
@@ -88,7 +88,7 @@ class REST_API {
 			REST_Contact_Controller::class,
 			REST_List_Controller::class,
 			REST_Tag_Controller::class,
-			Rest_Contact_Note_Controller::class,
+			REST_Activity_Controller::class,
 			REST_Campaign_Controller::class,
 			REST_Template_Controller::class,
 			Rest_Automation_Controller::class,

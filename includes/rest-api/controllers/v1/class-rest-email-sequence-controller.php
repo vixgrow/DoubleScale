@@ -447,7 +447,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 						'first_name' => $contact->first_name,
 						'last_name'  => $contact->last_name,
 						'phone'      => $contact->phone,
-						'status'     => $contact->status,
+						'status'     => $contact->email_status,
 						'created_at' => $contact->created_at,
 
 					);

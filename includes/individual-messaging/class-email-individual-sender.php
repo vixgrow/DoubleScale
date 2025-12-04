@@ -158,6 +158,137 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	}
 
 	/**
+	 * Check if QuillSMTP has a connection configured for a given email address
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $email Email address to check
+	 * @return bool True if connection exists, false otherwise
+	 */
+	protected function has_quillsmtp_connection( $email ) {
+		// Check if QuillSMTP is available
+		if ( ! class_exists( '\QuillSMTP\Settings' ) ) {
+			return false;
+		}
+
+		// Check if the email has a connection configured
+		$connection_id = \QuillSMTP\Settings::get_connection_by_from_email( $email );
+
+		return ! empty( $connection_id );
+	}
+
+	// COMMENTED OUT: Role-based validation - pending product owner decision
+	// /**
+	//  * Check if current user is a sales rep
+	//  *
+	//  * @since 1.0.0
+	//  *
+	//  * @return bool True if user has sales rep role, false otherwise
+	//  */
+	// protected function is_sales_rep() {
+	// 	$user = wp_get_current_user();
+	// 	if ( ! $user || ! $user->ID ) {
+	// 		return false;
+	// 	}
+	//
+	// 	return in_array( \QuillCRM\User_Roles\User_Roles::SALES_REP, (array) $user->roles, true );
+	// }
+
+	/**
+	 * Validate QuillSMTP connections for sender emails
+	 *
+	 * CURRENT: Only validates global email settings (pre-ahmed0magdy behavior)
+	 * FUTURE: Role-based validation available when product owner decides
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string      $user_email  Current user's email address (not used currently)
+	 * @param string      $admin_email Admin email address from settings
+	 * @return array|null Array with warning details if no connection found, null if valid
+	 */
+	protected function validate_quillsmtp_connections( $user_email, $admin_email ) {
+		// Check if QuillSMTP is available
+		if ( ! class_exists( '\QuillSMTP\Settings' ) ) {
+			return null; // QuillSMTP not active, skip validation
+		}
+
+		// SIMPLE VALIDATION: Check only global email settings
+		if ( empty( $admin_email ) || ! is_email( $admin_email ) ) {
+			return array(
+				'has_warning' => true,
+				'emails'      => array(),
+				'message'     => __( 'Global email settings are not configured. Please configure email settings in QuillCRM settings.', 'quillcrm' ),
+			);
+		}
+
+		$has_connection = $this->has_quillsmtp_connection( $admin_email );
+		if ( ! $has_connection ) {
+			return array(
+				'has_warning' => true,
+				'emails'      => array( $admin_email ),
+				'message'     => sprintf(
+					/* translators: %s: global email address */
+					__( 'No QuillSMTP connection configured for global email: %s. Please configure an SMTP connection in QuillSMTP settings to ensure reliable email delivery.', 'quillcrm' ),
+					$admin_email
+				),
+			);
+		}
+
+		return null; // Global email has connection, validation passes
+
+		// COMMENTED OUT: Role-based validation logic - available for future use
+		// $is_sales_rep = $this->is_sales_rep();
+		//
+		// // SALES REP: Check only their personal email
+		// if ( $is_sales_rep ) {
+		// 	if ( empty( $user_email ) || ! is_email( $user_email ) ) {
+		// 		return array(
+		// 			'has_warning' => true,
+		// 			'emails'      => array(),
+		// 			'message'     => __( 'Sales rep email address is not valid.', 'quillcrm' ),
+		// 		);
+		// 	}
+		//
+		// 	$has_connection = $this->has_quillsmtp_connection( $user_email );
+		// 	if ( ! $has_connection ) {
+		// 		return array(
+		// 			'has_warning' => true,
+		// 			'emails'      => array( $user_email ),
+		// 			'message'     => sprintf(
+		// 				__( 'No QuillSMTP connection configured for your email: %s. Please contact your administrator to configure an SMTP connection for your email address.', 'quillcrm' ),
+		// 				$user_email
+		// 			),
+		// 		);
+		// 	}
+		//
+		// 	return null; // Sales rep has connection, validation passes
+		// }
+		//
+		// // ADMIN/MANAGER/OTHERS: Check only global email settings
+		// if ( empty( $admin_email ) || ! is_email( $admin_email ) ) {
+		// 	return array(
+		// 		'has_warning' => true,
+		// 		'emails'      => array(),
+		// 		'message'     => __( 'Global email settings are not configured. Please configure email settings in QuillCRM settings.', 'quillcrm' ),
+		// 	);
+		// }
+		//
+		// $has_connection = $this->has_quillsmtp_connection( $admin_email );
+		// if ( ! $has_connection ) {
+		// 	return array(
+		// 		'has_warning' => true,
+		// 		'emails'      => array( $admin_email ),
+		// 		'message'     => sprintf(
+		// 			__( 'No QuillSMTP connection configured for global email: %s. Please configure an SMTP connection in QuillSMTP settings to ensure reliable email delivery.', 'quillcrm' ),
+		// 			$admin_email
+		// 		),
+		// 	);
+		// }
+		//
+		// return null; // Admin/global email has connection, validation passes
+	}
+
+	/**
 	 * Override send_via_provider to use WordPress email system
 	 *
 	 * Email uses wp_mail directly rather than the Message_Provider_Interface pattern
@@ -181,20 +312,43 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 			// Get global email settings as fallback
 			$email_settings = Settings::get( 'email', array() );
 
+			// Determine user email and admin email for validation
+			$user_email  = ( $current_user && $current_user->ID && is_email( $current_user->user_email ) )
+				? $current_user->user_email
+				: null;
+			$admin_email = $email_settings['from_email'] ?? get_option( 'admin_email' );
+
+			// Validate QuillSMTP connections
+			$connection_validation = $this->validate_quillsmtp_connections( $user_email, $admin_email );
+			if ( $connection_validation ) {
+				return array(
+					'success' => false,
+					'error'   => $connection_validation['message'],
+				);
+			}
+
 			// Setup Emails class
 			$emails = new Emails();
 
-			// Use current user's email as sender (if available), otherwise use global settings
-			if ( $current_user && $current_user->ID && is_email( $current_user->user_email ) ) {
-				$emails->from_name    = $current_user->display_name ?: $current_user->user_login;
-				$emails->from_address = $current_user->user_email;
-				$emails->reply_to     = $current_user->user_email;
-			} else {
-				// Fallback to global settings
-				$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-				$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-				$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
-			}
+			// SIMPLE: Always use global settings (pre-ahmed0magdy behavior)
+			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			$emails->from_address = $admin_email;
+			$emails->reply_to     = $email_settings['reply_to'] ?? $admin_email;
+
+			// COMMENTED OUT: Role-based sender selection - available for future use
+			// $is_sales_rep = $this->is_sales_rep();
+			//
+			// if ( $is_sales_rep && $user_email ) {
+			// 	// Sales rep: Use their own email
+			// 	$emails->from_name    = $current_user->display_name ?: $current_user->user_login;
+			// 	$emails->from_address = $user_email;
+			// 	$emails->reply_to     = $user_email;
+			// } else {
+			// 	// Admin/Manager/Others: Use global settings
+			// 	$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			// 	$emails->from_address = $admin_email;
+			// 	$emails->reply_to     = $email_settings['reply_to'] ?? $admin_email;
+			// }
 
 			// Send the email
 			$result = $emails->send( $to, $subject, $body );

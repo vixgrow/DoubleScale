@@ -14,6 +14,7 @@ import { ContactMappedFields, Field } from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 import ListsMapping from '../lists-mapping';
 import TagsMapping from '../tags-mapping';
+import CustomFieldsMapping from '../custom-fields ';
 import type { ImporterField } from '@quillcrm/config';
 import {
 	TooltipProvider,
@@ -126,6 +127,16 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 				fieldContent = (
 					<TagsMapping
 						tags={field.options.map((option) => option.label)}
+						mapping={values[key] || []}
+						onChange={(value) => updateValues(key, value)}
+					/>
+				);
+				break;
+
+			case 'custom_fields_mapping':
+				fieldContent = (
+					<CustomFieldsMapping
+						customFields={field.options}
 						mapping={values[key] || []}
 						onChange={(value) => updateValues(key, value)}
 					/>

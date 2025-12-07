@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class Boolean_Field
+ * Class Radio_Field
  *
  * @since 1.0.0
  *
@@ -14,23 +14,24 @@ use QuillCRM\Abstracts\Field_Type;
 use QuillCRM_Pro\Managers\Custom_Fields_Manager;
 
 /**
- * Boolean_Field class
+ * Radio_Field class
  */
-class Boolean_Field extends Field_Type {
+class Radio_Field extends Field_Type {
+
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Boolean Field';
+	public $name = 'Radio Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'boolean';
+	public $slug = 'radio';
 
 	/**
 	 * Is Value Array
@@ -66,11 +67,11 @@ class Boolean_Field extends Field_Type {
 
 		if ( ! is_bool( $value ) ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'Value must be a boolean';
+			$this->validation_err = 'Value must be a radio';
 		}
 	}
 }
 
 if ( class_exists( Custom_Fields_Manager::class ) ) {
-	Custom_Fields_Manager::instance()->register( new Boolean_Field() );
+	Custom_Fields_Manager::instance()->register( new Radio_Field() );
 }

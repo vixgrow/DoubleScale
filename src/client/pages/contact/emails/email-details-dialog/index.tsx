@@ -119,12 +119,12 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 				value: (
 					<span
 						className={`border rounded-md px-2 py-1 ${
-							String(campaignEmail.status) === 'sent'
+							campaignEmail.status_slug === 'sent'
 								? 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]'
 								: 'text-destructive bg-[#EF444429] border-destructive'
 						}`}
 					>
-						{String(campaignEmail.status) === 'sent'
+						{campaignEmail.status_slug === 'sent'
 							? __('Sent', 'quillcrm')
 							: __('Failed', 'quillcrm')}
 					</span>

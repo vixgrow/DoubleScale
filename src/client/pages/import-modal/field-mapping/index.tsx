@@ -10,10 +10,15 @@ import React from 'react';
  * internal dependencies
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ContactMappedFields, Field } from '@quillcrm/components';
+import {
+	ContactMappedFields,
+	Field,
+	ProFeatureNotice,
+} from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 import ListsMapping from '../lists-mapping';
 import TagsMapping from '../tags-mapping';
+import CustomFieldsMapping from '../custom-fields ';
 import type { ImporterField } from '@quillcrm/config';
 import {
 	TooltipProvider,
@@ -22,6 +27,7 @@ import {
 	TooltipContent,
 } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
+import { applyFilters } from '@wordpress/hooks';
 
 interface FieldMappingProps {
 	importer: any;
@@ -30,6 +36,8 @@ interface FieldMappingProps {
 const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 	const { state, updateValues } = useImportContext();
 	const { sourceData, values, source, fileData } = state;
+
+	const isProActive = applyFilters('quillcrm_is_pro_active', false);
 
 	const renderLabelWithTooltip = (label: string, tooltip: string) => {
 		return (
@@ -130,6 +138,30 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 						onChange={(value) => updateValues(key, value)}
 					/>
 				);
+				break;
+
+			case 'custom_fields_mapping':
+				if (isProActive) {
+					fieldContent = applyFilters(
+						'quillcrm_field_mapping_custom_fields',
+						field.options,
+						values[key] || [],
+						(value) => updateValues(key, value)
+					);
+				} else {
+					fieldContent = (
+						<ProFeatureNotice
+							featureName={__(
+								'Custom Fields Mapping',
+								'quillcrm'
+							)}
+							description={__(
+								'Custom fields mapping is only available in QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					);
+				}
 				break;
 			case 'select':
 				fieldContent = (

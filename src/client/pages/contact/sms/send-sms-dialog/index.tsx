@@ -123,7 +123,7 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 				<DialogFooter className="mt-6">
 					<Button
 						onClick={handleSendSMS}
-						disabled={isSending}
+						disabled={isSending || !toPhone?.trim() || !message?.trim()}
 						size="xl"
 						variant="gradient"
 						className="w-full"

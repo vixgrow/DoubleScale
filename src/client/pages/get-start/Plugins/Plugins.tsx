@@ -441,7 +441,7 @@ export default function PluginComplete({
 
 			{/* Email Subscription */}
 
-			<div className=" !p-0 !m-0">
+			{/* <div className=" !p-0 !m-0">
 				<label className="text-base leading-6 text-[#09090B] block mb-[2px]">
 					{__('Email Address', 'quillcrm')}
 				</label>
@@ -460,7 +460,7 @@ export default function PluginComplete({
 						'quillcrm'
 					)}
 				</p>
-			</div>
+			</div> */}
 
 			<div className="flex justify-between pt-8">
 				<div className="flex gap-2">

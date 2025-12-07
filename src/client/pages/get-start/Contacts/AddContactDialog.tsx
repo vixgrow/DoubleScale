@@ -113,7 +113,7 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
               onClick={onFormSubmit}
               disabled={isLoading}
               variant="ghost"
-              className="h-12 p-[10px] text-white disabled:opacity-50"
+              className="h-12 p-[10px] text-white hover:text-white disabled:opacity-50"
               style={{
                 background: "linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%)",
               }}

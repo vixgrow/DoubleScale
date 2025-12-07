@@ -115,7 +115,7 @@ const SendWhatsAppDialog: React.FC<SendWhatsAppDialogProps> = ({
 				<DialogFooter className="mt-6">
 					<Button
 						onClick={handleSendWhatsApp}
-						disabled={isSending}
+						disabled={isSending || !toPhone?.trim() || !message?.trim()}
 						size="xl"
 						variant="gradient"
 						className="w-full"

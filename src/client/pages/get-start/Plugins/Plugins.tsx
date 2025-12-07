@@ -1,15 +1,21 @@
 /**
  * WordPress dependencies
  */
+
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-
+//@ts-ignore
+import QuillBooking from '../../../../../assets/images/plugin-start/QuillBooking.png'
+//@ts-ignore
+import QuillForms from '../../../../../assets/images/plugin-start/QuillForms.png'
+//@ts-ignore
+import QuillSMTP from '../../../../../assets/images/plugin-start/QuillSMTP.png'
 /**
  * External dependencies
  */
-import React from 'react';
+
 import {
 	Accordion,
 	AccordionContent,
@@ -22,11 +28,13 @@ import QuillBookingIcon from '@quillcrm/components/icons/quillBooking';
 import OptionalPluginIcon from '@quillcrm/components/icons/optional-icon';
 import ButtonComponent from '../component/button';
 import { Input } from '../../../../components/ui/input';
+import { PluginsLoadingSkeleton } from './Plugin-Skeleton ';
 
 interface Plugin {
 	id: string;
 	name: string;
-	icon: React.ReactNode;
+	// icon: React.ReactNode;
+	icon: string;
 	description: string;
 	pluginFile?: string; // WordPress plugin file path (e.g., 'quill-smtp/quill-smtp.php')
 	downloadUrl?: string; // WordPress.org zip URL
@@ -38,7 +46,7 @@ const RecommendedPlugins: Plugin[] = [
 	{
 		id: 'quill-smtp',
 		name: 'Quill SMTP',
-		icon: '📧',
+		icon: QuillSMTP,
 		description: __(
 			'Quill SMTP helps you send reliable, trackable emails directly from your CRM.',
 			'quillcrm'
@@ -54,7 +62,7 @@ const OptionalPlugins: Plugin[] = [
 	{
 		id: 'quillbooking',
 		name: 'Quill Booking',
-		icon: <QuillBookingIcon />,
+		icon: QuillBooking,
 		description: __(
 			'Quill Booking empowers you with seamless appointment scheduling.',
 			'quillcrm'
@@ -66,7 +74,7 @@ const OptionalPlugins: Plugin[] = [
 	{
 		id: 'quillforms',
 		name: 'Quill Forms',
-		icon: '📝',
+		icon: QuillForms,
 		description: __(
 			'Quill Forms lets you build powerful forms and connect submissions to your CRM.',
 			'quillcrm'
@@ -102,7 +110,8 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 			<div className="flex flex-col items-start gap-3 flex-1">
 				<div className="flex justify-between items-center w-full">
 					<div className="flex gap-1 flex-1">
-						{plugin.icon}
+						{/* {plugin.icon} */}
+						<img src={plugin.icon} alt={plugin.name} />
 						<h4 className="text-xl font-medium leading-[30px] text-[#09090B]">
 							{plugin.name}
 						</h4>
@@ -368,7 +377,7 @@ export default function PluginComplete({
 			{isLoading ? (
 				<div className="text-center py-12">
 					<p className="text-[#777] text-lg">
-						{__('Loading plugins...', 'quillcrm')}
+						<PluginsLoadingSkeleton />
 					</p>
 				</div>
 			) : (

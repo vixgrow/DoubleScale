@@ -103,7 +103,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param string $channel Channel type
 	 * @return bool
 	 */
-	public function supports_channel( string $channel): bool {
+	public function supports_channel( string $channel ): bool {
 		return in_array( $channel, $this->supported_channels, true );
 	}
 
@@ -167,7 +167,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param string $channel Channel type
 	 * @return string|null Webhook URL or null
 	 */
-	public function get_webhook_url( string $channel): ?string {
+	public function get_webhook_url( string $channel ): ?string {
 		// Check if we have a tracking class for this channel
 		if ( ! isset( $this->tracking_classes[ $channel ] ) ) {
 			return null;
@@ -191,8 +191,8 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string        $channel Channel type ('sms', 'whatsapp', 'voice', etc.)
-	 * @param array         $data Message data
+	 * @param string                         $channel Channel type ('sms', 'whatsapp', 'voice', etc.)
+	 * @param array                          $data Message data
 	 * @param \QuillCRM\Models\Contact_Model $contact Contact model
 	 * @return array Result array
 	 */
@@ -233,7 +233,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param array  $metadata Additional provider-specific data
 	 * @return array Standardized success result
 	 */
-	protected function success_result( string $message_id, array $metadata = array()): array {
+	protected function success_result( string $message_id, array $metadata = array() ): array {
 		return array(
 			'success'    => true,
 			'message_id' => $message_id,
@@ -251,7 +251,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param array  $metadata Additional error context
 	 * @return array Standardized error result
 	 */
-	protected function error_result( string $error, array $metadata = array()): array {
+	protected function error_result( string $error, array $metadata = array() ): array {
 		return array(
 			'success'    => false,
 			'message_id' => null,
@@ -309,7 +309,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param array       $metadata Additional data
 	 * @return array Standardized webhook result
 	 */
-	protected function webhook_success_result( string $message_id, string $status, ?string $error_code = null, ?string $error_message = null, array $metadata = array()): array {
+	protected function webhook_success_result( string $message_id, string $status, ?string $error_code = null, ?string $error_message = null, array $metadata = array() ): array {
 		return array(
 			'valid'         => true,
 			'message_id'    => $message_id,
@@ -329,7 +329,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param array  $metadata Additional error context
 	 * @return array Standardized webhook error result
 	 */
-	protected function webhook_error_result( string $error, array $metadata = array()): array {
+	protected function webhook_error_result( string $error, array $metadata = array() ): array {
 		return array(
 			'valid'         => false,
 			'message_id'    => null,
@@ -350,7 +350,7 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 * @param array  $context Additional context
 	 * @return void
 	 */
-	protected function log( string $level, string $message, array $context = array()): void {
+	protected function log( string $level, string $message, array $context = array() ): void {
 		$context['provider'] = $this->provider_slug;
 
 		if ( function_exists( 'quillcrm_get_logger' ) ) {
@@ -358,4 +358,44 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 			$logger->$level( $message, $context );
 		}
 	}
+
+	/**
+	 * Parse incoming webhook data from provider
+	 * Each provider has different POST data format
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $post_data Raw $_POST data from webhook
+	 * @return array Normalized data array with keys:
+	 *   - from_number (string) Sender's phone number
+	 *   - to_number (string) Recipient's phone number
+	 *   - message_body (string) Message text
+	 *   - message_id (string) Provider's message ID
+	 *   - media_urls (array) Array of media URLs (for MMS)
+	 */
+	abstract public function parse_incoming_webhook( array $post_data): array;
+
+	/**
+	 * Verify incoming webhook signature
+	 * Each provider has different signature algorithms
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $server $_SERVER data (headers)
+	 * @param array  $post $_POST data (body)
+	 * @param string $url Full webhook URL
+	 * @return bool True if signature valid
+	 */
+	abstract public function verify_webhook_signature( array $server, array $post, string $url): bool;
+
+	/**
+	 * Send webhook response to provider
+	 * Each provider expects different response format (TwiML, JSON, etc.)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $reply_message Optional auto-reply message
+	 * @return void (exits script)
+	 */
+	abstract public function send_webhook_response( string $reply_message = ''): void;
 }

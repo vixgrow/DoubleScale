@@ -60,7 +60,7 @@ class Communication_Tracking_Table extends Migration {
             template_id BIGINT(20) NULL DEFAULT NULL COMMENT "NULL for individual messages",
             hash_key VARCHAR(255) NOT NULL,
             mode TINYINT(1) NOT NULL COMMENT "1=Email, 2=SMS, 3=WhatsApp",
-            direction ENUM("outbound","inbound") NOT NULL DEFAULT "outbound" COMMENT "Message direction: outbound=sent, inbound=received",
+            direction VARCHAR(20) NOT NULL DEFAULT "outbound" COMMENT "Message direction: outbound, inbound, forwarded, auto-reply, etc.",
             source_type TINYINT(2) NOT NULL DEFAULT 1 COMMENT "1=Campaign, 2=Automation, 3=Individual",
             source_id BIGINT(20) NULL DEFAULT NULL COMMENT "ID of the source (campaign_id or automation_id, NULL for individual)",
             step_id BIGINT(20) NULL DEFAULT NULL COMMENT "Automation step ID (NULL for campaigns/individual)",

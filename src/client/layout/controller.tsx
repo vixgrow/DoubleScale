@@ -406,6 +406,23 @@ registerAdminPage('sales-pipeline', {
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
+// Deal Detail - stub registration that Pro plugin will override
+registerAdminPage('deal-detail', {
+	path: 'pipeline/deal/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Deal Details', 'quillcrm')}
+			description={__(
+				'View and manage deal details with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
+	label: __('Deal Details', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+});
+
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,

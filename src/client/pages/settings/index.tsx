@@ -115,10 +115,21 @@ const SettingsPage: React.FC = () => {
 				type: 'success',
 				message: __('Settings updated successfully', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
+			// Extract error message from API response
+			let errorMessage = __('Failed to update settings', 'quillcrm');
+
+			if (error?.message) {
+				errorMessage = error.message;
+			} else if (error?.data?.message) {
+				errorMessage = error.data.message;
+			} else if (typeof error === 'string') {
+				errorMessage = error;
+			}
+
 			setNotice({
 				type: 'error',
-				message: __('Failed to update settings', 'quillcrm'),
+				message: errorMessage,
 			});
 		} finally {
 			setIsUpdating(false);

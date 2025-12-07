@@ -35,7 +35,11 @@ import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
-const DataCard: React.FC = () => {
+interface DataCardProps {
+	navigate: (path: string) => void;
+}
+
+const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	const { contact } = useContactContext();
 	const isEddActive = ConfigAPI.isEddActive();
 	const isWooActive = ConfigAPI.isWoocommerceActive();
@@ -55,7 +59,7 @@ const DataCard: React.FC = () => {
 		'quillcrm_contact_tab_component',
 		DealsBase,
 		'deals'
-	) as React.FC<{ contact_id: number }>;
+	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	// const WhatsApp = applyFilters('QuillCRM.Contact.TabComponent', WhatsAppBase, 'whatsapp') as React.FC<{ contact_id: number }>;
 
 	const tabsList = [
@@ -126,7 +130,7 @@ const DataCard: React.FC = () => {
 			value: 'deals',
 			children: (
 				<CardContent className="pt-6">
-					<Deals contact_id={contact.id} />
+					<Deals contact_id={contact.id} navigate={navigate} />
 				</CardContent>
 			),
 		},

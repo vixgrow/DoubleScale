@@ -495,6 +495,14 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
 			$tracking_table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
+			// Determine the correct status column based on action type.
+			$status_column_map = array(
+				'send_email'    => 'email_status',
+				'send_sms'      => 'sms_status',
+				'send_whatsapp' => 'whatsapp_status',
+			);
+			$status_column     = $status_column_map[ $automation_step->action ] ?? 'email_status';
+
 			$analytics_raw = Communication_Tracking_Model::byStep( $step_id )
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
@@ -505,7 +513,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = ? THEN 1 ELSE 0 END) as clicked_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as delivered_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as read_count,
-					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
+					SUM(CASE WHEN contacts.{$status_column} = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
 				",
 					array( Tracking_Status::SENT, Tracking_Status::SENT, Tracking_Status::SENT, Tracking_Status::DELIVERED, Tracking_Status::READ )
 				)

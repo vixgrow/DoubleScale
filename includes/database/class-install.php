@@ -16,7 +16,7 @@ use QuillCRM\Database\Migrations\Automation_Steps_Table;
 use QuillCRM\Database\Migrations\Automations_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
-use QuillCRM\Database\Migrations\Contact_Notes_Table;
+use QuillCRM\Database\Migrations\Contact_Unsubscribes_Table;
 use QuillCRM\Database\Migrations\Contact_Meta_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
 use QuillCRM\Database\Migrations\Lists_Table;
@@ -27,8 +27,8 @@ use QuillCRM\Database\Migrations\Communication_Tracking_Meta_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Communication_Tracking_Table;
 use QuillCRM\Database\Migrations\Activities_Table;
+use QuillCRM\Database\Migrations\Activity_Comments_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
-// use QuillCRM\Database\Migrations\Link_Triggers_Table; // Moved to Pro
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
 use QuillCRM\User_Roles\User_Roles;
@@ -123,7 +123,7 @@ class Install {
 				'contact_tag_relationship'     => Contact_Tag_Relationship_Table::class,
 				'lists'                        => Lists_Table::class,
 				'tags'                         => Tags_Table::class,
-				'contact_notes'                => Contact_Notes_Table::class,
+				'contact_unsubscribes'         => Contact_Unsubscribes_Table::class,
 				'campaigns'                    => Campaigns_Table::class,
 				'templates'                    => Templates_Table::class,
 				'automations'                  => Automations_Table::class,
@@ -131,13 +131,13 @@ class Install {
 				'automation_contacts'          => Automation_Contacts_Table::class,
 				'task_meta'                    => Task_Meta_Table::class,
 				'activities'                   => Activities_Table::class,
+				'activity_comments'            => Activity_Comments_Table::class,
 				'communication_tracking'       => Communication_Tracking_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
 				'logs'                         => Logs_Table::class,
 				'communication_tracking_meta'  => Communication_Tracking_Meta_Table::class,
-				// Pipeline, Link Triggers, and Custom Fields tables moved to Pro plugin
 			)
 		);
 

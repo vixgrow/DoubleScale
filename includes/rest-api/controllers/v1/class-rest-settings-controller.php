@@ -382,6 +382,12 @@ class REST_Settings_Controller extends REST_Controller {
 					array( 'status' => 400 )
 				);
 			}
+
+			// Validate QuillSMTP connection for from_email
+			$connection_validation = $this->validate_quillsmtp_connection( $email['from_email'] );
+			if ( is_wp_error( $connection_validation ) ) {
+				return $connection_validation;
+			}
 		}
 
 		// Validate reply_to
@@ -435,6 +441,42 @@ class REST_Settings_Controller extends REST_Controller {
 					array( 'status' => 400 )
 				);
 			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate QuillSMTP connection for an email address
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $email Email address to validate.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 */
+	private function validate_quillsmtp_connection( $email ) {
+		// Check if QuillSMTP is available
+		if ( ! class_exists( '\QuillSMTP\Settings' ) ) {
+			return new WP_Error(
+				'quillsmtp_not_active',
+				__( 'QuillSMTP plugin is not active. Please install and activate QuillSMTP to configure email settings.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Check if the email has a connection configured
+		$connection_id = \QuillSMTP\Settings::get_connection_by_from_email( $email );
+
+		if ( empty( $connection_id ) ) {
+			return new WP_Error(
+				'no_smtp_connection',
+				sprintf(
+					/* translators: %s: email address */
+					__( 'No QuillSMTP connection configured for: %s. Please configure an SMTP connection in QuillSMTP settings before saving this email address.', 'quillcrm' ),
+					$email
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		return true;

@@ -25,6 +25,7 @@ use QuillCRM\Models\Communication_Tracking_Model;
 // use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Models\Contact_Unsubscribe_Model;
 use QuillCRM\Campaign\Email_Processing;
 // use QuillCRM\Campaign\SMS_Processing; // Moved to Pro
 // use QuillCRM\Campaign\WhatsApp_Processing; // Moved to Pro
@@ -859,44 +860,45 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				return new WP_Error( 'not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			// Determine which status column to check based on campaign type
-			$status_column = 'email_status'; // Default to email
+			// Determine mode integer based on campaign type
+			$mode = 1; // Default to email
 			if ( $campaign->is_sms_campaign() ) {
-				$status_column = 'sms_status';
+				$mode = 2;
 			} elseif ( $campaign->is_whatsapp_campaign() ) {
-				$status_column = 'whatsapp_status';
+				$mode = 3;
 			}
 
-			// Get tracking records for this campaign
-			$query = Communication_Tracking_Model::where( 'source_type', Message_Source_Types::CAMPAIGN )
-				->where( 'source_id', $campaign_id )
-				->whereHas(
-					'contact',
-					function ( $q ) use ( $keywords, $status_column ) {
-						// Only get contacts who are currently unsubscribed for the campaign's channel
-						$q->where( $status_column, 'unsubscribed' );
+			// Query unsubscribes table for this campaign
+			$query = Contact_Unsubscribe_Model::forCampaign( $campaign_id )
+				->forMode( $mode )
+				->with( 'contact' );
 
-						// Apply keyword search if provided
-						if ( ! empty( $keywords ) ) {
-							$q->where(
-								function ( $query ) use ( $keywords ) {
-									$query->where( 'email', 'LIKE', '%' . $keywords . '%' )
-										->orWhere( 'first_name', 'LIKE', '%' . $keywords . '%' )
-										->orWhere( 'last_name', 'LIKE', '%' . $keywords . '%' )
-										->orWhere( 'phone', 'LIKE', '%' . $keywords . '%' );
-								}
-							);
-						}
+			// Apply keyword search if provided
+			if ( ! empty( $keywords ) ) {
+				$query->whereHas(
+					'contact',
+					function ( $q ) use ( $keywords ) {
+						$q->where(
+							function ( $query ) use ( $keywords ) {
+								$query->where( 'email', 'LIKE', '%' . $keywords . '%' )
+									->orWhere( 'first_name', 'LIKE', '%' . $keywords . '%' )
+									->orWhere( 'last_name', 'LIKE', '%' . $keywords . '%' )
+									->orWhere( 'phone', 'LIKE', '%' . $keywords . '%' );
+							}
+						);
 					}
-				)
-				->with( 'contact', 'contact.notes', 'template' );
+				);
+			}
 
 			$results = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
-			// Extract unsubscribe reason from contact notes and add to each item
+			// Transform data to include reason and created_at
 			if ( isset( $results['data'] ) && is_array( $results['data'] ) ) {
-				foreach ( $results['data'] as $tracking ) {
-					$tracking->unsubscribe_reason = $this->extract_unsubscribe_reason( $tracking->contact );
+				foreach ( $results['data'] as $unsubscribe ) {
+					if ( $unsubscribe->contact ) {
+						$unsubscribe->contact->unsubscribe_reason = $unsubscribe->reason;
+						$unsubscribe->contact->unsubscribed_at    = $unsubscribe->created_at;
+					}
 				}
 			}
 
@@ -904,30 +906,6 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
-	}
-
-	/**
-	 * Extract unsubscribe reason from contact notes
-	 *
-	 * @param Contact_Model|null $contact
-	 * @return string
-	 */
-	private function extract_unsubscribe_reason( $contact ) {
-		if ( ! $contact || ! $contact->notes ) {
-			return '';
-		}
-
-		// Find the most recent "Unsubscribed" note
-		foreach ( $contact->notes as $note ) {
-			if ( $note->title === 'Unsubscribed' && ! empty( $note->note ) ) {
-				// Extract reason from note text: "Contact unsubscribed from the email list. Reason: {reason}"
-				if ( preg_match( '/Reason:\s*(.+)$/i', $note->note, $matches ) ) {
-					return trim( $matches[1] );
-				}
-			}
-		}
-
-		return '';
 	}
 
 }

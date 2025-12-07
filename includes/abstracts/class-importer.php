@@ -259,7 +259,7 @@ abstract class Importer
 				foreach ($mapping as $key => $value) {
 					if ('status' === $key) {
 						$status = is_object($subscriber) ? $subscriber->status : $subscriber['status'];
-						$contact->status = isset($value[$status]) ? $value[$status] : 'unverified';
+						$contact->email_status = isset($value[$status]) ? $value[$status] : 'unverified';
 						continue;
 					}
 
@@ -267,7 +267,7 @@ abstract class Importer
 				}
 
 				if (!empty($this->status) && !isset($mapping['status'])) {
-					$contact->status = $this->status;
+					$contact->email_status = $this->status;
 				}
 
 				$contact->save();

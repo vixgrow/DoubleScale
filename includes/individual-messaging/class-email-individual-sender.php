@@ -157,6 +157,24 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 		return $processed;
 	}
 
+
+	// COMMENTED OUT: Role-based validation - pending product owner decision
+	// /**
+	//  * Check if current user is a sales rep
+	//  *
+	//  * @since 1.0.0
+	//  *
+	//  * @return bool True if user has sales rep role, false otherwise
+	//  */
+	// protected function is_sales_rep() {
+	// 	$user = wp_get_current_user();
+	// 	if ( ! $user || ! $user->ID ) {
+	// 		return false;
+	// 	}
+	//
+	// 	return in_array( \QuillCRM\User_Roles\User_Roles::SALES_REP, (array) $user->roles, true );
+	// }
+
 	/**
 	 * Override send_via_provider to use WordPress email system
 	 *
@@ -175,26 +193,41 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 */
 	protected function send_via_provider( $provider, $to, $body, $subject, $contact ) {
 		try {
-			// Get current WordPress user to use as sender
-			$current_user = wp_get_current_user();
-
-			// Get global email settings as fallback
+			// Get global email settings
 			$email_settings = Settings::get( 'email', array() );
+
+			// Get admin email from settings
+			$admin_email = $email_settings['from_email'] ?? get_option( 'admin_email' );
+
+			// Note: QuillSMTP connection validation removed - now handled as warning in settings
+			// Email will attempt to send using WordPress default mail system if no SMTP configured
 
 			// Setup Emails class
 			$emails = new Emails();
 
-			// Use current user's email as sender (if available), otherwise use global settings
-			if ( $current_user && $current_user->ID && is_email( $current_user->user_email ) ) {
-				$emails->from_name    = $current_user->display_name ?: $current_user->user_login;
-				$emails->from_address = $current_user->user_email;
-				$emails->reply_to     = $current_user->user_email;
-			} else {
-				// Fallback to global settings
-				$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-				$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-				$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
-			}
+			// Use global settings for email sending
+			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			$emails->from_address = $admin_email;
+			$emails->reply_to     = $email_settings['reply_to'] ?? $admin_email;
+
+			// COMMENTED OUT: Role-based sender selection - available for future use
+			// $current_user = wp_get_current_user();
+			// $user_email = ( $current_user && $current_user->ID && is_email( $current_user->user_email ) )
+			// 	? $current_user->user_email
+			// 	: null;
+			// $is_sales_rep = $this->is_sales_rep();
+			//
+			// if ( $is_sales_rep && $user_email ) {
+			// 	// Sales rep: Use their own email
+			// 	$emails->from_name    = $current_user->display_name ?: $current_user->user_login;
+			// 	$emails->from_address = $user_email;
+			// 	$emails->reply_to     = $user_email;
+			// } else {
+			// 	// Admin/Manager/Others: Use global settings
+			// 	$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			// 	$emails->from_address = $admin_email;
+			// 	$emails->reply_to     = $email_settings['reply_to'] ?? $admin_email;
+			// }
 
 			// Send the email
 			$result = $emails->send( $to, $subject, $body );

@@ -114,7 +114,7 @@ export function SegmentTable({
 										onAdd();
 									}
 								}}
-								className="w-full px-4 py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
+								className="w-full !px-4 !py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
 								disabled={isSaving}
 							/>
 						</td>
@@ -129,7 +129,7 @@ export function SegmentTable({
 										onAdd();
 									}
 								}}
-								className="w-full px-4 py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
+								className="w-full !px-4 !py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
 								disabled={isSaving}
 							/>
 						</td>
@@ -170,7 +170,7 @@ export function SegmentTable({
 											onChange={(event) =>
 												onChangeEditingName(event.target.value)
 											}
-											className="w-full px-4 py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
+											className="w-full !px-4 !py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
 											autoFocus
 										/>
 									) : (
@@ -187,7 +187,7 @@ export function SegmentTable({
 											onChange={(event) =>
 												onChangeEditingSlug(event.target.value)
 											}
-											className="w-full px-4 py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
+											className="w-full !px-4 !py-[5px] bg-[#FFF] border !border-[#DEE1E6] rounded-[8px] text-sm text-[#9197A4] focus:outline-none focus:ring-2 focus:ring-[#458DC7]"
 										/>
 									) : (
 										<span className="text-sm text-[#09090B]">

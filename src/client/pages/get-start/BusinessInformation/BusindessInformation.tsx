@@ -20,6 +20,7 @@ import { Input } from '@quillcrm/components/ui/input';
 import { Textarea } from '@quillcrm/components/ui/textarea';
 import ButtonComponent from '../component/button';
 import UploadImageIcon from '@quillcrm/components/icons/upload-image';
+import { BusinessFormSkeleton } from './BusinessFormSkeleton';
 
 export const formSchema = z.object({
 	name: z.string().min(2, 'Name must be at least 2 characters').optional(),
@@ -293,17 +294,6 @@ export default function BusindessInformation({
 
 	const isSubmitting = form.formState.isSubmitting;
 
-	if (isLoading) {
-		return (
-			<div className="flex flex-col gap-10">
-				<div className="text-center py-12">
-					<p className="text-[#777] text-lg">
-						{__('Loading business information...', 'quillcrm')}
-					</p>
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		<div className="flex flex-col gap-10">
@@ -319,7 +309,7 @@ export default function BusindessInformation({
 					)}
 				</p>
 			</div>
-
+            {isLoading ? <BusinessFormSkeleton/> :
 			<Form {...form}>
 				<form onSubmit={handleNext} className="space-y-6">
 					{/* Business Name */}
@@ -407,8 +397,12 @@ export default function BusindessInformation({
 						/>
 					</div>
 
-					{/* Buttons */}
-					<div className="flex justify-between pt-8">
+					
+				</form>
+			</Form>
+            }
+			{/* Buttons */}
+			<div className="flex justify-between pt-8">
 						<ButtonComponent
 							onClick={handlePrevious}
 							type=""
@@ -426,8 +420,6 @@ export default function BusindessInformation({
 								: __('Next Step', 'quillcrm')}
 						</ButtonComponent>
 					</div>
-				</form>
-			</Form>
 		</div>
 	);
 }

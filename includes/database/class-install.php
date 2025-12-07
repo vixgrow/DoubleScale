@@ -31,12 +31,15 @@ use QuillCRM\Database\Migrations\Activity_Comments_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
+use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\User_Roles\User_Roles;
 
 /**
  * Install class
  */
 class Install {
+
+
 
 	/**
 	 * Init
@@ -138,6 +141,7 @@ class Install {
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
 				'logs'                         => Logs_Table::class,
 				'communication_tracking_meta'  => Communication_Tracking_Meta_Table::class,
+				'forms'                        => Forms_Table::class,
 			)
 		);
 

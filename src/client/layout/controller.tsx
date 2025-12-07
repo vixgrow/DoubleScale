@@ -74,6 +74,8 @@ import { RocketIcon } from '@quillcrm/components';
 import config from '@/config';
 import GetStart from '../pages/get-start';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import Forms from '../pages/forms';
+import Form from '../pages/form';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
@@ -447,15 +449,7 @@ registerAdminPage('automation-reports', {
 
 registerAdminPage('forms', {
 	path: 'forms',
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Forms', 'quillcrm')}
-			description={__(
-				'Create and manage forms to capture leads and grow your contact list with QuillCRM Pro.',
-				'quillcrm'
-			)}
-		/>
-	),
+	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
 	icon: <FormsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -463,15 +457,7 @@ registerAdminPage('forms', {
 
 registerAdminPage('form', {
 	path: 'forms/:id/:tab?',
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Form', 'quillcrm')}
-			description={__(
-				'Create and manage a form to capture leads and grow your contact list with QuillCRM Pro.',
-				'quillcrm'
-			)}
-		/>
-	),
+	component: () => <Form />,
 	label: __('Form', 'quillcrm'),
 	hidden: true,
 });

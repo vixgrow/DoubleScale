@@ -1,0 +1,155 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useState, useEffect, useRef } from '@wordpress/element';
+
+/**
+ * External dependencies
+ */
+import { isObject, map } from 'lodash';
+import AsyncSelect from 'react-select/async';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+import { useFormContext } from '../../state/context';
+import ConfigAPI from '@quillcrm/config';
+
+interface Props {
+	label: string;
+	ajax_action: string;
+	parent: string;
+	slug: string;
+}
+
+const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
+	const { form, updateForm } = useFormContext();
+	const { getAjaxUrl, getNonce } = ConfigAPI;
+	const [formOptions, setFormOptions] = useState({});
+	const previousFormTypeRef = useRef<string | undefined>(form?.form_type);
+
+	// Reset form options when form type changes
+	useEffect(() => {
+		const currentFormType = form?.form_type;
+		const previousFormType = previousFormTypeRef.current;
+
+		// Only clear values if the form type actually changed
+		if (previousFormType && previousFormType !== currentFormType) {
+			setFormOptions({});
+			// Clear the selected value for this field when form type changes
+			if (form?.[slug]) {
+				updateForm({
+					[slug]: '',
+				});
+			}
+		}
+
+		// Update the ref with the current form type
+		previousFormTypeRef.current = currentFormType;
+	}, [form?.form_type, slug, updateForm]);
+
+	if (!form) return null;
+
+	const fetchOptions = async () => {
+		if (!form) {
+			return;
+		}
+
+		try {
+			const body = new FormData();
+			body.append('action', ajax_action);
+			body.append('nonce', getNonce());
+			if (form.form_id) {
+				body.append('form_id', form.form_id);
+			}
+			if (parent) {
+				const parentValue = form[parent];
+				body.append(parent, parentValue);
+			}
+			const response = await fetch(getAjaxUrl(), {
+				method: 'POST',
+				body,
+			});
+
+			const data = await response.json();
+
+			setFormOptions(data.data);
+			const options = map(data.data, (value: string, key: string) => ({
+				label: value,
+				value: key,
+			}));
+
+			return options;
+		} catch (error) {
+			console.error(error);
+			return [];
+		}
+	};
+
+	return (
+		<div className="qcrm-field">
+			<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+				{label} <span className="text-red-600">*</span>
+			</div>
+			<div className="qcrm-field-input">
+				<AsyncSelect
+					className="react-select-container"
+					classNamePrefix="react-select"
+					placeholder={__('Select Option', 'quillcrm')}
+					loadOptions={(_inputValue, callback) => {
+						fetchOptions().then((data) => {
+							if (!data) {
+								return;
+							}
+							callback(data);
+						});
+					}}
+					defaultOptions
+					value={
+						form[slug] && Object.keys(formOptions).length > 0
+							? map(formOptions, (value: string, key: string) => ({
+								label: value,
+								value: key,
+							})).find((option) => option.value == form[slug]) || null
+							: null
+					}
+					onChange={(val) => {
+						if (!isObject(val)) {
+							return;
+						}
+
+						updateForm({
+							[slug]: val.value,
+						});
+					}}
+					cacheOptions={false}
+					styles={{
+						control: (base) => ({
+							...base,
+							minHeight: 48,
+							height: 48,
+						}),
+						valueContainer: (base) => ({
+							...base,
+							height: 48,
+							padding: '0 8px',
+						}),
+						input: (base) => ({
+							...base,
+							margin: 0,
+							padding: 0,
+						}),
+						indicatorsContainer: (base) => ({
+							...base,
+							height: 48,
+						}),
+					}}
+				/>
+			</div>
+		</div>
+	);
+};
+
+export default AjaxSelect;

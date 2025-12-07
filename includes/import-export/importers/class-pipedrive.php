@@ -276,10 +276,10 @@ class Pipedrive extends Importer
 		$is_active = $person['active_flag'] ?? true;
 		// v2 API uses strict boolean values, not 1/0
 		if (is_bool($is_active)) {
-			$processed['status'] = $is_active ? 'subscribed' : 'unsubscribed';
+			$processed['email_status'] = $is_active ? 'subscribed' : 'unsubscribed';
 		} else {
 			// Fallback for any legacy data
-			$processed['status'] = ($is_active == true || $is_active === 1 || $is_active === '1') ? 'subscribed' : 'unsubscribed';
+			$processed['email_status'] = ($is_active == true || $is_active === 1 || $is_active === '1') ? 'subscribed' : 'unsubscribed';
 		}
 
 		// Process organization/company info

@@ -318,8 +318,8 @@ class Abandoned_Cart {
 			if ( ! $contact ) {
 				$contact = Contact_Model::create(
 					array(
-						'email'  => $abandoned_cart->email,
-						'status' => $abandoned_cart->status ? 'unsubscribed' : 'unverified',
+						'email'        => $abandoned_cart->email,
+						'email_status' => $abandoned_cart->status ? 'unsubscribed' : 'unverified',
 					)
 				);
 			}

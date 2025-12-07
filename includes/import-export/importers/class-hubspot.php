@@ -193,7 +193,7 @@ class HubSpot extends Importer
 
 		// Handle HubSpot-specific status mapping
 		$lead_status = $properties['hs_lead_status'] ?? 'new';
-		$processed['status'] = $this->map_hubspot_status($lead_status);
+		$processed['email_status'] = $this->map_hubspot_status($lead_status);
 
 		// Process list memberships efficiently
 		$processed['lists'] = $this->get_contact_lists($contact);

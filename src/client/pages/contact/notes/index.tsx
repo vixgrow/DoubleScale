@@ -115,7 +115,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/contact-notes/${noteToDelete.id}`,
+				path: `/qc/v1/activities/${noteToDelete.id}`,
 				method: 'DELETE',
 			});
 

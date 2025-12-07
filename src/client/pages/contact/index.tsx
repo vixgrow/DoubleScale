@@ -180,7 +180,10 @@ const Contact: React.FC<ContactProps> = ({
 	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
 		}
 	}, [notice]);
 
@@ -188,8 +191,13 @@ const Contact: React.FC<ContactProps> = ({
 		if (isDialog && onClose) {
 			onClose();
 		} else {
-			// Navigate back to contacts list
-			navigate(getToLink('contacts'));
+			// Navigate back to previous page (deal detail, contacts list, etc.)
+			if (window.history.length > 1) {
+				window.history.back();
+			} else {
+				// Fallback to contacts list if no history
+				navigate(getToLink('contacts'));
+			}
 		}
 	};
 
@@ -250,7 +258,7 @@ const Contact: React.FC<ContactProps> = ({
 							)}
 							<div className="flex gap-5">
 								<ContactInformation />
-								<DataCard />
+								<DataCard navigate={navigate} />
 							</div>
 						</div>
 					</Provider>

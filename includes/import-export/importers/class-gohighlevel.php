@@ -203,7 +203,7 @@ class GoHighLevel extends Importer
 		$processed['phone'] = $this->get_primary_phone($contact);
 
 		// Handle GoHighLevel status mapping
-		$processed['status'] = $this->map_gohighlevel_status($contact);
+		$processed['email_status'] = $this->map_gohighlevel_status($contact);
 
 		// Note: 'company' field not included as it doesn't exist in Contact model schema
 		// GoHighLevel company info could be stored in custom fields if needed

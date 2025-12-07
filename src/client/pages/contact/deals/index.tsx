@@ -10,6 +10,7 @@ import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 
 interface DealsProps {
 	contact_id: number;
+	navigate?: (path: string) => void;
 }
 
 const Deals: React.FC<DealsProps> = ({ contact_id }) => {

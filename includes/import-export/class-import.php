@@ -449,8 +449,8 @@ class Import {
 			if ( ( $this->update_existing && $existing ) || ! $existing ) {
 				foreach ( $mapping as $key => $value ) {
 					if ( 'status' === $key ) {
-						$status          = is_object( $subscriber ) ? $subscriber->status : $subscriber['status'];
-						$contact->status = isset( $value[ $status ] ) ? $value[ $status ] : 'unverified';
+						$status                = is_object( $subscriber ) ? $subscriber->status : $subscriber['status'];
+						$contact->email_status = isset( $value[ $status ] ) ? $value[ $status ] : 'unverified';
 						continue;
 					}
 
@@ -458,7 +458,7 @@ class Import {
 				}
 
 				if ( ! empty( $this->status ) && ! isset( $mapping['status'] ) ) {
-					$contact->status = $this->status;
+					$contact->email_status = $this->status;
 				}
 
 				$contact->save();

@@ -36,6 +36,28 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 			),
 		},
 		{
+			accessorKey: 'source',
+			header: __('Source', 'quillcrm'),
+			cell: ({ row }) => {
+				const isDealNote = row.original.deal_id !== null && row.original.deal_id !== undefined;
+				const sourceColors: Record<string, string> = {
+					deal: 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]',
+					contact: 'text-[#5570F1] bg-[#5570F129] border-[#5570F1]',
+				};
+
+				const sourceType = isDealNote ? 'deal' : 'contact';
+				const colorClass = sourceColors[sourceType];
+
+				return (
+					<span
+						className={`border rounded-md px-2 py-1 ${colorClass}`}
+					>
+						{isDealNote ? __('Deal', 'quillcrm') : __('Contact', 'quillcrm')}
+					</span>
+				);
+			},
+		},
+		{
 			accessorKey: 'type',
 			header: __('Type', 'quillcrm'),
 			cell: ({ row }) => {

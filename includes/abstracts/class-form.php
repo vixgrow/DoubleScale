@@ -197,7 +197,7 @@ abstract class Form {
 
 			$make_as_subscriber = $this->form_data->data['mark_as_subscribed'] ?? false;
 			if ( ! $make_as_subscriber ) {
-				$contact_data['status'] = 'unsubscribed';
+				$contact_data['email_status'] = 'unsubscribed';
 			}
 
 			if ( ! $update_existing ) {
@@ -441,9 +441,9 @@ abstract class Form {
 			$tags                   = $automation->get_setting( 'tags', array() );
 
 			if ( ! $make_as_subscriber ) {
-				$contact_data['status'] = 'unsubscribed';
+				$contact_data['email_status'] = 'unsubscribed';
 			} else {
-				$contact_data['status'] = 'subscribed';
+				$contact_data['email_status'] = 'subscribed';
 			}
 
 			if ( ! $update_blank_fields ) {

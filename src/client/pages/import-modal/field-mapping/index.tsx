@@ -10,11 +10,24 @@ import React from 'react';
  * internal dependencies
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ContactMappedFields, Field } from '@quillcrm/components';
+import {
+	ContactMappedFields,
+	Field,
+	ProFeatureNotice,
+} from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 import ListsMapping from '../lists-mapping';
 import TagsMapping from '../tags-mapping';
+import CustomFieldsMapping from '../custom-fields ';
 import type { ImporterField } from '@quillcrm/config';
+import {
+	TooltipProvider,
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
+} from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
+import { applyFilters } from '@wordpress/hooks';
 
 interface FieldMappingProps {
 	importer: any;
@@ -23,6 +36,28 @@ interface FieldMappingProps {
 const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 	const { state, updateValues } = useImportContext();
 	const { sourceData, values, source, fileData } = state;
+
+	const isProActive = applyFilters('quillcrm_is_pro_active', false);
+
+	const renderLabelWithTooltip = (label: string, tooltip: string) => {
+		return (
+			<span className="flex items-center gap-2">
+				<span>{label}</span>
+				{tooltip && (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+							</TooltipTrigger>
+							<TooltipContent className="z-[160000] bg-gray-100 border-none w-60 text-gray-600 text-xs">
+								<p>{tooltip}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				)}
+			</span>
+		);
+	};
 
 	const checkConditions = (conditions) => {
 		if (!conditions) {
@@ -104,6 +139,30 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 					/>
 				);
 				break;
+
+			case 'custom_fields_mapping':
+				if (isProActive) {
+					fieldContent = applyFilters(
+						'quillcrm_field_mapping_custom_fields',
+						field.options,
+						values[key] || [],
+						(value) => updateValues(key, value)
+					);
+				} else {
+					fieldContent = (
+						<ProFeatureNotice
+							featureName={__(
+								'Custom Fields Mapping',
+								'quillcrm'
+							)}
+							description={__(
+								'Custom fields mapping is only available in QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					);
+				}
+				break;
 			case 'select':
 				fieldContent = (
 					<Field
@@ -146,7 +205,9 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 
 		return (
 			<div key={key} className="space-y-3">
-				<label className="text-base">{field.label}</label>
+				<label className="text-base">
+					{renderLabelWithTooltip(field.label, field.tooltip || '')}
+				</label>
 				{fieldContent}
 			</div>
 		);
@@ -191,21 +252,20 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 					{__(`${importer.name} Data Import Tool`, 'quillcrm')}
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
-					{source === 'csv' 
+					{source === 'csv'
 						? __(
-							'Select the column field you want to map it on the system to import.',
-							'quillcrm'
-						)
+								'Select the column field you want to map it on the system to import.',
+								'quillcrm'
+							)
 						: source === 'pipedrive'
-						? __(
-							'Configure how Pipedrive data will be imported into QuillCRM.',
-							'quillcrm'
-						)
-						: __(
-							'Configure how your data will be imported into QuillCRM.',
-							'quillcrm'
-						)
-					}
+							? __(
+									'Configure how Pipedrive data will be imported into QuillCRM.',
+									'quillcrm'
+								)
+							: __(
+									'Configure how your data will be imported into QuillCRM.',
+									'quillcrm'
+								)}
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-6">

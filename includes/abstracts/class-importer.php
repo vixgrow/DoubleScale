@@ -20,8 +20,8 @@ use QuillCRM\Models\Tag_Model;
 /**
  * Importer class
  */
-abstract class Importer
-{
+abstract class Importer {
+
 
 	/**
 	 * Name
@@ -147,8 +147,7 @@ abstract class Importer
 	 *
 	 * @param array $args args
 	 */
-	public function __construct($args = array())
-	{
+	public function __construct( $args = array() ) {
 		// Get the max execution time
 		$this->max_execution_time = Utils::get_max_execution_time();
 
@@ -170,9 +169,8 @@ abstract class Importer
 	 *
 	 * @return array
 	 */
-	public function get_credentials()
-	{
-		return array();
+	public function get_credentials() {
+		 return array();
 	}
 
 	/**
@@ -182,8 +180,7 @@ abstract class Importer
 	 *
 	 * @return void
 	 */
-	public function set_credentials($credentials)
-	{
+	public function set_credentials( $credentials ) {
 		$this->credentials = $credentials;
 	}
 
@@ -192,8 +189,7 @@ abstract class Importer
 	 *
 	 * @return array
 	 */
-	public function get_fields()
-	{
+	public function get_fields() {
 		return array();
 	}
 
@@ -202,8 +198,7 @@ abstract class Importer
 	 *
 	 * @return bool
 	 */
-	public function is_active()
-	{
+	public function is_active() {
 		return true;
 	}
 
@@ -212,8 +207,7 @@ abstract class Importer
 	 *
 	 * @return bool
 	 */
-	public function is_integration()
-	{
+	public function is_integration() {
 		return $this->is_integration;
 	}
 
@@ -222,12 +216,11 @@ abstract class Importer
 	 *
 	 * @return array
 	 */
-	public function import()
-	{
-		if (! $this->is_active()) {
-			return new \WP_Error('importer_not_active', __('The importer is not active', 'quillcrm'));
+	public function import() {
+		if ( ! $this->is_active() ) {
+			return new \WP_Error( 'importer_not_active', __( 'The importer is not active', 'quillcrm' ) );
 		}
-		$this->start_time = microtime(true);
+		$this->start_time = microtime( true );
 		return $this->run();
 	}
 
@@ -248,94 +241,93 @@ abstract class Importer
 	 *
 	 * @return bool
 	 */
-	public function import_contact($subscriber, $mapping)
-	{
+	public function import_contact( $subscriber, $mapping ) {
 		try {
 			// Check if the contact already exists
-			$email = is_object($subscriber) ? $subscriber->{$mapping['email']} : $subscriber[$mapping['email']];
-			$lists = is_object($subscriber) ? $subscriber->lists ?? array() : $subscriber['lists'] ?? array();
-			$lists = $lists ? explode(',', $lists) : array();
-			$tags  = is_object($subscriber) ? $subscriber->tags ?? array() : $subscriber['tags'] ?? array();
-			$tags  = $tags ? explode(',', $tags) : array();
+			$email = is_object( $subscriber ) ? $subscriber->{$mapping['email']} : $subscriber[ $mapping['email'] ];
+			$lists = is_object( $subscriber ) ? $subscriber->lists ?? array() : $subscriber['lists'] ?? array();
+			$lists = $lists ? explode( ',', $lists ) : array();
+			$tags  = is_object( $subscriber ) ? $subscriber->tags ?? array() : $subscriber['tags'] ?? array();
+			$tags  = $tags ? explode( ',', $tags ) : array();
 
-			$contact  = Contact_Model::where('email', $email)->first();
+			$contact  = Contact_Model::where( 'email', $email )->first();
 			$existing = $contact ? true : false;
-			if (! $contact) {
+			if ( ! $contact ) {
 				$contact = new Contact_Model();
 			}
 
-			if (($this->update_existing && $existing) || !$existing) {
-				foreach ($mapping as $key => $value) {
-					if ('status' === $key) {
-						$status = is_object($subscriber) ? $subscriber->status : $subscriber['status'];
-						$contact->email_status = isset($value[$status]) ? $value[$status] : 'unverified';
+			if ( ( $this->update_existing && $existing ) || ! $existing ) {
+				foreach ( $mapping as $key => $value ) {
+					if ( 'status' === $key ) {
+						$status                = is_object( $subscriber ) ? $subscriber->status : $subscriber['status'];
+						$contact->email_status = isset( $value[ $status ] ) ? $value[ $status ] : 'unverified';
 						continue;
 					}
 
-					$contact->$key = is_object($subscriber) ? $subscriber->$value : $subscriber[$value];
+					$contact->$key = is_object( $subscriber ) ? $subscriber->$value : $subscriber[ $value ];
 				}
 
-				if (!empty($this->status) && !isset($mapping['status'])) {
+				if ( ! empty( $this->status ) && ! isset( $mapping['status'] ) ) {
 					$contact->email_status = $this->status;
 				}
 
 				$contact->save();
 
 				// Add the contact to the lists
-				foreach ($this->lists_mapping as $list) {
+				foreach ( $this->lists_mapping as $list ) {
 					$name        = $list['list'];
 					$assign_to   = $list['assignedList'] ?? array();
 					$auto_create = $list['auto'] ?? false;
 
-					if (! in_array($name, $lists)) {
+					if ( ! in_array( $name, $lists ) ) {
 						continue;
 					}
 
-					if ($auto_create) {
-						$list = List_Model::getOrCreate($name);
-						$contact->lists()->sync($list->id, false);
+					if ( $auto_create ) {
+						$list = List_Model::getOrCreate( $name );
+						$contact->lists()->sync( $list->id, false );
 					} else {
-						if (! empty($assign_to)) {
-							$contact->lists()->sync($assign_to, false);
+						if ( ! empty( $assign_to ) ) {
+							$contact->lists()->sync( $assign_to, false );
 						}
 					}
 				}
 
 				// Add the contact to the tags
-				foreach ($this->tags_mapping as $tag) {
+				foreach ( $this->tags_mapping as $tag ) {
 					$name        = $tag['tag'];
 					$assign_to   = $tag['assignedTag'] ?? array();
 					$auto_create = $tag['auto'] ?? false;
 
-					if (! in_array($name, $tags)) {
+					if ( ! in_array( $name, $tags ) ) {
 						continue;
 					}
 
-					if ($auto_create) {
-						$tag = Tag_Model::getOrCreate($name);
-						$contact->tags()->sync($tag->id, false);
+					if ( $auto_create ) {
+						$tag = Tag_Model::getOrCreate( $name );
+						$contact->tags()->sync( $tag->id, false );
 					} else {
-						if (! empty($assign_to)) {
-							$contact->tags()->sync($assign_to, false);
+						if ( ! empty( $assign_to ) ) {
+							$contact->tags()->sync( $assign_to, false );
 						}
 					}
 				}
 
-				if (! empty($this->tags)) {
-					$contact->tags()->sync($this->tags, false);
+				if ( ! empty( $this->tags ) ) {
+					$contact->tags()->sync( $this->tags, false );
 				}
 
-				if (! empty($this->lists)) {
-					$contact->lists()->sync($this->lists, false);
+				if ( ! empty( $this->lists ) ) {
+					$contact->lists()->sync( $this->lists, false );
 				}
 
 				// Handle custom fields mapping (Pro feature)
-				if (class_exists('QuillCRM_Pro\Models\Custom_Field_Model') && ! empty($this->custom_fields_mapping)) {
-					$this->import_custom_fields($contact, $subscriber);
+				if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) && ! empty( $this->custom_fields_mapping ) ) {
+					$this->import_custom_fields( $contact, $subscriber );
 				}
 			}
-		} catch (\Exception $e) {
-			$error_message = __('Error importing contact', 'quillcrm') . ': ' . $e->getMessage();
+		} catch ( \Exception $e ) {
+			$error_message = __( 'Error importing contact', 'quillcrm' ) . ': ' . $e->getMessage();
 			quillcrm_get_logger()->error(
 				$error_message,
 				array(
@@ -366,13 +358,12 @@ abstract class Importer
 	 *
 	 * @return void
 	 */
-	protected function import_custom_fields($contact, $subscriber)
-	{
-		if (! class_exists('QuillCRM_Pro\Models\Custom_Field_Model')) {
+	protected function import_custom_fields( $contact, $subscriber ) {
+		if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
 			return;
 		}
 
-		foreach ($this->custom_fields_mapping as $field_mapping) {
+		foreach ( $this->custom_fields_mapping as $field_mapping ) {
 			$source_field  = $field_mapping['field'] ?? '';
 			$target_fields = $field_mapping['assignedField'] ?? array();
 			$auto_create   = $field_mapping['auto'] ?? false;
@@ -381,46 +372,46 @@ abstract class Importer
 			$field_options = $field_mapping['options'] ?? array(); // Get options for select/radio/checkbox fields
 			$field_label   = $field_mapping['label'] ?? ''; // Get label from mapping
 
-			if (empty($target_fields) && ! $auto_create) {
+			if ( empty( $target_fields ) && ! $auto_create ) {
 				continue;
 			}
 
 			// Get the value from the subscriber
-			$value = is_object($subscriber) ? ($subscriber->$source_field ?? '') : ($subscriber[$source_field] ?? '');
+			$value = is_object( $subscriber ) ? ( $subscriber->$source_field ?? '' ) : ( $subscriber[ $source_field ] ?? '' );
 
 			// Skip if no value
-			if (empty($value) && $value !== '0') {
+			if ( empty( $value ) && $value !== '0' ) {
 				continue;
 			}
 
 			// Prepare attributes for fields with options
 			$attributes = null;
-			if (! empty($field_options) && in_array($field_type, array('select', 'multiselect', 'radio', 'checkbox'))) {
+			if ( ! empty( $field_options ) && in_array( $field_type, array( 'select', 'multiselect', 'radio', 'checkbox' ) ) ) {
 				$attributes = $field_options;
 			}
 
-			$value_serialized = maybe_unserialize($value);
+			$value_serialized = maybe_unserialize( $value );
 
 			// Convert arrays to JSON for storage in QuillCRM
-			if (is_array($value_serialized)) {
+			if ( is_array( $value_serialized ) ) {
 				// separate by comma
-				$value = implode(',', $value_serialized);
-				$value = trim($value);
+				$value = implode( ',', $value_serialized );
+				$value = trim( $value );
 			}
 
 			// Auto create custom field
-			if ($auto_create) {
+			if ( $auto_create ) {
 				// Get group ID (either from the source group or default)
-				$group_id = $this->get_or_create_custom_fields_group($field_group, $source_field);
+				$group_id = $this->get_or_create_custom_fields_group( $field_group, $source_field );
 
 				// Check if custom field already exists
-				$custom_field = \QuillCRM_Pro\Models\Custom_Field_Model::where('slug', sanitize_title($source_field))
-					->where('scope', 'contact')
+				$custom_field = \QuillCRM_Pro\Models\Custom_Field_Model::where( 'slug', sanitize_title( $source_field ) )
+					->where( 'scope', 'contact' )
 					->first();
 
-				if ($custom_field) {
+				if ( $custom_field ) {
 					// Update existing field
-					$custom_field->name       = ! empty($field_label) ? $field_label : $source_field;
+					$custom_field->name       = ! empty( $field_label ) ? $field_label : $source_field;
 					$custom_field->type       = $field_type;
 					$custom_field->group_id   = $group_id;
 					$custom_field->attributes = $attributes;
@@ -428,8 +419,8 @@ abstract class Importer
 				} else {
 					// Create new field
 					$custom_field             = new \QuillCRM_Pro\Models\Custom_Field_Model();
-					$custom_field->name       = ! empty($field_label) ? $field_label : $source_field;
-					$custom_field->slug       = sanitize_title($source_field);
+					$custom_field->name       = ! empty( $field_label ) ? $field_label : $source_field;
+					$custom_field->slug       = sanitize_title( $source_field );
 					$custom_field->type       = $field_type;
 					$custom_field->scope      = 'contact';
 					$custom_field->group_id   = $group_id;
@@ -437,22 +428,22 @@ abstract class Importer
 					$custom_field->save();
 				}
 
-				$this->attach_custom_field_to_contact($contact, $custom_field->id, $value);
+				$this->attach_custom_field_to_contact( $contact, $custom_field->id, $value );
 			} else {
 				// Map to existing custom fields
-				if (! empty($target_fields)) {
-					foreach ($target_fields as $custom_field_id) {
-						$custom_field = \QuillCRM_Pro\Models\Custom_Field_Model::find($custom_field_id);
-						if (! $custom_field) {
+				if ( ! empty( $target_fields ) ) {
+					foreach ( $target_fields as $custom_field_id ) {
+						$custom_field = \QuillCRM_Pro\Models\Custom_Field_Model::find( $custom_field_id );
+						if ( ! $custom_field ) {
 							continue;
 						}
 						// for updating attributes if these values are not in the attributes array
-						if ($custom_field->type === 'select' || $custom_field->type === 'multiselect') {
-							$custom_field->attributes = array_merge($custom_field->attributes, $attributes);
-							$custom_field->attributes = array_unique($custom_field->attributes);
+						if ( $custom_field->type === 'select' || $custom_field->type === 'multiselect' ) {
+							$custom_field->attributes = array_merge( $custom_field->attributes, $attributes );
+							$custom_field->attributes = array_unique( $custom_field->attributes );
 							$custom_field->save();
 						}
-						$this->attach_custom_field_to_contact($contact, $custom_field_id, $value);
+						$this->attach_custom_field_to_contact( $contact, $custom_field_id, $value );
 					}
 				}
 			}
@@ -470,14 +461,13 @@ abstract class Importer
 	 *
 	 * @return void
 	 */
-	protected function attach_custom_field_to_contact($contact, $custom_field_id, $value)
-	{
+	protected function attach_custom_field_to_contact( $contact, $custom_field_id, $value ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'quillcrm_custom_field_relationship';
 
 		// check table exists
-		if (! $wpdb->get_var("SHOW TABLES LIKE '{$table_name}'")) {
+		if ( ! $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) ) {
 			return;
 		}
 
@@ -490,19 +480,19 @@ abstract class Importer
 			)
 		);
 
-		if ($existing) {
+		if ( $existing ) {
 			// Update existing
 			$wpdb->update(
 				$table_name,
 				array(
 					'value'      => $value,
-					'updated_at' => current_time('mysql'),
+					'updated_at' => current_time( 'mysql' ),
 				),
 				array(
 					'id' => $existing->id,
 				),
-				array('%s', '%s'),
-				array('%d')
+				array( '%s', '%s' ),
+				array( '%d' )
 			);
 		} else {
 			// Insert new
@@ -513,10 +503,10 @@ abstract class Importer
 					'entity_type'     => 'contact',
 					'custom_field_id' => $custom_field_id,
 					'value'           => $value,
-					'created_at'      => current_time('mysql'),
-					'updated_at'      => current_time('mysql'),
+					'created_at'      => current_time( 'mysql' ),
+					'updated_at'      => current_time( 'mysql' ),
 				),
-				array('%d', '%s', '%d', '%s', '%s', '%s')
+				array( '%d', '%s', '%d', '%s', '%s', '%s' )
 			);
 		}
 	}
@@ -530,18 +520,17 @@ abstract class Importer
 	 * @param string $field_slug Field slug for fallback
 	 * @return int Group ID
 	 */
-	protected function get_or_create_custom_fields_group($group_name, $field_slug)
-	{
-		if (! class_exists('QuillCRM_Pro\Models\Custom_Fields_Group_Model')) {
+	protected function get_or_create_custom_fields_group( $group_name, $field_slug ) {
+		if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Fields_Group_Model' ) ) {
 			return 0;
 		}
 
 		// If no group name provided, use default
-		if (empty($group_name)) {
-			$group_name = __('Imported Fields', 'quillcrm');
+		if ( empty( $group_name ) ) {
+			$group_name = __( 'Imported Fields', 'quillcrm' );
 			$group_slug = 'imported-fields';
 		} else {
-			$group_slug = sanitize_title($group_name);
+			$group_slug = sanitize_title( $group_name );
 		}
 
 		$group = \QuillCRM_Pro\Models\Custom_Fields_Group_Model::firstOrCreate(
@@ -562,9 +551,8 @@ abstract class Importer
 	 *
 	 * @return int
 	 */
-	public function get_current_execution_time()
-	{
-		return microtime(true) - $this->start_time;
+	public function get_current_execution_time() {
+		return microtime( true ) - $this->start_time;
 	}
 
 	/**
@@ -576,24 +564,23 @@ abstract class Importer
 	 * @param array    $mapping
 	 * @return array
 	 */
-	public function import_with_offset($total, $offset, $get_subscribers_callback, $mapping)
-	{
-		while ($this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached()) {
+	public function import_with_offset( $total, $offset, $get_subscribers_callback, $mapping ) {
+		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
-			usleep(1000000);
+			usleep( 1000000 );
 
-			$subscribers = $get_subscribers_callback($offset);
-			if (empty($subscribers)) {
+			$subscribers = $get_subscribers_callback( $offset );
+			if ( empty( $subscribers ) ) {
 				break;
 			}
 
-			foreach ($subscribers as $subscriber) {
-				$this->import_contact($subscriber, $mapping);
+			foreach ( $subscribers as $subscriber ) {
+				$this->import_contact( $subscriber, $mapping );
 				$offset++;
 			}
 
 			// Check if offset is greater than or equal to total
-			if ($offset >= $total) {
+			if ( $offset >= $total ) {
 				break;
 			}
 		}
@@ -616,23 +603,22 @@ abstract class Importer
 	 * @param array    $mapping
 	 * @return array
 	 */
-	public function import_with_cursor($total, $offset, $get_subscribers_callback, $mapping)
-	{
+	public function import_with_cursor( $total, $offset, $get_subscribers_callback, $mapping ) {
 		$processed_in_session = 0;
 		$current_offset       = $offset;
 		$cursor               = $this->cursor; // Use the cursor from constructor
 
-		while ($this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached()) {
+		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
-			usleep(1000000);
+			usleep( 1000000 );
 
-			$batch_result = $get_subscribers_callback($cursor);
-			if (empty($batch_result['contacts'])) {
+			$batch_result = $get_subscribers_callback( $cursor );
+			if ( empty( $batch_result['contacts'] ) ) {
 				break;
 			}
 
-			foreach ($batch_result['contacts'] as $subscriber) {
-				$this->import_contact($subscriber, $mapping);
+			foreach ( $batch_result['contacts'] as $subscriber ) {
+				$this->import_contact( $subscriber, $mapping );
 				$processed_in_session++;
 				$current_offset++;
 			}
@@ -644,7 +630,7 @@ abstract class Importer
 			$this->cursor = $cursor;
 
 			// Check if we have a next cursor or if we've processed everything
-			if (empty($cursor) || $current_offset >= $total) {
+			if ( empty( $cursor ) || $current_offset >= $total ) {
 				break;
 			}
 		}
@@ -652,7 +638,7 @@ abstract class Importer
 		$result = array(
 			'offset' => $current_offset,
 			'cursor' => $cursor, // Include cursor for next request
-			'status' => empty($cursor) || $current_offset >= $total ? 'completed' : 'in_progress',
+			'status' => empty( $cursor ) || $current_offset >= $total ? 'completed' : 'in_progress',
 			'total'  => $total,
 		);
 

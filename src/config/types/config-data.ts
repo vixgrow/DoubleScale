@@ -28,9 +28,27 @@ export type ConfigData = Record<string, unknown> & {
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
 	quillsmtpInfo: QuillSMTPInfo;
+	license: License | false;
+	proPluginData: ProPluginData;
 	currency: string;
 	urlQuillCRMPro: string;
 };
+export type License = {
+	upgrades: {
+		[key: string]: Upgrade;
+	};
+	[key: string]: any;
+};
+export type Upgrade = {
+	[key: string]: any;
+};
+
+
+export type ProPluginData = {
+	is_installed: boolean;
+	is_active: boolean;
+};
+
 
 export type UserCapabilities = {
 	quillcrm_crm_manager: boolean;

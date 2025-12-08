@@ -19,8 +19,7 @@ use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
 /**
  * Renderer for email templates
  */
-class Email_Renderer
-{
+class Email_Renderer {
 
 	/**
 	 * Block registry instance
@@ -39,9 +38,8 @@ class Email_Renderer
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
-		$this->block_registry = Block_Registry::instance();
+	public function __construct() {
+		 $this->block_registry = Block_Registry::instance();
 	}
 
 	/**
@@ -52,46 +50,45 @@ class Email_Renderer
 	 * @param int|null                                    $tracking_id Optional tracking ID for stored merge tag values
 	 * @return string HTML output
 	 */
-	public function render_template($template_id, $contact = null, $tracking_id = null)
-	{
+	public function render_template( $template_id, $contact = null, $tracking_id = null ) {
 		// Use the Template_Model to fetch the template
-		$template = Template_Model::find($template_id);
+		$template = Template_Model::find( $template_id );
 
-		if (! $template) {
+		if ( ! $template ) {
 			return '';
 		}
 
 		// Set tracking context on contact if tracking_id is provided
-		if ($tracking_id && $contact && method_exists($contact, 'set_tracking_context')) {
-			error_log("QuillCRM: Setting tracking context {$tracking_id} on contact {$contact->id}");
-			$contact->set_tracking_context($tracking_id);
+		if ( $tracking_id && $contact && method_exists( $contact, 'set_tracking_context' ) ) {
+			error_log( "QuillCRM: Setting tracking context {$tracking_id} on contact {$contact->id}" );
+			$contact->set_tracking_context( $tracking_id );
 		} else {
-			error_log("QuillCRM: Not setting tracking context - tracking_id: {$tracking_id}, contact: " . ($contact ? $contact->id : 'null'));
+			error_log( "QuillCRM: Not setting tracking context - tracking_id: {$tracking_id}, contact: " . ( $contact ? $contact->id : 'null' ) );
 		}
 
 		// Parse the JSON content
-		$content = json_decode($template->body, true);
-		if (json_last_error() !== JSON_ERROR_NONE) {
+		$content = json_decode( $template->body, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			// Handle legacy templates or error cases
 			return $template->body;
 		}
 
 		// Check if this is a builder template with type='builder' structure
-		if (isset($content['type']) && $content['type'] === 'builder' && isset($content['value'])) {
+		if ( isset( $content['type'] ) && $content['type'] === 'builder' && isset( $content['value'] ) ) {
 			$content = $content['value'];
 		}
 
 		// Get global settings from content (builder stores them in body.globalSettings)
-		$global_settings = isset($content['globalSettings']) ? $content['globalSettings'] : array();
+		$global_settings = isset( $content['globalSettings'] ) ? $content['globalSettings'] : array();
 
 		// Get preview_text from template and process merge tags
-		$preview_text = ! empty($template->preview_text) ? $template->preview_text : '';
-		if (! empty($preview_text) && $contact) {
-			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags($preview_text, $contact);
+		$preview_text = ! empty( $template->preview_text ) ? $template->preview_text : '';
+		if ( ! empty( $preview_text ) && $contact ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $contact );
 		}
 
 		// Generate HTML for email body
-		$html = $this->build_email_structure($content, $global_settings, $contact, $preview_text);
+		$html = $this->build_email_structure( $content, $global_settings, $contact, $preview_text );
 
 		return $html;
 	}
@@ -106,22 +103,21 @@ class Email_Renderer
 	 * @param string                                      $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
-	public function render_from_builder_data($builder_data, $contact = null, $preview_text = '', $footer_html = '')
-	{
-		if (! is_array($builder_data)) {
+	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '', $footer_html = '' ) {
+		if ( ! is_array( $builder_data ) ) {
 			return '';
 		}
 
 		// Get global settings from builder data
-		$global_settings = isset($builder_data['globalSettings']) ? $builder_data['globalSettings'] : array();
+		$global_settings = isset( $builder_data['globalSettings'] ) ? $builder_data['globalSettings'] : array();
 
 		// Process preview text if provided
-		if (! empty($preview_text) && $contact) {
-			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags($preview_text, $contact);
+		if ( ! empty( $preview_text ) && $contact ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $contact );
 		}
 
 		// Generate HTML for email body
-		$html = $this->build_email_structure($builder_data, $global_settings, $contact, $preview_text, $footer_html);
+		$html = $this->build_email_structure( $builder_data, $global_settings, $contact, $preview_text, $footer_html );
 
 		return $html;
 	}
@@ -136,28 +132,27 @@ class Email_Renderer
 	 * @param string                                      $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
-	private function build_email_structure($content, $global_settings, $contact, $preview_text = '', $footer_html = '')
-	{
+	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
 		// Extract button settings from content if available
-		if (isset($content['buttonSettings']) && is_array($content['buttonSettings'])) {
+		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
 		}
 
 		// Extract global settings (with defaults)
-		$canvas_color        = isset($global_settings['canvasColor']) ? $global_settings['canvasColor'] : '#ffffff';
-		$canvas_width        = isset($global_settings['canvasWidth']) ? $global_settings['canvasWidth'] : 600;
-		$background_image    = isset($global_settings['backgroundImage']['url']) ? $global_settings['backgroundImage']['url'] : '';
-		$background_repeat   = isset($global_settings['backgroundRepeat']) ? $global_settings['backgroundRepeat'] : 'no-repeat';
-		$background_size     = isset($global_settings['backgroundSize']) ? $global_settings['backgroundSize'] : 'cover';
-		$background_position = isset($global_settings['backgroundPosition']) ? $global_settings['backgroundPosition'] : 'center';
+		$canvas_color        = isset( $global_settings['canvasColor'] ) ? $global_settings['canvasColor'] : '#ffffff';
+		$canvas_width        = isset( $global_settings['canvasWidth'] ) ? $global_settings['canvasWidth'] : 600;
+		$background_image    = isset( $global_settings['backgroundImage']['url'] ) ? $global_settings['backgroundImage']['url'] : '';
+		$background_repeat   = isset( $global_settings['backgroundRepeat'] ) ? $global_settings['backgroundRepeat'] : 'no-repeat';
+		$background_size     = isset( $global_settings['backgroundSize'] ) ? $global_settings['backgroundSize'] : 'cover';
+		$background_position = isset( $global_settings['backgroundPosition'] ) ? $global_settings['backgroundPosition'] : 'center';
 
 		// Process background image through merge tags if present
-		if (! empty($background_image) && $contact) {
-			error_log('QuillCRM Canvas - Original background image: ' . $background_image);
-			$background_image = Merge_Tags_Manager::instance()->process_merge_tags($background_image, $contact);
-			error_log('QuillCRM Canvas - Processed background image: ' . $background_image);
+		if ( ! empty( $background_image ) && $contact ) {
+			error_log( 'QuillCRM Canvas - Original background image: ' . $background_image );
+			$background_image = Merge_Tags_Manager::instance()->process_merge_tags( $background_image, $contact );
+			error_log( 'QuillCRM Canvas - Processed background image: ' . $background_image );
 		} else {
-			error_log('QuillCRM Canvas - No background image found in global settings: ' . print_r($global_settings, true));
+			error_log( 'QuillCRM Canvas - No background image found in global settings: ' . print_r( $global_settings, true ) );
 		}
 
 		// Use a light gray for outer wrapper background (email client background)
@@ -165,12 +160,12 @@ class Email_Renderer
 
 		// Generate preheader HTML if preview_text is provided
 		$preheader_html = '';
-		if (! empty($preview_text)) {
+		if ( ! empty( $preview_text ) ) {
 			// Add hidden preheader text - this appears in email client previews but not in the email body
 			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
-				. esc_html($preview_text)
+				. esc_html( $preview_text )
 				// Add invisible characters to push unwanted preview text out of view
-				. str_repeat('&nbsp;&zwnj;', 50)
+				. str_repeat( '&nbsp;&zwnj;', 50 )
 				. '</div>';
 		}
 
@@ -208,60 +203,14 @@ class Email_Renderer
 				a { text-decoration: none; }
 				a:hover { text-decoration: underline !important; }
 				
-				/* Desktop grid columns */
-				.side-by-side { width: 50%; max-width: 50%; }
-				.grid-col-25 { width: 25%; max-width: 25%; }
-				.grid-col-33 { width: 33.33%; max-width: 33.33%; }
-				.grid-col-50 { width: 50%; max-width: 50%; }
-				
-				/* Mobile responsiveness - tablets */
-				@media only screen and (max-width: " . ($canvas_width + 40) . "px) {
-					.email-container { width: 100% !important; }
-					.mobile-padding { padding: 10px !important; }
-					.mobile-hide { display: none !important; }
-					.mobile-center { text-align: center !important; }
-					.mobile-full-width { width: 100% !important; }
-				}
-				
-				/* Mobile responsiveness - phones: stack all grid columns */
-				@media only screen and (max-width: 480px) {
-					.stack-column {
-						display: block !important;
-						width: 100% !important;
-						min-width: 100% !important;
-						max-width: 100% !important;
-						direction: ltr !important;
-						padding: 10px 0 !important;
-						box-sizing: border-box !important;
-					}
-					.stack-column-table {
-						width: 100% !important;
-					}
-					.mobile-full-width {
-						display: block !important;
-						width: 100% !important;
-						min-width: 100% !important;
-						max-width: 100% !important;
-						padding: 10px 0 !important;
-					}
-					.side-by-side {
-						display: block !important;
-						width: 100% !important;
-						max-width: 100% !important;
-						padding: 10px 0 !important;
-					}
-					.grid-col-25, .grid-col-33, .grid-col-50 {
-						display: block !important;
-						width: 100% !important;
-						max-width: 100% !important;
-						padding: 10px 0 !important;
-					}
-					/* Reset padding for stacked columns */
-					.stack-column td, .mobile-full-width td {
-						padding-left: 0 !important;
-						padding-right: 0 !important;
-					}
-				}
+			/* Mobile responsiveness */
+			@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
+				.email-container { width: 100% !important; }
+				.mobile-padding { padding: 10px !important; }
+				.mobile-hide { display: none !important; }
+				.mobile-center { text-align: center !important; }
+				.mobile-full-width { width: 100% !important; }
+			}
 				
 				/* Outlook specific */
 				<!--[if mso]>
@@ -284,55 +233,55 @@ class Email_Renderer
 		);
 
 		// Add background image styles if set (Gmail-compatible)
-		if (! empty($background_image) && strpos($background_image, 'localhost') === false) {
+		if ( ! empty( $background_image ) && strpos( $background_image, 'localhost' ) === false ) {
 			$canvas_styles['background-image']    = "url('{$background_image}')";
 			$canvas_styles['background-repeat']   = $background_repeat;
 			$canvas_styles['background-size']     = $background_size;
 			$canvas_styles['background-position'] = $background_position;
 		}
 
-		$canvas_style_string = $this->build_style_string($canvas_styles);
+		$canvas_style_string = $this->build_style_string( $canvas_styles );
 
 		// Debug: Log canvas styles
-		error_log('QuillCRM Canvas - Canvas styles: ' . $canvas_style_string);
+		error_log( 'QuillCRM Canvas - Canvas styles: ' . $canvas_style_string );
 
 		$html .= "<table role=\"presentation\" class=\"email-container\" width=\"{$canvas_width}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"{$canvas_style_string}\">
 					<tr>
 						<td style=\"padding: 0;\">";
 
 		// Process all sections
-		if (isset($content['sections']) && is_array($content['sections'])) {
+		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {
 			// Structure with explicit 'sections' property
-			foreach ($content['sections'] as $section) {
+			foreach ( $content['sections'] as $section ) {
 				// Only render section if it has valid content
-				if ($this->section_has_content($section)) {
-					$html .= $this->render_section($section, $contact);
+				if ( $this->section_has_content( $section ) ) {
+					$html .= $this->render_section( $section, $contact );
 				}
 			}
-		} elseif (is_array($content)) {
+		} elseif ( is_array( $content ) ) {
 			// Check if this is an array of section objects
 			$is_section_array = false;
-			foreach ($content as $item) {
-				if (is_array($item) && isset($item['columns'])) {
+			foreach ( $content as $item ) {
+				if ( is_array( $item ) && isset( $item['columns'] ) ) {
 					$is_section_array = true;
 					break;
 				}
 			}
 
-			if ($is_section_array) {
+			if ( $is_section_array ) {
 				// Content is an array of section objects (each with id, columns, styles)
-				foreach ($content as $section) {
+				foreach ( $content as $section ) {
 					// Only render section if it has valid content
-					if ($this->section_has_content($section)) {
-						$html .= $this->render_section($section, $contact);
+					if ( $this->section_has_content( $section ) ) {
+						$html .= $this->render_section( $section, $contact );
 					}
 				}
 			} else {
 				// Handle flat content structure (no sections) - wrap in a default section
 				$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
-				foreach ($content as $block) {
-					if (isset($block['type'])) {
-						$html .= '<tr><td style="padding: 10px;">' . $this->render_block($block, $contact) . '</td></tr>';
+				foreach ( $content as $block ) {
+					if ( isset( $block['type'] ) ) {
+						$html .= '<tr><td style="padding: 10px;">' . $this->render_block( $block, $contact ) . '</td></tr>';
 					}
 				}
 				$html .= '</table>';
@@ -350,15 +299,15 @@ class Email_Renderer
 		// Inject footer HTML before closing </body> tag if provided
 		// Footer is injected here during rendering, but note that merge tags in the footer
 		// will be processed AFTER this method returns (in prepare_message_content)
-		if (! empty($footer_html)) {
+		if ( ! empty( $footer_html ) ) {
 			// Wrap footer in a centered table for proper email client compatibility
 			// Uses same canvas width and background as main email for consistency
 			$html .= '
 		<!-- Email Footer -->
-		<table role="presentation" class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ' . esc_attr($bg_color) . ';">
+		<table role="presentation" class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ' . esc_attr( $bg_color ) . ';">
 			<tr>
 				<td align="center" style="padding: 20px;">
-					<table role="presentation" class="email-container" width="' . esc_attr($canvas_width) . '" cellpadding="0" cellspacing="0" border="0" style="max-width: ' . esc_attr($canvas_width) . 'px;">
+					<table role="presentation" class="email-container" width="' . esc_attr( $canvas_width ) . '" cellpadding="0" cellspacing="0" border="0" style="max-width: ' . esc_attr( $canvas_width ) . 'px;">
 						<tr>
 							<td style="padding: 10px 20px; text-align: center; font-size: 12px; color: #666; line-height: 1.5;">
 								' . $footer_html . '
@@ -383,14 +332,13 @@ class Email_Renderer
 	 * @param array $section Section data
 	 * @return bool True if section has valid content, false if empty
 	 */
-	private function section_has_content($section)
-	{
-		if (empty($section['columns']) || ! is_array($section['columns'])) {
+	private function section_has_content( $section ) {
+		if ( empty( $section['columns'] ) || ! is_array( $section['columns'] ) ) {
 			return false;
 		}
 
-		foreach ($section['columns'] as $column) {
-			if ($this->column_has_content($column)) {
+		foreach ( $section['columns'] as $column ) {
+			if ( $this->column_has_content( $column ) ) {
 				return true;
 			}
 		}
@@ -405,20 +353,19 @@ class Email_Renderer
 	 * @param array $column Column data
 	 * @return bool True if column has valid content, false if empty
 	 */
-	private function column_has_content($column)
-	{
-		if (empty($column['blocks']) || ! is_array($column['blocks'])) {
+	private function column_has_content( $column ) {
+		if ( empty( $column['blocks'] ) || ! is_array( $column['blocks'] ) ) {
 			return false;
 		}
 
-		foreach ($column['blocks'] as $block) {
-			if (! isset($block['type'])) {
+		foreach ( $column['blocks'] as $block ) {
+			if ( ! isset( $block['type'] ) ) {
 				continue;
 			}
 
 			// Check if block type is registered
-			$block_instance = $this->block_registry->get_block($block['type']);
-			if ($block_instance !== null) {
+			$block_instance = $this->block_registry->get_block( $block['type'] );
+			if ( $block_instance !== null ) {
 				// Found at least one valid block
 				return true;
 			}
@@ -435,80 +382,61 @@ class Email_Renderer
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_section($section, $contact)
-	{
+	private function render_section( $section, $contact ) {
 		// Build section styles - convert to inline styles for email compatibility
 		$section_styles = array();
-		if (isset($section['styles'])) {
-			foreach ($section['styles'] as $property => $value) {
-				$css_property                    = $this->convert_camel_to_kebab($property);
-				$section_styles[$css_property] = $value;
+		if ( isset( $section['styles'] ) ) {
+			foreach ( $section['styles'] as $property => $value ) {
+				$css_property                    = $this->convert_camel_to_kebab( $property );
+				$section_styles[ $css_property ] = $value;
 			}
 		}
 
 		// Default section styles
-		if (! isset($section_styles['background-color'])) {
+		if ( ! isset( $section_styles['background-color'] ) ) {
 			$section_styles['background-color'] = 'transparent';
 		}
-		if (! isset($section_styles['padding'])) {
+		if ( ! isset( $section_styles['padding'] ) ) {
 			$section_styles['padding'] = '40px';
 		}
 
-		$section_style_string = $this->build_style_string($section_styles);
+		$section_style_string = $this->build_style_string( $section_styles );
 
 		// Outer section table wrapper
-		// Add min-width to force mobile stacking - email client compatible
-		$section_table_style = $section_style_string . ' min-width: 600px; width: 100%;';
-		$html                = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
-		$html               .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_table_style . '">';
+		$html  = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
+		$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_style_string . '">';
 
 		// Render columns
-		if (! empty($section['columns'])) {
+		if ( ! empty( $section['columns'] ) ) {
 			// First, filter out columns with no valid content
 			$valid_columns = array();
-			foreach ($section['columns'] as $column) {
-				if ($this->column_has_content($column)) {
+			foreach ( $section['columns'] as $column ) {
+				if ( $this->column_has_content( $column ) ) {
 					$valid_columns[] = $column;
 				}
 			}
 
 			// Only render row if we have valid columns
-			if (! empty($valid_columns)) {
+			if ( ! empty( $valid_columns ) ) {
+				$html .= '<tr>';
+
 				// Calculate total ratio to convert ratio-based widths to percentages
 				// Only include valid columns in the calculation
 				$total_ratio = 0;
-				foreach ($valid_columns as $column) {
-					$column_width = isset($column['width']) ? $column['width'] : 1;
+				foreach ( $valid_columns as $column ) {
+					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 					$total_ratio += $column_width;
 				}
 
-				// Build mobile divs first (outside table structure)
-				foreach ($valid_columns as $column_index => $column) {
-					// Build column content
-					$column_content  = '';
-					$column_content .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
-					if (isset($column['blocks']) && is_array($column['blocks'])) {
-						$column_content .= $this->render_column_blocks($column['blocks'], $contact);
-					}
-					$column_content .= '</table>';
-
-					// Mobile wrapper div (hidden on desktop, shown on mobile) - outside table structure
-					$mobile_div_style = 'display: none; max-height: 0; overflow: hidden; width: 100%; padding: 10px; box-sizing: border-box;';
-					$html            .= '<!--[if !mso]><!--><div class="mobile-column-' . $column_index . '" style="' . $mobile_div_style . '">' . $column_content . '</div><!--<![endif]-->';
-				}
-
-				// Desktop table row
-				$html .= '<tr>';
-
-				foreach ($valid_columns as $column_index => $column) {
-					$column_width = isset($column['width']) ? $column['width'] : 1;
+				foreach ( $valid_columns as $column_index => $column ) {
+					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 
 					// Calculate width as ratio-based to handle all layout patterns
-					$width = ($column_width / $total_ratio) * 100;
-					$width = round($width, 2);
+					$width = ( $column_width / $total_ratio ) * 100;
+					$width = round( $width, 2 );
 
 					// Calculate pixel width for Outlook (600px max width container)
-					$pixel_width = round(($width / 100) * 600);
+					$pixel_width = round( ( $width / 100 ) * 600 );
 
 					// Column styles - ensuring proper vertical alignment and spacing
 					$column_styles = array(
@@ -519,37 +447,27 @@ class Email_Renderer
 					);
 
 					// Add column-specific styles if available
-					if (isset($column['styles'])) {
-						foreach ($column['styles'] as $property => $value) {
-							$css_property                   = $this->convert_camel_to_kebab($property);
-							$column_styles[$css_property] = $value;
+					if ( isset( $column['styles'] ) ) {
+						foreach ( $column['styles'] as $property => $value ) {
+							$css_property                   = $this->convert_camel_to_kebab( $property );
+							$column_styles[ $css_property ] = $value;
 						}
 					}
 
-					$column_style_string = $this->build_style_string($column_styles);
-
-					// Determine responsive class based on width for mobile stacking
-					$responsive_class = 'stack-column mobile-full-width';
-					if ($width >= 49 && $width <= 51) {
-						$responsive_class .= ' side-by-side';
-					} elseif ($width >= 24 && $width <= 26) {
-						$responsive_class .= ' grid-col-25';
-					} elseif ($width >= 32 && $width <= 34) {
-						$responsive_class .= ' grid-col-33';
-					}
+					$column_style_string = $this->build_style_string( $column_styles );
 
 					// Outlook conditional comment for column
 					$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
 
-					// Standard column wrapper with responsive classes
-					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="' . $responsive_class . '">';
+					// Standard column wrapper
+					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
 
 					// Inner table for blocks (ensures proper stacking)
 					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
 
 					// Render blocks in this column using the same logic as frontend
-					if (isset($column['blocks']) && is_array($column['blocks'])) {
-						$html .= $this->render_column_blocks($column['blocks'], $contact);
+					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
+						$html .= $this->render_column_blocks( $column['blocks'], $contact );
 					}
 
 					$html .= '</table>'; // Close inner blocks table
@@ -575,31 +493,30 @@ class Email_Renderer
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_column_blocks($blocks, $contact)
-	{
+	private function render_column_blocks( $blocks, $contact ) {
 		$html     = '';
 		$i        = 0;
 		$registry = Layout_Handler_Registry::instance();
 
-		while ($i < count($blocks)) {
-			$block = $blocks[$i];
+		while ( $i < count( $blocks ) ) {
+			$block = $blocks[ $i ];
 
 			// Try to find a layout handler for this block
-			$handler = $registry->find_handler($block);
+			$handler = $registry->find_handler( $block );
 
-			if ($handler) {
+			if ( $handler ) {
 				// Use handler to render layout
 				$html .= $handler->render(
 					$blocks,
 					$i,
-					function ($block) use ($contact) {
-						return $this->render_block($block, $contact);
+					function ( $block ) use ( $contact ) {
+						return $this->render_block( $block, $contact );
 					}
 				);
 			} else {
 				// Regular block - render in single row
 				$html .= '<tr><td style="padding: 0;">';
-				$html .= $this->render_block($block, $contact);
+				$html .= $this->render_block( $block, $contact );
 				$html .= '</td></tr>';
 				$i++;
 			}
@@ -615,9 +532,8 @@ class Email_Renderer
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_block($block, $contact)
-	{
-		if (! isset($block['type'])) {
+	private function render_block( $block, $contact ) {
+		if ( ! isset( $block['type'] ) ) {
 			return '<!-- Missing block type -->';
 		}
 
@@ -627,7 +543,7 @@ class Email_Renderer
 
 		return $this->block_registry->render_block(
 			$block['type'],
-			isset($block['props']) ? $block['props'] : array(),
+			isset( $block['props'] ) ? $block['props'] : array(),
 			$contact
 		);
 	}
@@ -638,9 +554,8 @@ class Email_Renderer
 	 * @param string $string camelCase string
 	 * @return string kebab-case string
 	 */
-	private function convert_camel_to_kebab($string)
-	{
-		return strtolower(preg_replace('/([a-z0-9])([A-Z])/', '$1-$2', $string));
+	private function convert_camel_to_kebab( $string ) {
+		return strtolower( preg_replace( '/([a-z0-9])([A-Z])/', '$1-$2', $string ) );
 	}
 
 	/**
@@ -649,17 +564,16 @@ class Email_Renderer
 	 * @param array $styles Array of CSS properties
 	 * @return string CSS style string
 	 */
-	private function build_style_string(array $styles)
-	{
+	private function build_style_string( array $styles ) {
 		$style_string = '';
 
-		foreach ($styles as $property => $value) {
-			if ($value !== null && $value !== '') {
+		foreach ( $styles as $property => $value ) {
+			if ( $value !== null && $value !== '' ) {
 				$style_string .= "{$property}: {$value}; ";
 			}
 		}
 
-		return rtrim($style_string);
+		return rtrim( $style_string );
 	}
 
 	/**
@@ -668,10 +582,9 @@ class Email_Renderer
 	 * @param string $button_style Button style (primary, secondary, tertiary)
 	 * @return array Button settings
 	 */
-	public function get_button_settings($button_style = 'primary')
-	{
-		if (! empty($this->button_settings) && isset($this->button_settings[$button_style])) {
-			return $this->button_settings[$button_style];
+	public function get_button_settings( $button_style = 'primary' ) {
+		if ( ! empty( $this->button_settings ) && isset( $this->button_settings[ $button_style ] ) ) {
+			return $this->button_settings[ $button_style ];
 		}
 
 		return array();
@@ -686,16 +599,16 @@ class Email_Renderer
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model (optional, will be fetched from tracking if not provided)
 	 * @return string HTML output
 	 */
-	public function render_template_with_tracking($template_id, $tracking_id, $contact = null)
-	{
+	public function render_template_with_tracking( $template_id, $tracking_id, $contact = null ) {
 		// If no contact provided, try to get it from the tracking record
-		if (! $contact) {
-			$tracking = \QuillCRM\Models\Communication_Tracking_Model::find($tracking_id);
-			if ($tracking && $tracking->contact) {
+		if ( ! $contact ) {
+			$tracking = \QuillCRM\Models\Communication_Tracking_Model::find( $tracking_id );
+			if ( $tracking && $tracking->contact ) {
 				$contact = $tracking->contact;
 			}
 		}
 
-		return $this->render_template($template_id, $contact, $tracking_id);
+		return $this->render_template( $template_id, $contact, $tracking_id );
 	}
+
 }

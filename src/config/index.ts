@@ -14,6 +14,8 @@ import type {
 	Forms,
 	Importers,
 	Integrations,
+	License,
+	ProPluginData,
 	QuillSMTPInfo,
 	UserCapabilities,
 } from './types/config-data';
@@ -33,6 +35,10 @@ const configData: ConfigData = {
 			max_in_second: 0,
 			max_in_day: 0,
 		},
+		sms: {
+			max_in_second: 0,
+			max_in_day: 0,
+		},
 		double_optin: {
 			email_subject: '',
 			email_content: '',
@@ -44,6 +50,7 @@ const configData: ConfigData = {
 	blogName: '',
 	adminUrl: '',
 	pluginDirUrl: '',
+	license: false,
 	adminEmail: '',
 	ajaxUrl: '',
 	siteUrl: '',
@@ -78,6 +85,10 @@ const configData: ConfigData = {
 	},
 	currency: 'USD',
 	urlQuillCRMPro: '',
+	proPluginData: {
+		is_installed: false,
+		is_active: false,
+	},
 };
 
 /**
@@ -674,6 +685,50 @@ export const setCurrency = (data: ConfigData) => (value: string) => {
 	data.currency = value;
 };
 
+/**
+ * Set license
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns {License | false} license
+ */
+export const setLicense = (data: ConfigData) => (value: License | false) => {
+    data.license = value;
+};
+
+/**
+ * Get license
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns {License | false} license
+ */
+export const getLicense = (data: ConfigData) => (): License | false => {
+    return data.license;
+};
+
+/**
+ * Set pro plugin data
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns {ProPluginData} proPluginData
+ */
+export const setProPluginData = (data: ConfigData) => (value: ProPluginData) => {
+    data.proPluginData = value;
+};
+
+/**
+ * Get pro plugin data
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns {ProPluginData} proPluginData
+ */
+export const getProPluginData = (data: ConfigData) => (): ProPluginData => {
+    return data.proPluginData as unknown as ProPluginData;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -688,6 +743,8 @@ export interface ConfigApi {
 	getAjaxUrl: () => string;
 	setNonce: (value: string) => void;
 	getNonce: () => string;
+	getLicense: () => License | false;
+	setLicense: (value: License | false) => void;
 	setPluginDirUrl: (value: string) => void;
 	getPluginDirUrl: () => string;
 	getForms: () => Forms;
@@ -732,6 +789,8 @@ export interface ConfigApi {
 	setCurrency: (value: string) => void;
 	getUrlQuillCRMPro: () => string;
 	setUrlQuillCRMPro: (value: string) => void;
+	getProPluginData: () => ProPluginData;
+	setProPluginData: (value: ProPluginData) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -770,6 +829,10 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setAutomationRules = setAutomationRules(data);
 	configApi.isWoocommerceActive = () => isWoocommerceActive(data);
 	configApi.setIsWoocommerceActive = setIsWoocommerceActive(data);
+	configApi.getLicense = getLicense(data);
+	configApi.setLicense = setLicense(data);
+	configApi.getProPluginData = getProPluginData(data);
+	configApi.setProPluginData = setProPluginData(data);
 	configApi.getSiteUrl = getSiteUrl(data);
 	configApi.setSiteUrl = setSiteUrl(data);
 	configApi.getMergeTags = () => getMergeTags(data);

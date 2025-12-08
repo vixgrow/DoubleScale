@@ -13,7 +13,6 @@ export const FormContext = createContext<{
 	isLoading: boolean;
 	isSaving: boolean;
 	formFields: Form['fields_settings']['fields'] | null;
-	navigate?: (path: string) => void;
 	setForm: (form: Form) => void;
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
@@ -29,7 +28,6 @@ export const FormContext = createContext<{
 	isLoading: false,
 	isSaving: false,
 	formFields: null,
-	navigate: undefined,
 	setForm: (_form: Form) => {
 		throw new Error('setForm() not implemented');
 	},

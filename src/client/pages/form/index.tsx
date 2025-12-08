@@ -205,29 +205,22 @@ const Form: React.FC<FormProps> = ({
 				showNotice('error', error.message);
 			}
 		} else if (currentStep === 1) {
-			// Validate that all contact fields are mapped
+			// Validate that required contact fields are mapped
 			const mappedFields = (form?.data as any)?.mapped_fields || {};
 
-			// Check if form fields are available
-			if (!formFields || Object.keys(formFields).length === 0) {
-				showNotice(
-					'error',
-					__('No form fields available to map', 'quillcrm')
-				);
-				return;
-			}
+			// Required contact fields that must be mapped
+			const requiredContactFields = ['first_name', 'last_name', 'email'];
 
-			// Check if all available form fields have valid mappings
-			const availableFieldKeys = Object.keys(formFields);
-			const allFieldsMapped = availableFieldKeys.every(
+			// Check if all required contact fields have valid mappings
+			const allRequiredFieldsMapped = requiredContactFields.every(
 				(key) => mappedFields[key] && mappedFields[key] !== ''
 			);
 
-			if (!allFieldsMapped) {
+			if (!allRequiredFieldsMapped) {
 				showNotice(
 					'error',
 					__(
-						'Please map all contact fields before activating',
+						'Please map all required contact fields (First Name, Last Name, Email) before activating',
 						'quillcrm'
 					)
 				);

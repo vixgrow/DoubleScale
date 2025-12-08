@@ -19,7 +19,6 @@ use QuillCRM\Managers\Forms_Manager;
  */
 class Form extends Abstracts_Form {
 
-
 	/**
 	 * Slug
 	 *
@@ -116,7 +115,10 @@ class Form extends Abstracts_Form {
 			}
 
 			if ( isset( $field->attributes->name ) && isset( $field->settings->label ) ) {
-				$result[ $field->attributes->name ] = $field->settings->label;
+				$result[ $field->attributes->name ] = array(
+					'label' => $field->settings->label,
+					'type'  => $field->attributes->type,
+				);
 			}
 		}
 

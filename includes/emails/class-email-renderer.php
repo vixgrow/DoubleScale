@@ -203,13 +203,48 @@ class Email_Renderer {
 				a { text-decoration: none; }
 				a:hover { text-decoration: underline !important; }
 				
-			/* Mobile responsiveness */
-			@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
-				.email-container { width: 100% !important; }
+			/* Default: hide mobile divs, show desktop table */
+			.mobile-column-0,
+			.mobile-column-1,
+			.mobile-column-2,
+			.mobile-column-3,
+			.mobile-column-4 {
+				display: none !important;
+			}
+			.desktop-column {
+				display: table-cell !important;
+			}
+			/* Mobile responsiveness - ONLY on mobile devices */
+			@media only screen and (max-width: 600px) {
+				.email-container { 
+					width: 100% !important; 
+					max-width: 100% !important;
+				}
 				.mobile-padding { padding: 10px !important; }
 				.mobile-hide { display: none !important; }
 				.mobile-center { text-align: center !important; }
-				.mobile-full-width { width: 100% !important; }
+				/* Hide desktop table columns on mobile */
+				.email-container table tr {
+					display: none !important;
+				}
+				.desktop-column {
+					display: none !important;
+				}
+				/* Show mobile column divs ONLY on mobile */
+				.mobile-column-0,
+				.mobile-column-1,
+				.mobile-column-2,
+				.mobile-column-3,
+				.mobile-column-4 {
+					display: block !important;
+					max-height: none !important;
+					overflow: visible !important;
+					width: 100% !important;
+					max-width: 100% !important;
+					margin: 0 !important;
+					padding: 10px !important;
+					box-sizing: border-box !important;
+				}
 			}
 				
 				/* Outlook specific */
@@ -403,8 +438,10 @@ class Email_Renderer {
 		$section_style_string = $this->build_style_string( $section_styles );
 
 		// Outer section table wrapper
-		$html  = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
-		$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_style_string . '">';
+		// Add min-width to force mobile stacking - email client compatible
+		$section_table_style = $section_style_string . ' min-width: 600px; width: 100%;';
+		$html                = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
+		$html               .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_table_style . '">';
 
 		// Render columns
 		if ( ! empty( $section['columns'] ) ) {
@@ -418,8 +455,6 @@ class Email_Renderer {
 
 			// Only render row if we have valid columns
 			if ( ! empty( $valid_columns ) ) {
-				$html .= '<tr>';
-
 				// Calculate total ratio to convert ratio-based widths to percentages
 				// Only include valid columns in the calculation
 				$total_ratio = 0;
@@ -427,6 +462,24 @@ class Email_Renderer {
 					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 					$total_ratio += $column_width;
 				}
+
+				// Build mobile divs first (outside table structure)
+				foreach ( $valid_columns as $column_index => $column ) {
+					// Build column content
+					$column_content  = '';
+					$column_content .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
+					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
+						$column_content .= $this->render_column_blocks( $column['blocks'], $contact );
+					}
+					$column_content .= '</table>';
+
+					// Mobile wrapper div (hidden on desktop, shown on mobile) - outside table structure
+					$mobile_div_style = 'display: none; max-height: 0; overflow: hidden; width: 100%; padding: 10px; box-sizing: border-box;';
+					$html            .= '<!--[if !mso]><!--><div class="mobile-column-' . $column_index . '" style="' . $mobile_div_style . '">' . $column_content . '</div><!--<![endif]-->';
+				}
+
+				// Desktop table row
+				$html .= '<tr>';
 
 				foreach ( $valid_columns as $column_index => $column ) {
 					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
@@ -456,23 +509,23 @@ class Email_Renderer {
 
 					$column_style_string = $this->build_style_string( $column_styles );
 
+					// Build column content for desktop
+					$column_content  = '';
+					$column_content .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
+					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
+						$column_content .= $this->render_column_blocks( $column['blocks'], $contact );
+					}
+					$column_content .= '</table>';
+
 					// Outlook conditional comment for column
 					$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
 
-					// Standard column wrapper
-					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
-
-					// Inner table for blocks (ensures proper stacking)
-					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
-
-					// Render blocks in this column using the same logic as frontend
-					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-						$html .= $this->render_column_blocks( $column['blocks'], $contact );
-					}
-
-					$html .= '</table>'; // Close inner blocks table
-					$html .= '</td>'; // Close standard column
-					$html .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
+					// Desktop table column (hidden on mobile, shown on desktop)
+					$desktop_style = $column_style_string . ' width: ' . $width . '%;';
+					$html         .= '<td width="' . $width . '%" style="' . $desktop_style . '" class="desktop-column">';
+					$html         .= $column_content;
+					$html         .= '</td>'; // Close standard column
+					$html         .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
 				}
 
 				$html .= '</tr>';

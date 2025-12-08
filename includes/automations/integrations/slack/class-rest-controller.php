@@ -21,11 +21,35 @@ use QuillCRM\Abstracts\REST_Integration_Controller;
 class REST_Controller extends REST_Integration_Controller {
 
 	/**
-	 * Get settings schema (stub - returns empty for free version)
+	 * Get settings schema
 	 *
 	 * @return array
 	 */
 	public function get_settings_schema() {
-		return array();
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'app' => array(
+					'type'       => 'object',
+					'context'    => array( 'view' ),
+					'properties' => array(
+						'client_id'     => array(
+							'label'       => __( 'Client ID', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'context'     => array( 'view' ),
+							'description' => __( 'Your Slack App Client ID. This feature requires QuillCRM Pro.', 'quillcrm' ),
+						),
+						'client_secret' => array(
+							'label'       => __( 'Client Secret', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'context'     => array(),
+							'description' => __( 'Your Slack App Client Secret. This feature requires QuillCRM Pro.', 'quillcrm' ),
+						),
+					),
+				),
+			),
+		);
 	}
 }

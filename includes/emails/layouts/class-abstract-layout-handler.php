@@ -60,64 +60,34 @@ abstract class Abstract_Layout_Handler implements Layout_Handler_Interface {
 	}
 
 	/**
-	 * Create table wrapper with responsive support (hybrid/fluid approach)
-	 * Uses a container that allows inline-block children to stack naturally
+	 * Create table wrapper
 	 *
 	 * @param string $content Table content
 	 * @return string HTML output
 	 */
 	protected function wrap_in_table_row( string $content ): string {
-		// Hybrid layout: outer table row with inner div that has font-size:0 to remove whitespace
-		// The inline-block divs inside will stack naturally on narrow screens
 		return '<tr><td style="padding: 10px 0;">' .
-			   '<!--[if mso]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><![endif]-->' .
-			   '<div style="font-size: 0; text-align: center;">' .
-			   $content .
-			   '</div>' .
-			   '<!--[if mso]></tr></table><![endif]-->' .
+			   '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">' .
+			   '<tr>' . $content . '</tr>' .
+			   '</table>' .
 			   '</td></tr>';
 	}
 
 	/**
-	 * Create table cell with responsive stacking support (hybrid/fluid approach)
-	 * Uses inline-block divs that stack naturally on narrow screens
+	 * Create table cell
 	 *
 	 * @param string $width Width percentage
 	 * @param string $padding Padding style
 	 * @param string $content Cell content
-	 * @param string $extra_class Additional CSS class for responsive behavior
 	 * @return string HTML output
 	 */
-	protected function create_table_cell( string $width, string $padding, string $content, string $extra_class = '' ): string {
-		// Determine responsive class based on width
-		$responsive_class = 'stack-column';
-		if ( $width === '50%' ) {
-			$responsive_class .= ' side-by-side';
-		} elseif ( $width === '25%' ) {
-			$responsive_class .= ' grid-col-25';
-		} elseif ( $width === '33.33%' || $width === '33%' ) {
-			$responsive_class .= ' grid-col-33';
-		}
-		
-		if ( ! empty( $extra_class ) ) {
-			$responsive_class .= ' ' . $extra_class;
-		}
-
-		// Calculate pixel width for max-width (based on 600px container)
-		$width_num   = (float) str_replace( '%', '', $width );
-		$pixel_width = round( ( $width_num / 100 ) * 600 );
-		
-		// Hybrid approach: use inline-block div that stacks naturally
-		// This works without media queries in Gmail Web
-		$html  = '<!--[if mso]><td width="' . $pixel_width . '" style="vertical-align: top; ' . $padding . '"><![endif]-->';
-		$html .= '<div class="' . $responsive_class . '" style="display: inline-block; width: 100%; max-width: ' . $pixel_width . 'px; vertical-align: top;">';
-		$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
-		$html .= '<tr><td style="' . $padding . '">' . $content . '</td></tr>';
-		$html .= '</table>';
-		$html .= '</div>';
-		$html .= '<!--[if mso]></td><![endif]-->';
-		
-		return $html;
+	protected function create_table_cell( string $width, string $padding, string $content ): string {
+		return sprintf(
+			'<td width="%s" style="vertical-align: top; %s">%s</td>',
+			$width,
+			$padding,
+			$content
+		);
 	}
 
 	/**

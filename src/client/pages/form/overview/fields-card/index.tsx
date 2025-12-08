@@ -15,13 +15,11 @@ import {
 	List as AntList,
 	Typography,
 	Flex,
-	Popover,
 	Button,
 	Tag as AntTag,
 } from 'antd';
-import { MoreOutlined } from '@ant-design/icons';
 import { map, isEmpty } from 'lodash';
-
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 /**
  * Internal dependencies
  */
@@ -35,8 +33,9 @@ import type {
 	ListsResponse,
 	TagsResponse,
 } from '@quillcrm/client';
+import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 const FieldsCard: React.FC = () => {
-	const { form, isLoading, navigate } = useFormContext();
+	const { form, isLoading } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const fieldsSettings = form
@@ -51,7 +50,7 @@ const FieldsCard: React.FC = () => {
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 	const [savedLists, setSavedLists] = useState<List[]>([]);
 	const { createNotice } = useDispatch('quillcrm/core');
-
+	const navigate = useNavigate();
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
 			return;
@@ -165,21 +164,15 @@ const FieldsCard: React.FC = () => {
 					<Typography.Text strong>
 						{__('Fields', 'quillcrm')}
 					</Typography.Text>
-					<Popover
-						content={
-							<Button
-								type="link"
-								onClick={() => {
-									navigate?.(`forms/${form?.id}/settings`);
-								}}
-							>
-								{__('Edit', 'quillcrm')}
-							</Button>
-						}
-						trigger="click"
+					<Button
+						type="link"
+						onClick={() => {
+							navigate(getToLink(`forms/${form?.id}/settings`));
+						}}
 					>
-						<MoreOutlined />
-					</Popover>
+						<EditHeaderIcon />
+						{__('Edit', 'quillcrm')}
+					</Button>
 				</Flex>
 			}
 			style={{ marginTop: 20 }}

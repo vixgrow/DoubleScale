@@ -45,6 +45,7 @@ use QuillCRM\User_Roles\User_Roles;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\Database\Install;
+use QuillCRM\Site\Site;
 
 
 /**
@@ -257,6 +258,7 @@ final class QuillCRM {
 		User_Roles::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro
 		Install::init();
+		Site::instance();
 	}
 
 	/**

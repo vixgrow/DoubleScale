@@ -203,53 +203,14 @@ class Email_Renderer {
 				a { text-decoration: none; }
 				a:hover { text-decoration: underline !important; }
 				
-				/* Desktop grid columns */
-				.side-by-side { width: 50%; max-width: 50%; }
-				.grid-col-25 { width: 25%; max-width: 25%; }
-				.grid-col-33 { width: 33.33%; max-width: 33.33%; }
-				.grid-col-50 { width: 50%; max-width: 50%; }
-				
-				/* Mobile responsiveness - stack columns on all mobile devices */
-				/* Using same breakpoint as Omnisend (1000px) for reliable mobile detection */
-				@media screen and (max-width: 1000px) {
-					.email-container { width: 100% !important; }
-					.mobile-padding { padding: 10px !important; }
-					.mobile-hide { display: none !important; }
-					.mobile-center { text-align: center !important; }
-					.mobile-full-width { width: 100% !important; }
-					
-					/* Stack all multi-column layouts */
-					.stack-column {
-						display: block !important;
-						width: 100% !important;
-						min-width: 100% !important;
-						max-width: none !important;
-						padding: 12px 0 !important;
-						box-sizing: border-box !important;
-					}
-					.stack-column-table {
-						width: 100% !important;
-					}
-					.side-by-side {
-						display: block !important;
-						width: 100% !important;
-						max-width: none !important;
-						padding: 12px 0 !important;
-					}
-					.grid-col-25, .grid-col-33, .grid-col-50 {
-						display: block !important;
-						width: 100% !important;
-						max-width: none !important;
-						padding: 12px 0 !important;
-					}
-				}
-				
-				/* Extra small devices - even more aggressive */
-				@media screen and (max-width: 480px) {
-					.stack-column, .side-by-side, .grid-col-25, .grid-col-33, .grid-col-50 {
-						padding: 8px 0 !important;
-					}
-				}
+			/* Mobile responsiveness */
+			@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
+				.email-container { width: 100% !important; }
+				.mobile-padding { padding: 10px !important; }
+				.mobile-hide { display: none !important; }
+				.mobile-center { text-align: center !important; }
+				.mobile-full-width { width: 100% !important; }
+			}
 				
 				/* Outlook specific */
 				<!--[if mso]>
@@ -445,7 +406,7 @@ class Email_Renderer {
 		$html  = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
 		$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_style_string . '">';
 
-		// Render columns using hybrid/fluid approach for responsive stacking
+		// Render columns
 		if ( ! empty( $section['columns'] ) ) {
 			// First, filter out columns with no valid content
 			$valid_columns = array();
@@ -457,71 +418,64 @@ class Email_Renderer {
 
 			// Only render row if we have valid columns
 			if ( ! empty( $valid_columns ) ) {
+				$html .= '<tr>';
+
 				// Calculate total ratio to convert ratio-based widths to percentages
+				// Only include valid columns in the calculation
 				$total_ratio = 0;
 				foreach ( $valid_columns as $column ) {
 					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 					$total_ratio += $column_width;
 				}
 
-				// Multi-column layout: use hybrid approach with inline-block divs
-				if ( count( $valid_columns ) > 1 ) {
-					$html .= '<tr><td style="padding: 0;">';
-					// Outlook table wrapper for multi-column
-					$html .= '<!--[if mso]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><![endif]-->';
-					// Container div with font-size:0 to remove whitespace between inline-block elements
-					$html .= '<div style="font-size: 0; text-align: left;">';
+				foreach ( $valid_columns as $column_index => $column ) {
+					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 
-					foreach ( $valid_columns as $column_index => $column ) {
-						$column_width = isset( $column['width'] ) ? $column['width'] : 1;
-						$width        = ( $column_width / $total_ratio ) * 100;
-						$width        = round( $width, 2 );
-						$pixel_width  = round( ( $width / 100 ) * 600 );
+					// Calculate width as ratio-based to handle all layout patterns
+					$width = ( $column_width / $total_ratio ) * 100;
+					$width = round( $width, 2 );
 
-						// Determine responsive class based on width
-						$responsive_class = 'stack-column';
-						if ( $width >= 49 && $width <= 51 ) {
-							$responsive_class .= ' side-by-side';
-						} elseif ( $width >= 24 && $width <= 26 ) {
-							$responsive_class .= ' grid-col-25';
-						} elseif ( $width >= 32 && $width <= 34 ) {
-							$responsive_class .= ' grid-col-33';
+					// Calculate pixel width for Outlook (600px max width container)
+					$pixel_width = round( ( $width / 100 ) * 600 );
+
+					// Column styles - ensuring proper vertical alignment and spacing
+					$column_styles = array(
+						'vertical-align'   => 'top',
+						'padding'          => '10px 10px',
+						'mso-table-lspace' => '0pt',
+						'mso-table-rspace' => '0pt',
+					);
+
+					// Add column-specific styles if available
+					if ( isset( $column['styles'] ) ) {
+						foreach ( $column['styles'] as $property => $value ) {
+							$css_property                   = $this->convert_camel_to_kebab( $property );
+							$column_styles[ $css_property ] = $value;
 						}
-
-						// Outlook conditional column
-						$html .= '<!--[if mso]><td width="' . $pixel_width . '" style="vertical-align: top;"><![endif]-->';
-
-						// Hybrid inline-block div that stacks naturally on narrow screens
-						$html .= '<div class="' . $responsive_class . '" style="display: inline-block; width: 100%; max-width: ' . $pixel_width . 'px; vertical-align: top; font-size: 14px;">';
-						$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
-
-						// Render blocks in this column
-						if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-							$html .= $this->render_column_blocks( $column['blocks'], $contact );
-						}
-
-						$html .= '</table>';
-						$html .= '</div>';
-						$html .= '<!--[if mso]></td><![endif]-->';
 					}
 
-					$html .= '</div>';
-					$html .= '<!--[if mso]></tr></table><![endif]-->';
-					$html .= '</td></tr>';
-				} else {
-					// Single column: use simple table row
-					$html .= '<tr>';
-					foreach ( $valid_columns as $column ) {
-						$html .= '<td style="vertical-align: top; padding: 10px;">';
-						$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
-						if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-							$html .= $this->render_column_blocks( $column['blocks'], $contact );
-						}
-						$html .= '</table>';
-						$html .= '</td>';
+					$column_style_string = $this->build_style_string( $column_styles );
+
+					// Outlook conditional comment for column
+					$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
+
+					// Standard column wrapper
+					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
+
+					// Inner table for blocks (ensures proper stacking)
+					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
+
+					// Render blocks in this column using the same logic as frontend
+					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
+						$html .= $this->render_column_blocks( $column['blocks'], $contact );
 					}
-					$html .= '</tr>';
+
+					$html .= '</table>'; // Close inner blocks table
+					$html .= '</td>'; // Close standard column
+					$html .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
 				}
+
+				$html .= '</tr>';
 			}
 		}
 

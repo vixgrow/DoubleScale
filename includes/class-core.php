@@ -24,6 +24,7 @@ use QuillCRM_Pro\Managers\Rules_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Site\License;
 // use QuillCRM\Managers\Pipeline_Manager; // Moved to Pro
 // use QuillCRM\Managers\Deal_Manager; // Moved to Pro
 
@@ -58,6 +59,12 @@ class Core {
 		// Get QuillSMTP connection info
 		$quillsmtp_info = self::get_quillsmtp_connection_info();
 
+		// Get license info
+		$license_info = License::instance()->get_license_info();
+
+		// Get pro plugin data
+		$pro_plugin_data = self::get_pro_plugin_data();
+
 		wp_add_inline_script(
 			'qcrm-config',
 			'qcrm.config.setBlogName("' . get_bloginfo( 'name' ) . '");' .
@@ -91,7 +98,33 @@ class Core {
 					: 'qcrm.config.setDealPriorities( [] );' ) .
 				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');' .
 				'qcrm.config.setCurrency( "' . Settings::get_currency() . '" );' .
-				'qcrm.config.setUrlQuillCRMPro( "' . $url_quillcrm_pro . '" );'
+				'qcrm.config.setUrlQuillCRMPro( "' . $url_quillcrm_pro . '" );' .
+				'qcrm.config.setLicense( ' . ( $license_info ? wp_json_encode( $license_info ) : 'false' ) . ' );' .
+				'qcrm.config.setProPluginData( ' . wp_json_encode( $pro_plugin_data ) . ' );'
+		);
+	}
+
+	/**
+	 * Get pro plugin data
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array Pro plugin data including installation and activation status
+	 */
+	private static function get_pro_plugin_data() {
+		if ( ! function_exists( 'is_plugin_active' ) || ! function_exists( 'get_plugin_data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
+		$plugins_dir      = trailingslashit( dirname( dirname( QUILLCRM_PLUGIN_FILE ) ) );
+		$plugin_file      = 'QuillCRM-pro/quillcrm-pro.php';
+		$full_plugin_file = $plugins_dir . $plugin_file;
+		$plugin_exists    = file_exists( $full_plugin_file );
+
+		return array(
+			'is_installed' => $plugin_exists,
+			'is_active'    => is_plugin_active( $plugin_file ),
 		);
 	}
 

@@ -29,7 +29,7 @@ import {
 	NoticeBanner,
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
-import { useParams, useNavigate } from 'react-router-dom';
+import { getToLink, useNavigate, useParams } from '@quillcrm/navigation';
 
 interface FormProps {
 	isNewForm?: boolean;
@@ -247,7 +247,7 @@ const Form: React.FC<FormProps> = ({
 				if (onClose) {
 					onClose();
 				} else {
-					navigate('/forms');
+					navigate(getToLink('forms'));
 				}
 
 				if (onSuccess) {
@@ -266,7 +266,7 @@ const Form: React.FC<FormProps> = ({
 		} else {
 			// For existing forms, navigate back to forms list
 			if (!isNewForm) {
-				navigate('/forms');
+				navigate(getToLink('forms'));
 			}
 			// For new forms in modal, just close
 			if (isNewForm && onClose) {
@@ -282,7 +282,7 @@ const Form: React.FC<FormProps> = ({
 			if (isNewForm && onClose) {
 				onClose();
 			} else {
-				navigate('/forms');
+				navigate(getToLink('forms'));
 			}
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -301,9 +301,6 @@ const Form: React.FC<FormProps> = ({
 					href: 'forms',
 				},
 				{
-					label: __('Form Information', 'quillcrm'),
-				},
-				{
 					label: stepTitles[currentStep],
 				},
 			]
@@ -314,6 +311,7 @@ const Form: React.FC<FormProps> = ({
 				},
 				{
 					label: __('Form Information', 'quillcrm'),
+					href: 'forms',
 				},
 				{
 					label: stepTitles[currentStep],
@@ -392,7 +390,6 @@ const Form: React.FC<FormProps> = ({
 				}
 				showSaveDraft={true}
 				isLoading={isSaving}
-				handleNavigate={() => navigate('/forms')}
 			>
 				{notice && (
 					<NoticeBanner

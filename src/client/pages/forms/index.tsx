@@ -36,7 +36,7 @@ import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { formatDateForAPI } from '@quillcrm/utils';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
 import Form from '../form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -274,11 +274,11 @@ const FormsList: React.FC = () => {
 				<Form
 					isNewForm={true}
 					onClose={() => {
-						navigate('/forms');
+						navigate(getToLink('forms'));
 						handleFormCreated('Form created successfully');
 					}}
 					onSuccess={(message: string) => {
-						navigate('/forms');
+						navigate(getToLink('forms'));
 						handleFormCreated(message);
 					}}
 				/>

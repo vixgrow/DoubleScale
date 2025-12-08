@@ -203,14 +203,60 @@ class Email_Renderer {
 				a { text-decoration: none; }
 				a:hover { text-decoration: underline !important; }
 				
-			/* Mobile responsiveness */
-			@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
-				.email-container { width: 100% !important; }
-				.mobile-padding { padding: 10px !important; }
-				.mobile-hide { display: none !important; }
-				.mobile-center { text-align: center !important; }
-				.mobile-full-width { width: 100% !important; }
-			}
+				/* Desktop grid columns */
+				.side-by-side { width: 50%; max-width: 50%; }
+				.grid-col-25 { width: 25%; max-width: 25%; }
+				.grid-col-33 { width: 33.33%; max-width: 33.33%; }
+				.grid-col-50 { width: 50%; max-width: 50%; }
+				
+				/* Mobile responsiveness - tablets */
+				@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
+					.email-container { width: 100% !important; }
+					.mobile-padding { padding: 10px !important; }
+					.mobile-hide { display: none !important; }
+					.mobile-center { text-align: center !important; }
+					.mobile-full-width { width: 100% !important; }
+				}
+				
+				/* Mobile responsiveness - phones: stack all grid columns */
+				@media only screen and (max-width: 480px) {
+					.stack-column {
+						display: block !important;
+						width: 100% !important;
+						min-width: 100% !important;
+						max-width: 100% !important;
+						direction: ltr !important;
+						padding: 10px 0 !important;
+						box-sizing: border-box !important;
+					}
+					.stack-column-table {
+						width: 100% !important;
+					}
+					.mobile-full-width {
+						display: block !important;
+						width: 100% !important;
+						min-width: 100% !important;
+						max-width: 100% !important;
+						padding: 10px 0 !important;
+					}
+					.side-by-side {
+						display: block !important;
+						width: 100% !important;
+						max-width: 100% !important;
+						padding: 10px 0 !important;
+					}
+					.grid-col-25, .grid-col-33, .grid-col-50 {
+						display: block !important;
+						width: 100% !important;
+						max-width: 100% !important;
+						padding: 10px 0 !important;
+					}
+					/* Reset padding for stacked columns */
+					.stack-column td, .mobile-full-width td {
+						padding-left: 0 !important;
+						padding-right: 0 !important;
+					}
+				}
 				
 				/* Outlook specific */
 				<!--[if mso]>
@@ -456,11 +502,21 @@ class Email_Renderer {
 
 					$column_style_string = $this->build_style_string( $column_styles );
 
+					// Determine responsive class based on width for mobile stacking
+					$responsive_class = 'stack-column mobile-full-width';
+					if ( $width >= 49 && $width <= 51 ) {
+						$responsive_class .= ' side-by-side';
+					} elseif ( $width >= 24 && $width <= 26 ) {
+						$responsive_class .= ' grid-col-25';
+					} elseif ( $width >= 32 && $width <= 34 ) {
+						$responsive_class .= ' grid-col-33';
+					}
+
 					// Outlook conditional comment for column
 					$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
 
-					// Standard column wrapper
-					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
+					// Standard column wrapper with responsive classes
+					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="' . $responsive_class . '">';
 
 					// Inner table for blocks (ensures proper stacking)
 					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';

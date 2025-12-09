@@ -18,7 +18,7 @@ import {
 
 interface CategoryData {
     [key: string]: {
-        image: string | React.ReactNode;
+        image: React.ReactNode;
         description: string;
     };
 }
@@ -54,16 +54,8 @@ const ActionSelectorCard: React.FC<ActionSelectorCardProps> = ({
                         >
                             <div className="flex items-center space-x-4">
                                 {categoryData[index] && categoryData[index].image && (
-                                    <div className="flex-shrink-0 w-12 h-12 border rounded-md p-2">
-                                        {typeof categoryData[index].image === 'string' ? (
-                                            <img
-                                                src={categoryData[index].image as string}
-                                                alt={action.label}
-                                                className="w-full h-full object-contain"
-                                            />
-                                        ) : (
-                                            categoryData[index].image
-                                        )}
+                                    <div className="flex-shrink-0 w-12 h-12 border rounded-md p-2 flex items-center justify-center">
+                                        {categoryData[index].image}
                                     </div>
                                 )}
                                 <div className="flex-1">

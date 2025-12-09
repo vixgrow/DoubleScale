@@ -41,7 +41,7 @@ class Communication_Tracking_Table extends Migration {
 		  * hash_key: VARCHAR(255) NOT NULL
 		  * mode: TINYINT(1) NOT NULL COMMENT '1=Email, 2=SMS, 3=WhatsApp'
 		  * source_type: TINYINT(2) NOT NULL DEFAULT 1 COMMENT '1=Campaign, 2=Automation, 3=Individual'
-		  * source_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'ID of the source (campaign_id or automation_id, NULL for individual)'
+		  * source_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'Polymorphic FK: campaign_id, automation_id, or activity_id (for individuals)'
 		  * step_id: BIGINT(20) NULL DEFAULT NULL COMMENT 'Automation step ID (NULL for campaigns/individual)'
 		  * author_id: BIGINT(20) UNSIGNED DEFAULT 0 COMMENT 'User ID who sent the message (for individual sends)'
 		  * recipient: VARCHAR(255) NOT NULL COMMENT 'Email address or phone number'
@@ -53,15 +53,17 @@ class Communication_Tracking_Table extends Migration {
 		  * clicked_at: TIMESTAMP
 		  * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		  * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		  *
+		  * NOTE: activity_id column has been removed - use source_id + source_type instead
+		  * For individual messages (source_type=3), source_id points to activities table
 		  */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
-            activity_id BIGINT(20) NULL COMMENT "FK to activities table - links tracking to activity",
             contact_id BIGINT(20) NOT NULL,
             template_id BIGINT(20) NULL DEFAULT NULL COMMENT "NULL for individual messages",
             hash_key VARCHAR(255) NOT NULL,
             mode TINYINT(1) NOT NULL COMMENT "1=Email, 2=SMS, 3=WhatsApp",
             source_type TINYINT(2) NOT NULL DEFAULT 1 COMMENT "1=Campaign, 2=Automation, 3=Individual",
-            source_id BIGINT(20) NULL DEFAULT NULL COMMENT "ID of the source (campaign_id or automation_id, NULL for individual)",
+            source_id BIGINT(20) NULL DEFAULT NULL COMMENT "Polymorphic FK: campaign_id, automation_id, or activity_id (for individuals)",
             step_id BIGINT(20) NULL DEFAULT NULL COMMENT "Automation step ID (NULL for campaigns/individual)",
             author_id BIGINT(20) UNSIGNED DEFAULT 0 COMMENT "User ID who sent the message (for individual sends)",
             recipient VARCHAR(255) NOT NULL COMMENT "Email address or phone number",
@@ -75,13 +77,13 @@ class Communication_Tracking_Table extends Migration {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            KEY activity_id (activity_id),
             KEY contact_id (contact_id),
             KEY template_id (template_id),
             KEY hash_key (hash_key),
             KEY mode (mode),
             KEY source_type (source_type),
             KEY source_id (source_id),
+            KEY idx_source_polymorphic (source_type, source_id),
             KEY step_id (step_id),
             KEY author_id (author_id),
             KEY recipient (recipient),

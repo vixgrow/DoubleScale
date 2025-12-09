@@ -161,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({
 
 						<Button
 							variant="default"
-							className="px-3"
+							className="px-3 min-w-[200px]"
 							onClick={handleSaveAndContinue}
 							disabled={isSaving || isBuilderEmpty}
 						>

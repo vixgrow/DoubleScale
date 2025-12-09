@@ -83,7 +83,7 @@ abstract class Abstract_Layout_Handler implements Layout_Handler_Interface {
 	 */
 	protected function create_table_cell( string $width, string $padding, string $content ): string {
 		return sprintf(
-			'<td width="%s" style="vertical-align: top; %s">%s</td>',
+			'<td width="%s" class="gallery-item" style="vertical-align: top; %s">%s</td>',
 			$width,
 			$padding,
 			$content

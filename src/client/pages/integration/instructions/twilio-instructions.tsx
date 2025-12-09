@@ -146,8 +146,9 @@ const TwilioInstructions: React.FC = () => {
                             </Alert>
                         </div>
 
-                        {/* WhatsApp Webhook */}
-                        <div className="space-y-2">
+                        {/* WhatsApp Webhook - Future Implementation */}
+                        {/* TODO: Uncomment when WhatsApp two-way messaging is implemented */}
+                        {/* <div className="space-y-2">
                             <h4 className="font-medium text-sm text-gray-900">
                                 {webhooks.whatsapp.name}
                             </h4>
@@ -179,7 +180,7 @@ const TwilioInstructions: React.FC = () => {
                                     {webhooks.whatsapp.description}
                                 </AlertDescription>
                             </Alert>
-                        </div>
+                        </div> */}
 
                         {/* Configuration Instructions */}
                         <div className="pt-4 border-t border-gray-200">
@@ -188,10 +189,10 @@ const TwilioInstructions: React.FC = () => {
                             </p>
                             <ol className="list-decimal list-inside space-y-1 text-xs text-gray-700">
                                 <li>{__('Go to Twilio Console → Phone Numbers → Manage → Active numbers', 'quillcrm')}</li>
-                                <li>{__('Select your SMS/WhatsApp enabled phone number', 'quillcrm')}</li>
+                                <li>{__('Select your SMS-enabled phone number', 'quillcrm')}</li>
                                 <li>{__('Scroll to "Messaging Configuration"', 'quillcrm')}</li>
                                 <li>{__('Under "A MESSAGE COMES IN", select "Webhook"', 'quillcrm')}</li>
-                                <li>{__('Paste the webhook URL from above', 'quillcrm')}</li>
+                                <li>{__('Paste the SMS webhook URL from above', 'quillcrm')}</li>
                                 <li>{__('Set HTTP method to "POST"', 'quillcrm')}</li>
                                 <li>{__('Click "Save"', 'quillcrm')}</li>
                             </ol>

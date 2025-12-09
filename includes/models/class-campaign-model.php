@@ -749,6 +749,7 @@ class Campaign_Model extends Model {
 				unset( $campaign->failed_count );
 				unset( $campaign->opened_count );
 				unset( $campaign->clicked_count );
+				unset( $campaign->unsubscribed_count );
 
 				unset( $campaign->is_attached );
 

@@ -1,0 +1,14 @@
+.qcrm-overview-fields-list {
+	.ant-list-item {
+		width: 100%;
+		.ant-flex {
+			width: 100%;
+			.ant-typography:first-child {
+				flex: 1;
+			}
+			.ant-typography:last-child {
+				flex: 3;
+			}
+		}
+	}
+}

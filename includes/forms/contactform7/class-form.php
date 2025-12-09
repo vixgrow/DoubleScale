@@ -22,7 +22,6 @@ class Form extends Abstracts_Form {
 
 
 
-
 	/**
 	 * Slug
 	 *
@@ -84,7 +83,10 @@ class Form extends Abstracts_Form {
 
 		$form_fields = $form->scan_form_tags();
 		foreach ( $form_fields as $field ) {
-			$fields[ $field->name ] = $field->name;
+			$fields[ $field->name ] = array(
+				'label' => $field->name,
+				'type'  => $field->type,
+			);
 		}
 
 		return $fields;

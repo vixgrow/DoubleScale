@@ -21,6 +21,9 @@ use QuillForms\Managers\Blocks_Manager;
 class Form_Utils {
 
 
+
+
+
 	/**
 	 * Form id
 	 *
@@ -117,7 +120,10 @@ class Form_Utils {
 					$field_id
 				);
 			}
-			$fields[ $field_id ] = $field_label;
+			$fields[ $field_id ] = array(
+				'label' => $field_label,
+				'type'  => $field['name'],
+			);
 		}
 
 		return $fields;

@@ -1,8 +1,9 @@
 <?php
 /**
- * Class Slack
+ * Class Slack (Free Version Stub)
  *
- * This class is responsible for handling the Slack integration
+ * This is a stub integration that shows "Pro Feature" notice in free plugin
+ * The Pro plugin will override this with the actual Slack integration
  *
  * @since 1.0.0
  *
@@ -15,7 +16,7 @@ use QuillCRM\Abstracts\Integration as Integration_Abstract;
 use QuillCRM\Managers\Integrations_Manager;
 
 /**
- * Slack class
+ * Slack stub class for free plugin
  */
 class Integration extends Integration_Abstract {
 
@@ -47,11 +48,22 @@ class Integration extends Integration_Abstract {
 	public $description = 'Slack is a digital headquarters that brings all your work communication and tools together in one place, like a shared workspace for your team.';
 
 	/**
-	 * App
+	 * Is Pro feature
 	 *
-	 * @var App
+	 * @var bool
+	 *
+	 * @since 1.0.0
 	 */
-	public $app;
+	public $is_pro = true;
+
+	/**
+	 * Option name
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 */
+	public $option_name = 'slack';
 
 	/**
 	 * Class names
@@ -67,35 +79,44 @@ class Integration extends Integration_Abstract {
 	 * Constructor
 	 */
 	public function __construct() {
+		// Call parent constructor to initialize REST controller and remote data
 		parent::__construct();
-
-		$this->app = new App( $this );
 	}
 
 	/**
-	 * Connect the integration
+	 * Connect the integration (stub - always returns false)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return bool|API
+	 * @return bool
 	 */
 	public function connect() {
-		if ( $this->api instanceof API ) {
-			return $this->api;
-		}
+		return false;
+	}
 
-		$tokens        = $this->get_setting( 'credentials', array() );
-		$access_token  = $tokens['access_token'] ?? '';
-		$refresh_token = $tokens['refresh_token'] ?? '';
+	/**
+	 * Validate (stub - always returns error)
+	 *
+	 * @param array $settings Settings.
+	 *
+	 * @return \WP_Error
+	 */
+	public function validate( $settings ) {
+		return new \WP_Error( 'pro_feature', __( 'Slack integration is a Pro feature. Please upgrade to QuillCRM Pro.', 'quillcrm' ) );
+	}
 
-		if ( empty( $access_token ) ) {
-			return false;
-		}
-
-		$this->api = new API( $access_token, $refresh_token, $this->app );
-
-		return $this->api;
+	/**
+	 * Get fields (returns empty array in free version)
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array();
 	}
 }
 
-Integrations_Manager::instance()->register( new Integration() );
+// Register the stub integration in free plugin ONLY if Pro is not active
+// Pro plugin will register the real Slack integration instead
+if ( ! class_exists( 'QuillCRM_Pro\Automations\Integrations\Slack\Integration' ) ) {
+	Integrations_Manager::instance()->register( new Integration() );
+}

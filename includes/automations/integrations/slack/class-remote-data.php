@@ -1,8 +1,9 @@
 <?php
 /**
- * Class Slack Remote Data
+ * Class Slack Remote Data (Free Version Stub)
  *
- * This class is responsible for handling the Slack Remote Data
+ * This is a stub remote data handler for the free plugin
+ * The Pro plugin will override this with the actual implementation
  *
  * @since 1.0.0
  *
@@ -14,81 +15,16 @@ namespace QuillCRM\Automations\Integrations\Slack;
 use QuillCRM\Abstracts\Integration_Remote_Data;
 
 /**
- * Slack Remote Data class
+ * Slack Remote Data stub for free plugin
  */
 class Remote_Data extends Integration_Remote_Data {
 
 	/**
-	 * Entities.
+	 * Entities (empty in free version).
 	 *
 	 * @since 1.0.0
 	 *
 	 * @var array
 	 */
-	protected $entities = array(
-		'user'          => array(
-			'callback' => 'fetch_user',
-		),
-		'conversations' => array(
-			'callback' => 'fetch_conversations',
-		),
-	);
-
-	/**
-	 * Fetch user.
-	 *
-	 * @param string $user_id User ID.
-	 * @return array
-	 */
-	public function fetch_user( $user_id ) {
-		/** @var API $api */
-		$api = $this->integration->connect();
-		if ( ! $api ) {
-			return array();
-		}
-		$response = $api->get_user( $user_id );
-
-		return $response;
-	}
-
-	/**
-	 * Fetch conversations.
-	 *
-	 * @return array
-	 */
-	public function fetch_conversations() {
-		/** @var API $api */
-		$api = $this->integration->connect();
-		if ( ! $api ) {
-			return array();
-		}
-
-		$cursor = null;
-
-		$response = $api->get_conversations(
-			array(
-				'cursor' => $cursor,
-				'limit'  => 200,
-				'types'  => 'public_channel,private_channel,mpim,im',
-			)
-		);
-		$result   = array();
-
-		if ( ! $response['success'] ) {
-			return $result;
-		}
-
-		foreach ( $response['data']['channels'] as $channel ) {
-			if ( ! isset( $channel['name'] ) ) {
-				continue;
-			}
-
-			$result[] = array(
-				'value' => $channel['id'],
-				'label' => $channel['name'],
-			);
-		}
-
-		return $result;
-	}
+	protected $entities = array();
 }

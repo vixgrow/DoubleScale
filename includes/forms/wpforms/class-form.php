@@ -20,6 +20,10 @@ use QuillCRM\Managers\Forms_Manager;
  */
 class Form extends Abstracts_Form {
 
+
+
+
+
 	/**
 	 * Slug
 	 *
@@ -116,7 +120,10 @@ class Form extends Abstracts_Form {
 					$fields_arr = array_merge( $fields_arr, Form_Utils::prepare_address_field( $field, $field_id ) );
 					break;
 				default:
-					$fields_arr[ $field_id ] = $label;
+					$fields_arr[ $field_id ] = array(
+						'label' => $label,
+						'type'  => $field['type'],
+					);
 					break;
 			}
 		}

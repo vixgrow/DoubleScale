@@ -27,10 +27,6 @@ use QuillCRM_Pro\Managers\Rules_Manager;
  */
 abstract class Form {
 
-
-
-
-
 	/**
 	 * Slug
 	 *
@@ -280,38 +276,72 @@ abstract class Form {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param $mapped_fields array Mapped fields
+	 * @param array $mapped_fields Mapped fields
 	 *
 	 * @return array
 	 */
 	public function get_contact_fields( $mapped_fields ) {
-		$entry          = $this->submission['entry'];
+		$entry          = $this->submission['entry'] ?? array();
 		$fields         = $this->submission['fields'] ?? array();
 		$contact_fields = Contact_Fields::instance()->get_fields();
 
 		$contact_data  = array();
 		$custom_fields = array();
+
 		foreach ( $mapped_fields as $form_field => $contact_field ) {
-			if ( ! isset( $contact_fields[ $contact_field ] ) || ! isset( $entry['fields'][ $form_field ] ) || ! isset( $fields[ $form_field ] ) ) {
+
+			// Skip if field does not exist in contact_fields definition
+			if ( ! isset( $contact_fields[ $form_field ] ) ) {
 				continue;
 			}
 
-			if ( ! class_exists( $contact_fields[ $contact_field ]['type'] ) ) {
+			// Determine the raw value source (merge tags OR direct field mapping)
+			$raw_value = null;
+
+			if ( $this->has_form_merge_tags( $contact_field ) ) {
+				$raw_value = $this->resolve_form_merge_tags(
+					$contact_field,
+					$entry['fields'] ?? array()
+				);
+			} else {
+				// Normal field mapping
+				if ( ! isset( $entry['fields'][ $contact_field ] ) || ! isset( $fields[ $contact_field ] ) ) {
+					continue;
+				}
+				$raw_value = $entry['fields'][ $contact_field ];
+			}
+
+			// Validate class existence
+			if ( ! class_exists( $contact_fields[ $form_field ]['type'] ) ) {
 				throw new Exception( 'Invalid field type' );
 			}
+
+			// Initialize field type
 			/** @var \QuillCRM_Pro\Abstracts\Field_Type $field_type */
-			$field_type = new $contact_fields[ $contact_field ]['type']( $contact_fields[ $contact_field ] );
-			$form_field = $field_type->sanitize_field( $entry['fields'][ $form_field ] );
-			if ( 'country' === $contact_field ) {
-				$form_field = quillcrm_get_country_code( $form_field );
+			$field_type = new $contact_fields[ $form_field ]['type'](
+				$contact_fields[ $form_field ]
+			);
+
+			// Sanitize
+			$value = $field_type->sanitize_field( $raw_value );
+
+			// Special: Country
+			if ( $form_field === 'country' ) {
+				$value = quillcrm_get_country_code( $value );
 			}
-			$field_type->validate_value( $form_field );
-			if ( $field_type->is_valid ) {
-				if ( $contact_fields[ $contact_field ]['is_custom'] ?? false ) {
-					$custom_fields[ $contact_field ] = $form_field;
-				} else {
-					$contact_data[ $contact_field ] = $form_field;
-				}
+
+			// Validate
+			$field_type->validate_value( $value );
+
+			if ( ! $field_type->is_valid ) {
+				continue;
+			}
+
+			// Save to custom or standard fields
+			if ( $contact_fields[ $form_field ]['is_custom'] ?? false ) {
+				$custom_fields[ $form_field ] = $value;
+			} else {
+				$contact_data[ $form_field ] = $value;
 			}
 		}
 
@@ -319,6 +349,59 @@ abstract class Form {
 			'fields'        => $contact_data,
 			'custom_fields' => $custom_fields,
 		);
+	}
+
+
+	/**
+	 * Check if value contains form merge tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value Value to check
+	 *
+	 * @return bool
+	 */
+	private function has_form_merge_tags( $value ) {
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+		return preg_match( '/\{\{form:[^}]+\}\}/', $value ) === 1;
+	}
+
+	/**
+	 * Resolve form merge tags in a value
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value Value with merge tags
+	 * @param array  $entry_fields Entry fields data
+	 *
+	 * @return string Resolved value
+	 */
+	private function resolve_form_merge_tags( $value, $entry_fields ) {
+
+		$resolved_value = preg_replace_callback(
+			'/\{\{form:([^}]+)\}\}/',
+			function ( $matches ) use ( $entry_fields ) {
+				$field_key = $matches[1];
+
+				// Check if the field exists in entry fields
+				if ( isset( $entry_fields[ $field_key ] ) ) {
+					$field_value = $entry_fields[ $field_key ];
+
+					// Handle array values (for checkboxes, multi-select, etc.)
+					if ( is_array( $field_value ) ) {
+						return implode( ', ', $field_value );
+					}
+
+					return (string) $field_value;
+				}
+				return '';
+			},
+			$value
+		);
+
+		return $resolved_value;
 	}
 
 	/**

@@ -19,6 +19,7 @@ import {
 	AutomationsIcon,
 	DealsIcon,
 	ListsIcon,
+	PremiumIcon,
 } from '@quillcrm/components';
 import type { DashboardData } from '@quillcrm/client';
 
@@ -88,18 +89,18 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						label={__('Total Deals', 'quillcrm')}
 						value={data.deals || 0}
 						icon={<DealsIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4EEFD]"
-						borderColorClass="border-l-secondary"
-						iconColor="text-secondary"
+						iconBgClass="bg-[#FAF3DF]"
+						borderColorClass="border-l-[#A67D0A]"
+						iconColor="text-[#A67D0A]"
 					/>
 				) : (
 					<ProStatCard
 						label={__('Total Deals', 'quillcrm')}
 						value={data.deals || 0}
-						icon={<DealsIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4EEFD]"
-						borderColorClass="border-l-secondary"
-						iconColor="text-secondary"
+						icon={<PremiumIcon width={35} height={35} />}
+						iconBgClass="bg-[#FAEADF]"
+						borderColorClass="border-l-[#A67D0A]"
+						iconColor="text-[#CB5301]"
 					/>
 				)}
 
@@ -117,10 +118,10 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					<ProStatCard
 						label={__('Deals Closed Won ', 'quillcrm')}
 						value={data.deals_closed_won || 0}
-						icon={<DealsClosedWonIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4FAEC]"
+						icon={<PremiumIcon width={35} height={35} />}
+						iconBgClass="bg-[#FAEADF]"
 						borderColorClass="border-l-[#16A34A]"
-						iconColor="text-[#16A34A]"
+						iconColor="text-[#CB5301]"
 					/>
 				)}
 
@@ -138,10 +139,10 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					<ProStatCard
 						label={__('Deals Won Value', 'quillcrm')}
 						value={data.deals_won_value || 0}
-						icon={<DealsWonValueIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4FAEC]"
+						icon={<PremiumIcon width={35} height={35} />}
+						iconBgClass="bg-[#FAEADF]"
 						borderColorClass="border-l-[#16A34A]"
-						iconColor="text-[#16A34A]"
+						iconColor="text-[#CB5301]"
 					/>
 				)}
 			</div>

@@ -4,16 +4,10 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { Crown } from 'lucide-react';
-
-/**
  * Internal dependencies
  */
 import { MessageStatsCard } from '../message-stats-card';
 import './style.scss';
-import config from '../../config';
 
 interface ProStatCardProps {
 	label: string;
@@ -22,14 +16,12 @@ interface ProStatCardProps {
 	iconBgClass?: string;
 	borderColorClass?: string;
 	iconColor?: string;
-	upgradeUrl?: string;
 }
 
 /**
  * ProStatCard Component
  *
- * Displays a blurred stat card with a "Pro Feature" overlay for free plugin users.
- * Shows the actual stat card when Pro plugin is active.
+ * Displays a stat card with blurred value and "Pro Feature" text beside it.
  */
 export const ProStatCard: React.FC<ProStatCardProps> = ({
 	label,
@@ -38,39 +30,21 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 	iconBgClass,
 	borderColorClass,
 	iconColor,
-	upgradeUrl = config.getUrlQuillCRMPro(),
 }) => {
 	return (
 		<div className="qcrm-pro-stat-card">
-			{/* Blurred background stat card */}
-			<div className="qcrm-pro-stat-card__blurred">
-				<MessageStatsCard
-					label={label}
-					value={value}
-					icon={icon}
-					iconBgClass={iconBgClass}
-					borderColorClass={borderColorClass}
-					iconColor={iconColor}
-				/>
-			</div>
-
-			{/* Pro overlay */}
-			<div className="qcrm-pro-stat-card__overlay">
-				<div className="qcrm-pro-stat-card__content">
-					<Crown size={24} className="qcrm-pro-stat-card__icon" />
-					<span className="qcrm-pro-stat-card__text">
-						{__('Pro Feature', 'quillcrm')}
-					</span>
-					<a
-						href={upgradeUrl}
-						className="qcrm-pro-stat-card__link"
-						target="_blank"
-						rel="noopener noreferrer"
-						onClick={(e) => e.stopPropagation()}
-					>
-						{__('Upgrade', 'quillcrm')}
-					</a>
-				</div>
+			<MessageStatsCard
+				label={label}
+				value={value}
+				icon={icon}
+				iconBgClass={iconBgClass}
+				borderColorClass={borderColorClass}
+				iconColor={iconColor}
+			/>
+			<div className="qcrm-pro-stat-card__pro-feature">
+				<span className="text-lg text-[#CB5301] font-bold">
+					{__('Pro feature', 'quillcrm')}
+				</span>
 			</div>
 		</div>
 	);

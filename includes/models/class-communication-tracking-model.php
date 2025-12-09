@@ -59,13 +59,12 @@ class Communication_Tracking_Model extends Model {
 	 * @since 1.0.0
 	 */
 	protected $fillable = array(
-		'activity_id',    // FK to activities table
 		'contact_id',     // Who received the message
 		'template_id',    // Template used
 		'hash_key',       // Unique tracking hash
 		'mode',           // Email/SMS/WhatsApp
-		'source_type',    // Campaign/Automation/Manual
-		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
+		'source_type',    // Campaign/Automation/Individual
+		'source_id',      // Polymorphic FK: campaign_id, automation_id, or activity_id (for individuals)
 		'step_id',        // Automation step ID (NULL for campaigns/individual)
 		'author_id',      // User who sent the message (for individual sends)
 		'recipient',      // Email address or phone number
@@ -149,14 +148,17 @@ class Communication_Tracking_Model extends Model {
 	}
 
 	/**
-	 * Activity relationship (tracking belongs to activity)
+	 * Activity relationship (for individual messages only, via source_id)
+	 *
+	 * For individual messages (source_type = 3), source_id points to the activity.
+	 * This provides backwards compatibility and convenience.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function activity() {
-		return $this->belongsTo( Activity_Model::class, 'activity_id' );
+		return $this->belongsTo( Activity_Model::class, 'source_id' );
 	}
 
 	/**

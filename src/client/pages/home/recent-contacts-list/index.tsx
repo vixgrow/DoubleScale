@@ -9,7 +9,11 @@ import { isEmpty } from 'lodash';
 /**
  * internal dependencies
  */
-import { CalendarIcon, DashboardContentCard, FormattedDateCell } from '@quillcrm/components';
+import {
+	CalendarIcon,
+	DashboardContentCard,
+	FormattedDateCell,
+} from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
 import type { DashboardData } from '@quillcrm/client';
 import { EmptyState } from '../no-data';
@@ -37,7 +41,8 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 						const initials =
 							`${record.first_name?.[0] || ''}${record.last_name?.[0] || ''}`.toUpperCase();
 						const avatarUrl = (record as any).avatar_url;
-						const fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim();
+						const fullName =
+							`${record.first_name || ''} ${record.last_name || ''}`.trim();
 						const isLast = index === contacts.length - 1;
 
 						return (
@@ -48,7 +53,11 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 								<div className="flex items-center gap-4">
 									<Avatar className="w-12 h-12 rounded-lg">
 										{avatarUrl ? (
-											<AvatarImage src={avatarUrl} alt={fullName || record.email} className="rounded-full" />
+											<AvatarImage
+												src={avatarUrl}
+												alt={fullName || record.email}
+												className="rounded-full"
+											/>
 										) : null}
 										<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-extrabold text-lg">
 											{initials || '?'}
@@ -65,12 +74,18 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 									</NavLink>
 								</div>
 								<div className="text-base text-gray-500 flex items-center gap-2">
-									{record.created_at
-										? <>
-											<CalendarIcon/>
-											<FormattedDateCell value={record.created_at} />
+									{record.created_at ? (
+										<>
+											<div className="flex-shrink-0">
+												<CalendarIcon />
+											</div>
+											<FormattedDateCell
+												value={record.created_at}
+											/>
 										</>
-										: '-'}
+									) : (
+										'-'
+									)}
 								</div>
 							</div>
 						);

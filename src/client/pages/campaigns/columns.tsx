@@ -85,13 +85,16 @@ const getCommonColumns = ({
 			const campaign = row.original;
 			const name = row.getValue('name') as string;
 			const status = campaign.status;
+			const currentStep = campaign.settings?.current_step;
 
-			// Determine target tab based on status
-			let targetTab = 'overview';
-			if (status === CAMPAIGN_STATUS.DRAFT) {
-				targetTab = 'template';
-			} else if (status === CAMPAIGN_STATUS.SCHEDULED) {
-				targetTab = 'view';
+			// Determine target tab based on current step or status
+			let targetTab = currentStep || 'overview';
+			if (!currentStep) {
+				if (status === CAMPAIGN_STATUS.DRAFT) {
+					targetTab = 'template';
+				} else if (status === CAMPAIGN_STATUS.SCHEDULED) {
+					targetTab = 'view';
+				}
 			}
 
 			return (
@@ -175,11 +178,15 @@ const getCommonColumns = ({
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem
 								onClick={() => {
-									const targetTab =
-										campaign.status ===
+									const currentStep = campaign.settings?.current_step;
+									let targetTab = currentStep || 'overview';
+									if (!currentStep) {
+										targetTab =
+											campaign.status ===
 											CAMPAIGN_STATUS.SCHEDULED
-											? 'view'
-											: 'overview';
+												? 'view'
+												: 'overview';
+									}
 									navigate(
 										getToLink(
 											`campaigns/${campaign.id}/${targetTab}`
@@ -199,8 +206,10 @@ const getCommonColumns = ({
 							{canEdit && (
 								<DropdownMenuItem
 									onClick={() => {
+										const currentStep = campaign.settings?.current_step;
+										const targetTab = currentStep || 'template';
 										navigate(
-											getToLink(`campaigns/${campaign.id}/template`)
+											getToLink(`campaigns/${campaign.id}/${targetTab}`)
 										);
 									}}
 								>

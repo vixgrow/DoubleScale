@@ -114,7 +114,10 @@ const Header: React.FC<HeaderProps> = ({
 					<BreadcrumbComponent
 						items={[
 							{ label: __('Create Campaign', 'quillcrm') },
-							{ label: __('Standard Campaign', 'quillcrm') },
+							{
+								label: __('Standard Campaign', 'quillcrm'),
+								href: `campaigns/${campaign.id}/template`,
+							},
 							{ label: __('Email Template', 'quillcrm') },
 						]}
 					/>

@@ -70,6 +70,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 	selectedType,
 	onSelect,
 }) => {
+	console.log(forms)
 	const [showProModal, setShowProModal] = useState(false);
 	const [selectedProFeature, setSelectedProFeature] = useState<string>('');
 
@@ -136,7 +137,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
                                             text-xs leading-tight
                                             ${isSelected ? 'text-primary' : 'text-[#9197A4]'}`}
 										>
-											{__(
+											{formType.description || __(
 												'There are many variations of passages of Lorem available, but the majority have suffered alteration in some form',
 												'quillcrm'
 											)}

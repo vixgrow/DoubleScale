@@ -548,7 +548,8 @@ export type TrackedMessage = {
 	template_id: string;
 	hash_key: string;
 	recipient: string; // Unified recipient field (email address or phone number)
-	direction?: string; // Message direction: 'outbound' (sent) or 'inbound' (received) - for 2-way messaging
+	direction: number; // Message direction: 1=Outbound, 2=Inbound
+	direction_slug: 'outbound' | 'inbound'; // Direction slug for display
 	opened: string;
 	clicked: string;
 	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)

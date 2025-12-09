@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Activity_Model;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Models\Communication_Tracking_Meta_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
@@ -89,6 +90,7 @@ class Communication_Tracking_Model extends Model {
 		'opened'      => 'boolean',
 		'clicked'     => 'boolean',
 		'mode'        => 'integer',
+		'direction'   => 'integer',
 		'source_type' => 'integer',
 		'source_id'   => 'integer',
 		'step_id'     => 'integer',
@@ -104,6 +106,7 @@ class Communication_Tracking_Model extends Model {
 		'status_name',
 		'status_slug',
 		'status_class',
+		'direction_slug',
 	);
 
 	/**
@@ -223,7 +226,7 @@ class Communication_Tracking_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeOutbound( $query ) {
-		return $query->where( 'direction', 'outbound' );
+		return $query->where( 'direction', Message_Direction::OUTBOUND );
 	}
 
 	/**
@@ -233,7 +236,7 @@ class Communication_Tracking_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeInbound( $query ) {
-		return $query->where( 'direction', 'inbound' );
+		return $query->where( 'direction', Message_Direction::INBOUND );
 	}
 
 	/**
@@ -498,6 +501,15 @@ class Communication_Tracking_Model extends Model {
 	 */
 	public function getStatusClassAttribute() {
 		 return Tracking_Status::get_status_class( $this->status );
+	}
+
+	/**
+	 * Get direction slug (accessor for API)
+	 *
+	 * @return string
+	 */
+	public function getDirectionSlugAttribute() {
+		return Message_Direction::get_slug( $this->direction );
 	}
 
 

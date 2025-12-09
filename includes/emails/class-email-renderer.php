@@ -122,22 +122,22 @@ class Email_Renderer {
 		return $html;
 	}
 
-	
- /**
-  * FIXED: Email Renderer responsive methods
-  * This version fixes the desktop layout while maintaining mobile stacking
-  * 
-  * Replace your existing methods with these.
-  */
- 
+
+	/**
+	 * FIXED: Email Renderer responsive methods
+	 * This version fixes the desktop layout while maintaining mobile stacking
+	 *
+	 * Replace your existing methods with these.
+	 */
+
 	/**
 	 * BULLETPROOF Responsive Email Renderer
-	 * 
+	 *
 	 * This approach works WITHOUT media queries by using:
 	 * 1. display: inline-block (naturally wraps when space is insufficient)
 	 * 2. min-width + max-width combination for responsive behavior
 	 * 3. Ghost tables for Outlook only
-	 * 
+	 *
 	 * Replace your render_section and build_email_structure methods with these.
 	 */
 
@@ -347,8 +347,8 @@ class Email_Renderer {
 
 	/**
 	 * Render a section with BULLETPROOF responsive columns
-	 * 
-	 * KEY TECHNIQUE: 
+	 *
+	 * KEY TECHNIQUE:
 	 * - Parent div has font-size:0 to remove whitespace gaps
 	 * - Each column is display:inline-block with percentage width
 	 * - min-width forces stacking on small screens (NO media query needed!)
@@ -420,7 +420,7 @@ class Email_Renderer {
 
 				foreach ( $valid_columns as $column_index => $column ) {
 					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
-					$pixel_width = round( ( $column_width / $total_ratio ) * $canvas_width );
+					$pixel_width  = round( ( $column_width / $total_ratio ) * $canvas_width );
 
 					$html .= '<td width="' . $pixel_width . '" valign="top" style="padding: 0;">';
 					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
@@ -454,13 +454,13 @@ class Email_Renderer {
 					// Calculate widths
 					$percent_width = ( $column_width / $total_ratio ) * 100;
 					$percent_width = round( $percent_width, 2 );
-					$pixel_width = round( ( $column_width / $total_ratio ) * $canvas_width );
+					$pixel_width   = round( ( $column_width / $total_ratio ) * $canvas_width );
 
 					// Column styles
 					$column_styles_array = array();
 					if ( isset( $column['styles'] ) ) {
 						foreach ( $column['styles'] as $property => $value ) {
-							$css_property = $this->convert_camel_to_kebab( $property );
+							$css_property                         = $this->convert_camel_to_kebab( $property );
 							$column_styles_array[ $css_property ] = $value;
 						}
 					}
@@ -468,20 +468,19 @@ class Email_Renderer {
 
 					// THE MAGIC: inline-block + width:100% + max-width
 					// - display: inline-block allows side-by-side
-					// - width: 100% makes it fill container on mobile  
+					// - width: 100% makes it fill container on mobile
 					// - max-width: Xpx limits size on desktop
 					// - min-width: 200px (or similar) forces stacking when space is tight
-					//   (this is the KEY for Gmail mobile which ignores media queries)
-					
+					// (this is the KEY for Gmail mobile which ignores media queries)
+
 					// For 2 columns, each can shrink to ~280px before stacking
 					// For 3 columns, each can shrink to ~180px before stacking
 					$min_col_width = max( 150, floor( $canvas_width / $column_count ) - 50 );
-					
+
 					$html .= '<div class="responsive-column" style="';
 					$html .= 'display: inline-block; ';
 					$html .= 'width: 100%; ';
 					$html .= 'max-width: ' . $pixel_width . 'px; ';
-					$html .= 'min-width: ' . $min_col_width . 'px; ';
 					$html .= 'vertical-align: top; ';
 					$html .= 'font-size: 14px; '; // Reset font-size for content
 					$html .= 'text-align: left;';

@@ -233,6 +233,10 @@ class Email_Renderer {
 					width: 100% !important;
 					max-width: 100% !important;
 				}
+				.gallery-item {
+					display: block !important;
+					width: 100% !important;
+				}
 			}
 		</style>
 		<!--[if mso]>

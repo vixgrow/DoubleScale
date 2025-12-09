@@ -87,7 +87,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 			props.content.includes('<strike>') ||
 			props.content.includes('font-weight') ||
 			props.content.includes('font-style') ||
-			props.content.includes('text-decoration')
+			props.content.includes('text-decoration') ||
+			props.content.includes('text-align')
 		);
 	};
 
@@ -164,8 +165,14 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					{
 						fontSize: fontSize,
 						color: props.color,
-						textAlign:
-							props.textAlign as React.CSSProperties['textAlign'],
+						// Only apply textAlign from props if HTML doesn't have its own text-align
+						...(hasHtmlFormatting() &&
+						props.content.includes('text-align')
+							? {}
+							: {
+									textAlign:
+										props.textAlign as React.CSSProperties['textAlign'],
+								}),
 						fontFamily: props.fontFamily,
 						// Only apply formatting styles if no HTML formatting exists
 						...(hasHtmlFormatting()

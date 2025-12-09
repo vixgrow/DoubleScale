@@ -121,12 +121,16 @@ class Activity_Model extends Model {
 	/**
 	 * Tracking relationship (for messages that need tracking)
 	 *
+	 * For individual messages, tracking.source_id points to this activity.
+	 * Note: source_type must be INDIVIDUAL (3) for this relationship.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
 	 */
 	public function tracking() {
-		return $this->hasOne( Communication_Tracking_Model::class, 'activity_id' );
+		return $this->hasOne( Communication_Tracking_Model::class, 'source_id' )
+			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL );
 	}
 
 	/**

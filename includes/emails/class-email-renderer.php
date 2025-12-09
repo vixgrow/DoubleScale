@@ -177,7 +177,7 @@ class Email_Renderer {
 		$bg_color = '#f7f7f7';
 
 		// Mobile breakpoint for media query fallback
-		$mobile_breakpoint = $canvas_width + 40;
+		$mobile_breakpoint = 480;
 
 		// Generate preheader HTML if preview_text is provided
 		$preheader_html = '';

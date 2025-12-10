@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '../../components/ui/button';
 import { PremiumIcon } from '../../components';
+import config from '../../config';
 
 /**
  * Component to display locked library placeholder for Pro features
@@ -26,7 +27,13 @@ const LockedLibrary = () => {
 						)}
 					</h3>
 				</div>
-				<Button size="lg" className="w-full max-w-xs">
+				<Button
+					size="lg"
+					className="w-full max-w-xs"
+					onClick={() => {
+						window.open(config.getUrlQuillCRMPro(), '_blank');
+					}}
+				>
 					{__('Upgrade Pro Now', 'quillcrm')}
 				</Button>
 			</div>

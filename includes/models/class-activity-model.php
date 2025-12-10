@@ -80,7 +80,7 @@ class Activity_Model extends Model {
 	public $rules = array(
 		'deal_id'       => 'nullable|integer',
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,call_logged,meeting_scheduled,sms_sent,whatsapp_sent',
+		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received',
 		'user_id'       => 'nullable|integer',
 	);
 

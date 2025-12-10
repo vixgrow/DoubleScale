@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { PluginStatusCard } from '@/components/plugin-installer';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 
 const SMTPSettings: React.FC = () => {
 	return (
@@ -30,6 +31,20 @@ const SMTPSettings: React.FC = () => {
 				}}
 				variant="default"
 			/>
+
+			{/* Bounce Handler - Pro Feature */}
+			<div className="mt-8 pt-8 border-t border-gray-200">
+				<div className="text-[#09090B] font-semibold text-xl mb-4">
+					{__('Bounce Handler', 'quillcrm')}
+				</div>
+				<ProFeatureNotice
+					featureName={__('Email Bounce Handler', 'quillcrm')}
+					description={__(
+						'Automatically handle bounced emails with webhook integrations for SendGrid, Mailgun, Amazon SES, Postmark, and other major email service providers. Keep your contact list clean by automatically marking hard bounces and tracking soft bounces.',
+						'quillcrm'
+					)}
+				/>
+			</div>
 		</div>
 	);
 };

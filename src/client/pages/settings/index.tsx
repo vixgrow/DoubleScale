@@ -201,7 +201,11 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'smtp':
-				return <SMTPSettings />;
+				const SMTPComponent = applyFilters(
+					'quillcrm_settings_smtp_settings',
+					SMTPSettings
+				) as React.ComponentType;
+				return <SMTPComponent />;
 			case 'sms':
 				const SMSComponent = applyFilters(
 					'quillcrm_settings_sms_settings',

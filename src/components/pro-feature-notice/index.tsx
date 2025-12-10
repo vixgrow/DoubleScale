@@ -2,12 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import { AlertCircle, Crown, ExternalLink } from 'lucide-react';
-
 /**
  * Internal dependencies
  */
@@ -15,7 +9,7 @@ import './style.scss';
 import config from '../../config';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
-import { RocketIcon } from '../icons';
+import { PremiumIcon, RocketIcon } from '../icons';
 
 interface ProFeatureNoticeProps {
 	featureName: string;
@@ -33,7 +27,9 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	return (
 		<div className="qcrm-pro-feature-notice">
 			<div className="qcrm-pro-feature-notice__container">
-				<img src={proImage} alt="Pro Feature" />
+				<div className="bg-[#FAEADF] text-[#CB5301] rounded-full p-2">
+					<PremiumIcon width={54} height={54} />
+				</div>
 				<div className="qcrm-pro-feature-notice__content">
 					<h2 className="qcrm-pro-feature-notice__title">
 						{featureName} {__('is a Pro Feature', 'quillcrm')}
@@ -74,7 +70,6 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							<RocketIcon />
 							{__('Upgrade to Pro', 'quillcrm')}
 						</a>
-						
 					</div>
 				</div>
 			</div>

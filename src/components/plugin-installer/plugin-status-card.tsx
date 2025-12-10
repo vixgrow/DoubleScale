@@ -125,11 +125,10 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 						</h3>
 						{variant === 'default' && (
 							<p className="text-sm text-[#166534]">
-								{plugin.description ||
-									__(
-										'Plugin is installed and active.',
-										'quillcrm'
-									)}
+								{__(
+									'Plugin is active and ready to use.',
+									'quillcrm'
+								)}
 							</p>
 						)}
 					</div>

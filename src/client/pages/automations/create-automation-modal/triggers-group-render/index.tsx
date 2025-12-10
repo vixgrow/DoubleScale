@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/tooltip';
 import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 import type { TriggersGroup } from '@quillcrm/config';
+import config from '@quillcrm/config';
 
 interface TriggersGroupRenderProps {
 	groups: TriggersGroup[];
@@ -43,6 +44,10 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		name: string;
 		key: string;
 	} | null>(null);
+
+	// Check if Pro plugin is active once
+	const proPluginData = config.getProPluginData();
+	const isProActive = proPluginData.is_active;
 
 	// Helper function to get tooltip message for disabled triggers
 	const getDisabledTooltip = (groupLabel: string) => {
@@ -84,7 +89,10 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	};
 
 	const handleTriggerClick = (triggerKey: string, trigger: any) => {
-		if (trigger.is_pro) {
+		// Check if this is a Pro feature AND Pro plugin is not active
+		const isProFeatureLockedOut = trigger.is_pro && !isProActive;
+
+		if (isProFeatureLockedOut) {
 			setSelectedProTrigger({ name: trigger.label, key: triggerKey });
 			setShowProModal(true);
 		} else {
@@ -157,7 +165,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 														<span className="text-sm">
 															{trigger.label}
 														</span>
-														{trigger.is_pro && (
+														{trigger.is_pro && !isProActive && (
 															<Lock className="h-4 w-4 text-orange-500" />
 														)}
 													</div>

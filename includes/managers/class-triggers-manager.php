@@ -162,6 +162,10 @@ final class Triggers_Manager {
 						 'label'    => __( 'Contact', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
+					 'messaging'     => array(
+						 'label'    => __( 'Messaging', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
 					 'link_triggers' => array(
 						 'label'    => __( 'Link Triggers', 'quillcrm' ),
 						 'triggers' => array(),

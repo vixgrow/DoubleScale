@@ -287,7 +287,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
-						visible={!isProActive}
+						visible={isProActive}
 						onClose={() => setCurrentStep(null)}
 					/>
 				),

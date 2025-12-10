@@ -20,6 +20,7 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Activity_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Message_Provider_Registry;
 
@@ -225,6 +226,7 @@ abstract class Abstract_Individual_Message_Sender {
 				'template_id' => null, // No template for individual messages
 				'hash_key'    => \QuillCRM\Utils::generate_hash_key(),
 				'mode'        => $this->get_tracking_mode(),
+				'direction'   => Message_Direction::OUTBOUND,
 				'source_type' => Message_Source_Types::INDIVIDUAL,
 				'source_id'   => $activity_id, // Points to activity (polymorphic FK)
 				'author_id'   => get_current_user_id(), // Track who sent it

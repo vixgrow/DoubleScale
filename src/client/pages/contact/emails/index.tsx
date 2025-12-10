@@ -140,19 +140,23 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 				)}
 			</div>
 
-			{/* Dialogs */}
-			<EmailDetails
-				campaignEmail={campaignEmail}
-				onClose={() => setCampaignEmail(null)}
-			/>
-			<SendEmailDialog
-				open={showSendEmailModal}
-				onClose={() => {
-					setShowSendEmailModal(false);
-					refetch(); // Refresh the list after sending
-				}}
-				contact={contact}
-			/>
+		{/* Dialogs */}
+		<EmailDetails
+			campaignEmail={campaignEmail}
+			onClose={() => setCampaignEmail(null)}
+			onResendSuccess={() => {
+				setCampaignEmail(null);
+				refetch(); // Refresh the list after resending
+			}}
+		/>
+		<SendEmailDialog
+			open={showSendEmailModal}
+			onClose={() => {
+				setShowSendEmailModal(false);
+				refetch(); // Refresh the list after sending
+			}}
+			contact={contact}
+		/>
 		</div>
 	);
 };

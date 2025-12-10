@@ -548,6 +548,10 @@ export type TrackedMessage = {
 	template_id: string;
 	hash_key: string;
 	recipient: string; // Unified recipient field (email address or phone number)
+	direction: number; // Message direction: 1=Outbound, 2=Inbound
+	direction_slug: 'outbound' | 'inbound'; // Direction slug for display
+	source_type: number; // Message source: 1=Campaign, 2=Automation, 3=Individual
+	source_id: number; // Polymorphic FK: campaign_id, automation_id, or activity_id
 	opened: string;
 	clicked: string;
 	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)

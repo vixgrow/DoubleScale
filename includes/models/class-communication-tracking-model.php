@@ -157,6 +157,10 @@ class Communication_Tracking_Model extends Model {
 	 * For individual messages (source_type = 3), source_id points to the activity.
 	 * This provides backwards compatibility and convenience.
 	 *
+	 * IMPORTANT: This relationship should ONLY be used when source_type = INDIVIDUAL (3).
+	 * For campaigns/automations, source_id points to campaign/automation, not activity.
+	 * The relationship itself doesn't enforce this constraint to avoid affecting main queries.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -130,11 +130,13 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 							...base,
 							minHeight: 48,
 							height: 48,
+							borderRadius: "6px",
 						}),
 						valueContainer: (base) => ({
 							...base,
 							height: 48,
 							padding: '0 8px',
+							borderRadius: "6px",
 						}),
 						input: (base) => ({
 							...base,

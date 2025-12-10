@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Activity controller
  * Unified controller for all activity types (notes, emails, calls, meetings)
@@ -25,6 +26,8 @@ use WP_REST_Server;
  */
 class REST_Activity_Controller extends REST_Controller {
 
+
+
 	/**
 	 * Route base.
 	 *
@@ -38,7 +41,7 @@ class REST_Activity_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		// Get all activities.
+		 // Get all activities.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -187,7 +190,8 @@ class REST_Activity_Controller extends REST_Controller {
 	public function get_items( $request ) {
 		$filters = array(
 			'contact_id'    => $request->get_param( 'contact_id' ),
-			'deal_id'       => $request->get_param( 'deal_id' ),
+			'entity_id'     => $request->get_param( 'entity_id' ),
+			'entity_type'   => $request->get_param( 'entity_type' ),
 			'activity_type' => $request->get_param( 'activity_type' ),
 			'user_id'       => $request->get_param( 'user_id' ),
 			'date_from'     => $request->get_param( 'date_from' ),
@@ -259,14 +263,15 @@ class REST_Activity_Controller extends REST_Controller {
 	 */
 	public function add_note( $request ) {
 		$data = array(
-			'contact_id' => $request->get_param( 'contact_id' ),
-			'deal_id'    => $request->get_param( 'deal_id' ),
-			'title'      => sanitize_text_field( $request->get_param( 'title' ) ?? '' ),
-			'content'    => wp_kses_post( $request->get_param( 'content' ) ?? '' ),
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $request->get_param( 'entity_type' ),
+			'title'       => sanitize_text_field( $request->get_param( 'title' ) ?? '' ),
+			'content'     => wp_kses_post( $request->get_param( 'content' ) ?? '' ),
 		);
 
-		if ( empty( $data['contact_id'] ) && empty( $data['deal_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Deal ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $data['content'] ) && empty( $data['title'] ) ) {
@@ -297,15 +302,16 @@ class REST_Activity_Controller extends REST_Controller {
 
 		$data = array(
 			'contact_id'    => $request->get_param( 'contact_id' ),
-			'deal_id'       => $request->get_param( 'deal_id' ),
+			'entity_id'     => $request->get_param( 'entity_id' ),
+			'entity_type'   => $request->get_param( 'entity_type' ),
 			'subject'       => $email_data['subject'] ?? '',
 			'sent_at'       => $email_data['sent_at'] ?? current_time( 'mysql' ),
 			'contact_email' => $email_data['contact_email'] ?? '',
 			'contact_name'  => $email_data['contact_name'] ?? '',
 		);
 
-		if ( empty( $data['contact_id'] ) && empty( $data['deal_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Deal ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->log_email( $data );
@@ -332,7 +338,8 @@ class REST_Activity_Controller extends REST_Controller {
 
 		$data = array(
 			'contact_id'   => $request->get_param( 'contact_id' ),
-			'deal_id'      => $request->get_param( 'deal_id' ),
+			'entity_id'    => $request->get_param( 'entity_id' ),
+			'entity_type'  => $request->get_param( 'entity_type' ),
 			'duration'     => $call_data['duration'] ?? null,
 			'outcome'      => $call_data['outcome'] ?? '',
 			'notes'        => $call_data['notes'] ?? '',
@@ -340,8 +347,8 @@ class REST_Activity_Controller extends REST_Controller {
 			'phone_number' => $call_data['phone_number'] ?? '',
 		);
 
-		if ( empty( $data['contact_id'] ) && empty( $data['deal_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Deal ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->log_call( $data );
@@ -368,7 +375,8 @@ class REST_Activity_Controller extends REST_Controller {
 
 		$data = array(
 			'contact_id'             => $request->get_param( 'contact_id' ),
-			'deal_id'                => $request->get_param( 'deal_id' ),
+			'entity_id'              => $request->get_param( 'entity_id' ),
+			'entity_type'            => $request->get_param( 'entity_type' ),
 			'title'                  => $meeting_data['title'] ?? '',
 			'scheduled_at'           => $meeting_data['scheduled_at'] ?? '',
 			'duration'               => $meeting_data['duration'] ?? 60,
@@ -379,8 +387,8 @@ class REST_Activity_Controller extends REST_Controller {
 			'primary_attendee_email' => $meeting_data['primary_attendee_email'] ?? '',
 		);
 
-		if ( empty( $data['contact_id'] ) && empty( $data['deal_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Deal ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->schedule_meeting( $data );
@@ -655,11 +663,12 @@ class REST_Activity_Controller extends REST_Controller {
 	 */
 	public function get_statistics( $request ) {
 		$filters = array(
-			'contact_id' => $request->get_param( 'contact_id' ),
-			'deal_id'    => $request->get_param( 'deal_id' ),
-			'user_id'    => $request->get_param( 'user_id' ),
-			'date_from'  => $request->get_param( 'date_from' ),
-			'date_to'    => $request->get_param( 'date_to' ),
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $request->get_param( 'entity_type' ),
+			'user_id'     => $request->get_param( 'user_id' ),
+			'date_from'   => $request->get_param( 'date_from' ),
+			'date_to'     => $request->get_param( 'date_to' ),
 		);
 
 		// Remove null values.
@@ -687,7 +696,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$data = array(
 			'id'                => $activity->id,
 			'contact_id'        => $activity->contact_id,
-			'deal_id'           => $activity->deal_id,
+			'deal_id'           => $activity->deal_id, // Backward compatibility
 			'activity_type'     => $activity->activity_type,
 			'data'              => $activity->data,
 			'user_id'           => $activity->user_id,
@@ -698,19 +707,23 @@ class REST_Activity_Controller extends REST_Controller {
 			'updated_at'        => $activity->updated_at,
 		);
 
+		// Include entity associations if loaded.
+		if ( $activity->relationLoaded( 'associations' ) && $activity->associations ) {
+			$data['associations'] = array();
+			foreach ( $activity->associations as $association ) {
+				$data['associations'][] = array(
+					'entity_type' => $association->entity_type,
+					'entity_id'   => $association->entity_id,
+				);
+			}
+		}
+
 		// Include relationships if loaded.
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
 			$data['user'] = array(
 				'id'           => $activity->user->ID,
 				'display_name' => $activity->user->display_name,
 				'email'        => $activity->user->user_email,
-			);
-		}
-
-		if ( $activity->relationLoaded( 'deal' ) && $activity->deal ) {
-			$data['deal'] = array(
-				'id'    => $activity->deal->id,
-				'title' => $activity->deal->title,
 			);
 		}
 
@@ -818,4 +831,3 @@ class REST_Activity_Controller extends REST_Controller {
 		return Permissions::has_sales_rep_access();
 	}
 }
-

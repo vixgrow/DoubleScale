@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Activity_Manager
  * Unified manager for handling all activity operations (contacts and deals)
@@ -19,6 +20,11 @@ use QuillCRM\User_Roles\Permissions;
  * Activity_Manager class
  */
 final class Activity_Manager {
+
+
+
+
+
 
 	/**
 	 * Class Instance.
@@ -77,13 +83,14 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function add_note( $data, $user_id = null ) {
-		$contact_id = $data['contact_id'] ?? null;
-		$deal_id    = $data['deal_id'] ?? null;
-		$title      = $data['title'] ?? '';
-		$content    = $data['content'] ?? '';
+		$contact_id  = $data['contact_id'] ?? null;
+		$entity_id   = $data['entity_id'] ?? null;
+		$entity_type = $data['entity_type'] ?? null;
+		$title       = $data['title'] ?? '';
+		$content     = $data['content'] ?? '';
 
 		// Must have at least one entity.
-		if ( ! $contact_id && ! $deal_id ) {
+		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
 			return null;
 		}
 
@@ -91,20 +98,19 @@ final class Activity_Manager {
 			return null;
 		}
 
-		// Check deal permissions if deal_id is provided.
-		if ( $deal_id && ! $this->can_access_deal( $deal_id ) ) {
-			return null;
-		}
-
-		// Get contact_id from deal if not provided.
-		if ( $deal_id && ! $contact_id ) {
-			$contact_id = $this->get_contact_id_from_deal( $deal_id );
+		if ( $entity_type === 'deal' ) {
+			if ( ! $this->can_access_deal( $entity_id ) ) {
+				return null;
+			}
+			// Get contact_id from deal if not provided.
+			if ( $entity_id && ! $contact_id ) {
+				$contact_id = $this->get_contact_id_from_deal( $entity_id );
+			}
 		}
 
 		$activity = Activity_Model::create(
 			array(
 				'contact_id'    => $contact_id,
-				'deal_id'       => $deal_id,
 				'activity_type' => 'note',
 				'data'          => array(
 					'title'   => sanitize_text_field( $title ),
@@ -113,6 +119,17 @@ final class Activity_Manager {
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
 		);
+
+		// Create activity association with entity if provided
+		if ( $activity && $entity_type && $entity_id && class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+			\QuillCRM\Models\Activity_Association_Model::create(
+				array(
+					'activity_id' => $activity->id,
+					'entity_type' => $entity_type,
+					'entity_id'   => $entity_id,
+				)
+			);
+		}
 
 		do_action( 'quillcrm_note_added', $activity, $data );
 
@@ -130,34 +147,35 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function log_email( $data, $user_id = null ) {
-		$contact_id = $data['contact_id'] ?? null;
-		$deal_id    = $data['deal_id'] ?? null;
+		$contact_id  = $data['contact_id'] ?? null;
+		$entity_id   = $data['entity_id'] ?? null;
+		$entity_type = $data['entity_type'] ?? null;
 
 		// Must have at least one entity.
-		if ( ! $contact_id && ! $deal_id ) {
+		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
 			return null;
 		}
 
-		// Check deal permissions if deal_id is provided.
-		if ( $deal_id && ! $this->can_access_deal( $deal_id ) ) {
-			return null;
-		}
+		if ( $entity_type === 'deal' ) {
+			if ( ! $this->can_access_deal( $entity_id ) ) {
+				return null;
+			}
+			// Get contact_id from deal if not provided.
+			if ( ! $contact_id ) {
+				$contact_id = $this->get_contact_id_from_deal( $entity_id );
+				$deal_data  = $this->get_deal_with_contact( $entity_id );
+				$contact_id = $deal_data['contact_id'] ?? null;
 
-		// Get contact info from deal if not provided.
-		if ( $deal_id && ! $contact_id ) {
-			$deal_data  = $this->get_deal_with_contact( $deal_id );
-			$contact_id = $deal_data['contact_id'] ?? null;
-
-			if ( $deal_data['contact'] ?? null ) {
-				$data['contact_email'] = $data['contact_email'] ?? $deal_data['contact']['email'];
-				$data['contact_name']  = $data['contact_name'] ?? $deal_data['contact']['name'];
+				if ( $deal_data['contact'] ?? null ) {
+					$data['contact_email'] = $data['contact_email'] ?? $deal_data['contact']['email'];
+					$data['contact_name']  = $data['contact_name'] ?? $deal_data['contact']['name'];
+				}
 			}
 		}
 
 		$activity = Activity_Model::create(
 			array(
 				'contact_id'    => $contact_id,
-				'deal_id'       => $deal_id,
 				'activity_type' => 'email_sent',
 				'data'          => array(
 					'subject'       => sanitize_text_field( $data['subject'] ?? '' ),
@@ -168,6 +186,17 @@ final class Activity_Manager {
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
 		);
+
+		// Create activity association with entity if provided
+		if ( $activity && $entity_type && $entity_id && class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+			\QuillCRM\Models\Activity_Association_Model::create(
+				array(
+					'activity_id' => $activity->id,
+					'entity_type' => $entity_type,
+					'entity_id'   => $entity_id,
+				)
+			);
+		}
 
 		do_action( 'quillcrm_email_logged', $activity, $data );
 
@@ -185,28 +214,29 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function log_call( $data, $user_id = null ) {
-		$contact_id = $data['contact_id'] ?? null;
-		$deal_id    = $data['deal_id'] ?? null;
+		$contact_id  = $data['contact_id'] ?? null;
+		$entity_id   = $data['entity_id'] ?? null;
+		$entity_type = $data['entity_type'] ?? null;
 
 		// Must have at least one entity.
-		if ( ! $contact_id && ! $deal_id ) {
+		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
 			return null;
 		}
 
 		// Check deal permissions if deal_id is provided.
-		if ( $deal_id && ! $this->can_access_deal( $deal_id ) ) {
-			return null;
-		}
-
-		// Get contact_id from deal if not provided.
-		if ( $deal_id && ! $contact_id ) {
-			$contact_id = $this->get_contact_id_from_deal( $deal_id );
+		if ( $entity_type === 'deal' ) {
+			if ( ! $this->can_access_deal( $entity_id ) ) {
+				return null;
+			}
+			// Get contact_id from deal if not provided.
+			if ( ! $contact_id ) {
+				$contact_id = $this->get_contact_id_from_deal( $entity_id );
+			}
 		}
 
 		$activity = Activity_Model::create(
 			array(
 				'contact_id'    => $contact_id,
-				'deal_id'       => $deal_id,
 				'activity_type' => 'call_logged',
 				'data'          => array(
 					'duration'     => isset( $data['duration'] ) ? intval( $data['duration'] ) : null,
@@ -218,6 +248,17 @@ final class Activity_Manager {
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
 		);
+
+		// Create activity association with entity if provided
+		if ( $activity && $entity_type && $entity_id && class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+			\QuillCRM\Models\Activity_Association_Model::create(
+				array(
+					'activity_id' => $activity->id,
+					'entity_type' => $entity_type,
+					'entity_id'   => $entity_id,
+				)
+			);
+		}
 
 		do_action( 'quillcrm_call_logged', $activity, $data );
 
@@ -235,35 +276,37 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function schedule_meeting( $data, $user_id = null ) {
-		$contact_id = $data['contact_id'] ?? null;
-		$deal_id    = $data['deal_id'] ?? null;
+		$contact_id  = $data['contact_id'] ?? null;
+		$entity_id   = $data['entity_id'] ?? null;
+		$entity_type = $data['entity_type'] ?? null;
 
 		// Must have at least one entity.
-		if ( ! $contact_id && ! $deal_id ) {
+		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
 			return null;
 		}
 
-		// Check deal permissions if deal_id is provided.
-		if ( $deal_id && ! $this->can_access_deal( $deal_id ) ) {
-			return null;
-		}
+		if ( $entity_type === 'deal' ) {
+			// Check deal permissions if deal_id is provided.
+			if ( $entity_id && ! $this->can_access_deal( $entity_id ) ) {
+				return null;
+			}
 
-		// Get contact info from deal if not provided.
-		if ( $deal_id && ! $contact_id ) {
-			$deal_data  = $this->get_deal_with_contact( $deal_id );
-			$contact_id = $deal_data['contact_id'] ?? null;
+			// Get contact info from deal if not provided.
+			if ( $entity_id && ! $contact_id ) {
+				$deal_data  = $this->get_deal_with_contact( $entity_id );
+				$contact_id = $deal_data['contact_id'] ?? null;
 
-			if ( $deal_data['contact'] ?? null ) {
-				$data['primary_attendee_id']    = $data['primary_attendee_id'] ?? $deal_data['contact']['id'];
-				$data['primary_attendee_name']  = $data['primary_attendee_name'] ?? $deal_data['contact']['name'];
-				$data['primary_attendee_email'] = $data['primary_attendee_email'] ?? $deal_data['contact']['email'];
+				if ( $deal_data['contact'] ?? null ) {
+					$data['primary_attendee_id']    = $data['primary_attendee_id'] ?? $deal_data['contact']['id'];
+					$data['primary_attendee_name']  = $data['primary_attendee_name'] ?? $deal_data['contact']['name'];
+					$data['primary_attendee_email'] = $data['primary_attendee_email'] ?? $deal_data['contact']['email'];
+				}
 			}
 		}
 
 		$activity = Activity_Model::create(
 			array(
 				'contact_id'    => $contact_id,
-				'deal_id'       => $deal_id,
 				'activity_type' => 'meeting_scheduled',
 				'data'          => array(
 					'title'                  => sanitize_text_field( $data['title'] ?? '' ),
@@ -278,6 +321,17 @@ final class Activity_Manager {
 				'user_id'       => $user_id ?: get_current_user_id(),
 			)
 		);
+
+		// Create activity association with entity if provided
+		if ( $activity && $entity_type && $entity_id && class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+			\QuillCRM\Models\Activity_Association_Model::create(
+				array(
+					'activity_id' => $activity->id,
+					'entity_type' => $entity_type,
+					'entity_id'   => $entity_id,
+				)
+			);
+		}
 
 		do_action( 'quillcrm_meeting_scheduled', $activity, $data );
 
@@ -296,20 +350,30 @@ final class Activity_Manager {
 	 * @return \Illuminate\Pagination\LengthAwarePaginator|null
 	 */
 	public function get_activities( $filters = array(), $per_page = 20, $page = 1 ) {
-		$query = Activity_Model::with( array( 'user', 'comments.user' ) );
+		$query = Activity_Model::with( array( 'user', 'comments.user', 'associations' ) );
 
 		// Filter by contact.
 		if ( ! empty( $filters['contact_id'] ) ) {
 			$query->where( 'contact_id', $filters['contact_id'] );
 		}
 
-		// Filter by deal.
-		if ( ! empty( $filters['deal_id'] ) ) {
+		// Filter by deal using activity_associations table.
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === 'deal' ) {
 			// Check deal permissions.
-			if ( ! $this->can_access_deal( $filters['deal_id'] ) ) {
+			if ( ! $this->can_access_deal( $filters['entity_id'] ) ) {
 				return null;
 			}
-			$query->where( 'deal_id', $filters['deal_id'] );
+
+			// Use whereHas to filter activities that have a deal association
+			if ( class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+				$query->whereHas(
+					'associations',
+					function ( $q ) use ( $filters ) {
+						$q->where( 'entity_type', $filters['entity_type'] )
+							->where( 'entity_id', $filters['entity_id'] );
+					}
+				);
+			}
 		}
 
 		// Filter by activity type.
@@ -353,7 +417,7 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function get_activity( $activity_id, $with_comments = false ) {
-		$relations = array( 'user' );
+		$relations = array( 'user', 'associations' );
 		if ( $with_comments ) {
 			$relations[] = 'comments.user';
 		}
@@ -384,7 +448,7 @@ final class Activity_Manager {
 	 * @return Activity_Model|null
 	 */
 	public function update_activity( $activity_id, $data, $user_id = null ) {
-		$activity = Activity_Model::with( 'deal' )->find( $activity_id );
+		$activity = Activity_Model::with( array( 'associations' ) )->find( $activity_id );
 
 		if ( ! $activity ) {
 			return null;
@@ -656,9 +720,17 @@ final class Activity_Manager {
 			$query->where( 'contact_id', $filters['contact_id'] );
 		}
 
-		// Filter by deal.
-		if ( ! empty( $filters['deal_id'] ) ) {
-			$query->where( 'deal_id', $filters['deal_id'] );
+		// Filter by deal using activity_associations table.
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === 'deal' ) {
+			if ( class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+				$query->whereHas(
+					'associations',
+					function ( $q ) use ( $filters ) {
+						$q->where( 'entity_type', $filters['entity_type'] )
+							->where( 'entity_id', $filters['entity_id'] );
+					}
+				);
+			}
 		}
 
 		// Filter by user.
@@ -778,4 +850,3 @@ final class Activity_Manager {
 		return $result;
 	}
 }
-

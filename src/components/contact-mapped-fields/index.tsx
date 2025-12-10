@@ -30,15 +30,15 @@ interface ContactMappedFieldsProps {
 	values: { [key: string]: string };
 	fields: {
 		[key: string]:
-			| {
-					label: {
-						label: string;
-						type: string;
-					};
-			  }
-			| {
-					label: string;
-			  };
+		| {
+			label: {
+				label: string;
+				type: string;
+			};
+		}
+		| {
+			label: string;
+		};
 	};
 }
 
@@ -105,11 +105,10 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 			<div className="flex-1 relative">
 				<Input
 					ref={inputRef}
-					className={`w-full ${
-						hasMergeTags(value || '')
-							? 'pr-8 border-blue-300 bg-blue-50/30'
-							: ''
-					}`}
+					className={`w-full bg-white h-12 ${hasMergeTags(value || '')
+						? 'pr-8 border-blue-300 bg-blue-50/30'
+						: ''
+						}`}
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					placeholder={
@@ -132,7 +131,7 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 						type="button"
 						variant="outline"
 						size="icon"
-						className="shrink-0"
+						className="shrink-0 bg-white border-gray-200 h-12 w-12"
 						title={__('Insert merge tag', 'quillcrm')}
 					>
 						<Hash className="h-4 w-4" />
@@ -367,7 +366,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 					{__('Contact Field')}
 					<span className="text-red-600">*</span>
 				</div>
-				<div className="flex flex-1 text-[#09090B] font-normal text-base">
+				<div className="flex flex-1 text-[#09090B] font-normal text-base ml-7">
 					{__('Field')} <span className="text-red-600">*</span>
 				</div>
 			</div>
@@ -377,12 +376,15 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 						<Input
 							value={contactFields[key].label}
 							disabled
-							className="flex-1"
+							className="flex-1 bg-white h-12"
+							style={{
+								borderRadius: '8px',
+							}}
 						/>
 						{key === 'email' ? (
 							<Select
-								className="react-select-container"
-								classNamePrefix="react-select"
+								className="react-select-container h-12"
+								classNamePrefix="react-select "
 								onChange={(value) => {
 									if (!isObject(value)) {
 										return;
@@ -396,9 +398,9 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 								value={
 									values && values[key]
 										? emailOptions.find(
-												(option) =>
-													option.value === values[key]
-											)
+											(option) =>
+												option.value === values[key]
+										)
 										: null
 								}
 								options={emailOptions}
@@ -406,10 +408,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 									control: (styles) => ({
 										...styles,
 										flex: 1,
+										height: '48px',
+										borderRadius: '6px',
 									}),
 									container: (styles) => ({
 										...styles,
 										flex: 1,
+										height: '48px',
+										borderRadius: '6px',
 									}),
 									menu: (base: any) => ({
 										...base,
@@ -452,13 +458,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 				</div>
 
 				{otherFields.length > 0 && (
-					<div className="flex gap-5 mb-2">
+					<div className="flex gap-5">
 						<div className="flex flex-1 text-[#09090B] font-normal text-base">
 							{__('Field Label', 'quillcrm')}
 						</div>
 						<div className="flex flex-1 text-[#09090B] font-normal text-base">
 							{__('Field Value', 'quillcrm')}
 						</div>
+						<div className="w-12"></div>
 					</div>
 				)}
 
@@ -466,7 +473,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 					<div key={field.id} className="flex gap-5 items-start">
 						<div className="flex-1">
 							<Select
-								className="react-select-container"
+								className="react-select-container h-12"
 								classNamePrefix="react-select"
 								onChange={(value) => {
 									if (!isObject(value)) {
@@ -481,14 +488,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 								value={
 									field.fieldLabel
 										? allContactFieldOptions
-												.flatMap(
-													(group) => group.options
-												)
-												.find(
-													(option) =>
-														option.value ===
-														field.fieldLabel
-												)
+											.flatMap(
+												(group) => group.options
+											)
+											.find(
+												(option) =>
+													option.value ===
+													field.fieldLabel
+											)
 										: null
 								}
 								options={allContactFieldOptions}
@@ -496,10 +503,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 									control: (styles) => ({
 										...styles,
 										flex: 1,
+										height: '48px',
+										borderRadius: '6px',
 									}),
 									container: (styles) => ({
 										...styles,
 										flex: 1,
+										height: '48px',
+										borderRadius: '6px',
 									}),
 									menu: (base: any) => ({
 										...base,
@@ -531,11 +542,11 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 							type="button"
 							variant="outline"
 							size="icon"
-							className="shrink-0"
+							className="shrink-0 h-12 w-12 text-destructive border-destructive"
 							onClick={() => removeOtherField(field.id)}
 							title={__('Remove field', 'quillcrm')}
 						>
-							<X className="h-4 w-4" />
+							<X className="h-5 w-5" />
 						</Button>
 					</div>
 				))}
@@ -543,7 +554,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 				<Button
 					type="button"
 					variant="outline"
-					className="w-full mt-2 gap-2"
+					className="w-full mt-2 gap-2 rounded-md"
 					onClick={addOtherField}
 				>
 					<Plus className="h-4 w-4" />

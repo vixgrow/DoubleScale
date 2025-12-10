@@ -74,40 +74,12 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 
 	return (
 		<>
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<div onContextMenu={(e) => e.preventDefault()}>
-						{children}
-					</div>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent
-					className="qcrm-reactflow-context-menu"
-					side="bottom"
-					align="start"
-					onContextMenu={(e) => e.preventDefault()}
-				>
-					{onEdit && (
-						<DropdownMenuItem onSelect={handleEdit} className="pointer-events-auto cursor-pointer hover:bg-gray-100">
-							<EditHeaderIcon/>
-							{__('Edit', 'quillcrm')}
-						</DropdownMenuItem>
-					)}
-					{showDelete && (
-						<>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem
-								onSelect={handleDeleteClick}
-								className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
-							>
-								<DeleteIcon />
-								{__('Delete', 'quillcrm')}
-							</DropdownMenuItem>
-						</>
-					)}
-				</DropdownMenuContent>
-			</DropdownMenu>
+			{children}
 
-			<AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+			<AlertDialog
+				open={showDeleteAlert}
+				onOpenChange={setShowDeleteAlert}
+			>
 				<AlertDialogOverlay className="z-[150000]" />
 				<AlertDialogContent className="z-[150000]">
 					<AlertDialogHeader>

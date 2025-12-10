@@ -93,34 +93,38 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 			}}
 		>
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
+				<DropdownMenuTrigger
+					asChild
+					onClick={(e) => e.stopPropagation()}
+				>
 					<Button
 						variant="ghost"
 						size="icon"
 						className="qcrm-reactflow-node__dropdown-btn h-8 w-8"
-						onClick={(e) => {
-							e.stopPropagation();
-							e.preventDefault();
-						}}
-						onMouseDown={(e) => {
-							e.stopPropagation();
-						}}
 					>
 						<MoreVertical className="h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="z-[150000]">
+				<DropdownMenuContent
+					align="end"
+					className="z-[150000]"
+					removePortal={true}
+					onClick={(e) => e.stopPropagation()}
+				>
 					{showEdit && onEdit && (
 						<DropdownMenuItem
 							onClick={onEdit}
 							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 						>
-							<EditHeaderIcon/>
+							<EditHeaderIcon />
 							<span>{editLabel}</span>
 						</DropdownMenuItem>
 					)}
 					{showDelete && onDelete && (
-						<AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+						<AlertDialog
+							open={isDialogOpen}
+							onOpenChange={setIsDialogOpen}
+						>
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem
 									className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
@@ -142,7 +146,9 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
-										<AlertDialogCancel disabled={isDeleting}>
+										<AlertDialogCancel
+											disabled={isDeleting}
+										>
 											{__('Cancel', 'quillcrm')}
 										</AlertDialogCancel>
 										<AlertDialogAction
@@ -152,7 +158,9 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 											}}
 											disabled={isDeleting}
 										>
-											{isDeleting ? __('Deleting...', 'quillcrm') : __('Delete', 'quillcrm')}
+											{isDeleting
+												? __('Deleting...', 'quillcrm')
+												: __('Delete', 'quillcrm')}
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>

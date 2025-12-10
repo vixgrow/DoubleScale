@@ -116,6 +116,30 @@ class Campaign_Model extends Model {
 	 */
 	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body' );
 
+	/**
+	 * Guarded attributes - computed fields that should never be persisted
+	 * These are set by Campaign_Enrichment service and are not database columns
+	 *
+	 * @var array
+	 */
+	protected $guarded_computed = array(
+		'contacts_count',
+		'templates_count',
+		'sent_count',
+		'failed_count',
+		'opened_count',
+		'clicked_count',
+		'unsubscribed_count',
+		'open_rate',
+		'click_rate',
+		'pending_count',
+		'delivered_count',
+		'delivery_rate',
+		'read_count',
+		'read_rate',
+		'is_attached',
+	);
+
 
 	/**
 	 * Timestamps
@@ -536,148 +560,17 @@ class Campaign_Model extends Model {
 	}
 
 	/**
-	 * Attach counts
+	 * Attach counts (DEPRECATED - use Campaign_Enrichment service instead)
+	 * Kept for backward compatibility, delegates to enrichment service
 	 *
+	 * @deprecated Use Campaign_Enrichment::instance()->enrich() instead
 	 * @param Campaign_Model $campaign campaign model.
 	 *
 	 * @return void
 	 */
 	public function attach_counts( $campaign ) {
-		// Skip if campaign type is not set (e.g., when only selecting specific fields)
-		if ( empty( $campaign->type ) ) {
-			return;
-		}
-
-		// Calculate contacts count with type-specific filtering
-		$campaign->contacts_count = $this->get_contacts_count( $campaign );
-
-		// Get analytics stats from centralized service
-		$analytics = Campaign_Analytics::instance();
-		// Pass string type directly (campaign->type accessor returns string)
-		$stats = $analytics->get_campaign_stats( $campaign->type, $campaign->id );
-
-		// Get optimized template counts (single query instead of N queries)
-		$campaign->templates_count = $this->get_template_counts_optimized( $campaign );
-
-		// Assign stats based on campaign type
-		$this->assign_campaign_stats( $campaign, $stats );
-	}
-
-	/**
-	 * Get contacts count for campaign with type-specific filtering
-	 *
-	 * @param Campaign_Model $campaign campaign model.
-	 *
-	 * @return int Contact count
-	 */
-	private function get_contacts_count( $campaign ) {
-		$filters = $campaign->get_setting( 'filters', array() );
-		$query   = Contact_Model::query();
-
-		// Apply type-specific filtering with channel-specific status
-		if ( $campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail() ) {
-			$query->where( 'email_status', 'subscribed' )
-				->whereNotNull( 'email' )
-				->where( 'email', '!=', '' );
-		} elseif ( $campaign->is_sms_campaign() ) {
-			$query->where( 'sms_status', 'subscribed' )
-				->whereNotNull( 'phone' )
-				->where( 'phone', '!=', '' );
-		} elseif ( $campaign->is_whatsapp_campaign() ) {
-			$query->where( 'whatsapp_status', 'subscribed' )
-				->whereNotNull( 'phone' )
-				->where( 'phone', '!=', '' );
-		}
-
-		// Apply custom filters if provided
-		if ( ! empty( $filters ) ) {
-			$contact_filters = new Contact_Filters_Process( $query, $filters );
-			$query           = $contact_filters->filter();
-
-			// Safety check: ensure filter() returned a valid query
-			if ( ! $query ) {
-				quillcrm_get_logger()->error(
-					'Contact filters returned null query',
-					array(
-						'campaign_id' => $campaign->id,
-						'filters'     => $filters,
-						'context'     => 'campaign_get_contacts_count',
-					)
-				);
-				return 0;
-			}
-		}
-
-		return $query->count();
-	}
-
-	/**
-	 * Get template counts using optimized single query with GROUP BY
-	 * Fixes N+1 query problem - previously ran one COUNT query per template
-	 *
-	 * @param Campaign_Model $campaign campaign model.
-	 *
-	 * @return array Template counts indexed by template_id
-	 */
-	private function get_template_counts_optimized( $campaign ) {
-		// Convert campaign channel to tracking mode
-		$mode = Campaign_Channel::to_mode( $campaign->type );
-		if ( $mode === null ) {
-			return array();
-		}
-
-		// Single query with GROUP BY instead of N separate queries
-		$counts = $campaign->messages()
-			->where( 'mode', $mode )
-			->selectRaw( 'template_id, COUNT(*) as count' )
-			->groupBy( 'template_id' )
-			->get()
-			->pluck( 'count', 'template_id' )
-			->toArray();
-
-		// Ensure all template IDs have a count (even if 0)
-		$template_counts = array();
-		foreach ( $campaign->get_template_ids() as $template_id ) {
-			$template_counts[ $template_id ] = isset( $counts[ $template_id ] ) ? (int) $counts[ $template_id ] : 0;
-		}
-
-		return $template_counts;
-	}
-
-	/**
-	 * Assign campaign statistics based on type
-	 * Eliminates duplicate code across email/sms/whatsapp branches
-	 *
-	 * @param Campaign_Model $campaign campaign model.
-	 * @param array          $stats Statistics from analytics service.
-	 *
-	 * @return void
-	 */
-	private function assign_campaign_stats( $campaign, $stats ) {
-		// Common stats for all campaign types
-		$campaign->sent_count        = $stats['sent'] ?? 0;
-		$campaign->failed_count      = $stats['failed'] ?? 0;
-		$campaign->clicked_count     = $stats['clicked'] ?? 0;
-		$campaign->unsubscribed_count = $stats['unsubscribed'] ?? 0;
-
-		// Type-specific stats
-		if ( $campaign->is_email_campaign() ) {
-			$campaign->opened_count = $stats['opened'] ?? 0;
-			$campaign->open_rate    = $stats['open_rate'] ?? 0;
-			$campaign->click_rate   = $stats['click_rate'] ?? 0;
-		} elseif ( $campaign->is_sms_campaign() ) {
-			$campaign->pending_count   = $stats['pending'] ?? 0;
-			$campaign->delivered_count = $stats['delivered'] ?? 0;
-			$campaign->delivery_rate   = $stats['delivery_rate'] ?? 0;
-			$campaign->click_rate      = $stats['click_rate'] ?? 0;
-		} elseif ( $campaign->is_whatsapp_campaign() ) {
-			$campaign->pending_count   = $stats['pending'] ?? 0;
-			$campaign->delivered_count = $stats['delivered'] ?? 0;
-			$campaign->read_count      = $stats['read'] ?? 0;
-			$campaign->delivery_rate   = $stats['delivery_rate'] ?? 0;
-			$campaign->read_rate       = $stats['read_rate'] ?? 0;
-			$campaign->click_rate      = $stats['click_rate'] ?? 0;
-		}
+		$enrichment = \QuillCRM\Services\Campaign_Enrichment::instance();
+		$enrichment->enrich( $campaign );
 	}
 
 	/**
@@ -741,30 +634,6 @@ class Campaign_Model extends Model {
 
 				// Set the modified settings back to the model
 				$campaign->settings = $settings;
-
-				// Remove the contacts count, sent count, opened count and clicked count
-				unset( $campaign->templates_count );
-				unset( $campaign->contacts_count );
-				unset( $campaign->sent_count );
-				unset( $campaign->failed_count );
-				unset( $campaign->opened_count );
-				unset( $campaign->clicked_count );
-				unset( $campaign->unsubscribed_count );
-
-				unset( $campaign->is_attached );
-
-				// Remove email-specific calculated properties
-				unset( $campaign->open_rate );
-				unset( $campaign->click_rate );
-
-				// Remove SMS-specific calculated properties
-				unset( $campaign->pending_count );
-				unset( $campaign->delivered_count );
-				unset( $campaign->delivery_rate );
-
-				// Remove WhatsApp-specific calculated properties
-				unset( $campaign->read_count );
-				unset( $campaign->read_rate );
 			}
 		);
 
@@ -783,14 +652,8 @@ class Campaign_Model extends Model {
 			}
 		);
 
-		static::retrieved(
-			function ( $campaign ) {
-				$campaign->attach_counts( $campaign );
-			}
-		);
-
-		// Note: Analytics are NOT recalculated on save to prevent wasteful DB queries.
-		// They are freshly calculated when the campaign is retrieved, which happens
-		// after every update anyway (frontend re-fetches the campaign).
+		// Note: Computed attributes (counts, rates, etc.) are now handled by
+		// Campaign_Enrichment service in controllers, not in model events.
+		// This prevents N+1 queries and eliminates the need for unset() calls.
 	}
 }

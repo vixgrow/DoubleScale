@@ -44,10 +44,18 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	protected $analytics;
 
 	/**
+	 * Enrichment service
+	 *
+	 * @var \QuillCRM\Services\Campaign_Enrichment
+	 */
+	protected $enrichment;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->analytics = Campaign_Analytics::instance();
+		$this->analytics  = Campaign_Analytics::instance();
+		$this->enrichment = \QuillCRM\Services\Campaign_Enrichment::instance();
 	}
 
 	/**
@@ -305,6 +313,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaigns = $query->orderBy( 'created_at', 'desc' )
 				->paginate( $per_page, array( '*' ), 'page', $page );
 
+			// Enrich all campaigns with computed stats (prevents N+1)
+			$this->enrichment->enrich_collection( $campaigns->items() );
+
 			return new WP_REST_Response(
 				$campaigns->toArray() + array( 'total_count' => $total_count ),
 				200
@@ -333,8 +344,8 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			// Attach full template data for frontend use
 			$campaign->attach_templates( $campaign );
 
-			// Attach analytics counts for frontend use
-			$campaign->attach_counts( $campaign );
+			// Enrich with computed counts and analytics
+			$this->enrichment->enrich( $campaign );
 
 			return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {
@@ -356,8 +367,8 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign_data['type'] = $this->channel;
 			$campaign              = Campaign_Model::create( $campaign_data );
 
-			// Attach analytics counts for frontend use
-			$campaign->attach_counts( $campaign );
+			// Enrich with computed counts and analytics
+			$this->enrichment->enrich( $campaign );
 
 			return new WP_REST_Response( $campaign, 201 );
 		} catch ( \Exception $e ) {
@@ -405,8 +416,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 			// Attach full template data for frontend use
 			$campaign->attach_templates( $campaign );
-			// Attach analytics counts (sent, clicked, etc.) for frontend use
-			$campaign->attach_counts( $campaign );
+
+			// Enrich with computed counts and analytics
+			$this->enrichment->enrich( $campaign );
 
 			return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {

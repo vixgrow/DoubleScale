@@ -11,16 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use WC_Order;
 
 /**
  * Order Refunded Trigger
  */
-class Order_Refunded extends Trigger {
-
-
+class Order_Refunded extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -63,45 +60,6 @@ class Order_Refunded extends Trigger {
 	 * @var string
 	 */
 	public $group = 'order';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'woocommerce_order_refunded', array( $this, 'order_refunded' ), 10, 2 );
-	}
-
-	/**
-	 * Order Refunded
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 * @param int $refund_id Refund ID.
-	 * @return void
-	 */
-	public function order_refunded( $order_id, $refund_id ) {
-		$order = \wc_get_order( $order_id );
-		if ( ! $order instanceof WC_Order ) {
-			return;
-		}
-
-		$data = array(
-			'first_name' => $order->get_billing_first_name(),
-			'last_name'  => $order->get_billing_last_name(),
-			'email'      => $order->get_billing_email(),
-			'data'       => array(
-				'order_id'  => $order->get_id(),
-				'refund_id' => $refund_id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
 
 Triggers_Manager::instance()->register( new Order_Refunded() );

@@ -11,13 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers\WooCommerce\Review;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
 
 /**
  * Review Received Trigger
  */
-class Review_Received extends Trigger {
+class Review_Received extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -60,34 +60,6 @@ class Review_Received extends Trigger {
 	 * @var string
 	 */
 	public $group = 'review';
-
-	public function load_hooks() {
-		add_action( 'comment_post', array( $this, 'review_received' ), 10, 3 );
-	}
-
-	/**
-	 * Review Received
-	 *
-	 * @param int   $comment_ID Comment ID.
-	 * @param int   $comment_approved Whether comment is approved.
-	 * @param array $commentdata Comment data.
-	 */
-	public function review_received( $comment_ID, $comment_approved, $commentdata ) {
-		if ( isset( $commentdata['comment_type'] ) && $commentdata['comment_type'] === 'review' ) {
-			// Get the rating from comment meta
-			$rating = get_comment_meta( $comment_ID, 'rating', true );
-
-			$this->process(
-				array(
-					'review_id'      => $comment_ID,
-					'product_id'     => $commentdata['comment_post_ID'] ?? null,
-					'author_email'   => $commentdata['comment_author_email'] ?? '',
-					'review_content' => $commentdata['comment_content'] ?? '',
-					'review_rating'  => $rating ?? '',
-				)
-			);
-		}
-	}
 }
 
 Triggers_Manager::instance()->register( new Review_Received() );

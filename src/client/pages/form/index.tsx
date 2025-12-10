@@ -59,6 +59,7 @@ const Form: React.FC<FormProps> = ({
 	const [formFields, setFormFields] = useState<
 		FormType['fields_settings']['fields'] | null
 	>(null);
+	const [formWasSaved, setFormWasSaved] = useState(false);
 	const isEditMode = !isNewForm;
 
 	// Notice state
@@ -199,6 +200,7 @@ const Form: React.FC<FormProps> = ({
 			}
 			try {
 				await saveForm();
+				setFormWasSaved(true); // Mark that form was saved
 				closeNotice(); // Clear any existing notices when moving to step 2
 				setCurrentStep(1);
 			} catch (error: any) {
@@ -229,6 +231,7 @@ const Form: React.FC<FormProps> = ({
 
 			try {
 				await saveForm({ status: 'active' });
+				setFormWasSaved(true); // Mark that form was saved
 
 				// Show appropriate notice based on whether it's a new form or edit
 				const successMessage = isNewForm
@@ -264,35 +267,12 @@ const Form: React.FC<FormProps> = ({
 	// Modify the handleBack function to handle cancellation properly
 	const handleBack = () => {
 		if (currentStep > 0) {
-			// If going back from step 2 (currentStep === 1), check if form was saved
-			// Being on step 2 means step 1 was completed and form was saved
-			if (currentStep === 1 && form?.id && form.id > 0) {
-				// Form was saved in step 1, show success message and refresh
-				if (onSuccess) {
-					const onSuccessMessage = isNewForm
-						? __('Form created successfully', 'quillcrm')
-						: __('Form updated successfully', 'quillcrm');
-					onSuccess(onSuccessMessage);
-				}
-				// Close the form
-				if (isNewForm && onClose) {
-					onClose();
-				} else {
-					// In edit mode, navigate with success message in URL
-					const successType = isNewForm ? 'created' : 'updated';
-					const formsLink = getToLink('forms');
-					const separator = formsLink.includes('?') ? '&' : '?';
-					navigate(`${formsLink}${separator}success=${successType}`);
-				}
-			} else {
-				// Just go back to previous step
-				setCurrentStep(currentStep - 1);
-			}
+			// Just go back to previous step
+			setCurrentStep(currentStep - 1);
 		} else {
-			// When closing from step 0, check if form was already created/updated
-			// If form was created in step 1 (has ID), show success and refresh
-			if (form?.id && form.id > 0) {
-				// Form was created/updated, show success message and refresh
+			// When closing from step 0, only show success if form was actually saved
+			if (formWasSaved) {
+				// Form was saved during this session, show success message and refresh
 				if (onSuccess) {
 					const onSuccessMessage = isNewForm
 						? __('Form created successfully', 'quillcrm')
@@ -303,8 +283,8 @@ const Form: React.FC<FormProps> = ({
 
 			// For existing forms, navigate back to forms list
 			if (!isNewForm) {
-				// If form was updated, add success parameter to URL
-				if (form?.id && form.id > 0) {
+				// If form was saved during this session, add success parameter to URL
+				if (formWasSaved) {
 					const formsLink = getToLink('forms');
 					const separator = formsLink.includes('?') ? '&' : '?';
 					navigate(`${formsLink}${separator}success=updated`);
@@ -322,6 +302,7 @@ const Form: React.FC<FormProps> = ({
 	const handleSaveDraft = async () => {
 		try {
 			await saveForm({ status: 'inactive' });
+			setFormWasSaved(true); // Mark that form was saved
 
 			// Show appropriate notice based on whether it's a new form or edit
 			const successMessage = isNewForm
@@ -448,19 +429,19 @@ const Form: React.FC<FormProps> = ({
 				handleNavigate={(href) => {
 					// If navigating to forms, check if form was created/updated
 					if (href === 'forms') {
-						// If form was created/updated (has ID), show success message and refresh
-						if (form?.id && form.id > 0 && onSuccess) {
+						// If form was saved during this session, show success message and refresh
+						if (formWasSaved && onSuccess) {
 							const onSuccessMessage = isNewForm
-								? __('Form created', 'quillcrm')
-								: __('Form updated', 'quillcrm');
+								? __('Form created successfully', 'quillcrm')
+								: __('Form updated successfully', 'quillcrm');
 							onSuccess(onSuccessMessage);
 						}
 						// Close the form if it's a new form in modal, otherwise navigate
 						if (isNewForm && onClose) {
 							onClose();
 						} else {
-							// If form was created/updated, add success parameter to URL
-							if (form?.id && form.id > 0) {
+							// If form was saved during this session, add success parameter to URL
+							if (formWasSaved) {
 								const successType = isNewForm ? 'created' : 'updated';
 								const formsLink = getToLink(href);
 								const separator = formsLink.includes('?') ? '&' : '?';

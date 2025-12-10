@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { PluginStatusCard } from '@/components/plugin-installer';
+import { QuillSMTPInstaller } from '@/components/quillsmtp-installer';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 
 const SMTPSettings: React.FC = () => {
@@ -16,21 +16,7 @@ const SMTPSettings: React.FC = () => {
 				{__('SMTP / Email Sending Service Settings', 'quillcrm')}
 			</div>
 
-			<PluginStatusCard
-				plugin={{
-					id: 'quill-smtp',
-					name: __('QuillSMTP', 'quillcrm'),
-					description: __(
-						'QuillSMTP is not installed. Install and configure QuillSMTP for reliable email delivery with support for multiple SMTP providers including SendGrid, Mailgun, SES, and more.',
-						'quillcrm'
-					),
-					pluginFile: 'quill-smtp/quillsmtp.php',
-					downloadUrl:
-						'https://downloads.wordpress.org/plugin/quill-smtp.1.5.3.zip',
-					settingsUrl: '/wp-admin/admin.php?page=quill-smtp#/connections',
-				}}
-				variant="default"
-			/>
+			<QuillSMTPInstaller />
 
 			{/* Bounce Handler - Pro Feature */}
 			<div className="mt-8 pt-8 border-t border-gray-200">

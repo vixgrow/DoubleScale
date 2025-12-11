@@ -19,7 +19,7 @@ import type { Form } from '@quillcrm/config';
 import AjaxSelect from './ajax-select';
 import type { MappedFields } from '@quillcrm/client';
 import { Card, CardContent } from '@quillcrm/components/ui/card';
-import { Spinner } from '@quillcrm/components/ui/spinner';
+import { Skeleton } from '@quillcrm/components/ui/skeleton';
 import MappingDialog from './mapping-dialog';
 
 interface FormFieldsProps {
@@ -90,8 +90,13 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 	const getFormFields = async () => {
 		if (!fieldsSettings || !form_id) {
 			setIsFetching(false);
+			setFormFields(null);
 			return;
 		}
+
+		// Set loading state immediately when form_id changes
+		setIsFetching(true);
+		setFormFields(null);
 
 		try {
 			const body = new FormData();
@@ -175,8 +180,50 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 						{isFetching ? (
 							<Card>
 								<CardContent className="pt-6">
-									<div className="flex justify-center items-center py-8">
-										<Spinner className="size-8" />
+									<div className="flex flex-col gap-4">
+										{/* Map Fields Section Shimmer */}
+										<div className="flex flex-col gap-4">
+											<Skeleton className="h-6 w-32" />
+											{/* Header row shimmer */}
+											<div className="flex gap-5">
+												<Skeleton className="h-4 flex-1" />
+												<Skeleton className="h-4 flex-1" />
+											</div>
+											{/* Field rows shimmer */}
+											<div className="flex flex-col gap-3">
+												{Array.from({ length: 3 }).map((_, index) => (
+													<div key={index} className="flex gap-3">
+														<Skeleton className="h-12 flex-1" />
+														<Skeleton className="h-12 flex-1" />
+													</div>
+												))}
+											</div>
+										</div>
+
+										{/* Contact Settings Section Shimmer */}
+										<div className="border-t pt-4 mt-4">
+											<Skeleton className="h-6 w-40 mb-4" />
+											<div className="flex flex-col gap-4">
+												{/* Lists and Tags shimmer */}
+												<div className="flex flex-col gap-4 w-full">
+													<div className="flex flex-col gap-2.5">
+														<Skeleton className="h-4 w-16" />
+														<Skeleton className="h-10 w-full" />
+													</div>
+													<div className="flex flex-col gap-2.5">
+														<Skeleton className="h-4 w-16" />
+														<Skeleton className="h-10 w-full" />
+													</div>
+												</div>
+												{/* Switch toggles shimmer */}
+												{Array.from({ length: 3 }).map((_, index) => (
+													<div key={index} className="flex gap-2.5 justify-between items-center">
+														<Skeleton className="h-4 w-40" />
+														<Skeleton className="h-6 w-11 rounded-full" />
+													</div>
+												))}
+											</div>
+										</div>
 									</div>
 								</CardContent>
 							</Card>

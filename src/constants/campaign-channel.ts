@@ -15,7 +15,7 @@
 export const CAMPAIGN_CHANNEL = {
 	EMAIL: 'email',
 	SMS: 'sms',
-	// WHATSAPP: 'whatsapp', // Commented out - Coming in next version
+	WHATSAPP: 'whatsapp',
 	SEQUENCE_MAIL: 'sequence_mail',
 	EMAIL_SEQUENCE: 'email_sequence',
 } as const;

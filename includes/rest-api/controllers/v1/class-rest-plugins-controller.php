@@ -165,11 +165,32 @@ class REST_Plugins_Controller extends REST_Controller {
 
 			$plugin_path  = WP_PLUGIN_DIR . '/' . $plugin_file;
 			$is_installed = file_exists( $plugin_path );
-			$is_active    = $is_installed && is_plugin_active( $plugin_file );
+			$actual_plugin_file = $plugin_file;
+
+			// If the exact path doesn't exist, try to find the plugin by searching for the main plugin file name
+			if ( ! $is_installed ) {
+				$plugin_file_name = basename( $plugin_file );
+				$plugins_dir      = WP_PLUGIN_DIR;
+				$plugin_dirs      = glob( $plugins_dir . '/*', GLOB_ONLYDIR );
+
+				foreach ( $plugin_dirs as $dir ) {
+					$dir_name  = basename( $dir );
+					$test_file = $dir_name . '/' . $plugin_file_name;
+					$test_path = WP_PLUGIN_DIR . '/' . $test_file;
+					if ( file_exists( $test_path ) ) {
+						$actual_plugin_file = $test_file;
+						$is_installed      = true;
+						break;
+					}
+				}
+			}
+
+			$is_active = $is_installed && is_plugin_active( $actual_plugin_file );
 
 			$results[ $plugin_file ] = array(
-				'is_installed' => $is_installed,
-				'is_active'    => $is_active,
+				'is_installed'      => $is_installed,
+				'is_active'         => $is_active,
+				'actual_plugin_file' => $actual_plugin_file !== $plugin_file ? $actual_plugin_file : null,
 			);
 		}
 
@@ -240,8 +261,45 @@ class REST_Plugins_Controller extends REST_Controller {
 			);
 		}
 
-		// Activate the plugin.
-		$activate_result = activate_plugin( $plugin_file );
+		// Get the actual plugin file path from the upgrader after installation.
+		// The plugin folder name might differ from what we expected.
+		$actual_plugin_file = $upgrader->plugin_info();
+		
+		// If we couldn't get the actual plugin file, try to find it by the expected plugin file.
+		if ( ! $actual_plugin_file ) {
+			// Try the provided plugin_file first.
+			$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_file;
+			if ( file_exists( $plugin_path ) ) {
+				$actual_plugin_file = $plugin_file;
+			} else {
+				// Try to find the plugin by searching for the main plugin file name.
+				$plugin_file_name = basename( $plugin_file );
+				$plugins_dir       = WP_PLUGIN_DIR;
+				$plugin_dirs      = glob( $plugins_dir . '/*', GLOB_ONLYDIR );
+				
+				foreach ( $plugin_dirs as $dir ) {
+					$dir_name     = basename( $dir );
+					$test_file    = $dir_name . '/' . $plugin_file_name;
+					$test_path    = WP_PLUGIN_DIR . '/' . $test_file;
+					if ( file_exists( $test_path ) ) {
+						$actual_plugin_file = $test_file;
+						break;
+					}
+				}
+			}
+		}
+
+		// If we still don't have a plugin file, return an error.
+		if ( ! $actual_plugin_file ) {
+			return new WP_Error(
+				'quillcrm_rest_plugins_plugin_file_not_found',
+				__( 'Plugin installed successfully but plugin file could not be found.', 'quillcrm' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Activate the plugin using the actual plugin file path.
+		$activate_result = activate_plugin( $actual_plugin_file );
 
 		if ( is_wp_error( $activate_result ) ) {
 			return new WP_Error(
@@ -254,7 +312,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		return new WP_REST_Response(
 			array(
 				'success'      => true,
-				'plugin_file'  => $plugin_file,
+				'plugin_file'  => $actual_plugin_file,
 				'download_url' => $download_url,
 			),
 			200

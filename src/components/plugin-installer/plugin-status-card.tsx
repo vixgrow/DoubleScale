@@ -28,6 +28,7 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 	const { checkPluginStatus, installPlugin, activatePlugin, isProcessing } =
 		usePluginInstaller();
 	const [isChecking, setIsChecking] = useState<boolean>(true);
+	const [actualPluginFile, setActualPluginFile] = useState<string | null>(null);
 	const [pluginStatus, setPluginStatus] = useState<{
 		isInstalled: boolean;
 		isActive: boolean;
@@ -48,6 +49,10 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 			const status = await checkPluginStatus(plugin.pluginFile);
 			if (status) {
 				setPluginStatus(status);
+				// Store the actual plugin file path if it's different from expected
+				if (status.actualPluginFile) {
+					setActualPluginFile(status.actualPluginFile);
+				}
 				onStatusChange?.(status.isActive);
 			}
 			setIsChecking(false);
@@ -57,9 +62,11 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 	}, [plugin.pluginFile]);
 
 	const handleInstall = async () => {
-		const success = await installPlugin(plugin);
-		if (success && plugin.pluginFile) {
-			const status = await checkPluginStatus(plugin.pluginFile);
+		const actualPluginFile = await installPlugin(plugin);
+		if (actualPluginFile) {
+			// Use the actual plugin file path returned from the server
+			// This might differ from the expected path if the plugin folder name is different
+			const status = await checkPluginStatus(actualPluginFile);
 			if (status) {
 				setPluginStatus(status);
 				onStatusChange?.(status.isActive);
@@ -68,13 +75,19 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 	};
 
 	const handleActivate = async () => {
-		if (!plugin.pluginFile) return;
+		// Use the actual plugin file path if available, otherwise use the expected path
+		const pluginFileToActivate = actualPluginFile || plugin.pluginFile;
+		if (!pluginFileToActivate) return;
 
-		const success = await activatePlugin(plugin.pluginFile);
+		const success = await activatePlugin(pluginFileToActivate);
 		if (success) {
+			// Check status using the original plugin file path (the API will find the actual path)
 			const status = await checkPluginStatus(plugin.pluginFile);
 			if (status) {
 				setPluginStatus(status);
+				if (status.actualPluginFile) {
+					setActualPluginFile(status.actualPluginFile);
+				}
 				onStatusChange?.(status.isActive);
 			}
 		}

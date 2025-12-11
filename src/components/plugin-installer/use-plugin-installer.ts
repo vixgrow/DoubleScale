@@ -13,7 +13,7 @@ import type { Plugin, PluginStatus } from './types';
 
 interface UsePluginInstallerReturn {
 	checkPluginStatus: (pluginFile: string) => Promise<PluginStatus | null>;
-	installPlugin: (plugin: Plugin) => Promise<boolean>;
+	installPlugin: (plugin: Plugin) => Promise<string | false>;
 	activatePlugin: (pluginFile: string) => Promise<boolean>;
 	isProcessing: boolean;
 }
@@ -43,6 +43,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 				return {
 					isInstalled: Boolean(status.is_installed),
 					isActive: Boolean(status.is_active),
+					actualPluginFile: status.actual_plugin_file || null,
 				};
 			}
 			return null;
@@ -60,7 +61,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 		}
 	};
 
-	const installPlugin = async (plugin: Plugin): Promise<boolean> => {
+	const installPlugin = async (plugin: Plugin): Promise<string | false> => {
 		if (!plugin.pluginFile || !plugin.downloadUrl) {
 			createNotice({
 				type: 'error',
@@ -74,7 +75,9 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 
 		setIsProcessing(true);
 		try {
-			await apiFetch({
+			const response: {
+				plugin_file?: string;
+			} = await apiFetch({
 				path: '/qc/v1/plugins/install',
 				method: 'POST',
 				data: {
@@ -88,7 +91,9 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 				message: __('Plugin installed successfully', 'quillcrm'),
 			});
 
-			return true;
+			// Return the actual plugin file path from the server response
+			// This might differ from the expected path if the plugin folder name is different
+			return response?.plugin_file || plugin.pluginFile;
 		} catch (error: any) {
 			console.error('Failed to install plugin:', error);
 			const errorMessage =

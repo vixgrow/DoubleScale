@@ -13,4 +13,5 @@ export interface Plugin {
 export interface PluginStatus {
 	isInstalled: boolean;
 	isActive: boolean;
+	actualPluginFile?: string | null; // The actual plugin file path if different from expected
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Activity Model
  * Unified model for all activity types (messages, notes, calls, meetings, system events)
@@ -16,6 +17,9 @@ use WPEloquent\Eloquent\Model;
  * Activity_Model class
  */
 class Activity_Model extends Model {
+
+
+
 
 	/**
 	 * Table name
@@ -44,7 +48,6 @@ class Activity_Model extends Model {
 	 */
 	protected $fillable = array(
 		'contact_id',
-		'deal_id',
 		'activity_type',
 		'data',
 		'user_id',
@@ -59,6 +62,17 @@ class Activity_Model extends Model {
 	 */
 	protected $casts = array(
 		'data' => 'array',
+	);
+
+	/**
+	 * Attributes to append to model's array/JSON form
+	 *
+	 * @var array
+	 *
+	 * @since 1.0.0
+	 */
+	protected $appends = array(
+		'deal_id',
 	);
 
 	/**
@@ -78,9 +92,8 @@ class Activity_Model extends Model {
 	 * @var array
 	 */
 	public $rules = array(
-		'deal_id'       => 'nullable|integer',
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,call_logged,meeting_scheduled,sms_sent,whatsapp_sent',
+		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received',
 		'user_id'       => 'nullable|integer',
 	);
 
@@ -104,7 +117,7 @@ class Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		return $this->belongsTo( Contact_Model::class, 'contact_id' );
+		 return $this->belongsTo( Contact_Model::class, 'contact_id' );
 	}
 
 	/**
@@ -134,18 +147,8 @@ class Activity_Model extends Model {
 	}
 
 	/**
-	 * Deal relationship
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo|null
-	 */
-	public function deal() {
-		if ( class_exists( '\QuillCRM_Pro\Models\Deal_Model' ) ) {
-			return $this->belongsTo( '\QuillCRM_Pro\Models\Deal_Model', 'deal_id', 'id' );
-		}
-		return $this->belongsTo( self::class, 'deal_id' )->whereRaw( '1=0' ); // Return empty relation
-	}
+
+
 
 	/**
 	 * Comments relationship
@@ -156,6 +159,71 @@ class Activity_Model extends Model {
 	 */
 	public function comments() {
 		return $this->hasMany( Activity_Comment_Model::class, 'activity_id', 'id' )->orderBy( 'created_at', 'asc' );
+	}
+
+	/**
+	 * Activity associations relationship (many associations per activity)
+	 * Links this activity to deals, companies, or projects
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function associations() {
+		return $this->hasMany( Activity_Association_Model::class, 'activity_id', 'id' );
+	}
+
+	/**
+	 * Get activity associations of a specific type
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $type Entity type (deal, company, project).
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function associationsByType( $type ) {
+		return $this->associations()->where( 'entity_type', $type );
+	}
+
+	/**
+	 * Get deal associations for this activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function dealAssociations() {
+		return $this->associationsByType( 'deal' );
+	}
+
+	/**
+	 * Get campaign associations for this activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function campaignAssociations() {
+		return $this->associationsByType( 'campaign' );
+	}
+
+	/**
+	 * Get deal_id accessor for backward compatibility
+	 * Returns the first associated deal's ID or null
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|null
+	 */
+	public function getDealIdAttribute() {
+		if ( ! $this->relationLoaded( 'associations' ) ) {
+			// Load associations if not already loaded
+			$this->load( 'associations' );
+		}
+
+		$deal_association = $this->associations->where( 'entity_type', 'deal' )->first();
+		return $deal_association ? $deal_association->entity_id : null;
 	}
 
 	/**
@@ -171,7 +239,7 @@ class Activity_Model extends Model {
 	}
 
 	/**
-	 * Scope: Filter by deal
+	 * Scope: Filter by deal using activity_associations table
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
 	 * @param int                                   $deal_id Deal ID.
@@ -179,8 +247,13 @@ class Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeForDeal( $query, $deal_id ) {
-		return $query->where( 'deal_id', $deal_id )
-					 ->orderBy( 'created_at', 'desc' );
+		return $query->whereHas(
+			'associations',
+			function ( $q ) use ( $deal_id ) {
+				$q->where( 'entity_type', 'deal' )
+					->where( 'entity_id', $deal_id );
+			}
+		)->orderBy( 'created_at', 'desc' );
 	}
 
 	/**
@@ -575,7 +648,7 @@ class Activity_Model extends Model {
 	 * @return bool
 	 */
 	public function is_note() {
-		return 'note' === $this->activity_type;
+		 return 'note' === $this->activity_type;
 	}
 
 	/**
@@ -586,7 +659,7 @@ class Activity_Model extends Model {
 	 * @return bool
 	 */
 	public function is_editable() {
-		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
+		 $editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
 		return in_array( $this->activity_type, $editable_types, true );
 	}
 
@@ -635,6 +708,7 @@ class Activity_Model extends Model {
 	 * @return Activity_Model
 	 */
 	public static function add_note( $data ) {
+		xdebug_break();
 		return self::create(
 			array(
 				'contact_id'    => $data['contact_id'] ?? null,
@@ -732,6 +806,7 @@ class Activity_Model extends Model {
 		);
 	}
 
+
 	/**
 	 * Boot method
 	 *
@@ -740,7 +815,7 @@ class Activity_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		static::creating(
 			function ( $activity ) {
@@ -754,6 +829,7 @@ class Activity_Model extends Model {
 			function ( $activity ) {
 				// Delete all comments
 				$activity->comments()->delete();
+				$activity->associations()->delete();
 			}
 		);
 	}

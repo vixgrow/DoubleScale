@@ -272,6 +272,17 @@ class REST_Settings_Controller extends REST_Controller {
 					'additionalProperties' => true,
 					'default'              => array(),
 				),
+				'debugging'        => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'log_level' => array(
+							'type'    => 'string',
+							'default' => 'error',
+							'enum'    => array( 'error', 'error,debug', 'error,debug,info' ),
+						),
+					),
+				),
 			),
 		);
 		return $schema;

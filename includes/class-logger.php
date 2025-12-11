@@ -20,6 +20,7 @@ namespace QuillCRM;
 use QuillCRM\Abstracts\Log_Levels;
 use QuillCRM\Interfaces\Log_Handler_Interface;
 use QuillCRM\Interfaces\Logger_Interface;
+use QuillCRM\Settings;
 
 /**
  * Logger class.
@@ -39,6 +40,7 @@ class Logger implements Logger_Interface {
 	 * @var int Integer representation of minimum log level to handle.
 	 */
 	protected $threshold;
+
 
 	/**
 	 * Constructor for the logger.
@@ -95,10 +97,58 @@ class Logger implements Logger_Interface {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level ) {
-		if ( null === $this->threshold ) {
+		// First check threshold for backward compatibility
+		if ( null !== $this->threshold ) {
+			$level_severity = Log_Levels::get_level_severity( $level );
+			if ( $this->threshold > $level_severity ) {
+				return false;
+			}
+		}
+
+		// Check against the log level setting from debugging configuration
+		$allowed_levels = $this->get_allowed_levels();
+		
+		// Always allow error, critical, alert, emergency regardless of setting
+		$always_allowed = array( 'error', 'critical', 'alert', 'emergency' );
+		if ( in_array( strtolower( $level ), $always_allowed, true ) ) {
 			return true;
 		}
-		return $this->threshold <= Log_Levels::get_level_severity( $level );
+
+		// Check if the level is in the allowed list
+		return in_array( strtolower( $level ), $allowed_levels, true );
+	}
+
+	/**
+	 * Get allowed log levels based on the log level setting from debugging configuration.
+	 * This method reads the setting dynamically to ensure it's always up-to-date.
+	 *
+	 * @return array Array of allowed log level strings.
+	 */
+	protected function get_allowed_levels() {
+		// Get the log level setting from debugging configuration
+		$debugging_settings = Settings::get( 'debugging', array() );
+		$log_level_setting = isset( $debugging_settings['log_level'] ) ? $debugging_settings['log_level'] : 'error';
+
+		$allowed = array( 'error', 'critical', 'alert', 'emergency' ); // Always allowed
+
+		if ( 'error' === $log_level_setting ) {
+			// Only error and above (already in $allowed)
+			return $allowed;
+		}
+
+		if ( strpos( $log_level_setting, 'debug' ) !== false ) {
+			$allowed[] = 'debug';
+		}
+
+		if ( strpos( $log_level_setting, 'info' ) !== false ) {
+			$allowed[] = 'info';
+			$allowed[] = 'notice';
+		}
+
+		// Note: 'warning' is not included in any of the three options
+		// as per the requirement: error, error+debug, or error+debug+info
+
+		return $allowed;
 	}
 
 	/**

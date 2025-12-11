@@ -36,6 +36,7 @@ import {
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
+import SMTPSettings from './smtp';
 import DoubleOptInSettings from './double-optin';
 import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
@@ -55,7 +56,7 @@ import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'debugging']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -199,6 +200,12 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
+			case 'smtp':
+				const SMTPComponent = applyFilters(
+					'quillcrm_settings_smtp_settings',
+					SMTPSettings
+				) as React.ComponentType;
+				return <SMTPComponent />;
 			case 'sms':
 				const SMSComponent = applyFilters(
 					'quillcrm_settings_sms_settings',
@@ -259,7 +266,7 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'license':
-				return <License isActivated={isLicenseActivated} />;
+				return <License />;
 			case 'custom_fields':
 				const CustomFieldsComponent = applyFilters(
 					'quillcrm_settings_custom_fields_settings',
@@ -302,6 +309,11 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'email',
 			label: 'Email',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'smtp',
+			label: 'SMTP',
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{

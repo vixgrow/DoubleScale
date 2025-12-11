@@ -14,6 +14,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\QuillCRM;
@@ -611,6 +612,7 @@ abstract class Abstract_Campaign_Processing {
 				'contact_id'  => $contact->id,
 				'template_id' => $template_id,
 				'mode'        => $this->get_message_mode(),
+				'direction'   => Message_Direction::OUTBOUND,
 				'source_type' => $this->get_source_type(),
 				'source_id'   => $this->get_source_id( $campaign ),
 				'recipient'   => $recipient,

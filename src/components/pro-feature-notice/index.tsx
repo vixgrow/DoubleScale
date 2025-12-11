@@ -2,12 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import { AlertCircle, Crown, ExternalLink } from 'lucide-react';
-
 /**
  * Internal dependencies
  */
@@ -15,7 +9,8 @@ import './style.scss';
 import config from '../../config';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
-import { RocketIcon } from '../icons';
+import { PremiumIcon, RocketIcon } from '../icons';
+import { useProUpgrade } from '../../hooks/use-pro-upgrade';
 
 interface ProFeatureNoticeProps {
 	featureName: string;
@@ -28,12 +23,21 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
 	upgradeUrl = config.getUrlQuillCRMPro(),
-	features = [],
 }) => {
+	const {
+		isInstalling,
+		isActivating,
+		isLicenseExpired,
+		handleUpgradeClick,
+		getUpgradeButtonText,
+	} = useProUpgrade();
+
 	return (
 		<div className="qcrm-pro-feature-notice">
 			<div className="qcrm-pro-feature-notice__container">
-				<img src={proImage} alt="Pro Feature" />
+				<div className="bg-[#FAEADF] text-[#CB5301] rounded-full p-2">
+					<PremiumIcon width={54} height={54} />
+				</div>
 				<div className="qcrm-pro-feature-notice__content">
 					<h2 className="qcrm-pro-feature-notice__title">
 						{featureName} {__('is a Pro Feature', 'quillcrm')}
@@ -42,6 +46,14 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						<p className="qcrm-pro-feature-notice__description">
 							{description}
 						</p>
+					)}
+					{isLicenseExpired && (
+						<div className="mt-3 text-sm text-[#b91c1c] bg-[#FEF2F2] border border-[#FECACA] rounded-md px-3 py-2">
+							{__(
+								'Your license has expired. Renew to continue using Pro features.',
+								'quillcrm'
+							)}
+						</div>
 					)}
 					{/* {features.length > 0 && (
 						<div className="qcrm-pro-feature-notice__features">
@@ -65,16 +77,14 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						>
 							{__('Try a Free demo', 'quillcrm')}
 						</a>
-						<a
-							href={upgradeUrl}
+						<button
+							onClick={() => handleUpgradeClick(upgradeUrl)}
 							className="qcrm-pro-feature-notice__button qcrm-pro-feature-notice__button--primary"
-							target="_blank"
-							rel="noopener noreferrer"
+							disabled={isInstalling || isActivating}
 						>
 							<RocketIcon />
-							{__('Upgrade to Pro', 'quillcrm')}
-						</a>
-						
+							{getUpgradeButtonText()}
+						</button>
 					</div>
 				</div>
 			</div>

@@ -22,7 +22,12 @@ export const useProUpgrade = () => {
 	// Determine button state
 	const isProInstalled = pluginData?.is_installed || false;
 	const isProActive = pluginData?.is_active || false;
-	const hasValidLicense = license && license.status === 'valid';
+	const isLicenseObject = (value: typeof license): value is typeof license & { status: string } =>
+		!!value && typeof value === 'object' && 'status' in value;
+
+	const licenseStatus = isLicenseObject(license) ? license.status : 'none';
+	const isLicenseExpired = licenseStatus === 'expired';
+	const hasValidLicense = licenseStatus === 'valid';
 
 	// Get plugins page URL
 	const getPluginsPageUrl = () => {
@@ -123,9 +128,13 @@ export const useProUpgrade = () => {
 		if (isProInstalled && !isProActive) {
 			// Redirect to plugins page to activate
 			window.location.href = getPluginsPageUrl();
-		} else if (!isProInstalled && hasValidLicense) {
-			// Install Pro plugin
+		} else if (!isProInstalled) {
+			// Install Pro plugin regardless of current license validity
 			installPlugin();
+		} else if (isLicenseExpired) {
+			// Renew license -> same as upgrade URL
+			const url = upgradeUrl || config.getUrlQuillCRMPro();
+			window.open(url, '_blank', 'noopener,noreferrer');
 		} else {
 			// Upgrade to Pro (default behavior)
 			const url = upgradeUrl || config.getUrlQuillCRMPro();
@@ -137,8 +146,10 @@ export const useProUpgrade = () => {
 	const getUpgradeButtonText = () => {
 		if (isProInstalled && !isProActive) {
 			return __('Activate Pro Addon', 'quillcrm');
-		} else if (!isProInstalled && hasValidLicense) {
+		} else if (!isProInstalled) {
 			return isInstalling ? __('Installing...', 'quillcrm') : __('Install Pro', 'quillcrm');
+		} else if (isLicenseExpired) {
+			return __('Renew License', 'quillcrm');
 		} else {
 			return __('Upgrade to Pro', 'quillcrm');
 		}
@@ -148,6 +159,8 @@ export const useProUpgrade = () => {
 		isProInstalled,
 		isProActive,
 		hasValidLicense,
+		licenseStatus,
+		isLicenseExpired,
 		isInstalling,
 		isActivating,
 		handleUpgradeClick,

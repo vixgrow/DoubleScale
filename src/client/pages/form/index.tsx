@@ -211,7 +211,7 @@ const Form: React.FC<FormProps> = ({
 			const mappedFields = (form?.data as any)?.mapped_fields || {};
 
 			// Required contact fields that must be mapped
-			const requiredContactFields = ['first_name', 'last_name', 'email'];
+			const requiredContactFields = ['email'];
 
 			// Check if all required contact fields have valid mappings
 			const allRequiredFieldsMapped = requiredContactFields.every(
@@ -222,7 +222,7 @@ const Form: React.FC<FormProps> = ({
 				showNotice(
 					'error',
 					__(
-						'Please map all required contact fields (First Name, Last Name, Email) before activating',
+						'Please map all required contact fields (Email) before activating',
 						'quillcrm'
 					)
 				);
@@ -336,23 +336,23 @@ const Form: React.FC<FormProps> = ({
 
 	const breadcrumbItems = isNewForm
 		? [
-			{
-				label: __('Create Forms', 'quillcrm'),
-				href: 'forms',
-			},
-			{
-				label: stepTitles[currentStep],
-			},
-		]
+				{
+					label: __('Create Forms', 'quillcrm'),
+					href: 'forms',
+				},
+				{
+					label: stepTitles[currentStep],
+				},
+			]
 		: [
-			{
-				label: __('Edit Form', 'quillcrm'),
-				href: 'forms',
-			},
-			{
-				label: stepTitles[currentStep],
-			},
-		];
+				{
+					label: __('Edit Form', 'quillcrm'),
+					href: 'forms',
+				},
+				{
+					label: stepTitles[currentStep],
+				},
+			];
 
 	// // If tab is 'overview', show the overview page
 	// if (tab === 'overview') {
@@ -442,10 +442,16 @@ const Form: React.FC<FormProps> = ({
 						} else {
 							// If form was saved during this session, add success parameter to URL
 							if (formWasSaved) {
-								const successType = isNewForm ? 'created' : 'updated';
+								const successType = isNewForm
+									? 'created'
+									: 'updated';
 								const formsLink = getToLink(href);
-								const separator = formsLink.includes('?') ? '&' : '?';
-								navigate(`${formsLink}${separator}success=${successType}`);
+								const separator = formsLink.includes('?')
+									? '&'
+									: '?';
+								navigate(
+									`${formsLink}${separator}success=${successType}`
+								);
 							} else {
 								navigate(getToLink(href));
 							}

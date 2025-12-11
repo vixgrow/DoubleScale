@@ -199,7 +199,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 						borderRadius: props.borderRadius,
 						borderWidth: props.borderWidth,
 						backgroundColor: props.backgroundColor,
-						padding: `${(props.padding?.top || 0) * 2}px ${(props.padding?.right || 0) * 4}px ${(props.padding?.bottom || 0) * 2}px ${(props.padding?.left || 0) * 4}px`,
+						padding: `${props.padding?.top || 0}px ${props.padding?.right || 0}px ${props.padding?.bottom || 0}px ${props.padding?.left || 0}px`,
 						margin: 0,
 						// Overflow prevention properties like Button and Preheader renderers
 						wordWrap: 'break-word',

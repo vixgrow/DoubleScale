@@ -2,7 +2,7 @@
  * Type definitions for Email Sequences module
  */
 
-import { EmailTemplate } from '../../../types';
+import { EmailTemplate, NoticeMessage } from '../../../types';
 
 /**
  * Settings for sequence mail (stored in database)
@@ -181,6 +181,9 @@ export interface SequenceMailModalProps {
     title: string;
     initialData?: SequenceMailFormData;
     onSave: (data: SequenceMailFormData) => void;
+    notice?: NoticeMessage | null;
+	noticeBannerRef?: React.RefObject<HTMLDivElement>;
+	closeNotice?: () => void;
 }
 
 /**

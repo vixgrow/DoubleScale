@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	ABSplitIcon,
 	AllContactsIcon,
+	EmailSequenceOutlinedIcon,
 	PremiumIcon,
 } from '@quillcrm/components';
 import { CampaignType } from '@quillcrm/client';
@@ -44,15 +45,15 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 		// 	icon: <ABSplitIcon width={24} height={24} />,
 		// 	isPremium: true,
 		// },
-		// {
-		// 	label: __('Email Sequence', 'quillcrm'),
-		// 	description: __(
-		// 		'Slow, personalized follow-up series; stops automatically on reply',
-		// 		'quillcrm'
-		// 	),
-		// 	type: 'sequence',
-		// 	icon: <EmailSequenceOutlinedIcon />,
-		// },
+		{
+			label: __('Email Sequence', 'quillcrm'),
+			description: __(
+				'Slow, personalized follow-up series; stops automatically on reply',
+				'quillcrm'
+			),
+			type: 'sequence',
+			icon: <EmailSequenceOutlinedIcon />,
+		},
 	];
 
 	return (

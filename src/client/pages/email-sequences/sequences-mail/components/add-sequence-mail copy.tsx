@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -11,7 +11,6 @@ import {
 	SequenceMailFormData,
 	SequenceMailRequest,
 } from '../../types';
-import { NoticeMessage } from '@/client/types';
 
 const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 	isAdding,
@@ -19,24 +18,10 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 	sequenceId,
 	onSuccess,
 }) => {
-	const [notice, setNotice] = useState<NoticeMessage | null>(null);
-	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const handleClose = () => {
 		setIsAdding(false);
-	};
-	useEffect(() => {
-		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({
-				behavior: 'smooth',
-				block: 'nearest',
-			});
-		}
-	}, [notice]);
-
-	const handleCloseNotice = () => {
-		setNotice(null);
 	};
 
 	const handleSave = async (data: SequenceMailFormData) => {
@@ -44,15 +29,14 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 		try {
 			// Prepare the data for API
 			if (!data.subject || data.subject.trim() === '') {
-				setNotice({
+				createNotice({
 					type: 'error',
 					message: __('Subject is required', 'quillcrm'),
-				})
-				
+				});
 				return;
 			}
 			if (!data.email_body || data.email_body.trim() === '') {
-				setNotice({
+				createNotice({
 					type: 'error',
 					message: __('Email body is required', 'quillcrm'),
 				});
@@ -95,19 +79,17 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 				type: 'success',
 				message: __('Sequence email added successfully', 'quillcrm'),
 			});
-			
 
 			// Call the success callback to refresh the list
 			onSuccess();
 			handleClose();
 		} catch (error: any) {
-			
-			setNotice({
+			createNotice({
 				type: 'error',
 				message:
 					error.message ||
 					__('Failed to add sequence email', 'quillcrm'),
-			})
+			});
 		} finally {
 			// Processing complete
 		}
@@ -117,8 +99,7 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 		<SequenceMailModal
 			isOpen={isAdding}
 			onClose={handleClose}
-			
-			title={__(`Email (${sequenceId})`, 'quillcrm')}
+			title={__('Add Sequence Email', 'quillcrm')}
 			onSave={handleSave}
 			initialData={{
 				subject: '',
@@ -152,10 +133,6 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 				},
 				templates: [],
 			}}
-			notice={notice}
-			noticeBannerRef={noticeBannerRef}
-			closeNotice={handleCloseNotice}
-			
 		/>
 	);
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -12,7 +12,6 @@ import {
 	SequenceMailFormData,
 	SequenceMailRequest,
 } from '../../types';
-import { NoticeMessage } from '@/client/types';
 
 const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 	isEditing,
@@ -24,27 +23,12 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [loading, setLoading] = useState(false);
 	const [emailData, setEmailData] = useState<SequenceMail | null>(null);
-	const [notice, setNotice] = useState<NoticeMessage | null>(null);
-	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (isEditing && emailId) {
 			fetchEmailData();
 		}
 	}, [isEditing, emailId]);
-
-	useEffect(() => {
-		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({
-				behavior: 'smooth',
-				block: 'nearest',
-			});
-		}
-	}, [notice]);
-
-	const handleCloseNotice = () => {
-		setNotice(null);
-	};
 
 	const fetchEmailData = async () => {
 		setLoading(true);
@@ -127,13 +111,12 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 
 			setEmailData(response);
 		} catch (error: any) {
-			setNotice({
+			createNotice({
 				type: 'error',
 				message:
 					error.message ||
 					__('Failed to fetch email data', 'quillcrm'),
-			})
-			
+			});
 			setIsEditing(false);
 		} finally {
 			setLoading(false);
@@ -150,14 +133,14 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 		try {
 			// Prepare the data for API
 			if (!data.subject || data.subject.trim() === '') {
-				setNotice({
+				createNotice({
 					type: 'error',
 					message: __('Subject is required', 'quillcrm'),
 				});
 				return;
 			}
 			if (!data.email_body || data.email_body.trim() === '') {
-				setNotice({
+				createNotice({
 					type: 'error',
 					message: __('Email body is required', 'quillcrm'),
 				});
@@ -186,7 +169,6 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 					templates: data.templates || [],
 				},
 			};
-			console.log('sequenceMailData',sequenceMailData)
 
 			// Make the API call
 			await apiFetch({
@@ -195,7 +177,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				data: sequenceMailData,
 			});
 
-			setNotice({
+			createNotice({
 				type: 'success',
 				message: __('Sequence email updated successfully', 'quillcrm'),
 			});
@@ -204,7 +186,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 			onSuccess();
 			handleClose();
 		} catch (error: any) {
-			setNotice({
+			createNotice({
 				type: 'error',
 				message:
 					error.message ||
@@ -248,13 +230,8 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				utm_parameters: emailData.settings.utm_parameters,
 				templates: emailData.settings.templates || [],
 			}}
-			notice={notice}
-			noticeBannerRef={noticeBannerRef}
-			closeNotice={handleCloseNotice}
-			
 		/>
 	) : null;
 };
 
 export default EditSequenceMail;
-

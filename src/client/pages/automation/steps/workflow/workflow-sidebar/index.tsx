@@ -333,7 +333,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		<>
 			<div
 				className={cn(
-					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen min-w-[21rem] max-w-96 rounded-l-lg z-[150400] flex flex-col',
+					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen w-96 rounded-l-lg z-[150400] flex flex-col',
 					isVisible ? 'is-visible' : ''
 				)}
 			>

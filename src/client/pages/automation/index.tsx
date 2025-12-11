@@ -30,7 +30,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { UndoIcon, RedoIcon, WorkflowIcon, AutomationContactsIcon, AutomationAnalyticsIcon } from '@quillcrm/components';
+import {
+	UndoIcon,
+	RedoIcon,
+	WorkflowIcon,
+	AutomationContactsIcon,
+	AutomationAnalyticsIcon,
+} from '@quillcrm/components';
 import { AutomationShimmer } from './automation-shimmer';
 
 const Automation: React.FC = () => {
@@ -56,8 +62,12 @@ const Automation: React.FC = () => {
 		fetchAutomation();
 	}, [id]);
 
-	const fetchAutomation = async () => {
-		setLoading(true);
+	const fetchAutomation = async (
+		skipLoading = false
+	): Promise<AutomationType | undefined> => {
+		if (!skipLoading) {
+			setLoading(true);
+		}
 
 		try {
 			const response = (await apiFetch({
@@ -68,14 +78,21 @@ const Automation: React.FC = () => {
 			setSteps(response.steps);
 
 			// Fetch analytics data once when automation loads
-			fetchAnalyticsData(response.id);
+			if (!skipLoading) {
+				fetchAnalyticsData(response.id);
+			}
+
+			return response;
 		} catch (error) {
 			createNotice({
 				type: 'error',
 				message: __('Failed to fetch automation', 'quillcrm'),
 			});
+			return undefined;
 		} finally {
-			setLoading(false);
+			if (!skipLoading) {
+				setLoading(false);
+			}
 		}
 	};
 
@@ -130,9 +147,9 @@ const Automation: React.FC = () => {
 		}
 	};
 
-	const [activeTab, setActiveTab] = useState<'workflow' | 'contacts' | 'reports'>(
-		'workflow'
-	);
+	const [activeTab, setActiveTab] = useState<
+		'workflow' | 'contacts' | 'reports'
+	>('workflow');
 	const [open, setOpen] = useState(true);
 
 	const renderContent = () => {
@@ -142,7 +159,13 @@ const Automation: React.FC = () => {
 			case 'contacts':
 				return <Contacts />;
 			case 'reports':
-				return <AutomationFunnel automation={automation} analyticsData={analyticsData} loading={analyticsLoading} />;
+				return (
+					<AutomationFunnel
+						automation={automation}
+						analyticsData={analyticsData}
+						loading={analyticsLoading}
+					/>
+				);
 			default:
 				return <Workflow />;
 		}
@@ -177,6 +200,7 @@ const Automation: React.FC = () => {
 				setIsLoading: setLoading,
 				setIsSaving: setIsSaving,
 				saveAutomation,
+				refetchAutomation: () => fetchAutomation(true),
 				...$actions,
 			}}
 		>
@@ -204,11 +228,16 @@ const Automation: React.FC = () => {
 
 						// Check for builder-portal-wrapper or any builder element
 						const isBuilderClick =
-							target.closest('#builder-portal-wrapper') !== null ||
-							target.closest('[data-builder-portal="true"]') !== null ||
+							target.closest('#builder-portal-wrapper') !==
+								null ||
+							target.closest('[data-builder-portal="true"]') !==
+								null ||
 							target.id === 'builder-portal-wrapper' ||
-							target.getAttribute('data-builder-portal') === 'true' ||
-							document.getElementById('builder-portal-wrapper') !== null;
+							target.getAttribute('data-builder-portal') ===
+								'true' ||
+							document.getElementById(
+								'builder-portal-wrapper'
+							) !== null;
 
 						// Prevent closing if builder is open at all
 						if (isBuilderClick) {
@@ -217,7 +246,9 @@ const Automation: React.FC = () => {
 					}}
 					onEscapeKeyDown={(e) => {
 						// Prevent closing on Escape if builder is open
-						const builderPortalWrapper = document.getElementById('builder-portal-wrapper');
+						const builderPortalWrapper = document.getElementById(
+							'builder-portal-wrapper'
+						);
 						if (builderPortalWrapper) {
 							e.preventDefault();
 						}
@@ -254,7 +285,11 @@ const Automation: React.FC = () => {
 										<div className="flex items-center gap-2">
 											<span
 												className="text-base text-normal text-[#667085] cursor-pointer hover:text-[#1E3A8A] transition-colors"
-												onClick={() => navigate(getToLink('automations'))}
+												onClick={() =>
+													navigate(
+														getToLink('automations')
+													)
+												}
 											>
 												{__(
 													'Create Automation',
@@ -301,11 +336,19 @@ const Automation: React.FC = () => {
 										return (
 											<button
 												key={tab.id}
-												onClick={() => setActiveTab(tab.id as 'workflow' | 'contacts' | 'reports')}
-												className={`flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg transition-colors shadow-none ${isActive
-													? 'bg-[#E3EEFF99] text-secondary'
-													: 'border border-[#E4E7EC] text-[#667085] hover:bg-gray-50'
-													}`}
+												onClick={() =>
+													setActiveTab(
+														tab.id as
+															| 'workflow'
+															| 'contacts'
+															| 'reports'
+													)
+												}
+												className={`flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg transition-colors shadow-none ${
+													isActive
+														? 'bg-[#E3EEFF99] text-secondary'
+														: 'border border-[#E4E7EC] text-[#667085] hover:bg-gray-50'
+												}`}
 											>
 												<Icon width={24} height={24} />
 												<span className="text-base font-normal">

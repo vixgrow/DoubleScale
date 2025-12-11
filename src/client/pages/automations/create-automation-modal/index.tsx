@@ -30,6 +30,7 @@ import TriggerCategorySelector from './trigger-category-selector';
 import TriggersGroupRender from './triggers-group-render';
 interface CreateAutomationModalProps {
 	visible: boolean;
+	isEditAutomation?: boolean;
 	isSaving: boolean;
 	automation: {
 		name: string;
@@ -44,6 +45,7 @@ interface CreateAutomationModalProps {
 
 const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	visible,
+	isEditAutomation = false,
 	isSaving,
 	automation,
 	onOk,
@@ -430,11 +432,19 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
-			<DialogContent className="max-w-[1100px] max-h-[90vh] h-full flex flex-col overflow-hidden">
+			<DialogContent className="max-w-[1100px] z-[150000] max-h-[90vh] h-full flex flex-col overflow-hidden">
 				<DialogHeader className="shrink-0">
 					<CustomDialogHeader
-						title={__('Create Automation', 'quillcrm')}
-						subtitle={__('Add New Automation', 'quillcrm')}
+						title={
+							isEditAutomation
+								? __('Edit Automation', 'quillcrm')
+								: __('Create Automation', 'quillcrm')
+						}
+						subtitle={
+							isEditAutomation
+								? __('Edit Automation', 'quillcrm')
+								: __('Add New Automation', 'quillcrm')
+						}
 						icon={
 							<GradientAutomationsIcon width={32} height={32} />
 						}
@@ -509,8 +519,12 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						className="mt-0 px-8 py-3 rounded-lg"
 					>
 						{isSaving
-							? __('Creating...', 'quillcrm')
-							: __('Create Automation', 'quillcrm')}
+							? isEditAutomation
+								? __('Updating...', 'quillcrm')
+								: __('Creating...', 'quillcrm')
+							: isEditAutomation
+								? __('Update Automation', 'quillcrm')
+								: __('Create Automation', 'quillcrm')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

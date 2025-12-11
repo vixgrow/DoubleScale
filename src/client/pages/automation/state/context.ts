@@ -28,7 +28,8 @@ export const AutomationContext = createContext<{
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
 	updateAutomation: (payload: Partial<Automation>) => void;
-	saveAutomation: (payload?: Partial<Automation>) => void;
+	saveAutomation: (payload?: Partial<Automation>) => Promise<void>;
+	refetchAutomation: () => Promise<Automation | undefined>;
 	updateSettings: (
 		key: keyof Automation['settings'],
 		value: Automation['settings'][keyof Automation['settings']]
@@ -60,8 +61,11 @@ export const AutomationContext = createContext<{
 	updateAutomation: (_payload: Partial<Automation>) => {
 		throw new Error('updateAutomation() not implemented');
 	},
-	saveAutomation: (_payload?: Partial<Automation>) => {
+	saveAutomation: async (_payload?: Partial<Automation>) => {
 		throw new Error('saveAutomation() not implemented');
+	},
+	refetchAutomation: async () => {
+		throw new Error('refetchAutomation() not implemented');
 	},
 	updateSettings: (
 		_key: keyof Automation['settings'],

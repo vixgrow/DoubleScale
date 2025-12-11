@@ -142,15 +142,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		const warningMessage =
 			step.type === 'goal'
 				? step.settings?._goal_warning_message ||
-					__(
-						'Goal requires a plugin that is not currently active.',
-						'quillcrm'
-					)
+				__(
+					'Goal requires a plugin that is not currently active.',
+					'quillcrm'
+				)
 				: step.settings?._action_warning_message ||
-					__(
-						'Action requires a plugin that is not currently active.',
-						'quillcrm'
-					);
+				__(
+					'Action requires a plugin that is not currently active.',
+					'quillcrm'
+				);
 		const labelText =
 			step.type === 'goal'
 				? __('Goal:', 'quillcrm')
@@ -224,7 +224,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				/>
 			</div>
 
-			<div className="space-y-4">
+			<div className="flex items-center justify-between gap-2">
 				<Button
 					onClick={handleSave}
 					disabled={isSaving || isDeleting}

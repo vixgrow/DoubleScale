@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { pick, isObject, omit } from 'lodash';
 import Select from 'react-select';
 import { useState, useRef, useEffect } from 'react';
-import { Hash, Plus, X } from 'lucide-react';
+import { Hash, Plus } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -116,7 +116,7 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 					__('Enter value or use merge tags', 'quillcrm')
 				}
 			/>
-			<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+			<Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={false}>
 				<PopoverTrigger asChild>
 					<Button
 						type="button"
@@ -128,7 +128,7 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent
-					className="w-80 max-h-96 overflow-y-auto z-[18000000]"
+					className="w-80 max-h-96 overflow-y-auto z-[150300] pointer-events-auto"
 					align="end"
 				>
 					<div className="space-y-2">
@@ -356,13 +356,13 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 					{__('Contact Field')}
 					<span className="text-red-600">*</span>
 				</div>
-				<div className="flex flex-1 text-[#09090B] font-normal text-base ml-7">
+				<div className="flex flex-1 text-[#09090B] font-normal text-base ml-[14px]">
 					{__('Field')} <span className="text-red-600">*</span>
 				</div>
 			</div>
 			{map(contactFields, (_, key) => {
 				return (
-					<div key={key} className="flex gap-5">
+					<div key={key} className="flex gap-3">
 						<Input
 							value={contactFields[key].label}
 							disabled

@@ -56,7 +56,7 @@ import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'debugging']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -266,7 +266,7 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'license':
-				return <License isActivated={isLicenseActivated} />;
+				return <License />;
 			case 'custom_fields':
 				const CustomFieldsComponent = applyFilters(
 					'quillcrm_settings_custom_fields_settings',

@@ -237,8 +237,20 @@ function quillcrm_get_logger() {
 	$implements = class_implements( $class );
 
 	if ( is_array( $implements ) && in_array( Logger_Interface::class, $implements, true ) ) {
-		$threshold = Settings::get( 'log_level', 'info' );
-		$logger    = is_object( $class ) ? $class : new $class( null, $threshold );
+		// Get log level from debugging settings, default to 'error'
+		$debugging_settings = Settings::get( 'debugging', array() );
+		$log_level_setting = isset( $debugging_settings['log_level'] ) ? $debugging_settings['log_level'] : 'error';
+		
+		// Convert log level setting to threshold for backward compatibility
+		// The actual filtering is done in should_handle() method which reads the setting dynamically
+		$threshold = 'error'; // Default threshold
+		if ( strpos( $log_level_setting, 'debug' ) !== false ) {
+			$threshold = 'debug';
+		} elseif ( strpos( $log_level_setting, 'info' ) !== false ) {
+			$threshold = 'info';
+		}
+		
+		$logger = is_object( $class ) ? $class : new $class( null, $threshold );
 	} else {
 		_doing_it_wrong(
 			__FUNCTION__,

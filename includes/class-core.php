@@ -118,7 +118,7 @@ class Core {
 
 		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
 		$plugins_dir      = trailingslashit( dirname( dirname( QUILLCRM_PLUGIN_FILE ) ) );
-		$plugin_file      = 'QuillCRM-pro/quillcrm-pro.php';
+		$plugin_file      = 'QuillCRM-Pro/quillcrm-pro.php';
 		$full_plugin_file = $plugins_dir . $plugin_file;
 		$plugin_exists    = file_exists( $full_plugin_file );
 

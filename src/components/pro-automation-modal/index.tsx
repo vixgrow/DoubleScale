@@ -21,6 +21,7 @@ import {
 import './style.scss';
 import config from '../../config';
 import { RocketIcon } from '../icons';
+import { useProUpgrade } from '../../hooks/use-pro-upgrade';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
 
@@ -36,6 +37,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 	featureName,
 }) => {
 	const upgradeUrl = config.getUrlQuillCRMPro();
+	const { isInstalling, isActivating, handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogContent className="z-[150300] qcrm-pro-modal sm:max-w-[500px]">
@@ -80,12 +82,13 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 						<div className="qcrm-pro-modal__action">
 							<Button
 								onClick={() => {
-									window.open(upgradeUrl, '_blank');
+									handleUpgradeClick(upgradeUrl);
 								}}
 								className="flex-1 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+								disabled={isInstalling || isActivating}
 							>
 								<RocketIcon />
-								{__('Upgrade to PRO Now', 'quillcrm')}
+								{getUpgradeButtonText()}
 							</Button>
 						</div>
 					</div>

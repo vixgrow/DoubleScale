@@ -4,12 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { PremiumIcon, RocketIcon } from '../../components';
 import { Button } from '../../components/ui/button';
-import config from '../../config';
+import { useProUpgrade } from '../../hooks/use-pro-upgrade';
 
 /**
  * Component to display locked library placeholder for Pro features
  */
 const LockecButtons = () => {
+	const { isInstalling, isActivating, handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
+
 	return (
 		<div className="rounded-2xl bg-white shadow-[0_2px_2px_0_rgba(0,106,98,0.10)]">
 			<button
@@ -35,12 +37,11 @@ const LockecButtons = () => {
 				<Button
 					size="lg"
 					className="w-full max-w-xs [&_svg]:size-6"
-					onClick={() => {
-						window.open(config.getUrlQuillCRMPro(), '_blank');
-					}}
+					onClick={() => handleUpgradeClick()}
+					disabled={isInstalling || isActivating}
 				>
 					<RocketIcon />
-					{__('Upgrade Pro Now', 'quillcrm')}
+					{getUpgradeButtonText()}
 				</Button>
 			</div>
 		</div>

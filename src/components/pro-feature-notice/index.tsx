@@ -10,6 +10,7 @@ import config from '../../config';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
 import { PremiumIcon, RocketIcon } from '../icons';
+import { useProUpgrade } from '../../hooks/use-pro-upgrade';
 
 interface ProFeatureNoticeProps {
 	featureName: string;
@@ -22,8 +23,14 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
 	upgradeUrl = config.getUrlQuillCRMPro(),
-	features = [],
 }) => {
+	const {
+		isInstalling,
+		isActivating,
+		handleUpgradeClick,
+		getUpgradeButtonText,
+	} = useProUpgrade();
+
 	return (
 		<div className="qcrm-pro-feature-notice">
 			<div className="qcrm-pro-feature-notice__container">
@@ -61,15 +68,14 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						>
 							{__('Try a Free demo', 'quillcrm')}
 						</a>
-						<a
-							href={upgradeUrl}
+						<button
+							onClick={() => handleUpgradeClick(upgradeUrl)}
 							className="qcrm-pro-feature-notice__button qcrm-pro-feature-notice__button--primary"
-							target="_blank"
-							rel="noopener noreferrer"
+							disabled={isInstalling || isActivating}
 						>
 							<RocketIcon />
-							{__('Upgrade to Pro', 'quillcrm')}
-						</a>
+							{getUpgradeButtonText()}
+						</button>
 					</div>
 				</div>
 			</div>

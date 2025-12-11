@@ -24,6 +24,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
+import TrashIcon from '../icons/trash';
 
 interface ContactMappedFieldsProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -101,44 +102,33 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 	};
 
 	return (
-		<div className="flex-1 flex gap-2">
-			<div className="flex-1 relative">
-				<Input
-					ref={inputRef}
-					className={`w-full bg-white h-12 ${hasMergeTags(value || '')
-						? 'pr-8 border-blue-300 bg-blue-50/30'
-						: ''
-						}`}
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					placeholder={
-						placeholder ||
-						__('Enter value or use merge tags', 'quillcrm')
-					}
-				/>
-				{hasMergeTags(value || '') && (
-					<div
-						className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 text-xs font-mono bg-blue-100 px-2 py-0.5 rounded"
-						title={__('Contains merge tags', 'quillcrm')}
-					>
-						#
-					</div>
-				)}
-			</div>
+		<div className="flex-1 relative">
+			<Input
+				ref={inputRef}
+				className={`w-full bg-white h-12 pr-10 ${hasMergeTags(value || '')
+					? 'border-blue-300 bg-blue-50/30'
+					: ''
+					}`}
+				value={value || ''}
+				onChange={(e) => onChange(e.target.value)}
+				placeholder={
+					placeholder ||
+					__('Enter value or use merge tags', 'quillcrm')
+				}
+			/>
 			<Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
 				<PopoverTrigger asChild>
 					<Button
 						type="button"
-						variant="outline"
 						size="icon"
-						className="shrink-0 bg-white border-gray-200 h-12 w-12"
+						className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-transparent border-none hover:bg-transparent text-primary p-0 shadow-none"
 						title={__('Insert merge tag', 'quillcrm')}
 					>
 						<Hash className="h-4 w-4" />
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent
-					className="w-80 max-h-96 overflow-y-auto"
+					className="w-80 max-h-96 overflow-y-auto z-[18000000]"
 					align="end"
 				>
 					<div className="space-y-2">
@@ -376,7 +366,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 						<Input
 							value={contactFields[key].label}
 							disabled
-							className="flex-1 bg-white h-12"
+							className="flex-1 bg-white h-12 disabled:opacity-100"
 							style={{
 								borderRadius: '8px',
 							}}
@@ -410,12 +400,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 										flex: 1,
 										height: '48px',
 										borderRadius: '6px',
+										color: 'black',
 									}),
 									container: (styles) => ({
 										...styles,
 										flex: 1,
 										height: '48px',
 										borderRadius: '6px',
+										color: 'black',
 									}),
 									menu: (base: any) => ({
 										...base,
@@ -462,7 +454,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 						<div className="flex flex-1 text-[#09090B] font-normal text-base">
 							{__('Field Label', 'quillcrm')}
 						</div>
-						<div className="flex flex-1 text-[#09090B] font-normal text-base">
+						<div className="flex flex-1 text-[#09090B] font-normal text-base ml-[14px]">
 							{__('Field Value', 'quillcrm')}
 						</div>
 						<div className="w-12"></div>
@@ -470,7 +462,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 				)}
 
 				{otherFields.map((field) => (
-					<div key={field.id} className="flex gap-5 items-start">
+					<div key={field.id} className="flex gap-3 items-start">
 						<div className="flex-1">
 							<Select
 								className="react-select-container h-12"
@@ -505,12 +497,14 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 										flex: 1,
 										height: '48px',
 										borderRadius: '6px',
+										color: 'black',
 									}),
 									container: (styles) => ({
 										...styles,
 										flex: 1,
 										height: '48px',
 										borderRadius: '6px',
+										color: 'black',
 									}),
 									menu: (base: any) => ({
 										...base,
@@ -540,20 +534,19 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 
 						<Button
 							type="button"
-							variant="outline"
 							size="icon"
-							className="shrink-0 h-12 w-12 text-destructive border-destructive"
+							className="shrink-0 text-destructive shadow-none border-none hover:bg-transparent hover:text-destructive p-0 bg-transparent h-12"
 							onClick={() => removeOtherField(field.id)}
 							title={__('Remove field', 'quillcrm')}
 						>
-							<X className="h-5 w-5" />
+							<TrashIcon width={20} height={20} />
 						</Button>
 					</div>
 				))}
 
 				<Button
 					type="button"
-					variant="outline"
+					variant="secondaryDeepBlue"
 					className="w-full mt-2 gap-2 rounded-md"
 					onClick={addOtherField}
 				>

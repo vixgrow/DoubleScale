@@ -27,6 +27,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	const {
 		isInstalling,
 		isActivating,
+		isLicenseExpired,
 		handleUpgradeClick,
 		getUpgradeButtonText,
 	} = useProUpgrade();
@@ -45,6 +46,14 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						<p className="qcrm-pro-feature-notice__description">
 							{description}
 						</p>
+					)}
+					{isLicenseExpired && (
+						<div className="mt-3 text-sm text-[#b91c1c] bg-[#FEF2F2] border border-[#FECACA] rounded-md px-3 py-2">
+							{__(
+								'Your license has expired. Renew to continue using Pro features.',
+								'quillcrm'
+							)}
+						</div>
 					)}
 					{/* {features.length > 0 && (
 						<div className="qcrm-pro-feature-notice__features">

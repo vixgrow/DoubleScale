@@ -128,31 +128,43 @@ export const useProUpgrade = () => {
 		if (isProInstalled && !isProActive) {
 			// Redirect to plugins page to activate
 			window.location.href = getPluginsPageUrl();
-		} else if (!isProInstalled) {
-			// Install Pro plugin regardless of current license validity
+			return;
+		}
+
+		if (!isProInstalled && hasValidLicense) {
+			// Install Pro plugin only when license is valid
 			installPlugin();
-		} else if (isLicenseExpired) {
+			return;
+		}
+
+		if (isLicenseExpired) {
 			// Renew license -> same as upgrade URL
 			const url = upgradeUrl || config.getUrlQuillCRMPro();
 			window.open(url, '_blank', 'noopener,noreferrer');
-		} else {
-			// Upgrade to Pro (default behavior)
-			const url = upgradeUrl || config.getUrlQuillCRMPro();
-			window.open(url, '_blank', 'noopener,noreferrer');
+			return;
 		}
+
+		// Default: Upgrade to Pro (no license or invalid license)
+		const url = upgradeUrl || config.getUrlQuillCRMPro();
+		window.open(url, '_blank', 'noopener,noreferrer');
 	};
 
 	// Get primary button text
 	const getUpgradeButtonText = () => {
 		if (isProInstalled && !isProActive) {
 			return __('Activate Pro Addon', 'quillcrm');
-		} else if (!isProInstalled) {
-			return isInstalling ? __('Installing...', 'quillcrm') : __('Install Pro', 'quillcrm');
-		} else if (isLicenseExpired) {
-			return __('Renew License', 'quillcrm');
-		} else {
-			return __('Upgrade to Pro', 'quillcrm');
 		}
+
+		if (!isProInstalled && hasValidLicense) {
+			return isInstalling ? __('Installing...', 'quillcrm') : __('Install Pro', 'quillcrm');
+		}
+
+		if (isLicenseExpired) {
+			return __('Renew License', 'quillcrm');
+		}
+
+		// Default when plugin not installed and license invalid/missing
+		return __('Upgrade to Pro', 'quillcrm');
 	};
 
 	return {

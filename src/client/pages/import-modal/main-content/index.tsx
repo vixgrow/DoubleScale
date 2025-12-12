@@ -210,37 +210,38 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 														<label className="text-base">
 															{field.label}
 														</label>
-														<ContactMappedFields
-															fields={
-																fileData
-																	? fileData.header_columns.reduce(
-																			(
-																				acc,
+													<ContactMappedFields
+														fields={
+															fileData
+																? fileData.header_columns.reduce(
+																		(
+																			acc,
+																			field
+																		) => {
+																			acc[
 																				field
-																			) => {
-																				acc[
-																					field
-																				] =
-																					{
-																						label: field,
-																					};
-																				return acc;
-																			},
-																			{}
-																		)
-																	: field.options
-															}
-															values={
-																values[key] ||
-																{}
-															}
-															onChange={(value) =>
-																updateValues(
-																	key,
-																	value
-																)
-															}
-														/>
+																			] =
+																				{
+																					label: field,
+																				};
+																			return acc;
+																		},
+																		{}
+																	)
+																: field.options
+														}
+														values={
+															values[key] ||
+															{}
+														}
+														onChange={(value) =>
+															updateValues(
+																key,
+																value
+															)
+														}
+														source={source}
+													/>
 													</div>
 												)
 										)}

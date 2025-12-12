@@ -195,6 +195,7 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 						fields={fields}
 						values={values[key] || {}}
 						onChange={(value) => updateValues(key, value)}
+						source={source}
 					/>
 				);
 				break;

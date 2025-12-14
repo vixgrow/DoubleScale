@@ -107,7 +107,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 			{/* Conditional Section Badge */}
 			{hasConditions && (
-				<div className="absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-md shadow-sm z-10 flex items-center gap-1">
+				<div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-md shadow-sm z-10 flex items-center gap-1">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="12"

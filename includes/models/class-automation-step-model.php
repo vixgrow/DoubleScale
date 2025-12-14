@@ -22,6 +22,7 @@ use QuillCRM\Constants\Campaign_Channel;
 class Automation_Step_Model extends Model {
 
 
+
 	/**
 	 * Table name
 	 *
@@ -187,105 +188,40 @@ class Automation_Step_Model extends Model {
 			}
 		);
 
-		// Process template data when saving step
 		static::saving(
 			function ( $step ) {
 				$settings = $step->settings;
 
-				// Determine channel type from step action
 				$channel_type = self::get_channel_type_from_action( $step->action );
 
-				// Skip if not a message action or template_ids already exist
-				if ( ! $channel_type || isset( $settings['template_ids'] ) ) {
+				if ( ! $channel_type ) {
 					return;
 				}
 
-				// Prepare template data from settings fields using shared service
-				$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
-
-				if ( ! empty( $template_data ) ) {
-					// Use Campaign_Template_Factory to process template data
-					$template_factory = Campaign_Template_Factory::instance();
-					$template_ids     = $template_factory->process_templates_data(
-						array( $template_data ),
-						$channel_type,
-						'draft'
-					);
-
-					if ( ! empty( $template_ids ) ) {
-						// Store template IDs
-						$settings['template_ids'] = $template_ids;
-						$step->settings           = $settings;
-
-						quillcrm_get_logger()->info(
-							'Automation step: Template processed and saved',
-							array(
-								'step_id'      => $step->id ?? 'new',
-								'action'       => $step->action,
-								'template_ids' => $template_ids,
-								'code'         => 'automation_step_template_processed',
-							)
-						);
-					}
-				}
-			}
-		);
-
-		// Handle template updates when updating step
-		static::updating(
-			function ( $step ) {
-				$settings = $step->settings;
-
-				// Only process if this is a message action with existing template
-				$channel_type = self::get_channel_type_from_action( $step->action );
-				if ( ! $channel_type || ! isset( $settings['template_ids'] ) || empty( $settings['template_ids'] ) ) {
-					return;
-				}
-
-				$template_id = reset( $settings['template_ids'] );
-
-				// Check if content fields have changed
-				$has_content_changes = Template_Data_Preparer::has_raw_template_fields( $settings, $channel_type );
-				if ( ! $has_content_changes ) {
-					return; // No content changes, nothing to update
-				}
-
-				// Check if this template has been used in tracking
-				if ( Template_Model::is_used_in_tracking( $template_id ) ) {
-					// Template has been used - remove template_ids so saving event creates new one
-					unset( $settings['template_ids'] );
-					$step->settings = $settings;
-
-					quillcrm_get_logger()->info(
-						'Automation step: Template in use, will create new template',
-						array(
-							'step_id'         => $step->id,
-							'old_template_id' => $template_id,
-							'code'            => 'automation_step_template_in_use',
-						)
-					);
+				if ( isset( $settings['template_ids'] ) ) {
+					self::process_template_update( $step, $channel_type, $settings );
 				} else {
-					// Template not used yet - safe to update in-place using shared service
-					$template = Template_Model::find( $template_id );
-					if ( $template ) {
-						$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
-						if ( $template_data ) {
-							// Update template with new data
-							$template->update(
-								array(
-									'name'     => $template_data['name'],
-									'subject'  => $template_data['subject'],
-									'body'     => $template_data['body'],
-									'settings' => $template_data['settings'],
-								)
-							);
+					$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
+
+					if ( ! empty( $template_data ) ) {
+						$template_factory = Campaign_Template_Factory::instance();
+						$template_ids     = $template_factory->process_templates_data(
+							array( $template_data ),
+							$channel_type,
+							'draft'
+						);
+
+						if ( ! empty( $template_ids ) ) {
+							$settings['template_ids'] = $template_ids;
+							$step->settings           = $settings;
 
 							quillcrm_get_logger()->info(
-								'Automation step: Template updated in-place',
+								'Automation step: Template processed and saved',
 								array(
-									'step_id'     => $step->id,
-									'template_id' => $template_id,
-									'code'        => 'automation_step_template_updated',
+									'step_id'      => $step->id ?? 'new',
+									'action'       => $step->action,
+									'template_ids' => $template_ids,
+									'code'         => 'automation_step_template_processed',
 								)
 							);
 						}
@@ -293,6 +229,69 @@ class Automation_Step_Model extends Model {
 				}
 			}
 		);
+
+		static::updating(
+			function ( $step ) {
+				$settings = $step->settings;
+
+				$channel_type = self::get_channel_type_from_action( $step->action );
+
+				if ( ! $channel_type || ! isset( $settings['template_ids'] ) || empty( $settings['template_ids'] ) ) {
+					return;
+				}
+
+				self::process_template_update( $step, $channel_type, $settings );
+			}
+		);
+	}
+
+
+	protected static function process_template_update( $step, $channel_type, &$settings ) {
+		$template_id = reset( $settings['template_ids'] );
+
+		if ( Template_Data_Preparer::has_raw_template_fields( $settings, $channel_type ) ) {
+			if ( Template_Model::is_used_in_tracking( $template_id ) ) {
+				unset( $settings['template_ids'] );
+				$step->settings = $settings;
+
+				quillcrm_get_logger()->info(
+					'Automation step: Template in use, will create new template',
+					array(
+						'step_id'         => $step->id,
+						'old_template_id' => $template_id,
+						'code'            => 'automation_step_template_in_use',
+					)
+				);
+			} else {
+				$template = Template_Model::find( $template_id );
+				if ( $template ) {
+					$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
+					if ( $template_data ) {
+						// Add subject to settings array since setSubjectAttribute stores it there
+						if ( ! empty( $template_data['subject'] ) ) {
+							$template_data['settings']['subject'] = $template_data['subject'];
+						}
+
+						$template->update(
+							array(
+								'name'     => $template_data['name'],
+								'body'     => $template_data['body'],
+								'settings' => $template_data['settings'],
+							)
+						);
+
+						quillcrm_get_logger()->info(
+							'Automation step: Template updated in-place',
+							array(
+								'step_id'     => $step->id,
+								'template_id' => $template_id,
+								'code'        => 'automation_step_template_updated',
+							)
+						);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -310,5 +309,4 @@ class Automation_Step_Model extends Model {
 
 		return $action_channel_map[ $action ] ?? null;
 	}
-
 }

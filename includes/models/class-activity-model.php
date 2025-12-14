@@ -21,6 +21,7 @@ class Activity_Model extends Model {
 
 
 
+
 	/**
 	 * Table name
 	 *
@@ -708,7 +709,6 @@ class Activity_Model extends Model {
 	 * @return Activity_Model
 	 */
 	public static function add_note( $data ) {
-		xdebug_break();
 		return self::create(
 			array(
 				'contact_id'    => $data['contact_id'] ?? null,

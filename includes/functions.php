@@ -370,3 +370,23 @@ function quillcrm_get_meta_args( $meta_id ) {
 
 	return maybe_unserialize( $meta['value'] );
 }
+
+
+/**
+ * Find object in objects has specific key and value
+ *
+ * @since 1.0.0
+ *
+ * @param object[] $objects Array of objects.
+ * @param string   $key    Key.
+ * @param mixed    $value  Value.
+ * @return object|null
+ */
+function quillcrm_objects_find( $objects, $key, $value ) {
+	foreach ( $objects as $object ) {
+		if ( $object->{$key} === $value ) {
+			return $object;
+		}
+	}
+	return null;
+}

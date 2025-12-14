@@ -95,7 +95,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 
 	return (
 		<Card
-			className={`shadow-none ${rules.length > 1 ? 'ml-16 max-w-[800px]' : 'w-fit'}`}
+			className={`shadow-none ${rules.length > 1 ? 'ml-16' : 'w-full'}`}
 		>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">

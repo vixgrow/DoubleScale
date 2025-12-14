@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
@@ -11,6 +11,7 @@ import ColumnRenderer from './ColumnRenderer';
 import { CopyIcon, DeleteIcon } from '@quillcrm/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { DropIndicator } from './DropIndicator';
+import ConditionalSectionModal from '../blocks/layout/components/ConditionalSectionModal';
 
 interface SectionRendererProps {
 	section: EmailSection;
@@ -19,16 +20,23 @@ interface SectionRendererProps {
 const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const [showConditionsModal, setShowConditionsModal] = useState(false);
 
-	const { attributes, setNodeRef, transform, transition, isDragging, isOver } =
-		useSortable({
-			id: section.id,
-			data: {
-				type: 'section',
-				sectionId: section.id,
-				section: section,
-			},
-		});
+	const {
+		attributes,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+		isOver,
+	} = useSortable({
+		id: section.id,
+		data: {
+			type: 'section',
+			sectionId: section.id,
+			section: section,
+		},
+	});
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -42,6 +50,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	);
 
 	const isSelected = selectedSectionId === section.id;
+	const hasConditions = section.conditions && section.conditions.length > 0;
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -95,10 +104,33 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		>
 			{/* Drop Indicator */}
 			<DropIndicator position="top" isVisible={isOver} />
-			
+
+			{/* Conditional Section Badge */}
+			{hasConditions && (
+				<div className="absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-md shadow-sm z-10 flex items-center gap-1">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="12"
+						height="12"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+						<circle cx="9" cy="7" r="4" />
+						<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+						<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+					</svg>
+					{__('Conditional', 'quillcrm')}
+				</div>
+			)}
+
 			{/* Section Controls */}
 			{isSelected && (
-				<div className="absolute -top-[1.5px] h-[189.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500">
+				<div className="absolute -top-[1.5px] h-[230px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500">
 					<Button
 						variant="ghost"
 						size="lg"
@@ -117,6 +149,19 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						title={__('Duplicate', 'quillcrm')}
 					>
 						<CopyIcon width={24} height={24} />
+					</Button>
+					<div className="border-b-2 border-accent"></div>
+					<Button
+						variant="ghost"
+						size="lg"
+						className="h-6 w-6 p-0 text-secondary-foreground"
+						onClick={(e) => {
+							e.stopPropagation();
+							setShowConditionsModal(true);
+						}}
+						title={__('Conditions', 'quillcrm')}
+					>
+						<Filter className="w-6 h-6" />
 					</Button>
 					<div className="border-b-2 border-accent"></div>
 					<Button
@@ -151,6 +196,13 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 					/>
 				))}
 			</div>
+
+			{/* Conditional Section Modal */}
+			<ConditionalSectionModal
+				sectionId={section.id}
+				visible={showConditionsModal}
+				onClose={() => setShowConditionsModal(false)}
+			/>
 		</div>
 	);
 };

@@ -10,6 +10,7 @@ interface ListTagFilterProps {
 	fetchContacts?: () => Promise<void>;
 	loading?: boolean;
 	onApplyingChange?: (isApplying: boolean) => void;
+	showBtns?: boolean;
 }
 
 export default function ListTagFilter({
@@ -18,6 +19,7 @@ export default function ListTagFilter({
 	fetchContacts,
 	loading = false,
 	onApplyingChange,
+	showBtns = true,
 }: ListTagFilterProps) {
 	// Create refs to access the ContactFilterSection components
 	const includeFilterRef = useRef<{ resetFilters: () => void } | null>(null);
@@ -224,22 +226,24 @@ export default function ListTagFilter({
 
 			<div className="border-t border-gray-200"></div>
 
-			<div className="flex gap-2">
-				<Button
-					variant="secondaryDeepBlue"
-					onClick={handleApplyFilters}
-					disabled={loading}
-				>
-					{__('Apply Filters', 'quillcrm')}
-				</Button>
-				<Button
-					variant="destructive"
-					onClick={handleClearFilters}
-					disabled={loading || isApplying}
-				>
-					{__('Clear Filters', 'quillcrm')}
-				</Button>
-			</div>
+			{showBtns && (
+				<div className="flex gap-2">
+					<Button
+						variant="secondaryDeepBlue"
+						onClick={handleApplyFilters}
+						disabled={loading}
+					>
+						{__('Apply Filters', 'quillcrm')}
+					</Button>
+					<Button
+						variant="destructive"
+						onClick={handleClearFilters}
+						disabled={loading || isApplying}
+					>
+						{__('Clear Filters', 'quillcrm')}
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -315,12 +315,20 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 		}
 
 		case UPDATE_SECTION: {
-			const { sectionId, styles } = action.payload;
-			const newSections = state.sections.map((section) =>
-				section.id === sectionId
-					? { ...section, styles: { ...section.styles, ...styles } }
-					: section
-			);
+			const { sectionId, styles, conditions } = action.payload;
+			const newSections = state.sections.map((section) => {
+				if (section.id === sectionId) {
+					const updatedSection = { ...section };
+					if (styles) {
+						updatedSection.styles = { ...section.styles, ...styles };
+					}
+					if (conditions !== undefined) {
+						updatedSection.conditions = conditions;
+					}
+					return updatedSection;
+				}
+				return section;
+			});
 
 			return addToHistory(state, newSections);
 		}

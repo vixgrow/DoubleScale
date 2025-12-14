@@ -40,6 +40,12 @@ export interface EmailSection {
 	id: string;
 	columns: EmailColumn[];
 	styles?: Record<string, any>;
+	conditions?: Array<{
+		group: string;
+		filter: string;
+		operator: string;
+		value: any;
+	}>;
 }
 
 export interface GlobalEmailSettings {
@@ -142,7 +148,13 @@ export interface UpdateSectionAction {
 	type: 'UPDATE_SECTION';
 	payload: {
 		sectionId: string;
-		styles: Record<string, any>;
+		styles?: Record<string, any>;
+		conditions?: Array<{
+			group: string;
+			filter: string;
+			operator: string;
+			value: any;
+		}>;
 	};
 }
 

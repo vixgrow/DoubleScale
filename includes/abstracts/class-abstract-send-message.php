@@ -26,6 +26,7 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Utils;
 
@@ -178,6 +179,7 @@ abstract class Abstract_Send_Message extends Action {
 					'contact_id'  => $contact->id,
 					'template_id' => $template->id,
 					'mode'        => $this->get_tracking_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
 					'source_type' => Message_Source_Types::AUTOMATION,
 					'source_id'   => $automation->id,
 					'step_id'     => $step->id,

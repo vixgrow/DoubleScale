@@ -32,6 +32,7 @@ import {
 	ManagerIcon,
 	LicenseIcon,
 	BadConnectionIcon,
+	ProcessingEmailsIcon
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
@@ -314,7 +315,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'smtp',
 			label: 'SMTP',
-			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+			icon: <ProcessingEmailsIcon width={24} height={24} />,
 		},
 		{
 			value: 'sms',

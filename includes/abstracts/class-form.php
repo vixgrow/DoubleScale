@@ -27,6 +27,7 @@ use QuillCRM_Pro\Managers\Rules_Manager;
  */
 abstract class Form {
 
+
 	/**
 	 * Slug
 	 *
@@ -165,7 +166,7 @@ abstract class Form {
 		$rules_manager = Rules_Manager::instance();
 
 		foreach ( $fields as $field_id => $field_name ) {
-			$rule = new Form_Field_Rule( $this, $form_id, $field_id, $field_name );
+			$rule = new Form_Field_Rule( $this, $form_id, $field_id, $field_name['label'] ?? '' );
 			$rules_manager->register( $rule );
 		}
 	}

@@ -37,30 +37,36 @@ import EditHeaderIcon from '@/components/icons/edit-header';
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onChangeTrigger?: () => void;
 	editLabel?: string;
 	deleteLabel?: string;
+	changeTriggerLabel?: string;
 	deleteTitle?: string;
 	deleteDescription?: string;
 	showEdit?: boolean;
 	showDelete?: boolean;
+	showChangeTrigger?: boolean;
 	disabled?: boolean;
 }
 
 const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
+	onChangeTrigger,
 	editLabel = __('Edit', 'quillcrm'),
 	deleteLabel = __('Delete', 'quillcrm'),
+	changeTriggerLabel = __('Change Trigger', 'quillcrm'),
 	deleteTitle = __('Delete this item?', 'quillcrm'),
 	deleteDescription = __('This action cannot be undone.', 'quillcrm'),
 	showEdit = true,
 	showDelete = true,
+	showChangeTrigger = false,
 	disabled = false,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-	if (disabled || (!showEdit && !showDelete)) {
+	if (disabled || (!showEdit && !showDelete && !showChangeTrigger)) {
 		return null;
 	}
 
@@ -118,6 +124,15 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 						>
 							<EditHeaderIcon />
 							<span>{editLabel}</span>
+						</DropdownMenuItem>
+					)}
+					{showChangeTrigger && onChangeTrigger && (
+						<DropdownMenuItem
+							onClick={onChangeTrigger}
+							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+						>
+							<EditHeaderIcon />
+							<span>{changeTriggerLabel}</span>
 						</DropdownMenuItem>
 					)}
 					{showDelete && onDelete && (

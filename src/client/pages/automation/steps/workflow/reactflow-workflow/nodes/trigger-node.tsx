@@ -2,12 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -23,6 +25,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import CreateAutomationModal from '../../../../../automations/create-automation-modal';
+import { useAutomationContext } from '../../../../state/context';
+import apiFetch from '@wordpress/api-fetch';
 
 interface TriggerNodeData {
 	automation: Automation;
@@ -42,10 +47,103 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 		analytics,
 	} = data as unknown as TriggerNodeData;
 
+	const { saveAutomation, refetchAutomation, isSaving } =
+		useAutomationContext();
+	const { createNotice } = useDispatch('quillcrm/core');
+	const [showChangeTriggerModal, setShowChangeTriggerModal] = useState(false);
+	const [tempAutomation, setTempAutomation] = useState({
+		name: automation.name || '',
+		trigger: automation.trigger || '',
+	});
+
 	const handleEdit = () => {
 		if (!viewMode && onTriggerClick) {
 			onTriggerClick();
 		}
+	};
+
+	const handleChangeTrigger = () => {
+		if (!viewMode) {
+			setTempAutomation({
+				name: automation.name || '',
+				trigger: automation.trigger || '',
+			});
+			setShowChangeTriggerModal(true);
+		}
+	};
+
+	const handleChangeTriggerSave = async () => {
+		try {
+			// Only update if trigger has changed
+			if (tempAutomation.trigger !== automation.trigger) {
+				// check if you have any condtions is related with this trigger
+				const response = await apiFetch({
+					path: '/qc/v1/automations/check-conditions',
+					method: 'POST',
+					data: {
+						automation_id: automation.id,
+						is_check: true,
+						is_delete: false,
+					},
+				});
+				const responseData = response as { count: number };
+				if (responseData.count > 0) {
+					const confirm = window.confirm(
+						__(
+							'This trigger requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+							'quillcrm'
+						)
+					);
+					if (confirm) {
+						await apiFetch({
+							path: '/qc/v1/automations/check-conditions',
+							method: 'POST',
+							data: {
+								automation_id: automation.id,
+								is_check: false,
+								is_delete: true,
+							},
+						});
+						handleChangeTriggerConfirm();
+						setShowChangeTriggerModal(false);
+					}
+				} else {
+					handleChangeTriggerConfirm();
+					setShowChangeTriggerModal(false);
+				}
+			}
+			// Close the modal
+		} catch (error) {
+			console.error('Failed to change trigger:', error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to update trigger', 'quillcrm'),
+			});
+		}
+	};
+
+	const handleChangeTriggerConfirm = async () => {
+		await saveAutomation({
+			trigger: tempAutomation.trigger,
+			name: tempAutomation.name,
+		});
+
+		// Refetch the automation to get fresh data and trigger re-render
+		await refetchAutomation();
+	};
+
+	const handleChangeTriggerCancel = () => {
+		setShowChangeTriggerModal(false);
+		// Reset temp automation
+		setTempAutomation({
+			name: automation.name || '',
+			trigger: automation.trigger || '',
+		});
+		// Show success notification
+		createNotice({
+			type: 'success',
+			message: __('Trigger updated successfully', 'quillcrm'),
+		});
 	};
 
 	// Get trigger label and warning status from backend
@@ -86,36 +184,56 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 	);
 
 	return (
-		<NodeContextMenu
-			onEdit={viewMode ? undefined : handleEdit}
-			showDelete={false}
-			disabled={viewMode}
-		>
-			<div
-				className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+		<>
+			<NodeContextMenu
+				onEdit={viewMode ? undefined : handleEdit}
+				showDelete={false}
+				disabled={viewMode}
 			>
-				<NodeLayout
-					icon={<ActionIcon width={23} height={23} />}
-					title={__('Start Workflow (Trigger)', 'quillcrm')}
-					subtitle={subtitle}
-					onEdit={handleEdit}
-					onDelete={() => {}}
-					editLabel={__('Edit Trigger', 'quillcrm')}
-					deleteLabel=""
-					deleteTitle=""
-					deleteDescription=""
-					showDelete={false}
-					viewMode={viewMode}
-					analytics={analytics}
-				/>
+				<div
+					className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+				>
+					<NodeLayout
+						icon={<ActionIcon width={23} height={23} />}
+						title={__('Start Workflow (Trigger)', 'quillcrm')}
+						subtitle={subtitle}
+						onEdit={handleEdit}
+						onDelete={() => {}}
+						onChangeTrigger={
+							!viewMode ? handleChangeTrigger : undefined
+						}
+						editLabel={__('Edit Trigger', 'quillcrm')}
+						changeTriggerLabel={__('Change Trigger', 'quillcrm')}
+						deleteLabel=""
+						deleteTitle=""
+						deleteDescription=""
+						showDelete={false}
+						showChangeTrigger={!viewMode}
+						viewMode={viewMode}
+						analytics={analytics}
+					/>
 
-				<Handle
-					type="source"
-					position={Position.Bottom}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
-				/>
-			</div>
-		</NodeContextMenu>
+					<Handle
+						type="source"
+						position={Position.Bottom}
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+					/>
+				</div>
+			</NodeContextMenu>
+
+			{/* Change Trigger Modal - Reuse CreateAutomationModal */}
+			<CreateAutomationModal
+				visible={showChangeTriggerModal}
+				isEditAutomation={true}
+				isSaving={isSaving}
+				automation={tempAutomation}
+				onOk={handleChangeTriggerSave}
+				onCancel={handleChangeTriggerCancel}
+				onAutomationChange={setTempAutomation}
+				onClearError={() => {}}
+				error={null}
+			/>
+		</>
 	);
 };
 

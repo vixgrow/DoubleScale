@@ -1,21 +1,23 @@
 <?php
+
 /**
- * SMS Received Trigger (Pro Stub)
+ * SMS Received Trigger
+ * Triggers when an SMS message is received from a contact
  *
  * @since 1.0.0
- *
- * @package QuillCRM
+ * @package QuillCRM_Pro
  */
 
-namespace QuillCRM\Automations\Triggers;
+namespace QuillCRM_Pro\Automations\Triggers;
 
 use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
 
 /**
- * SMS Received Trigger
+ * SMS_Received class
  */
 class SMS_Received extends Trigger_Pro {
+
 
 	/**
 	 * Trigger Name
@@ -59,6 +61,4 @@ class SMS_Received extends Trigger_Pro {
 	 */
 	public $group = 'messaging';
 }
-
 Triggers_Manager::instance()->register( new SMS_Received() );
-

@@ -356,21 +356,21 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
-registerAdminPage('email-sequences', {
-	path: 'email-sequences',
-	component: () => <EmailSequences />,
-	label: __('Email Sequence', 'quillcrm'),
-	icon: <EmailSequenceIcon />,
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
+//registerAdminPage('email-sequences', {
+// 	path: 'email-sequences',
+// 	component: () => <EmailSequences />,
+// 	label: __('Email Sequence', 'quillcrm'),
+// 	icon: <EmailSequenceIcon />,
+// 	hidden: true,
+// 	requiredCapability: ['quillcrm_crm_manager'],
+// });
 
-registerAdminPage('email-sequence', {
-	path: 'email-sequences/:id',
-	component: () => <SequencesMail />,
-	label: __('Email Sequence', 'quillcrm'),
-	hidden: true,
-});
+// registerAdminPage('email-sequence', {
+// 	path: 'email-sequences/:id',
+// 	component: () => <SequencesMail />,
+// 	label: __('Email Sequence', 'quillcrm'),
+// 	hidden: true,
+// });
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
 // The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component

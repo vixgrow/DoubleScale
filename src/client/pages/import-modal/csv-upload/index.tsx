@@ -275,7 +275,7 @@ const CsvUpload: React.FC = () => {
 				<>{!fileData ? renderUploadArea() : renderFileCard()}</>
 			)}
 
-			<div className="mt-6 text-center">
+			{/* <div className="mt-6 text-center">
 				<p className="text-lg text-[#71717A] mb-2">
 					{__('Learn more or', 'quillcrm')}
 					<a
@@ -285,7 +285,7 @@ const CsvUpload: React.FC = () => {
 						{__('Download example file', 'quillcrm')}
 					</a>
 				</p>
-			</div>
+			</div> */}
 		</div>
 	);
 };

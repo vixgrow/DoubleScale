@@ -133,14 +133,12 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 					</span>
 					{/* Only show delete button for non-template blocks */}
 					{!isThisTemplateBlock && (
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-5 w-5 p-0 text-secondary-foreground hover:text-red-700"
+						<span
+							className="text-secondary-foreground cursor-pointer"
 							onClick={handleDeleteBlock}
 						>
 							<DeleteIcon />
-						</Button>
+						</span>
 					)}
 				</div>
 			)}

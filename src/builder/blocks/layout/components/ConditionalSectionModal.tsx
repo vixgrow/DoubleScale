@@ -51,36 +51,69 @@ const ConditionalSectionModal: React.FC<ConditionalSectionModalProps> = ({
 	);
 
 	const [filterBy, setFilterBy] = useState('list-tags');
-	const [filters, setFilters] = useState<FilterType[]>([]);
+	const [listTagFilters, setListTagFilters] = useState<FilterType[]>([]);
 	const filteredRulesGroups = getFilteredRulesGroups();
 	const [rules, setRules] = useState([[getInitialRule(filteredRulesGroups)]]);
-	const [hasConditions, setHasConditions] = useState(false);
+
+	// Helper function to check if a filter is a list-tag filter
+	const isListTagFilter = (filter: FilterType): boolean => {
+		return (
+			filter.group === 'segments' &&
+			(filter.filter === 'lists_segment' ||
+				filter.filter === 'tags_segment')
+		);
+	};
 
 	// Initialize from existing section conditions
 	useEffect(() => {
 		if (visible && section?.conditions && section.conditions.length > 0) {
-			setHasConditions(true);
-			setFilters(section.conditions);
+			// Separate conditions into list-tags and advanced filters
+			const listTagConditions: FilterType[] = [];
+			const advancedConditions: FilterType[] = [];
 
-			// Try to detect if it's list-tags or advanced based on filter types
-			const hasAdvancedFilters = section.conditions.some(
-				(c: any) =>
-					c.group !== 'segments' ||
-					(c.filter !== 'lists' && c.filter !== 'tags')
-			);
+			section.conditions.forEach((condition: FilterType) => {
+				if (isListTagFilter(condition)) {
+					listTagConditions.push(condition);
+				} else {
+					advancedConditions.push(condition);
+				}
+			});
 
-			if (hasAdvancedFilters) {
+			// Determine which mode to show based on which type has conditions
+			if (
+				listTagConditions.length > 0 &&
+				advancedConditions.length === 0
+			) {
+				setFilterBy('list-tags');
+				setListTagFilters(listTagConditions);
+				setRules([[getInitialRule(filteredRulesGroups)]]);
+			} else if (
+				advancedConditions.length > 0 &&
+				listTagConditions.length === 0
+			) {
 				setFilterBy('advanced');
 				setRules(
-					mapFiltersToRules(section.conditions, filteredRulesGroups)
+					mapFiltersToRules(advancedConditions, filteredRulesGroups)
+				);
+				setListTagFilters([]);
+			} else if (
+				listTagConditions.length > 0 &&
+				advancedConditions.length > 0
+			) {
+				// If both exist, default to list-tags but keep both states
+				setFilterBy('list-tags');
+				setListTagFilters(listTagConditions);
+				setRules(
+					mapFiltersToRules(advancedConditions, filteredRulesGroups)
 				);
 			} else {
-				setFilterBy('list-tags');
+				// No conditions
+				setListTagFilters([]);
+				setRules([[getInitialRule(filteredRulesGroups)]]);
 			}
 		} else if (visible) {
 			// Reset for new conditional setup
-			setHasConditions(false);
-			setFilters([]);
+			setListTagFilters([]);
 			setFilterBy('list-tags');
 			setRules([[getInitialRule(filteredRulesGroups)]]);
 		}
@@ -89,12 +122,11 @@ const ConditionalSectionModal: React.FC<ConditionalSectionModalProps> = ({
 	const handleApply = () => {
 		let conditionsToSave: FilterType[] = [];
 
-		if (hasConditions) {
-			if (filterBy === 'list-tags') {
-				conditionsToSave = filters;
-			} else {
-				conditionsToSave = mapRulesToFilters(rules);
-			}
+		// Only save conditions from the currently selected mode
+		if (filterBy === 'list-tags') {
+			conditionsToSave = listTagFilters;
+		} else {
+			conditionsToSave = mapRulesToFilters(rules);
 		}
 
 		dispatch(STORE_KEY).updateSection(sectionId, {
@@ -104,8 +136,7 @@ const ConditionalSectionModal: React.FC<ConditionalSectionModalProps> = ({
 	};
 
 	const handleClearAll = () => {
-		setHasConditions(false);
-		setFilters([]);
+		setListTagFilters([]);
 		setRules([[getInitialRule(filteredRulesGroups)]]);
 	};
 
@@ -171,25 +202,32 @@ const ConditionalSectionModal: React.FC<ConditionalSectionModalProps> = ({
 							</RadioGroup>
 						</div>
 
-						{filterBy === 'list-tags' && (
-							<div className="space-y-4 mt-4">
+						<div className="space-y-4 mt-4">
+							<div
+								className={
+									filterBy === 'list-tags'
+										? 'block'
+										: 'hidden'
+								}
+							>
 								<ListTagFilter
-									filters={filters}
-									setFilters={setFilters}
+									filters={listTagFilters}
+									setFilters={setListTagFilters}
 									showBtns={false}
 								/>
 							</div>
-						)}
-
-						{filterBy === 'advanced' && (
-							<div className="space-y-4 mt-4">
+							<div
+								className={
+									filterBy === 'advanced' ? 'block' : 'hidden'
+								}
+							>
 								<RulesBuilder
 									rules={rules}
 									onChange={setRules}
 									rulesGroups={filteredRulesGroups}
 								/>
 							</div>
-						)}
+						</div>
 					</div>
 				</div>
 

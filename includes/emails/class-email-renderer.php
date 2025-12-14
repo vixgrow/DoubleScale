@@ -346,6 +346,31 @@ class Email_Renderer {
 
 
 	/**
+	 * Check if a section should be rendered for a specific contact
+	 *
+	 * @param array                                       $section Section data
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model
+	 * @return bool True if section should be rendered
+	 */
+	private function should_render_section( $section, $contact ) {
+		// If no contact or no conditions, always render
+		if ( ! $contact || empty( $section['conditions'] ) || ! is_array( $section['conditions'] ) ) {
+			return true;
+		}
+
+		// Use Contact_Filters_Process to evaluate conditions
+		$query = \QuillCRM\Models\Contact_Model::where( 'id', $contact->id );
+		
+		$contact_filters = new \QuillCRM\Contact_Filters\Process( $query, $section['conditions'] );
+		$filtered_query  = $contact_filters->filter();
+		
+		// Check if the contact matches the conditions
+		$matches = $filtered_query->count() > 0;
+		
+		return $matches;
+	}
+
+	/**
 	 * Render a section with BULLETPROOF responsive columns
 	 *
 	 * KEY TECHNIQUE:
@@ -359,6 +384,10 @@ class Email_Renderer {
 	 * @return string HTML output
 	 */
 	private function render_section( $section, $contact ) {
+		// Check if section should be rendered based on conditions
+		if ( ! $this->should_render_section( $section, $contact ) ) {
+			return '';
+		}
 		// Build section styles
 		$section_styles = array();
 		if ( isset( $section['styles'] ) ) {

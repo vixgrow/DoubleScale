@@ -23,6 +23,7 @@ class Automation_Step_Model extends Model {
 
 
 
+
 	/**
 	 * Table name
 	 *
@@ -201,31 +202,7 @@ class Automation_Step_Model extends Model {
 				if ( isset( $settings['template_ids'] ) ) {
 					self::process_template_update( $step, $channel_type, $settings );
 				} else {
-					$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
-
-					if ( ! empty( $template_data ) ) {
-						$template_factory = Campaign_Template_Factory::instance();
-						$template_ids     = $template_factory->process_templates_data(
-							array( $template_data ),
-							$channel_type,
-							'draft'
-						);
-
-						if ( ! empty( $template_ids ) ) {
-							$settings['template_ids'] = $template_ids;
-							$step->settings           = $settings;
-
-							quillcrm_get_logger()->info(
-								'Automation step: Template processed and saved',
-								array(
-									'step_id'      => $step->id ?? 'new',
-									'action'       => $step->action,
-									'template_ids' => $template_ids,
-									'code'         => 'automation_step_template_processed',
-								)
-							);
-						}
-					}
+					self::process_template_create( $step, $channel_type, $settings );
 				}
 			}
 		);
@@ -253,6 +230,8 @@ class Automation_Step_Model extends Model {
 			if ( Template_Model::is_used_in_tracking( $template_id ) ) {
 				unset( $settings['template_ids'] );
 				$step->settings = $settings;
+
+				self::process_template_create( $step, $channel_type, $settings );
 
 				quillcrm_get_logger()->info(
 					'Automation step: Template in use, will create new template',
@@ -290,6 +269,34 @@ class Automation_Step_Model extends Model {
 						);
 					}
 				}
+			}
+		}
+	}
+
+	protected static function process_template_create( $step, $channel_type, &$settings ) {
+		$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
+
+		if ( ! empty( $template_data ) ) {
+			$template_factory = Campaign_Template_Factory::instance();
+			$template_ids     = $template_factory->process_templates_data(
+				array( $template_data ),
+				$channel_type,
+				'draft'
+			);
+
+			if ( ! empty( $template_ids ) ) {
+				$settings['template_ids'] = $template_ids;
+				$step->settings           = $settings;
+
+				quillcrm_get_logger()->info(
+					'Automation step: Template processed and saved',
+					array(
+						'step_id'      => $step->id ?? 'new',
+						'action'       => $step->action,
+						'template_ids' => $template_ids,
+						'code'         => 'automation_step_template_processed',
+					)
+				);
 			}
 		}
 	}

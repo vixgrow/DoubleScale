@@ -3,6 +3,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { ArrowDown, ArrowUp, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -11,7 +12,7 @@ import ColumnRenderer from './ColumnRenderer';
 import { CopyIcon, DeleteIcon } from '@quillcrm/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { DropIndicator } from './DropIndicator';
-import ConditionalSectionModal from '../blocks/layout/components/ConditionalSectionModal';
+import ConditionalSectionGate from './ConditionalSectionGate';
 
 interface SectionRendererProps {
 	section: EmailSection;
@@ -51,6 +52,12 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const isSelected = selectedSectionId === section.id;
 	const hasConditions = section.conditions && section.conditions.length > 0;
+
+	// Check if Pro is active for conditional sections
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
+	) as boolean;
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -159,7 +166,11 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 							e.stopPropagation();
 							setShowConditionsModal(true);
 						}}
-						title={__('Conditions', 'quillcrm')}
+						title={
+							isProActive
+								? __('Conditions', 'quillcrm')
+								: __('Conditions (Pro Feature)', 'quillcrm')
+						}
 					>
 						<Filter className="w-6 h-6" />
 					</Button>
@@ -197,8 +208,8 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 				))}
 			</div>
 
-			{/* Conditional Section Modal */}
-			<ConditionalSectionModal
+			{/* Conditional Section Modal - Gated by Pro */}
+			<ConditionalSectionGate
 				sectionId={section.id}
 				visible={showConditionsModal}
 				onClose={() => setShowConditionsModal(false)}

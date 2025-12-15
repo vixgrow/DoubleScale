@@ -347,6 +347,9 @@ class Email_Renderer {
 
 	/**
 	 * Check if a section should be rendered for a specific contact
+	 * 
+	 * Note: Conditional section rendering is a Pro feature. If Pro is not active
+	 * but conditions exist, the section will render for all contacts (graceful degradation).
 	 *
 	 * @param array                                       $section Section data
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model
@@ -358,6 +361,16 @@ class Email_Renderer {
 			return true;
 		}
 
+		// Conditional sections are a Pro feature
+		// Check if Pro is active via filter (Pro plugin sets this to true)
+		$is_pro_active = apply_filters( 'quillcrm_is_pro_active', false );
+		
+		// If Pro is not active, render section for all contacts (backward compatibility)
+		if ( ! $is_pro_active ) {
+			return true;
+		}
+
+		// Pro is active - evaluate conditions
 		// Use Contact_Filters_Process to evaluate conditions
 		$query = \QuillCRM\Models\Contact_Model::where( 'id', $contact->id );
 		

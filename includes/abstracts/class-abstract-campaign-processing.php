@@ -52,6 +52,16 @@ abstract class Abstract_Campaign_Processing {
 	private $template_merge_tag_keys = null;
 
 	/**
+	 * IDs of sections rendered in the most recent builder render.
+	 *
+	 * Populated by render_builder_content() when using Email_Renderer so that
+	 * prepare_message_content() can persist them to communication_tracking_meta.
+	 *
+	 * @var array
+	 */
+	protected $last_rendered_section_ids = array();
+
+	/**
 	 * Start time
 	 *
 	 * @var int
@@ -1008,9 +1018,17 @@ abstract class Abstract_Campaign_Processing {
 			);
 		}
 
-		// Check if the message is in builder JSON format and render it to HTML
-		// Pass the original contact model for merge tags
+		// Render builder content to HTML (applies conditional sections if Pro is active)
 		$message = $this->render_builder_content( $message, $contact_or_automation_contact );
+
+		// FIRST SEND: Save which sections were rendered (after conditional logic)
+		// Subsequent views will use these stored IDs to show the same content
+		if ( ! empty( $this->last_rendered_section_ids ) ) {
+			\QuillCRM\Models\Communication_Tracking_Meta_Model::store_sections_ids(
+				$campaign_message->id,
+				$this->last_rendered_section_ids
+			);
+		}
 
 		// Process merge tags - use the original contact model to support automation merge tags
 		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
@@ -1046,6 +1064,9 @@ abstract class Abstract_Campaign_Processing {
 	 * @return string Rendered HTML content
 	 */
 	protected function render_builder_content( $content, $contact_or_automation_contact, $footer_html = '' ) {
+		// Reset last rendered sections before attempting to render
+		$this->last_rendered_section_ids = array();
+
 		// Try to decode the content to see if it's JSON
 		$decoded = json_decode( $content, true );
 
@@ -1064,7 +1085,20 @@ abstract class Abstract_Campaign_Processing {
 				// Extract preview text if available
 				$preview_text = '';
 
-				return $renderer->render_from_builder_data( $builder_data, $contact_or_automation_contact, $preview_text, $footer_html );
+				$html = $renderer->render_from_builder_data(
+					$builder_data,
+					$contact_or_automation_contact,
+					$preview_text,
+					$footer_html
+				);
+
+				// Capture rendered section IDs (after conditional logic was applied)
+				// These will be stored in tracking_meta for consistent re-renders
+				if ( method_exists( $renderer, 'get_rendered_section_ids' ) ) {
+					$this->last_rendered_section_ids = $renderer->get_rendered_section_ids();
+				}
+
+				return $html;
 			}
 		}
 

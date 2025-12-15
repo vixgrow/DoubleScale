@@ -36,6 +36,22 @@ class Email_Renderer {
 	private $button_settings = array();
 
 	/**
+	 * IDs of sections rendered during the current render
+	 * Captured after first send, stored in tracking_meta
+	 *
+	 * @var array
+	 */
+	private $rendered_section_ids = array();
+
+	/**
+	 * IDs of sections to force render (from tracking_meta)
+	 * When set, ignores conditions and renders only these sections
+	 *
+	 * @var array|null
+	 */
+	private $forced_section_ids = null;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -152,6 +168,9 @@ class Email_Renderer {
 	 * @return string HTML output
 	 */
 	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
+		// Reset rendered section IDs for this render run
+		$this->rendered_section_ids = array();
+
 		// Extract button settings from content if available
 		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
@@ -347,40 +366,47 @@ class Email_Renderer {
 
 	/**
 	 * Check if a section should be rendered for a specific contact
-	 * 
-	 * Note: Conditional section rendering is a Pro feature. If Pro is not active
-	 * but conditions exist, the section will render for all contacts (graceful degradation).
 	 *
 	 * @param array                                       $section Section data
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model
 	 * @return bool True if section should be rendered
 	 */
 	private function should_render_section( $section, $contact ) {
-		// If no contact or no conditions, always render
-		if ( ! $contact || empty( $section['conditions'] ) || ! is_array( $section['conditions'] ) ) {
+		// If we have forced section IDs (from tracking_meta), use them
+		// This ensures subsequent renders match the original sent email
+		if ( ! empty( $this->forced_section_ids ) && is_array( $this->forced_section_ids ) ) {
+			$section_id = isset( $section['id'] ) ? $section['id'] : null;
+			
+			// Sections without IDs are always rendered (backward compatibility)
+			if ( null === $section_id || '' === $section_id ) {
+				return true;
+			}
+
+			return in_array( $section_id, $this->forced_section_ids, true );
+		}
+
+		// If no conditions, always render
+		if ( empty( $section['conditions'] ) || ! is_array( $section['conditions'] ) ) {
 			return true;
 		}
 
-		// Conditional sections are a Pro feature
-		// Check if Pro is active via filter (Pro plugin sets this to true)
+		// Check if Pro is active (required for conditional sections)
 		$is_pro_active = apply_filters( 'quillcrm_is_pro_active', false );
-		
-		// If Pro is not active, render section for all contacts (backward compatibility)
 		if ( ! $is_pro_active ) {
 			return true;
 		}
 
-		// Pro is active - evaluate conditions
-		// Use Contact_Filters_Process to evaluate conditions
-		$query = \QuillCRM\Models\Contact_Model::where( 'id', $contact->id );
-		
+		// No contact = render (fallback)
+		if ( ! $contact ) {
+			return true;
+		}
+
+		// Evaluate conditions
+		$query           = \QuillCRM\Models\Contact_Model::where( 'id', $contact->id );
 		$contact_filters = new \QuillCRM\Contact_Filters\Process( $query, $section['conditions'] );
 		$filtered_query  = $contact_filters->filter();
-		
-		// Check if the contact matches the conditions
-		$matches = $filtered_query->count() > 0;
-		
-		return $matches;
+
+		return $filtered_query->count() > 0;
 	}
 
 	/**
@@ -401,6 +427,12 @@ class Email_Renderer {
 		if ( ! $this->should_render_section( $section, $contact ) ) {
 			return '';
 		}
+
+		// Track rendered section ID for this run (if available)
+		if ( isset( $section['id'] ) && '' !== $section['id'] ) {
+			$this->rendered_section_ids[] = $section['id'];
+		}
+
 		// Build section styles
 		$section_styles = array();
 		if ( isset( $section['styles'] ) ) {
@@ -716,16 +748,36 @@ class Email_Renderer {
 	}
 
 	/**
+	 * Get IDs of sections rendered during the current render
+	 *
+	 * @return array
+	 */
+	public function get_rendered_section_ids() {
+		return $this->rendered_section_ids;
+	}
+
+	/**
+	 * Set section IDs to force render (from tracking_meta)
+	 * Call before rendering to reproduce the original sent email
+	 *
+	 * @param array $section_ids Array of section IDs
+	 * @return void
+	 */
+	public function set_forced_section_ids( array $section_ids ) {
+		$this->forced_section_ids = empty( $section_ids ) ? null : array_values( $section_ids );
+	}
+
+	/**
 	 * Render template with tracking context
-	 * Convenience method that automatically sets tracking context and renders
+	 * Used for viewing previously sent emails
 	 *
 	 * @param int                                         $template_id Template ID
 	 * @param int                                         $tracking_id Communication tracking ID
-	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model (optional, will be fetched from tracking if not provided)
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model
 	 * @return string HTML output
 	 */
 	public function render_template_with_tracking( $template_id, $tracking_id, $contact = null ) {
-		// If no contact provided, try to get it from the tracking record
+		// Get contact from tracking if not provided
 		if ( ! $contact ) {
 			$tracking = \QuillCRM\Models\Communication_Tracking_Model::find( $tracking_id );
 			if ( $tracking && $tracking->contact ) {
@@ -733,7 +785,19 @@ class Email_Renderer {
 			}
 		}
 
-		return $this->render_template( $template_id, $contact, $tracking_id );
+		// Load section IDs from tracking_meta to render same sections as originally sent
+		$sections_ids = \QuillCRM\Models\Communication_Tracking_Meta_Model::get_sections_ids( $tracking_id );
+		if ( ! empty( $sections_ids ) ) {
+			$this->set_forced_section_ids( $sections_ids );
+		}
+
+		// Render with stored section IDs
+		$html = $this->render_template( $template_id, $contact, $tracking_id );
+
+		// Clear forced IDs for next render
+		$this->set_forced_section_ids( array() );
+
+		return $html;
 	}
 
 }

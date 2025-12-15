@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract Send Message Action
  * Base class for all message sending actions (Email, SMS, WhatsApp)
@@ -26,6 +27,7 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Utils;
 
@@ -33,6 +35,9 @@ use QuillCRM\Utils;
  * Abstract_Send_Message class
  */
 abstract class Abstract_Send_Message extends Action {
+
+
+
 
 	/**
 	 * Source - all message actions are of type 'message'
@@ -62,7 +67,7 @@ abstract class Abstract_Send_Message extends Action {
 	 * @param Contact_Model $contact Contact Model.
 	 * @return string|null
 	 */
-	abstract protected function get_recipient( Contact_Model $contact );
+	abstract protected function get_recipient( Contact_Model $contact);
 
 	/**
 	 * Validate the recipient field
@@ -70,7 +75,7 @@ abstract class Abstract_Send_Message extends Action {
 	 * @param Contact_Model $contact Contact Model.
 	 * @return array|null Returns array with status/message if invalid, null if valid
 	 */
-	abstract protected function validate_recipient( Contact_Model $contact );
+	abstract protected function validate_recipient( Contact_Model $contact);
 
 	/**
 	 * Get the processing instance for this channel
@@ -171,51 +176,52 @@ abstract class Abstract_Send_Message extends Action {
 				throw new \Exception( "Template {$template_id} not found" );
 			}
 
-		// 4. Create tracking record BEFORE sending (critical for analytics)
-		try {
-			$tracking = Communication_Tracking_Model::create(
-				array(
-					'contact_id'  => $contact->id,
-					'template_id' => $template->id,
-					'mode'        => $this->get_tracking_mode(),
-					'source_type' => Message_Source_Types::AUTOMATION,
-					'source_id'   => $automation->id,
-					'step_id'     => $step->id,
-					'recipient'   => $this->get_recipient( $contact ),
-					'status'      => Tracking_Status::PENDING,
-					'hash_key'    => Utils::generate_hash_key(),
-				)
-			);
-		} catch ( \Exception $e ) {
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Exception creating tracking record",
-				array(
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-					'contact_id'    => $contact->id,
-					'template_id'   => $template->id,
-					'error'         => $e->getMessage(),
-					'code'          => "send_{$channel_type}_tracking_exception",
-				)
-			);
-			throw new \Exception( "Failed to create tracking record: {$e->getMessage()}" );
-		}
+			// 4. Create tracking record BEFORE sending (critical for analytics)
+			try {
+				$tracking = Communication_Tracking_Model::create(
+					array(
+						'contact_id'  => $contact->id,
+						'template_id' => $template->id,
+						'mode'        => $this->get_tracking_mode(),
+						'direction'   => Message_Direction::OUTBOUND,
+						'source_type' => Message_Source_Types::AUTOMATION,
+						'source_id'   => $automation->id,
+						'step_id'     => $step->id,
+						'recipient'   => $this->get_recipient( $contact ),
+						'status'      => Tracking_Status::PENDING,
+						'hash_key'    => Utils::generate_hash_key(),
+					)
+				);
+			} catch ( \Exception $e ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Exception creating tracking record",
+					array(
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+						'contact_id'    => $contact->id,
+						'template_id'   => $template->id,
+						'error'         => $e->getMessage(),
+						'code'          => "send_{$channel_type}_tracking_exception",
+					)
+				);
+				throw new \Exception( "Failed to create tracking record: {$e->getMessage()}" );
+			}
 
-		// Validate tracking was created successfully
-		if ( ! $tracking || ! $tracking->id || $tracking->id === 0 ) {
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Failed to create tracking record - invalid ID",
-				array(
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-					'contact_id'    => $contact->id,
-					'template_id'   => $template->id,
-					'tracking_id'   => $tracking ? $tracking->id : 'null',
-					'code'          => "send_{$channel_type}_tracking_creation_failed",
-				)
-			);
-			throw new \Exception( 'Failed to create tracking record in database - ID is invalid' );
-		}
+			// Validate tracking was created successfully
+			if ( ! $tracking || ! $tracking->id || $tracking->id === 0 ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Failed to create tracking record - invalid ID",
+					array(
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+						'contact_id'    => $contact->id,
+						'template_id'   => $template->id,
+						'tracking_id'   => $tracking ? $tracking->id : 'null',
+						'code'          => "send_{$channel_type}_tracking_creation_failed",
+					)
+				);
+				throw new \Exception( 'Failed to create tracking record in database - ID is invalid' );
+			}
 
 			// 5. Create dummy campaign for process_campaign_message() to work
 			// This allows us to reuse 100% of existing campaign infrastructure
@@ -229,76 +235,89 @@ abstract class Abstract_Send_Message extends Action {
 			);
 			$dummy_campaign->exists = true; // Mark as existing to prevent save attempts
 
+			// DEBUG: Log what we're passing to process_campaign_message
+			quillcrm_get_logger()->debug(
+				'Abstract_Send_Message: Passing to process_campaign_message',
+				array(
+					'automation_contact_class' => get_class( $automation_contact ),
+					'automation_contact_id'    => $automation_contact->id,
+					'contact_id'               => $contact->id,
+					'has_data'                 => ! empty( $automation_contact->data ),
+					'code'                     => "send_{$channel_type}_debug_contact_type",
+				)
+			);
+
 			// 6. REUSE EXISTING CAMPAIGN INFRASTRUCTURE
 			// This gives us: merge tags, provider integration, tracking, etc.
+			// Pass automation_contact instead of contact to support automation-specific merge tags
 			$this->get_processing_instance()->process_campaign_message(
 				$dummy_campaign,
-				$contact,
+				$automation_contact,
 				$tracking
 			);
 
-		// 7. Check result and return
-		// Validate tracking ID before refresh to avoid "No query results" error
-		if ( ! $tracking->id || $tracking->id === 0 ) {
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Tracking record was not created properly",
-				array(
-					'automation_id' => $automation->id,
-					'contact_id'    => $contact->id,
-					'tracking_id'   => $tracking->id,
-					'code'          => "send_{$channel_type}_invalid_tracking_id",
-				)
-			);
-			throw new \Exception( 'Failed to create tracking record' );
-		}
-
-		// Refresh tracking record to get updated status
-		try {
-			$tracking->refresh();
-		} catch ( \Exception $e ) {
-			$tracking_id = $tracking->id;
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Failed to refresh tracking record",
-				array(
-					'automation_id' => $automation->id,
-					'contact_id'    => $contact->id,
-					'tracking_id'   => $tracking_id,
-					'error'         => $e->getMessage(),
-					'code'          => "send_{$channel_type}_refresh_failed",
-				)
-			);
-			// Try to fetch the tracking record manually as fallback
-			$tracking = Communication_Tracking_Model::find( $tracking_id );
-			if ( ! $tracking ) {
-				throw new \Exception( "Tracking record {$tracking_id} not found after send" );
+			// 7. Check result and return
+			// Validate tracking ID before refresh to avoid "No query results" error
+			if ( ! $tracking->id || $tracking->id === 0 ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Tracking record was not created properly",
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'tracking_id'   => $tracking->id,
+						'code'          => "send_{$channel_type}_invalid_tracking_id",
+					)
+				);
+				throw new \Exception( 'Failed to create tracking record' );
 			}
-		}
 
-		if ( $tracking->status === Tracking_Status::SENT ) {
-			quillcrm_get_logger()->info(
-				"Send {$channel_name} action: Message sent successfully",
-				array(
-					'automation_id' => $automation->id,
-					'contact_id'    => $contact->id,
-					'tracking_id'   => $tracking->id,
-					'template_id'   => $template->id,
-					'code'          => "send_{$channel_type}_success",
-				)
-			);
-			return true;
-		} else {
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Message sending failed",
-				array(
-					'automation_id' => $automation->id,
-					'contact_id'    => $contact->id,
-					'tracking_id'   => $tracking->id,
-					'status'        => $tracking->status,
-					'code'          => "send_{$channel_type}_failed",
-				)
-			);
-			return false;
-		}
+			// Refresh tracking record to get updated status
+			try {
+				$tracking->refresh();
+			} catch ( \Exception $e ) {
+				$tracking_id = $tracking->id;
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Failed to refresh tracking record",
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'tracking_id'   => $tracking_id,
+						'error'         => $e->getMessage(),
+						'code'          => "send_{$channel_type}_refresh_failed",
+					)
+				);
+				// Try to fetch the tracking record manually as fallback
+				$tracking = Communication_Tracking_Model::find( $tracking_id );
+				if ( ! $tracking ) {
+					throw new \Exception( "Tracking record {$tracking_id} not found after send" );
+				}
+			}
+
+			if ( $tracking->status === Tracking_Status::SENT ) {
+				quillcrm_get_logger()->info(
+					"Send {$channel_name} action: Message sent successfully",
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'tracking_id'   => $tracking->id,
+						'template_id'   => $template->id,
+						'code'          => "send_{$channel_type}_success",
+					)
+				);
+				return true;
+			} else {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Message sending failed",
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'tracking_id'   => $tracking->id,
+						'status'        => $tracking->status,
+						'code'          => "send_{$channel_type}_failed",
+					)
+				);
+				return false;
+			}
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				"Send {$this->get_channel_name()} action: Exception occurred",
@@ -313,4 +332,3 @@ abstract class Abstract_Send_Message extends Action {
 		}
 	}
 }
-

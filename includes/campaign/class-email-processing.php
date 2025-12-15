@@ -122,17 +122,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		// Footer contains merge tags that will be processed after rendering
 		$footer_html = $this->prepare_footer_html( $message, $contact, $campaign_message );
 
-		// Render builder content to HTML (applies conditional sections if Pro is active)
+		// Check if the message is in builder JSON format and render it to HTML
+		// Pass footer_html so it gets injected before </body> tag
+		// Use the original contact model for merge tags
 		$message = $this->render_builder_content( $message, $contact_or_automation_contact, $footer_html );
-
-		// FIRST SEND: Save which sections were rendered (after conditional logic)
-		// Subsequent views will use these stored IDs to show the same content
-		if ( ! empty( $this->last_rendered_section_ids ) ) {
-			\QuillCRM\Models\Communication_Tracking_Meta_Model::store_sections_ids(
-				$campaign_message->id,
-				$this->last_rendered_section_ids
-			);
-		}
 
 		// Set channel context for merge tags
 		add_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );

@@ -191,10 +191,10 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => {})
+						(() => { })
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => {})
+						config.bulkActions.tags?.onSelectionChange || (() => { })
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
@@ -282,7 +282,7 @@ export function DataTableActions<TData>({
 							{__('Advanced Filters', 'quillcrm')}
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-[900px]">
+					<DialogContent className="max-w-[1000px]">
 						<DialogHeader>
 							<DialogTitle>
 								<CustomDialogHeader

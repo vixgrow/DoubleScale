@@ -310,7 +310,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 				{hasActiveFilters && (
 					<div className="my-2">
 						<Button
-							className=" w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 px-8  gap-1 rounded-md font-manrope text-base font-normal tracking-tight"
+							className=" w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 px-8  gap-1 rounded-md text-base font-normal tracking-tight"
 							onClick={() => {
 								onFiltersChange(filters);
 								// setIsFilterExpanded(false);

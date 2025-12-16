@@ -36,12 +36,7 @@ import { useState } from 'react';
 import { CampaignFilters } from '@/components/campaign-filters';
 import RulesBuilder from '@/components/rules-builder';
 import type { RuleItem } from '@/components/rules-builder';
-import {
-	getFilteredRulesGroups,
-	getInitialRule,
-	mapRulesToFilters,
-	mapFiltersToRules,
-} from '@/utils';
+import { getFilteredRulesGroups, getInitialRule } from '@/utils';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -138,7 +133,17 @@ export function DataTableActions<TData>({
 	const handleAdvancedFiltersDialogOpen = () => {
 		if (config.filters) {
 			const currentFilters = config.filters.currentFilters || [];
-			setTempRules(mapFiltersToRules(currentFilters, rulesGroups));
+
+			// If filters are already a nested array (OR groups -> AND conditions), keep them as-is
+			if (
+				Array.isArray(currentFilters) &&
+				Array.isArray(currentFilters[0])
+			) {
+				setTempRules(currentFilters as Array<Array<RuleItem>>);
+			} else {
+				// Fallback: initialize with a single default rule if shape is unknown/legacy
+				setTempRules([[getInitialRule(rulesGroups)]]);
+			}
 		} else {
 			// Initialize with default rule if no filters config
 			setTempRules([[getInitialRule(rulesGroups)]]);
@@ -149,8 +154,8 @@ export function DataTableActions<TData>({
 	// Handle advanced filters - apply and close dialog
 	const handleApplyAdvancedFilters = () => {
 		if (config.filters) {
-			const newFilters = mapRulesToFilters(tempRules);
-			config.filters.onFiltersChange(newFilters);
+			// Store rules directly as nested array, no mapping/flattening
+			config.filters.onFiltersChange(tempRules as any);
 			if (setPage) {
 				setPage(1);
 			}

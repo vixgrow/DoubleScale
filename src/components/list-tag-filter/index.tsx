@@ -30,7 +30,13 @@ export default function ListTagFilter({
 
 	// Initialize internal state from existing filters
 	useEffect(() => {
-		if (!filters || filters.length === 0) return;
+		if (!filters || filters.length === 0) {
+			return;
+		}
+
+		if (includeData.length > 0 || excludeData.length > 0) {
+			return;
+		}
 
 		// Separate filters by type and operator
 		const includeLists = new Set<string>();
@@ -93,7 +99,7 @@ export default function ListTagFilter({
 
 		setIncludeData(includeRows);
 		setExcludeData(excludeRows);
-	}, [filters]);
+	}, [filters, includeData.length, excludeData.length]);
 
 	// Convert ContactFilterSection data to Filter objects when data changes
 	useEffect(() => {

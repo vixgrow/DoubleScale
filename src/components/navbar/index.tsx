@@ -316,9 +316,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<>
 			<Sidebar
 				collapsible="icon"
-				className={`qcrm-navbar${
-					isMounted ? ' qcrm-navbar--mounted' : ''
-				}`}
+				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+					}`}
 			>
 				<div className="qcrm-navbar__surface">
 					<SidebarHeader className="qcrm-navbar__header">
@@ -369,7 +368,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						className="qcrm-navbar__submenu-portal"
 						style={{
 							position: 'fixed',
-							top: `${hoveredItem.rect.top - 80}px`,
+							top: `${hoveredItem.rect.top - 120}px`,
 							left: `${hoveredItem.rect.right + 20}px`,
 							zIndex: 99999,
 						}}

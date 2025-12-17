@@ -216,3 +216,4 @@ export { default as LicenseLastUpdateIcon } from './license-last-update';
 export { default as LicenseStartDateIcon } from './license-start-date';
 export { default as LicenseStatusIcon } from './license-status';
 export { default as LicenseIcon } from './license';
+export { default as LinkTriggersIcon } from './link-triggers';

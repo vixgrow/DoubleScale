@@ -52,8 +52,8 @@ const Contacts: React.FC = () => {
 	const [applyRequested, setApplyRequested] = useState(false);
 	const [inlineError, setInlineError] = useState<string | null>(null);
 
-	// Rules builder state (shared with ConditionsModal component)
-	const filteredRulesGroups = getFilteredRulesGroups();
+	// Rules builder state (shared with ConditionsModal component) - non-automation context
+	const filteredRulesGroups = getFilteredRulesGroups(false);
 	const [rules, setRules] = useState([[getInitialRule(filteredRulesGroups)]]);
 
 	// Keep applying spinner in sync with fetch lifecycle

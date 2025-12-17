@@ -60,8 +60,8 @@ export function DataTableActions<TData>({
 	const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 	const [tempRules, setTempRules] = useState<Array<Array<RuleItem>>>([]);
 
-	// Rules builder setup
-	const rulesGroups = getFilteredRulesGroups();
+	// Rules builder setup (non-automation context)
+	const rulesGroups = getFilteredRulesGroups(false);
 
 	// Initialize column visibility state when dialog opens
 	const handleDialogOpen = () => {
@@ -191,10 +191,10 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => { })
+						(() => {})
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => { })
+						config.bulkActions.tags?.onSelectionChange || (() => {})
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}

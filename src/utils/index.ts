@@ -304,15 +304,46 @@ export const getCampaignEndpoint = (campaignType: string): string | null => {
 };
 
 /**
- * Get filtered rules groups (excluding disabled groups)
+ * Get filtered rules groups (excluding disabled groups and filtering by automation context)
+ * @param isAutomation - Whether to filter for automation rules (true) or non-automation rules (false). If undefined, returns all rules.
  * @returns Filtered rules groups object
  */
-export const getFilteredRulesGroups = () => {
+export const getFilteredRulesGroups = (isAutomation?: boolean) => {
 	const allRulesGroups = ConfigAPI.getAutomationRules();
 	return Object.keys(allRulesGroups).reduce((acc, key) => {
-		if (!allRulesGroups[key].is_disabled) {
-			acc[key] = allRulesGroups[key];
+		const group = allRulesGroups[key];
+
+		// Skip disabled groups
+		if (group.is_disabled) {
+			return acc;
 		}
+
+		// If isAutomation is specified, filter rules within the group
+		if (isAutomation !== undefined && group.rules) {
+			const filteredRules = Object.keys(group.rules).reduce((rulesAcc, ruleKey) => {
+				const rule = group.rules[ruleKey];
+
+				const shouldInclude = isAutomation
+					? rule.is_automation === true
+					: rule.is_automation === false || rule.is_automation === undefined;
+
+				if (shouldInclude) {
+					rulesAcc[ruleKey] = rule;
+				}
+
+				return rulesAcc;
+			}, {} as any);
+
+			if (Object.keys(filteredRules).length > 0) {
+				acc[key] = {
+					...group,
+					rules: filteredRules
+				};
+			}
+		} else {
+			acc[key] = group;
+		}
+
 		return acc;
 	}, {} as any);
 };

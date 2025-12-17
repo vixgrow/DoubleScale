@@ -324,7 +324,6 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						rules={rules}
 						onChange={setRules}
 						rulesGroups={filteredRulesGroups}
-						isAutomation={true}
 					/>
 				</div>
 				<DialogFooter>

@@ -200,6 +200,25 @@ class Automation_Step_Model extends Model {
 					return;
 				}
 
+				// WhatsApp: Use pre-selected template_id instead of auto-generating
+				if ( $channel_type === 'whatsapp' && isset( $settings['template_id'] ) ) {
+					// User selected an existing WhatsApp template - store it as template_ids array
+					$settings['template_ids'] = array( (int) $settings['template_id'] );
+					$step->settings           = $settings;
+
+					quillcrm_get_logger()->info(
+						'Automation step: WhatsApp template linked (no auto-generation)',
+						array(
+							'step_id'     => $step->id ?? 'new',
+							'action'      => $step->action,
+							'template_id' => $settings['template_id'],
+							'code'        => 'automation_step_whatsapp_template_linked',
+						)
+					);
+					return;
+				}
+
+				// Email/SMS: Auto-generate template from body content
 				// Prepare template data from settings fields using shared service
 				$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
 
@@ -242,6 +261,30 @@ class Automation_Step_Model extends Model {
 					return;
 				}
 
+				// WhatsApp: Check if template_id changed (user selected different template)
+				if ( $channel_type === 'whatsapp' && isset( $settings['template_id'] ) ) {
+					$old_template_id = reset( $settings['template_ids'] );
+					$new_template_id = (int) $settings['template_id'];
+
+					if ( $old_template_id !== $new_template_id ) {
+						// User changed template selection - update template_ids
+						$settings['template_ids'] = array( $new_template_id );
+						$step->settings           = $settings;
+
+						quillcrm_get_logger()->info(
+							'Automation step: WhatsApp template changed',
+							array(
+								'step_id'         => $step->id,
+								'old_template_id' => $old_template_id,
+								'new_template_id' => $new_template_id,
+								'code'            => 'automation_step_whatsapp_template_changed',
+							)
+						);
+					}
+					return; // Don't auto-update WhatsApp templates
+				}
+
+				// Email/SMS: Auto-update template content
 				$template_id = reset( $settings['template_ids'] );
 
 				// Check if content fields have changed

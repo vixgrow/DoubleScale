@@ -30,6 +30,7 @@ import {
 	CardFooter,
 } from '@/components/ui/card';
 import Credentials from './credentials';
+import TwilioCredentials from './twilio-credentials';
 import App from './app';
 import Instructions from './instructions';
 import { Button } from '@quillcrm/components/ui/button';
@@ -176,12 +177,21 @@ const Integration: React.FC<IntegrationProps> = ({
 							<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
 								<CardContent className="flex-1 overflow-y-auto p-6">
 									{!isAppBased ? (
-										<Credentials
-											integration={integration}
-											slug={slug}
-											fieldsValue={fieldsValue}
-											setFieldsValue={setFieldsValue}
-										/>
+										slug === 'twilio' ? (
+											<TwilioCredentials
+												integration={integration}
+												slug={slug}
+												fieldsValue={fieldsValue}
+												setFieldsValue={setFieldsValue}
+											/>
+										) : (
+											<Credentials
+												integration={integration}
+												slug={slug}
+												fieldsValue={fieldsValue}
+												setFieldsValue={setFieldsValue}
+											/>
+										)
 									) : (
 										<App
 											integration={integration}

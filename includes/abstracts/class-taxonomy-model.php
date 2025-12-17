@@ -180,15 +180,14 @@ class Taxonomy_Model extends Model {
 			}
 		);
 
-		// Retrieved event (if WooCommerce is active)
-		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			$dispatcher->listen(
-				"eloquent.retrieved: {$model_name}",
-				function ( $taxonomy ) {
-					$taxonomy->contacts_count = $taxonomy->contacts()->count();
-				}
-			);
-		}
+		// Retrieved event - always calculate contacts_count
+		// Count distinct contacts in the relationship to ensure accuracy
+		$dispatcher->listen(
+			"eloquent.retrieved: {$model_name}",
+			function ( $taxonomy ) {
+				$taxonomy->contacts_count = $taxonomy->contacts()->distinct()->count();
+			}
+		);
 	}
 
 	/**

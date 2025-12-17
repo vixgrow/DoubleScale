@@ -19,7 +19,7 @@ use QuillCRM\Abstracts\REST_Controller;
 
 /**
  * Abstract Taxonomy Controller class
- * 
+ *
  * Base class for Tag, List, and other taxonomy-like controllers
  */
 abstract class REST_Taxonomy_Controller extends REST_Controller {
@@ -297,6 +297,13 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			$items = $query->orderBy( 'created_at', 'desc' )
 				->paginate( $per_page, array( '*' ), 'page', $page );
 
+			// Ensure contacts_count is calculated for each item
+			foreach ( $items->items() as $item ) {
+				if ( ! isset( $item->contacts_count ) || is_null( $item->contacts_count ) ) {
+					$item->contacts_count = $item->contacts()->distinct()->count();
+				}
+			}
+
 			return new WP_REST_Response(
 				$items->toArray() + array( 'total_count' => $total_count ),
 				200
@@ -355,6 +362,11 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 					sprintf( __( '%s not found.', 'quillcrm' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
+			}
+
+			// Ensure contacts_count is calculated
+			if ( ! isset( $item->contacts_count ) || is_null( $item->contacts_count ) ) {
+				$item->contacts_count = $item->contacts()->distinct()->count();
 			}
 
 			return new WP_REST_Response( $item, 200 );

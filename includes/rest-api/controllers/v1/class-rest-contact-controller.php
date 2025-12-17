@@ -1063,6 +1063,9 @@ class REST_Contact_Controller extends REST_Controller {
 				}
 			}
 
+			// Get filter total BEFORE applying search (this is what we show in the UI)
+			$filtered_total = $contacts->count();
+
 			// Apply keyword search AFTER filters (search within filtered results)
 			if ( '' !== $keywords ) {
 				$contacts = $contacts->where(
@@ -1078,7 +1081,7 @@ class REST_Contact_Controller extends REST_Controller {
 			// Paginate and get results (pagination automatically handles total count)
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count ), 200 );
+			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count, 'filtered_total' => $filtered_total ), 200 );
 		} catch ( Exception $e ) {
 			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

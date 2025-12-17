@@ -56,20 +56,21 @@ const ContactList: React.FC<ContactListProps> = ({
 	// Simple fetch function
 	const fetchContacts = async (
 		pageNum: number = 1,
-		append: boolean = false
+		append: boolean = false,
+		search: string = ''
 	) => {
 		setIsLoading(true);
 		setError(null);
 
 		try {
-			const response = await apiFetch<{ data: Contact[]; total: number }>(
+			const response = await apiFetch<{ data: Contact[]; total: number; filtered_total?: number }>(
 				{
 					path: addQueryArgs('/qc/v1/contacts', {
 						per_page: 50,
 						page: pageNum,
 						filters,
 						subscribed: true,
-						keywords: searchTerm,
+						keywords: search,
 						campaign_type: campaignType,
 					}),
 					method: 'GET',
@@ -86,7 +87,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				setContacts(newContacts);
 			}
 
-			setTotal(response.total);
+			setTotal(response.filtered_total ?? response.total);
 			setPage(pageNum);
 			setHasMore(newContacts.length === 50);
 		} catch (err: unknown) {
@@ -119,31 +120,21 @@ const ContactList: React.FC<ContactListProps> = ({
 	// Refetch when filters change (from apply button)
 	useEffect(() => {
 		if (shouldFetch) {
-			fetchContacts(1);
+			fetchContacts(1, false, searchTerm);
 			onFetchComplete?.();
 		}
 	}, [shouldFetch]);
 
-	// Local search only - compute filtered list client-side (no refetch)
-	const normalizedSearch = searchTerm.trim().toLowerCase();
-	const displayedContacts = normalizedSearch
-		? contacts.filter((c) => {
-				const first = String(c.first_name ?? '').toLowerCase();
-				const last = String(c.last_name ?? '').toLowerCase();
-				const email = String(c.email ?? '').toLowerCase();
-				const phone = String(
-					(c as unknown as { phone?: string })?.phone ?? ''
-				).toLowerCase();
-				const full = `${first} ${last}`.trim();
-				return (
-					first.includes(normalizedSearch) ||
-					last.includes(normalizedSearch) ||
-					full.includes(normalizedSearch) ||
-					email.includes(normalizedSearch) ||
-					phone.includes(normalizedSearch)
-				);
-			})
-		: contacts;
+	// Debounced search - refetch from API with search term
+	useEffect(() => {
+		if (isInitialMount.current) return;
+
+		const timer = setTimeout(() => {
+			fetchContacts(1, false, searchTerm);
+		}, 500);
+
+		return () => clearTimeout(timer);
+	}, [searchTerm]);
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
@@ -156,10 +147,10 @@ const ContactList: React.FC<ContactListProps> = ({
 				hasMore &&
 				!isLoading
 			) {
-				fetchContacts(page + 1, true);
+				fetchContacts(page + 1, true, searchTerm);
 			}
 		},
-		[hasMore, isLoading, page]
+		[hasMore, isLoading, page, searchTerm]
 	);
 
 	return (
@@ -222,11 +213,7 @@ const ContactList: React.FC<ContactListProps> = ({
 					<div className="flex items-center justify-center py-8">
 						<div className="text-red-500">{error}</div>
 					</div>
-				) : (
-						normalizedSearch
-							? displayedContacts.length === 0
-							: contacts.length === 0
-				  ) ? (
+				) : contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('No contacts found', 'quillcrm')}
@@ -234,7 +221,7 @@ const ContactList: React.FC<ContactListProps> = ({
 					</div>
 				) : (
 					<>
-						{(normalizedSearch ? displayedContacts : contacts).map(
+						{contacts.map(
 							(contact) => {
 								const fullName =
 									`${contact.first_name || ''} ${contact.last_name || ''}`.trim();

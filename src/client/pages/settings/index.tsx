@@ -399,36 +399,7 @@ const SettingsPage: React.FC = () => {
 					>
 						{content}
 					</CardContent>
-					{value === 'license' ? (
-						<CardFooter className={`border-t bg-white rounded-b-xl p-4 mt-auto ${!isLicenseActivated ? 'justify-end' : 'justify-between'}`}>
-							{!isLicenseActivated ? (
-								<Button
-									onClick={() => setIsLicenseActivated(true)}
-									className="min-w-[120px] rounded-lg px-0"
-									variant="gradient"
-								>
-									{__('Activate License', 'quillcrm')}
-								</Button>
-							) : (
-								<>
-									<Button
-										onClick={() => setShowDeactivateDialog(true)}
-										className="min-w-[120px] rounded-lg px-0 text-destructive border-destructive"
-										variant="outline"
-									>
-										{__('Deactivate', 'quillcrm')}
-									</Button>
-									<Button
-										onClick={() => { }}
-										className="min-w-[120px] rounded-lg px-0"
-										variant="gradient"
-									>
-										{__('Update', 'quillcrm')}
-									</Button>
-								</>
-							)}
-						</CardFooter>
-					) : !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
+					{ !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
 						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 							<Button
 								onClick={updateSettings}
@@ -471,43 +442,6 @@ const SettingsPage: React.FC = () => {
 				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"
 				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
 			/>
-
-			{/* Deactivate License Confirmation Dialog */}
-			<Dialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
-				<DialogContent className="max-w-[38rem] p-8">
-					<DialogHeader>
-						<div className="flex flex-col items-center justify-center gap-6">
-							<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FAEADF] text-[#CB5301]">
-								<BadConnectionIcon />
-							</div>
-							<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
-								{__('Are you sure you want to deactivate this license ?', 'quillcrm')}
-							</DialogTitle>
-						</div>
-					</DialogHeader>
-					<DialogFooter className="flex gap-2 mt-4">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => setShowDeactivateDialog(false)}
-							className="flex-1 border-[#374151] text-[#374151] rounded-lg"
-						>
-							{__('Cancel', 'quillcrm')}
-						</Button>
-						<Button
-							type="button"
-							variant="destructive"
-							onClick={() => {
-								setIsLicenseActivated(false);
-								setShowDeactivateDialog(false);
-							}}
-							className="flex-1 rounded-lg"
-						>
-							{__('Yes', 'quillcrm')}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 };

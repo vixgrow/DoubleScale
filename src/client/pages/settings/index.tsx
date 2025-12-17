@@ -32,7 +32,8 @@ import {
 	ManagerIcon,
 	LicenseIcon,
 	BadConnectionIcon,
-	ProcessingEmailsIcon
+	ProcessingEmailsIcon,
+	LinkTriggersIcon
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
@@ -360,7 +361,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'link_triggers',
 			label: 'Link Triggers',
-			icon: <ToolsIcon width={24} height={24} />,
+			icon: <LinkTriggersIcon width={24} height={24} />,
 		},
 	];
 

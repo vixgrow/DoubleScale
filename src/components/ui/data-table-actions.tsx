@@ -2,6 +2,7 @@
  * wordpress depnedencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * external dependencies
@@ -19,6 +20,7 @@ import {
 	GradientFilterIcon,
 	GradientColumnsIcon,
 } from '@quillcrm/components';
+import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 import { DataTableConfig } from '@quillcrm/client';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './date-range-picker';
@@ -37,6 +39,7 @@ import { CampaignFilters } from '@/components/campaign-filters';
 import RulesBuilder from '@/components/rules-builder';
 import type { RuleItem } from '@/components/rules-builder';
 import { getFilteredRulesGroups, getInitialRule } from '@/utils';
+import { Lock } from 'lucide-react';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -59,6 +62,13 @@ export function DataTableActions<TData>({
 	const [tempCampaignFilters, setTempCampaignFilters] = useState<any>(null);
 	const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
 	const [tempRules, setTempRules] = useState<Array<Array<RuleItem>>>([]);
+	const [showProModal, setShowProModal] = useState(false);
+
+	// Check if Pro is active for conditional sections
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
+	) as boolean;
 
 	// Rules builder setup (non-automation context)
 	const rulesGroups = getFilteredRulesGroups(false);
@@ -131,6 +141,12 @@ export function DataTableActions<TData>({
 
 	// Initialize temp rules when advanced filters dialog opens
 	const handleAdvancedFiltersDialogOpen = () => {
+		// Check if Pro is active before opening advanced filters
+		if (!isProActive) {
+			setShowProModal(true);
+			return;
+		}
+
 		if (config.filters) {
 			const currentFilters = config.filters.currentFilters || [];
 
@@ -262,61 +278,80 @@ export function DataTableActions<TData>({
 
 			{/* Advanced Filters Button */}
 			{config.filters?.enabled && (
-				<Dialog
-					open={isAdvancedFiltersOpen}
-					onOpenChange={(open) => {
-						if (open) {
-							handleAdvancedFiltersDialogOpen();
-						} else {
-							setIsAdvancedFiltersOpen(false);
-						}
-					}}
-				>
-					<DialogTrigger asChild>
-						<Button
-							variant="tertiary"
-							className="font-semibold px-4 text-[#3B82F6]"
-							onClick={handleAdvancedFiltersDialogOpen}
-						>
-							<FiltersIcon />
-							{__('Advanced Filters', 'quillcrm')}
-						</Button>
-					</DialogTrigger>
-					<DialogContent className="max-w-[1000px]">
-						<DialogHeader>
-							<DialogTitle>
-								<CustomDialogHeader
-									title={__('Advanced Filters', 'quillcrm')}
-									subtitle={__(
-										'Manage your filters for better data insights',
-										'quillcrm'
-									)}
-									icon={<GradientFilterIcon />}
-								/>
-							</DialogTitle>
-						</DialogHeader>
-						{tempRules.length > 0 && (
-							<RulesBuilder
-								rules={tempRules}
-								onChange={setTempRules}
-								rulesGroups={rulesGroups}
-							/>
-						)}
-						<DialogFooter>
+				<>
+					<Dialog
+						open={isAdvancedFiltersOpen}
+						onOpenChange={(open) => {
+							if (open) {
+								handleAdvancedFiltersDialogOpen();
+							} else {
+								setIsAdvancedFiltersOpen(false);
+							}
+						}}
+					>
+						<DialogTrigger asChild>
 							<Button
-								onClick={handleApplyAdvancedFilters}
-								disabled={config.filters?.isApplying}
-								className="w-full"
-								variant="gradient"
-								size="xl"
+								variant="tertiary"
+								className={`font-semibold px-4 text-[#3B82F6] ${
+									!isProActive ? 'relative' : ''
+								}`}
+								onClick={handleAdvancedFiltersDialogOpen}
 							>
-								{config.filters?.isApplying
-									? __('Applying...', 'quillcrm')
-									: __('Apply Filters', 'quillcrm')}
+								<FiltersIcon />
+								{__('Advanced Filters', 'quillcrm')}
+								{!isProActive && (
+									<Lock className="h-4 w-4 text-orange-500 ml-2" />
+								)}
 							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
+						</DialogTrigger>
+						<DialogContent className="max-w-[1000px]">
+							<DialogHeader>
+								<DialogTitle>
+									<CustomDialogHeader
+										title={__(
+											'Advanced Filters',
+											'quillcrm'
+										)}
+										subtitle={__(
+											'Manage your filters for better data insights',
+											'quillcrm'
+										)}
+										icon={<GradientFilterIcon />}
+									/>
+								</DialogTitle>
+							</DialogHeader>
+							{tempRules.length > 0 && (
+								<RulesBuilder
+									rules={tempRules}
+									onChange={setTempRules}
+									rulesGroups={rulesGroups}
+								/>
+							)}
+							<DialogFooter>
+								<Button
+									onClick={handleApplyAdvancedFilters}
+									disabled={config.filters?.isApplying}
+									className="w-full"
+									variant="gradient"
+									size="xl"
+								>
+									{config.filters?.isApplying
+										? __('Applying...', 'quillcrm')
+										: __('Apply Filters', 'quillcrm')}
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+
+					{/* Pro Feature Modal */}
+					{showProModal && (
+						<ProAutomationModal
+							visible={showProModal}
+							onClose={() => setShowProModal(false)}
+							featureName={__('Advanced Filters', 'quillcrm')}
+						/>
+					)}
+				</>
 			)}
 
 			{/* Manage Columns Dropdown */}

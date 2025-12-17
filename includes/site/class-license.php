@@ -443,7 +443,7 @@ class License {
 			// update last check only.
 			$license['last_check'] = gmdate( 'Y-m-d H:i:s' );
 			update_option( 'quillcrm_license', $license );
-
+	
 			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'quillcrm' );
 			return array(
 				'success' => false,
@@ -594,6 +594,7 @@ class License {
 			} else {
 				$message = esc_html__( 'An error occurred, please try again', 'quillcrm' );
 			}
+	
 			wp_send_json_error( $message, 422 );
 			exit;
 		}

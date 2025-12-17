@@ -15,7 +15,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
 import Emails from '../emails';
 import SMSBase from '../sms';
-// import WhatsAppBase from '../whatsapp';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
@@ -25,12 +24,12 @@ import {
 	AutomationsIcon,
 	ContactSMSIcon,
 	ContactTotalEmailsIcon,
-	// ContactWhatsAppIcon,
 	DealsIcon,
 	NotesIcon,
 	PurchaseHistoryIcon,
 	CoursesIcon,
 } from '@quillcrm/components';
+import { MessageCircle } from 'lucide-react';
 import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
@@ -60,7 +59,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		DealsBase,
 		'deals'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
-	// const WhatsApp = applyFilters('QuillCRM.Contact.TabComponent', WhatsAppBase, 'whatsapp') as React.FC<{ contact_id: number }>;
+	const WhatsApp = applyFilters(
+		'quillcrm_contact_tab_component',
+		null,
+		'whatsapp'
+	) as React.FC<{ contact_id: number }> | null;
 
 	const tabsList = [
 		{
@@ -69,7 +72,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
-		// { value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
+		...(WhatsApp ? [{ value: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle width={24} height={24} /> }] : []),
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
 		...(isCrmManager
@@ -118,14 +121,14 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				</CardContent>
 			),
 		},
-		// {
-		// 	value: 'whatsapp',
-		// 	children: (
-		// 		<CardContent className="pt-6">
-		// 			<WhatsApp contact_id={contact.id} />
-		// 		</CardContent>
-		// 	),
-		// },
+		...(WhatsApp ? [{
+			value: 'whatsapp',
+			children: (
+				<CardContent className="pt-6">
+					<WhatsApp contact_id={contact.id} />
+				</CardContent>
+			),
+		}] : []),
 		{
 			value: 'deals',
 			children: (

@@ -29,6 +29,7 @@ import {
 	NoticeBanner,
 	ProFeatureNotice,
 } from '@/components';
+import { MessageCircle } from 'lucide-react';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
@@ -77,6 +78,13 @@ const Campaigns: React.FC = () => {
 		checkStatus: checkSmsProviderStatus,
 	} = useProviderStatus('sms');
 
+	// Check WhatsApp provider status
+	const {
+		isConnected: isWhatsAppProviderConnected,
+		isLoading: isWhatsAppProviderLoading,
+		checkStatus: checkWhatsAppProviderStatus,
+	} = useProviderStatus('whatsapp');
+
 	// Use the reusable hook
 	const serverSideTable = useServerSideTable({
 		page,
@@ -104,6 +112,7 @@ const Campaigns: React.FC = () => {
 			const channelMap: Record<string, string> = {
 				email: 'email',
 				sms: 'sms',
+				whatsapp: 'whatsapp',
 			};
 
 			// Build query parameters
@@ -198,6 +207,8 @@ const Campaigns: React.FC = () => {
 				isAbTest = campaignType === 'ab_test';
 			} else if (activeTab === 'sms') {
 				channelType = 'sms';
+			} else if (activeTab === 'whatsapp') {
+				channelType = 'whatsapp';
 			}
 
 			// Use unified endpoint with type parameter (as string)
@@ -319,12 +330,13 @@ const Campaigns: React.FC = () => {
 	 */
 	const handleTwilioConfigSuccess = async () => {
 		await checkSmsProviderStatus();
+		await checkWhatsAppProviderStatus();
 		setShowTwilioConfig(false);
 	};
 
 	/**
 	 * Handle create campaign button click
-	 * For SMS campaigns, check provider connection before opening modal
+	 * For SMS/WhatsApp campaigns, check provider connection before opening modal
 	 */
 	const handleCreateCampaign = () => {
 		if (activeTab === 'sms' && !isSmsProviderConnected) {
@@ -333,6 +345,17 @@ const Campaigns: React.FC = () => {
 				type: 'error',
 				message: __(
 					'Please configure Twilio before creating SMS campaigns',
+					'quillcrm'
+				),
+			});
+			return;
+		}
+		if (activeTab === 'whatsapp' && !isWhatsAppProviderConnected) {
+			// Show error notice if provider not configured
+			setNotice({
+				type: 'error',
+				message: __(
+					'Please configure Twilio before creating WhatsApp campaigns',
 					'quillcrm'
 				),
 			});
@@ -354,6 +377,11 @@ const Campaigns: React.FC = () => {
 			value: 'sms',
 			label: 'SMS Campaigns',
 			icon: <ContactSMSIcon width={24} height={24} />,
+		},
+		{
+			value: 'whatsapp',
+			label: 'WhatsApp Campaigns',
+			icon: <MessageCircle width={24} height={24} />,
 		},
 	];
 
@@ -444,6 +472,26 @@ const Campaigns: React.FC = () => {
 			/>
 		);
 
+	const WhatsAppTabContentOverride = applyFilters(
+		'quillcrm_campaigns_tab_content',
+		'default', // Pass a signal value, not a component
+		'whatsapp'
+	);
+
+	const WhatsAppTabContent =
+		WhatsAppTabContentOverride === null ? (
+			<CampaignContent /> // PRO version active - use regular campaigns
+		) : (
+			// Free version - show PRO notice
+			<ProFeatureNotice
+				featureName={__('WhatsApp Campaigns', 'quillcrm')}
+				description={__(
+					'Create and send bulk WhatsApp campaigns using approved business templates with full tracking and analytics.',
+					'quillcrm'
+				)}
+			/>
+		);
+
 	const tabsContent = [
 		{
 			value: 'email',
@@ -453,13 +501,18 @@ const Campaigns: React.FC = () => {
 			value: 'sms',
 			children: SMSTabContent,
 		},
+		{
+			value: 'whatsapp',
+			children: WhatsAppTabContent,
+		},
 	];
 
 	// Determine if "Create Campaign" button should be shown
-	// Hide for SMS campaigns when Twilio is not configured
+	// Hide for SMS/WhatsApp campaigns when Twilio is not configured
 	const showCreateButton =
 		activeTab === 'email' ||
-		(activeTab === 'sms' && isSmsProviderConnected);
+		(activeTab === 'sms' && isSmsProviderConnected) ||
+		(activeTab === 'whatsapp' && isWhatsAppProviderConnected);
 
 	return (
 		<div className="qcrm-campaigns">
@@ -487,13 +540,21 @@ const Campaigns: React.FC = () => {
 				/>
 			)}
 
-			{/* SMS: Show provider warning if not configured */}
-			{activeTab === 'sms' && !isSmsProviderConnected && !isSmsProviderLoading && (
-				<ProviderNotConnectedWarning
-					channel="sms"
-					onConfigureClick={() => setShowTwilioConfig(true)}
-				/>
-			)}
+		{/* SMS: Show provider warning if not configured */}
+		{activeTab === 'sms' && !isSmsProviderConnected && !isSmsProviderLoading && (
+			<ProviderNotConnectedWarning
+				channel="sms"
+				onConfigureClick={() => setShowTwilioConfig(true)}
+			/>
+		)}
+
+		{/* WhatsApp: Show provider warning if not configured */}
+		{activeTab === 'whatsapp' && !isWhatsAppProviderConnected && !isWhatsAppProviderLoading && (
+			<ProviderNotConnectedWarning
+				channel="whatsapp"
+				onConfigureClick={() => setShowTwilioConfig(true)}
+			/>
+		)}
 
 			<PageTabs
 				defaultValue="email"

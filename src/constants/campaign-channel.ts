@@ -33,7 +33,7 @@ export function getCampaignChannelLabel(channel: CampaignChannelType): string {
 	const labels = {
 		[CAMPAIGN_CHANNEL.EMAIL]: 'Email',
 		[CAMPAIGN_CHANNEL.SMS]: 'SMS',
-		// [CAMPAIGN_CHANNEL.WHATSAPP]: 'WhatsApp', // Commented out - Coming in next version
+		[CAMPAIGN_CHANNEL.WHATSAPP]: 'WhatsApp',
 		[CAMPAIGN_CHANNEL.SEQUENCE_MAIL]: 'Sequence Mail',
 		[CAMPAIGN_CHANNEL.EMAIL_SEQUENCE]: 'Email Sequence',
 	};
@@ -46,8 +46,8 @@ export function getCampaignChannelLabel(channel: CampaignChannelType): string {
  */
 export function channelRequiresPhone(channel: CampaignChannelType): boolean {
 	return (
-		channel === CAMPAIGN_CHANNEL.SMS
-		// || channel === CAMPAIGN_CHANNEL.WHATSAPP // Commented out - Coming in next version
+		channel === CAMPAIGN_CHANNEL.SMS ||
+		channel === CAMPAIGN_CHANNEL.WHATSAPP
 	);
 }
 

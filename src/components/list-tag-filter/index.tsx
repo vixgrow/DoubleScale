@@ -2,11 +2,12 @@ import { __ } from '@wordpress/i18n';
 import { ContactFilterSection } from '../contact-filter';
 import { Button } from '@/components/ui/button';
 import { useRef, useState, useEffect } from 'react';
-import type { Filter as FilterType } from '@quillcrm/client';
 
 interface ListTagFilterProps {
-	filters?: FilterType[];
-	setFilters?: (filters: FilterType[]) => void;
+	// Nested filters array: [includeRows[], excludeRows[]]
+	// Each row is a plain object from ContactFilterSection (e.g. { id, list, tag })
+	filters?: any[][];
+	setFilters?: (filters: any[][]) => void;
 	fetchContacts?: () => Promise<void>;
 	loading?: boolean;
 	onApplyingChange?: (isApplying: boolean) => void;
@@ -25,138 +26,38 @@ export default function ListTagFilter({
 	const includeFilterRef = useRef<{ resetFilters: () => void } | null>(null);
 	const excludeFilterRef = useRef<{ resetFilters: () => void } | null>(null);
 	const [isApplying, setIsApplying] = useState(false);
-	const [includeData, setIncludeData] = useState<any[]>([]);
-	const [excludeData, setExcludeData] = useState<any[]>([]);
+	const [includeData, setIncludeData] = useState<any[]>(
+		Array.isArray(filters?.[0]) ? (filters?.[0] as any[]) : []
+	);
+	const [excludeData, setExcludeData] = useState<any[]>(
+		Array.isArray(filters?.[1]) ? (filters?.[1] as any[]) : []
+	);
 
-	// Initialize internal state from existing filters
+	// Keep local state in sync when filters prop changes (but without any mapping)
 	useEffect(() => {
-		if (!filters || filters.length === 0) return;
-
-		// Separate filters by type and operator
-		const includeLists = new Set<string>();
-		const includeTags = new Set<string>();
-		const excludeLists = new Set<string>();
-		const excludeTags = new Set<string>();
-
-		filters.forEach((filter) => {
-			if (filter.group !== 'segments') return;
-
-			const value = filter.value?.[0];
-			if (!value) return;
-
-			const isInclude = filter.operator === 'contains';
-
-			if (filter.filter === 'lists_segment') {
-				if (isInclude) {
-					includeLists.add(value.toString());
-				} else {
-					excludeLists.add(value.toString());
-				}
-			} else if (filter.filter === 'tags_segment') {
-				if (isInclude) {
-					includeTags.add(value.toString());
-				} else {
-					excludeTags.add(value.toString());
-				}
-			}
-		});
-
-		// Create rows from the collected lists and tags
-		const includeRows: any[] = [];
-		const excludeRows: any[] = [];
-
-		// For include: create rows for each list/tag combination
-		const maxInclude = Math.max(includeLists.size, includeTags.size, 1);
-		const includeListsArray = Array.from(includeLists);
-		const includeTagsArray = Array.from(includeTags);
-
-		for (let i = 0; i < maxInclude; i++) {
-			includeRows.push({
-				id: Date.now() + i,
-				list: includeListsArray[i] || 'all',
-				tag: includeTagsArray[i] || 'all',
-			});
+		if (!Array.isArray(filters)) {
+			return;
 		}
 
-		// For exclude: create rows for each list/tag combination
-		const maxExclude = Math.max(excludeLists.size, excludeTags.size);
-		const excludeListsArray = Array.from(excludeLists);
-		const excludeTagsArray = Array.from(excludeTags);
+		const nextInclude = Array.isArray(filters[0])
+			? (filters[0] as any[])
+			: [];
+		const nextExclude = Array.isArray(filters[1])
+			? (filters[1] as any[])
+			: [];
 
-		for (let i = 0; i < maxExclude; i++) {
-			excludeRows.push({
-				id: Date.now() + maxInclude + i,
-				list: excludeListsArray[i] || 'all',
-				tag: excludeTagsArray[i] || 'all',
-			});
-		}
-
-		setIncludeData(includeRows);
-		setExcludeData(excludeRows);
+		setIncludeData(nextInclude);
+		setExcludeData(nextExclude);
 	}, [filters]);
 
-	// Convert ContactFilterSection data to Filter objects when data changes
+	// Whenever local rows change, push them up as a nested array
 	useEffect(() => {
-		const newFilters: FilterType[] = [];
+		if (!setFilters) return;
 
-		// Add include filters (lists and tags)
-		includeData.forEach((row) => {
-			if (row.list && row.list !== 'all') {
-				const listId = parseInt(row.list);
-				if (!isNaN(listId)) {
-					newFilters.push({
-						group: 'segments',
-						filter: 'lists_segment',
-						operator: 'contains',
-						value: [listId],
-					});
-				}
-			}
-			if (row.tag && row.tag !== 'all') {
-				const tagId = parseInt(row.tag);
-				if (!isNaN(tagId)) {
-					newFilters.push({
-						group: 'segments',
-						filter: 'tags_segment',
-						operator: 'contains',
-						value: [tagId],
-					});
-				}
-			}
-		});
+		const nextFilters: any[][] = [includeData, excludeData];
 
-		// Add exclude filters (lists and tags with 'does_not_contain' operator)
-		excludeData.forEach((row) => {
-			if (row.list && row.list !== 'all') {
-				const listId = parseInt(row.list);
-				if (!isNaN(listId)) {
-					newFilters.push({
-						group: 'segments',
-						filter: 'lists_segment',
-						operator: 'does_not_contain',
-						value: [listId],
-					});
-				}
-			}
-			if (row.tag && row.tag !== 'all') {
-				const tagId = parseInt(row.tag);
-				if (!isNaN(tagId)) {
-					newFilters.push({
-						group: 'segments',
-						filter: 'tags_segment',
-						operator: 'does_not_contain',
-						value: [tagId],
-					});
-				}
-			}
-		});
-
-		// Only update if filters have changed
-		if (
-			setFilters &&
-			JSON.stringify(newFilters) !== JSON.stringify(filters)
-		) {
-			setFilters(newFilters);
+		if (JSON.stringify(nextFilters) !== JSON.stringify(filters)) {
+			setFilters(nextFilters);
 		}
 	}, [includeData, excludeData, setFilters, filters]);
 
@@ -179,9 +80,9 @@ export default function ListTagFilter({
 		setIncludeData([]);
 		setExcludeData([]);
 
-		// Clear filters in campaign settings
+		// Clear filters in campaign settings (nested array)
 		if (setFilters) {
-			setFilters([]);
+			setFilters([[], []]);
 		}
 
 		// Fetch contacts after clearing

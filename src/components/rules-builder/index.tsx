@@ -19,7 +19,8 @@ import RuleGroupCard from '@/client/pages/automation/steps/workflow/conditions-m
 export interface RuleItem {
 	rule: string;
 	operator: string;
-	value: string;
+	// Value can be string, number, array, or object – we keep it as-is
+	value: any;
 	selectedGroup: string;
 }
 

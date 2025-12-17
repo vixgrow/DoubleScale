@@ -142,7 +142,8 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 
 	useEffect(() => {
 		fetchContacts();
-	}, [perPage, page, keywords, dateRange]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [perPage, page, keywords, dateRange, filters]);
 
 	return (
 		<>

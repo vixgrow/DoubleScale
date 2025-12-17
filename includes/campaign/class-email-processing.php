@@ -125,7 +125,9 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		// Check if the message is in builder JSON format and render it to HTML
 		// Pass footer_html so it gets injected before </body> tag
 		// Use the original contact model for merge tags
-		$message = $this->render_builder_content( $message, $contact_or_automation_contact, $footer_html );
+		// IMPORTANT: Use render_builder_content_with_tracking() to capture conditional section IDs
+		$renderer = null;
+		$message  = $this->render_builder_content_with_tracking( $message, $contact_or_automation_contact, $campaign_message->id, $renderer, $footer_html );
 
 		// Set channel context for merge tags
 		add_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );

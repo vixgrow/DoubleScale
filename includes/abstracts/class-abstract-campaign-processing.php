@@ -52,6 +52,14 @@ abstract class Abstract_Campaign_Processing {
 	private $template_merge_tag_keys = null;
 
 	/**
+	 * Temporarily store rendered conditional section IDs by tracking ID
+	 * Used to write conditional_sections meta only after successful send
+	 *
+	 * @var array Array of tracking_id => rendered_section_ids
+	 */
+	private $pending_conditional_sections = array();
+
+	/**
 	 * Start time
 	 *
 	 * @var int
@@ -1010,7 +1018,8 @@ abstract class Abstract_Campaign_Processing {
 
 		// Check if the message is in builder JSON format and render it to HTML
 		// Pass the original contact model for merge tags
-		$message = $this->render_builder_content( $message, $contact_or_automation_contact );
+		$renderer = null;
+		$message  = $this->render_builder_content_with_tracking( $message, $contact_or_automation_contact, $campaign_message->id, $renderer );
 
 		// Process merge tags - use the original contact model to support automation merge tags
 		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
@@ -1038,14 +1047,16 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Render builder content to HTML if it's in builder JSON format
+	 * Render builder content with conditional section tracking
 	 *
 	 * @param string                                 $content The content to render (could be HTML or JSON)
 	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact model for merge tags
+	 * @param int|null                               $tracking_id Communication tracking ID (null if not yet created)
+	 * @param object|null                            &$renderer Renderer instance (passed by reference to capture rendered section IDs)
 	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string Rendered HTML content
 	 */
-	protected function render_builder_content( $content, $contact_or_automation_contact, $footer_html = '' ) {
+	protected function render_builder_content_with_tracking( $content, $contact_or_automation_contact, $tracking_id = null, &$renderer = null, $footer_html = '' ) {
 		// Try to decode the content to see if it's JSON
 		$decoded = json_decode( $content, true );
 
@@ -1064,12 +1075,53 @@ abstract class Abstract_Campaign_Processing {
 				// Extract preview text if available
 				$preview_text = '';
 
-				return $renderer->render_from_builder_data( $builder_data, $contact_or_automation_contact, $preview_text, $footer_html );
+				$html = $renderer->render_from_builder_data( $builder_data, $contact_or_automation_contact, $preview_text, $footer_html );
+
+				// Capture rendered conditional section IDs for later storage (only after successful send)
+				// IMPORTANT: Do NOT write conditional_sections meta here - it should only be written
+				// after the email is successfully sent, not during rendering/preparation phase
+				$rendered_section_ids = $renderer->get_rendered_section_ids();
+				
+				if ( $tracking_id ) {
+					// Validate that rendered_section_ids is an array
+					if ( ! is_array( $rendered_section_ids ) ) {
+						$rendered_section_ids = array();
+					}
+
+					// Filter out any invalid values (ensure all items are strings)
+					$rendered_section_ids = array_filter(
+						$rendered_section_ids,
+						function( $id ) {
+							return is_string( $id ) && ! empty( $id );
+						}
+					);
+					// Re-index array after filtering
+					$rendered_section_ids = array_values( $rendered_section_ids );
+
+					// Store rendered section IDs temporarily - will be written to meta only after successful send
+					// This ensures conditional_sections meta is only recorded for emails that were actually sent
+					$this->pending_conditional_sections[ $tracking_id ] = $rendered_section_ids;
+				}
+
+				return $html;
 			}
 		}
 
 		// If it's JSON but not builder format, return as-is (might be legacy format)
 		return $content;
+	}
+
+	/**
+	 * Render builder content to HTML if it's in builder JSON format
+	 *
+	 * @param string                                 $content The content to render (could be HTML or JSON)
+	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact model for merge tags
+	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @return string Rendered HTML content
+	 */
+	protected function render_builder_content( $content, $contact_or_automation_contact, $footer_html = '' ) {
+		$renderer = null;
+		return $this->render_builder_content_with_tracking( $content, $contact_or_automation_contact, null, $renderer, $footer_html );
 	}
 
 
@@ -1137,9 +1189,18 @@ abstract class Abstract_Campaign_Processing {
 			$campaign_message->status  = Tracking_Status::SENT;
 			$campaign_message->sent_at = current_time( 'mysql' );
 
+			// Write conditional_sections meta ONLY after successful send
+			// This ensures we only track sections for emails that were actually sent
+			$this->store_conditional_sections_meta( $campaign_message->id );
+
 			do_action( "quillcrm_{$this->channel}_send_after", $this );
 		} else {
 			$campaign_message->status = Tracking_Status::FAILED;
+
+			// Clear pending conditional sections if send failed - don't track sections for unsent emails
+			if ( isset( $this->pending_conditional_sections[ $campaign_message->id ] ) ) {
+				unset( $this->pending_conditional_sections[ $campaign_message->id ] );
+			}
 
 			// Log error details if available
 			if ( isset( $result['error'] ) ) {
@@ -1163,6 +1224,46 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		$campaign_message->save();
+	}
+
+	/**
+	 * Store conditional sections meta for a tracking record
+	 * Called only after successful send to ensure meta is only recorded for sent emails
+	 *
+	 * @param int $tracking_id Communication tracking ID
+	 * @return void
+	 */
+	private function store_conditional_sections_meta( $tracking_id ) {
+		// Check if we have pending conditional sections for this tracking ID
+		if ( ! isset( $this->pending_conditional_sections[ $tracking_id ] ) ) {
+			return; // No conditional sections were rendered for this email
+		}
+
+		$rendered_section_ids = $this->pending_conditional_sections[ $tracking_id ];
+
+		// Only save if we have valid section IDs
+		if ( ! empty( $rendered_section_ids ) && is_array( $rendered_section_ids ) ) {
+			// Check if record already exists
+			$existing_meta = \QuillCRM\Models\Communication_Tracking_Meta_Model::where( 'communication_tracking_id', $tracking_id )
+				->where( 'meta_key', 'conditional_sections' )
+				->first();
+			
+			if ( $existing_meta ) {
+				$existing_meta->meta_value = $rendered_section_ids;
+				$existing_meta->save();
+			} else {
+				\QuillCRM\Models\Communication_Tracking_Meta_Model::create(
+					array(
+						'communication_tracking_id' => $tracking_id,
+						'meta_key'                  => 'conditional_sections',
+						'meta_value'                => $rendered_section_ids,
+					)
+				);
+			}
+		}
+
+		// Clean up temporary storage
+		unset( $this->pending_conditional_sections[ $tracking_id ] );
 	}
 
 

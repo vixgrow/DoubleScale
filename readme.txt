@@ -22,11 +22,11 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 * Automatic contact syncing from WordPress users
 * Contact segmentation with lists and tags
 * Contact notes and activity timeline
-* Avatar integration with Gravatar
 * Advanced contact search and filtering
 * Bulk operations and import/export
 * Contact source tracking
 * Full contact history and activity log
+* Lead Scoring (Coming Soon)
 
 **Pipeline & Deal Management**
 * Visual pipeline boards for deal tracking
@@ -69,12 +69,13 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 * Two-way conversations
 
 **Marketing Automation**
-* Visual automation builder with 11+ automation docs
+* Visual automation builder
 * Trigger-based workflows
 * Contact tag and list automation
 * Multi-step sequences
 * Action scheduling
 * Conditional logic and branching
+* Support for nested conditions
 * Time delays and wait steps
 * Email and SMS automation actions
 * Webhook triggers
@@ -101,7 +102,7 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 * ROI tracking
 
 **Bounce Handler**
-* Automatic bounce detection with 5+ bounce docs
+* Automatic bounce detection
 * Soft and hard bounce classification
 * Auto-cleanup of invalid emails
 * Bounce statistics and reporting
@@ -133,6 +134,18 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 * Tag and list assignment on submission
 * Multiple forms support
 
+**Import Contacts**
+* Import contacts via CSV file
+* Import contacts from WordPress users
+* Import contacts from Woocommerce
+* Import contacts from Fluent CRM
+* Import contacts from ActiveCampaign
+* Import contacts from HubSpot
+* Import contacts from MailerLite
+* Import contacts from Pipedrive
+* Import contacts from GoHighLevel
+* Import contacts from Funnelkit automations
+
 ### 🔗 INTEGRATIONS
 
 **E-commerce Platforms:**
@@ -153,14 +166,13 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 
 **Other Integrations:**
 * **WordPress Users** - Automatic user synchronization
-* **Gravatar** - Profile images
 * **Third-Party Services** - Via webhooks and API
 
 ### 🎯 WHO IS QUILL CRM FOR?
 
 **Any business or organization that manages customer relationships!**
 
-Whether you're a solopreneur with 100 contacts or an enterprise with 100,000+, Quill CRM scales to meet your needs.
+Whether you're a solopreneur with **100 contacts** or an enterprise with **100,000+** contacts, Quill CRM scales to meet your needs.
 
 **By Business Size:**
 * **Solopreneurs & Freelancers** - Track clients and projects in one place

@@ -12,7 +12,7 @@ A powerful, native WordPress CRM with pipelines, contact management, email & SMS
 
 == Description ==
 
-**Quill CRM** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
+**[Quill CRM](https://quillcrm.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
 
 ### 🚀 KEY FEATURES
 
@@ -388,7 +388,6 @@ Quill CRM stores contact information in your WordPress database. We do not colle
 
 Quill CRM is developed and maintained by the Quill Forms team.
 
-* **Lead Developer**: Mohamed Magdy
 * **Website**: [quillcrm.io](https://quillcrm.io)
 * **Documentation**: [quillcrm.io/docs](https://quillcrm.io/docs)
 

@@ -1362,6 +1362,7 @@ class REST_Contact_Controller extends REST_Controller {
 			'last_name'       => $request->get_param( 'last_name' ),
 			'email'           => $request->get_param( 'email' ),
 			'phone'           => $request->get_param( 'phone' ),
+			'whatsapp_phone'  => $request->get_param( 'whatsapp_phone' ),
 			'address_1'       => $request->get_param( 'address_1' ),
 			'address_2'       => $request->get_param( 'address_2' ),
 			'city'            => $request->get_param( 'city' ),

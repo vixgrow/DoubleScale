@@ -268,14 +268,23 @@ class Campaign_Channel {
 	 * Get recipient field name for channel
 	 *
 	 * Returns the contact field name needed for this channel type.
+	 * WhatsApp uses a separate 'whatsapp_phone' field (like HubSpot).
 	 *
 	 * @param int $channel Channel type integer.
-	 * @return string Field name ('email' or 'phone')
+	 * @return string Field name ('email', 'phone', or 'whatsapp_phone')
 	 */
 	public static function get_recipient_field( $channel ) {
+		// WhatsApp uses dedicated whatsapp_phone field
+		if ( self::CHANNEL_WHATSAPP === $channel ) {
+			return 'whatsapp_phone';
+		}
+
+		// SMS uses phone field
 		if ( self::requires_phone( $channel ) ) {
 			return 'phone';
 		}
+
+		// Email uses email field
 		return 'email';
 	}
 

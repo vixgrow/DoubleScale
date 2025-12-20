@@ -135,8 +135,8 @@ class Campaign_Enrichment {
 				->where( 'phone', '!=', '' );
 		} elseif ( $campaign->is_whatsapp_campaign() ) {
 			$query->where( 'whatsapp_status', 'subscribed' )
-				->whereNotNull( 'phone' )
-				->where( 'phone', '!=', '' );
+				->whereNotNull( 'whatsapp_phone' )
+				->where( 'whatsapp_phone', '!=', '' );
 		}
 
 		// Apply custom filters if provided

@@ -37,6 +37,7 @@ export type Contact = {
 	first_name: string;
 	last_name: string;
 	phone: string;
+	whatsapp_phone: string;
 	address_1: string;
 	address_2: string;
 	city: string;

@@ -33,6 +33,7 @@ use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Activity_Associations_Table;
+use QuillCRM\Database\Migrations\Add_WhatsApp_Phone_Column;
 use QuillCRM\User_Roles\User_Roles;
 
 /**
@@ -155,6 +156,9 @@ class Install {
 			$migration->run();
 		}
 
+		// Run column migrations for existing installations
+		self::run_column_migrations();
+
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		delete_transient( 'quillcrm_installing' );
@@ -169,5 +173,31 @@ class Install {
 	 */
 	private static function update_quillcrm_version() {
 		 update_option( 'quillcrm_version', QUILLCRM_VERSION );
+	}
+
+	/**
+	 * Run column migrations for existing installations.
+	 *
+	 * These migrations add new columns to existing tables for
+	 * installations that already have the tables from previous versions.
+	 *
+	 * @since 1.1.0
+	 */
+	private static function run_column_migrations() {
+		$column_migrations = apply_filters(
+			'quillcrm_column_migrations',
+			array(
+				'add_whatsapp_phone_column' => Add_WhatsApp_Phone_Column::class,
+			)
+		);
+
+		foreach ( $column_migrations as $migration_name => $class ) {
+			if ( ! class_exists( $class ) ) {
+				continue;
+			}
+
+			$migration = new $class();
+			$migration->run();
+		}
 	}
 }

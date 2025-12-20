@@ -65,6 +65,7 @@ class Contact_Model extends Model {
 		'first_name',
 		'last_name',
 		'phone',
+		'whatsapp_phone',
 		'address_1',
 		'address_2',
 		'city',
@@ -111,9 +112,10 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $rules = array(
-		'email' => 'required|email',
-		'phone' => 'nullable|regex:/^\+?[0-9]+$/',
-		'zip'   => 'nullable|numeric',
+		'email'          => 'required|email',
+		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
+		'whatsapp_phone' => 'nullable|regex:/^\+?[0-9]+$/',
+		'zip'            => 'nullable|numeric',
 	);
 
 	/**
@@ -124,10 +126,11 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required' => 'Contact email field is required.',
-		'email.email'    => 'Invalid email address.',
-		'phone.regex'    => 'Invalid phone number.',
-		'zip.numeric'    => 'Invalid zip code.',
+		'email.required'        => 'Contact email field is required.',
+		'email.email'           => 'Invalid email address.',
+		'phone.regex'           => 'Invalid phone number.',
+		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number.',
+		'zip.numeric'           => 'Invalid zip code.',
 	);
 
 	/**

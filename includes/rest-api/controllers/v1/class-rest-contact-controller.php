@@ -514,6 +514,13 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
+				 'whatsapp_phone'  => array(
+					 'description'  => __( 'WhatsApp phone number of the contact.', 'quillcrm' ),
+					 'type'         => 'string',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
 				 'address_1'       => array(
 					 'description'  => __( 'Address line 1 of the contact.', 'quillcrm' ),
 					 'type'         => 'string',

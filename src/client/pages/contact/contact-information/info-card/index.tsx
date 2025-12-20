@@ -33,6 +33,7 @@ type EditingField =
 	| 'last_name'
 	| 'email'
 	| 'phone'
+	| 'whatsapp_phone'
 	| 'address_1'
 	| 'address_2'
 	| 'country'
@@ -362,8 +363,8 @@ const InfoCard: React.FC = () => {
 						value={editValue}
 						onChange={(e) => {
 							const newValue = e.target.value;
-							// For phone field, only allow numbers and +
-							if (fieldName === 'phone') {
+							// For phone fields, only allow numbers and +
+							if (fieldName === 'phone' || fieldName === 'whatsapp_phone') {
 								const phoneRegex = /^[0-9+]*$/;
 								if (phoneRegex.test(newValue)) {
 									setEditValue(newValue);
@@ -417,6 +418,11 @@ const InfoCard: React.FC = () => {
 							'phone',
 							__('Phone', 'quillcrm'),
 							contact?.phone || ''
+						)}
+						{renderField(
+							'whatsapp_phone',
+							__('WhatsApp Phone', 'quillcrm'),
+							contact?.whatsapp_phone || ''
 						)}
 					</div>
 				);

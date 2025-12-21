@@ -11,15 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use WC_Order;
 
 /**
  * Order Status Pending Trigger
  */
-class Order_Status_Pending extends Trigger {
-
+class Order_Status_Pending extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -62,46 +60,6 @@ class Order_Status_Pending extends Trigger {
 	 * @var string
 	 */
 	public $group = 'order';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'woocommerce_order_status_pending', array( $this, 'order_status_pending' ) );
-	}
-
-	/**
-	 * Order Status Pending
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 *
-	 * @return void
-	 */
-	public function order_status_pending( $order_id ) {
-		$order = \wc_get_order( $order_id );
-		if ( ! $order instanceof WC_Order ) {
-			return;
-		}
-
-		$data = array(
-			'first_name' => $order->get_billing_first_name(),
-			'last_name'  => $order->get_billing_last_name(),
-			'email'      => $order->get_billing_email(),
-			'data'       => array(
-				'order_id'     => $order->get_id(),
-				'order_total'  => $order->get_total(),
-				'order_status' => 'wc-pending',
-			),
-		);
-
-		$this->process( $data );
-	}
 }
 
 Triggers_Manager::instance()->register( new Order_Status_Pending() );

@@ -37,30 +37,36 @@ import EditHeaderIcon from '@/components/icons/edit-header';
 interface NodeActionsDropdownProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
+	onChangeTrigger?: () => void;
 	editLabel?: string;
 	deleteLabel?: string;
+	changeTriggerLabel?: string;
 	deleteTitle?: string;
 	deleteDescription?: string;
 	showEdit?: boolean;
 	showDelete?: boolean;
+	showChangeTrigger?: boolean;
 	disabled?: boolean;
 }
 
 const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
+	onChangeTrigger,
 	editLabel = __('Edit', 'quillcrm'),
 	deleteLabel = __('Delete', 'quillcrm'),
+	changeTriggerLabel = __('Change Trigger', 'quillcrm'),
 	deleteTitle = __('Delete this item?', 'quillcrm'),
 	deleteDescription = __('This action cannot be undone.', 'quillcrm'),
 	showEdit = true,
 	showDelete = true,
+	showChangeTrigger = false,
 	disabled = false,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-	if (disabled || (!showEdit && !showDelete)) {
+	if (disabled || (!showEdit && !showDelete && !showChangeTrigger)) {
 		return null;
 	}
 
@@ -93,34 +99,47 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 			}}
 		>
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
+				<DropdownMenuTrigger
+					asChild
+					onClick={(e) => e.stopPropagation()}
+				>
 					<Button
 						variant="ghost"
 						size="icon"
 						className="qcrm-reactflow-node__dropdown-btn h-8 w-8"
-						onClick={(e) => {
-							e.stopPropagation();
-							e.preventDefault();
-						}}
-						onMouseDown={(e) => {
-							e.stopPropagation();
-						}}
 					>
 						<MoreVertical className="h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="z-[150000]">
+				<DropdownMenuContent
+					align="end"
+					className="z-[150000]"
+					removePortal={true}
+					onClick={(e) => e.stopPropagation()}
+				>
 					{showEdit && onEdit && (
 						<DropdownMenuItem
 							onClick={onEdit}
 							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 						>
-							<EditHeaderIcon/>
+							<EditHeaderIcon />
 							<span>{editLabel}</span>
 						</DropdownMenuItem>
 					)}
+					{showChangeTrigger && onChangeTrigger && (
+						<DropdownMenuItem
+							onClick={onChangeTrigger}
+							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+						>
+							<EditHeaderIcon />
+							<span>{changeTriggerLabel}</span>
+						</DropdownMenuItem>
+					)}
 					{showDelete && onDelete && (
-						<AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+						<AlertDialog
+							open={isDialogOpen}
+							onOpenChange={setIsDialogOpen}
+						>
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem
 									className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
@@ -142,7 +161,9 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
-										<AlertDialogCancel disabled={isDeleting}>
+										<AlertDialogCancel
+											disabled={isDeleting}
+										>
 											{__('Cancel', 'quillcrm')}
 										</AlertDialogCancel>
 										<AlertDialogAction
@@ -152,7 +173,9 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 											}}
 											disabled={isDeleting}
 										>
-											{isDeleting ? __('Deleting...', 'quillcrm') : __('Delete', 'quillcrm')}
+											{isDeleting
+												? __('Deleting...', 'quillcrm')
+												: __('Delete', 'quillcrm')}
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>

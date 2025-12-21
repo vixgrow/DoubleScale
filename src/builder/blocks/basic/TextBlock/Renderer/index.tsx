@@ -87,7 +87,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 			props.content.includes('<strike>') ||
 			props.content.includes('font-weight') ||
 			props.content.includes('font-style') ||
-			props.content.includes('text-decoration')
+			props.content.includes('text-decoration') ||
+			props.content.includes('text-align')
 		);
 	};
 
@@ -164,8 +165,14 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					{
 						fontSize: fontSize,
 						color: props.color,
-						textAlign:
-							props.textAlign as React.CSSProperties['textAlign'],
+						// Only apply textAlign from props if HTML doesn't have its own text-align
+						...(hasHtmlFormatting() &&
+						props.content.includes('text-align')
+							? {}
+							: {
+									textAlign:
+										props.textAlign as React.CSSProperties['textAlign'],
+								}),
 						fontFamily: props.fontFamily,
 						// Only apply formatting styles if no HTML formatting exists
 						...(hasHtmlFormatting()
@@ -192,7 +199,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 						borderRadius: props.borderRadius,
 						borderWidth: props.borderWidth,
 						backgroundColor: props.backgroundColor,
-						padding: `${(props.padding?.top || 0) * 2}px ${(props.padding?.right || 0) * 4}px ${(props.padding?.bottom || 0) * 2}px ${(props.padding?.left || 0) * 4}px`,
+						padding: `${props.padding?.top || 0}px ${props.padding?.right || 0}px ${props.padding?.bottom || 0}px ${props.padding?.left || 0}px`,
 						margin: 0,
 						// Overflow prevention properties like Button and Preheader renderers
 						wordWrap: 'break-word',

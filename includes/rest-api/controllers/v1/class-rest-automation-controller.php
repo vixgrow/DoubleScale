@@ -32,9 +32,6 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -234,6 +231,36 @@ class Rest_Automation_Controller extends REST_Controller {
 							'description' => __( 'The automation key.', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// check if you have any condtions is related with this trigger
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/check-conditions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'check_conditions' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'automation_id' => array(
+							'description' => __( 'The automation ID.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'is_check'      => array(
+							'description' => __( 'Whether to check conditions.', 'quillcrm' ),
+							'type'        => 'boolean',
+							'default'     => true,
+						),
+						'is_delete'     => array(
+							'description' => __( 'Whether to delete conditions.', 'quillcrm' ),
+							'type'        => 'boolean',
+							'default'     => false,
 						),
 					),
 				),
@@ -1418,6 +1445,87 @@ class Rest_Automation_Controller extends REST_Controller {
 			'plugin_label' => '',
 		);
 	}
+
+
+	/**
+	 * Check conditions
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function check_conditions( $request ) {
+		$automation_id = $request->get_param( 'automation_id' );
+		$is_check      = $request->get_param( 'is_check' );
+		$is_delete     = $request->get_param( 'is_delete' );
+
+		if ( ! class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ) {
+			throw new \Exception( 'QuillCRM Pro is not installed. Please install and activate QuillCRM Pro to use this automation.' );
+		}
+
+		$automation = Automation_Model::find( $automation_id );
+		if ( ! $automation ) {
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+		}
+
+		// get trigger
+		$trigger = Triggers_Manager::instance()->get_trigger( $automation->trigger );
+		if ( ! $trigger ) {
+			return new WP_Error( 'not_found', __( 'Trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+		}
+
+		$trigger_source = $trigger->source;
+		$trigger_slug   = $trigger->slug;
+
+		$conditions = $automation->steps()->where( 'type', 'condition' )->get();
+
+		$count = 0;
+
+		foreach ( $conditions as $condition ) {
+			$condition_settings = $condition->settings;
+			foreach ( $condition_settings as $group_index => $rule_group ) {
+				if ( is_array( $rule_group ) ) {
+					foreach ( $rule_group as $rule_index => $rule ) {
+						$group_slug    = $rule['selectedGroup'];
+						$group_manager = Rules_Manager::instance()->get_group_by_slug( $group_slug );
+						$rule_manager  = Rules_Manager::instance()->get_rule( $rule['rule'] );
+						if ( ! $rule_manager ) {
+							continue;
+						}
+						$required_triggers = isset( $group_manager['triggers'] ) ? $group_manager['triggers'] : array();
+
+						if ( $group_slug === $trigger_source || in_array( $trigger_slug, $required_triggers ) ) {
+							$count++;
+							if ( $is_check ) {
+								return new WP_REST_Response(
+									array(
+										'count' => $count,
+									),
+									200
+								);
+							}
+							if ( $is_delete ) {
+								// delete this rule from condition settings
+								unset( $condition_settings[ $group_index ][ $rule_index ] );
+								$condition->settings = $condition_settings;
+								$condition->save();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return new WP_REST_Response(
+			array(
+				'count' => $count,
+			),
+			200
+		);
+	}
+
 	/**
 	 * Prepare automation
 	 *

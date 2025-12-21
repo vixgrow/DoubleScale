@@ -77,15 +77,6 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if this action supports analytics
 	const hasAnalytics = supportsAnalytics(step.action || '');
 
-	// Get recipient info for display
-	const getRecipientInfo = () => {
-		if (!isConfigured || !hasAnalytics) return null;
-
-		// This would come from step configuration in real implementation
-		// For now, showing placeholder
-		return __('To: (100 contacts)', 'quillcrm');
-	};
-
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
 			<span
@@ -148,9 +139,6 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const customFooter =
 		!viewMode && hasAnalytics && isConfigured ? (
 			<div className="qcrm-reactflow-node__footer-row">
-				<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
-					{getRecipientInfo()}
-				</div>
 				<button
 					className="qcrm-reactflow-node__analytics-link text-primary"
 					onClick={handleViewAnalytics}

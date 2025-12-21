@@ -1012,7 +1012,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 									onClick={addTextBlock}
 								>
 									<Plus className="w-4 h-4 mr-2" />
-									{__('Add Block', 'quillcrm')}
+									{__('Add Text Block', 'quillcrm')}
 								</Button>
 							</div>
 						)}

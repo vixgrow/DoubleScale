@@ -32,10 +32,13 @@ import {
 	ManagerIcon,
 	LicenseIcon,
 	BadConnectionIcon,
+	ProcessingEmailsIcon,
+	LinkTriggersIcon
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
+import SMTPSettings from './smtp';
 import DoubleOptInSettings from './double-optin';
 import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
@@ -55,7 +58,7 @@ import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'debugging']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -199,6 +202,12 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
+			case 'smtp':
+				const SMTPComponent = applyFilters(
+					'quillcrm_settings_smtp_settings',
+					SMTPSettings
+				) as React.ComponentType;
+				return <SMTPComponent />;
 			case 'sms':
 				const SMSComponent = applyFilters(
 					'quillcrm_settings_sms_settings',
@@ -259,7 +268,7 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'license':
-				return <License isActivated={isLicenseActivated} />;
+				return <License />;
 			case 'custom_fields':
 				const CustomFieldsComponent = applyFilters(
 					'quillcrm_settings_custom_fields_settings',
@@ -305,6 +314,11 @@ const SettingsPage: React.FC = () => {
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{
+			value: 'smtp',
+			label: 'SMTP',
+			icon: <ProcessingEmailsIcon width={24} height={24} />,
+		},
+		{
 			value: 'sms',
 			label: 'SMS',
 			icon: <TotalSMSIcon width={24} height={24} />,
@@ -347,7 +361,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'link_triggers',
 			label: 'Link Triggers',
-			icon: <ToolsIcon width={24} height={24} />,
+			icon: <LinkTriggersIcon width={24} height={24} />,
 		},
 	];
 
@@ -385,36 +399,7 @@ const SettingsPage: React.FC = () => {
 					>
 						{content}
 					</CardContent>
-					{value === 'license' ? (
-						<CardFooter className={`border-t bg-white rounded-b-xl p-4 mt-auto ${!isLicenseActivated ? 'justify-end' : 'justify-between'}`}>
-							{!isLicenseActivated ? (
-								<Button
-									onClick={() => setIsLicenseActivated(true)}
-									className="min-w-[120px] rounded-lg px-0"
-									variant="gradient"
-								>
-									{__('Activate License', 'quillcrm')}
-								</Button>
-							) : (
-								<>
-									<Button
-										onClick={() => setShowDeactivateDialog(true)}
-										className="min-w-[120px] rounded-lg px-0 text-destructive border-destructive"
-										variant="outline"
-									>
-										{__('Deactivate', 'quillcrm')}
-									</Button>
-									<Button
-										onClick={() => { }}
-										className="min-w-[120px] rounded-lg px-0"
-										variant="gradient"
-									>
-										{__('Update', 'quillcrm')}
-									</Button>
-								</>
-							)}
-						</CardFooter>
-					) : !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
+					{ !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
 						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 							<Button
 								onClick={updateSettings}
@@ -457,43 +442,6 @@ const SettingsPage: React.FC = () => {
 				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"
 				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
 			/>
-
-			{/* Deactivate License Confirmation Dialog */}
-			<Dialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
-				<DialogContent className="max-w-[38rem] p-8">
-					<DialogHeader>
-						<div className="flex flex-col items-center justify-center gap-6">
-							<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FAEADF] text-[#CB5301]">
-								<BadConnectionIcon />
-							</div>
-							<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
-								{__('Are you sure you want to deactivate this license ?', 'quillcrm')}
-							</DialogTitle>
-						</div>
-					</DialogHeader>
-					<DialogFooter className="flex gap-2 mt-4">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => setShowDeactivateDialog(false)}
-							className="flex-1 border-[#374151] text-[#374151] rounded-lg"
-						>
-							{__('Cancel', 'quillcrm')}
-						</Button>
-						<Button
-							type="button"
-							variant="destructive"
-							onClick={() => {
-								setIsLicenseActivated(false);
-								setShowDeactivateDialog(false);
-							}}
-							className="flex-1 rounded-lg"
-						>
-							{__('Yes', 'quillcrm')}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 };

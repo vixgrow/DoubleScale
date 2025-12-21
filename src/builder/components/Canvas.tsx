@@ -63,6 +63,14 @@ const Canvas = () => {
 
 	return (
 		<div className="flex-1 overflow-auto h-full">
+			<style>{`
+				/* Disable pointer events on links and buttons in canvas content only */
+				#quillcrm-email-builder [data-block-id] a,
+				#quillcrm-email-builder [data-block-id] button {
+					pointer-events: none !important;
+					cursor: default !important;
+				}
+			`}</style>
 			<div
 				className="mx-auto relative py-4"
 				style={{ width: `${globalSettings.canvasWidth}px` }}

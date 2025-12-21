@@ -9,7 +9,7 @@ import { useState } from '@wordpress/element';
  */
 import { Card, List as AntList, Typography, Flex, Popover, Button } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
-
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 /**
  * Internal dependencies
  */
@@ -17,10 +17,10 @@ import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
 const Overview: React.FC = () => {
-	const { form, isLoading, saveForm, navigate } = useFormContext();
+	const { form, isLoading, saveForm } = useFormContext();
 	const [deactivating, setDeactivating] = useState(false);
 	const formsData = ConfigAPI.getForms();
-
+	const navigate = useNavigate();
 	const deactivateForm = async () => {
 		setDeactivating(true);
 
@@ -29,7 +29,7 @@ const Overview: React.FC = () => {
 				status: 'inactive',
 			});
 
-			navigate?.('forms');
+			navigate(getToLink('forms'));
 		} catch (error) {
 			console.error(error);
 		} finally {

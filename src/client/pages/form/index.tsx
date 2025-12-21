@@ -29,7 +29,7 @@ import {
 	NoticeBanner,
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
-import { useParams, useNavigate } from 'react-router-dom';
+import { getToLink, useNavigate, useParams } from '@quillcrm/navigation';
 
 interface FormProps {
 	isNewForm?: boolean;
@@ -59,6 +59,7 @@ const Form: React.FC<FormProps> = ({
 	const [formFields, setFormFields] = useState<
 		FormType['fields_settings']['fields'] | null
 	>(null);
+	const [formWasSaved, setFormWasSaved] = useState(false);
 	const isEditMode = !isNewForm;
 
 	// Notice state
@@ -199,35 +200,29 @@ const Form: React.FC<FormProps> = ({
 			}
 			try {
 				await saveForm();
+				setFormWasSaved(true); // Mark that form was saved
 				closeNotice(); // Clear any existing notices when moving to step 2
 				setCurrentStep(1);
 			} catch (error: any) {
 				showNotice('error', error.message);
 			}
 		} else if (currentStep === 1) {
-			// Validate that all contact fields are mapped
+			// Validate that required contact fields are mapped
 			const mappedFields = (form?.data as any)?.mapped_fields || {};
 
-			// Check if form fields are available
-			if (!formFields || Object.keys(formFields).length === 0) {
-				showNotice(
-					'error',
-					__('No form fields available to map', 'quillcrm')
-				);
-				return;
-			}
+			// Required contact fields that must be mapped
+			const requiredContactFields = ['email'];
 
-			// Check if all available form fields have valid mappings
-			const availableFieldKeys = Object.keys(formFields);
-			const allFieldsMapped = availableFieldKeys.every(
+			// Check if all required contact fields have valid mappings
+			const allRequiredFieldsMapped = requiredContactFields.every(
 				(key) => mappedFields[key] && mappedFields[key] !== ''
 			);
 
-			if (!allFieldsMapped) {
+			if (!allRequiredFieldsMapped) {
 				showNotice(
 					'error',
 					__(
-						'Please map all contact fields before activating',
+						'Please map all required contact fields (Email) before activating',
 						'quillcrm'
 					)
 				);
@@ -236,22 +231,32 @@ const Form: React.FC<FormProps> = ({
 
 			try {
 				await saveForm({ status: 'active' });
+				setFormWasSaved(true); // Mark that form was saved
 
-				// Show updated notice
-				showNotice(
-					'success',
-					__('Form updated successfully', 'quillcrm')
-				);
+				// Show appropriate notice based on whether it's a new form or edit
+				const successMessage = isNewForm
+					? __('Form created successfully', 'quillcrm')
+					: __('Form updated successfully', 'quillcrm');
+
+				showNotice('success', successMessage);
+
+				// Call onSuccess first to refresh the forms list before closing
+				if (onSuccess) {
+					const onSuccessMessage = isNewForm
+						? __('Form created successfully', 'quillcrm')
+						: __('Form updated successfully', 'quillcrm');
+					onSuccess(onSuccessMessage);
+				}
 
 				// Close the form after activation
 				if (onClose) {
 					onClose();
 				} else {
-					navigate('/forms');
-				}
-
-				if (onSuccess) {
-					onSuccess(__('Form updated', 'quillcrm'));
+					// In edit mode, navigate with success message in URL
+					const successType = isNewForm ? 'created' : 'updated';
+					const formsLink = getToLink('forms');
+					const separator = formsLink.includes('?') ? '&' : '?';
+					navigate(`${formsLink}${separator}success=${successType}`);
 				}
 			} catch (error: any) {
 				showNotice('error', error.message);
@@ -262,11 +267,30 @@ const Form: React.FC<FormProps> = ({
 	// Modify the handleBack function to handle cancellation properly
 	const handleBack = () => {
 		if (currentStep > 0) {
+			// Just go back to previous step
 			setCurrentStep(currentStep - 1);
 		} else {
+			// When closing from step 0, only show success if form was actually saved
+			if (formWasSaved) {
+				// Form was saved during this session, show success message and refresh
+				if (onSuccess) {
+					const onSuccessMessage = isNewForm
+						? __('Form created successfully', 'quillcrm')
+						: __('Form updated successfully', 'quillcrm');
+					onSuccess(onSuccessMessage);
+				}
+			}
+
 			// For existing forms, navigate back to forms list
 			if (!isNewForm) {
-				navigate('/forms');
+				// If form was saved during this session, add success parameter to URL
+				if (formWasSaved) {
+					const formsLink = getToLink('forms');
+					const separator = formsLink.includes('?') ? '&' : '?';
+					navigate(`${formsLink}${separator}success=updated`);
+				} else {
+					navigate(getToLink('forms'));
+				}
 			}
 			// For new forms in modal, just close
 			if (isNewForm && onClose) {
@@ -278,11 +302,27 @@ const Form: React.FC<FormProps> = ({
 	const handleSaveDraft = async () => {
 		try {
 			await saveForm({ status: 'inactive' });
+			setFormWasSaved(true); // Mark that form was saved
+
+			// Show appropriate notice based on whether it's a new form or edit
+			const successMessage = isNewForm
+				? __('Form created successfully', 'quillcrm')
+				: __('Form updated successfully', 'quillcrm');
+
+			showNotice('success', successMessage);
+
+			// Call onSuccess first to refresh the forms list before closing
+			if (onSuccess) {
+				const onSuccessMessage = isNewForm
+					? __('Form created successfully', 'quillcrm')
+					: __('Form updated successfully', 'quillcrm');
+				onSuccess(onSuccessMessage);
+			}
 
 			if (isNewForm && onClose) {
 				onClose();
 			} else {
-				navigate('/forms');
+				navigate(getToLink('forms'));
 			}
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -301,9 +341,6 @@ const Form: React.FC<FormProps> = ({
 					href: 'forms',
 				},
 				{
-					label: __('Form Information', 'quillcrm'),
-				},
-				{
 					label: stepTitles[currentStep],
 				},
 			]
@@ -313,42 +350,39 @@ const Form: React.FC<FormProps> = ({
 					href: 'forms',
 				},
 				{
-					label: __('Form Information', 'quillcrm'),
-				},
-				{
 					label: stepTitles[currentStep],
 				},
 			];
 
-	// If tab is 'overview', show the overview page
-	if (tab === 'overview') {
-		// Don't render until form data is loaded
-		if (loading || !form) {
-			return (
-				<div className="flex justify-center items-center min-h-[400px]">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-				</div>
-			);
-		}
+	// // If tab is 'overview', show the overview page
+	// if (tab === 'overview') {
+	// 	// Don't render until form data is loaded
+	// 	if (loading || !form) {
+	// 		return (
+	// 			<div className="flex justify-center items-center min-h-[400px]">
+	// 				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+	// 			</div>
+	// 		);
+	// 	}
 
-		return (
-			<Provider
-				value={{
-					form: form as FormType,
-					isLoading: loading,
-					isSaving,
-					formFields,
-					setIsLoading: setLoading,
-					setIsSaving: setIsSaving,
-					setFormFields,
-					saveForm,
-					...$actions,
-				}}
-			>
-				<Overview />
-			</Provider>
-		);
-	}
+	// 	return (
+	// 		<Provider
+	// 			value={{
+	// 				form: form as FormType,
+	// 				isLoading: loading,
+	// 				isSaving,
+	// 				formFields,
+	// 				setIsLoading: setLoading,
+	// 				setIsSaving: setIsSaving,
+	// 				setFormFields,
+	// 				saveForm,
+	// 				...$actions,
+	// 			}}
+	// 		>
+	// 			<Overview />
+	// 		</Provider>
+	// 	);
+	// }
 
 	// Otherwise show the step-based form creation/editing UI
 	return (
@@ -392,7 +426,40 @@ const Form: React.FC<FormProps> = ({
 				}
 				showSaveDraft={true}
 				isLoading={isSaving}
-				handleNavigate={() => navigate('/forms')}
+				handleNavigate={(href) => {
+					// If navigating to forms, check if form was created/updated
+					if (href === 'forms') {
+						// If form was saved during this session, show success message and refresh
+						if (formWasSaved && onSuccess) {
+							const onSuccessMessage = isNewForm
+								? __('Form created successfully', 'quillcrm')
+								: __('Form updated successfully', 'quillcrm');
+							onSuccess(onSuccessMessage);
+						}
+						// Close the form if it's a new form in modal, otherwise navigate
+						if (isNewForm && onClose) {
+							onClose();
+						} else {
+							// If form was saved during this session, add success parameter to URL
+							if (formWasSaved) {
+								const successType = isNewForm
+									? 'created'
+									: 'updated';
+								const formsLink = getToLink(href);
+								const separator = formsLink.includes('?')
+									? '&'
+									: '?';
+								navigate(
+									`${formsLink}${separator}success=${successType}`
+								);
+							} else {
+								navigate(getToLink(href));
+							}
+						}
+					} else {
+						navigate(getToLink(href));
+					}
+				}}
 			>
 				{notice && (
 					<NoticeBanner

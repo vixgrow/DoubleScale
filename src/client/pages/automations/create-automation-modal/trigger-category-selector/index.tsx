@@ -22,7 +22,7 @@ interface TriggerCategorySelectorProps {
     triggers: AutomationTriggers;
     selectedCategory: string;
     onCategoryChange: (category: string) => void;
-    data?: Record<string, { image: string | JSX.Element; description: string }>;  // Map of category data
+    data?: Record<string, { image: React.ReactNode; description: string }>;  // Map of category data
 }
 
 const TriggerCategorySelector: React.FC<TriggerCategorySelectorProps> = ({
@@ -41,7 +41,6 @@ const TriggerCategorySelector: React.FC<TriggerCategorySelectorProps> = ({
             <CardContent className="p-0 space-y-3">
                 {categories.map((category) => {
                     const isSelected = selectedCategory === category.key;
-
                     return (
                         <Card
                             key={category.key}
@@ -53,17 +52,9 @@ const TriggerCategorySelector: React.FC<TriggerCategorySelectorProps> = ({
                                 }`}
                         >
                             <div className="flex items-center space-x-4">
-                                {data[category.key] && (
-                                    <div className="flex-shrink-0 w-12 h-12 border rounded-md p-2">
-                                        {typeof data[category.key].image === 'string' ? (
-                                            <img
-                                                src={data[category.key].image as string}
-                                                alt={category.label}
-                                                className="w-full h-full object-contain"
-                                            />
-                                        ) : (
-                                            data[category.key].image
-                                        )}
+                                {data[category.key] && data[category.key].image && (
+                                    <div className="flex-shrink-0 w-12 h-12 border rounded-md p-2 flex items-center justify-center">
+                                        {data[category.key].image}
                                     </div>
                                 )}
                                 <div className="flex-1">

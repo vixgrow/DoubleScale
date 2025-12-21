@@ -349,8 +349,8 @@
 	// Footer Row (Second row with recipient and analytics link)
 	&__footer-row {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		justify-content: flex-end;
+		align-items: flex-end;
 		padding: 12px 16px;
 		width: 100%;
 	}

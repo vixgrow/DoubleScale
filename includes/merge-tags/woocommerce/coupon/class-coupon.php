@@ -10,6 +10,8 @@ use QuillCRM\Managers\Merge_Tags_Manager;
 class Coupon extends Merge_Tag {
 
 
+
+
 	/**
 	 * Merge Tag Name
 	 *
@@ -37,15 +39,6 @@ class Coupon extends Merge_Tag {
 	 * @var string
 	 */
 	public $group = 'coupon';
-
-
-	/**
-	 * Is automation merge tag
-	 *
-	 * @var bool
-	 */
-	public $is_automation = false;
-
 
 	/**
 	 * Constructor

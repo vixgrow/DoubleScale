@@ -287,7 +287,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
-						visible={!isProActive}
+						visible={isProActive}
 						onClose={() => setCurrentStep(null)}
 					/>
 				),
@@ -333,7 +333,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		<>
 			<div
 				className={cn(
-					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen min-w-[21rem] max-w-96 rounded-l-lg z-[150400] overflow-y-auto',
+					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen w-96 rounded-l-lg z-[150400] flex flex-col',
 					isVisible ? 'is-visible' : ''
 				)}
 			>
@@ -342,7 +342,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 					onClose={handleClose}
 				/>
 
-				<div className="space-y-4 p-4">
+				<div className="flex-1 space-y-4 p-4 overflow-y-auto">
 					{notice && (
 						<NoticeBanner
 							notice={notice}

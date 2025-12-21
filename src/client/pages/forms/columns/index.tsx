@@ -15,7 +15,6 @@ import {
 	DeleteIcon,
 	ViewOutlinedIcon,
 	ThreeDotsIcon,
-	SettingsOutlinedIcon,
 	DisactivateIcon,
 	TimeAgoCell,
 	FormattedDateCell,
@@ -28,7 +27,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@quillcrm/components/ui/dropdown-menu';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 export const selectionColumn: ColumnDef<Form> = {
 	id: 'select',
@@ -193,7 +192,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 											form.status === 'active'
 												? `forms/${form.id}/overview`
 												: `forms/${form.id}`;
-										navigate(targetUrl);
+										navigate(getToLink(targetUrl));
 									}}
 								>
 									<ViewOutlinedIcon />

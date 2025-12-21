@@ -114,7 +114,10 @@ const Header: React.FC<HeaderProps> = ({
 					<BreadcrumbComponent
 						items={[
 							{ label: __('Create Campaign', 'quillcrm') },
-							{ label: __('Standard Campaign', 'quillcrm') },
+							{
+								label: __('Standard Campaign', 'quillcrm'),
+								href: `campaigns/${campaign.id}/template`,
+							},
 							{ label: __('Email Template', 'quillcrm') },
 						]}
 					/>
@@ -161,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({
 
 						<Button
 							variant="default"
-							className="px-3"
+							className="px-3 min-w-[200px]"
 							onClick={handleSaveAndContinue}
 							disabled={isSaving || isBuilderEmpty}
 						>

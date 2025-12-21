@@ -18,6 +18,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
+use QuillCRM\Services\Campaign_Rate_Limiter;
 
 /**
  * REST_Settings_Controller class.
@@ -151,11 +152,11 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 						'max_in_second' => array(
 							'type'    => 'integer',
-							'default' => 15,
+							'default' => Campaign_Rate_Limiter::instance()->get_default_per_second_limit( 'email' ),
 						),
 						'max_in_day'    => array(
 							'type'    => 'integer',
-							'default' => 10000,
+							'default' => Campaign_Rate_Limiter::instance()->get_default_daily_limit( 'email' ),
 						),
 					),
 				),
@@ -165,11 +166,11 @@ class REST_Settings_Controller extends REST_Controller {
 					'properties'           => array(
 						'max_in_second' => array(
 							'type'    => 'integer',
-							'default' => 10,
+							'default' => Campaign_Rate_Limiter::instance()->get_default_per_second_limit( 'sms' ),
 						),
 						'max_in_day'    => array(
 							'type'    => 'integer',
-							'default' => 1000,
+							'default' => Campaign_Rate_Limiter::instance()->get_default_daily_limit( 'sms' ),
 						),
 					),
 				),
@@ -271,6 +272,17 @@ class REST_Settings_Controller extends REST_Controller {
 					'type'                 => 'object',
 					'additionalProperties' => true,
 					'default'              => array(),
+				),
+				'debugging'        => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'log_level' => array(
+							'type'    => 'string',
+							'default' => 'error',
+							'enum'    => array( 'error', 'error,debug', 'error,debug,info' ),
+						),
+					),
 				),
 			),
 		);
@@ -417,13 +429,13 @@ class REST_Settings_Controller extends REST_Controller {
 				);
 			}
 
-			if ( $max_in_second > 100 ) {
-				return new WP_Error(
-					'invalid_rate_limit',
-					__( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
-					array( 'status' => 400 )
-				);
-			}
+			// if ( $max_in_second > 100 ) {
+			// 	return new WP_Error(
+			// 		'invalid_rate_limit',
+			// 		__( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
+			// 		array( 'status' => 400 )
+			// 	);
+			// }
 		}
 
 		// Validate max_in_day

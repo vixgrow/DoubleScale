@@ -3,8 +3,8 @@
     "require": {
         "quillforms/wpeloquent": "^1.0.2",
         "nesbot/carbon": "^2.0",
-        "carbonphp/carbon-doctrine-types": "^2.1"
-        
+        "league/csv": "9.0.0",
+        "carbonphp/carbon-doctrine-types": "^2.1"  
     },
     "config": {
         "allow-plugins": {

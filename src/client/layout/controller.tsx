@@ -48,6 +48,7 @@ import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 // import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
 import { ProFeatureNotice } from '@quillcrm/components';
+import { ProUpgradeButton } from '@/components/pro-upgrade-button';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -69,9 +70,6 @@ import SequencesMail from '../pages/email-sequences/sequences-mail';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
-import { Button } from '@/components/ui/button';
-import { RocketIcon } from '@quillcrm/components';
-import config from '@/config';
 import GetStart from '../pages/get-start';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import Forms from '../pages/forms';
@@ -257,15 +255,7 @@ export const Controller = ({ page }) => {
 				</div>
 				<div className="flex items-center gap-3 justify-end w-1/2">
 					{!isProActive && (
-						<a
-							href={config.getUrlQuillCRMPro()}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="border border-[#458DC7] text-[#458DC7] text-base px-3 py-2 rounded-lg flex items-center gap-2 mr-3"
-						>
-							<RocketIcon />
-							{__('Upgrade to Pro', 'quillcrm')}
-						</a>
+						<ProUpgradeButton />
 					)}
 					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 						{avatarUrl ? (
@@ -366,21 +356,21 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
-registerAdminPage('email-sequences', {
-	path: 'email-sequences',
-	component: () => <EmailSequences />,
-	label: __('Email Sequence', 'quillcrm'),
-	icon: <EmailSequenceIcon />,
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
+//registerAdminPage('email-sequences', {
+// 	path: 'email-sequences',
+// 	component: () => <EmailSequences />,
+// 	label: __('Email Sequence', 'quillcrm'),
+// 	icon: <EmailSequenceIcon />,
+// 	hidden: true,
+// 	requiredCapability: ['quillcrm_crm_manager'],
+// });
 
-registerAdminPage('email-sequence', {
-	path: 'email-sequences/:id',
-	component: () => <SequencesMail />,
-	label: __('Email Sequence', 'quillcrm'),
-	hidden: true,
-});
+// registerAdminPage('email-sequence', {
+// 	path: 'email-sequences/:id',
+// 	component: () => <SequencesMail />,
+// 	label: __('Email Sequence', 'quillcrm'),
+// 	hidden: true,
+// });
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
 // The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component

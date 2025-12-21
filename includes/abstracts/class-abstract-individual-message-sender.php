@@ -4,7 +4,7 @@
  * Base class for individual message sending (SMS, WhatsApp, Email)
  *
  * REFACTORED: Activity is now the PRIMARY record, tracking is supplementary
- * Activities are created FIRST, then tracking links to them via activity_id
+ * Activities are created FIRST, then tracking links to them via source_id (polymorphic FK)
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -20,6 +20,7 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Activity_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Message_Provider_Registry;
 
@@ -206,7 +207,10 @@ abstract class Abstract_Individual_Message_Sender {
 	}
 
 	/**
-	 * Create tracking entry (supplementary data, links to activity)
+	 * Create tracking entry (supplementary data, links to activity via source_id)
+	 *
+	 * For individual messages, source_id points to the activity (polymorphic FK).
+	 * This is semantically consistent: the activity IS the source of the message.
 	 *
 	 * @since 1.0.0
 	 *
@@ -218,13 +222,13 @@ abstract class Abstract_Individual_Message_Sender {
 	protected function create_tracking_entry( $contact, $recipient, $activity_id ) {
 		return Communication_Tracking_Model::create(
 			array(
-				'activity_id' => $activity_id, // LINK TO ACTIVITY
 				'contact_id'  => $contact->id,
 				'template_id' => null, // No template for individual messages
 				'hash_key'    => \QuillCRM\Utils::generate_hash_key(),
 				'mode'        => $this->get_tracking_mode(),
+				'direction'   => Message_Direction::OUTBOUND,
 				'source_type' => Message_Source_Types::INDIVIDUAL,
-				'source_id'   => null, // No campaign/automation
+				'source_id'   => $activity_id, // Points to activity (polymorphic FK)
 				'author_id'   => get_current_user_id(), // Track who sent it
 				'recipient'   => $recipient,
 				'status'      => Tracking_Status::PENDING,

@@ -93,7 +93,7 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 			{/* Chart on the left */}
 			<div className="flex-shrink-0 w-[200px] h-[200px]">
 				<Chart
-					type="polarArea"
+					type="pie"
 					data={{
 						labels: chartData.labels,
 						datasets: [
@@ -107,16 +107,6 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 					options={{
 						responsive: true,
 						maintainAspectRatio: true,
-						scales: {
-							r: {
-								ticks: {
-									display: false,
-								},
-								grid: {
-									display: false,
-								},
-							},
-						},
 						plugins: {
 							legend: {
 								display: false,
@@ -126,16 +116,15 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 									label: (context: any) => {
 										const value =
 											context.raw ||
-											context.parsed?.r ||
 											context.parsed ||
 											0;
 										const percentage =
 											totalForPercentage > 0
 												? (
-														(value /
-															totalForPercentage) *
-														100
-													).toFixed(1)
+													(value /
+														totalForPercentage) *
+													100
+												).toFixed(1)
 												: '0.0';
 										return `${percentage}%`;
 									},
@@ -153,8 +142,8 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 					const percentage =
 						totalForPercentage > 0
 							? ((value / totalForPercentage) * 100).toFixed(
-									1
-								)
+								1
+							)
 							: '0.0';
 					return (
 						<div

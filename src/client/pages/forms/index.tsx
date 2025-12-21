@@ -36,7 +36,7 @@ import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { formatDateForAPI } from '@quillcrm/utils';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
 import Form from '../form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -50,8 +50,24 @@ const FormsList: React.FC = () => {
 	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
 	const [isApplying, setIsApplying] = useState(false);
+	// Check URL for success message on initial render
+	const urlParams = new URLSearchParams(window.location.search);
+	const successParam = urlParams.get('success');
+	const initialNotice = successParam === 'created'
+		? { type: 'success' as const, message: __('Form created successfully', 'quillcrm') }
+		: successParam === 'updated'
+			? { type: 'success' as const, message: __('Form updated successfully', 'quillcrm') }
+			: null;
+
+	// Remove success parameter from URL if present
+	if (successParam) {
+		urlParams.delete('success');
+		const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
+		window.history.replaceState({}, '', newUrl);
+	}
+
 	// Notice state
-	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(initialNotice);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [hasRecords, setHasRecords] = useState(false);
 	const navigate = useNavigate();
@@ -274,12 +290,12 @@ const FormsList: React.FC = () => {
 				<Form
 					isNewForm={true}
 					onClose={() => {
-						navigate('/forms');
-						handleFormCreated('Form created successfully');
+						setShowCreateForm(false);
 					}}
 					onSuccess={(message: string) => {
-						navigate('/forms');
-						handleFormCreated(message);
+						setShowCreateForm(false);
+						fetchForms();
+						showNotice('success', message);
 					}}
 				/>
 			)}

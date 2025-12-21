@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Activity_Model;
+use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Models\Communication_Tracking_Meta_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
@@ -59,13 +60,13 @@ class Communication_Tracking_Model extends Model {
 	 * @since 1.0.0
 	 */
 	protected $fillable = array(
-		'activity_id',    // FK to activities table
 		'contact_id',     // Who received the message
 		'template_id',    // Template used
 		'hash_key',       // Unique tracking hash
 		'mode',           // Email/SMS/WhatsApp
-		'source_type',    // Campaign/Automation/Manual
-		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
+		'direction',      // outbound/inbound - message direction
+		'source_type',    // Campaign/Automation/Individual
+		'source_id',      // Polymorphic FK: campaign_id, automation_id, or activity_id (for individuals)
 		'step_id',        // Automation step ID (NULL for campaigns/individual)
 		'author_id',      // User who sent the message (for individual sends)
 		'recipient',      // Email address or phone number
@@ -89,6 +90,7 @@ class Communication_Tracking_Model extends Model {
 		'opened'      => 'boolean',
 		'clicked'     => 'boolean',
 		'mode'        => 'integer',
+		'direction'   => 'integer',
 		'source_type' => 'integer',
 		'source_id'   => 'integer',
 		'step_id'     => 'integer',
@@ -104,6 +106,7 @@ class Communication_Tracking_Model extends Model {
 		'status_name',
 		'status_slug',
 		'status_class',
+		'direction_slug',
 	);
 
 	/**
@@ -149,14 +152,21 @@ class Communication_Tracking_Model extends Model {
 	}
 
 	/**
-	 * Activity relationship (tracking belongs to activity)
+	 * Activity relationship (for individual messages only, via source_id)
+	 *
+	 * For individual messages (source_type = 3), source_id points to the activity.
+	 * This provides backwards compatibility and convenience.
+	 *
+	 * IMPORTANT: This relationship should ONLY be used when source_type = INDIVIDUAL (3).
+	 * For campaigns/automations, source_id points to campaign/automation, not activity.
+	 * The relationship itself doesn't enforce this constraint to avoid affecting main queries.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function activity() {
-		return $this->belongsTo( Activity_Model::class, 'activity_id' );
+		return $this->belongsTo( Activity_Model::class, 'source_id' );
 	}
 
 	/**
@@ -211,6 +221,26 @@ class Communication_Tracking_Model extends Model {
 	 */
 	public function scopeWhatsapp( $query ) {
 		return $query->where( 'mode', self::MODE_WHATSAPP );
+	}
+
+	/**
+	 * Scope: Outbound messages only
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeOutbound( $query ) {
+		return $query->where( 'direction', Message_Direction::OUTBOUND );
+	}
+
+	/**
+	 * Scope: Inbound messages only
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeInbound( $query ) {
+		return $query->where( 'direction', Message_Direction::INBOUND );
 	}
 
 	/**
@@ -475,6 +505,15 @@ class Communication_Tracking_Model extends Model {
 	 */
 	public function getStatusClassAttribute() {
 		 return Tracking_Status::get_status_class( $this->status );
+	}
+
+	/**
+	 * Get direction slug (accessor for API)
+	 *
+	 * @return string
+	 */
+	public function getDirectionSlugAttribute() {
+		return Message_Direction::get_slug( $this->direction );
 	}
 
 

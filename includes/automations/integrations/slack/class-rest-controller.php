@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Class Slack Rest Controller
+ * Class Slack Rest Controller (Free Version Stub)
  *
- * This class is responsible for handling the Slack REST API
+ * This is a stub REST controller for the free plugin
+ * The Pro plugin will override this with the actual implementation
  *
  * @since 1.0.0
  *
@@ -13,38 +14,11 @@
 namespace QuillCRM\Automations\Integrations\Slack;
 
 use QuillCRM\Abstracts\REST_Integration_Controller;
-use WP_Error;
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_REST_Server;
-use QuillCRM\User_Roles\Permissions;
 
 /**
- * Slack Rest Controller
+ * Slack Rest Controller stub for free plugin
  */
 class REST_Controller extends REST_Integration_Controller {
-
-
-	/**
-	 * Register the routes for the objects of the controller.
-	 *
-	 * @since 1.0.0
-	 */
-	public function register_routes() {
-		 parent::register_routes();
-
-		register_rest_route(
-			$this->namespace,
-			"/{$this->rest_base}/auth",
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'auth_uri' ),
-					'permission_callback' => array( $this, 'auth_uri_permissions_check' ),
-				),
-			)
-		);
-	}
 
 	/**
 	 * Get settings schema
@@ -52,54 +26,30 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @return array
 	 */
 	public function get_settings_schema() {
-		 return array(
-			 'type'       => 'object',
-			 'properties' => array(
-				 'app' => array(
-					 'type'       => 'object',
-					 'context'    => array( 'view' ),
-					 'properties' => array(
-						 'client_id'     => array(
-							 'label'    => __( 'Client ID', 'quillcrm' ),
-							 'type'     => 'string',
-							 'required' => true,
-							 'context'  => array( 'view' ),
-						 ),
-						 'client_secret' => array(
-							 'label'    => __( 'Client Secret', 'quillcrm' ),
-							 'type'     => 'string',
-							 'required' => true,
-							 'context'  => array(),
-						 ),
-					 ),
-				 ),
-			 ),
-		 );
-	}
-
-	/**
-	 * Get auth uri
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function auth_uri( $request ) {
-		/** @var App $app */
-		$app      = $this->integration->app;
-		$auth_uri = $app->get_auth_uri();
-
-		return new WP_REST_Response( array( 'auth_uri' => $auth_uri ) );
-	}
-
-	/**
-	 * Auth uri permissions check
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function auth_uri_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'app' => array(
+					'type'       => 'object',
+					'context'    => array( 'view' ),
+					'properties' => array(
+						'client_id'     => array(
+							'label'       => __( 'Client ID', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'context'     => array( 'view' ),
+							'description' => __( 'Your Slack App Client ID. This feature requires QuillCRM Pro.', 'quillcrm' ),
+						),
+						'client_secret' => array(
+							'label'       => __( 'Client Secret', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'context'     => array(),
+							'description' => __( 'Your Slack App Client Secret. This feature requires QuillCRM Pro.', 'quillcrm' ),
+						),
+					),
+				),
+			),
+		);
 	}
 }

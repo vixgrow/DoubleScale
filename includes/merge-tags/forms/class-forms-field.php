@@ -23,6 +23,7 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Field' ) ) {
 
 
 
+
 		/**
 		 * Merge Tag Name
 		 *
@@ -50,13 +51,6 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Field' ) ) {
 		 * @var string
 		 */
 		public $group;
-
-		/**
-		 * Is automation merge tag
-		 *
-		 * @var bool
-		 */
-		public $is_automation = true;
 
 		/**
 		 * Field name

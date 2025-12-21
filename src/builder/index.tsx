@@ -91,7 +91,8 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		dispatch(STORE_KEY).clearSelection();
 	};
 
-	useEffect(() => {
+	// Function to load template data
+	const loadTemplateData = useCallback(async () => {
 		if (initialData) {
 			dispatch(STORE_KEY).setLoading(true);
 			dispatch(STORE_KEY).resetBuilder();
@@ -109,7 +110,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					dispatch(STORE_KEY).updateButtonSettings(type, settings);
 				});
 			}
-			
+
 			// Set loading to false after a brief delay to ensure UI updates
 			setTimeout(() => {
 				dispatch(STORE_KEY).setLoading(false);
@@ -176,6 +177,33 @@ const BuilderContent: React.FC<BuilderProps> = ({
 
 		loadTemplate();
 	}, [initialData, existingTemplateData?.template_id, dispatch]);
+
+	// Initial load
+	useEffect(() => {
+		loadTemplateData();
+	}, [loadTemplateData]);
+
+	// Handle visibility change to refetch when user returns to tab
+	useEffect(() => {
+		const handleVisibilityChange = () => {
+			// Only refetch if tab becomes visible and we have template data to load
+			if (
+				!document.hidden &&
+				(existingTemplateData?.template_id || initialData)
+			) {
+				loadTemplateData();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			document.removeEventListener(
+				'visibilitychange',
+				handleVisibilityChange
+			);
+		};
+	}, [loadTemplateData, existingTemplateData?.template_id, initialData]);
 
 	// Cleanup: Reset builder state when component unmounts
 	useEffect(() => {

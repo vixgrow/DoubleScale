@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { useState, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 /**
  * Internal dependencies
  */
@@ -19,22 +19,34 @@ import {
 	TimeAgoCell,
 } from '@quillcrm/components';
 import MessageDetailsDialog from '@/components/message-details-dialog';
+import { useResendEmail } from '@/hooks/use-resend-email';
+import { useContactContext } from '../../state/context';
 
 interface EmailDetailsProps {
 	campaignEmail: CampaignEmail | null;
 	onClose: () => void;
+	onResendSuccess?: () => void;
 }
 
 const EmailDetails: React.FC<EmailDetailsProps> = ({
 	campaignEmail,
 	onClose,
+	onResendSuccess,
 }) => {
-	const [isResending, setIsResending] = useState(false);
+	const { contact } = useContactContext();
 
-	const resendEmail = () => {
-		setIsResending(true);
-		console.log(campaignEmail);
-	};
+	// Use the resend email hook
+	const { isResending, resendEmail } = useResendEmail({
+		contact,
+		onSuccess: onResendSuccess,
+	});
+
+	// Handle resend button click
+	const handleResendClick = useCallback(() => {
+		if (campaignEmail) {
+			resendEmail(campaignEmail);
+		}
+	}, [campaignEmail, resendEmail]);
 
 	const detailFields = useMemo(() => {
 		if (!campaignEmail) return [];
@@ -157,7 +169,7 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 				text: isResending
 					? __('Resending...', 'quillcrm')
 					: __('Resend Email again', 'quillcrm'),
-				onClick: resendEmail,
+				onClick: handleResendClick,
 				disabled: isResending,
 			}}
 			zIndex={150200}

@@ -2,12 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import SlackInstructions from './slack-instructions';
-import TwilioInstructions from './twilio-instructions';
 
 interface InstructionsProps {
     slug: string;
@@ -16,12 +16,21 @@ interface InstructionsProps {
 }
 
 const Instructions: React.FC<InstructionsProps> = ({ slug, label, description }) => {
+    // Allow Pro plugin to override instruction components
+    const OverrideComponent = applyFilters(
+        'quillcrm_integration_instructions_component',
+        null,
+        slug
+    ) as React.ComponentType | null;
+
+    if (OverrideComponent) {
+        return <OverrideComponent />;
+    }
+
     // Render specific instructions based on integration slug
     switch (slug) {
         case 'slack':
             return <SlackInstructions />;
-        case 'twilio':
-            return <TwilioInstructions />;
         default:
             // Default fallback for other integrations
             return (

@@ -9,7 +9,6 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
-import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelSettings,
@@ -19,21 +18,25 @@ import {
 	Stepper,
 	ListTagFilter,
 } from '@quillcrm/components';
+import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import RulesBuilder from '@/components/rules-builder';
-import {
-	getFilteredRulesGroups,
-	getInitialRule,
-	mapRulesToFilters,
-	mapFiltersToRules,
-} from '@/utils';
+import { getFilteredRulesGroups, getInitialRule } from '@/utils';
 import { useCampaignStep, campaignSteps } from '../shared';
+import { applyFilters } from '@wordpress/hooks';
+import { Lock } from 'lucide-react';
 
 const Contacts: React.FC = () => {
 	const { campaign, saveCampaignStep, updateSettings, goToStep, saving } =
 		useCampaignStep();
+
+	// Check if Pro is active for conditional sections
+	const isProActive = applyFilters(
+		'quillcrm_is_pro_active',
+		false
+	) as boolean;
 
 	// Get existing step data
 	const existingContactsData = useSelect(
@@ -41,8 +44,8 @@ const Contacts: React.FC = () => {
 		[]
 	);
 
-	const filters = campaign?.settings.filters || [];
-	const setFilters = (newFilters: FilterType[]) => {
+	const filters = (campaign?.settings.filters || []) as any;
+	const setFilters = (newFilters: any) => {
 		updateSettings('filters', newFilters);
 	};
 
@@ -57,9 +60,11 @@ const Contacts: React.FC = () => {
 	const [totalRecipients, setTotalRecipients] = useState(0);
 	const [applyRequested, setApplyRequested] = useState(false);
 	const [inlineError, setInlineError] = useState<string | null>(null);
+	const [showProModal, setShowProModal] = useState(false);
+	const [proFeatureName, setProFeatureName] = useState('');
 
-	// Rules builder state (shared with ConditionsModal component)
-	const filteredRulesGroups = getFilteredRulesGroups();
+	// Rules builder state (shared with ConditionsModal component) - non-automation context
+	const filteredRulesGroups = getFilteredRulesGroups(false);
 	const [rules, setRules] = useState([[getInitialRule(filteredRulesGroups)]]);
 
 	// Keep applying spinner in sync with fetch lifecycle
@@ -86,7 +91,13 @@ const Contacts: React.FC = () => {
 	// Initialize RulesBuilder from existing saved filters (DB) when advanced mode
 	useEffect(() => {
 		if (filterBy === 'advanced') {
-			setRules(mapFiltersToRules(filters, filteredRulesGroups));
+			// If filters are already in nested structure (OR groups -> AND conditions), keep them as-is
+			if (Array.isArray(filters) && Array.isArray(filters[0])) {
+				setRules(filters as any);
+			} else {
+				// Fallback to a single default rule if shape is unknown/legacy
+				setRules([[getInitialRule(filteredRulesGroups)]]);
+			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [filterBy]);
@@ -95,6 +106,13 @@ const Contacts: React.FC = () => {
 
 	// Handle filter mode change - clear filters immediately
 	const handleFilterModeChange = (newMode: string) => {
+		// Check if trying to select advanced filter without Pro
+		if (newMode === 'advanced' && !isProActive) {
+			setProFeatureName(__('Advanced Filter', 'quillcrm'));
+			setShowProModal(true);
+			return;
+		}
+
 		setFilters([]); // Clear filters first
 		setFilterBy(newMode); // Then change mode
 		setShouldFetchContacts(true); // Trigger refetch
@@ -187,18 +205,18 @@ const Contacts: React.FC = () => {
 				campaign?.status === 'processed' ||
 				campaign?.status === 'archived'
 			) && (
-					<Stepper
-						steps={
-							campaign?.type === 'email'
-								? campaignSteps
-								: campaignSteps.filter(
+				<Stepper
+					steps={
+						campaign?.type === 'email'
+							? campaignSteps
+							: campaignSteps.filter(
 									(step) => step.slug !== 'builder'
 								)
-						}
-						canProceed="true"
-						currentStep={campaign?.type === 'email' ? 3 : 2}
-					/>
-				)}
+					}
+					canProceed="true"
+					currentStep={campaign?.type === 'email' ? 3 : 2}
+				/>
+			)}
 
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-2/3">
@@ -258,10 +276,11 @@ const Contacts: React.FC = () => {
 								>
 									<Label
 										htmlFor="list-tags"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${filterBy === 'list-tags'
-											? 'border-blue-500 bg-blue-50 text-blue-500'
-											: 'border-gray-300 bg-white'
-											}`}
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
+											filterBy === 'list-tags'
+												? 'border-blue-500 bg-blue-50 text-blue-500'
+												: 'border-gray-300 bg-white'
+										}`}
 									>
 										<RadioGroupItem
 											value="list-tags"
@@ -272,18 +291,41 @@ const Contacts: React.FC = () => {
 										</span>
 									</Label>
 									<Label
-										htmlFor="advanced"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${filterBy === 'advanced'
-											? 'border-blue-500 bg-blue-50'
-											: 'border-gray-300 bg-white'
-											}`}
+										htmlFor={
+											isProActive ? 'advanced' : undefined
+										}
+										onClick={(e) => {
+											if (!isProActive) {
+												e.preventDefault();
+												setProFeatureName(
+													__(
+														'Advanced Filter',
+														'quillcrm'
+													)
+												);
+												setShowProModal(true);
+											}
+										}}
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 relative ${
+											filterBy === 'advanced'
+												? 'border-blue-500 bg-blue-50'
+												: 'border-gray-300 bg-white'
+										} ${
+											!isProActive
+												? 'opacity-75 cursor-pointer'
+												: 'cursor-pointer'
+										}`}
 									>
 										<RadioGroupItem
 											value="advanced"
 											id="advanced"
+											disabled={!isProActive}
 										/>
-										<span>
+										<span className="flex items-center gap-2">
 											{__('Advanced Filter', 'quillcrm')}
+											{!isProActive && (
+												<Lock className="h-4 w-4 text-orange-500" />
+											)}
 										</span>
 									</Label>
 								</RadioGroup>
@@ -311,9 +353,7 @@ const Contacts: React.FC = () => {
 											variant="secondaryDeepBlue"
 											onClick={() => {
 												// Sync filters then reuse existing handler
-												setFilters(
-													mapRulesToFilters(rules)
-												);
+												setFilters(rules as any);
 												setApplyRequested(true);
 												setIsApplying(true);
 												handleApplyFilters();
@@ -360,6 +400,15 @@ const Contacts: React.FC = () => {
 					campaignType={campaign?.type}
 				/>
 			</div>
+
+			{/* Pro Feature Modal */}
+			{showProModal && (
+				<ProAutomationModal
+					visible={showProModal}
+					onClose={() => setShowProModal(false)}
+					featureName={proFeatureName}
+				/>
+			)}
 		</PanelLayout>
 	);
 };

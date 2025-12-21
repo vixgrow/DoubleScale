@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Template Field Mapper
  * Centralized configuration for template field mappings across campaign types
@@ -80,7 +81,7 @@ class Template_Field_Mapper
     public static function template_to_array(Template_Model $template, $campaign_type)
     {
         $config = self::get_field_config($campaign_type);
-        
+
         // Start with common fields - all types use 'body' consistently
         $template_data = array(
             'template_id' => $template->id,
@@ -124,7 +125,7 @@ class Template_Field_Mapper
     public static function array_to_template($template_data, $campaign_type)
     {
         $config = self::get_field_config($campaign_type);
-        
+
         // Process name - use subject as fallback for email templates
         $name = $template_data['name'] ?? null;
         if (empty($name) && isset($template_data['subject'])) {
@@ -156,6 +157,10 @@ class Template_Field_Mapper
             }
             $settings[$field] = $settings_data[$field] ?? $default;
         }
+
+        // add subject to settings
+        $settings['subject'] = $template_data['subject'] ?? '';
+        $settings['preview_text'] = $template_data['preview_text'] ?? '';
 
         return array(
             'name' => $name,

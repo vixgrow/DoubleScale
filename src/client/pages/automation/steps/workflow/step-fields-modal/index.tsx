@@ -19,6 +19,7 @@ import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
 import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
+import ConfigAPI from '@quillcrm/config';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 import { useProviderStatus } from '@/hooks/use-provider-status';
@@ -127,6 +128,24 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			? getAction(actionKey)
 			: getGoal(step.action);
 
+	// Check if this is a delay step
+	const isDelayStep = step.type === 'delay';
+
+	// Check if this is a CRM contact action
+	const isContactInCrmAction = (() => {
+		if (step.type !== 'action') {
+			return false;
+		}
+		const automationActions = ConfigAPI.getAutomationActions();
+		return (
+			automationActions?.crm?.groups?.contact?.actions?.[actionKey] !==
+			undefined
+		);
+	})();
+
+	// Hide merge tags button for delay steps or CRM contact actions
+	const shouldHideMergeTags = isDelayStep || isContactInCrmAction;
+
 	// Check if action/goal has plugin dependency warning
 	const hasActionWarning =
 		step.type === 'goal'
@@ -203,15 +222,17 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					</div>
 				)}
 
-			<Button
-				onClick={handleMergeTagsClick}
-				disabled={isSaving || isDeleting}
-				variant="secondaryDeepBlue"
-				className="w-full mb-4"
-				size="lg"
-			>
-				{__('Merge Tags', 'quillcrm')}
-			</Button>
+			{!shouldHideMergeTags && (
+				<Button
+					onClick={handleMergeTagsClick}
+					disabled={isSaving || isDeleting}
+					variant="secondaryDeepBlue"
+					className="w-full mb-4"
+					size="lg"
+				>
+					{__('Merge Tags', 'quillcrm')}
+				</Button>
+			)}
 
 			<div className="mb-4">
 				<Fields

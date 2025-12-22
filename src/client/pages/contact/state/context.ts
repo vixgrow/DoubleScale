@@ -15,7 +15,11 @@ import type {
 } from '@quillcrm/client';
 import type { EmailAnalytics, PurchaseHistory } from './types';
 
-export const ContactContext = createContext<{
+/**
+ * Context type definition for contact page state.
+ * Shared between free and Pro plugin bundles via window.qcrm.contexts.
+ */
+export type ContactContextType = {
 	contact: Contact | null;
 	isLoading: boolean;
 	setContact: (contact: Contact) => void;
@@ -35,7 +39,9 @@ export const ContactContext = createContext<{
 	setPurchaseHistory: (purchaseHistory: PurchaseHistory) => void;
 	courses: LMSCourse[];
 	setCourses: (courses: LMSCourse[]) => void;
-}>({
+};
+
+const defaultContextValue: ContactContextType = {
 	contact: null,
 	isLoading: false,
 	isUpdating: false,
@@ -74,7 +80,47 @@ export const ContactContext = createContext<{
 	setCourses: (_courses: LMSCourse[]) => {
 		throw new Error('setCourses() not implemented');
 	},
-});
+};
+
+// Extend Window interface for TypeScript.
+declare global {
+	interface Window {
+		qcrm?: {
+			config?: unknown;
+			contexts?: {
+				ContactContext?: React.Context<ContactContextType>;
+			};
+		};
+	}
+}
+
+/**
+ * Get or create the ContactContext singleton.
+ * This ensures both free and Pro plugin bundles share the same context instance.
+ * Without this, each webpack bundle would create its own context via createContext(),
+ * causing the Pro plugin's useContactContext() to return defaults instead of Provider values.
+ */
+function getContactContext(): React.Context<ContactContextType> {
+	// Ensure window.qcrm.contexts exists.
+	if (!window.qcrm) {
+		window.qcrm = {};
+	}
+	if (!window.qcrm.contexts) {
+		window.qcrm.contexts = {};
+	}
+
+	// Return existing context if already created (by free plugin).
+	if (window.qcrm.contexts.ContactContext) {
+		return window.qcrm.contexts.ContactContext;
+	}
+
+	// Create and store the context singleton.
+	const context = createContext<ContactContextType>(defaultContextValue);
+	window.qcrm.contexts.ContactContext = context;
+	return context;
+}
+
+export const ContactContext = getContactContext();
 
 const Provider = ContactContext.Provider;
 const useContactContext = () => useContext(ContactContext);

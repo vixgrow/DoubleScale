@@ -22,6 +22,7 @@ use QuillCRM\Models\Contact_Model;
 class Abandoned_Cart {
 
 
+
 	/**
 	 * Settings.
 	 *
@@ -319,7 +320,7 @@ class Abandoned_Cart {
 				$contact = Contact_Model::create(
 					array(
 						'email'        => $abandoned_cart->email,
-						'email_status' => $abandoned_cart->status ? 'unsubscribed' : 'unverified',
+						'email_status' => $abandoned_cart->status ? 'subscribed' : 'unverified',
 					)
 				);
 			}

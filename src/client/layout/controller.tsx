@@ -74,6 +74,7 @@ import GetStart from '../pages/get-start';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
+import Campaigns_EmailSequences from '../pages/campaigns';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
@@ -254,9 +255,7 @@ export const Controller = ({ page }) => {
 					{__('Back to WordPress Dashboard', 'quillcrm')}
 				</div>
 				<div className="flex items-center gap-3 justify-end w-1/2">
-					{!isProActive && (
-						<ProUpgradeButton />
-					)}
+					{!isProActive && <ProUpgradeButton />}
 					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 						{avatarUrl ? (
 							<AvatarImage src={avatarUrl} alt={displayName} />
@@ -343,7 +342,7 @@ registerAdminPage('custom-fields', {
 
 registerAdminPage('campaigns', {
 	path: 'campaigns',
-	component: () => <Campaigns />,
+	component: () => <Campaigns_EmailSequences />,
 	label: __('Campaigns', 'quillcrm'),
 	icon: <CampaignsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -356,21 +355,20 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
-//registerAdminPage('email-sequences', {
-// 	path: 'email-sequences',
-// 	component: () => <EmailSequences />,
-// 	label: __('Email Sequence', 'quillcrm'),
-// 	icon: <EmailSequenceIcon />,
-// 	hidden: true,
-// 	requiredCapability: ['quillcrm_crm_manager'],
-// });
-
-// registerAdminPage('email-sequence', {
-// 	path: 'email-sequences/:id',
-// 	component: () => <SequencesMail />,
-// 	label: __('Email Sequence', 'quillcrm'),
-// 	hidden: true,
-// });
+registerAdminPage('email-sequence', {
+	path: 'email-sequences/:id',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Email Sequence', 'quillcrm')}
+			description={__(
+				'View and manage email sequences with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
+	label: __('Email Sequence', 'quillcrm'),
+	hidden: true,
+});
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
 // The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component

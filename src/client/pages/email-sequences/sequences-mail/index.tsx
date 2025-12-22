@@ -4,7 +4,6 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
-
 // Import components
 import AddSequenceMail from './components/add-sequence-mail';
 import EditSequenceMail from './components/edit-sequence-mail';
@@ -13,7 +12,7 @@ import { END_POINT, SEQUENCE_MAIL_TYPE } from '../constants';
 
 // Import types
 import { EmailSequence, SequenceMail } from '../types';
-import EmailSequenceFlowChart from './components/EmailSequenceFlowChart';
+import EmailSequenceFlowChart from './components/email-sequence-flow-chart';
 import CloseIcon from '@quillcrm/components/icons/close';
 import { DeleteEmail } from './components/deleteEmail';
 
@@ -33,7 +32,7 @@ const SequencesMail: React.FC = () => {
 	);
 	const [reportingEmailName, setReportingEmailName] = useState<string>('');
 	const [isShowingDeleteDialog, setIsShowingDeleteDialog] = useState(false);
-    const [deletingEmailId, setDeletingEmailId] = useState<number | null>(null);
+	const [deletingEmailId, setDeletingEmailId] = useState<number | null>(null);
 
 	// Fetch sequence emails on component mount
 	useEffect(() => {
@@ -63,7 +62,7 @@ const SequencesMail: React.FC = () => {
 	};
 
 	const handleEdit = (id: number) => {
-		setIsAddingEmail(false)
+		setIsAddingEmail(false);
 		setEditingEmailId(id);
 		setIsEditingEmail(true);
 	};
@@ -72,28 +71,29 @@ const SequencesMail: React.FC = () => {
 		setDeletingEmailId(emailId);
 		setIsShowingDeleteDialog(true);
 	};
-	
+
 	const handleConfirmDelete = async () => {
 		if (!deletingEmailId) return;
-	
+
 		try {
 			await apiFetch({
 				path: `${END_POINT}/${deletingEmailId}`,
 				method: 'DELETE',
 			});
-	
+
 			createNotice({
 				type: 'success',
 				message: __('Email deleted successfully', 'quillcrm'),
 			});
-	
+
 			setIsShowingDeleteDialog(false);
 			setDeletingEmailId(null);
 			fetchSequenceEmails();
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to delete email', 'quillcrm'),
+				message:
+					error.message || __('Failed to delete email', 'quillcrm'),
 			});
 			setIsShowingDeleteDialog(false);
 			setDeletingEmailId(null);
@@ -142,10 +142,9 @@ const SequencesMail: React.FC = () => {
 	};
 
 	const handleAddSequenceEmail = () => {
-		setIsEditingEmail(false); 
-        setEditingEmailId(null);
+		setIsEditingEmail(false);
+		setEditingEmailId(null);
 		setIsAddingEmail(true);
-		
 	};
 
 	// Check if any panel is open
@@ -156,7 +155,7 @@ const SequencesMail: React.FC = () => {
 			{/* Header - Always visible */}
 			<div className="flex-shrink-0 border-b bg-white px-6 py-4">
 				<h1 className="text-xl font-medium">
-					<NavLink to={`email-sequences`}>
+					<NavLink to={`campaigns`}>
 						{__('Email Sequences', 'quillcrm')}
 					</NavLink>
 					/ {sequenceName || id}
@@ -209,7 +208,6 @@ const SequencesMail: React.FC = () => {
 				)}
 
 				{isEditingEmail && editingEmailId && (
-					
 					<div className="w-1/2  relative h-full bg-white">
 						<div className="absolute -left-14 top-6 z-[9999]">
 							<button
@@ -224,13 +222,13 @@ const SequencesMail: React.FC = () => {
 							</button>
 						</div>
 						<div className="h-full overflow-y-auto border-l border-gray-200">
-						<EditSequenceMail
-							isEditing={isEditingEmail}
-							setIsEditing={setIsEditingEmail}
-							sequenceId={id || ''}
-							emailId={editingEmailId}
-							onSuccess={fetchSequenceEmails}
-						/>
+							<EditSequenceMail
+								isEditing={isEditingEmail}
+								setIsEditing={setIsEditingEmail}
+								sequenceId={id || ''}
+								emailId={editingEmailId}
+								onSuccess={fetchSequenceEmails}
+							/>
 						</div>
 					</div>
 				)}
@@ -247,19 +245,18 @@ const SequencesMail: React.FC = () => {
 				/>
 			)}
 			{isShowingDeleteDialog && deletingEmailId && (
-    <DeleteEmail
-        visible={isShowingDeleteDialog}
-        onClose={() => {
-            setIsShowingDeleteDialog(false);
-            setDeletingEmailId(null);
-        }}
-        email={sequenceEmails.find(e => e.id === deletingEmailId)}
-        onConfirm={handleConfirmDelete}
-    />
-)}
+				<DeleteEmail
+					visible={isShowingDeleteDialog}
+					onClose={() => {
+						setIsShowingDeleteDialog(false);
+						setDeletingEmailId(null);
+					}}
+					email={sequenceEmails.find((e) => e.id === deletingEmailId)}
+					onConfirm={handleConfirmDelete}
+				/>
+			)}
 		</div>
 	);
 };
 
 export default SequencesMail;
-

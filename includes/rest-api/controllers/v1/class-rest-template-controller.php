@@ -819,10 +819,10 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error The response object
 	 */
 	public function render_template( $request ) {
-		$template_id = (int) $request->get_param( 'id' );
-		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
-		$contact_id  = $request->get_param( 'contact_id' );
-		$tracking_id = $request->get_param( 'tracking_id' );
+		$template_id      = (int) $request->get_param( 'id' );
+		$merge_tags       = $request->get_param( 'merge_tags' ) ?: array();
+		$contact_id       = $request->get_param( 'contact_id' );
+		$tracking_id      = $request->get_param( 'tracking_id' );
 		$explicit_preview = $request->get_param( 'preview' );
 
 		// Get contact - prioritize contact_id parameter, then extract from merge_tags

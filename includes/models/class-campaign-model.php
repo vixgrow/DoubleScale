@@ -27,8 +27,8 @@ use QuillCRM\Services\Campaign_Analytics;
 /**
  * Campaign_Model class
  */
-class Campaign_Model extends Model
-{
+class Campaign_Model extends Model {
+
 	/**
 	 * Table name
 	 *
@@ -100,7 +100,7 @@ class Campaign_Model extends Model
 	 *
 	 * @var array
 	 */
-	protected $appends = array('sent', 'opened', 'click', 'subject', 'email_body', 'preview_text');
+	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body', 'preview_text' );
 
 	/**
 	 * Guarded attributes - computed fields that should never be persisted
@@ -143,10 +143,9 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function messages()
-	{
-		return $this->hasMany(Communication_Tracking_Model::class, 'source_id', 'id')
-			->where('source_type', Message_Source_Types::CAMPAIGN);
+	public function messages() {
+		return $this->hasMany( Communication_Tracking_Model::class, 'source_id', 'id' )
+			->where( 'source_type', Message_Source_Types::CAMPAIGN );
 	}
 
 	/**
@@ -157,19 +156,18 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function messages_with_contacts()
-	{
+	public function messages_with_contacts() {
 		global $wpdb;
 		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
 		$tracking_table = $wpdb->prefix . 'quillcrm_communication_tracking';
 
-		return $this->hasMany(Communication_Tracking_Model::class, 'source_id', 'id')
-			->where('source_type', Message_Source_Types::CAMPAIGN)
+		return $this->hasMany( Communication_Tracking_Model::class, 'source_id', 'id' )
+			->where( 'source_type', Message_Source_Types::CAMPAIGN )
 			->whereExists(
-				function ($query) use ($contacts_table, $tracking_table) {
-					$query->selectRaw('1')
-						->from($contacts_table)
-						->whereColumn("{$contacts_table}.id", "{$tracking_table}.contact_id");
+				function ( $query ) use ( $contacts_table, $tracking_table ) {
+					$query->selectRaw( '1' )
+						->from( $contacts_table )
+						->whereColumn( "{$contacts_table}.id", "{$tracking_table}.contact_id" );
 				}
 			);
 	}
@@ -181,8 +179,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function emails()
-	{
+	public function emails() {
 		return $this->messages()->emails();
 	}
 
@@ -193,9 +190,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function sms()
-	{
-		return $this->messages()->sms();
+	public function sms() {
+		 return $this->messages()->sms();
 	}
 
 	/**
@@ -205,8 +201,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function whatsapp()
-	{
+	public function whatsapp() {
 		return $this->messages()->whatsapp();
 	}
 
@@ -217,9 +212,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function sequences_mail()
-	{
-		return $this->hasMany(Campaign_Model::class, 'parent_id')->where('type', Campaign_Channel::CHANNEL_SEQUENCE_MAIL);
+	public function sequences_mail() {
+		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', Campaign_Channel::CHANNEL_SEQUENCE_MAIL );
 	}
 
 	/**
@@ -229,53 +223,47 @@ class Campaign_Model extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function parent()
-	{
-		return $this->belongsTo(Campaign_Model::class, 'parent_id');
+	public function parent() {
+		return $this->belongsTo( Campaign_Model::class, 'parent_id' );
 	}
 
 
-	public function getSentAttribute()
-	{
+	public function getSentAttribute() {
 		return $this->messages_with_contacts()
-			->where('status', Tracking_Status::SENT)
+			->where( 'status', Tracking_Status::SENT )
 			->count();
 	}
 
-	public function getOpenedAttribute()
-	{
+	public function getOpenedAttribute() {
 		return $this->messages_with_contacts()
-			->where('opened', true)
+			->where( 'opened', true )
 			->count();
 	}
 
-	public function getClickAttribute()
-	{
+	public function getClickAttribute() {
 		return $this->messages_with_contacts()
-			->where('clicked', true)
+			->where( 'clicked', true )
 			->count();
 	}
 
-	public function getSubjectAttribute()
-	{
-		$template_ids = $this->get_template_ids();
-		$template      = reset($template_ids);
-		if ($template) {
-			$template = Template_Model::find($template);
-			if ($template) {
+	public function getSubjectAttribute() {
+		 $template_ids = $this->get_template_ids();
+		$template      = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
 				return $template->settings['subject'] ?? '';
 			}
 		}
 		return '';
 	}
 
-	public function getEmailBodyAttribute()
-	{
+	public function getEmailBodyAttribute() {
 		$template_ids = $this->get_template_ids();
-		$template     = reset($template_ids);
-		if ($template) {
-			$template = Template_Model::find($template);
-			if ($template) {
+		$template     = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
 				return $template->body;
 			}
 		}
@@ -283,12 +271,11 @@ class Campaign_Model extends Model
 	}
 
 
-	public function getPreviewTextAttribute()
-	{
-		$template_ids = $this->get_template_ids();
-		$template     = reset($template_ids);
-		if ($template) {
-			$template = Template_Model::find($template);
+	public function getPreviewTextAttribute() {
+		 $template_ids = $this->get_template_ids();
+		$template      = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
 			return $template->settings['preview_text'] ?? '';
 		}
 		return '';
@@ -302,9 +289,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return mixed
 	 */
-	public function get_setting($key, $default = null)
-	{
-		return isset($this->settings[$key]) ? $this->settings[$key] : $default;
+	public function get_setting( $key, $default = null ) {
+		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
 	}
 
 	/**
@@ -314,10 +300,9 @@ class Campaign_Model extends Model
 	 *
 	 * @return string Campaign type string ('email', 'sms', 'whatsapp')
 	 */
-	public function getTypeAttribute($value)
-	{
+	public function getTypeAttribute( $value ) {
 		// Convert integer from database to string for API
-		return Campaign_Channel::to_string($value) ?? 'email';
+		return Campaign_Channel::to_string( $value ) ?? 'email';
 	}
 
 	/**
@@ -327,16 +312,15 @@ class Campaign_Model extends Model
 	 *
 	 * @param string|int $value Campaign type as string or integer
 	 */
-	public function setTypeAttribute($value)
-	{
+	public function setTypeAttribute( $value ) {
 		// If it's already an integer, store it directly
-		if (is_int($value)) {
+		if ( is_int( $value ) ) {
 			$this->attributes['type'] = $value;
 			return;
 		}
 
 		// Convert string to integer for database storage
-		$integer_value            = Campaign_Channel::to_integer($value);
+		$integer_value            = Campaign_Channel::to_integer( $value );
 		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
 	}
 
@@ -349,18 +333,17 @@ class Campaign_Model extends Model
 	 * @param string|null $value JSON string or null from database
 	 * @return array
 	 */
-	public function getSettingsAttribute($value)
-	{
+	public function getSettingsAttribute( $value ) {
 		// If settings is null, return empty array
-		if (is_null($value)) {
+		if ( is_null( $value ) ) {
 			return array();
 		}
 
 		// Parse JSON to array
-		$decoded = json_decode($value, true);
+		$decoded = json_decode( $value, true );
 
 		// If decoding failed or result is null, return empty array
-		return is_array($decoded) ? $decoded : array();
+		return is_array( $decoded ) ? $decoded : array();
 	}
 
 	/**
@@ -371,22 +354,21 @@ class Campaign_Model extends Model
 	 *
 	 * @param array|string|null $value Settings data
 	 */
-	public function setSettingsAttribute($value)
-	{
+	public function setSettingsAttribute( $value ) {
 		// If already a string (JSON), store directly
-		if (is_string($value)) {
+		if ( is_string( $value ) ) {
 			$this->attributes['settings'] = $value;
 			return;
 		}
 
 		// If null or not an array, store empty JSON object
-		if (! is_array($value)) {
+		if ( ! is_array( $value ) ) {
 			$this->attributes['settings'] = '{}';
 			return;
 		}
 
 		// Convert array to JSON string
-		$this->attributes['settings'] = json_encode($value);
+		$this->attributes['settings'] = json_encode( $value );
 	}
 
 	/**
@@ -396,11 +378,10 @@ class Campaign_Model extends Model
 	 *
 	 * @return int Campaign type integer
 	 */
-	public function get_type()
-	{
+	public function get_type() {
 		// Access the raw value from database and cast to integer
 		// Eloquent may return this as a string, so we ensure it's an integer
-		return (int) ($this->attributes['type'] ?? Campaign_Channel::get_default());
+		return (int) ( $this->attributes['type'] ?? Campaign_Channel::get_default() );
 	}
 
 	/**
@@ -411,12 +392,11 @@ class Campaign_Model extends Model
 	 *
 	 * @return int Campaign type integer for processing
 	 */
-	public function get_template_processing_type()
-	{
+	public function get_template_processing_type() {
 		$type = $this->get_type();
 
 		// Sequence mails and email sequences are email-based campaigns
-		if ($type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE) {
+		if ( $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
 			return Campaign_Channel::CHANNEL_EMAIL;
 		}
 
@@ -430,9 +410,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_sms_campaign()
-	{
-		return $this->get_type() === Campaign_Channel::CHANNEL_SMS;
+	public function is_sms_campaign() {
+		 return $this->get_type() === Campaign_Channel::CHANNEL_SMS;
 	}
 
 	/**
@@ -442,8 +421,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_email_campaign()
-	{
+	public function is_email_campaign() {
 		$type = $this->get_type();
 		return $type === Campaign_Channel::CHANNEL_EMAIL
 			|| $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE
@@ -457,8 +435,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_whatsapp_campaign()
-	{
+	public function is_whatsapp_campaign() {
 		return $this->get_type() === Campaign_Channel::CHANNEL_WHATSAPP;
 	}
 
@@ -469,8 +446,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_email_sequence()
-	{
+	public function is_email_sequence() {
 		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE;
 	}
 
@@ -481,8 +457,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function is_sequence_mail()
-	{
+	public function is_sequence_mail() {
 		return $this->get_type() === Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 	}
 
@@ -495,19 +470,18 @@ class Campaign_Model extends Model
 	 *
 	 * @return array
 	 */
-	public function get_templates()
-	{
-		$template_ids = $this->get_setting('template_ids', array());
+	public function get_templates() {
+		$template_ids = $this->get_setting( 'template_ids', array() );
 
-		if (empty($template_ids)) {
+		if ( empty( $template_ids ) ) {
 			return array();
 		}
 
 		$templates = array();
 
-		foreach ($template_ids as $template_id) {
-			$template = Template_Model::find($template_id);
-			if ($template) {
+		foreach ( $template_ids as $template_id ) {
+			$template = Template_Model::find( $template_id );
+			if ( $template ) {
 				$templates[] = $template;
 			}
 		}
@@ -521,15 +495,14 @@ class Campaign_Model extends Model
 	 * @param array $templates_data Array of template data
 	 * @return array Array of template IDs
 	 */
-	private function process_templates($templates_data)
-	{
+	private function process_templates( $templates_data ) {
 		$campaign_type_int = $this->get_template_processing_type();
 		// Convert integer to string for template factory
-		$campaign_type_str = Campaign_Channel::to_string($campaign_type_int) ?? 'email';
+		$campaign_type_str = Campaign_Channel::to_string( $campaign_type_int ) ?? 'email';
 		$campaign_status   = $this->status ?? 'draft';
 		$template_factory  = Campaign_Template_Factory::instance();
 
-		return $template_factory->process_templates_data($templates_data, $campaign_type_str, $campaign_status);
+		return $template_factory->process_templates_data( $templates_data, $campaign_type_str, $campaign_status );
 	}
 
 	/**
@@ -539,12 +512,11 @@ class Campaign_Model extends Model
 	 * @param Campaign_Model $campaign Campaign model
 	 * @return void
 	 */
-	public function attach_templates($campaign)
-	{
+	public function attach_templates( $campaign ) {
 		// Get templates and add them to settings for frontend
 		$templates = $campaign->get_templates();
 
-		if (! empty($templates)) {
+		if ( ! empty( $templates ) ) {
 			$settings              = $campaign->settings;
 			$settings['templates'] = $templates;
 			$campaign->settings    = $settings;
@@ -558,9 +530,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return array
 	 */
-	public function get_template_ids()
-	{
-		return $this->get_setting('template_ids', array());
+	public function get_template_ids() {
+		return $this->get_setting( 'template_ids', array() );
 	}
 
 	/**
@@ -570,9 +541,8 @@ class Campaign_Model extends Model
 	 *
 	 * @return int
 	 */
-	public function get_template_count()
-	{
-		return count($this->get_template_ids());
+	public function get_template_count() {
+		return count( $this->get_template_ids() );
 	}
 
 	/**
@@ -582,8 +552,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return bool
 	 */
-	public function has_multiple_templates()
-	{
+	public function has_multiple_templates() {
 		return $this->get_template_count() > 1;
 	}
 
@@ -596,10 +565,9 @@ class Campaign_Model extends Model
 	 *
 	 * @return void
 	 */
-	public function attach_counts($campaign)
-	{
+	public function attach_counts( $campaign ) {
 		$enrichment = \QuillCRM\Services\Campaign_Enrichment::instance();
-		$enrichment->enrich($campaign);
+		$enrichment->enrich( $campaign );
 	}
 
 	/**
@@ -607,8 +575,7 @@ class Campaign_Model extends Model
 	 *
 	 * @return Campaign_Status_Manager
 	 */
-	protected function get_status_manager()
-	{
+	protected function get_status_manager() {
 		return Campaign_Status_Manager::instance();
 	}
 
@@ -618,10 +585,9 @@ class Campaign_Model extends Model
 	 *
 	 * @return string
 	 */
-	public function get_status_label()
-	{
+	public function get_status_label() {
 		$labels = $this->get_status_manager()->get_status_labels();
-		return $labels[$this->status] ?? $this->status;
+		return $labels[ $this->status ] ?? $this->status;
 	}
 
 	/**
@@ -629,12 +595,11 @@ class Campaign_Model extends Model
 	 *
 	 * @param string $value
 	 */
-	public function setStatusAttribute($value)
-	{
+	public function setStatusAttribute( $value ) {
 		$manager = $this->get_status_manager();
 
-		if (! $manager->is_valid_status($value)) {
-			throw new \InvalidArgumentException("Invalid campaign status: {$value}");
+		if ( ! $manager->is_valid_status( $value ) ) {
+			throw new \InvalidArgumentException( "Invalid campaign status: {$value}" );
 		}
 
 		$this->attributes['status'] = $value;
@@ -647,22 +612,21 @@ class Campaign_Model extends Model
 	 *
 	 * @return void
 	 */
-	public static function boot()
-	{
-		parent::boot();
+	public static function boot() {
+		 parent::boot();
 
 		// Save templates when saving the campaign
 		static::saving(
-			function ($campaign) {
+			function ( $campaign ) {
 				// Retrieve the settings attribute
 				$settings = $campaign->settings;
 				// If templates exist in settings, create/update Template_Model records
-				if (isset($settings['templates']) && is_array($settings['templates']) && ! isset($settings['is_attached'])) {
-					$template_ids = $campaign->process_templates($settings['templates']);
+				if ( isset( $settings['templates'] ) && is_array( $settings['templates'] ) && ! isset( $settings['is_attached'] ) ) {
+					$template_ids = $campaign->process_templates( $settings['templates'] );
 
 					// Store only template IDs in settings and remove full template objects
 					$settings['template_ids'] = $template_ids;
-					unset($settings['templates']);
+					unset( $settings['templates'] );
 				}
 
 				// Set the modified settings back to the model
@@ -672,17 +636,17 @@ class Campaign_Model extends Model
 
 		// Delete the campaign templates when deleting the campaign
 		// static::deleting(
-		// 	function ($campaign) {
-		// 		// Get template IDs and delete associated templates
-		// 		$template_ids = $campaign->get_template_ids();
+		// function ($campaign) {
+		// Get template IDs and delete associated templates
+		// $template_ids = $campaign->get_template_ids();
 
-		// 		foreach ($template_ids as $template_id) {
-		// 			$template = Template_Model::find($template_id);
-		// 			if ($template) {
-		// 				$template->delete();
-		// 			}
-		// 		}
-		// 	}
+		// foreach ($template_ids as $template_id) {
+		// $template = Template_Model::find($template_id);
+		// if ($template) {
+		// $template->delete();
+		// }
+		// }
+		// }
 		// );
 
 		// Note: Computed attributes (counts, rates, etc.) are now handled by

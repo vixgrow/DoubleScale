@@ -19,8 +19,8 @@ use QuillCRM\Models\Contact_Model;
 /**
  * Abandoned Cart Class.
  */
-class Abandoned_Cart
-{
+class Abandoned_Cart {
+
 
 
 	/**
@@ -48,9 +48,8 @@ class Abandoned_Cart
 	 *
 	 * @return Abandoned_Cart
 	 */
-	public static function instance()
-	{
-		if (is_null(self::$instance)) {
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
 
@@ -62,42 +61,41 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct()
-	{
-		$this->settings = Settings::get('cart', array());
-		if (! quillcrm_is_plugin_active('woocommerce/woocommerce.php')) {
+	public function __construct() {
+		 $this->settings = Settings::get( 'cart', array() );
+		if ( ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			return;
 		}
 		// Enqueue scripts to the checkout page.
-		add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		// Ajax action to save the abandoned cart.
-		add_action('wp_ajax_quillcrm_save_abandoned_cart', array($this, 'save_abandoned_cart'));
-		add_action('wp_ajax_nopriv_quillcrm_save_abandoned_cart', array($this, 'save_abandoned_cart'));
-		add_action('wp_ajax_quillcrm_opt_out_abandoned_cart', array($this, 'opt_out_abandoned_cart'));
-		add_action('wp_ajax_nopriv_quillcrm_opt_out_abandoned_cart', array($this, 'opt_out_abandoned_cart'));
+		add_action( 'wp_ajax_quillcrm_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
+		add_action( 'wp_ajax_nopriv_quillcrm_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
+		add_action( 'wp_ajax_quillcrm_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
+		add_action( 'wp_ajax_nopriv_quillcrm_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
 
 		// Mark the cart as recovered when the order is processed.
-		add_action('woocommerce_checkout_order_processed', array($this, 'mark_as_recoverd'), 1);
-		add_action('woocommerce_store_api_checkout_order_processed', array($this, 'mark_as_recoverd'), 1);
+		add_action( 'woocommerce_checkout_order_processed', array( $this, 'mark_as_recoverd' ), 1 );
+		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'mark_as_recoverd' ), 1 );
 
 		// Restore the abandoned cart.
-		add_action('wp', array($this, 'restore_abandoned_cart'));
+		add_action( 'wp', array( $this, 'restore_abandoned_cart' ) );
 
 		// Save the cart blocks.
-		add_action('woocommerce_store_api_cart_update_customer_from_request', array($this, 'save_cart_blocks'));
+		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'save_cart_blocks' ) );
 
 		add_action(
 			'init',
 			function () {
-				QuillCRM::instance()->daily_tasks->register_callback('quillcrm_daily', array($this, 'check_lost_carts'));
-				QuillCRM::instance()->daily_tasks->register_callback('quillcrm_daily', array($this, 'check_cooling_off'));
-				QuillCRM::instance()->abandoned_cart_tasks->register_callback('mark_cart_recoverable', array($this, 'mark_cart_recoverable'));
+				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'check_lost_carts' ) );
+				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'check_cooling_off' ) );
+				QuillCRM::instance()->abandoned_cart_tasks->register_callback( 'mark_cart_recoverable', array( $this, 'mark_cart_recoverable' ) );
 			}
 		);
 
-		add_action('quillcrm_abandoned_cart_skipped', array($this, 'skip_abandoned_cart'));
-		add_action('quillcrm_abandoned_cart_processing', array($this, 'mark_as_processing'));
+		add_action( 'quillcrm_abandoned_cart_skipped', array( $this, 'skip_abandoned_cart' ) );
+		add_action( 'quillcrm_abandoned_cart_processing', array( $this, 'mark_as_processing' ) );
 	}
 
 	/**
@@ -105,17 +103,16 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function opt_out_abandoned_cart()
-	{
+	public function opt_out_abandoned_cart() {
 		// Verify the nonce.
-		check_ajax_referer('quillcrm_abandoned_cart', 'nonce');
+		check_ajax_referer( 'quillcrm_abandoned_cart', 'nonce' );
 
 		$this->set_skip_session();
 		$session = $this->get_session();
-		if (! empty($session)) {
-			$abandoned_cart = Abandoned_Cart_Model::getByHashKey($session);
-			if (empty($abandoned_cart)) {
-				wp_send_json_error(__('Abandoned cart not found.', 'quillcrm'));
+		if ( ! empty( $session ) ) {
+			$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
+			if ( empty( $abandoned_cart ) ) {
+				wp_send_json_error( __( 'Abandoned cart not found.', 'quillcrm' ) );
 			}
 
 			$abandoned_cart->status = 'opt-out';
@@ -126,7 +123,7 @@ class Abandoned_Cart
 
 		wp_send_json_success(
 			array(
-				'message' => __('You have successfully opted out of abandoned cart emails.', 'quillcrm'),
+				'message' => __( 'You have successfully opted out of abandoned cart emails.', 'quillcrm' ),
 			)
 		);
 	}
@@ -138,10 +135,9 @@ class Abandoned_Cart
 	 *
 	 * @param string $cart_id Cart ID.
 	 */
-	public function mark_as_processing($cart_id)
-	{
-		$abandoned_cart = Abandoned_Cart_Model::find($cart_id);
-		if (empty($abandoned_cart)) {
+	public function mark_as_processing( $cart_id ) {
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
+		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
 
@@ -156,9 +152,8 @@ class Abandoned_Cart
 	 *
 	 * @param \WC_Order $order Order.
 	 */
-	public function mark_as_recoverd($order)
-	{
-		if (! $order instanceof \WC_Order) {
+	public function mark_as_recoverd( $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return;
 		}
 
@@ -166,41 +161,41 @@ class Abandoned_Cart
 		$session = $this->get_session();
 
 		// Fallback: Try to get from WC session.
-		if (empty($session) && WC()->session) {
-			$session = WC()->session->get('quillcrm_cart_hash');
+		if ( empty( $session ) && WC()->session ) {
+			$session = WC()->session->get( 'quillcrm_cart_hash' );
 		}
 
 		$abandoned_cart = null;
 
 		// Try to get abandoned cart by hash key.
-		if (! empty($session)) {
-			$abandoned_cart = Abandoned_Cart_Model::getByHashKey($session);
+		if ( ! empty( $session ) ) {
+			$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
 		}
 
 		// Fallback: Try to find by email if hash key method failed.
-		if (empty($abandoned_cart)) {
+		if ( empty( $abandoned_cart ) ) {
 			$email = $order->get_billing_email();
-			if (! empty($email)) {
-				$abandoned_cart = Abandoned_Cart_Model::where('email', $email)
-					->where('status', 'pending')
-					->orderBy('id', 'DESC')
+			if ( ! empty( $email ) ) {
+				$abandoned_cart = Abandoned_Cart_Model::where( 'email', $email )
+					->where( 'status', 'pending' )
+					->orderBy( 'id', 'DESC' )
 					->first();
 			}
 		}
 
 		// If still no abandoned cart found, return.
-		if (empty($abandoned_cart)) {
+		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
 
 		// Update the abandoned cart items.
 		$items = array();
-		foreach ($order->get_items() as $item) {
+		foreach ( $order->get_items() as $item ) {
 			$product_id   = $item->get_product_id();
 			$variation_id = $item->get_variation_id();
 			$quantity     = $item->get_quantity();
 			$variation    = $item->get_meta_data();
-			$variation    = wp_list_pluck($variation, 'value', 'key');
+			$variation    = wp_list_pluck( $variation, 'value', 'key' );
 
 			$items[] = array(
 				'product_id'   => $product_id,
@@ -216,21 +211,21 @@ class Abandoned_Cart
 		$abandoned_cart->save();
 
 		// Remove tags and lists.
-		$contact = Contact_Model::get_by_email($abandoned_cart->email);
-		if ($contact) {
+		$contact = Contact_Model::get_by_email( $abandoned_cart->email );
+		if ( $contact ) {
 			$tags       = $this->settings['tags'] ?? array();
 			$lists      = $this->settings['lists'] ?? array();
 			$lost_tags  = $this->settings['lost_tags'] ?? array();
 			$lost_lists = $this->settings['lost_lists'] ?? array();
 
-			$contact->tags()->detach(array_merge($tags, $lost_tags));
-			$contact->lists()->detach(array_merge($lists, $lost_lists));
+			$contact->tags()->detach( array_merge( $tags, $lost_tags ) );
+			$contact->lists()->detach( array_merge( $lists, $lost_lists ) );
 		}
 
 		// Clear the session.
 		$this->clear_session();
 
-		do_action('quillcrm_abandoned_cart_recovered', $abandoned_cart);
+		do_action( 'quillcrm_abandoned_cart_recovered', $abandoned_cart );
 	}
 
 	/**
@@ -240,14 +235,13 @@ class Abandoned_Cart
 	 *
 	 * @param string $cart_id Cart ID.
 	 */
-	public function skip_abandoned_cart($cart_id)
-	{
-		$abandoned_cart = Abandoned_Cart_Model::find($cart_id);
-		if (empty($abandoned_cart)) {
+	public function skip_abandoned_cart( $cart_id ) {
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
+		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
 
-		if ('opt-out' === $abandoned_cart->status) {
+		if ( 'opt-out' === $abandoned_cart->status ) {
 			return;
 		}
 
@@ -262,27 +256,26 @@ class Abandoned_Cart
 	 *
 	 * @param string $meta_id Meta ID.
 	 */
-	public function mark_cart_recoverable($meta_id)
-	{
-		$meta = quillcrm_get_meta_args($meta_id);
-		if (empty($meta)) {
+	public function mark_cart_recoverable( $meta_id ) {
+		$meta = quillcrm_get_meta_args( $meta_id );
+		if ( empty( $meta ) ) {
 			return;
 		}
 
 		$cart_id        = $meta[0] ?? 0;
-		$abandoned_cart = Abandoned_Cart_Model::find($cart_id);
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
 
-		if (empty($abandoned_cart)) {
+		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
 
-		if ($abandoned_cart->status === 'recovered') {
+		if ( $abandoned_cart->status === 'recovered' ) {
 			return;
 		}
 
-		$this->add_contact($abandoned_cart);
+		$this->add_contact( $abandoned_cart );
 
-		do_action('quillcrm_abandoned_cart_created', $abandoned_cart);
+		do_action( 'quillcrm_abandoned_cart_created', $abandoned_cart );
 	}
 
 	/**
@@ -290,24 +283,23 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function check_lost_carts()
-	{
+	public function check_lost_carts() {
 		$lost_cart_days = $this->settings['lost_cart_days'] ?? 15;
 
 		// Get all carts that are pending and older than the lost cart days.
-		$abandoned_carts = Abandoned_Cart_Model::where('status', '!=', 'recovered')
-			->where('created_at', '<', strtotime('-' . $lost_cart_days . ' days'))
+		$abandoned_carts = Abandoned_Cart_Model::where( 'status', '!=', 'recovered' )
+			->where( 'created_at', '<', strtotime( '-' . $lost_cart_days . ' days' ) )
 			->get();
 
-		if (empty($abandoned_carts)) {
+		if ( empty( $abandoned_carts ) ) {
 			return;
 		}
 
-		foreach ($abandoned_carts as $abandoned_cart) {
+		foreach ( $abandoned_carts as $abandoned_cart ) {
 			$abandoned_cart->status = 'lost';
 			$abandoned_cart->save();
 
-			$this->add_contact($abandoned_cart, 'lost');
+			$this->add_contact( $abandoned_cart, 'lost' );
 		}
 	}
 
@@ -321,11 +313,10 @@ class Abandoned_Cart
 	 *
 	 * @return void
 	 */
-	public function add_contact($abandoned_cart, $status = 'abandoned')
-	{
+	public function add_contact( $abandoned_cart, $status = 'abandoned' ) {
 		try {
-			$contact = Contact_Model::get_by_email($abandoned_cart->email);
-			if (! $contact) {
+			$contact = Contact_Model::get_by_email( $abandoned_cart->email );
+			if ( ! $contact ) {
 				$contact = Contact_Model::create(
 					array(
 						'email'        => $abandoned_cart->email,
@@ -337,14 +328,14 @@ class Abandoned_Cart
 			$lists = $status === 'abandoned' ? $this->settings['lists'] ?? array() : $this->settings['lost_lists'] ?? array();
 			$tags  = $status === 'abandoned' ? $this->settings['tags'] ?? array() : $this->settings['lost_tags'] ?? array();
 
-			if (! empty($lists)) {
-				$contact->lists()->sync($lists);
+			if ( ! empty( $lists ) ) {
+				$contact->lists()->sync( $lists );
 			}
 
-			if (! empty($tags)) {
-				$contact->tags()->sync($tags);
+			if ( ! empty( $tags ) ) {
+				$contact->tags()->sync( $tags );
 			}
-		} catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 			return;
 		}
 	}
@@ -354,20 +345,19 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function check_cooling_off()
-	{
+	public function check_cooling_off() {
 		$cool_off_period = $this->settings['cool_off_period'] ?? 15;
 
 		// Get all carts that are pending and older than the lost cart days.
-		$abandoned_carts = Abandoned_Cart_Model::where('status', '!=', 'recovered')
-			->where('created_at', '<', strtotime('-' . $cool_off_period . ' days'))
+		$abandoned_carts = Abandoned_Cart_Model::where( 'status', '!=', 'recovered' )
+			->where( 'created_at', '<', strtotime( '-' . $cool_off_period . ' days' ) )
 			->get();
 
-		if (empty($abandoned_carts)) {
+		if ( empty( $abandoned_carts ) ) {
 			return;
 		}
 
-		foreach ($abandoned_carts as $abandoned_cart) {
+		foreach ( $abandoned_carts as $abandoned_cart ) {
 			$abandoned_cart->status = 'cool-off';
 			$abandoned_cart->save();
 		}
@@ -378,21 +368,20 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function restore_abandoned_cart()
-	{
-		$cart_id = sanitize_text_field($_GET['quillcrm-cart-id'] ?? '');
-		if (! $cart_id || wp_doing_ajax() || is_admin()) {
+	public function restore_abandoned_cart() {
+		$cart_id = sanitize_text_field( $_GET['quillcrm-cart-id'] ?? '' );
+		if ( ! $cart_id || wp_doing_ajax() || is_admin() ) {
 			return;
 		}
 
 		// Get the abandoned cart.
-		$abandoned_cart = Abandoned_Cart_Model::where('hash_key', $cart_id)->where('status', 'pending')->first();
-		if (empty($abandoned_cart)) {
+		$abandoned_cart = Abandoned_Cart_Model::where( 'hash_key', $cart_id )->where( 'status', 'pending' )->first();
+		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
 
 		// Restore the cart.
-		$this->restore_cart($abandoned_cart);
+		$this->restore_cart( $abandoned_cart );
 	}
 
 	/**
@@ -402,38 +391,37 @@ class Abandoned_Cart
 	 *
 	 * @param Abandoned_Cart_Model $abandoned_cart Abandoned Cart.
 	 */
-	public function restore_cart($abandoned_cart)
-	{
+	public function restore_cart( $abandoned_cart ) {
 		// Clear the cart.
 		WC()->cart->empty_cart();
 
 		// Restore the cart items.
-		foreach ($abandoned_cart->items as $item) {
+		foreach ( $abandoned_cart->items as $item ) {
 			$product_id   = $item['product_id'];
 			$quantity     = $item['quantity'];
 			$variation_id = $item['variation_id'] ?? null;
 			$variation    = $item['variation'] ?? array();
 
-			WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
+			WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation );
 		}
 
 		// Restore the cart coupons.
-		foreach ($abandoned_cart->coupons as $coupon => $data) {
-			if (WC()->cart->has_discount($coupon)) {
+		foreach ( $abandoned_cart->coupons as $coupon => $data ) {
+			if ( WC()->cart->has_discount( $coupon ) ) {
 				continue;
 			}
 
-			WC()->cart->add_discount($coupon);
+			WC()->cart->add_discount( $coupon );
 		}
 
 		// Restore the cart fees.
-		foreach ($abandoned_cart->fees as $fee) {
-			WC()->cart->add_fee($fee['name'], $fee['amount']);
+		foreach ( $abandoned_cart->fees as $fee ) {
+			WC()->cart->add_fee( $fee['name'], $fee['amount'] );
 		}
 
 		// Restore the cart taxes.
-		foreach ($abandoned_cart->taxes as $tax) {
-			WC()->cart->add_fee($tax['name'], $tax['amount']);
+		foreach ( $abandoned_cart->taxes as $tax ) {
+			WC()->cart->add_fee( $tax['name'], $tax['amount'] );
 		}
 
 		// Restore the cart shipping.
@@ -445,15 +433,15 @@ class Abandoned_Cart
 		// Restore fields.
 		$fields = $abandoned_cart->fields;
 		try {
-			WC()->customer->set_props($fields);
-		} catch (Error $e) {
+			WC()->customer->set_props( $fields );
+		} catch ( Error $e ) {
 		}
 
 		// Add new session.
-		$this->save_session($abandoned_cart->hash_key);
+		$this->save_session( $abandoned_cart->hash_key );
 
 		// Redirect to the checkout page.
-		wp_safe_redirect(wc_get_checkout_url());
+		wp_safe_redirect( wc_get_checkout_url() );
 	}
 
 	/**
@@ -461,10 +449,9 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function enqueue_scripts()
-	{
-		// check if the current page is the checkout page.
-		if (! is_checkout()) {
+	public function enqueue_scripts() {
+		 // check if the current page is the checkout page.
+		if ( ! is_checkout() ) {
 			return;
 		}
 
@@ -486,8 +473,8 @@ class Abandoned_Cart
 		// Text of merge tag.
 		$gdpr_message = preg_replace_callback(
 			'/{{no_thanks text="([^"]+)"}}/',
-			function ($matches) {
-				$text = $matches[1] ?? __('No Thanks', 'quillcrm');
+			function ( $matches ) {
+				$text = $matches[1] ?? __( 'No Thanks', 'quillcrm' );
 				return '<a href="#" id="quillcrm-opt-out">' . $text . '</a>';
 			},
 			$gdpr_message
@@ -498,8 +485,8 @@ class Abandoned_Cart
 			'quillcrm-abandoned-cart',
 			'quillcrm_abandoned_cart',
 			array(
-				'ajax_url'        => admin_url('admin-ajax.php'),
-				'nonce'           => wp_create_nonce('quillcrm_abandoned_cart'),
+				'ajax_url'        => admin_url( 'admin-ajax.php' ),
+				'nonce'           => wp_create_nonce( 'quillcrm_abandoned_cart' ),
 				'gdpr_compliance' => $this->get_skip_session() ? false : $gdpr_compliance,
 				'gdpr_message'    => $gdpr_message,
 			)
@@ -513,9 +500,8 @@ class Abandoned_Cart
 	 *
 	 * @param array $data Data.
 	 */
-	public function save_cart_blocks($customer)
-	{
-		if (! $customer instanceof \WC_Customer || 0 === sizeof(WC()->cart->get_cart())) {
+	public function save_cart_blocks( $customer ) {
+		if ( ! $customer instanceof \WC_Customer || 0 === sizeof( WC()->cart->get_cart() ) ) {
 			return false;
 		}
 
@@ -551,39 +537,39 @@ class Abandoned_Cart
 		);
 
 		$items = WC()->cart->get_cart();
-		if (empty($items)) {
+		if ( empty( $items ) ) {
 			return;
 		}
 
 		$data['items'] = $items;
 		// Check if there is coupons applied.
 		$coupons = WC()->cart->get_applied_coupons();
-		foreach ($coupons as $coupon) {
-			$data['coupons'][$coupon] = array(
-				'amount' => WC()->cart->get_coupon_discount_amount($coupon),
+		foreach ( $coupons as $coupon ) {
+			$data['coupons'][ $coupon ] = array(
+				'amount' => WC()->cart->get_coupon_discount_amount( $coupon ),
 			);
 		}
 
-		$data['total']    = WC()->cart->get_total('raw');
+		$data['total']    = WC()->cart->get_total( 'raw' );
 		$data['fees']     = WC()->cart->get_fees();
 		$data['taxes']    = WC()->cart->get_taxes();
 		$data['shipping'] = WC()->cart->get_shipping_total();
 		$data['currency'] = get_woocommerce_currency();
 
-		if (is_user_logged_in()) {
+		if ( is_user_logged_in() ) {
 			$data['user_id'] = get_current_user_id();
 		}
 
 		$session = $this->get_session();
-		if (! empty($session)) {
-			$update = $this->update($session, $data);
-			if ($update) {
+		if ( ! empty( $session ) ) {
+			$update = $this->update( $session, $data );
+			if ( $update ) {
 				return;
 			}
 		}
 
 		$data['hash_key'] = Utils::generate_hash_key();
-		$this->save($data);
+		$this->save( $data );
 		return;
 	}
 
@@ -592,25 +578,24 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function save_abandoned_cart()
-	{
-		// Verify the nonce.
-		check_ajax_referer('quillcrm_abandoned_cart', 'nonce');
+	public function save_abandoned_cart() {
+		 // Verify the nonce.
+		check_ajax_referer( 'quillcrm_abandoned_cart', 'nonce' );
 
 		// Check if the cart is skipped.
-		if ($this->get_skip_session()) {
+		if ( $this->get_skip_session() ) {
 			wp_send_json_success();
 		}
 
-		$fields = wp_unslash($_POST['fields']) ?? null;
-		if (empty($fields)) {
-			wp_send_json_error(__('Fields are required.', 'quillcrm'));
+		$fields = wp_unslash( $_POST['fields'] ) ?? null;
+		if ( empty( $fields ) ) {
+			wp_send_json_error( __( 'Fields are required.', 'quillcrm' ) );
 		}
 
-		$fields        = json_decode($fields, true);
-		$billing_email = sanitize_email($fields['billing_email']) ?? '';
-		if (empty($billing_email)) {
-			wp_send_json_error(__('Email is required.', 'quillcrm'));
+		$fields        = json_decode( $fields, true );
+		$billing_email = sanitize_email( $fields['billing_email'] ) ?? '';
+		if ( empty( $billing_email ) ) {
+			wp_send_json_error( __( 'Email is required.', 'quillcrm' ) );
 		}
 
 		$data = array(
@@ -622,44 +607,44 @@ class Abandoned_Cart
 
 		$items = WC()->cart->get_cart();
 
-		if (empty($items)) {
-			wp_send_json_error(__('Cart is empty.', 'quillcrm'));
+		if ( empty( $items ) ) {
+			wp_send_json_error( __( 'Cart is empty.', 'quillcrm' ) );
 		}
 
 		$data['items'] = $items;
 		// Check if there is coupons applied.
 		$coupons = WC()->cart->get_applied_coupons();
-		foreach ($coupons as $coupon) {
-			$data['coupons'][$coupon] = array(
-				'amount' => WC()->cart->get_coupon_discount_amount($coupon),
+		foreach ( $coupons as $coupon ) {
+			$data['coupons'][ $coupon ] = array(
+				'amount' => WC()->cart->get_coupon_discount_amount( $coupon ),
 			);
 		}
 
-		$data['total']    = WC()->cart->get_total('raw');
+		$data['total']    = WC()->cart->get_total( 'raw' );
 		$data['fees']     = WC()->cart->get_fees();
 		$data['taxes']    = WC()->cart->get_taxes();
 		$data['shipping'] = WC()->cart->get_shipping_total();
 		$data['currency'] = get_woocommerce_currency();
 
-		if (is_user_logged_in()) {
+		if ( is_user_logged_in() ) {
 			$data['user_id'] = get_current_user_id();
 		}
 
 		$session = $this->get_session();
-		if (! empty($session)) {
-			$update = $this->update($session, $data);
-			if ($update) {
+		if ( ! empty( $session ) ) {
+			$update = $this->update( $session, $data );
+			if ( $update ) {
 				wp_send_json_success();
 			}
 		}
 
 		$data['hash_key'] = Utils::generate_hash_key();
-		$abandoned_cart   = $this->save($data);
+		$abandoned_cart   = $this->save( $data );
 
-		if ($abandoned_cart) {
+		if ( $abandoned_cart ) {
 			wp_send_json_success();
 		} else {
-			wp_send_json_error(__('Failed to save the abandoned cart.', 'quillcrm'));
+			wp_send_json_error( __( 'Failed to save the abandoned cart.', 'quillcrm' ) );
 		}
 	}
 
@@ -672,27 +657,26 @@ class Abandoned_Cart
 	 *
 	 * @return Abandoned_Cart_Model|false
 	 */
-	public function save($data)
-	{
+	public function save( $data ) {
 		$wait_period = $this->settings['wait_period'] ?? 1;
 		$wait_period = $wait_period * 60;
 
 		try {
-			$abandoned_cart = Abandoned_Cart_Model::where('email', $data['email'])->first();
-			if (! empty($abandoned_cart)) {
-				$abandoned_cart->fill($data);
-				if ($this->get_skip_session()) {
+			$abandoned_cart = Abandoned_Cart_Model::where( 'email', $data['email'] )->first();
+			if ( ! empty( $abandoned_cart ) ) {
+				$abandoned_cart->fill( $data );
+				if ( $this->get_skip_session() ) {
 					$abandoned_cart->status = 'opt-out';
 				}
 				$abandoned_cart->save();
 			} else {
-				$abandoned_cart = Abandoned_Cart_Model::create($data);
-				QuillCRM::instance()->abandoned_cart_tasks->schedule_single(time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id);
+				$abandoned_cart = Abandoned_Cart_Model::create( $data );
+				QuillCRM::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			}
 
-			$this->save_session($abandoned_cart->hash_key);
+			$this->save_session( $abandoned_cart->hash_key );
 			return $abandoned_cart;
-		} catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 	}
@@ -707,25 +691,24 @@ class Abandoned_Cart
 	 *
 	 * @return Abandoned_Cart_Model|false
 	 */
-	public function update($hash_key, $data)
-	{
+	public function update( $hash_key, $data ) {
 		$wait_period = $this->settings['wait_period'] ?? 1;
 		$wait_period = $wait_period * 60;
 
 		try {
-			$abandoned_cart = Abandoned_Cart_Model::updateByHashKey($hash_key, $data);
-			if (! $abandoned_cart) {
+			$abandoned_cart = Abandoned_Cart_Model::updateByHashKey( $hash_key, $data );
+			if ( ! $abandoned_cart ) {
 				return false;
 			}
 
-			if ($this->get_skip_session()) {
+			if ( $this->get_skip_session() ) {
 				$abandoned_cart->status = 'opt-out';
 				$abandoned_cart->save();
 			}
 
-			QuillCRM::instance()->abandoned_cart_tasks->schedule_single(time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id);
+			QuillCRM::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			return $abandoned_cart;
-		} catch (\Exception $e) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 	}
@@ -737,9 +720,8 @@ class Abandoned_Cart
 	 *
 	 * @return string
 	 */
-	public function get_session()
-	{
-		return sanitize_text_field($_COOKIE['quillcrm_abandoned_cart'] ?? '');
+	public function get_session() {
+		 return sanitize_text_field( $_COOKIE['quillcrm_abandoned_cart'] ?? '' );
 	}
 
 	/**
@@ -749,17 +731,16 @@ class Abandoned_Cart
 	 *
 	 * @param string $hash_key Hash key.
 	 */
-	public function save_session($hash_key)
-	{
-		if (empty($hash_key)) {
+	public function save_session( $hash_key ) {
+		if ( empty( $hash_key ) ) {
 			return;
 		}
 		// Save the hash key in the cookie with proper path and domain.
-		setcookie('quillcrm_abandoned_cart', $hash_key, time() + (86400 * 30), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true);
+		setcookie( 'quillcrm_abandoned_cart', $hash_key, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
 
 		// Also store in WC session as fallback.
-		if (WC()->session) {
-			WC()->session->set('quillcrm_cart_hash', $hash_key);
+		if ( WC()->session ) {
+			WC()->session->set( 'quillcrm_cart_hash', $hash_key );
 		}
 	}
 
@@ -770,14 +751,13 @@ class Abandoned_Cart
 	 *
 	 * @return void
 	 */
-	public function clear_session()
-	{
+	public function clear_session() {
 		// Clear the hash key from the cookie.
-		setcookie('quillcrm_abandoned_cart', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true);
+		setcookie( 'quillcrm_abandoned_cart', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
 
 		// Also clear from WC session.
-		if (WC()->session) {
-			WC()->session->set('quillcrm_cart_hash', null);
+		if ( WC()->session ) {
+			WC()->session->set( 'quillcrm_cart_hash', null );
 		}
 	}
 
@@ -786,9 +766,8 @@ class Abandoned_Cart
 	 *
 	 * @since 1.0.0
 	 */
-	public function set_skip_session()
-	{
-		setcookie('quillcrm_abandoned_cart_skip', '1', time() + (86400 * 7), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true);
+	public function set_skip_session() {
+		setcookie( 'quillcrm_abandoned_cart_skip', '1', time() + ( 86400 * 7 ), COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
 	}
 
 	/**
@@ -798,8 +777,7 @@ class Abandoned_Cart
 	 *
 	 * @return string
 	 */
-	public function get_skip_session()
-	{
-		return sanitize_text_field($_COOKIE['quillcrm_abandoned_cart_skip'] ?? '');
+	public function get_skip_session() {
+		return sanitize_text_field( $_COOKIE['quillcrm_abandoned_cart_skip'] ?? '' );
 	}
 }

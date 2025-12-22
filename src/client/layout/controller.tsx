@@ -355,18 +355,17 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
-registerAdminPage('email-sequences', {
-	path: 'email-sequences',
-	component: () => <EmailSequences />,
-	label: __('Email Sequence', 'quillcrm'),
-	icon: <EmailSequenceIcon />,
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
-
 registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
-	component: () => <SequencesMail />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Email Sequence', 'quillcrm')}
+			description={__(
+				'View and manage email sequences with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Email Sequence', 'quillcrm'),
 	hidden: true,
 });

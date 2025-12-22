@@ -19,6 +19,7 @@ interface HeaderProps {
 	autoSaveEnabled?: boolean;
 	autoSaveInterval?: number;
 	onTemplatesSaved?: () => void;
+	handleNavigate?: (href: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -27,9 +28,11 @@ const Header: React.FC<HeaderProps> = ({
 	autoSaveEnabled = true,
 	autoSaveInterval = 10000,
 	onTemplatesSaved,
+	handleNavigate,
 }) => {
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
+	const navigate = handleNavigate ? handleNavigate : useNavigate();
+	console.log('handleNavigate', handleNavigate);
 	const { createNotice } = useDispatch('quillcrm/core');
 	const campaign = useSelect(
 		(select: any) => select('quillcrm/campaign').getCampaign(),
@@ -90,7 +93,9 @@ const Header: React.FC<HeaderProps> = ({
 
 		const { success } = await save();
 		if (success && campaign) {
-			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
+			handleNavigate
+				? handleNavigate(`campaigns/${campaign.id}/contacts`)
+				: navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
 

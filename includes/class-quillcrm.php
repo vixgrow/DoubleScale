@@ -59,6 +59,8 @@ final class QuillCRM {
 
 
 
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -153,9 +155,10 @@ final class QuillCRM {
 		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
 		// }
 
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_sequences' );
-		}
+		// Email sequences moved to Pro - scheduling handled by Pro plugin
+		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
+		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_sequences' );
+		// }
 
 		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily3' ) === false ) {
 			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily3' );
@@ -254,7 +257,6 @@ final class QuillCRM {
 		Email_Builder::instance();
 		GoHighLevel_OAuth::init();
 		Activity_Manager::instance();
-		Email_Sequences_Manager::instance();
 		User_Roles::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro
 		Install::init();

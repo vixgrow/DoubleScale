@@ -1077,7 +1077,8 @@ class REST_Contact_Controller extends REST_Controller {
 						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'email', 'like', '%' . $keywords . '%' )
-							->orWhere( 'phone', 'like', '%' . $keywords . '%' );
+							->orWhere( 'phone', 'like', '%' . $keywords . '%' )
+							->orWhere( 'whatsapp_phone', 'like', '%' . $keywords . '%' );
 					}
 				);
 			}

@@ -64,9 +64,15 @@ export function isEmailChannel(channel: CampaignChannelType): boolean {
 
 /**
  * Get recipient field name for channel
+ *
+ * Note: WhatsApp uses a separate 'whatsapp_phone' field (like HubSpot architecture)
+ * rather than sharing the 'phone' field with SMS.
  */
 export function getRecipientField(
 	channel: CampaignChannelType
-): 'email' | 'phone' {
+): 'email' | 'phone' | 'whatsapp_phone' {
+	if (channel === CAMPAIGN_CHANNEL.WHATSAPP) {
+		return 'whatsapp_phone';
+	}
 	return channelRequiresPhone(channel) ? 'phone' : 'email';
 }

@@ -541,6 +541,14 @@ type LineTaxData = {
 	total: string[];
 };
 
+// Communication tracking meta entry (for merge tags, WhatsApp template params, etc.)
+export type CommunicationTrackingMeta = {
+	id: number;
+	communication_tracking_id: number;
+	meta_key: string;
+	meta_value: any; // Can be object or string depending on meta_key
+};
+
 // Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
 export type TrackedMessage = {
 	id: number;
@@ -579,6 +587,7 @@ export type TrackedMessage = {
 	} | null; // Activity for individual messages (unified activities model)
 	campaign?: Partial<Campaign>;
 	unsubscribe_reason?: string; // Extracted from contact notes
+	communication_tracking_meta?: CommunicationTrackingMeta[]; // Meta data including merge tags and WhatsApp template params
 };
 
 // Legacy alias for backward compatibility

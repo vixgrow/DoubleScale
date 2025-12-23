@@ -92,6 +92,10 @@ class REST_Contact_Controller extends REST_Controller {
 							'type'        => 'string',
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
+						'has_whatsapp_phone' => array(
+							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'quillcrm' ),
+							'type'        => 'boolean',
+						),
 					),
 				),
 				array(
@@ -515,8 +519,9 @@ class REST_Contact_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'whatsapp_phone'  => array(
-					 'description'  => __( 'WhatsApp phone number of the contact.', 'quillcrm' ),
+					 'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quillcrm' ),
 					 'type'         => 'string',
+					 'pattern'      => '^\+[0-9]{1,15}$',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
@@ -1012,10 +1017,11 @@ class REST_Contact_Controller extends REST_Controller {
 			$page          = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$keywords      = $request->get_param( 'keywords' ) ?? '';
 			$filters       = $request->get_param( 'filters' );
-			$subscribed    = $request->get_param( 'subscribed' ) ?? false;
-			$campaign_type = $request->get_param( 'campaign_type' ) ?? null;
-			$from          = $request->get_param( 'from' ) ?? null;
-			$to            = $request->get_param( 'to' ) ?? null;
+			$subscribed          = $request->get_param( 'subscribed' ) ?? false;
+			$campaign_type       = $request->get_param( 'campaign_type' ) ?? null;
+			$has_whatsapp_phone  = $request->get_param( 'has_whatsapp_phone' ) ?? null;
+			$from                = $request->get_param( 'from' ) ?? null;
+			$to                  = $request->get_param( 'to' ) ?? null;
 			$query         = Contact_Model::query();
 			$total_count   = $query->count();
 
@@ -1067,6 +1073,21 @@ class REST_Contact_Controller extends REST_Controller {
 					// Apply recipient field filter (phone/email availability)
 					$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
 					$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
+				}
+			}
+
+			// Apply WhatsApp phone filter
+			if ( ! is_null( $has_whatsapp_phone ) ) {
+				if ( $has_whatsapp_phone ) {
+					$contacts = $contacts->whereNotNull( 'whatsapp_phone' )
+						->where( 'whatsapp_phone', '!=', '' );
+				} else {
+					$contacts = $contacts->where(
+						function ( $query ) {
+							$query->whereNull( 'whatsapp_phone' )
+								->orWhere( 'whatsapp_phone', '=', '' );
+						}
+					);
 				}
 			}
 

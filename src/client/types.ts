@@ -928,4 +928,29 @@ export const CAMPAIGN_STATUS = {
 export type CampaignStatus =
 	(typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];
 
+// Contact subscription status constants
+export const CONTACT_STATUS = {
+	EMAIL: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BOUNCED: 'bounced',
+		BLOCKED: 'blocked',
+		UNVERIFIED: 'unverified',
+	},
+	SMS: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BLOCKED: 'blocked',
+	},
+	WHATSAPP: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BLOCKED: 'blocked',
+	},
+} as const;
+
+export type EmailStatus = (typeof CONTACT_STATUS.EMAIL)[keyof typeof CONTACT_STATUS.EMAIL];
+export type SmsStatus = (typeof CONTACT_STATUS.SMS)[keyof typeof CONTACT_STATUS.SMS];
+export type WhatsAppStatus = (typeof CONTACT_STATUS.WHATSAPP)[keyof typeof CONTACT_STATUS.WHATSAPP];
+
 export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

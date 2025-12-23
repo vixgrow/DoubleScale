@@ -114,7 +114,7 @@ class Contact_Model extends Model {
 	public $rules = array(
 		'email'          => 'required|email',
 		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
-		'whatsapp_phone' => 'nullable|regex:/^\+?[0-9]+$/',
+		'whatsapp_phone' => 'nullable|regex:/^\+[0-9]{1,15}$/',
 		'zip'            => 'nullable|numeric',
 	);
 
@@ -129,7 +129,7 @@ class Contact_Model extends Model {
 		'email.required'        => 'Contact email field is required.',
 		'email.email'           => 'Invalid email address.',
 		'phone.regex'           => 'Invalid phone number.',
-		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number.',
+		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
 		'zip.numeric'           => 'Invalid zip code.',
 	);
 

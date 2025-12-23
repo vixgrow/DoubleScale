@@ -234,31 +234,27 @@ export type EmailTemplate = {
 };
 
 // SMS Template Type (for frontend use)
+// Note: SMS uses STOP keyword for unsubscribe, not URL links
 export type SMSTemplate = {
 	id?: number;
 	name: string;
 	type: 'sms';
 	body: string;
 	subject?: never; // SMS doesn't have subject
-	settings?: {
-		// For UI state management only
-		add_unsubscribe?: boolean;
-	};
+	settings?: Record<string, never>; // No settings needed - unsubscribe via STOP keyword
 	created_at?: string;
 	updated_at?: string;
 };
 
 // WhatsApp Template Type (for frontend use)
+// Note: WhatsApp uses STOP keyword for unsubscribe, not URL links
 export type WhatsAppTemplate = {
 	id?: number;
 	name: string;
 	type: 'whatsapp';
 	body: string;
 	subject?: never; // WhatsApp doesn't have subject
-	settings?: {
-		// For UI state management only
-		add_unsubscribe?: boolean;
-	};
+	settings?: Record<string, never>; // No settings needed - unsubscribe via STOP keyword
 	created_at?: string;
 	updated_at?: string;
 };

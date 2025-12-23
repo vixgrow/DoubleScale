@@ -990,8 +990,9 @@ abstract class Abstract_Campaign_Processing {
 			$tracked_message = $processed_message;
 		}
 
-		// Add unsubscribe link if enabled (if tracking class supports it)
-		if ( $add_unsubscribe && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
+		// Add unsubscribe link if enabled (EMAIL ONLY - SMS/WhatsApp use STOP keyword instead)
+		// SMS/WhatsApp unsubscribe is handled via STOP keyword in incoming message handler
+		if ( $add_unsubscribe && $this->channel === Campaign_Channel::STR_EMAIL && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
 			$tracked_message = $tracking_class::add_unsubscribe_link( $tracked_message, $campaign_message->hash_key );
 		}
 

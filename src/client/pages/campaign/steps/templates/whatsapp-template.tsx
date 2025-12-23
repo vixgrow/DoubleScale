@@ -18,7 +18,6 @@ import {
 	Stepper,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import type { WhatsAppTemplate, Campaign } from '@quillcrm/client';
 import type { ExtendedCampaign } from '@/stores/campaign/types';
@@ -37,9 +36,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 		name: __('WhatsApp Message', 'quillcrm'),
 		type: CAMPAIGN_CHANNEL.WHATSAPP,
 		body: '',
-		settings: {
-			add_unsubscribe: true,
-		},
+		settings: {},
 	};
 
 	const [template, setTemplate] = useState<WhatsAppTemplate>(defaultTemplate);
@@ -58,10 +55,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 				name: backendTemplate.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.WHATSAPP,
 				body: backendTemplate.body || '',
-				settings: {
-					add_unsubscribe:
-						backendTemplate.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			});
 		}
 	}, [campaign?.settings?.templates]);
@@ -111,9 +105,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 				name: template.name,
 				type: template.type,
 				body: template.body,
-				settings: {
-					add_unsubscribe: template.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			};
 
 			const endpoint = getCampaignEndpoint(campaign.type);
@@ -269,32 +261,15 @@ const WhatsAppTemplateStep: React.FC = () => {
 
 						<Separator />
 
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-lg font-semibold text-foreground">
-									{__('Add Unsubscribe Option', 'quillcrm')}
-								</p>
-								<p className="text-sm text-muted-foreground">
-									{__(
-										'Automatically add an unsubscribe option to the message',
-										'quillcrm'
-									)}
-								</p>
-							</div>
-							<Switch
-								checked={template.settings?.add_unsubscribe}
-								onCheckedChange={(checked) =>
-									updateTemplate({
-										settings: {
-											...template.settings,
-											add_unsubscribe: checked,
-										},
-									})
-								}
-							/>
+						<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+							<p className="text-sm text-gray-700">
+								<strong>{__('Unsubscribe:', 'quillcrm')}</strong>{' '}
+								{__(
+									'Recipients can reply STOP to unsubscribe from WhatsApp messages. This is handled automatically.',
+									'quillcrm'
+								)}
+							</p>
 						</div>
-
-						<Separator />
 
 						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
 							<p className="text-sm text-blue-800">

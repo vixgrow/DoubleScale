@@ -52,12 +52,12 @@ class Template_Field_Mapper
             Campaign_Channel::CHANNEL_SMS => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
-                'settings_fields' => array('add_unsubscribe'),
+                'settings_fields' => array(), // SMS uses STOP keyword for unsubscribe, not URL links
             ),
             Campaign_Channel::CHANNEL_WHATSAPP => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
-                'settings_fields' => array('add_unsubscribe'),
+                'settings_fields' => array(), // WhatsApp uses STOP keyword for unsubscribe, not URL links
             ),
         );
 

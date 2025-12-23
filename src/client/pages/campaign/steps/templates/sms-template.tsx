@@ -49,9 +49,7 @@ const SMSTemplateStep: React.FC = () => {
 		name: __('SMS Message', 'quillcrm'),
 		type: CAMPAIGN_CHANNEL.SMS,
 		body: '',
-		settings: {
-			add_unsubscribe: true,
-		},
+		settings: {},
 	};
 
 	const [template, setTemplate] = useState<SMSTemplate>(defaultTemplate);
@@ -70,10 +68,7 @@ const SMSTemplateStep: React.FC = () => {
 				name: backendTemplate.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.SMS,
 				body: backendTemplate.body || '',
-				settings: {
-					add_unsubscribe:
-						backendTemplate.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			});
 		}
 	}, [campaign?.settings?.templates]);
@@ -131,9 +126,7 @@ const SMSTemplateStep: React.FC = () => {
 				name: template.name,
 				type: template.type,
 				body: template.body,
-				settings: {
-					add_unsubscribe: template.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			};
 
 			const endpoint = getCampaignEndpoint(campaign.type);

@@ -103,11 +103,6 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						return;
 					}
 
-					// Filter by is_automation flag (only show automation rules)
-					if (rule.is_automation !== true) {
-						return;
-					}
-
 					// If rule has no required_triggers, include it
 					if (
 						!rule.required_triggers ||

@@ -523,7 +523,7 @@ class Contact_Model extends Model {
 			}
 		}
 
-		// Create system note (dual-write for backward compatibility)
+
 		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
 

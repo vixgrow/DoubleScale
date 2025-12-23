@@ -287,6 +287,19 @@ const SMSTemplateStep: React.FC = () => {
 									{__('Maximum 1600 characters', 'quillcrm')}
 								</p>
 							</div>
+
+							{/* Unsubscribe Info */}
+							<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+								<p className="text-sm text-gray-700">
+									<strong>
+										{__('Unsubscribe:', 'quillcrm')}
+									</strong>{' '}
+									{__(
+										'A "Reply STOP to unsubscribe" footer will be automatically added to your message. Recipients can reply STOP to unsubscribe.',
+										'quillcrm'
+									)}
+								</p>
+							</div>
 						</div>
 					</PanelSettings>
 				</div>

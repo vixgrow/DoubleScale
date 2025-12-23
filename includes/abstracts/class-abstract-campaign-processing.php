@@ -996,6 +996,11 @@ abstract class Abstract_Campaign_Processing {
 			$tracked_message = $tracking_class::add_unsubscribe_link( $tracked_message, $campaign_message->hash_key );
 		}
 
+		// Add opt-out footer for SMS campaigns (WhatsApp uses templates which have this baked in)
+		if ( $this->channel === Campaign_Channel::STR_SMS ) {
+			$tracked_message = $this->add_opt_out_footer( $tracked_message );
+		}
+
 		return array(
 			'subject'   => $processed_subject,
 			'body'      => $tracked_message,
@@ -1132,6 +1137,45 @@ abstract class Abstract_Campaign_Processing {
 		$campaign_message->save();
 	}
 
+	/**
+	 * Add opt-out footer to message
+	 *
+	 * Adds "Reply STOP to unsubscribe" footer for SMS messages.
+	 * This is required for compliance with TCPA/CTIA guidelines.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $message Message content
+	 * @return string Message with opt-out footer
+	 */
+	protected function add_opt_out_footer( $message ) {
+		// Check if message already contains opt-out keywords
+		$opt_out_keywords = array( 'STOP', 'UNSUBSCRIBE', 'OPT OUT', 'OPTOUT' );
+		$message_upper    = strtoupper( $message );
+
+		foreach ( $opt_out_keywords as $keyword ) {
+			if ( strpos( $message_upper, $keyword ) !== false ) {
+				// Message already contains opt-out instruction, don't add duplicate
+				return $message;
+			}
+		}
+
+		/**
+		 * Filter the opt-out footer text for SMS messages
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $footer_text The opt-out footer text
+		 * @param string $channel     The channel type (sms)
+		 */
+		$footer_text = apply_filters(
+			'quillcrm_message_opt_out_footer',
+			__( 'Reply STOP to unsubscribe', 'quillcrm' ),
+			$this->channel
+		);
+
+		return $message . "\n\n" . $footer_text;
+	}
 
 	/**
 	 * Get message provider for this channel

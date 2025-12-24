@@ -29,7 +29,7 @@ import {
 	NoticeBanner,
 	ProFeatureNotice,
 } from '@/components';
-import { MessageCircle } from 'lucide-react';
+// import { MessageCircle } from 'lucide-react'; // Disabled: WhatsApp campaigns disabled
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
@@ -378,11 +378,12 @@ const Campaigns: React.FC = () => {
 			label: 'SMS Campaigns',
 			icon: <ContactSMSIcon width={24} height={24} />,
 		},
-		{
-			value: 'whatsapp',
-			label: 'WhatsApp Campaigns',
-			icon: <MessageCircle width={24} height={24} />,
-		},
+		// Disabled: WhatsApp campaigns disabled (individual messaging and automations still active)
+		// {
+		// 	value: 'whatsapp',
+		// 	label: 'WhatsApp Campaigns',
+		// 	icon: <MessageCircle width={24} height={24} />,
+		// },
 	];
 
 	// Campaign content component

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Process Conditions
  *
@@ -18,6 +19,10 @@ use QuillCRM\Models\Automation_Contact_Model;
  * Process Conditions class
  */
 class Process {
+
+
+
+
 
 	/**
 	 * Conditions
@@ -49,7 +54,7 @@ class Process {
 	}
 
 	/**
-	 * Check
+	 * Check OR Conditions
 	 *
 	 * @since 1.0.0
 	 *
@@ -59,16 +64,16 @@ class Process {
 		foreach ( $this->conditions ?? array() as $group ) {
 			$group_result = $this->check_group( $group );
 
-			if ( ! $group_result ) {
-				return false;
+			if ( $group_result ) {
+				return true;
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	/**
-	 * Check group
+	 * Check AND Conditions
 	 *
 	 * @since 1.0.0
 	 *

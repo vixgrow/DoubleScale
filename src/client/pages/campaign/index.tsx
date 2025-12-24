@@ -16,7 +16,7 @@ import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
 import './style.scss';
 import TemplatesStep from './steps/templates';
 import SMSTemplateStep from './steps/templates/sms-template';
-// import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
+import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import Builder from '../../../builder';
@@ -134,8 +134,8 @@ const Campaign: React.FC = () => {
 		switch (campaign.type) {
 			case CAMPAIGN_CHANNEL.SMS:
 				return <SMSTemplateStep />;
-			// case CAMPAIGN_CHANNEL.WHATSAPP:
-			// 	return <WhatsAppTemplateStep />;
+			case CAMPAIGN_CHANNEL.WHATSAPP:
+				return <WhatsAppTemplateStep />;
 			case CAMPAIGN_CHANNEL.EMAIL:
 			default:
 				return <TemplatesStep />;

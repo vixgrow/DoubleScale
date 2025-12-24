@@ -75,7 +75,7 @@ class Communication_Tracking_Model extends Model {
 		'clicked',        // Click tracking
 		'status',         // sent/pending/failed/delivered/read
 		'sent_at',        // When sent
-		'opened_at',      // When opened (emails only)
+		'opened_at',      // When opened (emails/whatsapp read)
 		'clicked_at',     // When clicked
 		'created_at',     // Record created
 		'updated_at',     // Record updated

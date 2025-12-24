@@ -24,11 +24,13 @@ import {
 	ScheduleCard,
 	SendTestEmailCard,
 	SendTestSMSCard,
+	SendTestWhatsAppCard,
 } from './components';
 import type {
 	NoticeMessage,
 	EmailTemplate,
 	SMSTemplate,
+	WhatsAppTemplate,
 } from '@quillcrm/client';
 
 const Review: React.FC = () => {
@@ -74,14 +76,15 @@ const Review: React.FC = () => {
 
 	// Get template info from campaign
 	// Backend attaches templates via attach_templates() method
-	type CampaignTemplate = EmailTemplate | SMSTemplate;
+	type CampaignTemplate = EmailTemplate | SMSTemplate | WhatsAppTemplate;
 	const template: CampaignTemplate | null =
 		(campaign?.settings?.templates?.[0] as CampaignTemplate) || null;
 
 	// Extract template data based on Template_Field_Mapper structure
 	// For email: subject, preview_text, from_name, from_email, reply_to are in settings
-	// For SMS: No sender fields needed (uses global Twilio phone number)
+	// For SMS/WhatsApp: No sender fields needed (uses global Twilio phone number)
 	const isEmailTemplate = template?.type === 'email';
+	const isWhatsAppTemplate = template?.type === 'whatsapp';
 	const emailSubject =
 		isEmailTemplate && (template as EmailTemplate).settings?.subject
 			? (template as EmailTemplate).settings!.subject
@@ -103,16 +106,27 @@ const Review: React.FC = () => {
 			? (template as EmailTemplate).settings!.preview_text
 			: '-';
 
+	// WhatsApp template data
+	const whatsAppTemplateName = isWhatsAppTemplate
+		? (template as WhatsAppTemplate).name || '-'
+		: '-';
+	const whatsAppTemplateBody = isWhatsAppTemplate
+		? (template as WhatsAppTemplate).body || ''
+		: '';
+
 	// Debug: Log template structure to verify data
 	useEffect(() => {
 		if (template) {
 			console.log('Review - Template data:', {
 				template,
+				campaignType: campaign?.type,
 				subject: emailSubject,
 				fromName,
 				fromEmail,
 				replyTo,
 				previewText,
+				whatsAppTemplateName,
+				whatsAppTemplateBody,
 			});
 		}
 	}, [template]);
@@ -353,9 +367,11 @@ const Review: React.FC = () => {
 								replyTo={replyTo}
 								emailSubject={emailSubject}
 								previewText={previewText}
+								templateName={whatsAppTemplateName}
+								templateBody={whatsAppTemplateBody}
 								onEdit={() => goToStep('template')}
 								button={
-									campaign?.type === 'email' ? true : false
+									campaign?.type === 'email' || campaign?.type === 'whatsapp'
 								}
 							/>
 
@@ -381,10 +397,12 @@ const Review: React.FC = () => {
 					</PanelSettings>
 				</div>
 
-				{/* Send Test Email or SMS Card */}
+				{/* Send Test Email, SMS, or WhatsApp Card */}
 				<div className="w-1/3">
 					{campaign?.type === 'sms' ? (
 						<SendTestSMSCard campaignId={campaign?.id} />
+					) : campaign?.type === 'whatsapp' ? (
+						<SendTestWhatsAppCard campaignId={campaign?.id} />
 					) : (
 						<SendTestEmailCard campaignId={campaign?.id} />
 					)}

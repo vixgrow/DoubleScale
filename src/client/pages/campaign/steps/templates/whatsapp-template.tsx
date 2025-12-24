@@ -3,9 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -13,7 +11,6 @@ import { applyFilters } from '@wordpress/hooks';
 import { useCampaignStep, campaignSteps } from '../shared';
 import {
 	PanelSettings,
-	CategoryIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
@@ -52,8 +49,7 @@ interface WhatsAppBusinessTemplate {
  */
 const WhatsAppTemplateStep: React.FC = () => {
 	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
-	const { createNotice } = useDispatch('quillcrm/core');
-	
+
 	// Template state
 	const [templates, setTemplates] = useState<WhatsAppBusinessTemplate[]>([]);
 	const [selectedTemplate, setSelectedTemplate] = useState<WhatsAppBusinessTemplate | null>(null);

@@ -57,7 +57,7 @@ class Campaigns_Table extends Migration {
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
             description TEXT,
-            status VARCHAR(255) NOT NULL DEFAULT "inactive",
+            status VARCHAR(50) NOT NULL DEFAULT "inactive",
             type TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Email, 2=SMS, 3=WhatsApp, 4=Sequence Mail, 5=Email Sequence",
             settings TEXT,
             parent_id BIGINT(20) NOT NULL DEFAULT 0,

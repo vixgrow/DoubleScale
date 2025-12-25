@@ -133,7 +133,7 @@ class Admin {
 			__( 'Pipelines', 'quillcrm' ),
 			__( 'Pipelines', 'quillcrm' ),
 			'quillcrm_access',
-			'quillcrm&path=pipelines',
+			'quillcrm&path=sales-pipeline',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Automations

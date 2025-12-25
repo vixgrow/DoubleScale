@@ -11,6 +11,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { ChevronRight } from 'lucide-react';
 import { useRef, useEffect } from 'react';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -54,7 +55,8 @@ const Integration: React.FC<IntegrationProps> = ({
 }) => {
 	const { fields, settings, label, description, is_pro } = integration;
 	const isAppBased = !!fields.app;
-	const isProFeature = is_pro === true;
+	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProFeature = is_pro === true && !isProActive;
 
 	const initialValues = isAppBased
 		? typeof settings.app === 'object'
@@ -176,23 +178,35 @@ const Integration: React.FC<IntegrationProps> = ({
 							{/* Credentials/App Card */}
 							<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
 								<CardContent className="flex-1 overflow-y-auto p-6">
-									{!isAppBased ? (
-										slug === 'twilio' ? (
-											<TwilioCredentials
+								{!isAppBased ? (
+									(() => {
+										// Determine default component based on slug
+										// Twilio has a custom component with test connection in base plugin
+										let DefaultComponent = Credentials;
+										if (slug === 'twilio') {
+											DefaultComponent = TwilioCredentials;
+										}
+										// Allow Pro plugin to override credentials component
+										const CredentialsComponent = applyFilters(
+											'quillcrm_integration_credentials_component',
+											DefaultComponent,
+											slug
+										) as React.ComponentType<{
+											integration: typeof integration;
+											slug: string;
+											fieldsValue: Record<string, any>;
+											setFieldsValue: (value: Record<string, any>) => void;
+										}>;
+										return (
+											<CredentialsComponent
 												integration={integration}
 												slug={slug}
 												fieldsValue={fieldsValue}
 												setFieldsValue={setFieldsValue}
 											/>
-										) : (
-											<Credentials
-												integration={integration}
-												slug={slug}
-												fieldsValue={fieldsValue}
-												setFieldsValue={setFieldsValue}
-											/>
-										)
-									) : (
+										);
+									})()
+								) : (
 										<App
 											integration={integration}
 											fieldsValue={fieldsValue}

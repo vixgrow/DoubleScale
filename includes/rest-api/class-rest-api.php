@@ -29,7 +29,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_Log_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Automation_Reports_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Reports_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_User_Management_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Email_Sequence_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Plugins_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
 
@@ -39,6 +38,7 @@ use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
  * @since 1.0.0
  */
 class REST_API {
+
 
 
 	/**
@@ -106,7 +106,6 @@ class REST_API {
 			REST_Automation_Reports_Controller::class,
 			// Pipeline, Deal, Activity, Stage, Reports, Link Triggers, and Custom Fields controllers moved to Pro plugin
 			REST_User_Management_Controller::class,
-			REST_Email_Sequence_Controller::class,
 			REST_Plugins_Controller::class,
 			Rest_Form_Controller::class,
 		);

@@ -1,4 +1,5 @@
 <?php
+
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
@@ -7,6 +8,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 class Communication_Tracking_Meta_Model extends Model {
+
 	protected $table       = 'quillcrm_communication_tracking_meta';
 	protected $primary_key = 'id';
 	protected $fillable    = array(
@@ -28,15 +30,15 @@ class Communication_Tracking_Meta_Model extends Model {
 	/**
 	 * Capture merge tags using pre-extracted keys (optimized approach)
 	 *
-	 * @param int           $communication_tracking_id Communication tracking ID
-	 * @param array         $merge_tag_keys Pre-extracted merge tag keys
-	 * @param Contact_Model $contact Contact model
+	 * @param int                                                     $communication_tracking_id Communication tracking ID
+	 * @param array                                                   $merge_tag_keys Pre-extracted merge tag keys
+	 * @param Contact_Model|\QuillCRM\Models\Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact model
 	 * @return Communication_Tracking_Meta_Model
 	 */
-	public static function capture_merge_tags_from_keys( $communication_tracking_id, $merge_tag_keys, Contact_Model $contact ) {
+	public static function capture_merge_tags_from_keys( $communication_tracking_id, $merge_tag_keys, $contact_or_automation_contact ) {
 		$merge_tag_values = Merge_Tags_Manager::instance()->get_merge_tag_values_for_keys(
 			$merge_tag_keys,
-			$contact
+			$contact_or_automation_contact
 		);
 
 		return self::create(
@@ -74,8 +76,8 @@ class Communication_Tracking_Meta_Model extends Model {
 	 */
 	public static function get_meta_value( $communication_tracking_id, $meta_key ) {
 		$meta = self::where( 'communication_tracking_id', $communication_tracking_id )
-					->where( 'meta_key', $meta_key )
-					->first();
+			->where( 'meta_key', $meta_key )
+			->first();
 
 		return $meta ? $meta->meta_value : null;
 	}
@@ -134,7 +136,7 @@ class Communication_Tracking_Meta_Model extends Model {
 				// Return stored value if exists, otherwise return empty
 				$result = isset( $merge_tags[ $full_tag ] ) ? $merge_tags[ $full_tag ] : '';
 				error_log( "QuillCRM: Merge tag {$full_tag} result: " . $result );
-				
+
 				return $result;
 			},
 			$template_content

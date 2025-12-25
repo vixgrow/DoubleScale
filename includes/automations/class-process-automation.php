@@ -23,13 +23,6 @@ use QuillCRM\Automations\Conditions\Process as Process_Conditions;
  */
 class Process_Automation {
 
-
-
-
-
-
-
-
 	/**
 	 * Automation
 	 *
@@ -226,14 +219,14 @@ class Process_Automation {
 			$next_step          = $this->get_next_step( $step );
 
 			if ( ! $result ) {
-				$this->add_automation_contact_process( $step, $automation_contact->id, 'failed' );
+				$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'failed' );
 				$this->update_automation_contact_status( $automation_contact, 'failed', $step->id, $next_step ? $next_step->id : 0 );
 				throw new Exception( \__( 'Action failed', 'quillcrm' ) );
 			}
 
 			$status = $action->auto_enqueue ? 'completed' : 'pending';
 			// Add to the automation_contact_processes table
-			$this->add_automation_contact_process( $step, $automation_contact->id, $status );
+			$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, $status );
 
 			if ( $action->auto_enqueue ) {
 				if ( $next_step ) {
@@ -336,7 +329,7 @@ class Process_Automation {
 			$result             = new Process_Conditions( $automation_contact, $conditions );
 			$check              = $result->check();
 
-			$this->add_automation_contact_process( $step, $automation_contact->id, 'completed' );
+			$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'completed' );
 			if ( $check ) {
 				$this->process_yes_steps( $step, $automation_contact );
 			} else {
@@ -440,7 +433,7 @@ class Process_Automation {
 			$skip               = $step->get_setting( 'skip', false );
 			$next_step          = $this->get_next_step( $step );
 			if ( $skip ) {
-				$this->add_automation_contact_process( $step, $automation_contact->id, 'skipped' );
+				$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'skipped' );
 				if ( $next_step ) {
 					$this->enqueue_step( $next_step->id, $automation_contact->id );
 				}
@@ -448,7 +441,7 @@ class Process_Automation {
 			}
 
 			// Create a process record for the goal step with pending status
-			$this->add_automation_contact_process( $step, $automation_contact->id, 'pending' );
+			$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'pending' );
 			$this->update_automation_contact_status( $automation_contact, 'pending', $step->id, $next_step ? $next_step->id : 0 );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
@@ -499,10 +492,11 @@ class Process_Automation {
 	 *
 	 * @return void
 	 */
-	public function add_automation_contact_process( $step, $automation_contact_id, $status ) {
+	public function add_automation_contact_process( $step, $contact_id, $automation_contact_id, $status ) {
 		$this->automation->processes()->create(
 			array(
 				'automation_contact_id' => $automation_contact_id,
+				'contact_id'            => $contact_id,
 				'step_id'               => $step->id,
 				'status'                => $status,
 			)

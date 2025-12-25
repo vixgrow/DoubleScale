@@ -26,6 +26,7 @@ final class Merge_Tags_Manager {
 
 
 
+
 	/**
 	 * Registed merge tags
 	 *
@@ -280,7 +281,7 @@ final class Merge_Tags_Manager {
 		}
 
 		// Fall back to fresh processing for previews and non-tracking contexts
-		error_log( "QuillCRM: Using fresh merge tag processing - no tracking context" );
+		error_log( 'QuillCRM: Using fresh merge tag processing - no tracking context' );
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
 			function ( $matches ) use ( $contact ) {
@@ -313,13 +314,13 @@ final class Merge_Tags_Manager {
 	private function process_merge_tags_with_stored_values( $content, $tracking_id ) {
 		// Debug: Log that we're using stored values
 		error_log( "QuillCRM: Using stored merge tag values for tracking ID: {$tracking_id}" );
-		
+
 		// Use the Communication_Tracking_Meta_Model to render with stored values
 		$result = \QuillCRM\Models\Communication_Tracking_Meta_Model::render_with_stored_values( $tracking_id, $content );
-		
+
 		// Debug: Log the result
-		error_log( "QuillCRM: Stored values result length: " . strlen( $result ) );
-		
+		error_log( 'QuillCRM: Stored values result length: ' . strlen( $result ) );
+
 		return $result;
 	}
 
@@ -354,19 +355,19 @@ final class Merge_Tags_Manager {
 	/**
 	 * Get values for specific merge tag keys using contact
 	 *
-	 * @param array         $merge_tag_keys Array of merge tag keys to get values for
-	 * @param \QuillCRM\Models\Contact_Model $contact Contact to get values for
+	 * @param array                                                   $merge_tag_keys Array of merge tag keys to get values for
+	 * @param Contact_Model|\QuillCRM\Models\Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact model
 	 * @return array Array of merge tag keys and their values
 	 */
-	public function get_merge_tag_values_for_keys( $merge_tag_keys, $contact ) {
+	public function get_merge_tag_values_for_keys( $merge_tag_keys, $contact_or_automation_contact ) {
 		$merge_tags = array();
 
 		foreach ( $merge_tag_keys as $tag_key ) {
-			list( $group, $slug ) = explode( ':', $tag_key, 2 );
+			list($group, $slug) = explode( ':', $tag_key, 2 );
 
 			$merge_tag = $this->get_merge_tag( $group, $slug );
 			if ( $merge_tag ) {
-				$value                  = $merge_tag->get_tag_value( $contact, $slug );
+				$value                  = $merge_tag->get_tag_value( $contact_or_automation_contact, $slug );
 				$merge_tags[ $tag_key ] = $value;
 			}
 		}

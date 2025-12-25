@@ -17,6 +17,7 @@ namespace QuillCRM\Services;
 class Template_Data_Preparer {
 
 
+
 	/**
 	 * Prepare template data from individual fields (email)
 	 * Converts raw content fields into template data format expected by Campaign_Template_Factory
@@ -148,17 +149,25 @@ class Template_Data_Preparer {
 				// Load parent to get from_name, from_email, reply_to
 				$parent_campaign = \QuillCRM\Models\Campaign_Model::find( $data['parent_id'] );
 				if ( $parent_campaign && isset( $parent_campaign->settings ) ) {
-					// Merge parent settings with sequence data
+					$site_name   = get_option( 'blogname', '' );
+					$admin_email = get_option( 'admin_email' );
+
+					// Fallback just in case site title is empty
+					if ( empty( $site_name ) ) {
+						$site_name = wp_parse_url( home_url(), PHP_URL_HOST );
+					}
+
 					$merged_settings = array_merge(
 						array(
-							'from_name'       => $parent_campaign->settings['from_name'] ?? get_bloginfo( 'name' ),
-							'from_email'      => $parent_campaign->settings['from_email'] ?? get_option( 'admin_email' ),
-							'reply_to'        => $parent_campaign->settings['reply_to_email'] ?? get_option( 'admin_email' ),
+							'from_name'       => $parent_campaign->settings['from_name'] ?? $site_name,
+							'from_email'      => $parent_campaign->settings['from_email'] ?? $admin_email,
+							'reply_to'        => $parent_campaign->settings['reply_to_email'] ?? $admin_email,
 							'add_unsubscribe' => true,
 							'enable_utm'      => false,
 						),
 						$data
 					);
+
 					return self::prepare_from_settings( $merged_settings, $channel_type );
 				}
 			}

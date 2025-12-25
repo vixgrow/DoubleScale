@@ -28,6 +28,7 @@ use QuillCRM\Constants\Campaign_Channel;
 class Email_Processing extends Abstract_Campaign_Processing {
 
 
+
 	/**
 	 * Communication channel
 	 *
@@ -114,7 +115,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 				$campaign_message->id,
 				$this->template_merge_tag_keys,
-				$contact
+				$contact_or_automation_contact
 			);
 		}
 

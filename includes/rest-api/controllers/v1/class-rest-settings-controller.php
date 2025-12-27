@@ -168,10 +168,6 @@ class REST_Settings_Controller extends REST_Controller {
 							'type'    => 'integer',
 							'default' => Campaign_Rate_Limiter::instance()->get_default_per_second_limit( 'sms' ),
 						),
-						'max_in_day'    => array(
-							'type'    => 'integer',
-							'default' => Campaign_Rate_Limiter::instance()->get_default_daily_limit( 'sms' ),
-						),
 					),
 				),
 				'double_optin'    => array(
@@ -537,27 +533,6 @@ class REST_Settings_Controller extends REST_Controller {
 				return new WP_Error(
 					'invalid_rate_limit',
 					__( 'Max SMS per second cannot exceed 10 (Twilio account limit)', 'quillcrm' ),
-					array( 'status' => 400 )
-				);
-			}
-		}
-
-		// Validate max_in_day
-		if ( isset( $sms['max_in_day'] ) ) {
-			$max_in_day = intval( $sms['max_in_day'] );
-
-			if ( $max_in_day < 1 ) {
-				return new WP_Error(
-					'invalid_rate_limit',
-					__( 'Max SMS per day must be at least 1', 'quillcrm' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			if ( $max_in_day > 100000 ) {
-				return new WP_Error(
-					'invalid_rate_limit',
-					__( 'Max SMS per day cannot exceed 100,000', 'quillcrm' ),
 					array( 'status' => 400 )
 				);
 			}

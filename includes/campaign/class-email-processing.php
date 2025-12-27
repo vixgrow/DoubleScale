@@ -378,15 +378,6 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per day
-	 *
-	 * @return int
-	 */
-	protected function get_default_max_per_day() {
-		return 10000;
-	}
-
-	/**
 	 * Get default max per second
 	 *
 	 * @return int

@@ -46,12 +46,13 @@ class Campaign_Rate_Limiter {
 	/**
 	 * Default daily limits by channel
 	 *
+	 * Note: SMS and WhatsApp do not have daily limits enforced by this plugin.
+	 * Their rate limits are handled by the provider (Twilio, Meta, etc.).
+	 *
 	 * @var array
 	 */
 	private $default_daily_limits = array(
-		'email'    => 10000,
-		'sms'      => 1000,
-		'whatsapp' => 1000,
+		'email' => 10000,
 	);
 
 	/**

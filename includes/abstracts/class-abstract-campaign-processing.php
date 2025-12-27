@@ -491,10 +491,10 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	public function process_campaigns() {
-		// Check daily rate limit
-		$max_per_day = $this->settings['max_in_day'] ?? $this->rate_limiter->get_default_daily_limit( $this->channel );
+		// Check daily rate limit (only for channels that have daily limits configured)
+		$max_per_day = $this->get_max_per_day_setting();
 
-		if ( $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
+		if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
 			$daily_count = $this->rate_limiter->get_daily_count( $this->channel );
 			$this->rate_limiter->log_daily_limit_reached( $this->channel, $daily_count, $max_per_day );
 			return;
@@ -618,15 +618,15 @@ abstract class Abstract_Campaign_Processing {
 		// Get settings
 		$batch_size     = apply_filters( 'quillcrm_campaign_batch_size', 100, $this->channel );
 		$max_per_second = $this->settings['max_in_second'] ?? $this->rate_limiter->get_default_per_second_limit( $this->channel );
-		$max_per_day    = $this->settings['max_in_day'] ?? $this->rate_limiter->get_default_daily_limit( $this->channel );
+		$max_per_day    = $this->get_max_per_day_setting();
 
 		// Initialize per-second tracker
 		$this->rate_limiter->init_second_tracker( $this->channel );
 
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 
-			// Check daily limit at start of each batch
-			if ( $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
+			// Check daily limit at start of each batch (only for channels with daily limits)
+			if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
 				$daily_count = $this->rate_limiter->get_daily_count( $this->channel );
 				$this->rate_limiter->log_daily_limit_reached( $this->channel, $daily_count, $max_per_day );
 				break; // Stop processing, will continue tomorrow
@@ -662,8 +662,8 @@ abstract class Abstract_Campaign_Processing {
 					break 2;
 				}
 
-				// Re-check daily limit
-				if ( $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
+				// Re-check daily limit (only for channels with daily limits)
+				if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
 					update_option( $offset_key, $offset );
 					break 2;
 				}
@@ -1457,11 +1457,28 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per day - must be implemented by child classes
+	 * Get max per day setting for this channel
 	 *
-	 * @return int
+	 * Returns the max per day from settings, or the default from rate limiter.
+	 * Returns null for channels without daily limits (SMS, WhatsApp).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|null Max per day or null if no daily limit for this channel
 	 */
-	abstract protected function get_default_max_per_day();
+	protected function get_max_per_day_setting() {
+		// Check if channel has daily limits configured in rate limiter
+		$default_limit = $this->rate_limiter->get_default_daily_limit( $this->channel );
+
+		// If no default limit for this channel (returns fallback 10000 only for unknown channels)
+		// SMS and WhatsApp are not in the defaults array, so they'll get the fallback
+		// We explicitly check if it's email to apply daily limits
+		if ( 'email' !== $this->channel ) {
+			return null; // No daily limits for SMS/WhatsApp
+		}
+
+		return $this->settings['max_in_day'] ?? $default_limit;
+	}
 
 	/**
 	 * Get default max per second - must be implemented by child classes

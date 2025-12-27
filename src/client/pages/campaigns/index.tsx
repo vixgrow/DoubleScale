@@ -550,10 +550,11 @@ const Campaigns: React.FC = () => {
 		)}
 
 		{/* WhatsApp: Show provider warning if not configured */}
+		{/* For WhatsApp, navigate to integrations page where users can choose Twilio or Meta WhatsApp */}
 		{activeTab === 'whatsapp' && !isWhatsAppProviderConnected && !isWhatsAppProviderLoading && (
 			<ProviderNotConnectedWarning
 				channel="whatsapp"
-				onConfigureClick={() => setShowTwilioConfig(true)}
+				onConfigureClick={() => navigate(getToLink('/settings/integrations'))}
 			/>
 		)}
 

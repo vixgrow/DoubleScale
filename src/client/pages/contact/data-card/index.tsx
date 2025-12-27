@@ -53,7 +53,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		'quillcrm_contact_tab_component',
 		SMSBase,
 		'sms'
-	) as React.FC<{ contact_id: number }>;
+	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const Deals = applyFilters(
 		'quillcrm_contact_tab_component',
 		DealsBase,
@@ -63,7 +63,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		'quillcrm_contact_tab_component',
 		null,
 		'whatsapp'
-	) as React.FC<{ contact_id: number }> | null;
+	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }> | null;
 
 	const tabsList = [
 		{
@@ -117,7 +117,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			value: 'sms',
 			children: (
 				<CardContent className="pt-6">
-					<SMS contact_id={contact.id} />
+					<SMS contact_id={contact.id} navigate={navigate} />
 				</CardContent>
 			),
 		},
@@ -125,7 +125,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			value: 'whatsapp',
 			children: (
 				<CardContent className="pt-6">
-					<WhatsApp contact_id={contact.id} />
+					<WhatsApp contact_id={contact.id} navigate={navigate} />
 				</CardContent>
 			),
 		}] : []),

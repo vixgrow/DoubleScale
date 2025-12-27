@@ -31,7 +31,6 @@ import {
 	CardFooter,
 } from '@/components/ui/card';
 import Credentials from './credentials';
-import TwilioCredentials from './twilio-credentials';
 import App from './app';
 import Instructions from './instructions';
 import { Button } from '@quillcrm/components/ui/button';
@@ -180,16 +179,11 @@ const Integration: React.FC<IntegrationProps> = ({
 								<CardContent className="flex-1 overflow-y-auto p-6">
 								{!isAppBased ? (
 									(() => {
-										// Determine default component based on slug
-										// Twilio has a custom component with test connection in base plugin
-										let DefaultComponent = Credentials;
-										if (slug === 'twilio') {
-											DefaultComponent = TwilioCredentials;
-										}
 										// Allow Pro plugin to override credentials component
+										// Pro plugin provides custom components for Twilio and Meta WhatsApp
 										const CredentialsComponent = applyFilters(
 											'quillcrm_integration_credentials_component',
-											DefaultComponent,
+											Credentials,
 											slug
 										) as React.ComponentType<{
 											integration: typeof integration;

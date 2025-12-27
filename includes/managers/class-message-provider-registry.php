@@ -41,7 +41,8 @@ class Message_Provider_Registry {
 
 	/**
 	 * Default provider slugs per channel
-	 * MVP: Hardcoded to Twilio for SMS and WhatsApp
+	 * SMS: Twilio (only provider)
+	 * WhatsApp: Meta WhatsApp (preferred), falls back to Twilio if not configured
 	 *
 	 * @since 1.0.0
 	 *
@@ -49,7 +50,7 @@ class Message_Provider_Registry {
 	 */
 	private $default_providers = array(
 		'sms'      => 'twilio',
-		'whatsapp' => 'twilio',
+		'whatsapp' => 'meta-whatsapp',
 	);
 
 	/**
@@ -115,70 +116,82 @@ class Message_Provider_Registry {
 	/**
 	 * Get provider for a specific channel
 	 *
-	 * MVP: Returns default provider (Twilio) for SMS/WhatsApp
-	 * Future: Can accept preferred provider parameter
+	 * Returns a configured provider for the channel. If a preferred provider is specified,
+	 * it will be used if available and configured. Otherwise, falls back to:
+	 * 1. The default provider for the channel (if configured)
+	 * 2. Any other configured provider that supports the channel
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param string      $channel Channel type ('sms', 'whatsapp')
-	 * @param string|null $preferred_provider Optional provider slug (for future use)
+	 * @param string|null $preferred_provider Optional provider slug
 	 * @return Message_Provider_Interface|null Provider instance or null if not available
 	 */
 	public function get_provider( string $channel, ?string $preferred_provider = null): ?Message_Provider_Interface {
-		// Determine which provider to use
-		$provider_slug = $preferred_provider ?? $this->default_providers[ $channel ] ?? null;
-
-		if ( ! $provider_slug ) {
-			quillcrm_get_logger()->error(
-				sprintf( 'No default provider configured for channel: %s', $channel ),
-				array(
-					'code'    => 'no_default_provider',
-					'channel' => $channel,
-				)
-			);
-			return null;
+		// If preferred provider is specified, try it first
+		if ( $preferred_provider ) {
+			$provider = $this->get_configured_provider_by_slug( $preferred_provider, $channel );
+			if ( $provider ) {
+				return $provider;
+			}
 		}
 
-		// Get provider instance
+		// Try the default provider for this channel
+		$default_slug = $this->default_providers[ $channel ] ?? null;
+		if ( $default_slug ) {
+			$provider = $this->get_configured_provider_by_slug( $default_slug, $channel );
+			if ( $provider ) {
+				return $provider;
+			}
+		}
+
+		// Fallback: Find any configured provider that supports this channel
+		foreach ( $this->providers as $slug => $provider ) {
+			if ( $provider->supports_channel( $channel ) && $provider->is_configured() ) {
+				quillcrm_get_logger()->debug(
+					sprintf( 'Using fallback provider "%s" for channel: %s', $slug, $channel ),
+					array(
+						'code'          => 'fallback_provider_used',
+						'provider_slug' => $slug,
+						'channel'       => $channel,
+					)
+				);
+				return $provider;
+			}
+		}
+
+		// No configured provider found
+		quillcrm_get_logger()->debug(
+			sprintf( 'No configured provider found for channel: %s', $channel ),
+			array(
+				'code'    => 'no_configured_provider',
+				'channel' => $channel,
+			)
+		);
+		return null;
+	}
+
+	/**
+	 * Get a configured provider by slug for a specific channel
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $provider_slug Provider slug
+	 * @param string $channel Channel type
+	 * @return Message_Provider_Interface|null Provider if found, supports channel, and is configured
+	 */
+	private function get_configured_provider_by_slug( string $provider_slug, string $channel ): ?Message_Provider_Interface {
 		if ( ! isset( $this->providers[ $provider_slug ] ) ) {
-			quillcrm_get_logger()->error(
-				sprintf( 'Provider "%s" not registered for channel: %s', $provider_slug, $channel ),
-				array(
-					'code'          => 'provider_not_registered',
-					'provider_slug' => $provider_slug,
-					'channel'       => $channel,
-				)
-			);
 			return null;
 		}
 
 		$provider = $this->providers[ $provider_slug ];
 
-		// Verify provider supports the channel
 		if ( ! $provider->supports_channel( $channel ) ) {
-			quillcrm_get_logger()->error(
-				sprintf( 'Provider "%s" does not support channel: %s', $provider_slug, $channel ),
-				array(
-					'code'          => 'provider_channel_not_supported',
-					'provider_slug' => $provider_slug,
-					'provider_name' => $provider->get_provider_name(),
-					'channel'       => $channel,
-				)
-			);
 			return null;
 		}
 
-		// Verify provider is configured
 		if ( ! $provider->is_configured() ) {
-			quillcrm_get_logger()->error(
-				sprintf( 'Provider "%s" is not configured', $provider->get_provider_name() ),
-				array(
-					'code'          => 'provider_not_configured',
-					'provider_slug' => $provider_slug,
-					'provider_name' => $provider->get_provider_name(),
-					'channel'       => $channel,
-				)
-			);
 			return null;
 		}
 

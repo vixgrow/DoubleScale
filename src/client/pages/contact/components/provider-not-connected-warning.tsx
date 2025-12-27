@@ -1,5 +1,5 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { AlertTriangle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -11,12 +11,21 @@ interface ProviderNotConnectedWarningProps {
 /**
  * Shared component for displaying provider not connected warning
  * Used in SMS and WhatsApp tabs
+ * 
+ * For SMS: Only Twilio is available
+ * For WhatsApp: Both Twilio and Meta WhatsApp are available
  */
 export function ProviderNotConnectedWarning({
 	channel,
 	onConfigureClick,
 }: ProviderNotConnectedWarningProps) {
 	const channelName = channel === 'sms' ? __('SMS', 'quillcrm') : __('WhatsApp', 'quillcrm');
+
+	// For SMS, only Twilio is available
+	// For WhatsApp, both Twilio and Meta WhatsApp are available
+	const providerOptions = channel === 'sms' 
+		? __('Twilio', 'quillcrm')
+		: __('Twilio or Meta WhatsApp', 'quillcrm');
 
 	return (
 		<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
@@ -25,11 +34,11 @@ export function ProviderNotConnectedWarning({
 				<p className="text-sm text-yellow-800 mb-2">
 					{channel === 'sms'
 						? __(
-								'Twilio is not configured. Please configure Twilio to send SMS messages.',
+								'No SMS provider is configured. Please configure Twilio to send SMS messages.',
 								'quillcrm'
 						  )
 						: __(
-								'Twilio is not configured. Please configure Twilio to send WhatsApp messages.',
+								'No WhatsApp provider is configured. Please configure Twilio or Meta WhatsApp to send messages.',
 								'quillcrm'
 						  )}
 				</p>
@@ -40,8 +49,8 @@ export function ProviderNotConnectedWarning({
 					className="bg-white hover:bg-yellow-50"
 				>
 					{channel === 'sms'
-						? __('Configure Twilio to send SMS', 'quillcrm')
-						: __('Configure Twilio to send WhatsApp', 'quillcrm')}
+						? __('Configure SMS Provider', 'quillcrm')
+						: __('Configure WhatsApp Provider', 'quillcrm')}
 				</Button>
 			</div>
 		</div>

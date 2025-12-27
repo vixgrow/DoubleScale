@@ -311,11 +311,11 @@ const WhatsAppTemplateStep: React.FC = () => {
 								<AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
 								<div>
 									<p className="text-sm font-medium text-amber-900 mb-1">
-										{__('WhatsApp Business Templates Required', 'quillcrm')}
-									</p>
-									<p className="text-sm text-amber-800">
-										{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your Twilio console before using them here.', 'quillcrm')}
-									</p>
+									{__('WhatsApp Business Templates Required', 'quillcrm')}
+								</p>
+								<p className="text-sm text-amber-800">
+									{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your WhatsApp Business provider console (Meta or Twilio) before using them here.', 'quillcrm')}
+								</p>
 								</div>
 							</div>
 						</div>
@@ -333,14 +333,14 @@ const WhatsAppTemplateStep: React.FC = () => {
 							) : templates.length === 0 ? (
 								<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
 									<div className="flex gap-3">
-										<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-										<div>
-											<p className="text-sm font-medium text-yellow-900 mb-1">
-												{__('No WhatsApp templates found', 'quillcrm')}
-											</p>
-											<p className="text-sm text-yellow-800">
-												{__('Create and approve templates in your Twilio console, then refresh this page.', 'quillcrm')}
-											</p>
+									<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+									<div>
+										<p className="text-sm font-medium text-yellow-900 mb-1">
+											{__('No WhatsApp templates found', 'quillcrm')}
+										</p>
+										<p className="text-sm text-yellow-800">
+											{__('Create and approve templates in your WhatsApp Business provider console (Meta or Twilio), then refresh this page.', 'quillcrm')}
+										</p>
 											<Button
 												variant="outline"
 												size="sm"

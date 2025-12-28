@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Install
  * This class is responsible for handling the database installation
@@ -33,7 +32,6 @@ use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Activity_Associations_Table;
-use QuillCRM\Database\Migrations\Add_WhatsApp_Phone_Column;
 use QuillCRM\User_Roles\User_Roles;
 
 /**
@@ -47,7 +45,7 @@ class Install {
 	 * @since 1.0.0
 	 */
 	public static function init() {
-		 add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 	}
 
 	/**
@@ -72,13 +70,13 @@ class Install {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param bool $network_wide Whether the plugin is being network activated
+	 * @param bool $network_wide Whether the plugin is being network activated.
 	 */
 	public static function multisite_activate( $network_wide ) {
 		global $wpdb;
 
 		if ( is_multisite() && $network_wide ) {
-			// Get all blog IDs
+			// Get all blog IDs.
 			$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
 
 			foreach ( $blog_ids as $blog_id ) {
@@ -96,7 +94,7 @@ class Install {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $blog_id Blog ID of the new site
+	 * @param int $blog_id Blog ID of the new site.
 	 */
 	public static function activate_new_site( $blog_id ) {
 		if ( is_plugin_active_for_network( plugin_basename( QUILLCRM_PLUGIN_FILE ) ) ) {
@@ -116,6 +114,9 @@ class Install {
 		if ( 'yes' === get_transient( 'quillcrm_installing' ) ) {
 			return;
 		}
+
+		// If we made it till here nothing is running yet, lets set the transient now.
+		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 
 		$tables = apply_filters(
 			'quillcrm_database_tables',
@@ -146,24 +147,30 @@ class Install {
 			)
 		);
 
-		foreach ( $tables as $table => $class ) {
+		foreach ( $tables as $class ) {
 			if ( ! class_exists( $class ) ) {
 				continue;
 			}
 
-			/** @var \QuillCRM\Database\Migrations\Migration $migration */
+			/**
+			 * Migration instance.
+			 *
+			 * @var \QuillCRM\Database\Migrations\Migration $migration
+			 */
 			$migration = new $class();
 			$migration->run();
 		}
 
-		// Run column migrations for existing installations
-		self::run_column_migrations();
+		// Run version-specific migrations for existing installations.
+		// This must run BEFORE updating the version so failed migrations retry.
+		self::run_version_migrations();
 
-		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-		delete_transient( 'quillcrm_installing' );
 		User_Roles::add_roles_and_capabilities();
+
+		// Update version AFTER all migrations complete successfully.
 		self::update_quillcrm_version();
+
+		delete_transient( 'quillcrm_installing' );
 	}
 
 	/**
@@ -172,32 +179,85 @@ class Install {
 	 * @since 1.0.0
 	 */
 	private static function update_quillcrm_version() {
-		 update_option( 'quillcrm_version', QUILLCRM_VERSION );
+		update_option( 'quillcrm_version', QUILLCRM_VERSION );
 	}
 
 	/**
-	 * Run column migrations for existing installations.
+	 * Run version-specific migrations.
 	 *
-	 * These migrations add new columns to existing tables for
-	 * installations that already have the tables from previous versions.
+	 * These migrations run ONCE when upgrading from older versions.
+	 * Each migration checks the stored version and only runs if needed.
+	 *
+	 * IMPORTANT: Migrations must be listed in ascending version order.
+	 * The version number represents when the migration was introduced,
+	 * not the current plugin version.
 	 *
 	 * @since 1.1.0
 	 */
-	private static function run_column_migrations() {
-		$column_migrations = apply_filters(
-			'quillcrm_column_migrations',
-			array(
-				'add_whatsapp_phone_column' => Add_WhatsApp_Phone_Column::class,
-			)
-		);
+	private static function run_version_migrations() {
+		$current_version = get_option( 'quillcrm_version' );
 
-		foreach ( $column_migrations as $migration_name => $class ) {
-			if ( ! class_exists( $class ) ) {
-				continue;
-			}
-
-			$migration = new $class();
-			$migration->run();
+		// Skip for fresh installations - tables already have all columns.
+		// Fresh installs have no stored version yet.
+		if ( ! $current_version ) {
+			return;
 		}
+
+		// Version 1.1.0: Add WhatsApp columns to contacts table.
+		self::version_1_1_0_migration( $current_version );
+
+		// Future migrations go here in version order.
+
+		/**
+		 * Action hook for Pro or third-party version migrations.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param string $current_version The currently installed version before upgrade.
+		 */
+		do_action( 'quillcrm_run_version_migrations', $current_version );
+	}
+
+	/**
+	 * Version 1.1.0 migration.
+	 *
+	 * Adds WhatsApp columns to the contacts table:
+	 * - whatsapp_phone: Separate phone number for WhatsApp messaging
+	 * - whatsapp_status: Channel-specific subscription status
+	 * - Indexes for query performance
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string $current_version The currently installed version.
+	 */
+	private static function version_1_1_0_migration( $current_version ) {
+		global $wpdb;
+
+		// Only run if upgrading from version < 1.1.0.
+		if ( version_compare( $current_version, '1.1.0', '>=' ) ) {
+			return;
+		}
+
+		$table_name = $wpdb->prefix . 'quillcrm_contacts';
+
+		// Verify table exists before attempting migration.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Add whatsapp_phone column after phone.
+		$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN whatsapp_phone VARCHAR(255) DEFAULT NULL AFTER phone" );
+
+		// Add whatsapp_status column after sms_status.
+		$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN whatsapp_status VARCHAR(50) NOT NULL DEFAULT 'subscribed' AFTER sms_status" );
+
+		// Add indexes for WhatsApp columns.
+		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_phone (whatsapp_phone)" );
+		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_status (whatsapp_status)" );
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }

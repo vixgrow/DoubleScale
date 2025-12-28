@@ -203,6 +203,12 @@ abstract class Abstract_Tracking
 		$error_code    = $webhook_result['error_code'] ?? '';
 		$error_message = $webhook_result['error_message'] ?? '';
 
+		// Handle incoming messages - delegate to Messaging_Incoming handler.
+		if ( 'received' === $status ) {
+			$this->process_incoming_message( $provider, $webhook_data );
+			wp_die( 'OK' );
+		}
+
 		if ( empty( $message_id ) || empty( $status ) ) {
 			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' webhook missing required fields', array(
 				'message_id' => $message_id,
@@ -231,6 +237,43 @@ abstract class Abstract_Tracking
 		$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message );
 
 		wp_die( 'OK' ); // Acknowledge successful processing
+	}
+
+	/**
+	 * Process incoming message from webhook
+	 * Delegates to Messaging_Incoming handler if available (Pro feature).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $provider     Message provider instance.
+	 * @param array  $webhook_data Raw webhook data.
+	 * @return void
+	 */
+	protected function process_incoming_message( $provider, $webhook_data ) {
+		// Check if Messaging_Incoming class exists (Pro feature).
+		if ( ! class_exists( '\QuillCRM_Pro\Tracking\Messaging_Incoming' ) ) {
+			quillcrm_get_logger()->debug( ucfirst( $this->channel ) . ' incoming message received but Messaging_Incoming not available', array(
+				'code'    => "{$this->channel}_incoming_no_handler",
+				'channel' => $this->channel,
+			) );
+			return;
+		}
+
+		// Parse incoming message data using provider.
+		$parsed_data = $provider->parse_incoming_webhook( $webhook_data );
+
+		// Validate required fields.
+		if ( empty( $parsed_data['from_number'] ) || empty( $parsed_data['message_id'] ) ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' incoming message: missing required fields', array(
+				'code'    => "{$this->channel}_incoming_missing_fields",
+				'channel' => $this->channel,
+				'data'    => $parsed_data,
+			) );
+			return;
+		}
+
+		// Fire action for Pro to handle (Messaging_Incoming listens to this).
+		do_action( 'quillcrm_process_incoming_message', $parsed_data, $this->channel, $provider );
 	}
 
 	/**

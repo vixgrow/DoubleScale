@@ -42,7 +42,9 @@ class Message_Provider_Registry {
 	/**
 	 * Default provider slugs per channel
 	 * SMS: Twilio (only provider)
-	 * WhatsApp: Meta WhatsApp (preferred), falls back to Twilio if not configured
+	 * WhatsApp: Meta WhatsApp (only supported provider for WhatsApp)
+	 *
+	 * Note: Twilio WhatsApp support has been disabled. Only Meta WhatsApp is supported for WhatsApp messaging.
 	 *
 	 * @since 1.0.0
 	 *

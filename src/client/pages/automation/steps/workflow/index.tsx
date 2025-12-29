@@ -44,15 +44,16 @@ import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import ReactFlowWorkflow from './reactflow-workflow';
 import WorkflowSidebar from './workflow-sidebar';
-import { ActionIcon, ConditionsIcon, DeleteIcon, GoalIcon, TimerBlockIcon } from '@quillcrm/components';
+import {
+	ActionIcon,
+	ConditionsIcon,
+	DeleteIcon,
+	GoalIcon,
+	TimerBlockIcon,
+} from '@quillcrm/components';
 
 const Workflow: React.FC = () => {
-	const {
-		automation,
-		steps,
-		isLoading,
-		setSteps,
-	} = useAutomationContext();
+	const { automation, steps, isLoading, setSteps } = useAutomationContext();
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const useReactFlow = true;
@@ -72,6 +73,7 @@ const Workflow: React.FC = () => {
 					formId: automation.settings.form_id,
 					triggerId: automation.settings.form_type,
 					automationId: automation.id,
+					postId: automation.settings.post_id, // For Elementor forms
 				});
 			}
 		}
@@ -105,7 +107,6 @@ const Workflow: React.FC = () => {
 		return { yesChildren, noChildren };
 	};
 
-
 	const trigger = automation ? getTrigger(automation.trigger) : null;
 	const typesOptions = {
 		action: {
@@ -126,7 +127,7 @@ const Workflow: React.FC = () => {
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <Power className='w-6 h-6' />,
+			icon: <Power className="w-6 h-6" />,
 		},
 	};
 
@@ -278,7 +279,10 @@ const Workflow: React.FC = () => {
 									<AlertDialogContent className="z-[150000]">
 										<AlertDialogHeader>
 											<AlertDialogTitle>
-												{__('Are you sure?', 'quillcrm')}
+												{__(
+													'Are you sure?',
+													'quillcrm'
+												)}
 											</AlertDialogTitle>
 											<AlertDialogDescription>
 												{__(
@@ -369,10 +373,12 @@ const Workflow: React.FC = () => {
 					</div>
 				) : (
 					automation && (
-						<div className={cn(
-							"qcrm-automation-workflow",
-							(currentStep || visible) ? "has-sidebar" : ""
-						)}>
+						<div
+							className={cn(
+								'qcrm-automation-workflow',
+								currentStep || visible ? 'has-sidebar' : ''
+							)}
+						>
 							{useReactFlow ? (
 								<ReactFlowWorkflow
 									currentStep={currentStep}
@@ -380,7 +386,8 @@ const Workflow: React.FC = () => {
 									isSidebarOpen={
 										visible ||
 										(currentStep !== null &&
-											currentStep.type !== 'end_automation' &&
+											currentStep.type !==
+												'end_automation' &&
 											currentStep.type !== 'condition' &&
 											(!!currentStep.action ||
 												currentStep.type === 'goal' ||

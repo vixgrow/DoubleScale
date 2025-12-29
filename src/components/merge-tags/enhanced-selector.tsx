@@ -42,6 +42,7 @@ interface EnhancedMergeTagsSelectorProps {
 	triggerId?: string;
 	formId?: string | number;
 	automationId?: string | number;
+	postId?: string | number; // For Elementor forms
 }
 
 const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
@@ -51,6 +52,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	triggerId,
 	formId,
 	automationId,
+	postId,
 }) => {
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 	const [dynamicMergeTags, setDynamicMergeTags] =
@@ -68,13 +70,23 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	const activeFormId = formId || formContext?.formId;
 	// Use automationId prop or fallback to formContext
 	const activeAutomationId = automationId || formContext?.automationId;
+	// Use postId prop or fallback to formContext (for Elementor forms)
+	const activePostId = postId || formContext?.postId;
+
+	console.log('activePostId', activePostId);
 
 	// Load dynamic merge tags when form context changes
 	useEffect(() => {
 		if (visible && activeFormId && activeTrigger) {
 			loadDynamicMergeTags();
 		}
-	}, [visible, activeFormId, activeTrigger, activeAutomationId]);
+	}, [
+		visible,
+		activeFormId,
+		activeTrigger,
+		activeAutomationId,
+		activePostId,
+	]);
 
 	const loadDynamicMergeTags = async () => {
 		if (!activeFormId || !activeTrigger) return;
@@ -87,6 +99,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 
 			if (activeFormId) params.form_id = activeFormId;
 			if (activeAutomationId) params.automation_id = activeAutomationId;
+			if (activePostId) params.post_id = activePostId; // For Elementor forms
 
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/automations/merge-tags', params),
@@ -157,6 +170,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 							<strong>Context:</strong>
 							{activeTrigger && ` Trigger: ${activeTrigger}`}
 							{activeFormId && ` | Form ID: ${activeFormId}`}
+							{activePostId && ` | Post ID: ${activePostId}`}
 							{dynamicMergeTags && (
 								<span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
 									Dynamic Fields Loaded

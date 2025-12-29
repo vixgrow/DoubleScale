@@ -32,6 +32,8 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
+
+
 	/**
 	 * REST Base
 	 *
@@ -393,6 +395,7 @@ class Rest_Automation_Controller extends REST_Controller {
 		$trigger    = $request->get_param( 'trigger' );
 		$form_id    = $request->get_param( 'form_id' );
 		$trigger_id = $request->get_param( 'trigger_id' );
+		$post_id    = $request->get_param( 'post_id' );
 
 		$forms = Forms_Manager::instance()->get_all_forms();
 
@@ -400,6 +403,10 @@ class Rest_Automation_Controller extends REST_Controller {
 		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
 			$form_instance = $forms[ $trigger_id ];
 			if ( $form_instance && method_exists( $form_instance, 'register_field_rules_for_form' ) ) {
+				// For Elementor forms, set the post_id property before getting fields
+				if ( $trigger_id === 'elementor' && ! empty( $post_id ) ) {
+					$form_instance->post_id = $post_id;
+				}
 				$form_instance->register_field_rules_for_form( $form_id );
 			}
 		}
@@ -492,6 +499,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	public function get_merge_tags( $request ) {
 		$form_id    = $request->get_param( 'form_id' );
 		$trigger_id = $request->get_param( 'trigger_id' );
+		$post_id    = $request->get_param( 'post_id' );
 
 		$forms = Forms_Manager::instance()->get_all_forms();
 
@@ -499,6 +507,10 @@ class Rest_Automation_Controller extends REST_Controller {
 		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
 			$form_instance = $forms[ $trigger_id ];
 			if ( $form_instance ) {
+				// For Elementor forms, set the post_id property before getting fields
+				if ( $trigger_id === 'elementor' && ! empty( $post_id ) ) {
+					$form_instance->post_id = $post_id;
+				}
 				$form_instance->register_merge_tags_for_form( $form_id );
 			}
 		}

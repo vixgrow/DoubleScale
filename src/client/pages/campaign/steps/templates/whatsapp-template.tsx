@@ -45,7 +45,7 @@ interface WhatsAppBusinessTemplate {
  * WhatsApp Template Step Component
  * 
  * For WhatsApp campaigns, users must select an approved business template
- * from Twilio. Free-text messages are not supported for bulk campaigns.
+ * from Meta Business Suite. Free-text messages are not supported for bulk campaigns.
  */
 const WhatsAppTemplateStep: React.FC = () => {
 	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
@@ -57,6 +57,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 	const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [fetchError, setFetchError] = useState<string | null>(null);
 
 	// Load templates when component mounts
 	useEffect(() => {
@@ -85,10 +86,11 @@ const WhatsAppTemplateStep: React.FC = () => {
 	}, [campaign?.settings?.templates, templates]);
 
 	/**
-	 * Load WhatsApp templates from Twilio via API
+	 * Load WhatsApp templates from provider via API
 	 */
 	const loadTemplates = async () => {
 		setIsLoadingTemplates(true);
+		setFetchError(null);
 		try {
 			const response: any = await apiFetch({
 				path: '/qc/v1/whatsapp/templates',
@@ -101,10 +103,8 @@ const WhatsAppTemplateStep: React.FC = () => {
 			}
 		} catch (error: any) {
 			console.error('[WhatsApp Campaign] Failed to fetch templates:', error);
-			setNotice({
-				type: 'error',
-				message: error.message || __('Failed to load WhatsApp templates from Twilio', 'quillcrm'),
-			});
+			const errorMessage = error.message || __('Failed to load WhatsApp templates', 'quillcrm');
+			setFetchError(errorMessage);
 			setTemplates([]);
 		} finally {
 			setIsLoadingTemplates(false);
@@ -295,7 +295,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 				<PanelSettings
 					title={__('WhatsApp Template', 'quillcrm')}
 					description={__(
-						'Select an approved WhatsApp Business template for your campaign. Templates must be pre-approved in your Twilio account.',
+						'Select an approved WhatsApp Business template for your campaign. Templates must be pre-approved in your Meta Business Suite.',
 						'quillcrm'
 					)}
 					icon={
@@ -314,7 +314,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 									{__('WhatsApp Business Templates Required', 'quillcrm')}
 								</p>
 								<p className="text-sm text-amber-800">
-									{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your WhatsApp Business provider console (Meta or Twilio) before using them here.', 'quillcrm')}
+									{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your Meta Business Suite before using them here.', 'quillcrm')}
 								</p>
 								</div>
 							</div>
@@ -328,19 +328,42 @@ const WhatsAppTemplateStep: React.FC = () => {
 							{isLoadingTemplates ? (
 								<div className="flex items-center gap-2 text-sm text-gray-500 py-4">
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-									{__('Loading templates from Twilio...', 'quillcrm')}
+									{__('Loading templates...', 'quillcrm')}
+								</div>
+							) : fetchError ? (
+								/* API Error - Failed to fetch templates */
+								<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+									<div className="flex gap-3">
+										<AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+										<div>
+											<p className="text-sm font-medium text-red-900 mb-1">
+												{__('Failed to load templates', 'quillcrm')}
+											</p>
+											<p className="text-sm text-red-800 mb-2">
+												{fetchError}
+											</p>
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={loadTemplates}
+											>
+												{__('Try Again', 'quillcrm')}
+											</Button>
+										</div>
+									</div>
 								</div>
 							) : templates.length === 0 ? (
+								/* No templates exist in provider account */
 								<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
 									<div className="flex gap-3">
-									<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-									<div>
-										<p className="text-sm font-medium text-yellow-900 mb-1">
-											{__('No WhatsApp templates found', 'quillcrm')}
-										</p>
-										<p className="text-sm text-yellow-800">
-											{__('Create and approve templates in your WhatsApp Business provider console (Meta or Twilio), then refresh this page.', 'quillcrm')}
-										</p>
+										<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+										<div>
+											<p className="text-sm font-medium text-yellow-900 mb-1">
+												{__('No WhatsApp templates found', 'quillcrm')}
+											</p>
+											<p className="text-sm text-yellow-800">
+												{__('Create and approve templates in your Meta Business Suite, then import them via Settings > WhatsApp Templates.', 'quillcrm')}
+											</p>
 											<Button
 												variant="outline"
 												size="sm"

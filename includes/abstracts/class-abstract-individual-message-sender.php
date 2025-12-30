@@ -17,6 +17,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 use QuillCRM\Models\Activity_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
@@ -371,6 +372,16 @@ abstract class Abstract_Individual_Message_Sender {
 		// Update tracking status to failed
 		if ( $tracking_entry ) {
 			$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
+
+			// Store error information in meta table for display in message details
+			$error_message = $e->getMessage();
+			$error_code    = $e->getCode() ? (string) $e->getCode() : 'send_error';
+
+			Communication_Tracking_Meta_Model::store_error_info(
+				$tracking_entry->id,
+				$error_code,
+				$error_message
+			);
 		}
 
 		quillcrm_get_logger()->error(

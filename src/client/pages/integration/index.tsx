@@ -209,12 +209,12 @@ const Integration: React.FC<IntegrationProps> = ({
 									)}
 								</CardContent>
 								<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
-									<Button
-										onClick={save}
-										disabled={isSaving}
-										className="min-w-[120px] rounded-lg px-0"
-										variant="gradient"
-									>
+								<Button
+									onClick={save}
+									disabled={isSaving}
+									className="min-w-[120px] rounded-lg px-4"
+									variant="gradient"
+								>
 										{isSaving
 											? __('Connecting...', 'quillcrm')
 											: __(`Connect ${label}`, 'quillcrm')}

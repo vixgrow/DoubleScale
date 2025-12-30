@@ -16,6 +16,7 @@ use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Contact_Unsubscribe_Model;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 
 defined('ABSPATH') || exit;
 
@@ -405,6 +406,15 @@ abstract class Abstract_Tracking
 		}
 
 		$tracking_record->save();
+
+		// Store error information in meta table for failed messages
+		if ( ( 'failed' === $status || 'undelivered' === $status ) && ( ! empty( $error_code ) || ! empty( $error_message ) ) ) {
+			Communication_Tracking_Meta_Model::store_error_info(
+				$tracking_record->id,
+				$error_code,
+				$error_message
+			);
+		}
 
 		// Handle provider-reported opt-out (e.g., Meta WhatsApp blocked/spam errors)
 		// This auto-unsubscribes contacts who have opted out at the provider level

@@ -545,6 +545,13 @@ export type CommunicationTrackingMeta = {
 	meta_value: any; // Can be object or string depending on meta_key
 };
 
+// Error information for failed messages
+export type MessageErrorInfo = {
+	code: string;
+	message: string;
+	updated_at?: string;
+} | null;
+
 // Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
 export type TrackedMessage = {
 	id: number;
@@ -584,6 +591,7 @@ export type TrackedMessage = {
 	campaign?: Partial<Campaign>;
 	unsubscribe_reason?: string; // Extracted from contact notes
 	communication_tracking_meta?: CommunicationTrackingMeta[]; // Meta data including merge tags and WhatsApp template params
+	error_info?: MessageErrorInfo; // Error information for failed messages (code and message from provider)
 };
 
 // Legacy alias for backward compatibility

@@ -158,6 +158,55 @@ class Communication_Tracking_Meta_Model extends Model {
 	}
 
 	/**
+	 * Store error information for a failed message
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int    $communication_tracking_id Communication tracking ID
+	 * @param string $error_code Provider error code
+	 * @param string $error_message Provider error message
+	 * @return Communication_Tracking_Meta_Model
+	 */
+	public static function store_error_info( $communication_tracking_id, $error_code, $error_message ) {
+		// Check if error info already exists and update it, otherwise create
+		$existing = self::where( 'communication_tracking_id', $communication_tracking_id )
+			->where( 'meta_key', 'error_info' )
+			->first();
+
+		$error_data = array(
+			'code'       => $error_code,
+			'message'    => $error_message,
+			'updated_at' => current_time( 'mysql' ),
+		);
+
+		if ( $existing ) {
+			$existing->meta_value = $error_data;
+			$existing->save();
+			return $existing;
+		}
+
+		return self::create(
+			array(
+				'communication_tracking_id' => $communication_tracking_id,
+				'meta_key'                  => 'error_info',
+				'meta_value'                => $error_data,
+			)
+		);
+	}
+
+	/**
+	 * Get error information for a communication tracking record
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $communication_tracking_id Communication tracking ID
+	 * @return array|null Array with 'code' and 'message' keys, or null if no error
+	 */
+	public static function get_error_info( $communication_tracking_id ) {
+		return self::get_meta_value( $communication_tracking_id, 'error_info' );
+	}
+
+	/**
 	 * Render template content using stored merge tag values
 	 *
 	 * @param int    $communication_tracking_id Communication tracking ID

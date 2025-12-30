@@ -21,6 +21,9 @@ class Activity_Association_Model extends Model {
 
 
 
+
+
+
 	/**
 	 * Table name
 	 *
@@ -64,6 +67,14 @@ class Activity_Association_Model extends Model {
 	public $timestamps = true;
 
 	/**
+	 * Entity type constants
+	 *
+	 * @since 1.0.0
+	 */
+	const ENTITY_TYPE_DEAL     = 1;
+	const ENTITY_TYPE_CAMPAIGN = 2;
+
+	/**
 	 * Validation rules
 	 *
 	 * @since 1.0.0
@@ -72,7 +83,7 @@ class Activity_Association_Model extends Model {
 	 */
 	public $rules = array(
 		'activity_id' => 'required|integer',
-		'entity_type' => 'required|in:deal,campaign,company',
+		'entity_type' => 'required|integer|in:1,2',
 		'entity_id'   => 'required|integer',
 	);
 
@@ -86,7 +97,7 @@ class Activity_Association_Model extends Model {
 	public $messages = array(
 		'activity_id.required' => 'Activity ID is required.',
 		'entity_type.required' => 'Entity type is required.',
-		'entity_type.in'       => 'Entity type must be deal, campaign, or company.',
+		'entity_type.in'       => 'Entity type must be 1 (Deal) or 2 (Campaign).',
 		'entity_id.required'   => 'Entity ID is required.',
 	);
 
@@ -114,7 +125,7 @@ class Activity_Association_Model extends Model {
 	}
 
 	/**
-	 * Get deal association (if entity_type is 'deal')
+	 * Get deal association (if entity_type is ENTITY_TYPE_DEAL)
 	 *
 	 * @since 1.0.0
 	 *
@@ -123,13 +134,13 @@ class Activity_Association_Model extends Model {
 	public function deal() {
 		if ( class_exists( '\QuillCRM_Pro\Models\Deal_Model' ) ) {
 			return $this->belongsTo( '\QuillCRM_Pro\Models\Deal_Model', 'entity_id', 'id' )
-				->where( 'entity_type', 'deal' );
+				->where( 'entity_type', self::ENTITY_TYPE_DEAL );
 		}
 		return null;
 	}
 
 	/**
-	 * Get campaign association (if entity_type is 'campaign')
+	 * Get campaign association (if entity_type is ENTITY_TYPE_CAMPAIGN)
 	 * Note: Campaign model might be in Pro or added later
 	 *
 	 * @since 1.0.0
@@ -139,7 +150,7 @@ class Activity_Association_Model extends Model {
 	public function campaign() {
 		if ( class_exists( '\QuillCRM_Pro\Models\Campaign_Model' ) ) {
 			return $this->belongsTo( '\QuillCRM_Pro\Models\Campaign_Model', 'entity_id', 'id' )
-				->where( 'entity_type', 'campaign' );
+				->where( 'entity_type', self::ENTITY_TYPE_CAMPAIGN );
 		}
 		return null;
 	}
@@ -178,7 +189,7 @@ class Activity_Association_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeForDeal( $query, $deal_id ) {
-		return $query->where( 'entity_type', 'deal' )->where( 'entity_id', $deal_id );
+		return $query->where( 'entity_type', self::ENTITY_TYPE_DEAL )->where( 'entity_id', $deal_id );
 	}
 
 	/**
@@ -190,9 +201,42 @@ class Activity_Association_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function scopeForCampaign( $query, $campaign_id ) {
-		return $query->where( 'entity_type', 'campaign' )->where( 'entity_id', $campaign_id );
+		return $query->where( 'entity_type', self::ENTITY_TYPE_CAMPAIGN )->where( 'entity_id', $campaign_id );
 	}
 
+	/**
+	 * Convert string entity type to integer
+	 * For backward compatibility with API requests
+	 *
+	 * @param string $entity_type_string Entity type string ('deal', 'campaign').
+	 *
+	 * @return int|null Entity type integer or null if invalid.
+	 */
+	public static function string_to_entity_type( $entity_type_string ) {
+		$map = array(
+			'deal'     => self::ENTITY_TYPE_DEAL,
+			'campaign' => self::ENTITY_TYPE_CAMPAIGN,
+		);
+
+		return $map[ strtolower( $entity_type_string ) ] ?? null;
+	}
+
+	/**
+	 * Convert integer entity type to string
+	 * For backward compatibility with API responses
+	 *
+	 * @param int $entity_type_int Entity type integer.
+	 *
+	 * @return string|null Entity type string or null if invalid.
+	 */
+	public static function entity_type_to_string( $entity_type_int ) {
+		$map = array(
+			self::ENTITY_TYPE_DEAL     => 'deal',
+			self::ENTITY_TYPE_CAMPAIGN => 'campaign',
+		);
+
+		return $map[ $entity_type_int ] ?? null;
+	}
 
 	/**
 	 * Boot method
@@ -207,8 +251,13 @@ class Activity_Association_Model extends Model {
 		// Validate entity type before creating
 		static::creating(
 			function ( $association ) {
-				if ( ! in_array( $association->entity_type, array( 'deal', 'campaign' ), true ) ) {
-					throw new \Exception( 'Invalid entity type. Must be deal, campaign.' );
+				// Convert string to integer if needed (for backward compatibility)
+				if ( is_string( $association->entity_type ) ) {
+					$association->entity_type = self::string_to_entity_type( $association->entity_type );
+				}
+
+				if ( ! in_array( $association->entity_type, array( self::ENTITY_TYPE_DEAL, self::ENTITY_TYPE_CAMPAIGN ), true ) ) {
+					throw new \Exception( 'Invalid entity type. Must be 1 (Deal) or 2 (Campaign).' );
 				}
 			}
 		);

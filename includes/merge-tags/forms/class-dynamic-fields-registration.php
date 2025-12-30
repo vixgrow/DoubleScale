@@ -19,6 +19,7 @@ use QuillCRM\Merge_Tags\Forms\Forms_Metadata;
  */
 class Dynamic_Fields_Registration {
 
+
 	/**
 	 * Constructor
 	 */
@@ -42,7 +43,7 @@ class Dynamic_Fields_Registration {
 		}
 
 		foreach ( $fields as $field_name => $field_label ) {
-			$merge_tag = new Forms_Field( $field_name, $field_label, $slug );
+			$merge_tag = new Forms_Field( $field_name, $field_label['label'], $slug );
 			Merge_Tags_Manager::instance()->register( $merge_tag );
 		}
 	}

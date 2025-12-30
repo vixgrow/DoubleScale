@@ -15,6 +15,7 @@ namespace QuillCRM\Database\Migrations;
  */
 class Activity_Associations_Table extends Migration {
 
+
 	/**
 	 * Table name
 	 *
@@ -37,14 +38,18 @@ class Activity_Associations_Table extends Migration {
 		  *
 		  * id: BIGINT(20) NOT NULL AUTO_INCREMENT
 		  * activity_id: BIGINT(20) NOT NULL COMMENT "FK to activities table"
-		  * entity_type: VARCHAR(50) NOT NULL comment "deal, campaign"
+		  * entity_type: TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Deal, 2=Campaign"
 		  * entity_id: BIGINT(20) NOT NULL COMMENT "FK to deals, campaigns table"
 		  * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		  * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		  *
+		  * Entity types:
+		  * 1 = Deal
+		  * 2 = Campaign
 		  */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             activity_id BIGINT(20) NOT NULL COMMENT "FK to activities table",
-            entity_type VARCHAR(50) NOT NULL COMMENT "deal, campaign", 
+            entity_type TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Deal, 2=Campaign", 
             entity_id BIGINT(20) NOT NULL COMMENT "FK to deals, campaigns table",
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

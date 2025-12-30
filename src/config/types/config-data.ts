@@ -157,6 +157,8 @@ export type Rule = {
 	options: {
 		[key: string]: string;
 	};
+	required_triggers?: string[];
+	is_automation?: boolean;
 };
 
 export type Trigger = {

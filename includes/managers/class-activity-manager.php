@@ -26,6 +26,7 @@ final class Activity_Manager {
 
 
 
+
 	/**
 	 * Class Instance.
 	 *
@@ -98,7 +99,7 @@ final class Activity_Manager {
 			return null;
 		}
 
-		if ( $entity_type === 'deal' ) {
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			if ( ! $this->can_access_deal( $entity_id ) ) {
 				return null;
 			}
@@ -156,7 +157,7 @@ final class Activity_Manager {
 			return null;
 		}
 
-		if ( $entity_type === 'deal' ) {
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			if ( ! $this->can_access_deal( $entity_id ) ) {
 				return null;
 			}
@@ -224,7 +225,7 @@ final class Activity_Manager {
 		}
 
 		// Check deal permissions if deal_id is provided.
-		if ( $entity_type === 'deal' ) {
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			if ( ! $this->can_access_deal( $entity_id ) ) {
 				return null;
 			}
@@ -285,7 +286,7 @@ final class Activity_Manager {
 			return null;
 		}
 
-		if ( $entity_type === 'deal' ) {
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			// Check deal permissions if deal_id is provided.
 			if ( $entity_id && ! $this->can_access_deal( $entity_id ) ) {
 				return null;
@@ -358,7 +359,7 @@ final class Activity_Manager {
 		}
 
 		// Filter by deal using activity_associations table.
-		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === 'deal' ) {
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			// Check deal permissions.
 			if ( ! $this->can_access_deal( $filters['entity_id'] ) ) {
 				return null;
@@ -721,7 +722,7 @@ final class Activity_Manager {
 		}
 
 		// Filter by deal using activity_associations table.
-		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === 'deal' ) {
+		if ( ! empty( $filters['entity_id'] ) && ! empty( $filters['entity_type'] ) && $filters['entity_type'] === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
 			if ( class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
 				$query->whereHas(
 					'associations',

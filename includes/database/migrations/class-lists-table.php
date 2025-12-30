@@ -34,7 +34,7 @@ class Lists_Table extends Migration {
 	public function get_query() {
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
 			name VARCHAR(255) NOT NULL,
-			slug VARCHAR(255) NOT NULL,
+			slug VARCHAR(191) NOT NULL,
 			description TEXT,
 			status VARCHAR(255) NOT NULL DEFAULT "active",
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

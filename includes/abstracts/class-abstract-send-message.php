@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract Send Message Action
  * Base class for all message sending actions (Email, SMS, WhatsApp)
@@ -35,6 +36,9 @@ use QuillCRM\Utils;
  */
 abstract class Abstract_Send_Message extends Action {
 
+
+
+
 	/**
 	 * Source - all message actions are of type 'message'
 	 *
@@ -63,7 +67,7 @@ abstract class Abstract_Send_Message extends Action {
 	 * @param Contact_Model $contact Contact Model.
 	 * @return string|null
 	 */
-	abstract protected function get_recipient( Contact_Model $contact );
+	abstract protected function get_recipient( Contact_Model $contact);
 
 	/**
 	 * Validate the recipient field
@@ -71,7 +75,7 @@ abstract class Abstract_Send_Message extends Action {
 	 * @param Contact_Model $contact Contact Model.
 	 * @return array|null Returns array with status/message if invalid, null if valid
 	 */
-	abstract protected function validate_recipient( Contact_Model $contact );
+	abstract protected function validate_recipient( Contact_Model $contact);
 
 	/**
 	 * Get the processing instance for this channel
@@ -213,21 +217,21 @@ abstract class Abstract_Send_Message extends Action {
 			throw new \Exception( "Failed to create tracking record: {$e->getMessage()}" );
 		}
 
-		// Validate tracking was created successfully
-		if ( ! $tracking || ! $tracking->id || $tracking->id === 0 ) {
-			quillcrm_get_logger()->error(
-				"Send {$channel_name} action: Failed to create tracking record - invalid ID",
-				array(
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-					'contact_id'    => $contact->id,
-					'template_id'   => $template->id,
-					'tracking_id'   => $tracking ? $tracking->id : 'null',
-					'code'          => "send_{$channel_type}_tracking_creation_failed",
-				)
-			);
-			throw new \Exception( 'Failed to create tracking record in database - ID is invalid' );
-		}
+			// Validate tracking was created successfully
+			if ( ! $tracking || ! $tracking->id || $tracking->id === 0 ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Failed to create tracking record - invalid ID",
+					array(
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+						'contact_id'    => $contact->id,
+						'template_id'   => $template->id,
+						'tracking_id'   => $tracking ? $tracking->id : 'null',
+						'code'          => "send_{$channel_type}_tracking_creation_failed",
+					)
+				);
+				throw new \Exception( 'Failed to create tracking record in database - ID is invalid' );
+			}
 
 		// 5. Prepare channel-specific message data (e.g., WhatsApp variables, SMS/Email content)
 		// This allows child classes to perform pre-send setup (storing meta, validation, etc.)
@@ -261,9 +265,10 @@ abstract class Abstract_Send_Message extends Action {
 
 			// 7. REUSE EXISTING CAMPAIGN INFRASTRUCTURE
 			// This gives us: merge tags, provider integration, tracking, etc.
+			// Pass automation_contact instead of contact to support automation-specific merge tags
 			$this->get_processing_instance()->process_campaign_message(
 				$dummy_campaign,
-				$contact,
+				$automation_contact,
 				$tracking
 			);
 
@@ -363,4 +368,3 @@ abstract class Abstract_Send_Message extends Action {
 	 */
 	abstract protected function prepare_message_data( Automation_Step_Model $step, Contact_Model $contact, Communication_Tracking_Model $tracking );
 }
-

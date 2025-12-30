@@ -61,4 +61,4 @@ class Send_WhatsApp extends Action_Pro {
 	public $attributes = array();
 }
 
-Send_WhatsApp::instance();
+//Send_WhatsApp::instance();

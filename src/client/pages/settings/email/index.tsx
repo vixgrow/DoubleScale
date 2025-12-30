@@ -27,7 +27,6 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
         reply_to,
         email_footer,
         max_in_second,
-        max_in_day,
     } = settings.email;
 
     const handleFieldChange = (key: string, value: string) => {
@@ -87,15 +86,6 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         value={max_in_second}
                         onChange={(value) =>
                             handleFieldChange('max_in_second', value)
-                        }
-                        type="number"
-                        min={1}
-                    />
-                    <Field
-                        label={__('Max Emails in Day', 'quillcrm')}
-                        value={max_in_day}
-                        onChange={(value) =>
-                            handleFieldChange('max_in_day', value)
                         }
                         type="number"
                         min={1}

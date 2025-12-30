@@ -21,6 +21,8 @@ class Activity_Model extends Model {
 
 
 
+
+
 	/**
 	 * Table name
 	 *
@@ -194,7 +196,7 @@ class Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function dealAssociations() {
-		return $this->associationsByType( 'deal' );
+		return $this->associationsByType( Activity_Association_Model::ENTITY_TYPE_DEAL );
 	}
 
 	/**
@@ -205,7 +207,7 @@ class Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function campaignAssociations() {
-		return $this->associationsByType( 'campaign' );
+		return $this->associationsByType( Activity_Association_Model::ENTITY_TYPE_CAMPAIGN );
 	}
 
 	/**
@@ -222,7 +224,7 @@ class Activity_Model extends Model {
 			$this->load( 'associations' );
 		}
 
-		$deal_association = $this->associations->where( 'entity_type', 'deal' )->first();
+		$deal_association = $this->associations->where( 'entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL )->first();
 		return $deal_association ? $deal_association->entity_id : null;
 	}
 
@@ -250,7 +252,7 @@ class Activity_Model extends Model {
 		return $query->whereHas(
 			'associations',
 			function ( $q ) use ( $deal_id ) {
-				$q->where( 'entity_type', 'deal' )
+				$q->where( 'entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL )
 					->where( 'entity_id', $deal_id );
 			}
 		)->orderBy( 'created_at', 'desc' );
@@ -708,7 +710,6 @@ class Activity_Model extends Model {
 	 * @return Activity_Model
 	 */
 	public static function add_note( $data ) {
-		xdebug_break();
 		return self::create(
 			array(
 				'contact_id'    => $data['contact_id'] ?? null,

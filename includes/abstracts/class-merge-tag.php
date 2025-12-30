@@ -20,7 +20,6 @@ use QuillCRM\Models\Contact_Model;
  */
 abstract class Merge_Tag {
 
-
 	/**
 	 * Merge Tag Name
 	 *
@@ -87,20 +86,20 @@ abstract class Merge_Tag {
 	/**
 	 * Get tag value
 	 *
-	 * @param Automation_Contact_Model|Contact_Model|null $contact Contact Model.
+	 * @param Automation_Contact_Model|Contact_Model|null $contact_or_automation_contact.
 	 * @param string                                      $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_tag_value( $contact, $merge_tag = '' ) {
-		if ( $this->is_automation && ! $this->is_automation_contact( $contact ) ) {
+	public function get_tag_value( $contact_or_automation_contact, $merge_tag = '' ) {
+		if ( $this->is_automation && ! $this->is_automation_contact( $contact_or_automation_contact ) ) {
 			return '';
 		}
 
-		if ( ! $this->is_automation && $this->is_automation_contact( $contact ) ) {
-			return $this->get_value( $contact->contact, $merge_tag );
+		if ( ! $this->is_automation && $this->is_automation_contact( $contact_or_automation_contact ) ) {
+			return $this->get_value( $contact_or_automation_contact->contact, $merge_tag );
 		}
 
-		return $this->get_value( $contact, $merge_tag );
+		return $this->get_value( $contact_or_automation_contact, $merge_tag );
 	}
 }

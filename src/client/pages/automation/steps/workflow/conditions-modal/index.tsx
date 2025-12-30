@@ -72,7 +72,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		ConfigAPI.getAutomationRules()
 	);
 
-	// Filter rules groups by current trigger and disabled status
+	// Filter rules groups by current trigger, disabled status, and automation context
 	const filterRulesByTrigger = (groups: any) => {
 		if (!currentTrigger) return groups;
 		if (!groups || typeof groups !== 'object') return {};
@@ -95,13 +95,14 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			// Include group if it has no triggers property (available for all)
 			// or if the triggers array includes the current trigger
 			if (!group.triggers || group.triggers.includes(currentTrigger)) {
-				// Filter rules within the group based on required_triggers
+				// Filter rules within the group based on required_triggers and is_automation
 				const filteredRules: any = {};
 				Object.keys(group.rules).forEach((ruleKey) => {
 					const rule = group.rules[ruleKey];
 					if (!rule || typeof rule !== 'object') {
 						return;
 					}
+
 					// If rule has no required_triggers, include it
 					if (
 						!rule.required_triggers ||

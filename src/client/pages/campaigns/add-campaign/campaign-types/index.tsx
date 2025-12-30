@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	ABSplitIcon,
 	AllContactsIcon,
+	EmailSequenceOutlinedIcon,
 	PremiumIcon,
 } from '@quillcrm/components';
 import { CampaignType } from '@quillcrm/client';
@@ -23,7 +24,6 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 	selectedType,
 	onTypeChange,
 }) => {
-
 	const campaignTypesRows = [
 		{
 			label: __('Standard Campaign', 'quillcrm'),
@@ -44,15 +44,6 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 		// 	icon: <ABSplitIcon width={24} height={24} />,
 		// 	isPremium: true,
 		// },
-		// {
-		// 	label: __('Email Sequence', 'quillcrm'),
-		// 	description: __(
-		// 		'Slow, personalized follow-up series; stops automatically on reply',
-		// 		'quillcrm'
-		// 	),
-		// 	type: 'sequence',
-		// 	icon: <EmailSequenceOutlinedIcon />,
-		// },
 	];
 
 	return (
@@ -66,14 +57,13 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 					{campaignTypesRows.map((campaignType) => (
 						<div
 							key={campaignType.type}
-							className={`flex items-center justify-between px-4 py-6 border rounded-xl cursor-pointer transition-colors relative overflow-hidden ${selectedType === campaignType.type
-								? 'border-primary bg-blue-50'
-								: 'border-gray-200 hover:border-gray-300'
-								}`}
+							className={`flex items-center justify-between px-4 py-6 border rounded-xl cursor-pointer transition-colors relative overflow-hidden ${
+								selectedType === campaignType.type
+									? 'border-primary bg-blue-50'
+									: 'border-gray-200 hover:border-gray-300'
+							}`}
 							onClick={() =>
-								onTypeChange(
-									campaignType.type as CampaignType
-								)
+								onTypeChange(campaignType.type as CampaignType)
 							}
 						>
 							<div className="flex items-center gap-3 flex-1">
@@ -105,10 +95,11 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 							</div>
 							<div>
 								<div
-									className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedType === campaignType.type
-										? 'border-primary bg-primary'
-										: 'border-gray-300'
-										}`}
+									className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+										selectedType === campaignType.type
+											? 'border-primary bg-primary'
+											: 'border-gray-300'
+									}`}
 								>
 									{selectedType === campaignType.type && (
 										<div className="w-2 h-2 bg-white rounded-full" />

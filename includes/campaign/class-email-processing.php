@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Campaign Processing
  * This class is responsible for handling Email campaign processing
@@ -25,6 +26,8 @@ use QuillCRM\Constants\Campaign_Channel;
  * Email Campaign Processing class
  */
 class Email_Processing extends Abstract_Campaign_Processing {
+
+
 
 	/**
 	 * Communication channel
@@ -55,7 +58,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return int
 	 */
 	protected function get_message_mode() {
-		return Communication_Tracking_Model::MODE_EMAIL;
+		 return Communication_Tracking_Model::MODE_EMAIL;
 	}
 
 	/**
@@ -64,7 +67,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	public function get_channel_context() {
-		return 'email';
+		 return 'email';
 	}
 
 	/**
@@ -86,15 +89,20 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * 3. Process all merge tags (body + footer)
 	 * 4. Add click tracking and unsubscribe links
 	 *
-	 * @param Template_Model $template Template model
-	 * @param Contact_Model  $contact Contact model
-	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
+	 * @param Template_Model                                          $template Template model
+	 * @param Contact_Model|\QuillCRM\Models\Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact model
+	 * @param Communication_Tracking_Model                            $campaign_message Campaign tracking record
 	 * @return array Message data array with subject, body, recipient, hash_key
 	 */
-	protected function prepare_message_content( $template, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// Extract actual contact for operations that need Contact_Model
+		$contact = $contact_or_automation_contact instanceof \QuillCRM\Models\Automation_Contact_Model
+			? $contact_or_automation_contact->contact
+			: $contact_or_automation_contact;
 
 		// STEP 1: Extract merge tag keys if not already cached
 		if ( is_null( $this->template_merge_tag_keys ) ) {
@@ -107,7 +115,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 				$campaign_message->id,
 				$this->template_merge_tag_keys,
-				$contact
+				$contact_or_automation_contact
 			);
 		}
 
@@ -117,14 +125,18 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 		// Check if the message is in builder JSON format and render it to HTML
 		// Pass footer_html so it gets injected before </body> tag
-		$message = $this->render_builder_content( $message, $contact, $footer_html );
+		// Use the original contact model for merge tags
+		// IMPORTANT: Use render_builder_content_with_tracking() to capture conditional section IDs
+		$renderer = null;
+		$message  = $this->render_builder_content_with_tracking( $message, $contact_or_automation_contact, $campaign_message->id, $renderer, $footer_html );
 
 		// Set channel context for merge tags
 		add_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		// Process merge tags in both body and footer (if footer was injected)
-		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
-		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+		// Use the original contact model to support automation merge tags
+		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
+		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact_or_automation_contact );
 
 		// Remove filter to prevent pollution
 		remove_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );
@@ -157,8 +169,8 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * We prepare the footer with merge tags here, but they will be processed later
 	 * in prepare_message_content() along with the body content.
 	 *
-	 * @param string         $message Original message content (JSON for builder, HTML for legacy)
-	 * @param Contact_Model  $contact Contact model
+	 * @param string                       $message Original message content (JSON for builder, HTML for legacy)
+	 * @param Contact_Model                $contact Contact model
 	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return string Footer HTML with tracking pixel (or empty if not builder email)
 	 */
@@ -230,8 +242,8 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	/**
 	 * Send message
 	 *
-	 * @param array          $message_data Prepared message data
-	 * @param Contact_Model  $contact Contact model
+	 * @param array                        $message_data Prepared message data
+	 * @param Contact_Model                $contact Contact model
 	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
@@ -332,7 +344,6 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				'success'    => true,
 				'message_id' => $result,
 			);
-
 		} catch ( \Exception $e ) {
 			// Enhanced error logging with debugging information
 			$debug_info = array(
@@ -392,7 +403,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_default_campaign_content() {
-		return method_exists( $this, 'get_default_email_content' )
+		 return method_exists( $this, 'get_default_email_content' )
 			? $this->get_default_email_content()
 			: sprintf( __( '<p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p><a href="{{contact:unsubscribe_link}}">Unsubscribe</a></p>', 'quillcrm' ) );
 	}

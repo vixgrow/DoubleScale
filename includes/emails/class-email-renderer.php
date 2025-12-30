@@ -36,6 +36,20 @@ class Email_Renderer {
 	private $button_settings = array();
 
 	/**
+	 * Rendered conditional section IDs for current render
+	 *
+	 * @var array
+	 */
+	private $rendered_section_ids = array();
+
+	/**
+	 * Tracking context section IDs (when viewing a sent email)
+	 *
+	 * @var array|null
+	 */
+	private $tracking_section_ids = null;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -58,12 +72,14 @@ class Email_Renderer {
 			return '';
 		}
 
+		// Load tracking context section IDs if tracking_id is provided
+		if ( $tracking_id ) {
+			$this->load_tracking_section_ids( $tracking_id );
+		}
+
 		// Set tracking context on contact if tracking_id is provided
 		if ( $tracking_id && $contact && method_exists( $contact, 'set_tracking_context' ) ) {
-			error_log( "QuillCRM: Setting tracking context {$tracking_id} on contact {$contact->id}" );
 			$contact->set_tracking_context( $tracking_id );
-		} else {
-			error_log( "QuillCRM: Not setting tracking context - tracking_id: {$tracking_id}, contact: " . ( $contact ? $contact->id : 'null' ) );
 		}
 
 		// Parse the JSON content
@@ -108,6 +124,9 @@ class Email_Renderer {
 			return '';
 		}
 
+		// Reset rendered section IDs for this render
+		$this->rendered_section_ids = array();
+
 		// Get global settings from builder data
 		$global_settings = isset( $builder_data['globalSettings'] ) ? $builder_data['globalSettings'] : array();
 
@@ -120,6 +139,15 @@ class Email_Renderer {
 		$html = $this->build_email_structure( $builder_data, $global_settings, $contact, $preview_text, $footer_html );
 
 		return $html;
+	}
+
+	/**
+	 * Get the list of rendered conditional section IDs from the last render
+	 *
+	 * @return array Array of section IDs that were rendered
+	 */
+	public function get_rendered_section_ids() {
+		return $this->rendered_section_ids;
 	}
 
 
@@ -285,7 +313,7 @@ class Email_Renderer {
 
 		// Process all sections
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {
-			foreach ( $content['sections'] as $section ) {
+			foreach ( $content['sections'] as $index => $section ) {
 				if ( $this->section_has_content( $section ) ) {
 					$html .= $this->render_section( $section, $contact );
 				}
@@ -300,7 +328,7 @@ class Email_Renderer {
 			}
 
 			if ( $is_section_array ) {
-				foreach ( $content as $section ) {
+				foreach ( $content as $index => $section ) {
 					if ( $this->section_has_content( $section ) ) {
 						$html .= $this->render_section( $section, $contact );
 					}
@@ -346,6 +374,77 @@ class Email_Renderer {
 
 
 	/**
+	 * Check if a section should be rendered for a specific contact
+	 *
+	 * Note: Conditional section rendering is a Pro feature. If Pro is not active
+	 * but conditions exist, the section will render for all contacts (graceful degradation).
+	 *
+	 * @param array                                       $section Section data
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model
+	 * @return bool True if section should be rendered
+	 */
+	private function should_render_section( $section, $contact ) {
+		// If no contact or no conditions, always render
+		if ( ! $contact || empty( $section['conditions'] ) || ! is_array( $section['conditions'] ) ) {
+			return true;
+		}
+
+		// If tracking context is set, use stored section IDs (viewing a sent email)
+		if ( ! is_null( $this->tracking_section_ids ) ) {
+			// Check if this section ID exists in the tracking data
+			if ( isset( $section['id'] ) ) {
+				return in_array( $section['id'], $this->tracking_section_ids, true );
+			}
+			// If section has no ID but has conditions, don't render (safety check)
+			return false;
+		}
+
+		// No tracking context - this is a new send, evaluate conditions live
+		// Conditional sections are a Pro feature
+		// Check if Pro is active via filter (Pro plugin sets this to true)
+		$is_pro_active = quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
+		if ( ! $is_pro_active ) {
+				return true;
+		}
+
+		// Extract actual Contact_Model if Automation_Contact_Model is passed
+		$actual_contact = $contact instanceof \QuillCRM\Models\Automation_Contact_Model
+			? $contact->contact
+			: $contact;
+
+		if ( ! $actual_contact ) {
+			return false;
+		}
+
+		// Pro is active - evaluate conditions using Contact_Filters_Process
+		// Start with a query for this specific contact
+		$query = \QuillCRM\Models\Contact_Model::where( 'id', $actual_contact->id );
+
+		// Apply the section conditions (same format as campaigns use)
+		$contact_filters = new \QuillCRM\Contact_Filters\Process( $query, $section['conditions'] );
+		$filtered_query  = $contact_filters->filter();
+
+		// Check if the contact matches the conditions
+		$matches = $filtered_query->count() > 0;
+
+		// Log conditional section evaluation for debugging
+		quillcrm_get_logger()->debug(
+			'Conditional section evaluated',
+			array(
+				'code'          => 'conditional_section_evaluation',
+				'section_id'    => $section['id'] ?? 'unknown',
+				'contact_id'    => $actual_contact->id,
+				'contact_email' => $actual_contact->email ?? 'N/A',
+				'conditions'    => $section['conditions'],
+				'matches'       => $matches,
+				'query_count'   => $filtered_query->count(),
+			)
+		);
+
+		return $matches;
+	}
+
+	/**
 	 * Render a section with BULLETPROOF responsive columns
 	 *
 	 * KEY TECHNIQUE:
@@ -359,6 +458,22 @@ class Email_Renderer {
 	 * @return string HTML output
 	 */
 	private function render_section( $section, $contact ) {
+		$has_conditions = ! empty( $section['conditions'] ) && is_array( $section['conditions'] );
+
+		// Check if section should be rendered based on conditions
+		$should_render = $this->should_render_section( $section, $contact );
+
+		if ( ! $should_render ) {
+			return '';
+		}
+
+		// Track conditional section if it has conditions and was rendered
+		if ( $has_conditions && isset( $section['id'] ) && ! empty( $section['id'] ) ) {
+			if ( ! in_array( $section['id'], $this->rendered_section_ids, true ) ) {
+				$this->rendered_section_ids[] = $section['id'];
+			}
+		}
+
 		// Build section styles
 		$section_styles = array();
 		if ( isset( $section['styles'] ) ) {
@@ -692,6 +807,25 @@ class Email_Renderer {
 		}
 
 		return $this->render_template( $template_id, $contact, $tracking_id );
+	}
+
+	/**
+	 * Load tracking section IDs from tracking_meta
+	 *
+	 * @param int $tracking_id Communication tracking ID
+	 * @return void
+	 */
+	private function load_tracking_section_ids( $tracking_id ) {
+		$tracking_meta = \QuillCRM\Models\Communication_Tracking_Meta_Model::where( 'communication_tracking_id', $tracking_id )
+			->where( 'meta_key', 'conditional_sections' )
+			->first();
+
+		if ( $tracking_meta && ! empty( $tracking_meta->meta_value ) ) {
+			$this->tracking_section_ids = $tracking_meta->meta_value;
+		} else {
+			// If no tracking data, set empty array (no conditional sections were sent)
+			$this->tracking_section_ids = array();
+		}
 	}
 
 }

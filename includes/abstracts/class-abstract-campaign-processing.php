@@ -12,6 +12,7 @@ namespace QuillCRM\Abstracts;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Message_Direction;
@@ -30,7 +31,6 @@ use QuillCRM\Settings;
  */
 abstract class Abstract_Campaign_Processing {
 
-
 	/**
 	 * Communication channel (email, sms, whatsapp)
 	 *
@@ -44,6 +44,14 @@ abstract class Abstract_Campaign_Processing {
 	 * @var array|null
 	 */
 	private $template_merge_tag_keys = null;
+
+	/**
+	 * Temporarily store rendered conditional section IDs by tracking ID
+	 * Used to write conditional_sections meta only after successful send
+	 *
+	 * @var array Array of tracking_id => rendered_section_ids
+	 */
+	private $pending_conditional_sections = array();
 
 	/**
 	 * Start time
@@ -100,13 +108,12 @@ abstract class Abstract_Campaign_Processing {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->settings          = Settings::get( $this->channel, array() );
+		$this->settings           = Settings::get( $this->channel, array() );
 		$this->max_execution_time = Utils::get_max_execution_time();
 		$this->rate_limiter       = Campaign_Rate_Limiter::instance();
 		$this->contact_filter     = Campaign_Contact_Filter::instance();
 
 		add_action( 'quillcrm_loaded', array( $this, 'add_hooks' ) );
-		add_action( "quillcrm_{$this->channel}_send_after", array( $this, 'send_after' ) );
 	}
 
 	/**
@@ -115,7 +122,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @return static
 	 */
 	public static function instance() {
-		 $class = get_called_class();
+		$class = get_called_class();
 		if ( ! isset( self::$instances[ $class ] ) ) {
 			self::$instances[ $class ] = new static();
 		}
@@ -132,18 +139,19 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function register_campaign_processing_hooks() {
 		// Channel is already a string ('email', 'sms', 'whatsapp')
-		$type_string        = $this->channel;
-		$daily_callback_key = $this->get_daily_callback_key();
+		$type_string = $this->channel;
 
-		QuillCRM::instance()->daily_tasks->register_callback( $daily_callback_key, array( $this, 'reset_daily_count' ) );
 		QuillCRM::instance()->campaigns_tasks->register_callback( "quillcrm_{$type_string}_campaigns", array( $this, 'process_campaigns' ) );
 		QuillCRM::instance()->campaigns_tasks->register_callback( "process_campaign_{$type_string}", array( $this, 'process_campaign_message' ) );
 
-		 // NEW: Register continuation handler
-		 QuillCRM::instance()->campaigns_tasks->register_callback( 
-			"continue_{$type_string}_campaign", 
-			array( $this, 'continue_campaign_processing' ) 
+		// Register continuation handler (Action Scheduler fallback)
+		QuillCRM::instance()->campaigns_tasks->register_callback(
+			"continue_{$type_string}_campaign",
+			array( $this, 'continue_campaign_processing' )
 		);
+
+		// Register AJAX continuation handler (faster, immediate processing)
+		$this->register_ajax_continuation_hooks();
 	}
 
 
@@ -154,53 +162,60 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	public function continue_campaign_processing( $campaign_id ) {
-		// Prevent overlapping processing using atomic lock
+		// === CONCURRENCY LOCK (Database-based, works without Redis/Memcached) ===
+		// IMPORTANT: Uses the SAME lock key as process_campaign() to prevent overlap
 		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign_id}";
-		
-		// Use wp_cache_add for atomic lock acquisition (prevents race conditions)
-		$lock_duration = apply_filters( 
-			'quillcrm_campaign_lock_duration', 
+		$lock_duration = apply_filters(
+			'quillcrm_campaign_lock_duration',
 			300, // 5 minutes default
 			$this->channel,
 			$campaign_id
 		);
-		
-		if ( ! wp_cache_add( $lock_key, true, 'quillcrm_campaigns', $lock_duration ) ) {
-			return; // Already processing (atomic check-and-set)
+
+		// Try to acquire lock using transients (database-backed)
+		if ( ! $this->acquire_campaign_lock( $lock_key, $lock_duration ) ) {
+			quillcrm_get_logger()->debug(
+				sprintf( __( 'Campaign %s continuation skipped - already being processed', 'quillcrm' ), $this->channel ),
+				array(
+					'code'        => "{$this->channel}_continuation_locked",
+					'campaign_id' => $campaign_id,
+				)
+			);
+			return; // Another process is already handling this campaign
 		}
-		
+
 		try {
 			$campaign = Campaign_Model::find( $campaign_id );
-			
+
 			if ( ! $campaign || $campaign->status !== 'processing' ) {
-				wp_cache_delete( $lock_key, 'quillcrm_campaigns' );
+				// Don't release here - finally block will handle it
 				return;
 			}
-			
+
 			// Check if progress was made since last continuation
-			$progress_key = "quillcrm_{$this->channel}_campaign_last_offset_{$campaign_id}";
+			$progress_key    = "quillcrm_{$this->channel}_campaign_last_offset_{$campaign_id}";
 			$no_progress_key = "quillcrm_{$this->channel}_campaign_no_progress_count_{$campaign_id}";
-			$last_offset = get_transient( $progress_key );
-			$current_offset = get_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign_id}", 0 );
-			
+			$last_offset     = get_transient( $progress_key );
+			$current_offset  = get_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign_id}", 0 );
+
 			// Check if progress was made
 			if ( $last_offset !== false && $last_offset == $current_offset ) {
 				// No progress made - increment counter
 				$no_progress_count = (int) get_transient( $no_progress_key );
 				$no_progress_count++;
-				
+
 				// Maximum consecutive "no progress" attempts (configurable, default 5)
-				$max_no_progress = apply_filters( 
-					'quillcrm_campaign_max_no_progress_attempts', 
+				$max_no_progress = apply_filters(
+					'quillcrm_campaign_max_no_progress_attempts',
 					5,
 					$this->channel,
 					$campaign_id
 				);
-				
+
 				if ( $no_progress_count >= $max_no_progress ) {
 					// Too many consecutive attempts with no progress - mark as failed
 					quillcrm_get_logger()->error(
-						sprintf( __( 'Campaign %s failed: no progress after %d consecutive attempts', 'quillcrm' ), $this->channel, $no_progress_count ),
+						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'quillcrm' ), $this->channel, $no_progress_count ),
 						array(
 							'code'        => "{$this->channel}_no_progress_limit_exceeded",
 							'campaign_id' => $campaign_id,
@@ -212,11 +227,11 @@ abstract class Abstract_Campaign_Processing {
 					$campaign->save();
 					return;
 				}
-				
+
 				// Log warning for no progress
 				set_transient( $no_progress_key, $no_progress_count, HOUR_IN_SECONDS );
 				quillcrm_get_logger()->warning(
-					sprintf( __( 'Campaign %s continuation made no progress (attempt %d/%d)', 'quillcrm' ), $this->channel, $no_progress_count, $max_no_progress ),
+					sprintf( __( 'Campaign %1$s continuation made no progress (attempt %2$d/%3$d)', 'quillcrm' ), $this->channel, $no_progress_count, $max_no_progress ),
 					array(
 						'code'        => "{$this->channel}_no_progress",
 						'campaign_id' => $campaign_id,
@@ -228,42 +243,23 @@ abstract class Abstract_Campaign_Processing {
 				// Progress was made - reset no progress counter
 				delete_transient( $no_progress_key );
 			}
-			
+
 			// Update progress tracker
 			set_transient( $progress_key, $current_offset, HOUR_IN_SECONDS );
-			
+
 			// Raise memory limit
 			wp_raise_memory_limit( 'admin' );
-			
+
 			// Reset timing
 			$this->start_time = microtime( true );
-			
-			// Continue processing
-			$this->process_campaign( $campaign );
-			
+
+			// IMPORTANT: Call do_process_campaign() directly, NOT process_campaign()
+			// process_campaign() would try to acquire the same lock again and fail!
+			// We already hold the lock, so skip straight to the processing logic.
+			$this->do_process_campaign( $campaign );
 		} finally {
-			wp_cache_delete( $lock_key, 'quillcrm_campaigns' );
+			$this->release_campaign_lock( $lock_key );
 		}
-	}
-	/**
-	 * Get daily callback key for rate limiting
-	 * Maps campaign types to their daily task callback identifiers
-	 *
-	 * @since 1.0.0
-	 * @return string Daily callback key
-	 */
-	protected function get_daily_callback_key() {
-		// Channel is already a string
-		$channel_string = $this->channel;
-
-		// Map campaign types to daily callback keys
-		$callbacks = array(
-			'email'    => 'quillcrm_daily3',
-			'sms'      => 'quillcrm_daily4',
-			'whatsapp' => 'quillcrm_daily4',
-		);
-
-		return $callbacks[ $channel_string ] ?? 'quillcrm_daily_' . $channel_string;
 	}
 
 
@@ -272,8 +268,8 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array          $message_data Prepared message data
-	 * @param Contact_Model  $contact Contact model
+	 * @param array                        $message_data Prepared message data
+	 * @param Contact_Model                $contact Contact model
 	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
@@ -337,9 +333,9 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array          $result API result
+	 * @param array                        $result API result
 	 * @param Communication_Tracking_Model $campaign_message Campaign message record
-	 * @param Contact_Model  $contact Contact model
+	 * @param Contact_Model                $contact Contact model
 	 * @return array Processed result
 	 */
 	protected function handle_provider_response( $result, Communication_Tracking_Model $campaign_message, Contact_Model $contact ) {
@@ -447,17 +443,17 @@ abstract class Abstract_Campaign_Processing {
 	 * @param Contact_Model $contact
 	 * @return string|null Recipient (email or phone)
 	 */
-	abstract protected function get_recipient( Contact_Model $contact);
+	abstract protected function get_recipient( Contact_Model $contact );
 
 	/**
 	 * Send message - must be implemented by child classes
 	 *
-	 * @param array          $message_data Prepared message data
-	 * @param Contact_Model  $contact Contact model
+	 * @param array                        $message_data Prepared message data
+	 * @param Contact_Model                $contact Contact model
 	 * @param Communication_Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
-	abstract protected function send_message( $message_data, Contact_Model $contact, Communication_Tracking_Model $campaign_message);
+	abstract protected function send_message( $message_data, Contact_Model $contact, Communication_Tracking_Model $campaign_message );
 
 	/**
 	 * Get tracking class - must be implemented by child classes
@@ -491,15 +487,6 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	public function process_campaigns() {
-		// Check daily rate limit (only for channels that have daily limits configured)
-		$max_per_day = $this->get_max_per_day_setting();
-
-		if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
-			$daily_count = $this->rate_limiter->get_daily_count( $this->channel );
-			$this->rate_limiter->log_daily_limit_reached( $this->channel, $daily_count, $max_per_day );
-			return;
-		}
-
 		$this->start_time = microtime( true );
 
 		// Update heartbeat at the start to track that cron is running
@@ -568,10 +555,10 @@ abstract class Abstract_Campaign_Processing {
 					);
 			}
 		)
-		// Convert string to integer for database query (DB boundary)
-		->where( 'type', Campaign_Channel::to_integer( $this->channel ) )
-		->orderBy( 'updated_at', 'asc' )
-		->first();
+			// Convert string to integer for database query (DB boundary)
+			->where( 'type', Campaign_Channel::to_integer( $this->channel ) )
+			->orderBy( 'updated_at', 'asc' )
+			->first();
 	}
 
 	/**
@@ -596,7 +583,197 @@ abstract class Abstract_Campaign_Processing {
 			return;
 		}
 
+		// === CONCURRENCY LOCK (Database-based, works without Redis/Memcached) ===
+		// Prevent multiple cron workers from processing the same campaign simultaneously
+		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_duration = apply_filters(
+			'quillcrm_campaign_lock_duration',
+			300, // 5 minutes default
+			$this->channel,
+			$campaign->id
+		);
+
+		// Try to acquire lock using transients (database-backed)
+		if ( ! $this->acquire_campaign_lock( $lock_key, $lock_duration ) ) {
+			quillcrm_get_logger()->info(
+				sprintf( __( 'Campaign %s already being processed by another worker, skipping', 'quillcrm' ), $this->channel ),
+				array(
+					'code'        => "{$this->channel}_campaign_locked",
+					'campaign_id' => $campaign->id,
+				)
+			);
+			return; // Another cron/worker is already processing this campaign
+		}
+
+		// Wrap everything in try/finally to ensure lock is always released
+		try {
+			$this->do_process_campaign( $campaign );
+		} finally {
+			// Always release the lock when done (success or failure)
+			$this->release_campaign_lock( $lock_key );
+		}
+	}
+
+	/**
+	 * Acquire a campaign processing lock (database-based)
+	 * 
+	 * Uses timestamp-based approach for simplicity and reliability.
+	 * This approach is simpler than transient-based locking and avoids race conditions.
+	 * 
+	 * How it works:
+	 * 1. Check if lock timestamp exists and is recent (< 55 seconds old)
+	 * 2. If yes, another process is running - skip
+	 * 3. If no, atomically UPDATE the timestamp using conditional UPDATE
+	 * 4. If UPDATE affects 1 row, we got the lock
+	 * 5. If UPDATE affects 0 rows, another process got it first
+	 * 
+	 * Advantages:
+	 * - UPDATE operations are atomic in MySQL
+	 * - No complex INSERT IGNORE logic
+	 * - Natural expiration (55 seconds) handles crashed processes
+	 * - Simpler code, easier to maintain
+	 *
+	 * @param string $lock_key Lock identifier
+	 * @param int    $lock_duration Lock duration in seconds (not used in this approach, kept for compatibility)
+	 * @return bool True if lock acquired, false if already locked
+	 */
+	protected function acquire_campaign_lock( $lock_key, $lock_duration ) {
+		global $wpdb;
+
+		// Lock key already includes 'quillcrm_' prefix, use it directly
+		$option_name = $lock_key;
+		$current_time = time();
+		$lock_expiry_seconds = 55; // If process hasn't updated in 55 seconds, consider it dead
+
+		// Step 1: Check if lock exists and is still active (recent timestamp)
+		$last_process_time = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				$option_name
+			)
+		);
+
+		// If lock exists and timestamp is recent (< 55 seconds), another process is running
+		if ( $last_process_time && ( $current_time - (int) $last_process_time ) < $lock_expiry_seconds ) {
+			return false;
+		}
+
+		// Step 2: Atomically try to acquire the lock using conditional UPDATE
+		// This UPDATE will only succeed if:
+		// - The option doesn't exist (INSERT via UPDATE won't work, so we handle that separately)
+		// - OR the timestamp is expired (older than 55 seconds)
+		// 
+		// We use a two-step approach:
+		// 1. Try INSERT (if option doesn't exist)
+		// 2. Try UPDATE with WHERE condition (if option exists but is expired)
+
+		// First, try to INSERT if it doesn't exist
+		$inserted = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %d, 'no')",
+				$option_name,
+				$current_time
+			)
+		);
+
+		// If INSERT succeeded (1 row affected), we got the lock
+		if ( $inserted && $wpdb->rows_affected === 1 ) {
+			return true;
+		}
+
+		// If INSERT didn't succeed (option already exists), try conditional UPDATE
+		// Only update if the timestamp is expired (older than 55 seconds) or doesn't exist
+		$expired_threshold = $current_time - $lock_expiry_seconds;
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} 
+				SET option_value = %d 
+				WHERE option_name = %s 
+				AND (option_value IS NULL OR CAST(option_value AS UNSIGNED) <= %d)",
+				$current_time,
+				$option_name,
+				$expired_threshold
+			)
+		);
+
+		// If UPDATE affected 1 row, we successfully acquired the lock
+		if ( $updated !== false && $wpdb->rows_affected === 1 ) {
+			return true;
+		}
+
+		// If UPDATE affected 0 rows, another process got the lock (or it's still active)
+		return false;
+	}
+
+	/**
+	 * Release a campaign processing lock
+	 * 
+	 * Sets timestamp to 0 to clear the lock
+	 *
+	 * @param string $lock_key Lock identifier
+	 * @return void
+	 */
+	protected function release_campaign_lock( $lock_key ) {
+		global $wpdb;
+
+		// Lock key already includes 'quillcrm_' prefix, use it directly
+		$option_name = $lock_key;
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => '0' ),
+			array( 'option_name' => $option_name ),
+			array( '%s' ),
+			array( '%s' )
+		);
+	}
+
+	/**
+	 * Refresh/extend a campaign processing lock
+	 * 
+	 * Updates timestamp to current time to keep lock alive.
+	 * Call this periodically during long-running operations to prevent
+	 * the lock from expiring while processing is still active.
+	 *
+	 * @param string $lock_key Lock identifier
+	 * @param int    $lock_duration New duration in seconds (not used, kept for compatibility)
+	 * @return bool True if refreshed successfully
+	 */
+	protected function refresh_campaign_lock( $lock_key, $lock_duration = 300 ) {
+		global $wpdb;
+		
+		// Lock key already includes 'quillcrm_' prefix, use it directly
+		$option_name = $lock_key;
+		$current_time = time();
+		
+		// Update the timestamp to current time to keep the lock alive
+		$updated = $wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => $current_time ),
+			array( 'option_name' => $option_name ),
+			array( '%d' ),
+			array( '%s' )
+		);
+		
+		return $updated !== false;
+	}
+
+	/**
+	 * Internal campaign processing logic (called by process_campaign after lock acquired)
+	 *
+	 * @param Campaign_Model $campaign
+	 * @return void
+	 */
+	protected function do_process_campaign( Campaign_Model $campaign ) {
 		wp_raise_memory_limit( 'admin' );
+
+		// Lock key for refreshing during long operations
+		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_duration = apply_filters(
+			'quillcrm_campaign_lock_duration',
+			300, // 5 minutes default
+			$this->channel,
+			$campaign->id
+		);
 
 		$offset_key = "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
 		$filters    = $campaign->get_setting( 'filters', array() );
@@ -618,18 +795,37 @@ abstract class Abstract_Campaign_Processing {
 		// Get settings
 		$batch_size     = apply_filters( 'quillcrm_campaign_batch_size', 100, $this->channel );
 		$max_per_second = $this->settings['max_in_second'] ?? $this->rate_limiter->get_default_per_second_limit( $this->channel );
-		$max_per_day    = $this->get_max_per_day_setting();
 
 		// Initialize per-second tracker
 		$this->rate_limiter->init_second_tracker( $this->channel );
 
+		// Track last lock refresh time for periodic refresh during long batch processing
+		$last_lock_refresh_time = time();
+
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 
-			// Check daily limit at start of each batch (only for channels with daily limits)
-			if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
-				$daily_count = $this->rate_limiter->get_daily_count( $this->channel );
-				$this->rate_limiter->log_daily_limit_reached( $this->channel, $daily_count, $max_per_day );
-				break; // Stop processing, will continue tomorrow
+			usleep( 100000 ); // 0.1 second delay to prevent server overload
+
+			// Refresh lock at START of each batch iteration
+			// This ensures lock is always fresh before processing any batch
+			$this->refresh_campaign_lock( $lock_key, $lock_duration );
+			$last_lock_refresh_time = time();
+
+			// Check if campaign was paused/cancelled by admin during processing
+			// Re-fetch from database to get current status
+			$fresh_campaign = Campaign_Model::find( $campaign->id );
+			if ( ! $fresh_campaign || $fresh_campaign->status !== 'processing' ) {
+				quillcrm_get_logger()->info(
+					sprintf( __( 'Campaign %s stopped - status changed during processing', 'quillcrm' ), $this->channel ),
+					array(
+						'code'           => "{$this->channel}_campaign_status_changed",
+						'campaign_id'    => $campaign->id,
+						'current_status' => $fresh_campaign ? $fresh_campaign->status : 'deleted',
+						'offset'         => $offset,
+					)
+				);
+				update_option( $offset_key, $offset );
+				return;
 			}
 
 			// Check completion
@@ -662,10 +858,13 @@ abstract class Abstract_Campaign_Processing {
 					break 2;
 				}
 
-				// Re-check daily limit (only for channels with daily limits)
-				if ( null !== $max_per_day && $this->rate_limiter->is_daily_limit_reached( $this->channel, $max_per_day ) ) {
-					update_option( $offset_key, $offset );
-					break 2;
+				// CRITICAL: Refresh lock periodically during batch processing
+				// This handles the case where a single batch takes > 55 seconds due to rate limiting
+				// Refresh every 30 seconds to stay well under the 55-second expiry
+				$time_since_last_refresh = time() - $last_lock_refresh_time;
+				if ( $time_since_last_refresh >= 30 ) {
+					$this->refresh_campaign_lock( $lock_key, $lock_duration );
+					$last_lock_refresh_time = time();
 				}
 
 				// Process contact
@@ -680,7 +879,7 @@ abstract class Abstract_Campaign_Processing {
 					break 2;
 				}
 
-				// Record successful send (updates both per-second and daily counters)
+				// Track per-second rate (in-memory only, for throttling)
 				$this->rate_limiter->record_sent( $this->channel );
 
 				$offset++;
@@ -699,7 +898,13 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Queue continuation
+	 * Queue continuation with AJAX first, Action Scheduler fallback
+	 *
+	 * This method uses a hybrid approach:
+	 * 1. First tries immediate AJAX continuation (non-blocking, ~50-200ms delay)
+	 * 2. Falls back to Action Scheduler if AJAX fails (reliable, 0-60s delay)
+	 *
+	 * Both approaches are NON-BLOCKING - they don't block the current PHP process.
 	 *
 	 * @param int $campaign_id
 	 * @return void
@@ -710,16 +915,44 @@ abstract class Abstract_Campaign_Processing {
 		if ( ! $campaign || $campaign->status !== 'processing' ) {
 			return; // Don't queue if campaign is no longer processing
 		}
-		
-		// Queue the continuation task
+
+		// Try immediate AJAX continuation first (much faster - non-blocking)
+		// Wrap in try-catch to ensure fallback always works
+		try {
+			$ajax_success = $this->trigger_ajax_continuation( $campaign_id );
+
+			if ( $ajax_success ) {
+				quillcrm_get_logger()->info(
+					sprintf( __( 'Campaign %s continuation triggered via AJAX (non-blocking)', 'quillcrm' ), $this->channel ),
+					array(
+						'code'        => "{$this->channel}_continuation_ajax",
+						'campaign_id' => $campaign_id,
+					)
+				);
+				return; // Success - no need for Action Scheduler fallback
+			}
+		} catch ( \Exception $e ) {
+			// Log error but continue to fallback
+			quillcrm_get_logger()->warning(
+				sprintf( __( 'AJAX continuation attempt failed for campaign %s, using Action Scheduler fallback', 'quillcrm' ), $this->channel ),
+				array(
+					'code'        => "{$this->channel}_ajax_continuation_exception",
+					'campaign_id' => $campaign_id,
+					'error'       => $e->getMessage(),
+				)
+			);
+		}
+
+		// Fallback to Action Scheduler if AJAX fails or is disabled (reliable, non-blocking)
+		// This ensures campaigns always continue processing
 		$action_id = QuillCRM::instance()->campaigns_tasks->enqueue_async(
 			"continue_{$this->channel}_campaign",
 			$campaign_id
 		);
-		
+
 		if ( ! $action_id ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( 'Failed to queue campaign %s continuation', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Failed to queue campaign %s continuation (both AJAX and Action Scheduler failed)', 'quillcrm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_continuation_queue_failed",
 					'campaign_id' => $campaign_id,
@@ -727,9 +960,9 @@ abstract class Abstract_Campaign_Processing {
 			);
 			return;
 		}
-		
+
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Campaign %s continuation queued.', 'quillcrm' ), $this->channel ),
+			sprintf( __( 'Campaign %s continuation queued via Action Scheduler (fallback, non-blocking)', 'quillcrm' ), $this->channel ),
 			array(
 				'code'        => "{$this->channel}_continuation_queued",
 				'campaign_id' => $campaign_id,
@@ -739,17 +972,232 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Register AJAX continuation hooks
+	 *
+	 * Registers handlers for both authenticated and unauthenticated requests
+	 * to ensure continuation works regardless of user session state.
+	 *
+	 * Uses channel-specific hook names to avoid conflicts between email/SMS/WhatsApp processors.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	protected function register_ajax_continuation_hooks() {
+		// Use channel-specific hook names to avoid conflicts
+		// Each channel (email, sms, whatsapp) registers its own handler
+		$ajax_action = "quillcrm-continue-campaign-{$this->channel}";
+
+		// Register for both authenticated and unauthenticated requests
+		// This ensures continuation works even if user session expires
+		// Note: These hooks can be registered at any time, WordPress will handle them
+		add_action( "wp_ajax_nopriv_{$ajax_action}", array( $this, 'handle_ajax_continuation' ) );
+		add_action( "wp_ajax_{$ajax_action}", array( $this, 'handle_ajax_continuation' ) );
+	}
+
+	/**
+	 * Trigger immediate AJAX continuation (non-blocking)
+	 *
+	 * This method sends a non-blocking HTTP request to admin-ajax.php.
+	 * The request is "fire and forget" - it doesn't wait for a response.
+	 * The continuation processing happens in a completely separate PHP process.
+	 *
+	 * @param int $campaign_id Campaign ID to continue
+	 * @return bool True if AJAX request was sent successfully, false otherwise
+	 */
+	protected function trigger_ajax_continuation( $campaign_id ) {
+		// Check if AJAX continuation is enabled (can be disabled via filter for testing)
+		if ( ! apply_filters( 'quillcrm_enable_ajax_continuation', true, $this->channel, $campaign_id ) ) {
+			return false;
+		}
+
+		// Safety check: ensure we're not in a CLI context where AJAX won't work
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return false; // Use Action Scheduler in CLI context
+		}
+
+		// Check if we should use AJAX based on Action Scheduler schedule
+		// If Action Scheduler is about to run soon, let it handle it
+		try {
+			if ( ! $this->should_use_ajax_continuation() ) {
+				return false; // Let Action Scheduler handle it
+			}
+		} catch ( \Exception $e ) {
+			// If there's an error checking Action Scheduler, fall back to Action Scheduler
+			quillcrm_get_logger()->warning(
+				sprintf( __( 'Error checking AJAX continuation eligibility for campaign %s', 'quillcrm' ), $this->channel ),
+				array(
+					'code'        => "{$this->channel}_ajax_check_error",
+					'campaign_id' => $campaign_id,
+					'error'       => $e->getMessage(),
+				)
+			);
+			return false;
+		}
+
+		// Build AJAX URL with channel-specific action and security nonce
+		$ajax_action = "quillcrm-continue-campaign-{$this->channel}";
+		$url         = add_query_arg(
+			array(
+				'action'      => $ajax_action,
+				'campaign_id' => $campaign_id,
+				'channel'     => $this->channel,
+				'nonce'       => wp_create_nonce( 'quillcrm_continue_campaign_' . $campaign_id ),
+				'time'        => time(),
+			),
+			admin_url( 'admin-ajax.php' )
+		);
+
+		// Send non-blocking HTTP request
+		// blocking => false means: send request, don't wait for response, return immediately
+		$response = wp_remote_post(
+			$url,
+			array(
+				'sslverify' => false,  // Don't verify SSL (faster, acceptable for internal requests)
+				'blocking'  => false,  // NON-BLOCKING - returns immediately, doesn't wait
+				'timeout'   => 1,       // Fast timeout (request is non-blocking anyway)
+				'body'      => array(
+					'campaign_id' => $campaign_id,
+					'channel'     => $this->channel,
+				),
+			)
+		);
+
+		// Return true if request was sent (even if we don't wait for response)
+		return ! is_wp_error( $response );
+	}
+
+	/**
+	 * Determine if AJAX continuation should be used
+	 *
+	 * Uses AJAX if Action Scheduler won't run soon enough.
+	 * This prevents unnecessary AJAX calls when Action Scheduler is about to run.
+	 *
+	 * @return bool True if AJAX should be used, false to use Action Scheduler
+	 */
+	protected function should_use_ajax_continuation() {
+		// Build the full hook name with group prefix
+		$full_hook = "quillcrm_campaigns_continue_{$this->channel}_campaign";
+
+		// Check when Action Scheduler will run next
+		$next_action = as_next_scheduled_action( $full_hook );
+
+		if ( ! $next_action ) {
+			return true; // No scheduled action, use AJAX for immediate processing
+		}
+
+		$time_until_action = $next_action - time();
+
+		// Use AJAX if next action is more than threshold seconds away
+		// This ensures immediate continuation for better performance
+		$ajax_threshold = apply_filters(
+			'quillcrm_ajax_continuation_threshold',
+			5, // seconds - if Action Scheduler runs in >5 seconds, use AJAX
+			$this->channel
+		);
+
+		return $time_until_action > $ajax_threshold;
+	}
+
+	/**
+	 * Handle AJAX continuation request
+	 *
+	 * This method processes the AJAX continuation request.
+	 * It runs in a SEPARATE PHP process/request, so it doesn't block the original request.
+	 *
+	 * IMPORTANT: This is non-blocking from the original request's perspective.
+	 * The continuation processing happens in a completely separate HTTP request.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function handle_ajax_continuation() {
+		// Set no-cache headers
+		nocache_headers();
+
+		// Verify nonce for security
+		$campaign_id = isset( $_REQUEST['campaign_id'] ) ? (int) $_REQUEST['campaign_id'] : 0;
+		$channel     = isset( $_REQUEST['channel'] ) ? sanitize_text_field( $_REQUEST['channel'] ) : '';
+		$nonce       = isset( $_REQUEST['nonce'] ) ? sanitize_text_field( $_REQUEST['nonce'] ) : '';
+
+		// Validate parameters
+		if ( ! $campaign_id ) {
+			wp_send_json_error( array( 'message' => 'Invalid campaign ID' ) );
+			return;
+		}
+
+		// Verify channel matches (double-check since hook is channel-specific)
+		if ( $channel && $channel !== $this->channel ) {
+			wp_send_json_error( array( 'message' => 'Channel mismatch' ) );
+			return;
+		}
+
+		// Verify nonce
+		if ( ! wp_verify_nonce( $nonce, 'quillcrm_continue_campaign_' . $campaign_id ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+			return;
+		}
+
+		// Check if Action Scheduler is about to run (prevent unnecessary AJAX if cron is imminent)
+		$full_hook   = "quillcrm_campaigns_continue_{$this->channel}_campaign";
+		$next_action = as_next_scheduled_action( $full_hook );
+		if ( $next_action ) {
+			$time_until_action = $next_action - time();
+			// If Action Scheduler runs in < 3 seconds, let it handle it instead
+			if ( $time_until_action > 0 && $time_until_action <= 3 ) {
+				wp_send_json_success( array( 'message' => 'Action Scheduler will handle it soon' ) );
+				return;
+			}
+		}
+
+		// NOTE: Locking is handled inside continue_campaign_processing()
+		// using the unified lock key: quillcrm_{channel}_campaign_processing_{id}
+		// This ensures AJAX, Action Scheduler, and main cron all respect the same lock.
+
+		try {
+			// Process continuation (reuse existing method)
+			// This runs in a separate PHP process, so it doesn't block the original request
+			// The lock is acquired inside continue_campaign_processing()
+			$this->continue_campaign_processing( $campaign_id );
+
+			wp_send_json_success(
+				array(
+					'message'     => 'Processed',
+					'campaign_id' => $campaign_id,
+					'channel'     => $this->channel,
+				)
+			);
+		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				sprintf( __( 'AJAX continuation error for campaign %s', 'quillcrm' ), $this->channel ),
+				array(
+					'code'        => "{$this->channel}_ajax_continuation_error",
+					'campaign_id' => $campaign_id,
+					'error'       => $e->getMessage(),
+					'trace'       => $e->getTraceAsString(),
+				)
+			);
+
+			wp_send_json_error(
+				array(
+					'message'     => $e->getMessage(),
+					'campaign_id' => $campaign_id,
+				)
+			);
+		}
+		// NOTE: Lock cleanup is handled inside continue_campaign_processing()
+	}
+
+	/**
 	 * Add campaign message - unified logic for all types
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
-	 * @param int            $last_contact_offset
-	 * @return bool
+	 * @return array
 	 */
 	protected function add_message( Campaign_Model $campaign, Contact_Model $contact ) {
 		try {
 			$recipient = $this->get_recipient( $contact );
-			
+
 			if ( empty( $recipient ) ) {
 				$this->contact_filter->log_skipped_contact(
 					$contact->id,
@@ -758,11 +1206,15 @@ abstract class Abstract_Campaign_Processing {
 					$this->channel === Campaign_Channel::STR_EMAIL ? 'no email' : 'no phone number'
 				);
 				// Don't update DB here - caller handles offset
-				return array( 'success' => true, 'skipped' => true, 'fatal' => false );
+				return array(
+					'success' => true,
+					'skipped' => true,
+					'fatal'   => false,
+				);
 			}
-	
+
 			$template_id = $this->get_template_for_contact( $campaign, $contact );
-			
+
 			if ( ! $template_id ) {
 				quillcrm_get_logger()->error(
 					sprintf( __( 'No template found for %s campaign.', 'quillcrm' ), $this->channel ),
@@ -772,7 +1224,7 @@ abstract class Abstract_Campaign_Processing {
 						'contact_id'  => $contact->id,
 					)
 				);
-	
+
 				global $wpdb;
 				$wpdb->update(
 					$wpdb->prefix . 'quillcrm_campaigns',
@@ -782,32 +1234,38 @@ abstract class Abstract_Campaign_Processing {
 					array( '%d' )
 				);
 				$campaign->status = 'failed';
-	
-				return array( 'success' => false, 'skipped' => false, 'fatal' => true );
+
+				return array(
+					'success' => false,
+					'skipped' => false,
+					'fatal'   => true,
+				);
 			}
-	
-			$campaign_message = Communication_Tracking_Model::create( array(
-				'contact_id'  => $contact->id,
-				'template_id' => $template_id,
-				'mode'        => $this->get_message_mode(),
-				'direction'   => Message_Direction::OUTBOUND,
-				'source_type' => $this->get_source_type(),
-				'source_id'   => $this->get_source_id( $campaign ),
-				'recipient'   => $recipient,
-				'status'      => Tracking_Status::PENDING,
-				'hash_key'    => Utils::generate_hash_key(),
-			) );
-	
-			// Don't update offset here - caller handles it after batch
-	
-			$channel_string = $this->channel;
-			QuillCRM::instance()->campaigns_tasks->enqueue_sync( 
-				"process_campaign_{$channel_string}", 
-				$campaign, 
-				$contact, 
-				$campaign_message 
+
+			$campaign_message = Communication_Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => $template_id,
+					'mode'        => $this->get_message_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
+					'source_type' => $this->get_source_type(),
+					'source_id'   => $this->get_source_id( $campaign ),
+					'recipient'   => $recipient,
+					'status'      => Tracking_Status::PENDING,
+					'hash_key'    => Utils::generate_hash_key(),
+				)
 			);
-	
+
+			// Don't update offset here - caller handles it after batch
+
+			$channel_string = $this->channel;
+			QuillCRM::instance()->campaigns_tasks->enqueue_sync(
+				"process_campaign_{$channel_string}",
+				$campaign,
+				$contact,
+				$campaign_message
+			);
+
 			quillcrm_get_logger()->info(
 				sprintf( __( 'Campaign %s enqueued.', 'quillcrm' ), $this->channel ),
 				array(
@@ -818,9 +1276,12 @@ abstract class Abstract_Campaign_Processing {
 					),
 				)
 			);
-			
-			return array( 'success' => true, 'skipped' => false, 'fatal' => false );
-			
+
+			return array(
+				'success' => true,
+				'skipped' => false,
+				'fatal'   => false,
+			);
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				sprintf( __( 'Add campaign %s error.', 'quillcrm' ), $this->channel ),
@@ -832,21 +1293,31 @@ abstract class Abstract_Campaign_Processing {
 					),
 				)
 			);
-			return array( 'success' => false, 'skipped' => false, 'fatal' => false );
+			return array(
+				'success' => false,
+				'skipped' => false,
+				'fatal'   => false,
+			);
 		}
 	}
-	
+
 
 
 	/**
 	 * Process campaign message - unified logic for all types
 	 *
-	 * @param Campaign_Model $campaign
-	 * @param Contact_Model  $contact
-	 * @param Communication_Tracking_Model $campaign_message
+	 * @param Campaign_Model                         $campaign
+	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact Model
+	 * @param Communication_Tracking_Model           $campaign_message
 	 * @return void
 	 */
-	public function process_campaign_message( Campaign_Model $campaign, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
+	public function process_campaign_message( Campaign_Model $campaign, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
+		// Extract actual contact for operations that need it (validation, sending, etc.)
+		// But preserve the original for merge tag processing
+		$contact = $contact_or_automation_contact instanceof Automation_Contact_Model
+			? $contact_or_automation_contact->contact
+			: $contact_or_automation_contact;
+
 		// Check if memory limit is reached
 		if ( Utils::is_memory_limit_reached() ) {
 			// Track retry attempts using transients to prevent infinite requeue loop
@@ -892,9 +1363,9 @@ abstract class Abstract_Campaign_Processing {
 				)
 			);
 
-			// Requeue the task for later processing
+			// Requeue the task for later processing - pass the original contact model
 			$channel_string = $this->channel;
-			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact, $campaign_message );
+			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact_or_automation_contact, $campaign_message );
 			return;
 		}
 
@@ -922,10 +1393,10 @@ abstract class Abstract_Campaign_Processing {
 			// Validate template content
 			$this->validate_template( $template, $this->channel );
 
-			// Prepare message content
-			$message_data = $this->prepare_message_content( $template, $contact, $campaign_message );
+			// Prepare message content - pass the original contact model for merge tags
+			$message_data = $this->prepare_message_content( $template, $contact_or_automation_contact, $campaign_message );
 
-			// Send the message
+			// Send the message - use actual contact for sending
 			$result = $this->send_message( $message_data, $contact, $campaign_message );
 
 			// Handle result
@@ -950,15 +1421,20 @@ abstract class Abstract_Campaign_Processing {
 	/**
 	 * Prepare message content - unified logic for all types
 	 *
-	 * @param \QuillCRM\Models\Template_Model $template
-	 * @param Contact_Model                   $contact
-	 * @param Communication_Tracking_Model                  $campaign_message
+	 * @param \QuillCRM\Models\Template_Model        $template
+	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact Model for merge tags
+	 * @param Communication_Tracking_Model           $campaign_message
 	 * @return array Prepared message data
 	 */
-	protected function prepare_message_content( $template, Contact_Model $contact, Communication_Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// Extract actual contact for operations that need Contact_Model
+		$contact = $contact_or_automation_contact instanceof Automation_Contact_Model
+			? $contact_or_automation_contact->contact
+			: $contact_or_automation_contact;
 
 		// STEP 1: Extract merge tag keys if not already cached
 		if ( is_null( $this->template_merge_tag_keys ) ) {
@@ -976,11 +1452,13 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Check if the message is in builder JSON format and render it to HTML
-		$message = $this->render_builder_content( $message, $contact );
+		// Pass the original contact model for merge tags
+		$renderer = null;
+		$message  = $this->render_builder_content_with_tracking( $message, $contact_or_automation_contact, $campaign_message->id, $renderer );
 
-		// Process merge tags
-		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
-		$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+		// Process merge tags - use the original contact model to support automation merge tags
+		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
+		$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact_or_automation_contact );
 
 		// Add click tracking to URLs in the message (if tracking class supports it)
 		$tracking_class = $this->get_tracking_class();
@@ -1010,14 +1488,16 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Render builder content to HTML if it's in builder JSON format
+	 * Render builder content with conditional section tracking
 	 *
-	 * @param string        $content The content to render (could be HTML or JSON)
-	 * @param Contact_Model $contact Contact model for merge tags
-	 * @param string        $footer_html Optional footer HTML to inject before </body> tag
+	 * @param string                                 $content The content to render (could be HTML or JSON)
+	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact model for merge tags
+	 * @param int|null                               $tracking_id Communication tracking ID (null if not yet created)
+	 * @param object|null                            &$renderer Renderer instance (passed by reference to capture rendered section IDs)
+	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string Rendered HTML content
 	 */
-	protected function render_builder_content( $content, Contact_Model $contact, $footer_html = '' ) {
+	protected function render_builder_content_with_tracking( $content, $contact_or_automation_contact, $tracking_id = null, &$renderer = null, $footer_html = '' ) {
 		// Try to decode the content to see if it's JSON
 		$decoded = json_decode( $content, true );
 
@@ -1036,12 +1516,53 @@ abstract class Abstract_Campaign_Processing {
 				// Extract preview text if available
 				$preview_text = '';
 
-				return $renderer->render_from_builder_data( $builder_data, $contact, $preview_text, $footer_html );
+				$html = $renderer->render_from_builder_data( $builder_data, $contact_or_automation_contact, $preview_text, $footer_html );
+
+				// Capture rendered conditional section IDs for later storage (only after successful send)
+				// IMPORTANT: Do NOT write conditional_sections meta here - it should only be written
+				// after the email is successfully sent, not during rendering/preparation phase
+				$rendered_section_ids = $renderer->get_rendered_section_ids();
+
+				if ( $tracking_id ) {
+					// Validate that rendered_section_ids is an array
+					if ( ! is_array( $rendered_section_ids ) ) {
+						$rendered_section_ids = array();
+					}
+
+					// Filter out any invalid values (ensure all items are strings)
+					$rendered_section_ids = array_filter(
+						$rendered_section_ids,
+						function ( $id ) {
+							return is_string( $id ) && ! empty( $id );
+						}
+					);
+					// Re-index array after filtering
+					$rendered_section_ids = array_values( $rendered_section_ids );
+
+					// Store rendered section IDs temporarily - will be written to meta only after successful send
+					// This ensures conditional_sections meta is only recorded for emails that were actually sent
+					$this->pending_conditional_sections[ $tracking_id ] = $rendered_section_ids;
+				}
+
+				return $html;
 			}
 		}
 
 		// If it's JSON but not builder format, return as-is (might be legacy format)
 		return $content;
+	}
+
+	/**
+	 * Render builder content to HTML if it's in builder JSON format
+	 *
+	 * @param string                                 $content The content to render (could be HTML or JSON)
+	 * @param Contact_Model|Automation_Contact_Model $contact_or_automation_contact Contact model for merge tags
+	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @return string Rendered HTML content
+	 */
+	protected function render_builder_content( $content, $contact_or_automation_contact, $footer_html = '' ) {
+		$renderer = null;
+		return $this->render_builder_content_with_tracking( $content, $contact_or_automation_contact, null, $renderer, $footer_html );
 	}
 
 
@@ -1101,7 +1622,7 @@ abstract class Abstract_Campaign_Processing {
 	 * Handle send result - unified logic for all types
 	 *
 	 * @param Communication_Tracking_Model $campaign_message
-	 * @param array          $result Send result
+	 * @param array                        $result Send result
 	 * @return void
 	 */
 	protected function handle_send_result( Communication_Tracking_Model $campaign_message, $result ) {
@@ -1109,9 +1630,16 @@ abstract class Abstract_Campaign_Processing {
 			$campaign_message->status  = Tracking_Status::SENT;
 			$campaign_message->sent_at = current_time( 'mysql' );
 
-			do_action( "quillcrm_{$this->channel}_send_after", $this );
+			// Write conditional_sections meta ONLY after successful send
+			// This ensures we only track sections for emails that were actually sent
+			$this->store_conditional_sections_meta( $campaign_message->id );
 		} else {
 			$campaign_message->status = Tracking_Status::FAILED;
+
+			// Clear pending conditional sections if send failed - don't track sections for unsent emails
+			if ( isset( $this->pending_conditional_sections[ $campaign_message->id ] ) ) {
+				unset( $this->pending_conditional_sections[ $campaign_message->id ] );
+			}
 
 			// Log error details if available
 			if ( isset( $result['error'] ) ) {
@@ -1178,6 +1706,47 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Store conditional sections meta for a tracking record
+	 * Called only after successful send to ensure meta is only recorded for sent emails
+	 *
+	 * @param int $tracking_id Communication tracking ID
+	 * @return void
+	 */
+	private function store_conditional_sections_meta( $tracking_id ) {
+		// Check if we have pending conditional sections for this tracking ID
+		if ( ! isset( $this->pending_conditional_sections[ $tracking_id ] ) ) {
+			return; // No conditional sections were rendered for this email
+		}
+
+		$rendered_section_ids = $this->pending_conditional_sections[ $tracking_id ];
+
+		// Only save if we have valid section IDs
+		if ( ! empty( $rendered_section_ids ) && is_array( $rendered_section_ids ) ) {
+			// Check if record already exists
+			$existing_meta = \QuillCRM\Models\Communication_Tracking_Meta_Model::where( 'communication_tracking_id', $tracking_id )
+				->where( 'meta_key', 'conditional_sections' )
+				->first();
+
+			if ( $existing_meta ) {
+				$existing_meta->meta_value = $rendered_section_ids;
+				$existing_meta->save();
+			} else {
+				\QuillCRM\Models\Communication_Tracking_Meta_Model::create(
+					array(
+						'communication_tracking_id' => $tracking_id,
+						'meta_key'                  => 'conditional_sections',
+						'meta_value'                => $rendered_section_ids,
+					)
+				);
+			}
+		}
+
+		// Clean up temporary storage
+		unset( $this->pending_conditional_sections[ $tracking_id ] );
+	}
+
+
+	/**
 	 * Get message provider for this channel
 	 *
 	 * @since 1.0.0
@@ -1205,8 +1774,8 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Campaign_Model $campaign
-	 * @param Contact_Model  $contact
+	 * @param Campaign_Model               $campaign
+	 * @param Contact_Model                $contact
 	 * @param Communication_Tracking_Model $campaign_message
 	 * @return void
 	 */
@@ -1227,8 +1796,8 @@ abstract class Abstract_Campaign_Processing {
 	/**
 	 * Log campaign processing result
 	 *
-	 * @param Campaign_Model $campaign
-	 * @param Contact_Model  $contact
+	 * @param Campaign_Model               $campaign
+	 * @param Contact_Model                $contact
 	 * @param Communication_Tracking_Model $campaign_message
 	 * @return void
 	 */
@@ -1247,10 +1816,10 @@ abstract class Abstract_Campaign_Processing {
 	/**
 	 * Log campaign processing error
 	 *
-	 * @param Campaign_Model $campaign
-	 * @param Contact_Model  $contact
+	 * @param Campaign_Model               $campaign
+	 * @param Contact_Model                $contact
 	 * @param Communication_Tracking_Model $campaign_message
-	 * @param \Exception     $exception
+	 * @param \Exception                   $exception
 	 * @return void
 	 */
 	protected function log_campaign_processing_error( $campaign, $contact, $campaign_message, $exception ) {
@@ -1278,41 +1847,12 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Reset daily count
-	 *
-	 * @return void
-	 */
-	public function reset_daily_count() {
-		$this->rate_limiter->reset_daily_count( $this->channel );
-
-		// Update heartbeat to track daily task execution.
-		if ( ! \QuillCRM\QuillCRM::instance()->daily_tasks->update_heartbeat( 'quillcrm_daily3' ) ) {
-			quillcrm_get_logger()->warning(
-				'Failed to update heartbeat for daily tasks',
-				array(
-					'channel' => $this->channel,
-					'context' => 'daily_reset',
-				)
-			);
-		}
-	}
-
-	/**
-	 * Increment daily count after sending
-	 *
-	 * @return void
-	 */
-	public function send_after() {
-		$this->rate_limiter->increment_daily_count( $this->channel );
-	}
-
-	/**
 	 * Handle resending logic - unified implementation for all campaign types
 	 *
 	 * @return bool True if resending was handled
 	 */
 	protected function handle_resending() {
-		// Convert string to integer for database query (DB boundary)
+		 // Convert string to integer for database query (DB boundary)
 		$type_int = Campaign_Channel::to_integer( $this->channel );
 
 		$resending_campaign = Campaign_Model::where( 'status', 'resending' )
@@ -1387,8 +1927,8 @@ abstract class Abstract_Campaign_Processing {
 	 * Resend a single message
 	 * Helper method to resend a single tracking message
 	 *
-	 * @param Campaign_Model $campaign
-	 * @param Contact_Model  $contact
+	 * @param Campaign_Model               $campaign
+	 * @param Contact_Model                $contact
 	 * @param Communication_Tracking_Model $message
 	 * @return void
 	 */

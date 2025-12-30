@@ -29,20 +29,6 @@ use QuillCRM\Services\Campaign_Analytics;
  */
 class Campaign_Model extends Model {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Table name
 	 *
@@ -114,7 +100,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @var array
 	 */
-	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body' );
+	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body', 'preview_text' );
 
 	/**
 	 * Guarded attributes - computed fields that should never be persisted
@@ -266,7 +252,7 @@ class Campaign_Model extends Model {
 		if ( $template ) {
 			$template = Template_Model::find( $template );
 			if ( $template ) {
-				return $template->subject;
+				return $template->settings['subject'] ?? '';
 			}
 		}
 		return '';
@@ -280,6 +266,17 @@ class Campaign_Model extends Model {
 			if ( $template ) {
 				return $template->body;
 			}
+		}
+		return '';
+	}
+
+
+	public function getPreviewTextAttribute() {
+		 $template_ids = $this->get_template_ids();
+		$template      = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			return $template->settings['preview_text'] ?? '';
 		}
 		return '';
 	}
@@ -638,19 +635,19 @@ class Campaign_Model extends Model {
 		);
 
 		// Delete the campaign templates when deleting the campaign
-		static::deleting(
-			function ( $campaign ) {
-				// Get template IDs and delete associated templates
-				$template_ids = $campaign->get_template_ids();
+		// static::deleting(
+		// function ($campaign) {
+		// Get template IDs and delete associated templates
+		// $template_ids = $campaign->get_template_ids();
 
-				foreach ( $template_ids as $template_id ) {
-					$template = Template_Model::find( $template_id );
-					if ( $template ) {
-						$template->delete();
-					}
-				}
-			}
-		);
+		// foreach ($template_ids as $template_id) {
+		// $template = Template_Model::find($template_id);
+		// if ($template) {
+		// $template->delete();
+		// }
+		// }
+		// }
+		// );
 
 		// Note: Computed attributes (counts, rates, etc.) are now handled by
 		// Campaign_Enrichment service in controllers, not in model events.

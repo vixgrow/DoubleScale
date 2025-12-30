@@ -100,10 +100,18 @@ export const deleteSection = (sectionId: string): EmailBuilderActionTypes => ({
 
 export const updateSection = (
 	sectionId: string,
-	styles: Record<string, any>
+	updates: {
+		styles?: Record<string, any>;
+		conditions?: Array<{
+			group: string;
+			filter: string;
+			operator: string;
+			value: any;
+		}>;
+	}
 ): EmailBuilderActionTypes => ({
 	type: UPDATE_SECTION,
-	payload: { sectionId, styles },
+	payload: { sectionId, ...updates },
 });
 
 export const reorderSections = (

@@ -48,6 +48,7 @@ export interface BuilderProps {
 				enabled: boolean;
 				interval?: number;
 		  };
+	handleNavigate?: (href: string) => void;
 }
 
 const BuilderContent: React.FC<BuilderProps> = ({
@@ -55,6 +56,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	onSave,
 	onClose,
 	autoSave = true,
+	handleNavigate,
 }) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
@@ -290,6 +292,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					onTemplatesSaved={() =>
 						setTemplatesRefreshTrigger((prev) => prev + 1)
 					}
+					handleNavigate={handleNavigate}
 				/>
 				<div
 					className="flex flex-1 overflow-hidden"

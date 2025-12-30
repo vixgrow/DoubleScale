@@ -40,12 +40,6 @@ use QuillCRM\Constants\Tracking_Status;
 class REST_Automation_Reports_Controller extends REST_Controller {
 
 
-
-
-
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -171,10 +165,10 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				->get();
 
 			// Base query for automation contacts
-			$contacts_query = Automation_Contact_Model::where( 'automation_id', $automation_id );
+			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $automation_id );
 
 			// Get total contacts who entered the automation
-			$total_contacts = $contacts_query->count();
+			$total_contacts = $automation_contacts->count();
 
 			// Calculate funnel data for each step
 			$funnel_data = array();
@@ -214,7 +208,8 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			foreach ( $steps as $step ) {
 				$step_processes_query = Automation_Contact_Processes_Model::where( 'automation_id', $automation_id )
 					->where( 'step_id', $step->id )
-					->where( 'status', 'completed' );
+					->where( 'status', 'completed' )
+					->whereIn( 'automation_contact_id', $automation_contacts->pluck( 'id' ) );
 
 				if ( $step_processes_query->count() === 0 ) {
 					continue;
@@ -275,7 +270,8 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			}
 
 			// Get total contacts who entered the automation
-			$total_contacts = Automation_Contact_Model::where( 'automation_id', $automation_id )->count();
+			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $automation_id );
+			$total_contacts      = $automation_contacts->count();
 
 			if ( $total_contacts === 0 ) {
 				return new WP_REST_Response(
@@ -316,7 +312,8 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				// Count contacts who entered this step
 				$step_processes = Automation_Contact_Processes_Model::where( 'automation_id', $automation_id )
 					->where( 'step_id', $step->id )
-					->where( 'status', 'completed' );
+					->where( 'status', 'completed' )
+					->whereIn( 'automation_contact_id', $automation_contacts->pluck( 'id' ) );
 
 				if ( $step_processes->count() === 0 ) {
 					continue;
@@ -331,28 +328,28 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				// Calculate completion rate relative to total contacts
 				$completion_rate = $total_contacts > 0 ? round( ( $step_contacts_entered / $total_contacts ) * 100, 1 ) : 0;
 
-			// Calculate drop-off rate from previous step
-			$drop_off_rate = $total_contacts > 0 ? round( ( ( $total_contacts - $step_contacts_entered ) / $total_contacts ) * 100, 1 ) : 0;
+				// Calculate drop-off rate from previous step
+				$drop_off_rate = $total_contacts > 0 ? round( ( ( $total_contacts - $step_contacts_entered ) / $total_contacts ) * 100, 1 ) : 0;
 
-			// Base step data
-			$step_data = array(
-				'stepName'          => $this->get_step_label( $step->action ),
-				'contactsEntered'   => $step_contacts_entered,
-				'contactsCompleted' => $step_contacts_completed,
-				'completionRate'    => (int) ceil( $completion_rate ),
-				'dropOffRate'       => (int) ceil( $drop_off_rate ),
-				'stepId'            => $step->id,
-				'stepType'          => $step->type,
-			);
+				// Base step data
+				$step_data = array(
+					'stepName'          => $this->get_step_label( $step->action ),
+					'contactsEntered'   => $step_contacts_entered,
+					'contactsCompleted' => $step_contacts_completed,
+					'completionRate'    => (int) ceil( $completion_rate ),
+					'dropOffRate'       => (int) ceil( $drop_off_rate ),
+					'stepId'            => $step->id,
+					'stepType'          => $step->type,
+				);
 
-			// Add email tracking metrics for email action steps
-			$email_actions = array( 'send_email', 'send_campaign_email', 'send_email_sequence' );
-			if ( in_array( $step->action, $email_actions, true ) ) {
-				$email_metrics = $this->get_step_email_metrics( $step->id );
-				$step_data['emailMetrics'] = $email_metrics;
-			}
+				// Add email tracking metrics for email action steps
+				$email_actions = array( 'send_email', 'send_campaign_email', 'send_email_sequence' );
+				if ( in_array( $step->action, $email_actions, true ) ) {
+					$email_metrics             = $this->get_step_email_metrics( $step->id );
+					$step_data['emailMetrics'] = $email_metrics;
+				}
 
-			$step_reports[] = $step_data;
+				$step_reports[] = $step_data;
 			}
 
 			// Calculate overall conversion rate: (last step completed / first step entered) * 100
@@ -399,7 +396,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 	public function get_email_analytics( $request ) {
 		try {
 			$automation_id = $request->get_param( 'id' );
-			
+
 			// Verify automation exists
 			$automation = Automation_Model::find( $automation_id );
 			if ( ! $automation ) {
@@ -414,7 +411,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				->get();
 
 			$analytics = array();
-			$totals = array(
+			$totals    = array(
 				'total'   => 0,
 				'sent'    => 0,
 				'failed'  => 0,
@@ -425,38 +422,38 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 			foreach ( $email_steps as $step ) {
 				$metrics = $this->get_step_email_metrics( $step->id );
-				
+
 				// Add to totals
-				$totals['total'] += $metrics['total'];
-				$totals['sent'] += $metrics['sent'];
-				$totals['failed'] += $metrics['failed'];
+				$totals['total']   += $metrics['total'];
+				$totals['sent']    += $metrics['sent'];
+				$totals['failed']  += $metrics['failed'];
 				$totals['pending'] += $metrics['pending'];
-				$totals['opened'] += $metrics['opened'];
+				$totals['opened']  += $metrics['opened'];
 				$totals['clicked'] += $metrics['clicked'];
 
 				$analytics[] = array(
-					'stepId'       => $step->id,
-					'stepName'     => $this->get_step_label( $step->action ),
-					'stepOrder'    => $step->order,
-					'action'       => $step->action,
-					'metrics'      => $metrics,
+					'stepId'    => $step->id,
+					'stepName'  => $this->get_step_label( $step->action ),
+					'stepOrder' => $step->order,
+					'action'    => $step->action,
+					'metrics'   => $metrics,
 				);
 			}
 
 			// Calculate overall rates
-			$overall_open_rate = $totals['sent'] > 0 ? round( ( $totals['opened'] / $totals['sent'] ) * 100, 2 ) : 0;
-			$overall_click_rate = $totals['sent'] > 0 ? round( ( $totals['clicked'] / $totals['sent'] ) * 100, 2 ) : 0;
+			$overall_open_rate    = $totals['sent'] > 0 ? round( ( $totals['opened'] / $totals['sent'] ) * 100, 2 ) : 0;
+			$overall_click_rate   = $totals['sent'] > 0 ? round( ( $totals['clicked'] / $totals['sent'] ) * 100, 2 ) : 0;
 			$overall_failure_rate = $totals['total'] > 0 ? round( ( $totals['failed'] / $totals['total'] ) * 100, 2 ) : 0;
 
 			return new WP_REST_Response(
 				array(
-					'automation'     => array(
+					'automation'   => array(
 						'id'   => $automation->id,
 						'name' => $automation->name,
 					),
-					'steps'          => $analytics,
-					'totals'         => $totals,
-					'overallRates'   => array(
+					'steps'        => $analytics,
+					'totals'       => $totals,
+					'overallRates' => array(
 						'openRate'    => $overall_open_rate,
 						'clickRate'   => $overall_click_rate,
 						'failureRate' => $overall_failure_rate,
@@ -481,7 +478,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 	public function get_step_email_analytics( $request ) {
 		try {
 			$step_id = $request->get_param( 'step_id' );
-			
+
 			// Verify step exists and get step details
 			$step = Automation_Step_Model::find( $step_id );
 			if ( ! $step ) {
@@ -502,7 +499,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 			return new WP_REST_Response(
 				array(
-					'step' => array(
+					'step'    => array(
 						'id'     => $step->id,
 						'name'   => $step_label,
 						'action' => $step->action,
@@ -531,7 +528,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 		// Use raw SQL for better performance
 		$table_name = $wpdb->prefix . 'quillcrm_communication_tracking';
-		
+
 		$metrics = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT 
@@ -554,16 +551,16 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 		);
 
 		// Convert string values to integers
-		$total = (int) ( $metrics['total'] ?? 0 );
-		$sent = (int) ( $metrics['sent'] ?? 0 );
-		$failed = (int) ( $metrics['failed'] ?? 0 );
+		$total   = (int) ( $metrics['total'] ?? 0 );
+		$sent    = (int) ( $metrics['sent'] ?? 0 );
+		$failed  = (int) ( $metrics['failed'] ?? 0 );
 		$pending = (int) ( $metrics['pending'] ?? 0 );
-		$opened = (int) ( $metrics['opened'] ?? 0 );
+		$opened  = (int) ( $metrics['opened'] ?? 0 );
 		$clicked = (int) ( $metrics['clicked'] ?? 0 );
 
 		// Calculate rates
-		$open_rate = $sent > 0 ? round( ( $opened / $sent ) * 100, 2 ) : 0;
-		$click_rate = $sent > 0 ? round( ( $clicked / $sent ) * 100, 2 ) : 0;
+		$open_rate    = $sent > 0 ? round( ( $opened / $sent ) * 100, 2 ) : 0;
+		$click_rate   = $sent > 0 ? round( ( $clicked / $sent ) * 100, 2 ) : 0;
 		$failure_rate = $total > 0 ? round( ( $failed / $total ) * 100, 2 ) : 0;
 
 		return array(

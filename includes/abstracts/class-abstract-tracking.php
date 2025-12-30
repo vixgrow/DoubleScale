@@ -14,6 +14,7 @@ use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Contact_Unsubscribe_Model;
 
 defined('ABSPATH') || exit;
@@ -202,6 +203,7 @@ abstract class Abstract_Tracking
 		$status        = $webhook_result['status'] ?? '';
 		$error_code    = $webhook_result['error_code'] ?? '';
 		$error_message = $webhook_result['error_message'] ?? '';
+		$metadata      = $webhook_result['metadata'] ?? array();
 
 		// Handle incoming messages - delegate to Messaging_Incoming handler.
 		if ( 'received' === $status ) {
@@ -234,7 +236,7 @@ abstract class Abstract_Tracking
 		}
 
 		// Update tracking record status based on webhook data
-		$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message );
+		$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message, $metadata );
 
 		wp_die( 'OK' ); // Acknowledge successful processing
 	}
@@ -371,12 +373,13 @@ abstract class Abstract_Tracking
 	 * Centralized status update logic with campaign-type-specific handling
 	 *
 	 * @param object $tracking_record Tracking record
-	 * @param string $status Delivery status from Twilio
+	 * @param string $status Delivery status from provider
 	 * @param string $error_code Error code if any
 	 * @param string $error_message Error message if any
+	 * @param array  $metadata Additional metadata from provider (e.g., opt-out info)
 	 * @return void
 	 */
-	protected function update_delivery_status($tracking_record, $status, $error_code = '', $error_message = '')
+	protected function update_delivery_status($tracking_record, $status, $error_code = '', $error_message = '', $metadata = array())
 	{
 		$previous_status = $tracking_record->status;
 
@@ -403,6 +406,12 @@ abstract class Abstract_Tracking
 
 		$tracking_record->save();
 
+		// Handle provider-reported opt-out (e.g., Meta WhatsApp blocked/spam errors)
+		// This auto-unsubscribes contacts who have opted out at the provider level
+		if ( ! empty( $metadata['is_opt_out'] ) && $tracking_record->contact_id ) {
+			$this->handle_provider_opt_out( $tracking_record, $metadata );
+		}
+
 		// Log status update
 		quillcrm_get_logger()->info(ucfirst($this->channel) . ' delivery status updated', [
 			'tracking_record_id' => $tracking_record->id,
@@ -413,11 +422,71 @@ abstract class Abstract_Tracking
 			'source_type' => $tracking_record->source_type,
 			'error_code' => $error_code,
 			'error_message' => $error_message,
+			'is_opt_out' => ! empty( $metadata['is_opt_out'] ),
 			'code' => "{$this->channel}_delivery_status_updated"
 		]);
 
 		// Trigger delivery status hooks
 		do_action("quillcrm_{$this->channel}_delivery_status_updated", $tracking_record, $status, $previous_status);
+	}
+
+	/**
+	 * Handle provider-reported opt-out
+	 *
+	 * When a provider (like Meta WhatsApp) reports that a user has blocked the business
+	 * or opted out via their platform controls, automatically unsubscribe them in QuillCRM.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $tracking_record Tracking record with contact_id
+	 * @param array  $metadata Metadata containing opt_out_reason
+	 * @return void
+	 */
+	protected function handle_provider_opt_out( $tracking_record, $metadata ) {
+		$contact = Contact_Model::find( $tracking_record->contact_id );
+
+		if ( ! $contact ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' provider opt-out: contact not found', array(
+				'contact_id'    => $tracking_record->contact_id,
+				'opt_out_reason' => $metadata['opt_out_reason'] ?? 'unknown',
+				'code'          => "{$this->channel}_provider_optout_no_contact",
+			) );
+			return;
+		}
+
+		$opt_out_reason = $metadata['opt_out_reason'] ?? 'provider_reported';
+
+		// Get the channel status field
+		$status_field = $this->channel . '_status';
+
+		// Only unsubscribe if not already unsubscribed
+		if ( 'unsubscribed' === $contact->getAttribute( $status_field ) ) {
+			quillcrm_get_logger()->debug( ucfirst( $this->channel ) . ' provider opt-out: contact already unsubscribed', array(
+				'contact_id'    => $contact->id,
+				'opt_out_reason' => $opt_out_reason,
+				'code'          => "{$this->channel}_provider_optout_already_unsubscribed",
+			) );
+			return;
+		}
+
+		// Use the standard unsubscribe method
+		$contact->unsubscribe_from_mode(
+			$this->get_campaign_mode(),
+			$opt_out_reason, // Reason will be stored (e.g., 'meta_user_blocked', 'meta_offers_announcements')
+			$tracking_record->source_type,
+			$tracking_record->source_id
+		);
+
+		quillcrm_get_logger()->info( ucfirst( $this->channel ) . ' contact auto-unsubscribed due to provider opt-out', array(
+			'contact_id'     => $contact->id,
+			'opt_out_reason' => $opt_out_reason,
+			'source_type'    => $tracking_record->source_type,
+			'source_id'      => $tracking_record->source_id,
+			'code'           => "{$this->channel}_provider_optout_unsubscribed",
+		) );
+
+		// Fire specific action for provider opt-out (different from keyword unsubscribe)
+		do_action( "quillcrm_{$this->channel}_provider_optout", $contact, $opt_out_reason, $tracking_record );
 	}
 
 	/**

@@ -23,6 +23,7 @@ final class Actions_Manager {
 
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -322,16 +323,17 @@ final class Actions_Manager {
 			 ),
 		 );
 
-		//  foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
-		// 	 // Zapier doesn't require integration setup, so it's always enabled
-		// 	 if ( $group === 'zapier' || $group === 'http_request' ) {
-		// 		 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
-		// 	 } else {
-		// 		 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
-		// 	 }
-		//  }
+		 // foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
+		 // Zapier doesn't require integration setup, so it's always enabled
+		 // if ( $group === 'zapier' || $group === 'http_request' ) {
+		 // $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
+		 // } else {
+		 // $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
+		 // }
+		 // }
 
-		
+		 $this->refresh_integration_status();
+
 		 $this->sources = apply_filters( 'quillcrm_actions_sources', $this->sources );
 	}
 

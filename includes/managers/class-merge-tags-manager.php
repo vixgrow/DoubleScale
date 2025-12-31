@@ -84,6 +84,17 @@ final class Merge_Tags_Manager {
 	public function register_forms_merge_tags() {
 		$forms = Forms_Manager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
+			// Ensure the form group is properly initialized with its name
+			// This handles the case where set_groups() ran before forms were loaded
+			if ( ! isset( $this->groups[ $form->slug ] ) || ! isset( $this->groups[ $form->slug ]['name'] ) ) {
+				$this->groups[ $form->slug ] = array(
+					'name'        => $form->name,
+					'mergeTags'   => isset( $this->groups[ $form->slug ]['mergeTags'] ) ? $this->groups[ $form->slug ]['mergeTags'] : array(),
+					'triggers'    => array( $form->slug ),
+					'is_disabled' => ! $form->is_enabled(),
+				);
+			}
+
 			$this->register( new Forms_Field_Backend( $form->slug ) );
 			$this->register( new Forms_Metadata_BackEnd( $form->slug ) );
 		}
@@ -103,6 +114,14 @@ final class Merge_Tags_Manager {
 
 		if ( isset( $this->merge_tags[ $merge_tag->slug ] ) ) {
 			return;
+		}
+
+		// Ensure the group exists with a default structure
+		if ( ! isset( $this->groups[ $merge_tag->group ] ) ) {
+			$this->groups[ $merge_tag->group ] = array(
+				'name'      => ucwords( str_replace( array( '_', '-' ), ' ', $merge_tag->group ) ),
+				'mergeTags' => array(),
+			);
 		}
 
 		// Merge tag will be like {{group:slug}}

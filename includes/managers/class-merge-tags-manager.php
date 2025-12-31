@@ -23,10 +23,6 @@ use QuillCRM\Models\Contact_Model;
  */
 final class Merge_Tags_Manager {
 
-
-
-
-
 	/**
 	 * Registed merge tags
 	 *
@@ -210,7 +206,7 @@ final class Merge_Tags_Manager {
 				'name'        => __( 'Wishlist', 'quillcrm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
 			),
 			'subscription'   => array(
 				'name'        => __( 'Subscription', 'quillcrm' ),

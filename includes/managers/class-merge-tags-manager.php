@@ -250,6 +250,17 @@ final class Merge_Tags_Manager {
 				'is_disabled' => ! $form->is_enabled(),
 			);
 		}
+
+		/**
+		 * Filter merge tag groups
+		 *
+		 * Allows Pro and other extensions to register additional merge tag groups.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $groups Registered merge tag groups
+		 */
+		$this->groups = apply_filters( 'quillcrm_merge_tag_groups', $this->groups );
 	}
 
 	/**

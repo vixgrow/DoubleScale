@@ -99,6 +99,32 @@ final class Actions_Manager {
 				'is_pro'            => $action->is_pro,
 			);
 		}
+
+		// Refresh integration is_disabled status after Pro plugin has registered integrations.
+		// This is necessary because set_sources() runs before quillcrm_loaded,
+		// so integrations registered on quillcrm_loaded (like Pro Slack) would show as disabled.
+		$this->refresh_integration_status();
+	}
+
+	/**
+	 * Refresh the is_disabled status for send_data integration groups.
+	 * Called after quillcrm_loaded to pick up Pro-registered integrations.
+	 *
+	 * @since 1.0.0
+	 */
+	private function refresh_integration_status() {
+		if ( ! isset( $this->sources['send_data']['groups'] ) ) {
+			return;
+		}
+
+		foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
+			// Zapier and HTTP Request don't require integration setup
+			if ( $group === 'zapier' || $group === 'http_request' ) {
+				$this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
+			} else {
+				$this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
+			}
+		}
 	}
 
 
@@ -296,15 +322,16 @@ final class Actions_Manager {
 			 ),
 		 );
 
-		 foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
-			 // Zapier doesn't require integration setup, so it's always enabled
-			 if ( $group === 'zapier' || $group === 'http_request' ) {
-				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
-			 } else {
-				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
-			 }
-		 }
+		//  foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
+		// 	 // Zapier doesn't require integration setup, so it's always enabled
+		// 	 if ( $group === 'zapier' || $group === 'http_request' ) {
+		// 		 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
+		// 	 } else {
+		// 		 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
+		// 	 }
+		//  }
 
+		
 		 $this->sources = apply_filters( 'quillcrm_actions_sources', $this->sources );
 	}
 

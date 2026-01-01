@@ -532,7 +532,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second > 10 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max SMS per second cannot exceed 10 (Twilio account limit)', 'quillcrm' ),
+					__( 'Max SMS per second cannot exceed 10 (provider API limit)', 'quillcrm' ),
 					array( 'status' => 400 )
 				);
 			}

@@ -2022,13 +2022,6 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per second - must be implemented by child classes
-	 *
-	 * @return int
-	 */
-	abstract protected function get_default_max_per_second();
-
-	/**
 	 * Get default campaign content - must be implemented by child classes
 	 *
 	 * @return string

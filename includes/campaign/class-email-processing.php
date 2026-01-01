@@ -389,15 +389,6 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per second
-	 *
-	 * @return int
-	 */
-	protected function get_default_max_per_second() {
-		return 15;
-	}
-
-	/**
 	 * Get default campaign content
 	 *
 	 * @return string

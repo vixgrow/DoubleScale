@@ -33,7 +33,8 @@ import {
 	LicenseIcon,
 	BadConnectionIcon,
 	ProcessingEmailsIcon,
-	LinkTriggersIcon
+	LinkTriggersIcon,
+	WhatsAppIcon,
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
@@ -63,6 +64,7 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
 	'sms',
+	'whatsapp',
 	'double_optin',
 	'cart',
 	'currencies',
@@ -227,6 +229,25 @@ const SettingsPage: React.FC = () => {
 				return (
 					<SMSComponent settings={settings!} onChange={setSettings} />
 				);
+			case 'whatsapp':
+				const WhatsAppComponent = applyFilters(
+					'quillcrm_settings_whatsapp_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('WhatsApp Settings', 'quillcrm')}
+							description={__(
+								'Configure WhatsApp sending rate limits and manage Meta WhatsApp Business templates with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
+				return (
+					<WhatsAppComponent settings={settings!} onChange={setSettings} />
+				);
 			case 'double_optin':
 				return (
 					<DoubleOptInSettings
@@ -322,6 +343,11 @@ const SettingsPage: React.FC = () => {
 			value: 'sms',
 			label: 'SMS',
 			icon: <TotalSMSIcon width={24} height={24} />,
+		},
+		{
+			value: 'whatsapp',
+			label: 'WhatsApp',
+			icon: <WhatsAppIcon width={24} height={24} />,
 		},
 		{
 			value: 'double_optin',

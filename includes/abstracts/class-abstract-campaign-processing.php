@@ -14,6 +14,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
+use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Tracking_Status;
@@ -1426,7 +1427,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @param Communication_Tracking_Model           $campaign_message
 	 * @return array Prepared message data
 	 */
-	protected function prepare_message_content( $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( Template_Model $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );

@@ -800,7 +800,7 @@ class REST_Contact_Controller extends REST_Controller {
 							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
 						'activity'                    => function ( $query ) {
-							$query->select( 'id', 'contact_id', 'deal_id', 'activity_type', 'data', 'created_at' );
+							$query->select( 'id', 'contact_id', 'activity_type', 'data', 'created_at' );
 						}, // Include activity content for individual messages (email_sent, sms_sent, whatsapp_sent)
 						'communication_tracking_meta' => function ( $query ) {
 							$query->select( 'id', 'communication_tracking_id', 'meta_key', 'meta_value' );

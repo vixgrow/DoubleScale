@@ -65,6 +65,7 @@ class Contact_Model extends Model {
 		'first_name',
 		'last_name',
 		'phone',
+		'whatsapp_phone',
 		'address_1',
 		'address_2',
 		'city',
@@ -111,9 +112,10 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $rules = array(
-		'email' => 'required|email',
-		'phone' => 'nullable|regex:/^\+?[0-9]+$/',
-		'zip'   => 'nullable|numeric',
+		'email'          => 'required|email',
+		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
+		'whatsapp_phone' => 'nullable|regex:/^\+[0-9]{1,15}$/',
+		'zip'            => 'nullable|numeric',
 	);
 
 	/**
@@ -124,10 +126,11 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required' => 'Contact email field is required.',
-		'email.email'    => 'Invalid email address.',
-		'phone.regex'    => 'Invalid phone number.',
-		'zip.numeric'    => 'Invalid zip code.',
+		'email.required'        => 'Contact email field is required.',
+		'email.email'           => 'Invalid email address.',
+		'phone.regex'           => 'Invalid phone number.',
+		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'zip.numeric'           => 'Invalid zip code.',
 	);
 
 	/**
@@ -520,7 +523,7 @@ class Contact_Model extends Model {
 			}
 		}
 
-		// Create system note (dual-write for backward compatibility)
+
 		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
 

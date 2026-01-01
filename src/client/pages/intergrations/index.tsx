@@ -28,10 +28,11 @@ import './style.scss';
 const integrationImages: Record<string, string> = {
 	slack: `${ConfigAPI.getPluginDirUrl()}assets/images/slack/slack.png`,
 	twilio: `${ConfigAPI.getPluginDirUrl()}assets/images/twilio/twilio.png`,
+	'meta-whatsapp': `${ConfigAPI.getPluginDirUrl()}assets/images/meta-whatsapp/meta-whatsapp.svg`,
 };
 
 // Integration keys to display
-const INTEGRATIONS_TO_SHOW = ['twilio', 'slack'];
+const INTEGRATIONS_TO_SHOW = ['twilio', 'slack', 'meta-whatsapp'];
 
 /**
  * Helper function to filter integrations

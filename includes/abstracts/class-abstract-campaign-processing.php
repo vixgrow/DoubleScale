@@ -14,6 +14,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
+use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Tracking_Status;
@@ -1426,7 +1427,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @param Communication_Tracking_Model           $campaign_message
 	 * @return array Prepared message data
 	 */
-	protected function prepare_message_content( $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( Template_Model $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
@@ -1468,9 +1469,15 @@ abstract class Abstract_Campaign_Processing {
 			$tracked_message = $processed_message;
 		}
 
-		// Add unsubscribe link if enabled (if tracking class supports it)
-		if ( $add_unsubscribe && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
+		// Add unsubscribe link if enabled (EMAIL ONLY - SMS/WhatsApp use STOP keyword instead)
+		// SMS/WhatsApp unsubscribe is handled via STOP keyword in incoming message handler
+		if ( $add_unsubscribe && $this->channel === Campaign_Channel::STR_EMAIL && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
 			$tracked_message = $tracking_class::add_unsubscribe_link( $tracked_message, $campaign_message->hash_key );
+		}
+
+		// Add opt-out footer for SMS campaigns (WhatsApp uses templates which have this baked in)
+		if ( $this->channel === Campaign_Channel::STR_SMS ) {
+			$tracked_message = $this->add_opt_out_footer( $tracked_message );
 		}
 
 		return array(
@@ -1657,6 +1664,46 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		$campaign_message->save();
+	}
+
+	/**
+	 * Add opt-out footer to message
+	 *
+	 * Adds "Reply STOP to unsubscribe" footer for SMS messages.
+	 * This is required for compliance with TCPA/CTIA guidelines.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $message Message content
+	 * @return string Message with opt-out footer
+	 */
+	protected function add_opt_out_footer( $message ) {
+		// Check if message already contains opt-out keywords
+		$opt_out_keywords = array( 'STOP', 'UNSUBSCRIBE', 'OPT OUT', 'OPTOUT' );
+		$message_upper    = strtoupper( $message );
+
+		foreach ( $opt_out_keywords as $keyword ) {
+			if ( strpos( $message_upper, $keyword ) !== false ) {
+				// Message already contains opt-out instruction, don't add duplicate
+				return $message;
+			}
+		}
+
+		/**
+		 * Filter the opt-out footer text for SMS messages
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $footer_text The opt-out footer text
+		 * @param string $channel     The channel type (sms)
+		 */
+		$footer_text = apply_filters(
+			'quillcrm_message_opt_out_footer',
+			__( 'Reply STOP to unsubscribe', 'quillcrm' ),
+			$this->channel
+		);
+
+		return $message . "\n\n" . $footer_text;
 	}
 
 	/**
@@ -1951,11 +1998,28 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per second - must be implemented by child classes
+	 * Get max per day setting for this channel
 	 *
-	 * @return int
+	 * Returns the max per day from settings, or the default from rate limiter.
+	 * Returns null for channels without daily limits (SMS, WhatsApp).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int|null Max per day or null if no daily limit for this channel
 	 */
-	abstract protected function get_default_max_per_second();
+	protected function get_max_per_day_setting() {
+		// Check if channel has daily limits configured in rate limiter
+		$default_limit = $this->rate_limiter->get_default_daily_limit( $this->channel );
+
+		// If no default limit for this channel (returns fallback 10000 only for unknown channels)
+		// SMS and WhatsApp are not in the defaults array, so they'll get the fallback
+		// We explicitly check if it's email to apply daily limits
+		if ( 'email' !== $this->channel ) {
+			return null; // No daily limits for SMS/WhatsApp
+		}
+
+		return $this->settings['max_in_day'] ?? $default_limit;
+	}
 
 	/**
 	 * Get default campaign content - must be implemented by child classes

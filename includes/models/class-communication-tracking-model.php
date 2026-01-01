@@ -75,7 +75,7 @@ class Communication_Tracking_Model extends Model {
 		'clicked',        // Click tracking
 		'status',         // sent/pending/failed/delivered/read
 		'sent_at',        // When sent
-		'opened_at',      // When opened (emails only)
+		'opened_at',      // When opened (emails/whatsapp read)
 		'clicked_at',     // When clicked
 		'created_at',     // Record created
 		'updated_at',     // Record updated
@@ -107,6 +107,7 @@ class Communication_Tracking_Model extends Model {
 		'status_slug',
 		'status_class',
 		'direction_slug',
+		'error_info',
 	);
 
 	/**
@@ -514,6 +515,23 @@ class Communication_Tracking_Model extends Model {
 	 */
 	public function getDirectionSlugAttribute() {
 		return Message_Direction::get_slug( $this->direction );
+	}
+
+	/**
+	 * Get error info (accessor for API)
+	 * Returns error information for failed messages from the meta table
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array|null Array with 'code' and 'message' keys, or null if no error
+	 */
+	public function getErrorInfoAttribute() {
+		// Only fetch error info for failed messages to avoid unnecessary queries
+		if ( $this->status !== Tracking_Status::FAILED ) {
+			return null;
+		}
+
+		return Communication_Tracking_Meta_Model::get_error_info( $this->id );
 	}
 
 

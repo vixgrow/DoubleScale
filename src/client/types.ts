@@ -37,6 +37,7 @@ export type Contact = {
 	first_name: string;
 	last_name: string;
 	phone: string;
+	whatsapp_phone: string;
 	address_1: string;
 	address_2: string;
 	city: string;
@@ -233,31 +234,27 @@ export type EmailTemplate = {
 };
 
 // SMS Template Type (for frontend use)
+// Note: SMS uses STOP keyword for unsubscribe, not URL links
 export type SMSTemplate = {
 	id?: number;
 	name: string;
 	type: 'sms';
 	body: string;
 	subject?: never; // SMS doesn't have subject
-	settings?: {
-		// For UI state management only
-		add_unsubscribe?: boolean;
-	};
+	settings?: Record<string, never>; // No settings needed - unsubscribe via STOP keyword
 	created_at?: string;
 	updated_at?: string;
 };
 
 // WhatsApp Template Type (for frontend use)
+// Note: WhatsApp uses STOP keyword for unsubscribe, not URL links
 export type WhatsAppTemplate = {
 	id?: number;
 	name: string;
 	type: 'whatsapp';
 	body: string;
 	subject?: never; // WhatsApp doesn't have subject
-	settings?: {
-		// For UI state management only
-		add_unsubscribe?: boolean;
-	};
+	settings?: Record<string, never>; // No settings needed - unsubscribe via STOP keyword
 	created_at?: string;
 	updated_at?: string;
 };
@@ -540,6 +537,21 @@ type LineTaxData = {
 	total: string[];
 };
 
+// Communication tracking meta entry (for merge tags, WhatsApp template params, etc.)
+export type CommunicationTrackingMeta = {
+	id: number;
+	communication_tracking_id: number;
+	meta_key: string;
+	meta_value: any; // Can be object or string depending on meta_key
+};
+
+// Error information for failed messages
+export type MessageErrorInfo = {
+	code: string;
+	message: string;
+	updated_at?: string;
+} | null;
+
 // Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
 export type TrackedMessage = {
 	id: number;
@@ -578,6 +590,8 @@ export type TrackedMessage = {
 	} | null; // Activity for individual messages (unified activities model)
 	campaign?: Partial<Campaign>;
 	unsubscribe_reason?: string; // Extracted from contact notes
+	communication_tracking_meta?: CommunicationTrackingMeta[]; // Meta data including merge tags and WhatsApp template params
+	error_info?: MessageErrorInfo; // Error information for failed messages (code and message from provider)
 };
 
 // Legacy alias for backward compatibility
@@ -917,5 +931,30 @@ export const CAMPAIGN_STATUS = {
 
 export type CampaignStatus =
 	(typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];
+
+// Contact subscription status constants
+export const CONTACT_STATUS = {
+	EMAIL: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BOUNCED: 'bounced',
+		BLOCKED: 'blocked',
+		UNVERIFIED: 'unverified',
+	},
+	SMS: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BLOCKED: 'blocked',
+	},
+	WHATSAPP: {
+		SUBSCRIBED: 'subscribed',
+		UNSUBSCRIBED: 'unsubscribed',
+		BLOCKED: 'blocked',
+	},
+} as const;
+
+export type EmailStatus = (typeof CONTACT_STATUS.EMAIL)[keyof typeof CONTACT_STATUS.EMAIL];
+export type SmsStatus = (typeof CONTACT_STATUS.SMS)[keyof typeof CONTACT_STATUS.SMS];
+export type WhatsAppStatus = (typeof CONTACT_STATUS.WHATSAPP)[keyof typeof CONTACT_STATUS.WHATSAPP];
 
 export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

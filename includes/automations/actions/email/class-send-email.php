@@ -198,6 +198,42 @@ class Send_Email extends Abstract_Send_Message {
 			),
 		);
 	}
+
+	/**
+	 * Prepare channel-specific message data for sending
+	 *
+	 * For Email, this returns the subject, body, and optional from/reply fields.
+	 * Template auto-generation is handled by Automation_Step_Model events.
+	 *
+	 * @param Automation_Step_Model        $step     Automation Step Model.
+	 * @param Contact_Model                $contact  Contact Model.
+	 * @param Communication_Tracking_Model $tracking Communication Tracking Model.
+	 * @return array Prepared message data with subject, body, from_name, from_email, reply_to.
+	 * @throws \Exception If required fields are empty.
+	 */
+	protected function prepare_message_data( Automation_Step_Model $step, Contact_Model $contact, Communication_Tracking_Model $tracking ) {
+		$subject    = $step->get_setting( 'subject' );
+		$body       = $step->get_setting( 'body' );
+		$from_name  = $step->get_setting( 'from_name' );
+		$from_email = $step->get_setting( 'from_email' );
+		$reply_to   = $step->get_setting( 'reply_to' );
+
+		if ( empty( $subject ) ) {
+			throw new \Exception( __( 'Email subject is empty.', 'quillcrm' ) );
+		}
+
+		if ( empty( $body ) ) {
+			throw new \Exception( __( 'Email body is empty.', 'quillcrm' ) );
+		}
+
+		return array(
+			'subject'    => $subject,
+			'body'       => $body,
+			'from_name'  => $from_name,
+			'from_email' => $from_email,
+			'reply_to'   => $reply_to,
+		);
+	}
 }
 
 Send_Email::instance();

@@ -23,9 +23,10 @@ const TabsSelection: React.FC = () => {
 	) as CampaignType | null;
 
 	const isSMSCampaign = campaign?.type === CAMPAIGN_CHANNEL.SMS;
+	const isWhatsAppCampaign = campaign?.type === CAMPAIGN_CHANNEL.WHATSAPP;
 
-	// SMS campaigns only show Campaign Details and Unsubscribes tabs
-	const tabsList = isSMSCampaign
+	// SMS and WhatsApp campaigns only show Campaign Details and Unsubscribes tabs
+	const tabsList = (isSMSCampaign || isWhatsAppCampaign)
 		? [
 			{
 				value: 'details',
@@ -56,7 +57,7 @@ const TabsSelection: React.FC = () => {
 			},
 		];
 
-	const tabsContent = isSMSCampaign
+	const tabsContent = (isSMSCampaign || isWhatsAppCampaign)
 		? [
 			{
 				value: 'details',

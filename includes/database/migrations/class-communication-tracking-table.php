@@ -70,7 +70,7 @@ class Communication_Tracking_Table extends Migration {
             recipient VARCHAR(255) NOT NULL COMMENT "Email address or phone number",
             opened TINYINT(1) DEFAULT 0 COMMENT "Only for emails",
             clicked TINYINT(1) DEFAULT 0,
-            status TINYINT(2) UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Pending, 2=Sent, 3=Failed, 4=Delivered, 5=Scheduled",
+            status TINYINT(2) UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Pending, 2=Sent, 3=Failed, 4=Delivered, 5=Scheduled ,6=Read",
             external_id VARCHAR(255) NULL COMMENT "Twilio MessageSid, email ID, etc.",
             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             opened_at TIMESTAMP NULL COMMENT "Only for emails",

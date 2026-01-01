@@ -282,6 +282,30 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 			),
 		});
 
+		// Failure Reason (only show when status is failed and error_info exists)
+		if (
+			campaignEmail.status_slug === 'failed' &&
+			campaignEmail.error_info
+		) {
+			fields.push({
+				label: __('Failure Reason', 'quillcrm'),
+				value: (
+					<div className="flex flex-col gap-1 text-right">
+						{campaignEmail.error_info.code && (
+							<span className="text-sm text-gray-500">
+								{__('Code:', 'quillcrm')}{' '}
+								{campaignEmail.error_info.code}
+							</span>
+						)}
+						<span className="text-sm text-destructive max-w-[400px]">
+							{campaignEmail.error_info.message ||
+								__('Unknown error', 'quillcrm')}
+						</span>
+					</div>
+				),
+			});
+		}
+
 		return fields;
 	}, [campaignEmail, campaignType]);
 

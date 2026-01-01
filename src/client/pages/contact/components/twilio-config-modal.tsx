@@ -19,12 +19,26 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Field } from '@quillcrm/components';
-import { Settings } from 'lucide-react';
+import { Settings, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface TwilioConfigModalProps {
 	open: boolean;
 	onClose: () => void;
 	onSuccess?: () => void;
+}
+
+interface TestCheck {
+	label: string;
+	status: 'success' | 'error' | 'warning';
+	message: string;
+	details?: any;
+	help?: string;
+}
+
+interface TestResult {
+	success: boolean;
+	message: string;
+	checks: Record<string, TestCheck>;
 }
 
 const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
@@ -39,6 +53,8 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 	const [authToken, setAuthToken] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [isSaving, setIsSaving] = useState(false);
+	const [isTesting, setIsTesting] = useState(false);
+	const [testResult, setTestResult] = useState<TestResult | null>(null);
 
 	const handleSave = async () => {
 		// Validation
@@ -100,9 +116,92 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 		}
 	};
 
+	const handleTestConnection = async () => {
+		// Validation
+		if (!accountSid || !authToken || !phoneNumber) {
+			createNotice({
+				type: 'error',
+				message: __('Please fill in all fields before testing', 'quillcrm'),
+			});
+			return;
+		}
+
+		setIsTesting(true);
+		setTestResult(null);
+
+		try {
+			const result: TestResult = await apiFetch({
+				path: '/qc/v1/integrations/twilio/test-whatsapp',
+				method: 'POST',
+				data: {
+					account_sid: accountSid,
+					auth_token: authToken,
+					phone_number: phoneNumber,
+				},
+			});
+
+			setTestResult(result);
+
+			if (result.success) {
+				createNotice({
+					type: 'success',
+					message: result.message,
+				});
+			} else {
+				createNotice({
+					type: 'warning',
+					message: result.message,
+				});
+			}
+		} catch (error: any) {
+			let errorMessage = __('Failed to test connection', 'quillcrm');
+
+			if (error.message) {
+				errorMessage = error.message;
+			} else if (error.data?.message) {
+				errorMessage = error.data.message;
+			}
+
+			createNotice({
+				type: 'error',
+				message: errorMessage,
+			});
+
+			setTestResult({
+				success: false,
+				message: errorMessage,
+				checks: {},
+			});
+		} finally {
+			setIsTesting(false);
+		}
+	};
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		handleSave();
+	};
+
+	const getStatusIcon = (status: 'success' | 'error' | 'warning') => {
+		switch (status) {
+			case 'success':
+				return <CheckCircle className="w-5 h-5 text-green-600" />;
+			case 'error':
+				return <XCircle className="w-5 h-5 text-red-600" />;
+			case 'warning':
+				return <AlertCircle className="w-5 h-5 text-yellow-600" />;
+		}
+	};
+
+	const getStatusBgColor = (status: 'success' | 'error' | 'warning') => {
+		switch (status) {
+			case 'success':
+				return 'bg-green-50 border-green-200';
+			case 'error':
+				return 'bg-red-50 border-red-200';
+			case 'warning':
+				return 'bg-yellow-50 border-yellow-200';
+		}
 	};
 
 	return (
@@ -173,6 +272,97 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 								'quillcrm'
 							)}
 						/>
+
+						{/* Test Connection Button */}
+						<div className="pt-2">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={handleTestConnection}
+								disabled={isTesting || isSaving}
+								className="w-full"
+							>
+								{isTesting ? (
+									<>
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+										{__('Testing Connection...', 'quillcrm')}
+									</>
+								) : (
+									<>
+										<Settings className="w-4 h-4 mr-2" />
+										{__('Test WhatsApp Connection', 'quillcrm')}
+									</>
+								)}
+							</Button>
+						</div>
+
+						{/* Test Results */}
+						{testResult && (
+							<div className="space-y-3 mt-4">
+								<div
+									className={`p-4 rounded-lg border ${
+										testResult.success
+											? 'bg-green-50 border-green-200'
+											: 'bg-yellow-50 border-yellow-200'
+									}`}
+								>
+									<div className="flex items-start gap-3">
+										{testResult.success ? (
+											<CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+										) : (
+											<AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+										)}
+										<div className="flex-1">
+											<p className="font-medium text-sm">
+												{testResult.message}
+											</p>
+										</div>
+									</div>
+								</div>
+
+								{/* Individual Checks */}
+								{Object.entries(testResult.checks).map(([key, check]) => (
+									<div
+										key={key}
+										className={`p-3 rounded-lg border ${getStatusBgColor(
+											check.status
+										)}`}
+									>
+										<div className="flex items-start gap-3">
+											{getStatusIcon(check.status)}
+											<div className="flex-1 min-w-0">
+												<p className="font-medium text-sm">
+													{check.label}
+												</p>
+												<p className="text-sm text-gray-700 mt-1">
+													{check.message}
+												</p>
+												{check.help && (
+													<a
+														href={check.help}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+													>
+														{__('Learn More →', 'quillcrm')}
+													</a>
+												)}
+												{check.details && (
+													<div className="mt-2 text-xs text-gray-600">
+														{check.details.template_count !== undefined && (
+															<span>
+																{__('Templates: ', 'quillcrm')}
+																{check.details.template_count}
+															</span>
+														)}
+													</div>
+												)}
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 
 					<DialogFooter>

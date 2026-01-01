@@ -80,6 +80,11 @@ class REST_Integration_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Allow child classes to register additional routes
+		if ( method_exists( $this, 'register_additional_routes' ) ) {
+			$this->register_additional_routes();
+		}
 	}
 
 	/**

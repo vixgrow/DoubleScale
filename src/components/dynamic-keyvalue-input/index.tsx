@@ -36,6 +36,12 @@ export interface DynamicKeyValueInputProps {
 	keyPlaceholder?: string;
 	valuePlaceholder?: string;
 	className?: string;
+	/** When true, keys are displayed as readonly (for pre-defined templates) */
+	readonlyKeys?: boolean;
+	/** When false, the "Add New" button is hidden (default: true) */
+	allowAdd?: boolean;
+	/** When false, the remove button is hidden (default: true) */
+	allowRemove?: boolean;
 }
 
 const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
@@ -44,6 +50,9 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 	keyPlaceholder = __('Enter key', 'quillcrm'),
 	valuePlaceholder = __('Enter value', 'quillcrm'),
 	className = '',
+	readonlyKeys = false,
+	allowAdd = true,
+	allowRemove = true,
 }) => {
 	const generateId = () =>
 		`kv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -102,16 +111,18 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 												<ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
 											</Button>
 										</CollapsibleTrigger>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											onClick={() => removePair(pair.id)}
-											className="h-8 w-8 text-destructive hover:text-destructive"
-											title={__('Remove pair', 'quillcrm')}
-										>
-											<DeleteIcon />
-										</Button>
+										{allowRemove && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												onClick={() => removePair(pair.id)}
+												className="h-8 w-8 text-destructive hover:text-destructive"
+												title={__('Remove pair', 'quillcrm')}
+											>
+												<DeleteIcon />
+											</Button>
+										)}
 									</div>
 								</div>
 							</CardHeader>
@@ -129,6 +140,8 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 													updatePair(pair.id, 'key', e.target.value)
 												}
 												placeholder={keyPlaceholder}
+												readOnly={readonlyKeys}
+												className={readonlyKeys ? 'bg-muted cursor-not-allowed' : ''}
 											/>
 										</div>
 										<div className="flex flex-col gap-2">
@@ -160,17 +173,19 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 				)}
 			</div>
 
-			<div className="dynamic-keyvalue-input__actions mt-4">
-				<Button
-					type="button"
-					variant="secondaryDeepBlue"
-					onClick={addPair}
-					className="w-full"
-				>
-					<PlusIcon className="h-5 w-5" />
-					{__('Add New', 'quillcrm')}
-				</Button>
-			</div>
+			{allowAdd && (
+				<div className="dynamic-keyvalue-input__actions mt-4">
+					<Button
+						type="button"
+						variant="secondaryDeepBlue"
+						onClick={addPair}
+						className="w-full"
+					>
+						<PlusIcon className="h-5 w-5" />
+						{__('Add New', 'quillcrm')}
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 };

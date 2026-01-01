@@ -128,6 +128,21 @@ export const useContactsColumns = () => {
 			cell: ({ row }) => row.original.phone || '-',
 		},
 		{
+			accessorKey: 'whatsapp_phone',
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('WhatsApp Phone', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => row.original.whatsapp_phone || '-',
+		},
+		{
 			accessorKey: 'country',
 			header: ({ column }) => (
 				<div

@@ -199,6 +199,26 @@ class Automation_Step_Model extends Model {
 					return;
 				}
 
+				// WhatsApp: Use pre-selected template_id instead of auto-generating
+				// WhatsApp Business API requires pre-approved templates, so we link rather than create
+				if ( $channel_type === 'whatsapp' && isset( $settings['template_id'] ) ) {
+					// User selected an existing WhatsApp template - store it as template_ids array
+					$settings['template_ids'] = array( (int) $settings['template_id'] );
+					$step->settings           = $settings;
+
+					quillcrm_get_logger()->info(
+						'Automation step: WhatsApp template linked (no auto-generation)',
+						array(
+							'step_id'     => $step->id ?? 'new',
+							'action'      => $step->action,
+							'template_id' => $settings['template_id'],
+							'code'        => 'automation_step_whatsapp_template_linked',
+						)
+					);
+					return;
+				}
+
+				// Email/SMS: Auto-generate template from body content
 				if ( isset( $settings['template_ids'] ) ) {
 					self::process_template_update( $step, $channel_type, $settings );
 				} else {
@@ -224,6 +244,30 @@ class Automation_Step_Model extends Model {
 
 
 	protected static function process_template_update( $step, $channel_type, &$settings ) {
+		// WhatsApp: Check if template_id changed (user selected different template)
+		// WhatsApp uses pre-approved Meta templates, so we just link to the new one
+		if ( $channel_type === 'whatsapp' && isset( $settings['template_id'] ) ) {
+			$old_template_id = reset( $settings['template_ids'] );
+			$new_template_id = (int) $settings['template_id'];
+
+			if ( $old_template_id !== $new_template_id ) {
+				// User changed template selection - update template_ids
+				$settings['template_ids'] = array( $new_template_id );
+				$step->settings           = $settings;
+
+				quillcrm_get_logger()->info(
+					'Automation step: WhatsApp template changed',
+					array(
+						'step_id'         => $step->id,
+						'old_template_id' => $old_template_id,
+						'new_template_id' => $new_template_id,
+						'code'            => 'automation_step_whatsapp_template_changed',
+					)
+				);
+			}
+			return; // Don't auto-update WhatsApp templates - they're pre-approved by Meta
+		}
+
 		$template_id = reset( $settings['template_ids'] );
 
 		if ( Template_Data_Preparer::has_raw_template_fields( $settings, $channel_type ) ) {

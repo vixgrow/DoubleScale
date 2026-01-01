@@ -15,7 +15,7 @@
 export const CAMPAIGN_CHANNEL = {
 	EMAIL: 'email',
 	SMS: 'sms',
-	// WHATSAPP: 'whatsapp', // Commented out - Coming in next version
+	WHATSAPP: 'whatsapp',
 	SEQUENCE_MAIL: 'sequence_mail',
 	EMAIL_SEQUENCE: 'email_sequence',
 } as const;
@@ -33,7 +33,7 @@ export function getCampaignChannelLabel(channel: CampaignChannelType): string {
 	const labels = {
 		[CAMPAIGN_CHANNEL.EMAIL]: 'Email',
 		[CAMPAIGN_CHANNEL.SMS]: 'SMS',
-		// [CAMPAIGN_CHANNEL.WHATSAPP]: 'WhatsApp', // Commented out - Coming in next version
+		[CAMPAIGN_CHANNEL.WHATSAPP]: 'WhatsApp',
 		[CAMPAIGN_CHANNEL.SEQUENCE_MAIL]: 'Sequence Mail',
 		[CAMPAIGN_CHANNEL.EMAIL_SEQUENCE]: 'Email Sequence',
 	};
@@ -46,8 +46,8 @@ export function getCampaignChannelLabel(channel: CampaignChannelType): string {
  */
 export function channelRequiresPhone(channel: CampaignChannelType): boolean {
 	return (
-		channel === CAMPAIGN_CHANNEL.SMS
-		// || channel === CAMPAIGN_CHANNEL.WHATSAPP // Commented out - Coming in next version
+		channel === CAMPAIGN_CHANNEL.SMS ||
+		channel === CAMPAIGN_CHANNEL.WHATSAPP
 	);
 }
 
@@ -64,9 +64,15 @@ export function isEmailChannel(channel: CampaignChannelType): boolean {
 
 /**
  * Get recipient field name for channel
+ *
+ * Note: WhatsApp uses a separate 'whatsapp_phone' field (like HubSpot architecture)
+ * rather than sharing the 'phone' field with SMS.
  */
 export function getRecipientField(
 	channel: CampaignChannelType
-): 'email' | 'phone' {
+): 'email' | 'phone' | 'whatsapp_phone' {
+	if (channel === CAMPAIGN_CHANNEL.WHATSAPP) {
+		return 'whatsapp_phone';
+	}
 	return channelRequiresPhone(channel) ? 'phone' : 'email';
 }

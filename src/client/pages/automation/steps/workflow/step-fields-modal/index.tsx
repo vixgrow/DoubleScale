@@ -19,6 +19,7 @@ import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
 import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
@@ -47,6 +48,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
+	const navigate = useNavigate();
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
@@ -210,6 +212,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	return (
 		<div className="qcrm-step-fields-content flex flex-col">
 			{/* Provider not configured warning for SMS/WhatsApp actions (non-blocking) */}
+			{/* SMS: Open quick Twilio config modal */}
+			{/* WhatsApp: Navigate to integrations page (supports Twilio and Meta WhatsApp) */}
 			{requiresProvider &&
 				!isConnected &&
 				!providerLoading &&
@@ -217,7 +221,13 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					<div className="mb-4">
 						<ProviderNotConnectedWarning
 							channel={channel}
-							onConfigureClick={() => setShowTwilioConfig(true)}
+							onConfigureClick={() => {
+								if (channel === 'whatsapp') {
+									navigate(getToLink('integrations/meta-whatsapp'));
+								} else {
+									setShowTwilioConfig(true);
+								}
+							}}
 						/>
 					</div>
 				)}

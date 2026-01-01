@@ -130,6 +130,7 @@ export type MergeTags = {
 export type MergeTag = {
 	name: string;
 	value: string;
+	required_triggers?: string[];
 };
 
 export type AutomationRules = {

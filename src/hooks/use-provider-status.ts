@@ -55,7 +55,7 @@ export function useProviderStatus(
 				error:
 					error.message ||
 					__('Failed to check provider status', 'quillcrm'),
-				help_link: '/wp-admin/admin.php?page=quillcrm#/settings/integrations',
+				help_link: '/wp-admin/admin.php?page=quillcrm#/integrations',
 			});
 			return false;
 		} finally {

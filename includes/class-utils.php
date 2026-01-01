@@ -28,17 +28,20 @@ class Utils {
 	 */
 	public static function get_max_execution_time() {
 		$max_execution_time = 30;
-
+	
 		if ( function_exists( 'ini_get' ) ) {
 			$max_execution_time = ini_get( 'max_execution_time' );
-
+	
 			if ( ! $max_execution_time ) {
 				$max_execution_time = 30;
 			}
 		}
-
+	
+		// Cap at 60 seconds max to avoid overly long runs
+		$max_execution_time = min( $max_execution_time, 60 );
+	
 		$adjusted_execution_time = $max_execution_time * 0.75;
-
+	
 		return apply_filters( 'quillcrm_max_execution_time', $adjusted_execution_time );
 	}
 

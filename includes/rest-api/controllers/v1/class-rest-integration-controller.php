@@ -292,7 +292,7 @@ class REST_Integration_Controller extends REST_Controller {
 					__( '%s provider is not configured', 'quillcrm' ),
 					$this->get_default_provider_name( $channel )
 				),
-				'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+				'help_link'     => admin_url( 'admin.php?page=quillcrm#/integrations' ),
 			);
 		}
 
@@ -307,7 +307,7 @@ class REST_Integration_Controller extends REST_Controller {
 				__( '%s provider is not connected', 'quillcrm' ),
 				$provider->get_provider_name()
 			),
-			'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+			'help_link'     => admin_url( 'admin.php?page=quillcrm#/integrations' ),
 		);
 	}
 

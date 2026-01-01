@@ -59,12 +59,11 @@ import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'debugging']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'whatsapp', 'debugging']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
 	'sms',
-	'whatsapp',
 	'double_optin',
 	'cart',
 	'currencies',

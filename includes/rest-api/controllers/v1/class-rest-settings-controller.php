@@ -170,6 +170,16 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'whatsapp'        => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'max_in_second' => array(
+							'type'    => 'integer',
+							'default' => Campaign_Rate_Limiter::instance()->get_default_per_second_limit( 'whatsapp' ),
+						),
+					),
+				),
 				'double_optin'    => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
@@ -378,6 +388,14 @@ class REST_Settings_Controller extends REST_Controller {
 			}
 		}
 
+		// Validate WhatsApp settings
+		if ( isset( $settings['whatsapp'] ) ) {
+			$whatsapp_validation = $this->validate_whatsapp_settings( $settings['whatsapp'] );
+			if ( is_wp_error( $whatsapp_validation ) ) {
+				return $whatsapp_validation;
+			}
+		}
+
 		return true;
 	}
 
@@ -513,10 +531,16 @@ class REST_Settings_Controller extends REST_Controller {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $sms SMS settings.
+	 * @param array &$sms SMS settings (passed by reference to allow cleanup).
 	 * @return true|WP_Error True if valid, WP_Error otherwise.
 	 */
-	private function validate_sms_settings( $sms ) {
+	private function validate_sms_settings( &$sms ) {
+		// Remove max_in_day if present (legacy field, not enforced)
+		// SMS providers (Twilio, etc.) enforce their own account quotas
+		if ( isset( $sms['max_in_day'] ) ) {
+			unset( $sms['max_in_day'] );
+		}
+
 		// Validate max_in_second
 		if ( isset( $sms['max_in_second'] ) ) {
 			$max_in_second = intval( $sms['max_in_second'] );
@@ -534,6 +558,49 @@ class REST_Settings_Controller extends REST_Controller {
 					'invalid_rate_limit',
 					__( 'Max SMS per second cannot exceed 10 (provider API limit)', 'quillcrm' ),
 					array( 'status' => 400 )
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate WhatsApp settings
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array &$whatsapp WhatsApp settings (passed by reference to allow cleanup).
+	 * @return true|WP_Error
+	 */
+	private function validate_whatsapp_settings( &$whatsapp ) {
+		// Remove max_in_day if present (legacy field, not enforced)
+		// Meta WhatsApp enforces tier-based quotas (1K/10K/100K/unlimited per 24h)
+		if ( isset( $whatsapp['max_in_day'] ) ) {
+			unset( $whatsapp['max_in_day'] );
+		}
+
+		// Validate max_in_second is within acceptable range (1-10)
+		if ( isset( $whatsapp['max_in_second'] ) ) {
+			$max_in_second = intval( $whatsapp['max_in_second'] );
+
+			if ( $max_in_second > 10 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max WhatsApp per second cannot exceed 10 (provider API limit)', 'quillcrm' ),
+					array(
+						'status' => 400,
+					)
+				);
+			}
+
+			if ( $max_in_second < 1 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max WhatsApp per second must be at least 1', 'quillcrm' ),
+					array(
+						'status' => 400,
+					)
 				);
 			}
 		}

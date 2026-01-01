@@ -135,13 +135,14 @@ abstract class Integration {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $key
+	 * @param string $key     Setting key.
+	 * @param mixed  $default Default value if setting doesn't exist.
 	 *
 	 * @return mixed
 	 */
-	public function get_setting( $key ) {
+	public function get_setting( $key, $default = '' ) {
 		$settings = $this->get_settings();
-		return isset( $settings[ $key ] ) ? $settings[ $key ] : '';
+		return isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
 	}
 
 	/**

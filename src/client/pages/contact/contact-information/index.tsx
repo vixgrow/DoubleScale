@@ -37,7 +37,7 @@ import PhoneIcon from '@/components/icons/phone';
 const DROPDOWN_Z_INDEX = 'z-[150000]'; // High z-index to appear above modals
 
 // Type definitions
-type ChannelType = 'email' | 'sms';
+type ChannelType = 'email' | 'sms' | 'whatsapp';
 type EmailStatus =
 	| 'subscribed'
 	| 'unsubscribed'
@@ -45,6 +45,7 @@ type EmailStatus =
 	| 'blocked'
 	| 'unverified';
 type SmsStatus = 'subscribed' | 'unsubscribed' | 'blocked';
+type WhatsAppStatus = 'subscribed' | 'unsubscribed' | 'blocked';
 
 // Status options for each channel
 const EMAIL_STATUSES: EmailStatus[] = [
@@ -55,6 +56,7 @@ const EMAIL_STATUSES: EmailStatus[] = [
 	'unverified',
 ];
 const SMS_STATUSES: SmsStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
+const WHATSAPP_STATUSES: WhatsAppStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {
@@ -78,6 +80,11 @@ const getChannelStatusLabel = (channel: string, status: string): string => {
 			unsubscribed: __('Unsubscribed', 'quillcrm'),
 			blocked: __('Blocked', 'quillcrm'),
 		},
+		whatsapp: {
+			subscribed: __('Subscribed', 'quillcrm'),
+			unsubscribed: __('Unsubscribed', 'quillcrm'),
+			blocked: __('Blocked', 'quillcrm'),
+		},
 	};
 
 	return labels[channel]?.[status] || `${channel}_${status}`;
@@ -88,6 +95,7 @@ const getChannelDisplayLabel = (channel: string): string => {
 	const channels: Record<string, string> = {
 		email: __('Email', 'quillcrm'),
 		sms: __('SMS', 'quillcrm'),
+		whatsapp: __('WhatsApp', 'quillcrm'),
 	};
 
 	return channels[channel] || channel;
@@ -215,6 +223,15 @@ const ContactInformation: React.FC = () => {
 			sms_status: value,
 		});
 		updateContact({ sms_status: value });
+	};
+
+	const handleWhatsAppStatusChange = (value: string) => {
+		if (!contact) return;
+		setContact({
+			...contact,
+			whatsapp_status: value,
+		});
+		updateContact({ whatsapp_status: value });
 	};
 
 	if (!contact) {
@@ -345,7 +362,7 @@ const ContactInformation: React.FC = () => {
 							</div>
 						</div>
 					</div>
-					<div className="flex gap-5 items-center mt-4">
+					<div className="flex gap-5 items-center mt-4 flex-wrap">
 						<StatusSelect
 							channel="email"
 							value={contact.email_status}
@@ -357,6 +374,12 @@ const ContactInformation: React.FC = () => {
 							value={contact.sms_status}
 							onChange={handleSmsStatusChange}
 							statuses={SMS_STATUSES}
+						/>
+						<StatusSelect
+							channel="whatsapp"
+							value={contact.whatsapp_status}
+							onChange={handleWhatsAppStatusChange}
+							statuses={WHATSAPP_STATUSES}
 						/>
 					</div>
 				</div>

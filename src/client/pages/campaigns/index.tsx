@@ -61,7 +61,7 @@ const Campaigns_EmailSequences: React.FC = () => {
 			<div className="flex-1 overflow-y-auto">
 				{activeTab === 'campaigns' && <Campaigns />}
 				{activeTab === 'email-sequences' && EmailSequences && (
-					<EmailSequences />
+					<EmailSequences handleNavigate={handleNavigate} />
 				)}
 			</div>
 

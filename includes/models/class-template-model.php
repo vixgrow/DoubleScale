@@ -248,4 +248,51 @@ class Template_Model extends Model {
 
 		return $template;
 	}
+
+	/**
+	 * Get WhatsApp ContentSid for Twilio API
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_whatsapp_content_sid() {
+		return $this->get_setting( 'external_id' );
+	}
+
+	/**
+	 * Get WhatsApp template variables
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_whatsapp_variables() {
+		return $this->get_setting( 'variables', array() );
+	}
+
+	/**
+	 * Get WhatsApp template variable mappings
+	 * Format: {"1": "{{contact:first_name}}", "2": "Order #123"}
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_whatsapp_variable_mappings() {
+		return $this->get_setting( 'variable_mappings', array() );
+	}
+
+	/**
+	 * Check if this is a WhatsApp Business template
+	 * (approved template from Twilio, not a user-created template)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_whatsapp_business_template() {
+		return $this->category === 'whatsapp_business'
+			&& ! empty( $this->get_setting( 'external_id' ) );
+	}
 }

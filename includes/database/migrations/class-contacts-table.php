@@ -37,7 +37,8 @@ class Contacts_Table extends Migration {
 			email VARCHAR(191) NOT NULL,
 			first_name VARCHAR(255),
 			last_name VARCHAR(255),
-			phone VARCHAR(100),
+			phone VARCHAR(255),
+			whatsapp_phone VARCHAR(255),
 			address_1 VARCHAR(255),
 			address_2 VARCHAR(255),
 			city VARCHAR(100),
@@ -53,6 +54,7 @@ class Contacts_Table extends Migration {
 			PRIMARY KEY (id),
 			UNIQUE KEY  (email),
 			KEY phone (phone),
+			KEY whatsapp_phone (whatsapp_phone),
 			KEY email_status (email_status),
 			KEY sms_status (sms_status),
 			KEY whatsapp_status (whatsapp_status)';

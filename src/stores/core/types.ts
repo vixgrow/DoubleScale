@@ -29,6 +29,7 @@ export type FormContext = {
 	formId?: string | number;
 	triggerId?: string;
 	automationId?: string | number;
+	postId?: string | number; // For Elementor forms (source/page ID)
 };
 
 export type InitialAccountData = {

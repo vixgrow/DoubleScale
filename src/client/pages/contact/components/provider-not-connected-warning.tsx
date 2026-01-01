@@ -1,5 +1,5 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { AlertTriangle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -11,12 +11,21 @@ interface ProviderNotConnectedWarningProps {
 /**
  * Shared component for displaying provider not connected warning
  * Used in SMS and WhatsApp tabs
+ * 
+ * For SMS: Only Twilio is available
+ * For WhatsApp: Both Twilio and Meta WhatsApp are available
  */
 export function ProviderNotConnectedWarning({
 	channel,
 	onConfigureClick,
 }: ProviderNotConnectedWarningProps) {
 	const channelName = channel === 'sms' ? __('SMS', 'quillcrm') : __('WhatsApp', 'quillcrm');
+
+	// For SMS, only Twilio is available
+	// For WhatsApp, both Twilio and Meta WhatsApp are available
+	const providerOptions = channel === 'sms' 
+		? __('Twilio', 'quillcrm')
+		: __('Twilio or Meta WhatsApp', 'quillcrm');
 
 	return (
 		<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
@@ -25,11 +34,11 @@ export function ProviderNotConnectedWarning({
 				<p className="text-sm text-yellow-800 mb-2">
 					{channel === 'sms'
 						? __(
-								'Twilio is not configured. Please configure Twilio to send SMS messages.',
+								'No SMS provider is configured. Please configure Twilio to send SMS messages.',
 								'quillcrm'
 						  )
 						: __(
-								'Twilio is not configured. Please configure Twilio to send WhatsApp messages.',
+								'No WhatsApp provider is configured. Please configure Twilio or Meta WhatsApp to send messages.',
 								'quillcrm'
 						  )}
 				</p>
@@ -40,8 +49,8 @@ export function ProviderNotConnectedWarning({
 					className="bg-white hover:bg-yellow-50"
 				>
 					{channel === 'sms'
-						? __('Configure Twilio to send SMS', 'quillcrm')
-						: __('Configure Twilio to send WhatsApp', 'quillcrm')}
+						? __('Configure SMS Provider', 'quillcrm')
+						: __('Configure WhatsApp Provider', 'quillcrm')}
 				</Button>
 			</div>
 		</div>
@@ -57,25 +66,32 @@ interface ContactNoPhoneWarningProps {
 /**
  * Shared component for displaying warning when contact has no phone number
  * Used in SMS and WhatsApp tabs
+ * 
+ * For SMS: Checks for missing phone number
+ * For WhatsApp: Checks for missing whatsapp_phone (separate field)
  */
 export function ContactNoPhoneWarning({
 	channel,
 	contactId,
 	onAddPhoneClick,
 }: ContactNoPhoneWarningProps) {
-	const channelName = channel === 'sms' ? __('SMS', 'quillcrm') : __('WhatsApp', 'quillcrm');
+	const isWhatsApp = channel === 'whatsapp';
+	const channelName = isWhatsApp ? __('WhatsApp', 'quillcrm') : __('SMS', 'quillcrm');
 
 	return (
 		<div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 flex items-start gap-3">
 			<Phone className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
 			<div className="flex-1">
 				<p className="text-sm text-orange-800 mb-2">
-					{__(
-						'This contact does not have a phone number. Please add a phone number to send',
-						'quillcrm'
-					)}{' '}
-					{channelName}{' '}
-					{__('messages.', 'quillcrm')}
+					{isWhatsApp
+						? __(
+								'This contact does not have a WhatsApp phone number. Please add a WhatsApp phone number in the contact details to send WhatsApp messages.',
+								'quillcrm'
+						  )
+						: __(
+								'This contact does not have a phone number. Please add a phone number to send SMS messages.',
+								'quillcrm'
+						  )}
 				</p>
 				<p className="text-xs text-orange-600">
 					{__(
@@ -90,7 +106,9 @@ export function ContactNoPhoneWarning({
 						onClick={onAddPhoneClick}
 						className="bg-white hover:bg-orange-50 mt-2"
 					>
-						{__('Add Phone Number', 'quillcrm')}
+						{isWhatsApp
+							? __('Add WhatsApp Phone Number', 'quillcrm')
+							: __('Add Phone Number', 'quillcrm')}
 					</Button>
 				)}
 			</div>

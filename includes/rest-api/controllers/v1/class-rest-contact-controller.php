@@ -92,6 +92,10 @@ class REST_Contact_Controller extends REST_Controller {
 							'type'        => 'string',
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
+						'has_whatsapp_phone' => array(
+							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'quillcrm' ),
+							'type'        => 'boolean',
+						),
 					),
 				),
 				array(
@@ -510,6 +514,14 @@ class REST_Contact_Controller extends REST_Controller {
 				 'phone'           => array(
 					 'description'  => __( 'Phone number of the contact.', 'quillcrm' ),
 					 'type'         => 'string',
+					 'args_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'whatsapp_phone'  => array(
+					 'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quillcrm' ),
+					 'type'         => 'string',
+					 'pattern'      => '^\+[0-9]{1,15}$',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
@@ -1005,10 +1017,11 @@ class REST_Contact_Controller extends REST_Controller {
 			$page          = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$keywords      = $request->get_param( 'keywords' ) ?? '';
 			$filters       = $request->get_param( 'filters' );
-			$subscribed    = $request->get_param( 'subscribed' ) ?? false;
-			$campaign_type = $request->get_param( 'campaign_type' ) ?? null;
-			$from          = $request->get_param( 'from' ) ?? null;
-			$to            = $request->get_param( 'to' ) ?? null;
+			$subscribed          = $request->get_param( 'subscribed' ) ?? false;
+			$campaign_type       = $request->get_param( 'campaign_type' ) ?? null;
+			$has_whatsapp_phone  = $request->get_param( 'has_whatsapp_phone' ) ?? null;
+			$from                = $request->get_param( 'from' ) ?? null;
+			$to                  = $request->get_param( 'to' ) ?? null;
 			$query         = Contact_Model::query();
 			$total_count   = $query->count();
 
@@ -1063,8 +1076,20 @@ class REST_Contact_Controller extends REST_Controller {
 				}
 			}
 
-			// Get filter total BEFORE applying search (this is what we show in the UI)
-			$filtered_total = $contacts->count();
+			// Apply WhatsApp phone filter
+			if ( ! is_null( $has_whatsapp_phone ) ) {
+				if ( $has_whatsapp_phone ) {
+					$contacts = $contacts->whereNotNull( 'whatsapp_phone' )
+						->where( 'whatsapp_phone', '!=', '' );
+				} else {
+					$contacts = $contacts->where(
+						function ( $query ) {
+							$query->whereNull( 'whatsapp_phone' )
+								->orWhere( 'whatsapp_phone', '=', '' );
+						}
+					);
+				}
+			}
 
 			// Apply keyword search AFTER filters (search within filtered results)
 			if ( '' !== $keywords ) {
@@ -1073,13 +1098,16 @@ class REST_Contact_Controller extends REST_Controller {
 						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
 							->orWhere( 'email', 'like', '%' . $keywords . '%' )
-							->orWhere( 'phone', 'like', '%' . $keywords . '%' );
+							->orWhere( 'phone', 'like', '%' . $keywords . '%' )
+							->orWhere( 'whatsapp_phone', 'like', '%' . $keywords . '%' );
 					}
 				);
 			}
 
 			// Paginate and get results (pagination automatically handles total count)
-			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			// Note: paginate() returns total in the response, so filtered_total comes from pagination
+			$contacts       = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$filtered_total = $contacts->total();
 
 			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count, 'filtered_total' => $filtered_total ), 200 );
 		} catch ( Exception $e ) {
@@ -1358,6 +1386,7 @@ class REST_Contact_Controller extends REST_Controller {
 			'last_name'       => $request->get_param( 'last_name' ),
 			'email'           => $request->get_param( 'email' ),
 			'phone'           => $request->get_param( 'phone' ),
+			'whatsapp_phone'  => $request->get_param( 'whatsapp_phone' ),
 			'address_1'       => $request->get_param( 'address_1' ),
 			'address_2'       => $request->get_param( 'address_2' ),
 			'city'            => $request->get_param( 'city' ),

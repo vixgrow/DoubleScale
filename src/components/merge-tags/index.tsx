@@ -41,6 +41,7 @@ interface MergeTagsSelectorProps {
 	triggerId?: string;
 	formId?: string | number;
 	automationId?: string | number;
+	postId?: string | number; // For Elementor forms
 }
 
 const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
@@ -50,6 +51,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	triggerId,
 	formId,
 	automationId,
+	postId,
 }) => {
 	// All hooks must be called at the top level
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
@@ -72,6 +74,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 				triggerId={triggerId}
 				formId={formId}
 				automationId={automationId}
+				postId={postId}
 			/>
 		);
 	}

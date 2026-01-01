@@ -14,7 +14,9 @@ use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Contact_Unsubscribe_Model;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 
 defined('ABSPATH') || exit;
 
@@ -147,70 +149,224 @@ abstract class Abstract_Tracking
 
 	/**
 	 * Process provider webhook (common logic for SMS and WhatsApp)
+	 * Supports multi-provider detection (Twilio, Meta WhatsApp, etc.)
 	 *
 	 * @return void
 	 */
 	protected function process_provider_webhook()
 	{
-		// Get provider for this channel
-		$provider = Message_Provider_Registry::instance()->get_provider($this->channel);
+		// Handle Meta webhook verification challenge (GET request)
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] && isset( $_GET['hub_mode'] ) ) {
+			$this->handle_meta_verification_challenge();
+			return;
+		}
 
-		if (!$provider) {
-			quillcrm_get_logger()->error(ucfirst($this->channel) . ' webhook: no provider configured', [
-				'code' => "{$this->channel}_webhook_no_provider",
-				'channel' => $this->channel
-			]);
-			wp_die('Service Unavailable', 'Service Unavailable', 503);
+		// Detect provider from request format (headers/body structure)
+		$provider = $this->detect_provider_from_request();
+
+		if ( ! $provider ) {
+			quillcrm_get_logger()->error( ucfirst( $this->channel ) . ' webhook: no provider detected', array(
+				'code'    => "{$this->channel}_webhook_no_provider",
+				'channel' => $this->channel,
+			) );
+			wp_die( 'Service Unavailable', 'Service Unavailable', 503 );
+		}
+
+		// Get raw body before WordPress processes it (needed for Meta signature verification)
+		$raw_body = file_get_contents( 'php://input' );
+
+		// Parse JSON for Meta, use $_POST for Twilio
+		$webhook_data = json_decode( $raw_body, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			// Not JSON, use $_POST (Twilio format)
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$webhook_data = $_POST;
 		}
 
 		// Process webhook through provider (handles signature verification and parsing)
-		$webhook_result = $provider->process_webhook($this->channel, $_POST);
+		$webhook_result = $provider->process_webhook( $this->channel, $webhook_data );
 
 		// Check if webhook is valid
-		if (!isset($webhook_result['valid']) || !$webhook_result['valid']) {
+		if ( ! isset( $webhook_result['valid'] ) || ! $webhook_result['valid'] ) {
 			$error = $webhook_result['error_message'] ?? 'Invalid webhook';
-			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook validation failed', [
-				'code' => "{$this->channel}_webhook_validation_failed",
-				'error' => $error,
-				'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-			]);
-			wp_die('Bad Request', 'Bad Request', 400);
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' webhook validation failed', array(
+				'code'        => "{$this->channel}_webhook_validation_failed",
+				'error'       => $error,
+				'provider'    => $provider->get_provider_name(),
+				'remote_addr' => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown',
+			) );
+			wp_die( 'Bad Request', 'Bad Request', 400 );
 		}
 
 		// Extract standardized webhook data
-		$message_id = $webhook_result['message_id'] ?? '';
-		$status = $webhook_result['status'] ?? '';
-		$error_code = $webhook_result['error_code'] ?? '';
+		$message_id    = $webhook_result['message_id'] ?? '';
+		$status        = $webhook_result['status'] ?? '';
+		$error_code    = $webhook_result['error_code'] ?? '';
 		$error_message = $webhook_result['error_message'] ?? '';
+		$metadata      = $webhook_result['metadata'] ?? array();
 
-		if (empty($message_id) || empty($status)) {
-			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook missing required fields', [
+		// Handle incoming messages - delegate to Messaging_Incoming handler.
+		if ( 'received' === $status ) {
+			$this->process_incoming_message( $provider, $webhook_data );
+			wp_die( 'OK' );
+		}
+
+		if ( empty( $message_id ) || empty( $status ) ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' webhook missing required fields', array(
 				'message_id' => $message_id,
-				'status' => $status,
-				'code' => "{$this->channel}_webhook_missing_data"
-			]);
-			wp_die('Bad Request', 'Bad Request', 400);
+				'status'     => $status,
+				'code'       => "{$this->channel}_webhook_missing_data",
+			) );
+			wp_die( 'Bad Request', 'Bad Request', 400 );
 		}
 
 		// Find tracking record by provider's message ID
 		$campaign_model_class = $this->get_campaign_model_class();
-		$tracking_record = $campaign_model_class::where('external_id', $message_id)
-			->where('mode', $this->get_campaign_mode())
+		$tracking_record      = $campaign_model_class::where( 'external_id', $message_id )
+			->where( 'mode', $this->get_campaign_mode() )
 			->first();
 
-		if (!$tracking_record) {
-			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook: tracking record not found', [
+		if ( ! $tracking_record ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' webhook: tracking record not found', array(
 				'message_id' => $message_id,
-				'status' => $status,
-				'code' => "{$this->channel}_webhook_tracking_not_found"
-			]);
-			wp_die('OK'); // Acknowledge but don't process
+				'status'     => $status,
+				'code'       => "{$this->channel}_webhook_tracking_not_found",
+			) );
+			wp_die( 'OK' ); // Acknowledge but don't process
 		}
 
 		// Update tracking record status based on webhook data
-		$this->update_delivery_status($tracking_record, $status, $error_code, $error_message);
+		$this->update_delivery_status( $tracking_record, $status, $error_code, $error_message, $metadata );
 
-		wp_die('OK'); // Acknowledge successful processing
+		wp_die( 'OK' ); // Acknowledge successful processing
+	}
+
+	/**
+	 * Process incoming message from webhook
+	 * Delegates to Messaging_Incoming handler if available (Pro feature).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $provider     Message provider instance.
+	 * @param array  $webhook_data Raw webhook data.
+	 * @return void
+	 */
+	protected function process_incoming_message( $provider, $webhook_data ) {
+		// Check if Messaging_Incoming class exists (Pro feature).
+		if ( ! class_exists( '\QuillCRM_Pro\Tracking\Messaging_Incoming' ) ) {
+			quillcrm_get_logger()->debug( ucfirst( $this->channel ) . ' incoming message received but Messaging_Incoming not available', array(
+				'code'    => "{$this->channel}_incoming_no_handler",
+				'channel' => $this->channel,
+			) );
+			return;
+		}
+
+		// Parse incoming message data using provider.
+		$parsed_data = $provider->parse_incoming_webhook( $webhook_data );
+
+		// Validate required fields.
+		if ( empty( $parsed_data['from_number'] ) || empty( $parsed_data['message_id'] ) ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' incoming message: missing required fields', array(
+				'code'    => "{$this->channel}_incoming_missing_fields",
+				'channel' => $this->channel,
+				'data'    => $parsed_data,
+			) );
+			return;
+		}
+
+		// Fire action for Pro to handle (Messaging_Incoming listens to this).
+		do_action( 'quillcrm_process_incoming_message', $parsed_data, $this->channel, $provider );
+	}
+
+	/**
+	 * Handle Meta webhook verification challenge
+	 * Meta sends: GET /webhook?hub.mode=subscribe&hub.verify_token=xxx&hub.challenge=xxx
+	 *
+	 * @return void
+	 */
+	protected function handle_meta_verification_challenge()
+	{
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$mode      = isset( $_GET['hub_mode'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_mode'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token     = isset( $_GET['hub_verify_token'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_verify_token'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$challenge = isset( $_GET['hub_challenge'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_challenge'] ) ) : '';
+
+		// Get Meta integration
+		$integration  = \QuillCRM\Managers\Integrations_Manager::instance()->get_integration( 'meta-whatsapp' );
+		$stored_token = $integration ? $integration->get_setting( 'webhook_verify_token' ) : '';
+
+		if ( 'subscribe' === $mode && ! empty( $stored_token ) && hash_equals( $stored_token, $token ) ) {
+			quillcrm_get_logger()->info( 'Meta WhatsApp webhook verification successful', array(
+				'code' => 'meta_webhook_verified',
+			) );
+
+			status_header( 200 );
+			header( 'Content-Type: text/plain; charset=utf-8' );
+			echo esc_html( $challenge );
+			exit;
+		}
+
+		quillcrm_get_logger()->warning( 'Meta WhatsApp webhook verification failed', array(
+			'code' => 'meta_webhook_verification_failed',
+			'mode' => $mode,
+		) );
+
+		status_header( 403 );
+		echo 'Verification failed';
+		exit;
+	}
+
+	/**
+	 * Detect provider from webhook request format
+	 *
+	 * @return \QuillCRM\Interfaces\Message_Provider_Interface|null
+	 */
+	protected function detect_provider_from_request()
+	{
+		$registry = Message_Provider_Registry::instance();
+
+		// Check for Meta webhook signature header
+		if ( ! empty( $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ) ) {
+			$provider = $registry->get_provider_by_slug( 'meta-whatsapp' );
+			if ( $provider && $provider->is_configured() ) {
+				return $provider;
+			}
+		}
+
+		// Check for Twilio webhook signature header
+		if ( ! empty( $_SERVER['HTTP_X_TWILIO_SIGNATURE'] ) ) {
+			$provider = $registry->get_provider_by_slug( 'twilio' );
+			if ( $provider && $provider->is_configured() ) {
+				return $provider;
+			}
+		}
+
+		// Check request body format
+		$raw_body  = file_get_contents( 'php://input' );
+		$json_data = json_decode( $raw_body, true );
+
+		// Meta uses "entry" array structure (JSON)
+		if ( is_array( $json_data ) && isset( $json_data['entry'] ) ) {
+			$provider = $registry->get_provider_by_slug( 'meta-whatsapp' );
+			if ( $provider && $provider->is_configured() ) {
+				return $provider;
+			}
+		}
+
+		// Twilio uses form-encoded with MessageSid/SmsSid
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['MessageSid'] ) || isset( $_POST['SmsSid'] ) ) {
+			$provider = $registry->get_provider_by_slug( 'twilio' );
+			if ( $provider && $provider->is_configured() ) {
+				return $provider;
+			}
+		}
+
+		// Fallback to default provider for channel
+		return $registry->get_provider( $this->channel );
 	}
 
 	/**
@@ -218,12 +374,13 @@ abstract class Abstract_Tracking
 	 * Centralized status update logic with campaign-type-specific handling
 	 *
 	 * @param object $tracking_record Tracking record
-	 * @param string $status Delivery status from Twilio
+	 * @param string $status Delivery status from provider
 	 * @param string $error_code Error code if any
 	 * @param string $error_message Error message if any
+	 * @param array  $metadata Additional metadata from provider (e.g., opt-out info)
 	 * @return void
 	 */
-	protected function update_delivery_status($tracking_record, $status, $error_code = '', $error_message = '')
+	protected function update_delivery_status($tracking_record, $status, $error_code = '', $error_message = '', $metadata = array())
 	{
 		$previous_status = $tracking_record->status;
 
@@ -250,6 +407,21 @@ abstract class Abstract_Tracking
 
 		$tracking_record->save();
 
+		// Store error information in meta table for failed messages
+		if ( ( 'failed' === $status || 'undelivered' === $status ) && ( ! empty( $error_code ) || ! empty( $error_message ) ) ) {
+			Communication_Tracking_Meta_Model::store_error_info(
+				$tracking_record->id,
+				$error_code,
+				$error_message
+			);
+		}
+
+		// Handle provider-reported opt-out (e.g., Meta WhatsApp blocked/spam errors)
+		// This auto-unsubscribes contacts who have opted out at the provider level
+		if ( ! empty( $metadata['is_opt_out'] ) && $tracking_record->contact_id ) {
+			$this->handle_provider_opt_out( $tracking_record, $metadata );
+		}
+
 		// Log status update
 		quillcrm_get_logger()->info(ucfirst($this->channel) . ' delivery status updated', [
 			'tracking_record_id' => $tracking_record->id,
@@ -260,11 +432,71 @@ abstract class Abstract_Tracking
 			'source_type' => $tracking_record->source_type,
 			'error_code' => $error_code,
 			'error_message' => $error_message,
+			'is_opt_out' => ! empty( $metadata['is_opt_out'] ),
 			'code' => "{$this->channel}_delivery_status_updated"
 		]);
 
 		// Trigger delivery status hooks
 		do_action("quillcrm_{$this->channel}_delivery_status_updated", $tracking_record, $status, $previous_status);
+	}
+
+	/**
+	 * Handle provider-reported opt-out
+	 *
+	 * When a provider (like Meta WhatsApp) reports that a user has blocked the business
+	 * or opted out via their platform controls, automatically unsubscribe them in QuillCRM.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $tracking_record Tracking record with contact_id
+	 * @param array  $metadata Metadata containing opt_out_reason
+	 * @return void
+	 */
+	protected function handle_provider_opt_out( $tracking_record, $metadata ) {
+		$contact = Contact_Model::find( $tracking_record->contact_id );
+
+		if ( ! $contact ) {
+			quillcrm_get_logger()->warning( ucfirst( $this->channel ) . ' provider opt-out: contact not found', array(
+				'contact_id'    => $tracking_record->contact_id,
+				'opt_out_reason' => $metadata['opt_out_reason'] ?? 'unknown',
+				'code'          => "{$this->channel}_provider_optout_no_contact",
+			) );
+			return;
+		}
+
+		$opt_out_reason = $metadata['opt_out_reason'] ?? 'provider_reported';
+
+		// Get the channel status field
+		$status_field = $this->channel . '_status';
+
+		// Only unsubscribe if not already unsubscribed
+		if ( 'unsubscribed' === $contact->getAttribute( $status_field ) ) {
+			quillcrm_get_logger()->debug( ucfirst( $this->channel ) . ' provider opt-out: contact already unsubscribed', array(
+				'contact_id'    => $contact->id,
+				'opt_out_reason' => $opt_out_reason,
+				'code'          => "{$this->channel}_provider_optout_already_unsubscribed",
+			) );
+			return;
+		}
+
+		// Use the standard unsubscribe method
+		$contact->unsubscribe_from_mode(
+			$this->get_campaign_mode(),
+			$opt_out_reason, // Reason will be stored (e.g., 'meta_user_blocked', 'meta_offers_announcements')
+			$tracking_record->source_type,
+			$tracking_record->source_id
+		);
+
+		quillcrm_get_logger()->info( ucfirst( $this->channel ) . ' contact auto-unsubscribed due to provider opt-out', array(
+			'contact_id'     => $contact->id,
+			'opt_out_reason' => $opt_out_reason,
+			'source_type'    => $tracking_record->source_type,
+			'source_id'      => $tracking_record->source_id,
+			'code'           => "{$this->channel}_provider_optout_unsubscribed",
+		) );
+
+		// Fire specific action for provider opt-out (different from keyword unsubscribe)
+		do_action( "quillcrm_{$this->channel}_provider_optout", $contact, $opt_out_reason, $tracking_record );
 	}
 
 	/**

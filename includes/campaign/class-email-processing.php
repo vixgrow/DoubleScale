@@ -94,7 +94,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @param Communication_Tracking_Model                            $campaign_message Campaign tracking record
 	 * @return array Message data array with subject, body, recipient, hash_key
 	 */
-	protected function prepare_message_content( $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
+	protected function prepare_message_content( Template_Model $template, $contact_or_automation_contact, Communication_Tracking_Model $campaign_message ) {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
@@ -386,24 +386,6 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 */
 	protected function get_tracking_class() {
 		return Email::class;
-	}
-
-	/**
-	 * Get default max per day
-	 *
-	 * @return int
-	 */
-	protected function get_default_max_per_day() {
-		return 10000;
-	}
-
-	/**
-	 * Get default max per second
-	 *
-	 * @return int
-	 */
-	protected function get_default_max_per_second() {
-		return 15;
 	}
 
 	/**

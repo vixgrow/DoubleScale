@@ -42,6 +42,7 @@ export const CreateContactModal: React.FC = () => {
 		first_name: '',
 		last_name: '',
 		phone: '',
+		whatsapp_phone: '',
 	};
 
 	const [contactForm, setContactForm] = useState(emptyContact);
@@ -128,6 +129,23 @@ export const CreateContactModal: React.FC = () => {
 						}}
 						type="tel"
 						placeholder={__('Enter Phone Number', 'quillcrm')}
+					/>
+					<Field
+						label={__('WhatsApp Phone', 'quillcrm')}
+						value={contactForm.whatsapp_phone}
+						onChange={(value) => {
+							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
+							const phoneRegex = /^[0-9+\-\s()]*$/;
+							if (phoneRegex.test(value) || value === '') {
+								setContactForm((prev) => ({
+									...prev,
+									whatsapp_phone: value,
+								}));
+							}
+						}}
+						type="tel"
+						placeholder={__('Enter WhatsApp Phone Number', 'quillcrm')}
+						helperText={__('Phone number for WhatsApp messaging (e.g., +1234567890)', 'quillcrm')}
 					/>
 				</div>
 

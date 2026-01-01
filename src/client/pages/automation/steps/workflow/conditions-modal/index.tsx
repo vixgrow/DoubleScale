@@ -187,11 +187,18 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		const fetchDynamicRules = async () => {
 			if (formContext && formContext.formId && formContext.triggerId) {
 				try {
+					const params: any = {
+						form_id: formContext.formId,
+						trigger_id: formContext.triggerId,
+					};
+
+					// Add post_id for Elementor forms
+					if (formContext.postId) {
+						params.post_id = formContext.postId;
+					}
+
 					const response = (await apiFetch({
-						path: addQueryArgs('/qc/v1/automations/rules', {
-							form_id: formContext.formId,
-							trigger_id: formContext.triggerId,
-						}),
+						path: addQueryArgs('/qc/v1/automations/rules', params),
 						method: 'GET',
 					})) as any;
 

@@ -11,6 +11,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { ChevronRight } from 'lucide-react';
 import { useRef, useEffect } from 'react';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -53,7 +54,8 @@ const Integration: React.FC<IntegrationProps> = ({
 }) => {
 	const { fields, settings, label, description, is_pro } = integration;
 	const isAppBased = !!fields.app;
-	const isProFeature = is_pro === true;
+	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProFeature = is_pro === true && !isProActive;
 
 	const initialValues = isAppBased
 		? typeof settings.app === 'object'
@@ -175,14 +177,30 @@ const Integration: React.FC<IntegrationProps> = ({
 							{/* Credentials/App Card */}
 							<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
 								<CardContent className="flex-1 overflow-y-auto p-6">
-									{!isAppBased ? (
-										<Credentials
-											integration={integration}
-											slug={slug}
-											fieldsValue={fieldsValue}
-											setFieldsValue={setFieldsValue}
-										/>
-									) : (
+								{!isAppBased ? (
+									(() => {
+										// Allow Pro plugin to override credentials component
+										// Pro plugin provides custom components for Twilio and Meta WhatsApp
+										const CredentialsComponent = applyFilters(
+											'quillcrm_integration_credentials_component',
+											Credentials,
+											slug
+										) as React.ComponentType<{
+											integration: typeof integration;
+											slug: string;
+											fieldsValue: Record<string, any>;
+											setFieldsValue: (value: Record<string, any>) => void;
+										}>;
+										return (
+											<CredentialsComponent
+												integration={integration}
+												slug={slug}
+												fieldsValue={fieldsValue}
+												setFieldsValue={setFieldsValue}
+											/>
+										);
+									})()
+								) : (
 										<App
 											integration={integration}
 											fieldsValue={fieldsValue}
@@ -191,12 +209,12 @@ const Integration: React.FC<IntegrationProps> = ({
 									)}
 								</CardContent>
 								<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
-									<Button
-										onClick={save}
-										disabled={isSaving}
-										className="min-w-[120px] rounded-lg px-0"
-										variant="gradient"
-									>
+								<Button
+									onClick={save}
+									disabled={isSaving}
+									className="min-w-[120px] rounded-lg px-4"
+									variant="gradient"
+								>
 										{isSaving
 											? __('Connecting...', 'quillcrm')
 											: __(`Connect ${label}`, 'quillcrm')}

@@ -25,7 +25,7 @@ interface Props {
 
 interface SelectOption {
 	label: string;
-	value: number;
+	value: number | string;
 }
 
 interface DataItem {
@@ -33,9 +33,20 @@ interface DataItem {
 	name: string;
 }
 
+// Integration endpoints return flat array with value/label
+interface IntegrationDataItem {
+	value: string;
+	label: string;
+}
+
 interface ApiResponse {
 	data: DataItem[];
 	total?: number;
+}
+
+// Type guard to check if response is flat array (integration format)
+function isIntegrationResponse(response: any): response is IntegrationDataItem[] {
+	return Array.isArray(response) && response.length > 0 && 'value' in response[0] && 'label' in response[0];
 }
 
 const API_Select = ({ endpoint, value, onChange, multiple = false }: Props) => {
@@ -110,20 +121,35 @@ const SingleAPISelect = ({
 			hasMore: boolean;
 		}> => {
 			try {
-				const response = (await apiFetch({
+				const response = await apiFetch({
 					path: addQueryArgs(endpoint, {
 						keyword: keyword,
 						per_page: perPage,
 						page: page,
 					}),
-				})) as ApiResponse;
+				});
 
-				const newOptions = response.data.map((item: DataItem) => ({
-					label: item.name,
-					value: item.id,
-				}));
+				let newOptions: SelectOption[];
+				let totalPages = 0;
 
-				const totalPages = Math.ceil((response.total || 0) / perPage);
+				// Handle integration endpoints that return flat array with value/label
+				if (isIntegrationResponse(response)) {
+					newOptions = response.map((item) => ({
+						label: item.label,
+						value: typeof item.value === 'string' ? parseInt(item.value, 10) || item.value : item.value,
+					})) as SelectOption[];
+					// Integration endpoints typically return all items, no pagination
+					totalPages = 1;
+				} else {
+					// Standard API response with data array containing id/name
+					const apiResponse = response as ApiResponse;
+					newOptions = (apiResponse.data || []).map((item: DataItem) => ({
+						label: item.name,
+						value: item.id,
+					}));
+					totalPages = Math.ceil((apiResponse.total || 0) / perPage);
+				}
+
 				const hasMorePages = page < totalPages;
 
 				return {
@@ -208,7 +234,12 @@ const SingleAPISelect = ({
 		return allOptions;
 	}, [options, isLoadingMore, hasMore]);
 
-	const selectedOption = options.find((opt) => opt.value === parseInt(value, 10));
+	// Handle both string and numeric value comparison
+	const selectedOption = options.find((opt) => {
+		const optValue = String(opt.value);
+		const searchValue = String(value);
+		return optValue === searchValue;
+	});
 
 	return (
 		<div className="flex flex-col gap-2.5">
@@ -220,7 +251,8 @@ const SingleAPISelect = ({
 						options={optionsWithLoading}
 						value={selectedOption || null}
 						onChange={(val: SelectOption | null) => {
-							if (!val || val.value < 0) return;
+							// Skip placeholder options (negative numbers for loading states)
+							if (!val || (typeof val.value === 'number' && val.value < 0)) return;
 							onChange(String(val.value));
 						}}
 						onInputChange={handleInputChange}

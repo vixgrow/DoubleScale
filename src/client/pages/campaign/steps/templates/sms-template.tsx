@@ -49,9 +49,7 @@ const SMSTemplateStep: React.FC = () => {
 		name: __('SMS Message', 'quillcrm'),
 		type: CAMPAIGN_CHANNEL.SMS,
 		body: '',
-		settings: {
-			add_unsubscribe: true,
-		},
+		settings: {},
 	};
 
 	const [template, setTemplate] = useState<SMSTemplate>(defaultTemplate);
@@ -70,10 +68,7 @@ const SMSTemplateStep: React.FC = () => {
 				name: backendTemplate.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.SMS,
 				body: backendTemplate.body || '',
-				settings: {
-					add_unsubscribe:
-						backendTemplate.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			});
 		}
 	}, [campaign?.settings?.templates]);
@@ -131,9 +126,7 @@ const SMSTemplateStep: React.FC = () => {
 				name: template.name,
 				type: template.type,
 				body: template.body,
-				settings: {
-					add_unsubscribe: template.settings?.add_unsubscribe ?? true,
-				},
+				settings: {},
 			};
 
 			const endpoint = getCampaignEndpoint(campaign.type);
@@ -292,6 +285,19 @@ const SMSTemplateStep: React.FC = () => {
 								/>
 								<p className="text-sm text-[#71717A]">
 									{__('Maximum 1600 characters', 'quillcrm')}
+								</p>
+							</div>
+
+							{/* Unsubscribe Info */}
+							<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+								<p className="text-sm text-gray-700">
+									<strong>
+										{__('Unsubscribe:', 'quillcrm')}
+									</strong>{' '}
+									{__(
+										'A "Reply STOP to unsubscribe" footer will be automatically added to your message. Recipients can reply STOP to unsubscribe.',
+										'quillcrm'
+									)}
 								</p>
 							</div>
 						</div>

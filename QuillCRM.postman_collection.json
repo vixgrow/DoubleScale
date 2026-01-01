@@ -1,0 +1,4536 @@
+{
+	"info": {
+		"_postman_id": "01ef3cf4-a5c5-45ce-b9e4-95876173caab",
+		"name": "QuillCRM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44189853",
+		"_collection_link": "https://galactic-equinox-147362.postman.co/workspace/QuillCRM~9b1c595d-cfd2-4036-b99e-01fe0a128a3d/collection/17000798-01ef3cf4-a5c5-45ce-b9e4-95876173caab?action=share&source=collection_link&creator=44189853"
+	},
+	"item": [
+		{
+			"name": "Contact",
+			"item": [
+				{
+					"name": "List Contacts",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "''",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Abdo\",\r\n    \"last_name\": \"Haridy\",\r\n    \"email\": \"peach2150@awgarstone.com\",\r\n    \"notes\": [\r\n        {\r\n            \"text\": \"Contact Note\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "haridy@quillcrm.com",
+									"disabled": true
+								},
+								{
+									"key": "first_name",
+									"value": "AbdelRhman",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Haridy",
+									"disabled": true
+								},
+								{
+									"key": "phone",
+									"value": "+201114014667",
+									"disabled": true
+								},
+								{
+									"key": "address_1",
+									"value": "51 Omar Ebn AbdelAziz Street, Elhamara",
+									"disabled": true
+								},
+								{
+									"key": "address_2",
+									"value": "Saraya Elkoba, New Cairo",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "Asyut",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "Asyut",
+									"disabled": true
+								},
+								{
+									"key": "country",
+									"value": "Egypt",
+									"disabled": true
+								},
+								{
+									"key": "zip",
+									"value": "71511",
+									"disabled": true
+								},
+								{
+									"key": "lists",
+									"value": "[{type: \"new\", name: \"List 1\"}]",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Contact",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/1195",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"1195"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"lists\": [{\r\n        \"id\": 1\r\n    }]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/8",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"8"
+							],
+							"query": [
+								{
+									"key": "first_name",
+									"value": "Ahmed",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Mohamed",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/10",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Contact",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"keyword\": \"abdo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/search",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Automation Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/9/automation-contacts",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"9",
+								"automation-contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filters",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/filters",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"filters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Emails",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Purchase",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/1001/lms-courses",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"1001",
+								"lms-courses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Campaign",
+			"item": [
+				{
+					"name": "List Campaings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "''",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Campaign",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Campaign1\",\r\n    \"description\": \"Welcome Campaign1\",\r\n    \"count\": \"1\",\r\n    \"settings\": {\r\n        \"template_id\": 13\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Campaign",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Campaign",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"New Campaign\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns",
+								"3"
+							],
+							"query": [
+								{
+									"key": "first_name",
+									"value": "Ahmed",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Mohamed",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Campaign",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Campaign",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns?keyword=new",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "new"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/campaigns/6/emails",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"campaigns",
+								"6",
+								"emails"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Automations",
+			"item": [
+				{
+					"name": "List Automations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "''",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Automation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Contact Subscribed\",\r\n    \"trigger\": \"contact_subscribed\",\r\n    \"status\": \"active\",\r\n    \"settings\": {\r\n        \"multiple_runs\": true\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Automation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/8",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Automation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"settings\": {\r\n        \"multiple_runs\": true,\r\n        \"webhook_key\": \"2a1d38eb2e8340ee2e6f0e535db7eeb3\",\r\n        \"payload\": {\r\n            \"email\": \"email@email.com\",\r\n            \"first_name\": \"Abdo\",\r\n            \"last_name\": \"Ahmed\"\r\n        },\r\n        \"received_at\": \"2024-05-27 13:21:06\",\r\n        \"mapped_fields\": {\r\n            \"first_name\": \"first_name\",\r\n            \"last_name\": \"last_name\",\r\n            \"email\": \"email\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/13",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"13"
+							],
+							"query": [
+								{
+									"key": "first_name",
+									"value": "Ahmed",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Mohamed",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Automation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Automation",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations?keyword=new",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "new"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Automation Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/2/contacts",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"2",
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Automation Steps",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/6/steps",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"6",
+								"steps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Triggers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/triggers",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"triggers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Actions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/actions",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"actions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merge Tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/merge-tags",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"merge-tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/rules",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"rules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Goals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automations/goals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automations",
+								"goals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Templates",
+			"item": [
+				{
+					"name": "List Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "''",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Template Abandoned\",\r\n    \"settings\": {},\r\n    \"body\": \"Abandoned Cart: {{abandoned_cart::url}}\",\r\n    \"subject\": \"Abandoned Cart\",\r\n    \"type\": \"email\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Template",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates/6",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"body\": \"Trigger Link: <a href='http://localhost/wp/?quillcrm-link-trigger=A3UW8spOtAQbm9hCTem9yPMrmsVnhgBk'>Click Link Trigger</a>\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates/14",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates",
+								"14"
+							],
+							"query": [
+								{
+									"key": "first_name",
+									"value": "Ahmed",
+									"disabled": true
+								},
+								{
+									"key": "last_name",
+									"value": "Mohamed",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Template",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Templates",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/templates?keyword=new",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"templates"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "new"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "List",
+			"item": [
+				{
+					"name": "Get Lists",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/lists?keyword=''",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"lists"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "''"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create List",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Logged In Subscribers\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/lists",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"lists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete List",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/lists/4",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"lists",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update List",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"All Customers\",\r\n    \"slug\": \"customers\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/lists/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"lists",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/lists/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"lists",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Forms",
+			"item": [
+				{
+					"name": "Get Forms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/forms",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"forms"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "black",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Form",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Contact (Metform)\",\r\n    \"form_type\": \"metform\",\r\n    \"form_id\": \"53\",\r\n    \"data\": {\r\n        \"mapped_fields\": {\r\n            \"first_name\": \"mf-first-name\",\r\n            \"last_name\": \"mf-last-name\",\r\n            \"email\": \"mf-email\",\r\n            \"address_1\": \"9\",\r\n            \"address_2\": \"10\",\r\n            \"city\": \"input_text_1\",\r\n            \"country\": \"address-1_country\",\r\n            \"state\":\"address-1_state\",\r\n            \"zip\": \"address-1_zip\"\r\n        }\r\n    },\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/forms",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"forms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Form",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/forms/4",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"forms",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Form",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data\": {\r\n        \"mapped_fields\": {\r\n            \"first_name\": \"1.3\",\r\n            \"last_name\": \"1.6\",\r\n            \"email\": \"2\",\r\n            \"country\": \"4.6\",\r\n            \"city\": \"4.3\",\r\n            \"address_1\": \"4.1\",\r\n            \"address_2\": \"4.2\",\r\n            \"state\": \"4.4\",\r\n            \"zip\": \"4.5\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/forms/8",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"forms",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Form",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/forms/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"forms",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Automation Steps",
+			"item": [
+				{
+					"name": "Create Step",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"automation_id\": 4,\r\n    \"action\": \"twilio_send_message\",\r\n    \"type\": \"action\",\r\n    \"status\": \"active\",\r\n    \"settings\": {\r\n        \"message\": \"Welcome to QuillCRM\",\r\n        \"to\": \"+201114014667\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-steps",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-steps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Step",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-steps/4",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-steps",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Step",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"settings\": {\r\n        \"lists\": [1],\r\n        \"skip\": true\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-steps/8",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-steps",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Step",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-steps/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-steps",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Automation Contacts",
+			"item": [
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"automation_id\": 1,\r\n    \"contact_id\": 2,\r\n    \"execution_time\": \"{{$timestamp}}\",\r\n    \"event\": \"quillforms_submission\",\r\n    \"step_id\": 1,\r\n    \"status\": \"completed\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-contacts",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-contacts/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-contacts",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-contacts/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-contacts",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Contact",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/automation-contacts/55",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"automation-contacts",
+								"55"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Custom Fields Groups",
+			"item": [
+				{
+					"name": "Get Groups",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Group 2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Group",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups/4",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Custom Input\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Group",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Fields",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields-groups/1/fields",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields-groups",
+								"1",
+								"fields"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Custom Fields",
+			"item": [
+				{
+					"name": "List Fields",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Field",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "mohamed",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "1234",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"oooo\",\r\n    \"type\": \"date\",\r\n    \"scope\" : \"deal\",\r\n    \"group_id\": 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Field",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields/4",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Field",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Input\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Field",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/custom-fields/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"custom-fields",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tag",
+			"item": [
+				{
+					"name": "Get Tags",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tags",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tags"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "black",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Tag",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Tag 4\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tags",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tag",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tags/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tags",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tag",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Vip Tag\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tags/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tags",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Tag",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tags/2",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tags",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Link Trigger",
+			"item": [
+				{
+					"name": "Get Link Triggers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/link-trigger",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"link-trigger"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "black",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Link",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Link 3\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/link-triggers",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"link-triggers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Link",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/link-triggers/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"link-triggers",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Link",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"settings\": {\r\n        \"redirect_url\": \"http://localhost/wp/\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/link-triggers/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"link-triggers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Link",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/link-triggers/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"link-triggers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Get Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contact-notes",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contact-notes"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "black",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contact_id\": 1,\r\n    \"note\": \"Hello World\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contact-notes",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contact-notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contact-notes/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contact-notes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Vip Tag\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contact-notes/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contact-notes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Note",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contact-notes/3",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contact-notes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Contact Notes",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ajax Requests",
+			"item": [
+				{
+					"name": "Get QuillForms Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_quillforms_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "quillcrm_quillforms_get_fields",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ContactForm7 Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_contactform7_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Gravity Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_gravityforms_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get NinjaForms Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_ninjaforms_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Metfrom Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_metform_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Forminator Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_forminator_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get WPForms Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_wpforms_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Fluent Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_fluentforms_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Formidable Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_formidable_get_form_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Elementor Forms",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_elementor_get_form_select_options",
+									"type": "text"
+								},
+								{
+									"key": "source_id",
+									"value": "23",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Elementor Forms Pages",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_elementor_get_source_select_options",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get QuillForms Form Field",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_quillforms_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "9",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get GravityForms Form Field",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_gravityforms_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get WPforms Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_wpforms_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "11",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get WPforms Form Fields Copy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_forminator_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "41",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get MetForm Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_metform_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "53",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get NinjaForms Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_ninjaforms_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get ContactForm7 Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_contactform7_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "44",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get FluentForms Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_fluentforms_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "3",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Fromidable Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_formidable_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Elementor Form Fields",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillcrm_elementor_get_fields",
+									"type": "text"
+								},
+								{
+									"key": "form_id",
+									"value": "a510de7",
+									"type": "text"
+								},
+								{
+									"key": "source_id",
+									"value": "23",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "action",
+									"value": "quillsmtp_send_summary_email",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-admin/admin-ajax.php",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-admin",
+								"admin-ajax.php"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Integratons",
+			"item": [
+				{
+					"name": "ActiveCampaign",
+					"item": [
+						{
+							"name": "ActiveCampaign",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_url\": \"https://quillforms29614.activehosted.com\",\r\n        \"api_key\": \"f25d7a2bff53b6e9a6d8f970f823da5837a5d030315a33db4c9d7836e96f221ea277164b\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/activecampaign",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"activecampaign"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/activecampaign/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"activecampaign",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Convertkit",
+					"item": [
+						{
+							"name": "Convertkit",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_secret\": \"qIRZ3CVCh-reGjOUTQinj4DMWlTlVChKGvuVVYtY71Y\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/convertkit",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"convertkit"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/convertkit/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"convertkit",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/convertkit/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"convertkit",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sequence",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/convertkit/sequences",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"convertkit",
+										"sequences"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mailchimp",
+					"item": [
+						{
+							"name": "Mailchimp",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"82136d26faa2e43cb95c64510936bf70-us18\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailchimp",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailchimp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailchimp/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailchimp",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailchimp/lists",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailchimp",
+										"lists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update List",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"list_id\": \"ba1379ddb2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailchimp/list",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailchimp",
+										"list"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Drip",
+					"item": [
+						{
+							"name": "Drip",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_token\": \"1aeefbfc34e2cf6677b77b8f66652353\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Campaigns",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip/campaigns",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip",
+										"campaigns"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Workflows",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip/workflows",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip",
+										"workflows"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Account",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"account_id\": \"9516285\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/drip/account",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"drip",
+										"account"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GetResponse",
+					"item": [
+						{
+							"name": "GetResponse",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"g3421oppvpprv7r8fbd80wsdx5kdkm4m\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/getresponse",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"getresponse"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/getresponse/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"getresponse",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/getresponse/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"getresponse",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/getresponse/lists",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"getresponse",
+										"lists"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update List",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"account_id\": \"9516285\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/getresponse/list",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"getresponse",
+										"list"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Klaviyo",
+					"item": [
+						{
+							"name": "Klaviyo",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"pk_e794632952faa0054552cde7fff862c6dd\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/klaviyo",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"klaviyo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/klaviyo/lists",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"klaviyo",
+										"lists"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "MailerLite",
+					"item": [
+						{
+							"name": "MailerLite",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiOTkzOWE4ZjZlZjU2MjhjOWI5YWNjOGI3OTY3N2FkYzdiZjYzYjNhY2RjNzlhYmFiNGYzZTA0N2MyYTYwNzhlMzNkMGE1OWFjNGFkMWIyY2EiLCJpYXQiOjE3MjA1NDM4MzAuNzY4NzE4LCJuYmYiOjE3MjA1NDM4MzAuNzY4NzIxLCJleHAiOjQ4NzYyMTc0MzAuNzY2MjEzLCJzdWIiOiIyOTAyNzQiLCJzY29wZXMiOltdfQ.wvMmmDFQZN1OsorrkImhWFROu9lQO0MepML3QzBzvPs8kyXrJpNcX1R9JmwFqgGoAny1nQaUKGou7NZVyxoyKdHvIBudhVTWY_y7zSsIH7iZsUa8G1FhT-3wtAGtpICMMpw-8A6QtN0OkDf78kCfkQ0pvPyq20WSaC6SXH9haNtxrP3KDMmd19VpBVOhLG7bWdfSd_Bz8HDFXmPSSUI8WySwK8mAn2QUeMOcpnjaKNtsoWdcGSgRdB89jRJYD-B16BfiA3oH4yLDPvNsPHEb3ztY2bHG7P-ld6bGeR9Vx6jmm5RI9ndhJAKViOyIyElhMW4XFcIiEZssQkXpivSBnRhGbPkYkqpeb9eIXrG0VZ7r5HJ4xFWRFbjD8RSJpKzb42gIAWsx-UpS9RssmYMyZh-B14IRv4PfQCoYbuaGJDdqfKhK2_aOuBForhQru3exqdWoY3wYouYfqhqxAYH_OqxnOZ-X9UtsgGvN4wAOtRq0y07LhiMLpyWqRciIYKZPUGsmql6qg_yXEitV06Yq46bQMQo6tOgwqZUeztd9Em517Etv2RPfzpvpwZS9wshtIUe1nqC0ClPzcz_x8HroD7OEVq_PmXKiKQmMDOvfFuYR6wSp_ROjGejO1wqtPlzx7Gkh2oqeBL5WT2_nVvU9-4qJvEowzs6f81HxEws_d2U\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailerlite",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailerlite"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Groups",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mailerlite/groups",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mailerlite",
+										"groups"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ontraport",
+					"item": [
+						{
+							"name": "Ontraport",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"0i686GcszAEXnPF\",\r\n        \"app_id\": \"2_263188_8Lhm62iKW\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/ontraport",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"ontraport"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/ontraport/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"ontraport",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Keap",
+					"item": [
+						{
+							"name": "Keap",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"app\": {\r\n            \"client_id\": \"kLgzS007eO6ao5NSY3MP0Z8JOybDPge9\",\r\n            \"client_secret\": \"XI0VmUtyYKJeEHl2\"\r\n        }\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/keap",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"keap"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Auth URI",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/keap/auth",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"keap",
+										"auth"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/keap/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"keap",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/keap/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"keap",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Slack",
+					"item": [
+						{
+							"name": "Slack",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"app\": {\r\n            \"client_id\": \"5620162469317.7402530166982\",\r\n            \"client_secret\": \"36629bfea2b5b8c1381646a3983e2e20\"\r\n        }\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/slack",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"slack"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Auth URI",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/slack/auth",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"slack",
+										"auth"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "users",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"entity_id\": \"U05K0PCU480\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/slack/user",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"slack",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "conversations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/slack/conversations",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"slack",
+										"conversations"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Twilio",
+					"item": [
+						{
+							"name": "Twilio",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"account_sid\": \"AC7740c98c8e13a58bdbd32e54fa3a725b\",\r\n        \"auth_token\": \"81aa914676576eae51315d72ccc79378\",\r\n        \"phone_number\": \"+17626677701\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/twilio",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"twilio"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mautic",
+					"item": [
+						{
+							"name": "Mautic",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"app\": {\r\n            \"base_url\": \"http://localhost/mautic/index_dev.php\",\r\n            \"client_id\": \"1_1p8e0hj6azdw80sww88ow8gk8s0k48wwkgsgkco0wgwgo8k8cg\",\r\n            \"client_secret\": \"10gy2e76y19ckwk0oc4wk4oc84o8kocgkcgko04wwgg4wgwo8g\"\r\n        }\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Auth URI",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/auth",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"auth"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Campaigns",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/campaigns",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"campaigns"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/lists",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"lists"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Hubspot",
+					"item": [
+						{
+							"name": "Hubspot",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"access_token\": \"pat-eu1-476efec1-2477-4bf3-aa25-c7c59578be0e\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/hubspot",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"hubspot"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Auth URI",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/auth",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"auth"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/hubspot/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"hubspot",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"mautic",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lists",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/hubspot/lists",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"hubspot",
+										"lists"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Moblie App",
+			"item": [
+				{
+					"name": "http://localhost/wordpress/wp-json/qc/v1/site/verify",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://pipeline.quillsmtp.com/wp-json/qc/v1/site/verify",
+							"protocol": "https",
+							"host": [
+								"pipeline",
+								"quillsmtp",
+								"com"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"site",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost/wordpress/wp-json/qc/v1/site/authenticate",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\" : \"ahmedgalal\",\r\n    \"password\" : \"sC9!vlA$Mu^mDB9nZMnzBdIB\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pipeline.quillsmtp.com/wp-json/qc/v1/site/login",
+							"protocol": "https",
+							"host": [
+								"pipeline",
+								"quillsmtp",
+								"com"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"site",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost/wordpress/wp-json/qc/v1/site/create-app-password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-QuillCRM-Token",
+								"value": "1xxTDl55i8hLwZyaX7gyv05oUqDcrrSMv5v847O9rKSmbutpKaqWkIZZlingGUsa",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"hello\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://pipeline.quillsmtp.com/wp-json/qc/v1/site/create-app-password",
+							"protocol": "https",
+							"host": [
+								"pipeline",
+								"quillsmtp",
+								"com"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"site",
+								"create-app-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "https://pipeline.quillsmtp.com/wp-json/qc/v1/contacts",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "ahmedgalal",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "5u1vZV4Sll1bpIKNsv7AjEaO",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://pipeline.quillsmtp.com/wp-json/qc/v1/deals",
+							"protocol": "https",
+							"host": [
+								"pipeline",
+								"quillsmtp",
+								"com"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Webhook",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"abdo@email.test1\",\r\n    \"first_name\": \"Abdo\",\r\n    \"last_name\": \"Haridy\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/wp/wp-json/qc/v1/automations/webhook/?quillcrm_key=ba1f264b9bbc4e5f3fcf3bcbab4741e2&quillcrm_id=12",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"wp",
+						"wp-json",
+						"qc",
+						"v1",
+						"automations",
+						"webhook",
+						""
+					],
+					"query": [
+						{
+							"key": "quillcrm_key",
+							"value": "ba1f264b9bbc4e5f3fcf3bcbab4741e2"
+						},
+						{
+							"key": "quillcrm_id",
+							"value": "12"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "QuillCRM Webhook",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"nahirer580@qiradio.com\",\r\n    \"first_name\": \"AbdelR1\",\r\n    \"last_name\": \"Ahmed1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{site}}/wp-json/qc/v1/automations/webhook?quillcrm_id=13&quillcrm_key=2a1d38eb2e8340ee2e6f0e535db7eeb3",
+					"host": [
+						"{{site}}"
+					],
+					"path": [
+						"wp-json",
+						"qc",
+						"v1",
+						"automations",
+						"webhook"
+					],
+					"query": [
+						{
+							"key": "quillcrm_id",
+							"value": "13"
+						},
+						{
+							"key": "quillcrm_key",
+							"value": "2a1d38eb2e8340ee2e6f0e535db7eeb3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Abandoned Carts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{site}}/wp-json/qc/v1/abandoned-carts",
+					"host": [
+						"{{site}}"
+					],
+					"path": [
+						"wp-json",
+						"qc",
+						"v1",
+						"abandoned-carts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "123456",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "haridy",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "contactId",
+			"value": "1"
+		},
+		{
+			"key": "address",
+			"value": "51 Omar Ebn AbdelAziz Street, Elhamara"
+		},
+		{
+			"key": "phone",
+			"value": "+201114014667"
+		},
+		{
+			"key": "address2",
+			"value": "Saraya Elkoba, New Cairo"
+		},
+		{
+			"key": "city",
+			"value": "Asyut"
+		},
+		{
+			"key": "state",
+			"value": "Asyut City"
+		},
+		{
+			"key": "zip",
+			"value": "71511"
+		},
+		{
+			"key": "country",
+			"value": "Egypt"
+		}
+	]
+}

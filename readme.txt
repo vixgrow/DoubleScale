@@ -1,14 +1,14 @@
 === Quill CRM - Complete Customer Relationship Management for WordPress ===
 Contributors: quillforms, mdmag
-Tags: crm, customer management, contact management, pipeline, sales, sms, automation
+Tags: crm, customer management, contact management, pipeline, sales, sms, automation, whatsapp
 Requires at least: 5.8
 Tested up to: 6.9.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A powerful, native WordPress CRM with pipelines, contact management, email & SMS campaigns, automations, and seamless integrations with 12+ popular plugins.
+A powerful, native WordPress CRM with pipelines, contact management, email, SMS, and WhatsApp marketing, automations, and seamless integrations with 20+ popular plugins.
 
 == Description ==
 
@@ -370,6 +370,14 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 
 
 == Upgrade Notice ==
+= 1.1.0 =
+* Added WhatsApp automation feature as a pro feature
+* Added WhatsApp 2 way messaging feature as a pro feature
+* Added email sequence feature as a pro feature
+* Fixed some bugs in individual message sending
+* Fixed a bug in installing the pro version
+* Redirect sales rep and crm manager to their respective dashboards after login
+* Add support for Naira currency
 
 = 1.0.0 =
 Initial release of Quill CRM. Install now to start managing your customer relationships with email & SMS campaigns, powerful automations, and 12+ plugin integrations!

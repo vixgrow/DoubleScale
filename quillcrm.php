@@ -4,7 +4,7 @@
  * Plugin Name:       Quill CRM
  * Plugin URI:        https://www.quillcrm.com/
  * Description:       A powerful CRM Builder for WordPress that lets you manage leads, track interactions, and automate customer relationships—all seamlessly integrated within your WordPress dashboard.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            quillcrm.com
  * Author URI:        http://www.quillcrm.com
  * Text Domain:       quillcrm

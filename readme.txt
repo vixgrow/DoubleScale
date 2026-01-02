@@ -4,7 +4,7 @@ Tags: crm, customer management, contact management, pipeline, sales, sms, automa
 Requires at least: 5.8
 Tested up to: 6.9.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,7 +50,7 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 * Contact engagement scoring
 * Personalization with merge tags
 
-**SMS Campaigns**
+**SMS Marketing** (Pro Feature)
 * Send bulk SMS campaigns
 * Individual SMS messaging to contacts
 * SMS automation support
@@ -61,8 +61,7 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 * Cost-effective bulk messaging
 * Two way conversations
 
-**WhatsApp Campaigns** (Coming Soon)
-* WhatsApp message broadcasting
+**WhatsApp Marketing** (Pro Feature)
 * Template message support
 * Rich media messaging
 * Automated WhatsApp workflows
@@ -330,9 +329,9 @@ Yes! Quill CRM includes a powerful visual automation builder with 11+ automation
 
 Yes! Assign WordPress user roles and permissions to control access levels.
 
-= What about WhatsApp campaigns? =
+= What about WhatsApp marketing? =
 
-WhatsApp campaign functionality is coming soon and will allow you to send WhatsApp messages to your contacts directly from Quill CRM.
+Yes! Quill CRM includes WhatsApp marketing features allowing you to send WhatsApp messages to your contacts directly from Quill CRM. or you can automate WhatsApp workflows with our visual automation builder.
 
 = How do I get support? =
 

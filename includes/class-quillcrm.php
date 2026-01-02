@@ -42,6 +42,7 @@ use QuillCRM\Custom_Metabox;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
 use QuillCRM\User_Roles\User_Roles;
+use QuillCRM\User_Roles\Login_Redirect;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\Database\Install;
@@ -258,6 +259,7 @@ final class QuillCRM {
 		GoHighLevel_OAuth::init();
 		Activity_Manager::instance();
 		User_Roles::instance();
+		Login_Redirect::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro
 		Install::init();
 		Site::instance();

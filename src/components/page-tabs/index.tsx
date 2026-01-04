@@ -17,6 +17,7 @@ type TabContent = {
 
 interface PageTabsProps {
 	defaultValue: string;
+	value?: string;
 	className?: string;
 	tabsList: TabListItem[];
 	tabsContent: TabContent[];
@@ -26,6 +27,7 @@ interface PageTabsProps {
 }
 const PageTabs: React.FC<PageTabsProps> = ({
 	defaultValue,
+	value,
 	tabsList,
 	tabsContent,
 	className,
@@ -40,7 +42,8 @@ const PageTabs: React.FC<PageTabsProps> = ({
 
 	const checkScrollButtons = () => {
 		if (!scrollContainerRef.current) return;
-		const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+		const { scrollLeft, scrollWidth, clientWidth } =
+			scrollContainerRef.current;
 		setShowLeftChevron(scrollLeft > 0);
 		setShowRightChevron(scrollLeft < scrollWidth - clientWidth - 1);
 	};
@@ -78,12 +81,14 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	return (
 		<Tabs
 			defaultValue={defaultValue}
+			value={value}
 			className={className}
 			onValueChange={onValueChange}
 		>
 			<div
-				className={`${tabsListWrapperClassName} ${hasManyTabs ? 'relative' : ''
-					}`}
+				className={`${tabsListWrapperClassName} ${
+					hasManyTabs ? 'relative' : ''
+				}`}
 			>
 				{hasManyTabs && showLeftChevron && (
 					<button

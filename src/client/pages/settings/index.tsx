@@ -13,6 +13,11 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
+ * QuillCRM dependencies
+ */
+import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
@@ -31,7 +36,6 @@ import {
 	TotalSMSIcon,
 	ManagerIcon,
 	LicenseIcon,
-	BadConnectionIcon,
 	ProcessingEmailsIcon,
 	LinkTriggersIcon,
 	WhatsAppIcon,
@@ -45,13 +49,6 @@ import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
 import CurrenciesSettings from './currencies';
 import SystemSettings from './system';
 import License from './license';
@@ -59,7 +56,16 @@ import License from './license';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers', 'system', 'managers', 'license', 'smtp', 'whatsapp', 'debugging']);
+const TABS_WITHOUT_SAVE_BUTTON = new Set([
+	'custom_fields',
+	'link_triggers',
+	'system',
+	'managers',
+	'license',
+	'smtp',
+	'whatsapp',
+	'debugging',
+]);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
@@ -70,16 +76,26 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 ]);
 
 const SettingsPage: React.FC = () => {
+	const navigate = useNavigate();
+	const { tab: urlTab } = useParams<{ tab?: string }>();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
-	const [tab, setTab] = useState<string>('business');
 	const [settings, setSettings] = useState<Settings | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const [isLicenseActivated, setIsLicenseActivated] = useState<boolean>(false);
-	const [showDeactivateDialog, setShowDeactivateDialog] = useState<boolean>(false);
+	const [activeTab, setActiveTab] = useState<string>(urlTab || 'business');
+
+	// Sync activeTab with URL param
+	useEffect(() => {
+		if (urlTab) {
+			setActiveTab(urlTab);
+		} else {
+			// If no tab in URL, redirect to default tab
+			navigate(getToLink('settings/business'), { replace: true });
+		}
+	}, [urlTab, navigate]);
 
 	const fetchSettings = async () => {
 		try {
@@ -100,6 +116,11 @@ const SettingsPage: React.FC = () => {
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const handleTabChange = (value: string) => {
+		setActiveTab(value);
+		navigate(getToLink(`settings/${value}`));
 	};
 
 	const updateSettings = async () => {
@@ -175,7 +196,6 @@ const SettingsPage: React.FC = () => {
 		);
 	}, [settings, saveCounter]);
 
-
 	useEffect(() => {
 		fetchSettings();
 	}, []);
@@ -245,7 +265,10 @@ const SettingsPage: React.FC = () => {
 					onChange: (settings: Settings) => void;
 				}>;
 				return (
-					<WhatsAppComponent settings={settings!} onChange={setSettings} />
+					<WhatsAppComponent
+						settings={settings!}
+						onChange={setSettings}
+					/>
 				);
 			case 'double_optin':
 				return (
@@ -391,7 +414,7 @@ const SettingsPage: React.FC = () => {
 	];
 
 	const tabsContent = tabsList.map(({ value }) => {
-		if (tab !== value) {
+		if (activeTab !== value) {
 			return { value, children: null };
 		}
 
@@ -407,24 +430,26 @@ const SettingsPage: React.FC = () => {
 			value,
 			children: (
 				<Card
-					className={`flex shadow-none flex-col mt-4 ${value === 'license'
-						? 'bg-[#F8F8F8]'
-						: TABS_WITHOUT_SAVE_BUTTON.has(value)
-							? 'bg-white'
-							: 'bg-[#F8F8F8]'
-						}`}
+					className={`flex shadow-none flex-col mt-4 ${
+						value === 'license'
+							? 'bg-[#F8F8F8]'
+							: TABS_WITHOUT_SAVE_BUTTON.has(value)
+								? 'bg-white'
+								: 'bg-[#F8F8F8]'
+					}`}
 				>
 					<CardContent
-						className={`flex-1 ${value === 'custom_fields'
-							? 'px-6 py-0 pb-6'
-							: TABS_WITHOUT_SAVE_BUTTON.has(value)
-								? 'px-6 py-6'
-								: 'p-6'
-							}`}
+						className={`flex-1 ${
+							value === 'custom_fields'
+								? 'px-6 py-0 pb-6'
+								: TABS_WITHOUT_SAVE_BUTTON.has(value)
+									? 'px-6 py-6'
+									: 'p-6'
+						}`}
 					>
 						{content}
 					</CardContent>
-					{ !TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
+					{!TABS_WITHOUT_SAVE_BUTTON.has(value) ? (
 						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 							<Button
 								onClick={updateSettings}
@@ -460,8 +485,9 @@ const SettingsPage: React.FC = () => {
 			)}
 
 			<PageTabs
-				defaultValue="business"
-				onValueChange={setTab}
+				defaultValue={activeTab}
+				value={activeTab}
+				onValueChange={handleTabChange}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
 				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"

@@ -621,7 +621,7 @@ registerAdminPage('emails-analytics', {
 // });
 
 registerAdminPage('settings', {
-	path: 'settings',
+	path: 'settings/:tab?',
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
 	icon: <SettingsIcon />,

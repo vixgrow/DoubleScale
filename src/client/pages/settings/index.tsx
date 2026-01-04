@@ -85,14 +85,14 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const [activeTab, setActiveTab] = useState<string>(urlTab || 'business');
+	const [activeTab, setActiveTab] = useState<string>('business');
 
 	// Sync activeTab with URL param
 	useEffect(() => {
-		if (urlTab) {
+		if (urlTab && urlTab !== 'tab?') {
 			setActiveTab(urlTab);
-		} else {
-			// If no tab in URL, redirect to default tab
+		} else if (!urlTab || urlTab === 'tab?') {
+			// If no valid tab in URL, redirect to default tab
 			navigate(getToLink('settings/business'), { replace: true });
 		}
 	}, [urlTab, navigate]);

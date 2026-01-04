@@ -162,7 +162,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 	const handleNavigation = (path: string) => {
 		setSelectedKey(path);
-		navigate(getToLink(path));
+		// Strip optional route params (e.g., ':tab?' from 'settings/:tab?')
+		const cleanPath = path.replace(/\/:[^/]+\?/g, '');
+		navigate(getToLink(cleanPath));
 	};
 
 	const updateScrollIndicators = useCallback(() => {
@@ -316,8 +318,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<>
 			<Sidebar
 				collapsible="icon"
-				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
-					}`}
+				className={`qcrm-navbar${
+					isMounted ? ' qcrm-navbar--mounted' : ''
+				}`}
 			>
 				<div className="qcrm-navbar__surface">
 					<SidebarHeader className="qcrm-navbar__header">

@@ -486,6 +486,45 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'whatsapp_template':
+			// Get WhatsAppTemplateField from Pro plugin via filter
+			// Templates are fetched from Meta API and use template_sid (external ID) as identifier
+			const WhatsAppTemplateFieldComponent = applyFilters(
+				'quillcrm_pro_component',
+				null,
+				'WhatsAppTemplateField'
+			) as React.ComponentType<{
+				value: { template_sid?: string; template_variables?: Record<string, string> };
+				onChange: (value: { template_sid: string; template_variables: Record<string, string> }) => void;
+				options: Record<string, string>;
+				templateData?: Record<string, any>;
+			}> | null;
+
+			if (WhatsAppTemplateFieldComponent) {
+				fieldContent = (
+					<WhatsAppTemplateFieldComponent
+						value={value || {}}
+						onChange={onChange}
+						options={options || {}}
+						templateData={settings?.templateData}
+					/>
+				);
+			} else {
+				// Fallback message if Pro not available
+				fieldContent = (
+					<div style={{ 
+						padding: '12px', 
+						backgroundColor: '#fff3cd', 
+						border: '1px solid #ffc107',
+						borderRadius: '4px',
+						color: '#856404'
+					}}>
+						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
+						{__('WhatsApp Template Field requires QuillCRM Pro.', 'quillcrm')}
+					</div>
+				);
+			}
+			break;
 		case 'button':
 		case 'test_button':
 			fieldContent = (

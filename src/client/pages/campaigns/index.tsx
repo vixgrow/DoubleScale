@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lock } from 'lucide-react';
 import Campaigns from './campaigns';
@@ -6,10 +6,15 @@ import { applyFilters } from '@wordpress/hooks';
 import { ProAutomationModal } from '@/components/pro-automation-modal';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 
-const Campaigns_EmailSequences: React.FC = () => {
-	const [activeTab, setActiveTab] = useState<string>('campaigns');
+const Campaigns_EmailSequences: React.FC<{ path: string }> = ({ path }) => {
+	const [activeTab, setActiveTab] = useState<string>(path);
 	const [showProModal, setShowProModal] = useState<boolean>(false);
 	const navigate = useNavigate();
+
+	// Sync activeTab with path prop
+	useEffect(() => {
+		setActiveTab(path);
+	}, [path]);
 	const handleNavigate = (path: string) => {
 		navigate(getToLink(path));
 	};
@@ -29,6 +34,7 @@ const Campaigns_EmailSequences: React.FC = () => {
 			setShowProModal(true);
 		} else {
 			setActiveTab(value);
+			handleNavigate(value);
 		}
 	};
 
@@ -39,13 +45,13 @@ const Campaigns_EmailSequences: React.FC = () => {
 				<Tabs value={activeTab} onValueChange={handleTabChange}>
 					<TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
 						<TabsTrigger
-							value="campaigns"
+							value={'campaigns'}
 							className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3"
 						>
 							Campaigns
 						</TabsTrigger>
 						<TabsTrigger
-							value="email-sequences"
+							value={'email-sequences'}
 							className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 flex items-center gap-2"
 						>
 							Email Sequences

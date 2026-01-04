@@ -342,7 +342,7 @@ registerAdminPage('custom-fields', {
 
 registerAdminPage('campaigns', {
 	path: 'campaigns',
-	component: () => <Campaigns_EmailSequences />,
+	component: () => <Campaigns_EmailSequences path="campaigns" />,
 	label: __('Campaigns', 'quillcrm'),
 	icon: <CampaignsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -352,6 +352,15 @@ registerAdminPage('campaign', {
 	path: 'campaigns/:id/:tab?/:subtab?',
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('email-sequences', {
+	path: 'email-sequences',
+	component: () => <Campaigns_EmailSequences path="email-sequences" />,
+	label: __('Email Sequences', 'quillcrm'),
+	icon: <EmailSequenceIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 	hidden: true,
 });
 

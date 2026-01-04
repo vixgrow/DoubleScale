@@ -166,7 +166,7 @@ class License {
 		$plugins_dir = trailingslashit( dirname( dirname( QUILLCRM_PLUGIN_FILE ) ) );
 
 		// get plugin data.
-		$plugin_file      = 'QuillCRM-pro/quillcrm-pro.php';
+		$plugin_file      = 'QuillCRM-Pro/quillcrm-pro.php';
 		$full_plugin_file = $plugins_dir . $plugin_file;
 		$plugin_exists    = file_exists( $full_plugin_file );
 		$plugin_data      = $plugin_exists ? get_plugin_data( $full_plugin_file, true, false ) : array();
@@ -177,7 +177,7 @@ class License {
 		$data['is_installed']     = $plugin_exists;
 		$data['is_active']        = is_plugin_active( $plugin_file );
 		$data['version']          = $plugin_data['Version'] ?? null;
-		$data['slug']             = 'QuillCRM-pro';
+		$data['slug']             = 'QuillCRM-Pro';
 
 		$this->plugin_data = $data;
 	}

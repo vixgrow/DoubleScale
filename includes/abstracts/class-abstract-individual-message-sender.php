@@ -134,9 +134,14 @@ abstract class Abstract_Individual_Message_Sender {
 			}
 
 			// STEP 1: Create ACTIVITY first (primary record)
-			$activity = $this->create_activity( $contact, $to, $subject, $body, $deal_id );
+			$activity = $this->create_activity( $contact, $to, $subject, $body );
 
-			// STEP 2: Create TRACKING second (supplementary data, links to activity)
+			// STEP 2: Add deal to activity if it exists
+			if ( $deal_id ) {
+				$this->add_deal_to_activity( $activity, $deal_id );
+			}
+
+			// STEP 3: Create TRACKING second (supplementary data, links to activity)
 			$tracking_entry = $this->create_tracking_entry( $contact, $to, $activity->id );
 
 			// Capture merge tags for individual messages
@@ -195,7 +200,7 @@ abstract class Abstract_Individual_Message_Sender {
 		return Activity_Model::create(
 			array(
 				'contact_id'    => $contact->id,
-				'deal_id'       => $deal_id, // SET if sent from deal modal, NULL if from contact details
+				// 'deal_id'       => $deal_id, // SET if sent from deal modal, NULL if from contact details
 				'activity_type' => $this->get_activity_type(),
 				'data'          => array(
 					'subject' => $subject,
@@ -203,6 +208,19 @@ abstract class Abstract_Individual_Message_Sender {
 					'to'      => $recipient,
 				),
 				'user_id'       => get_current_user_id(),
+			)
+		);
+	}
+
+	protected function add_deal_to_activity( $activity, $deal_id ) {
+		// in activity association table, add the deal_id to the activity
+		\QuillCRM\Models\Activity_Association_Model::create(
+			array(
+				'activity_id' => $activity->id,
+				'entity_type' => \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL,
+				'entity_id'   => $deal_id,
+				'created_at'  => current_time( 'mysql' ),
+				'updated_at'  => current_time( 'mysql' ),
 			)
 		);
 	}

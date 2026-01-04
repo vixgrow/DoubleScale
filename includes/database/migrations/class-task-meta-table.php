@@ -43,10 +43,10 @@ class Task_Meta_Table extends Migration {
 				last_run datetime DEFAULT NULL,
 				PRIMARY KEY  (ID),
 				KEY action_id (action_id),
-				KEY hook (hook),
-				KEY group_slug (group_slug),
+				KEY hook (hook(100)),
+				KEY group_slug (group_slug(100)),
 				KEY last_run (last_run),
-				KEY hook_group (hook, group_slug)';
+				KEY hook_group (hook(100), group_slug(100))';
 
 		return $query;
 	}

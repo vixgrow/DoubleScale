@@ -296,8 +296,8 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						<Button
 							className={`py-2 px-4 rounded-md border hover:bg-white !shadow-none font-sm text-base tracking-[-.5px] ${
 								hasActiveFilters
-									? '!text-[#777] !border-[#777] bg-white'
-									: '!text-[#E13B3B] !border-[#E13B3B] bg-white'
+									? '!text-[#E13B3B] !border-[#E13B3B] bg-white' 
+									: '!text-[#777] !border-[#777] bg-white'
 							}`}
 							onClick={clearFilters}
 							title={__('Clear all filters', 'quillcrm')}

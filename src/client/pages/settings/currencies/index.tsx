@@ -32,6 +32,8 @@ const currencyOptions = [
     { value: 'MXN', label: 'MXN - Mexican Peso' },
     { value: 'SGD', label: 'SGD - Singapore Dollar' },
     { value: 'HKD', label: 'HKD - Hong Kong Dollar' },
+    // Nigerian Naira
+    { value: 'NGN', label: 'NGN - Nigerian Naira' },
     { value: 'NOK', label: 'NOK - Norwegian Krone' },
     { value: 'KRW', label: 'KRW - South Korean Won' },
     { value: 'TRY', label: 'TRY - Turkish Lira' },

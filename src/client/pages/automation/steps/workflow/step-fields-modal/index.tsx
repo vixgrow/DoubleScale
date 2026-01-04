@@ -223,7 +223,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 							channel={channel}
 							onConfigureClick={() => {
 								if (channel === 'whatsapp') {
-									navigate(getToLink('/settings/integrations'));
+									navigate(getToLink('integrations/meta-whatsapp'));
 								} else {
 									setShowTwilioConfig(true);
 								}

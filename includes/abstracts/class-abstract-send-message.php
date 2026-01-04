@@ -366,5 +366,11 @@ abstract class Abstract_Send_Message extends Action {
 	 * @return array Prepared message data (structure varies by channel).
 	 * @throws \Exception If required message data is missing or invalid.
 	 */
-	abstract protected function prepare_message_data( Automation_Step_Model $step, Contact_Model $contact, Communication_Tracking_Model $tracking );
+	 protected function prepare_message_data( Automation_Step_Model $step, Contact_Model $contact, Communication_Tracking_Model $tracking ) {
+		// This method is implemented by child classes to prepare the message data for sending
+		// For WhatsApp, it should extract template_id and template_variables, store them in tracking meta, and return prepared data.
+		// For SMS/Email, it should extract body/subject and return prepared data.
+		// By default, we return an empty array to avoid errors.
+		return array();
+	 }
 }

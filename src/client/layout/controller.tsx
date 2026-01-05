@@ -64,9 +64,8 @@ import {
 	PiplelinesIcon,
 	WordPressIcon,
 } from '@quillcrm/components';
-import EmailSequences from '../pages/email-sequences';
+import { TaskDoneIcon as TasksIcon } from '@quillcrm/components';
 import { User as UserIcon } from 'lucide-react';
-import SequencesMail from '../pages/email-sequences/sequences-mail';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -528,6 +527,30 @@ registerAdminPage('abandoned-carts', {
 	),
 	label: __('Abandoned Carts', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+// Tasks - stub registration that Pro plugin will override via filter
+registerAdminPage('tasks', {
+	path: 'tasks',
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Tasks', 'quillcrm')}
+			description={__(
+				'Manage your CRM tasks, schedule follow-ups, and track activities with QuillCRM Pro.',
+				'quillcrm'
+			)}
+			features={[
+				__('Task Management & Scheduling', 'quillcrm'),
+				__('Contact & Deal Task Association', 'quillcrm'),
+				__('Priority & Status Tracking', 'quillcrm'),
+				__('Task Reminders & Due Dates', 'quillcrm'),
+				__('Assigned User Management', 'quillcrm'),
+			]}
+		/>
+	),
+	label: __('Tasks', 'quillcrm'),
+	icon: <TasksIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
 });
 

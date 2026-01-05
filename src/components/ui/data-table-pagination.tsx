@@ -107,7 +107,7 @@ export default function DataTablePagination<TData>({
 	const visiblePages = getVisiblePages();
 	console.log(table.getFilteredRowModel().rows);
 	return (
-		<div className="flex items-center justify-between px-4 pt-3 pb-8 rounded-b-md border">
+		<div className="flex items-center justify-between px-4 pt-3 ">
 			{/* Left side - Results info */}
 			<div className="flex items-center text-sm text-gray-700 space-x-2">
 				<span className="text-[#3F3F46]">

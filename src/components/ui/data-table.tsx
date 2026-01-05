@@ -89,9 +89,9 @@ export function DataTable<TData>({
 				</div>
 			)}
 
-			<div className="rounded-t-md border w-full">
+			<div className="rounded-t-lg border border-[#DEE1E6] overflow-hidden bg-white w-full">
 				<Table>
-					<TableHeader className="bg-[#FAFAFA]">
+					<TableHeader className="bg-[#F8F8F8] ">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => (
@@ -111,7 +111,7 @@ export function DataTable<TData>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody>
+					<TableBody className="bg-white">
 						{loading ? (
 							<TableSkeleton columns={table.getVisibleLeafColumns().length} />
 						) : table.getRowModel().rows?.length ? (

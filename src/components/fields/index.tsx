@@ -25,6 +25,7 @@ type FieldType = {
 	settings?: {
 		ajax_action?: string;
 		button_text?: string;
+		templateData?: Record<string, any>;
 	};
 	'default-value'?: string;
 	tooltip?: string;
@@ -57,7 +58,17 @@ const Fields: React.FC<FieldsProps> = ({
 		onChange(newValues);
 	};
 
+	/**
+	 * Convert options object to react-select format array
+	 * For most field types: { key: label } → [{ label, value: key }]
+	 * For whatsapp_template: returns raw options object (component handles its own format)
+	 */
 	const optionsArray = (field: FieldType) => {
+		// WhatsApp template field expects raw options object, not react-select format
+		if (field.type === 'whatsapp_template') {
+			return field.options || {};
+		}
+
 		const options = map(field.options, (label, value) => {
 			return { label, value };
 		});

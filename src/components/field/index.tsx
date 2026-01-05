@@ -51,7 +51,8 @@ import { TooltipContent } from '../ui/tooltip';
 interface FieldProps {
 	label?: string;
 	type: string;
-	options?: ReactSelectOptions;
+	// Options can be either react-select format array or raw object (for whatsapp_template)
+	options?: ReactSelectOptions | Record<string, string>;
 	onChange: (value: any) => void;
 	value: any;
 	status?: 'error' | 'warning' | 'success';
@@ -69,6 +70,7 @@ interface FieldProps {
 	settings?: {
 		ajax_action?: string;
 		button_text?: string;
+		templateData?: Record<string, any>;
 	};
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
@@ -501,11 +503,17 @@ const Field: React.FC<FieldProps> = ({
 			}> | null;
 
 			if (WhatsAppTemplateFieldComponent) {
+				// Options should be a Record<string, string> for whatsapp_template
+				// (Fields component passes raw options object for this type)
+				const templateOptions = (options && !Array.isArray(options) 
+					? options 
+					: {}) as Record<string, string>;
+				
 				fieldContent = (
 					<WhatsAppTemplateFieldComponent
 						value={value || {}}
 						onChange={onChange}
-						options={options || {}}
+						options={templateOptions}
 						templateData={settings?.templateData}
 					/>
 				);

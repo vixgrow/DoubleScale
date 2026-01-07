@@ -429,7 +429,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 									</Button>
 								</PopoverAnchor>
 								<PopoverContent
-									className="w-[17rem] p-0"
+									className="w-80 p-0"
 									align="start"
 									onInteractOutside={(e) => {
 										// Prevent closing when merge tags modal is visible

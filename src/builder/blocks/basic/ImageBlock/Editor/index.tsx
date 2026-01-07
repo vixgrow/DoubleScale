@@ -50,7 +50,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 			<BaseBlockEditor props={props} onChange={onChange}>
 				{(props, onChange) => (
 					<>
-						{/* Image Upload Section */}
+						{/* Image Upload Section with URL Support */}
 						<MediaControls.ImageUploadControl
 							label={__('Image', 'quillcrm')}
 							description={__(
@@ -62,6 +62,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							onChange={({ src, alt }) => onChange({ src, alt })}
 							uploadId="image"
 							placeholder="Describe the image"
+							enableUrl={true}
 						/>
 
 						{/* Alt Text */}
@@ -73,7 +74,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 
 						{/* Link Input */}
 						<MediaControls.LinkInput
-							label={__('Link', 'quillcrm')}
+							label={__('Link when image is clicked', 'quillcrm')}
 							value={props.link}
 							onChange={(link) => onChange({ link })}
 							placeholder="https://example.com"
@@ -126,10 +127,10 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 						<LayoutControls.AlignmentControl
 							value={
 								props.align as
-									| 'left'
-									| 'center'
-									| 'right'
-									| 'full'
+								| 'left'
+								| 'center'
+								| 'right'
+								| 'full'
 							}
 							onChange={(align) => onChange({ align })}
 						/>

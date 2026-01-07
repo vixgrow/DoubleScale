@@ -217,3 +217,4 @@ export { default as LicenseStartDateIcon } from './license-start-date';
 export { default as LicenseStatusIcon } from './license-status';
 export { default as LicenseIcon } from './license';
 export { default as LinkTriggersIcon } from './link-triggers';
+export { default as MerageTagsIcon } from './merage-tags';

@@ -41,8 +41,6 @@ use QuillCRM\Managers\Merge_Tags_Manager;
 class REST_Contact_Controller extends REST_Controller {
 
 
-
-
 	/**
 	 * REST Base
 	 *
@@ -67,27 +65,27 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
-						'keyword'       => array(
+						'keyword'            => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'per_page'      => array(
+						'per_page'           => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'page'          => array(
+						'page'               => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'filters'       => array(
+						'filters'            => array(
 							'description' => __( 'Filters to apply.', 'quillcrm' ),
 							'type'        => 'array',
 						),
-						'subscribed'    => array(
+						'subscribed'         => array(
 							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
 							'type'        => 'boolean',
 						),
-						'campaign_type' => array(
+						'campaign_type'      => array(
 							'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
 							'type'        => 'string',
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
@@ -469,6 +467,25 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get lead score
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/lead-score',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_lead_score' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -674,6 +691,54 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_lms_courses_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get lead score
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_lead_score( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			// Get the lead score data
+			$lead_score_data = \QuillCRM\Managers\Lead_Scoring_Manager::get_lead_score( $contact );
+
+			if ( ! $lead_score_data ) {
+				return new WP_REST_Response(
+					array(
+						'points' => 0,
+						'level'  => null,
+					),
+					200
+				);
+			}
+
+			// Format the response
+			$response = array(
+				'points' => $lead_score_data['points'],
+				'level'  => $lead_score_data['level'] ? array(
+					'id'     => $lead_score_data['level']->id,
+					'name'   => $lead_score_data['level']->name,
+					'slug'   => $lead_score_data['level']->slug,
+					'points' => $lead_score_data['level']->points,
+				) : null,
+			);
+
+			return new WP_REST_Response( $response, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
 	}
 
 	/**
@@ -1013,17 +1078,17 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page      = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page          = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$keywords      = $request->get_param( 'keywords' ) ?? '';
-			$filters       = $request->get_param( 'filters' );
-			$subscribed          = $request->get_param( 'subscribed' ) ?? false;
-			$campaign_type       = $request->get_param( 'campaign_type' ) ?? null;
-			$has_whatsapp_phone  = $request->get_param( 'has_whatsapp_phone' ) ?? null;
-			$from                = $request->get_param( 'from' ) ?? null;
-			$to                  = $request->get_param( 'to' ) ?? null;
-			$query         = Contact_Model::query();
-			$total_count   = $query->count();
+			$per_page           = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page               = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keywords           = $request->get_param( 'keywords' ) ?? '';
+			$filters            = $request->get_param( 'filters' );
+			$subscribed         = $request->get_param( 'subscribed' ) ?? false;
+			$campaign_type      = $request->get_param( 'campaign_type' ) ?? null;
+			$has_whatsapp_phone = $request->get_param( 'has_whatsapp_phone' ) ?? null;
+			$from               = $request->get_param( 'from' ) ?? null;
+			$to                 = $request->get_param( 'to' ) ?? null;
+			$query              = Contact_Model::query();
+			$total_count        = $query->count();
 
 			// Start with base query and load relationships
 			// Load custom_fields only if Pro plugin is active
@@ -1109,7 +1174,13 @@ class REST_Contact_Controller extends REST_Controller {
 			$contacts       = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			$filtered_total = $contacts->total();
 
-			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count, 'filtered_total' => $filtered_total ), 200 );
+			return new WP_REST_Response(
+				$contacts->toArray() + array(
+					'total_count'    => $total_count,
+					'filtered_total' => $filtered_total,
+				),
+				200
+			);
 		} catch ( Exception $e ) {
 			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

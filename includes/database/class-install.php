@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Install
  * This class is responsible for handling the database installation
@@ -33,11 +34,14 @@ use QuillCRM\Database\Migrations\Logs_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Activity_Associations_Table;
 use QuillCRM\User_Roles\User_Roles;
+use QuillCRM\Database\Migrations\Lead_Scoring_Rules_Table;
+use QuillCRM\Database\Migrations\Lead_Scoring_Rules_Levels_Table;
 
 /**
  * Install class
  */
 class Install {
+
 
 	/**
 	 * Init
@@ -45,7 +49,7 @@ class Install {
 	 * @since 1.0.0
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		 add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 	}
 
 	/**
@@ -138,12 +142,13 @@ class Install {
 				'activity_comments'            => Activity_Comments_Table::class,
 				'communication_tracking'       => Communication_Tracking_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
-				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
 				'logs'                         => Logs_Table::class,
 				'communication_tracking_meta'  => Communication_Tracking_Meta_Table::class,
 				'forms'                        => Forms_Table::class,
 				'activity_associations'        => Activity_Associations_Table::class,
+				'lead_scoring_rules'           => Lead_Scoring_Rules_Table::class,
+				'lead_scoring_rules_levels'    => Lead_Scoring_Rules_Levels_Table::class,
 			)
 		);
 
@@ -179,7 +184,7 @@ class Install {
 	 * @since 1.0.0
 	 */
 	private static function update_quillcrm_version() {
-		update_option( 'quillcrm_version', QUILLCRM_VERSION );
+		 update_option( 'quillcrm_version', QUILLCRM_VERSION );
 	}
 
 	/**

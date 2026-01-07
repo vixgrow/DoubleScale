@@ -30,10 +30,6 @@ use QuillCRM\Utils;
  */
 class Contact_Model extends Model {
 
-
-
-
-
 	/**
 	 * Table name
 	 *
@@ -126,11 +122,11 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required'        => 'Contact email field is required.',
-		'email.email'           => 'Invalid email address.',
-		'phone.regex'           => 'Invalid phone number.',
-		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
-		'zip.numeric'           => 'Invalid zip code.',
+		'email.required'       => 'Contact email field is required.',
+		'email.email'          => 'Invalid email address.',
+		'phone.regex'          => 'Invalid phone number.',
+		'whatsapp_phone.regex' => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'zip.numeric'          => 'Invalid zip code.',
 	);
 
 	/**
@@ -302,6 +298,17 @@ class Contact_Model extends Model {
 	 */
 	public function processes() {
 		return $this->hasMany( Automation_Contact_Processes_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get the contact meta
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function meta() {
+		return $this->hasMany( Contact_Meta_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -482,12 +489,12 @@ class Contact_Model extends Model {
 			2 => 'sms',
 			3 => 'whatsapp',
 		);
-		
+
 		if ( ! isset( $channel_map[ $mode ] ) ) {
 			return false;
 		}
-		
-		$channel = $channel_map[ $mode ];
+
+		$channel      = $channel_map[ $mode ];
 		$status_field = $channel . '_status';
 
 		// Check if already unsubscribed
@@ -522,7 +529,6 @@ class Contact_Model extends Model {
 				);
 			}
 		}
-
 
 		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
@@ -831,7 +837,7 @@ class Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		// Use global flag to prevent multiple event registrations
+		 // Use global flag to prevent multiple event registrations
 		global $quillcrm_contact_events_registered;
 
 		parent::boot();

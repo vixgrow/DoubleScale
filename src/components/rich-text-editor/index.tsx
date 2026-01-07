@@ -34,7 +34,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
 import { LinkDialog, LinkData } from './LinkDialog';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@quillcrm/components';
 import MergeTagsSelector from '@/components/merge-tags';
 
 interface RichTextEditorProps {
@@ -860,7 +860,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					onMouseDown={(e) => e.preventDefault()}
 					title={__('Insert Merge Tags', 'quillcrm')}
 				>
-					<MergeTagsIcon width={16} height={16} />
+					<MerageTagsIcon />
 				</Button>
 			</div>
 

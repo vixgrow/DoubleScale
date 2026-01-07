@@ -6,7 +6,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * internal dependencies
  */
-import { MergeTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@quillcrm/components';
 import { Input } from '@/components/ui/input';
 
 export interface InputWithMergeTagsProps {
@@ -48,12 +48,12 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
         <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-[#333333]">
                 <label className="text-sm">{label}</label>
-                <div
+                <span
                     className="cursor-pointer hover:opacity-80"
                     onClick={handleMergeTagClick}
                 >
-                    <MergeTagsIcon />
-                </div>
+                    <MerageTagsIcon />
+                </span>
             </div>
             <Input
                 type={type}

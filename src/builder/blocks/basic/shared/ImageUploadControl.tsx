@@ -377,6 +377,67 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 		openMediaLibrary();
 	};
 
+	// Render popover content (reusable)
+	const renderPopoverContent = () => (
+		<PopoverContent
+			className="w-80 p-0"
+			align="start"
+			onInteractOutside={(e) => {
+				// Prevent closing when merge tags modal is visible
+				if (mergeTagsVisible) {
+					e.preventDefault();
+				}
+			}}
+		>
+			{!mode ? (
+				<div className="p-2 space-y-2">
+					<Button
+						variant="ghost"
+						className="w-full justify-start px-2"
+						onClick={handleUploadClick}
+					>
+						{__('Upload from Media Library', 'quillcrm')}
+					</Button>
+					<Button
+						variant="ghost"
+						className="w-full justify-start px-2"
+						onClick={handleUrlClick}
+					>
+						{__('Insert URL', 'quillcrm')}
+					</Button>
+				</div>
+			) : mode === 'url' ? (
+				<div className="p-2 space-y-4">
+					<LinkInput
+						label={__('Image URL', 'quillcrm')}
+						value={urlValue}
+						onChange={setUrlValue}
+						placeholder="https://example.com/image.jpg"
+					/>
+					<div className="flex gap-2 justify-end">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								setMode(null);
+								setUrlValue(value || '');
+							}}
+						>
+							{__('Cancel', 'quillcrm')}
+						</Button>
+						<Button
+							size="sm"
+							onClick={handleUrlSubmit}
+							disabled={!urlValue || urlValue.trim() === ''}
+						>
+							{__('Insert', 'quillcrm')}
+						</Button>
+					</div>
+				</div>
+			) : null}
+		</PopoverContent>
+	);
+
 	return (
 		<div>
 			<label className="text-[#333333] mb-2 text-base">{label}</label>
@@ -428,63 +489,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 										{__('Replace', 'quillcrm')}
 									</Button>
 								</PopoverAnchor>
-								<PopoverContent
-									className="w-80 p-0"
-									align="start"
-									onInteractOutside={(e) => {
-										// Prevent closing when merge tags modal is visible
-										if (mergeTagsVisible) {
-											e.preventDefault();
-										}
-									}}
-								>
-									{!mode ? (
-										<div className="p-2 space-y-2">
-											<Button
-												variant="ghost"
-												className="w-full justify-start px-2"
-												onClick={handleUploadClick}
-											>
-												{__('Upload from Media Library', 'quillcrm')}
-											</Button>
-											<Button
-												variant="ghost"
-												className="w-full justify-start px-2"
-												onClick={handleUrlClick}
-											>
-												{__('Insert URL', 'quillcrm')}
-											</Button>
-										</div>
-									) : mode === 'url' ? (
-										<div className="p-2 space-y-4">
-											<LinkInput
-												label={__('Image URL', 'quillcrm')}
-												value={urlValue}
-												onChange={setUrlValue}
-												placeholder="https://example.com/image.jpg"
-											/>
-											<div className="flex gap-2 justify-end">
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() => {
-														setMode(null);
-														setUrlValue(value);
-													}}
-												>
-													{__('Cancel', 'quillcrm')}
-												</Button>
-												<Button
-													size="sm"
-													onClick={handleUrlSubmit}
-													disabled={!urlValue || urlValue.trim() === ''}
-												>
-													{__('Insert', 'quillcrm')}
-												</Button>
-											</div>
-										</div>
-									) : null}
-								</PopoverContent>
+								{renderPopoverContent()}
 							</Popover>
 						) : (
 							<Button
@@ -548,63 +553,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 								</div>
 							</button>
 						</PopoverAnchor>
-						<PopoverContent
-							className="w-[17rem] p-0"
-							align="start"
-							onInteractOutside={(e) => {
-								// Prevent closing when merge tags modal is visible
-								if (mergeTagsVisible) {
-									e.preventDefault();
-								}
-							}}
-						>
-							{!mode ? (
-								<div className="p-2 space-y-2">
-									<Button
-										variant="ghost"
-										className="w-full justify-start px-2"
-										onClick={handleUploadClick}
-									>
-										{__('Upload from Media Library', 'quillcrm')}
-									</Button>
-									<Button
-										variant="ghost"
-										className="w-full justify-start px-2"
-										onClick={handleUrlClick}
-									>
-										{__('Insert URL', 'quillcrm')}
-									</Button>
-								</div>
-							) : mode === 'url' ? (
-								<div className="p-2 space-y-4">
-									<LinkInput
-										label={__('Image URL', 'quillcrm')}
-										value={urlValue}
-										onChange={setUrlValue}
-										placeholder="https://example.com/image.jpg"
-									/>
-									<div className="flex gap-2 justify-end">
-										<Button
-											variant="outline"
-											size="sm"
-											onClick={() => {
-												setMode(null);
-												setUrlValue('');
-											}}
-										>
-											{__('Cancel', 'quillcrm')}
-										</Button>
-										<Button
-											size="sm"
-											onClick={handleUrlSubmit}
-											disabled={!urlValue || urlValue.trim() === ''}
-										>
-											{__('Insert', 'quillcrm')}
-										</Button>
-									</div>
-								</div>
-							) : null}
-						</PopoverContent>
+						{renderPopoverContent()}
 					</Popover>
 				</div>
 			) : (

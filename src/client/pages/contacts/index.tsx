@@ -21,8 +21,10 @@ import {
 import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
+import LeadScoring, { LeadScoringRef } from './lead-scoring';
 import AllContacts, { AllContactsRef } from './all-contacts';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { PlusIcon as LeadScoringIcon } from '@quillcrm/components/icons';
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
@@ -31,11 +33,12 @@ const ContactsList: React.FC = () => {
 	const listsRef = useRef<ListsRef>(null);
 	const tagsRef = useRef<TagsRef>(null);
 	const allContactsRef = useRef<AllContactsRef>(null);
-
+	const leadScoringRef = useRef<LeadScoringRef>(null);
 	const tabTitles = {
 		all: __('Contacts List', 'quillcrm'),
 		lists: __('Lists', 'quillcrm'),
 		tags: __('Tags', 'quillcrm'),
+		lead_scoring: __('Lead Scoring', 'quillcrm'),
 	};
 
 	const headerActions =
@@ -86,7 +89,17 @@ const ContactsList: React.FC = () => {
 								icon: <PlusIcon />,
 							},
 						]
-					: [];
+					: activeTab == 'lead_scoring' && isCrmManager
+						? [
+								{
+									label: __('Add', 'quillcrm'),
+									onClick: () => {
+										leadScoringRef.current?.openCreateModal();
+									},
+									icon: <PlusIcon />,
+								},
+							]
+						: [];
 
 	return (
 		<div className="qcrm-contacts-list w-full">
@@ -117,6 +130,16 @@ const ContactsList: React.FC = () => {
 									value: 'tags',
 									icon: <TagsIcon width={20} height={20} />,
 								},
+								{
+									label: __('Lead Scoring', 'quillcrm'),
+									value: 'lead_scoring',
+									icon: (
+										<LeadScoringIcon
+											width={20}
+											height={20}
+										/>
+									),
+								},
 							]
 						: []),
 				]}
@@ -134,6 +157,15 @@ const ContactsList: React.FC = () => {
 					{
 						value: 'tags',
 						children: <Tags ref={tagsRef} activeTab="tags" />,
+					},
+					{
+						value: 'lead_scoring',
+						children: (
+							<LeadScoring
+								ref={leadScoringRef}
+								activeTab="lead_scoring"
+							/>
+						),
 					},
 				]}
 			/>

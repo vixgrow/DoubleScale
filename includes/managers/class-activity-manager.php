@@ -180,6 +180,7 @@ final class Activity_Manager {
 				'activity_type' => 'email_sent',
 				'data'          => array(
 					'subject'       => sanitize_text_field( $data['subject'] ?? '' ),
+					'body'          => wp_kses_post( $data['body'] ?? '' ),
 					'sent_at'       => $data['sent_at'] ?? current_time( 'mysql' ),
 					'contact_email' => sanitize_email( $data['contact_email'] ?? '' ),
 					'contact_name'  => sanitize_text_field( $data['contact_name'] ?? '' ),
@@ -487,6 +488,7 @@ final class Activity_Manager {
 				if ( isset( $data['email_data'] ) && is_array( $data['email_data'] ) ) {
 					$activity->data = array(
 						'subject'       => sanitize_text_field( $data['email_data']['subject'] ?? $activity->data['subject'] ?? '' ),
+						'body'          => wp_kses_post( $data['email_data']['body'] ?? $activity->data['body'] ?? '' ),
 						'sent_at'       => $data['email_data']['sent_at'] ?? $activity->data['sent_at'] ?? current_time( 'mysql' ),
 						'contact_email' => $activity->data['contact_email'] ?? '',
 						'contact_name'  => $activity->data['contact_name'] ?? '',

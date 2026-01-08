@@ -59,7 +59,7 @@ class Lead_Scoring_Manager {
 			$automation_contact->contact_id = $contact->id;
 
 			// Check if the contact matches the given filters using the condition processor
-			$processor = new Process_Conditions( $automation_contact, $filters );
+			$processor = new Process_Conditions( $automation_contact, $filters['conditions'] );
 			$matches   = $processor->Check();
 
 			// Contact matches the given filters

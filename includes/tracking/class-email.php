@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Email Tracking
  * This class is responsible for handling the Email Tracking
@@ -48,7 +49,7 @@ class Email {
 	 * Email Tracking
 	 */
 	public function __construct() {
-		add_action( 'quillcrm_loaded', array( $this, 'init' ) );
+		 add_action( 'quillcrm_loaded', array( $this, 'init' ) );
 	}
 
 	/**
@@ -69,7 +70,7 @@ class Email {
 				return;
 			}
 
-			$hash_key = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
+			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
 			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
 				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
@@ -85,15 +86,16 @@ class Email {
 					'opened_at' => current_time( 'mysql' ),
 				)
 			);
+			 do_action( 'quillcrm_email_opened', $tracking_entry->contact );
 
-			// Send the pixel
-			header( 'Content-Type: image/gif' );
-			header( 'Content-Length: 43' );
-			header( 'Cache-Control: private, no-cache, no-cache=Set-Cookie, proxy-revalidate' );
-			header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
-			header( 'Last-Modified: Wed, 11 Jan 1984 05:00:00 GMT' );
-			header( 'Pragma: no-cache' );
-			die( base64_decode( 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=' ) );
+			 // Send the pixel
+			 header( 'Content-Type: image/gif' );
+			 header( 'Content-Length: 43' );
+			 header( 'Cache-Control: private, no-cache, no-cache=Set-Cookie, proxy-revalidate' );
+			 header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
+			 header( 'Last-Modified: Wed, 11 Jan 1984 05:00:00 GMT' );
+			 header( 'Pragma: no-cache' );
+			 die( base64_decode( 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=' ) );
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				__( 'Email Opened Tracking Error', 'quillcrm' ),
@@ -124,7 +126,7 @@ class Email {
 				return;
 			}
 
-			$hash_key = sanitize_text_field( $_GET['hash_key'] );
+			$hash_key       = sanitize_text_field( $_GET['hash_key'] );
 			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
 				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
@@ -141,7 +143,7 @@ class Email {
 				)
 			);
 
-			// If email was clicked but not opened, mark as opened too
+			  // If email was clicked but not opened, mark as opened too
 			if ( ! $tracking_entry->opened ) {
 				$tracking_entry->update(
 					array(
@@ -151,9 +153,11 @@ class Email {
 				);
 			}
 
-		$original_url = urldecode( $_GET['original'] );
-		wp_redirect( $original_url );
-			exit;
+			  do_action( 'quillcrm_email_clicked', $tracking_entry->contact );
+
+			  $original_url = urldecode( $_GET['original'] );
+			  wp_redirect( $original_url );
+			  exit;
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				__( 'Email Clicked Tracking Error', 'quillcrm' ),

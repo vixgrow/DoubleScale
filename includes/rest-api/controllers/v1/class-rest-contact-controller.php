@@ -518,28 +518,28 @@ class REST_Contact_Controller extends REST_Controller {
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
-				 'whatsapp_phone'  => array(
-					 'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quillcrm' ),
-					 'type'         => 'string',
-					 'args_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-						 'validate_callback' => function( $value, $request, $param ) {
-							 // Allow empty values
-							 if ( empty( $value ) ) {
-								 return true;
-							 }
-							 // Validate E.164 format if value is provided
-							 if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
-								 return new WP_Error(
-									 'rest_invalid_param',
-									 sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quillcrm' ), $param ),
-									 array( 'status' => 400 )
-								 );
-							 }
-							 return true;
-						 },
-					 ),
-				 ),
+				'whatsapp_phone'  => array(
+					'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => function( $value, $request, $param ) {
+							// Allow empty values (null, empty string, or false)
+							if ( is_null( $value ) || $value === '' || $value === false ) {
+								return true;
+							}
+							// Validate E.164 format if value is provided
+							if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
+								return new WP_Error(
+									'rest_invalid_param',
+									sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quillcrm' ), $param ),
+									array( 'status' => 400 )
+								);
+							}
+							return true;
+						},
+					),
+				),
 				 'address_1'       => array(
 					 'description'  => __( 'Address line 1 of the contact.', 'quillcrm' ),
 					 'type'         => 'string',

@@ -133,48 +133,29 @@ abstract class Abstract_Individual_Message_Sender {
 				}
 			}
 
-			// STEP 1: Create ACTIVITY first (primary record)
-			$activity = $this->create_activity( $contact, $to, $subject, $body );
+			// STEP 1: Process merge tags FIRST (before creating activity)
+			// Individual messages store PROCESSED content in activity (unlike campaigns which store templates)
+			// This is because activity is a 1:1 record for this specific contact - no need for tracking_meta
+			$processed_subject = $subject ? Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact ) : null;
+			$processed_body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
 
-			// STEP 2: Add deal to activity if it exists
+			// STEP 2: Create ACTIVITY with processed content (display-ready, NO tracking elements)
+			$activity = $this->create_activity( $contact, $to, $processed_subject, $processed_body );
+
+			// STEP 3: Add deal to activity if it exists
 			if ( $deal_id ) {
 				$this->add_deal_to_activity( $activity, $deal_id );
 			}
 
-			// STEP 3: Create TRACKING second (supplementary data, links to activity)
+			// STEP 4: Create TRACKING record (supplementary data, links to activity)
 			$tracking_entry = $this->create_tracking_entry( $contact, $to, $activity->id );
 
-			// Capture merge tags for individual messages
-			$combined_content = ( $subject ?? '' ) . ' ' . $body;
-			$merge_tag_keys   = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
-			if ( ! empty( $merge_tag_keys ) ) {
-				\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
-					$tracking_entry->id,
-					$merge_tag_keys,
-					$contact
-				);
-			}
+			// STEP 5: Add tracking elements for SENDING ONLY (pixel, click tracking)
+			// These are NEVER stored in activity - only used for the sent message
+			$sendable_body = $this->add_tracking_elements( $processed_body, $contact, $tracking_entry );
 
-			// Process message (merge tags + click tracking)
-			$processed_subject = $subject ? Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact ) : null;
-			$processed_body    = $this->process_message( $body, $contact, $tracking_entry );
-
-			// Update activity with processed content
-			$activity->update(
-				array(
-					'data' => array_merge(
-						$activity->data ?? array(),
-						array(
-							'subject' => $processed_subject,
-							'body'    => $processed_body,
-							'to'      => $to,
-						)
-					),
-				)
-			);
-
-			// Send message via provider
-			$result = $this->send_via_provider( $provider, $to, $processed_body, $processed_subject, $contact );
+			// Send message via provider (with tracking elements)
+			$result = $this->send_via_provider( $provider, $to, $sendable_body, $processed_subject, $contact );
 
 			// Handle result
 			return $this->handle_result( $result, $tracking_entry, $activity, $provider, $contact, $to );
@@ -256,26 +237,26 @@ abstract class Abstract_Individual_Message_Sender {
 	}
 
 	/**
-	 * Process message (merge tags + click tracking)
+	 * Add tracking elements to message for sending
+	 *
+	 * Adds click tracking URLs (and pixel for email via override).
+	 * These elements are for sending ONLY - never stored in activity.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string         $message        Raw message content
-	 * @param Contact_Model  $contact        Contact for merge tags
-	 * @param Communication_Tracking_Model $tracking_entry Tracking record
-	 * @return string Processed message
+	 * @param string                        $message        Processed message (merge tags already resolved)
+	 * @param Contact_Model                 $contact        Contact model
+	 * @param Communication_Tracking_Model  $tracking_entry Tracking record
+	 * @return string Message with tracking elements added
 	 */
-	protected function process_message( $message, $contact, $tracking_entry ) {
-		// Process merge tags
-		$processed = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
-
+	protected function add_tracking_elements( $message, $contact, $tracking_entry ) {
 		// Add click tracking
 		$tracking_class = $this->get_tracking_class();
 		if ( class_exists( $tracking_class ) && method_exists( $tracking_class, 'add_click_tracking' ) ) {
-			$processed = $tracking_class::add_click_tracking( $processed, $tracking_entry->hash_key );
+			$message = $tracking_class::add_click_tracking( $message, $tracking_entry->hash_key );
 		}
 
-		return $processed;
+		return $message;
 	}
 
 	/**

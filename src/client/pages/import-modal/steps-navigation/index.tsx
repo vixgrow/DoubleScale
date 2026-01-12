@@ -36,17 +36,6 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 
 	const { validateCredentials, getSourceData } = useImportActions();
 
-	// Debug logging for step navigation
-	console.log('StepNavigation Debug:', {
-		currentStep,
-		source,
-		sourceData: !!sourceData,
-		canValidate: validateCredentials(),
-		isFetching,
-		isUploading,
-		importing,
-	});
-
 	const canProceedToStep2 = () => {
 		if (!importer) return false;
 		if (source !== 'csv') return false;
@@ -78,9 +67,6 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 							/* Credentials validation step */
 							<Button
 								onClick={() => {
-									console.log(
-										'Connect & Fetch Data button clicked'
-									);
 									getSourceData();
 								}}
 								disabled={
@@ -107,7 +93,6 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 								<Button
 									variant="outline"
 									onClick={() => {
-										console.log('Back button clicked - resetting sourceData');
 										// Reset sourceData to go back to credentials step
 										dispatch({ type: 'SET_SOURCE_DATA', payload: null });
 										// Reset currentStep to 1 to ensure UI consistency

@@ -53,24 +53,6 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		}
 	};
 
-	// Debug logging for step flow
-	console.log('Import Modal Debug:', {
-		source,
-		importer: !!importer,
-		importerIsIntegration: importer?.is_integration,
-		importerFields: importer?.fields ? Object.keys(importer.fields) : [],
-		hasCredentials:
-			importer?.credentials &&
-			Object.keys(importer.credentials || {}).length > 0,
-		sourceData: sourceData,
-		sourceDataExists: !!sourceData,
-		sourceDataIsEmpty: sourceData && Object.keys(sourceData).length === 0,
-		currentStep,
-		isFetching,
-		importing,
-		userCredentials: state.credentials,
-	});
-
 	// Show progress if importing OR showing completion
 	if (importing || showingCompletion) {
 		return <ImportProgress />;

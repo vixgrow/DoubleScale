@@ -114,22 +114,6 @@ const Review: React.FC = () => {
 		? (template as WhatsAppTemplate).body || ''
 		: '';
 
-	// Debug: Log template structure to verify data
-	useEffect(() => {
-		if (template) {
-			console.log('Review - Template data:', {
-				template,
-				campaignType: campaign?.type,
-				subject: emailSubject,
-				fromName,
-				fromEmail,
-				replyTo,
-				previewText,
-				whatsAppTemplateName,
-				whatsAppTemplateBody,
-			});
-		}
-	}, [template]);
 
 	// Fetch list and tag names from filters
 	useEffect(() => {

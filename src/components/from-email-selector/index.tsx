@@ -52,7 +52,6 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	let quillsmtpInfo: QuillSMTPInfo | undefined;
 	try {
 		quillsmtpInfo = config.getQuillSMTPInfo() as QuillSMTPInfo | undefined;
-		console.log('[QuillCRM] QuillSMTP Info:', quillsmtpInfo);
 	} catch (e) {
 		console.warn('[QuillCRM] Failed to get QuillSMTP info:', e);
 		quillsmtpInfo = undefined;

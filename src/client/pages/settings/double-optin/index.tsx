@@ -36,7 +36,6 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
             },
         });
     };
-    console.log(settings);
 
     return (
         <div className="double-optin-settings qcrm-fields">

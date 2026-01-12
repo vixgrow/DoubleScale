@@ -32,7 +32,6 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const navigate = handleNavigate ? handleNavigate : useNavigate();
-	console.log('handleNavigate', handleNavigate);
 	const { createNotice } = useDispatch('quillcrm/core');
 	const campaign = useSelect(
 		(select: any) => select('quillcrm/campaign').getCampaign(),

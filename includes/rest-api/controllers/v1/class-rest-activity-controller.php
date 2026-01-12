@@ -305,6 +305,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'entity_id'     => $request->get_param( 'entity_id' ),
 			'entity_type'   => $request->get_param( 'entity_type' ),
 			'subject'       => $email_data['subject'] ?? '',
+			'body'          => $email_data['body'] ?? '',
 			'sent_at'       => $email_data['sent_at'] ?? current_time( 'mysql' ),
 			'contact_email' => $email_data['contact_email'] ?? '',
 			'contact_name'  => $email_data['contact_name'] ?? '',

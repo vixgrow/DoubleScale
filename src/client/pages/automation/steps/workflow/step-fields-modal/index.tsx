@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { BarChart3, AlertTriangle } from 'lucide-react';
+import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -48,6 +48,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
+	const [showMergeTagNotice, setShowMergeTagNotice] = useState(false);
 	const navigate = useNavigate();
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
@@ -112,6 +113,13 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const handleMergeTagsClick = () => {
 		setMergeTagCallback((tagValue: string) => {
 			navigator.clipboard.writeText(tagValue);
+			// Show local notice banner
+			setShowMergeTagNotice(true);
+			// Auto-hide after 3 seconds
+			setTimeout(() => {
+				setShowMergeTagNotice(false);
+			}, 5000);
+			// Also create global notice
 			createNotice({
 				type: 'success',
 				message: __(
@@ -233,15 +241,28 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				)}
 
 			{!shouldHideMergeTags && (
-				<Button
-					onClick={handleMergeTagsClick}
-					disabled={isSaving || isDeleting}
-					variant="secondaryDeepBlue"
-					className="w-full mb-4"
-					size="lg"
-				>
-					{__('Merge Tags', 'quillcrm')}
-				</Button>
+				<>
+					<Button
+						onClick={handleMergeTagsClick}
+						disabled={isSaving || isDeleting}
+						variant="secondaryDeepBlue"
+						className="w-full mb-4"
+						size="lg"
+					>
+						{__('Merge Tags', 'quillcrm')}
+					</Button>
+					{showMergeTagNotice && (
+						<Alert className="mb-4 border-green-500 bg-green-50">
+							<CheckCircle className="h-4 w-4 text-green-600" />
+							<AlertDescription className="text-sm text-green-800">
+								{__(
+									'Merge tag copied to clipboard. You can now paste it in any field.',
+									'quillcrm'
+								)}
+							</AlertDescription>
+						</Alert>
+					)}
+				</>
 			)}
 
 			<div className="mb-4">

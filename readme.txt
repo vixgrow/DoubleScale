@@ -1,4 +1,4 @@
-=== Quill CRM - Complete Customer Relationship Management for WordPress ===
+=== Quill CRM - Complete Customer Relationship Management for WordPress, Pipelines, Automations, Email, SMS, and WhatsApp Marketing ===
 Contributors: quillforms, mdmag
 Tags: crm, customer management, contact management, pipeline, sales, sms, automation, whatsapp
 Requires at least: 5.8
@@ -369,6 +369,11 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+* Added tasks module to the CRM
+* Fixed some minor bugs
+
 = 1.1.0 =
 * Added WhatsApp automation feature as a pro feature
 * Added WhatsApp 2 way messaging feature as a pro feature

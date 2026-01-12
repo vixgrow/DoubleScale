@@ -62,7 +62,7 @@ export const CreateContactModal: React.FC = () => {
 
 	return (
 		<Dialog open={createContactVisible} onOpenChange={handleClose}>
-			<DialogContent>
+			<DialogContent className="max-h-[90vh]">
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
@@ -76,7 +76,7 @@ export const CreateContactModal: React.FC = () => {
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-5">
+				<div className="qcrm-fields space-y-5 h-[calc(90vh-13rem)] overflow-y-auto">
 					<Field
 						label={__('First Name', 'quillcrm')}
 						placeholder={__('Enter First Name', 'quillcrm')}
@@ -101,7 +101,7 @@ export const CreateContactModal: React.FC = () => {
 						type="text"
 						placeholder={__('Enter Last Name', 'quillcrm')}
 					/>
-					
+
 					<Field
 						label={__('Email', 'quillcrm')}
 						value={contactForm.email}

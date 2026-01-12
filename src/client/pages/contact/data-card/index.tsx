@@ -20,6 +20,7 @@ import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import DealsBase from '../deals';
+import TasksBase from '../tasks';
 import {
 	AutomationsIcon,
 	ContactSMSIcon,
@@ -28,6 +29,7 @@ import {
 	NotesIcon,
 	PurchaseHistoryIcon,
 	CoursesIcon,
+	TaskDoneIcon,
 } from '@quillcrm/components';
 import { MessageCircle } from 'lucide-react';
 import ConfigAPI from '@quillcrm/config';
@@ -59,6 +61,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		DealsBase,
 		'deals'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
+	const Tasks = applyFilters(
+		'quillcrm_contact_tab_component',
+		TasksBase,
+		'tasks'
+	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const WhatsApp = applyFilters(
 		'quillcrm_contact_tab_component',
 		null,
@@ -74,6 +81,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
 		...(WhatsApp ? [{ value: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle width={24} height={24} /> }] : []),
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> },
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
 		...(isCrmManager
 			? [
@@ -134,6 +142,14 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			children: (
 				<CardContent className="pt-6">
 					<Deals contact_id={contact.id} navigate={navigate} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'tasks',
+			children: (
+				<CardContent className="pt-6">
+					<Tasks contact_id={contact.id} navigate={navigate} />
 				</CardContent>
 			),
 		},

@@ -300,7 +300,11 @@ class Emails {
 		$body = ob_get_clean();
 
 		$message = str_replace( '{email}', $message, $body );
-		$message = make_clickable( $message );
+
+		// Skip make_clickable if message already has links (prevents nested <a> tags)
+		if ( strpos( $message, '<a ' ) === false ) {
+			$message = make_clickable( $message );
+		}
 
 		return apply_filters( 'quillcrm_email_message', $message, $this );
 	}

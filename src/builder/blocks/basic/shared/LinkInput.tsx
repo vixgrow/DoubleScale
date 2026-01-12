@@ -7,7 +7,7 @@ import { useDispatch } from '@wordpress/data';
  * external dependencies
  */
 import { useRef } from 'react';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@quillcrm/components';
 /**
  * internal dependencies
  */
@@ -87,14 +87,13 @@ export const LinkInput: React.FC<LinkInputProps> = ({
         <div className="flex flex-col gap-2 text-[#333333]">
             <div className="flex items-center justify-between">
                 <label className="text-sm">{label}</label>
-                <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-md border border-transparent text-[#333333] transition hover:border-[#d1d5db] hover:bg-[#f9fafb]"
+                <div
+                    className="cursor-pointer hover:opacity-80"
                     onClick={handleMergeTagClick}
                     title={__('Insert Merge Tag', 'quillcrm')}
                 >
-                    <MergeTagsIcon width={20} height={20} />
-                </button>
+                    <MerageTagsIcon />
+                </div>
             </div>
             <Input
                 type="url"

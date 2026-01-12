@@ -135,26 +135,26 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	}
 
 	/**
-	 * Override process_message to add email-specific tracking (pixel + footer)
+	 * Override add_tracking_elements to add email-specific tracking (pixel + click tracking)
+	 *
+	 * Adds tracking pixel and click tracking URLs for sending.
+	 * These elements are NEVER stored in activity - only used for sending.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string         $message Raw message content
-	 * @param Contact_Model  $contact Contact for merge tags
-	 * @param Communication_Tracking_Model $tracking_entry Tracking record
-	 * @return string Processed message
+	 * @param string                        $message        Processed message (merge tags already resolved)
+	 * @param Contact_Model                 $contact        Contact model
+	 * @param Communication_Tracking_Model  $tracking_entry Tracking record
+	 * @return string Message with tracking elements added
 	 */
-	protected function process_message( $message, $contact, $tracking_entry ) {
-		// Process merge tags (from parent)
-		$processed = parent::process_message( $message, $contact, $tracking_entry );
+	protected function add_tracking_elements( $message, $contact, $tracking_entry ) {
+		// Add tracking pixel (email-specific)
+		$message = Email_Tracking_Helper::add_tracking_pixel( $message, $tracking_entry );
 
-		// Add tracking pixel only (no footer for individual messages)
-		$processed = Email_Tracking_Helper::add_tracking_pixel( $processed, $tracking_entry );
+		// Add click tracking to all links
+		$message = Email_Tracking_Helper::add_click_tracking( $message, $tracking_entry->hash_key, $contact );
 
-		// Add click tracking
-		$processed = Email_Tracking_Helper::add_click_tracking( $processed, $tracking_entry->hash_key, $contact );
-
-		return $processed;
+		return $message;
 	}
 
 

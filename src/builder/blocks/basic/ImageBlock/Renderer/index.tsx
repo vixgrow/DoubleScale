@@ -7,6 +7,7 @@
  */
 import React, {
 	useState,
+	useEffect,
 	forwardRef,
 	useRef,
 	useImperativeHandle,
@@ -39,6 +40,11 @@ export const ImageBlockRenderer = forwardRef<
 	const { renderResizeHandles, ...imageProps } = props;
 
 	const [imageError, setImageError] = useState(false);
+
+	// Reset error state when src changes
+	useEffect(() => {
+		setImageError(false);
+	}, [imageProps.src]);
 
 	// Determine display type based on width and alignment (matches backend logic)
 	const is_full_width =
@@ -92,7 +98,7 @@ export const ImageBlockRenderer = forwardRef<
 	};
 
 	const renderImageElement = () => {
-		if (!imageProps.src || imageError) {
+		if (!imageProps.src || imageProps.src.trim() === '' || imageError) {
 			return (
 				<div style={placeholderStyle}>
 					<ImageBlockIcon width={48} height={48} />
@@ -102,8 +108,9 @@ export const ImageBlockRenderer = forwardRef<
 
 		return (
 			<img
+				key={imageProps.src}
 				src={imageProps.src}
-				alt={imageProps.alt}
+				alt={imageProps.alt || 'Image'}
 				style={imageStyle}
 				onError={handleImageError}
 			/>

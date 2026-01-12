@@ -20,6 +20,7 @@ use QuillCRM\Managers\Forms_Manager;
  */
 class Form extends Abstracts_Form {
 
+
 	/**
 	 * Slug
 	 *
@@ -149,11 +150,17 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $contact_form, $result ) {
+		global $wpdb;
 		$data               = $this->get_default_data();
 		$data['form_id']    = $contact_form->id();
 		$data['fields']     = $this->get_fields( $contact_form->id() );
 		$data['form_title'] = $contact_form->title();
-		$data['entry']      = array(
+
+		// Contact Form 7 doesn't store entries by default, so entry_id will be null
+		// unless a plugin like Flamingo is installed
+		$data['entry_id'] = null;
+
+		$data['entry'] = array(
 			'fields' => $this->get_form_entry_fields( $contact_form ),
 		);
 

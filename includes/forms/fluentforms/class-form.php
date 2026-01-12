@@ -19,6 +19,8 @@ use QuillCRM\Managers\Forms_Manager;
  */
 class Form extends Abstracts_Form {
 
+
+
 	/**
 	 * Slug
 	 *
@@ -182,6 +184,7 @@ class Form extends Abstracts_Form {
 	public function process( $submission_id, $form_data, $form ) {
 		$data               = $this->get_default_data();
 		$data['form_id']    = $form['id'];
+		$data['entry_id']   = $submission_id;
 		$data['form_title'] = $form['title'];
 		$fields             = json_decode( $form['form_fields'] );
 		$data['fields']     = $this->get_fields_recursive( $fields->fields );

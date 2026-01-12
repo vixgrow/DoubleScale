@@ -15,6 +15,7 @@ namespace QuillCRM\Abstracts;
 use Exception;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Form_Model;
+use QuillCRM\Models\Form_Submission_Model;
 use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\QuillCRM;
@@ -25,9 +26,8 @@ use QuillCRM_Pro\Managers\Rules_Manager;
 /**
  * Form class
  */
-abstract class Form {
-
-
+abstract class Form
+{
 	/**
 	 * Slug
 	 *
@@ -87,7 +87,8 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	public function get_forms() {
+	public function get_forms()
+	{
 		return $this->forms;
 	}
 
@@ -99,8 +100,9 @@ abstract class Form {
 	 * @param string $id
 	 * @return array
 	 */
-	public function get_form( $id ) {
-		return isset( $this->forms[ $id ] ) ? $this->forms[ $id ] : null;
+	public function get_form($id)
+	{
+		return isset($this->forms[$id]) ? $this->forms[$id] : null;
 	}
 
 	/**
@@ -112,7 +114,7 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	abstract public function get_fields( $form_id);
+	abstract public function get_fields($form_id);
 
 	/**
 	 * Register merge tags
@@ -123,18 +125,19 @@ abstract class Form {
 	 *
 	 * @return void
 	 */
-	public function register_merge_tags_for_form( $form_id, array $new_fields = array() ) {
-		if ( ! $this->is_enabled() ) {
+	public function register_merge_tags_for_form($form_id, array $new_fields = array())
+	{
+		if (! $this->is_enabled()) {
 			return;
 		}
 
-		$fields = ! empty( $new_fields ) ? $new_fields : $this->get_fields( $form_id );
+		$fields = ! empty($new_fields) ? $new_fields : $this->get_fields($form_id);
 
-		if ( empty( $fields ) ) {
+		if (empty($fields)) {
 			return;
 		}
 
-		new Dynamic_Fields_Registration( $fields, $this->slug );
+		new Dynamic_Fields_Registration($fields, $this->slug);
 	}
 
 	/**
@@ -146,28 +149,29 @@ abstract class Form {
 	 *
 	 * @return void
 	 */
-	public function register_field_rules_for_form( $form_id, array $new_fields = array() ): void {
-		if ( ! $this->is_enabled() ) {
+	public function register_field_rules_for_form($form_id, array $new_fields = array()): void
+	{
+		if (! $this->is_enabled()) {
 			return;
 		}
 
 		// Prefer provided fields; fallback to existing fields
-		$fields = ! empty( $new_fields ) ? $new_fields : $this->get_fields( $form_id );
+		$fields = ! empty($new_fields) ? $new_fields : $this->get_fields($form_id);
 
 		// Exit early if no fields
-		if ( empty( $fields ) ) {
+		if (empty($fields)) {
 			return;
 		}
 
-		if ( ! class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ) {
+		if (! class_exists('QuillCRM_Pro\Managers\Rules_Manager')) {
 			return;
 		}
 
 		$rules_manager = Rules_Manager::instance();
 
-		foreach ( $fields as $field_id => $field_name ) {
-			$rule = new Form_Field_Rule( $this, $form_id, $field_id, $field_name['label'] ?? '' );
-			$rules_manager->register( $rule );
+		foreach ($fields as $field_id => $field_name) {
+			$rule = new Form_Field_Rule($this, $form_id, $field_id, $field_name['label'] ?? '');
+			$rules_manager->register($rule);
 		}
 	}
 
@@ -181,7 +185,8 @@ abstract class Form {
 	 *
 	 * @return void
 	 */
-	public function process_form( $data ) {
+	public function process_form($data)
+	{
 		try {
 			$this->submission = $data;
 			$contact_fields   = $this->get_contact_data();
@@ -195,49 +200,54 @@ abstract class Form {
 			$contact_data['source'] = $this->slug;
 
 			$make_as_subscriber = $this->form_data->data['mark_as_subscribed'] ?? false;
-			if ( ! $make_as_subscriber ) {
+			if (! $make_as_subscriber) {
 				$contact_data['email_status'] = 'unsubscribed';
 			}
 
-			if ( ! $update_existing ) {
-				$contact = Contact_Model::get_by_email( $contact_data['email'] ?? '' );
-				if ( $contact ) {
+			if (! $update_existing) {
+				$contact = Contact_Model::get_by_email($contact_data['email'] ?? '');
+				if ($contact) {
+					// Save submission even if contact exists
+					$this->save_form_submission($data, $contact->id);
 					return;
 				}
 			}
 
-			$contact = Contact_Model::createOrUpdate( $contact_data );
+			$contact = Contact_Model::createOrUpdate($contact_data);
 
-			if ( ! empty( $lists ) ) {
-				$contact->lists()->syncWithoutDetaching( $lists );
+			if (! empty($lists)) {
+				$contact->lists()->syncWithoutDetaching($lists);
 			}
 
-			if ( ! empty( $tags ) ) {
-				$contact->tags()->syncWithoutDetaching( $tags );
+			if (! empty($tags)) {
+				$contact->tags()->syncWithoutDetaching($tags);
 			}
 
-			if ( ! empty( $custom_fields ) ) {
+			if (! empty($custom_fields)) {
 				$custom_fields_values = array();
-				foreach ( $custom_fields as $key => $value ) {
-					$custom_fields_values[ $key ] = array(
+				foreach ($custom_fields as $key => $value) {
+					$custom_fields_values[$key] = array(
 						'value' => $value,
 					);
 				}
 
-				$contact->custom_fields()->sync( $custom_fields_values );
+				$contact->custom_fields()->sync($custom_fields_values);
 			}
 
+			// Save form submission
+			$this->save_form_submission($data, $contact->id);
+
 			quillcrm_get_logger()->info(
-				__( 'Contact created successfully', 'quillcrm' ),
+				__('Contact created successfully', 'quillcrm'),
 				array(
 					'id'     => $contact->id,
 					'email'  => $contact->email,
 					'source' => $this->slug,
 				)
 			);
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__( 'Error creating contact', 'quillcrm' ),
+				__('Error creating contact', 'quillcrm'),
 				array(
 					'code'  => 'error_creating_contact',
 					'data'  => $data,
@@ -254,20 +264,56 @@ abstract class Form {
 
 
 	/**
+	 * Save form submission
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Form submission data
+	 * @param int   $contact_id Contact ID
+	 */
+	protected function save_form_submission($data, $contact_id = null)
+	{
+		try {
+			$submission_data = array(
+				'form_id'           => $this->form_data->id ?? null,
+				'contact_id'        => $contact_id,
+				'external_entry_id' => $data['entry_id'] ?? null,
+			);
+
+			Form_Submission_Model::create($submission_data);
+
+			do_action('quillcrm_form_submitted', $contact_id);
+		} catch (Exception $e) {
+			quillcrm_get_logger()->error(
+				__('Error saving form submission', 'quillcrm'),
+				array(
+					'code'  => 'error_saving_form_submission',
+					'data'  => $data,
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+					),
+				)
+			);
+		}
+	}
+
+	/**
 	 * Get contact fields
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
-	public function get_contact_data() {
+	public function get_contact_data()
+	{
 		$mapped_fields = $this->form_data->data['mapped_fields'] ?? array();
 
-		if ( empty( $mapped_fields ) ) {
-			throw new Exception( 'No mapped fields found' );
+		if (empty($mapped_fields)) {
+			throw new Exception('No mapped fields found');
 		}
 
-		$contact_data = $this->get_contact_fields( $mapped_fields );
+		$contact_data = $this->get_contact_fields($mapped_fields);
 
 		return $contact_data;
 	}
@@ -281,7 +327,8 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	public function get_contact_fields( $mapped_fields ) {
+	public function get_contact_fields($mapped_fields)
+	{
 		$entry          = $this->submission['entry'] ?? array();
 		$fields         = $this->submission['fields'] ?? array();
 		$contact_fields = Contact_Fields::instance()->get_fields();
@@ -289,60 +336,60 @@ abstract class Form {
 		$contact_data  = array();
 		$custom_fields = array();
 
-		foreach ( $mapped_fields as $form_field => $contact_field ) {
+		foreach ($mapped_fields as $form_field => $contact_field) {
 
 			// Skip if field does not exist in contact_fields definition
-			if ( ! isset( $contact_fields[ $form_field ] ) ) {
+			if (! isset($contact_fields[$form_field])) {
 				continue;
 			}
 
 			// Determine the raw value source (merge tags OR direct field mapping)
 			$raw_value = null;
 
-			if ( $this->has_form_merge_tags( $contact_field ) ) {
+			if ($this->has_form_merge_tags($contact_field)) {
 				$raw_value = $this->resolve_form_merge_tags(
 					$contact_field,
 					$entry['fields'] ?? array()
 				);
 			} else {
 				// Normal field mapping
-				if ( ! isset( $entry['fields'][ $contact_field ] ) || ! isset( $fields[ $contact_field ] ) ) {
+				if (! isset($entry['fields'][$contact_field]) || ! isset($fields[$contact_field])) {
 					continue;
 				}
-				$raw_value = $entry['fields'][ $contact_field ];
+				$raw_value = $entry['fields'][$contact_field];
 			}
 
 			// Validate class existence
-			if ( ! class_exists( $contact_fields[ $form_field ]['type'] ) ) {
-				throw new Exception( 'Invalid field type' );
+			if (! class_exists($contact_fields[$form_field]['type'])) {
+				throw new Exception('Invalid field type');
 			}
 
 			// Initialize field type
 			/** @var \QuillCRM_Pro\Abstracts\Field_Type $field_type */
-			$field_type = new $contact_fields[ $form_field ]['type'](
-				$contact_fields[ $form_field ]
+			$field_type = new $contact_fields[$form_field]['type'](
+				$contact_fields[$form_field]
 			);
 
 			// Sanitize
-			$value = $field_type->sanitize_field( $raw_value );
+			$value = $field_type->sanitize_field($raw_value);
 
 			// Special: Country
-			if ( $form_field === 'country' ) {
-				$value = quillcrm_get_country_code( $value );
+			if ($form_field === 'country') {
+				$value = quillcrm_get_country_code($value);
 			}
 
 			// Validate
-			$field_type->validate_value( $value );
+			$field_type->validate_value($value);
 
-			if ( ! $field_type->is_valid ) {
+			if (! $field_type->is_valid) {
 				continue;
 			}
 
 			// Save to custom or standard fields
-			if ( $contact_fields[ $form_field ]['is_custom'] ?? false ) {
-				$custom_fields[ $form_field ] = $value;
+			if ($contact_fields[$form_field]['is_custom'] ?? false) {
+				$custom_fields[$form_field] = $value;
 			} else {
-				$contact_data[ $form_field ] = $value;
+				$contact_data[$form_field] = $value;
 			}
 		}
 
@@ -362,11 +409,12 @@ abstract class Form {
 	 *
 	 * @return bool
 	 */
-	private function has_form_merge_tags( $value ) {
-		if ( ! is_string( $value ) ) {
+	private function has_form_merge_tags($value)
+	{
+		if (! is_string($value)) {
 			return false;
 		}
-		return preg_match( '/\{\{form:[^}]+\}\}/', $value ) === 1;
+		return preg_match('/\{\{form:[^}]+\}\}/', $value) === 1;
 	}
 
 	/**
@@ -379,20 +427,21 @@ abstract class Form {
 	 *
 	 * @return string Resolved value
 	 */
-	private function resolve_form_merge_tags( $value, $entry_fields ) {
+	private function resolve_form_merge_tags($value, $entry_fields)
+	{
 
 		$resolved_value = preg_replace_callback(
 			'/\{\{form:([^}]+)\}\}/',
-			function ( $matches ) use ( $entry_fields ) {
+			function ($matches) use ($entry_fields) {
 				$field_key = $matches[1];
 
 				// Check if the field exists in entry fields
-				if ( isset( $entry_fields[ $field_key ] ) ) {
-					$field_value = $entry_fields[ $field_key ];
+				if (isset($entry_fields[$field_key])) {
+					$field_value = $entry_fields[$field_key];
 
 					// Handle array values (for checkboxes, multi-select, etc.)
-					if ( is_array( $field_value ) ) {
-						return implode( ', ', $field_value );
+					if (is_array($field_value)) {
+						return implode(', ', $field_value);
 					}
 
 					return (string) $field_value;
@@ -412,7 +461,8 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	public function get_default_data() {
+	public function get_default_data()
+	{
 		return array();
 	}
 
@@ -425,15 +475,16 @@ abstract class Form {
 	 *
 	 * @return bool
 	 */
-	public function is_form_active( $form_id ) {
+	public function is_form_active($form_id)
+	{
 		try {
-			if ( ! class_exists( 'QuillCRM\Models\Form_Model' ) ) {
+			if (! class_exists('QuillCRM\Models\Form_Model')) {
 				return false;
 			}
-			$form            = Form_Model::get_form_by_form_id( $this->get_form_id( $form_id ), $this->slug, 'active' );
+			$form            = Form_Model::get_form_by_form_id($this->get_form_id($form_id), $this->slug, 'active');
 			$this->form_data = $form;
 			return true;
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			return false;
 		}
 	}
@@ -447,9 +498,10 @@ abstract class Form {
 	 *
 	 * @return string
 	 */
-	public function get_form_id( $form_id ) {
-		if ( strpos( $form_id, ':' ) !== false ) {
-			$form_id = explode( ':', $form_id );
+	public function get_form_id($form_id)
+	{
+		if (strpos($form_id, ':') !== false) {
+			$form_id = explode(':', $form_id);
 			$form_id = $form_id[1];
 		}
 
@@ -465,19 +517,20 @@ abstract class Form {
 	 *
 	 * @return void
 	 */
-	public function process_automations( $args ) {
+	public function process_automations($args)
+	{
 		try {
 			$this->submission = $args;
 
-			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+			$automations = Automation_Model::get_automations_by_trigger($this->slug);
 
-			foreach ( $automations as $automation ) {
-				if ( ! $this->is_processable( $automation, $args ) ) {
+			foreach ($automations as $automation) {
+				if (! $this->is_processable($automation, $args)) {
 					continue;
 				}
 
-				$contact = $this->maybe_create_contact( $automation );
-				if ( ! $contact ) {
+				$contact = $this->maybe_create_contact($automation);
+				if (! $contact) {
 					continue;
 				}
 
@@ -486,11 +539,11 @@ abstract class Form {
 					'data'    => $args,
 				);
 
-				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $data );
+				QuillCRM::instance()->automations_tasks->enqueue_sync('process_automations', $automation, $data);
 			}
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__( 'Error processing automations', 'quillcrm' ),
+				__('Error processing automations', 'quillcrm'),
 				array(
 					'code'  => 'error_processing_automations',
 					'data'  => $args,
@@ -513,65 +566,71 @@ abstract class Form {
 	 *
 	 * @return Contact_Model
 	 */
-	public function maybe_create_contact( Automation_Model $automation ) {
+	public function maybe_create_contact(Automation_Model $automation)
+	{
 		try {
-			$mapped_fields          = $automation->get_setting( 'mapped_fields', array() );
-			$contact_fields         = $this->get_contact_fields( $mapped_fields );
+			$mapped_fields          = $automation->get_setting('mapped_fields', array());
+			$contact_fields         = $this->get_contact_fields($mapped_fields);
 			$custom_fields          = $contact_fields['custom_fields'];
 			$contact_data           = $contact_fields['fields'];
 			$contact_data['source'] = $this->slug;
-			$make_as_subscriber     = $automation->get_setting( 'mark_as_subscribed', false );
-			$update_blank_fields    = $automation->get_setting( 'update_blank_fields', false );
-			$update_existing        = $automation->get_setting( 'update_existing_contact', false );
-			$lists                  = $automation->get_setting( 'lists', array() );
-			$tags                   = $automation->get_setting( 'tags', array() );
+			$make_as_subscriber     = $automation->get_setting('mark_as_subscribed', false);
+			$update_blank_fields    = $automation->get_setting('update_blank_fields', false);
+			$update_existing        = $automation->get_setting('update_existing_contact', false);
+			$lists                  = $automation->get_setting('lists', array());
+			$tags                   = $automation->get_setting('tags', array());
 
-			if ( ! $make_as_subscriber ) {
+			if (! $make_as_subscriber) {
 				$contact_data['email_status'] = 'unsubscribed';
 			} else {
 				$contact_data['email_status'] = 'subscribed';
 			}
 
-			if ( ! $update_blank_fields ) {
-				$contact_data = array_filter( $contact_data );
+			if (! $update_blank_fields) {
+				$contact_data = array_filter($contact_data);
 			}
 
-			if ( ! $update_existing ) {
-				$contact = Contact_Model::get_by_email( $contact_data['email'] ?? '' );
-				if ( $contact ) {
+			if (! $update_existing) {
+				$contact = Contact_Model::get_by_email($contact_data['email'] ?? '');
+				if ($contact) {
+					// Save submission for existing contact
+					$this->save_form_submission($this->submission, $contact->id);
 					return $contact;
 				}
 			}
 
-			$contact = Contact_Model::createOrUpdate( $contact_data );
+			$contact = Contact_Model::createOrUpdate($contact_data);
 
-			if ( ! empty( $lists ) ) {
-				$contact->lists()->syncWithoutDetaching( $lists );
+			if (! empty($lists)) {
+				$contact->lists()->syncWithoutDetaching($lists);
 			}
 
-			if ( ! empty( $tags ) ) {
-				$contact->tags()->syncWithoutDetaching( $tags );
+			if (! empty($tags)) {
+				$contact->tags()->syncWithoutDetaching($tags);
 			}
 
 			// Only process custom fields if Pro plugin is active
-			if ( ! empty( $custom_fields ) && class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+			if (! empty($custom_fields) && class_exists('QuillCRM_Pro\Models\Custom_Field_Model')) {
 				$custom_fields_values = array();
-				foreach ( $custom_fields as $key => $value ) {
-					$custom_fields_values[ $key ] = array(
+				foreach ($custom_fields as $key => $value) {
+					$custom_fields_values[$key] = array(
 						'value' => $value,
 					);
 				}
 
-				$contact->custom_fields()->syncWithoutDetaching( $custom_fields_values );
+				$contact->custom_fields()->syncWithoutDetaching($custom_fields_values);
 			}
 
+			// Save form submission
+			$this->save_form_submission($this->submission, $contact->id);
+
 			return $contact;
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__( 'Error creating contact', 'quillcrm' ),
+				__('Error creating contact', 'quillcrm'),
 				array(
 					'code'  => 'error_creating_contact',
-					'data'  => $contact_data,
+					'data'  => $contact_data ?? array(),
 					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
@@ -593,9 +652,10 @@ abstract class Form {
 	 *
 	 * @return bool
 	 */
-	public function is_processable( Automation_Model $automation, $args ) {
-		$form_id            = $this->get_form_id( $args['form_id'] );
-		$automation_form_id = $automation->get_setting( 'form_id' );
+	public function is_processable(Automation_Model $automation, $args)
+	{
+		$form_id            = $this->get_form_id($args['form_id']);
+		$automation_form_id = $automation->get_setting('form_id');
 
 		return $form_id == $automation_form_id;
 	}
@@ -607,10 +667,11 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	public function get_form_options() {
+	public function get_form_options()
+	{
 		$options = array(
 			'form_id' => array(
-				'label'       => __( 'Form ID', 'quillcrm' ),
+				'label'       => __('Form ID', 'quillcrm'),
 				'type'        => 'ajax_select',
 				'ajax_action' => "quillcrm_{$this->slug}_get_form_select_options",
 			),
@@ -626,7 +687,8 @@ abstract class Form {
 	 *
 	 * @return array
 	 */
-	public function get_form_fields_settings() {
+	public function get_form_fields_settings()
+	{
 		$settings = array(
 			'action' => "quillcrm_{$this->slug}_get_fields",
 			'fields' => array(
@@ -644,7 +706,8 @@ abstract class Form {
 	 *
 	 * @return bool
 	 */
-	public function is_enabled() {
+	public function is_enabled()
+	{
 		return true;
 	}
 }

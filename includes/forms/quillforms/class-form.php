@@ -21,6 +21,14 @@ use QuillCRM\Managers\Forms_Manager;
  */
 class Form extends Abstracts_Form {
 
+
+
+
+
+
+
+
+
 	/**
 	 * Slug
 	 *
@@ -147,6 +155,7 @@ class Form extends Abstracts_Form {
 		$data               = $this->get_default_data();
 		$data['fields']     = $form_utils->get_fields();
 		$data['entry']      = $form_data;
+		$data['entry_id']   = $entry->ID;
 		$data['form_id']    = $entry->form_id;
 		$data['form_title'] = isset( $entry->form_id ) ? get_the_title( $entry->form_id ) : '';
 

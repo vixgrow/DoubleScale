@@ -20,13 +20,14 @@ use QuillCRM\Managers\Lead_Scoring_Manager;
  */
 class Event_Handler {
 
+
 	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->add_common_event_actions();
+		 $this->add_common_event_actions();
 	}
 
 	/**
@@ -40,6 +41,7 @@ class Event_Handler {
 		// Email tracking events
 		add_action( 'quillcrm_email_opened', array( $this, 'handle_contact' ), 99, 1 );
 		add_action( 'quillcrm_email_clicked', array( $this, 'handle_contact' ), 99, 1 );
+		add_action( 'quillcrm_form_submitted', array( $this, 'handle_contact' ), 99, 1 );
 		// Custom field updates (Pro)
 		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
 			add_action( 'quillcrm_contact_custom_field_updated', array( $this, 'handle_contact' ), 99, 1 );
@@ -54,9 +56,9 @@ class Event_Handler {
 	 * @return void
 	 */
 	public function remove_common_event_actions() {
-		remove_action( 'quillcrm_email_opened', array( $this, 'handle_contact' ), 99 );
+		 remove_action( 'quillcrm_email_opened', array( $this, 'handle_contact' ), 99 );
 		remove_action( 'quillcrm_email_clicked', array( $this, 'handle_contact' ), 99 );
-
+		remove_action( 'quillcrm_form_submitted', array( $this, 'handle_contact' ), 99 );
 		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
 			remove_action( 'quillcrm_contact_custom_field_updated', array( $this, 'handle_contact' ), 99 );
 		}
@@ -94,7 +96,7 @@ class Event_Handler {
 	 * @return void
 	 */
 	public function disable() {
-		$this->remove_common_event_actions();
+		 $this->remove_common_event_actions();
 	}
 
 	/**

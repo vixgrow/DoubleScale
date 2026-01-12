@@ -37,6 +37,7 @@ import { Slider } from '@/components/ui/slider';
 import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
+import EmailOpened from '../email-opened';
 import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
@@ -47,7 +48,8 @@ import { TooltipProvider } from '../ui/tooltip';
 import { Tooltip } from '../ui/tooltip';
 import { TooltipTrigger } from '../ui/tooltip';
 import { TooltipContent } from '../ui/tooltip';
-
+import EmailClicked from '../email-clicked';
+import FormSubmission from '../form-submission';
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -250,15 +252,20 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Show Pro notice if component not available
 				fieldContent = (
-					<div style={{ 
-						padding: '12px', 
-						backgroundColor: '#fff3cd', 
-						border: '1px solid #ffc107',
-						borderRadius: '4px',
-						color: '#856404'
-					}}>
+					<div
+						style={{
+							padding: '12px',
+							backgroundColor: '#fff3cd',
+							border: '1px solid #ffc107',
+							borderRadius: '4px',
+							color: '#856404',
+						}}
+					>
 						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
-						{__('Link Triggers require QuillCRM Pro to be installed and activated.', 'quillcrm')}
+						{__(
+							'Link Triggers require QuillCRM Pro to be installed and activated.',
+							'quillcrm'
+						)}
 					</div>
 				);
 			}
@@ -496,8 +503,14 @@ const Field: React.FC<FieldProps> = ({
 				null,
 				'WhatsAppTemplateField'
 			) as React.ComponentType<{
-				value: { template_sid?: string; template_variables?: Record<string, string> };
-				onChange: (value: { template_sid: string; template_variables: Record<string, string> }) => void;
+				value: {
+					template_sid?: string;
+					template_variables?: Record<string, string>;
+				};
+				onChange: (value: {
+					template_sid: string;
+					template_variables: Record<string, string>;
+				}) => void;
 				options: Record<string, string>;
 				templateData?: Record<string, any>;
 			}> | null;
@@ -505,10 +518,10 @@ const Field: React.FC<FieldProps> = ({
 			if (WhatsAppTemplateFieldComponent) {
 				// Options should be a Record<string, string> for whatsapp_template
 				// (Fields component passes raw options object for this type)
-				const templateOptions = (options && !Array.isArray(options) 
-					? options 
-					: {}) as Record<string, string>;
-				
+				const templateOptions = (
+					options && !Array.isArray(options) ? options : {}
+				) as Record<string, string>;
+
 				fieldContent = (
 					<WhatsAppTemplateFieldComponent
 						value={value || {}}
@@ -520,15 +533,20 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Fallback message if Pro not available
 				fieldContent = (
-					<div style={{ 
-						padding: '12px', 
-						backgroundColor: '#fff3cd', 
-						border: '1px solid #ffc107',
-						borderRadius: '4px',
-						color: '#856404'
-					}}>
+					<div
+						style={{
+							padding: '12px',
+							backgroundColor: '#fff3cd',
+							border: '1px solid #ffc107',
+							borderRadius: '4px',
+							color: '#856404',
+						}}
+					>
 						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
-						{__('WhatsApp Template Field requires QuillCRM Pro.', 'quillcrm')}
+						{__(
+							'WhatsApp Template Field requires QuillCRM Pro.',
+							'quillcrm'
+						)}
 					</div>
 				);
 			}
@@ -561,6 +579,31 @@ const Field: React.FC<FieldProps> = ({
 					value={value}
 					onChange={(dateValue) => onChange(dateValue)}
 					placeholder="Select date & time"
+				/>
+			);
+			break;
+		case 'email_opened':
+			fieldContent = (
+				<EmailOpened
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'email_clicked':
+			fieldContent = (
+				<EmailClicked
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'form_submission':
+			fieldContent = (
+				<FormSubmission
+					options={options || []}
+					value={value}
+					onChange={(value) => onChange(value)}
 				/>
 			);
 			break;

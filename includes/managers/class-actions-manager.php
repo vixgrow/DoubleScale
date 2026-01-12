@@ -249,6 +249,11 @@ final class Actions_Manager
 						'label'       => __('LearnDash', 'quillcrm'),
 						'actions'     => array(),
 					),
+					'tutorlms'  => array(
+						'is_disabled' => ! defined('TUTOR_VERSION'),
+						'label'       => __('Tutor LMS', 'quillcrm'),
+						'actions'     => array(),
+					),
 				),
 			),
 			'email'       => array(

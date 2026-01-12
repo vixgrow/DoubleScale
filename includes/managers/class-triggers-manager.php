@@ -242,6 +242,11 @@ final class Triggers_Manager {
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 					 ),
+					 'tutorlms'  => array(
+						 'label'       => __( 'Tutor LMS', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! defined( 'TUTOR_VERSION' ),
+					 ),
 				 ),
 			 ),
 			 // 'memberpress' => array(

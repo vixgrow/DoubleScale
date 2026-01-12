@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { isObject } from 'lodash';
 import Select from 'react-select';
-import { Copy, HelpCircle } from 'lucide-react';
+import { Copy, HelpCircle, Circle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -250,9 +250,9 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Show Pro notice if component not available
 				fieldContent = (
-					<div style={{ 
-						padding: '12px', 
-						backgroundColor: '#fff3cd', 
+					<div style={{
+						padding: '12px',
+						backgroundColor: '#fff3cd',
 						border: '1px solid #ffc107',
 						borderRadius: '4px',
 						color: '#856404'
@@ -278,17 +278,18 @@ const Field: React.FC<FieldProps> = ({
 		case 'number':
 		case 'email':
 		case 'tel':
+		case 'phone':
 		case 'url':
 		case 'password':
 			fieldContent = (
 				<Input
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					type={type}
+					type={type === 'phone' ? 'tel' : type}
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500',
+						'border-red-500 focus-visible:ring-red-500',
 						disabled && 'bg-gray-100 cursor-not-allowed opacity-70'
 					)}
 					style={{
@@ -309,7 +310,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -327,8 +328,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -404,6 +405,33 @@ const Field: React.FC<FieldProps> = ({
 					checked={value}
 					onCheckedChange={(checked) => onChange(checked)}
 				/>
+			);
+			break;
+		case 'radio':
+			// Radio button works like checkbox - yes/no toggle
+			const isRadioChecked = value === true || value === 'true' || value === 'yes' || value === '1';
+			fieldContent = (
+				<button
+					type="button"
+					onClick={() => {
+						// Toggle between checked and unchecked
+						onChange(isRadioChecked ? 'no' : 'yes');
+					}}
+					className={cn(
+						'aspect-square h-4 w-4 rounded-full border-2 border-primary text-white shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+						isRadioChecked
+							? 'border-secondary bg-secondary'
+							: 'border-primary bg-transparent'
+					)}
+					aria-checked={isRadioChecked ? 'true' : 'false'}
+					role="radio"
+				>
+					{isRadioChecked && (
+						<div className="flex items-center justify-center h-full">
+							<Circle className="h-[0.8rem] w-[0.6rem] fill-current" />
+						</div>
+					)}
+				</button>
 			);
 			break;
 		case 'switch':
@@ -505,10 +533,10 @@ const Field: React.FC<FieldProps> = ({
 			if (WhatsAppTemplateFieldComponent) {
 				// Options should be a Record<string, string> for whatsapp_template
 				// (Fields component passes raw options object for this type)
-				const templateOptions = (options && !Array.isArray(options) 
-					? options 
+				const templateOptions = (options && !Array.isArray(options)
+					? options
 					: {}) as Record<string, string>;
-				
+
 				fieldContent = (
 					<WhatsAppTemplateFieldComponent
 						value={value || {}}
@@ -520,9 +548,9 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Fallback message if Pro not available
 				fieldContent = (
-					<div style={{ 
-						padding: '12px', 
-						backgroundColor: '#fff3cd', 
+					<div style={{
+						padding: '12px',
+						backgroundColor: '#fff3cd',
 						border: '1px solid #ffc107',
 						borderRadius: '4px',
 						color: '#856404'
@@ -587,6 +615,23 @@ const Field: React.FC<FieldProps> = ({
 
 	// Special layout for checkbox - checkbox before label
 	if (type === 'checkbox') {
+		return (
+			<div className="qcrm-field" style={style || {}}>
+				<div className="flex items-center gap-3">
+					<div className="qcrm-field-input">{fieldContent}</div>
+					{label && (
+						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+							{renderLabelWithTooltip()}
+						</div>
+					)}
+				</div>
+				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// Special layout for radio - radio before label (like checkbox)
+	if (type === 'radio') {
 		return (
 			<div className="qcrm-field" style={style || {}}>
 				<div className="flex items-center gap-3">

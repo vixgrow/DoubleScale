@@ -31,6 +31,7 @@ import DelaySelector from '../delay-selector';
 import { NoticeBanner } from '@quillcrm/components';
 import ProAutomationModal from '../../../../../../components/pro-automation-modal';
 import { applyFilters } from '@wordpress/hooks';
+import { getApiErrorMessage } from '@quillcrm/utils';
 
 interface WorkflowSidebarProps {
 	currentStep: OrganizedStep | null;
@@ -152,10 +153,17 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 			setNotice({ type: 'success', message: successMessage });
 		} catch (error: any) {
+			// Use utility to extract detailed error message from WordPress REST API
+			// This handles validation errors (rest_invalid_param) with detailed params
+			const errorMessage = getApiErrorMessage(error, __('Failed to save', 'quillcrm'));
+
 			setNotice({
 				type: 'error',
-				message: error.message || __('Failed to save', 'quillcrm'),
+				message: errorMessage,
 			});
+
+			// Debug log to help troubleshoot error format
+			console.error('Save error:', { error, errorMessage });
 		}
 	};
 

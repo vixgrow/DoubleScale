@@ -24,6 +24,8 @@ interface PageTabsProps {
 	onValueChange?: (value: string) => void;
 	tabsListWrapperClassName?: string;
 	tabsListClassName?: string;
+	scrollThreshold?: number;
+	scrollArrowBg?: string;
 }
 const PageTabs: React.FC<PageTabsProps> = ({
 	defaultValue,
@@ -34,11 +36,13 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	onValueChange,
 	tabsListWrapperClassName = 'border px-5 py-3 rounded-lg',
 	tabsListClassName = 'bg-transparent text-foreground gap-3',
+	scrollThreshold = 10,
+	scrollArrowBg = 'bg-white',
 }) => {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [showLeftChevron, setShowLeftChevron] = useState(false);
 	const [showRightChevron, setShowRightChevron] = useState(false);
-	const hasManyTabs = tabsList.length > 10;
+	const hasManyTabs = tabsList.length > scrollThreshold;
 
 	const checkScrollButtons = () => {
 		if (!scrollContainerRef.current) return;
@@ -86,14 +90,13 @@ const PageTabs: React.FC<PageTabsProps> = ({
 			onValueChange={onValueChange}
 		>
 			<div
-				className={`${tabsListWrapperClassName} ${
-					hasManyTabs ? 'relative' : ''
-				}`}
+				className={`${tabsListWrapperClassName} ${hasManyTabs ? 'relative' : ''
+					}`}
 			>
 				{hasManyTabs && showLeftChevron && (
 					<button
 						onClick={() => scroll('left')}
-						className="absolute left-0 top-0 bottom-0 h-full z-10 bg-white rounded-r-md shadow-sm transition-colors flex items-center justify-center px-1"
+						className={`absolute left-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-r-md shadow-sm transition-colors flex items-center justify-center px-1`}
 						aria-label="Scroll left"
 					>
 						<ChevronLeft className="w-5 h-5" />
@@ -119,7 +122,7 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				{hasManyTabs && showRightChevron && (
 					<button
 						onClick={() => scroll('right')}
-						className="absolute right-0 top-0 bottom-0 h-full z-10 bg-white rounded-l-md shadow-sm transition-colors flex items-center justify-center px-1"
+						className={`absolute right-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-l-md shadow-sm transition-colors flex items-center justify-center px-1`}
 						aria-label="Scroll right"
 					>
 						<ChevronRight className="w-5 h-5" />

@@ -203,7 +203,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	}, [isOpen]);
 
 	/**
-	 * Ensure selected item is in list (only when we have items loaded)
+	 * Ensure selected item is in list 
 	 */
 	useEffect(() => {
 		if (selectedItem && value && items.length > 0) {

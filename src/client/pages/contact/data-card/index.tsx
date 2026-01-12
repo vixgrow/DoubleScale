@@ -85,12 +85,12 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
 		...(isCrmManager
 			? [
-					{
-						value: 'automation',
-						label: 'Automation',
-						icon: <AutomationsIcon width={24} height={24} />,
-					},
-				]
+				{
+					value: 'automation',
+					label: 'Automation',
+					icon: <AutomationsIcon width={24} height={24} />,
+				},
+			]
 			: []),
 	];
 
@@ -204,6 +204,8 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				className="w-full"
 				tabsListWrapperClassName="border-b pb-7 pt-5"
 				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
+				scrollThreshold={6}
+				scrollArrowBg="bg-[#F8F8F8]"
 			/>
 		</Card>
 	);

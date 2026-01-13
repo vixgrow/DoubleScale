@@ -4,7 +4,7 @@ Tags: crm, customer management, contact management, pipeline, sales, sms, automa
 Requires at least: 5.8
 Tested up to: 6.9.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -395,6 +395,89 @@ Quill CRM stores contact information in your WordPress database. We do not colle
 * Manage consent
 * Handle unsubscribe requests
 * Process data deletion requests
+
+== External Services ==
+
+Quill CRM may connect to external third-party services for specific optional features. These services are only used when you explicitly configure and enable the respective integrations. No data is sent to these services unless you set them up.
+
+**ActiveCampaign Integration (Optional)**
+* **Purpose**: Sync contacts and manage marketing automation with ActiveCampaign
+* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the ActiveCampaign automation actions
+* **When**: Only when ActiveCampaign integration is configured and automation actions are triggered
+* **Service Provider**: ActiveCampaign LLC
+* **API Endpoint**: https://api.infusionsoft.com/
+* **Terms of Service**: https://www.activecampaign.com/legal/terms-of-service
+* **Privacy Policy**: https://www.activecampaign.com/legal/privacy-policy
+
+**ConvertKit Integration (Optional)**
+* **Purpose**: Sync subscribers and manage email marketing with ConvertKit
+* **Data Sent**: Contact information (name, email, tags) when you use the ConvertKit automation actions
+* **When**: Only when ConvertKit integration is configured and automation actions are triggered
+* **Service Provider**: ConvertKit LLC
+* **API Endpoint**: https://api.convertkit.com/v3
+* **Terms of Service**: https://convertkit.com/terms
+* **Privacy Policy**: https://convertkit.com/privacy
+
+**Drip Integration (Optional)**
+* **Purpose**: Sync subscribers and manage marketing automation with Drip
+* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Drip automation actions
+* **When**: Only when Drip integration is configured and automation actions are triggered
+* **Service Provider**: Drip LLC
+* **API Endpoint**: https://api.getdrip.com/v2
+* **Terms of Service**: https://www.drip.com/terms
+* **Privacy Policy**: https://www.drip.com/privacy
+
+**GetResponse Integration (Optional)**
+* **Purpose**: Sync contacts and manage email marketing campaigns with GetResponse
+* **Data Sent**: Contact information (name, email, custom fields) when you use the GetResponse automation actions
+* **When**: Only when GetResponse integration is configured and automation actions are triggered
+* **Service Provider**: GetResponse
+* **API Endpoint**: https://api.getresponse.com/v3
+* **Terms of Service**: https://www.getresponse.com/legal/terms-and-conditions
+* **Privacy Policy**: https://www.getresponse.com/legal/privacy
+
+**HubSpot Integration (Optional)**
+* **Purpose**: Sync contacts and manage CRM data with HubSpot
+* **Data Sent**: Contact information (name, email, custom properties) when you use the HubSpot automation actions
+* **When**: Only when HubSpot integration is configured and automation actions are triggered
+* **Service Provider**: HubSpot, Inc.
+* **API Endpoint**: https://api.hubapi.com
+* **Terms of Service**: https://legal.hubspot.com/terms-of-service
+* **Privacy Policy**: https://legal.hubspot.com/privacy-policy
+
+**Keap (Infusionsoft) Integration (Optional)**
+* **Purpose**: Sync contacts and manage CRM and marketing automation with Keap
+* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Keap automation actions
+* **When**: Only when Keap integration is configured and automation actions are triggered
+* **Service Provider**: Keap (Infusionsoft)
+* **API Endpoint**: https://api.infusionsoft.com/
+* **Terms of Service**: https://keap.com/legal/terms-of-service
+* **Privacy Policy**: https://keap.com/legal/privacy-policy
+
+**MailerLite Integration (Optional)**
+* **Purpose**: Sync subscribers and manage email marketing with MailerLite
+* **Data Sent**: Contact information (name, email, custom fields) when you use the MailerLite automation actions
+* **When**: Only when MailerLite integration is configured and automation actions are triggered
+* **Service Provider**: MailerLite
+* **API Endpoint**: https://api.mailerlite.com/api/v2
+* **Terms of Service**: https://www.mailerlite.com/legal/terms-of-service
+* **Privacy Policy**: https://www.mailerlite.com/legal/privacy-policy
+
+**Ontraport Integration (Optional)**
+* **Purpose**: Sync contacts and manage CRM and marketing automation with Ontraport
+* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Ontraport automation actions
+* **When**: Only when Ontraport integration is configured and automation actions are triggered
+* **Service Provider**: Ontraport
+* **API Endpoint**: https://api.ontraport.com/1
+* **Terms of Service**: https://ontraport.com/terms
+* **Privacy Policy**: https://ontraport.com/privacy
+
+**Important Notes:**
+* All integrations are completely optional and disabled by default
+* You must manually configure API keys and enable each integration
+* No data is transmitted to these services unless you explicitly set up the integration
+* You can disable any integration at any time from the Quill CRM settings
+* When using these integrations, you are subject to the respective service's terms and privacy policies
 
 == Credits ==
 

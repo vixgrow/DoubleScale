@@ -70,7 +70,8 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Field' ) ) {
 			$this->name        = $field_label;
 			$this->slug        = "field:{$field_name}";
 			$this->group       = $slug;
-			$this->description = sprintf( __( $slug . ' field: %s', 'quillcrm' ), $field_label );
+			/* translators: 1: Form type slug, 2: Field label */
+		$this->description = sprintf( __( '%1$s field: %2$s', 'quillcrm' ), $slug, $field_label );
 		}
 
 		/**

@@ -122,32 +122,42 @@ class License {
 			exit;
 		}
 
-		if ( ! function_exists( 'activate_plugin' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
+		/**
+		 * WordPress.org Review: Automatic activation removed
+		 * Plugins cannot change the activation status of other plugins.
+		 * This must be performed by the user manually.
+		 */
+		
+		// if ( ! function_exists( 'activate_plugin' ) ) {
+		// 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		// }
 
-		try {
-			$result = activate_plugin( $this->plugin_data['plugin_file'] );
-			if ( is_wp_error( $result ) ) {
-				// quillbooking_get_logger()->error(
-				// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
-				// 	array(
-				// 		'code'  => 'cannot_activate_pro',
-				// 		'error' => $result,
-				// 	)
-				// );
-			}
-			wp_send_json_success( esc_html__( 'QuillCRM Pro activated successfully', 'quillcrm' ), 200 );
-		} catch ( \Exception $e ) {
-			// quillbooking_get_logger()->error(
-			// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
-			// 	array(
-			// 		'code'  => 'cannot_activate_pro',
-			// 		'error' => $e,
-			// 	)
-			// );
-			wp_send_json_error( esc_html__( 'Cannot activate QuillCRM Pro, check log for details', 'quillcrm' ) );
-		}
+		// WordPress.org Compliance: Automatic activation not allowed
+		// try {
+		// 	$result = activate_plugin( $this->plugin_data['plugin_file'] );
+		// 	if ( is_wp_error( $result ) ) {
+		// 		// quillbooking_get_logger()->error(
+		// 		// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
+		// 		// 	array(
+		// 		// 		'code'  => 'cannot_activate_pro',
+		// 		// 		'error' => $result,
+		// 		// 	)
+		// 		// );
+		// 	}
+		// 	wp_send_json_success( esc_html__( 'QuillCRM Pro activated successfully', 'quillcrm' ), 200 );
+		// } catch ( \Exception $e ) {
+		// 	// quillbooking_get_logger()->error(
+		// 	// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
+		// 	// 	array(
+		// 	// 		'code'  => 'cannot_activate_pro',
+		// 	// 		'error' => $e,
+		// 	// 	)
+		// 	// );
+		// 	wp_send_json_error( esc_html__( 'Cannot activate QuillCRM Pro, check log for details', 'quillcrm' ) );
+		// }
+		
+		// Inform user to activate manually
+		wp_send_json_success( esc_html__( 'QuillCRM Pro is installed. Please activate it manually from the WordPress Plugins page.', 'quillcrm' ), 200 );
 	}
 
 	/**
@@ -286,29 +296,33 @@ class License {
 			);
 		}
 
+		/**
+		 * WordPress.org Review: delete_plugins() commented out
+		 * Plugins cannot delete other plugins automatically.
+		 */
 		// check the installed plugin.
-		if ( $installer->plugin_info() !== $this->plugin_data['plugin_file'] ) {
+		// if ( $installer->plugin_info() !== $this->plugin_data['plugin_file'] ) {
 
-			if ( ! function_exists( 'delete_plugins' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/plugin.php';
-			}
-			$removed = delete_plugins( array( $installer->plugin_info() ) );
-			// quillbooking_get_logger()->critical(
-			// 	esc_html__( 'Invalid QuillCRM Pro plugin installation detected', 'quillcrm' ),
-			// 	array(
-			// 		'code'                  => 'invalid_plugin_installation',
-			// 		'plugin_slug'           => $plugin_slug,
-			// 		'plugin_file'           => $this->plugin_data['plugin_file'],
-			// 		'installer_plugin_info' => $installer->plugin_info(),
-			// 		'removed'               => $removed,
-			// 		'upgrade_messages'      => $installer_skin->get_upgrade_messages(),
-			// 	)
-			// );
-			return array(
-				'success' => false,
-				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quillcrm' ),
-			);
-		}
+		// 	if ( ! function_exists( 'delete_plugins' ) ) {
+		// 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		// 	}
+		// 	$removed = delete_plugins( array( $installer->plugin_info() ) );
+		// 	// quillbooking_get_logger()->critical(
+		// 	// 	esc_html__( 'Invalid QuillCRM Pro plugin installation detected', 'quillcrm' ),
+		// 	// 	array(
+		// 	// 		'code'                  => 'invalid_plugin_installation',
+		// 	// 		'plugin_slug'           => $plugin_slug,
+		// 	// 		'plugin_file'           => $this->plugin_data['plugin_file'],
+		// 	// 		'installer_plugin_info' => $installer->plugin_info(),
+		// 	// 		'removed'               => $removed,
+		// 	// 		'upgrade_messages'      => $installer_skin->get_upgrade_messages(),
+		// 	// 	)
+		// 	// );
+		// 	return array(
+		// 		'success' => false,
+		// 		'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quillcrm' ),
+		// 	);
+		// }
 
 		// log successful installation.
 		// quillbooking_get_logger()->info(
@@ -319,9 +333,11 @@ class License {
 		// 		'upgrade_messages' => $installer_skin->get_upgrade_messages(),
 		// 	)
 		// );
+		
+		// WordPress.org Compliance: Installation is allowed, but automatic activation is not
 		return array(
 			'success' => true,
-			'message' => esc_html__( 'QuillCRM Pro plugin installed successfully', 'quillcrm' ),
+			'message' => esc_html__( 'QuillCRM Pro plugin installed successfully. Please activate it manually from the WordPress Plugins page.', 'quillcrm' ),
 		);
 	}
 

@@ -293,27 +293,33 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( ! $actual_plugin_file ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_plugin_file_not_found',
-				__( 'Plugin installed successfully but plugin file could not be found.', 'quillcrm' ),
+				esc_html__( 'Plugin installed successfully but plugin file could not be found.', 'quillcrm' ),
 				array( 'status' => 500 )
 			);
 		}
 
+		/**
+		 * WordPress.org Review: Automatic activation removed
+		 * Plugins cannot change the activation status of other plugins.
+		 * The plugin is installed successfully, but user must activate manually.
+		 */
 		// Activate the plugin using the actual plugin file path.
-		$activate_result = activate_plugin( $actual_plugin_file );
+		// $activate_result = activate_plugin( $actual_plugin_file );
 
-		if ( is_wp_error( $activate_result ) ) {
-			return new WP_Error(
-				'quillcrm_rest_plugins_activate_failed',
-				$activate_result->get_error_message(),
-				array( 'status' => 500 )
-			);
-		}
+		// if ( is_wp_error( $activate_result ) ) {
+		// 	return new WP_Error(
+		// 		'quillcrm_rest_plugins_activate_failed',
+		// 		$activate_result->get_error_message(),
+		// 		array( 'status' => 500 )
+		// 	);
+		// }
 
 		return new WP_REST_Response(
 			array(
 				'success'      => true,
 				'plugin_file'  => $actual_plugin_file,
 				'download_url' => $download_url,
+				'message'      => esc_html__( 'Plugin installed successfully. Please activate it manually from the WordPress Plugins page.', 'quillcrm' ),
 			),
 			200
 		);
@@ -342,30 +348,37 @@ class REST_Plugins_Controller extends REST_Controller {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		/**
+		 * WordPress.org Review: Automatic activation removed
+		 * Plugins cannot change the activation status of other plugins.
+		 * This must be performed by the user manually.
+		 */
 		$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_file;
 
 		if ( ! file_exists( $plugin_path ) ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_not_installed',
-				__( 'Plugin is not installed.', 'quillcrm' ),
+				esc_html__( 'Plugin is not installed.', 'quillcrm' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$activate_result = activate_plugin( $plugin_file );
+		// WordPress.org Compliance: Automatic activation not allowed
+		// $activate_result = activate_plugin( $plugin_file );
 
-		if ( is_wp_error( $activate_result ) ) {
-			return new WP_Error(
-				'quillcrm_rest_plugins_activate_failed',
-				$activate_result->get_error_message(),
-				array( 'status' => 500 )
-			);
-		}
+		// if ( is_wp_error( $activate_result ) ) {
+		// 	return new WP_Error(
+		// 		'quillcrm_rest_plugins_activate_failed',
+		// 		$activate_result->get_error_message(),
+		// 		array( 'status' => 500 )
+		// 	);
+		// }
 
 		return new WP_REST_Response(
 			array(
 				'success'     => true,
 				'plugin_file' => $plugin_file,
+				'message'     => esc_html__( 'Plugin is installed. Please activate it manually from the WordPress Plugins page.', 'quillcrm' ),
 			),
 			200
 		);

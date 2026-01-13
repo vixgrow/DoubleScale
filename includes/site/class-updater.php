@@ -40,11 +40,16 @@ class Updater {
 	 * @since 1.0.0
 	 */
 	private function __construct() {
+		/**
+		 * WordPress.org Review: Custom update checker removed
+		 * WordPress.org provides update functionality, so custom update checks are not permitted.
+		 * This code is preserved for reference but commented out for WordPress.org compliance.
+		 */
 		// set pro updates data.
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'init_pro_updates' ) );
+		// add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'init_pro_updates' ) );
 
 		// filter pro plugins info.
-		add_filter( 'plugins_api', array( $this, 'filter_plugins_api' ), 10, 3 );
+		// add_filter( 'plugins_api', array( $this, 'filter_plugins_api' ), 10, 3 );
 
 		// add additional messages to pro plugin row.
 		add_action(

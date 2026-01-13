@@ -1,10 +1,10 @@
-=== Quill CRM - Complete Customer Relationship Management for WordPress, Pipelines, Automations, Email, SMS, and WhatsApp Marketing ===
+=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations, Email Campaigns, SMS Campaigns, and More! ===
 Contributors: quillforms, mdmag
-Tags: crm, customer management, contact management, pipeline, sales, sms, automation, whatsapp
+Tags: crm, customer management, pipeline, whatsapp, automation
 Requires at least: 5.8
-Tested up to: 6.9.0
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -245,6 +245,28 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 
 Comprehensive documentation with 70+ articles is available at [quillcrm.io/docs](https://quillcrm.io/docs)
 
+
+== Source Code ==
+
+This plugin includes compiled/minified JavaScript and CSS files in the `build/` directory. The complete human-readable source code is included in the `src/` directory of this plugin.
+
+**GitHub Repository:**
+The full source code is also publicly available on GitHub: [https://github.com/QuillCRM/QuillCRM](https://github.com/QuillCRM/QuillCRM)
+
+To build from source:
+1. Install Node.js (v16 or higher recommended)
+2. Navigate to the plugin directory
+3. Run: `npm install` (installs dependencies)
+4. Run: `npm run build` (builds production files)
+
+For development with watch mode:
+* Run: `npm run dev`
+
+**Build Output:**
+* `build/client/` - Compiled client application
+* `build/config/` - Compiled configuration module
+
+All third-party libraries used are documented in `package.json` and are publicly available on npm.
 
 == Installation ==
 

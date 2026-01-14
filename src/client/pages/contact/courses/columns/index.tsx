@@ -29,6 +29,8 @@ const STATUS_STYLES: Record<
 const LMS_LABELS: Record<string, string> = {
     learndash: 'LearnDash',
     tutorlms: 'Tutor LMS',
+    lifterlms: 'LifterLMS',
+    learnpress: 'LearnPress',
 };
 
 const getStatusContent = (status?: string) => {

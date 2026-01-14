@@ -66,6 +66,18 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'quillcrm'
 			);
 		}
+		if (groupLabel === 'LifterLMS') {
+			return __(
+				'LifterLMS plugin is not installed or activated. Install LifterLMS to use these actions.',
+				'quillcrm'
+			);
+		}
+		if (groupLabel === 'LearnPress') {
+			return __(
+				'LearnPress plugin is not installed or activated. Install LearnPress to use these actions.',
+				'quillcrm'
+			);
+		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these actions.',

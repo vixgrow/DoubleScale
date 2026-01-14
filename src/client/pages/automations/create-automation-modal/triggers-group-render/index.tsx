@@ -75,6 +75,18 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 				'quillcrm'
 			);
 		}
+		if (groupLabel === 'LifterLMS') {
+			return __(
+				'LifterLMS plugin is not installed or activated. Install LifterLMS to use these triggers.',
+				'quillcrm'
+			);
+		}
+		if (groupLabel === 'LearnPress') {
+			return __(
+				'LearnPress plugin is not installed or activated. Install LearnPress to use these triggers.',
+				'quillcrm'
+			);
+		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these triggers.',

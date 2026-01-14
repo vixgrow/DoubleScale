@@ -40,15 +40,20 @@ class Updater {
 	 * @since 1.0.0
 	 */
 	private function __construct() {
+		/**
+		 * WordPress.org Review: Custom update checker removed
+		 * WordPress.org provides update functionality, so custom update checks are not permitted.
+		 * This code is preserved for reference but commented out for WordPress.org compliance.
+		 */
 		// set pro updates data.
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'init_pro_updates' ) );
+		// add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'init_pro_updates' ) );
 
 		// filter pro plugins info.
-		add_filter( 'plugins_api', array( $this, 'filter_plugins_api' ), 10, 3 );
+		// add_filter( 'plugins_api', array( $this, 'filter_plugins_api' ), 10, 3 );
 
 		// add additional messages to pro plugin row.
 		add_action(
-			'in_plugin_update_message-QuillCRM-pro/quillcrm-pro.php',
+			'in_plugin_update_message-QuillCRM-Pro/quillcrm-pro.php',
 			array( $this, 'add_in_plugin_update_message' ),
 			10
 		);
@@ -80,8 +85,8 @@ class Updater {
 
 		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
 		$plugins_dir      = trailingslashit( dirname( dirname( QUILLCRM_PLUGIN_FILE ) ) );
-		$plugin_file      = 'QuillCRM-pro/quillcrm-pro.php';
-		$full_plugin_file = $plugins_dir . 'QuillCRM-pro/quillcrm-pro.php';
+		$plugin_file      = 'QuillCRM-Pro/quillcrm-pro.php';
+		$full_plugin_file = $plugins_dir . 'QuillCRM-Pro/quillcrm-pro.php';
 		$plugin_exists    = file_exists( $full_plugin_file );
 		$plugin_data      = $plugin_exists ? get_plugin_data( $full_plugin_file ) : array();
 		$plugin_slug      = 'quillcrm-pro';
@@ -180,7 +185,7 @@ class Updater {
 				'item_id' => "{$plugin['slug']}",
 				'version' => $plugin['version'],
 				'slug'    => basename( $plugin['full_plugin_file'], '.php' ),
-				'author'  => 'quillcrm.com',
+				'author'  => 'quillcrm.io',
 				'url'     => home_url(),
 				'beta'    => false,
 			);

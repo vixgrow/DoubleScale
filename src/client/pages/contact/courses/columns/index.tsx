@@ -40,14 +40,15 @@ const getStatusContent = (status?: string) => {
         };
     }
 
-    const normalizedStatus = status.toLowerCase() as keyof typeof STATUS_STYLES;
+    const normalizedStatus = status.toLowerCase().replace(/\s+/g, '_') as keyof typeof STATUS_STYLES;
 
     const classes =
         STATUS_STYLES[normalizedStatus] ??
         'bg-[#F4F4F5] border-[#D4D4D8] text-[#4B5563]';
 
     return {
-        label: status.replace(/_/g, ' '),
+        // Display label: replace underscores with spaces and capitalize first letter of each word
+        label: status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
         classes,
     };
 };

@@ -743,34 +743,41 @@ class REST_Contact_Controller extends REST_Controller {
 				$is_completed = tutor_utils()->is_completed_course( $course_id, $user_id );
 
 				// Get completion date if completed.
+				// TutorLMS stores completion in comments table with comment_type = 'course_completed'.
 				$completed_on = null;
 				if ( $is_completed ) {
-					$completion = tutor_utils()->get_course_completed_date( $course_id, $user_id );
-					if ( $completion ) {
-						$completed_on = $completion;
+					global $wpdb;
+					$completion_comment = $wpdb->get_row(
+						$wpdb->prepare(
+							"SELECT comment_date FROM {$wpdb->comments} WHERE comment_post_ID = %d AND user_id = %d AND comment_type = %s",
+							$course_id,
+							$user_id,
+							'course_completed'
+						)
+					);
+					if ( $completion_comment && ! empty( $completion_comment->comment_date ) ) {
+						$completed_on = $completion_comment->comment_date;
 					}
 				}
 
 				// Get enrollment date.
-				$started_on  = null;
-				$enrolled_id = tutor_utils()->is_enrolled( $course_id, $user_id );
-				if ( $enrolled_id ) {
-					$enrolled_post = get_post( $enrolled_id );
-					if ( $enrolled_post ) {
-						$started_on = $enrolled_post->post_date;
-					}
+				// Note: tutor_utils()->is_enrolled() returns an object with ID, post_author, post_date, etc.
+				$started_on = null;
+				$enrolled   = tutor_utils()->is_enrolled( $course_id, $user_id );
+				if ( $enrolled && isset( $enrolled->post_date ) ) {
+					$started_on = $enrolled->post_date;
 				}
 
-				// Determine status.
+				// Determine status (use underscores to match frontend STATUS_STYLES keys).
 				if ( $is_completed ) {
-					$status = 'Completed';
+					$status = 'completed';
 				} else {
 					// Check progress.
 					$progress = tutor_utils()->get_course_completed_percent( $course_id, $user_id );
 					if ( $progress > 0 ) {
-						$status = 'In Progress';
+						$status = 'in_progress';
 					} else {
-						$status = 'Not Started';
+						$status = 'not_started';
 					}
 				}
 

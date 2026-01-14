@@ -727,6 +727,11 @@ export type Settings = {
 	currency: {
 		currency: string;
 	};
+	website_tracking: {
+		enabled: boolean;
+		retention_type: 'days' | 'never' | null;
+		retention_days: string | null;
+	};
 };
 
 export type Response = {

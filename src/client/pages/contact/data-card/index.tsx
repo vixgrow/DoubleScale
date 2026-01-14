@@ -21,6 +21,7 @@ import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import DealsBase from '../deals';
 import TasksBase from '../tasks';
+import WebsiteTrackingBase from '../website-tracking';
 import {
 	AutomationsIcon,
 	ContactSMSIcon,
@@ -30,6 +31,7 @@ import {
 	PurchaseHistoryIcon,
 	CoursesIcon,
 	TaskDoneIcon,
+	WebsiteIcon,
 } from '@quillcrm/components';
 import { MessageCircle } from 'lucide-react';
 import ConfigAPI from '@quillcrm/config';
@@ -70,7 +72,18 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		'quillcrm_contact_tab_component',
 		null,
 		'whatsapp'
-	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }> | null;
+	) as React.FC<{
+		contact_id: number;
+		navigate?: (path: string) => void;
+	}> | null;
+	const WebsiteTracking = applyFilters(
+		'quillcrm_contact_tab_component',
+		WebsiteTrackingBase,
+		'website_tracking'
+	) as React.FC<{
+		contact_id: number;
+		navigate?: (path: string) => void;
+	}>;
 
 	const tabsList = [
 		{
@@ -79,10 +92,23 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
-		...(WhatsApp ? [{ value: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle width={24} height={24} /> }] : []),
+		...(WhatsApp
+			? [
+					{
+						value: 'whatsapp',
+						label: 'WhatsApp',
+						icon: <MessageCircle width={24} height={24} />,
+					},
+				]
+			: []),
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
 		{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> },
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'website_tracking',
+			label: 'Website Tracking',
+			icon: <WebsiteIcon width={24} height={24} />,
+		},
 		...(isCrmManager
 			? [
 					{
@@ -129,19 +155,37 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				</CardContent>
 			),
 		},
-		...(WhatsApp ? [{
-			value: 'whatsapp',
-			children: (
-				<CardContent className="pt-6">
-					<WhatsApp contact_id={contact.id} navigate={navigate} />
-				</CardContent>
-			),
-		}] : []),
+		...(WhatsApp
+			? [
+					{
+						value: 'whatsapp',
+						children: (
+							<CardContent className="pt-6">
+								<WhatsApp
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
 		{
 			value: 'deals',
 			children: (
 				<CardContent className="pt-6">
 					<Deals contact_id={contact.id} navigate={navigate} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'website_tracking',
+			children: (
+				<CardContent className="pt-6">
+					<WebsiteTracking
+						contact_id={contact.id}
+						navigate={navigate}
+					/>
 				</CardContent>
 			),
 		},

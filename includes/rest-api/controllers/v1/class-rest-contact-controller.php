@@ -639,10 +639,12 @@ class REST_Contact_Controller extends REST_Controller {
 			$contact_id = $request->get_param( 'id' );
 			$contact    = Contact_Model::find( $contact_id );
 
-			$is_learndash_active = quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' );
-			$is_tutor_active     = quillcrm_is_plugin_active( 'tutor/tutor.php' );
+			$is_learndash_active  = quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' );
+			$is_tutor_active      = quillcrm_is_plugin_active( 'tutor/tutor.php' );
+			$is_lifterlms_active  = quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' );
+			$is_learnpress_active = quillcrm_is_plugin_active( 'learnpress/learnpress.php' );
 
-			if ( ! $is_learndash_active && ! $is_tutor_active ) {
+			if ( ! $is_learndash_active && ! $is_tutor_active && ! $is_lifterlms_active && ! $is_learnpress_active ) {
 				return new WP_Error( 'error', 'No LMS plugin is active', array( 'status' => 400 ) );
 			}
 
@@ -671,6 +673,16 @@ class REST_Contact_Controller extends REST_Controller {
 			// TutorLMS courses.
 			if ( $is_tutor_active ) {
 				$result = array_merge( $result, $this->get_tutor_courses( $user->ID ) );
+			}
+
+			// LifterLMS courses.
+			if ( $is_lifterlms_active ) {
+				$result = array_merge( $result, $this->get_lifterlms_courses( $user->ID ) );
+			}
+
+			// LearnPress courses.
+			if ( $is_learnpress_active ) {
+				$result = array_merge( $result, $this->get_learnpress_courses( $user->ID ) );
 			}
 
 			return new WP_REST_Response(
@@ -792,6 +804,151 @@ class REST_Contact_Controller extends REST_Controller {
 				);
 			}
 			wp_reset_postdata();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get LifterLMS courses for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return array
+	 */
+	private function get_lifterlms_courses( $user_id ) {
+		$result = array();
+
+		if ( ! function_exists( 'llms_get_student' ) ) {
+			return $result;
+		}
+
+		$student = llms_get_student( $user_id );
+		if ( ! $student ) {
+			return $result;
+		}
+
+		$courses = $student->get_courses( array( 'limit' => 10000 ) );
+		if ( empty( $courses['results'] ) ) {
+			return $result;
+		}
+
+		foreach ( $courses['results'] as $course_id ) {
+			$course = get_post( $course_id );
+			if ( ! $course ) {
+				continue;
+			}
+
+			// Get enrollment status.
+			$enrollment_status = $student->get_enrollment_status( $course_id );
+			$is_complete       = $student->is_complete( $course_id, 'course' );
+
+			// Get dates.
+			$started_on   = $student->get_enrollment_date( $course_id, 'enrolled' );
+			$completed_on = null;
+			if ( $is_complete ) {
+				$completed_on = $student->get_completion_date( $course_id );
+			}
+
+			// Determine status.
+			if ( $is_complete ) {
+				$status = 'completed';
+			} elseif ( 'enrolled' === $enrollment_status ) {
+				// Check progress.
+				$progress = $student->get_progress( $course_id, 'course' );
+				if ( $progress > 0 ) {
+					$status = 'in_progress';
+				} else {
+					$status = 'not_started';
+				}
+			} else {
+				$status = 'not_started';
+			}
+
+			$result[] = array(
+				'id'           => $course->ID,
+				'name'         => $course->post_title,
+				'url'          => get_edit_post_link( $course->ID ),
+				'status'       => $status,
+				'completed_on' => $completed_on,
+				'started_on'   => $started_on,
+				'lms'          => 'lifterlms',
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get LearnPress courses for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return array
+	 */
+	private function get_learnpress_courses( $user_id ) {
+		$result = array();
+
+		if ( ! defined( 'LP_PLUGIN_FILE' ) ) {
+			return $result;
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'learnpress_user_items';
+
+		// Check if table exists.
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		if ( ! $table_exists ) {
+			return $result;
+		}
+
+		// Get all course enrollments for user.
+		$enrollments = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name} WHERE user_id = %d AND item_type = %s ORDER BY start_time DESC",
+				$user_id,
+				'lp_course'
+			)
+		);
+
+		if ( empty( $enrollments ) ) {
+			return $result;
+		}
+
+		foreach ( $enrollments as $enrollment ) {
+			$course = get_post( $enrollment->item_id );
+			if ( ! $course ) {
+				continue;
+			}
+
+			// Determine status based on graduation field.
+			if ( 'passed' === $enrollment->graduation ) {
+				$status = 'completed';
+			} elseif ( 'enrolled' === $enrollment->status || 'finished' === $enrollment->status ) {
+				$status = 'in_progress';
+			} else {
+				$status = 'not_started';
+			}
+
+			// Get completion date if passed.
+			$completed_on = null;
+			if ( 'passed' === $enrollment->graduation && ! empty( $enrollment->end_time ) && '0000-00-00 00:00:00' !== $enrollment->end_time ) {
+				$completed_on = $enrollment->end_time;
+			}
+
+			$result[] = array(
+				'id'           => $course->ID,
+				'name'         => $course->post_title,
+				'url'          => get_edit_post_link( $course->ID ),
+				'status'       => $status,
+				'completed_on' => $completed_on,
+				'started_on'   => ! empty( $enrollment->start_time ) && '0000-00-00 00:00:00' !== $enrollment->start_time ? $enrollment->start_time : null,
+				'lms'          => 'learnpress',
+			);
 		}
 
 		return $result;

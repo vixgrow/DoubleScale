@@ -60,6 +60,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'quillcrm'
 			);
 		}
+		if (groupLabel === 'Tutor LMS') {
+			return __(
+				'Tutor LMS plugin is not installed or activated. Install Tutor LMS to use these actions.',
+				'quillcrm'
+			);
+		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these actions.',

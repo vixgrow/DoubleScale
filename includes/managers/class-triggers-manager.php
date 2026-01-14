@@ -237,15 +237,25 @@ final class Triggers_Manager {
 			 'lms'         => array(
 				 'label'  => __( 'LMS', 'quillcrm' ),
 				 'groups' => array(
-					 'learndash' => array(
+					 'learndash'  => array(
 						 'label'       => __( 'LearnDash', 'quillcrm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 					 ),
-					 'tutorlms'  => array(
+					 'tutorlms'   => array(
 						 'label'       => __( 'Tutor LMS', 'quillcrm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'tutor/tutor.php' ),
+					 ),
+					 'lifterlms'  => array(
+						 'label'       => __( 'LifterLMS', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' ),
+					 ),
+					 'learnpress' => array(
+						 'label'       => __( 'LearnPress', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'learnpress/learnpress.php' ),
 					 ),
 				 ),
 			 ),

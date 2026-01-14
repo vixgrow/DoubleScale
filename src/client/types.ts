@@ -112,6 +112,7 @@ export type LMSCourse = {
 	url: string;
 	completed_on: string;
 	started_on: string;
+	lms?: 'learndash' | 'tutorlms';
 };
 
 export type LMSCoursesResponse = {

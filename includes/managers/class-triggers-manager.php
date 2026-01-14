@@ -245,7 +245,7 @@ final class Triggers_Manager {
 					 'tutorlms'  => array(
 						 'label'       => __( 'Tutor LMS', 'quillcrm' ),
 						 'triggers'    => array(),
-						 'is_disabled' => ! defined( 'TUTOR_VERSION' ),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'tutor/tutor.php' ),
 					 ),
 				 ),
 			 ),

@@ -639,8 +639,11 @@ class REST_Contact_Controller extends REST_Controller {
 			$contact_id = $request->get_param( 'id' );
 			$contact    = Contact_Model::find( $contact_id );
 
-			if ( ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
-				return new WP_Error( 'error', 'LearnDash is not active', array( 'status' => 400 ) );
+			$is_learndash_active = quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' );
+			$is_tutor_active     = quillcrm_is_plugin_active( 'tutor/tutor.php' );
+
+			if ( ! $is_learndash_active && ! $is_tutor_active ) {
+				return new WP_Error( 'error', 'No LMS plugin is active', array( 'status' => 400 ) );
 			}
 
 			if ( ! $contact ) {
@@ -649,32 +652,142 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$user = get_user_by( 'email', $contact->email );
 			if ( ! $user ) {
-				return array();
+				return new WP_REST_Response(
+					array(
+						'data'  => array(),
+						'total' => 0,
+					),
+					200
+				);
 			}
 
-			$courses = learndash_user_get_enrolled_courses( $user->ID );
-			$result  = array();
+			$result = array();
 
-			foreach ( $courses as $course_id ) {
-				$course = get_post( $course_id );
-				if ( $course ) {
-					$completed_on = learndash_user_get_course_completed_date( $user->ID, $course_id );
-					$started_on   = ld_course_access_from( $user->ID, $course_id );
-					$result[]     = array(
-						'id'           => $course->ID,
-						'name'         => $course->post_title,
-						'url'          => get_edit_post_link( $course->ID ),
-						'status'       => learndash_course_status( $course_id, $user->ID ),
-						'completed_on' => $completed_on ? date( 'Y-m-d H:i:s', $completed_on ) : null,
-						'started_on'   => $started_on ? date( 'Y-m-d H:i:s', $started_on ) : null,
-					);
-				}
+			// LearnDash courses.
+			if ( $is_learndash_active ) {
+				$result = array_merge( $result, $this->get_learndash_courses( $user->ID ) );
 			}
 
-			return new WP_REST_Response( $result, 200 );
+			// TutorLMS courses.
+			if ( $is_tutor_active ) {
+				$result = array_merge( $result, $this->get_tutor_courses( $user->ID ) );
+			}
+
+			return new WP_REST_Response(
+				array(
+					'data'  => $result,
+					'total' => count( $result ),
+				),
+				200
+			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
+	}
+
+	/**
+	 * Get LearnDash courses for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return array
+	 */
+	private function get_learndash_courses( $user_id ) {
+		$result  = array();
+		$courses = learndash_user_get_enrolled_courses( $user_id );
+
+		foreach ( $courses as $course_id ) {
+			$course = get_post( $course_id );
+			if ( $course ) {
+				$completed_on = learndash_user_get_course_completed_date( $user_id, $course_id );
+				$started_on   = ld_course_access_from( $user_id, $course_id );
+				$result[]     = array(
+					'id'           => $course->ID,
+					'name'         => $course->post_title,
+					'url'          => get_edit_post_link( $course->ID ),
+					'status'       => learndash_course_status( $course_id, $user_id ),
+					'completed_on' => $completed_on ? gmdate( 'Y-m-d H:i:s', $completed_on ) : null,
+					'started_on'   => $started_on ? gmdate( 'Y-m-d H:i:s', $started_on ) : null,
+					'lms'          => 'learndash',
+				);
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get TutorLMS courses for a user.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return array
+	 */
+	private function get_tutor_courses( $user_id ) {
+		$result = array();
+
+		if ( ! function_exists( 'tutor_utils' ) ) {
+			return $result;
+		}
+
+		$enrolled_courses = tutor_utils()->get_enrolled_courses_by_user( $user_id );
+
+		if ( $enrolled_courses && $enrolled_courses->have_posts() ) {
+			while ( $enrolled_courses->have_posts() ) {
+				$enrolled_courses->the_post();
+				$course_id    = get_the_ID();
+				$is_completed = tutor_utils()->is_completed_course( $course_id, $user_id );
+
+				// Get completion date if completed.
+				$completed_on = null;
+				if ( $is_completed ) {
+					$completion = tutor_utils()->get_course_completed_date( $course_id, $user_id );
+					if ( $completion ) {
+						$completed_on = $completion;
+					}
+				}
+
+				// Get enrollment date.
+				$started_on  = null;
+				$enrolled_id = tutor_utils()->is_enrolled( $course_id, $user_id );
+				if ( $enrolled_id ) {
+					$enrolled_post = get_post( $enrolled_id );
+					if ( $enrolled_post ) {
+						$started_on = $enrolled_post->post_date;
+					}
+				}
+
+				// Determine status.
+				if ( $is_completed ) {
+					$status = 'Completed';
+				} else {
+					// Check progress.
+					$progress = tutor_utils()->get_course_completed_percent( $course_id, $user_id );
+					if ( $progress > 0 ) {
+						$status = 'In Progress';
+					} else {
+						$status = 'Not Started';
+					}
+				}
+
+				$result[] = array(
+					'id'           => $course_id,
+					'name'         => get_the_title(),
+					'url'          => get_edit_post_link( $course_id ),
+					'status'       => $status,
+					'completed_on' => $completed_on,
+					'started_on'   => $started_on,
+					'lms'          => 'tutorlms',
+				);
+			}
+			wp_reset_postdata();
+		}
+
+		return $result;
 	}
 
 	/**

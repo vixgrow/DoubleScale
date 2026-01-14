@@ -26,6 +26,11 @@ const STATUS_STYLES: Record<
         'bg-[#F8F8F8] border-gray-500 text-gray-500',
 };
 
+const LMS_LABELS: Record<string, string> = {
+    learndash: 'LearnDash',
+    tutorlms: 'Tutor LMS',
+};
+
 const getStatusContent = (status?: string) => {
     if (!status) {
         return {
@@ -86,6 +91,19 @@ export const getColumns = (): ColumnDef<LMSCourse>[] => [
         cell: ({ row }) => (
             row.original.completed_on ? <FormattedDateCell value={row.original.completed_on} /> : <span>-</span>
         ),
+    },
+    {
+        accessorKey: 'lms',
+        header: __('LMS', 'quillcrm'),
+        cell: ({ row }) => {
+            const lms = row.original.lms;
+            if (!lms) return <span>-</span>;
+            return (
+                <span className="inline-flex items-center rounded-full bg-[#F4F4F5] border border-[#D4D4D8] px-3 py-1 text-sm font-medium text-[#4B5563]">
+                    {LMS_LABELS[lms] || lms}
+                </span>
+            );
+        },
     },
 ];
 

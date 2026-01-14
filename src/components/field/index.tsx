@@ -50,6 +50,7 @@ import { TooltipTrigger } from '../ui/tooltip';
 import { TooltipContent } from '../ui/tooltip';
 import EmailClicked from '../email-clicked';
 import FormSubmission from '../form-submission';
+import PageVisited from '../page-visited';
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -593,6 +594,15 @@ const Field: React.FC<FieldProps> = ({
 		case 'email_clicked':
 			fieldContent = (
 				<EmailClicked
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'page_visited':
+			fieldContent = (
+				<PageVisited
+					options={options || []}
 					value={value}
 					onChange={(value) => onChange(value)}
 				/>

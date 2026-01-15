@@ -194,6 +194,16 @@ final class Goals_Manager {
 					 ),
 				 ),
 			 ),
+			 'surecart'    => array(
+				 'label'  => __( 'SureCart', 'quillcrm' ),
+				 'groups' => array(
+					 'order' => array(
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'goals'       => array(),
+						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+					 ),
+				 ),
+			 ),
 		 );
 
 		 $this->sources = apply_filters( 'quillcrm_goals_sources', $this->sources );

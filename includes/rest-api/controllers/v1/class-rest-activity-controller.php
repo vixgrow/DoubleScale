@@ -284,7 +284,7 @@ class REST_Activity_Controller extends REST_Controller {
 			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'quillcrm' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user' ) );
+		$activity->load( array( 'user', 'associations' ) );
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -328,7 +328,7 @@ class REST_Activity_Controller extends REST_Controller {
 			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'quillcrm' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user' ) );
+		$activity->load( array( 'user', 'associations' ) );
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -365,7 +365,7 @@ class REST_Activity_Controller extends REST_Controller {
 			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'quillcrm' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user' ) );
+		$activity->load( array( 'user', 'associations' ) );
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
@@ -414,7 +414,7 @@ class REST_Activity_Controller extends REST_Controller {
 			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'quillcrm' ), array( 'status' => 500 ) );
 		}
 
-		$activity->load( array( 'user' ) );
+		$activity->load( array( 'user', 'associations' ) );
 		$response_data = $this->prepare_item_for_response( $activity, $request );
 
 		return new WP_REST_Response( $response_data, 201 );

@@ -382,6 +382,30 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load TutorLMS triggers (Pro placeholders)
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/tutorlms/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load LifterLMS triggers (Pro placeholders)
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/lifterlms/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load LearnPress triggers (Pro placeholders)
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learnpress/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load SureCart triggers (Pro placeholders)
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/surecart/**/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
 		// Load all automations messaging actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/messaging/class-*.php' );
 		foreach ( $actions_files as $file ) {
@@ -453,6 +477,24 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load TutorLMS actions (Pro placeholders)
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/tutorlms/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load LifterLMS actions (Pro placeholders)
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/lifterlms/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load LearnPress actions (Pro placeholders)
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learnpress/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
 		// Load all froms
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
@@ -497,6 +539,12 @@ final class QuillCRM {
 
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
+		foreach ( $goals_files as $file ) {
+			require $file;
+		}
+
+		// Load SureCart goals (Pro placeholders)
+		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/surecart/class-*.php' );
 		foreach ( $goals_files as $file ) {
 			require $file;
 		}

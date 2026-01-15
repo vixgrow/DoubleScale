@@ -21,6 +21,7 @@ export type ConfigData = Record<string, unknown> & {
 	automationRules: AutomationRules;
 	isWoocommerceActive: boolean;
 	isEddActive: boolean;
+	isSurecartActive: boolean;
 	isLmsActive: boolean;
 	mergeTags: AutomationMergeTags;
 	importers: Importers;

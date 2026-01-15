@@ -283,6 +283,16 @@ final class Triggers_Manager {
 				 'label'  => __( 'Forms', 'quillcrm' ),
 				 'groups' => array(),
 			 ),
+			 'surecart'    => array(
+				 'label'  => __( 'SureCart', 'quillcrm' ),
+				 'groups' => array(
+					 'order' => array(
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+					 ),
+				 ),
+			 ),
 		 );
 
 		 $this->sources = apply_filters( 'quillcrm_triggers_sources', $this->sources );

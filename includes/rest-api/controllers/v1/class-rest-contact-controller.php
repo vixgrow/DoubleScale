@@ -439,9 +439,39 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_purchase_history' ),
 					'permission_callback' => array( $this, 'get_purchase_history_permissions_check' ),
 					'args'                => array(
-						'id' => array(
+						'id'               => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
 							'type'        => 'integer',
+						),
+						'woo_page'         => array(
+							'description' => __( 'WooCommerce page number.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 1,
+						),
+						'woo_per_page'     => array(
+							'description' => __( 'WooCommerce items per page.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 10,
+						),
+						'edd_page'         => array(
+							'description' => __( 'EDD page number.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 1,
+						),
+						'edd_per_page'     => array(
+							'description' => __( 'EDD items per page.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 10,
+						),
+						'surecart_page'    => array(
+							'description' => __( 'SureCart page number.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 1,
+						),
+						'surecart_per_page' => array(
+							'description' => __( 'SureCart items per page.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 10,
 						),
 					),
 				),
@@ -1050,7 +1080,7 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			$results = array(
-				'edd' => array(
+				'edd'      => array(
 					'orders'     => array(),
 					'total'      => 0,
 					'revenue'    => 0,
@@ -1058,7 +1088,15 @@ class REST_Contact_Controller extends REST_Controller {
 					'last_order' => null,
 					'currency'   => null,
 				),
-				'wc'  => array(
+				'wc'       => array(
+					'orders'     => array(),
+					'total'      => 0,
+					'revenue'    => 0,
+					'average'    => 0,
+					'last_order' => null,
+					'currency'   => null,
+				),
+				'surecart' => array(
 					'orders'     => array(),
 					'total'      => 0,
 					'revenue'    => 0,
@@ -1118,6 +1156,47 @@ class REST_Contact_Controller extends REST_Controller {
 					$results['wc']['average']    = $wc_orders->avg( 'total_amount' );
 					$results['wc']['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
 					$results['wc']['currency']   = get_woocommerce_currency();
+				}
+			}
+
+			// SureCart purchase history
+			if ( defined( 'SURECART_PLUGIN_FILE' ) && class_exists( '\SureCart\Models\Customer' ) ) {
+				$customer = \SureCart\Models\Customer::byEmail( $contact->email );
+
+				if ( $customer && ! is_wp_error( $customer ) ) {
+					$sc_orders = \SureCart\Models\Order::where(
+						array(
+							'customer_ids' => array( $customer->id ),
+						)
+					)->with( array( 'checkout' ) )->get();
+
+					if ( $sc_orders && ! is_wp_error( $sc_orders ) && isset( $sc_orders->data ) && is_array( $sc_orders->data ) ) {
+						$formatted_orders = array();
+						$total_revenue    = 0;
+
+						foreach ( $sc_orders->data as $order ) {
+							$order_total       = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
+							$total_revenue    += $order_total;
+							$formatted_orders[] = array(
+								'id'           => $order->id ?? '',
+								'number'       => $order->number ?? '',
+								'total_amount' => $order_total,
+								'date'         => isset( $order->created_at ) ? gmdate( 'Y-m-d H:i:s', $order->created_at ) : null,
+								'url'          => admin_url( 'admin.php?page=sc-orders&action=edit&id=' . ( $order->id ?? '' ) ),
+								'status'       => $order->status ?? '',
+								'order_type'   => $order->order_type ?? '',
+								'currency'     => isset( $order->checkout->currency ) ? strtoupper( $order->checkout->currency ) : 'USD',
+							);
+						}
+
+						$order_count                        = count( $formatted_orders );
+						$results['surecart']['orders']      = $formatted_orders;
+						$results['surecart']['total']       = $order_count;
+						$results['surecart']['revenue']     = $total_revenue;
+						$results['surecart']['average']     = $order_count > 0 ? ( $total_revenue / $order_count ) : 0;
+						$results['surecart']['last_order']  = ! empty( $formatted_orders ) ? $formatted_orders[0]['date'] : null;
+						$results['surecart']['currency']    = ! empty( $formatted_orders ) ? $formatted_orders[0]['currency'] : 'USD';
+					}
 				}
 			}
 

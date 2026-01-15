@@ -46,6 +46,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	const { contact } = useContactContext();
 	const isEddActive = ConfigAPI.isEddActive();
 	const isWooActive = ConfigAPI.isWoocommerceActive();
+	const isSurecartActive = ConfigAPI.isSurecartActive();
 	const lmsActive = ConfigAPI.isLmsActive();
 	const isCrmManager = useCapabilities().isCrmManager();
 	if (!contact) {
@@ -121,7 +122,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	];
 
 	// Conditionally add Purchase History tab
-	if (isWooActive || isEddActive) {
+	if (isWooActive || isEddActive || isSurecartActive) {
 		tabsList.push({
 			value: 'purchase-history',
 			label: 'Purchase History',
@@ -216,7 +217,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	];
 
 	// Conditionally add Purchase History content
-	if (isWooActive || isEddActive) {
+	if (isWooActive || isEddActive || isSurecartActive) {
 		tabsContent.push({
 			value: 'purchase-history',
 			children: (

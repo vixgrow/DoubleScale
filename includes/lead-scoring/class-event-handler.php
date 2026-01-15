@@ -20,9 +20,6 @@ use QuillCRM\Managers\Lead_Scoring_Manager;
  */
 class Event_Handler {
 
-
-
-
 	/**
 	 * Constructor
 	 *
@@ -45,10 +42,7 @@ class Event_Handler {
 		add_action( 'quillcrm_email_clicked', array( $this, 'handle_contact' ), 99, 1 );
 		add_action( 'quillcrm_form_submitted', array( $this, 'handle_contact' ), 99, 1 );
 		add_action( 'quillcrm_page_visited', array( $this, 'handle_contact' ), 99, 1 );
-		// Custom field updates (Pro)
-		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
-			add_action( 'quillcrm_contact_custom_field_updated', array( $this, 'handle_contact' ), 99, 1 );
-		}
+		add_action( 'quillcrm_contact_updated', array( $this, 'handle_contact' ), 99, 1 );
 	}
 
 	/**
@@ -59,13 +53,12 @@ class Event_Handler {
 	 * @return void
 	 */
 	public function remove_common_event_actions() {
-		 remove_action( 'quillcrm_email_opened', array( $this, 'handle_contact' ), 99 );
+		 // Email tracking events
+		remove_action( 'quillcrm_email_opened', array( $this, 'handle_contact' ), 99 );
 		remove_action( 'quillcrm_email_clicked', array( $this, 'handle_contact' ), 99 );
 		remove_action( 'quillcrm_form_submitted', array( $this, 'handle_contact' ), 99 );
 		remove_action( 'quillcrm_page_visited', array( $this, 'handle_contact' ), 99 );
-		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
-			remove_action( 'quillcrm_contact_custom_field_updated', array( $this, 'handle_contact' ), 99 );
-		}
+		remove_action( 'quillcrm_contact_updated', array( $this, 'handle_contact' ), 99 );
 	}
 
 	/**

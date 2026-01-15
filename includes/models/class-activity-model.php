@@ -18,11 +18,6 @@ use WPEloquent\Eloquent\Model;
  */
 class Activity_Model extends Model {
 
-
-
-
-
-
 	/**
 	 * Table name
 	 *
@@ -95,7 +90,7 @@ class Activity_Model extends Model {
 	 */
 	public $rules = array(
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received',
+		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received,logged_in,logged_out',
 		'user_id'       => 'nullable|integer',
 	);
 
@@ -521,6 +516,31 @@ class Activity_Model extends Model {
 					$user_name
 				);
 
+			case 'logged_in':
+				$ip_address = $this->data['ip_address'] ?? '';
+				$message    = sprintf(
+					/* translators: %s: user name */
+					__( '%s logged in', 'quillcrm' ),
+					$user_name
+				);
+
+				if ( ! empty( $ip_address ) ) {
+					$message .= sprintf(
+						/* translators: %s: IP address */
+						__( ' from IP: %s', 'quillcrm' ),
+						$ip_address
+					);
+				}
+
+				return $message;
+
+			case 'logged_out':
+				return sprintf(
+					/* translators: %s: user name */
+					__( '%s logged out', 'quillcrm' ),
+					$user_name
+				);
+
 			default:
 				return sprintf(
 					/* translators: %s: user name */
@@ -803,6 +823,65 @@ class Activity_Model extends Model {
 					'primary_attendee_email' => $data['primary_attendee_email'] ?? '',
 				),
 				'user_id'       => $data['user_id'] ?? get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Log user login activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Login data.
+	 *
+	 * @return Activity_Model|null
+	 */
+	public static function log_login( $data ) {
+		$user_id    = $data['user_id'];
+		$user_email = $data['user_email'] ?? '';
+		$contact    = Contact_Model::where( 'email', $user_email )->first();
+		if ( ! $contact ) {
+			return null;
+		}
+
+		return self::create(
+			array(
+				'contact_id'    => $contact->id,
+				'activity_type' => 'logged_in',
+				'data'          => array(
+					'ip_address' => $data['ip_address'] ?? '',
+					'user_agent' => $data['user_agent'] ?? '',
+					'login_time' => $data['login_time'] ?? current_time( 'mysql' ),
+				),
+				'user_id'       => $user_id,
+			)
+		);
+	}
+
+	/**
+	 * Log user logout activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Logout data.
+	 *
+	 * @return Activity_Model|null
+	 */
+	public static function log_logout( $data ) {
+		$user_id    = $data['user_id'];
+		$user_email = $data['user_email'] ?? '';
+		$contact    = Contact_Model::where( 'email', $user_email )->first();
+		if ( ! $contact ) {
+			return null;
+		}
+		return self::create(
+			array(
+				'contact_id'    => $contact->id,
+				'activity_type' => 'logged_out',
+				'data'          => array(
+					'logout_time' => $data['logout_time'] ?? current_time( 'mysql' ),
+				),
+				'user_id'       => $user_id,
 			)
 		);
 	}

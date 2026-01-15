@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { Order, EddOrder } from '@quillcrm/client';
+import type { Order, EddOrder, SurecartOrder } from '@quillcrm/client';
 import { Button } from '@quillcrm/components/ui/button';
 import { ViewIcon } from '@quillcrm/components';
 
@@ -131,6 +131,69 @@ export function getEddColumns() {
 			accessorKey: 'total',
 			header: __('Total', 'quillcrm'),
 			cell: ({ row }) => `${row.original.total} ${row.original.currency}`,
+		},
+		{
+			accessorKey: 'actions',
+			header: __('Actions', 'quillcrm'),
+			cell: ({ row }) => (
+				<Button
+					size="sm"
+					className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+					onClick={() => window.open(row.original.url, '_blank')}
+				>
+					<ViewIcon />
+					{__('View', 'quillcrm')}
+				</Button>
+			),
+		},
+	];
+
+	return columns;
+}
+
+export function getSurecartColumns() {
+	const columns: ColumnDef<SurecartOrder>[] = [
+		{
+			accessorKey: 'number',
+			header: __('Order #', 'quillcrm'),
+			cell: ({ row }) => `#${row.original.number}`,
+		},
+		{
+			accessorKey: 'date',
+			header: __('Date', 'quillcrm'),
+			cell: ({ row }) => formatDate(row.original.date),
+		},
+		{
+			accessorKey: 'order_type',
+			header: __('Type', 'quillcrm'),
+			cell: ({ row }) => row.original.order_type,
+		},
+		{
+			accessorKey: 'status',
+			header: __('Status', 'quillcrm'),
+			cell: ({ row }) => {
+				const status = row.original.status.toLowerCase();
+				const statusStyles: Record<string, string> = {
+					paid: 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]',
+					pending: 'bg-[#FFF2E2] text-[#A6600B] border-[#A6600B]',
+					refunded: 'bg-[#5570F129] text-[#5570F1] border-[#5570F1]',
+					canceled: 'bg-[#FEE2E2] text-[#DC2626] border-[#DC2626]',
+				};
+
+				return (
+					<span
+						className={`border rounded-md px-2 py-1 ${statusStyles[status] || ''}`}
+					>
+						{row.original.status}
+					</span>
+				);
+			},
+		},
+		{
+			accessorKey: 'total_amount',
+			header: __('Total', 'quillcrm'),
+			cell: ({ row }) =>
+				`${row.original.total_amount.toFixed(2)} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'actions',

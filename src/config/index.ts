@@ -71,6 +71,7 @@ const configData: ConfigData = {
 	automationRules: {},
 	isWoocommerceActive: false,
 	isEddActive: false,
+	isSurecartActive: false,
 	isLmsActive: false,
 	mergeTags: {},
 	importers: {},
@@ -478,6 +479,27 @@ export const setIsEddActive = (data: ConfigData) => (value: boolean) => {
 };
 
 /**
+ * Get is surecart active
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns boolean
+ */
+export const isSurecartActive = (data: ConfigData): boolean => {
+	return data.isSurecartActive;
+};
+
+/**
+ * Set is surecart active
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setIsSurecartActive = (data: ConfigData) => (value: boolean) => {
+	data.isSurecartActive = value;
+};
+
+/**
  * Get is lms active
  * 
  * @param data the json environment configuration to use for getting config values
@@ -775,6 +797,8 @@ export interface ConfigApi {
 	setImporters: (value: Importers) => void;
 	isEddActive: () => boolean;
 	setIsEddActive: (value: boolean) => void;
+	isSurecartActive: () => boolean;
+	setIsSurecartActive: (value: boolean) => void;
 	isLmsActive: () => boolean;
 	setIsLmsActive: (value: boolean) => void;
 	getUserCapabilities: () => UserCapabilities;
@@ -841,6 +865,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setImporters = setImporters(data);
 	configApi.isEddActive = () => isEddActive(data);
 	configApi.setIsEddActive = setIsEddActive(data);
+	configApi.isSurecartActive = () => isSurecartActive(data);
+	configApi.setIsSurecartActive = setIsSurecartActive(data);
 	configApi.isLmsActive = () => isLmsActive(data);
 	configApi.setIsLmsActive = setIsLmsActive(data);
 	configApi.getUserCapabilities = () => getUserCapabilities(data);

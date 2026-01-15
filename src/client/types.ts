@@ -105,6 +105,17 @@ export type EddOrder = {
 	url: string;
 };
 
+export type SurecartOrder = {
+	id: string;
+	number: string;
+	total_amount: number;
+	date: string;
+	url: string;
+	status: string;
+	order_type: string;
+	currency: string;
+};
+
 export type LMSCourse = {
 	id: number;
 	name: string;

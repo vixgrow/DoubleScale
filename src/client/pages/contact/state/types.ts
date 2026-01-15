@@ -19,6 +19,7 @@ import type {
 	CampaignEmailsResponse,
 	Order,
 	EddOrder,
+	SurecartOrder,
 	LMSCourse,
 } from '@quillcrm/client';
 
@@ -78,6 +79,14 @@ export type PurchaseHistory = {
 	};
 	wc: {
 		orders: Order[];
+		total: number;
+		revenue: number;
+		average: number;
+		last_order: string;
+		currency: string;
+	};
+	surecart: {
+		orders: SurecartOrder[];
 		total: number;
 		revenue: number;
 		average: number;

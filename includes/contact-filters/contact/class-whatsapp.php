@@ -22,6 +22,7 @@ class Whatsapp extends Filter {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -56,7 +57,7 @@ class Whatsapp extends Filter {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'text';
+	public $type = 'phone';
 }
 
 Filters_Manager::instance()->register( new Whatsapp() );

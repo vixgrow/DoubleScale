@@ -30,11 +30,19 @@ import {
 	PurchaseHistoryIcon,
 	CoursesIcon,
 	TaskDoneIcon,
+	PhoneIcon,
+	DealActivityIcon,
+	CalendarIcon,
+	UpcomingActivitiesIcon,
 } from '@quillcrm/components';
-import { MessageCircle } from 'lucide-react';
 import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import Meetings from '../meetings';
+import Calls from '../calls';
+import Activities from '../activities';
+import UpcomingActivities from '../upcoming-activities';
+import WhatsAppIcon from '@quillcrm/components/icons/whatsapp-icon';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -71,27 +79,58 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		'quillcrm_contact_tab_component',
 		null,
 		'whatsapp'
-	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }> | null;
+	) as React.FC<{
+		contact_id: number;
+		navigate?: (path: string) => void;
+	}> | null;
 
 	const tabsList = [
+		{
+			value: 'upcoming-activities',
+			label: 'Upcoming Activities',
+			icon: <UpcomingActivitiesIcon />,
+		},
+		{
+			value: 'activities',
+			label: 'Activities',
+			icon: <DealActivityIcon width={24} height={24} />,
+		},
 		{
 			value: 'emails',
 			label: 'Emails',
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
+		{
+			value: 'calls',
+			label: 'Calls',
+			icon: <PhoneIcon width={24} height={24} />,
+		},
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
-		...(WhatsApp ? [{ value: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle width={24} height={24} /> }] : []),
+		...(WhatsApp
+			? [
+					{
+						value: 'whatsapp',
+						label: 'WhatsApp',
+						icon: <WhatsAppIcon width={24} height={24} />,
+					},
+				]
+			: []),
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
 		{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> },
+		{
+			value: 'meetings',
+			label: 'Meetings',
+			icon: <CalendarIcon width={24} height={24} />,
+		},
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
 		...(isCrmManager
 			? [
-				{
-					value: 'automation',
-					label: 'Automation',
-					icon: <AutomationsIcon width={24} height={24} />,
-				},
-			]
+					{
+						value: 'automation',
+						label: 'Automation',
+						icon: <AutomationsIcon width={24} height={24} />,
+					},
+				]
 			: []),
 	];
 
@@ -115,6 +154,38 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 
 	const tabsContent = [
 		{
+			value: 'meetings',
+			children: (
+				<CardContent className="pt-6">
+					<Meetings contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'calls',
+			children: (
+				<CardContent className="pt-6">
+					<Calls contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'activities',
+			children: (
+				<CardContent className="pt-6">
+					<Activities contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'upcoming-activities',
+			children: (
+				<CardContent className="pt-6">
+					<UpcomingActivities contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
 			value: 'emails',
 			children: (
 				<CardContent className="pt-6">
@@ -130,14 +201,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				</CardContent>
 			),
 		},
-		...(WhatsApp ? [{
-			value: 'whatsapp',
-			children: (
-				<CardContent className="pt-6">
-					<WhatsApp contact_id={contact.id} navigate={navigate} />
-				</CardContent>
-			),
-		}] : []),
+		...(WhatsApp
+			? [
+					{
+						value: 'whatsapp',
+						children: (
+							<CardContent className="pt-6">
+								<WhatsApp
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
 		{
 			value: 'deals',
 			children: (
@@ -199,7 +277,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	return (
 		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
 			<PageTabs
-				defaultValue="emails"
+				defaultValue="upcoming-activities"
 				tabsList={tabsList}
 				tabsContent={tabsContent}
 				className="w-full"

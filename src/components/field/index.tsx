@@ -51,6 +51,8 @@ import { TooltipContent } from '../ui/tooltip';
 import EmailClicked from '../email-clicked';
 import FormSubmission from '../form-submission';
 import PageVisited from '../page-visited';
+import LoggedInOut from '../logged-in-out';
+import WasActiveInactive from '../was-active-inactive';
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -644,6 +646,22 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = (
 				<FormSubmission
 					options={options || []}
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'logged_in_out':
+			fieldContent = (
+				<LoggedInOut
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'was_active_inactive':
+			fieldContent = (
+				<WasActiveInactive
 					value={value}
 					onChange={(value) => onChange(value)}
 				/>

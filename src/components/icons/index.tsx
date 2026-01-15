@@ -226,3 +226,5 @@ export { default as GradientMeetingsIcon } from './gradient-meetings';
 export { default as GradientCallsIcon } from './gradient-calls';
 export { default as GradientActivitiesIcon } from './gradient-activities';
 export { default as GradientUpcomingActivitiesIcon } from './gradient-upcoming-activities';
+export { default as AddLogIcon } from './add-log';
+export { default as GradientAddCallIcon } from './gradient-add-call';

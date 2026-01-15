@@ -4460,6 +4460,593 @@
 				"header": []
 			},
 			"response": []
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "List Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities?contact_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								},
+								{
+									"key": "activity_type",
+									"value": "email_sent",
+									"disabled": true
+								},
+								{
+									"key": "entity_id",
+									"value": "1",
+									"disabled": true,
+									"description": "Deal ID"
+								},
+								{
+									"key": "entity_type",
+									"value": "1",
+									"disabled": true,
+									"description": "1=deal, 2=campaign"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Activity",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"note\": \"Updated note content\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Activity",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Activities",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ids\": [1, 2, 3]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/bulk-delete",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"bulk-delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/statistics?contact_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"note\": \"This is a test note\",\n    \"deal_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/notes",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log Email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"subject\": \"Test Email Subject\",\n    \"body\": \"<p>This is a test email body with <strong>HTML</strong> content.</p>\",\n    \"deal_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/emails",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"emails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log Call",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"outcome\": \"answered\",\n    \"call_type\": \"outbound\",\n    \"duration\": 300,\n    \"notes\": \"Discussed product features\",\n    \"deal_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/calls",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"calls"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Schedule Meeting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"title\": \"Product Demo\",\n    \"location\": \"Zoom\",\n    \"start_time\": \"2026-01-20T10:00:00\",\n    \"end_time\": \"2026-01-20T11:00:00\",\n    \"notes\": \"Discuss pricing options\",\n    \"deal_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/meetings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"meetings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity Comments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}/comments",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Comment to Activity",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"This is a comment on the activity\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}/comments",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Updated comment content\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/comments/{{commentId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"comments",
+								"{{commentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/comments/{{commentId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"comments",
+								"{{commentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message (Email/SMS/WhatsApp)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"channel\": \"email\",\n    \"to\": \"recipient@example.com\",\n    \"subject\": \"Test Email\",\n    \"body\": \"<p>Hello, this is a test email.</p>\",\n    \"deal_id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/{{contactId}}/send-message",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"{{contactId}}",
+								"send-message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contact Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/{{contactId}}/messages?mode=email",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"{{contactId}}",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "mode",
+									"value": "email",
+									"description": "email, sms, or whatsapp"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Activities by Deal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities?contact_id={{contactId}}&entity_id=1&entity_type=1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								},
+								{
+									"key": "entity_id",
+									"value": "1",
+									"description": "Deal ID"
+								},
+								{
+									"key": "entity_type",
+									"value": "1",
+									"description": "1=deal"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Sent Emails",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities?contact_id={{contactId}}&activity_type=email_sent",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								},
+								{
+									"key": "activity_type",
+									"value": "email_sent"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Calls",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities?contact_id={{contactId}}&activity_type=call_logged",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								},
+								{
+									"key": "activity_type",
+									"value": "call_logged"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Meetings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities?contact_id={{contactId}}&activity_type=meeting_scheduled",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}"
+								},
+								{
+									"key": "activity_type",
+									"value": "meeting_scheduled"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -4531,6 +5118,18 @@
 		{
 			"key": "country",
 			"value": "Egypt"
+		},
+		{
+			"key": "activityId",
+			"value": "1"
+		},
+		{
+			"key": "commentId",
+			"value": "1"
+		},
+		{
+			"key": "dealId",
+			"value": "1"
 		}
 	]
 }

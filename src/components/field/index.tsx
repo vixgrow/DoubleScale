@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { isObject } from 'lodash';
 import Select from 'react-select';
-import { Copy, HelpCircle } from 'lucide-react';
+import { Copy, HelpCircle, Circle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -286,13 +286,14 @@ const Field: React.FC<FieldProps> = ({
 		case 'number':
 		case 'email':
 		case 'tel':
+		case 'phone':
 		case 'url':
 		case 'password':
 			fieldContent = (
 				<Input
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					type={type}
+					type={type === 'phone' ? 'tel' : type}
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
@@ -412,6 +413,37 @@ const Field: React.FC<FieldProps> = ({
 					checked={value}
 					onCheckedChange={(checked) => onChange(checked)}
 				/>
+			);
+			break;
+		case 'radio':
+			// Radio button works like checkbox - yes/no toggle
+			const isRadioChecked =
+				value === true ||
+				value === 'true' ||
+				value === 'yes' ||
+				value === '1';
+			fieldContent = (
+				<button
+					type="button"
+					onClick={() => {
+						// Toggle between checked and unchecked
+						onChange(isRadioChecked ? 'no' : 'yes');
+					}}
+					className={cn(
+						'aspect-square h-4 w-4 rounded-full border-2 border-primary text-white shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
+						isRadioChecked
+							? 'border-secondary bg-secondary'
+							: 'border-primary bg-transparent'
+					)}
+					aria-checked={isRadioChecked ? 'true' : 'false'}
+					role="radio"
+				>
+					{isRadioChecked && (
+						<div className="flex items-center justify-center h-full">
+							<Circle className="h-[0.8rem] w-[0.6rem] fill-current" />
+						</div>
+					)}
+				</button>
 			);
 			break;
 		case 'switch':
@@ -640,6 +672,23 @@ const Field: React.FC<FieldProps> = ({
 
 	// Special layout for checkbox - checkbox before label
 	if (type === 'checkbox') {
+		return (
+			<div className="qcrm-field" style={style || {}}>
+				<div className="flex items-center gap-3">
+					<div className="qcrm-field-input">{fieldContent}</div>
+					{label && (
+						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+							{renderLabelWithTooltip()}
+						</div>
+					)}
+				</div>
+				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// Special layout for radio - radio before label (like checkbox)
+	if (type === 'radio') {
 		return (
 			<div className="qcrm-field" style={style || {}}>
 				<div className="flex items-center gap-3">

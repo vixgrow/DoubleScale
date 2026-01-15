@@ -79,6 +79,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const { hasRequiredCapability, isSalesRep } = useCapabilities();
 
+	// Submenu top offset configuration for different menu items
+	const getSubmenuTopOffset = (path: string): number => {
+		const offsetMap: Record<string, number> = {
+			'campaigns': 10,
+			'analytics-and-reports': 120,
+		};
+		return offsetMap[path] ?? 120; // Default to 120 if not specified
+	};
+
 	useEffect(() => {
 		const frameId = requestAnimationFrame(() => setIsMounted(true));
 		return () => cancelAnimationFrame(frameId);
@@ -154,6 +163,20 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 						navItem.subMenu = submenu;
 					}
+				}
+
+				// Add submenu for Campaigns
+				if (item.path === 'campaigns') {
+					navItem.subMenu = [
+						{
+							path: 'campaigns',
+							label: __('Campaigns', 'quillcrm'),
+						},
+						{
+							path: 'email-sequences',
+							label: __('Email Sequences', 'quillcrm'),
+						},
+					];
 				}
 
 				return navItem;
@@ -270,6 +293,16 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				return true;
 			}
 
+			// Check if current path matches any submenu item
+			if (item.subMenu) {
+				const subMenuMatch = item.subMenu.some(
+					(subItem) => currentPath === subItem.path
+				);
+				if (subMenuMatch) {
+					return true;
+				}
+			}
+
 			// Check if current path starts with item path (for sub-routes like 'contacts/123')
 			// Make sure we match on path boundaries (e.g., 'contacts' matches 'contacts/123' but not 'contact')
 			return (
@@ -318,9 +351,8 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<>
 			<Sidebar
 				collapsible="icon"
-				className={`qcrm-navbar${
-					isMounted ? ' qcrm-navbar--mounted' : ''
-				}`}
+				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+					}`}
 			>
 				<div className="qcrm-navbar__surface">
 					<SidebarHeader className="qcrm-navbar__header">
@@ -371,7 +403,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						className="qcrm-navbar__submenu-portal"
 						style={{
 							position: 'fixed',
-							top: `${hoveredItem.rect.top - 120}px`,
+							top: `${hoveredItem.rect.top - getSubmenuTopOffset(hoveredItem.path)}px`,
 							left: `${hoveredItem.rect.right + 20}px`,
 							zIndex: 99999,
 						}}

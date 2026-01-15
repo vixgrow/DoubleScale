@@ -244,9 +244,24 @@ final class Actions_Manager
 			'lms'         => array(
 				'label'  => __('LMS', 'quillcrm'),
 				'groups' => array(
-					'learndash' => array(
+					'learndash'  => array(
 						'is_disabled' => ! quillcrm_is_plugin_active('sfwd-lms/sfwd_lms.php'),
 						'label'       => __('LearnDash', 'quillcrm'),
+						'actions'     => array(),
+					),
+					'tutorlms'   => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'tutor/tutor.php' ),
+						'label'       => __('Tutor LMS', 'quillcrm'),
+						'actions'     => array(),
+					),
+					'lifterlms'  => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' ),
+						'label'       => __('LifterLMS', 'quillcrm'),
+						'actions'     => array(),
+					),
+					'learnpress' => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'learnpress/learnpress.php' ),
+						'label'       => __('LearnPress', 'quillcrm'),
 						'actions'     => array(),
 					),
 				),

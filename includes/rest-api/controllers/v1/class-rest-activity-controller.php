@@ -301,15 +301,22 @@ class REST_Activity_Controller extends REST_Controller {
 		$email_data = $request->get_param( 'email_data' ) ?? array();
 
 		$data = array(
-			'contact_id'    => $request->get_param( 'contact_id' ),
-			'entity_id'     => $request->get_param( 'entity_id' ),
-			'entity_type'   => $request->get_param( 'entity_type' ),
-			'subject'       => $email_data['subject'] ?? '',
-			'body'          => $email_data['body'] ?? '',
-			'sent_at'       => $email_data['sent_at'] ?? current_time( 'mysql' ),
-			'contact_email' => $email_data['contact_email'] ?? '',
-			'contact_name'  => $email_data['contact_name'] ?? '',
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $request->get_param( 'entity_type' ),
+			'subject'     => $email_data['subject'] ?? '',
+			'body'        => $email_data['body'] ?? '',
+			'sent_at'     => $email_data['sent_at'] ?? current_time( 'mysql' ),
 		);
+
+		// Only include contact_email/contact_name if provided with actual values.
+		// This allows the manager to auto-populate from deal contact when not provided.
+		if ( ! empty( $email_data['contact_email'] ) ) {
+			$data['contact_email'] = $email_data['contact_email'];
+		}
+		if ( ! empty( $email_data['contact_name'] ) ) {
+			$data['contact_name'] = $email_data['contact_name'];
+		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
 			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
@@ -375,18 +382,27 @@ class REST_Activity_Controller extends REST_Controller {
 		$meeting_data = $request->get_param( 'meeting_data' ) ?? array();
 
 		$data = array(
-			'contact_id'             => $request->get_param( 'contact_id' ),
-			'entity_id'              => $request->get_param( 'entity_id' ),
-			'entity_type'            => $request->get_param( 'entity_type' ),
-			'title'                  => $meeting_data['title'] ?? '',
-			'scheduled_at'           => $meeting_data['scheduled_at'] ?? '',
-			'duration'               => $meeting_data['duration'] ?? 60,
-			'location'               => $meeting_data['location'] ?? '',
-			'description'            => $meeting_data['description'] ?? '',
-			'primary_attendee_id'    => $meeting_data['primary_attendee_id'] ?? null,
-			'primary_attendee_name'  => $meeting_data['primary_attendee_name'] ?? '',
-			'primary_attendee_email' => $meeting_data['primary_attendee_email'] ?? '',
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $request->get_param( 'entity_type' ),
+			'title'       => $meeting_data['title'] ?? '',
+			'scheduled_at' => $meeting_data['scheduled_at'] ?? '',
+			'duration'    => $meeting_data['duration'] ?? 60,
+			'location'    => $meeting_data['location'] ?? '',
+			'description' => $meeting_data['description'] ?? '',
 		);
+
+		// Only include primary_attendee fields if provided with actual values.
+		// This allows the manager to auto-populate from deal contact when not provided.
+		if ( ! empty( $meeting_data['primary_attendee_id'] ) ) {
+			$data['primary_attendee_id'] = $meeting_data['primary_attendee_id'];
+		}
+		if ( ! empty( $meeting_data['primary_attendee_name'] ) ) {
+			$data['primary_attendee_name'] = $meeting_data['primary_attendee_name'];
+		}
+		if ( ! empty( $meeting_data['primary_attendee_email'] ) ) {
+			$data['primary_attendee_email'] = $meeting_data['primary_attendee_email'];
+		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
 			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );

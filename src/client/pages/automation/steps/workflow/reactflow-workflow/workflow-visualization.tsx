@@ -434,11 +434,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			positions[node.id] = node.position;
 		});
 
-		console.log('Positions:', positions);
-		console.log('Nodes:', nodes);
-		console.log('Positions Length:', Object.keys(positions).length);
-		console.log('Nodes Length:', nodes.length);
-
 		// Check if positions have actually changed to avoid unnecessary saves
 		const currentPositions = automation.settings?.reactflow_positions || {};
 
@@ -456,7 +451,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		});
 
 		if (!hasChanges) {
-			console.log('No position changes detected, skipping save');
 			return;
 		}
 

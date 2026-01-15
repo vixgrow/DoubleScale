@@ -151,7 +151,6 @@ const renderTemplateBody = async (
 
 const View: React.FC = () => {
 	const { campaign } = useCampaignStep();
-	console.log(campaign);
 	const navigate = useNavigate();
 	const [dialogChannel, setDialogChannel] = useState<
 		typeof CAMPAIGN_CHANNEL.EMAIL | typeof CAMPAIGN_CHANNEL.SMS | null

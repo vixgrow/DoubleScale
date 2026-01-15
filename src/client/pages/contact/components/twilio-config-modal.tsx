@@ -46,8 +46,6 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 	onClose,
 	onSuccess,
 }) => {
-	console.log('[TwilioConfigModal] Rendered with open:', open);
-	
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [accountSid, setAccountSid] = useState('');
 	const [authToken, setAuthToken] = useState('');

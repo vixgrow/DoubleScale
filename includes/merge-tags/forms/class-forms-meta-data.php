@@ -70,7 +70,8 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Metadata' ) ) {
 			$this->name          = $metadata_label;
 			$this->slug          = "metadata:{$metadata_name}";
 			$this->group         = $slug;
-			$this->description   = sprintf( __( $slug . ' metadata: %s', 'quillcrm' ), $metadata_label );
+			/* translators: 1: Form type slug, 2: Metadata label */
+		$this->description   = sprintf( __( '%1$s metadata: %2$s', 'quillcrm' ), $slug, $metadata_label );
 		}
 
 		/**

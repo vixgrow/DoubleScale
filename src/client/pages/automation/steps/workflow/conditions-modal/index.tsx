@@ -203,7 +203,6 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					})) as any;
 
 					if (response) {
-						console.log('response', response);
 						setRulesGroups(response);
 						ConfigAPI.setAutomationRules(response);
 					}
@@ -230,10 +229,6 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						currentRule.rule
 					])
 			) {
-				console.log(
-					'Resetting rules due to invalid current rule',
-					currentRule
-				);
 				// Current rule is invalid, reset to initial
 				setRules([[getInitialRule()]]);
 			}

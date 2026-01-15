@@ -54,12 +54,12 @@ const mockTable: MockTable = {
 	getPageCount: () => 85, // Total pages
 	getFilteredSelectedRowModel: () => ({ rows: [] }),
 	getFilteredRowModel: () => ({ rows: Array(843).fill({}) }), // Total 843 results
-	setPageSize: (size: number) => console.log('Set page size:', size),
-	setPageIndex: (index: number) => console.log('Set page index:', index),
+	setPageSize: (_size: number) => {},
+	setPageIndex: (_index: number) => {},
 	getCanPreviousPage: () => false, // First page
 	getCanNextPage: () => true,
-	previousPage: () => console.log('Previous page'),
-	nextPage: () => console.log('Next page'),
+	previousPage: () => {},
+	nextPage: () => {},
 };
 
 export default function DataTablePagination<TData>({
@@ -105,7 +105,6 @@ export default function DataTablePagination<TData>({
 	};
 
 	const visiblePages = getVisiblePages();
-	console.log(table.getFilteredRowModel().rows);
 	return (
 		<div className="flex items-center justify-between px-4 pt-3 ">
 			{/* Left side - Results info */}

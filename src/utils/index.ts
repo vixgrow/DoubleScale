@@ -537,19 +537,62 @@ export const getAutomationWarnings = (automation: any): any[] => {
 	return automation?._warnings || [];
 };
 
+/**
+ * Shape of WordPress REST API error responses
+ * 
+ * Standard format: { code: 'error_code', message: 'Error message', data: {...} }
+ * Validation errors: { code: 'rest_invalid_param', message: 'Invalid parameter(s): field', data: { params: { field: 'Error details' }, details: {...} } }
+ */
 type ApiErrorShape = {
+	code?: string;
 	message?: string;
 	data?: {
 		message?: string;
+		params?: Record<string, string>;
+		details?: Record<string, unknown>;
 	};
 };
 
+/**
+ * Extract a user-friendly error message from WordPress REST API errors
+ * 
+ * Handles multiple error formats:
+ * 1. Validation errors with detailed params (rest_invalid_param)
+ * 2. Standard WP_Error format with message
+ * 3. Nested data.message format
+ * 4. Plain string errors
+ * 
+ * @param error - The error object from apiFetch
+ * @param fallback - Fallback message if no error message found
+ * @returns User-friendly error message string
+ */
 export const getApiErrorMessage = (
 	error: unknown,
 	fallback: string
 ): string => {
 	const typed = error as ApiErrorShape | undefined;
 
+	// Check for validation errors with detailed params
+	// WordPress REST API stores validation errors in data.params
+	if (typed?.code === 'rest_invalid_param' && typed?.data?.params) {
+		const params = typed.data.params;
+		const paramErrors = Object.entries(params)
+			.map(([field, message]) => {
+				// If the field is 'settings', just show the message without the field name
+				// as it's more user-friendly
+				if (field === 'settings') {
+					return message;
+				}
+				return `${field}: ${message}`;
+			})
+			.join('; ');
+		
+		if (paramErrors) {
+			return paramErrors;
+		}
+	}
+
+	// Standard error message
 	return (
 		typed?.message ||
 		typed?.data?.message ||

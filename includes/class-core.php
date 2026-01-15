@@ -84,7 +84,7 @@ class Core {
 				'qcrm.config.setAutomationRules(' . wp_json_encode( class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ? Rules_Manager::instance()->get_groups() : array() ) . ');' .
 				'qcrm.config.setIsWoocommerceActive( ' . quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) . ' );' .
 				'qcrm.config.setIsEddActive( ' . defined( 'EDD_PLUGIN_FILE' ) . ' );' .
-				'qcrm.config.setIsLmsActive( ' . quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) . ' );' .
+				'qcrm.config.setIsLmsActive( ' . ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) || quillcrm_is_plugin_active( 'tutor/tutor.php' ) || quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' ) || quillcrm_is_plugin_active( 'learnpress/learnpress.php' ) ) . ' );' .
 				'qcrm.config.setSiteUrl( "' . site_url() . '" );' .
 				'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');' .
 				'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');' .

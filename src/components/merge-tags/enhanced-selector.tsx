@@ -73,8 +73,6 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	// Use postId prop or fallback to formContext (for Elementor forms)
 	const activePostId = postId || formContext?.postId;
 
-	console.log('activePostId', activePostId);
-
 	// Load dynamic merge tags when form context changes
 	useEffect(() => {
 		if (visible && activeFormId && activeTrigger) {
@@ -280,8 +278,6 @@ const MergeTagsGroupRender: React.FC<{
 			});
 		}
 
-		// Log for debugging
-		console.log('Merge tag selected:', { tagValue, isDynamic, formId });
 	};
 
 	return (

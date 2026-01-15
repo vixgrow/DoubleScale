@@ -70,7 +70,6 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 	selectedType,
 	onSelect,
 }) => {
-	console.log(forms)
 	const [showProModal, setShowProModal] = useState(false);
 	const [selectedProFeature, setSelectedProFeature] = useState<string>('');
 

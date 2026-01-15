@@ -16,6 +16,7 @@ import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import './style.scss';
+import config from '@quillcrm/config';
 import { getFilteredGoalsByTrigger } from '@quillcrm/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -47,6 +48,10 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 		key: string;
 	} | null>(null);
 
+	// Check if Pro plugin is active once
+	const proPluginData = config.getProPluginData();
+	const isProActive = proPluginData.is_active;
+
 	// Get current trigger from store
 	const currentTrigger = useSelect((select: any) => {
 		return select('quillcrm/core').getCurrentTrigger();
@@ -75,6 +80,12 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 				'quillcrm'
 			);
 		}
+		if (groupLabel === 'Order' || groupLabel === 'SureCart') {
+			return __(
+				'SureCart plugin is not installed or activated. Install SureCart to use these goals.',
+				'quillcrm'
+			);
+		}
 		return __(
 			'This integration is not available. Please install the required plugin.',
 			'quillcrm'
@@ -89,7 +100,10 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	};
 
 	const handleSelect = async (goalKey: string, goal: any) => {
-		if (goal.is_pro) {
+		// Check if this is a Pro feature AND Pro plugin is not active
+		const isProFeatureLockedOut = goal.is_pro && !isProActive;
+
+		if (isProFeatureLockedOut) {
 			setSelectedProGoal({ name: goal.label, key: goalKey });
 			setShowProModal(true);
 			return;
@@ -176,7 +190,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 																						goal.label
 																					}
 																				</span>
-																				{goal.is_pro && (
+																				{goal.is_pro && !isProActive && (
 																					<Lock className="h-4 w-4 text-orange-500" />
 																				)}
 																			</div>

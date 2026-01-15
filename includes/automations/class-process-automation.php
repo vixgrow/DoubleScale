@@ -38,6 +38,13 @@ class Process_Automation {
 	public $args = array();
 
 	/**
+	 * Start time of automation processing
+	 *
+	 * @var float|null
+	 */
+	private static $start_time = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
@@ -506,6 +513,10 @@ class Process_Automation {
 	/**
 	 * Enqueue Next Step
 	 *
+	 * Uses smart hybrid approach:
+	 * - Runs synchronously for speed when safe
+	 * - Switches to async when approaching timeout or memory limits
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param int $step_id Step ID.
@@ -514,6 +525,59 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function enqueue_step( $step_id, $automation_contact_id ) {
-		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_step', $this->automation, $step_id, $automation_contact_id );
+		// Initialize start time on first call.
+		if ( null === self::$start_time ) {
+			self::$start_time = microtime( true );
+		}
+
+		// Check if we should switch to async.
+		if ( $this->should_switch_to_async() ) {
+			QuillCRM::instance()->automations_tasks->enqueue_async( 
+				'process_automation_step', 
+				$this->automation->id, 
+				$step_id, 
+				$automation_contact_id 
+			);
+			// Reset start time for next batch.
+			self::$start_time = null;
+			return;
+		}
+
+		// Safe to continue synchronously.
+		QuillCRM::instance()->automations_tasks->enqueue_sync( 
+			'process_automation_step', 
+			$this->automation, 
+			$step_id, 
+			$automation_contact_id 
+		);
+	}
+
+	/**
+	 * Check if we should switch to async execution
+	 *
+	 * Switches to async when:
+	 * - Execution time exceeds 70% of the safe threshold (which is already 75% of max)
+	 * - Memory usage approaches limit
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private function should_switch_to_async() {
+		// Check execution time (70% of the already-safe 75% threshold).
+		// get minimum of 10 seconds and the max execution time
+		$max_time = min( 10, \QuillCRM\Utils::get_max_execution_time() );
+		$elapsed  = microtime( true ) - self::$start_time;
+
+		if ( $elapsed >= ( $max_time * 0.70 ) ) {
+			return true;
+		}
+
+		// Check memory limit.
+		if ( \QuillCRM\Utils::is_memory_limit_reached() ) {
+			return true;
+		}
+
+		return false;
 	}
 }

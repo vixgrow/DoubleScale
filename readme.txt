@@ -1,10 +1,10 @@
-=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations, Email Campaigns, SMS Campaigns, and More! ===
+=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations, Campaigns and More! ===
 Contributors: quillforms, mdmag
 Tags: crm, customer management, pipeline, whatsapp, automation
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -385,6 +385,11 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 10. Global Settings - Easy configuration for email, SMS, and system settings
 
 == Changelog ==
+
+= 1.1.8 - 15 Jan 2026 =
+* Added integration with Tutor LMS
+* Added integration with LifterLMS
+* Added integration with LearnPress
 
 = 1.0.0 - 17 Dec 2025 =
 * Initial release

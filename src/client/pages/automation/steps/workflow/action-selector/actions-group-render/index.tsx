@@ -14,6 +14,7 @@ import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
  * Internal dependencies
  */
 import type { ActionsGroup } from '@quillcrm/config';
+import config from '@quillcrm/config';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,6 +46,10 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		name: string;
 		key: string;
 	} | null>(null);
+
+	// Check if Pro plugin is active once
+	const proPluginData = config.getProPluginData();
+	const isProActive = proPluginData.is_active;
 
 	// Helper function to get tooltip message for disabled actions
 	const getDisabledTooltip = (groupLabel: string) => {
@@ -98,7 +103,10 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 	};
 
 	const handleActionClick = (actionKey: string, action: any) => {
-		if (action.is_pro) {
+		// Check if this is a Pro feature AND Pro plugin is not active
+		const isProFeatureLockedOut = action.is_pro && !isProActive;
+
+		if (isProFeatureLockedOut) {
 			setSelectedProAction({ name: action.label, key: actionKey });
 			setShowProModal(true);
 		} else {
@@ -169,7 +177,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 													<span className="text-sm">
 														{action.label}
 													</span>
-													{action.is_pro && (
+													{action.is_pro && !isProActive && (
 														<Lock className="h-4 w-4 text-orange-500" />
 													)}
 												</div>

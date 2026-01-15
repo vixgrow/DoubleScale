@@ -1,8 +1,8 @@
 <?php
 
 /**
- * SMS Received Trigger
- * Triggers when an SMS message is received from a contact
+ * WhatsApp Received Trigger (Pro Placeholder)
+ * Triggers when a WhatsApp message is received from a contact
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -14,31 +14,30 @@ use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
 
 /**
- * SMS_Received class
+ * WhatsApp_Received class
  */
-class SMS_Received extends Trigger_Pro {
-
+class WhatsApp_Received extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'SMS Received';
+	public $name = 'WhatsApp Received';
 
 	/**
 	 * Trigger Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'sms_received';
+	public $slug = 'whatsapp_received';
 
 	/**
 	 * Trigger Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Triggers when an SMS is received from a contact';
+	public $description = 'Triggers when a WhatsApp message is received from a contact';
 
 	/**
 	 * Trigger Attributes
@@ -61,4 +60,5 @@ class SMS_Received extends Trigger_Pro {
 	 */
 	public $group = 'messaging';
 }
-Triggers_Manager::instance()->register( new SMS_Received() );
+
+Triggers_Manager::instance()->register( new WhatsApp_Received() );

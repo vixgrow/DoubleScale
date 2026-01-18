@@ -1016,140 +1016,195 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			$results = array(
-				'edd'      => array(
-					'orders'     => array(),
-					'total'      => 0,
-					'revenue'    => 0,
-					'average'    => 0,
-					'last_order' => null,
-					'currency'   => null,
-				),
-				'wc'       => array(
-					'orders'     => array(),
-					'total'      => 0,
-					'revenue'    => 0,
-					'average'    => 0,
-					'last_order' => null,
-					'currency'   => null,
-				),
-				'surecart' => array(
-					'orders'     => array(),
-					'total'      => 0,
-					'revenue'    => 0,
-					'average'    => 0,
-					'last_order' => null,
-					'currency'   => null,
-				),
+				'edd'      => $this->get_edd_purchase_history( $contact ),
+				'wc'       => $this->get_wc_purchase_history( $contact ),
+				'surecart' => $this->get_surecart_purchase_history( $contact ),
 			);
-
-			if ( defined( 'EDD_PLUGIN_FILE' ) ) {
-				$edd_orders                   = $contact->edd_orders()
-					->orderBy( 'date_created', 'desc' )
-					->get();
-				$results['edd']['orders']     = $edd_orders;
-				$results['edd']['total']      = $edd_orders->count();
-				$results['edd']['revenue']    = $edd_orders->sum( 'total' );
-				$results['edd']['average']    = $edd_orders->avg( 'total' );
-				$results['edd']['last_order'] = $edd_orders->first()->date_created ?? null;
-				$results['edd']['currency']   = edd_get_option( 'currency', 'USD' );
-			}
-
-			if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-				$user = get_user_by( 'email', $contact->email );
-				if ( $user ) {
-					$wc_orders                   = wc_get_orders(
-						array(
-							'customer' => $user->ID,
-							'limit'    => -1,
-						)
-					);
-					$results['wc']['orders']     = array_map(
-						function ( $order ) {
-							return array(
-								'id'           => $order->get_id(),
-								'total_amount' => floatval( $order->get_total() ),
-								'date'         => $order->get_date_created(),
-								'url'          => get_edit_post_link( $order->get_id() ),
-								'status'       => wc_get_order_status_name( $order->get_status() ),
-								'subtotal'     => $order->get_subtotal(),
-								'currency'     => $order->get_currency(),
-							);
-						},
-						$wc_orders
-					);
-					$results['wc']['total']      = count( $wc_orders );
-					$results['wc']['revenue']    = array_sum( array_column( $results['wc']['orders'], 'total_amount' ) );
-					$results['wc']['average']    = $results['wc']['revenue'] / $results['wc']['total'];
-					$results['wc']['last_order'] = $wc_orders[0]->get_date_created() ?? null;
-					$results['wc']['currency']   = get_woocommerce_currency();
-				} else {
-					$wc_orders                   = $contact->orders()
-						->orderBy( 'date_created_gmt', 'desc' )
-						->get();
-					$results['wc']['orders']     = $wc_orders;
-					$results['wc']['total']      = $wc_orders->count();
-					$results['wc']['revenue']    = $wc_orders->sum( 'total_amount' );
-					$results['wc']['average']    = $wc_orders->avg( 'total_amount' );
-					$results['wc']['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
-					$results['wc']['currency']   = get_woocommerce_currency();
-				}
-			}
-
-			// SureCart purchase history
-			if ( defined( 'SURECART_PLUGIN_FILE' ) && class_exists( '\SureCart\Models\Customer' ) ) {
-				$customer = \SureCart\Models\Customer::byEmail( $contact->email );
-
-				if ( $customer && ! is_wp_error( $customer ) ) {
-					$sc_orders = \SureCart\Models\Order::where(
-						array(
-							'customer_ids' => array( $customer->id ),
-						)
-					)->with( array( 'checkout' ) )->get();
-
-					// Handle both array and object with data property response formats
-					$orders_data = null;
-					if ( $sc_orders && ! is_wp_error( $sc_orders ) ) {
-						if ( is_array( $sc_orders ) ) {
-							$orders_data = $sc_orders;
-						} elseif ( isset( $sc_orders->data ) && is_array( $sc_orders->data ) ) {
-							$orders_data = $sc_orders->data;
-						}
-					}
-
-					if ( ! empty( $orders_data ) ) {
-						$formatted_orders = array();
-						$total_revenue    = 0;
-
-						foreach ( $orders_data as $order ) {
-							$order_total       = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
-							$total_revenue    += $order_total;
-							$formatted_orders[] = array(
-								'id'           => $order->id ?? '',
-								'number'       => $order->number ?? '',
-								'total_amount' => $order_total,
-								'date'         => isset( $order->created_at ) ? gmdate( 'Y-m-d H:i:s', $order->created_at ) : null,
-								'url'          => admin_url( 'admin.php?page=sc-orders&action=edit&id=' . ( $order->id ?? '' ) ),
-								'status'       => $order->status ?? '',
-								'order_type'   => $order->order_type ?? '',
-								'currency'     => isset( $order->checkout->currency ) ? strtoupper( $order->checkout->currency ) : 'USD',
-							);
-						}
-
-						$order_count                        = count( $formatted_orders );
-						$results['surecart']['orders']      = $formatted_orders;
-						$results['surecart']['total']       = $order_count;
-						$results['surecart']['revenue']     = $total_revenue;
-						$results['surecart']['average']     = $order_count > 0 ? ( $total_revenue / $order_count ) : 0;
-						$results['surecart']['last_order']  = ! empty( $formatted_orders ) ? $formatted_orders[0]['date'] : null;
-						$results['surecart']['currency']    = ! empty( $formatted_orders ) ? $formatted_orders[0]['currency'] : 'USD';
-					}
-				}
-			}
 
 			return new WP_REST_Response( $results, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
+	}
+
+	/**
+	 * Get default purchase history structure
+	 *
+	 * @return array
+	 */
+	private function get_default_purchase_history() {
+		return array(
+			'orders'     => array(),
+			'total'      => 0,
+			'revenue'    => 0,
+			'average'    => 0,
+			'last_order' => null,
+			'currency'   => null,
+		);
+	}
+
+	/**
+	 * Get EDD purchase history for a contact
+	 *
+	 * @param Contact_Model $contact
+	 * @return array
+	 */
+	private function get_edd_purchase_history( $contact ) {
+		$result = $this->get_default_purchase_history();
+
+		if ( ! defined( 'EDD_PLUGIN_FILE' ) ) {
+			return $result;
+		}
+
+		$edd_orders = $contact->edd_orders()
+			->orderBy( 'date_created', 'desc' )
+			->get();
+
+		$order_count = $edd_orders->count();
+		if ( $order_count === 0 ) {
+			return $result;
+		}
+
+		$result['orders']     = $edd_orders;
+		$result['total']      = $order_count;
+		$result['revenue']    = $edd_orders->sum( 'total' );
+		$result['average']    = $edd_orders->avg( 'total' );
+		$result['last_order'] = $edd_orders->first()->date_created ?? null;
+		$result['currency']   = edd_get_option( 'currency', 'USD' );
+
+		return $result;
+	}
+
+	/**
+	 * Get WooCommerce purchase history for a contact
+	 *
+	 * @param Contact_Model $contact
+	 * @return array
+	 */
+	private function get_wc_purchase_history( $contact ) {
+		$result = $this->get_default_purchase_history();
+
+		if ( ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			return $result;
+		}
+
+		$result['currency'] = get_woocommerce_currency();
+
+		// Try to get orders via WP user first (more reliable)
+		$user = get_user_by( 'email', $contact->email );
+		if ( $user ) {
+			$wc_orders = wc_get_orders(
+				array(
+					'customer' => $user->ID,
+					'limit'    => -1,
+				)
+			);
+
+			if ( empty( $wc_orders ) ) {
+				return $result;
+			}
+
+			$formatted_orders = array_map(
+				function ( $order ) {
+					return array(
+						'id'           => $order->get_id(),
+						'total_amount' => floatval( $order->get_total() ),
+						'date'         => $order->get_date_created(),
+						'url'          => get_edit_post_link( $order->get_id() ),
+						'status'       => wc_get_order_status_name( $order->get_status() ),
+						'subtotal'     => $order->get_subtotal(),
+						'currency'     => $order->get_currency(),
+					);
+				},
+				$wc_orders
+			);
+
+			$order_count          = count( $formatted_orders );
+			$result['orders']     = $formatted_orders;
+			$result['total']      = $order_count;
+			$result['revenue']    = array_sum( array_column( $formatted_orders, 'total_amount' ) );
+			$result['average']    = $order_count > 0 ? ( $result['revenue'] / $order_count ) : 0;
+			$result['last_order'] = $wc_orders[0]->get_date_created() ?? null;
+
+			return $result;
+		}
+
+		// Fallback: query orders table directly by email
+		$wc_orders = $contact->orders()
+			->orderBy( 'date_created_gmt', 'desc' )
+			->get();
+
+		$order_count = $wc_orders->count();
+		if ( $order_count === 0 ) {
+			return $result;
+		}
+
+		$result['orders']     = $wc_orders;
+		$result['total']      = $order_count;
+		$result['revenue']    = $wc_orders->sum( 'total_amount' );
+		$result['average']    = $wc_orders->avg( 'total_amount' );
+		$result['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
+
+		return $result;
+	}
+
+	/**
+	 * Get SureCart purchase history for a contact
+	 *
+	 * @param Contact_Model $contact
+	 * @return array
+	 */
+	private function get_surecart_purchase_history( $contact ) {
+		$result = $this->get_default_purchase_history();
+
+		if ( ! defined( 'SURECART_PLUGIN_FILE' ) || ! class_exists( '\SureCart\Models\Customer' ) ) {
+			return $result;
+		}
+
+		$customer = \SureCart\Models\Customer::byEmail( $contact->email );
+		if ( ! $customer || is_wp_error( $customer ) ) {
+			return $result;
+		}
+
+		// SureCart's Model::get() returns an array of model objects directly
+		$sc_orders = \SureCart\Models\Order::where(
+			array(
+				'customer_ids' => array( $customer->id ),
+			)
+		)->with( array( 'checkout' ) )->get();
+
+		if ( ! is_array( $sc_orders ) || empty( $sc_orders ) ) {
+			return $result;
+		}
+
+		$formatted_orders = array();
+		$total_revenue    = 0;
+
+		foreach ( $sc_orders as $order ) {
+			// SureCart stores amounts in cents
+			$order_total       = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
+			$total_revenue    += $order_total;
+			$formatted_orders[] = array(
+				'id'           => $order->id ?? '',
+				'number'       => $order->number ?? '',
+				'total_amount' => $order_total,
+				'date'         => isset( $order->created_at ) ? gmdate( 'Y-m-d H:i:s', $order->created_at ) : null,
+				'url'          => admin_url( 'admin.php?page=sc-orders&action=edit&id=' . ( $order->id ?? '' ) ),
+				'status'       => $order->status ?? '',
+				'order_type'   => $order->order_type ?? '',
+				'currency'     => isset( $order->checkout->currency ) ? strtoupper( $order->checkout->currency ) : 'USD',
+			);
+		}
+
+		$order_count          = count( $formatted_orders );
+		$result['orders']     = $formatted_orders;
+		$result['total']      = $order_count;
+		$result['revenue']    = $total_revenue;
+		$result['average']    = $order_count > 0 ? ( $total_revenue / $order_count ) : 0;
+		$result['last_order'] = $formatted_orders[0]['date'] ?? null;
+		$result['currency']   = $formatted_orders[0]['currency'] ?? 'USD';
+
+		return $result;
 	}
 
 	/**

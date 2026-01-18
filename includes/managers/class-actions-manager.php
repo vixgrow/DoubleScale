@@ -331,21 +331,31 @@ final class Actions_Manager
 					// 'label'   => __( 'Mautic', 'quillcrm' ),
 					// 'actions' => array(),
 					// ),
-					'slack'        => array(
-						'label'   => __('Slack', 'quillcrm'),
-						'actions' => array(),
-					),
-					'zapier'       => array(
-						'label'   => __('Zapier', 'quillcrm'),
-						'actions' => array(),
-					),
-					'http_request' => array(
-						'label'   => __('HTTP Request', 'quillcrm'),
-						'actions' => array(),
-					),
+				'slack'        => array(
+					'label'   => __('Slack', 'quillcrm'),
+					'actions' => array(),
+				),
+				'zapier'       => array(
+					'label'   => __('Zapier', 'quillcrm'),
+					'actions' => array(),
+				),
+				'http_request' => array(
+					'label'   => __('HTTP Request', 'quillcrm'),
+					'actions' => array(),
 				),
 			),
-		);
+		),
+		'video'       => array(
+			'label'  => __( 'Video', 'quillcrm' ),
+			'groups' => array(
+				'prestoplayer' => array(
+					'label'       => __( 'Presto Player', 'quillcrm' ),
+					'actions'     => array(),
+					'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
+				),
+			),
+		),
+	);
 
 		$this->sources = apply_filters('quillcrm_actions_sources', $this->sources);
 	}

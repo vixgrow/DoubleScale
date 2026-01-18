@@ -293,6 +293,16 @@ final class Triggers_Manager {
 					 ),
 				 ),
 			 ),
+			 'video'       => array(
+				 'label'  => __( 'Video', 'quillcrm' ),
+				 'groups' => array(
+					 'prestoplayer' => array(
+						 'label'       => __( 'Presto Player', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
+					 ),
+				 ),
+			 ),
 		 );
 
 		 $this->sources = apply_filters( 'quillcrm_triggers_sources', $this->sources );

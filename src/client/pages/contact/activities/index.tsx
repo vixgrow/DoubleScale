@@ -19,26 +19,38 @@ import timezone from 'dayjs/plugin/timezone';
 import apiFetch from '@wordpress/api-fetch';
 import ActivitiesFilters from './ActivitiesFilters';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TaskDoneIcon } from '@quillcrm/components';
+import { Button } from '@/components/ui/button';
 import './style.scss';
-
-import NoteAddIcon from '@quillcrm/components/icons/note-add';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import DealValueIcon from '@quillcrm/components/icons/deal-value';
-import MeetingActivityIcon from '@quillcrm/components/icons/meeting-activity';
-import UserActivityIcon from '@quillcrm/components/icons/user-activity';
-import StartDateIcon from '@quillcrm/components/icons/start-date';
-import DurationIcon from '@quillcrm/components/icons/duration';
-import LocationIcon from '@quillcrm/components/icons/location';
-import CallActivityIcon from '@quillcrm/components/icons/call-activity';
-import { NoData, GradientActivitiesIcon } from '@quillcrm/components';
-import EmailActivityIcon from '@quillcrm/components/icons/email-activity';
-import { ActivityActionsDropdown } from './activity-action-dropdown/ActivityActionDropdown';
+import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
+import { ActivityActionsDropdown } from './activity-action-dropdown';
 import { useActivityOperations } from './use-activity-operations';
 import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
+import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@quillcrm/client';
+
+// Pro plugin imports - will be loaded dynamically if available
+// Using dynamic import pattern that works with webpack
+const loadProTaskDialog = async () => {
+    try {
+        // @ts-ignore - Pro plugin path
+        const module = await import('@pro/client/pages/tasks/components/add-or-edit-dialog');
+        return module.default;
+    } catch {
+        return null;
+    }
+};
+
+const loadProTaskService = async () => {
+    try {
+        // @ts-ignore - Pro plugin path
+        const module = await import('@pro/client/pages/tasks/api/tasks');
+        return module.TaskService;
+    } catch {
+        return null;
+    }
+};
 
 
 interface ActivitiesProps {
@@ -119,6 +131,56 @@ const activityTypeColors: Record<string, string> = {
     follow_up: '#F59E0B',
 };
 
+// Task Dialog Wrapper Component - loads Pro plugin dialog dynamically
+const TaskDialogWrapper: React.FC<{
+    open: boolean;
+    onClose: (open: boolean) => void;
+    task: any;
+    contact_id: number;
+    isSubmitting: boolean;
+    setIsSubmitting: (val: boolean) => void;
+    onSuccess: () => void;
+    showNotice: (type: 'success' | 'error', message: string) => void;
+}> = ({ open, onClose, task, contact_id, isSubmitting, setIsSubmitting, onSuccess, showNotice }) => {
+    const [TaskDialog, setTaskDialog] = useState<any>(null);
+    const [TaskService, setTaskService] = useState<any>(null);
+
+    useEffect(() => {
+        if (open && !TaskDialog) {
+            loadProTaskDialog().then(setTaskDialog);
+            loadProTaskService().then(setTaskService);
+        }
+    }, [open, TaskDialog]);
+
+    if (!TaskDialog || !TaskService) {
+        return null;
+    }
+
+    return (
+        <TaskDialog
+            open={open}
+            onClose={onClose}
+            mode="edit"
+            task={task}
+            presetContactId={contact_id}
+            isSubmitting={isSubmitting}
+            onSubmit={async (data: any) => {
+                setIsSubmitting(true);
+                try {
+                    await TaskService.updateTask(task.id, data);
+                    showNotice('success', __('Task updated successfully', 'quillcrm'));
+                    onClose(false);
+                    onSuccess();
+                } catch (error: any) {
+                    showNotice('error', error?.message || __('Failed to update task', 'quillcrm'));
+                } finally {
+                    setIsSubmitting(false);
+                }
+            }}
+        />
+    );
+};
+
 const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const { deleteActivity } = useActivityOperations();
     const { contact } = useContactContext();
@@ -130,6 +192,11 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [noteDialogOpen, setNoteDialogOpen] = useState(false);
     const [selectedCall, setSelectedCall] = useState<Activity | null>(null);
     const [callDialogOpen, setCallDialogOpen] = useState(false);
+    const [selectedMeeting, setSelectedMeeting] = useState<Activity | null>(null);
+    const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<any>(null);
+    const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+    const [isSubmittingTask, setIsSubmittingTask] = useState(false);
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [filters, setFilters] = useState({
@@ -213,7 +280,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     }, [filters.date_from, filters.date_to]);
 
     // Edit/Delete handlers
-    const handleEditActivity = (activity: Activity) => {
+    const handleEditActivity = async (activity: Activity) => {
         if (activity.activity_type === 'note') {
             // Convert Activity to Note format
             // Note: The activity data structure may have 'content' for the note body
@@ -233,8 +300,28 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             // Convert Activity to Call format for CallDialog
             setSelectedCall(activity);
             setCallDialogOpen(true);
+        } else if (activity.activity_type === 'meeting_scheduled') {
+            // Convert Activity to Meeting format for MeetingDialog
+            setSelectedMeeting(activity);
+            setMeetingDialogOpen(true);
         }
-        // Add other activity types as needed
+        // Tasks are handled separately via handleEditTask
+    };
+
+    const handleEditTask = async (taskId: number) => {
+        try {
+            const TaskService = await loadProTaskService();
+            if (!TaskService) {
+                showNotice('error', __('Task editing is not available. Pro plugin may not be installed.', 'quillcrm'));
+                return;
+            }
+            const task = await TaskService.getTask(taskId);
+            setSelectedTask(task);
+            setTaskDialogOpen(true);
+        } catch (error) {
+            console.error('Failed to fetch task:', error);
+            showNotice('error', __('Failed to load task', 'quillcrm'));
+        }
     };
 
     const handleNoteSave = (note: Note) => {
@@ -265,8 +352,26 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         }
     };
 
+    const handleMarkTaskComplete = async (taskId: number) => {
+        try {
+            await apiFetch({
+                path: `/qc/v1/tasks/${taskId}`,
+                method: 'PATCH',
+                data: {
+                    status: 'completed',
+                },
+            });
+            fetchActivities();
+            showNotice('success', __('Task marked as complete', 'quillcrm'));
+        } catch (error) {
+            console.error('Failed to mark task as complete:', error);
+            showNotice('error', __('Failed to mark task as complete', 'quillcrm'));
+        }
+    };
+
     const isEditableActivity = (activityType: string) => {
-        const editableTypes = ['note', 'email_sent', 'call_logged', 'meeting_scheduled'];
+        // Only these activity types can be edited
+        const editableTypes = ['note', 'call_logged', 'meeting_scheduled'];
         return editableTypes.includes(activityType);
     };
 
@@ -406,9 +511,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                     <h4 className="text-[#09090B] text-base font-medium">
                                         {__('Email Body', 'quillcrm')}
                                     </h4>
-                                    <p className="text-base font-normal text-[#777] leading-[26px] whitespace-pre-wrap">
-                                        {activity.data.body}
-                                    </p>
+                                    <div
+                                        className="text-base font-normal text-[#777] leading-[26px]"
+                                        dangerouslySetInnerHTML={{ __html: activity.data.body }}
+                                    />
                                 </div>
                             )}
                             {!activity.data.subject && !activity.data.body && (
@@ -537,7 +643,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                     <div className="flex justify-center gap-2">
                                                         <UserActivityIcon />
                                                         <p className="text-base font-normal text-[#777]">
-                                                            {item.user?.display_name || __('System', 'quillcrm')}
+                                                            {contact?.first_name} {contact?.last_name}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -549,15 +655,34 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                             onDelete={() => handleDeleteActivity(itemId!)}
                                                         />
                                                     )}
-                                                    {isTask && item.status && (
-                                                        <Badge variant="default" className="text-xs">
-                                                            {item.status}
-                                                        </Badge>
-                                                    )}
-                                                    {isTask && item.priority && (
-                                                        <Badge variant="outline" className="text-xs ml-2">
-                                                            {item.priority}
-                                                        </Badge>
+                                                    {isTask && (
+                                                        <>
+                                                            <ActivityActionsDropdown
+                                                                onEdit={() => handleEditTask(item.task_id!)}
+                                                                onDelete={() => handleDeleteActivity(item.task_id!)}
+                                                            />
+                                                            {item.status !== 'completed' && (
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleMarkTaskComplete(item.task_id!)}
+                                                                    className="flex items-center gap-2 text-[#16A34A]"
+                                                                >
+                                                                    <CheckCircleIcon width={16} height={16} />
+                                                                    {__('Mark Complete', 'quillcrm')}
+                                                                </Button>
+                                                            )}
+                                                            {item.status && (
+                                                                <Badge className="text-xs">
+                                                                    {item.status}
+                                                                </Badge>
+                                                            )}
+                                                            {item.priority && (
+                                                                <Badge className="text-xs ml-2">
+                                                                    {item.priority}
+                                                                </Badge>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
@@ -644,6 +769,59 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     showNotice={showNotice}
                 />
             )}
+
+            {/* Meeting Dialog */}
+            {selectedMeeting && (
+                <MeetingDialog
+                    open={meetingDialogOpen}
+                    onClose={() => {
+                        setMeetingDialogOpen(false);
+                        setSelectedMeeting(null);
+                    }}
+                    contact_id={contact_id}
+                    selectedMeeting={{
+                        id: selectedMeeting.id,
+                        contact_id: selectedMeeting.contact_id,
+                        activity_type: selectedMeeting.activity_type,
+                        data: {
+                            meeting_title: selectedMeeting.data?.meeting_title,
+                            duration: selectedMeeting.data?.duration,
+                            location: selectedMeeting.data?.location,
+                            meeting_date_time: selectedMeeting.data?.meeting_date_time,
+                            meeting_end_time: selectedMeeting.data?.meeting_end_time,
+                            description: selectedMeeting.data?.description,
+                        },
+                        created_at: selectedMeeting.created_at,
+                        updated_at: selectedMeeting.updated_at,
+                    }}
+                    onSave={() => {
+                        fetchActivities();
+                    }}
+                    onUpdate={() => {
+                        fetchActivities();
+                    }}
+                    showNotice={showNotice}
+                />
+            )}
+
+            {/* Task Dialog (Pro plugin) */}
+            {selectedTask && <TaskDialogWrapper
+                open={taskDialogOpen}
+                onClose={(open: boolean) => {
+                    setTaskDialogOpen(open);
+                    if (!open) {
+                        setSelectedTask(null);
+                    }
+                }}
+                task={selectedTask}
+                contact_id={contact_id}
+                isSubmitting={isSubmittingTask}
+                setIsSubmitting={setIsSubmittingTask}
+                onSuccess={() => {
+                    fetchActivities();
+                }}
+                showNotice={showNotice}
+            />}
         </div>
     );
 };

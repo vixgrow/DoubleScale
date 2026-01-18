@@ -1106,11 +1106,21 @@ class REST_Contact_Controller extends REST_Controller {
 						)
 					)->with( array( 'checkout' ) )->get();
 
-					if ( $sc_orders && ! is_wp_error( $sc_orders ) && isset( $sc_orders->data ) && is_array( $sc_orders->data ) ) {
+					// Handle both array and object with data property response formats
+					$orders_data = null;
+					if ( $sc_orders && ! is_wp_error( $sc_orders ) ) {
+						if ( is_array( $sc_orders ) ) {
+							$orders_data = $sc_orders;
+						} elseif ( isset( $sc_orders->data ) && is_array( $sc_orders->data ) ) {
+							$orders_data = $sc_orders->data;
+						}
+					}
+
+					if ( ! empty( $orders_data ) ) {
 						$formatted_orders = array();
 						$total_revenue    = 0;
 
-						foreach ( $sc_orders->data as $order ) {
+						foreach ( $orders_data as $order ) {
 							$order_total       = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
 							$total_revenue    += $order_total;
 							$formatted_orders[] = array(

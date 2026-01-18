@@ -41,7 +41,7 @@ class REST_Activity_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		 // Get all activities.
+		// Get all activities (and optionally tasks when Pro is active).
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -50,6 +50,7 @@ class REST_Activity_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
 			)
 		);
@@ -181,23 +182,66 @@ class REST_Activity_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get all activities
+	 * Get all activities (and optionally tasks when Pro is active)
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
+		$include = $request->get_param( 'include' ) ?? 'activities';
+
+		// Validate include parameter.
+		if ( ! in_array( $include, array( 'activities', 'tasks', 'all' ), true ) ) {
+			$include = 'activities';
+		}
+
+		// Check Pro availability for tasks.
+		$pro_active  = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
+		$wants_tasks = in_array( $include, array( 'tasks', 'all' ), true );
+
+		// If requesting tasks-only without Pro, return error.
+		// If requesting all (activities + tasks) without Pro, gracefully degrade to activities only.
+		if ( $wants_tasks && ! $pro_active ) {
+			if ( 'tasks' === $include ) {
+				return new WP_Error(
+					'pro_required',
+					__( 'Tasks require QuillCRM Pro plugin', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+			// For 'all', degrade to activities only.
+			$include     = 'activities';
+			$wants_tasks = false;
+		}
+
+		// Normalize entity_type to integer constant.
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+
+		// Check Pro availability for deal entity type.
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
+			return new WP_Error(
+				'pro_required',
+				__( 'Deal activities require QuillCRM Pro plugin', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Build filters with new parameters.
 		$filters = array(
-			'contact_id'    => $request->get_param( 'contact_id' ),
-			'entity_id'     => $request->get_param( 'entity_id' ),
-			'entity_type'   => $request->get_param( 'entity_type' ),
-			'activity_type' => $request->get_param( 'activity_type' ),
-			'user_id'       => $request->get_param( 'user_id' ),
-			'date_from'     => $request->get_param( 'date_from' ),
-			'date_to'       => $request->get_param( 'date_to' ),
-			'sort_by'       => $request->get_param( 'sort_by' ),
-			'sort_order'    => $request->get_param( 'sort_order' ),
+			'contact_id'         => $request->get_param( 'contact_id' ),
+			'entity_id'          => $request->get_param( 'entity_id' ),
+			'entity_type'        => $entity_type,
+			'activity_type'      => $request->get_param( 'activity_type' ),
+			'activity_editable'  => $request->get_param( 'activity_editable' ),
+			'task_type'          => $request->get_param( 'task_type' ),
+			'task_status'        => $request->get_param( 'task_status' ),
+			'task_priority'      => $request->get_param( 'task_priority' ),
+			'user_id'            => $request->get_param( 'user_id' ),
+			'date_from'          => $request->get_param( 'date_from' ),
+			'date_to'            => $request->get_param( 'date_to' ),
+			'sort_by'            => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_order'         => $request->get_param( 'sort_order' ) ?? 'desc',
 		);
 
 		// Remove null values.
@@ -211,6 +255,23 @@ class REST_Activity_Controller extends REST_Controller {
 		$per_page = intval( $request->get_param( 'per_page' ) ) ?: 20;
 		$page     = intval( $request->get_param( 'page' ) ) ?: 1;
 
+		// Use unified method when including tasks.
+		if ( $wants_tasks ) {
+			$include_activities = $include !== 'tasks';
+			$include_tasks      = true;
+
+			$result = Activity_Manager::instance()->get_unified_timeline(
+				$filters,
+				$per_page,
+				$page,
+				$include_activities,
+				$include_tasks
+			);
+
+			return new WP_REST_Response( $result, 200 );
+		}
+
+		// Original behavior for activities-only (unchanged for backward compatibility).
 		$activities = Activity_Manager::instance()->get_activities( $filters, $per_page, $page );
 
 		if ( null === $activities ) {
@@ -219,17 +280,60 @@ class REST_Activity_Controller extends REST_Controller {
 
 		$data = array();
 		foreach ( $activities->items() as $activity ) {
-			$data[] = $this->prepare_item_for_response( $activity, $request );
+			$item              = $this->prepare_item_for_response( $activity, $request );
+			$item['item_type'] = 'activity'; // Add item_type for consistency.
+			$data[]            = $item;
 		}
 
-		$response = new WP_REST_Response( $data, 200 );
+		$response = new WP_REST_Response(
+			array(
+				'data' => $data,
+				'meta' => array(
+					'total'          => $activities->total(),
+					'per_page'       => $per_page,
+					'current_page'   => $page,
+					'total_pages'    => $activities->lastPage(),
+					'includes_tasks' => false,
+					'pro_active'     => $pro_active,
+				),
+			),
+			200
+		);
 
-		// Add pagination headers.
+		// Add pagination headers for backward compatibility.
 		$response->header( 'X-Total-Count', $activities->total() );
 		$response->header( 'X-Total-Pages', $activities->lastPage() );
 		$response->header( 'X-Current-Page', $activities->currentPage() );
 
 		return $response;
+	}
+
+	/**
+	 * Normalize entity_type to integer constant
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param string|int|null $entity_type Entity type.
+	 *
+	 * @return int|null Normalized entity type.
+	 */
+	private function normalize_entity_type( $entity_type ) {
+		if ( empty( $entity_type ) ) {
+			return null;
+		}
+
+		// Already numeric.
+		if ( is_numeric( $entity_type ) ) {
+			return intval( $entity_type );
+		}
+
+		// String mapping.
+		$map = array(
+			'deal'     => \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL,
+			'campaign' => \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_CAMPAIGN,
+		);
+
+		return $map[ strtolower( $entity_type ) ] ?? null;
 	}
 
 	/**
@@ -791,6 +895,110 @@ class REST_Activity_Controller extends REST_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get collection params for activities endpoint
+	 *
+	 * @since 1.x.0
+	 *
+	 * @return array Collection parameters.
+	 */
+	public function get_collection_params() {
+		return array(
+			// Entity filtering.
+			'contact_id'        => array(
+				'description' => __( 'Filter by contact ID', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+			'entity_type'       => array(
+				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'quillcrm' ),
+				'type'        => 'string',
+			),
+			'entity_id'         => array(
+				'description' => __( 'Entity ID (used with entity_type)', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+
+			// Content type.
+			'include'           => array(
+				'description' => __( 'What to include: activities, tasks, all', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => array( 'activities', 'tasks', 'all' ),
+				'default'     => 'activities',
+			),
+
+			// Activity filtering.
+			'activity_type'     => array(
+				'description' => __( 'Filter by activity type(s), comma-separated', 'quillcrm' ),
+				'type'        => 'string',
+			),
+			'activity_editable' => array(
+				'description' => __( 'Filter by editable status', 'quillcrm' ),
+				'type'        => 'boolean',
+			),
+
+			// Task filtering (Pro).
+			'task_type'         => array(
+				'description' => __( 'Filter by task type(s), comma-separated (Pro)', 'quillcrm' ),
+				'type'        => 'string',
+			),
+			'task_status'       => array(
+				'description' => __( 'Filter by task status: pending, completed, overdue (Pro)', 'quillcrm' ),
+				'type'        => 'string',
+			),
+			'task_priority'     => array(
+				'description' => __( 'Filter by task priority: low, medium, high (Pro)', 'quillcrm' ),
+				'type'        => 'string',
+			),
+
+			// User filtering.
+			'user_id'           => array(
+				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+
+			// Date filtering.
+			'date_from'         => array(
+				'description' => __( 'Filter from date (Y-m-d)', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'date_to'           => array(
+				'description' => __( 'Filter to date (Y-m-d)', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+
+			// Sorting.
+			'sort_by'           => array(
+				'description' => __( 'Sort field: created_at, due_date', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => array( 'created_at', 'due_date' ),
+				'default'     => 'created_at',
+			),
+			'sort_order'        => array(
+				'description' => __( 'Sort direction: asc, desc', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => array( 'asc', 'desc' ),
+				'default'     => 'desc',
+			),
+
+			// Pagination.
+			'per_page'          => array(
+				'description' => __( 'Items per page', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 20,
+				'minimum'     => 1,
+				'maximum'     => 100,
+			),
+			'page'              => array(
+				'description' => __( 'Page number', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 1,
+				'minimum'     => 1,
+			),
+		);
 	}
 
 	/**

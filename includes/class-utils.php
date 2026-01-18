@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Utils
  * This class contains functions that are used in multiple places
@@ -21,6 +22,7 @@ use DateTime;
  */
 class Utils {
 
+
 	/**
 	 * Get max execution time
 	 *
@@ -28,20 +30,20 @@ class Utils {
 	 */
 	public static function get_max_execution_time() {
 		$max_execution_time = 30;
-	
+
 		if ( function_exists( 'ini_get' ) ) {
 			$max_execution_time = ini_get( 'max_execution_time' );
-	
+
 			if ( ! $max_execution_time ) {
 				$max_execution_time = 30;
 			}
 		}
-	
+
 		// Cap at 60 seconds max to avoid overly long runs
 		$max_execution_time = min( $max_execution_time, 60 );
-	
+
 		$adjusted_execution_time = $max_execution_time * 0.75;
-	
+
 		return apply_filters( 'quillcrm_max_execution_time', $adjusted_execution_time );
 	}
 
@@ -53,14 +55,14 @@ class Utils {
 	public static function is_memory_limit_reached() {
 		$memory_limit = self::get_memory_limit();
 		$memory_usage = memory_get_usage( true );
-		
+
 		// Handle unlimited memory (-1)
 		if ( $memory_limit === '-1' ) {
 			return false;
 		}
-		
+
 		$memory_limit_bytes = self::convert_to_bytes( $memory_limit );
-		$memory_threshold = $memory_limit_bytes * 0.75;
+		$memory_threshold   = $memory_limit_bytes * 0.75;
 
 		return $memory_usage >= $memory_threshold;
 	}
@@ -71,7 +73,7 @@ class Utils {
 	 * @return string
 	 */
 	public static function get_memory_limit() {
-		$memory_limit = '128M';
+		 $memory_limit = '128M';
 
 		if ( function_exists( 'ini_get' ) ) {
 			$memory_limit = ini_get( 'memory_limit' );
@@ -132,45 +134,49 @@ class Utils {
 			0 => array(
 				'label'  => __( 'Default Fields', 'quillcrm' ),
 				'fields' => array(
-					'first_name' => array(
+					'first_name'     => array(
 						'label' => __( 'First Name', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'last_name'  => array(
+					'last_name'      => array(
 						'label' => __( 'Last Name', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'email'      => array(
+					'email'          => array(
 						'label' => __( 'Email', 'quillcrm' ),
 						'type'  => 'email',
 					),
-					'phone'      => array(
+					'phone'          => array(
 						'label' => __( 'Phone', 'quillcrm' ),
 						'type'  => 'phone',
 					),
-					'address_1'  => array(
+					'address_1'      => array(
 						'label' => __( 'Address 1', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'address_2'  => array(
+					'address_2'      => array(
 						'label' => __( 'Address 2', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'city'       => array(
+					'city'           => array(
 						'label' => __( 'City', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'state'      => array(
+					'state'          => array(
 						'label' => __( 'State', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'country'    => array(
+					'country'        => array(
 						'label' => __( 'Country', 'quillcrm' ),
 						'type'  => 'text',
 					),
-					'zip'        => array(
+					'zip'            => array(
 						'label' => __( 'Zip', 'quillcrm' ),
 						'type'  => 'text',
+					),
+					'whatsapp_phone' => array(
+						'label' => __( 'WhatsApp Phone', 'quillcrm' ),
+						'type'  => 'phone',
 					),
 				),
 			),

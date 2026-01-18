@@ -4733,7 +4733,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"title\": \"Product Demo\",\n    \"location\": \"Zoom\",\n    \"start_time\": \"2026-01-20T10:00:00\",\n    \"end_time\": \"2026-01-20T11:00:00\",\n    \"notes\": \"Discuss pricing options\",\n    \"deal_id\": 1\n}",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"entity_id\": {{dealId}},\n    \"entity_type\": 1,\n    \"meeting_data\": {\n        \"title\": \"Product Demo\",\n        \"scheduled_at\": \"2026-01-20T10:00:00\",\n        \"duration\": 60,\n        \"location\": \"Zoom\",\n        \"description\": \"Discuss pricing options\",\n        \"primary_attendee_name\": \"John Doe\",\n        \"primary_attendee_email\": \"john@example.com\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"

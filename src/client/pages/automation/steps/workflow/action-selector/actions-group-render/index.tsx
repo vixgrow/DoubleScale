@@ -89,6 +89,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'quillcrm'
 			);
 		}
+		if (groupLabel === 'Presto Player') {
+			return __(
+				'Presto Player plugin is not installed or activated. Install Presto Player to use these actions.',
+				'quillcrm'
+			);
+		}
 		return __(
 			'This integration is not available. Please install the required plugin.',
 			'quillcrm'

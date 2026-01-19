@@ -862,15 +862,14 @@ final class Activity_Manager {
 	 * Get unified timeline combining activities and tasks
 	 *
 	 * Uses raw SQL UNION query for optimal performance when combining
-	 * data from multiple tables. Always includes activities, and includes
-	 * tasks automatically when Pro is active (unless activity_type filter is set).
+	 * data from multiple tables. Always includes all activities, and includes
+	 * tasks automatically when Pro is active.
 	 *
 	 * Supported filters:
 	 * - contact_id: Filter by contact
 	 * - entity_id + entity_type: Filter by associated entity (deal, campaign)
 	 * - user_id: Filter by creator (activities) or assignee (tasks)
 	 * - date_from, date_to: Date range filter
-	 * - activity_type: Filter by activity type (e.g., note, call_logged). When set, tasks are excluded.
 	 * - sort_by, sort_order: Sorting options
 	 *
 	 * @since 1.x.0
@@ -1039,12 +1038,30 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
 		}
 
-		// Date filters.
+		// Date filters - use scheduled/called date from JSON data if available, fallback to created_at.
+		// This ensures meetings/calls are filtered by their scheduled time, not creation time.
+		// - Meetings use: scheduled_at
+		// - Calls use: called_at
+		// - Other activities: created_at
 		if ( ! empty( $filters['date_from'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'DATE(a.created_at) >= %s', $filters['date_from'] );
+			$where_clauses[] = $wpdb->prepare(
+				'DATE(COALESCE(
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
+					a.created_at
+				)) >= %s',
+				$filters['date_from']
+			);
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'DATE(a.created_at) <= %s', $filters['date_to'] );
+			$where_clauses[] = $wpdb->prepare(
+				'DATE(COALESCE(
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
+					a.created_at
+				)) <= %s',
+				$filters['date_to']
+			);
 		}
 
 		// LEFT JOIN to get deal_id from associations (entity_type = 2 for deals).
@@ -1137,12 +1154,13 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 't.assigned_to = %d', $filters['user_id'] );
 		}
 
-		// Date filters.
+		// Date filters - use due_date for tasks (more relevant for "upcoming" filtering).
+		// Tasks without due_date are excluded from date filtering.
 		if ( ! empty( $filters['date_from'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'DATE(t.created_at) >= %s', $filters['date_from'] );
+			$where_clauses[] = $wpdb->prepare( 't.due_date IS NOT NULL AND DATE(t.due_date) >= %s', $filters['date_from'] );
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'DATE(t.created_at) <= %s', $filters['date_to'] );
+			$where_clauses[] = $wpdb->prepare( 't.due_date IS NOT NULL AND DATE(t.due_date) <= %s', $filters['date_to'] );
 		}
 
 		$where_sql = implode( ' AND ', $where_clauses );

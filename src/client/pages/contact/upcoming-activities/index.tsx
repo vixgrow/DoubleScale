@@ -18,8 +18,10 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
  * Internal dependencies
  */
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@quillcrm/services/activities-service';
-import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon } from '@quillcrm/components';
+import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
 import { useActivityOperations } from '@quillcrm/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
@@ -27,6 +29,7 @@ import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@quillcrm/client';
+import apiFetch from '@wordpress/api-fetch';
 
 interface UpcomingActivitiesProps {
     contact_id: number;
@@ -96,11 +99,23 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     follow_up: <TaskDoneIcon color="#CB5301" />,
 };
 
+// Dynamic import for Pro task service
+const loadProTaskService = async () => {
+    try {
+        // @ts-ignore - Pro plugin path
+        const module = await import('@pro/client/pages/tasks/api/tasks');
+        return module.TaskService;
+    } catch {
+        return null;
+    }
+};
+
 const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) => {
     const { deleteActivity } = useActivityOperations();
     const { contact } = useContactContext();
     const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
     const [loading, setLoading] = useState(false);
+    const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     // Modal states for editing
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -122,6 +137,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
             const today = dayjs().format('YYYY-MM-DD');
 
             // Use timeline endpoint to get activities + tasks
+            // Backend filters by scheduled date for activities and due_date for tasks
             const response = await ActivitiesService.getTimeline({
                 contact_id,
                 per_page: 100,
@@ -130,20 +146,8 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
             });
 
             if (response && response.data) {
-                // Filter for upcoming activities (future dates or today)
-                const todayStart = dayjs().startOf('day');
-                const upcomingActivities = response.data.filter((activity) => {
-                    const activityData = activity.data as Record<string, string> | undefined;
-                    const activityDate = activityData?.meeting_date_time ||
-                        activityData?.scheduled_at ||
-                        activityData?.due_date ||
-                        activity.created_at;
-                    const activityDay = dayjs(activityDate).startOf('day');
-                    return activityDay.isSameOrAfter(todayStart);
-                });
-
                 // Transform using service utility
-                const timelineItems = transformApiItemsToTimeline(upcomingActivities);
+                const timelineItems = transformApiItemsToTimeline(response.data);
                 setTimelineItems(timelineItems);
             }
         } catch (error) {
@@ -188,8 +192,8 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
     };
 
     const showNotice = (type: 'success' | 'error', message: string) => {
-        // Notice handling can be added if needed
-        console.log(type, message);
+        setNotice({ type, message });
+        setTimeout(() => setNotice(null), 3000);
     };
 
     const handleDeleteActivity = async (activityId: number) => {
@@ -200,8 +204,46 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
         try {
             await deleteActivity(activityId);
             fetchUpcomingActivities();
+            showNotice('success', __('Activity deleted successfully', 'quillcrm'));
         } catch (error) {
             console.error('Failed to delete activity:', error);
+            showNotice('error', __('Failed to delete activity', 'quillcrm'));
+        }
+    };
+
+    const handleDeleteTask = async (taskId: number) => {
+        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'quillcrm'))) {
+            return;
+        }
+        try {
+            const TaskService = await loadProTaskService();
+            if (!TaskService) {
+                showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
+                return;
+            }
+            await TaskService.deleteTask(taskId);
+            fetchUpcomingActivities();
+            showNotice('success', __('Task deleted successfully', 'quillcrm'));
+        } catch (error) {
+            console.error('Failed to delete task:', error);
+            showNotice('error', __('Failed to delete task', 'quillcrm'));
+        }
+    };
+
+    const handleMarkTaskComplete = async (taskId: number) => {
+        try {
+            await apiFetch({
+                path: `/qc/v1/tasks/${taskId}`,
+                method: 'PATCH',
+                data: {
+                    status: 'completed',
+                },
+            });
+            fetchUpcomingActivities();
+            showNotice('success', __('Task marked as complete', 'quillcrm'));
+        } catch (error) {
+            console.error('Failed to mark task as complete:', error);
+            showNotice('error', __('Failed to mark task as complete', 'quillcrm'));
         }
     };
 
@@ -214,17 +256,30 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
         return activityTypeIcons[activityType] || <User className="w-4 h-4" />;
     };
 
-    const formatActivityTime = (createdAt: string) => {
+    const formatActivityTime = (dateStr: string) => {
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const date = dayjs.utc(createdAt).tz(userTimeZone);
-
+        const date = dayjs.utc(dateStr).tz(userTimeZone);
         const now = dayjs();
-        const diffDays = now.diff(date, 'day');
+        
+        // Check if date is in the future or past
+        const isFuture = date.isAfter(now);
+        const diffDays = Math.abs(now.diff(date, 'day'));
 
         if (diffDays === 0) {
             return date.format('h:mm A');
         } else if (diffDays < 7) {
-            return `Last ${date.format('dddd [at] h:mm A')}`;
+            if (isFuture) {
+                // Future dates: "This Tuesday at 2:00 PM" or "Next Tuesday at 2:00 PM"
+                const thisWeekEnd = now.endOf('week');
+                if (date.isBefore(thisWeekEnd)) {
+                    return `This ${date.format('dddd [at] h:mm A')}`;
+                } else {
+                    return `Next ${date.format('dddd [at] h:mm A')}`;
+                }
+            } else {
+                // Past dates: "Last Tuesday at 2:00 PM"
+                return `Last ${date.format('dddd [at] h:mm A')}`;
+            }
         } else {
             return date.format('MMM D, YYYY [at] h:mm A');
         }
@@ -380,6 +435,12 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
 
     return (
         <div className="upcoming-activities-container">
+            {/* Notice */}
+            {notice && (
+                <div className={`mb-4 p-3 rounded-md ${notice.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {notice.message}
+                </div>
+            )}
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">
                     {__('Upcoming Activities', 'quillcrm')}
@@ -406,9 +467,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
 
                         <div className="space-y-0">
                             {timelineItems.map((item) => {
-                                // Build editable activity from timeline item for dialog compatibility
+                                const isTask = item.type === 'task';
+                                // Build editable activity from timeline item for dialog compatibility (only for activities)
                                 const activityRecord = item.activity as Record<string, unknown> | undefined;
-                                const activity: EditableActivity = {
+                                const activity: EditableActivity | null = isTask ? null : {
                                     id: item.activity_id ?? 0,
                                     contact_id: (activityRecord?.contact_id as number) ?? contact_id,
                                     activity_type: item.icon_type,
@@ -419,27 +481,34 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                                     updated_at: item.timestamp,
                                     user: item.user,
                                 };
-                                const itemId = item.activity_id;
+                                const itemId = isTask ? item.task_id : item.activity_id;
+
+                                // For tasks, use due_date for display; for activities use scheduled date or timestamp
+                                const displayDate = isTask && item.due_date
+                                    ? item.due_date
+                                    : (item.data as ActivityData)?.scheduled_at 
+                                        || (item.data as ActivityData)?.called_at
+                                        || item.timestamp;
 
                                 return (
                                     <div
                                         key={item.id}
                                         className="activity-item relative pl-12 pb-8"
                                     >
-                                        {/* Activity Icon */}
+                                        {/* Activity/Task Icon */}
                                         <div className="absolute p-1 left-0 top-0 w-9 h-9 rounded-full bg-[#FFF] flex items-center justify-center border border-[#DEE1E6]">
                                             {getActivityIcon(item.icon_type)}
                                         </div>
 
-                                        {/* Activity Content */}
+                                        {/* Activity/Task Content */}
                                         <div className="activity-content">
                                             {/* Header */}
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <div className="flex justify-center gap-2">
-                                                        <MeetingActivityIcon />
+                                                        {isTask ? <TaskDoneIcon color="#CB5301" /> : <MeetingActivityIcon />}
                                                         <p className="text-base font-normal text-[#777] border-r border-r-[#DEE1E6] pr-2">
-                                                            {formatActivityTime(item.timestamp)}
+                                                            {formatActivityTime(displayDate)}
                                                         </p>
                                                     </div>
                                                     <div className="flex justify-center gap-2">
@@ -451,23 +520,65 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                                                 </div>
                                                 {/* Actions */}
                                                 <div className="flex items-center gap-5">
-                                                    {activity && isEditableActivity(item.icon_type) && (
+                                                    {!isTask && activity && isEditableActivity(item.icon_type) && (
                                                         <ActivityActionsDropdown
                                                             onEdit={() => handleEditActivity(activity)}
                                                             onDelete={() => handleDeleteActivity(itemId!)}
                                                         />
                                                     )}
+                                                    {isTask && (
+                                                        <>
+                                                            <ActivityActionsDropdown
+                                                                onEdit={() => {}} // Task editing requires Pro dialog
+                                                                onDelete={() => handleDeleteTask(item.task_id!)}
+                                                            />
+                                                            {item.status !== 'completed' && (
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleMarkTaskComplete(item.task_id!)}
+                                                                    className="flex items-center gap-2 text-[#16A34A]"
+                                                                >
+                                                                    <CheckCircleIcon width={16} height={16} />
+                                                                    {__('Mark Complete', 'quillcrm')}
+                                                                </Button>
+                                                            )}
+                                                            {item.status && (
+                                                                <Badge className="text-xs">
+                                                                    {item.status}
+                                                                </Badge>
+                                                            )}
+                                                            {item.priority && (
+                                                                <Badge className="text-xs ml-2">
+                                                                    {item.priority}
+                                                                </Badge>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* Activity Description */}
+                                            {/* Activity/Task Description */}
                                             <div className="activity-body">
                                                 <p className="text-base text-[#09090B] mb-3 font-medium">
-                                                    {activity?.formatted_message || item.title}
+                                                    {isTask ? item.title : (activity?.formatted_message || item.title)}
                                                 </p>
 
+                                                {/* Task-specific content */}
+                                                {isTask && item.description && (
+                                                    <p className="text-sm text-gray-700 mb-2">
+                                                        {item.description}
+                                                    </p>
+                                                )}
+
+                                                {isTask && item.due_date && (
+                                                    <p className="text-xs text-gray-600">
+                                                        {__('Due', 'quillcrm')}: {item.due_date} {item.due_time}
+                                                    </p>
+                                                )}
+
                                                 {/* Activity-specific content */}
-                                                {activity && renderActivityContent(activity)}
+                                                {!isTask && activity && renderActivityContent(activity)}
                                             </div>
                                         </div>
                                     </div>

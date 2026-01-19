@@ -377,7 +377,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'item_type'         => 'activity',
 			'activity_type'     => $activity->activity_type,
 			'contact_id'        => $activity->contact_id ? (int) $activity->contact_id : null,
-			'deal_id'           => null,
+			'deal_id'           => $activity->deal_id ? (int) $activity->deal_id : null,
 			'data'              => $activity->data,
 			'user_id'           => $activity->user_id ? (int) $activity->user_id : null,
 			'user'              => $user,

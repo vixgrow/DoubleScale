@@ -93,6 +93,8 @@ export interface TimelineItem {
 	type: 'activity' | 'task';
 	activity_id?: number;
 	task_id?: number;
+	contact_id?: number;
+	deal_id?: number;
 	title: string;
 	description: string;
 	timestamp: string;
@@ -145,6 +147,8 @@ export function transformApiItemToTimelineItem(
 			id: `task-${item.id}`,
 			type: 'task',
 			task_id: item.id,
+			contact_id: item.contact_id,
+			deal_id: item.deal_id,
 			title: item.title || '',
 			description: item.description || '',
 			timestamp: item.created_at,
@@ -164,6 +168,8 @@ export function transformApiItemToTimelineItem(
 		id: `activity-${item.id}`,
 		type: 'activity',
 		activity_id: item.id,
+		contact_id: item.contact_id,
+		deal_id: item.deal_id,
 		title: item.formatted_message || '',
 		description: (item.data as Record<string, string>)?.message || '',
 		timestamp: item.created_at,

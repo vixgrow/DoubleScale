@@ -1017,7 +1017,7 @@ final class Activity_Manager {
 		$comments_table     = $wpdb->prefix . 'quillcrm_activity_comments';
 
 		$where_clauses = array( '1=1' );
-		$join_clause   = '';
+		$join_clauses  = array();
 
 		// Contact filter.
 		if ( ! empty( $filters['contact_id'] ) ) {
@@ -1026,7 +1026,7 @@ final class Activity_Manager {
 
 		// Deal/Entity filter (via associations).
 		if ( ! empty( $filters['entity_type'] ) && ! empty( $filters['entity_id'] ) ) {
-			$join_clause     = "INNER JOIN {$associations_table} aa ON a.id = aa.activity_id";
+			$join_clauses[]  = "INNER JOIN {$associations_table} aa ON a.id = aa.activity_id";
 			$where_clauses[] = $wpdb->prepare(
 				'aa.entity_type = %d AND aa.entity_id = %d',
 				$filters['entity_type'],
@@ -1047,8 +1047,12 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 'DATE(a.created_at) <= %s', $filters['date_to'] );
 		}
 
+		// LEFT JOIN to get deal_id from associations (entity_type = 2 for deals).
+		$deal_entity_type = 2; // Activity_Association_Model::ENTITY_TYPE_DEAL.
+		$join_clauses[]   = "LEFT JOIN {$associations_table} deal_assoc ON a.id = deal_assoc.activity_id AND deal_assoc.entity_type = {$deal_entity_type}";
 
-		$where_sql = implode( ' AND ', $where_clauses );
+		$where_sql  = implode( ' AND ', $where_clauses );
+		$joins_sql  = implode( ' ', $join_clauses );
 
 		// Select query - normalized columns for UNION.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1058,6 +1062,7 @@ final class Activity_Manager {
 			a.activity_type,
 			NULL as task_type,
 			a.contact_id,
+			deal_assoc.entity_id as deal_id,
 			a.data,
 			a.user_id,
 			a.created_at,
@@ -1073,12 +1078,18 @@ final class Activity_Manager {
 			NULL as is_overdue,
 			(SELECT COUNT(*) FROM {$comments_table} c WHERE c.activity_id = a.id) as comments_count
 		FROM {$activities_table} a
-		{$join_clause}
+		{$joins_sql}
 		WHERE {$where_sql}";
 
-		// Count query.
+		// Count query - only need the filter joins, not the deal_id lookup join.
+		$filter_joins = array();
+		if ( ! empty( $filters['entity_type'] ) && ! empty( $filters['entity_id'] ) ) {
+			$filter_joins[] = "INNER JOIN {$associations_table} aa ON a.id = aa.activity_id";
+		}
+		$filter_joins_sql = implode( ' ', $filter_joins );
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count_sql = "SELECT COUNT(*) FROM {$activities_table} a {$join_clause} WHERE {$where_sql}";
+		$count_sql = "SELECT COUNT(*) FROM {$activities_table} a {$filter_joins_sql} WHERE {$where_sql}";
 
 		return array(
 			'select' => $select_sql,
@@ -1136,8 +1147,9 @@ final class Activity_Manager {
 
 		$where_sql = implode( ' AND ', $where_clauses );
 
-		// Get entity type constant for contact.
+		// Get entity type constants.
 		$contact_entity_type = \QuillCRM_Pro\Constants\Task_Entity_Type::CONTACT;
+		$deal_entity_type    = \QuillCRM_Pro\Constants\Task_Entity_Type::DEAL;
 
 		// Select query - normalized columns for UNION.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1150,6 +1162,10 @@ final class Activity_Manager {
 				WHEN t.entity_type = {$contact_entity_type} THEN t.entity_id
 				ELSE NULL
 			END as contact_id,
+			CASE
+				WHEN t.entity_type = {$deal_entity_type} THEN t.entity_id
+				ELSE NULL
+			END as deal_id,
 			NULL as data,
 			t.assigned_to as user_id,
 			t.created_at,
@@ -1241,7 +1257,7 @@ final class Activity_Manager {
 			'item_type'         => 'activity',
 			'activity_type'     => $row->activity_type,
 			'contact_id'        => $row->contact_id ? (int) $row->contact_id : null,
-			'deal_id'           => null,
+			'deal_id'           => ! empty( $row->deal_id ) ? (int) $row->deal_id : null,
 			'data'              => $data,
 			'user_id'           => $row->user_id ? (int) $row->user_id : null,
 			'user'              => $user,
@@ -1270,7 +1286,7 @@ final class Activity_Manager {
 			'item_type'      => 'task',
 			'task_type'      => $row->task_type,
 			'contact_id'     => $row->contact_id ? (int) $row->contact_id : null,
-			'deal_id'        => null,
+			'deal_id'        => ! empty( $row->deal_id ) ? (int) $row->deal_id : null,
 			'title'          => $row->title,
 			'description'    => $row->description,
 			'user_id'        => $row->user_id ? (int) $row->user_id : null,

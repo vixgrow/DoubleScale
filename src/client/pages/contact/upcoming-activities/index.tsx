@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@quillcrm/services/activities-service';
 import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon } from '@quillcrm/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
-import { useActivityOperations } from '../activities/use-activity-operations';
+import { useActivityOperations } from '@quillcrm/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';

@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import './style.scss';
 import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
 import { ActivityActionsDropdown } from './activity-action-dropdown';
-import { useActivityOperations } from './use-activity-operations';
+import { useActivityOperations } from '@quillcrm/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
@@ -301,6 +301,25 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             fetchActivities();
         } catch (error) {
             console.error('Failed to delete activity:', error);
+        }
+    };
+
+    const handleDeleteTask = async (taskId: number) => {
+        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'quillcrm'))) {
+            return;
+        }
+        try {
+            const TaskService = await loadProTaskService();
+            if (!TaskService) {
+                showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
+                return;
+            }
+            await TaskService.deleteTask(taskId);
+            fetchActivities();
+            showNotice('success', __('Task deleted successfully', 'quillcrm'));
+        } catch (error) {
+            console.error('Failed to delete task:', error);
+            showNotice('error', __('Failed to delete task', 'quillcrm'));
         }
     };
 
@@ -611,7 +630,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                         <>
                                                             <ActivityActionsDropdown
                                                                 onEdit={() => handleEditTask(item.task_id!)}
-                                                                onDelete={() => handleDeleteActivity(item.task_id!)}
+                                                                onDelete={() => handleDeleteTask(item.task_id!)}
                                                             />
                                                             {item.status !== 'completed' && (
                                                                 <Button

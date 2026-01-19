@@ -95,6 +95,41 @@ interface TimelineItem {
     activity?: Activity; // Store full activity object for editing
 }
 
+interface ActivitiesApiItem {
+    id: number;
+    item_type: 'activity' | 'task';
+    activity_type?: string;
+    task_type?: string;
+    contact_id?: number;
+    title?: string;
+    description?: string;
+    formatted_message?: string;
+    data?: any;
+    user_id?: number;
+    user?: {
+        id: number;
+        display_name: string;
+    };
+    status?: string;
+    priority?: string;
+    due_date?: string;
+    due_time?: string;
+    created_at: string;
+    updated_at?: string;
+    comments_count?: number;
+}
+
+interface ActivitiesResponse {
+    data: ActivitiesApiItem[];
+    meta: {
+        total: number;
+        per_page: number;
+        current_page: number;
+        total_pages: number;
+        pro_active: boolean;
+    };
+}
+
 const activityTypeIcons: Record<string, React.ReactNode> = {
     created: <UserActivityIcon color="#3B82F6" />,
     stage_changed: <ArrowRight className="w-4 h-4" />,
@@ -200,7 +235,6 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [filters, setFilters] = useState({
-        activity_type: '',
         sort_by: 'created_at',
         sort_order: 'desc',
         date_from: '',
@@ -226,37 +260,62 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 params.append('date_to', filters.date_to);
             }
 
-            const response: any = await apiFetch({
+            const response = (await apiFetch({
                 path: `/qc/v1/activities?${params.toString()}`,
-            });
+            })) as ActivitiesResponse;
 
-            if (response && Array.isArray(response)) {
-                // Transform activities to timeline items format
-                const timelineItems = response.map((activity: any) => ({
-                    id: `activity-${activity.id}`,
-                    type: 'activity' as const,
-                    activity_id: activity.id,
-                    title: activity.formatted_message || '',
-                    description: '',
-                    timestamp: activity.created_at,
-                    user: activity.user,
-                    data: activity.data,
-                    icon_type: activity.activity_type,
-                    comments_count: activity.comments?.length || 0,
-                    // Store full activity for editing
-                    activity: {
-                        id: activity.id,
-                        contact_id: activity.contact_id,
-                        activity_type: activity.activity_type,
-                        data: activity.data,
-                        user_id: activity.user_id,
-                        formatted_message: activity.formatted_message,
-                        created_at: activity.created_at,
-                        updated_at: activity.updated_at,
-                        user: activity.user,
-                    } as Activity,
-                }));
-                setTimelineItems(timelineItems);
+            if (response && response.data) {
+                // Transform items to timeline format (supports both activities and tasks)
+                const items: TimelineItem[] = response.data.map((item) => {
+                    if (item.item_type === 'task') {
+                        // Task item (Pro only)
+                        return {
+                            id: `task-${item.id}`,
+                            type: 'task' as const,
+                            task_id: item.id,
+                            title: item.title || '',
+                            description: item.description || '',
+                            timestamp: item.created_at,
+                            user: item.user,
+                            data: null,
+                            icon_type: item.task_type || 'task',
+                            status: item.status,
+                            priority: item.priority,
+                            due_date: item.due_date,
+                            due_time: item.due_time,
+                            comments_count: 0,
+                        };
+                    } else {
+                        // Activity item
+                        return {
+                            id: `activity-${item.id}`,
+                            type: 'activity' as const,
+                            activity_id: item.id,
+                            title: item.formatted_message || '',
+                            description: '',
+                            timestamp: item.created_at,
+                            user: item.user,
+                            data: item.data,
+                            icon_type: item.activity_type || 'note',
+                            comments_count: item.comments_count || 0,
+                            // Store full activity for editing
+                            activity: {
+                                id: item.id,
+                                contact_id: item.contact_id,
+                                activity_type: item.activity_type || 'note',
+                                data: item.data,
+                                user_id: item.user_id,
+                                formatted_message: item.formatted_message,
+                                created_at: item.created_at,
+                                updated_at: item.updated_at,
+                                user: item.user,
+                            } as Activity,
+                        };
+                    }
+                });
+                setTimelineItems(items);
+            } else {
+                setTimelineItems([]);
             }
         } catch (error) {
             console.error('Failed to fetch timeline:', error);

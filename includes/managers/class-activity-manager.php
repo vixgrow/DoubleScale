@@ -862,25 +862,35 @@ final class Activity_Manager {
 	 * Get unified timeline combining activities and tasks
 	 *
 	 * Uses raw SQL UNION query for optimal performance when combining
-	 * data from multiple tables.
+	 * data from multiple tables. Always includes activities, and includes
+	 * tasks automatically when Pro is active (unless activity_type filter is set).
+	 *
+	 * Supported filters:
+	 * - contact_id: Filter by contact
+	 * - entity_id + entity_type: Filter by associated entity (deal, campaign)
+	 * - user_id: Filter by creator (activities) or assignee (tasks)
+	 * - date_from, date_to: Date range filter
+	 * - activity_type: Filter by activity type (e.g., note, call_logged). When set, tasks are excluded.
+	 * - sort_by, sort_order: Sorting options
 	 *
 	 * @since 1.x.0
 	 *
-	 * @param array $filters          Filter criteria.
-	 * @param int   $per_page         Results per page.
-	 * @param int   $page             Page number.
-	 * @param bool  $include_activities Whether to include activities.
-	 * @param bool  $include_tasks    Whether to include tasks.
+	 * @param array $filters  Filter criteria.
+	 * @param int   $per_page Results per page.
+	 * @param int   $page     Page number.
 	 *
 	 * @return array Array with 'data' and 'meta' keys.
 	 */
 	public function get_unified_timeline(
 		array $filters,
 		int $per_page = 20,
-		int $page = 1,
-		bool $include_activities = true,
-		bool $include_tasks = true
+		int $page = 1
 	): array {
+		// Sanitize pagination parameters to prevent division by zero and invalid values.
+		$per_page = max( 1, $per_page );
+		$page     = max( 1, $page );
+
+		$pro_active = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
 		global $wpdb;
 
 		// Permission check for deal access.
@@ -890,13 +900,12 @@ final class Activity_Manager {
 				return array(
 					'data' => array(),
 					'meta' => array(
-						'total'          => 0,
-						'per_page'       => $per_page,
-						'current_page'   => $page,
-						'total_pages'    => 0,
-						'includes_tasks' => $include_tasks,
-						'pro_active'     => class_exists( '\QuillCRM_Pro\Models\Task_Model' ),
-						'error'          => 'access_denied',
+					'total'        => 0,
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'total_pages'  => 0,
+					'pro_active'   => $pro_active,
+					'error'        => 'access_denied',
 					),
 				);
 			}
@@ -906,16 +915,15 @@ final class Activity_Manager {
 		$count_queries  = array();
 
 		// Build activities query.
-		if ( $include_activities ) {
-			$activities_sql = $this->build_activities_union_sql( $filters, $wpdb );
-			if ( $activities_sql ) {
-				$select_queries[] = $activities_sql['select'];
-				$count_queries[]  = $activities_sql['count'];
-			}
+		$activities_sql = $this->build_activities_union_sql( $filters, $wpdb );
+		if ( $activities_sql ) {
+			$select_queries[] = $activities_sql['select'];
+			$count_queries[]  = $activities_sql['count'];
 		}
 
-		// Build tasks query (Pro only).
-		if ( $include_tasks && class_exists( '\QuillCRM_Pro\Models\Task_Model' ) ) {
+		// Include tasks only when Pro is active AND no activity_type filter is set.
+		// When filtering by activity_type, we only want activities of that type (no tasks).
+		if ( $pro_active && empty( $filters['activity_type'] ) ) {
 			$tasks_sql = $this->build_tasks_union_sql( $filters, $wpdb );
 			if ( $tasks_sql ) {
 				$select_queries[] = $tasks_sql['select'];
@@ -928,12 +936,11 @@ final class Activity_Manager {
 			return array(
 				'data' => array(),
 				'meta' => array(
-					'total'          => 0,
-					'per_page'       => $per_page,
-					'current_page'   => $page,
-					'total_pages'    => 0,
-					'includes_tasks' => $include_tasks,
-					'pro_active'     => class_exists( '\QuillCRM_Pro\Models\Task_Model' ),
+				'total'        => 0,
+				'per_page'     => $per_page,
+				'current_page' => $page,
+				'total_pages'  => 0,
+				'pro_active'   => $pro_active,
 				),
 			);
 		}
@@ -984,12 +991,11 @@ final class Activity_Manager {
 		return array(
 			'data' => $data,
 			'meta' => array(
-				'total'          => $total,
-				'per_page'       => $per_page,
-				'current_page'   => $page,
-				'total_pages'    => (int) ceil( $total / $per_page ),
-				'includes_tasks' => $include_tasks && class_exists( '\QuillCRM_Pro\Models\Task_Model' ),
-				'pro_active'     => class_exists( '\QuillCRM_Pro\Models\Task_Model' ),
+			'total'        => $total,
+			'per_page'     => $per_page,
+			'current_page' => $page,
+			'total_pages'  => (int) ceil( $total / $per_page ),
+			'pro_active'   => $pro_active,
 			),
 		);
 	}
@@ -1027,29 +1033,6 @@ final class Activity_Manager {
 			);
 		}
 
-		// Activity type filter.
-		if ( ! empty( $filters['activity_type'] ) ) {
-			$types        = array_map( 'sanitize_text_field', explode( ',', $filters['activity_type'] ) );
-			$placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$where_clauses[] = $wpdb->prepare( "a.activity_type IN ({$placeholders})", ...$types );
-		}
-
-		// Editable filter.
-		if ( isset( $filters['activity_editable'] ) ) {
-			$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-			if ( $filters['activity_editable'] ) {
-				$placeholders    = implode( ',', array_fill( 0, count( $editable_types ), '%s' ) );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$where_clauses[] = $wpdb->prepare( "a.activity_type IN ({$placeholders})", ...$editable_types );
-			} else {
-				$system_types    = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
-				$placeholders    = implode( ',', array_fill( 0, count( $system_types ), '%s' ) );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$where_clauses[] = $wpdb->prepare( "a.activity_type IN ({$placeholders})", ...$system_types );
-			}
-		}
-
 		// User filter.
 		if ( ! empty( $filters['user_id'] ) ) {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
@@ -1061,6 +1044,11 @@ final class Activity_Manager {
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
 			$where_clauses[] = $wpdb->prepare( 'DATE(a.created_at) <= %s', $filters['date_to'] );
+		}
+
+		// Activity type filter.
+		if ( ! empty( $filters['activity_type'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 'a.activity_type = %s', $filters['activity_type'] );
 		}
 
 		$where_sql = implode( ' AND ', $where_clauses );
@@ -1134,33 +1122,6 @@ final class Activity_Manager {
 				\QuillCRM_Pro\Constants\Task_Entity_Type::DEAL,
 				$filters['entity_id']
 			);
-		}
-
-		// Task type filter.
-		if ( ! empty( $filters['task_type'] ) ) {
-			$types        = array_map( 'sanitize_text_field', explode( ',', $filters['task_type'] ) );
-			$placeholders = implode( ',', array_fill( 0, count( $types ), '%s' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$where_clauses[] = $wpdb->prepare( "t.task_type IN ({$placeholders})", ...$types );
-		}
-
-		// Task status filter.
-		if ( ! empty( $filters['task_status'] ) ) {
-			$status = sanitize_text_field( $filters['task_status'] );
-			if ( $status === 'overdue' ) {
-				$where_clauses[] = $wpdb->prepare(
-					"t.status = %s AND t.due_date < %s",
-					'pending',
-					current_time( 'Y-m-d' )
-				);
-			} else {
-				$where_clauses[] = $wpdb->prepare( 't.status = %s', $status );
-			}
-		}
-
-		// Task priority filter.
-		if ( ! empty( $filters['task_priority'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 't.priority = %s', $filters['task_priority'] );
 		}
 
 		// User filter (assigned_to for tasks).

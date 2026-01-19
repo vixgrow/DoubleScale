@@ -4,6 +4,10 @@
  * REST API: Activity controller
  * Unified controller for all activity types (notes, emails, calls, meetings)
  *
+ * GET /qc/v1/activities behavior:
+ * - When Pro is active: Returns both activities AND tasks (unified timeline)
+ * - When Pro is inactive: Returns activities only
+ *
  * @since 1.0.0
  * @package QuillCRM
  * @subpackage REST_API
@@ -206,16 +210,15 @@ class REST_Activity_Controller extends REST_Controller {
 
 		// Build filters.
 		$filters = array(
-			'contact_id'        => $request->get_param( 'contact_id' ),
-			'entity_id'         => $request->get_param( 'entity_id' ),
-			'entity_type'       => $entity_type,
-			'activity_type'     => $request->get_param( 'activity_type' ),
-			'activity_editable' => $request->get_param( 'activity_editable' ),
-			'user_id'           => $request->get_param( 'user_id' ),
-			'date_from'         => $request->get_param( 'date_from' ),
-			'date_to'           => $request->get_param( 'date_to' ),
-			'sort_by'           => $request->get_param( 'sort_by' ) ?? 'created_at',
-			'sort_order'        => $request->get_param( 'sort_order' ) ?? 'desc',
+			'contact_id'    => $request->get_param( 'contact_id' ),
+			'entity_id'     => $request->get_param( 'entity_id' ),
+			'entity_type'   => $entity_type,
+			'user_id'       => $request->get_param( 'user_id' ),
+			'date_from'     => $request->get_param( 'date_from' ),
+			'date_to'       => $request->get_param( 'date_to' ),
+			'activity_type' => $request->get_param( 'activity_type' ),
+			'sort_by'       => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_order'    => $request->get_param( 'sort_order' ) ?? 'desc',
 		);
 
 		// Remove null values.
@@ -234,9 +237,7 @@ class REST_Activity_Controller extends REST_Controller {
 			$result = Activity_Manager::instance()->get_unified_timeline(
 				$filters,
 				$per_page,
-				$page,
-				true,  // include_activities
-				true   // include_tasks
+				$page
 			);
 
 			return new WP_REST_Response( $result, 200 );
@@ -882,20 +883,16 @@ class REST_Activity_Controller extends REST_Controller {
 				'type'        => 'integer',
 			),
 
-			// Activity filtering.
-			'activity_type'     => array(
-				'description' => __( 'Filter by activity type(s), comma-separated', 'quillcrm' ),
-				'type'        => 'string',
-			),
-			'activity_editable' => array(
-				'description' => __( 'Filter by editable status', 'quillcrm' ),
-				'type'        => 'boolean',
-			),
-
 			// User filtering.
 			'user_id'           => array(
 				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'quillcrm' ),
 				'type'        => 'integer',
+			),
+
+			// Activity type filtering (filters activities only, tasks are excluded when this is set).
+			'activity_type'     => array(
+				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'quillcrm' ),
+				'type'        => 'string',
 			),
 
 			// Date filtering.

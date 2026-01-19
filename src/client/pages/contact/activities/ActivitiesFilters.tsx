@@ -10,7 +10,6 @@ import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
 
 interface ActivitiesFiltersProps {
 	filters: {
-		activity_type: string;
 		sort_by: string;
 		sort_order: string;
 		date_from?: string;

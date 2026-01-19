@@ -27,6 +27,7 @@ module.exports = {
 			'@quillcrm/components': path.resolve(__dirname, 'src/components'),
 			'@quillcrm/hooks': path.resolve(__dirname, 'src/hooks'),
 			'@quillcrm/utils': path.resolve(__dirname, 'src/utils'),
+			'@quillcrm/services': path.resolve(__dirname, 'src/services'),
 			'@quillcrm/assets': path.resolve(__dirname, 'assets'),
 		},
 		fallback: {

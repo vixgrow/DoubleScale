@@ -921,9 +921,10 @@ final class Activity_Manager {
 			$count_queries[]  = $activities_sql['count'];
 		}
 
-		// Include tasks only when Pro is active AND no activity_type filter is set.
-		// When filtering by activity_type, we only want activities of that type (no tasks).
-		if ( $pro_active && empty( $filters['activity_type'] ) ) {
+		// Include tasks when Pro is active.
+		// Note: activity_type filtering is handled by get_activities(), not here.
+		// This method always returns all activities + tasks (when Pro active).
+		if ( $pro_active ) {
 			$tasks_sql = $this->build_tasks_union_sql( $filters, $wpdb );
 			if ( $tasks_sql ) {
 				$select_queries[] = $tasks_sql['select'];
@@ -1046,10 +1047,6 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 'DATE(a.created_at) <= %s', $filters['date_to'] );
 		}
 
-		// Activity type filter.
-		if ( ! empty( $filters['activity_type'] ) ) {
-			$where_clauses[] = $wpdb->prepare( 'a.activity_type = %s', $filters['activity_type'] );
-		}
 
 		$where_sql = implode( ' AND ', $where_clauses );
 

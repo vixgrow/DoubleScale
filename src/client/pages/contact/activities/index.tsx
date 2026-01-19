@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -16,8 +17,11 @@ import timezone from 'dayjs/plugin/timezone';
 /**
  * Internal dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import ActivitiesFilters from './ActivitiesFilters';
+import {
+    ActivitiesService,
+    type TimelineItem,
+} from '@quillcrm/services/activities-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import './style.scss';
@@ -73,62 +77,7 @@ interface Activity {
     comments?: any[];
 }
 
-interface TimelineItem {
-    id: string;
-    type: 'activity' | 'task';
-    activity_id?: number;
-    task_id?: number;
-    title: string;
-    description: string;
-    timestamp: string;
-    user?: {
-        id: number;
-        display_name: string;
-    };
-    data?: any;
-    icon_type: string;
-    status?: string;
-    priority?: string;
-    due_date?: string;
-    due_time?: string;
-    comments_count?: number;
-    activity?: Activity; // Store full activity object for editing
-}
-
-interface ActivitiesApiItem {
-    id: number;
-    item_type: 'activity' | 'task';
-    activity_type?: string;
-    task_type?: string;
-    contact_id?: number;
-    title?: string;
-    description?: string;
-    formatted_message?: string;
-    data?: any;
-    user_id?: number;
-    user?: {
-        id: number;
-        display_name: string;
-    };
-    status?: string;
-    priority?: string;
-    due_date?: string;
-    due_time?: string;
-    created_at: string;
-    updated_at?: string;
-    comments_count?: number;
-}
-
-interface ActivitiesResponse {
-    data: ActivitiesApiItem[];
-    meta: {
-        total: number;
-        per_page: number;
-        current_page: number;
-        total_pages: number;
-        pro_active: boolean;
-    };
-}
+// TimelineItem is imported from activities-service (includes activity field)
 
 const activityTypeIcons: Record<string, React.ReactNode> = {
     created: <UserActivityIcon color="#3B82F6" />,
@@ -247,73 +196,17 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
         setLoading(true);
         try {
-            // Build query params
-            const params = new URLSearchParams();
-            params.append('contact_id', contact_id.toString());
-            params.append('per_page', '100');
-            params.append('page', '1');
-
-            if (filters.date_from) {
-                params.append('date_from', filters.date_from);
-            }
-            if (filters.date_to) {
-                params.append('date_to', filters.date_to);
-            }
-
-            const response = (await apiFetch({
-                path: `/qc/v1/activities?${params.toString()}`,
-            })) as ActivitiesResponse;
+            const { response, items: serviceItems } = await ActivitiesService.fetch({
+                contact_id,
+                per_page: 100,
+                page: 1,
+                date_from: filters.date_from || undefined,
+                date_to: filters.date_to || undefined,
+            });
 
             if (response && response.data) {
-                // Transform items to timeline format (supports both activities and tasks)
-                const items: TimelineItem[] = response.data.map((item) => {
-                    if (item.item_type === 'task') {
-                        // Task item (Pro only)
-                        return {
-                            id: `task-${item.id}`,
-                            type: 'task' as const,
-                            task_id: item.id,
-                            title: item.title || '',
-                            description: item.description || '',
-                            timestamp: item.created_at,
-                            user: item.user,
-                            data: null,
-                            icon_type: item.task_type || 'task',
-                            status: item.status,
-                            priority: item.priority,
-                            due_date: item.due_date,
-                            due_time: item.due_time,
-                            comments_count: 0,
-                        };
-                    } else {
-                        // Activity item
-                        return {
-                            id: `activity-${item.id}`,
-                            type: 'activity' as const,
-                            activity_id: item.id,
-                            title: item.formatted_message || '',
-                            description: '',
-                            timestamp: item.created_at,
-                            user: item.user,
-                            data: item.data,
-                            icon_type: item.activity_type || 'note',
-                            comments_count: item.comments_count || 0,
-                            // Store full activity for editing
-                            activity: {
-                                id: item.id,
-                                contact_id: item.contact_id,
-                                activity_type: item.activity_type || 'note',
-                                data: item.data,
-                                user_id: item.user_id,
-                                formatted_message: item.formatted_message,
-                                created_at: item.created_at,
-                                updated_at: item.updated_at,
-                                user: item.user,
-                            } as Activity,
-                        };
-                    }
-                });
-                setTimelineItems(items);
+                // Items already include activity data from service transformer
+                setTimelineItems(serviceItems);
             } else {
                 setTimelineItems([]);
             }
@@ -665,9 +558,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             {timelineItems.map((item) => {
                                 const isTask = item.type === 'task';
                                 // Use stored activity if available, otherwise construct it
-                                const activity: Activity | null = isTask ? null : (item.activity || {
+                                const activity: Activity | null = isTask ? null : {
                                     id: item.activity_id ?? 0,
-                                    contact_id: 0,
+                                    contact_id: (item.activity as Record<string, unknown>)?.contact_id as number ?? 0,
                                     activity_type: item.icon_type,
                                     data: item.data,
                                     user_id: item.user?.id ?? 0,
@@ -675,7 +568,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                     created_at: item.timestamp,
                                     updated_at: item.timestamp,
                                     user: item.user,
-                                });
+                                };
                                 const itemId = isTask ? item.task_id : item.activity_id;
 
                                 return (

@@ -42,6 +42,7 @@ export type ActivityType = (typeof ACTIVITY_TYPES)[keyof typeof ACTIVITY_TYPES];
 export interface ActivityUser {
 	id: number;
 	display_name: string;
+	email: string;
 }
 
 /**

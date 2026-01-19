@@ -90,8 +90,9 @@ final class Activity_Manager {
 		$title       = $data['title'] ?? '';
 		$content     = $data['content'] ?? '';
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -152,8 +153,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -161,9 +163,8 @@ final class Activity_Manager {
 			if ( ! $this->can_access_deal( $entity_id ) ) {
 				return null;
 			}
-			// Get contact_id from deal if not provided.
+			// Get contact_id and contact info from deal if not provided.
 			if ( ! $contact_id ) {
-				$contact_id = $this->get_contact_id_from_deal( $entity_id );
 				$deal_data  = $this->get_deal_with_contact( $entity_id );
 				$contact_id = $deal_data['contact_id'] ?? null;
 
@@ -220,8 +221,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -282,8 +284,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 

@@ -369,6 +369,7 @@ class REST_Activity_Controller extends REST_Controller {
 			$user = array(
 				'id'           => $activity->user->ID,
 				'display_name' => $activity->user->display_name,
+				'email'        => $activity->user->user_email,
 			);
 		}
 

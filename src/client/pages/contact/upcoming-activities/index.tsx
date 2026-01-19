@@ -17,8 +17,8 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 /**
  * Internal dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@quillcrm/services/activities-service';
 import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon } from '@quillcrm/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
 import { useActivityOperations } from '../activities/use-activity-operations';
@@ -32,11 +32,42 @@ interface UpcomingActivitiesProps {
     contact_id: number;
 }
 
-interface Activity {
+/**
+ * Activity data types for different activity types.
+ */
+interface ActivityData {
+    // Note
+    title?: string;
+    content?: string;
+    note?: string;
+    // Call
+    phone_number?: string;
+    duration?: number;
+    outcome?: string;
+    notes?: string;
+    called_at?: string;
+    // Meeting
+    meeting_title?: string;
+    location?: string;
+    meeting_date_time?: string;
+    meeting_end_time?: string;
+    description?: string;
+    start_date?: string;
+    scheduled_at?: string;
+    // Email
+    subject?: string;
+    body?: string;
+}
+
+/**
+ * Activity type used for editing dialogs.
+ * More specific than the generic TimelineItem.activity for dialog compatibility.
+ */
+interface EditableActivity {
     id: number;
     contact_id: number;
     activity_type: string;
-    data: any;
+    data: ActivityData;
     user_id: number;
     formatted_message: string;
     created_at: string;
@@ -45,29 +76,7 @@ interface Activity {
         id: number;
         display_name: string;
     };
-    comments?: any[];
-}
-
-interface TimelineItem {
-    id: string;
-    type: 'activity' | 'task';
-    activity_id?: number;
-    task_id?: number;
-    title: string;
-    description: string;
-    timestamp: string;
-    user?: {
-        id: number;
-        display_name: string;
-    };
-    data?: any;
-    icon_type: string;
-    status?: string;
-    priority?: string;
-    due_date?: string;
-    due_time?: string;
-    comments_count?: number;
-    activity?: Activity;
+    comments?: unknown[];
 }
 
 const activityTypeIcons: Record<string, React.ReactNode> = {
@@ -96,9 +105,9 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
     // Modal states for editing
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-    const [selectedCall, setSelectedCall] = useState<Activity | null>(null);
+    const [selectedCall, setSelectedCall] = useState<EditableActivity | null>(null);
     const [callDialogOpen, setCallDialogOpen] = useState(false);
-    const [selectedMeeting, setSelectedMeeting] = useState<Activity | null>(null);
+    const [selectedMeeting, setSelectedMeeting] = useState<EditableActivity | null>(null);
     const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
 
     dayjs.extend(utc);
@@ -111,51 +120,30 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
         setLoading(true);
         try {
             const today = dayjs().format('YYYY-MM-DD');
-            const params = new URLSearchParams();
-            params.append('contact_id', contact_id.toString());
-            params.append('per_page', '100');
-            params.append('page', '1');
-            params.append('date_from', today);
 
-            const response: any = await apiFetch({
-                path: `/qc/v1/activities?${params.toString()}`,
+            // Use timeline endpoint to get activities + tasks
+            const response = await ActivitiesService.getTimeline({
+                contact_id,
+                per_page: 100,
+                page: 1,
+                date_from: today,
             });
 
-            if (response && Array.isArray(response)) {
+            if (response && response.data) {
                 // Filter for upcoming activities (future dates or today)
-                const today = dayjs().startOf('day');
-                const upcomingActivities = response.filter((activity: any) => {
-                    const activityDate = activity.data?.meeting_date_time ||
-                        activity.data?.scheduled_at ||
-                        activity.data?.due_date ||
+                const todayStart = dayjs().startOf('day');
+                const upcomingActivities = response.data.filter((activity) => {
+                    const activityData = activity.data as Record<string, string> | undefined;
+                    const activityDate = activityData?.meeting_date_time ||
+                        activityData?.scheduled_at ||
+                        activityData?.due_date ||
                         activity.created_at;
                     const activityDay = dayjs(activityDate).startOf('day');
-                    return activityDay.isSameOrAfter(today);
+                    return activityDay.isSameOrAfter(todayStart);
                 });
 
-                const timelineItems = upcomingActivities.map((activity: any) => ({
-                    id: `activity-${activity.id}`,
-                    type: 'activity' as const,
-                    activity_id: activity.id,
-                    title: activity.formatted_message || '',
-                    description: '',
-                    timestamp: activity.created_at,
-                    user: activity.user,
-                    data: activity.data,
-                    icon_type: activity.activity_type,
-                    comments_count: activity.comments?.length || 0,
-                    activity: {
-                        id: activity.id,
-                        contact_id: activity.contact_id,
-                        activity_type: activity.activity_type,
-                        data: activity.data,
-                        user_id: activity.user_id,
-                        formatted_message: activity.formatted_message,
-                        created_at: activity.created_at,
-                        updated_at: activity.updated_at,
-                        user: activity.user,
-                    } as Activity,
-                }));
+                // Transform using service utility
+                const timelineItems = transformApiItemsToTimeline(upcomingActivities);
                 setTimelineItems(timelineItems);
             }
         } catch (error) {
@@ -169,7 +157,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
         fetchUpcomingActivities();
     }, [contact_id]);
 
-    const handleEditActivity = (activity: Activity) => {
+    const handleEditActivity = (activity: EditableActivity) => {
         if (activity.activity_type === 'note') {
             const note: Note = {
                 id: activity.id,
@@ -242,7 +230,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
         }
     };
 
-    const renderActivityContent = (activity: Activity) => {
+    const renderActivityContent = (activity: EditableActivity) => {
         switch (activity.activity_type) {
             case 'note':
                 return (
@@ -418,11 +406,13 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
 
                         <div className="space-y-0">
                             {timelineItems.map((item) => {
-                                const activity: Activity | null = item.activity || {
+                                // Build editable activity from timeline item for dialog compatibility
+                                const activityRecord = item.activity as Record<string, unknown> | undefined;
+                                const activity: EditableActivity = {
                                     id: item.activity_id ?? 0,
-                                    contact_id: 0,
+                                    contact_id: (activityRecord?.contact_id as number) ?? contact_id,
                                     activity_type: item.icon_type,
-                                    data: item.data,
+                                    data: (item.data ?? {}) as ActivityData,
                                     user_id: item.user?.id ?? 0,
                                     formatted_message: item.title || '',
                                     created_at: item.timestamp,

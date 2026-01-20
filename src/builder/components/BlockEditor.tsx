@@ -69,20 +69,20 @@ const BlockEditor: React.FC = () => {
 		isUnknown,
 		info,
 	} = selectedBlock
-		? getBlockDefinition(
+			? getBlockDefinition(
 				selectedBlock.type,
 				blocksRegistry,
 				blocksRegistry.unknown
 			)
-		: { block: null, isUnknown: false, info: undefined };
+			: { block: null, isUnknown: false, info: undefined };
 
 	// Prepare props for the editor
 	const editorProps =
 		isUnknown && info
 			? {
-					originalType: info.originalType,
-					originalProps: selectedBlock?.props || {},
-				}
+				originalType: info.originalType,
+				originalProps: selectedBlock?.props || {},
+			}
 			: selectedBlock?.props;
 
 	// Handle back navigation from settings
@@ -118,9 +118,9 @@ const BlockEditor: React.FC = () => {
 									: isSectionSelected
 										? __('Layout Settings', 'quillcrm')
 										: __(
-												'Global Email Settings',
-												'quillcrm'
-											)}
+											'Global Email Settings',
+											'quillcrm'
+										)}
 							</h3>
 						</div>
 						{(isBlockSelected || isSectionSelected) && (
@@ -193,7 +193,7 @@ const BlockEditor: React.FC = () => {
 						</div>
 
 						{isBlockSelected && selectedBlock && !isUnknown && (
-							<div className="mt-6 pt-4 px-4 border-t border-border">
+							<div className="my-6 pt-4 px-4 border-t border-border">
 								<Button
 									variant="destructive"
 									size="sm"

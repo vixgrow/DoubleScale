@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External dependencies
@@ -34,27 +35,10 @@ import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@quillcrm/client';
 
-// Pro plugin imports - will be loaded dynamically if available
-// Using dynamic import pattern that works with webpack
-const loadProTaskDialog = async () => {
-    try {
-        // @ts-ignore - Pro plugin path
-        const module = await import('@pro/client/pages/tasks/components/add-or-edit-dialog');
-        return module.default;
-    } catch {
-        return null;
-    }
-};
-
-const loadProTaskService = async () => {
-    try {
-        // @ts-ignore - Pro plugin path
-        const module = await import('@pro/client/pages/tasks/api/tasks');
-        return module.TaskService;
-    } catch {
-        return null;
-    }
-};
+// Pro plugin components - loaded via WordPress filters at runtime
+// Pro plugin registers these via addFilter('quillcrm_pro_component', ...)
+const getProTaskDialog = () => applyFilters('quillcrm_pro_component', null, 'TaskDialog') as React.ComponentType<any> | null;
+const getProTaskService = () => applyFilters('quillcrm_pro_component', null, 'TaskService') as any;
 
 
 interface ActivitiesProps {
@@ -115,7 +99,7 @@ const activityTypeColors: Record<string, string> = {
     follow_up: '#F59E0B',
 };
 
-// Task Dialog Wrapper Component - loads Pro plugin dialog dynamically
+// Task Dialog Wrapper Component - uses Pro plugin components via WordPress filters
 const TaskDialogWrapper: React.FC<{
     open: boolean;
     onClose: (open: boolean) => void;
@@ -126,15 +110,9 @@ const TaskDialogWrapper: React.FC<{
     onSuccess: () => void;
     showNotice: (type: 'success' | 'error', message: string) => void;
 }> = ({ open, onClose, task, contact_id, isSubmitting, setIsSubmitting, onSuccess, showNotice }) => {
-    const [TaskDialog, setTaskDialog] = useState<any>(null);
-    const [TaskService, setTaskService] = useState<any>(null);
-
-    useEffect(() => {
-        if (open && !TaskDialog) {
-            loadProTaskDialog().then(setTaskDialog);
-            loadProTaskService().then(setTaskService);
-        }
-    }, [open, TaskDialog]);
+    // Get Pro components via WordPress filters (registered by Pro plugin at runtime)
+    const TaskDialog = getProTaskDialog();
+    const TaskService = getProTaskService();
 
     if (!TaskDialog || !TaskService) {
         return null;
@@ -262,7 +240,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
     const handleEditTask = async (taskId: number) => {
         try {
-            const TaskService = await loadProTaskService();
+            const TaskService = getProTaskService();
             if (!TaskService) {
                 showNotice('error', __('Task editing is not available. Pro plugin may not be installed.', 'quillcrm'));
                 return;
@@ -309,7 +287,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             return;
         }
         try {
-            const TaskService = await loadProTaskService();
+            const TaskService = getProTaskService();
             if (!TaskService) {
                 showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
                 return;

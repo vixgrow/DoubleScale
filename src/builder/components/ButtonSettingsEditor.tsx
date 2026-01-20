@@ -83,7 +83,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 	};
 
 	return (
-		<div>
+		<div className='overflow-y-auto'>
 			<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4">
 				<div className="flex items-center gap-2">
 					<Button
@@ -145,7 +145,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 0 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 0 })
@@ -157,7 +157,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 8 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 8 })
@@ -169,7 +169,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 9999 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 9999 })

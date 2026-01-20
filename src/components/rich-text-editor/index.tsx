@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
 	Bold,
 	Italic,
@@ -20,6 +21,7 @@ import {
 	AlignCenter,
 	AlignRight,
 	AlignJustify,
+	Copy,
 } from 'lucide-react';
 
 /**
@@ -55,6 +57,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
 	const [isMergeTagsModalOpen, setIsMergeTagsModalOpen] = useState(false);
+	const [showCopyNotification, setShowCopyNotification] = useState(false);
 	const [editorId] = useState(
 		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
 	);
@@ -62,6 +65,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const [currentLinkData, setCurrentLinkData] = useState<{
 		url: string;
 	}>({ url: '' });
+	const savedSelectionRef = useRef<{
+		startContainer: Node;
+		startOffset: number;
+		endContainer: Node;
+		endOffset: number;
+	} | null>(null);
 	const [activeFormats, setActiveFormats] = useState({
 		bold: false,
 		italic: false,
@@ -73,12 +82,30 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		justifyCenter: false,
 		justifyRight: false,
 		justifyFull: false,
+		link: false,
 	});
 
 	// Wrapper for deprecated queryCommandState (no modern alternative for contentEditable)
 	const queryCommandState = (command: string): boolean => {
 		// @ts-ignore - deprecated API but no modern alternative exists
 		return document.queryCommandState(command);
+	};
+
+	// Check if selection is within a link
+	const isLinkSelected = (): boolean => {
+		if (!editorRef.current) return false;
+		const selection = window.getSelection();
+		if (selection && selection.rangeCount > 0) {
+			const range = selection.getRangeAt(0);
+			const parentElement =
+				range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+					? range.commonAncestorContainer.parentElement
+					: (range.commonAncestorContainer as Element);
+
+			const selectedLink = parentElement?.closest('a') as HTMLAnchorElement;
+			return selectedLink !== null && editorRef.current.contains(selectedLink);
+		}
+		return false;
 	};
 
 	// Update active formats based on current selection
@@ -94,10 +121,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			justifyCenter: queryCommandState('justifyCenter'),
 			justifyRight: queryCommandState('justifyRight'),
 			justifyFull: queryCommandState('justifyFull'),
+			link: isLinkSelected(),
 		});
 	};
 
-	// Process all links to open in new tab
+	// Process all links to open in new tab and apply styling
 	const processLinks = () => {
 		if (editorRef.current) {
 			const links = editorRef.current.querySelectorAll('a');
@@ -106,6 +134,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					link.setAttribute('target', '_blank');
 					link.setAttribute('rel', 'noopener noreferrer');
 				}
+				// Apply styling to make links visible - blue color and underline
+				link.style.textDecoration = 'underline';
+				link.style.color = '#458DC7'; // text-blue-300
 			});
 		}
 	};
@@ -247,9 +278,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							const newRange = newSelection.getRangeAt(0);
 							const newParent =
 								newRange.commonAncestorContainer.nodeType ===
-								Node.TEXT_NODE
+									Node.TEXT_NODE
 									? newRange.commonAncestorContainer
-											.parentElement
+										.parentElement
 									: (newRange.commonAncestorContainer as Element);
 
 							const newListItem = newParent?.closest('li');
@@ -493,9 +524,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		const selection = window.getSelection();
 		let existingUrl = '';
 
-		// Check if selected text is already a link
+		// Save the current selection before opening the dialog
 		if (selection && selection.rangeCount > 0) {
 			const range = selection.getRangeAt(0);
+
+			// Save selection details
+			savedSelectionRef.current = {
+				startContainer: range.startContainer,
+				startOffset: range.startOffset,
+				endContainer: range.endContainer,
+				endOffset: range.endOffset,
+			};
+
 			const parentElement =
 				range.commonAncestorContainer.nodeType === Node.TEXT_NODE
 					? range.commonAncestorContainer.parentElement
@@ -515,10 +555,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	const handleLinkConfirm = (linkData: LinkData) => {
+		// Restore the saved selection
 		const selection = window.getSelection();
-		if (!selection || selection.rangeCount === 0) return;
+		if (!selection || !savedSelectionRef.current) return;
 
-		const range = selection.getRangeAt(0);
+		// Focus the editor first
+		editorRef.current?.focus();
+
+		// Restore the selection from saved details
+		const range = document.createRange();
+		try {
+			range.setStart(savedSelectionRef.current.startContainer, savedSelectionRef.current.startOffset);
+			range.setEnd(savedSelectionRef.current.endContainer, savedSelectionRef.current.endOffset);
+		} catch (e) {
+			// If restoring fails, return early
+			savedSelectionRef.current = null;
+			return;
+		}
+
+		selection.removeAllRanges();
+		selection.addRange(range);
+
 		const parentElement =
 			range.commonAncestorContainer.nodeType === Node.TEXT_NODE
 				? range.commonAncestorContainer.parentElement
@@ -531,12 +588,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			existingLink.href = linkData.url;
 			existingLink.target = '_blank';
 			existingLink.rel = 'noopener noreferrer';
+			// Apply styling
+			existingLink.style.textDecoration = 'underline';
+			existingLink.style.color = '#458DC7'; // text-blue-300
 		} else {
 			// Create new link
 			const linkElement = document.createElement('a');
 			linkElement.href = linkData.url;
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
+			// Apply styling
+			linkElement.style.textDecoration = 'underline';
+			linkElement.style.color = '#458DC7'; // text-blue-300
 
 			try {
 				range.surroundContents(linkElement);
@@ -550,11 +613,34 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		}
 
 		if (editorRef.current) {
+			// Process links to ensure all styling is applied
+			processLinks();
 			onChange(editorRef.current.innerHTML);
+
+			// Update active formats to show link button as selected
+			setTimeout(() => {
+				updateActiveFormats();
+			}, 50);
 		}
+
+		// Clear the saved selection
+		savedSelectionRef.current = null;
 	};
 
-	const handleInsertMergeTag = (tagValue: string) => {
+	const handleInsertMergeTag = async (tagValue: string) => {
+		// Copy to clipboard
+		try {
+			await navigator.clipboard.writeText(tagValue);
+			setShowCopyNotification(true);
+
+			// Hide notification after 5 seconds
+			setTimeout(() => {
+				setShowCopyNotification(false);
+			}, 5000);
+		} catch (error) {
+			console.error('Failed to copy to clipboard:', error);
+		}
+
 		if (editorRef.current) {
 			// Focus the editor first
 			editorRef.current.focus();
@@ -630,7 +716,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				.${editorId} a {
 					position: relative !important;
 					text-decoration: underline !important;
-					color: #333 !important;
+					color: #458DC7 !important;
 				}
 				.${editorId} a:hover::after {
 					content: attr(href) !important;
@@ -842,7 +928,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				<Button
 					variant="ghost"
 					size="sm"
-					className="p-2 h-8 w-8"
+					className={cn(
+						'p-2 h-8 w-8',
+						activeFormats.link && 'bg-accent'
+					)}
 					onClick={handleLinkClick}
 					onMouseDown={(e) => e.preventDefault()}
 				>
@@ -897,7 +986,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			{/* Link Dialog */}
 			<LinkDialog
 				isOpen={isLinkDialogOpen}
-				onClose={() => setIsLinkDialogOpen(false)}
+				onClose={() => {
+					setIsLinkDialogOpen(false);
+					savedSelectionRef.current = null;
+				}}
 				onConfirm={handleLinkConfirm}
 				initialUrl={currentLinkData.url}
 			/>
@@ -908,6 +1000,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				onClose={() => setIsMergeTagsModalOpen(false)}
 				onInsertTag={handleInsertMergeTag}
 			/>
+
+			{/* Copy Notification - Rendered via Portal to document body */}
+			{showCopyNotification &&
+				typeof document !== 'undefined' &&
+				createPortal(
+					<div className="fixed bottom-2 right-4 z-[999999] bg-green-500 text-white text-base font-medium px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300 ease-out">
+						<Copy className="h-4 w-4" />
+						<span>{__('Merge tag copied to clipboard', 'quillcrm')}</span>
+					</div>,
+					document.body
+				)}
 		</div>
 	);
 };

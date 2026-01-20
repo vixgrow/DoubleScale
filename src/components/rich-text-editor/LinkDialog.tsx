@@ -41,10 +41,12 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 }) => {
 	const [url, setUrl] = useState(initialUrl);
 
-	// Update state when initial values change (for editing existing links)
+	// Update state when dialog opens or initial values change (for editing existing links)
 	useEffect(() => {
-		setUrl(initialUrl);
-	}, [initialUrl]);
+		if (isOpen) {
+			setUrl(initialUrl);
+		}
+	}, [isOpen, initialUrl]);
 
 	const handleConfirm = () => {
 		if (!url.trim()) {

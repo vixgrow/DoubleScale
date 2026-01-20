@@ -21,6 +21,8 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
 use QuillCRM\Models\Contact_Unsubscribe_Model;
+use QuillCRM_Pro\Models\Form_Submission_Model;
+use QuillCRM_Pro\Models\Page_Visit_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
 // use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Utils;
@@ -29,6 +31,7 @@ use QuillCRM\Utils;
  * Contact_Model class
  */
 class Contact_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -243,7 +246,58 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function notes() {
-		return $this->hasMany( Activity_Model::class, 'contact_id', 'id' )->where( 'activity_type', 'note' );
+		return $this->activities()->where( 'activity_type', 'note' );
+	}
+
+	/**
+	 * Get all activities for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function activities() {
+		return $this->hasMany( Activity_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get all communication tracking records for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function communication_tracking() {
+		return $this->hasMany( Communication_Tracking_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get form submissions for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function form_submissions() {
+		if ( class_exists( 'QuillCRM_Pro\Models\Form_Submission_Model' ) ) {
+			return $this->hasMany( Form_Submission_Model::class, 'contact_id', 'id' );
+		}
+		return null;
+	}
+
+	/**
+	 * Get page visits for this contact
+	 * Page visits are PRO-only feature - uses PRO model if available
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
+	 */
+	public function page_visits() {
+		if ( class_exists( 'QuillCRM_Pro\Models\Page_Visit_Model' ) ) {
+			return $this->hasMany( Page_Visit_Model::class, 'contact_id', 'id' );
+		}
+		return null;
 	}
 
 	/**

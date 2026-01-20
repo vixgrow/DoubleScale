@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
 	Bold,
 	Italic,
@@ -20,6 +21,7 @@ import {
 	AlignCenter,
 	AlignRight,
 	AlignJustify,
+	Copy,
 } from 'lucide-react';
 
 /**
@@ -55,6 +57,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
 	const [isMergeTagsModalOpen, setIsMergeTagsModalOpen] = useState(false);
+	const [showCopyNotification, setShowCopyNotification] = useState(false);
 	const [editorId] = useState(
 		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
 	);
@@ -624,7 +627,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		savedSelectionRef.current = null;
 	};
 
-	const handleInsertMergeTag = (tagValue: string) => {
+	const handleInsertMergeTag = async (tagValue: string) => {
+		// Copy to clipboard
+		try {
+			await navigator.clipboard.writeText(tagValue);
+			setShowCopyNotification(true);
+
+			// Hide notification after 5 seconds
+			setTimeout(() => {
+				setShowCopyNotification(false);
+			}, 5000);
+		} catch (error) {
+			console.error('Failed to copy to clipboard:', error);
+		}
+
 		if (editorRef.current) {
 			// Focus the editor first
 			editorRef.current.focus();
@@ -984,6 +1000,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				onClose={() => setIsMergeTagsModalOpen(false)}
 				onInsertTag={handleInsertMergeTag}
 			/>
+
+			{/* Copy Notification - Rendered via Portal to document body */}
+			{showCopyNotification &&
+				typeof document !== 'undefined' &&
+				createPortal(
+					<div className="fixed bottom-2 right-4 z-[999999] bg-green-500 text-white text-base font-medium px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300 ease-out">
+						<Copy className="h-4 w-4" />
+						<span>{__('Merge tag copied to clipboard', 'quillcrm')}</span>
+					</div>,
+					document.body
+				)}
 		</div>
 	);
 };

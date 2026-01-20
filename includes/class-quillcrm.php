@@ -564,13 +564,13 @@ final class QuillCRM {
 		// Load all custom fields files
 		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
 		foreach ( $custom_fields_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 
 		// Load all custom filters files
 		$filters_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/contact-filters/**/class-*.php' );
 		foreach ( $filters_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 	}
 

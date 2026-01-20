@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -42,6 +43,25 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import TrashIcon from '@quillcrm/components/icons/trash';
+
+/**
+ * Pro plugin TaskService - loaded via WordPress filters at runtime.
+ * Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
+ */
+const getProTaskService = () =>
+    applyFilters('quillcrm_pro_component', null, 'TaskService') as {
+        createTask: (data: {
+            title: string;
+            description?: string;
+            contact_id?: number;
+            deal_id?: number;
+            assigned_to: number;
+            task_type: string;
+            priority: string;
+            due_date: string;
+            reminder_at?: string;
+        }) => Promise<any>;
+    } | null;
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -257,10 +277,34 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                 })) as Meeting;
 
                 onSave(response);
-                showNotice(
-                    'success',
-                    __('Meeting scheduled successfully', 'quillcrm')
-                );
+
+                // Create follow-up task if requested (Pro feature)
+                const TaskService = getProTaskService();
+                if (formData.createTask && formData.dueDate && TaskService) {
+                    try {
+                        const currentUserId = (window as any).quillcrmData?.currentUserId || 1;
+                        const reminderAt = formData.setReminder && formData.reminderDates.length > 0
+                            ? dayjs(formData.reminderDates[0]).format('YYYY-MM-DD') + ' 09:00:00'
+                            : undefined;
+
+                        await TaskService.createTask({
+                            title: __('Follow up: Meeting - ', 'quillcrm') + formData.meetingTitle.trim(),
+                            description: formData.description.trim() || undefined,
+                            contact_id: contact_id,
+                            assigned_to: currentUserId,
+                            task_type: 'meeting',
+                            priority: 'medium',
+                            due_date: dayjs(formData.dueDate).format('YYYY-MM-DD'),
+                            reminder_at: reminderAt,
+                        });
+                        showNotice('success', __('Meeting scheduled and follow-up task created', 'quillcrm'));
+                    } catch (taskError) {
+                        console.error('Failed to create follow-up task:', taskError);
+                        showNotice('success', __('Meeting scheduled (task creation failed)', 'quillcrm'));
+                    }
+                } else {
+                    showNotice('success', __('Meeting scheduled successfully', 'quillcrm'));
+                }
             }
 
             onClose();
@@ -453,24 +497,26 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             </div>
                         </div>
 
-                        {/* Create a task to follow up */}
-                        <div className="flex items-center gap-2 border-t pt-4">
-                            <Checkbox
-                                id="create-task"
-                                checked={formData.createTask}
-                                onCheckedChange={(checked) =>
-                                    updateFormData({
-                                        createTask: checked as boolean,
-                                    })
-                                }
-                            />
-                            <Label
-                                htmlFor="create-task"
-                                className="text-base font-normal text-[#09090B] cursor-pointer"
-                            >
-                                {__('Create a task to follow up', 'quillcrm')}
-                            </Label>
-                        </div>
+                        {/* Create a task to follow up (Pro feature) */}
+                        {getProTaskService() && (
+                            <div className="flex items-center gap-2 border-t pt-4">
+                                <Checkbox
+                                    id="create-task"
+                                    checked={formData.createTask}
+                                    onCheckedChange={(checked) =>
+                                        updateFormData({
+                                            createTask: checked as boolean,
+                                        })
+                                    }
+                                />
+                                <Label
+                                    htmlFor="create-task"
+                                    className="text-base font-normal text-[#09090B] cursor-pointer"
+                                >
+                                    {__('Create a task to follow up', 'quillcrm')}
+                                </Label>
+                            </div>
+                        )}
 
                         {/* Due date (shown when createTask is checked) */}
                         {formData.createTask && (
@@ -491,6 +537,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                     )}
                                     className="h-12"
                                     buttonClassName="h-12 w-full bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
+                                    minDate={new Date()}
                                 />
                             </div>
                         )}
@@ -556,6 +603,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                                     )}
                                                     className="h-12 flex-1"
                                                     buttonClassName="h-12 flex-1 bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
+                                                    minDate={new Date()} // Only allow future dates
                                                 />
                                                 {index === 0 ? (
                                                     <Button

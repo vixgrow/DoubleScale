@@ -21,6 +21,8 @@ interface DatePickerProps {
 	error?: boolean;
 	required?: boolean;
 	outputFormat?: 'iso' | 'display'; // 'iso' for YYYY-MM-DD, 'display' for formatted text
+	minDate?: Date; // Minimum selectable date (dates before this are disabled)
+	maxDate?: Date; // Maximum selectable date (dates after this are disabled)
 }
 
 function formatDate(date: Date | undefined) {
@@ -65,6 +67,8 @@ export function DatePicker({
 	className,
 	outputFormat = 'iso',
 	buttonClassName,
+	minDate,
+	maxDate,
 }: DatePickerProps) {
 	const [open, setOpen] = React.useState(false);
 
@@ -127,7 +131,23 @@ export function DatePicker({
 						month={month}
 						onMonthChange={setMonth}
 						onSelect={handleDateSelect}
-						disabled={disabled}
+						disabled={
+							minDate || maxDate
+								? (checkDate) => {
+										// Compare dates only (ignore time component)
+										const checkDateOnly = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
+										if (minDate) {
+											const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+											if (checkDateOnly < minDateOnly) return true;
+										}
+										if (maxDate) {
+											const maxDateOnly = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
+											if (checkDateOnly > maxDateOnly) return true;
+										}
+										return disabled;
+								  }
+								: disabled
+						}
 					/>
 				</PopoverContent>
 			</Popover>

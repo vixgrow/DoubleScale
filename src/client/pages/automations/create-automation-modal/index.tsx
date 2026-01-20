@@ -447,6 +447,52 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __('SureCart e-commerce automation', 'quillcrm'),
 		},
+		video: {
+			image: (
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						opacity="0.4"
+						d="M22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15Z"
+						fill="url(#paint0_linear_video)"
+					/>
+					<path
+						d="M9.1001 12.0001V10.5201C9.1001 8.61012 10.4501 7.84012 12.1001 8.79012L13.3801 9.53012L14.6601 10.2701C16.3101 11.2201 16.3101 12.7801 14.6601 13.7301L13.3801 14.4701L12.1001 15.2101C10.4501 16.1601 9.1001 15.3901 9.1001 13.4801V12.0001Z"
+						fill="url(#paint1_linear_video)"
+					/>
+					<defs>
+						<linearGradient
+							id="paint0_linear_video"
+							x1="2"
+							y1="12"
+							x2="22"
+							y2="12"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint1_linear_video"
+							x1="9.1001"
+							y1="12"
+							x2="16.0001"
+							y2="12"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop offset="0.610577" stopColor="#1E3A8A" />
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+					</defs>
+				</svg>
+			),
+			description: __('Video player automation', 'quillcrm'),
+		},
 	};
 
 	// Get the currently selected category's data

@@ -1,0 +1,15 @@
+.activity-container {
+	.activity-item-skeleton {
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+	}
+
+	.activity-item {
+		.activity-content {
+			.activity-body {
+				margin-top: 0.5rem;
+			}
+		}
+	}
+}

@@ -108,8 +108,9 @@ final class Activity_Manager {
 		$title       = $data['title'] ?? '';
 		$content     = $data['content'] ?? '';
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -170,8 +171,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -179,9 +181,8 @@ final class Activity_Manager {
 			if ( ! $this->can_access_deal( $entity_id ) ) {
 				return null;
 			}
-			// Get contact_id from deal if not provided.
+			// Get contact_id and contact info from deal if not provided.
 			if ( ! $contact_id ) {
-				$contact_id = $this->get_contact_id_from_deal( $entity_id );
 				$deal_data  = $this->get_deal_with_contact( $entity_id );
 				$contact_id = $deal_data['contact_id'] ?? null;
 
@@ -238,8 +239,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -300,8 +302,9 @@ final class Activity_Manager {
 		$entity_id   = $data['entity_id'] ?? null;
 		$entity_type = $data['entity_type'] ?? null;
 
-		// Must have at least one entity.
-		if ( ! $contact_id && ! $entity_id && ! $entity_type ) {
+		// Must have contact_id OR both entity_id and entity_type.
+		$has_entity_association = $entity_id && $entity_type;
+		if ( ! $contact_id && ! $has_entity_association ) {
 			return null;
 		}
 
@@ -398,10 +401,15 @@ final class Activity_Manager {
 
 		// Filter by activity type.
 		if ( ! empty( $filters['activity_type'] ) ) {
-			if ( is_array( $filters['activity_type'] ) ) {
-				$query->whereIn( 'activity_type', $filters['activity_type'] );
+			$activity_types = $filters['activity_type'];
+			// Handle comma-separated string.
+			if ( is_string( $activity_types ) && strpos( $activity_types, ',' ) !== false ) {
+				$activity_types = array_map( 'trim', explode( ',', $activity_types ) );
+			}
+			if ( is_array( $activity_types ) ) {
+				$query->whereIn( 'activity_type', $activity_types );
 			} else {
-				$query->where( 'activity_type', $filters['activity_type'] );
+				$query->where( 'activity_type', $activity_types );
 			}
 		}
 
@@ -869,5 +877,514 @@ final class Activity_Manager {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get unified timeline combining activities and tasks
+	 *
+	 * Uses raw SQL UNION query for optimal performance when combining
+	 * data from multiple tables. Always includes all activities, and includes
+	 * tasks automatically when Pro is active.
+	 *
+	 * Supported filters:
+	 * - contact_id: Filter by contact
+	 * - entity_id + entity_type: Filter by associated entity (deal, campaign)
+	 * - user_id: Filter by creator (activities) or assignee (tasks)
+	 * - date_from, date_to: Date range filter
+	 * - sort_by, sort_order: Sorting options
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param array $filters  Filter criteria.
+	 * @param int   $per_page Results per page.
+	 * @param int   $page     Page number.
+	 *
+	 * @return array Array with 'data' and 'meta' keys.
+	 */
+	public function get_unified_timeline(
+		array $filters,
+		int $per_page = 20,
+		int $page = 1
+	): array {
+		// Sanitize pagination parameters to prevent division by zero and invalid values.
+		$per_page = max( 1, $per_page );
+		$page     = max( 1, $page );
+
+		$pro_active = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
+		global $wpdb;
+
+		// Permission check for deal access.
+		if ( ! empty( $filters['entity_type'] ) &&
+			$filters['entity_type'] == \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL ) {
+			if ( ! $this->can_access_deal( $filters['entity_id'] ) ) {
+				return array(
+					'data' => array(),
+					'meta' => array(
+					'total'        => 0,
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'total_pages'  => 0,
+					'pro_active'   => $pro_active,
+					'error'        => 'access_denied',
+					),
+				);
+			}
+		}
+
+		$select_queries = array();
+		$count_queries  = array();
+
+		// Build activities query.
+		$activities_sql = $this->build_activities_union_sql( $filters, $wpdb );
+		if ( $activities_sql ) {
+			$select_queries[] = $activities_sql['select'];
+			$count_queries[]  = $activities_sql['count'];
+		}
+
+		// Include tasks when Pro is active.
+		// Note: activity_type filtering is handled by get_activities(), not here.
+		// This method always returns all activities + tasks (when Pro active).
+		if ( $pro_active ) {
+			$tasks_sql = $this->build_tasks_union_sql( $filters, $wpdb );
+			if ( $tasks_sql ) {
+				$select_queries[] = $tasks_sql['select'];
+				$count_queries[]  = $tasks_sql['count'];
+			}
+		}
+
+		// If no queries, return empty.
+		if ( empty( $select_queries ) ) {
+			return array(
+				'data' => array(),
+				'meta' => array(
+				'total'        => 0,
+				'per_page'     => $per_page,
+				'current_page' => $page,
+				'total_pages'  => 0,
+				'pro_active'   => $pro_active,
+				),
+			);
+		}
+
+		// Get total count.
+		$total = 0;
+		foreach ( $count_queries as $count_sql ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$count_result = $wpdb->get_var( $count_sql );
+			$total       += intval( $count_result );
+		}
+
+		// Build final UNION query with sorting and pagination.
+		$offset     = ( $page - 1 ) * $per_page;
+		$sort_by    = $this->sanitize_sort_field( $filters['sort_by'] ?? 'created_at' );
+		$sort_order = strtoupper( $filters['sort_order'] ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC';
+
+		$union_sql = '(' . implode( ') UNION ALL (', $select_queries ) . ')';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$final_sql = $wpdb->prepare(
+			"SELECT * FROM ({$union_sql}) AS combined
+			ORDER BY {$sort_by} {$sort_order}
+			LIMIT %d OFFSET %d",
+			$per_page,
+			$offset
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $final_sql );
+
+		// Batch load users.
+		$user_ids = array_unique( array_filter( wp_list_pluck( $results, 'user_id' ) ) );
+		$users    = $this->batch_load_users( $user_ids );
+
+		// Transform results.
+		$data = array();
+		foreach ( $results as $row ) {
+			$user = $users[ $row->user_id ] ?? null;
+
+			if ( $row->item_type === 'activity' ) {
+				$data[] = $this->transform_activity_row( $row, $user );
+			} else {
+				$data[] = $this->transform_task_row( $row, $user );
+			}
+		}
+
+		return array(
+			'data' => $data,
+			'meta' => array(
+			'total'        => $total,
+			'per_page'     => $per_page,
+			'current_page' => $page,
+			'total_pages'  => (int) ceil( $total / $per_page ),
+			'pro_active'   => $pro_active,
+			),
+		);
+	}
+
+	/**
+	 * Build activities SQL for UNION query
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param array $filters Filters.
+	 * @param wpdb  $wpdb    WordPress database object.
+	 *
+	 * @return array|null SQL queries.
+	 */
+	private function build_activities_union_sql( array $filters, $wpdb ): ?array {
+		$activities_table   = $wpdb->prefix . 'quillcrm_activities';
+		$associations_table = $wpdb->prefix . 'quillcrm_activity_associations';
+		$comments_table     = $wpdb->prefix . 'quillcrm_activity_comments';
+
+		$where_clauses = array( '1=1' );
+		$join_clauses  = array();
+
+		// Contact filter.
+		if ( ! empty( $filters['contact_id'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 'a.contact_id = %d', $filters['contact_id'] );
+		}
+
+		// Deal/Entity filter (via associations).
+		if ( ! empty( $filters['entity_type'] ) && ! empty( $filters['entity_id'] ) ) {
+			$join_clauses[]  = "INNER JOIN {$associations_table} aa ON a.id = aa.activity_id";
+			$where_clauses[] = $wpdb->prepare(
+				'aa.entity_type = %d AND aa.entity_id = %d',
+				$filters['entity_type'],
+				$filters['entity_id']
+			);
+		}
+
+		// User filter.
+		if ( ! empty( $filters['user_id'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
+		}
+
+		// Date filters - use scheduled/called date from JSON data if available, fallback to created_at.
+		// This ensures meetings/calls are filtered by their scheduled time, not creation time.
+		// - Meetings use: scheduled_at
+		// - Calls use: called_at
+		// - Other activities: created_at
+		if ( ! empty( $filters['date_from'] ) ) {
+			$where_clauses[] = $wpdb->prepare(
+				'DATE(COALESCE(
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
+					a.created_at
+				)) >= %s',
+				$filters['date_from']
+			);
+		}
+		if ( ! empty( $filters['date_to'] ) ) {
+			$where_clauses[] = $wpdb->prepare(
+				'DATE(COALESCE(
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
+					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
+					a.created_at
+				)) <= %s',
+				$filters['date_to']
+			);
+		}
+
+		// LEFT JOIN to get deal_id from associations (entity_type = 2 for deals).
+		$deal_entity_type = 2; // Activity_Association_Model::ENTITY_TYPE_DEAL.
+		$join_clauses[]   = "LEFT JOIN {$associations_table} deal_assoc ON a.id = deal_assoc.activity_id AND deal_assoc.entity_type = {$deal_entity_type}";
+
+		$where_sql  = implode( ' AND ', $where_clauses );
+		$joins_sql  = implode( ' ', $join_clauses );
+
+		// Select query - normalized columns for UNION.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$select_sql = "SELECT
+			a.id,
+			'activity' as item_type,
+			a.activity_type,
+			NULL as task_type,
+			a.contact_id,
+			deal_assoc.entity_id as deal_id,
+			a.data,
+			a.user_id,
+			a.created_at,
+			a.updated_at,
+			a.created_at as sort_timestamp,
+			NULL as title,
+			NULL as description,
+			NULL as status,
+			NULL as display_status,
+			NULL as priority,
+			NULL as due_date,
+			NULL as due_time,
+			NULL as is_overdue,
+			(SELECT COUNT(*) FROM {$comments_table} c WHERE c.activity_id = a.id) as comments_count
+		FROM {$activities_table} a
+		{$joins_sql}
+		WHERE {$where_sql}";
+
+		// Count query - only need the filter joins, not the deal_id lookup join.
+		$filter_joins = array();
+		if ( ! empty( $filters['entity_type'] ) && ! empty( $filters['entity_id'] ) ) {
+			$filter_joins[] = "INNER JOIN {$associations_table} aa ON a.id = aa.activity_id";
+		}
+		$filter_joins_sql = implode( ' ', $filter_joins );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$count_sql = "SELECT COUNT(*) FROM {$activities_table} a {$filter_joins_sql} WHERE {$where_sql}";
+
+		return array(
+			'select' => $select_sql,
+			'count'  => $count_sql,
+		);
+	}
+
+	/**
+	 * Build tasks SQL for UNION query
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param array $filters Filters.
+	 * @param wpdb  $wpdb    WordPress database object.
+	 *
+	 * @return array|null SQL queries.
+	 */
+	private function build_tasks_union_sql( array $filters, $wpdb ): ?array {
+		$tasks_table = $wpdb->prefix . 'quillcrm_tasks';
+
+		$where_clauses = array( '1=1' );
+
+		// Contact filter.
+		if ( ! empty( $filters['contact_id'] ) ) {
+			$where_clauses[] = $wpdb->prepare(
+				't.entity_type = %d AND t.entity_id = %d',
+				\QuillCRM_Pro\Constants\Task_Entity_Type::CONTACT,
+				$filters['contact_id']
+			);
+		}
+
+		// Deal filter.
+		if ( ! empty( $filters['entity_type'] ) &&
+			$filters['entity_type'] == \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL &&
+			! empty( $filters['entity_id'] ) ) {
+			$where_clauses[] = $wpdb->prepare(
+				't.entity_type = %d AND t.entity_id = %d',
+				\QuillCRM_Pro\Constants\Task_Entity_Type::DEAL,
+				$filters['entity_id']
+			);
+		}
+
+		// User filter (assigned_to for tasks).
+		if ( ! empty( $filters['user_id'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 't.assigned_to = %d', $filters['user_id'] );
+		}
+
+		// Date filters - use due_date for tasks (more relevant for "upcoming" filtering).
+		// Tasks without due_date are excluded from date filtering.
+		if ( ! empty( $filters['date_from'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 't.due_date IS NOT NULL AND DATE(t.due_date) >= %s', $filters['date_from'] );
+		}
+		if ( ! empty( $filters['date_to'] ) ) {
+			$where_clauses[] = $wpdb->prepare( 't.due_date IS NOT NULL AND DATE(t.due_date) <= %s', $filters['date_to'] );
+		}
+
+		$where_sql = implode( ' AND ', $where_clauses );
+
+		// Get entity type constants.
+		$contact_entity_type = \QuillCRM_Pro\Constants\Task_Entity_Type::CONTACT;
+		$deal_entity_type    = \QuillCRM_Pro\Constants\Task_Entity_Type::DEAL;
+
+		// Select query - normalized columns for UNION.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$select_sql = "SELECT
+			t.id,
+			'task' as item_type,
+			NULL as activity_type,
+			t.task_type,
+			CASE
+				WHEN t.entity_type = {$contact_entity_type} THEN t.entity_id
+				ELSE NULL
+			END as contact_id,
+			CASE
+				WHEN t.entity_type = {$deal_entity_type} THEN t.entity_id
+				ELSE NULL
+			END as deal_id,
+			NULL as data,
+			t.assigned_to as user_id,
+			t.created_at,
+			t.updated_at,
+			t.created_at as sort_timestamp,
+			t.title,
+			t.description,
+			t.status,
+			CASE
+				WHEN t.status = 'completed' THEN 'completed'
+				WHEN t.due_date < CURDATE() THEN 'overdue'
+				WHEN t.due_date = CURDATE() THEN 'due_today'
+				ELSE 'upcoming'
+			END as display_status,
+			t.priority,
+			t.due_date,
+			t.due_time,
+			CASE WHEN t.status = 'pending' AND t.due_date < CURDATE() THEN 1 ELSE 0 END as is_overdue,
+			0 as comments_count
+		FROM {$tasks_table} t
+		WHERE {$where_sql}";
+
+		// Count query.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$count_sql = "SELECT COUNT(*) FROM {$tasks_table} t WHERE {$where_sql}";
+
+		return array(
+			'select' => $select_sql,
+			'count'  => $count_sql,
+		);
+	}
+
+	/**
+	 * Batch load users by IDs
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param array $user_ids User IDs.
+	 *
+	 * @return array Users array.
+	 */
+	private function batch_load_users( array $user_ids ): array {
+		if ( empty( $user_ids ) ) {
+			return array();
+		}
+
+		global $wpdb;
+
+		$placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, display_name, user_email FROM {$wpdb->users} WHERE ID IN ({$placeholders})",
+				...$user_ids
+			)
+		);
+
+		$users = array();
+		foreach ( $results as $user ) {
+			$users[ $user->ID ] = array(
+				'id'           => (int) $user->ID,
+				'display_name' => $user->display_name,
+				'email'        => $user->user_email,
+			);
+		}
+
+		return $users;
+	}
+
+	/**
+	 * Transform activity row from SQL result
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param object     $row  Activity row.
+	 * @param array|null $user User data.
+	 *
+	 * @return array Transformed activity.
+	 */
+	private function transform_activity_row( $row, ?array $user ): array {
+		$data = ! empty( $row->data ) ? json_decode( $row->data, true ) : array();
+
+		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
+		$system_types   = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+
+		return array(
+			'id'                => (int) $row->id,
+			'item_type'         => 'activity',
+			'activity_type'     => $row->activity_type,
+			'contact_id'        => $row->contact_id ? (int) $row->contact_id : null,
+			'deal_id'           => ! empty( $row->deal_id ) ? (int) $row->deal_id : null,
+			'data'              => $data,
+			'user_id'           => $row->user_id ? (int) $row->user_id : null,
+			'user'              => $user,
+			'formatted_message' => $this->format_activity_message( $row->activity_type, $user, $data ),
+			'is_editable'       => in_array( $row->activity_type, $editable_types, true ),
+			'is_system'         => in_array( $row->activity_type, $system_types, true ),
+			'comments_count'    => (int) $row->comments_count,
+			'created_at'        => $row->created_at,
+			'updated_at'        => $row->updated_at,
+		);
+	}
+
+	/**
+	 * Transform task row from SQL result
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param object     $row  Task row.
+	 * @param array|null $user User data.
+	 *
+	 * @return array Transformed task.
+	 */
+	private function transform_task_row( $row, ?array $user ): array {
+		return array(
+			'id'             => (int) $row->id,
+			'item_type'      => 'task',
+			'task_type'      => $row->task_type,
+			'contact_id'     => $row->contact_id ? (int) $row->contact_id : null,
+			'deal_id'        => ! empty( $row->deal_id ) ? (int) $row->deal_id : null,
+			'title'          => $row->title,
+			'description'    => $row->description,
+			'user_id'        => $row->user_id ? (int) $row->user_id : null,
+			'user'           => $user,
+			'status'         => $row->status,
+			'display_status' => $row->display_status,
+			'priority'       => $row->priority,
+			'due_date'       => $row->due_date,
+			'due_time'       => $row->due_time,
+			'is_overdue'     => (bool) $row->is_overdue,
+			'created_at'     => $row->created_at,
+			'updated_at'     => $row->updated_at,
+		);
+	}
+
+	/**
+	 * Format activity message
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param string     $type Activity type.
+	 * @param array|null $user User data.
+	 * @param array      $data Activity data.
+	 *
+	 * @return string Formatted message.
+	 */
+	private function format_activity_message( string $type, ?array $user, array $data ): string {
+		$user_name = $user ? $user['display_name'] : __( 'Unknown User', 'quillcrm' );
+
+		$messages = array(
+			'note'              => sprintf( __( '%s added a note', 'quillcrm' ), $user_name ),
+			'email_sent'        => sprintf( __( '%s sent an email', 'quillcrm' ), $user_name ),
+			'call_logged'       => sprintf( __( '%s logged a call', 'quillcrm' ), $user_name ),
+			'meeting_scheduled' => sprintf( __( '%s scheduled a meeting', 'quillcrm' ), $user_name ),
+			'created'           => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
+			'stage_changed'     => sprintf( __( '%s changed the stage', 'quillcrm' ), $user_name ),
+			'value_changed'     => sprintf( __( '%s updated the value', 'quillcrm' ), $user_name ),
+			'status_changed'    => sprintf( __( '%s changed the status', 'quillcrm' ), $user_name ),
+		);
+
+		return $messages[ $type ] ?? sprintf( __( '%s performed an action', 'quillcrm' ), $user_name );
+	}
+
+	/**
+	 * Sanitize sort field
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param string $field Sort field.
+	 *
+	 * @return string Sanitized field.
+	 */
+	private function sanitize_sort_field( string $field ): string {
+		$allowed = array( 'created_at', 'sort_timestamp', 'due_date' );
+
+		if ( $field === 'due_date' ) {
+			return 'COALESCE(due_date, sort_timestamp)';
+		}
+
+		return in_array( $field, $allowed, true ) ? $field : 'sort_timestamp';
 	}
 }

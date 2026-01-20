@@ -406,6 +406,12 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load Presto Player triggers (Pro placeholders)
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/prestoplayer/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
 		// Load all automations messaging actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/messaging/class-*.php' );
 		foreach ( $actions_files as $file ) {
@@ -491,6 +497,12 @@ final class QuillCRM {
 
 		// Load LearnPress actions (Pro placeholders)
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learnpress/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load Presto Player actions (Pro placeholders)
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/prestoplayer/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}

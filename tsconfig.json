@@ -43,6 +43,8 @@
 			"@quillcrm/components": ["components"],
 			"@quillcrm/components/*": ["components/*"],
 			"@quillcrm/utils": ["utils"],
+			"@quillcrm/services": ["services"],
+			"@quillcrm/services/*": ["services/*"],
 			"@quillcrm/hooks/*": ["hooks/*"],
 			"@quillcrm/assets": ["assets/*"],
 			"@/*": ["./*"]

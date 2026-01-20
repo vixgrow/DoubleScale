@@ -4,6 +4,13 @@
  * REST API: Activity controller
  * Unified controller for all activity types (notes, emails, calls, meetings)
  *
+ * Two main endpoints:
+ * - GET /qc/v1/activities - For activity type tabs (Notes, Calls, etc.)
+ *   Uses Eloquent query, supports activity_type filtering
+ *
+ * - GET /qc/v1/timeline - For "All Activity" tab (unified timeline)
+ *   Uses SQL UNION, returns activities + tasks when Pro is active
+ *
  * @since 1.0.0
  * @package QuillCRM
  * @subpackage REST_API
@@ -41,7 +48,7 @@ class REST_Activity_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		 // Get all activities.
+		// Get activities filtered by type (for activity type tabs: Notes, Calls, etc.).
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -50,6 +57,22 @@ class REST_Activity_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+			)
+		);
+
+		// Unified timeline endpoint (activities + tasks when Pro is active).
+		// Use this for the "All Activity" tab.
+		register_rest_route(
+			$this->namespace,
+			'/timeline',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_timeline' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_timeline_params(),
 				),
 			)
 		);
@@ -181,23 +204,44 @@ class REST_Activity_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get all activities
+	 * Get activities filtered by type (for activity type tabs: Notes, Calls, etc.)
+	 *
+	 * Uses Eloquent query via get_activities()
+	 * when filtering by activity_type.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
+		// Check Pro availability.
+		$pro_active = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
+
+		// Normalize entity_type to integer constant.
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+
+		// Check Pro availability for deal entity type.
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
+			return new WP_Error(
+				'pro_required',
+				__( 'Deal activities require QuillCRM Pro plugin', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Build filters.
 		$filters = array(
 			'contact_id'    => $request->get_param( 'contact_id' ),
 			'entity_id'     => $request->get_param( 'entity_id' ),
-			'entity_type'   => $request->get_param( 'entity_type' ),
-			'activity_type' => $request->get_param( 'activity_type' ),
+			'entity_type'   => $entity_type,
 			'user_id'       => $request->get_param( 'user_id' ),
 			'date_from'     => $request->get_param( 'date_from' ),
 			'date_to'       => $request->get_param( 'date_to' ),
-			'sort_by'       => $request->get_param( 'sort_by' ),
-			'sort_order'    => $request->get_param( 'sort_order' ),
+			'activity_type' => $request->get_param( 'activity_type' ),
+			'sort_by'       => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_order'    => $request->get_param( 'sort_order' ) ?? 'desc',
 		);
 
 		// Remove null values.
@@ -211,25 +255,234 @@ class REST_Activity_Controller extends REST_Controller {
 		$per_page = intval( $request->get_param( 'per_page' ) ) ?: 20;
 		$page     = intval( $request->get_param( 'page' ) ) ?: 1;
 
+		// Use Eloquent-based get_activities() for activity type filtering.
 		$activities = Activity_Manager::instance()->get_activities( $filters, $per_page, $page );
 
 		if ( null === $activities ) {
 			return new WP_Error( 'access_denied', __( 'Access denied', 'quillcrm' ), array( 'status' => 403 ) );
 		}
 
+		// Transform to unified format for frontend compatibility.
 		$data = array();
 		foreach ( $activities->items() as $activity ) {
-			$data[] = $this->prepare_item_for_response( $activity, $request );
+			$data[] = $this->transform_activity_to_unified( $activity );
 		}
 
-		$response = new WP_REST_Response( $data, 200 );
+		return new WP_REST_Response(
+			array(
+				'data' => $data,
+				'meta' => array(
+					'total'        => $activities->total(),
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'total_pages'  => $activities->lastPage(),
+					'pro_active'   => $pro_active,
+				),
+			),
+			200
+		);
+	}
 
-		// Add pagination headers.
-		$response->header( 'X-Total-Count', $activities->total() );
-		$response->header( 'X-Total-Pages', $activities->lastPage() );
-		$response->header( 'X-Current-Page', $activities->currentPage() );
+	/**
+	 * Get unified timeline (activities + tasks when Pro is active)
+	 *
+	 * Uses SQL UNION query via get_unified_timeline() - designed for the
+	 * "All Activity" tab that shows everything.
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_timeline( $request ) {
+		// Check Pro availability.
+		$pro_active = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
 
-		return $response;
+		// Normalize entity_type to integer constant.
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+
+		// Check Pro availability for deal entity type.
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
+			return new WP_Error(
+				'pro_required',
+				__( 'Deal timeline requires QuillCRM Pro plugin', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Build filters (no activity_type - timeline shows everything).
+		$filters = array(
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $entity_type,
+			'user_id'     => $request->get_param( 'user_id' ),
+			'date_from'   => $request->get_param( 'date_from' ),
+			'date_to'     => $request->get_param( 'date_to' ),
+			'sort_by'     => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_order'  => $request->get_param( 'sort_order' ) ?? 'desc',
+		);
+
+		// Remove null values.
+		$filters = array_filter(
+			$filters,
+			function ( $value ) {
+				return null !== $value && '' !== $value;
+			}
+		);
+
+		$per_page = intval( $request->get_param( 'per_page' ) ) ?: 20;
+		$page     = intval( $request->get_param( 'page' ) ) ?: 1;
+
+		// Use unified timeline - returns activities + tasks (when Pro active).
+		$result = Activity_Manager::instance()->get_unified_timeline(
+			$filters,
+			$per_page,
+			$page
+		);
+
+		// Check for access denied error in result.
+		if ( isset( $result['meta']['error'] ) && 'access_denied' === $result['meta']['error'] ) {
+			return new WP_Error( 'access_denied', __( 'Access denied', 'quillcrm' ), array( 'status' => 403 ) );
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Transform Eloquent activity model to unified format
+	 *
+	 * Ensures consistent response format between get_activities() and get_unified_timeline().
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param Activity_Model $activity Activity model.
+	 *
+	 * @return array Transformed activity data.
+	 */
+	private function transform_activity_to_unified( $activity ): array {
+		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
+		$system_types   = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+
+		$user = null;
+		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+			$user = array(
+				'id'           => $activity->user->ID,
+				'display_name' => $activity->user->display_name,
+				'email'        => $activity->user->user_email,
+			);
+		}
+
+		return array(
+			'id'                => (int) $activity->id,
+			'item_type'         => 'activity',
+			'activity_type'     => $activity->activity_type,
+			'contact_id'        => $activity->contact_id ? (int) $activity->contact_id : null,
+			'deal_id'           => $activity->deal_id ? (int) $activity->deal_id : null,
+			'data'              => $activity->data,
+			'user_id'           => $activity->user_id ? (int) $activity->user_id : null,
+			'user'              => $user,
+			'formatted_message' => $activity->formatted_message,
+			'is_editable'       => in_array( $activity->activity_type, $editable_types, true ),
+			'is_system'         => in_array( $activity->activity_type, $system_types, true ),
+			'comments_count'    => $activity->relationLoaded( 'comments' ) ? $activity->comments->count() : 0,
+			'created_at'        => (string) $activity->created_at,
+			'updated_at'        => (string) $activity->updated_at,
+		);
+	}
+
+	/**
+	 * Get timeline endpoint parameters
+	 *
+	 * @since 1.x.0
+	 *
+	 * @return array Parameters for timeline endpoint.
+	 */
+	public function get_timeline_params() {
+		return array(
+			// Contact filtering.
+			'contact_id'  => array(
+				'description' => __( 'Filter by contact ID.', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+			// Entity (deal) filtering.
+			'entity_id'   => array(
+				'description' => __( 'Filter by entity ID (e.g., deal ID).', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+			'entity_type' => array(
+				'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'quillcrm' ),
+				'type'        => array( 'string', 'integer' ),
+			),
+			// User filtering.
+			'user_id'     => array(
+				'description' => __( 'Filter by user ID.', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+			// Date filtering.
+			'date_from'   => array(
+				'description' => __( 'Filter by start date (YYYY-MM-DD).', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'date_to'     => array(
+				'description' => __( 'Filter by end date (YYYY-MM-DD).', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			// Sorting.
+			'sort_by'     => array(
+				'description' => __( 'Sort by field.', 'quillcrm' ),
+				'type'        => 'string',
+				'default'     => 'created_at',
+				'enum'        => array( 'created_at', 'updated_at' ),
+			),
+			'sort_order'  => array(
+				'description' => __( 'Sort order.', 'quillcrm' ),
+				'type'        => 'string',
+				'default'     => 'desc',
+				'enum'        => array( 'asc', 'desc' ),
+			),
+			// Pagination.
+			'per_page'    => array(
+				'description' => __( 'Number of items per page.', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 20,
+			),
+			'page'        => array(
+				'description' => __( 'Page number.', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 1,
+			),
+		);
+	}
+
+	/**
+	 * Normalize entity_type to integer constant
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param string|int|null $entity_type Entity type.
+	 *
+	 * @return int|null Normalized entity type.
+	 */
+	private function normalize_entity_type( $entity_type ) {
+		if ( empty( $entity_type ) ) {
+			return null;
+		}
+
+		// Already numeric.
+		if ( is_numeric( $entity_type ) ) {
+			return intval( $entity_type );
+		}
+
+		// String mapping.
+		$map = array(
+			'deal'     => \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL,
+			'campaign' => \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_CAMPAIGN,
+		);
+
+		return $map[ strtolower( $entity_type ) ] ?? null;
 	}
 
 	/**
@@ -791,6 +1044,84 @@ class REST_Activity_Controller extends REST_Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get collection params for activities endpoint
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Collection parameters.
+	 */
+	public function get_collection_params() {
+		return array(
+			// Entity filtering.
+			'contact_id'        => array(
+				'description' => __( 'Filter by contact ID', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+			'entity_type'       => array(
+				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'quillcrm' ),
+				'type'        => 'string',
+			),
+			'entity_id'         => array(
+				'description' => __( 'Entity ID (used with entity_type)', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+
+			// User filtering.
+			'user_id'           => array(
+				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'quillcrm' ),
+				'type'        => 'integer',
+			),
+
+			// Activity type filtering (filters activities only, tasks are excluded when this is set).
+			'activity_type'     => array(
+				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'quillcrm' ),
+				'type'        => 'string',
+			),
+
+			// Date filtering.
+			'date_from'         => array(
+				'description' => __( 'Filter from date (Y-m-d)', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'date_to'           => array(
+				'description' => __( 'Filter to date (Y-m-d)', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+
+			// Sorting.
+			'sort_by'           => array(
+				'description' => __( 'Sort field: created_at', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => array( 'created_at' ),
+				'default'     => 'created_at',
+			),
+			'sort_order'        => array(
+				'description' => __( 'Sort direction: asc, desc', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => array( 'asc', 'desc' ),
+				'default'     => 'desc',
+			),
+
+			// Pagination.
+			'per_page'          => array(
+				'description' => __( 'Items per page', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 20,
+				'minimum'     => 1,
+				'maximum'     => 100,
+			),
+			'page'              => array(
+				'description' => __( 'Page number', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 1,
+				'minimum'     => 1,
+			),
+		);
 	}
 
 	/**

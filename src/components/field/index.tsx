@@ -84,6 +84,7 @@ interface FieldProps {
 	className?: string;
 	tooltip?: string;
 	disabled?: boolean;
+	compact?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -108,6 +109,7 @@ const Field: React.FC<FieldProps> = ({
 	className,
 	tooltip,
 	disabled,
+	compact = false,
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -299,7 +301,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500',
+						'border-red-500 focus-visible:ring-red-500',
 						disabled && 'bg-gray-100 cursor-not-allowed opacity-70'
 					)}
 					style={{
@@ -320,7 +322,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -338,8 +340,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -718,6 +720,35 @@ const Field: React.FC<FieldProps> = ({
 					)}
 				</div>
 				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// List of complex field types that render multiple inputs
+	const complexFieldTypes = [
+		'page_visited',
+		'form_submission',
+		'logged_in_out',
+		'was_active_inactive',
+		'email_opened',
+		'email_clicked',
+	];
+
+	const isComplexField = complexFieldTypes.includes(type);
+
+	// Compact layout for complex fields or when compact prop is true
+	if (isComplexField || compact) {
+		return (
+			<div className={cn('qcrm-field qcrm-field-compact', compact && 'qcrm-field-compact-mode')} style={style || {}}>
+				{label && !compact && (
+					<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+						{renderLabelWithTooltip()}
+					</div>
+				)}
+				<div className={cn('qcrm-field-input qcrm-field-input-compact', className)}>
+					{fieldContent}
+				</div>
+				{helperText && !compact && renderHelperText(helperText)}
 			</div>
 		);
 	}

@@ -42,23 +42,26 @@ const PageVisited = ({ value, onChange, options }: PageVisitedProps) => {
 
 	return (
 		<>
-			<Field
-				type="select"
-				value={value?.guid || ''}
-				onChange={handlePageGuidChange}
-				placeholder="Select page"
-				options={options}
-			/>
-
-			{value?.guid && (
+			<div className="qcrm-page-visited-row">
 				<Field
-					type="text"
-					value={value.guid}
+					type="select"
+					value={value?.guid || ''}
 					onChange={handlePageGuidChange}
-					placeholder="Page URL"
-					label="Page URL (editable)"
+					placeholder="Select page"
+					options={options}
+					compact={true}
 				/>
-			)}
+				{value?.guid && (
+					<Field
+						type="text"
+						value={value.guid}
+						onChange={handlePageGuidChange}
+						placeholder="Page URL"
+						label="Page URL (editable)"
+						compact={true}
+					/>
+				)}
+			</div>
 
 			<EventCountCondition
 				value={value?.event_count_condition || {}}

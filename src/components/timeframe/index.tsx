@@ -83,6 +83,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 					value={value?.count || 0}
 					onChange={handleCountChange}
 					placeholder="Enter number of days"
+					compact={true}
 				/>
 			);
 		}
@@ -95,6 +96,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 					value={value?.date || ''}
 					onChange={handleDateChange}
 					placeholder="Select date"
+					compact={true}
 				/>
 			);
 		}
@@ -109,6 +111,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 						onChange={handleDateFromChange}
 						placeholder="From"
 						label="From"
+						compact={true}
 					/>
 					<Field
 						type="date"
@@ -116,6 +119,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 						onChange={handleDateToChange}
 						placeholder="To"
 						label="To"
+						compact={true}
 					/>
 				</>
 			);
@@ -125,15 +129,16 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 	};
 
 	return (
-		<>
+		<div className="qcrm-timeframe">
 			<Field
 				type="select"
 				value={selectedTimeframe}
 				onChange={handleTimeframeTypeChange}
 				options={timeframeOptions}
+				compact={true}
 			/>
 			{renderAdditionalField()}
-		</>
+		</div>
 	);
 };
 

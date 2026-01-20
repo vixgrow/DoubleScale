@@ -70,7 +70,7 @@ const Rule: React.FC<RuleProps> = ({
 					<Button
 						size="icon"
 						onClick={onRemove}
-						className="bg-transparent hover:bg-transparent text-destructive shadow-none border-l px-0 h-12"
+						className="bg-transparent hover:bg-transparent text-destructive shadow-none border-l rounded-none px-0 h-12"
 					>
 						<DeleteIcon width={20} height={20} />
 					</Button>

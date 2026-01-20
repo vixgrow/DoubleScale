@@ -36,21 +36,23 @@ const EventCountCondition = ({ value, onChange }: EventCountConditionProps) => {
 	const selectedEventCountCondition = value?.type || 'extactly';
 
 	return (
-		<>
+		<div className="qcrm-event-count-condition">
 			<Field
 				type="select"
 				value={selectedEventCountCondition}
 				onChange={handleEventCountConditionTypeChange}
 				options={eventCountConditionOptions}
+				compact={true}
 			/>
 			<Field
 				type="number"
 				value={value?.count || 1}
 				onChange={handleCountChange}
 				placeholder="Enter number of events"
+				compact={true}
 			/>
-			<span>Times</span>
-		</>
+			<span className="qcrm-event-count-label">Times</span>
+		</div>
 	);
 };
 

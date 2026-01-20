@@ -3,6 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External dependencies
@@ -29,7 +31,6 @@ import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@quillcrm/client';
-import apiFetch from '@wordpress/api-fetch';
 
 interface UpcomingActivitiesProps {
     contact_id: number;
@@ -99,16 +100,9 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     follow_up: <TaskDoneIcon color="#CB5301" />,
 };
 
-// Dynamic import for Pro task service
-const loadProTaskService = async () => {
-    try {
-        // @ts-ignore - Pro plugin path
-        const module = await import('@pro/client/pages/tasks/api/tasks');
-        return module.TaskService;
-    } catch {
-        return null;
-    }
-};
+// Pro plugin TaskService - loaded via WordPress filters at runtime
+// Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
+const getProTaskService = () => applyFilters('quillcrm_pro_component', null, 'TaskService') as any;
 
 const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) => {
     const { deleteActivity } = useActivityOperations();
@@ -216,7 +210,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
             return;
         }
         try {
-            const TaskService = await loadProTaskService();
+            const TaskService = getProTaskService();
             if (!TaskService) {
                 showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
                 return;

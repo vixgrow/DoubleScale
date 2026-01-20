@@ -311,15 +311,43 @@
 					"name": "Get Emails",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/{{contactId}}/emails",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"{{contactId}}",
+								"emails"
+							]
+						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get Purchase",
+					"name": "Get Purchases",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/{{contactId}}/purchases",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"{{contactId}}",
+								"purchases"
+							]
+						}
 					},
 					"response": []
 				},
@@ -1975,7 +2003,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{site}}/wp-json/qc/v1/link-trigger",
+							"raw": "{{site}}/wp-json/qc/v1/link-triggers",
 							"host": [
 								"{{site}}"
 							],
@@ -1983,7 +2011,7 @@
 								"wp-json",
 								"qc",
 								"v1",
-								"link-trigger"
+								"link-triggers"
 							],
 							"query": [
 								{
@@ -2234,7 +2262,21 @@
 					"name": "Contact Notes",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/contacts/{{contactId}}/notes",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"contacts",
+								"{{contactId}}",
+								"notes"
+							]
+						}
 					},
 					"response": []
 				}
@@ -2929,7 +2971,7 @@
 			]
 		},
 		{
-			"name": "Integratons",
+			"name": "Integrations",
 			"item": [
 				{
 					"name": "ActiveCampaign",
@@ -4084,34 +4126,12 @@
 							"response": []
 						},
 						{
-							"name": "Auth URI",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/auth",
-									"host": [
-										"{{site}}"
-									],
-									"path": [
-										"wp-json",
-										"qc",
-										"v1",
-										"integrations",
-										"mautic",
-										"auth"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Tags",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/tags",
+									"raw": "{{site}}/wp-json/qc/v1/integrations/hubspot/tags",
 									"host": [
 										"{{site}}"
 									],
@@ -4120,7 +4140,7 @@
 										"qc",
 										"v1",
 										"integrations",
-										"mautic",
+										"hubspot",
 										"tags"
 									]
 								}
@@ -4128,7 +4148,7 @@
 							"response": []
 						},
 						{
-							"name": "fields",
+							"name": "Fields",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -4143,28 +4163,6 @@
 										"v1",
 										"integrations",
 										"hubspot",
-										"fields"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Fields",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{site}}/wp-json/qc/v1/integrations/mautic/fields",
-									"host": [
-										"{{site}}"
-									],
-									"path": [
-										"wp-json",
-										"qc",
-										"v1",
-										"integrations",
-										"mautic",
 										"fields"
 									]
 								}
@@ -4194,11 +4192,213 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Pipedrive",
+					"item": [
+						{
+							"name": "Pipedrive",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_token\": \"your_pipedrive_api_token\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/pipedrive",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"pipedrive"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/pipedrive/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"pipedrive",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Pipelines",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/pipedrive/pipelines",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"pipedrive",
+										"pipelines"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Stages",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/pipedrive/stages",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"pipedrive",
+										"stages"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GoHighLevel",
+					"item": [
+						{
+							"name": "GoHighLevel",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"settings\": {\r\n        \"api_key\": \"your_gohighlevel_api_key\",\r\n        \"location_id\": \"your_location_id\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/gohighlevel",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"gohighlevel"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/gohighlevel/tags",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"gohighlevel",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Fields",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/gohighlevel/fields",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"gohighlevel",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Pipelines",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/integrations/gohighlevel/pipelines",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"integrations",
+										"gohighlevel",
+										"pipelines"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "Moblie App",
+			"name": "Mobile App",
 			"item": [
 				{
 					"name": "http://localhost/wordpress/wp-json/qc/v1/site/verify",
@@ -4450,14 +4650,6 @@
 						"abandoned-carts"
 					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": []
 			},
 			"response": []
 		},
@@ -5047,6 +5239,1773 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Pipelines (Pro)",
+			"item": [
+				{
+					"name": "List Pipelines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines?with_stages=true&with_stats=true",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines"
+							],
+							"query": [
+								{
+									"key": "with_stages",
+									"value": "true"
+								},
+								{
+									"key": "with_stats",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Pipeline",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sales Pipeline\",\r\n    \"description\": \"Main sales pipeline\",\r\n    \"stages\": [\r\n        {\r\n            \"name\": \"Lead\",\r\n            \"color\": \"#6d78d8\",\r\n            \"win_probability\": 10\r\n        },\r\n        {\r\n            \"name\": \"Qualified\",\r\n            \"color\": \"#4CAF50\",\r\n            \"win_probability\": 30\r\n        },\r\n        {\r\n            \"name\": \"Proposal\",\r\n            \"color\": \"#FF9800\",\r\n            \"win_probability\": 60\r\n        },\r\n        {\r\n            \"name\": \"Negotiation\",\r\n            \"color\": \"#2196F3\",\r\n            \"win_probability\": 80\r\n        },\r\n        {\r\n            \"name\": \"Closed Won\",\r\n            \"color\": \"#4CAF50\",\r\n            \"win_probability\": 100\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Pipeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}?with_stages=true&with_stats=true",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}"
+							],
+							"query": [
+								{
+									"key": "with_stages",
+									"value": "true"
+								},
+								{
+									"key": "with_stats",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Pipeline",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Updated Pipeline Name\",\r\n    \"description\": \"Updated description\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Pipeline",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}"
+							],
+							"query": [
+								{
+									"key": "move_deals_to",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pipeline Stages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/stages",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"stages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Stage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"New Stage\",\r\n    \"color\": \"#9C27B0\",\r\n    \"win_probability\": 50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/stages",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"stages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Stage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Updated Stage Name\",\r\n    \"color\": \"#E91E63\",\r\n    \"win_probability\": 75\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/stages/{{stageId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"stages",
+								"{{stageId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Stage",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/stages/{{stageId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"stages",
+								"{{stageId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pipeline Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/analytics",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"analytics"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Pipeline",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Pipeline Copy\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/{{pipelineId}}/duplicate",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"{{pipelineId}}",
+								"duplicate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Sort Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pipeline_ids\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/pipelines/sort-order",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"pipelines",
+								"sort-order"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Deals (Pro)",
+			"item": [
+				{
+					"name": "List Deals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals"
+							],
+							"query": [
+								{
+									"key": "pipeline_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "stage_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "open",
+									"disabled": true
+								},
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "contact_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "keyword",
+									"disabled": true
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"disabled": true
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Deal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"New Deal\",\r\n    \"contact_id\": {{contactId}},\r\n    \"pipeline_id\": {{pipelineId}},\r\n    \"stage_id\": {{stageId}},\r\n    \"value\": 5000,\r\n    \"expected_close_date\": \"2026-03-15\",\r\n    \"priority\": \"medium\",\r\n    \"source\": \"website\",\r\n    \"custom_fields\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Deal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/{{dealId}}?with_relationships=true",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"{{dealId}}"
+							],
+							"query": [
+								{
+									"key": "with_relationships",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Deal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Updated Deal Title\",\r\n    \"value\": 7500,\r\n    \"priority\": \"high\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/{{dealId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"{{dealId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Deal",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/{{dealId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"{{dealId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Move Deal to Stage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"stage_id\": {{stageId}},\r\n    \"update_probability\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/{{dealId}}/move-stage",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"{{dealId}}",
+								"move-stage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Move Deal to Pipeline",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pipeline_id\": {{pipelineId}},\r\n    \"stage_id\": {{stageId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/{{dealId}}/move-pipeline",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"{{dealId}}",
+								"move-pipeline"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Overdue Deals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/overdue",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"overdue"
+							],
+							"query": [
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Deal Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/statistics",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"statistics"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Update Deals",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"deal_ids\": [1, 2, 3],\r\n    \"data\": {\r\n        \"stage_id\": {{stageId}},\r\n        \"priority\": \"high\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/bulk",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Deals",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"deal_ids\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals/bulk-delete",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals",
+								"bulk-delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stages (Pro)",
+			"item": [
+				{
+					"name": "Get Stage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/stages/{{stageId}}?with_pipeline=true&with_deals=true",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"stages",
+								"{{stageId}}"
+							],
+							"query": [
+								{
+									"key": "with_pipeline",
+									"value": "true"
+								},
+								{
+									"key": "with_deals",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Stage",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Updated Stage\",\r\n    \"color\": \"#673AB7\",\r\n    \"win_probability\": 65,\r\n    \"sort_order\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/stages/{{stageId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"stages",
+								"{{stageId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Stage",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/stages/{{stageId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"stages",
+								"{{stageId}}"
+							],
+							"query": [
+								{
+									"key": "move_deals_to",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tasks (Pro)",
+			"item": [
+				{
+					"name": "List Tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "assigned_to",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "entity_type",
+									"value": "1",
+									"description": "1=Contact, 2=Deal",
+									"disabled": true
+								},
+								{
+									"key": "entity_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "high",
+									"disabled": true
+								},
+								{
+									"key": "task_type",
+									"value": "call",
+									"disabled": true
+								},
+								{
+									"key": "keywords",
+									"value": "search term",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Follow up call\",\r\n    \"description\": \"Call to discuss proposal\",\r\n    \"contact_id\": {{contactId}},\r\n    \"assigned_to\": 1,\r\n    \"task_type\": \"call\",\r\n    \"status\": \"pending\",\r\n    \"priority\": \"high\",\r\n    \"due_date\": \"2026-02-01\",\r\n    \"due_time\": \"14:00:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Task",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/{{taskId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Updated task title\",\r\n    \"priority\": \"medium\",\r\n    \"due_date\": \"2026-02-15\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/{{taskId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/{{taskId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Task Completed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/{{taskId}}/complete",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"{{taskId}}",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Task Pending",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/{{taskId}}/pending",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"{{taskId}}",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Email Sequences (Pro)",
+			"item": [
+				{
+					"name": "List Email Sequences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences"
+							],
+							"query": [
+								{
+									"key": "keywords",
+									"value": "search",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Email Sequence",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Welcome Sequence\",\r\n    \"description\": \"Welcome new subscribers\",\r\n    \"status\": \"draft\",\r\n    \"settings\": {\r\n        \"from_name\": \"Support\",\r\n        \"from_email\": \"support@example.com\",\r\n        \"reply_to_email\": \"reply@example.com\",\r\n        \"contact_ids\": [1, 2, 3]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Email Sequence",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Email Sequence",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Updated Sequence Name\",\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Email Sequence",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sequence Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}/reports",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sequence Subscribers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}/subscribers",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}",
+								"subscribers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Email Sequence",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": \"email_sequence\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/{{emailSequenceId}}/duplicate",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"{{emailSequenceId}}",
+								"duplicate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Email Sequences",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email_sequence_ids\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/email-sequences/bulk",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"email-sequences",
+								"bulk"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports (Pro)",
+			"item": [
+				{
+					"name": "Contacts & Deals Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/contacts-deals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"contacts-deals"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								},
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pipeline_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deals by Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/deals-by-date?days_back=30&frequency=daily",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"deals-by-date"
+							],
+							"query": [
+								{
+									"key": "days_back",
+									"value": "30"
+								},
+								{
+									"key": "frequency",
+									"value": "daily",
+									"description": "daily, weekly, monthly"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deals Leaderboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/deals-leaderboard",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"deals-leaderboard"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sales Rep Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/sales-rep",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"sales-rep"
+							],
+							"query": [
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sales Rep Pipeline Stages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/sales-rep/pipeline-stages",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"sales-rep",
+								"pipeline-stages"
+							],
+							"query": [
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pipeline_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sales Rep Active Deals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/sales-rep/active-deals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"sales-rep",
+								"active-deals"
+							],
+							"query": [
+								{
+									"key": "owner_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "keyword",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Sales Rep Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/reports/all-sales-rep",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"reports",
+								"all-sales-rep"
+							],
+							"query": [
+								{
+									"key": "date_from",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "date_to",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Settings",
+			"item": [
+				{
+					"name": "Get Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/settings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Settings",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"general\": {\r\n        \"currency\": \"USD\",\r\n        \"date_format\": \"Y-m-d\"\r\n    },\r\n    \"email\": {\r\n        \"from_name\": \"QuillCRM\",\r\n        \"from_email\": \"noreply@example.com\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/settings",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Logs",
+			"item": [
+				{
+					"name": "List Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/logs",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"logs"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "level",
+									"value": "error",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Log",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/logs/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"logs",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Log",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/logs/1",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"logs",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Import/Export",
+			"item": [
+				{
+					"name": "Export Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/import-export/export",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"import-export",
+								"export"
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "csv",
+									"disabled": true
+								},
+								{
+									"key": "list_id",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import Contacts",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "list_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "mapping",
+									"value": "{\"email\": \"email\", \"first_name\": \"first_name\", \"last_name\": \"last_name\"}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/import-export/import",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"import-export",
+								"import"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -5129,6 +7088,22 @@
 		},
 		{
 			"key": "dealId",
+			"value": "1"
+		},
+		{
+			"key": "pipelineId",
+			"value": "1"
+		},
+		{
+			"key": "stageId",
+			"value": "1"
+		},
+		{
+			"key": "taskId",
+			"value": "1"
+		},
+		{
+			"key": "emailSequenceId",
 			"value": "1"
 		}
 	]

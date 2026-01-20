@@ -312,7 +312,7 @@ const MergeTagsGroupRender: React.FC<{
 				map(filteredMergeTags, (tag, key) => (
 					<Button
 						key={key}
-						className="w-full justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary py-8"
+						className="w-full justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none py-8"
 						onClick={(e) => {
 							e.preventDefault();
 							e.stopPropagation();

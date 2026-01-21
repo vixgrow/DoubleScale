@@ -24,7 +24,7 @@ import Tags, { TagsRef } from './tags';
 import LeadScoring, { LeadScoringRef } from './lead-scoring';
 import AllContacts, { AllContactsRef } from './all-contacts';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
-import { PlusIcon as LeadScoringIcon } from '@quillcrm/components/icons';
+import { LeadScoringIcon } from '@quillcrm/components/icons';
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');

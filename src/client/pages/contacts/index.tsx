@@ -3,6 +3,7 @@
  */
 import { useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -21,10 +22,13 @@ import {
 import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
-import LeadScoring, { LeadScoringRef } from './lead-scoring';
 import AllContacts, { AllContactsRef } from './all-contacts';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
-import { LeadScoringIcon } from '@quillcrm/components/icons';
+
+// Define the ref interface for lead scoring (used by Pro plugin)
+export interface LeadScoringRef {
+	openCreateModal: () => void;
+}
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
@@ -34,11 +38,24 @@ const ContactsList: React.FC = () => {
 	const tagsRef = useRef<TagsRef>(null);
 	const allContactsRef = useRef<AllContactsRef>(null);
 	const leadScoringRef = useRef<LeadScoringRef>(null);
-	const tabTitles = {
+
+	// Get lead scoring tab config from Pro plugin if available
+	const leadScoringTab = applyFilters(
+		'quillcrm_contacts_lead_scoring_tab',
+		null,
+		leadScoringRef
+	) as {
+		tab: { label: string; value: string; icon: React.ReactNode };
+		content: { value: string; children: React.ReactNode };
+		headerAction: { label: string; onClick: () => void; icon: React.ReactNode };
+		title: string;
+	} | null;
+
+	const tabTitles: Record<string, string> = {
 		all: __('Contacts List', 'quillcrm'),
 		lists: __('Lists', 'quillcrm'),
 		tags: __('Tags', 'quillcrm'),
-		lead_scoring: __('Lead Scoring', 'quillcrm'),
+		...(leadScoringTab ? { lead_scoring: leadScoringTab.title } : {}),
 	};
 
 	const headerActions =
@@ -89,16 +106,8 @@ const ContactsList: React.FC = () => {
 								icon: <PlusIcon />,
 							},
 						]
-					: activeTab == 'lead_scoring' && isCrmManager
-						? [
-								{
-									label: __('Add', 'quillcrm'),
-									onClick: () => {
-										leadScoringRef.current?.openCreateModal();
-									},
-									icon: <PlusIcon />,
-								},
-							]
+					: activeTab == 'lead_scoring' && isCrmManager && leadScoringTab
+						? [leadScoringTab.headerAction]
 						: [];
 
 	return (
@@ -130,16 +139,7 @@ const ContactsList: React.FC = () => {
 									value: 'tags',
 									icon: <TagsIcon width={20} height={20} />,
 								},
-								{
-									label: __('Lead Scoring', 'quillcrm'),
-									value: 'lead_scoring',
-									icon: (
-										<LeadScoringIcon
-											width={20}
-											height={20}
-										/>
-									),
-								},
+								...(leadScoringTab ? [leadScoringTab.tab] : []),
 							]
 						: []),
 				]}
@@ -158,15 +158,7 @@ const ContactsList: React.FC = () => {
 						value: 'tags',
 						children: <Tags ref={tagsRef} activeTab="tags" />,
 					},
-					{
-						value: 'lead_scoring',
-						children: (
-							<LeadScoring
-								ref={leadScoringRef}
-								activeTab="lead_scoring"
-							/>
-						),
-					},
+					...(leadScoringTab ? [leadScoringTab.content] : []),
 				]}
 			/>
 		</div>

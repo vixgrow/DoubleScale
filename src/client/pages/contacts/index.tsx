@@ -18,7 +18,9 @@ import {
 	ListsIcon,
 	TagsIcon,
 	ContactsIcon,
+	LeadScoringIcon,
 } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
@@ -39,23 +41,21 @@ const ContactsList: React.FC = () => {
 	const allContactsRef = useRef<AllContactsRef>(null);
 	const leadScoringRef = useRef<LeadScoringRef>(null);
 
-	// Get lead scoring tab config from Pro plugin if available
-	const leadScoringTab = applyFilters(
+	// Get lead scoring content from Pro plugin if available
+	const leadScoringContent = applyFilters(
 		'quillcrm_contacts_lead_scoring_tab',
 		null,
 		leadScoringRef
 	) as {
-		tab: { label: string; value: string; icon: React.ReactNode };
 		content: { value: string; children: React.ReactNode };
 		headerAction: { label: string; onClick: () => void; icon: React.ReactNode };
-		title: string;
 	} | null;
 
 	const tabTitles: Record<string, string> = {
 		all: __('Contacts List', 'quillcrm'),
 		lists: __('Lists', 'quillcrm'),
 		tags: __('Tags', 'quillcrm'),
-		...(leadScoringTab ? { lead_scoring: leadScoringTab.title } : {}),
+		lead_scoring: __('Lead Scoring', 'quillcrm'),
 	};
 
 	const headerActions =
@@ -106,8 +106,8 @@ const ContactsList: React.FC = () => {
 								icon: <PlusIcon />,
 							},
 						]
-					: activeTab == 'lead_scoring' && isCrmManager && leadScoringTab
-						? [leadScoringTab.headerAction]
+					: activeTab == 'lead_scoring' && isCrmManager && leadScoringContent
+						? [leadScoringContent.headerAction]
 						: [];
 
 	return (
@@ -139,7 +139,11 @@ const ContactsList: React.FC = () => {
 									value: 'tags',
 									icon: <TagsIcon width={20} height={20} />,
 								},
-								...(leadScoringTab ? [leadScoringTab.tab] : []),
+								{
+									label: __('Lead Scoring', 'quillcrm'),
+									value: 'lead_scoring',
+									icon: <LeadScoringIcon width={20} height={20} />,
+								},
 							]
 						: []),
 				]}
@@ -158,7 +162,20 @@ const ContactsList: React.FC = () => {
 						value: 'tags',
 						children: <Tags ref={tagsRef} activeTab="tags" />,
 					},
-					...(leadScoringTab ? [leadScoringTab.content] : []),
+					{
+						value: 'lead_scoring',
+						children: leadScoringContent ? (
+							leadScoringContent.content.children
+						) : (
+							<ProFeatureNotice
+								featureName={__('Lead Scoring', 'quillcrm')}
+								description={__(
+									'Score and prioritize your leads based on their engagement and behavior. Create custom scoring rules to identify your most valuable prospects with QuillCRM Pro.',
+									'quillcrm'
+								)}
+							/>
+						),
+					},
 				]}
 			/>
 		</div>

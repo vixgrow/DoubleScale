@@ -32,6 +32,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM_Pro\Managers\Merge_Tags_Manager;
+use QuillCRM_Pro\Managers\Lead_Scoring_Manager;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -1023,7 +1024,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_lead_score( $request ) {
-		if ( class_exists( 'QuillCRM_Pro\Managers\Lead_Scoring_Manager' ) ) {
+		if ( ! class_exists( 'QuillCRM_Pro\Managers\Lead_Scoring_Manager' ) ) {
 			return new WP_Error( 'not_found', 'Lead scoring is not available', array( 'status' => 404 ) );
 		}
 
@@ -1036,7 +1037,7 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			// Get the lead score data
-			$lead_score_data = \QuillCRM\Managers\Lead_Scoring_Manager::get_lead_score( $contact );
+			$lead_score_data = Lead_Scoring_Manager::get_lead_score( $contact );
 
 			if ( ! $lead_score_data ) {
 				return new WP_REST_Response(

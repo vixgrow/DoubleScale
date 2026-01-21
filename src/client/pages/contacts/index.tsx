@@ -3,6 +3,7 @@
  */
 import { useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -17,12 +18,19 @@ import {
 	ListsIcon,
 	TagsIcon,
 	ContactsIcon,
+	LeadScoringIcon,
 } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
 import AllContacts, { AllContactsRef } from './all-contacts';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+
+// Define the ref interface for lead scoring (used by Pro plugin)
+export interface LeadScoringRef {
+	openCreateModal: () => void;
+}
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
@@ -31,11 +39,23 @@ const ContactsList: React.FC = () => {
 	const listsRef = useRef<ListsRef>(null);
 	const tagsRef = useRef<TagsRef>(null);
 	const allContactsRef = useRef<AllContactsRef>(null);
+	const leadScoringRef = useRef<LeadScoringRef>(null);
 
-	const tabTitles = {
+	// Get lead scoring content from Pro plugin if available
+	const leadScoringContent = applyFilters(
+		'quillcrm_contacts_lead_scoring_tab',
+		null,
+		leadScoringRef
+	) as {
+		content: { value: string; children: React.ReactNode };
+		headerAction: { label: string; onClick: () => void; icon: React.ReactNode };
+	} | null;
+
+	const tabTitles: Record<string, string> = {
 		all: __('Contacts List', 'quillcrm'),
 		lists: __('Lists', 'quillcrm'),
 		tags: __('Tags', 'quillcrm'),
+		lead_scoring: __('Lead Scoring', 'quillcrm'),
 	};
 
 	const headerActions =
@@ -86,7 +106,9 @@ const ContactsList: React.FC = () => {
 								icon: <PlusIcon />,
 							},
 						]
-					: [];
+					: activeTab == 'lead_scoring' && isCrmManager && leadScoringContent
+						? [leadScoringContent.headerAction]
+						: [];
 
 	return (
 		<div className="qcrm-contacts-list w-full">
@@ -117,6 +139,11 @@ const ContactsList: React.FC = () => {
 									value: 'tags',
 									icon: <TagsIcon width={20} height={20} />,
 								},
+								{
+									label: __('Lead Scoring', 'quillcrm'),
+									value: 'lead_scoring',
+									icon: <LeadScoringIcon width={20} height={20} />,
+								},
 							]
 						: []),
 				]}
@@ -134,6 +161,20 @@ const ContactsList: React.FC = () => {
 					{
 						value: 'tags',
 						children: <Tags ref={tagsRef} activeTab="tags" />,
+					},
+					{
+						value: 'lead_scoring',
+						children: leadScoringContent ? (
+							leadScoringContent.content.children
+						) : (
+							<ProFeatureNotice
+								featureName={__('Lead Scoring', 'quillcrm')}
+								description={__(
+									'Score and prioritize your leads based on their engagement and behavior. Create custom scoring rules to identify your most valuable prospects with QuillCRM Pro.',
+									'quillcrm'
+								)}
+							/>
+						),
 					},
 				]}
 			/>

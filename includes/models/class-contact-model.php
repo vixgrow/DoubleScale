@@ -21,6 +21,8 @@ use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
 use QuillCRM\Models\Contact_Unsubscribe_Model;
+use QuillCRM_Pro\Models\Form_Submission_Model;
+use QuillCRM_Pro\Models\Page_Visit_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
 // use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Utils;
@@ -29,9 +31,6 @@ use QuillCRM\Utils;
  * Contact_Model class
  */
 class Contact_Model extends Model {
-
-
-
 
 
 	/**
@@ -126,11 +125,11 @@ class Contact_Model extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'email.required'        => 'Contact email field is required.',
-		'email.email'           => 'Invalid email address.',
-		'phone.regex'           => 'Invalid phone number.',
-		'whatsapp_phone.regex'  => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
-		'zip.numeric'           => 'Invalid zip code.',
+		'email.required'       => 'Contact email field is required.',
+		'email.email'          => 'Invalid email address.',
+		'phone.regex'          => 'Invalid phone number.',
+		'whatsapp_phone.regex' => 'Invalid WhatsApp phone number. Must be in E.164 format (e.g., +12025551234).',
+		'zip.numeric'          => 'Invalid zip code.',
 	);
 
 	/**
@@ -247,7 +246,58 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function notes() {
-		return $this->hasMany( Activity_Model::class, 'contact_id', 'id' )->where( 'activity_type', 'note' );
+		return $this->activities()->where( 'activity_type', 'note' );
+	}
+
+	/**
+	 * Get all activities for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function activities() {
+		return $this->hasMany( Activity_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get all communication tracking records for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function communication_tracking() {
+		return $this->hasMany( Communication_Tracking_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get form submissions for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function form_submissions() {
+		if ( class_exists( 'QuillCRM_Pro\Models\Form_Submission_Model' ) ) {
+			return $this->hasMany( Form_Submission_Model::class, 'contact_id', 'id' );
+		}
+		return null;
+	}
+
+	/**
+	 * Get page visits for this contact
+	 * Page visits are PRO-only feature - uses PRO model if available
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
+	 */
+	public function page_visits() {
+		if ( class_exists( 'QuillCRM_Pro\Models\Page_Visit_Model' ) ) {
+			return $this->hasMany( Page_Visit_Model::class, 'contact_id', 'id' );
+		}
+		return null;
 	}
 
 	/**
@@ -302,6 +352,17 @@ class Contact_Model extends Model {
 	 */
 	public function processes() {
 		return $this->hasMany( Automation_Contact_Processes_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get the contact meta
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function meta() {
+		return $this->hasMany( Contact_Meta_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -482,12 +543,12 @@ class Contact_Model extends Model {
 			2 => 'sms',
 			3 => 'whatsapp',
 		);
-		
+
 		if ( ! isset( $channel_map[ $mode ] ) ) {
 			return false;
 		}
-		
-		$channel = $channel_map[ $mode ];
+
+		$channel      = $channel_map[ $mode ];
 		$status_field = $channel . '_status';
 
 		// Check if already unsubscribed
@@ -522,7 +583,6 @@ class Contact_Model extends Model {
 				);
 			}
 		}
-
 
 		$channel_label = self::get_channel_label( $channel );
 		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
@@ -831,7 +891,7 @@ class Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		// Use global flag to prevent multiple event registrations
+		 // Use global flag to prevent multiple event registrations
 		global $quillcrm_contact_events_registered;
 
 		parent::boot();

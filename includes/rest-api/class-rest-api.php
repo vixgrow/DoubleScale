@@ -43,6 +43,7 @@ class REST_API {
 
 
 
+
 	/**
 	 *  Class singleton instance
 	 *

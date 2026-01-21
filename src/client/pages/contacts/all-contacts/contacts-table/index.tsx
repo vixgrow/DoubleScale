@@ -137,6 +137,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			total_orders: true,
 			total_revenue: true,
 			last_order_date: true,
+			whatsapp_phone: false,
 		},
 	};
 

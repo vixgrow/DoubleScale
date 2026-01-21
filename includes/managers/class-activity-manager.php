@@ -21,12 +21,6 @@ use QuillCRM\User_Roles\Permissions;
  */
 final class Activity_Manager {
 
-
-
-
-
-
-
 	/**
 	 * Class Instance.
 	 *
@@ -60,6 +54,30 @@ final class Activity_Manager {
 	 */
 	private function __construct() {
 		add_action( 'quillcrm_loaded', array( $this, 'init' ) );
+		add_action( 'wp_login', array( $this, 'on_user_login' ), 10, 2 );
+		add_action( 'wp_logout', array( $this, 'on_user_logout' ), 10, 1 );
+	}
+
+	public function on_user_login( $user_login, $user ) {
+		Activity_Model::log_login(
+			array(
+				'user_id'    => $user->ID,
+				'user_email' => $user->user_email,
+			)
+		);
+	}
+
+	public function on_user_logout( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return;
+		}
+		Activity_Model::log_logout(
+			array(
+				'user_id'    => $user_id,
+				'user_email' => $user->user_email,
+			)
+		);
 	}
 
 	/**

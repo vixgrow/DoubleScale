@@ -61,6 +61,10 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 				itemType = __('note', 'quillcrm');
 				itemTypePlural = __('notes', 'quillcrm');
 				break;
+			case 'page_visits':
+				itemType = __('page visit', 'quillcrm');
+				itemTypePlural = __('page visits', 'quillcrm');
+				break;
 			default:
 				itemType = __('item', 'quillcrm');
 				itemTypePlural = __('items', 'quillcrm');
@@ -70,10 +74,11 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 
 		return {
 			title: __('Confirm Deletion', 'quillcrm'),
-			message: selectedCount === 1
-				? `${__('Do you really want to delete the selected', 'quillcrm')} ${displayType}?`
-				: `${__('Do you really want to delete the selected', 'quillcrm')} ${selectedCount} ${displayType}?`,
-			warning: __('This action cannot be undone.', 'quillcrm')
+			message:
+				selectedCount === 1
+					? `${__('Do you really want to delete the selected', 'quillcrm')} ${displayType}?`
+					: `${__('Do you really want to delete the selected', 'quillcrm')} ${selectedCount} ${displayType}?`,
+			warning: __('This action cannot be undone.', 'quillcrm'),
 		};
 	};
 

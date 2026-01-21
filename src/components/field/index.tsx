@@ -37,6 +37,7 @@ import { Slider } from '@/components/ui/slider';
 import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
+import EmailOpened from '../email-opened';
 import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
@@ -47,7 +48,11 @@ import { TooltipProvider } from '../ui/tooltip';
 import { Tooltip } from '../ui/tooltip';
 import { TooltipTrigger } from '../ui/tooltip';
 import { TooltipContent } from '../ui/tooltip';
-
+import EmailClicked from '../email-clicked';
+import FormSubmission from '../form-submission';
+import PageVisited from '../page-visited';
+import LoggedInOut from '../logged-in-out';
+import WasActiveInactive from '../was-active-inactive';
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -79,6 +84,7 @@ interface FieldProps {
 	className?: string;
 	tooltip?: string;
 	disabled?: boolean;
+	compact?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -103,6 +109,7 @@ const Field: React.FC<FieldProps> = ({
 	className,
 	tooltip,
 	disabled,
+	compact = false,
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -250,15 +257,20 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Show Pro notice if component not available
 				fieldContent = (
-					<div style={{
-						padding: '12px',
-						backgroundColor: '#fff3cd',
-						border: '1px solid #ffc107',
-						borderRadius: '4px',
-						color: '#856404'
-					}}>
+					<div
+						style={{
+							padding: '12px',
+							backgroundColor: '#fff3cd',
+							border: '1px solid #ffc107',
+							borderRadius: '4px',
+							color: '#856404',
+						}}
+					>
 						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
-						{__('Link Triggers require QuillCRM Pro to be installed and activated.', 'quillcrm')}
+						{__(
+							'Link Triggers require QuillCRM Pro to be installed and activated.',
+							'quillcrm'
+						)}
 					</div>
 				);
 			}
@@ -409,7 +421,11 @@ const Field: React.FC<FieldProps> = ({
 			break;
 		case 'radio':
 			// Radio button works like checkbox - yes/no toggle
-			const isRadioChecked = value === true || value === 'true' || value === 'yes' || value === '1';
+			const isRadioChecked =
+				value === true ||
+				value === 'true' ||
+				value === 'yes' ||
+				value === '1';
 			fieldContent = (
 				<button
 					type="button"
@@ -524,8 +540,14 @@ const Field: React.FC<FieldProps> = ({
 				null,
 				'WhatsAppTemplateField'
 			) as React.ComponentType<{
-				value: { template_sid?: string; template_variables?: Record<string, string> };
-				onChange: (value: { template_sid: string; template_variables: Record<string, string> }) => void;
+				value: {
+					template_sid?: string;
+					template_variables?: Record<string, string>;
+				};
+				onChange: (value: {
+					template_sid: string;
+					template_variables: Record<string, string>;
+				}) => void;
 				options: Record<string, string>;
 				templateData?: Record<string, any>;
 			}> | null;
@@ -533,9 +555,9 @@ const Field: React.FC<FieldProps> = ({
 			if (WhatsAppTemplateFieldComponent) {
 				// Options should be a Record<string, string> for whatsapp_template
 				// (Fields component passes raw options object for this type)
-				const templateOptions = (options && !Array.isArray(options)
-					? options
-					: {}) as Record<string, string>;
+				const templateOptions = (
+					options && !Array.isArray(options) ? options : {}
+				) as Record<string, string>;
 
 				fieldContent = (
 					<WhatsAppTemplateFieldComponent
@@ -548,15 +570,20 @@ const Field: React.FC<FieldProps> = ({
 			} else {
 				// Fallback message if Pro not available
 				fieldContent = (
-					<div style={{
-						padding: '12px',
-						backgroundColor: '#fff3cd',
-						border: '1px solid #ffc107',
-						borderRadius: '4px',
-						color: '#856404'
-					}}>
+					<div
+						style={{
+							padding: '12px',
+							backgroundColor: '#fff3cd',
+							border: '1px solid #ffc107',
+							borderRadius: '4px',
+							color: '#856404',
+						}}
+					>
 						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
-						{__('WhatsApp Template Field requires QuillCRM Pro.', 'quillcrm')}
+						{__(
+							'WhatsApp Template Field requires QuillCRM Pro.',
+							'quillcrm'
+						)}
 					</div>
 				);
 			}
@@ -589,6 +616,56 @@ const Field: React.FC<FieldProps> = ({
 					value={value}
 					onChange={(dateValue) => onChange(dateValue)}
 					placeholder="Select date & time"
+				/>
+			);
+			break;
+		case 'email_opened':
+			fieldContent = (
+				<EmailOpened
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'email_clicked':
+			fieldContent = (
+				<EmailClicked
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'page_visited':
+			fieldContent = (
+				<PageVisited
+					options={options || []}
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'form_submission':
+			fieldContent = (
+				<FormSubmission
+					options={options || []}
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'logged_in_out':
+			fieldContent = (
+				<LoggedInOut
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'was_active_inactive':
+			fieldContent = (
+				<WasActiveInactive
+					value={value}
+					onChange={(value) => onChange(value)}
 				/>
 			);
 			break;
@@ -643,6 +720,35 @@ const Field: React.FC<FieldProps> = ({
 					)}
 				</div>
 				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// List of complex field types that render multiple inputs
+	const complexFieldTypes = [
+		'page_visited',
+		'form_submission',
+		'logged_in_out',
+		'was_active_inactive',
+		'email_opened',
+		'email_clicked',
+	];
+
+	const isComplexField = complexFieldTypes.includes(type);
+
+	// Compact layout for complex fields or when compact prop is true
+	if (isComplexField || compact) {
+		return (
+			<div className={cn('qcrm-field qcrm-field-compact', compact && 'qcrm-field-compact-mode')} style={style || {}}>
+				{label && !compact && (
+					<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+						{renderLabelWithTooltip()}
+					</div>
+				)}
+				<div className={cn('qcrm-field-input qcrm-field-input-compact', className)}>
+					{fieldContent}
+				</div>
+				{helperText && !compact && renderHelperText(helperText)}
 			</div>
 		);
 	}

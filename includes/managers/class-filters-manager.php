@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Filters_Manager
  *
@@ -18,6 +19,7 @@ use QuillCRM\Abstracts\Filter;
  * Filters class
  */
 final class Filters_Manager {
+
 
 	/**
 	 * Registed filters
@@ -67,7 +69,7 @@ final class Filters_Manager {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->set_groups();
+		 $this->set_groups();
 	}
 
 	/**
@@ -81,6 +83,10 @@ final class Filters_Manager {
 		$this->groups = array(
 			'contact'        => array(
 				'name'    => __( 'Contact', 'quillcrm' ),
+				'filters' => array(),
+			),
+			'lead_scoring'   => array(
+				'name'    => __( 'Lead Scoring', 'quillcrm' ),
 				'filters' => array(),
 			),
 			'contact_fields' => array(
@@ -140,7 +146,7 @@ final class Filters_Manager {
 	 * @return array
 	 */
 	public function get_filters() {
-		return $this->filters;
+		 return $this->filters;
 	}
 
 	/**

@@ -60,6 +60,19 @@ export type Contact = {
 			value: string;
 		};
 	})[];
+	lead_score?: LeadScoreData;
+};
+
+export type LeadScoreLevel = {
+	id: number;
+	name: string;
+	slug: string;
+	points: number;
+};
+
+export type LeadScoreData = {
+	points: number;
+	level: LeadScoreLevel | null;
 };
 
 export type Order = {
@@ -725,6 +738,11 @@ export type Settings = {
 	};
 	currency: {
 		currency: string;
+	};
+	website_tracking: {
+		enabled: boolean;
+		retention_type: 'days' | 'never' | null;
+		retention_days: string | null;
 	};
 };
 

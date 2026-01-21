@@ -39,6 +39,7 @@ import {
 	ProcessingEmailsIcon,
 	LinkTriggersIcon,
 	WhatsAppIcon,
+	WebsiteIcon,
 } from '@quillcrm/components';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
@@ -73,6 +74,7 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 	'double_optin',
 	'cart',
 	'currencies',
+	'website_tracking',
 ]);
 
 const SettingsPage: React.FC = () => {
@@ -310,6 +312,28 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
+			case 'website_tracking':
+				const WebsiteTrackingComponent = applyFilters(
+					'quillcrm_settings_website_tracking_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('Website Tracking', 'quillcrm')}
+							description={__(
+								'Track page visits for contacts on your website and manage data retention settings with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
+				return (
+					<WebsiteTrackingComponent
+						settings={settings!}
+						onChange={setSettings}
+					/>
+				);
 			case 'license':
 				return <License />;
 			case 'custom_fields':
@@ -385,6 +409,11 @@ const SettingsPage: React.FC = () => {
 			value: 'currencies',
 			label: 'Currencies',
 			icon: <CurrencyIcon />,
+		},
+		{
+			value: 'website_tracking',
+			label: 'Website Tracking',
+			icon: <WebsiteIcon width={24} height={24} />,
 		},
 		{
 			value: 'license',

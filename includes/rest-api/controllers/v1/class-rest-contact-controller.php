@@ -31,7 +31,7 @@ use QuillCRM\Settings;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
-use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM_Pro\Managers\Merge_Tags_Manager;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -439,31 +439,31 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_purchase_history' ),
 					'permission_callback' => array( $this, 'get_purchase_history_permissions_check' ),
 					'args'                => array(
-						'id'               => array(
+						'id'                => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'woo_page'         => array(
+						'woo_page'          => array(
 							'description' => __( 'WooCommerce page number.', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
-						'woo_per_page'     => array(
+						'woo_per_page'      => array(
 							'description' => __( 'WooCommerce items per page.', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
-						'edd_page'         => array(
+						'edd_page'          => array(
 							'description' => __( 'EDD page number.', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
-						'edd_per_page'     => array(
+						'edd_per_page'      => array(
 							'description' => __( 'EDD items per page.', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
-						'surecart_page'    => array(
+						'surecart_page'     => array(
 							'description' => __( 'SureCart page number.', 'quillcrm' ),
 							'type'        => 'integer',
 							'default'     => 1,
@@ -1023,6 +1023,10 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_lead_score( $request ) {
+		if ( class_exists( 'QuillCRM_Pro\Managers\Lead_Scoring_Manager' ) ) {
+			return new WP_Error( 'not_found', 'Lead scoring is not available', array( 'status' => 404 ) );
+		}
+
 		try {
 			$contact_id = $request->get_param( 'id' );
 			$contact    = Contact_Model::find( $contact_id );
@@ -1246,8 +1250,8 @@ class REST_Contact_Controller extends REST_Controller {
 
 		foreach ( $sc_orders as $order ) {
 			// SureCart stores amounts in cents
-			$order_total       = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
-			$total_revenue    += $order_total;
+			$order_total        = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
+			$total_revenue     += $order_total;
 			$formatted_orders[] = array(
 				'id'           => $order->id ?? '',
 				'number'       => $order->number ?? '',

@@ -47,7 +47,7 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\Database\Install;
 use QuillCRM\Site\Site;
-use QuillCRM\Lead_Scoring\Event_Handler as Lead_Scoring_Event_Handler;
+
 
 
 /**
@@ -263,7 +263,6 @@ final class QuillCRM {
 		User_Roles::instance();
 		Login_Redirect::instance();
 		// Bounce_Handler_Manager::instance(); // Moved to Pro
-		new Lead_Scoring_Event_Handler();
 		Install::init();
 		Site::instance();
 	}

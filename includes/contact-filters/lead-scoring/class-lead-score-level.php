@@ -15,7 +15,7 @@ namespace QuillCRM\Contact_Filters\Lead_Scoring;
 use QuillCRM\Abstracts\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use QuillCRM\Managers\Filters_Manager;
-use QuillCRM\Models\Lead_Scoring_Rule_Level_Model;
+use QuillCRM_Pro\Models\Lead_Scoring_Rule_Level_Model;
 
 /**
  * Lead_Score_Level class
@@ -171,4 +171,6 @@ class Lead_Score_Level extends Filter {
 	}
 }
 
-Filters_Manager::instance()->register( new Lead_Score_Level() );
+if ( class_exists( 'QuillCRM_Pro\Models\Lead_Scoring_Rule_Level_Model' ) ) {
+	Filters_Manager::instance()->register( new Lead_Score_Level() );
+}

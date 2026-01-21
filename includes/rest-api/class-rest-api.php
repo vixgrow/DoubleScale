@@ -32,8 +32,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_User_Management_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Plugins_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Site_Verification_Controller;
-use QuillCRM\REST_API\Controllers\V1\Rest_Lead_Scoring_Rule_Controller;
-use QuillCRM\REST_API\Controllers\V1\Rest_Lead_Scoring_Rule_Level_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -114,8 +112,6 @@ class REST_API {
 			REST_Plugins_Controller::class,
 			Rest_Form_Controller::class,
 			REST_Site_Verification_Controller::class,
-			Rest_Lead_Scoring_Rule_Controller::class,
-			Rest_Lead_Scoring_Rule_Level_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

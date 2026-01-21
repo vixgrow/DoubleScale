@@ -97,4 +97,5 @@ function quillcrm_deactivation() {
 	wp_clear_scheduled_hook( 'quillcrm_email_sequences' );
 	wp_clear_scheduled_hook( 'quillcrm_daily3' );
 	wp_clear_scheduled_hook( 'quillcrm_daily4' );
+	wp_clear_scheduled_hook( 'quillcrm_cleanup_page_visits' );
 }

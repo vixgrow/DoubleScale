@@ -278,7 +278,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 					placeholder={placeholder}
 					disabled={disabled || externalLoading}
 					autoComplete="off"
-					className={`h-12 w-full py-[5px] px-4 pr-10 rounded-[8px] border border-[#DEE1E6] text-[#09090B] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+					className={`h-12 w-full py-[5px] px-4 pr-10 !rounded-[8px] border !border-[#DEE1E6] text-[#09090B] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
 						displayError ? 'border-red-500' : ''
 					} ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
 				/>

@@ -49,6 +49,7 @@ use QuillCRM\Database\Install;
 use QuillCRM\Site\Site;
 
 
+
 /**
  * QuillCRM Main Class.
  * The main class that's responsible for loading all dependencies
@@ -56,6 +57,7 @@ use QuillCRM\Site\Site;
  * @since 1.0.0
  */
 final class QuillCRM {
+
 
 
 
@@ -561,13 +563,13 @@ final class QuillCRM {
 		// Load all custom fields files
 		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
 		foreach ( $custom_fields_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 
 		// Load all custom filters files
 		$filters_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/contact-filters/**/class-*.php' );
 		foreach ( $filters_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 	}
 

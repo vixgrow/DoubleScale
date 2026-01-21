@@ -33,24 +33,30 @@ const Rule: React.FC<RuleProps> = ({
 	onChange,
 	onRemove,
 }) => {
+	const hasOperators =
+		ruleSettings.operators &&
+		Object.keys(ruleSettings.operators).length > 0;
+
 	return (
 		<div className="qcrm-rule">
 			<div className="qcrm-rule-row w-full">
-				<Select
-					value={rule.operator}
-					onValueChange={(value) => onChange('operator', value)}
-				>
-					<SelectTrigger className="w-[150px] h-12 border-[#D3D4D6] rounded-lg">
-						<SelectValue placeholder="Select operator" />
-					</SelectTrigger>
-					<SelectContent className="max-h-[200px] overflow-y-auto">
-						{map(ruleSettings.operators, (operator, key) => (
-							<SelectItem key={key} value={key}>
-								{operator}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				{hasOperators && (
+					<Select
+						value={rule.operator}
+						onValueChange={(value) => onChange('operator', value)}
+					>
+						<SelectTrigger className="w-[150px] h-12 border-[#D3D4D6] rounded-lg">
+							<SelectValue placeholder="Select operator" />
+						</SelectTrigger>
+						<SelectContent className="max-h-[200px] overflow-y-auto">
+							{map(ruleSettings.operators, (operator, key) => (
+								<SelectItem key={key} value={key}>
+									{operator}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
 				<Field
 					type={ruleSettings.type}
 					value={rule.value}
@@ -64,7 +70,7 @@ const Rule: React.FC<RuleProps> = ({
 					<Button
 						size="icon"
 						onClick={onRemove}
-						className="bg-transparent hover:bg-transparent text-destructive shadow-none border-l px-0 h-12"
+						className="bg-transparent hover:bg-transparent text-destructive shadow-none border-l rounded-none px-0 h-12"
 					>
 						<DeleteIcon width={20} height={20} />
 					</Button>

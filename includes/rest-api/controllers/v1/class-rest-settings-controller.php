@@ -112,7 +112,7 @@ class REST_Settings_Controller extends REST_Controller {
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => array(
-				'business'        => array(
+				'business'         => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -130,7 +130,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'email'           => array(
+				'email'            => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -160,7 +160,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'sms'             => array(
+				'sms'              => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -170,7 +170,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'whatsapp'        => array(
+				'whatsapp'         => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -180,7 +180,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'double_optin'    => array(
+				'double_optin'     => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -206,7 +206,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'cart'            => array(
+				'cart'             => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -264,7 +264,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'currency'        => array(
+				'currency'         => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -274,7 +274,26 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'button_settings' => array(
+				'website_tracking' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'enabled'        => array(
+							'type'    => 'boolean',
+							'default' => true,
+						),
+						'retention_type' => array(
+							'type'    => 'string',
+							'default' => 'days',
+							'enum'    => array( 'days', 'never' ),
+						),
+						'retention_days' => array(
+							'type'    => 'string',
+							'default' => '30',
+						),
+					),
+				),
+				'button_settings'  => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,
 					'default'              => array(),
@@ -444,11 +463,11 @@ class REST_Settings_Controller extends REST_Controller {
 			}
 
 			// if ( $max_in_second > 100 ) {
-			// 	return new WP_Error(
-			// 		'invalid_rate_limit',
-			// 		__( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
-			// 		array( 'status' => 400 )
-			// 	);
+			// return new WP_Error(
+			// 'invalid_rate_limit',
+			// __( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
+			// array( 'status' => 400 )
+			// );
 			// }
 		}
 
@@ -883,7 +902,7 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return int Memory limit in megabytes.
 	 */
 	private function get_memory_limit_in_mb() {
-		$memory_limit = ini_get( 'memory_limit' );
+		 $memory_limit = ini_get( 'memory_limit' );
 
 		if ( preg_match( '/^(\d+)(.)$/', $memory_limit, $matches ) ) {
 			if ( 'G' === $matches[2] ) {

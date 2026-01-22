@@ -12,7 +12,6 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { applyFilters } from '@wordpress/hooks';
 import {
 	useCallback,
 	useEffect,
@@ -362,7 +361,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								{__('Quill CRM', 'quillcrm')}
 							</span>
 						</div>
-						{applyFilters('quillcrm_navbar_header_actions', null) as React.ReactNode}
 					</SidebarHeader>
 					<SidebarContent className="qcrm-navbar__content">
 						{!isAtTop && (

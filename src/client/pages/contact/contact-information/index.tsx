@@ -30,6 +30,7 @@ import {
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
+import LeadScoreCard from './lead-score-card';
 import { UserRound, Mail, MessageSquare } from 'lucide-react';
 import PhoneIcon from '@/components/icons/phone';
 
@@ -56,7 +57,11 @@ const EMAIL_STATUSES: EmailStatus[] = [
 	'unverified',
 ];
 const SMS_STATUSES: SmsStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
-const WHATSAPP_STATUSES: WhatsAppStatus[] = ['subscribed', 'unsubscribed', 'blocked'];
+const WHATSAPP_STATUSES: WhatsAppStatus[] = [
+	'subscribed',
+	'unsubscribed',
+	'blocked',
+];
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName?: string, lastName?: string): string => {
@@ -386,6 +391,7 @@ const ContactInformation: React.FC = () => {
 			</CardHeader>
 			<CardContent className="flex flex-col gap-5">
 				<ListsTagsCards />
+				<LeadScoreCard />
 				<InfoCard />
 			</CardContent>
 		</Card>

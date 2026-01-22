@@ -240,3 +240,4 @@ export { default as DurationIcon } from './duration';
 export { default as LocationIcon } from './location';
 export { default as CallActivityIcon } from './call-activity';
 export { default as EmailActivityIcon } from './email-activity';
+export { default as LeadScoringIcon } from './lead-scoring';

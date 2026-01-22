@@ -16,12 +16,8 @@ use WPEloquent\Eloquent\Model;
 /**
  * Activity_Model class
  */
-class Activity_Model extends Model {
-
-
-
-
-
+class Activity_Model extends Model
+{
 
 	/**
 	 * Table name
@@ -95,7 +91,7 @@ class Activity_Model extends Model {
 	 */
 	public $rules = array(
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received',
+		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received,logged_in,logged_out',
 		'user_id'       => 'nullable|integer',
 	);
 
@@ -118,8 +114,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function contact() {
-		 return $this->belongsTo( Contact_Model::class, 'contact_id' );
+	public function contact()
+	{
+		return $this->belongsTo(Contact_Model::class, 'contact_id');
 	}
 
 	/**
@@ -129,8 +126,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function user() {
-		return $this->belongsTo( User_Model::class, 'user_id', 'ID' );
+	public function user()
+	{
+		return $this->belongsTo(User_Model::class, 'user_id', 'ID');
 	}
 
 	/**
@@ -143,9 +141,10 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
 	 */
-	public function tracking() {
-		return $this->hasOne( Communication_Tracking_Model::class, 'source_id' )
-			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL );
+	public function tracking()
+	{
+		return $this->hasOne(Communication_Tracking_Model::class, 'source_id')
+			->where('source_type', \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL);
 	}
 
 	/**
@@ -159,8 +158,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function comments() {
-		return $this->hasMany( Activity_Comment_Model::class, 'activity_id', 'id' )->orderBy( 'created_at', 'asc' );
+	public function comments()
+	{
+		return $this->hasMany(Activity_Comment_Model::class, 'activity_id', 'id')->orderBy('created_at', 'asc');
 	}
 
 	/**
@@ -171,8 +171,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function associations() {
-		return $this->hasMany( Activity_Association_Model::class, 'activity_id', 'id' );
+	public function associations()
+	{
+		return $this->hasMany(Activity_Association_Model::class, 'activity_id', 'id');
 	}
 
 	/**
@@ -184,8 +185,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function associationsByType( $type ) {
-		return $this->associations()->where( 'entity_type', $type );
+	public function associationsByType($type)
+	{
+		return $this->associations()->where('entity_type', $type);
 	}
 
 	/**
@@ -195,8 +197,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function dealAssociations() {
-		return $this->associationsByType( Activity_Association_Model::ENTITY_TYPE_DEAL );
+	public function dealAssociations()
+	{
+		return $this->associationsByType(Activity_Association_Model::ENTITY_TYPE_DEAL);
 	}
 
 	/**
@@ -206,8 +209,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function campaignAssociations() {
-		return $this->associationsByType( Activity_Association_Model::ENTITY_TYPE_CAMPAIGN );
+	public function campaignAssociations()
+	{
+		return $this->associationsByType(Activity_Association_Model::ENTITY_TYPE_CAMPAIGN);
 	}
 
 	/**
@@ -218,13 +222,14 @@ class Activity_Model extends Model {
 	 *
 	 * @return int|null
 	 */
-	public function getDealIdAttribute() {
-		if ( ! $this->relationLoaded( 'associations' ) ) {
+	public function getDealIdAttribute()
+	{
+		if (! $this->relationLoaded('associations')) {
 			// Load associations if not already loaded
-			$this->load( 'associations' );
+			$this->load('associations');
 		}
 
-		$deal_association = $this->associations->where( 'entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL )->first();
+		$deal_association = $this->associations->where('entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL)->first();
 		return $deal_association ? $deal_association->entity_id : null;
 	}
 
@@ -236,8 +241,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeForContact( $query, $contact_id ) {
-		return $query->where( 'contact_id', $contact_id );
+	public function scopeForContact($query, $contact_id)
+	{
+		return $query->where('contact_id', $contact_id);
 	}
 
 	/**
@@ -248,14 +254,15 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeForDeal( $query, $deal_id ) {
+	public function scopeForDeal($query, $deal_id)
+	{
 		return $query->whereHas(
 			'associations',
-			function ( $q ) use ( $deal_id ) {
-				$q->where( 'entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL )
-					->where( 'entity_id', $deal_id );
+			function ($q) use ($deal_id) {
+				$q->where('entity_type', Activity_Association_Model::ENTITY_TYPE_DEAL)
+					->where('entity_id', $deal_id);
 			}
-		)->orderBy( 'created_at', 'desc' );
+		)->orderBy('created_at', 'desc');
 	}
 
 	/**
@@ -266,11 +273,12 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeByType( $query, $type ) {
-		if ( is_array( $type ) ) {
-			return $query->whereIn( 'activity_type', $type );
+	public function scopeByType($query, $type)
+	{
+		if (is_array($type)) {
+			return $query->whereIn('activity_type', $type);
 		}
-		return $query->where( 'activity_type', $type );
+		return $query->where('activity_type', $type);
 	}
 
 	/**
@@ -280,8 +288,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeMessages( $query ) {
-		return $query->whereIn( 'activity_type', array( 'email_sent', 'sms_sent', 'whatsapp_sent' ) );
+	public function scopeMessages($query)
+	{
+		return $query->whereIn('activity_type', array('email_sent', 'sms_sent', 'whatsapp_sent'));
 	}
 
 	/**
@@ -291,8 +300,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeTracked( $query ) {
-		return $query->has( 'tracking' );
+	public function scopeTracked($query)
+	{
+		return $query->has('tracking');
 	}
 
 	/**
@@ -302,8 +312,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeNotes( $query ) {
-		return $query->where( 'activity_type', 'note' );
+	public function scopeNotes($query)
+	{
+		return $query->where('activity_type', 'note');
 	}
 
 	/**
@@ -313,8 +324,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeUserCreated( $query ) {
-		return $query->whereIn( 'activity_type', array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' ) );
+	public function scopeUserCreated($query)
+	{
+		return $query->whereIn('activity_type', array('note', 'email_sent', 'call_logged', 'meeting_scheduled'));
 	}
 
 	/**
@@ -324,8 +336,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function scopeSystemGenerated( $query ) {
-		return $query->whereIn( 'activity_type', array( 'created', 'stage_changed', 'value_changed', 'status_changed' ) );
+	public function scopeSystemGenerated($query)
+	{
+		return $query->whereIn('activity_type', array('created', 'stage_changed', 'value_changed', 'status_changed'));
 	}
 
 	/**
@@ -335,24 +348,25 @@ class Activity_Model extends Model {
 	 *
 	 * @return string
 	 */
-	public function getFormattedMessageAttribute() {
-		$user_name = $this->user ? $this->user->display_name : __( 'Unknown User', 'quillcrm' );
+	public function getFormattedMessageAttribute()
+	{
+		$user_name = $this->user ? $this->user->display_name : __('Unknown User', 'quillcrm');
 
-		switch ( $this->activity_type ) {
+		switch ($this->activity_type) {
 			case 'created':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s created this deal', 'quillcrm' ),
+					__('%s created this deal', 'quillcrm'),
 					$user_name
 				);
 
 			case 'stage_changed':
-				$old_stage_name = __( 'Unknown Stage', 'quillcrm' );
-				$new_stage_name = __( 'Unknown Stage', 'quillcrm' );
+				$old_stage_name = __('Unknown Stage', 'quillcrm');
+				$new_stage_name = __('Unknown Stage', 'quillcrm');
 
-				if ( class_exists( '\QuillCRM_Pro\Models\Pipeline_Stage_Model' ) ) {
-					$old_stage = \QuillCRM_Pro\Models\Pipeline_Stage_Model::find( $this->data['old_stage_id'] ?? 0 );
-					$new_stage = \QuillCRM_Pro\Models\Pipeline_Stage_Model::find( $this->data['new_stage_id'] ?? 0 );
+				if (class_exists('\QuillCRM_Pro\Models\Pipeline_Stage_Model')) {
+					$old_stage = \QuillCRM_Pro\Models\Pipeline_Stage_Model::find($this->data['old_stage_id'] ?? 0);
+					$new_stage = \QuillCRM_Pro\Models\Pipeline_Stage_Model::find($this->data['new_stage_id'] ?? 0);
 
 					$old_stage_name = $old_stage ? $old_stage->name : $old_stage_name;
 					$new_stage_name = $new_stage ? $new_stage->name : $new_stage_name;
@@ -360,7 +374,7 @@ class Activity_Model extends Model {
 
 				return sprintf(
 					/* translators: 1: user name, 2: old stage name, 3: new stage name */
-					__( '%1$s moved deal from "%2$s" to "%3$s"', 'quillcrm' ),
+					__('%1$s moved deal from "%2$s" to "%3$s"', 'quillcrm'),
 					$user_name,
 					$old_stage_name,
 					$new_stage_name
@@ -369,7 +383,7 @@ class Activity_Model extends Model {
 			case 'value_changed':
 				return sprintf(
 					/* translators: 1: user name, 2: old value, 3: new value */
-					__( '%1$s changed deal value from %2$s to %3$s', 'quillcrm' ),
+					__('%1$s changed deal value from %2$s to %3$s', 'quillcrm'),
 					$user_name,
 					$this->data['old_value'] ?? 0,
 					$this->data['new_value'] ?? 0
@@ -377,24 +391,24 @@ class Activity_Model extends Model {
 
 			case 'status_changed':
 				$status = $this->data['status'] ?? 'unknown';
-				if ( 'won' === $status ) {
+				if ('won' === $status) {
 					return sprintf(
 						/* translators: %s: user name */
-						__( '%s marked deal as won', 'quillcrm' ),
+						__('%s marked deal as won', 'quillcrm'),
 						$user_name
 					);
-				} elseif ( 'lost' === $status ) {
-					$reason = ! empty( $this->data['reason'] ) ? ' - ' . $this->data['reason'] : '';
+				} elseif ('lost' === $status) {
+					$reason = ! empty($this->data['reason']) ? ' - ' . $this->data['reason'] : '';
 					return sprintf(
 						/* translators: 1: user name, 2: reason */
-						__( '%1$s marked deal as lost%2$s', 'quillcrm' ),
+						__('%1$s marked deal as lost%2$s', 'quillcrm'),
 						$user_name,
 						$reason
 					);
 				}
 				return sprintf(
 					/* translators: 1: user name, 2: status */
-					__( '%1$s changed deal status to %2$s', 'quillcrm' ),
+					__('%1$s changed deal status to %2$s', 'quillcrm'),
 					$user_name,
 					$status
 				);
@@ -402,7 +416,7 @@ class Activity_Model extends Model {
 			case 'note':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s added a note', 'quillcrm' ),
+					__('%s added a note', 'quillcrm'),
 					$user_name
 				);
 
@@ -413,23 +427,23 @@ class Activity_Model extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s sent an email', 'quillcrm' ),
+					__('%s sent an email', 'quillcrm'),
 					$user_name
 				);
 
-				if ( ! empty( $subject ) ) {
+				if (! empty($subject)) {
 					$message .= sprintf(
 						/* translators: %s: email subject */
-						__( ' with subject "%s"', 'quillcrm' ),
+						__(' with subject "%s"', 'quillcrm'),
 						$subject
 					);
 				}
 
-				if ( ! empty( $contact_email ) ) {
-					$recipient = ! empty( $contact_name ) ? $contact_name : $contact_email;
+				if (! empty($contact_email)) {
+					$recipient = ! empty($contact_name) ? $contact_name : $contact_email;
 					$message  .= sprintf(
 						/* translators: %s: recipient */
-						__( ' to %s', 'quillcrm' ),
+						__(' to %s', 'quillcrm'),
 						$recipient
 					);
 				}
@@ -443,30 +457,30 @@ class Activity_Model extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s logged a call', 'quillcrm' ),
+					__('%s logged a call', 'quillcrm'),
 					$user_name
 				);
 
-				if ( ! empty( $phone_number ) ) {
+				if (! empty($phone_number)) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' to %s', 'quillcrm' ),
+						__(' to %s', 'quillcrm'),
 						$phone_number
 					);
 				}
 
-				if ( ! empty( $outcome ) ) {
+				if (! empty($outcome)) {
 					$message .= sprintf(
 						/* translators: %s: call outcome */
-						__( ' with outcome: %s', 'quillcrm' ),
+						__(' with outcome: %s', 'quillcrm'),
 						$outcome
 					);
 				}
 
-				if ( $duration ) {
+				if ($duration) {
 					$message .= sprintf(
 						/* translators: %d: duration in minutes */
-						__( ' (Duration: %d minutes)', 'quillcrm' ),
+						__(' (Duration: %d minutes)', 'quillcrm'),
 						$duration
 					);
 				}
@@ -480,27 +494,27 @@ class Activity_Model extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s scheduled a meeting', 'quillcrm' ),
+					__('%s scheduled a meeting', 'quillcrm'),
 					$user_name
 				);
 
-				if ( ! empty( $title ) ) {
-					$message .= sprintf( ' "%s"', $title );
+				if (! empty($title)) {
+					$message .= sprintf(' "%s"', $title);
 				}
 
-				if ( ! empty( $attendee_name ) ) {
+				if (! empty($attendee_name)) {
 					$message .= sprintf(
 						/* translators: %s: attendee name */
-						__( ' with %s', 'quillcrm' ),
+						__(' with %s', 'quillcrm'),
 						$attendee_name
 					);
 				}
 
-				if ( ! empty( $scheduled_at ) ) {
-					$formatted_date = date_i18n( 'M j, Y \a\t g:i A', strtotime( $scheduled_at ) );
+				if (! empty($scheduled_at)) {
+					$formatted_date = date_i18n('M j, Y \a\t g:i A', strtotime($scheduled_at));
 					$message       .= sprintf(
 						/* translators: %s: scheduled date */
-						__( ' for %s', 'quillcrm' ),
+						__(' for %s', 'quillcrm'),
 						$formatted_date
 					);
 				}
@@ -510,21 +524,46 @@ class Activity_Model extends Model {
 			case 'sms_sent':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s sent an SMS', 'quillcrm' ),
+					__('%s sent an SMS', 'quillcrm'),
 					$user_name
 				);
 
 			case 'whatsapp_sent':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s sent a WhatsApp message', 'quillcrm' ),
+					__('%s sent a WhatsApp message', 'quillcrm'),
+					$user_name
+				);
+
+			case 'logged_in':
+				$ip_address = $this->data['ip_address'] ?? '';
+				$message    = sprintf(
+					/* translators: %s: user name */
+					__('%s logged in', 'quillcrm'),
+					$user_name
+				);
+
+				if (! empty($ip_address)) {
+					$message .= sprintf(
+						/* translators: %s: IP address */
+						__(' from IP: %s', 'quillcrm'),
+						$ip_address
+					);
+				}
+
+				return $message;
+
+			case 'logged_out':
+				return sprintf(
+					/* translators: %s: user name */
+					__('%s logged out', 'quillcrm'),
 					$user_name
 				);
 
 			default:
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s performed an action', 'quillcrm' ),
+					__('%s performed an action', 'quillcrm'),
 					$user_name
 				);
 		}
@@ -537,8 +576,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return string|null
 	 */
-	public function get_subject() {
-		if ( ! is_array( $this->data ) ) {
+	public function get_subject()
+	{
+		if (! is_array($this->data)) {
 			return null;
 		}
 		return $this->data['subject'] ?? null;
@@ -551,8 +591,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return string|null
 	 */
-	public function get_body() {
-		if ( ! is_array( $this->data ) ) {
+	public function get_body()
+	{
+		if (! is_array($this->data)) {
 			return null;
 		}
 		return $this->data['body'] ?? null;
@@ -565,8 +606,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return string|null
 	 */
-	public function get_content() {
-		if ( ! is_array( $this->data ) ) {
+	public function get_content()
+	{
+		if (! is_array($this->data)) {
 			return null;
 		}
 		return $this->data['content'] ?? null;
@@ -579,8 +621,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return string|null
 	 */
-	public function get_title() {
-		if ( ! is_array( $this->data ) ) {
+	public function get_title()
+	{
+		if (! is_array($this->data)) {
 			return null;
 		}
 		return $this->data['title'] ?? null;
@@ -595,10 +638,11 @@ class Activity_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-	public static function search_content( $search_term ) {
+	public static function search_content($search_term)
+	{
 		return self::whereRaw(
 			'JSON_SEARCH(data, "one", ?) IS NOT NULL',
-			array( "%{$search_term}%" )
+			array("%{$search_term}%")
 		)->get();
 	}
 
@@ -611,11 +655,12 @@ class Activity_Model extends Model {
 	 *
 	 * @return Activity_Model|null
 	 */
-	public static function get_by_tracking_id( $tracking_id ) {
+	public static function get_by_tracking_id($tracking_id)
+	{
 		return self::whereHas(
 			'tracking',
-			function ( $query ) use ( $tracking_id ) {
-				$query->where( 'id', $tracking_id );
+			function ($query) use ($tracking_id) {
+				$query->where('id', $tracking_id);
 			}
 		)->first();
 	}
@@ -627,8 +672,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return bool
 	 */
-	public function is_message() {
-		return in_array( $this->activity_type, array( 'email_sent', 'sms_sent', 'whatsapp_sent' ), true );
+	public function is_message()
+	{
+		return in_array($this->activity_type, array('email_sent', 'sms_sent', 'whatsapp_sent'), true);
 	}
 
 	/**
@@ -638,7 +684,8 @@ class Activity_Model extends Model {
 	 *
 	 * @return bool
 	 */
-	public function has_tracking() {
+	public function has_tracking()
+	{
 		return $this->tracking()->exists();
 	}
 
@@ -649,8 +696,9 @@ class Activity_Model extends Model {
 	 *
 	 * @return bool
 	 */
-	public function is_note() {
-		 return 'note' === $this->activity_type;
+	public function is_note()
+	{
+		return 'note' === $this->activity_type;
 	}
 
 	/**
@@ -660,9 +708,10 @@ class Activity_Model extends Model {
 	 *
 	 * @return bool
 	 */
-	public function is_editable() {
-		 $editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		return in_array( $this->activity_type, $editable_types, true );
+	public function is_editable()
+	{
+		$editable_types = array('note', 'email_sent', 'call_logged', 'meeting_scheduled');
+		return in_array($this->activity_type, $editable_types, true);
 	}
 
 	/**
@@ -672,9 +721,10 @@ class Activity_Model extends Model {
 	 *
 	 * @return bool
 	 */
-	public function is_system_activity() {
-		$system_types = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
-		return in_array( $this->activity_type, $system_types, true );
+	public function is_system_activity()
+	{
+		$system_types = array('created', 'stage_changed', 'value_changed', 'status_changed');
+		return in_array($this->activity_type, $system_types, true);
 	}
 
 	/**
@@ -685,7 +735,8 @@ class Activity_Model extends Model {
 	 *
 	 * @return array
 	 */
-	public function to_note_format() {
+	public function to_note_format()
+	{
 		$data = $this->data ?? array();
 		return array(
 			'id'         => $this->id,
@@ -701,25 +752,199 @@ class Activity_Model extends Model {
 	}
 
 	/**
+	 * Add a note activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Note data (contact_id, deal_id, title, content, user_id).
+	 *
+	 * @return Activity_Model
+	 */
+	public static function add_note($data)
+	{
+		return self::create(
+			array(
+				'contact_id'    => $data['contact_id'] ?? null,
+				'deal_id'       => $data['deal_id'] ?? null,
+				'activity_type' => 'note',
+				'data'          => array(
+					'title'   => $data['title'] ?? '',
+					'content' => $data['content'] ?? '',
+				),
+				'user_id'       => $data['user_id'] ?? get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Log email activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Email data.
+	 *
+	 * @return Activity_Model
+	 */
+	public static function log_email($data)
+	{
+		return self::create(
+			array(
+				'contact_id'    => $data['contact_id'] ?? null,
+				'deal_id'       => $data['deal_id'] ?? null,
+				'activity_type' => 'email_sent',
+				'data'          => array(
+					'subject'       => $data['subject'] ?? '',
+					'sent_at'       => $data['sent_at'] ?? current_time('mysql'),
+					'contact_email' => $data['contact_email'] ?? '',
+					'contact_name'  => $data['contact_name'] ?? '',
+				),
+				'user_id'       => $data['user_id'] ?? get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Log call activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Call data.
+	 *
+	 * @return Activity_Model
+	 */
+	public static function log_call($data)
+	{
+		return self::create(
+			array(
+				'contact_id'    => $data['contact_id'] ?? null,
+				'deal_id'       => $data['deal_id'] ?? null,
+				'activity_type' => 'call_logged',
+				'data'          => array(
+					'duration'     => isset($data['duration']) ? intval($data['duration']) : null,
+					'outcome'      => $data['outcome'] ?? '',
+					'notes'        => $data['notes'] ?? '',
+					'called_at'    => $data['called_at'] ?? current_time('mysql'),
+					'phone_number' => $data['phone_number'] ?? '',
+				),
+				'user_id'       => $data['user_id'] ?? get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Schedule meeting activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Meeting data.
+	 *
+	 * @return Activity_Model
+	 */
+	public static function schedule_meeting($data)
+	{
+		return self::create(
+			array(
+				'contact_id'    => $data['contact_id'] ?? null,
+				'deal_id'       => $data['deal_id'] ?? null,
+				'activity_type' => 'meeting_scheduled',
+				'data'          => array(
+					'title'                  => $data['title'] ?? '',
+					'scheduled_at'           => $data['scheduled_at'] ?? '',
+					'duration'               => isset($data['duration']) ? intval($data['duration']) : 60,
+					'location'               => $data['location'] ?? '',
+					'description'            => $data['description'] ?? '',
+					'primary_attendee_id'    => $data['primary_attendee_id'] ?? null,
+					'primary_attendee_name'  => $data['primary_attendee_name'] ?? '',
+					'primary_attendee_email' => $data['primary_attendee_email'] ?? '',
+				),
+				'user_id'       => $data['user_id'] ?? get_current_user_id(),
+			)
+		);
+	}
+
+	/**
+	 * Log user login activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Login data.
+	 *
+	 * @return Activity_Model|null
+	 */
+	public static function log_login($data)
+	{
+		$user_id    = $data['user_id'];
+		$user_email = $data['user_email'] ?? '';
+		$contact    = Contact_Model::where('email', $user_email)->first();
+		if (! $contact) {
+			return null;
+		}
+
+		return self::create(
+			array(
+				'contact_id'    => $contact->id,
+				'activity_type' => 'logged_in',
+				'data'          => array(
+					'ip_address' => $data['ip_address'] ?? '',
+					'user_agent' => $data['user_agent'] ?? '',
+					'login_time' => $data['login_time'] ?? current_time('mysql'),
+				),
+				'user_id'       => $user_id,
+			)
+		);
+	}
+
+	/**
+	 * Log user logout activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Logout data.
+	 *
+	 * @return Activity_Model|null
+	 */
+	public static function log_logout($data)
+	{
+		$user_id    = $data['user_id'];
+		$user_email = $data['user_email'] ?? '';
+		$contact    = Contact_Model::where('email', $user_email)->first();
+		if (! $contact) {
+			return null;
+		}
+		return self::create(
+			array(
+				'contact_id'    => $contact->id,
+				'activity_type' => 'logged_out',
+				'data'          => array(
+					'logout_time' => $data['logout_time'] ?? current_time('mysql'),
+				),
+				'user_id'       => $user_id,
+			)
+		);
+	}
+
+
+	/**
 	 * Boot method
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
-	public static function boot() {
-		 parent::boot();
+	public static function boot()
+	{
+		parent::boot();
 
 		static::creating(
-			function ( $activity ) {
-				if ( ! $activity->created_at ) {
-					$activity->created_at = current_time( 'mysql' );
+			function ($activity) {
+				if (! $activity->created_at) {
+					$activity->created_at = current_time('mysql');
 				}
 			}
 		);
 
 		static::deleting(
-			function ( $activity ) {
+			function ($activity) {
 				// Delete all comments
 				$activity->comments()->delete();
 				$activity->associations()->delete();

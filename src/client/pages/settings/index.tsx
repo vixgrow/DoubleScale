@@ -40,6 +40,7 @@ import {
 	LinkTriggersIcon,
 	WhatsAppIcon,
 } from '@quillcrm/components';
+import { Bell } from 'lucide-react';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
@@ -65,6 +66,7 @@ const TABS_WITHOUT_SAVE_BUTTON = new Set([
 	'smtp',
 	'whatsapp',
 	'debugging',
+	'notifications',
 ]);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
@@ -340,6 +342,20 @@ const SettingsPage: React.FC = () => {
 					)
 				) as React.ComponentType;
 				return <LinkTriggersComponent />;
+			case 'notifications':
+				const NotificationsComponent = applyFilters(
+					'quillcrm_settings_notifications_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('Notification Preferences', 'quillcrm')}
+							description={__(
+								'Configure how you receive notifications via bell icon and email with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType;
+				return <NotificationsComponent />;
 			default:
 				return null;
 		}
@@ -410,6 +426,11 @@ const SettingsPage: React.FC = () => {
 			value: 'link_triggers',
 			label: 'Link Triggers',
 			icon: <LinkTriggersIcon width={24} height={24} />,
+		},
+		{
+			value: 'notifications',
+			label: 'Notifications',
+			icon: <Bell size={24} />,
 		},
 	];
 

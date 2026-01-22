@@ -215,6 +215,10 @@ abstract class Abstract_Campaign_Processing {
 
 				if ( $no_progress_count >= $max_no_progress ) {
 					// Too many consecutive attempts with no progress - mark as failed
+					$error_message = sprintf(
+						__( 'Campaign failed: no progress after %d consecutive attempts', 'quillcrm' ),
+						$no_progress_count
+					);
 					quillcrm_get_logger()->error(
 						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'quillcrm' ), $this->channel, $no_progress_count ),
 						array(
@@ -226,6 +230,17 @@ abstract class Abstract_Campaign_Processing {
 					);
 					$campaign->status = 'failed';
 					$campaign->save();
+
+					/**
+					 * Fires when a campaign fails.
+					 *
+					 * @since 1.2.0
+					 *
+					 * @param Campaign_Model $campaign      The failed campaign.
+					 * @param string         $error_message Error description.
+					 * @param string         $channel       Campaign channel (email, sms, whatsapp).
+					 */
+					do_action( 'quillcrm_campaign_failed', $campaign, $error_message, $this->channel );
 					return;
 				}
 
@@ -1593,6 +1608,17 @@ abstract class Abstract_Campaign_Processing {
 				),
 			)
 		);
+
+		/**
+		 * Fires when a campaign is completed successfully.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param Campaign_Model $campaign         The completed campaign.
+		 * @param int            $recipients_count Number of recipients processed.
+		 * @param string         $channel          Campaign channel (email, sms, whatsapp).
+		 */
+		do_action( 'quillcrm_campaign_completed', $campaign, $recipients_count, $this->channel );
 	}
 
 	/**

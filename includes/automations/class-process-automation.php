@@ -486,6 +486,20 @@ class Process_Automation {
 				'next_step'    => $next_step,
 			)
 		);
+
+		// Fire action when automation step fails.
+		if ( 'failed' === $status ) {
+			/**
+			 * Fires when an automation step fails.
+			 *
+			 * @since 1.2.0
+			 *
+			 * @param \QuillCRM\Models\Automation_Model         $automation         The automation.
+			 * @param \QuillCRM\Models\Automation_Contact_Model $automation_contact The automation contact.
+			 * @param int                                       $step_id            The failed step ID.
+			 */
+			do_action( 'quillcrm_automation_step_failed', $this->automation, $automation_contact, $current_step );
+		}
 	}
 
 	/**

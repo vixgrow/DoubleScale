@@ -362,6 +362,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								{__('Quill CRM', 'quillcrm')}
 							</span>
 						</div>
+						{applyFilters('quillcrm_navbar_header_actions', null) as React.ReactNode}
 					</SidebarHeader>
 					<SidebarContent className="qcrm-navbar__content">
 						{!isAtTop && (

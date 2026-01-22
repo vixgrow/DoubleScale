@@ -35,6 +35,12 @@ import ninjaForms from '../../../../../../assets/images/form-types/ninjaforms.pn
 import quillForms from '../../../../../../assets/images/form-types/quillforms.png';
 //@ts-ignore
 import wpForms from '../../../../../../assets/images/form-types/wpforms.png';
+//@ts-ignore
+import wsForms from '../../../../../../assets/images/form-types/wsforms.png';
+//@ts-ignore
+import bitForms from '../../../../../../assets/images/form-types/bitforms.png';
+//@ts-ignore
+import sureForms from '../../../../../../assets/images/form-types/sureforms.png';
 
 interface FormTypeSelectorProps {
 	forms: any;
@@ -54,6 +60,9 @@ const getFormIcon = (sourceKey: string) => {
 		ninjaforms: ninjaForms,
 		quillforms: quillForms,
 		wpforms: wpForms,
+		wsform: wsForms,
+		bitform: bitForms,
+		sureforms: sureForms,
 	};
 
 	return (

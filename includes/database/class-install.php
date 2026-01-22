@@ -206,6 +206,9 @@ class Install {
 		// Version 1.1.0: Add WhatsApp columns to contacts table.
 		self::version_1_1_0_migration( $current_version );
 
+		// Version 1.1.9: Add created_by columns to campaigns and automations tables.
+		self::version_1_1_9_migration( $current_version );
+
 		// Future migrations go here in version order.
 
 		/**
@@ -257,6 +260,60 @@ class Install {
 		// Add indexes for WhatsApp columns.
 		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_phone (whatsapp_phone)" );
 		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_status (whatsapp_status)" );
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Version 1.1.9 migration.
+	 *
+	 * Adds created_by columns to campaigns and automations tables:
+	 * - created_by: WordPress user ID who created the record
+	 * - Indexes for query performance
+	 *
+	 * @since 1.1.9
+	 *
+	 * @param string $current_version The currently installed version.
+	 */
+	private static function version_1_1_9_migration( $current_version ) {
+		global $wpdb;
+
+		// Only run if upgrading from version < 1.1.9.
+		if ( version_compare( $current_version, '1.1.9', '>=' ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Add created_by column to campaigns table.
+		$campaigns_table = $wpdb->prefix . 'quillcrm_campaigns';
+
+		// Verify table exists before attempting migration.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $campaigns_table ) ) === $campaigns_table ) {
+			// Check if column already exists to prevent duplicate column errors.
+			$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$campaigns_table} LIKE 'created_by'" );
+
+			if ( empty( $column_exists ) ) {
+				$wpdb->query( "ALTER TABLE {$campaigns_table} ADD COLUMN created_by BIGINT(20) UNSIGNED DEFAULT NULL COMMENT 'WordPress user ID who created this campaign' AFTER execute_at" );
+				$wpdb->query( "ALTER TABLE {$campaigns_table} ADD INDEX idx_created_by (created_by)" );
+			}
+		}
+
+		// Add created_by column to automations table.
+		$automations_table = $wpdb->prefix . 'quillcrm_automations';
+
+		// Verify table exists before attempting migration.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $automations_table ) ) === $automations_table ) {
+			// Check if column already exists to prevent duplicate column errors.
+			$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$automations_table} LIKE 'created_by'" );
+
+			if ( empty( $column_exists ) ) {
+				$wpdb->query( "ALTER TABLE {$automations_table} ADD COLUMN created_by BIGINT(20) UNSIGNED DEFAULT NULL COMMENT 'WordPress user ID who created this automation' AFTER settings" );
+				$wpdb->query( "ALTER TABLE {$automations_table} ADD INDEX idx_created_by (created_by)" );
+			}
+		}
 
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}

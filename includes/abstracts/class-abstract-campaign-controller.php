@@ -364,8 +364,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		try {
 			$campaign_data = $this->prepare_campaign( $request );
 			// Pass string directly - model's setTypeAttribute will convert to integer
-			$campaign_data['type'] = $this->channel;
-			$campaign              = Campaign_Model::create( $campaign_data );
+			$campaign_data['type']       = $this->channel;
+			$campaign_data['created_by'] = get_current_user_id() ?: null;
+			$campaign                    = Campaign_Model::create( $campaign_data );
 
 			// Enrich with computed counts and analytics
 			$this->enrichment->enrich( $campaign );
@@ -705,7 +706,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	/**
 	 * Prepare campaign data
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
 	 */

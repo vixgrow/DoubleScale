@@ -168,6 +168,7 @@ export type Automation = {
 		_trigger_warning?: boolean;
 		[key: string]: any;
 	};
+	created_by?: number | null;
 	created_at: string;
 	updated_at: string;
 	steps: AutomationStep[];
@@ -321,6 +322,7 @@ export type Campaign = {
 	parent_id: string;
 	count: string;
 	execute_at: string;
+	created_by?: number | null;
 	created_at: string;
 	updated_at: string;
 	contacts_count: number;

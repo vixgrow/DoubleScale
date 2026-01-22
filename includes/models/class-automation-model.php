@@ -50,6 +50,7 @@ class Automation_Model extends Model {
 		'trigger',
 		'status',
 		'settings',
+		'created_by',
 		'created_at',
 		'updated_at',
 	);

@@ -93,6 +93,13 @@ final class QuillCRM {
 	private $abandoned_cart_tasks;
 
 	/**
+	 * Forms tasks
+	 *
+	 * @var Tasks
+	 */
+	private $forms_tasks;
+
+	/**
 	 * Validator
 	 *
 	 * @var ValidatorFactory
@@ -235,6 +242,7 @@ final class QuillCRM {
 		$this->automations_tasks    = new Tasks( 'quillcrm_automations' );
 		$this->daily_tasks          = new Tasks( 'quillcrm_daily' );
 		$this->abandoned_cart_tasks = new Tasks( 'quillcrm_abandoned_cart' );
+		$this->forms_tasks          = new Tasks( 'quillcrm_forms' );
 
 		// Custom_Fields_Manager::instance(); // Moved to Pro
 		Admin::instance();
@@ -281,6 +289,22 @@ final class QuillCRM {
 
 		// Register contact meta table
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
+
+		// Register daily cleanup task
+		add_action( 'quillcrm_daily_quillcrm_daily3', array( __CLASS__, 'run_daily_cleanup' ) );
+	}
+
+	/**
+	 * Run daily cleanup tasks
+	 *
+	 * Cleans up old Action Scheduler entries and orphaned task meta.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function run_daily_cleanup() {
+		Tasks::cleanup_old_tasks();
 	}
 
 	/**

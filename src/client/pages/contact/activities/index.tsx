@@ -21,6 +21,7 @@ import timezone from 'dayjs/plugin/timezone';
 import ActivitiesFilters from './ActivitiesFilters';
 import {
     ActivitiesService,
+    ACTIVITY_TYPES,
     type TimelineItem,
 } from '@quillcrm/services/activities-service';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -319,8 +320,13 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const isEditableActivity = (activityType: string) => {
-        // Only these activity types can be edited
-        const editableTypes = ['note', 'call_logged', 'meeting_scheduled'];
+        // Only these activity types can be edited (matches PHP Activity_Types::get_editable_types())
+        const editableTypes: string[] = [
+            ACTIVITY_TYPES.NOTE,
+            ACTIVITY_TYPES.EMAIL_SENT,
+            ACTIVITY_TYPES.CALL_LOGGED,
+            ACTIVITY_TYPES.MEETING_SCHEDULED,
+        ];
         return editableTypes.includes(activityType);
     };
 

@@ -22,16 +22,34 @@ export const ACTIVITIES_ENDPOINTS = {
 
 /**
  * Activity types
+ *
+ * These match the Activity_Types constants in PHP (includes/constants/class-activity-types.php)
+ * Keep in sync when adding new activity types.
  */
 export const ACTIVITY_TYPES = {
+	// User-generated activities
 	NOTE: 'note',
-	CALL_LOGGED: 'call_logged',
 	EMAIL_SENT: 'email_sent',
+	EMAIL_RECEIVED: 'email_received',
+	CALL_LOGGED: 'call_logged',
 	MEETING_SCHEDULED: 'meeting_scheduled',
+
+	// Messaging activities
+	SMS_SENT: 'sms_sent',
+	SMS_RECEIVED: 'sms_received',
+	WHATSAPP_SENT: 'whatsapp_sent',
+	WHATSAPP_RECEIVED: 'whatsapp_received',
+
+	// System-generated activities
 	CREATED: 'created',
+	DEAL_CREATED: 'deal_created',
 	STAGE_CHANGED: 'stage_changed',
 	VALUE_CHANGED: 'value_changed',
 	STATUS_CHANGED: 'status_changed',
+
+	// Authentication activities
+	LOGGED_IN: 'logged_in',
+	LOGGED_OUT: 'logged_out',
 } as const;
 
 export type ActivityType = (typeof ACTIVITY_TYPES)[keyof typeof ACTIVITY_TYPES];

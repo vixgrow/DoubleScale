@@ -4,7 +4,7 @@ Tags: crm, customer management, pipeline, whatsapp, automation
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,7 +26,8 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 * Bulk operations and import/export
 * Contact source tracking
 * Full contact history and activity log
-* Lead Scoring (Coming Soon)
+* Lead Scoring 
+* Website visitor tracking
 
 **Pipeline & Deal Management**
 * Visual pipeline boards for deal tracking
@@ -42,7 +43,7 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 * Drag-and-drop email builder
 * Beautiful, responsive email templates
 * Standard broadcast campaigns
-* Email sequence automation (Coming Soon)
+* Email sequence automation 
 * A/B split testing (Coming Soon)
 * Click and open tracking
 * Unsubscribe management
@@ -149,7 +150,8 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 
 **E-commerce Platforms:**
 * **WooCommerce** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
-* **LearnDash** - LMS integration for course enrollment tracking
+* **Easy Digital Downloads** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
+* **Sure Cart** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
 
 **Form Plugins (10+ Integrations):**
 * **Quill Forms** - Conversational form builder
@@ -162,6 +164,15 @@ A powerful, native WordPress CRM with pipelines, contact management, email, SMS,
 * **MetForm** - Elementor form builder
 * **Ninja Forms** - Flexible form builder
 * **WPForms** - Beginner-friendly forms
+* **WS Form** - Free form builder
+* **Sure Forms** - Free form builder
+* **Bit Forms** - Free form builder
+
+**LMS Plugins (5+ Integrations):**
+* **LearnDash** - LMS integration for course enrollment tracking
+* **LifterLMS** - LMS integration for course enrollment tracking
+* **LearnPress** - LMS integration for course enrollment tracking
+* **Tutor LMS** - LMS integration for course enrollment tracking
 
 **Other Integrations:**
 * **WordPress Users** - Automatic user synchronization
@@ -218,6 +229,7 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 * **Self-Hosted** - Your data stays on your server, complete control and privacy
 * **Scalable Architecture** - Efficiently handles 100 to 100,000+ contacts
 * **Visual Automation Builder** - No coding required for complex workflows
+* **Mobile App** - iOS and Android app for mobile access (Coming Soon)
 * **Developer Friendly** - Extensive hooks, filters, and REST API
 * **Regular Updates** - Active development with continuous improvements
 * **Comprehensive Documentation** - 70+ detailed guides and tutorials
@@ -385,6 +397,13 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 10. Global Settings - Easy configuration for email, SMS, and system settings
 
 == Changelog ==
+
+= 1.2.0 - 25 Jan 2026 =
+* Added integration with WS Form
+* Added integration with Sure Forms
+* Added integration with Bit Forms
+* Added lead scoring feature
+* Added website visitor tracking feature
 
 = 1.1.8 - 15 Jan 2026 =
 * Added integration with Tutor LMS

@@ -362,7 +362,7 @@ class REST_Activity_Controller extends REST_Controller {
 	 */
 	private function transform_activity_to_unified( $activity ): array {
 		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		$system_types   = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+		$system_types   = array( 'created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed' );
 
 		$user = null;
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {

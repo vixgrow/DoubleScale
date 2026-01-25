@@ -46,7 +46,7 @@ class Activities_Table extends Migration {
 		  */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
 			contact_id BIGINT(20) NULL COMMENT "FK to contacts for quick filtering",
-			activity_type VARCHAR(50) NOT NULL COMMENT "email_sent, sms_sent, note_added, call_logged, meeting_scheduled, created, stage_changed, etc.",
+			activity_type VARCHAR(50) NOT NULL COMMENT "email_sent, sms_sent, note_added, call_logged, meeting_scheduled, created, deal_created, stage_changed, etc.",
 			data JSON NULL COMMENT "Activity-specific data including subject, body, and other metadata",
 			user_id BIGINT(20) UNSIGNED NULL COMMENT "User who performed action",
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

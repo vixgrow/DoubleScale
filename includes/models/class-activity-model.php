@@ -91,7 +91,7 @@ class Activity_Model extends Model
 	 */
 	public $rules = array(
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received,logged_in,logged_out',
+		'activity_type' => 'required|in:note,created,deal_created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received,logged_in,logged_out',
 		'user_id'       => 'nullable|integer',
 	);
 
@@ -338,7 +338,7 @@ class Activity_Model extends Model
 	 */
 	public function scopeSystemGenerated($query)
 	{
-		return $query->whereIn('activity_type', array('created', 'stage_changed', 'value_changed', 'status_changed'));
+		return $query->whereIn('activity_type', array('created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed'));
 	}
 
 	/**
@@ -723,7 +723,7 @@ class Activity_Model extends Model
 	 */
 	public function is_system_activity()
 	{
-		$system_types = array('created', 'stage_changed', 'value_changed', 'status_changed');
+		$system_types = array('created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed');
 		return in_array($this->activity_type, $system_types, true);
 	}
 

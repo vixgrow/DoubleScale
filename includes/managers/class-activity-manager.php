@@ -1310,7 +1310,7 @@ final class Activity_Manager {
 		$data = ! empty( $row->data ) ? json_decode( $row->data, true ) : array();
 
 		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		$system_types   = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+		$system_types   = array( 'created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed' );
 
 		return array(
 			'id'                => (int) $row->id,

@@ -399,6 +399,18 @@ final class Activity_Manager {
 			}
 		}
 
+		// Exclude activities that have deal associations when no entity type is provided.
+		if ( empty( $filters['entity_type'] ) ) {
+			if ( class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+				$query->whereDoesntHave(
+					'associations',
+					function ( $q ) {
+						$q->where( 'entity_type', \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL );
+					}
+				);
+			}
+		}
+
 		// Filter by activity type.
 		if ( ! empty( $filters['activity_type'] ) ) {
 			$activity_types = $filters['activity_type'];
@@ -1054,6 +1066,15 @@ final class Activity_Manager {
 			);
 		}
 
+		// Exclude activities with deal associations when no entity_type is provided.
+		if ( empty( $filters['entity_type'] ) ) {
+			$deal_type       = \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL;
+			$where_clauses[] = "NOT EXISTS (
+				SELECT 1 FROM {$associations_table} excl
+				WHERE excl.activity_id = a.id AND excl.entity_type = {$deal_type}
+			)";
+		}
+
 		// User filter.
 		if ( ! empty( $filters['user_id'] ) ) {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
@@ -1360,13 +1381,15 @@ final class Activity_Manager {
 			'email_sent'        => sprintf( __( '%s sent an email', 'quillcrm' ), $user_name ),
 			'call_logged'       => sprintf( __( '%s logged a call', 'quillcrm' ), $user_name ),
 			'meeting_scheduled' => sprintf( __( '%s scheduled a meeting', 'quillcrm' ), $user_name ),
-			'created'           => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
+			'deal_created'           => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
 			'stage_changed'     => sprintf( __( '%s changed the stage', 'quillcrm' ), $user_name ),
 			'value_changed'     => sprintf( __( '%s updated the value', 'quillcrm' ), $user_name ),
 			'status_changed'    => sprintf( __( '%s changed the status', 'quillcrm' ), $user_name ),
+			'logged_in'         => __( 'Contact logged in', 'quillcrm' ),
+			'logged_out'        => __( 'Contact logged out', 'quillcrm' ),
 		);
 
-		return $messages[ $type ] ?? sprintf( __( '%s performed an action', 'quillcrm' ), $user_name );
+		return $messages[ $type ] ?? sprintf( __( '%s performed an action', 'quillcrm' ), ucfirst( $user_name ) );
 	}
 
 	/**

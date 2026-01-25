@@ -23,6 +23,7 @@ use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
 use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Constants\Activity_Types;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -361,8 +362,8 @@ class REST_Activity_Controller extends REST_Controller {
 	 * @return array Transformed activity data.
 	 */
 	private function transform_activity_to_unified( $activity ): array {
-		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		$system_types   = array( 'created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed' );
+		$editable_types = Activity_Types::get_editable_types();
+		$system_types   = Activity_Types::get_system_types();
 
 		$user = null;
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {

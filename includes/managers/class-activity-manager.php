@@ -15,6 +15,7 @@ use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Constants\Activity_Types;
 
 /**
  * Activity_Manager class
@@ -1309,8 +1310,8 @@ final class Activity_Manager {
 	private function transform_activity_row( $row, ?array $user ): array {
 		$data = ! empty( $row->data ) ? json_decode( $row->data, true ) : array();
 
-		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		$system_types   = array( 'created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed' );
+		$editable_types = Activity_Types::get_editable_types();
+		$system_types   = Activity_Types::get_system_types();
 
 		return array(
 			'id'                => (int) $row->id,
@@ -1374,22 +1375,8 @@ final class Activity_Manager {
 	 * @return string Formatted message.
 	 */
 	private function format_activity_message( string $type, ?array $user, array $data ): string {
-		$user_name = $user ? $user['display_name'] : __( 'Unknown User', 'quillcrm' );
-
-		$messages = array(
-			'note'              => sprintf( __( '%s added a note', 'quillcrm' ), $user_name ),
-			'email_sent'        => sprintf( __( '%s sent an email', 'quillcrm' ), $user_name ),
-			'call_logged'       => sprintf( __( '%s logged a call', 'quillcrm' ), $user_name ),
-			'meeting_scheduled' => sprintf( __( '%s scheduled a meeting', 'quillcrm' ), $user_name ),
-			'deal_created'           => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
-			'stage_changed'     => sprintf( __( '%s changed the stage', 'quillcrm' ), $user_name ),
-			'value_changed'     => sprintf( __( '%s updated the value', 'quillcrm' ), $user_name ),
-			'status_changed'    => sprintf( __( '%s changed the status', 'quillcrm' ), $user_name ),
-			'logged_in'         => __( 'Contact logged in', 'quillcrm' ),
-			'logged_out'        => __( 'Contact logged out', 'quillcrm' ),
-		);
-
-		return $messages[ $type ] ?? sprintf( __( '%s performed an action', 'quillcrm' ), ucfirst( $user_name ) );
+		$user_name = $user ? $user['display_name'] : null;
+		return Activity_Types::get_activity_message( $type, $user_name );
 	}
 
 	/**

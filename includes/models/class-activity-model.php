@@ -12,6 +12,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Constants\Activity_Types;
 
 /**
  * Activity_Model class
@@ -91,7 +92,7 @@ class Activity_Model extends Model
 	 */
 	public $rules = array(
 		'contact_id'    => 'nullable|integer',
-		'activity_type' => 'required|in:note,created,deal_created,stage_changed,value_changed,status_changed,email_sent,email_received,call_logged,meeting_scheduled,sms_sent,sms_received,whatsapp_sent,whatsapp_received,logged_in,logged_out',
+		'activity_type' => '', // Set dynamically in constructor
 		'user_id'       => 'nullable|integer',
 	);
 
@@ -106,6 +107,18 @@ class Activity_Model extends Model
 		'activity_type.required' => 'Activity type is required.',
 		'activity_type.in'       => 'Invalid activity type.',
 	);
+
+	/**
+	 * Constructor
+	 *
+	 * @param array $attributes Model attributes.
+	 */
+	public function __construct( array $attributes = array() )
+	{
+		// Set validation rule dynamically from constants
+		$this->rules['activity_type'] = Activity_Types::get_validation_rule();
+		parent::__construct( $attributes );
+	}
 
 	/**
 	 * Contact relationship
@@ -314,7 +327,7 @@ class Activity_Model extends Model
 	 */
 	public function scopeNotes($query)
 	{
-		return $query->where('activity_type', 'note');
+		return $query->where('activity_type', Activity_Types::NOTE);
 	}
 
 	/**
@@ -326,7 +339,7 @@ class Activity_Model extends Model
 	 */
 	public function scopeUserCreated($query)
 	{
-		return $query->whereIn('activity_type', array('note', 'email_sent', 'call_logged', 'meeting_scheduled'));
+		return $query->whereIn('activity_type', Activity_Types::get_editable_types());
 	}
 
 	/**
@@ -338,7 +351,7 @@ class Activity_Model extends Model
 	 */
 	public function scopeSystemGenerated($query)
 	{
-		return $query->whereIn('activity_type', array('created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed'));
+		return $query->whereIn('activity_type', Activity_Types::get_system_types());
 	}
 
 	/**
@@ -710,8 +723,7 @@ class Activity_Model extends Model
 	 */
 	public function is_editable()
 	{
-		$editable_types = array('note', 'email_sent', 'call_logged', 'meeting_scheduled');
-		return in_array($this->activity_type, $editable_types, true);
+		return Activity_Types::is_editable_type($this->activity_type);
 	}
 
 	/**
@@ -723,8 +735,7 @@ class Activity_Model extends Model
 	 */
 	public function is_system_activity()
 	{
-		$system_types = array('created', 'deal_created', 'stage_changed', 'value_changed', 'status_changed');
-		return in_array($this->activity_type, $system_types, true);
+		return Activity_Types::is_system_type($this->activity_type);
 	}
 
 	/**

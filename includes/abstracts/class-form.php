@@ -177,15 +177,39 @@ abstract class Form
 
 
 	/**
-	 * Process form
+	 * Process form (async)
+	 *
+	 * Schedules form processing as a background task using Action Scheduler.
+	 * This prevents form submission from crashing if CRM processing fails.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $data
+	 * @param array $data Form submission data
 	 *
 	 * @return void
 	 */
 	public function process_form($data)
+	{
+		// Store form settings in the submission data for async retrieval
+		$data['_form_settings'] = $this->form_data ? $this->form_data->toArray() : array();
+		$data['_form_slug']     = $this->slug;
+
+		// Schedule async processing
+		QuillCRM::instance()->forms_tasks->enqueue_async('process_form', $data);
+	}
+
+	/**
+	 * Process form synchronously
+	 *
+	 * Contains the actual form processing logic. Called by the async handler.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Form submission data
+	 *
+	 * @return void
+	 */
+	public function process_form_sync($data)
 	{
 		try {
 			$this->submission = $data;
@@ -709,5 +733,27 @@ abstract class Form
 	public function is_enabled()
 	{
 		return true;
+	}
+
+	/**
+	 * Restore form data from serialized settings
+	 *
+	 * Used by async handler to restore form_data from the stored settings
+	 * that were serialized when the async task was scheduled.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings Form settings array
+	 *
+	 * @return void
+	 */
+	public function restore_form_data($settings)
+	{
+		if (empty($settings)) {
+			return;
+		}
+
+		// Create a Form_Model instance from the settings array
+		$this->form_data = new Form_Model($settings);
 	}
 }

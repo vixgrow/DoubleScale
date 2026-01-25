@@ -13,6 +13,7 @@ namespace QuillCRM\Managers;
 
 use Exception;
 use QuillCRM\Abstracts\Form;
+use QuillCRM\QuillCRM;
 
 /**
  * Forms class
@@ -155,6 +156,12 @@ final class Forms_Manager {
 			// Load the form's hooks
 			$form->load_hooks();
 		}
+
+		// Register async form processing callback
+		QuillCRM::instance()->forms_tasks->register_callback(
+			'process_form',
+			array( $this, 'handle_async_form_processing' )
+		);
 	}
 
 	/**
@@ -166,5 +173,94 @@ final class Forms_Manager {
 	 */
 	public function get_options() {
 		 return $this->options;
+	}
+
+	/**
+	 * Handle async form processing
+	 *
+	 * Callback for the Action Scheduler task that processes form submissions
+	 * in the background.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $args Task arguments containing meta_id
+	 *
+	 * @return void
+	 */
+	public function handle_async_form_processing( $args ) {
+		$meta_id = $args['meta_id'] ?? null;
+
+		if ( ! $meta_id ) {
+			quillcrm_get_logger()->error(
+				__( 'Async form processing failed: missing meta_id', 'quillcrm' ),
+				array( 'code' => 'async_form_missing_meta_id' )
+			);
+			return;
+		}
+
+		// Retrieve data from task meta
+		global $wpdb;
+		$meta = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT value FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
+				$meta_id
+			)
+		);
+
+		if ( ! $meta ) {
+			quillcrm_get_logger()->error(
+				__( 'Async form processing failed: meta not found', 'quillcrm' ),
+				array(
+					'code'    => 'async_form_meta_not_found',
+					'meta_id' => $meta_id,
+				)
+			);
+			return;
+		}
+
+		$data      = maybe_unserialize( $meta->value );
+		$form_data = $data[0] ?? array();
+
+		if ( empty( $form_data ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Async form processing failed: empty form data', 'quillcrm' ),
+				array(
+					'code'    => 'async_form_empty_data',
+					'meta_id' => $meta_id,
+				)
+			);
+			return;
+		}
+
+		$form_slug = $form_data['_form_slug'] ?? '';
+
+		if ( empty( $form_slug ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Async form processing failed: missing form slug', 'quillcrm' ),
+				array(
+					'code'    => 'async_form_missing_slug',
+					'meta_id' => $meta_id,
+				)
+			);
+			return;
+		}
+
+		$form = $this->get_form( $form_slug );
+
+		if ( ! $form ) {
+			quillcrm_get_logger()->error(
+				__( 'Async form processing failed: form not found', 'quillcrm' ),
+				array(
+					'code'      => 'async_form_not_found',
+					'form_slug' => $form_slug,
+					'meta_id'   => $meta_id,
+				)
+			);
+			return;
+		}
+
+		// Restore form settings and process synchronously
+		$form->restore_form_data( $form_data['_form_settings'] ?? array() );
+		$form->process_form_sync( $form_data );
 	}
 }

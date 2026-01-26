@@ -671,8 +671,9 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function create_item( $request ) {
 		try {
-			$automation_data = $this->prepare_automation( $request );
-			$automation      = Automation_Model::create( $automation_data );
+			$automation_data               = $this->prepare_automation( $request );
+			$automation_data['created_by'] = get_current_user_id() ?: null;
+			$automation                    = Automation_Model::create( $automation_data );
 
 			if ( ! $automation ) {
 				return new WP_Error( 'error', __( 'Failed to create automation.', 'quillcrm' ), array( 'status' => 500 ) );
@@ -1556,7 +1557,7 @@ class Rest_Automation_Controller extends REST_Controller {
 		);
 
 		foreach ( $automation_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) && $value !== 0 ) {
 				unset( $automation_data[ $key ] );
 			}
 		}

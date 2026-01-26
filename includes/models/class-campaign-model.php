@@ -63,6 +63,7 @@ class Campaign_Model extends Model {
 		'parent_id',
 		'count',
 		'execute_at',
+		'created_by',
 		'created_at',
 		'updated_at',
 	);

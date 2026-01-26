@@ -48,9 +48,11 @@ class Automations_Table extends Migration {
             `trigger` VARCHAR(255) NOT NULL,
             status VARCHAR(255) NOT NULL,
             settings TEXT,
+            created_by BIGINT(20) UNSIGNED DEFAULT NULL COMMENT "WordPress user ID who created this automation",
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id)';
+            PRIMARY KEY (id),
+            INDEX idx_created_by (created_by)';
 
 		return $query;
 	}

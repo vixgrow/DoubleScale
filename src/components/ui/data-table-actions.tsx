@@ -207,10 +207,10 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => {})
+						(() => { })
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => {})
+						config.bulkActions.tags?.onSelectionChange || (() => { })
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
@@ -292,9 +292,8 @@ export function DataTableActions<TData>({
 						<DialogTrigger asChild>
 							<Button
 								variant="tertiary"
-								className={`font-semibold px-4 text-[#3B82F6] ${
-									!isProActive ? 'relative' : ''
-								}`}
+								className={`font-semibold px-4 text-[#3B82F6] ${!isProActive ? 'relative' : ''
+									}`}
 								onClick={handleAdvancedFiltersDialogOpen}
 							>
 								<FiltersIcon />
@@ -304,7 +303,7 @@ export function DataTableActions<TData>({
 								)}
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="max-w-[1000px]">
+						<DialogContent className="max-w-[1100px] max-h-[90vh] overflow-y-auto">
 							<DialogHeader>
 								<DialogTitle>
 									<CustomDialogHeader

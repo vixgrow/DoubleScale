@@ -59,9 +59,9 @@ class Condition {
 	 */
 	public function is_condition_fulfilled() {
 		$result = true;
-
-		if ( ! class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ) {
-			return throw new \Exception( 'QuillCRM Pro is not installed' );
+		if ( ! defined( 'QUILLCRM_PRO_PLUGIN_FILE' ) ) {
+			quillcrm_get_logger()->error( 'QuillCRM Pro is not installed or not loaded yet' );
+			throw new \Exception( 'QuillCRM Pro is not installed or not loaded yet' );
 		}
 
 		foreach ( $this->rules as $rule ) {

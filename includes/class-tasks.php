@@ -367,4 +367,105 @@ class Tasks {
 			ARRAY_A
 		);
 	}
+
+	/**
+	 * Clean up old Action Scheduler entries and orphaned task meta
+	 *
+	 * Removes completed/failed actions older than 7 days from all QuillCRM groups,
+	 * their associated logs, orphaned claims, and orphaned task meta entries.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Cleanup statistics
+	 */
+	public static function cleanup_old_tasks() {
+		global $wpdb;
+
+		$stats = array(
+			'actions_deleted'   => 0,
+			'orphaned_meta'     => 0,
+			'orphaned_claims'   => 0,
+		);
+
+		$days_old    = 7;
+		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days_old} days" ) );
+
+		// Get all QuillCRM group IDs
+		$group_slugs = array(
+			'quillcrm_campaigns',
+			'quillcrm_automations',
+			'quillcrm_daily',
+			'quillcrm_abandoned_cart',
+			'quillcrm_forms',
+		);
+
+		$placeholders = implode( ', ', array_fill( 0, count( $group_slugs ), '%s' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$group_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT group_id FROM {$wpdb->prefix}actionscheduler_groups WHERE slug IN ($placeholders)",
+				...$group_slugs
+			)
+		);
+
+		if ( ! empty( $group_ids ) ) {
+			$group_placeholders = implode( ', ', array_fill( 0, count( $group_ids ), '%d' ) );
+
+			// Delete old completed/failed actions and their associated logs
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE a, l
+					FROM {$wpdb->prefix}actionscheduler_actions a
+					LEFT JOIN {$wpdb->prefix}actionscheduler_logs l ON a.action_id = l.action_id
+					WHERE a.group_id IN ($group_placeholders)
+					AND a.status IN ('complete', 'failed')
+					AND a.scheduled_date_gmt < %s",
+					...array_merge( $group_ids, array( $cutoff_date ) )
+				)
+			);
+
+			$stats['actions_deleted'] = $deleted !== false ? $deleted : 0;
+		}
+
+		// Clean up orphaned claims
+		$orphaned_claims = $wpdb->query(
+			"DELETE c
+			FROM {$wpdb->prefix}actionscheduler_claims c
+			LEFT JOIN {$wpdb->prefix}actionscheduler_actions a ON c.claim_id = a.claim_id
+			WHERE a.action_id IS NULL"
+		);
+
+		$stats['orphaned_claims'] = $orphaned_claims !== false ? $orphaned_claims : 0;
+
+		// Clean up orphaned task meta (meta entries without corresponding action)
+		// Only clean meta that has an action_id (async tasks), not recurring task meta
+		$orphaned_meta = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE tm
+				FROM {$wpdb->prefix}quillcrm_task_meta tm
+				LEFT JOIN {$wpdb->prefix}actionscheduler_actions a ON tm.action_id = a.action_id
+				WHERE tm.action_id IS NOT NULL
+				AND a.action_id IS NULL
+				AND tm.date_created < %s",
+				$cutoff_date
+			)
+		);
+
+		$stats['orphaned_meta'] = $orphaned_meta !== false ? $orphaned_meta : 0;
+
+		// Log cleanup results
+		if ( function_exists( 'quillcrm_get_logger' ) ) {
+			quillcrm_get_logger()->info(
+				__( 'Task cleanup completed', 'quillcrm' ),
+				array(
+					'code'  => 'task_cleanup_completed',
+					'stats' => $stats,
+				)
+			);
+		}
+
+		return $stats;
+	}
 }

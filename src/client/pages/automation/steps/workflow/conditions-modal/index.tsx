@@ -160,8 +160,8 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	>(() => {
 		const stepRules =
 			step.settings &&
-			Array.isArray(step.settings) &&
-			step.settings.length > 0
+				Array.isArray(step.settings) &&
+				step.settings.length > 0
 				? step.settings
 				: [[getInitialRule()]];
 		return stepRules;
@@ -173,8 +173,8 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		if (visible) {
 			const stepRules =
 				step.settings &&
-				Array.isArray(step.settings) &&
-				step.settings.length > 0
+					Array.isArray(step.settings) &&
+					step.settings.length > 0
 					? step.settings
 					: [[getInitialRule()]];
 			setRules(stepRules);
@@ -226,7 +226,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 				currentRule &&
 				(!filteredRulesGroups[currentRule.selectedGroup] ||
 					!filteredRulesGroups[currentRule.selectedGroup]?.rules[
-						currentRule.rule
+					currentRule.rule
 					])
 			) {
 				// Current rule is invalid, reset to initial
@@ -254,7 +254,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150300]" />
-			<DialogContent className="max-w-[1000px] max-h-[90vh] z-[150300] overflow-y-auto">
+			<DialogContent className="max-w-[1100px] max-h-[90vh] z-[150300] overflow-y-auto">
 				<DialogHeader>
 					<CustomDialogHeader
 						title={__('Create a condition', 'quillcrm')}
@@ -278,7 +278,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 								{conditionWarning?.message}
 								{conditionWarning?.plugin_labels &&
 									conditionWarning.plugin_labels.length >
-										0 && (
+									0 && (
 										<span className="block mt-1 font-medium">
 											{__(
 												'Required plugins:',

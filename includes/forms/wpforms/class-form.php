@@ -22,8 +22,6 @@ class Form extends Abstracts_Form {
 
 
 
-
-
 	/**
 	 * Slug
 	 *
@@ -191,6 +189,7 @@ class Form extends Abstracts_Form {
 		$data               = $this->get_default_data();
 		$entry['fields']    = $fields;
 		$data['entry']      = $this->prepare_entry( $entry, $this->prepare_fields( $fields ) );
+		$data['entry_id']   = $entry_id;
 		$data['form_id']    = $form_data['id'];
 		$data['form_title'] = isset( $form_data['id'] ) ? get_the_title( $form_data['id'] ) : '';
 		$data['fields']     = $this->prepare_fields( $fields );

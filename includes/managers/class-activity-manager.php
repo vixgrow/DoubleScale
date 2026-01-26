@@ -15,17 +15,12 @@ use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Constants\Activity_Types;
 
 /**
  * Activity_Manager class
  */
 final class Activity_Manager {
-
-
-
-
-
-
 
 	/**
 	 * Class Instance.
@@ -60,6 +55,30 @@ final class Activity_Manager {
 	 */
 	private function __construct() {
 		add_action( 'quillcrm_loaded', array( $this, 'init' ) );
+		add_action( 'wp_login', array( $this, 'on_user_login' ), 10, 2 );
+		add_action( 'wp_logout', array( $this, 'on_user_logout' ), 10, 1 );
+	}
+
+	public function on_user_login( $user_login, $user ) {
+		Activity_Model::log_login(
+			array(
+				'user_id'    => $user->ID,
+				'user_email' => $user->user_email,
+			)
+		);
+	}
+
+	public function on_user_logout( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return;
+		}
+		Activity_Model::log_logout(
+			array(
+				'user_id'    => $user_id,
+				'user_email' => $user->user_email,
+			)
+		);
 	}
 
 	/**
@@ -376,6 +395,18 @@ final class Activity_Manager {
 					function ( $q ) use ( $filters ) {
 						$q->where( 'entity_type', $filters['entity_type'] )
 							->where( 'entity_id', $filters['entity_id'] );
+					}
+				);
+			}
+		}
+
+		// Exclude activities that have deal associations when no entity type is provided.
+		if ( empty( $filters['entity_type'] ) ) {
+			if ( class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
+				$query->whereDoesntHave(
+					'associations',
+					function ( $q ) {
+						$q->where( 'entity_type', \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL );
 					}
 				);
 			}
@@ -1036,6 +1067,15 @@ final class Activity_Manager {
 			);
 		}
 
+		// Exclude activities with deal associations when no entity_type is provided.
+		if ( empty( $filters['entity_type'] ) ) {
+			$deal_type       = \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL;
+			$where_clauses[] = "NOT EXISTS (
+				SELECT 1 FROM {$associations_table} excl
+				WHERE excl.activity_id = a.id AND excl.entity_type = {$deal_type}
+			)";
+		}
+
 		// User filter.
 		if ( ! empty( $filters['user_id'] ) ) {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
@@ -1270,8 +1310,8 @@ final class Activity_Manager {
 	private function transform_activity_row( $row, ?array $user ): array {
 		$data = ! empty( $row->data ) ? json_decode( $row->data, true ) : array();
 
-		$editable_types = array( 'note', 'email_sent', 'call_logged', 'meeting_scheduled' );
-		$system_types   = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+		$editable_types = Activity_Types::get_editable_types();
+		$system_types   = Activity_Types::get_system_types();
 
 		return array(
 			'id'                => (int) $row->id,
@@ -1335,20 +1375,8 @@ final class Activity_Manager {
 	 * @return string Formatted message.
 	 */
 	private function format_activity_message( string $type, ?array $user, array $data ): string {
-		$user_name = $user ? $user['display_name'] : __( 'Unknown User', 'quillcrm' );
-
-		$messages = array(
-			'note'              => sprintf( __( '%s added a note', 'quillcrm' ), $user_name ),
-			'email_sent'        => sprintf( __( '%s sent an email', 'quillcrm' ), $user_name ),
-			'call_logged'       => sprintf( __( '%s logged a call', 'quillcrm' ), $user_name ),
-			'meeting_scheduled' => sprintf( __( '%s scheduled a meeting', 'quillcrm' ), $user_name ),
-			'created'           => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
-			'stage_changed'     => sprintf( __( '%s changed the stage', 'quillcrm' ), $user_name ),
-			'value_changed'     => sprintf( __( '%s updated the value', 'quillcrm' ), $user_name ),
-			'status_changed'    => sprintf( __( '%s changed the status', 'quillcrm' ), $user_name ),
-		);
-
-		return $messages[ $type ] ?? sprintf( __( '%s performed an action', 'quillcrm' ), $user_name );
+		$user_name = $user ? $user['display_name'] : null;
+		return Activity_Types::get_activity_message( $type, $user_name );
 	}
 
 	/**

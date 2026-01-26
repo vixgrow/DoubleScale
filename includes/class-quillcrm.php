@@ -49,6 +49,7 @@ use QuillCRM\Database\Install;
 use QuillCRM\Site\Site;
 
 
+
 /**
  * QuillCRM Main Class.
  * The main class that's responsible for loading all dependencies
@@ -56,6 +57,7 @@ use QuillCRM\Site\Site;
  * @since 1.0.0
  */
 final class QuillCRM {
+
 
 
 
@@ -89,6 +91,13 @@ final class QuillCRM {
 	 * @var Tasks
 	 */
 	private $abandoned_cart_tasks;
+
+	/**
+	 * Forms tasks
+	 *
+	 * @var Tasks
+	 */
+	private $forms_tasks;
 
 	/**
 	 * Validator
@@ -233,6 +242,7 @@ final class QuillCRM {
 		$this->automations_tasks    = new Tasks( 'quillcrm_automations' );
 		$this->daily_tasks          = new Tasks( 'quillcrm_daily' );
 		$this->abandoned_cart_tasks = new Tasks( 'quillcrm_abandoned_cart' );
+		$this->forms_tasks          = new Tasks( 'quillcrm_forms' );
 
 		// Custom_Fields_Manager::instance(); // Moved to Pro
 		Admin::instance();
@@ -279,6 +289,22 @@ final class QuillCRM {
 
 		// Register contact meta table
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
+
+		// Register daily cleanup task
+		add_action( 'quillcrm_daily_quillcrm_daily3', array( __CLASS__, 'run_daily_cleanup' ) );
+	}
+
+	/**
+	 * Run daily cleanup tasks
+	 *
+	 * Cleans up old Action Scheduler entries and orphaned task meta.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function run_daily_cleanup() {
+		Tasks::cleanup_old_tasks();
 	}
 
 	/**
@@ -561,13 +587,13 @@ final class QuillCRM {
 		// Load all custom fields files
 		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
 		foreach ( $custom_fields_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 
 		// Load all custom filters files
 		$filters_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/contact-filters/**/class-*.php' );
 		foreach ( $filters_files as $file ) {
-			require $file;
+			require_once $file;
 		}
 	}
 

@@ -60,6 +60,19 @@ export type Contact = {
 			value: string;
 		};
 	})[];
+	lead_score?: LeadScoreData;
+};
+
+export type LeadScoreLevel = {
+	id: number;
+	name: string;
+	slug: string;
+	points: number;
+};
+
+export type LeadScoreData = {
+	points: number;
+	level: LeadScoreLevel | null;
 };
 
 export type Order = {
@@ -168,6 +181,7 @@ export type Automation = {
 		_trigger_warning?: boolean;
 		[key: string]: any;
 	};
+	created_by?: number | null;
 	created_at: string;
 	updated_at: string;
 	steps: AutomationStep[];
@@ -321,6 +335,7 @@ export type Campaign = {
 	parent_id: string;
 	count: string;
 	execute_at: string;
+	created_by?: number | null;
 	created_at: string;
 	updated_at: string;
 	contacts_count: number;
@@ -725,6 +740,11 @@ export type Settings = {
 	};
 	currency: {
 		currency: string;
+	};
+	website_tracking: {
+		enabled: boolean;
+		retention_type: 'days' | 'never' | null;
+		retention_days: string | null;
 	};
 };
 

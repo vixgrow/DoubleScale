@@ -540,30 +540,32 @@ class Process_Automation {
 	 */
 	public function enqueue_step( $step_id, $automation_contact_id ) {
 		// Initialize start time on first call.
-		if ( null === self::$start_time ) {
-			self::$start_time = microtime( true );
-		}
+		// if ( null === self::$start_time ) {
+		// 	self::$start_time = microtime( true );
+		// }
 
-		// Check if we should switch to async.
-		if ( $this->should_switch_to_async() ) {
+		// // Check if we should switch to async.
+		// if ( $this->should_switch_to_async() ) {
 			QuillCRM::instance()->automations_tasks->enqueue_async( 
 				'process_automation_step', 
 				$this->automation->id, 
+				0, // parent_step_id - only used for delay steps
 				$step_id, 
 				$automation_contact_id 
 			);
 			// Reset start time for next batch.
-			self::$start_time = null;
-			return;
-		}
+		// 	self::$start_time = null;
+		// 	return;
+		// }
 
-		// Safe to continue synchronously.
-		QuillCRM::instance()->automations_tasks->enqueue_sync( 
-			'process_automation_step', 
-			$this->automation, 
-			$step_id, 
-			$automation_contact_id 
-		);
+		// // Safe to continue synchronously.
+		// QuillCRM::instance()->automations_tasks->enqueue_sync( 
+		// 	'process_automation_step', 
+		// 	$this->automation, 
+		// 	0, // parent_step_id - only used for delay steps
+		// 	$step_id, 
+		// 	$automation_contact_id 
+		// );
 	}
 
 	/**

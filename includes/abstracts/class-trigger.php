@@ -102,7 +102,7 @@ abstract class Trigger {
 					continue;
 				}
 
-				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $args );
+				QuillCRM::instance()->automations_tasks->enqueue_async( 'process_automations', $automation, $args );
 			}
 		} catch ( Exception $e ) {
 			// Log error

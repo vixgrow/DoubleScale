@@ -63,11 +63,13 @@ class Campaigns_Table extends Migration {
             parent_id BIGINT(20) NOT NULL DEFAULT 0,
             count INT(11) NOT NULL DEFAULT 0,
             execute_at TIMESTAMP,
+            created_by BIGINT(20) UNSIGNED DEFAULT NULL COMMENT "WordPress user ID who created this campaign",
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             INDEX idx_type (type),
-            INDEX idx_status_type (status, type)';
+            INDEX idx_status_type (status, type),
+            INDEX idx_created_by (created_by)';
 
 		return $query;
 	}

@@ -21,6 +21,7 @@ import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import DealsBase from '../deals';
 import TasksBase from '../tasks';
+import WebsiteTrackingBase from '../website-tracking';
 import {
 	AutomationsIcon,
 	ContactSMSIcon,
@@ -33,7 +34,8 @@ import {
 	PhoneIcon,
 	DealActivityIcon,
 	CalendarIcon,
-	UpcomingActivitiesIcon,
+	// UpcomingActivitiesIcon,
+	WebsiteIcon,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
@@ -41,7 +43,7 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
-import UpcomingActivities from '../upcoming-activities';
+// import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@quillcrm/components/icons/whatsapp-icon';
 
 interface DataCardProps {
@@ -83,13 +85,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		contact_id: number;
 		navigate?: (path: string) => void;
 	}> | null;
+	const WebsiteTracking = applyFilters(
+		'quillcrm_contact_tab_component',
+		WebsiteTrackingBase,
+		'website_tracking'
+	) as React.FC<{
+		contact_id: number;
+		navigate?: (path: string) => void;
+	}>;
 
 	const tabsList = [
-		{
-			value: 'upcoming-activities',
-			label: 'Upcoming Activities',
-			icon: <UpcomingActivitiesIcon />,
-		},
+		// {
+		// 	value: 'upcoming-activities',
+		// 	label: 'Upcoming Activities',
+		// 	icon: <UpcomingActivitiesIcon />,
+		// },
 		{
 			value: 'activities',
 			label: 'Activities',
@@ -123,6 +133,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			icon: <CalendarIcon width={24} height={24} />,
 		},
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'website_tracking',
+			label: 'Website Tracking',
+			icon: <WebsiteIcon width={24} height={24} />,
+		},
 		...(isCrmManager
 			? [
 					{
@@ -177,14 +192,14 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				</CardContent>
 			),
 		},
-		{
-			value: 'upcoming-activities',
-			children: (
-				<CardContent className="pt-6">
-					<UpcomingActivities contact_id={contact.id} />
-				</CardContent>
-			),
-		},
+		// {
+		// 	value: 'upcoming-activities',
+		// 	children: (
+		// 		<CardContent className="pt-6">
+		// 			<UpcomingActivities contact_id={contact.id} />
+		// 		</CardContent>
+		// 	),
+		// },
 		{
 			value: 'emails',
 			children: (
@@ -221,6 +236,17 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			children: (
 				<CardContent className="pt-6">
 					<Deals contact_id={contact.id} navigate={navigate} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'website_tracking',
+			children: (
+				<CardContent className="pt-6">
+					<WebsiteTracking
+						contact_id={contact.id}
+						navigate={navigate}
+					/>
 				</CardContent>
 			),
 		},
@@ -277,7 +303,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	return (
 		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
 			<PageTabs
-				defaultValue="upcoming-activities"
+				defaultValue="activities"
 				tabsList={tabsList}
 				tabsContent={tabsContent}
 				className="w-full"

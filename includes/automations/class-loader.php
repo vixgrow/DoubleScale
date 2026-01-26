@@ -78,17 +78,68 @@ final class Loader {
 	/**
 	 * Process Automations
 	 *
+	 * Handles both sync calls (direct arguments) and async calls (meta_id).
+	 * When called async via Action Scheduler, receives meta_id as first arg and null for second.
+	 * When called sync, receives Automation_Model and args directly.
+	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model $automation
-	 * @param array            $args
+	 * @param Automation_Model|array|int $automation Either the automation model (sync), array with meta_id, or meta_id int (async).
+	 * @param array|null                 $args       The trigger arguments (only for sync calls).
 	 *
 	 * @return void
 	 */
-	public function process_automations( Automation_Model $automation, $args ) {
-		error_log( 'started' );
-		$process_automation = new Process_Automation( $automation, $args );
-		$process_automation->start();
+	public function process_automations( $automation, $args = null ) {
+		try {
+			// Check if this is an async call from Action Scheduler
+			// When async via do_action_ref_array, ['meta_id' => X] gets unpacked to just X as first arg
+			// So we check: numeric value + null args = meta_id from async call
+			if ( is_numeric( $automation ) && null === $args ) {
+				$meta_id   = $automation;
+				$meta_args = quillcrm_get_meta_args( $meta_id );
+				if ( ! $meta_args || count( $meta_args ) < 2 ) {
+					throw new Exception( 'Failed to retrieve automation arguments from meta_id: ' . $meta_id );
+				}
+				list( $automation, $args ) = $meta_args;
+			}
+			// Legacy: array format (kept for backwards compatibility)
+			elseif ( is_array( $automation ) && isset( $automation['meta_id'] ) ) {
+				$meta_id   = $automation['meta_id'];
+				$meta_args = quillcrm_get_meta_args( $meta_id );
+				if ( ! $meta_args || count( $meta_args ) < 2 ) {
+					throw new Exception( 'Failed to retrieve automation arguments from meta_id: ' . $meta_id );
+				}
+				list( $automation, $args ) = $meta_args;
+			}
+
+			// Ensure we have an Automation_Model
+			if ( ! $automation instanceof Automation_Model ) {
+				if ( is_numeric( $automation ) ) {
+					$automation = Automation_Model::find( $automation );
+				} elseif ( is_array( $automation ) && isset( $automation['id'] ) ) {
+					$automation = Automation_Model::find( $automation['id'] );
+				}
+
+				if ( ! $automation ) {
+					throw new Exception( 'Automation not found' );
+				}
+			}
+
+			$process_automation = new Process_Automation( $automation, $args );
+			$process_automation->start();
+		} catch ( Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Process Automations Error', 'quillcrm' ),
+				array(
+					'code'  => 'process_automations_error',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
+		}
 	}
 
 	/**

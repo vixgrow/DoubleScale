@@ -22,6 +22,7 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@quillcrm/services/activities-service';
 import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
@@ -519,6 +520,23 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                                                             onEdit={() => handleEditActivity(activity)}
                                                             onDelete={() => handleDeleteActivity(itemId!)}
                                                         />
+                                                    )}
+                                                    {!isTask && item.display_status && (
+                                                        <Badge
+                                                            className={cn(
+                                                                "text-xs",
+                                                                item.display_status === 'upcoming' && "bg-blue-100 text-blue-800 hover:bg-blue-100",
+                                                                item.display_status === 'due_today' && "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+                                                                item.display_status === 'completed' && "bg-green-100 text-green-800 hover:bg-green-100"
+                                                            )}
+                                                        >
+                                                            {item.display_status === 'due_today'
+                                                                ? __('Due Today', 'quillcrm')
+                                                                : item.display_status === 'upcoming'
+                                                                ? __('Upcoming', 'quillcrm')
+                                                                : __('Completed', 'quillcrm')
+                                                            }
+                                                        </Badge>
                                                     )}
                                                     {isTask && (
                                                         <>

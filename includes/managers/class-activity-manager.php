@@ -1131,7 +1131,21 @@ final class Activity_Manager {
 			NULL as title,
 			NULL as description,
 			NULL as status,
-			NULL as display_status,
+			CASE
+			WHEN a.activity_type IN ('meeting_scheduled', 'call_logged') THEN
+				CASE
+					WHEN DATE(COALESCE(
+						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.scheduled_at')),
+						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.called_at'))
+					)) < CURDATE() THEN 'completed'
+					WHEN DATE(COALESCE(
+						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.scheduled_at')),
+						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.called_at'))
+					)) = CURDATE() THEN 'due_today'
+					ELSE 'upcoming'
+				END
+			ELSE NULL
+		END as display_status,
 			NULL as priority,
 			NULL as due_date,
 			NULL as due_time,
@@ -1325,6 +1339,7 @@ final class Activity_Manager {
 			'formatted_message' => $this->format_activity_message( $row->activity_type, $user, $data ),
 			'is_editable'       => in_array( $row->activity_type, $editable_types, true ),
 			'is_system'         => in_array( $row->activity_type, $system_types, true ),
+			'display_status'    => $row->display_status ?? null,
 			'comments_count'    => (int) $row->comments_count,
 			'created_at'        => $row->created_at,
 			'updated_at'        => $row->updated_at,

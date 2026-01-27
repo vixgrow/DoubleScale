@@ -72,11 +72,9 @@ export function DateRangePicker({
 		setInternalRange(newRange);
 
 		// Only call onChange (which triggers parent re-render) when:
-		// 1. Both dates are selected (complete range)
+		// 1. Both dates are selected (complete range, including same-day)
 		// 2. Range is cleared (both null)
-		// 3. Only 'from' is selected and 'to' is explicitly null (not same as from)
-		const isCompleteRange =
-			newRange.from && newRange.to && newRange.from !== newRange.to;
+		const isCompleteRange = newRange.from && newRange.to;
 		const isCleared = !newRange.from && !newRange.to;
 
 		if (isCompleteRange || isCleared) {

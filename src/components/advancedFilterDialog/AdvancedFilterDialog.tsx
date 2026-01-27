@@ -59,7 +59,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 			expectedCloseDateRange: { from: null, to: null },
 			createdDateRange: { from: null, to: null },
 			valueRange: { min: null, max: null },
-			status: 'open',
+			status: 'all',
 			priority: null,
 		});
 	};
@@ -73,7 +73,8 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 		filters.createdDateRange?.to ||
 		filters.valueRange?.min !== null ||
 		filters.valueRange?.max !== null ||
-		filters.priority !== null;
+		filters.priority !== null ||
+		filters.status !== 'all';
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,19 +107,12 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									)
 								}
 								placeholder={__('Select All Owner', 'quillcrm')}
-								apiEndpoint="/qc/v1/contacts"
-								getOptionLabel={(c) => {
-									const name =
-										[c.first_name, c.last_name]
-											.filter(Boolean)
-											.join(' ') || 'Unnamed';
-									return c.email
-										? `${name} (${c.email})`
-										: name;
-								}}
-								getOptionValue={(c) => c.id}
-								dataPath="data"
-								searchParamName="keywords"
+								apiEndpoint="/qc/v1/user-management/users/frontend"
+								getOptionLabel={(u) => u.display_name || u.name}
+								getOptionValue={(u) => u.id}
+								dataPath="users"
+								searchParamName="search"
+								apiParams={{ filter_crm_users: true }}
 								perPage={10}
 								className="h-10"
 							/>
@@ -220,11 +214,11 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 							</label>
 
 							<Select
-								value={filters.priority || ''}
+								value={filters.priority || '__all__'}
 								onValueChange={(value) =>
 									handleFilterChange(
 										'priority',
-										value || null
+										value === '__all__' ? null : value
 									)
 								}
 							>
@@ -238,6 +232,9 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 								</SelectTrigger>
 
 								<SelectContent>
+									<SelectItem value="__all__">
+										{__('All priorities', 'quillcrm')}
+									</SelectItem>
 									{Object.keys(priorities).map((key) => (
 										<SelectItem key={key} value={key}>
 											{priorities[key].label}
@@ -307,21 +304,19 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 					</div>
 				</div>
 				{/*Apply filter */}
-				{hasActiveFilters && (
-					<div className="my-2">
-						<Button
-							className=" w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 px-8  gap-1 rounded-md text-base font-normal tracking-tight"
-							onClick={() => {
-								onFiltersChange(filters);
-								// setIsFilterExpanded(false);
-								onOpenChange(false);
-							}}
-							title={__('Apply Filter', 'quillcrm')}
-						>
-							{__('Apply Filter', 'quillcrm')}
-						</Button>
-					</div>
-				)}
+				<div className="my-2">
+					<Button
+						className=" w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 px-8  gap-1 rounded-md text-base font-normal tracking-tight"
+						onClick={() => {
+							onFiltersChange(filters);
+							// setIsFilterExpanded(false);
+							onOpenChange(false);
+						}}
+						title={__('Apply Filters', 'quillcrm')}
+					>
+						{__('Apply Filters', 'quillcrm')}
+					</Button>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

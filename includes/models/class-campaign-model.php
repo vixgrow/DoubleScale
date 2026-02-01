@@ -635,6 +635,27 @@ class Campaign_Model extends Model {
 			}
 		);
 
+		// Fire event when campaign is scheduled
+		static::saved(
+			function ( $campaign ) {
+				// Check if status changed to 'schedule'
+				$original_status = $campaign->getOriginal( 'status' );
+				$new_status      = $campaign->status;
+
+				if ( $new_status === 'schedule' && $original_status !== 'schedule' ) {
+					/**
+					 * Fires when a campaign is scheduled.
+					 *
+					 * @since 1.2.0
+					 *
+					 * @param Campaign_Model $campaign   The scheduled campaign.
+					 * @param string         $execute_at Scheduled execution time.
+					 */
+					do_action( 'quillcrm_campaign_scheduled', $campaign, $campaign->execute_at );
+				}
+			}
+		);
+
 		// Delete the campaign templates when deleting the campaign
 		// static::deleting(
 		// function ($campaign) {

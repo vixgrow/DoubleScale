@@ -253,20 +253,21 @@ export const Controller = ({ page }) => {
 					<WordPressIcon />
 					{__('Back to WordPress Dashboard', 'quillcrm')}
 				</div>
-				<div className="flex items-center gap-3 justify-end w-1/2">
-					{!isProActive && <ProUpgradeButton />}
-					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
-						{avatarUrl ? (
-							<AvatarImage src={avatarUrl} alt={displayName} />
-						) : null}
-						<AvatarFallback className="text-[#1D1F2C] flex items-center justify-center uppercase">
-							{avatarInitials || <UserIcon className="w-5 h-5" />}
-						</AvatarFallback>
-					</Avatar>
-					<div className="text-lg font-semibold text-[#333333]">
-						{displayName}
-					</div>
+			<div className="flex items-center gap-3 justify-end w-1/2">
+				{!isProActive && <ProUpgradeButton />}
+				{applyFilters('quillcrm_header_before_avatar', null) as React.ReactNode}
+				<Avatar className="w-10 h-10 bg-[#F5F5F5]">
+					{avatarUrl ? (
+						<AvatarImage src={avatarUrl} alt={displayName} />
+					) : null}
+					<AvatarFallback className="text-[#1D1F2C] flex items-center justify-center uppercase">
+						{avatarInitials || <UserIcon className="w-5 h-5" />}
+					</AvatarFallback>
+				</Avatar>
+				<div className="text-lg font-semibold text-[#333333]">
+					{displayName}
 				</div>
+			</div>
 			</div>
 			<page.component navigate={handleNavigate} params={params} />
 		</motion.div>

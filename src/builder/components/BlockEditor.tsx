@@ -176,7 +176,7 @@ const BlockEditor: React.FC = () => {
 										};
 										dispatch(STORE_KEY).updateSection(
 											selectedSectionId,
-											sectionStyles
+											{ styles: sectionStyles }
 										);
 									}}
 								/>

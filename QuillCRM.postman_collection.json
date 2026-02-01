@@ -4700,6 +4700,131 @@
 					"response": []
 				},
 				{
+					"name": "Get Timeline (Unified)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/timeline?contact_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"timeline"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}",
+									"description": "Filter by contact ID"
+								},
+								{
+									"key": "entity_type",
+									"value": "deal",
+									"disabled": true,
+									"description": "Entity type: 'deal' or 1 for deals"
+								},
+								{
+									"key": "entity_id",
+									"value": "{{dealId}}",
+									"disabled": true,
+									"description": "Entity ID (e.g., deal ID)"
+								},
+								{
+									"key": "user_id",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter by user ID"
+								},
+								{
+									"key": "date_from",
+									"value": "2026-01-01",
+									"disabled": true,
+									"description": "Filter from date (YYYY-MM-DD)"
+								},
+								{
+									"key": "date_to",
+									"value": "2026-12-31",
+									"disabled": true,
+									"description": "Filter to date (YYYY-MM-DD)"
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"disabled": true,
+									"description": "Sort by: created_at, updated_at"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"disabled": true,
+									"description": "Sort order: asc, desc"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true,
+									"description": "Items per page"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true,
+									"description": "Page number"
+								}
+							]
+						},
+						"description": "Get unified timeline (activities + tasks when Pro is active). Use this for the 'All Activity' tab."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Timeline by Deal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/timeline?entity_type=deal&entity_id={{dealId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"timeline"
+							],
+							"query": [
+								{
+									"key": "entity_type",
+									"value": "deal",
+									"description": "Entity type: 'deal' or 1"
+								},
+								{
+									"key": "entity_id",
+									"value": "{{dealId}}",
+									"description": "Deal ID"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get unified timeline for a specific deal (Pro required)"
+					},
+					"response": []
+				},
+				{
 					"name": "Get Activity",
 					"request": {
 						"method": "GET",
@@ -5662,6 +5787,51 @@
 					"response": []
 				},
 				{
+					"name": "List Deals by Contact",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals?contact_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}",
+									"description": "Filter deals by contact ID"
+								},
+								{
+									"key": "status",
+									"value": "open",
+									"disabled": true,
+									"description": "Filter by status: open, won, lost"
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at",
+									"disabled": true,
+									"description": "Sort by: created_at, value, expected_close_date"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all deals associated with a specific contact"
+					},
+					"response": []
+				},
+				{
 					"name": "Create Deal",
 					"request": {
 						"method": "POST",
@@ -5687,6 +5857,36 @@
 								"deals"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Deal for Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Deal from Contact\",\n    \"contact_id\": \"{{contactId}}\",\n    \"pipeline_id\": \"{{pipelineId}}\",\n    \"stage_id\": \"{{stageId}}\",\n    \"value\": 5000,\n    \"expected_close_date\": \"2026-03-15\",\n    \"priority\": \"medium\",\n    \"source\": \"website\",\n    \"custom_fields\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/deals",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"deals"
+							]
+						},
+						"description": "Create a new deal linked to a contact. Required: title, contact_id, pipeline_id, stage_id"
 					},
 					"response": []
 				},
@@ -6124,6 +6324,94 @@
 					"response": []
 				},
 				{
+					"name": "List Tasks by Contact",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks?entity_type=1&entity_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "entity_type",
+									"value": "1",
+									"description": "1=Contact, 2=Deal"
+								},
+								{
+									"key": "entity_id",
+									"value": "{{contactId}}",
+									"description": "Contact ID"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true,
+									"description": "Filter by status: pending, completed"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all tasks associated with a specific contact"
+					},
+					"response": []
+				},
+				{
+					"name": "List Tasks by Deal",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks?entity_type=2&entity_id={{dealId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "entity_type",
+									"value": "2",
+									"description": "1=Contact, 2=Deal"
+								},
+								{
+									"key": "entity_id",
+									"value": "{{dealId}}",
+									"description": "Deal ID"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true,
+									"description": "Filter by status: pending, completed"
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all tasks associated with a specific deal (Pro required)"
+					},
+					"response": []
+				},
+				{
 					"name": "Create Task",
 					"request": {
 						"method": "POST",
@@ -6149,6 +6437,66 @@
 								"tasks"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task for Contact",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Follow up call\",\n    \"description\": \"Call to discuss proposal\",\n    \"contact_id\": \"{{contactId}}\",\n    \"assigned_to\": 1,\n    \"task_type\": \"call\",\n    \"status\": \"pending\",\n    \"priority\": \"high\",\n    \"due_date\": \"2026-02-01\",\n    \"due_time\": \"14:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Create a task linked to a contact using contact_id"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task for Deal",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Send proposal\",\n    \"description\": \"Prepare and send proposal document\",\n    \"deals\": \"{{dealId}}\",\n    \"assigned_to\": 1,\n    \"task_type\": \"todo\",\n    \"status\": \"pending\",\n    \"priority\": \"high\",\n    \"due_date\": \"2026-02-01\",\n    \"due_time\": \"10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Create a task linked to a deal using deals parameter (Pro required)"
 					},
 					"response": []
 				},

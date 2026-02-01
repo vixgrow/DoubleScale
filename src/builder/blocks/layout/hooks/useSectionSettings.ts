@@ -1,5 +1,5 @@
 import { useSelect } from '@wordpress/data';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { STORE_KEY } from '../../../../stores/email-builder/constants';
 import { EmailSection } from '../../../../stores/email-builder/types';
 import { PaddingValue } from '../../basic/shared';
@@ -98,6 +98,9 @@ export const useSectionSettings = ({
     ? sections.find((s) => s.id === sectionId)
     : null;
 
+  // Track previous sectionId to only sync when switching sections
+  const previousSectionIdRef = useRef<string | undefined>(sectionId);
+
   const [settings, setSettings] = useState<LayoutSettingsData>(() => {
     const defaultSettings: LayoutSettingsData = {
       backgroundColor: '#ffffff',
@@ -122,21 +125,61 @@ export const useSectionSettings = ({
     return { ...defaultSettings, ...initialSettings };
   });
 
+  // Only sync from store when sectionId changes (switching sections), 
+  // not when section data changes (which would overwrite user changes)
   useEffect(() => {
-    if (currentSection) {
-      const sectionSettings =
-        convertSectionStylesToSettings(currentSection);
-      setSettings((prev) => ({
-        ...prev,
-        ...sectionSettings,
-      }));
-    } else if (initialSettings) {
-      setSettings((prev) => ({
-        ...prev,
-        ...initialSettings,
-      }));
+    // Only sync if sectionId actually changed
+    if (previousSectionIdRef.current !== sectionId) {
+      previousSectionIdRef.current = sectionId;
+      
+      // Get the current section at the time of the effect
+      // Using sections from closure - it will have the latest value when sectionId changes
+      const sectionToSync = sectionId
+        ? sections.find((s) => s.id === sectionId)
+        : null;
+      
+      if (sectionToSync) {
+        const sectionSettings =
+          convertSectionStylesToSettings(sectionToSync);
+        setSettings((prev) => {
+          const defaultSettings: LayoutSettingsData = {
+            backgroundColor: '#ffffff',
+            backgroundImage: null,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: {
+              top: 40,
+              right: 40,
+              bottom: 40,
+              left: 40,
+            },
+          };
+          return { ...defaultSettings, ...sectionSettings };
+        });
+      } else if (initialSettings && Object.keys(initialSettings).length > 0) {
+        setSettings((prev) => {
+          const defaultSettings: LayoutSettingsData = {
+            backgroundColor: '#ffffff',
+            backgroundImage: null,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            padding: {
+              top: 40,
+              right: 40,
+              bottom: 40,
+              left: 40,
+            },
+          };
+          return { ...defaultSettings, ...initialSettings };
+        });
+      }
     }
-  }, [initialSettings, currentSection]);
+    // Only depend on sectionId, not sections or currentSection, to avoid overwriting user changes
+    // When sectionId changes, sections will have the latest value from the closure
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionId]);
 
   const handleInputChange = (
     field: keyof LayoutSettingsData,

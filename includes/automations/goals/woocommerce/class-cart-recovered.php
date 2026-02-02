@@ -10,7 +10,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Goals;
+namespace QuillCRM\Automations\Goals\WooCommerce;
 
 
 use QuillCRM\Abstracts\Goal_Pro;
@@ -38,7 +38,7 @@ class Cart_Recovered extends Goal_Pro {
 	 *
 	 * @since 1.0.0
 	 */
-	public $slug = 'wc_cart_recovered';
+	public $slug = 'wc_cart_recovered_goal';
 
 	/**
 	 * Goal Description

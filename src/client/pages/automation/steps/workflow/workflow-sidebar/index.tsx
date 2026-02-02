@@ -30,6 +30,10 @@ import GoalSelector from '../goal-selector';
 import DelaySelector from '../delay-selector';
 import { NoticeBanner } from '@quillcrm/components';
 import ProAutomationModal from '../../../../../../components/pro-automation-modal';
+import {
+	SidebarLayoutProvider,
+	SidebarFooter,
+} from './sidebar-layout-context';
 import { applyFilters } from '@wordpress/hooks';
 import { getApiErrorMessage } from '@quillcrm/utils';
 
@@ -339,27 +343,31 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	// Render content within sidebar wrapper
 	return (
 		<>
-			<div
-				className={cn(
-					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen w-96 rounded-l-lg z-[150400] flex flex-col',
-					isVisible ? 'is-visible' : ''
-				)}
-			>
-				<SidebarHeader
-					title={getTitle(isTriggerVisible, currentStep)}
-					onClose={handleClose}
-				/>
-
-				<div className="flex-1 space-y-4 p-4 overflow-y-auto">
-					{notice && (
-						<NoticeBanner
-							notice={notice}
-							closeNotice={closeNotice}
-						/>
+			<SidebarLayoutProvider>
+				<div
+					className={cn(
+						'qcrm-workflow-sidebar absolute top-0 right-0 bottom-0 w-96 rounded-l-lg z-[150400] flex flex-col min-h-0',
+						isVisible ? 'is-visible' : ''
 					)}
-					{renderContent()}
+				>
+					<SidebarHeader
+						title={getTitle(isTriggerVisible, currentStep)}
+						onClose={handleClose}
+					/>
+
+					<div className="flex-1 min-h-0 overflow-y-auto space-y-4 p-4">
+						{notice && (
+							<NoticeBanner
+								notice={notice}
+								closeNotice={closeNotice}
+							/>
+						)}
+						{renderContent()}
+					</div>
+
+					<SidebarFooter />
 				</div>
-			</div>
+			</SidebarLayoutProvider>
 
 			<ProAutomationModal
 				visible={showProConditionModal}

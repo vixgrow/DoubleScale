@@ -1,27 +1,32 @@
 .qcrm-reactflow-container {
 	width: 100%;
+	height: 100%;
+	min-height: 0;
 	background-color: #fff;
 	border-radius: 8px;
 	border: 1px solid var(--qcrm-border-color);
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: hidden;
 	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 // ReactFlow Workflow Styles
 .qcrm-reactflow-workflow {
-	height: 100vh;
+	height: 100%;
 	min-height: 400px;
 	width: 100%;
 	background: #f9f9f9;
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: hidden;
 	position: relative;
+	flex: 1;
 
 	&__layout {
 		display: flex;
 		height: 100%;
+		min-height: 0;
 		width: 100%;
+		flex: 1;
 	}
 
 	&__sidebar {
@@ -37,7 +42,8 @@
 	&__canvas {
 		flex: 1;
 		position: relative;
-		min-width: 0; // Allow flex item to shrink below its content size
+		min-width: 0;
+		min-height: 0;
 	}
 
 	.react-flow__viewport {
@@ -301,6 +307,7 @@
 
 	// Node Type Specific Styles
 	&--action {
+
 		// Action configuration status
 		.qcrm-reactflow-action__configured {
 			color: #52c41a;
@@ -479,6 +486,7 @@
 	}
 
 	&--goal {
+
 		// Goal configuration status
 		.qcrm-reactflow-goal__configured {
 			color: #52c41a;
@@ -550,11 +558,9 @@
 			inset: -2px;
 			border-radius: 50%;
 			padding: 2px;
-			background: linear-gradient(
-				135deg,
-				rgba(255, 255, 255, 0.8),
-				rgba(255, 255, 255, 0.2)
-			);
+			background: linear-gradient(135deg,
+					rgba(255, 255, 255, 0.8),
+					rgba(255, 255, 255, 0.2));
 			mask:
 				linear-gradient(#fff 0 0) content-box,
 				linear-gradient(#fff 0 0);
@@ -566,11 +572,9 @@
 			position: absolute;
 			inset: -8px;
 			border-radius: 50%;
-			background: radial-gradient(
-				circle,
-				transparent 70%,
-				rgba(24, 144, 255, 0.1) 100%
-			);
+			background: radial-gradient(circle,
+					transparent 70%,
+					rgba(24, 144, 255, 0.1) 100%);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			pointer-events: none;

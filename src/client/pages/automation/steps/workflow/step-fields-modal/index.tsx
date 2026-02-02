@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -32,6 +32,7 @@ import {
 	supportsAnalytics,
 	getChannelType,
 } from '../reactflow-workflow/constants/action-types';
+import { useSidebarLayout } from '../workflow-sidebar/sidebar-layout-context';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -44,6 +45,9 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	setStep,
 	saveStep,
 }) => {
+	const sidebarLayout = useSidebarLayout();
+	const setFooterRef = useRef(sidebarLayout?.setFooter);
+	setFooterRef.current = sidebarLayout?.setFooter;
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
@@ -109,6 +113,40 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setIsDeleting(false);
 		setStep(null); // Close the modal after deletion
 	};
+
+	// Register footer in sidebar so scroll is between header and buttons (footer fixed at bottom)
+	// Use ref for setFooter to avoid infinite loop (context value changes when footer updates)
+	useLayoutEffect(() => {
+		const setFooter = setFooterRef.current;
+		if (!setFooter) return;
+		setFooter(
+			<div className="flex items-center justify-between gap-2">
+				<Button
+					onClick={handleSave}
+					disabled={isSaving || isDeleting}
+					variant="gradient"
+					className="w-full"
+					size="lg"
+				>
+					{isSaving
+						? __('Saving...', 'quillcrm')
+						: __('Save Changes', 'quillcrm')}
+				</Button>
+				<Button
+					onClick={handleDelete}
+					disabled={isSaving || isDeleting}
+					variant="outline"
+					className="w-full text-destructive border-destructive hover:text-destructive"
+					size="lg"
+				>
+					{isDeleting
+						? __('Deleting...', 'quillcrm')
+						: __('Delete', 'quillcrm')}
+				</Button>
+			</div>
+		);
+		return () => setFooter(null);
+	}, [isSaving, isDeleting]);
 
 	const handleMergeTagsClick = () => {
 		setMergeTagCallback((tagValue: string) => {
@@ -218,7 +256,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	}
 
 	return (
-		<div className="qcrm-step-fields-content flex flex-col">
+		<div className="qcrm-step-fields-content flex flex-col min-h-0">
 			{/* Provider not configured warning for SMS/WhatsApp actions (non-blocking) */}
 			{/* SMS: Open quick Twilio config modal */}
 			{/* WhatsApp: Navigate to integrations page (supports Twilio and Meta WhatsApp) */}
@@ -274,32 +312,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					}}
 					stepId={step.id}
 				/>
-			</div>
-
-			<div className="flex items-center justify-between gap-2">
-				<Button
-					onClick={handleSave}
-					disabled={isSaving || isDeleting}
-					variant="gradient"
-					className="w-full"
-					size="lg"
-				>
-					{isSaving
-						? __('Saving...', 'quillcrm')
-						: __('Save Changes', 'quillcrm')}
-				</Button>
-
-				<Button
-					onClick={handleDelete}
-					disabled={isSaving || isDeleting}
-					variant="outline"
-					className="w-full text-destructive border-destructive hover:text-destructive"
-					size="lg"
-				>
-					{isDeleting
-						? __('Deleting...', 'quillcrm')
-						: __('Delete', 'quillcrm')}
-				</Button>
 			</div>
 
 			{/* Twilio Configuration Modal */}

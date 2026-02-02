@@ -215,7 +215,7 @@ const Automation: React.FC = () => {
 				}}
 			>
 				<DialogContent
-					className="z-[150000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
+					className="z-[150000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
 					style={{
 						paddingTop: '10px',
 						paddingLeft: '0px',
@@ -229,12 +229,12 @@ const Automation: React.FC = () => {
 						// Check for builder-portal-wrapper or any builder element
 						const isBuilderClick =
 							target.closest('#builder-portal-wrapper') !==
-								null ||
+							null ||
 							target.closest('[data-builder-portal="true"]') !==
-								null ||
+							null ||
 							target.id === 'builder-portal-wrapper' ||
 							target.getAttribute('data-builder-portal') ===
-								'true' ||
+							'true' ||
 							document.getElementById(
 								'builder-portal-wrapper'
 							) !== null;
@@ -327,9 +327,9 @@ const Automation: React.FC = () => {
 									</div>
 								</DialogTitle>
 							</DialogHeader>
-							<div className="flex flex-1 overflow-hidden">
+							<div className="flex flex-1 min-h-0 overflow-hidden">
 								{/* Left Sidebar */}
-								<div className="w-28 border-r border-[#E4E7EC] flex flex-col gap-5 pt-4 px-2">
+								<div className="w-28 border-r border-[#E4E7EC] flex flex-col gap-5 pt-4 px-2 shrink-0">
 									{tabs.map((tab) => {
 										const Icon = tab.icon;
 										const isActive = activeTab === tab.id;
@@ -339,16 +339,15 @@ const Automation: React.FC = () => {
 												onClick={() =>
 													setActiveTab(
 														tab.id as
-															| 'workflow'
-															| 'contacts'
-															| 'reports'
+														| 'workflow'
+														| 'contacts'
+														| 'reports'
 													)
 												}
-												className={`flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg transition-colors shadow-none ${
-													isActive
-														? 'bg-[#E3EEFF99] text-secondary'
-														: 'border border-[#E4E7EC] text-[#667085] hover:bg-gray-50'
-												}`}
+												className={`flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg transition-colors shadow-none ${isActive
+													? 'bg-[#E3EEFF99] text-secondary'
+													: 'border border-[#E4E7EC] text-[#667085] hover:bg-gray-50'
+													}`}
 											>
 												<Icon width={24} height={24} />
 												<span className="text-base font-normal">
@@ -359,7 +358,12 @@ const Automation: React.FC = () => {
 									})}
 								</div>
 								{/* Main Content */}
-								<div className="flex-1 overflow-y-auto overflow-x-hidden">
+								<div
+									className={`flex-1 min-h-0 flex flex-col ${activeTab === 'contacts'
+											? 'overflow-y-auto overflow-x-hidden'
+											: 'overflow-hidden'
+										}`}
+								>
 									{renderContent()}
 								</div>
 							</div>

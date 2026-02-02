@@ -40,13 +40,13 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 
 	return (
 		<Provider value={contextValue}>
-			<div className="h-screen overflow-auto">
+			<div className="h-full min-h-0 overflow-hidden flex flex-col">
 				<ReactFlowWorkflow
 					currentStep={null}
 					isTriggerVisible={false}
 					isSidebarOpen={false}
-					onStepClick={() => {}}
-					onTriggerClick={() => {}}
+					onStepClick={() => { }}
+					onTriggerClick={() => { }}
 					viewMode={true}
 					analyticsData={analyticsData}
 				/>

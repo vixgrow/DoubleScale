@@ -106,7 +106,10 @@ export function DatePicker({
 
 	return (
 		<div className={cn('relative flex gap-2', className)}>
-			<Popover open={open} onOpenChange={setOpen}>
+			<Popover open={open} onOpenChange={(val) => {
+				if (!val) return;
+				setOpen(val);
+			}}>
 				<PopoverTrigger asChild>
 					<Button
 						className={cn(

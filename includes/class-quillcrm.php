@@ -584,6 +584,12 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load WooCommerce goals (Pro placeholders)
+		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/woocommerce/class-*.php' );
+		foreach ( $goals_files as $file ) {
+			require $file;
+		}
+
 		// Load all custom fields files
 		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
 		foreach ( $custom_fields_files as $file ) {

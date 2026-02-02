@@ -511,6 +511,8 @@ class Import {
 					$contact->lists()->sync( $this->lists, false );
 				}
 			}
+
+			return true;
 		} catch ( \Exception $e ) {
 			return new \WP_Error( 'import_failed', $e->getMessage() );
 		}
@@ -535,6 +537,9 @@ class Import {
 	 * @return array
 	 */
 	private function import_with_offset( $total, $offset, $get_subscribers_callback, $mapping ) {
+		$imported_count = 0;
+		$error_count    = 0;
+
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
 			usleep( 1000000 );
@@ -545,7 +550,12 @@ class Import {
 			}
 
 			foreach ( $subscribers as $subscriber ) {
-				$this->import_contact( $subscriber, $mapping );
+				$import_result = $this->import_contact( $subscriber, $mapping );
+				if ( is_wp_error( $import_result ) ) {
+					$error_count++;
+				} else {
+					$imported_count++;
+				}
 				$offset++;
 			}
 
@@ -555,11 +565,28 @@ class Import {
 			}
 		}
 
+		$is_completed = $offset >= $total;
+
 		$result = array(
 			'offset' => $offset,
-			'status' => $offset >= $total ? 'completed' : 'in_progress',
+			'status' => $is_completed ? 'completed' : 'in_progress',
 			'total'  => $total,
 		);
+
+		// Fire action when import is completed.
+		if ( $is_completed ) {
+			/**
+			 * Fires when a contact import is completed.
+			 *
+			 * @since 1.2.0
+			 *
+			 * @param int $user_id        The user who initiated the import.
+			 * @param int $imported_count Number of contacts successfully imported.
+			 * @param int $error_count    Number of errors during import.
+			 * @param int $total          Total contacts processed.
+			 */
+			do_action( 'quillcrm_import_completed', get_current_user_id(), $imported_count, $error_count, $total );
+		}
 
 		return $result;
 	}

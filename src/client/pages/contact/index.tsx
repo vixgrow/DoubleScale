@@ -209,6 +209,7 @@ const Contact: React.FC<ContactProps> = ({
 					handleClose();
 				}
 			}}
+			modal={false}
 		>
 			<DialogContent
 				className="z-[140000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"

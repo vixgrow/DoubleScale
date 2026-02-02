@@ -192,6 +192,12 @@ final class Goals_Manager {
 						 'goals'       => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
+					 'cart'   => array(
+						 'label'       => __( 'Cart', 'quillcrm' ),
+						 'goals'       => array(),
+						 'triggers'    => array( 'wc_abandoned_cart_created' ),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					 ),
 				 ),
 			 ),
 			 'surecart'    => array(

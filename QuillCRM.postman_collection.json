@@ -6615,6 +6615,99 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Bulk Complete Tasks",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\": [1, 2, 3, 4, 5]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/bulk-complete",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"bulk-complete"
+							]
+						},
+						"description": "Mark multiple tasks as completed in a single request. Returns the number of tasks affected and a success message. Sales reps can only complete their own tasks."
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Mark Tasks Pending",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\": [1, 2, 3, 4, 5]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/bulk-pending",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"bulk-pending"
+							]
+						},
+						"description": "Mark multiple tasks as pending in a single request. Resets completed_at and reminder_sent_at timestamps. Sales reps can only update their own tasks."
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Tasks",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\": [1, 2, 3, 4, 5]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/tasks/bulk-delete",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"tasks",
+								"bulk-delete"
+							]
+						},
+						"description": "Delete multiple tasks in a single request. Uses POST method instead of DELETE for better client compatibility. Sales reps can only delete their own tasks."
+					},
+					"response": []
 				}
 			]
 		},

@@ -80,6 +80,7 @@ export interface ActivitiesApiItem {
 	user_id?: number;
 	user?: ActivityUser;
 	status?: string;
+	display_status?: string;
 	priority?: string;
 	due_date?: string;
 	due_time?: string;
@@ -121,6 +122,7 @@ export interface TimelineItem {
 	data?: Record<string, unknown>;
 	icon_type: string;
 	status?: string;
+	display_status?: string;
 	priority?: string;
 	due_date?: string;
 	due_time?: string;
@@ -195,6 +197,7 @@ export function transformApiItemToTimelineItem(
 		user: item.user,
 		data: item.data,
 		icon_type: item.activity_type || 'note',
+		display_status: item.display_status,
 		comments_count: item.comments_count || 0,
 		activity: item,
 	};

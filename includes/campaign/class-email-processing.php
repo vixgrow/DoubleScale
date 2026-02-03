@@ -18,17 +18,19 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
+use QuillCRM\Emails\Bulk_Email_Sender;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Tracking\Email;
 use QuillCRM\Constants\Campaign_Channel;
-
+use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Message_Direction;
+use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Models\Communication_Tracking_Meta_Model;
 /**
  * Email Campaign Processing class
  */
 class Email_Processing extends Abstract_Campaign_Processing {
-
-
-
 	/**
 	 * Communication channel
 	 *
@@ -44,12 +46,432 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	private $template_merge_tag_keys = null;
 
 	/**
+	 * Whether to use bulk sending for this campaign
+	 *
+	 * @var bool|null
+	 */
+	private $use_bulk_sending = null;
+
+	/**
 	 * Add hooks
 	 *
 	 * @return void
 	 */
 	public function add_hooks() {
 		$this->register_campaign_processing_hooks();
+	}
+
+	/**
+	 * Check if bulk sending should be used
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return bool True if bulk sending should be used
+	 */
+	protected function should_use_bulk_sending( Campaign_Model $campaign ) {
+		if ( $this->use_bulk_sending !== null ) {
+			return $this->use_bulk_sending;
+		}
+
+		// Check if bulk sending is available (QuillSMTP with bulk-capable mailer)
+		if ( ! Bulk_Email_Sender::is_available() ) {
+			$this->use_bulk_sending = false;
+			return false;
+		}
+
+		// Allow filtering whether to use bulk sending
+		$this->use_bulk_sending = apply_filters(
+			'quillcrm_use_bulk_email_sending',
+			true,
+			$campaign
+		);
+
+		if ( $this->use_bulk_sending ) {
+			quillcrm_get_logger()->info(
+				__( 'Bulk email sending enabled for campaign', 'quillcrm' ),
+				array(
+					'code'        => 'bulk_email_enabled',
+					'campaign_id' => $campaign->id,
+					'mailer'      => Bulk_Email_Sender::get_active_mailer_slug(),
+				)
+			);
+		}
+
+		return $this->use_bulk_sending;
+	}
+
+	/**
+	 * Override do_process_campaign to support bulk sending
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return void
+	 */
+	protected function do_process_campaign( Campaign_Model $campaign ) {
+		// Check if bulk sending should be used
+		if ( $this->should_use_bulk_sending( $campaign ) ) {
+			$this->do_process_campaign_bulk( $campaign );
+			return;
+		}
+
+		// Fall back to parent individual sending
+		parent::do_process_campaign( $campaign );
+	}
+
+	/**
+	 * Process campaign using bulk sending
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return void
+	 */
+	protected function do_process_campaign_bulk( Campaign_Model $campaign ) {
+		wp_raise_memory_limit( 'admin' );
+
+		// Lock key for refreshing during long operations
+		$lock_key      = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_duration = apply_filters(
+			'quillcrm_campaign_lock_duration',
+			300,
+			$this->channel,
+			$campaign->id
+		);
+
+		$offset_key = "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
+		$filters    = $campaign->get_setting( 'filters', array() );
+
+		$campaign_recipients_count = $this->contact_filter->get_contact_count( $this->channel, $filters );
+
+		if ( $campaign->count != $campaign_recipients_count ) {
+			$campaign->count = $campaign_recipients_count;
+			$campaign->save();
+		}
+
+		$offset = (int) get_option( $offset_key, 0 );
+
+		if ( $offset >= $campaign_recipients_count ) {
+			$this->complete_campaign( $campaign, $campaign_recipients_count );
+			return;
+		}
+
+		// Get batch size - use bulk mailer's max batch size
+		$batch_size = min(
+			Bulk_Email_Sender::get_max_batch_size(),
+			apply_filters( 'quillcrm_bulk_campaign_batch_size', 500, $this->channel )
+		);
+
+		// Get template for batch preparation
+		$template_id = reset( $campaign->get_template_ids() );
+		$template    = Template_Model::find( $template_id );
+
+		if ( ! $template ) {
+			quillcrm_get_logger()->error(
+				__( 'Template not found for bulk email campaign', 'quillcrm' ),
+				array(
+					'code'        => 'bulk_email_no_template',
+					'campaign_id' => $campaign->id,
+				)
+			);
+			$campaign->status = 'failed';
+			$campaign->save();
+			return;
+		}
+
+		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
+			usleep( 100000 ); // 0.1 second delay
+
+			// Refresh lock
+			$this->refresh_campaign_lock( $lock_key, $lock_duration );
+
+			// Check if campaign was paused/cancelled
+			$fresh_campaign = Campaign_Model::find( $campaign->id );
+			if ( ! $fresh_campaign || $fresh_campaign->status !== 'processing' ) {
+				update_option( $offset_key, $offset );
+				return;
+			}
+
+			// Check completion
+			if ( $offset >= $campaign_recipients_count ) {
+				$this->complete_campaign( $campaign, $campaign_recipients_count );
+				return;
+			}
+
+			// Fetch batch of contacts
+			$contacts = $this->contact_filter->get_contacts_for_processing(
+				$this->channel,
+				$filters,
+				$offset,
+				$batch_size
+			);
+
+			if ( $contacts->isEmpty() ) {
+				break;
+			}
+
+			// Send batch
+			$result = $this->send_email_batch( $campaign, $template, $contacts );
+
+			// Update offset based on contacts processed
+			$offset += $contacts->count();
+			update_option( $offset_key, $offset );
+
+			// If batch failed critically, stop processing
+			if ( isset( $result['fatal'] ) && $result['fatal'] ) {
+				return;
+			}
+		}
+
+		// Check if more work remains
+		if ( $offset >= $campaign_recipients_count ) {
+			$this->complete_campaign( $campaign, $campaign_recipients_count );
+		} else {
+			$this->queue_continuation( $campaign->id );
+		}
+	}
+
+	/**
+	 * Send a batch of emails via bulk API
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign Campaign model
+	 * @param Template_Model                           $template Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts Collection of contacts
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch( Campaign_Model $campaign, Template_Model $template, $contacts ) {
+		$tracking_records    = array();
+		$recipients          = array();
+		$recipient_variables = array();
+		$skipped_contacts    = array();
+		// Step 2: Prepare email content with Mailgun recipient variables
+		$subject = $template->subject ?? '';
+		$body    = $template->body ?? $this->get_default_campaign_content();
+
+		$content = $subject . ' ' . $body;
+
+		// extract the merge tags and resolve for each contact
+		$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $content );
+
+		// Step 1: Create tracking records and prepare recipient data
+		foreach ( $contacts as $contact ) {
+			$email = $this->get_recipient( $contact );
+
+			// Skip contacts without valid email
+			if ( empty( $email ) || ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+				$skipped_contacts[] = $contact->id;
+				$this->contact_filter->log_skipped_contact(
+					$contact->id,
+					$campaign->id,
+					$this->channel,
+					'invalid or missing email'
+				);
+				continue;
+			}
+
+			// Create tracking record
+			$tracking = Communication_Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => $template->id,
+					'mode'        => $this->get_message_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
+					'source_type' => Message_Source_Types::CAMPAIGN,
+					'source_id'   => $campaign->id,
+					'recipient'   => $email,
+					'status'      => Tracking_Status::PENDING,
+					'hash_key'    => Utils::generate_hash_key(),
+				)
+			);
+
+			$tracking_records[ $email ] = $tracking;
+			$recipients[]               = $email;
+			Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$tracking->id,
+				$merge_tag_keys,
+				$contact
+			);
+			$recipient_variables[ $email ] = Merge_Tags_Manager::instance()->get_merge_tag_values_for_keys_slug_only( $merge_tag_keys, $contact );
+		}
+
+		// If no valid recipients, return early
+		if ( empty( $recipients ) ) {
+			quillcrm_get_logger()->info(
+				__( 'No valid recipients in batch', 'quillcrm' ),
+				array(
+					'code'          => 'bulk_email_no_recipients',
+					'campaign_id'   => $campaign->id,
+					'skipped_count' => count( $skipped_contacts ),
+				)
+			);
+			return array(
+				'success' => true,
+				'skipped' => count( $skipped_contacts ),
+			);
+		}
+
+		// Render builder content if needed (without personalization - that's handled by recipient variables)
+		$body = $this->render_builder_content_for_bulk( $body ); // to return html without change format
+
+		// Get footer content
+		$footer = $this->get_bulk_footer_content(); // to return html with convert merge tags format to mailer format
+
+		// Inject footer into body (for builder emails)
+		if ( strpos( $body, '</body>' ) !== false ) {
+			$body = str_replace( '</body>', $footer . '</body>', $body );
+		} else {
+			$body .= $footer;
+		}
+
+		// Convert QuillCRM merge tags to mailer-specific recipient variables
+		$subject = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
+		$body    = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $body );
+
+		// Add tracking pixel using recipient variable (mailer-specific format)
+		$tracking_pixel_tag = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
+		if ( strpos( $body, '</body>' ) !== false ) {
+			$body = str_replace( '</body>', $tracking_pixel . '</body>', $body );
+		} else {
+			$body .= $tracking_pixel;
+		}
+
+		// Step 3: Prepare batch data
+		$batch_data = array(
+			'subject'             => $subject,
+			'html'                => $body,
+			'from_email'          => $template->get_setting( 'from_email' ) ?: get_option( 'admin_email' ),
+			'from_name'           => $template->get_setting( 'from_name' ) ?: get_bloginfo( 'name' ),
+			'reply_to'            => $template->get_setting( 'reply_to' ) ?: '',
+			'recipients'          => $recipients,
+			'recipient_variables' => $recipient_variables,
+			'campaign_id'         => $campaign->id,
+			'tags'                => array( 'quillcrm', 'campaign-' . $campaign->id ),
+		);
+
+		// Step 4: Send via bulk API
+		$result = Bulk_Email_Sender::send_batch( $batch_data );
+
+		// Step 5: Update tracking records based on result
+		if ( is_wp_error( $result ) ) {
+			// Mark all as failed
+			foreach ( $tracking_records as $email => $tracking ) {
+				$tracking->status = Tracking_Status::FAILED;
+				$tracking->save();
+			}
+
+			quillcrm_get_logger()->error(
+				__( 'Bulk email batch failed', 'quillcrm' ),
+				array(
+					'code'            => 'bulk_email_batch_failed',
+					'campaign_id'     => $campaign->id,
+					'error'           => $result->get_error_message(),
+					'recipient_count' => count( $recipients ),
+				)
+			);
+
+			return array(
+				'success' => false,
+				'error'   => $result->get_error_message(),
+				'fatal'   => false,
+			);
+		}
+
+		// Success - mark all tracking records as sent
+		$message_id = $result['message_id'] ?? '';
+		foreach ( $tracking_records as $email => $tracking ) {
+			$tracking->status      = Tracking_Status::SENT;
+			$tracking->sent_at     = current_time( 'mysql' );
+			$tracking->external_id = $message_id;
+			$tracking->save();
+		}
+
+		quillcrm_get_logger()->info(
+			__( 'Bulk email batch sent successfully', 'quillcrm' ),
+			array(
+				'code'          => 'bulk_email_batch_success',
+				'campaign_id'   => $campaign->id,
+				'message_id'    => $message_id,
+				'sent_count'    => count( $recipients ),
+				'skipped_count' => count( $skipped_contacts ),
+			)
+		);
+
+		return array(
+			'success'    => true,
+			'message_id' => $message_id,
+			'sent_count' => count( $recipients ),
+			'skipped'    => count( $skipped_contacts ),
+		);
+	}
+
+	/**
+	 * Render builder content for bulk sending (without personalization)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $content Content to render
+	 *
+	 * @return string Rendered HTML
+	 */
+	protected function render_builder_content_for_bulk( $content ) {
+		// Try to decode as JSON
+		$decoded = json_decode( $content, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return $content; // Not JSON, return as-is
+		}
+
+		// Check if it's builder format
+		if ( ! isset( $decoded['type'] ) || $decoded['type'] !== 'builder' || ! isset( $decoded['value'] ) ) {
+			return $content; // Not builder format
+		}
+
+		// Render without contact context (merge tags will be handled by Mailgun)
+		if ( class_exists( '\QuillCRM\Emails\Email_Renderer' ) ) {
+			$renderer     = new \QuillCRM\Emails\Email_Renderer();
+			$builder_data = $decoded['value'];
+
+			// Render with null contact - merge tags stay as placeholders
+			$html = $renderer->render_from_builder_data( $builder_data, null, '', '' );
+
+			return $html;
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Get footer content for bulk emails
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Footer HTML with recipient variable placeholders
+	 */
+	protected function get_bulk_footer_content() {
+		// Get footer from settings
+		if ( ! empty( $this->settings['email_footer'] ) ) {
+			$footer = $this->settings['email_footer'];
+		} else {
+			$global_settings = \QuillCRM\Settings::get( 'email', array() );
+			if ( ! empty( $global_settings['email_footer'] ) ) {
+				$footer = $global_settings['email_footer'];
+			} else {
+				$footer = Email_Tracking_Helper::get_default_footer();
+			}
+		}
+
+		// Convert merge tags to mailer-specific format
+		$footer = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $footer );
+
+		return $footer;
 	}
 
 	/**
@@ -107,12 +529,12 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		// STEP 1: Extract merge tag keys if not already cached
 		if ( is_null( $this->template_merge_tag_keys ) ) {
 			$combined_content              = $subject . ' ' . $message;
-			$this->template_merge_tag_keys = \QuillCRM\Managers\Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
+			$this->template_merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $combined_content );
 		}
 
 		// STEP 2: Capture merge tag values for this contact using pre-extracted keys
 		if ( ! empty( $this->template_merge_tag_keys ) ) {
-			\QuillCRM\Models\Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
+			Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
 				$campaign_message->id,
 				$this->template_merge_tag_keys,
 				$contact_or_automation_contact
@@ -135,8 +557,8 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 		// Process merge tags in both body and footer (if footer was injected)
 		// Use the original contact model to support automation merge tags
-		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
-		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact_or_automation_contact );
+		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact_or_automation_contact );
+		$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact_or_automation_contact );
 
 		// Remove filter to prevent pollution
 		remove_filter( 'quillcrm_current_channel_context', array( $this, 'get_channel_context' ), 10 );

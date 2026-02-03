@@ -400,4 +400,31 @@ final class Merge_Tags_Manager {
 
 		return $merge_tags;
 	}
+
+	/**
+	 * Get values for specific merge tag keys using contact, with slug-only keys
+	 *
+	 * This is useful for bulk email APIs (like Mailgun) that use recipient variables
+	 * with just the slug as the key (e.g., "first_name" instead of "contact:first_name").
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array                                                   $merge_tag_keys Array of merge tag keys (format: "group:slug")
+	 * @param Contact_Model|\QuillCRM\Models\Automation_Contact_Model $contact_or_automation_contact Contact or Automation Contact model
+	 * @return array Array of slug-only keys and their values (e.g., ["first_name" => "John"])
+	 */
+	public function get_merge_tag_values_for_keys_slug_only( $merge_tag_keys, $contact_or_automation_contact ) {
+		$full_values = $this->get_merge_tag_values_for_keys( $merge_tag_keys, $contact_or_automation_contact );
+		$slug_values = array();
+
+		foreach ( $full_values as $tag_key => $value ) {
+			// Extract just the slug from "group:slug"
+			$parts = explode( ':', $tag_key, 2 );
+			$slug  = isset( $parts[1] ) ? $parts[1] : $tag_key;
+
+			$slug_values[ $slug ] = $value;
+		}
+
+		return $slug_values;
+	}
 }

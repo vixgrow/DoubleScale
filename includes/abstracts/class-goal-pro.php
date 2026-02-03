@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Class Goal
+ * Class Goal_Pro
  *
- * This class is responsible for handling the goal
+ * Base class for Pro-only goals. This class serves as a placeholder in the free plugin
+ * that gets replaced by full implementations when the Pro plugin is active.
  *
  * @since 1.0.0
  *
@@ -12,24 +13,27 @@
 
 namespace QuillCRM\Abstracts;
 
-use Exception;
-use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\QuillCRM;
-use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Automation_Contact_Model;
-
 /**
- * Goal class
+ * Goal_Pro class
+ *
+ * Goals extending this class are Pro-only features. The $is_pro flag indicates
+ * whether the feature should be locked in the UI (true = locked, needs Pro).
  */
 abstract class Goal_Pro extends Goal {
 
 	/**
 	 * Constructor
 	 *
+	 * Sets is_pro flag to indicate if this feature is locked.
+	 * When Pro is NOT active, is_pro = true (feature is locked).
+	 * When Pro IS active, this class is replaced by the Pro implementation.
+	 *
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		 $this->is_pro = ! quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
+		// is_pro = true when Pro is NOT active (feature is locked/requires Pro)
+		// is_pro = false when Pro IS active (feature is available)
+		$this->is_pro = ! quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
 	}
 
 	/**

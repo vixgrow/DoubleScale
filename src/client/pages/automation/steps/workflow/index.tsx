@@ -363,7 +363,7 @@ const Workflow: React.FC = () => {
 
 	return (
 		<>
-			<div className="relative">
+			<div className="relative h-full min-h-0 flex flex-col">
 				{isLoading ? (
 					<div>
 						<div className="animate-pulse space-y-4">
@@ -375,7 +375,7 @@ const Workflow: React.FC = () => {
 					automation && (
 						<div
 							className={cn(
-								'qcrm-automation-workflow',
+								'qcrm-automation-workflow flex-1 min-h-0 flex flex-col',
 								currentStep || visible ? 'has-sidebar' : ''
 							)}
 						>
@@ -387,7 +387,7 @@ const Workflow: React.FC = () => {
 										visible ||
 										(currentStep !== null &&
 											currentStep.type !==
-												'end_automation' &&
+											'end_automation' &&
 											currentStep.type !== 'condition' &&
 											(!!currentStep.action ||
 												currentStep.type === 'goal' ||

@@ -27,6 +27,8 @@ use QuillCRM\Constants\Message_Direction;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Models\Communication_Tracking_Meta_Model;
+use QuillCRM\Contact_Filters\Condition_Evaluator;
+
 /**
  * Email Campaign Processing class
  */
@@ -238,6 +240,12 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	/**
 	 * Send a batch of emails via bulk API
 	 *
+	 * This method supports conditional sections by:
+	 * 1. Evaluating which conditional sections apply to each contact
+	 * 2. Creating a hash based on the rendered section IDs
+	 * 3. Grouping contacts with the same hash (same email body)
+	 * 4. Sending one bulk email per group for efficiency
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param Campaign_Model                           $campaign Campaign model
@@ -247,20 +255,479 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return array Result array
 	 */
 	protected function send_email_batch( Campaign_Model $campaign, Template_Model $template, $contacts ) {
+		$skipped_contacts = array();
+		$subject          = $template->subject ?? '';
+		$body             = $template->body ?? $this->get_default_campaign_content();
+		$content          = $subject . ' ' . $body;
+
+		// Extract merge tags from content
+		$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $content );
+
+		// Check if template has conditional sections
+		$has_conditional_sections = $this->template_has_conditional_sections( $body );
+
+		if ( $has_conditional_sections ) {
+			// Use conditional sections aware processing
+			return $this->send_email_batch_with_conditional_sections(
+				$campaign,
+				$template,
+				$contacts,
+				$subject,
+				$body,
+				$merge_tag_keys,
+				$skipped_contacts
+			);
+		}
+
+		// No conditional sections - use standard bulk processing
+		return $this->send_email_batch_standard(
+			$campaign,
+			$template,
+			$contacts,
+			$subject,
+			$body,
+			$merge_tag_keys,
+			$skipped_contacts
+		);
+	}
+
+	/**
+	 * Check if template body contains conditional sections
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $body Template body (JSON or HTML)
+	 *
+	 * @return bool True if template has conditional sections
+	 */
+	protected function template_has_conditional_sections( $body ) {
+		$decoded = json_decode( $body, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return false;
+		}
+
+		if ( ! isset( $decoded['type'] ) || $decoded['type'] !== 'builder' || ! isset( $decoded['value'] ) ) {
+			return false;
+		}
+
+		$builder_data = $decoded['value'];
+
+		if ( ! isset( $builder_data['sections'] ) || ! is_array( $builder_data['sections'] ) ) {
+			return false;
+		}
+
+		// Check if any section has conditions
+		foreach ( $builder_data['sections'] as $section ) {
+			if ( ! empty( $section['conditions'] ) && is_array( $section['conditions'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Compute template hash for a contact based on which conditional sections will render
+	 *
+	 * Uses the shared Condition_Evaluator for in-memory condition evaluation.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string        $body    Template body (JSON)
+	 * @param Contact_Model $contact Contact model
+	 *
+	 * @return array Array with 'hash' (string) and 'section_ids' (array of rendered section IDs)
+	 */
+	protected function compute_template_hash_for_contact( $body, Contact_Model $contact ) {
+		$decoded = json_decode( $body, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE || ! isset( $decoded['value']['sections'] ) ) {
+			return array(
+				'hash'        => 'default',
+				'section_ids' => array(),
+			);
+		}
+
+		$sections             = $decoded['value']['sections'];
+		$rendered_section_ids = array();
+
+		// Check Pro availability
+		$is_pro_active = quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
+
+		// Get condition evaluator instance
+		$evaluator = Condition_Evaluator::instance();
+
+		foreach ( $sections as $section ) {
+			$section_id     = $section['id'] ?? null;
+			$has_conditions = ! empty( $section['conditions'] ) && is_array( $section['conditions'] );
+
+			if ( ! $has_conditions ) {
+				// No conditions - section always renders
+				if ( $section_id ) {
+					$rendered_section_ids[] = $section_id;
+				}
+				continue;
+			}
+
+			// Has conditions - evaluate if should render
+			if ( ! $is_pro_active ) {
+				// Pro not active - render all sections
+				if ( $section_id ) {
+					$rendered_section_ids[] = $section_id;
+				}
+				continue;
+			}
+
+			// Use shared Condition_Evaluator for in-memory evaluation
+			$matches = $evaluator->evaluate( $section['conditions'], $contact );
+
+			if ( $matches && $section_id ) {
+				$rendered_section_ids[] = $section_id;
+			}
+		}
+
+		// Create hash from rendered section IDs
+		sort( $rendered_section_ids );
+		$hash = md5( implode( '|', $rendered_section_ids ) );
+
+		return array(
+			'hash'        => $hash,
+			'section_ids' => $rendered_section_ids,
+		);
+	}
+
+	/**
+	 * Send batch with conditional sections support
+	 *
+	 * Groups contacts by template hash and sends separate bulk emails for each group.
+	 * Pre-loads relationships for all contacts to avoid N+1 queries.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign        Campaign model
+	 * @param Template_Model                           $template        Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts        Collection of contacts
+	 * @param string                                   $subject         Email subject
+	 * @param string                                   $body            Template body (JSON)
+	 * @param array                                    $merge_tag_keys  Merge tag keys
+	 * @param array                                    &$skipped_contacts Skipped contacts array (by reference)
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_with_conditional_sections(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contacts,
+		$subject,
+		$body,
+		$merge_tag_keys,
+		&$skipped_contacts
+	) {
+		// Pre-load relationships for all contacts to optimize condition evaluation
+		$this->preload_relationships_for_conditions( $contacts, $body );
+
+		// Group contacts by their template hash
+		$contact_groups = array(); // hash => array of contact data
+
+		foreach ( $contacts as $contact ) {
+			$email = $this->get_recipient( $contact );
+
+			// Skip contacts without valid email
+			if ( empty( $email ) || ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+				$skipped_contacts[] = $contact->id;
+				$this->contact_filter->log_skipped_contact(
+					$contact->id,
+					$campaign->id,
+					$this->channel,
+					'invalid or missing email'
+				);
+				continue;
+			}
+
+			// Compute template hash for this contact
+			$hash_result = $this->compute_template_hash_for_contact( $body, $contact );
+			$hash        = $hash_result['hash'];
+			$section_ids = $hash_result['section_ids'];
+
+			if ( ! isset( $contact_groups[ $hash ] ) ) {
+				$contact_groups[ $hash ] = array(
+					'section_ids' => $section_ids,
+					'contacts'    => array(),
+				);
+			}
+
+			$contact_groups[ $hash ]['contacts'][] = array(
+				'contact' => $contact,
+				'email'   => $email,
+			);
+		}
+
+		if ( empty( $contact_groups ) ) {
+			quillcrm_get_logger()->info(
+				__( 'No valid recipients in batch (conditional sections)', 'quillcrm' ),
+				array(
+					'code'          => 'bulk_email_no_recipients_conditional',
+					'campaign_id'   => $campaign->id,
+					'skipped_count' => count( $skipped_contacts ),
+				)
+			);
+			return array(
+				'success' => true,
+				'skipped' => count( $skipped_contacts ),
+			);
+		}
+
+		// Log grouping info
+		quillcrm_get_logger()->info(
+			__( 'Contacts grouped by conditional sections', 'quillcrm' ),
+			array(
+				'code'        => 'bulk_email_conditional_groups',
+				'campaign_id' => $campaign->id,
+				'group_count' => count( $contact_groups ),
+				'group_sizes' => array_map(
+					function ( $group ) {
+						return count( $group['contacts'] );
+					},
+					$contact_groups
+				),
+			)
+		);
+
+		// Send bulk email for each group
+		$total_sent      = 0;
+		$total_failed    = 0;
+		$last_error      = null;
+		$all_message_ids = array();
+
+		foreach ( $contact_groups as $hash => $group ) {
+			$result = $this->send_email_batch_for_group(
+				$campaign,
+				$template,
+				$group['contacts'],
+				$group['section_ids'],
+				$subject,
+				$body,
+				$merge_tag_keys
+			);
+
+			if ( $result['success'] ) {
+				$total_sent += $result['sent_count'] ?? 0;
+				if ( ! empty( $result['message_id'] ) ) {
+					$all_message_ids[] = $result['message_id'];
+				}
+			} else {
+				$total_failed += count( $group['contacts'] );
+				$last_error    = $result['error'] ?? 'Unknown error';
+			}
+		}
+
+		quillcrm_get_logger()->info(
+			__( 'Bulk email with conditional sections completed', 'quillcrm' ),
+			array(
+				'code'          => 'bulk_email_conditional_complete',
+				'campaign_id'   => $campaign->id,
+				'groups_sent'   => count( $contact_groups ),
+				'total_sent'    => $total_sent,
+				'total_failed'  => $total_failed,
+				'skipped_count' => count( $skipped_contacts ),
+			)
+		);
+
+		return array(
+			'success'     => $total_failed === 0,
+			'message_ids' => $all_message_ids,
+			'sent_count'  => $total_sent,
+			'skipped'     => count( $skipped_contacts ),
+			'error'       => $last_error,
+			'fatal'       => false,
+		);
+	}
+
+	/**
+	 * Send bulk email for a group of contacts with the same template hash
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign        Campaign model
+	 * @param Template_Model $template        Template model
+	 * @param array          $contact_data    Array of contact data (contact, email)
+	 * @param array          $section_ids     Array of section IDs that should render
+	 * @param string         $subject         Email subject
+	 * @param string         $body            Template body (JSON)
+	 * @param array          $merge_tag_keys  Merge tag keys
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_for_group(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contact_data,
+		$section_ids,
+		$subject,
+		$body,
+		$merge_tag_keys
+	) {
 		$tracking_records    = array();
 		$recipients          = array();
 		$recipient_variables = array();
-		$skipped_contacts    = array();
-		// Step 2: Prepare email content with Mailgun recipient variables
-		$subject = $template->subject ?? '';
-		$body    = $template->body ?? $this->get_default_campaign_content();
 
-		$content = $subject . ' ' . $body;
+		// Create tracking records for all contacts in this group
+		foreach ( $contact_data as $data ) {
+			$contact = $data['contact'];
+			$email   = $data['email'];
 
-		// extract the merge tags and resolve for each contact
-		$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $content );
+			// Create tracking record
+			$tracking = Communication_Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => $template->id,
+					'mode'        => $this->get_message_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
+					'source_type' => Message_Source_Types::CAMPAIGN,
+					'source_id'   => $campaign->id,
+					'recipient'   => $email,
+					'status'      => Tracking_Status::PENDING,
+					'hash_key'    => Utils::generate_hash_key(),
+				)
+			);
 
-		// Step 1: Create tracking records and prepare recipient data
+			$tracking_records[ $email ] = $tracking;
+			$recipients[]               = $email;
+
+			// Capture merge tags for this contact
+			Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$tracking->id,
+				$merge_tag_keys,
+				$contact
+			);
+
+			// Store conditional section IDs for this tracking record
+			if ( ! empty( $section_ids ) ) {
+				Communication_Tracking_Meta_Model::create(
+					array(
+						'communication_tracking_id' => $tracking->id,
+						'meta_key'                  => 'conditional_sections',
+						'meta_value'                => $section_ids,
+					)
+				);
+			}
+
+			// Get recipient variables for this contact
+			$recipient_variables[ $email ] = Merge_Tags_Manager::instance()->get_merge_tag_values_for_keys_slug_only( $merge_tag_keys, $contact );
+		}
+
+		// Render body with specific section IDs
+		$rendered_body = $this->render_builder_content_for_bulk_with_sections( $body, $section_ids );
+
+		// Get footer content
+		$footer = $this->get_bulk_footer_content();
+
+		// Inject footer into body
+		if ( strpos( $rendered_body, '</body>' ) !== false ) {
+			$rendered_body = str_replace( '</body>', $footer . '</body>', $rendered_body );
+		} else {
+			$rendered_body .= $footer;
+		}
+
+		// Convert QuillCRM merge tags to mailer-specific recipient variables
+		$converted_subject = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
+		$converted_body    = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $rendered_body );
+
+		// Add tracking pixel
+		$tracking_pixel_tag = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
+		if ( strpos( $converted_body, '</body>' ) !== false ) {
+			$converted_body = str_replace( '</body>', $tracking_pixel . '</body>', $converted_body );
+		} else {
+			$converted_body .= $tracking_pixel;
+		}
+
+		// Prepare batch data
+		$batch_data = array(
+			'subject'             => $converted_subject,
+			'html'                => $converted_body,
+			'from_email'          => $template->get_setting( 'from_email' ) ?: get_option( 'admin_email' ),
+			'from_name'           => $template->get_setting( 'from_name' ) ?: get_bloginfo( 'name' ),
+			'reply_to'            => $template->get_setting( 'reply_to' ) ?: '',
+			'recipients'          => $recipients,
+			'recipient_variables' => $recipient_variables,
+			'campaign_id'         => $campaign->id,
+			'tags'                => array( 'quillcrm', 'campaign-' . $campaign->id ),
+		);
+
+		// Send via bulk API
+		$result = Bulk_Email_Sender::send_batch( $batch_data );
+
+		// Update tracking records based on result
+		if ( is_wp_error( $result ) ) {
+			foreach ( $tracking_records as $email => $tracking ) {
+				$tracking->status = Tracking_Status::FAILED;
+				$tracking->save();
+			}
+
+			quillcrm_get_logger()->error(
+				__( 'Bulk email group batch failed', 'quillcrm' ),
+				array(
+					'code'            => 'bulk_email_group_failed',
+					'campaign_id'     => $campaign->id,
+					'error'           => $result->get_error_message(),
+					'recipient_count' => count( $recipients ),
+					'section_ids'     => $section_ids,
+				)
+			);
+
+			return array(
+				'success' => false,
+				'error'   => $result->get_error_message(),
+			);
+		}
+
+		// Success - mark all tracking records as sent
+		$message_id = $result['message_id'] ?? '';
+		foreach ( $tracking_records as $email => $tracking ) {
+			$tracking->status      = Tracking_Status::SENT;
+			$tracking->sent_at     = current_time( 'mysql' );
+			$tracking->external_id = $message_id;
+			$tracking->save();
+		}
+
+		return array(
+			'success'    => true,
+			'message_id' => $message_id,
+			'sent_count' => count( $recipients ),
+		);
+	}
+
+	/**
+	 * Send standard batch without conditional sections
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign        Campaign model
+	 * @param Template_Model                           $template        Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts        Collection of contacts
+	 * @param string                                   $subject         Email subject
+	 * @param string                                   $body            Template body
+	 * @param array                                    $merge_tag_keys  Merge tag keys
+	 * @param array                                    &$skipped_contacts Skipped contacts array (by reference)
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_standard(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contacts,
+		$subject,
+		$body,
+		$merge_tag_keys,
+		&$skipped_contacts
+	) {
+		$tracking_records    = array();
+		$recipients          = array();
+		$recipient_variables = array();
+
+		// Create tracking records and prepare recipient data
 		foreach ( $contacts as $contact ) {
 			$email = $this->get_recipient( $contact );
 
@@ -343,7 +810,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			$body .= $tracking_pixel;
 		}
 
-		// Step 3: Prepare batch data
+		// Prepare batch data
 		$batch_data = array(
 			'subject'             => $subject,
 			'html'                => $body,
@@ -356,10 +823,10 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			'tags'                => array( 'quillcrm', 'campaign-' . $campaign->id ),
 		);
 
-		// Step 4: Send via bulk API
+		// Send via bulk API
 		$result = Bulk_Email_Sender::send_batch( $batch_data );
 
-		// Step 5: Update tracking records based on result
+		// Update tracking records based on result
 		if ( is_wp_error( $result ) ) {
 			// Mark all as failed
 			foreach ( $tracking_records as $email => $tracking ) {
@@ -449,6 +916,70 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Render builder content for bulk sending with specific section IDs
+	 *
+	 * This method renders only the sections whose IDs are in the provided array.
+	 * Used for conditional sections where different contacts see different sections.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $content     Content to render (JSON)
+	 * @param array  $section_ids Array of section IDs that should be rendered
+	 *
+	 * @return string Rendered HTML
+	 */
+	protected function render_builder_content_for_bulk_with_sections( $content, $section_ids ) {
+		// Try to decode as JSON
+		$decoded = json_decode( $content, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return $content; // Not JSON, return as-is
+		}
+
+		// Check if it's builder format
+		if ( ! isset( $decoded['type'] ) || $decoded['type'] !== 'builder' || ! isset( $decoded['value'] ) ) {
+			return $content; // Not builder format
+		}
+
+		$builder_data = $decoded['value'];
+
+		// Filter sections based on provided section IDs
+		if ( isset( $builder_data['sections'] ) && is_array( $builder_data['sections'] ) ) {
+			$filtered_sections = array();
+
+			foreach ( $builder_data['sections'] as $section ) {
+				$section_id     = $section['id'] ?? null;
+				$has_conditions = ! empty( $section['conditions'] ) && is_array( $section['conditions'] );
+
+				if ( ! $has_conditions ) {
+					// No conditions - always include
+					$filtered_sections[] = $section;
+				} elseif ( $section_id && in_array( $section_id, $section_ids, true ) ) {
+					// Has conditions and is in the render list - include
+					// Remove conditions from section to prevent re-evaluation during render
+					unset( $section['conditions'] );
+					$filtered_sections[] = $section;
+				}
+				// If has conditions but not in section_ids, skip (don't include)
+			}
+
+			$builder_data['sections'] = $filtered_sections;
+		}
+
+		// Render without contact context (merge tags will be handled by Mailgun)
+		if ( class_exists( '\QuillCRM\Emails\Email_Renderer' ) ) {
+			$renderer = new \QuillCRM\Emails\Email_Renderer();
+
+			// Render with null contact - merge tags stay as placeholders
+			$html = $renderer->render_from_builder_data( $builder_data, null, '', '' );
+
+			return $html;
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Get footer content for bulk emails
 	 *
 	 * @since 1.0.0
@@ -472,6 +1003,42 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		$footer = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $footer );
 
 		return $footer;
+	}
+
+	/**
+	 * Pre-load relationships needed for condition evaluation
+	 *
+	 * Analyzes template conditions to determine which relationships need to be loaded,
+	 * then loads them all at once to avoid N+1 queries.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts Contacts collection
+	 * @param string                                   $body     Template body (JSON)
+	 *
+	 * @return void
+	 */
+	protected function preload_relationships_for_conditions( $contacts, $body ) {
+		$decoded = json_decode( $body, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE || ! isset( $decoded['value']['sections'] ) ) {
+			return;
+		}
+
+		// Collect all conditions from all sections
+		$all_conditions = array();
+		foreach ( $decoded['value']['sections'] as $section ) {
+			if ( ! empty( $section['conditions'] ) && is_array( $section['conditions'] ) ) {
+				$all_conditions = array_merge( $all_conditions, $section['conditions'] );
+			}
+		}
+
+		if ( empty( $all_conditions ) ) {
+			return;
+		}
+
+		// Use the Condition_Evaluator to preload needed relationships
+		Condition_Evaluator::instance()->preload_relationships( $contacts, $all_conditions );
 	}
 
 	/**

@@ -21,6 +21,7 @@ use QuillCRM\Emails\BulkMailers\Postmark_Bulk_Mailer;
 use QuillCRM\Emails\BulkMailers\Sparkpost_Bulk_Mailer;
 use QuillCRM\Emails\BulkMailers\Mailjet_Bulk_Mailer;
 use QuillCRM\Emails\BulkMailers\Elasticemail_Bulk_Mailer;
+use QuillCRM\Emails\BulkMailers\Aws_Bulk_Mailer;
 use WP_Error;
 
 /**
@@ -44,6 +45,7 @@ class Bulk_Email_Sender {
 		'sparkpost'    => Sparkpost_Bulk_Mailer::class,
 		'mailjet'      => Mailjet_Bulk_Mailer::class,
 		'elasticemail' => Elasticemail_Bulk_Mailer::class,
+		'aws'          => Aws_Bulk_Mailer::class,
 	);
 
 	/**
@@ -201,6 +203,7 @@ class Bulk_Email_Sender {
 	 * - SparkPost: {{contact:first_name}} -> {{first_name}}
 	 * - Mailjet: {{contact:first_name}} -> {{var:first_name}}
 	 * - ElasticEmail: {{contact:first_name}} -> {first_name}
+	 * - AWS SES: {{contact:first_name}} -> {{first_name}}
 	 *
 	 * @since 1.0.0
 	 *

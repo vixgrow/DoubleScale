@@ -552,7 +552,7 @@ registerAdminPage('tasks', {
 	),
 	label: __('Tasks', 'quillcrm'),
 	icon: <TasksIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('analytics-and-reports', {
@@ -649,7 +649,7 @@ registerAdminPage('settings', {
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
 	icon: <SettingsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('debug', {

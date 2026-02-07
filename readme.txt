@@ -4,7 +4,7 @@ Tags: crm, customer management, pipeline, whatsapp, automation
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -397,6 +397,13 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 10. Global Settings - Easy configuration for email, SMS, and system settings
 
 == Changelog ==
+
+= 1.2.2 - 7 Feb 2026
+* Added bell notifications
+* Added web push notifications
+* Added email notifications
+* Added cart recovered goal
+* Fixed some minor bugs
 
 = 1.2.0 - 25 Jan 2026 =
 * Added integration with WS Form

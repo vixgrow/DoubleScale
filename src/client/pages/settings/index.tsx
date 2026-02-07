@@ -94,14 +94,17 @@ const SettingsPage: React.FC = () => {
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const { isSalesRep } = useCapabilities();
-	const defaultTab = isSalesRep() ? 'notifications' : 'business';
+	
+	// Memoize the sales rep check to avoid recalculating on every render
+	const isSalesRepUser = useMemo(() => isSalesRep(), []);
+	const defaultTab = isSalesRepUser ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
 			// If sales rep tries to access a restricted tab, redirect to notifications
-			if (isSalesRep() && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
+			if (isSalesRepUser && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
 				navigate(getToLink('settings/notifications'), { replace: true });
 				return;
 			}
@@ -110,7 +113,7 @@ const SettingsPage: React.FC = () => {
 			// If no valid tab in URL, redirect to default tab
 			navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 		}
-	}, [urlTab, navigate, isSalesRep, defaultTab]);
+	}, [urlTab, navigate, isSalesRepUser, defaultTab]);
 
 	const fetchSettings = async () => {
 		try {
@@ -219,7 +222,8 @@ const SettingsPage: React.FC = () => {
 			return;
 		}
 		fetchSettings();
-	}, [isSalesRep]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const renderTabBody = (currentTab: string) => {
 		switch (currentTab) {

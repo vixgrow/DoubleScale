@@ -52,7 +52,6 @@ interface ActivityData {
     notes?: string;
     called_at?: string;
     // Meeting
-    title?: string;
     meeting_title?: string;
     location?: string;
     scheduled_at?: string;
@@ -60,7 +59,6 @@ interface ActivityData {
     meeting_end_time?: string;
     description?: string;
     start_date?: string;
-    scheduled_at?: string;
     // Email
     subject?: string;
     body?: string;
@@ -256,30 +254,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
     const formatActivityTime = (dateStr: string) => {
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = dayjs.utc(dateStr).tz(userTimeZone);
-        const now = dayjs();
-        
-        // Check if date is in the future or past
-        const isFuture = date.isAfter(now);
-        const diffDays = Math.abs(now.diff(date, 'day'));
-
-        if (diffDays === 0) {
-            return date.format('h:mm A');
-        } else if (diffDays < 7) {
-            if (isFuture) {
-                // Future dates: "This Tuesday at 2:00 PM" or "Next Tuesday at 2:00 PM"
-                const thisWeekEnd = now.endOf('week');
-                if (date.isBefore(thisWeekEnd)) {
-                    return `This ${date.format('dddd [at] h:mm A')}`;
-                } else {
-                    return `Next ${date.format('dddd [at] h:mm A')}`;
-                }
-            } else {
-                // Past dates: "Last Tuesday at 2:00 PM"
-                return `Last ${date.format('dddd [at] h:mm A')}`;
-            }
-        } else {
-            return date.format('MMM D, YYYY [at] h:mm A');
-        }
+        return date.format('MMM D, YYYY [at] h:mm A');
     };
 
     const renderActivityContent = (activity: EditableActivity) => {
@@ -670,11 +645,9 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                         contact_id: selectedMeeting.contact_id,
                         activity_type: selectedMeeting.activity_type,
                         data: {
-                            title: selectedMeeting.data?.title || selectedMeeting.data?.meeting_title,
                             meeting_title: selectedMeeting.data?.meeting_title || selectedMeeting.data?.title,
                             duration: selectedMeeting.data?.duration,
                             location: selectedMeeting.data?.location,
-                            scheduled_at: selectedMeeting.data?.scheduled_at || selectedMeeting.data?.meeting_date_time,
                             meeting_date_time: selectedMeeting.data?.meeting_date_time || selectedMeeting.data?.scheduled_at,
                             meeting_end_time: selectedMeeting.data?.meeting_end_time,
                             description: selectedMeeting.data?.description,

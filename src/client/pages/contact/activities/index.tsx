@@ -343,17 +343,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const formatActivityTime = (createdAt: string) => {
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = dayjs.utc(createdAt).tz(userTimeZone);
-
-        const now = dayjs();
-        const diffDays = now.diff(date, 'day');
-
-        if (diffDays === 0) {
-            return date.format('h:mm A');
-        } else if (diffDays < 7) {
-            return `Last ${date.format('dddd [at] h:mm A')}`;
-        } else {
-            return date.format('MMM D, YYYY [at] h:mm A');
-        }
+        return date.format('MMM D, YYYY [at] h:mm A');
     };
 
     const renderActivityContent = (activity: Activity) => {
@@ -739,11 +729,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                         contact_id: selectedMeeting.contact_id,
                         activity_type: selectedMeeting.activity_type,
                         data: {
-                            title: selectedMeeting.data?.title || selectedMeeting.data?.meeting_title,
                             meeting_title: selectedMeeting.data?.meeting_title || selectedMeeting.data?.title,
                             duration: selectedMeeting.data?.duration,
                             location: selectedMeeting.data?.location,
-                            scheduled_at: selectedMeeting.data?.scheduled_at || selectedMeeting.data?.meeting_date_time,
                             meeting_date_time: selectedMeeting.data?.meeting_date_time || selectedMeeting.data?.scheduled_at,
                             meeting_end_time: selectedMeeting.data?.meeting_end_time,
                             description: selectedMeeting.data?.description,

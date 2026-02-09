@@ -997,11 +997,12 @@ class Activity_Model extends Model
 		}
 		if (is_array($data)) {
 			foreach (array('called_at', 'sent_at', 'scheduled_at') as $key) {
-				if (! empty($data[ $key ])) {
-					return $data[ $key ];
+				if (! empty($data[ $key ]) && strtotime($data[ $key ]) !== false) {
+					return gmdate('Y-m-d H:i:s', strtotime($data[ $key ]));
 				}
 			}
 		}
-		return $activity->created_at ?: current_time('mysql');
+		$fallback = $activity->created_at;
+		return $fallback ? (string) $fallback : current_time('mysql');
 	}
 }

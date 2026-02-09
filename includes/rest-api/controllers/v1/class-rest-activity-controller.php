@@ -241,7 +241,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'date_from'     => $request->get_param( 'date_from' ),
 			'date_to'       => $request->get_param( 'date_to' ),
 			'activity_type' => $request->get_param( 'activity_type' ),
-			'sort_by'       => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_by'       => $request->get_param( 'sort_by' ) ?? 'activity_date',
 			'sort_order'    => $request->get_param( 'sort_order' ) ?? 'desc',
 		);
 
@@ -436,7 +436,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'sort_by'     => array(
 				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'quillcrm' ),
 				'type'        => 'string',
-				'default'     => 'created_at',
+				'default'     => 'activity_date',
 				'enum'        => array( 'created_at', 'updated_at', 'activity_date' ),
 			),
 			'sort_order'  => array(

@@ -109,6 +109,16 @@ class Process_Automation {
 			)
 		);
 
+		/**
+		 * Fires when a contact enters an automation.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param \QuillCRM\Models\Automation_Model         $automation         The automation.
+		 * @param \QuillCRM\Models\Automation_Contact_Model $automation_contact The automation contact record.
+		 */
+		do_action( 'quillcrm_automation_contact_entered', $this->automation, $automation_contact );
+
 		return $automation_contact;
 	}
 
@@ -499,6 +509,19 @@ class Process_Automation {
 			 * @param int                                       $step_id            The failed step ID.
 			 */
 			do_action( 'quillcrm_automation_step_failed', $this->automation, $automation_contact, $current_step );
+		}
+
+		// Fire action when a contact completes an automation (next_step = 0 means no more steps).
+		if ( 'completed' === $status && 0 === $next_step ) {
+			/**
+			 * Fires when a contact completes an automation.
+			 *
+			 * @since 1.2.0
+			 *
+			 * @param \QuillCRM\Models\Automation_Model         $automation         The automation.
+			 * @param \QuillCRM\Models\Automation_Contact_Model $automation_contact The automation contact.
+			 */
+			do_action( 'quillcrm_automation_contact_completed', $this->automation, $automation_contact );
 		}
 	}
 

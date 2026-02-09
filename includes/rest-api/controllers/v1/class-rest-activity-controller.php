@@ -320,7 +320,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'user_id'     => $request->get_param( 'user_id' ),
 			'date_from'   => $request->get_param( 'date_from' ),
 			'date_to'     => $request->get_param( 'date_to' ),
-			'sort_by'     => $request->get_param( 'sort_by' ) ?? 'created_at',
+			'sort_by'     => $request->get_param( 'sort_by' ) ?? 'activity_date',
 			'sort_order'  => $request->get_param( 'sort_order' ) ?? 'desc',
 		);
 
@@ -433,10 +433,10 @@ class REST_Activity_Controller extends REST_Controller {
 			),
 			// Sorting.
 			'sort_by'     => array(
-				'description' => __( 'Sort by field.', 'quillcrm' ),
+				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'quillcrm' ),
 				'type'        => 'string',
 				'default'     => 'created_at',
-				'enum'        => array( 'created_at', 'updated_at' ),
+				'enum'        => array( 'created_at', 'updated_at', 'activity_date' ),
 			),
 			'sort_order'  => array(
 				'description' => __( 'Sort order.', 'quillcrm' ),
@@ -636,14 +636,14 @@ class REST_Activity_Controller extends REST_Controller {
 		$meeting_data = $request->get_param( 'meeting_data' ) ?? array();
 
 		$data = array(
-			'contact_id'  => $request->get_param( 'contact_id' ),
-			'entity_id'   => $request->get_param( 'entity_id' ),
-			'entity_type' => $request->get_param( 'entity_type' ),
-			'title'       => $meeting_data['title'] ?? '',
-			'scheduled_at' => $meeting_data['scheduled_at'] ?? '',
-			'duration'    => $meeting_data['duration'] ?? 60,
-			'location'    => $meeting_data['location'] ?? '',
-			'description' => $meeting_data['description'] ?? '',
+			'contact_id'   => $request->get_param( 'contact_id' ),
+			'entity_id'    => $request->get_param( 'entity_id' ),
+			'entity_type'  => $request->get_param( 'entity_type' ),
+			'title'        => $meeting_data['title'] ?? $meeting_data['meeting_title'] ?? '',
+			'scheduled_at' => $meeting_data['scheduled_at'] ?? $meeting_data['meeting_date_time'] ?? '',
+			'duration'     => $meeting_data['duration'] ?? 60,
+			'location'     => $meeting_data['location'] ?? '',
+			'description'  => $meeting_data['description'] ?? '',
 		);
 
 		// Only include primary_attendee fields if provided with actual values.
@@ -933,10 +933,13 @@ class REST_Activity_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_statistics( $request ) {
+		// Normalize entity_type to integer constant.
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+
 		$filters = array(
 			'contact_id'  => $request->get_param( 'contact_id' ),
 			'entity_id'   => $request->get_param( 'entity_id' ),
-			'entity_type' => $request->get_param( 'entity_type' ),
+			'entity_type' => $entity_type,
 			'user_id'     => $request->get_param( 'user_id' ),
 			'date_from'   => $request->get_param( 'date_from' ),
 			'date_to'     => $request->get_param( 'date_to' ),
@@ -1096,10 +1099,10 @@ class REST_Activity_Controller extends REST_Controller {
 
 			// Sorting.
 			'sort_by'           => array(
-				'description' => __( 'Sort field: created_at', 'quillcrm' ),
+				'description' => __( 'Sort field: activity_date (actual event time) or created_at (record creation)', 'quillcrm' ),
 				'type'        => 'string',
-				'enum'        => array( 'created_at' ),
-				'default'     => 'created_at',
+				'enum'        => array( 'activity_date', 'created_at' ),
+				'default'     => 'activity_date',
 			),
 			'sort_order'        => array(
 				'description' => __( 'Sort direction: asc, desc', 'quillcrm' ),

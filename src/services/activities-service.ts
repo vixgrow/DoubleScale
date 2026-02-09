@@ -86,6 +86,7 @@ export interface ActivitiesApiItem {
 	due_time?: string;
 	is_editable?: boolean;
 	is_system?: boolean;
+	activity_date?: string;
 	created_at: string;
 	updated_at?: string;
 	comments_count?: number;
@@ -141,7 +142,7 @@ export interface TimelineParams {
 	user_id?: number;
 	date_from?: string;
 	date_to?: string;
-	sort_by?: 'created_at' | 'updated_at';
+	sort_by?: 'created_at' | 'updated_at' | 'activity_date';
 	sort_order?: 'asc' | 'desc';
 	per_page?: number;
 	page?: number;
@@ -193,7 +194,7 @@ export function transformApiItemToTimelineItem(
 		deal_id: item.deal_id,
 		title: item.formatted_message || '',
 		description: (item.data as Record<string, string>)?.message || '',
-		timestamp: item.created_at,
+		timestamp: item.activity_date || item.created_at,
 		user: item.user,
 		data: item.data,
 		icon_type: item.activity_type || 'note',

@@ -106,20 +106,14 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 				}),
 			});
 
-			// The API returns an array of activities
-			if (Array.isArray(response)) {
+			// The API returns { data: [...], meta: { total, per_page, ... } }
+			if (response?.data && Array.isArray(response.data)) {
+				setCalls(response.data);
+				setTotalRecords(response.meta?.total || response.data.length);
+			} else if (Array.isArray(response)) {
+				// Legacy fallback
 				setCalls(response);
-				// Update total: if we got less than perPage, we're on the last page
-				if (response.length < perPage) {
-					setTotalRecords((page - 1) * perPage + response.length);
-				} else {
-					// If we got a full page, there might be more
-					// Set total to at least current page * perPage
-					setTotalRecords((prev) => {
-						const minTotal = page * perPage;
-						return prev < minTotal ? minTotal : prev;
-					});
-				}
+				setTotalRecords(response.length);
 			}
 		} catch (error: any) {
 			showNotice(

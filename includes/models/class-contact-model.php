@@ -846,7 +846,8 @@ class Contact_Model extends Model {
 			function ( $contact ) {
 				if ( $contact->email_status === 'unsubscribed' ) {
 					do_action( 'quillcrm_contact_unsubscribed', $contact );
-				} else {
+				} elseif ( $contact->wasRecentlyCreated ) {
+					// Only fire subscribed for genuinely new contacts, not existing ones being updated.
 					do_action( 'quillcrm_contact_subscribed', $contact );
 				}
 			}

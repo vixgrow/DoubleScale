@@ -52,8 +52,10 @@ interface ActivityData {
     notes?: string;
     called_at?: string;
     // Meeting
+    title?: string;
     meeting_title?: string;
     location?: string;
+    scheduled_at?: string;
     meeting_date_time?: string;
     meeting_end_time?: string;
     description?: string;
@@ -300,14 +302,14 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                             <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
                                 <div className=" text-[#09090B] text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
-                                        activity.data.start_date ||
+                                        activity.data.scheduled_at ||
                                         activity.created_at
                                     ).getDate()}
                                 </div>
                                 <div className=" text-[#09090B] text-base text-center font-normal leading-[26px]">
                                     {format(
                                         new Date(
-                                            activity.data.start_date ||
+                                            activity.data.scheduled_at ||
                                             activity.created_at
                                         ),
                                         'MMM'
@@ -668,10 +670,12 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                         contact_id: selectedMeeting.contact_id,
                         activity_type: selectedMeeting.activity_type,
                         data: {
-                            meeting_title: selectedMeeting.data?.meeting_title,
+                            title: selectedMeeting.data?.title || selectedMeeting.data?.meeting_title,
+                            meeting_title: selectedMeeting.data?.meeting_title || selectedMeeting.data?.title,
                             duration: selectedMeeting.data?.duration,
                             location: selectedMeeting.data?.location,
-                            meeting_date_time: selectedMeeting.data?.meeting_date_time,
+                            scheduled_at: selectedMeeting.data?.scheduled_at || selectedMeeting.data?.meeting_date_time,
+                            meeting_date_time: selectedMeeting.data?.meeting_date_time || selectedMeeting.data?.scheduled_at,
                             meeting_end_time: selectedMeeting.data?.meeting_end_time,
                             description: selectedMeeting.data?.description,
                         },

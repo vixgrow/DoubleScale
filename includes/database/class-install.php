@@ -213,6 +213,9 @@ class Install {
 		// Version 1.1.9: Add created_by columns to campaigns and automations tables.
 		self::version_1_1_9_migration( $current_version );
 
+		// Version 1.2.5: Add activity_date column and backfill from JSON data.
+		self::version_1_2_5_migration( $current_version );
+
 		// Future migrations go here in version order.
 
 		/**
@@ -318,6 +321,65 @@ class Install {
 				$wpdb->query( "ALTER TABLE {$automations_table} ADD INDEX idx_created_by (created_by)" );
 			}
 		}
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Version 1.2.5 migration.
+	 *
+	 * Adds activity_date column to activities table and backfills it from
+	 * the JSON data column (called_at, sent_at, scheduled_at fields),
+	 * falling back to created_at.
+	 *
+	 * @since 1.2.5
+	 *
+	 * @param string $current_version The currently installed version.
+	 */
+	private static function version_1_2_5_migration( $current_version ) {
+		global $wpdb;
+
+		// Only run if upgrading from version < 1.2.5.
+		if ( version_compare( $current_version, '1.2.5', '>=' ) ) {
+			return;
+		}
+
+		$table_name = $wpdb->prefix . 'quillcrm_activities';
+
+		// Verify table exists before attempting migration.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Check if column already exists to prevent duplicate column errors.
+		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'activity_date'" );
+
+		if ( empty( $column_exists ) ) {
+			$wpdb->query(
+				"ALTER TABLE {$table_name}
+				ADD COLUMN activity_date DATETIME NULL
+				COMMENT 'When the activity occurred (called_at, sent_at, scheduled_at, or created_at)'
+				AFTER user_id"
+			);
+			$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX activity_date (activity_date)" );
+			$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX composite_contact_activity_date (contact_id, activity_date)" );
+		}
+
+		// Backfill activity_date from JSON data for existing rows.
+		// Uses the same COALESCE logic as was previously in queries.
+		$wpdb->query(
+			"UPDATE {$table_name}
+			SET activity_date = COALESCE(
+				JSON_UNQUOTE(JSON_EXTRACT(data, '$.called_at')),
+				JSON_UNQUOTE(JSON_EXTRACT(data, '$.sent_at')),
+				JSON_UNQUOTE(JSON_EXTRACT(data, '$.scheduled_at')),
+				created_at
+			)
+			WHERE activity_date IS NULL"
+		);
 
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}

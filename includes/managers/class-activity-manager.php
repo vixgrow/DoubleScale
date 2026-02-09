@@ -433,37 +433,20 @@ final class Activity_Manager {
 			$query->where( 'user_id', $filters['user_id'] );
 		}
 
-		// Filter by date range using the activity-specific date from JSON data.
-		// Each type stores its date under a different key: called_at, sent_at, scheduled_at.
-		// Falls back to created_at for activities without a specific date (notes, system events).
-		$activity_date_expr = "COALESCE(
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.called_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.sent_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.scheduled_at')),
-			created_at
-		)";
+		// Filter by date range using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
-			$query->whereRaw(
-				"DATE({$activity_date_expr}) >= ?",
-				array( $filters['date_from'] )
-			);
+			$query->where( 'activity_date', '>=', $filters['date_from'] . ' 00:00:00' );
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$query->whereRaw(
-				"DATE({$activity_date_expr}) <= ?",
-				array( $filters['date_to'] )
-			);
+			$query->where( 'activity_date', '<', gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00' );
 		}
 
 		// Sort by the activity-specific date by default.
 		$sort_by    = $filters['sort_by'] ?? 'activity_date';
 		$sort_order = $filters['sort_order'] ?? 'desc';
-		if ( $sort_by === 'activity_date' ) {
-			$query->orderByRaw( "{$activity_date_expr} {$sort_order}" );
-		} else {
-			$allowed = array( 'created_at', 'updated_at' );
-			$query->orderBy( in_array( $sort_by, $allowed, true ) ? $sort_by : 'created_at', $sort_order );
-		}
+		$allowed    = array( 'activity_date', 'created_at', 'updated_at' );
+		$query->orderBy( in_array( $sort_by, $allowed, true ) ? $sort_by : 'activity_date', $sort_order );
 
 		return $query->paginate( $per_page, array( '*' ), 'page', $page );
 	}
@@ -804,24 +787,13 @@ final class Activity_Manager {
 			$query->where( 'user_id', $filters['user_id'] );
 		}
 
-		// Filter by date range using the activity-specific date from JSON data.
-		$activity_date_expr = "COALESCE(
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.called_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.sent_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(data, '$.scheduled_at')),
-			created_at
-		)";
+		// Filter by date range using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
-			$query->whereRaw(
-				"DATE({$activity_date_expr}) >= ?",
-				array( $filters['date_from'] )
-			);
+			$query->where( 'activity_date', '>=', $filters['date_from'] . ' 00:00:00' );
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$query->whereRaw(
-				"DATE({$activity_date_expr}) <= ?",
-				array( $filters['date_to'] )
-			);
+			$query->where( 'activity_date', '<', gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00' );
 		}
 
 		$activities = $query->get();
@@ -1025,7 +997,7 @@ final class Activity_Manager {
 
 		// Build final UNION query with sorting and pagination.
 		$offset     = ( $page - 1 ) * $per_page;
-		$sort_by    = $this->sanitize_sort_field( $filters['sort_by'] ?? 'created_at' );
+		$sort_by    = $this->sanitize_sort_field( $filters['sort_by'] ?? 'activity_date' );
 		$sort_order = strtoupper( $filters['sort_order'] ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC';
 
 		$union_sql = '(' . implode( ') UNION ALL (', $select_queries ) . ')';
@@ -1117,25 +1089,18 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
 		}
 
-		// Date filters - extract the activity-specific date from the JSON data column.
-		// Each activity type stores its date under a different key: called_at, sent_at, scheduled_at.
-		// Falls back to created_at for activities without a specific date (notes, system events).
-		$activity_date_expr = "COALESCE(
-			JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.called_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.sent_at')),
-			JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.scheduled_at')),
-			a.created_at
-		)";
+		// Date filters using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
-				"DATE({$activity_date_expr}) >= %s",
-				$filters['date_from']
+				'a.activity_date >= %s',
+				$filters['date_from'] . ' 00:00:00'
 			);
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
-				"DATE({$activity_date_expr}) <= %s",
-				$filters['date_to']
+				'a.activity_date < %s',
+				gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00'
 			);
 		}
 
@@ -1147,8 +1112,6 @@ final class Activity_Manager {
 		$joins_sql  = implode( ' ', $join_clauses );
 
 		// Select query - normalized columns for UNION.
-		// activity_date extracts the activity-specific date from JSON (called_at, sent_at, scheduled_at)
-		// falling back to created_at for activities without a specific date.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$select_sql = "SELECT
 			a.id,
@@ -1161,15 +1124,15 @@ final class Activity_Manager {
 			a.user_id,
 			a.created_at,
 			a.updated_at,
-			{$activity_date_expr} as activity_date,
+			a.activity_date,
 			NULL as title,
 			NULL as description,
 			NULL as status,
 			CASE
 			WHEN a.activity_type IN ('meeting_scheduled', 'call_logged') THEN
 				CASE
-					WHEN DATE({$activity_date_expr}) < CURDATE() THEN 'completed'
-					WHEN DATE({$activity_date_expr}) = CURDATE() THEN 'due_today'
+					WHEN DATE(a.activity_date) < CURDATE() THEN 'completed'
+					WHEN DATE(a.activity_date) = CURDATE() THEN 'due_today'
 					ELSE 'upcoming'
 				END
 			ELSE NULL

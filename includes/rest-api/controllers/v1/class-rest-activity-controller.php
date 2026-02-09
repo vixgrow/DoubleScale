@@ -387,6 +387,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'is_editable'       => in_array( $activity->activity_type, $editable_types, true ),
 			'is_system'         => in_array( $activity->activity_type, $system_types, true ),
 			'comments_count'    => $activity->relationLoaded( 'comments' ) ? $activity->comments->count() : 0,
+			'activity_date'     => (string) $activity->activity_date,
 			'created_at'        => (string) $activity->created_at,
 			'updated_at'        => (string) $activity->updated_at,
 		);
@@ -977,6 +978,7 @@ class REST_Activity_Controller extends REST_Controller {
 			'formatted_message' => $activity->formatted_message,
 			'is_editable'       => $activity->is_editable(),
 			'is_system'         => $activity->is_system_activity(),
+			'activity_date'     => (string) $activity->activity_date,
 			'created_at'        => $activity->created_at,
 			'updated_at'        => $activity->updated_at,
 		);

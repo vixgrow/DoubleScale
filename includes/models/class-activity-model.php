@@ -50,6 +50,7 @@ class Activity_Model extends Model
 		'activity_type',
 		'data',
 		'user_id',
+		'activity_date',
 		'created_at',
 		'updated_at',
 	);
@@ -951,6 +952,19 @@ class Activity_Model extends Model
 				if (! $activity->created_at) {
 					$activity->created_at = current_time('mysql');
 				}
+				// Auto-populate activity_date from activity-specific date fields.
+				if (! $activity->activity_date) {
+					$activity->activity_date = self::extract_activity_date( $activity );
+				}
+			}
+		);
+
+		static::updating(
+			function ($activity) {
+				// Re-sync activity_date when data (JSON) changes.
+				if ($activity->isDirty('data')) {
+					$activity->activity_date = self::extract_activity_date( $activity );
+				}
 			}
 		);
 
@@ -961,5 +975,33 @@ class Activity_Model extends Model
 				$activity->associations()->delete();
 			}
 		);
+	}
+
+	/**
+	 * Extract the activity-specific date from the data JSON.
+	 *
+	 * Checks called_at, sent_at, scheduled_at in order and falls back to
+	 * created_at. This mirrors the COALESCE logic previously used in SQL.
+	 *
+	 * @since 1.2.5
+	 *
+	 * @param Activity_Model $activity The activity instance.
+	 *
+	 * @return string Date string in MySQL format.
+	 */
+	private static function extract_activity_date( $activity )
+	{
+		$data = $activity->data;
+		if (is_string($data)) {
+			$data = json_decode($data, true);
+		}
+		if (is_array($data)) {
+			foreach (array('called_at', 'sent_at', 'scheduled_at') as $key) {
+				if (! empty($data[ $key ])) {
+					return $data[ $key ];
+				}
+			}
+		}
+		return $activity->created_at ?: current_time('mysql');
 	}
 }

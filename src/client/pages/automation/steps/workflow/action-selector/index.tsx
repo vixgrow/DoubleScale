@@ -269,15 +269,15 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="z-[150200] h-[90vh] overflow-y-auto max-w-[1000px]">
-				<DialogHeader>
+			<DialogContent className="z-[150200] h-[90vh] max-w-[1000px] flex flex-col overflow-hidden">
+				<DialogHeader className="shrink-0">
 					<DialogTitle>{__('Action Library', 'quillcrm')}</DialogTitle>
 					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'quillcrm')}</DialogDescription>
 				</DialogHeader>
-				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="flex h-full gap-5">
-							<div className="w-1/2">
+				<div className="qcrm-fields flex-1 flex flex-col overflow-hidden min-h-0">
+					<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">
+						<div className="flex flex-1 gap-5 overflow-hidden min-h-0">
+							<div className="w-1/2 overflow-y-auto pr-1">
 								<ActionSelectorCard
 									automationActions={filteredActions}
 									selectedCategory={selectedCategory}
@@ -285,7 +285,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 									categoryData={categoryData}
 								/>
 							</div>
-							<div className="w-1/2">
+							<div className="w-1/2 overflow-y-auto pr-1">
 								<ActionsGroupRender
 									groups={currentCategoryData?.groups || {}}
 									onChange={(value) => handleActionSelect(value)}

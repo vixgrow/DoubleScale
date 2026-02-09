@@ -186,7 +186,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 					onClick={handleAddCall}
 				>
 					<AddLogIcon />
-					{__('Add Log Call', 'quillcrm')}
+					{__('Log Call', 'quillcrm')}
 				</Button>
 			</div>
 			{notice && (

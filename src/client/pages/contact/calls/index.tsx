@@ -110,10 +110,6 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 			if (response?.data && Array.isArray(response.data)) {
 				setCalls(response.data);
 				setTotalRecords(response.meta?.total || response.data.length);
-			} else if (Array.isArray(response)) {
-				// Legacy fallback
-				setCalls(response);
-				setTotalRecords(response.length);
 			}
 		} catch (error: any) {
 			showNotice(

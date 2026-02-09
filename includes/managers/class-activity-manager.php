@@ -460,10 +460,9 @@ final class Activity_Manager {
 		$sort_order = $filters['sort_order'] ?? 'desc';
 		if ( $sort_by === 'activity_date' ) {
 			$query->orderByRaw( "{$activity_date_expr} {$sort_order}" );
-		} elseif ( in_array( $sort_by, array( 'created_at', 'updated_at' ), true ) ) {
-			$query->orderBy( $sort_by, $sort_order );
 		} else {
-			$query->orderBy( 'created_at', $sort_order );
+			$allowed = array( 'created_at', 'updated_at' );
+			$query->orderBy( in_array( $sort_by, $allowed, true ) ? $sort_by : 'created_at', $sort_order );
 		}
 
 		return $query->paginate( $per_page, array( '*' ), 'page', $page );

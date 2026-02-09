@@ -106,10 +106,6 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
             if (response?.data && Array.isArray(response.data)) {
                 setMeetings(response.data);
                 setTotalRecords(response.meta?.total || response.data.length);
-            } else if (Array.isArray(response)) {
-                // Legacy fallback
-                setMeetings(response);
-                setTotalRecords(response.length);
             }
         } catch (error: any) {
             showNotice(

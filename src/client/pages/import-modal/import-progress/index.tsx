@@ -6,11 +6,14 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
+import { CheckCircle2, XCircle, MinusCircle, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 /**
  * internal dependencies
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { ImportProgressIcon, LoadingSpinner } from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@quillcrm/config';
@@ -22,10 +25,15 @@ import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
 import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
 //@ts-ignore
 import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
+import { getToLink } from '@quillcrm/navigation';
 
-const ImportProgress: React.FC = () => {
+interface ImportProgressProps {
+	onComplete?: () => void;
+}
+
+const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 	const { state } = useImportContext();
-	const { source, count, offset, importing, showingCompletion } = state;
+	const { source, count, offset, importing, showingCompletion, importStats } = state;
 	const importers = ConfigAPI.getImporters();
 	const importer = importers[source] || null;
 
@@ -114,7 +122,7 @@ const ImportProgress: React.FC = () => {
 									'quillcrm'
 								)
 							: __(
-									'All contacts have been imported successfully. You will be redirected shortly.',
+									'All contacts have been processed. You will be redirected shortly.',
 									'quillcrm'
 								)}
 					</div>
@@ -132,11 +140,77 @@ const ImportProgress: React.FC = () => {
 						</div>
 					</div>
 
-					{/* Debug info - remove in production */}
-					<div className="mt-2 text-xs text-gray-400 border-t pt-2">
-						Debug: importing={importing ? 'true' : 'false'}, offset=
-						{offset}, count={count}, progress={progressPercentage}%
-					</div>
+					{/* Import Statistics */}
+					{showingCompletion && (importStats.imported > 0 || importStats.skipped > 0 || importStats.failed > 0) && (
+						<div className="mt-4 pt-4 border-t border-gray-200">
+							<h4 className="text-sm font-medium text-gray-700 mb-3 text-center">
+								{__('Import Summary', 'quillcrm')}
+							</h4>
+							<div className="grid grid-cols-3 gap-4">
+								<div className="flex flex-col items-center p-3 bg-green-50 rounded-lg">
+									<CheckCircle2 className="w-6 h-6 text-green-600 mb-1" />
+									<span className="text-lg font-semibold text-green-700">
+										{importStats.imported}
+									</span>
+									<span className="text-xs text-green-600">
+										{__('Imported', 'quillcrm')}
+									</span>
+								</div>
+								<div className="flex flex-col items-center p-3 bg-yellow-50 rounded-lg">
+									<MinusCircle className="w-6 h-6 text-yellow-600 mb-1" />
+									<span className="text-lg font-semibold text-yellow-700">
+										{importStats.skipped}
+									</span>
+									<span className="text-xs text-yellow-600">
+										{__('Skipped', 'quillcrm')}
+									</span>
+								</div>
+								<div className="flex flex-col items-center p-3 bg-red-50 rounded-lg">
+									<XCircle className="w-6 h-6 text-red-600 mb-1" />
+									<span className="text-lg font-semibold text-red-700">
+										{importStats.failed}
+									</span>
+									<span className="text-xs text-red-600">
+										{__('Failed', 'quillcrm')}
+									</span>
+								</div>
+							</div>
+							{importStats.skipped > 0 && (
+								<p className="text-xs text-gray-500 text-center mt-2">
+									{__('Skipped contacts already exist and "Update existing" was not enabled.', 'quillcrm')}
+								</p>
+							)}
+							{importStats.failed > 0 && (
+								<div className="text-center mt-3">
+									<p className="text-xs text-gray-500 mb-2">
+										{__('Failed contacts may have invalid email addresses or other data issues.', 'quillcrm')}
+									</p>
+									<Link to={getToLink('settings/system')}>
+										<Button
+											variant="outline"
+											size="sm"
+											className="text-xs"
+										>
+											<ExternalLink className="w-3 h-3 mr-1" />
+											{__('View Log Management', 'quillcrm')}
+										</Button>
+									</Link>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Close button when import is complete */}
+					{showingCompletion && onComplete && (
+						<div className="mt-6 flex justify-center">
+							<Button
+								onClick={onComplete}
+								className="px-8"
+							>
+								{__('Close', 'quillcrm')}
+							</Button>
+						</div>
+					)}
 				</CardContent>
 			</Card>
 		</div>

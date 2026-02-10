@@ -100,19 +100,6 @@ class Message_Provider_Registry {
 		}
 
 		$this->providers[ $slug ] = $provider;
-
-		quillcrm_get_logger()->debug(
-			sprintf( 'Registered message provider: %s', $provider->get_provider_name() ),
-			array(
-				'code'          => 'provider_registered',
-				'provider_slug' => $slug,
-				'provider_name' => $provider->get_provider_name(),
-				'channels'      => array_filter(
-					array( 'sms', 'whatsapp' ),
-					array( $provider, 'supports_channel' )
-				),
-			)
-		);
 	}
 
 	/**

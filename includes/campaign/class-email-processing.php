@@ -19,6 +19,7 @@ use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Emails\Bulk_Email_Sender;
+use QuillCRM\Emails\Curl_Multi_Email_Sender;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Tracking\Email;
 use QuillCRM\Constants\Campaign_Channel;
@@ -53,6 +54,13 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @var bool|null
 	 */
 	private $use_bulk_sending = null;
+
+	/**
+	 * Whether to use curl multi sending for this campaign
+	 *
+	 * @var bool|null
+	 */
+	private $use_curl_multi_sending = null;
 
 	/**
 	 * Add hooks
@@ -105,6 +113,47 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Check if curl multi sending should be used
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return bool True if curl multi sending should be used
+	 */
+	protected function should_use_curl_multi_sending( Campaign_Model $campaign ) {
+		if ( $this->use_curl_multi_sending !== null ) {
+			return $this->use_curl_multi_sending;
+		}
+
+		// Check if curl multi sending is available (QuillSMTP with curl multi-capable mailer like SMTP2GO)
+		if ( ! Curl_Multi_Email_Sender::is_available() ) {
+			$this->use_curl_multi_sending = false;
+			return false;
+		}
+
+		// Allow filtering whether to use curl multi sending
+		$this->use_curl_multi_sending = apply_filters(
+			'quillcrm_use_curl_multi_email_sending',
+			true,
+			$campaign
+		);
+
+		if ( $this->use_curl_multi_sending ) {
+			quillcrm_get_logger()->info(
+				__( 'Curl Multi email sending enabled for campaign', 'quillcrm' ),
+				array(
+					'code'        => 'curl_multi_email_enabled',
+					'campaign_id' => $campaign->id,
+					'mailer'      => Curl_Multi_Email_Sender::get_active_mailer_slug(),
+				)
+			);
+		}
+
+		return $this->use_curl_multi_sending;
+	}
+
+	/**
 	 * Override do_process_campaign to support bulk sending
 	 *
 	 * @since 1.0.0
@@ -114,13 +163,19 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	protected function do_process_campaign( Campaign_Model $campaign ) {
-		// Check if bulk sending should be used
+		// Check if bulk sending should be used (Mailgun, SendGrid, etc.)
 		if ( $this->should_use_bulk_sending( $campaign ) ) {
 			$this->do_process_campaign_bulk( $campaign );
 			return;
 		}
 
-		// Fall back to parent individual sending
+		// Check if curl multi sending should be used (SMTP2GO, etc.)
+		if ( $this->should_use_curl_multi_sending( $campaign ) ) {
+			$this->do_process_campaign_curl_multi( $campaign );
+			return;
+		}
+
+		// Fall back to parent individual sending (wp_mail)
 		parent::do_process_campaign( $campaign );
 	}
 
@@ -186,7 +241,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		}
 
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
-			usleep( 100000 ); // 0.1 second delay
+			usleep( 1000000 ); // 0.1 second delay // TODO: search about each email sending delay
 
 			// Refresh lock
 			$this->refresh_campaign_lock( $lock_key, $lock_duration );
@@ -235,6 +290,679 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		} else {
 			$this->queue_continuation( $campaign->id );
 		}
+	}
+
+	/**
+	 * Process campaign using curl multi sending
+	 *
+	 * This method uses cURL Multi to send emails in parallel for mailers
+	 * that don't support native bulk API (e.g., SMTP2GO).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return void
+	 */
+	protected function do_process_campaign_curl_multi( Campaign_Model $campaign ) {
+		wp_raise_memory_limit( 'admin' );
+
+		// Lock key for refreshing during long operations
+		$lock_key      = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_duration = apply_filters(
+			'quillcrm_campaign_lock_duration',
+			300,
+			$this->channel,
+			$campaign->id
+		);
+
+		$offset_key = "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
+		$filters    = $campaign->get_setting( 'filters', array() );
+
+		$campaign_recipients_count = $this->contact_filter->get_contact_count( $this->channel, $filters );
+
+		if ( $campaign->count != $campaign_recipients_count ) {
+			$campaign->count = $campaign_recipients_count;
+			$campaign->save();
+		}
+
+		$offset = (int) get_option( $offset_key, 0 );
+
+		if ( $offset >= $campaign_recipients_count ) {
+			$this->complete_campaign( $campaign, $campaign_recipients_count );
+			return;
+		}
+
+		// Get batch size - use curl multi mailer's max batch size
+		$batch_size = min(
+			Curl_Multi_Email_Sender::get_max_batch_size(),
+			apply_filters( 'quillcrm_curl_multi_campaign_batch_size', 100, $this->channel )
+		);
+
+		// Get template for batch preparation
+		$template_id = reset( $campaign->get_template_ids() );
+		$template    = Template_Model::find( $template_id );
+
+		if ( ! $template ) {
+			quillcrm_get_logger()->error(
+				__( 'Template not found for curl multi email campaign', 'quillcrm' ),
+				array(
+					'code'        => 'curl_multi_email_no_template',
+					'campaign_id' => $campaign->id,
+				)
+			);
+			$campaign->status = 'failed';
+			$campaign->save();
+			return;
+		}
+
+		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
+			usleep( 100000 ); // 0.1 second delay
+
+			// Refresh lock
+			$this->refresh_campaign_lock( $lock_key, $lock_duration );
+
+			// Check if campaign was paused/cancelled
+			$fresh_campaign = Campaign_Model::find( $campaign->id );
+			if ( ! $fresh_campaign || $fresh_campaign->status !== 'processing' ) {
+				update_option( $offset_key, $offset );
+				return;
+			}
+
+			// Check completion
+			if ( $offset >= $campaign_recipients_count ) {
+				$this->complete_campaign( $campaign, $campaign_recipients_count );
+				return;
+			}
+
+			// Fetch batch of contacts
+			$contacts = $this->contact_filter->get_contacts_for_processing(
+				$this->channel,
+				$filters,
+				$offset,
+				$batch_size
+			);
+
+			if ( $contacts->isEmpty() ) {
+				break;
+			}
+
+			// Send batch using curl multi
+			$result = $this->send_email_batch_curl_multi( $campaign, $template, $contacts );
+
+			// Update offset based on contacts processed
+			$offset += $contacts->count();
+			update_option( $offset_key, $offset );
+
+			// If batch failed critically, stop processing
+			if ( isset( $result['fatal'] ) && $result['fatal'] ) {
+				return;
+			}
+		}
+
+		// Check if more work remains
+		if ( $offset >= $campaign_recipients_count ) {
+			$this->complete_campaign( $campaign, $campaign_recipients_count );
+		} else {
+			$this->queue_continuation( $campaign->id );
+		}
+	}
+
+	/**
+	 * Send a batch of emails via cURL Multi
+	 *
+	 * This method reuses the same logic as send_email_batch but uses
+	 * Curl_Multi_Email_Sender instead of Bulk_Email_Sender.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign Campaign model
+	 * @param Template_Model                           $template Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts Collection of contacts
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_curl_multi( Campaign_Model $campaign, Template_Model $template, $contacts ) {
+		$skipped_contacts = array();
+		$subject          = $template->subject ?? '';
+		$body             = $template->body ?? $this->get_default_campaign_content();
+		$content          = $subject . ' ' . $body;
+
+		// Extract merge tags from content
+		$merge_tag_keys = Merge_Tags_Manager::instance()->extract_merge_tag_keys( $content );
+
+		// Check if template has conditional sections
+		$has_conditional_sections = $this->template_has_conditional_sections( $body );
+
+		if ( $has_conditional_sections ) {
+			// Use conditional sections aware processing
+			return $this->send_email_batch_curl_multi_with_conditional_sections(
+				$campaign,
+				$template,
+				$contacts,
+				$subject,
+				$body,
+				$merge_tag_keys,
+				$skipped_contacts
+			);
+		}
+
+		// No conditional sections - use standard curl multi processing
+		return $this->send_email_batch_curl_multi_standard(
+			$campaign,
+			$template,
+			$contacts,
+			$subject,
+			$body,
+			$merge_tag_keys,
+			$skipped_contacts
+		);
+	}
+
+	/**
+	 * Send standard batch via cURL Multi without conditional sections
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign        Campaign model
+	 * @param Template_Model                           $template        Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts        Collection of contacts
+	 * @param string                                   $subject         Email subject
+	 * @param string                                   $body            Template body
+	 * @param array                                    $merge_tag_keys  Merge tag keys
+	 * @param array                                    &$skipped_contacts Skipped contacts array (by reference)
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_curl_multi_standard(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contacts,
+		$subject,
+		$body,
+		$merge_tag_keys,
+		&$skipped_contacts
+	) {
+		$tracking_records    = array();
+		$recipients          = array();
+		$recipient_variables = array();
+
+		// Create tracking records and prepare recipient data
+		foreach ( $contacts as $contact ) {
+			$email = $this->get_recipient( $contact );
+
+			// Skip contacts without valid email
+			if ( empty( $email ) || ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+				$skipped_contacts[] = $contact->id;
+				$this->contact_filter->log_skipped_contact(
+					$contact->id,
+					$campaign->id,
+					$this->channel,
+					'invalid or missing email'
+				);
+				continue;
+			}
+
+			// Create tracking record
+			$tracking = Communication_Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => $template->id,
+					'mode'        => $this->get_message_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
+					'source_type' => Message_Source_Types::CAMPAIGN,
+					'source_id'   => $campaign->id,
+					'recipient'   => $email,
+					'status'      => Tracking_Status::PENDING,
+					'hash_key'    => Utils::generate_hash_key(),
+				)
+			);
+
+			$tracking_records[ $email ] = $tracking;
+			$recipients[]               = $email;
+			Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$tracking->id,
+				$merge_tag_keys,
+				$contact
+			);
+
+			// Get recipient variables with tracking pixel URL
+			$variables = Merge_Tags_Manager::instance()->get_merge_tag_values_for_keys_slug_only( $merge_tag_keys, $contact );
+
+			// Add tracking pixel URL for this contact
+			$variables['tracking_pixel'] = home_url( '?quillcrm=email_open&hash_key=' . $tracking->hash_key );
+
+			// Add unsubscribe URL
+			$variables['unsubscribe_url'] = add_query_arg(
+				array(
+					'quillcrm' => 'email_unsubscribe',
+					'hash_key' => $tracking->hash_key,
+				),
+				home_url()
+			);
+
+			$recipient_variables[ $email ] = $variables;
+		}
+
+		// If no valid recipients, return early
+		if ( empty( $recipients ) ) {
+			quillcrm_get_logger()->info(
+				__( 'No valid recipients in curl multi batch', 'quillcrm' ),
+				array(
+					'code'          => 'curl_multi_email_no_recipients',
+					'campaign_id'   => $campaign->id,
+					'skipped_count' => count( $skipped_contacts ),
+				)
+			);
+			return array(
+				'success' => true,
+				'skipped' => count( $skipped_contacts ),
+			);
+		}
+
+		// Render builder content if needed
+		$body = $this->render_builder_content_for_bulk( $body );
+
+		// Get footer content (with merge tags - will be processed per contact)
+		$footer = $this->get_curl_multi_footer_content();
+
+		// Inject footer into body
+		if ( strpos( $body, '</body>' ) !== false ) {
+			$body = str_replace( '</body>', $footer . '</body>', $body );
+		} else {
+			$body .= $footer;
+		}
+
+		// Add tracking pixel placeholder (will be replaced per contact)
+		$tracking_pixel = '<img src="{{tracking:tracking_pixel}}" width="1" height="1" style="width:1px;height:1px;" alt="" />';
+		if ( strpos( $body, '</body>' ) !== false ) {
+			$body = str_replace( '</body>', $tracking_pixel . '</body>', $body );
+		} else {
+			$body .= $tracking_pixel;
+		}
+
+		// Prepare batch data
+		$batch_data = array(
+			'subject'             => $subject,
+			'html'                => $body,
+			'from_email'          => $template->get_setting( 'from_email' ) ?: get_option( 'admin_email' ),
+			'from_name'           => $template->get_setting( 'from_name' ) ?: get_bloginfo( 'name' ),
+			'reply_to'            => $template->get_setting( 'reply_to' ) ?: '',
+			'recipients'          => $recipients,
+			'recipient_variables' => $recipient_variables,
+			'campaign_id'         => $campaign->id,
+			'tags'                => array( 'quillcrm', 'campaign-' . $campaign->id ),
+		);
+
+		// Send via cURL Multi
+		$result = Curl_Multi_Email_Sender::send_batch( $batch_data );
+
+		// Update tracking records based on result
+		if ( is_wp_error( $result ) ) {
+			// Mark all as failed
+			foreach ( $tracking_records as $email => $tracking ) {
+				$tracking->status = Tracking_Status::FAILED;
+				$tracking->save();
+			}
+
+			quillcrm_get_logger()->error(
+				__( 'Curl Multi email batch failed', 'quillcrm' ),
+				array(
+					'code'            => 'curl_multi_email_batch_failed',
+					'campaign_id'     => $campaign->id,
+					'error'           => $result->get_error_message(),
+					'recipient_count' => count( $recipients ),
+				)
+			);
+
+			return array(
+				'success' => false,
+				'error'   => $result->get_error_message(),
+				'fatal'   => false,
+			);
+		}
+
+		// Process individual results
+		$sent_count  = $result['sent_count'] ?? 0;
+		$failed      = $result['failed'] ?? array();
+		$message_ids = $result['message_ids'] ?? array();
+
+		foreach ( $tracking_records as $email => $tracking ) {
+			if ( isset( $failed[ $email ] ) ) {
+				$tracking->status = Tracking_Status::FAILED;
+			} else {
+				$tracking->status      = Tracking_Status::SENT;
+				$tracking->sent_at     = current_time( 'mysql' );
+				$tracking->external_id = $message_ids[ $email ] ?? '';
+			}
+			$tracking->save();
+		}
+
+		quillcrm_get_logger()->info(
+			__( 'Curl Multi email batch completed', 'quillcrm' ),
+			array(
+				'code'          => 'curl_multi_email_batch_success',
+				'campaign_id'   => $campaign->id,
+				'sent_count'    => $sent_count,
+				'failed_count'  => count( $failed ),
+				'skipped_count' => count( $skipped_contacts ),
+			)
+		);
+
+		return array(
+			'success'    => empty( $failed ),
+			'sent_count' => $sent_count,
+			'skipped'    => count( $skipped_contacts ),
+			'failed'     => $failed,
+		);
+	}
+
+	/**
+	 * Send batch with conditional sections support via cURL Multi
+	 *
+	 * Groups contacts by template hash and sends separate batches for each group.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model                           $campaign        Campaign model
+	 * @param Template_Model                           $template        Template model
+	 * @param \Illuminate\Database\Eloquent\Collection $contacts        Collection of contacts
+	 * @param string                                   $subject         Email subject
+	 * @param string                                   $body            Template body (JSON)
+	 * @param array                                    $merge_tag_keys  Merge tag keys
+	 * @param array                                    &$skipped_contacts Skipped contacts array (by reference)
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_curl_multi_with_conditional_sections(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contacts,
+		$subject,
+		$body,
+		$merge_tag_keys,
+		&$skipped_contacts
+	) {
+		// Pre-load relationships for all contacts to optimize condition evaluation
+		$this->preload_relationships_for_conditions( $contacts, $body );
+
+		// Group contacts by their template hash
+		$contact_groups = array(); // hash => array of contact data
+
+		foreach ( $contacts as $contact ) {
+			$email = $this->get_recipient( $contact );
+
+			// Skip contacts without valid email
+			if ( empty( $email ) || ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+				$skipped_contacts[] = $contact->id;
+				$this->contact_filter->log_skipped_contact(
+					$contact->id,
+					$campaign->id,
+					$this->channel,
+					'invalid or missing email'
+				);
+				continue;
+			}
+
+			// Compute template hash for this contact
+			$hash_result = $this->compute_template_hash_for_contact( $body, $contact );
+			$hash        = $hash_result['hash'];
+			$section_ids = $hash_result['section_ids'];
+
+			if ( ! isset( $contact_groups[ $hash ] ) ) {
+				$contact_groups[ $hash ] = array(
+					'section_ids' => $section_ids,
+					'contacts'    => array(),
+				);
+			}
+
+			$contact_groups[ $hash ]['contacts'][] = array(
+				'contact' => $contact,
+				'email'   => $email,
+			);
+		}
+
+		if ( empty( $contact_groups ) ) {
+			return array(
+				'success' => true,
+				'skipped' => count( $skipped_contacts ),
+			);
+		}
+
+		// Log grouping info
+		quillcrm_get_logger()->info(
+			__( 'Contacts grouped by conditional sections for curl multi', 'quillcrm' ),
+			array(
+				'code'        => 'curl_multi_email_conditional_groups',
+				'campaign_id' => $campaign->id,
+				'group_count' => count( $contact_groups ),
+			)
+		);
+
+		// Send batch for each group
+		$total_sent      = 0;
+		$total_failed    = 0;
+		$last_error      = null;
+		$all_message_ids = array();
+
+		foreach ( $contact_groups as $hash => $group ) {
+			$result = $this->send_email_batch_curl_multi_for_group(
+				$campaign,
+				$template,
+				$group['contacts'],
+				$group['section_ids'],
+				$subject,
+				$body,
+				$merge_tag_keys
+			);
+
+			if ( isset( $result['sent_count'] ) ) {
+				$total_sent += $result['sent_count'];
+			}
+			if ( ! empty( $result['failed'] ) ) {
+				$total_failed += count( $result['failed'] );
+				$last_error    = is_array( $result['failed'] ) ? reset( $result['failed'] ) : 'Unknown error';
+			}
+			if ( ! empty( $result['message_ids'] ) ) {
+				$all_message_ids = array_merge( $all_message_ids, $result['message_ids'] );
+			}
+		}
+
+		return array(
+			'success'     => $total_failed === 0,
+			'message_ids' => $all_message_ids,
+			'sent_count'  => $total_sent,
+			'skipped'     => count( $skipped_contacts ),
+			'error'       => $last_error,
+			'fatal'       => false,
+		);
+	}
+
+	/**
+	 * Send cURL Multi batch for a group of contacts with the same template hash
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign        Campaign model
+	 * @param Template_Model $template        Template model
+	 * @param array          $contact_data    Array of contact data (contact, email)
+	 * @param array          $section_ids     Array of section IDs that should render
+	 * @param string         $subject         Email subject
+	 * @param string         $body            Template body (JSON)
+	 * @param array          $merge_tag_keys  Merge tag keys
+	 *
+	 * @return array Result array
+	 */
+	protected function send_email_batch_curl_multi_for_group(
+		Campaign_Model $campaign,
+		Template_Model $template,
+		$contact_data,
+		$section_ids,
+		$subject,
+		$body,
+		$merge_tag_keys
+	) {
+		$tracking_records    = array();
+		$recipients          = array();
+		$recipient_variables = array();
+
+		// Create tracking records for all contacts in this group
+		foreach ( $contact_data as $data ) {
+			$contact = $data['contact'];
+			$email   = $data['email'];
+
+			// Create tracking record
+			$tracking = Communication_Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => $template->id,
+					'mode'        => $this->get_message_mode(),
+					'direction'   => Message_Direction::OUTBOUND,
+					'source_type' => Message_Source_Types::CAMPAIGN,
+					'source_id'   => $campaign->id,
+					'recipient'   => $email,
+					'status'      => Tracking_Status::PENDING,
+					'hash_key'    => Utils::generate_hash_key(),
+				)
+			);
+
+			$tracking_records[ $email ] = $tracking;
+			$recipients[]               = $email;
+
+			// Capture merge tags for this contact
+			Communication_Tracking_Meta_Model::capture_merge_tags_from_keys(
+				$tracking->id,
+				$merge_tag_keys,
+				$contact
+			);
+
+			// Store conditional section IDs for this tracking record
+			if ( ! empty( $section_ids ) ) {
+				Communication_Tracking_Meta_Model::create(
+					array(
+						'communication_tracking_id' => $tracking->id,
+						'meta_key'                  => 'conditional_sections',
+						'meta_value'                => $section_ids,
+					)
+				);
+			}
+
+			// Get recipient variables with tracking info
+			$variables = Merge_Tags_Manager::instance()->get_merge_tag_values_for_keys_slug_only( $merge_tag_keys, $contact );
+
+			// Add tracking pixel URL for this contact
+			$variables['tracking_pixel'] = home_url( '?quillcrm=email_open&hash_key=' . $tracking->hash_key );
+
+			// Add unsubscribe URL
+			$variables['unsubscribe_url'] = add_query_arg(
+				array(
+					'quillcrm' => 'email_unsubscribe',
+					'hash_key' => $tracking->hash_key,
+				),
+				home_url()
+			);
+
+			$recipient_variables[ $email ] = $variables;
+		}
+
+		// Render body with specific section IDs
+		$rendered_body = $this->render_builder_content_for_bulk_with_sections( $body, $section_ids );
+
+		// Get footer content
+		$footer = $this->get_curl_multi_footer_content();
+
+		// Inject footer into body
+		if ( strpos( $rendered_body, '</body>' ) !== false ) {
+			$rendered_body = str_replace( '</body>', $footer . '</body>', $rendered_body );
+		} else {
+			$rendered_body .= $footer;
+		}
+
+		// Add tracking pixel placeholder
+		$tracking_pixel = '<img src="{{tracking:tracking_pixel}}" width="1" height="1" style="width:1px;height:1px;" alt="" />';
+		if ( strpos( $rendered_body, '</body>' ) !== false ) {
+			$rendered_body = str_replace( '</body>', $tracking_pixel . '</body>', $rendered_body );
+		} else {
+			$rendered_body .= $tracking_pixel;
+		}
+
+		// Prepare batch data
+		$batch_data = array(
+			'subject'             => $subject,
+			'html'                => $rendered_body,
+			'from_email'          => $template->get_setting( 'from_email' ) ?: get_option( 'admin_email' ),
+			'from_name'           => $template->get_setting( 'from_name' ) ?: get_bloginfo( 'name' ),
+			'reply_to'            => $template->get_setting( 'reply_to' ) ?: '',
+			'recipients'          => $recipients,
+			'recipient_variables' => $recipient_variables,
+			'campaign_id'         => $campaign->id,
+			'tags'                => array( 'quillcrm', 'campaign-' . $campaign->id ),
+		);
+
+		// Send via cURL Multi
+		$result = Curl_Multi_Email_Sender::send_batch( $batch_data );
+
+		// Update tracking records based on result
+		if ( is_wp_error( $result ) ) {
+			foreach ( $tracking_records as $email => $tracking ) {
+				$tracking->status = Tracking_Status::FAILED;
+				$tracking->save();
+			}
+
+			return array(
+				'success' => false,
+				'error'   => $result->get_error_message(),
+			);
+		}
+
+		// Process individual results
+		$failed      = $result['failed'] ?? array();
+		$message_ids = $result['message_ids'] ?? array();
+
+		foreach ( $tracking_records as $email => $tracking ) {
+			if ( isset( $failed[ $email ] ) ) {
+				$tracking->status = Tracking_Status::FAILED;
+			} else {
+				$tracking->status      = Tracking_Status::SENT;
+				$tracking->sent_at     = current_time( 'mysql' );
+				$tracking->external_id = $message_ids[ $email ] ?? '';
+			}
+			$tracking->save();
+		}
+
+		return array(
+			'success'     => empty( $failed ),
+			'message_ids' => $message_ids,
+			'sent_count'  => $result['sent_count'] ?? 0,
+			'failed'      => $failed,
+		);
+	}
+
+	/**
+	 * Get footer content for cURL Multi emails
+	 *
+	 * Unlike bulk email which converts merge tags to mailer format,
+	 * cURL Multi keeps QuillCRM merge tags as they will be processed per contact.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Footer HTML with merge tag placeholders
+	 */
+	protected function get_curl_multi_footer_content() {
+		// Get footer from settings
+		if ( ! empty( $this->settings['email_footer'] ) ) {
+			$footer = $this->settings['email_footer'];
+		} else {
+			$global_settings = \QuillCRM\Settings::get( 'email', array() );
+			if ( ! empty( $global_settings['email_footer'] ) ) {
+				$footer = $global_settings['email_footer'];
+			} else {
+				$footer = Email_Tracking_Helper::get_default_footer();
+			}
+		}
+
+		// Keep merge tags as-is for curl multi (they will be processed per contact)
+		return $footer;
 	}
 
 	/**

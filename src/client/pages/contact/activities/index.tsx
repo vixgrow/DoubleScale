@@ -163,7 +163,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [filters, setFilters] = useState({
-        sort_by: 'created_at',
+        sort_by: 'activity_date',
         sort_order: 'desc',
         date_from: '',
         date_to: '',

@@ -41,12 +41,6 @@ class Elasticemail_Bulk_Mailer extends Abstract_Bulk_Mailer {
 	 */
 	protected $supports_tracking = true;
 
-	/**
-	 * Cached account API instance
-	 *
-	 * @var object|null
-	 */
-	private $account_api = null;
 
 	/**
 	 * Convert QuillCRM merge tags to ElasticEmail merge field format
@@ -186,84 +180,4 @@ class Elasticemail_Bulk_Mailer extends Abstract_Bulk_Mailer {
 		return $headers;
 	}
 
-	/**
-	 * Get the ElasticEmail Account API instance
-	 *
-	 * @return object|null Account API instance or null
-	 */
-	private function get_account_api() {
-		if ( $this->account_api !== null ) {
-			return $this->account_api;
-		}
-
-		if ( ! class_exists( '\\QuillSMTP\\Mailers\\ElasticEmail\\Accounts' ) ) {
-			return null;
-		}
-
-		$settings = get_option( 'quillsmtp_settings', array() );
-
-		if ( empty( $settings['connections'] ) || ! is_array( $settings['connections'] ) ) {
-			return null;
-		}
-
-		$connections = $settings['connections'];
-		$account_id  = null;
-
-		// Check default_connection first
-		if ( ! empty( $settings['default_connection'] ) ) {
-			$default_connection_id = $settings['default_connection'];
-
-			if ( isset( $connections[ $default_connection_id ] ) ) {
-				$connection = $connections[ $default_connection_id ];
-
-				if ( ! empty( $connection['mailer'] ) && $connection['mailer'] === 'elasticemail' ) {
-					$account_id = $connection['account_id'] ?? null;
-				}
-			}
-		}
-
-		// Check fallback_connection if default is not ElasticEmail
-		if ( ! $account_id && ! empty( $settings['fallback_connection'] ) ) {
-			$fallback_connection_id = $settings['fallback_connection'];
-
-			if ( isset( $connections[ $fallback_connection_id ] ) ) {
-				$connection = $connections[ $fallback_connection_id ];
-
-				if ( ! empty( $connection['mailer'] ) && $connection['mailer'] === 'elasticemail' ) {
-					$account_id = $connection['account_id'] ?? null;
-				}
-			}
-		}
-
-		if ( ! $account_id ) {
-			return null;
-		}
-
-		try {
-			$mailers      = \QuillSMTP\Mailers\Mailers::instance();
-			$elasticemail = $mailers->get_mailer( 'elasticemail' );
-
-			if ( ! $elasticemail || ! isset( $elasticemail->accounts ) ) {
-				return null;
-			}
-
-			$account_api = $elasticemail->accounts->connect( $account_id );
-
-			if ( is_wp_error( $account_api ) ) {
-				return null;
-			}
-
-			$this->account_api = $account_api;
-			return $this->account_api;
-		} catch ( \Exception $e ) {
-			quillcrm_get_logger()->error(
-				__( 'Failed to get ElasticEmail Account API', 'quillcrm' ),
-				array(
-					'code'  => 'bulk_email_elasticemail_api_error',
-					'error' => $e->getMessage(),
-				)
-			);
-			return null;
-		}
-	}
 }

@@ -12,6 +12,7 @@
 
 namespace QuillCRM\Emails\BulkMailers;
 
+use QuillCRM\Emails\Traits\Account_API_Helper;
 use WP_Error;
 
 /**
@@ -20,6 +21,8 @@ use WP_Error;
  * @since 1.0.0
  */
 abstract class Abstract_Bulk_Mailer {
+
+	use Account_API_Helper;
 
 	/**
 	 * Mailer slug identifier

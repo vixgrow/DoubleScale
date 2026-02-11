@@ -53,7 +53,7 @@ abstract class Abstract_Curl_Multi_Mailer {
 	 *
 	 * @var int
 	 */
-	protected $batch_delay = 100000; // 100ms
+	protected $batch_delay = 1000000; // 1s
 
 	/**
 	 * Whether this mailer supports tracking

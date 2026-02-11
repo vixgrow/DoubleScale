@@ -319,6 +319,25 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		$offset_key = "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
 		$filters    = $campaign->get_setting( 'filters', array() );
 
+		// Track campaign start time (only set if not already set - first processing batch)
+		$start_time_key      = "quillcrm_{$this->channel}_campaign_start_time_{$campaign->id}";
+		$campaign_start_time = get_option( $start_time_key );
+		if ( ! $campaign_start_time ) {
+			$campaign_start_time = microtime( true );
+			update_option( $start_time_key, $campaign_start_time );
+
+			// Log to PHP error log for debugging
+			error_log(
+				sprintf(
+					'[QuillCRM] %s Campaign started processing. Campaign ID: %d, Name: %s, Start Time: %s',
+					ucfirst( $this->channel ),
+					$campaign->id,
+					$campaign->name,
+					gmdate( 'Y-m-d H:i:s', (int) $campaign_start_time )
+				)
+			);
+		}
+
 		$campaign_recipients_count = $this->contact_filter->get_contact_count( $this->channel, $filters );
 
 		if ( $campaign->count != $campaign_recipients_count ) {

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect, useLayoutEffect, useRef } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -92,7 +92,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setSettings(step.settings || {});
 	}, [step.settings]);
 
-	const handleSave = async () => {
+	const handleSave = useCallback(async () => {
 		setIsSaving(true);
 
 		const newStep = {
@@ -105,14 +105,14 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		await saveStep(newStep);
 
 		setIsSaving(false);
-	};
+	}, [step, settings, saveStep]);
 
-	const handleDelete = async () => {
+	const handleDelete = useCallback(async () => {
 		setIsDeleting(true);
 		await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 		setIsDeleting(false);
 		setStep(null); // Close the modal after deletion
-	};
+	}, [step.id, steps, setSteps, createNotice, setStep]);
 
 	// Register footer in sidebar so scroll is between header and buttons (footer fixed at bottom)
 	// Use ref for setFooter to avoid infinite loop (context value changes when footer updates)
@@ -146,7 +146,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			</div>
 		);
 		return () => setFooter(null);
-	}, [isSaving, isDeleting]);
+	}, [isSaving, isDeleting, handleSave, handleDelete]);
 
 	const handleMergeTagsClick = () => {
 		setMergeTagCallback((tagValue: string) => {

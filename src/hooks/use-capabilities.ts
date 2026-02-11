@@ -27,7 +27,7 @@ export const useCapabilities = () => {
     }, []);
 
     /**
-     * Check if current user is a sales rep (has restricted permissions)
+     * Check if current user is a sales rep (has restricted permissions - can only manage own deals)
      */
     const isSalesRep = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
@@ -35,7 +35,24 @@ export const useCapabilities = () => {
     }, []);
 
     /**
+     * Check if current user is a sales manager (can manage all deals but not full CRM access)
+     */
+    const isSalesManager = useCallback((): boolean => {
+        const userCapabilities = Config.getUserCapabilities();
+        return userCapabilities.quillcrm_sales_manager || false;
+    }, []);
+
+    /**
      * Check if current user can manage deals (not restricted to own deals)
+     * Sales Manager, CRM Manager, and Administrator can manage all deals
+     */
+    const canManageAllDeals = useCallback((): boolean => {
+        const userCapabilities = Config.getUserCapabilities();
+        return userCapabilities.quillcrm_crm_manager || userCapabilities.quillcrm_sales_manager || false;
+    }, []);
+
+    /**
+     * Check if current user is a CRM manager (full CRM access)
      */
     const isCrmManager = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
@@ -45,6 +62,8 @@ export const useCapabilities = () => {
     return {
         hasRequiredCapability,
         isSalesRep,
+        isSalesManager,
+        canManageAllDeals,
         isCrmManager,
     };
 };

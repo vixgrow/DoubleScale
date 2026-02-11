@@ -287,7 +287,7 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('start', {
@@ -304,7 +304,7 @@ registerAdminPage('contact', {
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('lists', {
@@ -402,7 +402,7 @@ registerAdminPage('sales-pipeline', {
 	), // Pro plugin overrides with actual pipeline
 	label: __('Pipelines', 'quillcrm'),
 	icon: <PiplelinesIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 // Deal Detail - stub registration that Pro plugin will override
@@ -419,7 +419,7 @@ registerAdminPage('deal-detail', {
 	),
 	label: __('Deal Details', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('automations', {
@@ -552,7 +552,7 @@ registerAdminPage('tasks', {
 	),
 	label: __('Tasks', 'quillcrm'),
 	icon: <TasksIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('analytics-and-reports', {
@@ -560,7 +560,7 @@ registerAdminPage('analytics-and-reports', {
 	component: (props) => <AnalyticsAndReports {...props} />,
 	label: __('Analytics', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('deals-analytics', {
@@ -568,7 +568,7 @@ registerAdminPage('deals-analytics', {
 	component: (props) => <AnalyticsAndReports {...props} defaultTab="deals" />,
 	label: __('Deals Analytics', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
 });
 
 registerAdminPage('sales-rep-analytics', {
@@ -578,7 +578,7 @@ registerAdminPage('sales-rep-analytics', {
 	),
 	label: __('Sales Rep Analytics', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
 });
 
 registerAdminPage('pipeline-analytics', {
@@ -588,7 +588,7 @@ registerAdminPage('pipeline-analytics', {
 	),
 	label: __('Pipeline Analytics', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
 });
 
 registerAdminPage('my-reports', {
@@ -598,7 +598,7 @@ registerAdminPage('my-reports', {
 	),
 	label: __('My Reports', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_sales_rep', 'quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_sales_rep', 'quillcrm_sales_manager', 'quillcrm_crm_manager'],
 });
 
 registerAdminPage('cart-analytics', {
@@ -649,7 +649,7 @@ registerAdminPage('settings', {
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
 	icon: <SettingsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('debug', {

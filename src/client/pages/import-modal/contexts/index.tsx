@@ -2,6 +2,12 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import type { ImporterField } from '@quillcrm/config';
 
+export interface ImportStats {
+	imported: number;
+	skipped: number;
+	failed: number;
+}
+
 export interface ImportState {
 	currentStep: number;
 	importing: boolean;
@@ -26,6 +32,7 @@ export interface ImportState {
 	uploadProgress: number;
 	isUploading: boolean;
 	values: Record<string, any>;
+	importStats: ImportStats; // Track import statistics
 }
 
 type ImportAction =
@@ -47,6 +54,8 @@ type ImportAction =
 	| { type: 'SET_UPLOAD_PROGRESS'; payload: number }
 	| { type: 'SET_IS_UPLOADING'; payload: boolean }
 	| { type: 'SET_VALUES'; payload: Record<string, any> }
+	| { type: 'SET_IMPORT_STATS'; payload: ImportStats }
+	| { type: 'UPDATE_IMPORT_STATS'; payload: Partial<ImportStats> }
 	| { type: 'RESET_STATE' };
 
 const initialState: ImportState = {
@@ -68,6 +77,7 @@ const initialState: ImportState = {
 	uploadProgress: 0,
 	isUploading: false,
 	values: {},
+	importStats: { imported: 0, skipped: 0, failed: 0 },
 };
 
 function importReducer(state: ImportState, action: ImportAction): ImportState {
@@ -108,6 +118,18 @@ function importReducer(state: ImportState, action: ImportAction): ImportState {
 			return { ...state, isUploading: action.payload };
 		case 'SET_VALUES':
 			return { ...state, values: action.payload };
+		case 'SET_IMPORT_STATS':
+			return { ...state, importStats: action.payload };
+		case 'UPDATE_IMPORT_STATS':
+			return {
+				...state,
+				importStats: {
+					...state.importStats,
+					imported: state.importStats.imported + (action.payload.imported || 0),
+					skipped: state.importStats.skipped + (action.payload.skipped || 0),
+					failed: state.importStats.failed + (action.payload.failed || 0),
+				},
+			};
 		case 'RESET_STATE':
 			return initialState;
 		default:

@@ -134,13 +134,15 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
 
     useEffect(() => {
         if (selectedMeeting) {
-            const meetingDate = selectedMeeting.data?.meeting_date_time
-                ? new Date(selectedMeeting.data.meeting_date_time)
-                : new Date(selectedMeeting.created_at);
+            const meetingDate = selectedMeeting.data?.scheduled_at
+                ? new Date(selectedMeeting.data.scheduled_at)
+                : selectedMeeting.data?.meeting_date_time
+                    ? new Date(selectedMeeting.data.meeting_date_time)
+                    : new Date(selectedMeeting.created_at);
 
             setFormData({
                 contactName: contact ? `${contact.first_name} ${contact.last_name}`.trim() : '',
-                meetingTitle: selectedMeeting.data?.meeting_title || '',
+                meetingTitle: selectedMeeting.data?.title || selectedMeeting.data?.meeting_title || '',
                 duration: selectedMeeting.data?.duration || 60,
                 location: selectedMeeting.data?.location || '',
                 meetingDateTime: meetingDate,

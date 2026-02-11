@@ -239,12 +239,18 @@ abstract class Importer {
 	 * @param object $subscriber Subscriber
 	 * @param array  $mapping Mapping
 	 *
-	 * @return bool
+	 * @return bool|string True on success, 'skipped' if skipped, false on failure
 	 */
 	public function import_contact( $subscriber, $mapping ) {
 		try {
 			// Check if the contact already exists
 			$email = is_object( $subscriber ) ? $subscriber->{$mapping['email']} : $subscriber[ $mapping['email'] ];
+
+			// Validate email
+			if ( empty( $email ) || ! is_email( $email ) ) {
+				return false;
+			}
+
 			$lists = is_object( $subscriber ) ? $subscriber->lists ?? array() : $subscriber['lists'] ?? array();
 			$lists = $lists ? explode( ',', $lists ) : array();
 			$tags  = is_object( $subscriber ) ? $subscriber->tags ?? array() : $subscriber['tags'] ?? array();
@@ -254,6 +260,11 @@ abstract class Importer {
 			$existing = $contact ? true : false;
 			if ( ! $contact ) {
 				$contact = new Contact_Model();
+			}
+
+			// Skip if contact exists and update_existing is false
+			if ( $existing && ! $this->update_existing ) {
+				return 'skipped';
 			}
 
 			if ( ( $this->update_existing && $existing ) || ! $existing ) {
@@ -325,7 +336,11 @@ abstract class Importer {
 				if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) && ! empty( $this->custom_fields_mapping ) ) {
 					$this->import_custom_fields( $contact, $subscriber );
 				}
+
+				return true;
 			}
+
+			return 'skipped';
 		} catch ( \Exception $e ) {
 			$error_message = __( 'Error importing contact', 'quillcrm' ) . ': ' . $e->getMessage();
 			quillcrm_get_logger()->error(
@@ -565,6 +580,10 @@ abstract class Importer {
 	 * @return array
 	 */
 	public function import_with_offset( $total, $offset, $get_subscribers_callback, $mapping ) {
+		$imported = 0;
+		$skipped  = 0;
+		$failed   = 0;
+
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
 			usleep( 1000000 );
@@ -575,7 +594,14 @@ abstract class Importer {
 			}
 
 			foreach ( $subscribers as $subscriber ) {
-				$this->import_contact( $subscriber, $mapping );
+				$result = $this->import_contact( $subscriber, $mapping );
+				if ( false === $result ) {
+					$failed++;
+				} elseif ( 'skipped' === $result ) {
+					$skipped++;
+				} else {
+					$imported++;
+				}
 				$offset++;
 			}
 
@@ -586,9 +612,12 @@ abstract class Importer {
 		}
 
 		$result = array(
-			'offset' => $offset,
-			'status' => $offset >= $total ? 'completed' : 'in_progress',
-			'total'  => $total,
+			'offset'   => $offset,
+			'status'   => $offset >= $total ? 'completed' : 'in_progress',
+			'total'    => $total,
+			'imported' => $imported,
+			'skipped'  => $skipped,
+			'failed'   => $failed,
 		);
 
 		return $result;
@@ -607,6 +636,9 @@ abstract class Importer {
 		$processed_in_session = 0;
 		$current_offset       = $offset;
 		$cursor               = $this->cursor; // Use the cursor from constructor
+		$imported             = 0;
+		$skipped              = 0;
+		$failed               = 0;
 
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
@@ -618,7 +650,14 @@ abstract class Importer {
 			}
 
 			foreach ( $batch_result['contacts'] as $subscriber ) {
-				$this->import_contact( $subscriber, $mapping );
+				$result = $this->import_contact( $subscriber, $mapping );
+				if ( false === $result ) {
+					$failed++;
+				} elseif ( 'skipped' === $result ) {
+					$skipped++;
+				} else {
+					$imported++;
+				}
 				$processed_in_session++;
 				$current_offset++;
 			}
@@ -636,10 +675,13 @@ abstract class Importer {
 		}
 
 		$result = array(
-			'offset' => $current_offset,
-			'cursor' => $cursor, // Include cursor for next request
-			'status' => empty( $cursor ) || $current_offset >= $total ? 'completed' : 'in_progress',
-			'total'  => $total,
+			'offset'   => $current_offset,
+			'cursor'   => $cursor, // Include cursor for next request
+			'status'   => empty( $cursor ) || $current_offset >= $total ? 'completed' : 'in_progress',
+			'total'    => $total,
+			'imported' => $imported,
+			'skipped'  => $skipped,
+			'failed'   => $failed,
 		);
 
 		return $result;

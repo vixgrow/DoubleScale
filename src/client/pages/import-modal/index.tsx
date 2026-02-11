@@ -40,6 +40,7 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 		dispatch({ type: 'SET_COUNT', payload: 0 });
 		dispatch({ type: 'SET_OFFSET', payload: 0 });
 		dispatch({ type: 'SET_CURSOR', payload: null });
+		dispatch({ type: 'SET_IMPORT_STATS', payload: { imported: 0, skipped: 0, failed: 0 } });
 		// Then reset the entire state
 		resetState();
 		onClose();

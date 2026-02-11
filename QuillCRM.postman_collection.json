@@ -4680,7 +4680,8 @@
 								{
 									"key": "activity_type",
 									"value": "email_sent",
-									"disabled": true
+									"disabled": true,
+									"description": "Filter by type: note, email_sent, call, meeting_scheduled"
 								},
 								{
 									"key": "entity_id",
@@ -4693,6 +4694,48 @@
 									"value": "1",
 									"disabled": true,
 									"description": "1=deal, 2=campaign"
+								},
+								{
+									"key": "user_id",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter by user ID"
+								},
+								{
+									"key": "date_from",
+									"value": "2026-01-01",
+									"disabled": true,
+									"description": "Filter from date (YYYY-MM-DD)"
+								},
+								{
+									"key": "date_to",
+									"value": "2026-12-31",
+									"disabled": true,
+									"description": "Filter to date (YYYY-MM-DD)"
+								},
+								{
+									"key": "sort_by",
+									"value": "activity_date",
+									"disabled": true,
+									"description": "Sort by: activity_date (default), created_at, updated_at"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc",
+									"disabled": true,
+									"description": "Sort order: asc, desc"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true,
+									"description": "Items per page (default: 20)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true,
+									"description": "Page number"
 								}
 							]
 						}
@@ -4751,12 +4794,12 @@
 									"disabled": true,
 									"description": "Filter to date (YYYY-MM-DD)"
 								},
-								{
-									"key": "sort_by",
-									"value": "created_at",
-									"disabled": true,
-									"description": "Sort by: created_at, updated_at"
-								},
+							{
+								"key": "sort_by",
+								"value": "activity_date",
+								"disabled": true,
+								"description": "Sort by: activity_date (default), created_at, updated_at"
+							},
 								{
 									"key": "sort_order",
 									"value": "desc",
@@ -4846,13 +4889,103 @@
 					"response": []
 				},
 				{
-					"name": "Update Activity",
+					"name": "Update Activity (Note)",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"data\": {\n        \"note\": \"Updated note content\"\n    }\n}",
+							"raw": "{\n    \"title\": \"Updated note title\",\n    \"content\": \"Updated note content\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Activity (Call)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"call_data\": {\n        \"called_at\": \"2026-02-05 15:00:00\",\n        \"duration\": 600,\n        \"outcome\": \"connected\",\n        \"notes\": \"Follow-up discussion\",\n        \"phone_number\": \"+1234567890\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Activity (Meeting)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"meeting_data\": {\n        \"title\": \"Updated Meeting Title\",\n        \"scheduled_at\": \"2026-03-15 10:00:00\",\n        \"duration\": 90,\n        \"location\": \"Google Meet\",\n        \"description\": \"Updated agenda\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/{{activityId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"{{activityId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Activity (Email)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email_data\": {\n        \"subject\": \"Updated Subject\",\n        \"body\": \"<p>Updated email body</p>\",\n        \"sent_at\": \"2026-02-01 09:00:00\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4899,11 +5032,11 @@
 				{
 					"name": "Bulk Delete Activities",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"ids\": [1, 2, 3]\n}",
+							"raw": "{\n    \"activity_ids\": [1, 2, 3]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4960,7 +5093,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"note\": \"This is a test note\",\n    \"deal_id\": 1\n}",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"content\": \"This is a test note\",\n    \"title\": \"Test Note Title\",\n    \"entity_id\": 1,\n    \"entity_type\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4990,7 +5123,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"subject\": \"Test Email Subject\",\n    \"body\": \"<p>This is a test email body with <strong>HTML</strong> content.</p>\",\n    \"deal_id\": 1\n}",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"entity_id\": 1,\n    \"entity_type\": 1,\n    \"email_data\": {\n        \"subject\": \"Test Email Subject\",\n        \"body\": \"<p>This is a test email body with <strong>HTML</strong> content.</p>\",\n        \"sent_at\": \"2026-02-01 10:30:00\",\n        \"contact_email\": \"john@example.com\",\n        \"contact_name\": \"John Doe\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5020,7 +5153,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"outcome\": \"answered\",\n    \"call_type\": \"outbound\",\n    \"duration\": 300,\n    \"notes\": \"Discussed product features\",\n    \"deal_id\": 1\n}",
+							"raw": "{\n    \"contact_id\": {{contactId}},\n    \"entity_id\": 1,\n    \"entity_type\": 1,\n    \"call_data\": {\n        \"outcome\": \"connected\",\n        \"duration\": 300,\n        \"notes\": \"Discussed product features\",\n        \"called_at\": \"2026-02-01 14:00:00\",\n        \"phone_number\": \"+1234567890\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"

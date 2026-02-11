@@ -746,6 +746,10 @@ export type Settings = {
 		retention_type: 'days' | 'never' | null;
 		retention_days: string | null;
 	};
+	notifications: {
+		retention_type: 'days' | 'never' | null;
+		retention_days: string | null;
+	};
 };
 
 export type Response = {

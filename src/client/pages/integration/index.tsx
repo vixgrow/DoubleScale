@@ -4,12 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 import { useRef, useEffect } from 'react';
 import { applyFilters } from '@wordpress/hooks';
 
@@ -45,6 +44,31 @@ interface IntegrationProps {
 	onSuccess?: (integrationLabel: string) => void;
 }
 
+/**
+ * Extract error message from various error formats (WordPress REST API, fetch errors, etc.)
+ */
+const getErrorMessage = (error: unknown, fallback: string): string => {
+	if (!error) return fallback;
+	if (typeof error === 'string') return error;
+	if (typeof error === 'object') {
+		const err = error as Record<string, any>;
+		return err.message || err.data?.message || fallback;
+	}
+	return fallback;
+};
+
+/**
+ * Parse settings into initial field values based on integration type
+ */
+const parseSettingsToFieldValues = (
+	settings: Record<string, any> | undefined,
+	isAppBased: boolean
+): Record<string, any> => {
+	if (!settings) return {};
+	if (!isAppBased) return settings;
+	return typeof settings.app === 'object' ? settings.app : {};
+};
+
 const Integration: React.FC<IntegrationProps> = ({
 	open,
 	onClose,
@@ -52,25 +76,47 @@ const Integration: React.FC<IntegrationProps> = ({
 	slug,
 	onSuccess,
 }) => {
-	const { fields, settings, label, description, is_pro } = integration;
+	const { fields, label, description, is_pro } = integration;
 	const isAppBased = !!fields.app;
 	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
 	const isProFeature = is_pro === true && !isProActive;
 
-	const initialValues = isAppBased
-		? typeof settings.app === 'object'
-			? settings.app
-			: {}
-		: settings || {};
-
-	const [fieldsValue, setFieldsValue] =
-		useState<Record<string, any>>(initialValues);
+	const [fieldsValue, setFieldsValue] = useState<Record<string, any>>({});
+	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
-	const closeNotice = () => {
-		setNotice(null);
+	// Fetch fresh settings from API when dialog opens
+	useEffect(() => {
+		if (!open || !slug) return;
+
+		const loadSettings = async () => {
+			setIsLoading(true);
+			try {
+				const response = await apiFetch<{ settings: Record<string, any> }>({
+					path: `/qc/v1/integrations/${slug}`,
+				});
+				setFieldsValue(parseSettingsToFieldValues(response.settings, isAppBased));
+			} catch (error) {
+				console.error('Failed to load integration settings:', error);
+				// Fallback to integration prop settings if API fails
+				setFieldsValue(parseSettingsToFieldValues(integration.settings, isAppBased));
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadSettings();
+	}, [open, slug, isAppBased]);
+
+	const closeNotice = () => setNotice(null);
+
+	const showError = (error: unknown, fallbackMessage: string) => {
+		setNotice({
+			type: 'error',
+			message: getErrorMessage(error, fallbackMessage),
+		});
 	};
 
 	// Scroll to notice banner when notice appears
@@ -84,9 +130,8 @@ const Integration: React.FC<IntegrationProps> = ({
 		setIsSaving(true);
 
 		try {
-			// @ts-ignore
 			await apiFetch({
-				path: addQueryArgs(`/qc/v1/integrations/${slug}`),
+				path: `/qc/v1/integrations/${slug}`,
 				method: 'POST',
 				data: {
 					settings: isAppBased ? { app: fieldsValue } : fieldsValue,
@@ -97,15 +142,10 @@ const Integration: React.FC<IntegrationProps> = ({
 				await getAuthUrl();
 			} else {
 				onClose();
-				if (onSuccess) {
-					onSuccess(label);
-				}
+				onSuccess?.(label);
 			}
 		} catch (error) {
-			setNotice({
-				type: 'error',
-				message: __('Failed to save settings', 'quillcrm'),
-			});
+			showError(error, __('Failed to save settings', 'quillcrm'));
 		} finally {
 			setIsSaving(false);
 		}
@@ -113,17 +153,12 @@ const Integration: React.FC<IntegrationProps> = ({
 
 	const getAuthUrl = async () => {
 		try {
-			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/integrations/${slug}/auth`),
-				method: 'GET',
-			})) as { auth_uri: string };
-
+			const response = await apiFetch<{ auth_uri: string }>({
+				path: `/qc/v1/integrations/${slug}/auth`,
+			});
 			window.location.href = response.auth_uri;
 		} catch (error) {
-			setNotice({
-				type: 'error',
-				message: __('Failed to get auth url', 'quillcrm'),
-			});
+			showError(error, __('Failed to get auth url', 'quillcrm'));
 		} finally {
 			setIsSaving(false);
 		}
@@ -161,6 +196,10 @@ const Integration: React.FC<IntegrationProps> = ({
 							featureName={label}
 							description={description}
 						/>
+					) : isLoading ? (
+						<div className="flex items-center justify-center h-64">
+							<Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+						</div>
 					) : (
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							{/* Instructions Card */}
@@ -211,7 +250,7 @@ const Integration: React.FC<IntegrationProps> = ({
 								<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 								<Button
 									onClick={save}
-									disabled={isSaving}
+									disabled={isSaving || isLoading}
 									className="min-w-[120px] rounded-lg px-4"
 									variant="gradient"
 								>

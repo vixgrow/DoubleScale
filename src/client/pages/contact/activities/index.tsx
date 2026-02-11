@@ -163,7 +163,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [filters, setFilters] = useState({
-        sort_by: 'created_at',
+        sort_by: 'activity_date',
         sort_order: 'desc',
         date_from: '',
         date_to: '',
@@ -343,17 +343,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const formatActivityTime = (createdAt: string) => {
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const date = dayjs.utc(createdAt).tz(userTimeZone);
-
-        const now = dayjs();
-        const diffDays = now.diff(date, 'day');
-
-        if (diffDays === 0) {
-            return date.format('h:mm A');
-        } else if (diffDays < 7) {
-            return `Last ${date.format('dddd [at] h:mm A')}`;
-        } else {
-            return date.format('MMM D, YYYY [at] h:mm A');
-        }
+        return date.format('MMM D, YYYY [at] h:mm A');
     };
 
     const renderActivityContent = (activity: Activity) => {
@@ -376,14 +366,14 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
                                 <div className=" text-[#09090B] text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
-                                        activity.data.start_date ||
+                                        activity.data.scheduled_at ||
                                         activity.created_at
                                     ).getDate()}
                                 </div>
                                 <div className=" text-[#09090B] text-base text-center font-normal leading-[26px]">
                                     {format(
                                         new Date(
-                                            activity.data.start_date ||
+                                            activity.data.scheduled_at ||
                                             activity.created_at
                                         ),
                                         'MMM'
@@ -739,10 +729,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                         contact_id: selectedMeeting.contact_id,
                         activity_type: selectedMeeting.activity_type,
                         data: {
-                            meeting_title: selectedMeeting.data?.meeting_title,
+                            meeting_title: selectedMeeting.data?.meeting_title || selectedMeeting.data?.title,
                             duration: selectedMeeting.data?.duration,
                             location: selectedMeeting.data?.location,
-                            meeting_date_time: selectedMeeting.data?.meeting_date_time,
+                            meeting_date_time: selectedMeeting.data?.meeting_date_time || selectedMeeting.data?.scheduled_at,
                             meeting_end_time: selectedMeeting.data?.meeting_end_time,
                             description: selectedMeeting.data?.description,
                         },

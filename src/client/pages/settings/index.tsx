@@ -43,6 +43,7 @@ import {
 } from '@quillcrm/components';
 import { Bell } from 'lucide-react';
 import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
@@ -79,6 +80,9 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 	'website_tracking',
 ]);
 
+// Tabs that Sales Reps can access (limited settings)
+const SALES_REP_ALLOWED_TABS = new Set(['notifications']);
+
 const SettingsPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { tab: urlTab } = useParams<{ tab?: string }>();
@@ -89,17 +93,27 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const [activeTab, setActiveTab] = useState<string>('business');
+	const { isSalesRep } = useCapabilities();
+	
+	// Memoize the sales rep check to avoid recalculating on every render
+	const isSalesRepUser = useMemo(() => isSalesRep(), []);
+	const defaultTab = isSalesRepUser ? 'notifications' : 'business';
+	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
+			// If sales rep tries to access a restricted tab, redirect to notifications
+			if (isSalesRepUser && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
+				navigate(getToLink('settings/notifications'), { replace: true });
+				return;
+			}
 			setActiveTab(urlTab);
 		} else if (!urlTab || urlTab === 'tab?') {
 			// If no valid tab in URL, redirect to default tab
-			navigate(getToLink('settings/business'), { replace: true });
+			navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 		}
-	}, [urlTab, navigate]);
+	}, [urlTab, navigate, isSalesRepUser, defaultTab]);
 
 	const fetchSettings = async () => {
 		try {
@@ -201,7 +215,14 @@ const SettingsPage: React.FC = () => {
 	}, [settings, saveCounter]);
 
 	useEffect(() => {
+		// Sales Reps only see tabs that don't require main settings (e.g., notifications)
+		// Skip fetching settings to avoid 403 error
+		if (isSalesRep()) {
+			setIsLoading(false);
+			return;
+		}
 		fetchSettings();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const renderTabBody = (currentTab: string) => {
@@ -385,7 +406,7 @@ const SettingsPage: React.FC = () => {
 		}
 	};
 
-	const tabsList = [
+	const allTabsList = [
 		{
 			value: 'business',
 			label: 'Business',
@@ -462,6 +483,11 @@ const SettingsPage: React.FC = () => {
 			icon: <Bell size={24} />,
 		},
 	];
+
+	// Filter tabs based on user role - Sales Reps only see allowed tabs
+	const tabsList = isSalesRep()
+		? allTabsList.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value))
+		: allTabsList;
 
 	const tabsContent = tabsList.map(({ value }) => {
 		if (activeTab !== value) {

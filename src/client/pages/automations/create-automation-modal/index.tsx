@@ -531,9 +531,9 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					/>
 				</DialogHeader>
 
-				<div className="flex-1 overflow-y-auto pr-1">
+				<div className="flex-1 flex flex-col overflow-hidden">
 					{error && (
-						<div className="mb-4">
+						<div className="mb-4 shrink-0 pr-1">
 							<NoticeBanner
 								ref={noticeBannerRef}
 								notice={error}
@@ -542,28 +542,30 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 					)}
 
-					<div className="qcrm-fields qcrm-automation-modal-fields">
-						<Field
-							label={__('Automation Name', 'quillcrm')}
-							value={automation.name}
-							onChange={(value) =>
-								onAutomationChange({
-									...automation,
-									name: value,
-								})
-							}
-							type="text"
-							required
-						/>
+					<div className="qcrm-fields qcrm-automation-modal-fields flex-1 flex flex-col overflow-hidden">
+						<div className="shrink-0">
+							<Field
+								label={__('Automation Name', 'quillcrm')}
+								value={automation.name}
+								onChange={(value) =>
+									onAutomationChange({
+										...automation,
+										name: value,
+									})
+								}
+								type="text"
+								required
+							/>
+						</div>
 
-						<div className="qcrm-field">
-							<div className="qcrm-field-label flex items-center text-base text-[#09090B]">
+						<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">
+							<div className="qcrm-field-label flex items-center text-base text-[#09090B] shrink-0">
 								{__('Trigger', 'quillcrm')}
 								<span className="text-destructive">*</span>
 							</div>
 
-							<div className="flex h-full gap-5">
-								<div className="w-1/2">
+							<div className="flex flex-1 gap-5 overflow-hidden min-h-0">
+								<div className="w-1/2 overflow-y-auto pr-1">
 									<TriggerCategorySelector
 										triggers={automationTriggers}
 										selectedCategory={selectedCategory}
@@ -572,7 +574,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 									/>
 								</div>
 
-								<div className="w-1/2">
+								<div className="w-1/2 overflow-y-auto pr-1">
 									<TriggersGroupRender
 										groups={
 											currentCategoryData?.groups || []

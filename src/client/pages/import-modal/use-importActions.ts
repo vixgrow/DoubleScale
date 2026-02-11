@@ -14,7 +14,7 @@ import { useEffect, useRef } from 'react';
  * internal dependencies
  */
 import ConfigAPI from '@quillcrm/config';
-import { useImportContext } from './contexts';
+import { useImportContext, type ImportStats } from './contexts';
 import { useGoHighLevelOAuth } from './hooks/use-gohighlevel-oauth';
 
 export const useImportActions = () => {
@@ -22,6 +22,9 @@ export const useImportActions = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 	const importers = ConfigAPI.getImporters();
 	const importer = importers[state.source] || null;
+
+	// Use a ref to track the accumulated import stats across batches
+	const importStatsRef = useRef<ImportStats>({ imported: 0, skipped: 0, failed: 0 });
 
 	// GoHighLevel OAuth hook
 	const goHighLevelOAuth = useGoHighLevelOAuth({
@@ -330,6 +333,12 @@ export const useImportActions = () => {
 	const startImport = async (currentOffset = 0): Promise<boolean> => {
 		dispatch({ type: 'SET_IMPORTING', payload: true });
 
+		// Reset stats at the start of import (only on first call)
+		if (currentOffset === 0) {
+			importStatsRef.current = { imported: 0, skipped: 0, failed: 0 };
+			dispatch({ type: 'SET_IMPORT_STATS', payload: { imported: 0, skipped: 0, failed: 0 } });
+		}
+
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/import-export/import'),
@@ -351,11 +360,27 @@ export const useImportActions = () => {
 				cursor?: string; // Add cursor to response type
 				status: string;
 				processed: number;
+				imported?: number;
+				skipped?: number;
+				failed?: number;
 			};
 
 			// Update progress
 			dispatch({ type: 'SET_COUNT', payload: response.total });
 			dispatch({ type: 'SET_OFFSET', payload: response.offset });
+
+			// Update import stats if present (accumulate in ref for accurate tracking)
+			if (response.imported !== undefined || response.skipped !== undefined || response.failed !== undefined) {
+				importStatsRef.current = {
+					imported: importStatsRef.current.imported + (response.imported || 0),
+					skipped: importStatsRef.current.skipped + (response.skipped || 0),
+					failed: importStatsRef.current.failed + (response.failed || 0),
+				};
+				dispatch({
+					type: 'SET_IMPORT_STATS',
+					payload: importStatsRef.current,
+				});
+			}
 
 			// Update cursor if present (for cursor-based pagination)
 			if (response.cursor !== undefined) {
@@ -369,7 +394,7 @@ export const useImportActions = () => {
 				// Import completed - ensure 100% is shown
 				dispatch({ type: 'SET_COUNT', payload: response.total });
 				dispatch({ type: 'SET_OFFSET', payload: response.total });
-				handleImportComplete();
+				handleImportComplete(importStatsRef.current);
 				return true;
 			}
 		} catch (error: any) {
@@ -378,12 +403,35 @@ export const useImportActions = () => {
 		}
 	};
 
-	const handleImportComplete = () => {
-		console.log('Import completed');
+	const handleImportComplete = (stats: ImportStats) => {
+		console.log('Import completed', stats);
+
+		const hasStats = stats.imported > 0 || stats.skipped > 0 || stats.failed > 0;
+
+		let message = __('Import completed', 'quillcrm');
+		if (hasStats) {
+			const parts: string[] = [];
+			if (stats.imported > 0) {
+				parts.push(`${stats.imported} ${__('imported', 'quillcrm')}`);
+			}
+			if (stats.skipped > 0) {
+				parts.push(`${stats.skipped} ${__('skipped', 'quillcrm')}`);
+			}
+			if (stats.failed > 0) {
+				parts.push(`${stats.failed} ${__('failed', 'quillcrm')}`);
+			}
+			message = `${__('Import completed', 'quillcrm')}: ${parts.join(', ')}`;
+
+			// Add hint about log management if there are failures
+			if (stats.failed > 0) {
+				message += `. ${__('Check Settings > System for error logs.', 'quillcrm')}`;
+			}
+		}
 
 		createNotice({
-			type: 'success',
-			message: __('Import completed', 'quillcrm'),
+			type: stats.failed > 0 ? 'warning' : 'success',
+			message,
+			duration: stats.failed > 0 ? 10000 : 5000, // Longer duration for failures
 		});
 
 		// First set importing to false

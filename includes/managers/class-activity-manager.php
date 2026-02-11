@@ -328,23 +328,25 @@ final class Activity_Manager {
 			}
 		}
 
-		$activity = Activity_Model::create(
-			array(
-				'contact_id'    => $contact_id,
-				'activity_type' => 'meeting_scheduled',
-				'data'          => array(
-					'title'                  => sanitize_text_field( $data['title'] ?? '' ),
-					'scheduled_at'           => sanitize_text_field( $data['scheduled_at'] ?? '' ),
-					'duration'               => isset( $data['duration'] ) ? intval( $data['duration'] ) : 60,
-					'location'               => sanitize_text_field( $data['location'] ?? '' ),
-					'description'            => wp_kses_post( $data['description'] ?? '' ),
-					'primary_attendee_id'    => $data['primary_attendee_id'] ?? null,
-					'primary_attendee_name'  => sanitize_text_field( $data['primary_attendee_name'] ?? '' ),
-					'primary_attendee_email' => sanitize_email( $data['primary_attendee_email'] ?? '' ),
-				),
-				'user_id'       => $user_id ?: get_current_user_id(),
-			)
+		$scheduled_at = sanitize_text_field( $data['scheduled_at'] ?? '' );
+
+		$activity_data = array(
+			'contact_id'    => $contact_id,
+			'activity_type' => 'meeting_scheduled',
+			'data'          => array(
+				'title'                  => sanitize_text_field( $data['title'] ?? '' ),
+				'scheduled_at'           => $scheduled_at,
+				'duration'               => isset( $data['duration'] ) ? intval( $data['duration'] ) : 60,
+				'location'               => sanitize_text_field( $data['location'] ?? '' ),
+				'description'            => wp_kses_post( $data['description'] ?? '' ),
+				'primary_attendee_id'    => $data['primary_attendee_id'] ?? null,
+				'primary_attendee_name'  => sanitize_text_field( $data['primary_attendee_name'] ?? '' ),
+				'primary_attendee_email' => sanitize_email( $data['primary_attendee_email'] ?? '' ),
+			),
+			'user_id'       => $user_id ?: get_current_user_id(),
 		);
+
+		$activity = Activity_Model::create( $activity_data );
 
 		// Create activity association with entity if provided
 		if ( $activity && $entity_type && $entity_id && class_exists( '\QuillCRM\Models\Activity_Association_Model' ) ) {
@@ -431,18 +433,20 @@ final class Activity_Manager {
 			$query->where( 'user_id', $filters['user_id'] );
 		}
 
-		// Filter by date range.
+		// Filter by date range using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
-			$query->whereDate( 'created_at', '>=', $filters['date_from'] );
+			$query->where( 'activity_date', '>=', $filters['date_from'] . ' 00:00:00' );
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$query->whereDate( 'created_at', '<=', $filters['date_to'] );
+			$query->where( 'activity_date', '<', gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00' );
 		}
 
-		// Sort options.
-		$sort_by    = $filters['sort_by'] ?? 'created_at';
+		// Sort by the activity-specific date by default.
+		$sort_by    = $filters['sort_by'] ?? 'activity_date';
 		$sort_order = $filters['sort_order'] ?? 'desc';
-		$query->orderBy( $sort_by, $sort_order );
+		$allowed    = array( 'activity_date', 'created_at', 'updated_at' );
+		$query->orderBy( in_array( $sort_by, $allowed, true ) ? $sort_by : 'activity_date', $sort_order );
 
 		return $query->paginate( $per_page, array( '*' ), 'page', $page );
 	}
@@ -525,10 +529,11 @@ final class Activity_Manager {
 
 			case 'email_sent':
 				if ( isset( $data['email_data'] ) && is_array( $data['email_data'] ) ) {
+					$sent_at        = $data['email_data']['sent_at'] ?? $activity->data['sent_at'] ?? current_time( 'mysql' );
 					$activity->data = array(
 						'subject'       => sanitize_text_field( $data['email_data']['subject'] ?? $activity->data['subject'] ?? '' ),
 						'body'          => wp_kses_post( $data['email_data']['body'] ?? $activity->data['body'] ?? '' ),
-						'sent_at'       => $data['email_data']['sent_at'] ?? $activity->data['sent_at'] ?? current_time( 'mysql' ),
+						'sent_at'       => $sent_at,
 						'contact_email' => $activity->data['contact_email'] ?? '',
 						'contact_name'  => $activity->data['contact_name'] ?? '',
 					);
@@ -537,11 +542,12 @@ final class Activity_Manager {
 
 			case 'call_logged':
 				if ( isset( $data['call_data'] ) && is_array( $data['call_data'] ) ) {
+					$called_at      = $data['call_data']['called_at'] ?? $activity->data['called_at'] ?? current_time( 'mysql' );
 					$activity->data = array(
 						'duration'     => isset( $data['call_data']['duration'] ) ? intval( $data['call_data']['duration'] ) : ( $activity->data['duration'] ?? null ),
 						'outcome'      => sanitize_text_field( $data['call_data']['outcome'] ?? $activity->data['outcome'] ?? '' ),
 						'notes'        => wp_kses_post( $data['call_data']['notes'] ?? $activity->data['notes'] ?? '' ),
-						'called_at'    => $data['call_data']['called_at'] ?? $activity->data['called_at'] ?? current_time( 'mysql' ),
+						'called_at'    => $called_at,
 						'phone_number' => sanitize_text_field( $data['call_data']['phone_number'] ?? $activity->data['phone_number'] ?? '' ),
 					);
 				}
@@ -549,9 +555,10 @@ final class Activity_Manager {
 
 			case 'meeting_scheduled':
 				if ( isset( $data['meeting_data'] ) && is_array( $data['meeting_data'] ) ) {
+					$scheduled_at   = sanitize_text_field( $data['meeting_data']['scheduled_at'] ?? $data['meeting_data']['meeting_date_time'] ?? $activity->data['scheduled_at'] ?? '' );
 					$activity->data = array(
-						'title'                  => sanitize_text_field( $data['meeting_data']['title'] ?? $activity->data['title'] ?? '' ),
-						'scheduled_at'           => sanitize_text_field( $data['meeting_data']['scheduled_at'] ?? $activity->data['scheduled_at'] ?? '' ),
+						'title'                  => sanitize_text_field( $data['meeting_data']['title'] ?? $data['meeting_data']['meeting_title'] ?? $activity->data['title'] ?? '' ),
+						'scheduled_at'           => $scheduled_at,
 						'duration'               => isset( $data['meeting_data']['duration'] ) ? intval( $data['meeting_data']['duration'] ) : ( $activity->data['duration'] ?? 60 ),
 						'location'               => sanitize_text_field( $data['meeting_data']['location'] ?? $activity->data['location'] ?? '' ),
 						'description'            => wp_kses_post( $data['meeting_data']['description'] ?? $activity->data['description'] ?? '' ),
@@ -780,12 +787,13 @@ final class Activity_Manager {
 			$query->where( 'user_id', $filters['user_id'] );
 		}
 
-		// Filter by date range.
+		// Filter by date range using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
-			$query->whereDate( 'created_at', '>=', $filters['date_from'] );
+			$query->where( 'activity_date', '>=', $filters['date_from'] . ' 00:00:00' );
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
-			$query->whereDate( 'created_at', '<=', $filters['date_to'] );
+			$query->where( 'activity_date', '<', gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00' );
 		}
 
 		$activities = $query->get();
@@ -989,7 +997,7 @@ final class Activity_Manager {
 
 		// Build final UNION query with sorting and pagination.
 		$offset     = ( $page - 1 ) * $per_page;
-		$sort_by    = $this->sanitize_sort_field( $filters['sort_by'] ?? 'created_at' );
+		$sort_by    = $this->sanitize_sort_field( $filters['sort_by'] ?? 'activity_date' );
 		$sort_order = strtoupper( $filters['sort_order'] ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC';
 
 		$union_sql = '(' . implode( ') UNION ALL (', $select_queries ) . ')';
@@ -1081,34 +1089,23 @@ final class Activity_Manager {
 			$where_clauses[] = $wpdb->prepare( 'a.user_id = %d', $filters['user_id'] );
 		}
 
-		// Date filters - use scheduled/called date from JSON data if available, fallback to created_at.
-		// This ensures meetings/calls are filtered by their scheduled time, not creation time.
-		// - Meetings use: scheduled_at
-		// - Calls use: called_at
-		// - Other activities: created_at
+		// Date filters using the indexed activity_date column.
+		// Use range comparisons (>=, <) instead of DATE() to preserve index usage.
 		if ( ! empty( $filters['date_from'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
-				'DATE(COALESCE(
-					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
-					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
-					a.created_at
-				)) >= %s',
-				$filters['date_from']
+				'a.activity_date >= %s',
+				$filters['date_from'] . ' 00:00:00'
 			);
 		}
 		if ( ! empty( $filters['date_to'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
-				'DATE(COALESCE(
-					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.scheduled_at")),
-					JSON_UNQUOTE(JSON_EXTRACT(a.data, "$.called_at")),
-					a.created_at
-				)) <= %s',
-				$filters['date_to']
+				'a.activity_date < %s',
+				gmdate( 'Y-m-d', strtotime( $filters['date_to'] . ' +1 day' ) ) . ' 00:00:00'
 			);
 		}
 
-		// LEFT JOIN to get deal_id from associations (entity_type = 2 for deals).
-		$deal_entity_type = 2; // Activity_Association_Model::ENTITY_TYPE_DEAL.
+		// LEFT JOIN to get deal_id from associations.
+		$deal_entity_type = \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL;
 		$join_clauses[]   = "LEFT JOIN {$associations_table} deal_assoc ON a.id = deal_assoc.activity_id AND deal_assoc.entity_type = {$deal_entity_type}";
 
 		$where_sql  = implode( ' AND ', $where_clauses );
@@ -1127,21 +1124,15 @@ final class Activity_Manager {
 			a.user_id,
 			a.created_at,
 			a.updated_at,
-			a.created_at as sort_timestamp,
+			a.activity_date,
 			NULL as title,
 			NULL as description,
 			NULL as status,
 			CASE
 			WHEN a.activity_type IN ('meeting_scheduled', 'call_logged') THEN
 				CASE
-					WHEN DATE(COALESCE(
-						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.scheduled_at')),
-						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.called_at'))
-					)) < CURDATE() THEN 'completed'
-					WHEN DATE(COALESCE(
-						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.scheduled_at')),
-						JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.called_at'))
-					)) = CURDATE() THEN 'due_today'
+					WHEN DATE(a.activity_date) < CURDATE() THEN 'completed'
+					WHEN DATE(a.activity_date) = CURDATE() THEN 'due_today'
 					ELSE 'upcoming'
 				END
 			ELSE NULL
@@ -1245,7 +1236,7 @@ final class Activity_Manager {
 			t.assigned_to as user_id,
 			t.created_at,
 			t.updated_at,
-			t.created_at as sort_timestamp,
+			t.created_at as activity_date,
 			t.title,
 			t.description,
 			t.status,
@@ -1341,6 +1332,7 @@ final class Activity_Manager {
 			'is_system'         => in_array( $row->activity_type, $system_types, true ),
 			'display_status'    => $row->display_status ?? null,
 			'comments_count'    => (int) $row->comments_count,
+			'activity_date'     => $row->activity_date,
 			'created_at'        => $row->created_at,
 			'updated_at'        => $row->updated_at,
 		);
@@ -1404,12 +1396,12 @@ final class Activity_Manager {
 	 * @return string Sanitized field.
 	 */
 	private function sanitize_sort_field( string $field ): string {
-		$allowed = array( 'created_at', 'sort_timestamp', 'due_date' );
+		$allowed = array( 'created_at', 'activity_date', 'due_date' );
 
 		if ( $field === 'due_date' ) {
-			return 'COALESCE(due_date, sort_timestamp)';
+			return 'COALESCE(due_date, activity_date)';
 		}
 
-		return in_array( $field, $allowed, true ) ? $field : 'sort_timestamp';
+		return in_array( $field, $allowed, true ) ? $field : 'activity_date';
 	}
 }

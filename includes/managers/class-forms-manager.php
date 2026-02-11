@@ -181,33 +181,38 @@ final class Forms_Manager {
 	 * Callback for the Action Scheduler task that processes form submissions
 	 * in the background.
 	 *
+	 * When called async via Action Scheduler, the ['meta_id' => X] array gets unpacked
+	 * so we receive just X (the meta_id) as the first argument.
+	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $args Task arguments containing meta_id
+	 * @param array|int $args Task arguments - either meta_id (int) when async, or array with 'meta_id' key (legacy)
 	 *
 	 * @return void
 	 */
 	public function handle_async_form_processing( $args ) {
-		$meta_id = $args['meta_id'] ?? null;
-
-		if ( ! $meta_id ) {
+		// Handle both formats:
+		// 1. Numeric meta_id (when Action Scheduler unpacks ['meta_id' => X] to just X)
+		// 2. Array with 'meta_id' key (legacy format)
+		if ( is_numeric( $args ) ) {
+			$meta_id = (int) $args;
+		} elseif ( is_array( $args ) && isset( $args['meta_id'] ) ) {
+			$meta_id = $args['meta_id'];
+		} else {
 			quillcrm_get_logger()->error(
 				__( 'Async form processing failed: missing meta_id', 'quillcrm' ),
-				array( 'code' => 'async_form_missing_meta_id' )
+				array(
+					'code' => 'async_form_missing_meta_id',
+					'args' => $args,
+				)
 			);
 			return;
 		}
 
-		// Retrieve data from task meta
-		global $wpdb;
-		$meta = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT value FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
-				$meta_id
-			)
-		);
+		// Retrieve data from task meta using helper function
+		$meta_args = quillcrm_get_meta_args( $meta_id );
 
-		if ( ! $meta ) {
+		if ( ! $meta_args ) {
 			quillcrm_get_logger()->error(
 				__( 'Async form processing failed: meta not found', 'quillcrm' ),
 				array(
@@ -218,8 +223,7 @@ final class Forms_Manager {
 			return;
 		}
 
-		$data      = maybe_unserialize( $meta->value );
-		$form_data = $data[0] ?? array();
+		$form_data = $meta_args[0] ?? array();
 
 		if ( empty( $form_data ) ) {
 			quillcrm_get_logger()->error(

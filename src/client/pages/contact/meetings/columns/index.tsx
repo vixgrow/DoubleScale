@@ -21,9 +21,11 @@ interface Meeting {
     contact_id: number;
     activity_type: string;
     data: {
+        title?: string;
         meeting_title?: string;
         duration?: number;
         location?: string;
+        scheduled_at?: string;
         meeting_date_time?: string;
         meeting_end_time?: string;
         description?: string;
@@ -69,7 +71,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             accessorKey: 'meeting_date_time',
             header: __('Meeting Date & Time', 'quillcrm'),
             cell: ({ row }) => {
-                const dateTime = row.original.data?.meeting_date_time || row.original.created_at;
+                const dateTime = row.original.data?.scheduled_at || row.original.data?.meeting_date_time || row.original.created_at;
                 return (
                     <span className="text-[#09090B]">
                         {formatMeetingDateTime(dateTime)}

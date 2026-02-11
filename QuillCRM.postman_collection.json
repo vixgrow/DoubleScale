@@ -7580,6 +7580,274 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Notifications (Pro)",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/notifications?page=1&per_page=20",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Items per page (default: 20, max: 50)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get paginated notifications for the current user. Only returns notifications for subcategories where the bell channel is enabled in user preferences. System category notifications are excluded for non-administrators.\n\nResponse includes: notifications array, total count, page, per_page, and total_pages."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/notifications/count",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"notifications",
+								"count"
+							]
+						},
+						"description": "Lightweight endpoint for getting the unread notification count. Designed for heartbeat polling (15-60s intervals). Only counts notifications for subcategories where bell is enabled. Uses cached count for performance.\n\nResponse: { \"unread_count\": 5 }"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Read - Single",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{notificationId}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/notifications/read",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"notifications",
+								"read"
+							]
+						},
+						"description": "Mark a single notification as read by providing its ID. Returns 404 if notification not found or doesn't belong to current user.\n\nResponse: { \"success\": true, \"message\": \"Notification marked as read.\" }"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/notifications/read",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"notifications",
+								"read"
+							]
+						},
+						"description": "Mark all unread notifications as read for the current user. Omit the 'id' parameter (or send empty body) to mark all.\n\nResponse: { \"success\": true, \"message\": \"5 notifications marked as read.\", \"count\": 5 }"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/notifications/{{notificationId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"notifications",
+								"{{notificationId}}"
+							]
+						},
+						"description": "Delete a specific notification by ID. Only the notification owner can delete it. Returns 404 if not found.\n\nResponse: { \"success\": true, \"message\": \"Notification deleted.\" }"
+					},
+					"response": []
+				},
+				{
+					"name": "Preferences",
+					"item": [
+						{
+							"name": "Get Preferences",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/notification-preferences",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"notification-preferences"
+									]
+								},
+								"description": "Get the current user's notification preferences. Returns merged result of user customizations over defaults.\n\nResponse includes:\n- channels: { bell: true, email: false, browser: true }\n- subcategories: { email_campaigns: { bell: true, email: true, browser: true }, ... }"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Preferences",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"channels\": {\n        \"bell\": true,\n        \"email\": true,\n        \"browser\": true\n    },\n    \"subcategories\": {\n        \"email_campaigns\": {\n            \"bell\": true,\n            \"email\": true,\n            \"browser\": true\n        },\n        \"deal_won_lost\": {\n            \"bell\": true,\n            \"email\": true,\n            \"browser\": true\n        },\n        \"automation_errors\": {\n            \"bell\": true,\n            \"email\": true,\n            \"browser\": true\n        },\n        \"task_reminder\": {\n            \"bell\": true,\n            \"email\": true,\n            \"browser\": true\n        }\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/notification-preferences",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"notification-preferences"
+									]
+								},
+								"description": "Update the current user's notification preferences. Both 'channels' and 'subcategories' are required.\n\nChannels control global on/off for each delivery method (bell, email, browser).\nSubcategories control per-notification-type channel settings.\n\nReturns the updated preferences after save."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Defaults",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/notification-preferences/defaults",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"notification-preferences",
+										"defaults"
+									]
+								},
+								"description": "Get the default notification preferences structure before any user customization. Useful for resetting preferences or understanding the baseline configuration.\n\nReturns same structure as Get Preferences but with factory defaults."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/notification-preferences/categories",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"notification-preferences",
+										"categories"
+									]
+								},
+								"description": "Get all available notification categories with metadata. Categories are filtered based on user capabilities:\n- System: requires manage_options (administrators only)\n- Campaigns, Automations, Forms, Integrations: require quillcrm_manage\n- Contacts, Pipeline, Tasks, Email Tracking: all CRM users\n\nEach category includes: label, description, has_subcategories, subcategories_count."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Subcategories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{site}}/wp-json/qc/v1/notification-preferences/subcategories/campaigns",
+									"host": [
+										"{{site}}"
+									],
+									"path": [
+										"wp-json",
+										"qc",
+										"v1",
+										"notification-preferences",
+										"subcategories",
+										"campaigns"
+									]
+								},
+								"description": "Get subcategories for a specific notification category. The category path parameter is validated against known categories.\n\nValid categories: campaigns, automations, contacts, pipeline, tasks, email_tracking, forms, integrations, system.\n\nExample: /subcategories/campaigns returns: email_campaigns, sms_campaigns, email_campaign_scheduled with labels and descriptions."
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"auth": {
@@ -7678,6 +7946,10 @@
 		},
 		{
 			"key": "emailSequenceId",
+			"value": "1"
+		},
+		{
+			"key": "notificationId",
 			"value": "1"
 		}
 	]

@@ -96,11 +96,40 @@ trait Account_API_Helper {
 	/**
 	 * Find account ID for this mailer from QuillSMTP settings
 	 *
-	 * Checks default_connection first, then fallback_connection.
+	 * Uses QuillSMTP smart routing to get the appropriate connection,
+	 * then checks if it uses this mailer. Falls back to fallback connection.
 	 *
+	 * @param string|null $from_email Optional from email for smart routing.
 	 * @return string|null Account ID or null if not found
 	 */
-	protected function find_account_id() {
+	protected function find_account_id( $from_email = null ) {
+		// Use QuillSMTP smart routing if available
+		if ( class_exists( '\\QuillSMTP\\Settings' ) ) {
+			$route = \QuillSMTP\Settings::get_smart_route( $from_email );
+			$slug  = $this->get_slug();
+
+			// Check default connection from smart route
+			if ( ! empty( $route['default_connection'] ) ) {
+				$connection = $route['default_connection'];
+
+				if ( ! empty( $connection['mailer'] ) && $connection['mailer'] === $slug ) {
+					return $connection['account_id'] ?? null;
+				}
+			}
+
+			// Check fallback connection if default doesn't use this mailer
+			if ( ! empty( $route['fallback_connection'] ) ) {
+				$connection = $route['fallback_connection'];
+
+				if ( ! empty( $connection['mailer'] ) && $connection['mailer'] === $slug ) {
+					return $connection['account_id'] ?? null;
+				}
+			}
+
+			return null;
+		}
+
+		// Fallback to direct option reading if QuillSMTP Settings class not available
 		$settings = get_option( 'quillsmtp_settings', array() );
 
 		// Check if connections exist

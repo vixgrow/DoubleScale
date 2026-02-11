@@ -50,8 +50,9 @@ class Core {
 
 		// Get current user capabilities for role-based access control
 		$user_capabilities = array(
-			'quillcrm_crm_manager' => Permissions::is_crm_manager(),
-			'quillcrm_sales_rep'   => Permissions::is_sales_rep(),
+			'quillcrm_crm_manager'   => Permissions::is_crm_manager(),
+			'quillcrm_sales_manager' => Permissions::is_sales_manager(),
+			'quillcrm_sales_rep'     => Permissions::is_sales_rep(),
 		);
 
 		$url_quillcrm_pro = QUILLCRM_PRO_PRICE_URL;

@@ -47,15 +47,14 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 	const handleImportContacts = async () => {
 		const success = await importContacts();
 		if (success) {
-			// Call onImportComplete first to refresh the contacts data
-			await onImportComplete();
-			// The modal will close automatically via onImportComplete -> handleClose
+			// Don't auto-close - let the user see the summary first
+			// The ImportProgress component will show a "Close" button
 		}
 	};
 
 	// Show progress if importing OR showing completion
 	if (importing || showingCompletion) {
-		return <ImportProgress />;
+		return <ImportProgress onComplete={onImportComplete} />;
 	}
 
 	if (currentStep === 1) {

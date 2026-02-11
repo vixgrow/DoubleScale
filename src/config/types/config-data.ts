@@ -53,6 +53,7 @@ export type ProPluginData = {
 
 export type UserCapabilities = {
 	quillcrm_crm_manager: boolean;
+	quillcrm_sales_manager: boolean;
 	quillcrm_sales_rep: boolean;
 };
 

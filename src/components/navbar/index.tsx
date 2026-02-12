@@ -76,7 +76,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	} | null>(null);
 	const hoverTimeoutRef = useRef<number | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-	const { hasRequiredCapability, isSalesRep } = useCapabilities();
+	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } = useCapabilities();
 
 	// Submenu top offset configuration for different menu items
 	const getSubmenuTopOffset = (path: string): number => {
@@ -119,7 +119,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
-					if (isSalesRep()) {
+					if (isSalesRep() && !canManageAllDeals()) {
 						// Sales reps see only their reports
 						navItem.subMenu = [
 							{
@@ -127,8 +127,28 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('My Reports', 'quillcrm'),
 							},
 						];
+					} else if (canManageAllDeals() && !isCrmManager()) {
+						// Sales Managers see deal-related analytics plus their own reports
+						navItem.subMenu = [
+							{
+								path: 'deals-analytics',
+								label: __('Deals Analytics', 'quillcrm'),
+							},
+							{
+								path: 'sales-rep-analytics',
+								label: __('Sales Rep Analytics', 'quillcrm'),
+							},
+							{
+								path: 'pipeline-analytics',
+								label: __('Pipeline Analytics', 'quillcrm'),
+							},
+							{
+								path: 'my-reports',
+								label: __('My Reports', 'quillcrm'),
+							},
+						];
 					} else {
-						// Non-sales reps see all analytics including My Reports
+						// CRM Managers and Administrators see all analytics
 						const submenu = [
 							{
 								path: 'deals-analytics',

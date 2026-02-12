@@ -77,6 +77,7 @@ const configData: ConfigData = {
 	importers: {},
 	userCapabilities: {
 		quillcrm_crm_manager: false,
+		quillcrm_sales_manager: false,
 		quillcrm_sales_rep: false,
 	},
 	defaultStages: [],

@@ -24,7 +24,7 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 	navigate,
 	params,
 }) => {
-	const { isSalesRep } = useCapabilities();
+	const { isSalesRep, canManageAllDeals } = useCapabilities();
 	const { data } = useDashboardData();
 
 	// Render content based on defaultTab prop
@@ -107,7 +107,8 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 				return data ? <EmailAnalytics dashboardData={data} /> : null;
 			default:
 				// Default view for analytics-and-reports main page
-				if (isSalesRep()) {
+				// Sales Rep (without manager access) sees only their reports
+				if (isSalesRep() && !canManageAllDeals()) {
 					return applyFilters(
 						'quillcrm_analytics_my_reports_content',
 						<ProFeatureNotice

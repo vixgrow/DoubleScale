@@ -16,8 +16,9 @@ namespace QuillCRM\User_Roles;
 /**
  * User_Roles class
  *
- * Manages the two-role CRM system:
+ * Manages the CRM role system:
  * - CRM Manager/Admin (quillcrm_crm_manager)
+ * - Sales Manager (quillcrm_sales_manager)
  * - Sales Rep (quillcrm_sales_rep)
  */
 final class User_Roles {
@@ -25,6 +26,7 @@ final class User_Roles {
 
 	public const PREFIX        = 'quillcrm_';
 	public const CRM_MANAGER   = self::PREFIX . 'crm_manager';
+	public const SALES_MANAGER = self::PREFIX . 'sales_manager';
 	public const SALES_REP     = self::PREFIX . 'sales_rep';
 	public const ADMINISTRATOR = 'administrator';
 	public const NONE          = self::PREFIX . 'none';
@@ -78,6 +80,8 @@ final class User_Roles {
 		foreach ( $roles as $role => $label ) {
 			if ( $role === User_Roles::CRM_MANAGER ) {
 				$capabilities = self::get_crm_manager_capabilities();
+			} elseif ( $role === User_Roles::SALES_MANAGER ) {
+				$capabilities = self::get_sales_manager_capabilities();
 			} elseif ( $role === User_Roles::SALES_REP ) {
 				$capabilities = self::get_sales_rep_capabilities();
 			}
@@ -133,24 +137,30 @@ final class User_Roles {
 	 */
 	private static function get_capabilities() {
 		return array(
-			'common'                => array(
+			'common'                  => array(
 				'quillcrm_access',           // Basic CRM access
 				'quillcrm_view_contacts',    // View contacts
 				'quillcrm_view_deals',       // View deals
 				'quillcrm_view_activities',  // View activities
 				'read',                     // For Wordpress
 			),
-			User_Roles::SALES_REP   => array(
+			User_Roles::SALES_REP     => array(
 				'quillcrm_edit_own_deals',     // Edit own deals
 				'quillcrm_edit_own_contacts',  // Edit own contacts
 				'quillcrm_create_activities',  // Create activities
 			),
-			User_Roles::CRM_MANAGER => array(
+			User_Roles::SALES_MANAGER => array(
+				'quillcrm_manage_deals',       // Manage all deals (CRUD for all deals)
+				'quillcrm_view_all_deals',     // View all deals (assigned to anyone)
+				'quillcrm_create_activities',  // Create activities
+			),
+			User_Roles::CRM_MANAGER   => array(
 				'quillcrm_manage',             // Full CRM management
 				'quillcrm_manage_users',       // Manage CRM users
 				'quillcrm_manage_settings',    // Manage CRM settings
 				'quillcrm_manage_contacts',    // Manage all contacts
 				'quillcrm_manage_deals',       // Manage all deals
+				'quillcrm_view_all_deals',     // View all deals
 				'quillcrm_manage_pipelines',   // Manage pipelines
 				'quillcrm_manage_activities',  // Manage all activities
 				'quillcrm_view_reports',       // View reports
@@ -172,6 +182,7 @@ final class User_Roles {
 		return array_merge(
 			self::get_capabilities()['common'],
 			self::get_capabilities()[ User_Roles::CRM_MANAGER ],
+			self::get_capabilities()[ User_Roles::SALES_MANAGER ],
 			self::get_capabilities()[ User_Roles::SALES_REP ]
 		);
 	}
@@ -186,8 +197,9 @@ final class User_Roles {
 	 */
 	public static function get_roles() {
 		return array(
-			User_Roles::CRM_MANAGER => __( 'CRM Manager', 'quillcrm' ),
-			User_Roles::SALES_REP   => __( 'Sales Rep', 'quillcrm' ),
+			User_Roles::CRM_MANAGER   => __( 'CRM Manager', 'quillcrm' ),
+			User_Roles::SALES_MANAGER => __( 'Sales Manager', 'quillcrm' ),
+			User_Roles::SALES_REP     => __( 'Sales Rep', 'quillcrm' ),
 		);
 	}
 
@@ -203,6 +215,23 @@ final class User_Roles {
 			self::get_capabilities()['common'],
 			self::get_capabilities()[ User_Roles::CRM_MANAGER ],
 			self::get_capabilities()[ User_Roles::SALES_REP ]
+		);
+	}
+
+	/**
+	 * Get sales manager capabilities
+	 *
+	 * Sales Manager has same base capabilities as Sales Rep but can manage all deals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Array of sales manager capabilities
+	 */
+	public static function get_sales_manager_capabilities() {
+		return array_merge(
+			self::get_capabilities()['common'],
+			self::get_capabilities()[ User_Roles::SALES_REP ],
+			self::get_capabilities()[ User_Roles::SALES_MANAGER ]
 		);
 	}
 

@@ -80,7 +80,7 @@ const SETTINGS_DEPENDENT_TABS = new Set([
 	'website_tracking',
 ]);
 
-// Tabs that Sales Reps can access (limited settings)
+// Tabs that Sales Reps and Sales Managers can access (limited settings)
 const SALES_REP_ALLOWED_TABS = new Set(['notifications']);
 
 const SettingsPage: React.FC = () => {
@@ -93,18 +93,19 @@ const SettingsPage: React.FC = () => {
 	const [saveCounter, setSaveCounter] = useState<number>(0);
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
-	const { isSalesRep } = useCapabilities();
+	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
 	
-	// Memoize the sales rep check to avoid recalculating on every render
-	const isSalesRepUser = useMemo(() => isSalesRep(), []);
-	const defaultTab = isSalesRepUser ? 'notifications' : 'business';
+	// Memoize the role checks to avoid recalculating on every render
+	// Sales Rep and Sales Manager have limited settings access
+	const hasLimitedSettingsAccess = useMemo(() => isSalesRep() || (isSalesManager() && !isCrmManager()), []);
+	const defaultTab = hasLimitedSettingsAccess ? 'notifications' : 'business';
 	const [activeTab, setActiveTab] = useState<string>(defaultTab);
 
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
-			// If sales rep tries to access a restricted tab, redirect to notifications
-			if (isSalesRepUser && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
+			// If user with limited access tries to access a restricted tab, redirect to notifications
+			if (hasLimitedSettingsAccess && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
 				navigate(getToLink('settings/notifications'), { replace: true });
 				return;
 			}
@@ -113,7 +114,7 @@ const SettingsPage: React.FC = () => {
 			// If no valid tab in URL, redirect to default tab
 			navigate(getToLink(`settings/${defaultTab}`), { replace: true });
 		}
-	}, [urlTab, navigate, isSalesRepUser, defaultTab]);
+	}, [urlTab, navigate, hasLimitedSettingsAccess, defaultTab]);
 
 	const fetchSettings = async () => {
 		try {
@@ -215,9 +216,9 @@ const SettingsPage: React.FC = () => {
 	}, [settings, saveCounter]);
 
 	useEffect(() => {
-		// Sales Reps only see tabs that don't require main settings (e.g., notifications)
+		// Sales Reps and Sales Managers only see tabs that don't require main settings (e.g., notifications)
 		// Skip fetching settings to avoid 403 error
-		if (isSalesRep()) {
+		if (hasLimitedSettingsAccess) {
 			setIsLoading(false);
 			return;
 		}
@@ -484,8 +485,8 @@ const SettingsPage: React.FC = () => {
 		},
 	];
 
-	// Filter tabs based on user role - Sales Reps only see allowed tabs
-	const tabsList = isSalesRep()
+	// Filter tabs based on user role - Sales Reps and Sales Managers only see allowed tabs
+	const tabsList = hasLimitedSettingsAccess
 		? allTabsList.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value))
 		: allTabsList;
 

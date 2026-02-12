@@ -18,8 +18,6 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
-use QuillCRM\Emails\Bulk_Email_Sender;
-use QuillCRM\Emails\Curl_Multi_Email_Sender;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Tracking\Email;
 use QuillCRM\Constants\Campaign_Channel;
@@ -85,8 +83,17 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			return $this->use_bulk_sending;
 		}
 
+		// Bulk sending requires QuillCRM Pro
+		if ( ! class_exists( '\QuillCRM_Pro\Emails\Bulk_Email_Sender' ) ) {
+			$this->use_bulk_sending = false;
+			return false;
+		}
+
+		// Get from_email from campaign template for smart routing
+		$from_email = $this->get_campaign_from_email( $campaign );
+
 		// Check if bulk sending is available (QuillSMTP with bulk-capable mailer)
-		if ( ! Bulk_Email_Sender::is_available() ) {
+		if ( ! \QuillCRM_Pro\Emails\Bulk_Email_Sender::is_available( $from_email ) ) {
 			$this->use_bulk_sending = false;
 			return false;
 		}
@@ -104,7 +111,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				array(
 					'code'        => 'bulk_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => Bulk_Email_Sender::get_active_mailer_slug(),
+					'mailer'      => \QuillCRM_Pro\Emails\Bulk_Email_Sender::get_active_mailer_slug( $from_email ),
 				)
 			);
 		}
@@ -126,8 +133,17 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			return $this->use_curl_multi_sending;
 		}
 
+		// Curl multi sending requires QuillCRM Pro
+		if ( ! class_exists( '\QuillCRM_Pro\Emails\Curl_Multi_Email_Sender' ) ) {
+			$this->use_curl_multi_sending = false;
+			return false;
+		}
+
+		// Get from_email from campaign template for smart routing
+		$from_email = $this->get_campaign_from_email( $campaign );
+
 		// Check if curl multi sending is available (QuillSMTP with curl multi-capable mailer like SMTP2GO)
-		if ( ! Curl_Multi_Email_Sender::is_available() ) {
+		if ( ! \QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::is_available( $from_email ) ) {
 			$this->use_curl_multi_sending = false;
 			return false;
 		}
@@ -145,12 +161,40 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				array(
 					'code'        => 'curl_multi_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => Curl_Multi_Email_Sender::get_active_mailer_slug(),
+					'mailer'      => \QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::get_active_mailer_slug( $from_email ),
 				)
 			);
 		}
 
 		return $this->use_curl_multi_sending;
+	}
+
+	/**
+	 * Get the from_email from campaign template for smart routing
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 *
+	 * @return string|null From email address or null if not set
+	 */
+	protected function get_campaign_from_email( Campaign_Model $campaign ) {
+		$template_ids = $campaign->get_template_ids();
+
+		if ( empty( $template_ids ) ) {
+			return null;
+		}
+
+		$template_id = reset( $template_ids );
+		$template    = Template_Model::find( $template_id );
+
+		if ( ! $template ) {
+			return null;
+		}
+
+		$from_email = $template->get_setting( 'from_email' );
+
+		return $from_email ?: null;
 	}
 
 	/**
@@ -225,7 +269,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				array(
 					'code'        => 'bulk_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => Bulk_Email_Sender::get_active_mailer_slug(),
+					'mailer'      => \QuillCRM_Pro\Emails\Bulk_Email_Sender::get_active_mailer_slug(),
 				)
 			);
 		}
@@ -246,7 +290,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 		// Get batch size - use bulk mailer's max batch size
 		$batch_size = min(
-			Bulk_Email_Sender::get_max_batch_size(),
+			\QuillCRM_Pro\Emails\Bulk_Email_Sender::get_max_batch_size(),
 			apply_filters( 'quillcrm_bulk_campaign_batch_size', 500, $this->channel )
 		);
 
@@ -368,7 +412,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				array(
 					'code'        => 'curl_multi_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => Curl_Multi_Email_Sender::get_active_mailer_slug(),
+					'mailer'      => \QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::get_active_mailer_slug(),
 				)
 			);
 		}
@@ -389,7 +433,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 		// Get batch size - use curl multi mailer's max batch size
 		$batch_size = min(
-			Curl_Multi_Email_Sender::get_max_batch_size(),
+			\QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::get_max_batch_size(),
 			apply_filters( 'quillcrm_curl_multi_campaign_batch_size', 100, $this->channel )
 		);
 
@@ -649,7 +693,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		);
 
 		// Send via cURL Multi
-		$result = Curl_Multi_Email_Sender::send_batch( $batch_data );
+		$result = \QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::send_batch( $batch_data );
 
 		// Update tracking records based on result
 		if ( is_wp_error( $result ) ) {
@@ -954,7 +998,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		);
 
 		// Send via cURL Multi
-		$result = Curl_Multi_Email_Sender::send_batch( $batch_data );
+		$result = \QuillCRM_Pro\Emails\Curl_Multi_Email_Sender::send_batch( $batch_data );
 
 		// Update tracking records based on result
 		if ( is_wp_error( $result ) ) {
@@ -1413,11 +1457,11 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		}
 
 		// Convert QuillCRM merge tags to mailer-specific recipient variables
-		$converted_subject = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
-		$converted_body    = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $rendered_body );
+		$converted_subject = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
+		$converted_body    = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $rendered_body );
 
 		// Add tracking pixel
-		$tracking_pixel_tag = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel_tag = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
 		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $converted_body, '</body>' ) !== false ) {
 			$converted_body = str_replace( '</body>', $tracking_pixel . '</body>', $converted_body );
@@ -1439,7 +1483,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		);
 
 		// Send via bulk API
-		$result = Bulk_Email_Sender::send_batch( $batch_data );
+		$result = \QuillCRM_Pro\Emails\Bulk_Email_Sender::send_batch( $batch_data );
 
 		// Update tracking records based on result
 		if ( is_wp_error( $result ) ) {
@@ -1580,11 +1624,11 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		}
 
 		// Convert QuillCRM merge tags to mailer-specific recipient variables
-		$subject = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
-		$body    = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $body );
+		$subject = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $subject );
+		$body    = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $body );
 
 		// Add tracking pixel using recipient variable (mailer-specific format)
-		$tracking_pixel_tag = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel_tag = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
 		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $body, '</body>' ) !== false ) {
 			$body = str_replace( '</body>', $tracking_pixel . '</body>', $body );
@@ -1606,7 +1650,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		);
 
 		// Send via bulk API
-		$result = Bulk_Email_Sender::send_batch( $batch_data );
+		$result = \QuillCRM_Pro\Emails\Bulk_Email_Sender::send_batch( $batch_data );
 
 		// Update tracking records based on result
 		if ( is_wp_error( $result ) ) {
@@ -1782,7 +1826,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		}
 
 		// Convert merge tags to mailer-specific format
-		$footer = Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $footer );
+		$footer = \QuillCRM_Pro\Emails\Bulk_Email_Sender::convert_merge_tags_to_recipient_variables( $footer );
 
 		return $footer;
 	}

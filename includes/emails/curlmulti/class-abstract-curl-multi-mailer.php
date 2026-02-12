@@ -63,13 +63,6 @@ abstract class Abstract_Curl_Multi_Mailer {
 	protected $supports_tracking = true;
 
 	/**
-	 * API endpoint URL
-	 *
-	 * @var string
-	 */
-	protected $api_endpoint = '';
-
-	/**
 	 * Get mailer slug
 	 *
 	 * @return string

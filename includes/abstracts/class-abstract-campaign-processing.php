@@ -1622,6 +1622,21 @@ abstract class Abstract_Campaign_Processing {
 			)
 		);
 
+		quillcrm_get_logger()->info(
+			sprintf( __( '%s Campaign completed.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			array(
+				'code'       => "{$this->channel}_campaign_completed",
+				'campaign'   => array(
+					'id'   => $campaign->id,
+					'name' => $campaign->name,
+				),
+				'duration'   => $campaign_duration['formatted'],
+				'start_time' => $campaign_duration['start_time'],
+				'end_time'   => $campaign_duration['end_time'],
+				'recipients' => $recipients_count,
+			)
+		);
+
 		// Clean up the campaign start time
 		delete_option( "quillcrm_{$this->channel}_campaign_start_time_{$campaign->id}" );
 

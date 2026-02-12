@@ -11,6 +11,7 @@
 
 namespace QuillCRM\Emails\BulkMailers;
 
+use QuillCRM\Emails\Traits\SMTP_Plugin_Active;
 use WP_Error;
 
 /**
@@ -19,6 +20,8 @@ use WP_Error;
  * @since 1.0.0
  */
 class Aws_Bulk_Mailer extends Abstract_Bulk_Mailer {
+
+	use SMTP_Plugin_Active;
 
 	/**
 	 * Mailer slug identifier
@@ -73,6 +76,14 @@ class Aws_Bulk_Mailer extends Abstract_Bulk_Mailer {
 	 * @return bool
 	 */
 	public function is_available() {
+		if ( ! self::is_quillsmtp_pro_plugin_active() ) {
+			return false;
+		}
+
+		if ( ! self::is_quillsmtp_pro_plugin_accepting_version() ) {
+			return false;
+		}
+
 		return $this->get_account_api() !== null;
 	}
 

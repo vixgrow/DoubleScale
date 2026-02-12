@@ -17,6 +17,7 @@ namespace QuillCRM\Emails;
 
 use QuillCRM\Emails\CurlMulti\Abstract_Curl_Multi_Mailer;
 use QuillCRM\Emails\CurlMulti\SMTP2GO_Curl_Multi_Mailer;
+use QuillCRM\Emails\Traits\SMTP_Plugin_Active;
 use WP_Error;
 
 /**
@@ -25,6 +26,8 @@ use WP_Error;
  * @since 1.0.0
  */
 class Curl_Multi_Email_Sender {
+
+	use SMTP_Plugin_Active;
 
 	/**
 	 * Registered curl multi mailer classes
@@ -43,19 +46,23 @@ class Curl_Multi_Email_Sender {
 	private static $mailer_instance = null;
 
 	/**
-	 * Check if curl multi sending is available
+	 * Check if curl multi sending is available and version is 1.7.0+
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return bool True if a curl multi-capable mailer is active
 	 */
 	public static function is_available() {
-		// Check if QuillSMTP is active
-		if ( ! class_exists( '\\QuillSMTP\\QuillSMTP' ) ) {
+
+		if ( ! self::is_quillsmtp_plugin_active() ) {
 			return false;
 		}
 
-		// Check if cURL extension is available
+		if ( ! self::is_quillsmtp_plugin_accepting_version() ) {
+			return false;
+		}
+
+		// 3. Check if cURL extension is available
 		if ( ! function_exists( 'curl_multi_init' ) ) {
 			return false;
 		}
@@ -67,50 +74,44 @@ class Curl_Multi_Email_Sender {
 	/**
 	 * Get the active curl multi-capable mailer slug
 	 *
-	 * Checks only the default_connection and fallback_connection.
+	 * Uses QuillSMTP smart routing to get the appropriate connection.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return string|null Mailer slug or null if not available
 	 */
 	public static function get_active_mailer_slug() {
-		if ( ! class_exists( '\\QuillSMTP\\QuillSMTP' ) ) {
+
+		if ( ! self::is_quillsmtp_plugin_active() ) {
 			return null;
 		}
 
-		// Get QuillSMTP settings
-		$settings = get_option( 'quillsmtp_settings', array() );
-
-		// Check if connections exist
-		if ( empty( $settings['connections'] ) || ! is_array( $settings['connections'] ) ) {
+		if ( ! self::is_quillsmtp_plugin_accepting_version() ) {
 			return null;
 		}
 
-		$connections = $settings['connections'];
+		if ( ! class_exists( '\\QuillSMTP\\Settings' ) ) {
+			return null;
+		}
 
-		// Check default_connection first
-		if ( ! empty( $settings['default_connection'] ) ) {
-			$default_connection_id = $settings['default_connection'];
+		// Use QuillSMTP smart routing
+		$route = \QuillSMTP\Settings::get_smart_route();
 
-			if ( isset( $connections[ $default_connection_id ] ) ) {
-				$connection = $connections[ $default_connection_id ];
+		// Check default connection from smart route
+		if ( ! empty( $route['default_connection'] ) ) {
+			$connection = $route['default_connection'];
 
-				if ( ! empty( $connection['mailer'] ) && isset( self::$mailer_classes[ $connection['mailer'] ] ) ) {
-					return $connection['mailer'];
-				}
+			if ( ! empty( $connection['mailer'] ) && isset( self::$mailer_classes[ $connection['mailer'] ] ) ) {
+				return $connection['mailer'];
 			}
 		}
 
-		// Check fallback_connection if default is not curl multi-capable
-		if ( ! empty( $settings['fallback_connection'] ) ) {
-			$fallback_connection_id = $settings['fallback_connection'];
+		// Check fallback connection if default is not curl multi-capable
+		if ( ! empty( $route['fallback_connection'] ) ) {
+			$connection = $route['fallback_connection'];
 
-			if ( isset( $connections[ $fallback_connection_id ] ) ) {
-				$connection = $connections[ $fallback_connection_id ];
-
-				if ( ! empty( $connection['mailer'] ) && isset( self::$mailer_classes[ $connection['mailer'] ] ) ) {
-					return $connection['mailer'];
-				}
+			if ( ! empty( $connection['mailer'] ) && isset( self::$mailer_classes[ $connection['mailer'] ] ) ) {
+				return $connection['mailer'];
 			}
 		}
 

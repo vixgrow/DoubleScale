@@ -48,14 +48,8 @@ class SMTP2GO_Curl_Multi_Mailer extends Abstract_Curl_Multi_Mailer {
 	 *
 	 * @var int
 	 */
-	protected $batch_delay = 100000;
+	protected $batch_delay = 1000000; // 1s
 
-	/**
-	 * API endpoint URL
-	 *
-	 * @var string
-	 */
-	protected $api_endpoint = 'https://api.smtp2go.com/v3/email/send';
 
 	/**
 	 * Check if SMTP2GO is properly configured and available

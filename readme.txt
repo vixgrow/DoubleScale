@@ -1,4 +1,4 @@
-=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations, Campaigns and More! ===
+=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations & More! ===
 Contributors: quillforms, mdmag
 Tags: crm, pipeline, whatsapp, automation
 Requires at least: 5.8
@@ -8,8 +8,7 @@ Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A powerful, native WordPress CRM with pipelines, contact management, email, SMS, and WhatsApp marketing, automations, and seamless integrations with 20+ popular plugins.
-
+A native WordPress CRM with pipelines, contact management, email/SMS/WhatsApp campaigns, automations, and integrations with 20+ plugins.
 == Description ==
 
 **[Quill CRM](https://quillcrm.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.

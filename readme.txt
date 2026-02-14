@@ -4,7 +4,7 @@ Tags: crm, pipeline, whatsapp, automation
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -396,6 +396,24 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 10. Global Settings - Easy configuration for email, SMS, and system settings
 
 == Changelog ==
+
+= 1.3.3 = 14 Feb 2026
+* Enhance code quality and maintainability with PHPCS improvements
+- Added PHPCS ignore comments for various security and escaping issues across multiple files to improve code quality and compliance.
+- Updated translation comments for better clarity and consistency in the codebase.
+- Removed unnecessary error logging statements to streamline the code and reduce clutter.
+- Improved overall readability and maintainability of the code by refining comments and structure.
+
+* Refactor email templates and improve database query safety
+- Updated email templates to use consistent variable names for header images and background colors.
+- Enhanced database query safety by adding PHPCS ignore comments for unescaped parameters in various files.
+- Improved action hooks with appropriate comments for clarity and compliance with naming conventions.
+- Fixed minor bugs and improved overall code readability.
+
+*Update text domain from 'quillcrm' to 'quill-crm' and add ABSPATH check in multiple files
+- Changed the text domain in quillcrm.php and various other files to 'quill-crm' for consistency.
+- Added a check for ABSPATH in several classes and functions to enhance security by preventing direct access.
+
 
 = 1.3.2 = 14 Feb 2026
 * Make sure the plugin is compatible with wp guidelines

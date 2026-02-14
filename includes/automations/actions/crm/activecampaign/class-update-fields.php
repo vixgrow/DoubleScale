@@ -74,7 +74,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Update Fields: Mapped Fields is empty.', 'quillcrm' ),
+				__( 'ActiveCampaign Update Fields: Mapped Fields is empty.', 'quill-crm' ),
 				array(
 					'code'          => 'activecampaign_update_fields',
 					'data'          => array(
@@ -119,7 +119,7 @@ class Update_Fields extends Action {
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				__( 'ActiveCampaign API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_connect',
 					'data' => array(
@@ -145,7 +145,7 @@ class Update_Fields extends Action {
 
 		if ( $result['success'] ) {
 			quillcrm_get_logger()->info(
-				__( 'ActiveCampaign Update Fields: Contact updated successfully.', 'quillcrm' ),
+				__( 'ActiveCampaign Update Fields: Contact updated successfully.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_update_fields',
 					'data'     => array(
@@ -166,7 +166,7 @@ class Update_Fields extends Action {
 
 		if ( 422 === $result['code'] ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quillcrm' ),
+				__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_update_fields',
 					'data'     => array(
@@ -186,7 +186,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->error(
-			__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quillcrm' ),
+			__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quill-crm' ),
 			array(
 				'code'     => 'activecampaign_update_fields',
 				'data'     => array(
@@ -230,17 +230,17 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 				'endpoint' => 'activecampaign/fields',

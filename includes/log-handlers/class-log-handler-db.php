@@ -137,9 +137,9 @@ class Log_Handler_DB extends Log_Handler
 				$plugin = '';
 				$main_namespace = explode('\\', $log->source)[0];
 				if ('QuillCRM' === $main_namespace) {
-					$plugin = esc_html__('Core', 'quillcrm');
+					$plugin = esc_html__('Core', 'quill-crm');
 				} else {
-					$plugin = esc_html__('Pro', 'quillcrm');
+					$plugin = esc_html__('Pro', 'quill-crm');
 				}
 
 				// prepare context

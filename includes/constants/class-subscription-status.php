@@ -61,13 +61,13 @@ class Subscription_Status {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING        => __( 'Pending', 'quillcrm' ),
-			self::ACTIVE         => __( 'Active', 'quillcrm' ),
-			self::ON_HOLD        => __( 'On Hold', 'quillcrm' ),
-			self::CANCELLED      => __( 'Cancelled', 'quillcrm' ),
-			self::SWITCHED       => __( 'Switched', 'quillcrm' ),
-			self::EXPIRED        => __( 'Expired', 'quillcrm' ),
-			self::PENDING_CANCEL => __( 'Pending Cancellation', 'quillcrm' ),
+			self::PENDING        => __( 'Pending', 'quill-crm' ),
+			self::ACTIVE         => __( 'Active', 'quill-crm' ),
+			self::ON_HOLD        => __( 'On Hold', 'quill-crm' ),
+			self::CANCELLED      => __( 'Cancelled', 'quill-crm' ),
+			self::SWITCHED       => __( 'Switched', 'quill-crm' ),
+			self::EXPIRED        => __( 'Expired', 'quill-crm' ),
+			self::PENDING_CANCEL => __( 'Pending Cancellation', 'quill-crm' ),
 		);
 	}
 

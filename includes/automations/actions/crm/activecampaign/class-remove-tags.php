@@ -74,7 +74,7 @@ class Remove_Tags extends Action {
 
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Remove Tags: Tags is empty.', 'quillcrm' ),
+				__( 'ActiveCampaign Remove Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_remove_tags',
 					'data' => array(
@@ -96,7 +96,7 @@ class Remove_Tags extends Action {
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				__( 'ActiveCampaign API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_connect',
 					'data' => array(
@@ -117,7 +117,7 @@ class Remove_Tags extends Action {
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact',
 					'data'     => array(
@@ -139,7 +139,7 @@ class Remove_Tags extends Action {
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact ID from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact ID from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact_id',
 					'data'     => array(
@@ -169,7 +169,7 @@ class Remove_Tags extends Action {
 			$result = $api->remove_contact_tag( $data );
 			if ( ! $result['success'] ) {
 				quillcrm_get_logger()->error(
-					__( 'Failed to remove tag from ActiveCampaign.', 'quillcrm' ),
+					__( 'Failed to remove tag from ActiveCampaign.', 'quill-crm' ),
 					array(
 						'code'     => 'activecampaign_remove_tag',
 						'data'     => array(
@@ -189,7 +189,7 @@ class Remove_Tags extends Action {
 				continue;
 			} else {
 				quillcrm_get_logger()->info(
-					__( 'Tag removed from ActiveCampaign.', 'quillcrm' ),
+					__( 'Tag removed from ActiveCampaign.', 'quill-crm' ),
 					array(
 						'code'     => 'activecampaign_remove_tag',
 						'data'     => array(
@@ -240,7 +240,7 @@ class Remove_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'activecampaign/tags',
 				'multiple' => true,
 			),

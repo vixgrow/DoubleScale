@@ -73,7 +73,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Update Fields: Mapped Fields are empty.', 'quillcrm' ),
+				__( 'Keap Update Fields: Mapped Fields are empty.', 'quill-crm' ),
 				array(
 					'code' => 'keap_update_fields',
 					'data' => array(
@@ -117,7 +117,7 @@ class Update_Fields extends Action {
 		$api  = $keap->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Update Fields: Could not connect to Keap.', 'quillcrm' ),
+				__( 'Keap Update Fields: Could not connect to Keap.', 'quill-crm' ),
 				array(
 					'code' => 'keap_connect',
 					'data' => array(
@@ -137,7 +137,7 @@ class Update_Fields extends Action {
 		$result = $api->create_or_update( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Update Fields: Could not update fields.', 'quillcrm' ),
+				__( 'Keap Update Fields: Could not update fields.', 'quill-crm' ),
 				array(
 					'code' => 'keap_update_fields',
 					'data' => array(
@@ -155,7 +155,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Keap Update Fields: Fields updated successfully.', 'quillcrm' ),
+			__( 'Keap Update Fields: Fields updated successfully.', 'quill-crm' ),
 			array(
 				'code' => 'keap_update_fields',
 				'data' => array(
@@ -198,7 +198,7 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(),
 				'endpoint' => 'keap/fields',

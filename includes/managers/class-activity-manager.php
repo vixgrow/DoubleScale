@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
 use QuillCRM\Models\Contact_Model;

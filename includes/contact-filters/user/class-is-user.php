@@ -65,8 +65,8 @@ class Is_User extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Yes', 'quillcrm' ),
-			'is_not' => __( 'No', 'quillcrm' ),
+			'is'     => __( 'Yes', 'quill-crm' ),
+			'is_not' => __( 'No', 'quill-crm' ),
 		);
 	}
 

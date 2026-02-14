@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Contact_Filters;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Illuminate\Database\Eloquent\Builder;
 use QuillCRM\Managers\Filters_Manager;
 

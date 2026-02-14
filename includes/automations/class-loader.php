@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Automations;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\QuillCRM;
 use Exception;
 use QuillCRM\Models\Automation_Model;
@@ -129,7 +133,7 @@ final class Loader {
 			$process_automation->start();
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Process Automations Error', 'quillcrm' ),
+				__( 'Process Automations Error', 'quill-crm' ),
 				array(
 					'code'  => 'process_automations_error',
 					'error' => array(
@@ -190,7 +194,7 @@ final class Loader {
 			$automation_process->process_step( $step, $automation_contact_id );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Process Automation Step Error: ', 'quillcrm' ),
+				__( 'Process Automation Step Error: ', 'quill-crm' ),
 				array(
 					'code'  => 'process_automation_step',
 					'error' => array(
@@ -246,7 +250,7 @@ final class Loader {
 			}
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Process Automation Goal Error: ', 'quillcrm' ),
+				__( 'Process Automation Goal Error: ', 'quill-crm' ),
 				array(
 					'code'  => 'process_automation_goal',
 					'error' => array(

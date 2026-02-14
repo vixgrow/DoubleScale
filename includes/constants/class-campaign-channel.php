@@ -189,17 +189,17 @@ class Campaign_Channel {
 	 */
 	public static function get_label( $channel ) {
 		$labels = array(
-			self::CHANNEL_EMAIL          => __( 'Email', 'quillcrm' ),
-			self::CHANNEL_SMS            => __( 'SMS', 'quillcrm' ),
-			self::CHANNEL_WHATSAPP       => __( 'WhatsApp', 'quillcrm' ),
-			self::CHANNEL_SEQUENCE_MAIL  => __( 'Sequence Mail', 'quillcrm' ),
-			self::CHANNEL_EMAIL_SEQUENCE => __( 'Email Sequence', 'quillcrm' ),
+			self::CHANNEL_EMAIL          => __( 'Email', 'quill-crm' ),
+			self::CHANNEL_SMS            => __( 'SMS', 'quill-crm' ),
+			self::CHANNEL_WHATSAPP       => __( 'WhatsApp', 'quill-crm' ),
+			self::CHANNEL_SEQUENCE_MAIL  => __( 'Sequence Mail', 'quill-crm' ),
+			self::CHANNEL_EMAIL_SEQUENCE => __( 'Email Sequence', 'quill-crm' ),
 		);
 
 		// Allow custom channels to define labels via filter
 		$labels = apply_filters( 'quillcrm_campaign_channel_labels', $labels );
 
-		return $labels[ $channel ] ?? __( 'Unknown', 'quillcrm' );
+		return $labels[ $channel ] ?? __( 'Unknown', 'quill-crm' );
 	}
 
 	/**

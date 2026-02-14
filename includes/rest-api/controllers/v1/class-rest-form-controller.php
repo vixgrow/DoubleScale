@@ -61,7 +61,7 @@ class Rest_Form_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'IDs of the forms.', 'quillcrm' ),
+							'description' => __( 'IDs of the forms.', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
@@ -112,11 +112,11 @@ class Rest_Form_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'         => array(
-					 'description' => esc_html__( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => esc_html__( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 				 ),
 				 'name'       => array(
-					 'description' => esc_html__( 'Name of the form.', 'quillcrm' ),
+					 'description' => esc_html__( 'Name of the form.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
@@ -124,38 +124,38 @@ class Rest_Form_Controller extends REST_Controller {
 					 'required'    => true,
 				 ),
 				 'form_type'  => array(
-					 'description' => esc_html__( 'Type of the form.', 'quillcrm' ),
+					 'description' => esc_html__( 'Type of the form.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'form_id'    => array(
-					 'description' => esc_html__( 'ID of the form.', 'quillcrm' ),
+					 'description' => esc_html__( 'ID of the form.', 'quill-crm' ),
 					 'type'        => array( 'integer', 'string' ),
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'data'       => array(
-					 'description' => esc_html__( 'Data of the form.', 'quillcrm' ),
+					 'description' => esc_html__( 'Data of the form.', 'quill-crm' ),
 					 'type'        => 'object',
 				 ),
 				 'status'     => array(
-					 'description' => esc_html__( 'Status of the form.', 'quillcrm' ),
+					 'description' => esc_html__( 'Status of the form.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'created_at' => array(
-					 'description' => esc_html__( 'Date the object was created.', 'quillcrm' ),
+					 'description' => esc_html__( 'Date the object was created.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
 				 ),
 				 'updated_at' => array(
-					 'description' => esc_html__( 'Date the object was last modified.', 'quillcrm' ),
+					 'description' => esc_html__( 'Date the object was last modified.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
@@ -174,34 +174,34 @@ class Rest_Form_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keywork'  => array(
-				'description'       => __( 'Limit results to those matching a string.', 'quillcrm' ),
+				'description'       => __( 'Limit results to those matching a string.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'per_page' => array(
-				'description' => __( 'Number of items to return in one page.', 'quillcrm' ),
+				'description' => __( 'Number of items to return in one page.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 10,
 			),
 			'page'     => array(
-				'description' => __( 'Current page of the collection.', 'quillcrm' ),
+				'description' => __( 'Current page of the collection.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'ids'      => array(
-				'description' => __( 'IDs of the forms.', 'quillcrm' ),
+				'description' => __( 'IDs of the forms.', 'quill-crm' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'integer',
 				),
 			),
 			'from'     => array(
-				'description' => __( 'Start date for filtering forms.', 'quillcrm' ),
+				'description' => __( 'Start date for filtering forms.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'to'       => array(
-				'description' => __( 'End date for filtering forms.', 'quillcrm' ),
+				'description' => __( 'End date for filtering forms.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
@@ -300,7 +300,7 @@ class Rest_Form_Controller extends REST_Controller {
 			$form    = Form_Model::find( $form_id );
 
 			if ( ! $form ) {
-				return new WP_Error( 'error', __( 'Form not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Form not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $form, 200 );
@@ -324,7 +324,7 @@ class Rest_Form_Controller extends REST_Controller {
 			$form    = Form_Model::find( $form_id );
 
 			if ( ! $form ) {
-				return new WP_Error( 'error', __( 'Form not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Form not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$form_data = $this->prepare_form( $request );
@@ -351,7 +351,7 @@ class Rest_Form_Controller extends REST_Controller {
 			$form    = Form_Model::find( $form_id );
 
 			if ( ! $form ) {
-				return new WP_Error( 'error', __( 'Form not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Form not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$form->delete();

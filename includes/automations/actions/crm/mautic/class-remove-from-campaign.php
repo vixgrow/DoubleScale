@@ -73,7 +73,7 @@ class Remove_From_Campaign extends Action {
 		$campaign_id = $step->get_setting( 'campaign_id', '' );
 		if ( empty( $campaign_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove From Campaign action is missing campaign_id setting.', 'quillcrm' ),
+				__( 'Mautic Remove From Campaign action is missing campaign_id setting.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_remove_from_campaign',
 					'data' => array(
@@ -100,7 +100,7 @@ class Remove_From_Campaign extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove From Campaign: Could not connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Remove From Campaign: Could not connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_remove_from_campaign',
 					'data' => array(
@@ -120,7 +120,7 @@ class Remove_From_Campaign extends Action {
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove From Campaign: Could not get or create contact.', 'quillcrm' ),
+				__( 'Mautic Remove From Campaign: Could not get or create contact.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_remove_from_campaign',
 					'data'     => array(
@@ -142,7 +142,7 @@ class Remove_From_Campaign extends Action {
 		$result     = $api->remove_contact_from_campaign( $contact_id, $campaign_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove From Campaign: Could not remove contact from campaign.', 'quillcrm' ),
+				__( 'Mautic Remove From Campaign: Could not remove contact from campaign.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_remove_from_campaign',
 					'data'     => array(
@@ -161,7 +161,7 @@ class Remove_From_Campaign extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Remove From Campaign: Contact removed from campaign.', 'quillcrm' ),
+			__( 'Mautic Remove From Campaign: Contact removed from campaign.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_remove_from_campaign',
 				'response' => $result,
@@ -197,7 +197,7 @@ class Remove_From_Campaign extends Action {
 		return array(
 			'campaign_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Campaign', 'quillcrm' ),
+				'label'    => __( 'Campaign', 'quill-crm' ),
 				'endpoint' => 'mautic/campaigns',
 			),
 		);

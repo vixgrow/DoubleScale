@@ -73,7 +73,7 @@ class Add_To_List extends Action {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To List action is missing list_id.', 'quillcrm' ),
+				__( 'Mautic Add To List action is missing list_id.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_add_to_list',
 					'data' => array(
@@ -100,7 +100,7 @@ class Add_To_List extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To List: Could not connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Add To List: Could not connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -120,7 +120,7 @@ class Add_To_List extends Action {
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To List: Failed to get or create contact.', 'quillcrm' ),
+				__( 'Mautic Add To List: Failed to get or create contact.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_add_to_list',
 					'data' => array(
@@ -141,7 +141,7 @@ class Add_To_List extends Action {
 		$result     = $api->add_contact_to_list( $contact_id, $list_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To List: Failed to add contact to list.', 'quillcrm' ),
+				__( 'Mautic Add To List: Failed to add contact to list.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_add_to_list',
 					'data'     => array(
@@ -160,7 +160,7 @@ class Add_To_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Add To List: Contact added to list.', 'quillcrm' ),
+			__( 'Mautic Add To List: Contact added to list.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_add_to_list',
 				'response' => $result,
@@ -196,7 +196,7 @@ class Add_To_List extends Action {
 		return array(
 			'list_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'List', 'quillcrm' ),
+				'label'    => __( 'List', 'quill-crm' ),
 				'endpoint' => 'mautic/lists',
 			),
 		);

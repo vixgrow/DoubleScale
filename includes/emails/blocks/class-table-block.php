@@ -30,7 +30,7 @@ class Table_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Table', 'quillcrm' );
+		return __( 'Table', 'quill-crm' );
 	}
 
 	/**
@@ -122,7 +122,7 @@ class Table_Block extends Email_Block {
 			// Return placeholder (matching frontend)
 			return "<div style=\"{$container_style};text-align:center;padding:20px;\">
 				<span style=\"font-size: 32px; font-weight: 600; color: #1E3A8A;\">" .
-					esc_html__( 'Add table data', 'quillcrm' ) . '</span>
+					esc_html__( 'Add table data', 'quill-crm' ) . '</span>
 			</div>';
 		}
 

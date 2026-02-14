@@ -165,7 +165,6 @@ class Process_Automation {
 
 				if ( ! $parent_process ) {
 					// Parent condition hasn't been processed yet, so we shouldn't process this step
-					error_log( 'Skipping step ' . $step->id . ' because parent condition ' . $parent_step->id . ' has not been processed yet' );
 					return;
 				}
 			}
@@ -204,7 +203,7 @@ class Process_Automation {
 			$this->update_automation_contact_status( $automation_contact, 'completed', $step->id, 0 );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				\__( 'Process End Automation Error', 'quillcrm' ),
+				\__( 'Process End Automation Error', 'quill-crm' ),
 				array(
 					'code'  => 'process_end_automation',
 					'error' => array(
@@ -238,7 +237,7 @@ class Process_Automation {
 			if ( ! $result ) {
 				$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'failed' );
 				$this->update_automation_contact_status( $automation_contact, 'failed', $step->id, $next_step ? $next_step->id : 0 );
-				throw new Exception( \__( 'Action failed', 'quillcrm' ) );
+				throw new Exception( \__( 'Action failed', 'quill-crm' ) );
 			}
 
 			$status = $action->auto_enqueue ? 'completed' : 'pending';
@@ -254,7 +253,7 @@ class Process_Automation {
 			}
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				\__( 'Process Action Error', 'quillcrm' ),
+				\__( 'Process Action Error', 'quill-crm' ),
 				array(
 					'code'  => 'process_action',
 					'error' => array(
@@ -354,7 +353,7 @@ class Process_Automation {
 			}
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				\__( 'Process Condition Error', 'quillcrm' ),
+				\__( 'Process Condition Error', 'quill-crm' ),
 				array(
 					'code'  => 'process_condition',
 					'error' => array(
@@ -387,10 +386,8 @@ class Process_Automation {
 			->first();
 
 		if ( $first_yes_step ) {
-			error_log( 'Processing YES condition branch - enqueueing step: ' . $first_yes_step->id );
 			$this->enqueue_step( $first_yes_step->id, $automation_contact->id );
 		} else {
-			error_log( 'No YES branch steps found for condition step: ' . $step->id . ', moving to next step after condition' );
 			// No YES branch steps, continue to the next step after this condition
 			$next_step = $this->get_next_step( $step );
 			if ( $next_step ) {
@@ -420,10 +417,8 @@ class Process_Automation {
 			->first();
 
 		if ( $first_no_step ) {
-			error_log( 'Processing NO condition branch - enqueueing step: ' . $first_no_step->id );
 			$this->enqueue_step( $first_no_step->id, $automation_contact->id );
 		} else {
-			error_log( 'No NO branch steps found for condition step: ' . $step->id . ', moving to next step after condition' );
 			// No NO branch steps, continue to the next step after this condition
 			$next_step = $this->get_next_step( $step );
 			if ( $next_step ) {
@@ -462,7 +457,7 @@ class Process_Automation {
 			$this->update_automation_contact_status( $automation_contact, 'pending', $step->id, $next_step ? $next_step->id : 0 );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				\__( 'Process Goal Error', 'quillcrm' ),
+				\__( 'Process Goal Error', 'quill-crm' ),
 				array(
 					'code'  => 'process_goal',
 					'error' => array(

@@ -66,7 +66,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Automation ID.', 'quillcrm' ),
+							'description' => __( 'Automation ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -86,7 +86,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Automation ID.', 'quillcrm' ),
+							'description' => __( 'Automation ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -106,7 +106,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Automation ID.', 'quillcrm' ),
+							'description' => __( 'Automation ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -126,7 +126,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'step_id' => array(
-							'description' => __( 'Automation Step ID.', 'quillcrm' ),
+							'description' => __( 'Automation Step ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -151,7 +151,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			// Verify automation exists
 			$automation = Automation_Model::find( $automation_id );
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 			// get step from automation_contacts_processes
 			$steps_ids = Automation_Contact_Processes_Model::where( 'automation_id', $automation_id )
@@ -175,7 +175,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 			// Add entrance step
 			$funnel_data[] = array(
-				'label'      => __( 'Entrance', 'quillcrm' ),
+				'label'      => __( 'Entrance', 'quill-crm' ),
 				'value'      => $total_contacts,
 				'percentage' => $total_contacts > 0 ? 100 : 0,
 				'step_id'    => null,
@@ -266,7 +266,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			// Verify automation exists
 			$automation = Automation_Model::find( $automation_id );
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Get total contacts who entered the automation
@@ -298,7 +298,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 			// Add entrance step
 			$step_reports[] = array(
-				'stepName'          => __( 'Entrance', 'quillcrm' ),
+				'stepName'          => __( 'Entrance', 'quill-crm' ),
 				'contactsEntered'   => $total_contacts,
 				'contactsCompleted' => $total_contacts,
 				'completionRate'    => 100,
@@ -400,7 +400,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			// Verify automation exists
 			$automation = Automation_Model::find( $automation_id );
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Get all email steps for this automation
@@ -482,13 +482,13 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			// Verify step exists and get step details
 			$step = Automation_Step_Model::find( $step_id );
 			if ( ! $step ) {
-				return new WP_Error( 'not_found', __( 'Automation step not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation step not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Verify this is an email step
 			$email_actions = array( 'send_email', 'send_campaign_email', 'send_email_sequence' );
 			if ( ! in_array( $step->action, $email_actions, true ) ) {
-				return new WP_Error( 'invalid_step', __( 'This step does not send emails.', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'invalid_step', __( 'This step does not send emails.', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			// Get step metrics

@@ -30,7 +30,7 @@ class HTML_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'HTML', 'quillcrm' );
+		return __( 'HTML', 'quill-crm' );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class HTML_Block extends Email_Block {
 			trim( $content ) === '<p>Insert your HTML here</p>';
 
 		// Generate unique ID for this HTML block (matching frontend)
-		$unique_id = 'html-block-' . substr( md5( rand() ), 0, 9 );
+		$unique_id = 'html-block-' . substr( md5( wp_rand() ), 0, 9 );
 
 		// Use CSS string directly (matching frontend)
 		$css_string = $props['customCss'] ?? '';

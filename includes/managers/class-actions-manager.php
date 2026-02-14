@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Exception;
 use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Integrations_Manager;
@@ -145,7 +149,7 @@ final class Actions_Manager
 	public function register(Action $action)
 	{
 		if (! $action instanceof Action) {
-			throw new Exception(__('Invalid action', 'quillcrm'));
+			throw new Exception(__('Invalid action', 'quill-crm'));
 		}
 
 		if (isset($this->actions[$action->slug])) {
@@ -177,7 +181,8 @@ final class Actions_Manager
 			return $this->actions[$slug];
 		}
 
-		throw new Exception(sprintf(__('Action %s not found', 'quillcrm'), $slug));
+		/* translators: %s: action slug */
+		throw new Exception(sprintf(__('Action %s not found', 'quill-crm'), $slug));
 	}
 
 	/**
@@ -201,155 +206,155 @@ final class Actions_Manager
 	{
 		$this->sources = array(
 			'crm'         => array(
-				'label'  => __('CRM', 'quillcrm'),
+				'label'  => __('CRM', 'quill-crm'),
 				'groups' => array(
 					'contact' => array(
-						'label'   => __('Contact', 'quillcrm'),
+						'label'   => __('Contact', 'quill-crm'),
 						'actions' => array(),
 					),
 					'delay'   => array(
-						'label'   => __('Delay', 'quillcrm'),
+						'label'   => __('Delay', 'quill-crm'),
 						'actions' => array(),
 					),
 					'deal'    => array(
-						'label'   => __('Deal', 'quillcrm'),
+						'label'   => __('Deal', 'quill-crm'),
 						'actions' => array(),
 					),
 				),
 			),
 			'woocommerce' => array(
-				'label'  => __('WooCommerce', 'quillcrm'),
+				'label'  => __('WooCommerce', 'quill-crm'),
 				'groups' => array(
 					'order'  => array(
-						'label'       => __('Order', 'quillcrm'),
+						'label'       => __('Order', 'quill-crm'),
 						'actions'     => array(),
 						'is_disabled' => ! quillcrm_is_plugin_active('woocommerce/woocommerce.php'),
 					),
 					'coupon' => array(
-						'label'       => __('Coupon', 'quillcrm'),
+						'label'       => __('Coupon', 'quill-crm'),
 						'actions'     => array(),
 						'is_disabled' => ! quillcrm_is_plugin_active('woocommerce/woocommerce.php'),
 					),
 				),
 			),
 			'wp'          => array(
-				'label'  => __('WordPress', 'quillcrm'),
+				'label'  => __('WordPress', 'quill-crm'),
 				'groups' => array(
 					'user' => array(
-						'label'   => __('User', 'quillcrm'),
+						'label'   => __('User', 'quill-crm'),
 						'actions' => array(),
 					),
 				),
 			),
 			'lms'         => array(
-				'label'  => __('LMS', 'quillcrm'),
+				'label'  => __('LMS', 'quill-crm'),
 				'groups' => array(
 					'learndash'  => array(
 						'is_disabled' => ! quillcrm_is_plugin_active('sfwd-lms/sfwd_lms.php'),
-						'label'       => __('LearnDash', 'quillcrm'),
+						'label'       => __('LearnDash', 'quill-crm'),
 						'actions'     => array(),
 					),
 					'tutorlms'   => array(
 						'is_disabled' => ! quillcrm_is_plugin_active( 'tutor/tutor.php' ),
-						'label'       => __('Tutor LMS', 'quillcrm'),
+						'label'       => __('Tutor LMS', 'quill-crm'),
 						'actions'     => array(),
 					),
 					'lifterlms'  => array(
 						'is_disabled' => ! quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' ),
-						'label'       => __('LifterLMS', 'quillcrm'),
+						'label'       => __('LifterLMS', 'quill-crm'),
 						'actions'     => array(),
 					),
 					'learnpress' => array(
 						'is_disabled' => ! quillcrm_is_plugin_active( 'learnpress/learnpress.php' ),
-						'label'       => __('LearnPress', 'quillcrm'),
+						'label'       => __('LearnPress', 'quill-crm'),
 						'actions'     => array(),
 					),
 				),
 			),
 			'email'       => array(
-				'label'  => __('Email', 'quillcrm'),
+				'label'  => __('Email', 'quill-crm'),
 				'groups' => array(
 					'email' => array(
-						'label'   => __('Email', 'quillcrm'),
+						'label'   => __('Email', 'quill-crm'),
 						'actions' => array(),
 					),
 				),
 			),
 			'message'     => array(
-				'label'  => __('Messaging', 'quillcrm'),
+				'label'  => __('Messaging', 'quill-crm'),
 				'groups' => array(
 					'sms'      => array(
-						'label'   => __('SMS', 'quillcrm'),
+						'label'   => __('SMS', 'quill-crm'),
 						'actions' => array(),
 					),
 					'whatsapp' => array(
-						'label'   => __('WhatsApp', 'quillcrm'),
+						'label'   => __('WhatsApp', 'quill-crm'),
 						'actions' => array(),
 					),
 				),
 			),
 			'send_data'   => array(
-				'label'  => __('Send Data', 'quillcrm'),
+				'label'  => __('Send Data', 'quill-crm'),
 				'groups' => array(
 					// 'activecampaign' => array(
-					// 'label'   => __( 'ActiveCampaign', 'quillcrm' ),
+					// 'label'   => __( 'ActiveCampaign', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'convertkit'     => array(
-					// 'label'   => __( 'ConvertKit', 'quillcrm' ),
+					// 'label'   => __( 'ConvertKit', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'drip'           => array(
-					// 'label'   => __( 'Drip', 'quillcrm' ),
+					// 'label'   => __( 'Drip', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'getresponse'    => array(
-					// 'label'   => __( 'GetResponse', 'quillcrm' ),
+					// 'label'   => __( 'GetResponse', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'hubspot'        => array(
-					// 'label'   => __( 'HubSpot', 'quillcrm' ),
+					// 'label'   => __( 'HubSpot', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'keap'           => array(
-					// 'label'   => __( 'Keap', 'quillcrm' ),
+					// 'label'   => __( 'Keap', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'klaviyo'        => array(
-					// 'label'   => __( 'Klaviyo', 'quillcrm' ),
+					// 'label'   => __( 'Klaviyo', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'mailchimp'      => array(
-					// 'label'   => __( 'Mailchimp', 'quillcrm' ),
+					// 'label'   => __( 'Mailchimp', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'mailerlite'     => array(
-					// 'label'   => __( 'MailerLite', 'quillcrm' ),
+					// 'label'   => __( 'MailerLite', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 					// 'mautic'         => array(
-					// 'label'   => __( 'Mautic', 'quillcrm' ),
+					// 'label'   => __( 'Mautic', 'quill-crm' ),
 					// 'actions' => array(),
 					// ),
 				'slack'        => array(
-					'label'   => __('Slack', 'quillcrm'),
+					'label'   => __('Slack', 'quill-crm'),
 					'actions' => array(),
 				),
 				'zapier'       => array(
-					'label'   => __('Zapier', 'quillcrm'),
+					'label'   => __('Zapier', 'quill-crm'),
 					'actions' => array(),
 				),
 				'http_request' => array(
-					'label'   => __('HTTP Request', 'quillcrm'),
+					'label'   => __('HTTP Request', 'quill-crm'),
 					'actions' => array(),
 				),
 			),
 		),
 		'video'       => array(
-			'label'  => __( 'Video', 'quillcrm' ),
+			'label'  => __( 'Video', 'quill-crm' ),
 			'groups' => array(
 				'prestoplayer' => array(
-					'label'       => __( 'Presto Player', 'quillcrm' ),
+					'label'       => __( 'Presto Player', 'quill-crm' ),
 					'actions'     => array(),
 					'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
 				),

@@ -30,7 +30,7 @@ class Preheader_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Preheader', 'quillcrm' );
+		return __( 'Preheader', 'quill-crm' );
 	}
 
 	/**
@@ -130,8 +130,8 @@ class Preheader_Block extends Email_Block {
 		$element_tag = $this->get_element_tag( $props['headingStyle'] );
 
 		// Use default text if empty
-		$display_text      = ! empty( $text ) ? $text : __( 'If you cannot see images, Please', 'quillcrm' );
-		$display_link_text = ! empty( $link_text ) ? $link_text : __( 'Click here', 'quillcrm' );
+		$display_text      = ! empty( $text ) ? $text : __( 'If you cannot see images, Please', 'quill-crm' );
+		$display_link_text = ! empty( $link_text ) ? $link_text : __( 'Click here', 'quill-crm' );
 
 		// Use table structure for better email client compatibility
 		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">

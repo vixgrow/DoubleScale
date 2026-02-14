@@ -96,7 +96,7 @@ class Add_Tags extends Action {
 	public function get_fields() {
 		return array(
 			'tags' => array(
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'type'     => 'tags',
 				'multiple' => true,
 			),

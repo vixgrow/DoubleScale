@@ -9,6 +9,10 @@
 
 namespace QuillCRM\Emails;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Emails.
  *

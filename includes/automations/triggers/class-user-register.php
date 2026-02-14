@@ -9,6 +9,10 @@
 
 namespace QuillCRM\Automations\Triggers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 

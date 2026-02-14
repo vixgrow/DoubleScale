@@ -10,6 +10,10 @@
 
 namespace QuillCRM\Campaign;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Communication_Tracking_Model;
@@ -321,7 +325,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			// Set unsubscribe URL for List-Unsubscribe header (RFC 8058 compliance)
 			$emails->unsubscribe_url = add_query_arg(
 				array(
-					'quillcrm' => 'email_unsubscribe',
+					'quill-crm' => 'email_unsubscribe',
 					'hash_key' => $campaign_message->hash_key,
 				),
 				home_url()
@@ -362,7 +366,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			);
 
 			quillcrm_get_logger()->error(
-				__( 'Email send error with debug info.', 'quillcrm' ),
+				__( 'Email send error with debug info.', 'quill-crm' ),
 				$debug_info
 			);
 
@@ -394,9 +398,20 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_default_campaign_content() {
-		 return method_exists( $this, 'get_default_email_content' )
-			? $this->get_default_email_content()
-			: sprintf( __( '<p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p><a href="{{contact:unsubscribe_link}}">Unsubscribe</a></p>', 'quillcrm' ) );
+		if ( method_exists( $this, 'get_default_email_content' ) ) {
+			return $this->get_default_email_content();
+		}
+
+		$greeting        = sprintf(
+			/* translators: %1$s: first name merge tag, %2$s: last name merge tag */
+			__( 'Hi %1$s %2$s,', 'quill-crm' ),
+			'{{contact:first_name}}',
+			'{{contact:last_name}}'
+		);
+		$thank_you       = __( 'Thank you for subscribing to our updates.', 'quill-crm' );
+		$unsubscribe_txt = __( 'Unsubscribe', 'quill-crm' );
+
+		return '<p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p><a href="{{contact:unsubscribe_link}}">' . esc_html( $unsubscribe_txt ) . '</a></p>';
 	}
 
 	/**
@@ -405,9 +420,17 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_default_email_content() {
-		$default_content = sprintf(
-			__( '<div><p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p>Don\'t want to stay in the loop? We\'ll be sad to see you go, but you can click here to <a href="{{contact:unsubscribe_link}}" target="_blank">unsubscribe</a>.</p></div>', 'quillcrm' )
+		$greeting        = sprintf(
+			/* translators: %1$s: first name merge tag, %2$s: last name merge tag */
+			__( 'Hi %1$s %2$s,', 'quill-crm' ),
+			'{{contact:first_name}}',
+			'{{contact:last_name}}'
 		);
+		$thank_you       = __( 'Thank you for subscribing to our updates.', 'quill-crm' );
+		$unsubscribe_msg = __( "Don't want to stay in the loop? We'll be sad to see you go, but you can click here to", 'quill-crm' );
+		$unsubscribe_txt = __( 'unsubscribe', 'quill-crm' );
+
+		$default_content = '<div><p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p>' . esc_html( $unsubscribe_msg ) . ' <a href="{{contact:unsubscribe_link}}" target="_blank">' . esc_html( $unsubscribe_txt ) . '</a>.</p></div>';
 
 		return apply_filters( 'quillcrm_default_email_content', $default_content );
 	}

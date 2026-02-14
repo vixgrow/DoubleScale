@@ -128,7 +128,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'The ids of the items to delete.', 'quillcrm' ),
+							'description' => __( 'The ids of the items to delete.', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'integer' ),
 							'required'    => true,
@@ -145,7 +145,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 						'type'        => 'integer',
 					),
 				),
@@ -188,18 +188,18 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			array(
 				'args' => array(
 					'id'     => array(
-						'description' => __( 'Campaign ID', 'quillcrm' ),
+						'description' => __( 'Campaign ID', 'quill-crm' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'period' => array(
-						'description' => __( 'Time period for grouping', 'quillcrm' ),
+						'description' => __( 'Time period for grouping', 'quill-crm' ),
 						'type'        => 'string',
 						'enum'        => array( 'hour', 'day', 'week', 'month' ),
 						'default'     => 'day',
 					),
 					'limit'  => array(
-						'description' => __( 'Number of periods to return', 'quillcrm' ),
+						'description' => __( 'Number of periods to return', 'quill-crm' ),
 						'type'        => 'integer',
 						'default'     => 30,
 					),
@@ -219,7 +219,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 						'type'        => 'integer',
 					),
 				),
@@ -338,7 +338,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			// Attach full template data for frontend use
@@ -390,11 +390,11 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			if ( $campaign['status'] !== 'draft' ) {
-				return new WP_Error( 'error', __( 'Campaign is not draft', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'error', __( 'Campaign is not draft', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			$campaign_data = $this->prepare_campaign( $request );
@@ -448,7 +448,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			$campaign->delete();
@@ -472,7 +472,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaigns    = $this->get_campaign_query()->whereIn( 'id', $campaign_ids )->get();
 
 			if ( $campaigns->isEmpty() ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaigns not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaigns not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			Campaign_Model::destroy( $campaign_ids );
@@ -496,7 +496,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			$campaign_data = $campaign->toArray();
@@ -618,7 +618,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( empty( $this->channel ) ) {
 				return new WP_Error(
 					'missing_channel',
-					__( 'Channel parameter is required', 'quillcrm' ),
+					__( 'Channel parameter is required', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -669,7 +669,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			// Validate campaign exists and matches type
 			$campaign = $this->get_campaign_query()->find( $campaign_id );
 			if ( ! $campaign ) {
-				return new WP_Error( 'not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Campaign not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Generate cache key
@@ -737,16 +737,16 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description' => __( 'The keyword to search for.', 'quillcrm' ),
+				'description' => __( 'The keyword to search for.', 'quill-crm' ),
 				'type'        => 'string',
 			),
 			'per_page' => array(
-				'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+				'description' => __( 'The number of items to return per page.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 10,
 			),
 			'page'     => array(
-				'description' => __( 'The page number.', 'quillcrm' ),
+				'description' => __( 'The page number.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
@@ -761,24 +761,24 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	public function get_analytics_params() {
 		return array(
 			'channel'    => array(
-				'description' => __( 'Campaign channel (email, sms, whatsapp).', 'quillcrm' ),
+				'description' => __( 'Campaign channel (email, sms, whatsapp).', 'quill-crm' ),
 				'type'        => 'string',
 				'enum'        => Campaign_Channel::get_core_channel_strings(),
 				'required'    => false,
 			),
 			'interval'   => array(
-				'description' => __( 'Interval for the analytics.', 'quillcrm' ),
+				'description' => __( 'Interval for the analytics.', 'quill-crm' ),
 				'type'        => 'string',
 				'enum'        => array( 'custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
 				'required'    => false,
 			),
 			'start_date' => array(
-				'description' => __( 'Start date for the analytics.', 'quillcrm' ),
+				'description' => __( 'Start date for the analytics.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'end_date'   => array(
-				'description' => __( 'End date for the analytics.', 'quillcrm' ),
+				'description' => __( 'End date for the analytics.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
@@ -812,7 +812,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		if ( ! $status_manager->is_valid_status( $status ) ) {
 			return new WP_Error(
 				'invalid_campaign_status',
-				sprintf( __( 'Invalid campaign status: %s', 'quillcrm' ), $status ),
+				sprintf( __( 'Invalid campaign status: %s', 'quill-crm' ), $status ),
 				array( 'status' => 400 )
 			);
 		}

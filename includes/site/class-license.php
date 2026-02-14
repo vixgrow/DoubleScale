@@ -8,6 +8,10 @@
 
 namespace QuillCRM\Site;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\QuillCRM;
 use Automatic_Upgrader_Skin;
 use Plugin_Upgrader;
@@ -90,7 +94,7 @@ class License {
 		$this->check_authorization();
 
 		if ( $this->plugin_data['is_installed'] ) {
-			wp_send_json_error( esc_html__( 'QuillCRM Pro is already installed', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'QuillCRM Pro is already installed', 'quill-crm' ), 403 );
 			exit;
 		}
 
@@ -113,12 +117,12 @@ class License {
 		$this->check_authorization();
 
 		if ( ! $this->plugin_data['is_installed'] ) {
-			wp_send_json_error( esc_html__( 'QuillCRM Pro is not installed', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'QuillCRM Pro is not installed', 'quill-crm' ), 403 );
 			exit;
 		}
 
 		if ( $this->plugin_data['is_active'] ) {
-			wp_send_json_error( esc_html__( 'QuillCRM Pro is already active', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'QuillCRM Pro is already active', 'quill-crm' ), 403 );
 			exit;
 		}
 
@@ -130,23 +134,23 @@ class License {
 			$result = activate_plugin( $this->plugin_data['plugin_file'] );
 			if ( is_wp_error( $result ) ) {
 				// quillbooking_get_logger()->error(
-				// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
+				// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quill-crm' ),
 				// 	array(
 				// 		'code'  => 'cannot_activate_pro',
 				// 		'error' => $result,
 				// 	)
 				// );
 			}
-			wp_send_json_success( esc_html__( 'QuillCRM Pro activated successfully', 'quillcrm' ), 200 );
+			wp_send_json_success( esc_html__( 'QuillCRM Pro activated successfully', 'quill-crm' ), 200 );
 		} catch ( \Exception $e ) {
 			// quillbooking_get_logger()->error(
-			// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quillcrm' ),
+			// 	esc_html__( 'Cannot activate QuillCRM Pro', 'quill-crm' ),
 			// 	array(
 			// 		'code'  => 'cannot_activate_pro',
 			// 		'error' => $e,
 			// 	)
 			// );
-			wp_send_json_error( esc_html__( 'Cannot activate QuillCRM Pro, check log for details', 'quillcrm' ) );
+			wp_send_json_error( esc_html__( 'Cannot activate QuillCRM Pro, check log for details', 'quill-crm' ) );
 		}
 	}
 
@@ -192,7 +196,7 @@ class License {
 		if ( $this->plugin_data['is_installed'] ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'QuillCRM Pro is already installed', 'quillcrm' ),
+				'message' => esc_html__( 'QuillCRM Pro is already installed', 'quill-crm' ),
 			);
 		}
 
@@ -201,7 +205,7 @@ class License {
 		if ( ! $license ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'No license found', 'quillcrm' ),
+				'message' => esc_html__( 'No license found', 'quill-crm' ),
 			);
 		}
 
@@ -218,7 +222,7 @@ class License {
 		$download_link = $plugin_data['data']['download_link'] ?? null;
 		if ( empty( $download_link ) ) {
 			// quillbooking_get_logger()->debug(
-			// 	esc_html__( 'Cannot get plugin info', 'quillcrm' ),
+			// 	esc_html__( 'Cannot get plugin info', 'quill-crm' ),
 			// 	array(
 			// 		'code'        => 'cannot_get_plugin_info',
 			// 		'plugin_slug' => $this->plugin_data['slug'],
@@ -227,7 +231,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot get plugin info, please check your license', 'quillcrm' ),
+				'message' => esc_html__( 'Cannot get plugin info, please check your license', 'quill-crm' ),
 			);
 		}
 
@@ -241,7 +245,7 @@ class License {
 		if ( ! $filesystem_access ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin automatically, please download it and install it manually', 'quillcrm' ),
+				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin automatically, please download it and install it manually', 'quill-crm' ),
 			);
 		}
 
@@ -253,7 +257,7 @@ class License {
 		
 
 			// quillbooking_get_logger()->error(
-			// 	esc_html__( 'Cannot install QuillCRM Pro plugin plugin', 'quillcrm' ),
+			// 	esc_html__( 'Cannot install QuillCRM Pro plugin plugin', 'quill-crm' ),
 			// 	array(
 			// 		'code'        => 'cannot_install_plugin_plugin',
 			// 		'plugin_slug' => $plugin_slug,
@@ -266,14 +270,14 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quillcrm' ),
+				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quill-crm' ),
 			);
 		}
 
 		// check failed installation.
 		if ( ! $installer_skin->result || ! $installer->plugin_info() ) {
 			// quillbooking_get_logger()->error(
-			// 	esc_html__( 'Cannot install QuillCRM Pro plugin plugin', 'quillcrm' ),
+			// 	esc_html__( 'Cannot install QuillCRM Pro plugin plugin', 'quill-crm' ),
 			// 	array(
 			// 		'code'             => 'cannot_install_plugin_plugin',
 			// 		'plugin_slug'      => $plugin_slug,
@@ -282,7 +286,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quillcrm' ),
+				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quill-crm' ),
 			);
 		}
 
@@ -294,7 +298,7 @@ class License {
 			}
 			$removed = delete_plugins( array( $installer->plugin_info() ) );
 			// quillbooking_get_logger()->critical(
-			// 	esc_html__( 'Invalid QuillCRM Pro plugin installation detected', 'quillcrm' ),
+			// 	esc_html__( 'Invalid QuillCRM Pro plugin installation detected', 'quill-crm' ),
 			// 	array(
 			// 		'code'                  => 'invalid_plugin_installation',
 			// 		'plugin_slug'           => $plugin_slug,
@@ -306,13 +310,13 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quillcrm' ),
+				'message' => esc_html__( 'Cannot install QuillCRM Pro plugin, check log for details', 'quill-crm' ),
 			);
 		}
 
 		// log successful installation.
 		// quillbooking_get_logger()->info(
-		// 	esc_html__( 'QuillCRM Pro plugin installed successfully', 'quillcrm' ),
+		// 	esc_html__( 'QuillCRM Pro plugin installed successfully', 'quill-crm' ),
 		// 	array(
 		// 		'code'             => 'plugin_installed_successfully',
 		// 		'plugin_slug'      => $this->plugin_data['slug'],
@@ -321,7 +325,7 @@ class License {
 		// );
 		return array(
 			'success' => true,
-			'message' => esc_html__( 'QuillCRM Pro plugin installed successfully', 'quillcrm' ),
+			'message' => esc_html__( 'QuillCRM Pro plugin installed successfully', 'quill-crm' ),
 		);
 	}
 
@@ -335,22 +339,22 @@ class License {
 	private function define_plans() {
 		$this->plans = array(
 			'basic'      => array(
-				'label' => esc_html__( 'Basic', 'quillcrm' ),
+				'label' => esc_html__( 'Basic', 'quill-crm' ),
 			),
 			'plus'       => array(
-				'label' => esc_html__( 'Plus', 'quillcrm' ),
+				'label' => esc_html__( 'Plus', 'quill-crm' ),
 			),
 			'enterprise' => array(
-				'label' => esc_html__( 'Enterprise', 'quillcrm' ),
+				'label' => esc_html__( 'Enterprise', 'quill-crm' ),
 			),
 			'basic-ltd' => array(
-				'label' => esc_html__( 'Basic LTD', 'quillcrm' ),
+				'label' => esc_html__( 'Basic LTD', 'quill-crm' ),
 			),
 			'plus-ltd'  => array(
-				'label' => esc_html__( 'Plus LTD', 'quillcrm' ),
+				'label' => esc_html__( 'Plus LTD', 'quill-crm' ),
 			),
 			'enterprise-ltd' => array(
-				'label' => esc_html__( 'Enterprise LTD', 'quillcrm' ),
+				'label' => esc_html__( 'Enterprise LTD', 'quill-crm' ),
 			),
 		);
 	}
@@ -426,7 +430,7 @@ class License {
 		if ( empty( $license['key'] ) ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'No license key found', 'quillcrm' ),
+				'message' => esc_html__( 'No license key found', 'quill-crm' ),
 			);
 		}
 
@@ -444,7 +448,7 @@ class License {
 			$license['last_check'] = gmdate( 'Y-m-d H:i:s' );
 			update_option( 'quillcrm_license', $license );
 	
-			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'quillcrm' );
+			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'quill-crm' );
 			return array(
 				'success' => false,
 				'message' => $message,
@@ -527,7 +531,7 @@ class License {
 
 			if ( $result['success'] ) {
 				// quillbooking_get_logger()->debug(
-				// 	esc_html__( 'License update task done', 'quillcrm' ),
+				// 	esc_html__( 'License update task done', 'quill-crm' ),
 				// 	array(
 				// 		'code'    => 'license_update_task_done',
 				// 		'trigger' => $trigger,
@@ -535,7 +539,7 @@ class License {
 				// );
 			} else {
 				// quillbooking_get_logger()->warning(
-				// 	esc_html__( 'License update task failed', 'quillcrm' ),
+				// 	esc_html__( 'License update task failed', 'quill-crm' ),
 				// 	array(
 				// 		'code'    => 'license_update_task_failed',
 				// 		'trigger' => $trigger,
@@ -557,14 +561,14 @@ class License {
 
 		// check current license.
 		if ( ! empty( get_option( 'quillcrm_license' ) ) ) {
-			wp_send_json_error( esc_html__( 'Current license must be deactivated first', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'Current license must be deactivated first', 'quill-crm' ), 403 );
 			exit;
 		}
 
 		// posted license key.
 		$license_key = trim( sanitize_text_field( $_POST['license_key'] ?? '' ) );
 		if ( empty( $license_key ) ) {
-			wp_send_json_error( esc_html__( 'License key is required', 'quillcrm' ), 400 );
+			wp_send_json_error( esc_html__( 'License key is required', 'quill-crm' ), 400 );
 			exit;
 		}
 
@@ -578,7 +582,7 @@ class License {
 
 		// failed request.
 		if ( ! $response['success'] ) {
-			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'quillcrm' );
+			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'quill-crm' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
@@ -587,9 +591,9 @@ class License {
 		if ( ! ( $response['data']['success'] ?? false ) ) {
 			$status_label = $this->get_status_label( $response['data']['error'] ?? null );
 			if ( $status_label ) {
-				$message = esc_html__( 'License error', 'quillcrm' ) . ": $status_label";
+				$message = esc_html__( 'License error', 'quill-crm' ) . ": $status_label";
 			} else {
-				$message = esc_html__( 'An error occurred, please try again', 'quillcrm' );
+				$message = esc_html__( 'An error occurred, please try again', 'quill-crm' );
 			}
 	
 			wp_send_json_error( $message, 422 );
@@ -597,13 +601,13 @@ class License {
 		}
 
 		if ( 'valid' !== $response['data']['license'] ) {
-			$message = esc_html__( 'Invalid license', 'quillcrm' );
+			$message = esc_html__( 'Invalid license', 'quill-crm' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
 
 		if ( empty( $response['data']['plan'] ) ) {
-			$message = esc_html__( 'Server error, please contact the support', 'quillcrm' );
+			$message = esc_html__( 'Server error, please contact the support', 'quill-crm' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
@@ -668,7 +672,7 @@ class License {
 			delete_option( 'quillcrm_license' );
 		}
 
-		wp_send_json_success( esc_html__( 'License removed successfully', 'quillcrm' ), 200 );
+		wp_send_json_success( esc_html__( 'License removed successfully', 'quill-crm' ), 200 );
 	}
 
 	/**
@@ -682,28 +686,28 @@ class License {
 	public function get_status_label( $status ) {
 		switch ( $status ) {
 			case 'valid':
-				return esc_html__( 'Valid', 'quillcrm' );
+				return esc_html__( 'Valid', 'quill-crm' );
 
 			case 'expired':
-				return esc_html__( 'Expired', 'quillcrm' );
+				return esc_html__( 'Expired', 'quill-crm' );
 
 			case 'disabled':
 			case 'revoked':
-				return esc_html__( 'Disabled', 'quillcrm' );
+				return esc_html__( 'Disabled', 'quill-crm' );
 
 			case 'missing':
 			case 'invalid':
-				return esc_html__( 'Invalid', 'quillcrm' );
+				return esc_html__( 'Invalid', 'quill-crm' );
 
 			case 'inactive':
 			case 'site_inactive':
-				return esc_html__( 'Not active for this website', 'quillcrm' );
+				return esc_html__( 'Not active for this website', 'quill-crm' );
 
 			case 'item_name_mismatch':
-				return esc_html__( 'Invalid key for a plan', 'quillcrm' );
+				return esc_html__( 'Invalid key for a plan', 'quill-crm' );
 
 			case 'no_activations_left':
-				return esc_html__( 'Key reached its activation limit', 'quillcrm' );
+				return esc_html__( 'Key reached its activation limit', 'quill-crm' );
 
 			default:
 				return null;
@@ -721,13 +725,13 @@ class License {
 	private function check_authorization() {
 		// check for valid nonce field.
 		if ( ! check_ajax_referer( 'quillcrm-admin', '_nonce', false ) ) {
-			wp_send_json_error( esc_html__( 'Invalid nonce', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'Invalid nonce', 'quill-crm' ), 403 );
 			exit;
 		}
 
 		// check for user capability.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( esc_html__( 'Forbidden', 'quillcrm' ), 403 );
+			wp_send_json_error( esc_html__( 'Forbidden', 'quill-crm' ), 403 );
 			exit;
 		}
 	}

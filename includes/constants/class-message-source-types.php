@@ -37,9 +37,9 @@ class Message_Source_Types
     public static function get_all_types()
     {
         return [
-            self::CAMPAIGN => __('Campaign', 'quillcrm'),
-            self::AUTOMATION => __('Automation', 'quillcrm'),
-            self::INDIVIDUAL => __('Individual', 'quillcrm'),
+            self::CAMPAIGN => __('Campaign', 'quill-crm'),
+            self::AUTOMATION => __('Automation', 'quill-crm'),
+            self::INDIVIDUAL => __('Individual', 'quill-crm'),
         ];
     }
 
@@ -52,7 +52,7 @@ class Message_Source_Types
     public static function get_type_label($type)
     {
         $types = self::get_all_types();
-        return isset($types[$type]) ? $types[$type] : __('Unknown', 'quillcrm');
+        return isset($types[$type]) ? $types[$type] : __('Unknown', 'quill-crm');
     }
 
     /**

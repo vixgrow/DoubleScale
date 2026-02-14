@@ -69,7 +69,7 @@ class Cart_Total extends Merge_Tag {
 
 		// Format the total with currency
 		if ( function_exists( 'wc_price' ) ) {
-			return strip_tags( wc_price( $total, array( 'currency' => $currency ) ) );
+			return wp_strip_all_tags( wc_price( $total, array( 'currency' => $currency ) ) );
 		}
 
 		return $total . ' ' . $currency;

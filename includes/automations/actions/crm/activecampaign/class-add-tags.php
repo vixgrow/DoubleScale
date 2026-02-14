@@ -80,7 +80,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Add Tags: Tags is empty.', 'quillcrm' ),
+				__( 'ActiveCampaign Add Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_add_tags',
 					'data' => array(
@@ -102,7 +102,7 @@ class Add_Tags extends Action {
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to connect to ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to connect to ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_connect',
 					'data' => array(
@@ -123,7 +123,7 @@ class Add_Tags extends Action {
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact',
 					'data'     => array(
@@ -145,7 +145,7 @@ class Add_Tags extends Action {
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact ID from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact ID from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact_id',
 					'data'     => array(
@@ -175,7 +175,7 @@ class Add_Tags extends Action {
 			$result = $api->add_contact_tag( $data );
 			if ( ! $result['success'] ) {
 				quillcrm_get_logger()->error(
-					__( 'Failed to add tag to contact in ActiveCampaign.', 'quillcrm' ),
+					__( 'Failed to add tag to contact in ActiveCampaign.', 'quill-crm' ),
 					array(
 						'code'     => 'activecampaign_add_tag',
 						'data'     => array(
@@ -195,7 +195,7 @@ class Add_Tags extends Action {
 				continue;
 			} else {
 				quillcrm_get_logger()->info(
-					__( 'Tag added to contact in ActiveCampaign.', 'quillcrm' ),
+					__( 'Tag added to contact in ActiveCampaign.', 'quill-crm' ),
 					array(
 						'code'     => 'activecampaign_add_tag',
 						'data'     => array(
@@ -246,7 +246,7 @@ class Add_Tags extends Action {
 		return array(
 			'tag' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'activecampaign/tags',
 				'multiple' => true,
 			),

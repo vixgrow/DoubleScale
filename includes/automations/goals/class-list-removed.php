@@ -12,6 +12,10 @@
 
 namespace QuillCRM\Automations\Goals;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -130,7 +134,7 @@ class List_Removed extends Goal {
 	public function get_fields() {
 		return array(
 			'lists' => array(
-				'label'    => __( 'Lists', 'quillcrm' ),
+				'label'    => __( 'Lists', 'quill-crm' ),
 				'type'     => 'lists',
 				'multiple' => true,
 			),

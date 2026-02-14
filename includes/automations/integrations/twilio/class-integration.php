@@ -102,7 +102,7 @@ class Integration extends Integration_Abstract {
 	 * @return \WP_Error
 	 */
 	public function validate( $settings ) {
-		return new \WP_Error( 'pro_feature', __( 'Twilio integration is a Pro feature. Please upgrade to QuillCRM Pro.', 'quillcrm' ) );
+		return new \WP_Error( 'pro_feature', __( 'Twilio integration is a Pro feature. Please upgrade to QuillCRM Pro.', 'quill-crm' ) );
 	}
 
 	/**

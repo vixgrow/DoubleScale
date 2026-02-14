@@ -11,6 +11,10 @@
 
 namespace QuillCRM;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Contact_Model;
 
 /**
@@ -75,7 +79,7 @@ final class Custom_Metabox {
 
 		add_meta_box(
 			'quillcrm-contact-metabox',
-			__( 'QuillCRM Contact', 'quillcrm' ),
+			__( 'QuillCRM Contact', 'quill-crm' ),
 			function() use ( $contact ) {
 				$this->generate_contact_metabox_html( $contact->email );
 			},
@@ -137,7 +141,7 @@ final class Custom_Metabox {
 
 		?>
 		<div class="quillcrm-edd-order-metabox postbox">
-			<h2 class="hndle"><?php esc_html_e( 'QuillCRM Contact', 'quillcrm' ); ?></h2>
+			<h2 class="hndle"><?php esc_html_e( 'QuillCRM Contact', 'quill-crm' ); ?></h2>
 			<div class="inside">
 				<a class="quillcrm-avatar" href="<?php echo esc_url( $profile_url ); ?>">
 					<img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $contact->first_name . ' ' . $contact->last_name ); ?>" class="quillcrm-avatar-img">
@@ -147,15 +151,15 @@ final class Custom_Metabox {
 				</a>
 				<div class="quillcrm-contact-emails">
 					<p>
-						<strong><?php esc_html_e( 'Emails:', 'quillcrm' ); ?></strong>
+						<strong><?php esc_html_e( 'Emails:', 'quill-crm' ); ?></strong>
 						<?php echo esc_html( $total_emails ); ?>
 					</p>
 					<p>
-						<strong><?php esc_html_e( 'Opened:', 'quillcrm' ); ?></strong>
+						<strong><?php esc_html_e( 'Opened:', 'quill-crm' ); ?></strong>
 						<?php echo esc_html( $total_opened_emails ); ?>
 					</p>
 					<p>
-						<strong><?php esc_html_e( 'Clicked:', 'quillcrm' ); ?></strong>
+						<strong><?php esc_html_e( 'Clicked:', 'quill-crm' ); ?></strong>
 						<?php echo esc_html( $total_clicked_emails ); ?>
 					</p>
 				</div>

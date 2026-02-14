@@ -73,7 +73,7 @@ class Add_To_Workflow extends Action {
 		$workflow_id = $step->get_setting( 'workflow_id', '' );
 		if ( empty( $workflow_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Workflow ID is required.', 'quillcrm' ),
+				__( 'Drip Workflow ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'drip_add_to_workflow',
 					'data' => array(
@@ -104,7 +104,7 @@ class Add_To_Workflow extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -125,7 +125,7 @@ class Add_To_Workflow extends Action {
 		$result = $api->add_subscriber_to_workflow( $workflow_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add subscriber to Drip Workflow.', 'quillcrm' ),
+				__( 'Failed to add subscriber to Drip Workflow.', 'quill-crm' ),
 				array(
 					'code' => 'drip_add_to_workflow',
 					'data' => array(
@@ -144,7 +144,7 @@ class Add_To_Workflow extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Subscriber added to Drip Workflow.', 'quillcrm' ),
+			__( 'Subscriber added to Drip Workflow.', 'quill-crm' ),
 			array(
 				'code'     => 'drip_add_to_workflow',
 				'data'     => array(
@@ -190,7 +190,7 @@ class Add_To_Workflow extends Action {
 		return array(
 			'workflow_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Workflow', 'quillcrm' ),
+				'label'    => __( 'Workflow', 'quill-crm' ),
 				'endpoint' => 'drip/workflows',
 			),
 		);

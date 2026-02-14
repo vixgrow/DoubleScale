@@ -34,18 +34,18 @@ class REST_Controller extends REST_Integration_Controller {
 					'context'    => array( 'view' ),
 					'properties' => array(
 						'client_id'     => array(
-							'label'       => __( 'Client ID', 'quillcrm' ),
+							'label'       => __( 'Client ID', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 							'context'     => array( 'view' ),
-							'description' => __( 'Your Slack App Client ID. This feature requires QuillCRM Pro.', 'quillcrm' ),
+							'description' => __( 'Your Slack App Client ID. This feature requires QuillCRM Pro.', 'quill-crm' ),
 						),
 						'client_secret' => array(
-							'label'       => __( 'Client Secret', 'quillcrm' ),
+							'label'       => __( 'Client Secret', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 							'context'     => array(),
-							'description' => __( 'Your Slack App Client Secret. This feature requires QuillCRM Pro.', 'quillcrm' ),
+							'description' => __( 'Your Slack App Client Secret. This feature requires QuillCRM Pro.', 'quill-crm' ),
 						),
 					),
 				),

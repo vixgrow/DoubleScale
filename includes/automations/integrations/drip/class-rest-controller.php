@@ -56,7 +56,7 @@ class REST_Controller extends REST_Integration_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'api_token'  => array(
-					 'label'       => __( 'API Token', 'quillcrm' ),
+					 'label'       => __( 'API Token', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -64,7 +64,7 @@ class REST_Controller extends REST_Integration_Controller {
 					 ),
 				 ),
 				 'account_id' => array(
-					 'label'       => __( 'Account ID', 'quillcrm' ),
+					 'label'       => __( 'Account ID', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 					 'arg_options' => array(
@@ -84,7 +84,7 @@ class REST_Controller extends REST_Integration_Controller {
 	public function update_account( $request ) {
 		$account_id = $request->get_param( 'account_id' );
 		if ( empty( $account_id ) ) {
-			return new WP_Error( 'invalid_account_id', __( 'Account ID is required.', 'quillcrm' ) );
+			return new WP_Error( 'invalid_account_id', __( 'Account ID is required.', 'quill-crm' ) );
 		}
 
 		$this->integration->update_setting( 'account_id', $account_id );
@@ -92,7 +92,7 @@ class REST_Controller extends REST_Integration_Controller {
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'Account ID updated.', 'quillcrm' ),
+				'message' => __( 'Account ID updated.', 'quill-crm' ),
 			),
 		);
 	}

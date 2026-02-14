@@ -12,6 +12,10 @@
 
 namespace QuillCRM\Automations\Goals;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -131,7 +135,7 @@ class Tags_Added extends Goal {
 	public function get_fields() {
 		return array(
 			'tags' => array(
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'type'     => 'tags',
 				'multiple' => true,
 			),

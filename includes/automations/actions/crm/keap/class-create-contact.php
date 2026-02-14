@@ -84,7 +84,7 @@ class Add_Contact extends Action {
 
 		if ( empty( $email ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Contact: Email is required.', 'quillcrm' ),
+				__( 'Keap Add Contact: Email is required.', 'quill-crm' ),
 				array(
 					'code' => 'keap_add_contact',
 					'data' => array(
@@ -117,7 +117,7 @@ class Add_Contact extends Action {
 		$api  = $keap->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Contact: API connection failed.', 'quillcrm' ),
+				__( 'Keap Add Contact: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'keap_connect',
 					'data' => array(
@@ -137,7 +137,7 @@ class Add_Contact extends Action {
 		$result = $api->create_or_update( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Contact: Failed to create or update contact.', 'quillcrm' ),
+				__( 'Keap Add Contact: Failed to create or update contact.', 'quill-crm' ),
 				array(
 					'code'     => 'keap_create_or_update_contact',
 					'data'     => array(
@@ -156,7 +156,7 @@ class Add_Contact extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Keap Add Contact: Contact added successfully.', 'quillcrm' ),
+			__( 'Keap Add Contact: Contact added successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'keap_add_contact',
 				'response' => $result,
@@ -204,17 +204,17 @@ class Add_Contact extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'label'  => __( 'Mapped Fields', 'quill-crm' ),
 				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 			),

@@ -30,7 +30,7 @@ class Video_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Video', 'quillcrm' );
+		return __( 'Video', 'quill-crm' );
 	}
 
 	/**

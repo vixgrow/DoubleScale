@@ -73,7 +73,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Update Fields action is missing mapped_fields.', 'quillcrm' ),
+				__( 'Mautic Update Fields action is missing mapped_fields.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_update_fields',
 					'data' => array(
@@ -101,7 +101,7 @@ class Update_Fields extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Update Fields action failed to connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Update Fields action failed to connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -131,7 +131,7 @@ class Update_Fields extends Action {
 		$result = $api->create_or_update_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Update Fields action failed to update fields.', 'quillcrm' ),
+				__( 'Mautic Update Fields action failed to update fields.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_update_fields',
 					'data'     => array(
@@ -150,7 +150,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Update Fields action successfully updated fields.', 'quillcrm' ),
+			__( 'Mautic Update Fields action successfully updated fields.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_update_fields',
 				'response' => $result,
@@ -185,7 +185,7 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(),
 				'endpoint' => 'mautic/fields',

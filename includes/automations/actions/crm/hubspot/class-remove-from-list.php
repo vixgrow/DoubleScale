@@ -73,7 +73,7 @@ class Remove_Subscriber_From_List extends Action {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Remove Subscriber From List: List ID is required.', 'quillcrm' ),
+				__( 'Hubspot Remove Subscriber From List: List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_remove_contact_from_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_Subscriber_From_List extends Action {
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Could not connect to Hubspot.', 'quillcrm' ),
+				__( 'Could not connect to Hubspot.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_connect',
 					'data' => array(
@@ -115,7 +115,7 @@ class Remove_Subscriber_From_List extends Action {
 		$result = $api->get_contact_by_email( $email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Remove Subscriber From List: Could not get contact.', 'quillcrm' ),
+				__( 'Hubspot Remove Subscriber From List: Could not get contact.', 'quill-crm' ),
 				array(
 					'code'     => 'hubspot_remove_contact_from_list',
 					'data'     => array(
@@ -136,7 +136,7 @@ class Remove_Subscriber_From_List extends Action {
 		$result = $api->remove_contact_from_list( $result['data']['id'], $list_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Remove Subscriber From List: Could not remove contact from list.', 'quillcrm' ),
+				__( 'Hubspot Remove Subscriber From List: Could not remove contact from list.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_remove_contact_from_list',
 					'data' => array(
@@ -155,7 +155,7 @@ class Remove_Subscriber_From_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Hubspot Remove Subscriber From List: Contact removed from list.', 'quillcrm' ),
+			__( 'Hubspot Remove Subscriber From List: Contact removed from list.', 'quill-crm' ),
 			array(
 				'code'     => 'hubspot_remove_contact_from_list',
 				'data'     => array(
@@ -199,7 +199,7 @@ class Remove_Subscriber_From_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'hubspot/lists',
 			),

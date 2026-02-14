@@ -73,7 +73,7 @@ class Remove_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Remove Tags: Tags is empty.', 'quillcrm' ),
+				__( 'Convertkit Remove Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_remove_tags',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_Tags extends Action {
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				__( 'Convertkit Add Tags: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_connect',
 					'data' => array(
@@ -121,7 +121,7 @@ class Remove_Tags extends Action {
 			$result = $api->remove_subscriber_tag( $tag, $data );
 			if ( ! $result['success'] ) {
 				quillcrm_get_logger()->error(
-					__( 'Failed to remove tag from Convertkit.', 'quillcrm' ),
+					__( 'Failed to remove tag from Convertkit.', 'quill-crm' ),
 					array(
 						'code' => 'convertkit_remove_tags',
 						'data' => array(
@@ -139,7 +139,7 @@ class Remove_Tags extends Action {
 				continue;
 			} else {
 				quillcrm_get_logger()->info(
-					__( 'Tag removed from Convertkit.', 'quillcrm' ),
+					__( 'Tag removed from Convertkit.', 'quill-crm' ),
 					array(
 						'code'     => 'convertkit_remove_tags',
 						'data'     => array(
@@ -190,7 +190,7 @@ class Remove_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'convertkit/tags',
 				'multiple' => true,
 			),

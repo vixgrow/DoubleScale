@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Subscription_Manage;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Settings;
 
@@ -89,7 +93,7 @@ class Subscription_Manage {
 			<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="Imagetoolbar" content="No"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title><?php esc_html_e( 'Request Unsubscribe', 'quillcrm' ); ?></title>
+			<title><?php esc_html_e( 'Request Unsubscribe', 'quill-crm' ); ?></title>
 			<meta name="robots" content="noindex">
 			<?php
 				wp_enqueue_style( 'quillcrm-public' );
@@ -121,11 +125,13 @@ class Subscription_Manage {
 	 * Subscribe
 	 */
 	public function subscribe() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public subscription link, nonce not applicable
 		if ( ! isset( $_GET['quillcrm-subscribe'] ) || $_GET['quillcrm-subscribe'] !== '1' || ! isset( $_GET['id'] ) ) {
 			return;
 		}
 
-		$id      = sanitize_text_field( $_GET['id'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public subscription link, nonce not applicable
+		$id      = sanitize_text_field( wp_unslash( $_GET['id'] ) );
 		$contact = Contact_Model::get_by_hash_id( $id );
 		if ( ! $contact ) {
 			return;
@@ -139,9 +145,9 @@ class Subscription_Manage {
 				'contact_id'    => $contact->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __( 'Subscribed', 'quillcrm' ),
+					'title' => __( 'Subscribed', 'quill-crm' ),
 					'type'  => 'system',
-					'note'  => __( 'Contact subscribed to the email list.', 'quillcrm' ),
+					'note'  => __( 'Contact subscribed to the email list.', 'quill-crm' ),
 				),
 				'user_id'       => null,
 			)
@@ -155,7 +161,9 @@ class Subscription_Manage {
 		}
 
 		$redirect_url = $double_optin['confirmation_redirect'] ?? home_url();
-		wp_redirect( $redirect_url );
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect URL is from admin settings, may be external
+		wp_redirect( esc_url_raw( $redirect_url ) );
+		exit;
 	}
 
 	/**
@@ -190,11 +198,11 @@ class Subscription_Manage {
 	public function get_default_message() {
 		ob_start();
 		?>
-		<h2><?php esc_html_e( 'Subscription Confirmed', 'quillcrm' ); ?></h2>
-		<p><?php esc_html_e( 'You have successfully subscribed to our mailing list.', 'quillcrm' ); ?></p>
+		<h2><?php esc_html_e( 'Subscription Confirmed', 'quill-crm' ); ?></h2>
+		<p><?php esc_html_e( 'You have successfully subscribed to our mailing list.', 'quill-crm' ); ?></p>
 		<div>
-			<p><?php esc_html_e( 'Thank you for subscribing!', 'quillcrm' ); ?></p>
-			<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'quillcrm' ); ?></a>
+			<p><?php esc_html_e( 'Thank you for subscribing!', 'quill-crm' ); ?></p>
+			<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'quill-crm' ); ?></a>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -206,18 +214,18 @@ class Subscription_Manage {
 	public function unsubscribe_ajax() {
 		check_ajax_referer( 'quillcrm-unsubscribe', 'nonce' );
 
-		$id      = sanitize_text_field( $_POST['id'] ?? '' );
-		$channel = sanitize_text_field( $_POST['channel'] ?? 'email' );
-		$reason  = sanitize_text_field( $_POST['reason'] ?? 'other' );
+		$id      = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '';
+		$channel = isset( $_POST['channel'] ) ? sanitize_text_field( wp_unslash( $_POST['channel'] ) ) : 'email';
+		$reason  = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : 'other';
 
 		if ( ! $id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quillcrm' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quill-crm' ) ) );
 		}
 
 		try {
 			$contact = Contact_Model::get_by_hash_id( $id );
 			if ( ! $contact ) {
-				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quillcrm' ) ) );
+				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'quill-crm' ) ) );
 			}
 
 			// Try to find the most recent tracking record for source context
@@ -267,12 +275,15 @@ class Subscription_Manage {
 	 * Unsubscribe
 	 */
 	public function unsubscribe() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public unsubscribe link, nonce not applicable
 		if ( ! isset( $_GET['quillcrm-unsubscribe'] ) || $_GET['quillcrm-unsubscribe'] !== '1' || ! isset( $_GET['id'] ) ) {
 			return;
 		}
 
-		$id      = sanitize_text_field( $_GET['id'] );
-		$channel = isset( $_GET['channel'] ) ? sanitize_text_field( $_GET['channel'] ) : 'email';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public unsubscribe link, nonce not applicable
+		$id      = sanitize_text_field( wp_unslash( $_GET['id'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public unsubscribe link, nonce not applicable
+		$channel = isset( $_GET['channel'] ) ? sanitize_text_field( wp_unslash( $_GET['channel'] ) ) : 'email';
 
 		$contact = Contact_Model::get_by_hash_id( $id );
 		if ( ! $contact ) {
@@ -306,8 +317,8 @@ class Subscription_Manage {
 		?>
 		<div class="quillcrm-unsubscribe-message-container">
 			<div class="quillcrm-unsubscribe-message">
-				<p><?php echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'quillcrm' ), esc_html( $channel_label ) ); ?></p>
-				<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'quillcrm' ); ?></a>
+				<p><?php echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'quill-crm' ), esc_html( $channel_label ) ); ?></p>
+				<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'quill-crm' ); ?></a>
 			</div>
 		</div>
 		<?php
@@ -336,7 +347,7 @@ class Subscription_Manage {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
-			<title><?php echo esc_html( sprintf( __( 'Unsubscribe - %s', 'quillcrm' ), $site_name ) ); ?></title>
+			<title><?php echo esc_html( sprintf( __( 'Unsubscribe - %s', 'quill-crm' ), $site_name ) ); ?></title>
 			<?php wp_head(); ?>
 			<style>
 				* {
@@ -484,7 +495,7 @@ class Subscription_Manage {
 					box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
 				}
 
-				button[type="submit]:active {
+				button[type="submit"]:active {
 					transform: translateY(0);
 				}
 
@@ -532,10 +543,10 @@ class Subscription_Manage {
 					</svg>
 				</div>
 
-				<h3><?php echo sprintf( esc_html__( 'Unsubscribe from %s', 'quillcrm' ), $channel_label ); ?></h3>
+				<h3><?php echo sprintf( esc_html__( 'Unsubscribe from %s', 'quill-crm' ), $channel_label ); ?></h3>
 				
 				<p class="intro-text">
-					<?php esc_html_e( 'We\'re sorry to see you go. Please let us know why you\'re unsubscribing.', 'quillcrm' ); ?>
+					<?php esc_html_e( 'We\'re sorry to see you go. Please let us know why you\'re unsubscribing.', 'quill-crm' ); ?>
 				</p>
 
 				<div class="error-message" id="error-message"></div>
@@ -548,7 +559,7 @@ class Subscription_Manage {
 					
 					<div class="quillcrm-form-item">
 						<label for="contact_info">
-							<?php echo 'email' === $channel ? esc_html__( 'Email', 'quillcrm' ) : esc_html__( 'Phone', 'quillcrm' ); ?>
+							<?php echo 'email' === $channel ? esc_html__( 'Email', 'quill-crm' ) : esc_html__( 'Phone', 'quill-crm' ); ?>
 						</label>
 						<input
 							type="text"
@@ -559,24 +570,24 @@ class Subscription_Manage {
 					</div>
 					
 					<div class="quillcrm-form-item">
-						<label for="reason"><?php esc_html_e( 'Reason for unsubscribing', 'quillcrm' ); ?></label>
+						<label for="reason"><?php esc_html_e( 'Reason for unsubscribing', 'quill-crm' ); ?></label>
 						<div class="quillcrm-form-radio-group">
 							<label>
 								<input type="radio" name="reason" value="spam">
-								<?php echo esc_html( sprintf( __( 'I consider these %s to be spam', 'quillcrm' ), $channel_label ) ); ?>
+								<?php echo esc_html( sprintf( __( 'I consider these %s to be spam', 'quill-crm' ), $channel_label ) ); ?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="not-interested">
-								<?php echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'quillcrm' ), $channel_label ) ); ?>
+								<?php echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'quill-crm' ), $channel_label ) ); ?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="other" checked>
-								<?php esc_html_e( 'Other', 'quillcrm' ); ?>
+								<?php esc_html_e( 'Other', 'quill-crm' ); ?>
 							</label>
 						</div>
 					</div>
 					
-					<button type="submit"><?php esc_html_e( 'Confirm Unsubscribe', 'quillcrm' ); ?></button>
+					<button type="submit"><?php esc_html_e( 'Confirm Unsubscribe', 'quill-crm' ); ?></button>
 				</form>
 			</div>
 
@@ -589,7 +600,7 @@ class Subscription_Manage {
 					const formData = new FormData(this);
 					
 					button.disabled = true;
-					button.textContent = '<?php esc_html_e( 'Processing...', 'quillcrm' ); ?>';
+					button.textContent = '<?php esc_html_e( 'Processing...', 'quill-crm' ); ?>';
 					errorDiv.classList.remove('show');
 					
 					fetch('<?php echo admin_url( 'admin-ajax.php' ); ?>', {
@@ -608,18 +619,18 @@ class Subscription_Manage {
 							alert(data.data.message);
 							window.location.reload();
 						} else {
-							errorDiv.textContent = data.data?.message || '<?php esc_html_e( 'An error occurred. Please try again.', 'quillcrm' ); ?>';
+							errorDiv.textContent = data.data?.message || '<?php esc_html_e( 'An error occurred. Please try again.', 'quill-crm' ); ?>';
 							errorDiv.classList.add('show');
 							button.disabled = false;
-							button.textContent = '<?php esc_html_e( 'Confirm Unsubscribe', 'quillcrm' ); ?>';
+							button.textContent = '<?php esc_html_e( 'Confirm Unsubscribe', 'quill-crm' ); ?>';
 						}
 					})
 					.catch(error => {
 						console.error('Unsubscribe error:', error);
-						errorDiv.textContent = '<?php esc_html_e( 'An error occurred. Please try again.', 'quillcrm' ); ?>';
+						errorDiv.textContent = '<?php esc_html_e( 'An error occurred. Please try again.', 'quill-crm' ); ?>';
 						errorDiv.classList.add('show');
 						button.disabled = false;
-						button.textContent = '<?php esc_html_e( 'Confirm Unsubscribe', 'quillcrm' ); ?>';
+						button.textContent = '<?php esc_html_e( 'Confirm Unsubscribe', 'quill-crm' ); ?>';
 					});
 				});
 			</script>
@@ -688,7 +699,7 @@ class Subscription_Manage {
 	 */
 	private function render_styled_unsubscribe_page( $already_unsubscribed = false ) {
 		$site_name = get_bloginfo( 'name' );
-		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'quillcrm' ) : __( 'You\'re Unsubscribed', 'quillcrm' );
+		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'quill-crm' ) : __( 'You\'re Unsubscribed', 'quill-crm' );
 		?>
 		<!DOCTYPE html>
 		<html <?php language_attributes(); ?>>
@@ -696,7 +707,7 @@ class Subscription_Manage {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
-			<title><?php echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quillcrm' ), $site_name ) ); ?></title>
+			<title><?php echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quill-crm' ), $site_name ) ); ?></title>
 			<style>
 				* {
 					margin: 0;
@@ -852,25 +863,25 @@ class Subscription_Manage {
 				<p class="message">
 					<?php
 					if ( $already_unsubscribed ) {
-						esc_html_e( 'You have already unsubscribed from our mailing list.', 'quillcrm' );
+						esc_html_e( 'You have already unsubscribed from our mailing list.', 'quill-crm' );
 					} else {
-						esc_html_e( 'You have been successfully unsubscribed from our mailing list. We\'re sorry to see you go, but we respect your decision.', 'quillcrm' );
+						esc_html_e( 'You have been successfully unsubscribed from our mailing list. We\'re sorry to see you go, but we respect your decision.', 'quill-crm' );
 					}
 					?>
 				</p>
 
 				<?php if ( ! $already_unsubscribed ) : ?>
 				<p class="message">
-					<?php esc_html_e( 'You will no longer receive emails from us.', 'quillcrm' ); ?>
+					<?php esc_html_e( 'You will no longer receive emails from us.', 'quill-crm' ); ?>
 				</p>
 				<?php endif; ?>
 
 				<a href="<?php echo esc_url( home_url() ); ?>" class="home-button">
-					<?php esc_html_e( 'Back to Home', 'quillcrm' ); ?>
+					<?php esc_html_e( 'Back to Home', 'quill-crm' ); ?>
 				</a>
 
 				<div class="footer-note">
-					<?php esc_html_e( 'Changed your mind? You can resubscribe anytime by contacting us.', 'quillcrm' ); ?>
+					<?php esc_html_e( 'Changed your mind? You can resubscribe anytime by contacting us.', 'quill-crm' ); ?>
 				</div>
 			</div>
 		</body>

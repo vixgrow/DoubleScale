@@ -118,7 +118,7 @@ abstract class Goal {
 			}
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Error processing goal', 'quillcrm' ),
+				__( 'Error processing goal', 'quill-crm' ),
 				array(
 					'code'  => 'goal_error',
 					'error' => array(

@@ -73,7 +73,7 @@ class Remove_Subscriber_From_Workflow extends Action {
 		$workflow_id = $step->get_setting( 'workflow_id', '' );
 		if ( empty( $workflow_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip workflow ID is required.', 'quillcrm' ),
+				__( 'Drip workflow ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'drip_remove_subscriber_from_workflow',
 					'data' => array(
@@ -104,7 +104,7 @@ class Remove_Subscriber_From_Workflow extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -125,7 +125,7 @@ class Remove_Subscriber_From_Workflow extends Action {
 		$result = $api->remove_subscriber_from_workflow( $workflow_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API request failed.', 'quillcrm' ),
+				__( 'Drip API request failed.', 'quill-crm' ),
 				array(
 					'code'     => 'drip_remove_subscriber_from_workflow',
 					'data'     => array(
@@ -145,7 +145,7 @@ class Remove_Subscriber_From_Workflow extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Subscriber removed from Drip workflow.', 'quillcrm' ),
+			__( 'Subscriber removed from Drip workflow.', 'quill-crm' ),
 			array(
 				'code'     => 'drip_remove_subscriber_from_workflow',
 				'data'     => array(
@@ -191,7 +191,7 @@ class Remove_Subscriber_From_Workflow extends Action {
 		return array(
 			'workflow_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Workflow', 'quillcrm' ),
+				'label'    => __( 'Workflow', 'quill-crm' ),
 				'endpoint' => 'drip/workflows',
 			),
 		);

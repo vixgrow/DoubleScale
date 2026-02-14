@@ -197,9 +197,9 @@ final class User_Roles {
 	 */
 	public static function get_roles() {
 		return array(
-			User_Roles::CRM_MANAGER   => __( 'CRM Manager', 'quillcrm' ),
-			User_Roles::SALES_MANAGER => __( 'Sales Manager', 'quillcrm' ),
-			User_Roles::SALES_REP     => __( 'Sales Rep', 'quillcrm' ),
+			User_Roles::CRM_MANAGER   => __( 'CRM Manager', 'quill-crm' ),
+			User_Roles::SALES_MANAGER => __( 'Sales Manager', 'quill-crm' ),
+			User_Roles::SALES_REP     => __( 'Sales Rep', 'quill-crm' ),
 		);
 	}
 

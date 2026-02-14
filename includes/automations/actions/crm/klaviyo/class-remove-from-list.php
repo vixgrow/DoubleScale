@@ -74,7 +74,7 @@ class Remove_From_List extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Remove From List action failed. List ID is required.', 'quillcrm' ),
+				__( 'Klaviyo Remove From List action failed. List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'klaviyo_remove_from_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_From_List extends Action {
 		$api     = $klaviyo->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Remove From List action failed. API connection failed.', 'quillcrm' ),
+				__( 'Klaviyo Remove From List action failed. API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'klaviyo_connect',
 					'data' => array(
@@ -117,7 +117,7 @@ class Remove_From_List extends Action {
 		$profile = $result['data']['data'][0] ?? null;
 		if ( ! $profile ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Remove From List action failed. Profile not found.', 'quillcrm' ),
+				__( 'Klaviyo Remove From List action failed. Profile not found.', 'quill-crm' ),
 				array(
 					'code' => 'klaviyo_remove_from_list',
 					'data' => array(
@@ -146,7 +146,7 @@ class Remove_From_List extends Action {
 		$result     = $api->remove_profile_from_list( $list_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Remove From List action failed. Failed to remove profile from list.', 'quillcrm' ),
+				__( 'Klaviyo Remove From List action failed. Failed to remove profile from list.', 'quill-crm' ),
 				array(
 					'code'     => 'klaviyo_remove_from_list',
 					'data'     => array(
@@ -165,7 +165,7 @@ class Remove_From_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Klaviyo Remove From List action completed successfully.', 'quillcrm' ),
+			__( 'Klaviyo Remove From List action completed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'klaviyo_remove_from_list',
 				'response' => $result,
@@ -185,7 +185,7 @@ class Remove_From_List extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'list_id' => array(
-					'description' => __( 'List ID', 'quillcrm' ),
+					'description' => __( 'List ID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
@@ -201,7 +201,7 @@ class Remove_From_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'klaviyo/lists',
 			),

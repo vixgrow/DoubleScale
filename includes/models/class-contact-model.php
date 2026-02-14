@@ -585,10 +585,12 @@ class Contact_Model extends Model {
 		}
 
 		$channel_label = self::get_channel_label( $channel );
-		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quillcrm' ), $channel_label );
+		/* translators: %s: channel label (e.g., Email, SMS, WhatsApp) */
+		$note_text     = sprintf( __( 'Contact unsubscribed from %s.', 'quill-crm' ), $channel_label );
 
 		if ( ! empty( $reason ) ) {
-			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'quillcrm' ), $reason );
+			/* translators: %s: unsubscribe reason */
+			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'quill-crm' ), $reason );
 		}
 
 		Activity_Model::create(
@@ -596,7 +598,7 @@ class Contact_Model extends Model {
 				'contact_id'    => $this->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __( 'Unsubscribed', 'quillcrm' ),
+					'title' => __( 'Unsubscribed', 'quill-crm' ),
 					'type'  => 'system',
 					'note'  => $note_text,
 				),
@@ -645,9 +647,10 @@ class Contact_Model extends Model {
 				'contact_id'    => $this->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __( 'Subscribed', 'quillcrm' ),
+					'title' => __( 'Subscribed', 'quill-crm' ),
 					'type'  => 'system',
-					'note'  => sprintf( __( 'Contact subscribed to %s.', 'quillcrm' ), $channel_label ),
+					/* translators: %s: channel label (e.g., Email, SMS, WhatsApp) */
+					'note'  => sprintf( __( 'Contact subscribed to %s.', 'quill-crm' ), $channel_label ),
 				),
 				'user_id'       => get_current_user_id() ?: null,
 			)
@@ -684,12 +687,12 @@ class Contact_Model extends Model {
 	 */
 	public static function get_channel_label( $channel ) {
 		$labels = array(
-			'email'    => __( 'emails', 'quillcrm' ),
-			'sms'      => __( 'SMS messages', 'quillcrm' ),
-			'whatsapp' => __( 'WhatsApp messages', 'quillcrm' ),
+			'email'    => __( 'emails', 'quill-crm' ),
+			'sms'      => __( 'SMS messages', 'quill-crm' ),
+			'whatsapp' => __( 'WhatsApp messages', 'quill-crm' ),
 		);
 
-		return $labels[ $channel ] ?? __( 'communications', 'quillcrm' );
+		return $labels[ $channel ] ?? __( 'communications', 'quill-crm' );
 	}
 
 	/**

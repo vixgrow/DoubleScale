@@ -54,7 +54,7 @@ class REST_Plugins_Controller extends REST_Controller {
 						'plugins' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Comma-separated list of plugin file paths.', 'quillcrm' ),
+							'description'       => __( 'Comma-separated list of plugin file paths.', 'quill-crm' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -74,13 +74,13 @@ class REST_Plugins_Controller extends REST_Controller {
 						'download_url' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Zip download URL from WordPress.org.', 'quillcrm' ),
+							'description'       => __( 'Zip download URL from WordPress.org.', 'quill-crm' ),
 							'sanitize_callback' => 'esc_url_raw',
 						),
 						'plugin_file'  => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'quillcrm' ),
+							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'quill-crm' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -100,7 +100,7 @@ class REST_Plugins_Controller extends REST_Controller {
 						'plugin_file' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'quillcrm' ),
+							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'quill-crm' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -124,7 +124,7 @@ class REST_Plugins_Controller extends REST_Controller {
 
 		return new WP_Error(
 			'quillcrm_rest_plugins_forbidden',
-			__( 'Sorry, you are not allowed to manage plugins.', 'quillcrm' ),
+			__( 'Sorry, you are not allowed to manage plugins.', 'quill-crm' ),
 			array( 'status' => 403 )
 		);
 	}
@@ -146,7 +146,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( empty( $plugins ) ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_invalid',
-				__( 'No plugins specified.', 'quillcrm' ),
+				__( 'No plugins specified.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -217,7 +217,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( empty( $download_url ) || empty( $plugin_file ) ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_missing_params',
-				__( 'Both download_url and plugin_file are required.', 'quillcrm' ),
+				__( 'Both download_url and plugin_file are required.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -227,7 +227,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( empty( $parsed_url['host'] ) || 'downloads.wordpress.org' !== $parsed_url['host'] ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_invalid_source',
-				__( 'Only installs from the WordPress.org plugins directory are allowed.', 'quillcrm' ),
+				__( 'Only installs from the WordPress.org plugins directory are allowed.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -243,7 +243,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( ! $fs_initialized ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_fs_error',
-				__( 'Unable to initialize the filesystem API.', 'quillcrm' ),
+				__( 'Unable to initialize the filesystem API.', 'quill-crm' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -293,7 +293,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( ! $actual_plugin_file ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_plugin_file_not_found',
-				__( 'Plugin installed successfully but plugin file could not be found.', 'quillcrm' ),
+				__( 'Plugin installed successfully but plugin file could not be found.', 'quill-crm' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -333,7 +333,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( empty( $plugin_file ) ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_missing_params',
-				__( 'Plugin file is required.', 'quillcrm' ),
+				__( 'Plugin file is required.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -347,7 +347,7 @@ class REST_Plugins_Controller extends REST_Controller {
 		if ( ! file_exists( $plugin_path ) ) {
 			return new WP_Error(
 				'quillcrm_rest_plugins_not_installed',
-				__( 'Plugin is not installed.', 'quillcrm' ),
+				__( 'Plugin is not installed.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}

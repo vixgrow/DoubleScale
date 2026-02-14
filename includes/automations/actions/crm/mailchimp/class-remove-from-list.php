@@ -73,7 +73,7 @@ class Remove_From_List extends Action {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp Remove From List: List ID is required.', 'quillcrm' ),
+				__( 'Mailchimp Remove From List: List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_remove_from_list',
 					'data' => array(
@@ -94,7 +94,7 @@ class Remove_From_List extends Action {
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp Remove From List: API connection failed.', 'quillcrm' ),
+				__( 'Mailchimp Remove From List: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_connect',
 					'data' => array(
@@ -115,7 +115,7 @@ class Remove_From_List extends Action {
 		$result = $api->remove_subscriber( $list, $email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp Remove From List: Failed to remove subscriber.', 'quillcrm' ),
+				__( 'Mailchimp Remove From List: Failed to remove subscriber.', 'quill-crm' ),
 				array(
 					'code'     => 'mailchimp_remove_subscriber',
 					'data'     => array(
@@ -134,7 +134,7 @@ class Remove_From_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mailchimp Remove From List: Subscriber removed successfully.', 'quillcrm' ),
+			__( 'Mailchimp Remove From List: Subscriber removed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mailchimp_remove_subscriber',
 				'response' => $result,
@@ -169,7 +169,7 @@ class Remove_From_List extends Action {
 	public function get_fields() {
 		return array(
 			'list' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'mailchimp/lists',
 			),

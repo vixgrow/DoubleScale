@@ -69,7 +69,7 @@ class HubSpot extends Importer
 
 		$total_response = $api->get_contacts_count();
 		if (!$total_response['success']) {
-			$error_message = __('HubSpot: Error fetching contacts count', 'quillcrm');
+			$error_message = __('HubSpot: Error fetching contacts count', 'quill-crm');
 			$error_details = array(
 				'code' => 'hubspot_get_contacts_count',
 				'response' => $total_response,
@@ -311,9 +311,9 @@ class HubSpot extends Importer
 	{
 		return array(
 			'access_token' => array(
-				'label' => __('Access Token', 'quillcrm'),
+				'label' => __('Access Token', 'quill-crm'),
 				'type' => 'text',
-				'description' => __('HubSpot Private App Access Token', 'quillcrm'),
+				'description' => __('HubSpot Private App Access Token', 'quill-crm'),
 			),
 		);
 	}
@@ -328,14 +328,14 @@ class HubSpot extends Importer
 	public function get_api()
 	{
 		if (empty($this->credentials['access_token'])) {
-			throw new \Exception(__('HubSpot Access Token is required.', 'quillcrm'));
+			throw new \Exception(__('HubSpot Access Token is required.', 'quill-crm'));
 		}
 
 		$access_token = trim($this->credentials['access_token']);
 
 		// Basic validation for HubSpot access token format
 		if (strlen($access_token) < 20) {
-			throw new \Exception(__('HubSpot Access Token appears to be invalid. Please verify your token.', 'quillcrm'));
+			throw new \Exception(__('HubSpot Access Token appears to be invalid. Please verify your token.', 'quill-crm'));
 		}
 
 		return new API($access_token);
@@ -354,7 +354,7 @@ class HubSpot extends Importer
 
 			if (!$response['success']) {
 				quillcrm_get_logger()->error(
-					__('HubSpot: Error fetching lists', 'quillcrm'),
+					__('HubSpot: Error fetching lists', 'quill-crm'),
 					array(
 						'code' => 'hubspot_get_lists',
 						'response' => $response,
@@ -374,7 +374,7 @@ class HubSpot extends Importer
 			return $options;
 		} catch (\Exception $e) {
 			quillcrm_get_logger()->error(
-				__('HubSpot: Exception fetching lists', 'quillcrm'),
+				__('HubSpot: Exception fetching lists', 'quill-crm'),
 				array(
 					'code' => 'hubspot_get_lists_exception',
 					'error' => $e->getMessage(),
@@ -394,7 +394,7 @@ class HubSpot extends Importer
 		return array(
 			'lists_mapping' => array(
 				'type' => 'lists_mapping',
-				'label' => __('Lists', 'quillcrm'),
+				'label' => __('Lists', 'quill-crm'),
 				'options' => $this->get_lists(),
 			),
 		);

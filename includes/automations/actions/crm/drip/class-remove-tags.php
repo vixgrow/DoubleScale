@@ -73,7 +73,7 @@ class Remove_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Remove Tags: Tags are required.', 'quillcrm' ),
+				__( 'Drip Remove Tags: Tags are required.', 'quill-crm' ),
 				array(
 					'code' => 'drip_remove_tags',
 					'data' => array(
@@ -104,7 +104,7 @@ class Remove_Tags extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -124,7 +124,7 @@ class Remove_Tags extends Action {
 		$result = $api->remove_subscriber( $data );
 		if ( ! $result ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Remove Tags: Failed to remove tags.', 'quillcrm' ),
+				__( 'Drip Remove Tags: Failed to remove tags.', 'quill-crm' ),
 				array(
 					'code' => 'drip_remove_tags',
 					'data' => array(
@@ -142,7 +142,7 @@ class Remove_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Drip Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			__( 'Drip Remove Tags: Tags removed successfully.', 'quill-crm' ),
 			array(
 				'code' => 'drip_remove_tags',
 				'data' => array(
@@ -188,7 +188,7 @@ class Remove_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'drip/tags',
 				'multiple' => true,
 			),

@@ -67,14 +67,14 @@ class Order_Status {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING_PAYMENT => __( 'Pending Payment', 'quillcrm' ),
-			self::PROCESSING      => __( 'Processing', 'quillcrm' ),
-			self::ON_HOLD         => __( 'On Hold', 'quillcrm' ),
-			self::COMPLETED       => __( 'Completed', 'quillcrm' ),
-			self::CANCELLED       => __( 'Cancelled', 'quillcrm' ),
-			self::REFUNDED        => __( 'Refunded', 'quillcrm' ),
-			self::FAILED          => __( 'Failed', 'quillcrm' ),
-			self::CHECKOUT_DRAFT  => __( 'Checkout Draft', 'quillcrm' ),
+			self::PENDING_PAYMENT => __( 'Pending Payment', 'quill-crm' ),
+			self::PROCESSING      => __( 'Processing', 'quill-crm' ),
+			self::ON_HOLD         => __( 'On Hold', 'quill-crm' ),
+			self::COMPLETED       => __( 'Completed', 'quill-crm' ),
+			self::CANCELLED       => __( 'Cancelled', 'quill-crm' ),
+			self::REFUNDED        => __( 'Refunded', 'quill-crm' ),
+			self::FAILED          => __( 'Failed', 'quill-crm' ),
+			self::CHECKOUT_DRAFT  => __( 'Checkout Draft', 'quill-crm' ),
 		);
 	}
 }

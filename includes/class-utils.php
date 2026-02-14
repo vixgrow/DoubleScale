@@ -119,7 +119,7 @@ class Utils {
 	 * @return string
 	 */
 	public static function generate_hash_key() {
-		return md5( uniqid( rand(), true ) );
+		return md5( uniqid( wp_rand(), true ) );
 	}
 
 	/**
@@ -132,50 +132,50 @@ class Utils {
 	public static function get_contact_fields() {
 		$fields = array(
 			0 => array(
-				'label'  => __( 'Default Fields', 'quillcrm' ),
+				'label'  => __( 'Default Fields', 'quill-crm' ),
 				'fields' => array(
 					'first_name'     => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'last_name'      => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'email'          => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 						'type'  => 'email',
 					),
 					'phone'          => array(
-						'label' => __( 'Phone', 'quillcrm' ),
+						'label' => __( 'Phone', 'quill-crm' ),
 						'type'  => 'phone',
 					),
 					'address_1'      => array(
-						'label' => __( 'Address 1', 'quillcrm' ),
+						'label' => __( 'Address 1', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'address_2'      => array(
-						'label' => __( 'Address 2', 'quillcrm' ),
+						'label' => __( 'Address 2', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'city'           => array(
-						'label' => __( 'City', 'quillcrm' ),
+						'label' => __( 'City', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'state'          => array(
-						'label' => __( 'State', 'quillcrm' ),
+						'label' => __( 'State', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'country'        => array(
-						'label' => __( 'Country', 'quillcrm' ),
+						'label' => __( 'Country', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'zip'            => array(
-						'label' => __( 'Zip', 'quillcrm' ),
+						'label' => __( 'Zip', 'quill-crm' ),
 						'type'  => 'text',
 					),
 					'whatsapp_phone' => array(
-						'label' => __( 'WhatsApp Phone', 'quillcrm' ),
+						'label' => __( 'WhatsApp Phone', 'quill-crm' ),
 						'type'  => 'phone',
 					),
 				),
@@ -376,28 +376,28 @@ class Utils {
 		$start_date = '';
 		switch ( $interval ) {
 			case 'today':
-				$start_date = date( 'Y-m-d' );
+				$start_date = gmdate( 'Y-m-d' );
 				break;
 			case 'yesterday':
-				$start_date = date( 'Y-m-d', strtotime( '-1 day' ) );
+				$start_date = gmdate( 'Y-m-d', strtotime( '-1 day' ) );
 				break;
 			case 'last_7_days':
-				$start_date = date( 'Y-m-d', strtotime( '-7 days' ) );
+				$start_date = gmdate( 'Y-m-d', strtotime( '-7 days' ) );
 				break;
 			case 'last_30_days':
-				$start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
+				$start_date = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
 				break;
 			case 'this_month':
-				$start_date = date( 'Y-m-01' );
+				$start_date = gmdate( 'Y-m-01' );
 				break;
 			case 'last_month':
-				$start_date = date( 'Y-m-01', strtotime( 'first day of last month' ) );
+				$start_date = gmdate( 'Y-m-01', strtotime( 'first day of last month' ) );
 				break;
 			case 'this_year':
-				$start_date = date( 'Y-01-01' );
+				$start_date = gmdate( 'Y-01-01' );
 				break;
 			case 'last_year':
-				$start_date = date( 'Y-01-01', strtotime( 'first day of last year' ) );
+				$start_date = gmdate( 'Y-01-01', strtotime( 'first day of last year' ) );
 				break;
 		}
 
@@ -418,28 +418,28 @@ class Utils {
 		$end_date = '';
 		switch ( $interval ) {
 			case 'today':
-				$end_date = date( 'Y-m-d' );
+				$end_date = gmdate( 'Y-m-d' );
 				break;
 			case 'yesterday':
-				$end_date = date( 'Y-m-d', strtotime( '-1 day' ) );
+				$end_date = gmdate( 'Y-m-d', strtotime( '-1 day' ) );
 				break;
 			case 'last_7_days':
-				$end_date = date( 'Y-m-d' );
+				$end_date = gmdate( 'Y-m-d' );
 				break;
 			case 'last_30_days':
-				$end_date = date( 'Y-m-d' );
+				$end_date = gmdate( 'Y-m-d' );
 				break;
 			case 'this_month':
-				$end_date = date( 'Y-m-t' );
+				$end_date = gmdate( 'Y-m-t' );
 				break;
 			case 'last_month':
-				$end_date = date( 'Y-m-t', strtotime( 'last day of last month' ) );
+				$end_date = gmdate( 'Y-m-t', strtotime( 'last day of last month' ) );
 				break;
 			case 'this_year':
-				$end_date = date( 'Y-12-31' );
+				$end_date = gmdate( 'Y-12-31' );
 				break;
 			case 'last_year':
-				$end_date = date( 'Y-12-31', strtotime( 'last day of last year' ) );
+				$end_date = gmdate( 'Y-12-31', strtotime( 'last day of last year' ) );
 				break;
 		}
 

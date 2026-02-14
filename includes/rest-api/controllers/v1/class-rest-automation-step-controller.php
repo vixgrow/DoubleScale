@@ -89,13 +89,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'direction'     => array(
-							'description' => __( 'Direction to move the step (up or down)', 'quillcrm' ),
+							'description' => __( 'Direction to move the step (up or down)', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => array( 'up', 'down' ),
 							'required'    => true,
 						),
 						'updated_steps' => array(
-							'description' => __( 'Array of steps with updated orders', 'quillcrm' ),
+							'description' => __( 'Array of steps with updated orders', 'quill-crm' ),
 							'type'        => 'object',
 							'required'    => true,
 						),
@@ -131,12 +131,12 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'            => array(
-					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
 				 'automation_id' => array(
-					 'description' => __( 'The ID of the automation this step belongs to.', 'quillcrm' ),
+					 'description' => __( 'The ID of the automation this step belongs to.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -144,14 +144,14 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'parent_id'     => array(
-					 'description' => __( 'The ID of the parent step.', 'quillcrm' ),
+					 'description' => __( 'The ID of the parent step.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'absint',
 					 ),
 				 ),
 				 'action'        => array(
-					 'description' => __( 'The action of the step.', 'quillcrm' ),
+					 'description' => __( 'The action of the step.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 					 'arg_options' => array(
@@ -159,7 +159,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'type'          => array(
-					 'description' => __( 'The type of the step.', 'quillcrm' ),
+					 'description' => __( 'The type of the step.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -167,41 +167,41 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'condition'     => array(
-					 'description' => __( 'The condition of the step.', 'quillcrm' ),
+					 'description' => __( 'The condition of the step.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'status'        => array(
-					 'description' => __( 'The status of the step.', 'quillcrm' ),
+					 'description' => __( 'The status of the step.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'settings'      => array(
-					 'description' => __( 'The settings of the step.', 'quillcrm' ),
+					 'description' => __( 'The settings of the step.', 'quill-crm' ),
 					 'type'        => 'object',
 					 'arg_options' => array(
 						 'validate_callback' => array( $this, 'validate_item_settings' ),
 					 ),
 				 ),
 				 'order'         => array(
-					 'description' => __( 'Order of the list.', 'quillcrm' ),
+					 'description' => __( 'Order of the list.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'absint',
 					 ),
 				 ),
 				 'created_at'    => array(
-					 'description' => __( 'The date the object was created.', 'quillcrm' ),
+					 'description' => __( 'The date the object was created.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
 				 ),
 				 'updated_at'    => array(
-					 'description' => __( 'The date the object was last modified.', 'quillcrm' ),
+					 'description' => __( 'The date the object was last modified.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
@@ -293,7 +293,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$automation_step = Automation_Step_Model::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $automation_step, 200 );
@@ -316,7 +316,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$automation_step = Automation_Step_Model::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$step_data = $this->prepare_step( $request );
@@ -345,7 +345,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			if ( 'draft' === $automation_step->status ) {
@@ -383,12 +383,12 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$automation_step = Automation_Step_Model::find( $step_id );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Validate direction
 			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
-				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			// Update the orders based on the frontend calculations
@@ -481,13 +481,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$automation_step = Automation_Step_Model::find( $step_id );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Validate step supports analytics.
 			$analytics_actions = array( 'send_email', 'send_sms', 'send_whatsapp' );
 			if ( ! in_array( $automation_step->action, $analytics_actions, true ) ) {
-				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			// Get all analytics in a single optimized query with JOIN to contacts table.

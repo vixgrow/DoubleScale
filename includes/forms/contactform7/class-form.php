@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Forms\ContactForm7;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use WPCF7_ContactForm;
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
@@ -103,10 +107,10 @@ class Form extends Abstracts_Form {
 		 // Check nonce.
 		check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
-		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';
+		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['form_id'] ) ) : '';
 
 		if ( empty( $form_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid form ID', 'quillcrm' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid form ID', 'quill-crm' ) ) );
 		}
 
 		$fields = $this->get_fields( $form_id );
@@ -129,7 +133,7 @@ class Form extends Abstracts_Form {
 		$options = array();
 
 		if ( empty( $forms ) ) {
-			wp_send_json_error( array( 'message' => __( 'No forms found', 'quillcrm' ) ) );
+			wp_send_json_error( array( 'message' => __( 'No forms found', 'quill-crm' ) ) );
 		}
 
 		foreach ( $forms as $form ) {
@@ -188,7 +192,8 @@ class Form extends Abstracts_Form {
 
 			$pipes = $field->pipes;
 
-			$value = ( ! empty( $_POST[ $field->name ] ) ) ? $_POST[ $field->name ] : '';
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by Contact Form 7
+			$value = ( ! empty( $_POST[ $field->name ] ) ) ? map_deep( wp_unslash( $_POST[ $field->name ] ), 'sanitize_text_field' ) : '';
 			if ( ! WPCF7_USE_PIPE || ! $pipes instanceof \WPCF7_Pipes || $pipes->zero() ) {
 				$data[ $field->name ] = $value;
 			}

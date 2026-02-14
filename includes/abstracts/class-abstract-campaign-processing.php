@@ -10,6 +10,10 @@
 
 namespace QuillCRM\Abstracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -176,7 +180,8 @@ abstract class Abstract_Campaign_Processing {
 		// Try to acquire lock using transients (database-backed)
 		if ( ! $this->acquire_campaign_lock( $lock_key, $lock_duration ) ) {
 			quillcrm_get_logger()->debug(
-				sprintf( __( 'Campaign %s continuation skipped - already being processed', 'quillcrm' ), $this->channel ),
+				/* translators: %s: channel name (email, sms, whatsapp) */
+				sprintf( __( 'Campaign %s continuation skipped - already being processed', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_continuation_locked",
 					'campaign_id' => $campaign_id,
@@ -215,12 +220,14 @@ abstract class Abstract_Campaign_Processing {
 
 				if ( $no_progress_count >= $max_no_progress ) {
 					// Too many consecutive attempts with no progress - mark as failed
+					/* translators: %d: number of consecutive attempts */
 					$error_message = sprintf(
-						__( 'Campaign failed: no progress after %d consecutive attempts', 'quillcrm' ),
+						__( 'Campaign failed: no progress after %d consecutive attempts', 'quill-crm' ),
 						$no_progress_count
 					);
 					quillcrm_get_logger()->error(
-						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'quillcrm' ), $this->channel, $no_progress_count ),
+						/* translators: %1$s: channel name, %2$d: number of consecutive attempts */
+						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'quill-crm' ), $this->channel, $no_progress_count ),
 						array(
 							'code'        => "{$this->channel}_no_progress_limit_exceeded",
 							'campaign_id' => $campaign_id,
@@ -247,7 +254,7 @@ abstract class Abstract_Campaign_Processing {
 				// Log warning for no progress
 				set_transient( $no_progress_key, $no_progress_count, HOUR_IN_SECONDS );
 				quillcrm_get_logger()->warning(
-					sprintf( __( 'Campaign %1$s continuation made no progress (attempt %2$d/%3$d)', 'quillcrm' ), $this->channel, $no_progress_count, $max_no_progress ),
+					sprintf( __( 'Campaign %1$s continuation made no progress (attempt %2$d/%3$d)', 'quill-crm' ), $this->channel, $no_progress_count, $max_no_progress ),
 					array(
 						'code'        => "{$this->channel}_no_progress",
 						'campaign_id' => $campaign_id,
@@ -396,7 +403,7 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function handle_provider_error( \Exception $e ) {
 		quillcrm_get_logger()->error(
-			sprintf( __( '%s send error.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			sprintf( __( '%s send error.', 'quill-crm' ), ucfirst( $this->channel ) ),
 			array(
 				'code'  => "{$this->channel}_send_error",
 				'error' => $e->getMessage(),
@@ -508,7 +515,7 @@ abstract class Abstract_Campaign_Processing {
 		// Update heartbeat at the start to track that cron is running
 		if ( ! QuillCRM::instance()->campaigns_tasks->update_heartbeat( "quillcrm_{$this->channel}_campaigns" ) ) {
 			quillcrm_get_logger()->warning(
-				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'quill-crm' ), $this->channel ),
 				array(
 					'channel' => $this->channel,
 					'context' => 'campaign_processing_start',
@@ -541,7 +548,7 @@ abstract class Abstract_Campaign_Processing {
 			$this->process_campaign( $campaign );
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( '%s Campaign processing error.', 'quillcrm' ), ucfirst( $this->channel ) ),
+				sprintf( __( '%s Campaign processing error.', 'quill-crm' ), ucfirst( $this->channel ) ),
 				array(
 					'code'  => "{$this->channel}_campaign_error",
 					'error' => array(
@@ -566,7 +573,7 @@ abstract class Abstract_Campaign_Processing {
 					->orWhere(
 						function ( $subQuery ) {
 							$subQuery->where( 'status', 'schedule' )
-								->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
+								->whereDate( 'execute_at', '<=', gmdate( 'Y-m-d H:i:s' ) );
 						}
 					);
 			}
@@ -587,7 +594,7 @@ abstract class Abstract_Campaign_Processing {
 		// Validate campaign type
 		if ( $campaign->type !== $this->channel ) {
 			quillcrm_get_logger()->error(
-				__( 'Campaign type mismatch detected.', 'quillcrm' ),
+				__( 'Campaign type mismatch detected.', 'quill-crm' ),
 				array(
 					'code'          => 'campaign_type_mismatch',
 					'campaign_id'   => $campaign->id,
@@ -612,7 +619,7 @@ abstract class Abstract_Campaign_Processing {
 		// Try to acquire lock using transients (database-backed)
 		if ( ! $this->acquire_campaign_lock( $lock_key, $lock_duration ) ) {
 			quillcrm_get_logger()->info(
-				sprintf( __( 'Campaign %s already being processed by another worker, skipping', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Campaign %s already being processed by another worker, skipping', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_campaign_locked",
 					'campaign_id' => $campaign->id,
@@ -832,7 +839,7 @@ abstract class Abstract_Campaign_Processing {
 			$fresh_campaign = Campaign_Model::find( $campaign->id );
 			if ( ! $fresh_campaign || $fresh_campaign->status !== 'processing' ) {
 				quillcrm_get_logger()->info(
-					sprintf( __( 'Campaign %s stopped - status changed during processing', 'quillcrm' ), $this->channel ),
+					sprintf( __( 'Campaign %s stopped - status changed during processing', 'quill-crm' ), $this->channel ),
 					array(
 						'code'           => "{$this->channel}_campaign_status_changed",
 						'campaign_id'    => $campaign->id,
@@ -939,7 +946,7 @@ abstract class Abstract_Campaign_Processing {
 
 			if ( $ajax_success ) {
 				quillcrm_get_logger()->info(
-					sprintf( __( 'Campaign %s continuation triggered via AJAX (non-blocking)', 'quillcrm' ), $this->channel ),
+					sprintf( __( 'Campaign %s continuation triggered via AJAX (non-blocking)', 'quill-crm' ), $this->channel ),
 					array(
 						'code'        => "{$this->channel}_continuation_ajax",
 						'campaign_id' => $campaign_id,
@@ -950,7 +957,7 @@ abstract class Abstract_Campaign_Processing {
 		} catch ( \Exception $e ) {
 			// Log error but continue to fallback
 			quillcrm_get_logger()->warning(
-				sprintf( __( 'AJAX continuation attempt failed for campaign %s, using Action Scheduler fallback', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'AJAX continuation attempt failed for campaign %s, using Action Scheduler fallback', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_ajax_continuation_exception",
 					'campaign_id' => $campaign_id,
@@ -968,7 +975,7 @@ abstract class Abstract_Campaign_Processing {
 
 		if ( ! $action_id ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( 'Failed to queue campaign %s continuation (both AJAX and Action Scheduler failed)', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Failed to queue campaign %s continuation (both AJAX and Action Scheduler failed)', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_continuation_queue_failed",
 					'campaign_id' => $campaign_id,
@@ -978,7 +985,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Campaign %s continuation queued via Action Scheduler (fallback, non-blocking)', 'quillcrm' ), $this->channel ),
+			sprintf( __( 'Campaign %s continuation queued via Action Scheduler (fallback, non-blocking)', 'quill-crm' ), $this->channel ),
 			array(
 				'code'        => "{$this->channel}_continuation_queued",
 				'campaign_id' => $campaign_id,
@@ -1040,7 +1047,7 @@ abstract class Abstract_Campaign_Processing {
 		} catch ( \Exception $e ) {
 			// If there's an error checking Action Scheduler, fall back to Action Scheduler
 			quillcrm_get_logger()->warning(
-				sprintf( __( 'Error checking AJAX continuation eligibility for campaign %s', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Error checking AJAX continuation eligibility for campaign %s', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_ajax_check_error",
 					'campaign_id' => $campaign_id,
@@ -1184,7 +1191,7 @@ abstract class Abstract_Campaign_Processing {
 			);
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( 'AJAX continuation error for campaign %s', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'AJAX continuation error for campaign %s', 'quill-crm' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_ajax_continuation_error",
 					'campaign_id' => $campaign_id,
@@ -1233,7 +1240,7 @@ abstract class Abstract_Campaign_Processing {
 
 			if ( ! $template_id ) {
 				quillcrm_get_logger()->error(
-					sprintf( __( 'No template found for %s campaign.', 'quillcrm' ), $this->channel ),
+					sprintf( __( 'No template found for %s campaign.', 'quill-crm' ), $this->channel ),
 					array(
 						'code'        => "{$this->channel}_no_template",
 						'campaign_id' => $campaign->id,
@@ -1283,7 +1290,7 @@ abstract class Abstract_Campaign_Processing {
 			);
 
 			quillcrm_get_logger()->info(
-				sprintf( __( 'Campaign %s enqueued.', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Campaign %s enqueued.', 'quill-crm' ), $this->channel ),
 				array(
 					'code'             => "add_campaign_{$this->channel}",
 					'campaign_message' => array(
@@ -1300,7 +1307,7 @@ abstract class Abstract_Campaign_Processing {
 			);
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( 'Add campaign %s error.', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Add campaign %s error.', 'quill-crm' ), $this->channel ),
 				array(
 					'code'  => "add_campaign_{$this->channel}",
 					'error' => array(
@@ -1350,7 +1357,7 @@ abstract class Abstract_Campaign_Processing {
 				delete_transient( $retry_key );
 
 				quillcrm_get_logger()->error(
-					sprintf( __( '%s message failed after memory limit retries', 'quillcrm' ), ucfirst( $this->channel ) ),
+					sprintf( __( '%s message failed after memory limit retries', 'quill-crm' ), ucfirst( $this->channel ) ),
 					array(
 						'code'         => "{$this->channel}_memory_retry_exceeded",
 						'tracking_id'  => $campaign_message->id,
@@ -1369,7 +1376,7 @@ abstract class Abstract_Campaign_Processing {
 
 			// Log retry attempt
 			quillcrm_get_logger()->warning(
-				sprintf( __( '%1$s message requeued due to memory limit (attempt %2$d/3)', 'quillcrm' ), ucfirst( $this->channel ), $retry_count + 1 ),
+				sprintf( __( '%1$s message requeued due to memory limit (attempt %2$d/3)', 'quill-crm' ), ucfirst( $this->channel ), $retry_count + 1 ),
 				array(
 					'code'         => "{$this->channel}_memory_requeue",
 					'tracking_id'  => $campaign_message->id,
@@ -1403,7 +1410,7 @@ abstract class Abstract_Campaign_Processing {
 			// Get template data
 			$template = \QuillCRM\Models\Template_Model::find( $campaign_message->template_id );
 			if ( ! $template ) {
-				throw new \Exception( sprintf( __( 'Template not found for %s campaign', 'quillcrm' ), $this->channel ) );
+				throw new \Exception( sprintf( __( 'Template not found for %s campaign', 'quill-crm' ), $this->channel ) );
 			}
 
 			// Validate template content
@@ -1599,7 +1606,7 @@ abstract class Abstract_Campaign_Processing {
 		delete_transient( "quillcrm_{$this->channel}_campaign_no_progress_count_{$campaign->id}" );
 
 		quillcrm_get_logger()->info(
-			sprintf( __( '%s Campaign completed.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			sprintf( __( '%s Campaign completed.', 'quill-crm' ), ucfirst( $this->channel ) ),
 			array(
 				'code'     => "{$this->channel}_campaign_completed",
 				'campaign' => array(
@@ -1671,7 +1678,7 @@ abstract class Abstract_Campaign_Processing {
 			// Log error details if available
 			if ( isset( $result['error'] ) ) {
 				quillcrm_get_logger()->error(
-					sprintf( __( '%1$s message failed: %2$s', 'quillcrm' ), ucfirst( $this->channel ), $result['error'] ),
+					sprintf( __( '%1$s message failed: %2$s', 'quill-crm' ), ucfirst( $this->channel ), $result['error'] ),
 					array(
 						'campaign_id' => $campaign_message->source_id,
 						'contact_id'  => $campaign_message->contact_id,
@@ -1683,7 +1690,7 @@ abstract class Abstract_Campaign_Processing {
 			// Log additional debug info if available
 			if ( isset( $result['debug'] ) ) {
 				quillcrm_get_logger()->debug(
-					sprintf( __( '%s message failed with debug info', 'quillcrm' ), ucfirst( $this->channel ) ),
+					sprintf( __( '%s message failed with debug info', 'quill-crm' ), ucfirst( $this->channel ) ),
 					$result['debug']
 				);
 			}
@@ -1725,7 +1732,7 @@ abstract class Abstract_Campaign_Processing {
 		 */
 		$footer_text = apply_filters(
 			'quillcrm_message_opt_out_footer',
-			__( 'Reply STOP to unsubscribe', 'quillcrm' ),
+			__( 'Reply STOP to unsubscribe', 'quill-crm' ),
 			$this->channel
 		);
 
@@ -1811,7 +1818,7 @@ abstract class Abstract_Campaign_Processing {
 		$campaign_message->save();
 
 		quillcrm_get_logger()->error(
-			sprintf( __( 'Failed to connect to message provider for %s campaign.', 'quillcrm' ), $this->channel ),
+			sprintf( __( 'Failed to connect to message provider for %s campaign.', 'quill-crm' ), $this->channel ),
 			array(
 				'code'        => 'provider_connect_failed',
 				'campaign_id' => $campaign->id,
@@ -1830,7 +1837,7 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function log_campaign_processing_result( $campaign, $contact, $campaign_message ) {
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Campaign %s message processed.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			sprintf( __( 'Campaign %s message processed.', 'quill-crm' ), ucfirst( $this->channel ) ),
 			array(
 				'code'        => "campaign_{$this->channel}_processed",
 				'status'      => $campaign_message->status,
@@ -1854,7 +1861,7 @@ abstract class Abstract_Campaign_Processing {
 		$campaign_message->save();
 
 		quillcrm_get_logger()->error(
-			sprintf( __( 'Campaign %s message processing error.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			sprintf( __( 'Campaign %s message processing error.', 'quill-crm' ), ucfirst( $this->channel ) ),
 			array(
 				'code'        => "campaign_{$this->channel}_error",
 				'error'       => $exception->getMessage(),
@@ -1937,7 +1944,7 @@ abstract class Abstract_Campaign_Processing {
 			}
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				sprintf( __( 'Resent failed %s messages error.', 'quillcrm' ), $this->channel ),
+				sprintf( __( 'Resent failed %s messages error.', 'quill-crm' ), $this->channel ),
 				array(
 					'code'  => "resent_failed_{$this->channel}",
 					'error' => array(
@@ -1986,7 +1993,7 @@ abstract class Abstract_Campaign_Processing {
 		update_option( $offset_key, 0 );
 
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Resent failed %s messages completed.', 'quillcrm' ), $this->channel ),
+			sprintf( __( 'Resent failed %s messages completed.', 'quill-crm' ), $this->channel ),
 			array(
 				'code'     => "resent_failed_{$this->channel}",
 				'campaign' => $campaign->id,
@@ -2064,18 +2071,18 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function validate_template( $template, $campaign_type ) {
 		if ( ! $template ) {
-			throw new \Exception( sprintf( __( 'Template not found for %s campaign', 'quillcrm' ), $campaign_type ) );
+			throw new \Exception( sprintf( __( 'Template not found for %s campaign', 'quill-crm' ), $campaign_type ) );
 		}
 
 		// Check for empty body
 		if ( empty( trim( $template->body ) ) ) {
-			throw new \Exception( __( 'Template body cannot be empty', 'quillcrm' ) );
+			throw new \Exception( __( 'Template body cannot be empty', 'quill-crm' ) );
 		}
 
 		// Check for subject in email templates
 		if ( $campaign_type === Campaign_Channel::STR_EMAIL && empty( trim( $template->subject ) ) ) {
 			quillcrm_get_logger()->warning(
-				__( 'Email template missing subject', 'quillcrm' ),
+				__( 'Email template missing subject', 'quill-crm' ),
 				array( 'template_id' => $template->id )
 			);
 		}
@@ -2084,7 +2091,7 @@ abstract class Abstract_Campaign_Processing {
 		if ( $campaign_type === Campaign_Channel::STR_EMAIL ) {
 			if ( ! $this->is_valid_html( $template->body ) ) {
 				quillcrm_get_logger()->warning(
-					__( 'Email template contains potentially invalid HTML', 'quillcrm' ),
+					__( 'Email template contains potentially invalid HTML', 'quill-crm' ),
 					array( 'template_id' => $template->id )
 				);
 			}
@@ -2094,7 +2101,7 @@ abstract class Abstract_Campaign_Processing {
 		// Note: Validation disabled - footer automatically adds unsubscribe link via default_email_footer()
 		// if ( $campaign_type === 'email' && strpos( $template->body, '{{contact:unsubscribe_link}}' ) === false ) {
 		// quillcrm_get_logger()->warning(
-		// __( 'Email template missing unsubscribe link', 'quillcrm' ),
+		// __( 'Email template missing unsubscribe link', 'quill-crm' ),
 		// array(
 		// 'template_id'   => $template->id,
 		// 'template_name' => $template->name ?? 'Unknown',
@@ -2107,7 +2114,7 @@ abstract class Abstract_Campaign_Processing {
 			$plain_text = wp_strip_all_tags( $template->body );
 			if ( strlen( $plain_text ) > 1600 ) { // SMS limit is typically 1600 chars
 				quillcrm_get_logger()->warning(
-					sprintf( __( '%1$s template content may be too long (%2$d characters)', 'quillcrm' ), ucfirst( $campaign_type ), strlen( $plain_text ) ),
+					sprintf( __( '%1$s template content may be too long (%2$d characters)', 'quill-crm' ), ucfirst( $campaign_type ), strlen( $plain_text ) ),
 					array(
 						'template_id' => $template->id,
 						'length'      => strlen( $plain_text ),

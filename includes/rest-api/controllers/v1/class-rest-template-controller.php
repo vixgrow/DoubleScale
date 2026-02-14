@@ -120,22 +120,22 @@ class REST_Template_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'merge_tags'  => array(
-							'description' => __( 'Merge tags to use in the template', 'quillcrm' ),
+							'description' => __( 'Merge tags to use in the template', 'quill-crm' ),
 							'type'        => 'object',
 							'default'     => array(),
 						),
 						'contact_id'  => array(
-							'description' => __( 'Contact ID to use for merge tags', 'quillcrm' ),
+							'description' => __( 'Contact ID to use for merge tags', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => null,
 						),
 						'tracking_id' => array(
-							'description' => __( 'Communication tracking ID to use stored merge tag values', 'quillcrm' ),
+							'description' => __( 'Communication tracking ID to use stored merge tag values', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => null,
 						),
 						'preview'     => array(
-							'description' => __( 'Whether this is a preview render (strips tracking elements). If not provided, auto-detected based on context: true when no contact_id/tracking_id, false otherwise.', 'quillcrm' ),
+							'description' => __( 'Whether this is a preview render (strips tracking elements). If not provided, auto-detected based on context: true when no contact_id/tracking_id, false otherwise.', 'quill-crm' ),
 							'type'        => 'boolean',
 							'default'     => null,
 						),
@@ -155,13 +155,13 @@ class REST_Template_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'type'   => array(
-							'description' => __( 'Filter by template type.', 'quillcrm' ),
+							'description' => __( 'Filter by template type.', 'quill-crm' ),
 							'type'        => 'string',
 							'default'     => Campaign_Channel::STR_EMAIL,
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						'search' => array(
-							'description'       => __( 'Search templates by name.', 'quillcrm' ),
+							'description'       => __( 'Search templates by name.', 'quill-crm' ),
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -198,43 +198,43 @@ class REST_Template_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'         => array(
-					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
 				 'name'       => array(
-					 'description' => __( 'Name of the template.', 'quillcrm' ),
+					 'description' => __( 'Name of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'arg_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'type'       => array(
-					 'description' => __( 'Type of the template.', 'quillcrm' ),
+					 'description' => __( 'Type of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'enum'        => Campaign_Channel::get_core_channel_strings(),
 				 ),
 				 'body'       => array(
-					 'description' => __( 'Body of the template.', 'quillcrm' ),
+					 'description' => __( 'Body of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 				 ),
 				 'settings'   => array(
-					 'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'quillcrm' ),
+					 'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'quill-crm' ),
 					 'type'        => array( 'object', 'null' ),
 				 ),
 				 'created_at' => array(
-					 'description' => __( 'Creation time of the template.', 'quillcrm' ),
+					 'description' => __( 'Creation time of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'readonly'    => false,
 				 ),
 				 'updated_at' => array(
-					 'description' => __( 'Update time of the template.', 'quillcrm' ),
+					 'description' => __( 'Update time of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'readonly'    => false,
 				 ),
 				 'thumbnail'  => array(
-					 'description' => __( 'Thumbnail URL of the template.', 'quillcrm' ),
+					 'description' => __( 'Thumbnail URL of the template.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 					 'arg_options' => array(
@@ -242,7 +242,7 @@ class REST_Template_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'hidden'     => array(
-					 'description' => __( 'Whether the template is hidden from users.', 'quillcrm' ),
+					 'description' => __( 'Whether the template is hidden from users.', 'quill-crm' ),
 					 'type'        => 'boolean',
 					 'required'    => false,
 					 'default'     => false,
@@ -262,53 +262,53 @@ class REST_Template_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Limit results to those matching a string.', 'quillcrm' ),
+				'description'       => __( 'Limit results to those matching a string.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'search'   => array(
-				'description'       => __( 'Search templates by name.', 'quillcrm' ),
+				'description'       => __( 'Search templates by name.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'type'     => array(
-				'description' => __( 'Filter by template type.', 'quillcrm' ),
+				'description' => __( 'Filter by template type.', 'quill-crm' ),
 				'type'        => 'string',
 				'default'     => Campaign_Channel::STR_EMAIL,
 				'enum'        => Campaign_Channel::get_core_channel_strings(),
 			),
 			'category' => array(
-				'description'       => __( 'Filter by template category.', 'quillcrm' ),
+				'description'       => __( 'Filter by template category.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'hidden'   => array(
-				'description' => __( 'Filter by hidden status.', 'quillcrm' ),
+				'description' => __( 'Filter by hidden status.', 'quill-crm' ),
 				'type'        => 'integer',
 				'enum'        => array( 0, 1 ),
 			),
 			'is_pro'   => array(
-				'description' => __( 'Filter by pro status.', 'quillcrm' ),
+				'description' => __( 'Filter by pro status.', 'quill-crm' ),
 				'type'        => 'integer',
 				'enum'        => array( 0, 1 ),
 			),
 			'per_page' => array(
-				'description' => __( 'Number of items to return in one page.', 'quillcrm' ),
+				'description' => __( 'Number of items to return in one page.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 20,
 			),
 			'page'     => array(
-				'description' => __( 'Current page of the collection.', 'quillcrm' ),
+				'description' => __( 'Current page of the collection.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'orderby'  => array(
-				'description' => __( 'Order by field.', 'quillcrm' ),
+				'description' => __( 'Order by field.', 'quill-crm' ),
 				'type'        => 'string',
 				'default'     => 'id',
 			),
 			'order'    => array(
-				'description' => __( 'Order direction.', 'quillcrm' ),
+				'description' => __( 'Order direction.', 'quill-crm' ),
 				'type'        => 'string',
 				'default'     => 'DESC',
 				'enum'        => array( 'ASC', 'DESC' ),
@@ -443,7 +443,7 @@ class REST_Template_Controller extends REST_Controller {
 			$template    = Template_Model::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $template, 200 );
@@ -487,7 +487,7 @@ class REST_Template_Controller extends REST_Controller {
 			$template    = Template_Model::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$template_data = $this->prepare_template( $request );
@@ -535,7 +535,7 @@ class REST_Template_Controller extends REST_Controller {
 			$template = Template_Model::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Check if template has been used in any sent messages
@@ -632,7 +632,7 @@ class REST_Template_Controller extends REST_Controller {
 			$templates    = Template_Model::find_many( $template_ids );
 
 			if ( ! $templates ) {
-				return new WP_Error( 'error', __( 'Templates not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Templates not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			Template_Model::destroy( $template_ids );
@@ -658,7 +658,7 @@ class REST_Template_Controller extends REST_Controller {
 			$template    = Template_Model::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$template->delete();
@@ -866,7 +866,7 @@ class REST_Template_Controller extends REST_Controller {
 		if ( empty( $html ) ) {
 			return new WP_Error(
 				'rendering_failed',
-				__( 'Failed to render template', 'quillcrm' ),
+				__( 'Failed to render template', 'quill-crm' ),
 				array( 'status' => 500 )
 			);
 		}

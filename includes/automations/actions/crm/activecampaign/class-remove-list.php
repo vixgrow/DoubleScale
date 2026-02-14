@@ -73,7 +73,7 @@ class Remove_List extends Action {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Remove List: List is empty.', 'quillcrm' ),
+				__( 'ActiveCampaign Remove List: List is empty.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_remove_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_List extends Action {
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				__( 'ActiveCampaign API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_connect',
 					'data' => array(
@@ -116,7 +116,7 @@ class Remove_List extends Action {
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact',
 					'data'     => array(
@@ -138,7 +138,7 @@ class Remove_List extends Action {
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get contact ID from ActiveCampaign.', 'quillcrm' ),
+				__( 'Failed to get contact ID from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_get_contact_id',
 					'data'     => array(
@@ -168,7 +168,7 @@ class Remove_List extends Action {
 		$result = $api->sync_contact_list( $data );
 		if ( $result['success'] ) {
 			quillcrm_get_logger()->info(
-				__( 'List removed from ActiveCampaign.', 'quillcrm' ),
+				__( 'List removed from ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_remove_list',
 					'data' => array(
@@ -188,7 +188,7 @@ class Remove_List extends Action {
 		}
 
 		quillcrm_get_logger()->error(
-			__( 'Failed to remove list from ActiveCampaign.', 'quillcrm' ),
+			__( 'Failed to remove list from ActiveCampaign.', 'quill-crm' ),
 			array(
 				'code' => 'activecampaign_remove_list',
 				'data' => array(
@@ -233,7 +233,7 @@ class Remove_List extends Action {
 		return array(
 			'list' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'List', 'quillcrm' ),
+				'label'    => __( 'List', 'quill-crm' ),
 				'endpoint' => 'activecampaign/lists',
 			),
 		);

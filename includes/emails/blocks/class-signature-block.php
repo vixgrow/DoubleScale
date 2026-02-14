@@ -30,7 +30,7 @@ class Signature_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Signature', 'quillcrm' );
+		return __( 'Signature', 'quill-crm' );
 	}
 
 	/**

@@ -74,7 +74,7 @@ class Add_To_List extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Add To List action is missing list_id', 'quillcrm' ),
+				__( 'GetResponse Add To List action is missing list_id', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_add_to_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Add_To_List extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse failed to connect to API', 'quillcrm' ),
+				__( 'GetResponse failed to connect to API', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -122,7 +122,7 @@ class Add_To_List extends Action {
 		$result = $api->create_or_update_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse failed to add contact to list', 'quillcrm' ),
+				__( 'GetResponse failed to add contact to list', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_add_to_list',
 					'data' => array(
@@ -140,7 +140,7 @@ class Add_To_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'GetResponse added contact to list', 'quillcrm' ),
+			__( 'GetResponse added contact to list', 'quill-crm' ),
 			array(
 				'code' => 'getresponse_add_to_list',
 				'data' => array(
@@ -168,7 +168,7 @@ class Add_To_List extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'list_id' => array(
-					'description' => __( 'List ID', 'quillcrm' ),
+					'description' => __( 'List ID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
@@ -184,7 +184,7 @@ class Add_To_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'getresponse/lists',
 			),

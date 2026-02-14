@@ -8,6 +8,9 @@
 
 namespace QuillCRM;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Tasks class
@@ -458,7 +461,7 @@ class Tasks {
 		// Log cleanup results
 		if ( function_exists( 'quillcrm_get_logger' ) ) {
 			quillcrm_get_logger()->info(
-				__( 'Task cleanup completed', 'quillcrm' ),
+				__( 'Task cleanup completed', 'quill-crm' ),
 				array(
 					'code'  => 'task_cleanup_completed',
 					'stats' => $stats,

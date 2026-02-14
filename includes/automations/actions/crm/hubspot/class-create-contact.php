@@ -84,7 +84,7 @@ class Add_Contact extends Action {
 
 		if ( empty( $email ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Add Contact: Email is required.', 'quillcrm' ),
+				__( 'Hubspot Add Contact: Email is required.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_add_contact',
 					'data' => array(
@@ -113,7 +113,7 @@ class Add_Contact extends Action {
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot API connection failed.', 'quillcrm' ),
+				__( 'Hubspot API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_connect',
 					'data' => array(
@@ -133,7 +133,7 @@ class Add_Contact extends Action {
 		$result = $api->create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to create contact in Hubspot.', 'quillcrm' ),
+				__( 'Failed to create contact in Hubspot.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_create_contact',
 					'data' => array(
@@ -152,7 +152,7 @@ class Add_Contact extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact added to Hubspot.', 'quillcrm' ),
+			__( 'Contact added to Hubspot.', 'quill-crm' ),
 			array(
 				'code' => 'hubspot_add_contact',
 				'data' => array(
@@ -209,17 +209,17 @@ class Add_Contact extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'label'  => __( 'Mapped Fields', 'quill-crm' ),
 				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 			),

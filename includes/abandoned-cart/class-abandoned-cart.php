@@ -10,6 +10,10 @@
 
 namespace QuillCRM\Abandoned_Cart;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Models\Abandoned_Cart_Model;
@@ -112,7 +116,7 @@ class Abandoned_Cart {
 		if ( ! empty( $session ) ) {
 			$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
 			if ( empty( $abandoned_cart ) ) {
-				wp_send_json_error( __( 'Abandoned cart not found.', 'quillcrm' ) );
+				wp_send_json_error( __( 'Abandoned cart not found.', 'quill-crm' ) );
 			}
 
 			$abandoned_cart->status = 'opt-out';
@@ -123,7 +127,7 @@ class Abandoned_Cart {
 
 		wp_send_json_success(
 			array(
-				'message' => __( 'You have successfully opted out of abandoned cart emails.', 'quillcrm' ),
+				'message' => __( 'You have successfully opted out of abandoned cart emails.', 'quill-crm' ),
 			)
 		);
 	}
@@ -474,7 +478,7 @@ class Abandoned_Cart {
 		$gdpr_message = preg_replace_callback(
 			'/{{no_thanks text="([^"]+)"}}/',
 			function ( $matches ) {
-				$text = $matches[1] ?? __( 'No Thanks', 'quillcrm' );
+				$text = $matches[1] ?? __( 'No Thanks', 'quill-crm' );
 				return '<a href="#" id="quillcrm-opt-out">' . $text . '</a>';
 			},
 			$gdpr_message
@@ -589,13 +593,13 @@ class Abandoned_Cart {
 
 		$fields = wp_unslash( $_POST['fields'] ) ?? null;
 		if ( empty( $fields ) ) {
-			wp_send_json_error( __( 'Fields are required.', 'quillcrm' ) );
+			wp_send_json_error( __( 'Fields are required.', 'quill-crm' ) );
 		}
 
 		$fields        = json_decode( $fields, true );
 		$billing_email = sanitize_email( $fields['billing_email'] ) ?? '';
 		if ( empty( $billing_email ) ) {
-			wp_send_json_error( __( 'Email is required.', 'quillcrm' ) );
+			wp_send_json_error( __( 'Email is required.', 'quill-crm' ) );
 		}
 
 		$data = array(
@@ -608,7 +612,7 @@ class Abandoned_Cart {
 		$items = WC()->cart->get_cart();
 
 		if ( empty( $items ) ) {
-			wp_send_json_error( __( 'Cart is empty.', 'quillcrm' ) );
+			wp_send_json_error( __( 'Cart is empty.', 'quill-crm' ) );
 		}
 
 		$data['items'] = $items;
@@ -644,7 +648,7 @@ class Abandoned_Cart {
 		if ( $abandoned_cart ) {
 			wp_send_json_success();
 		} else {
-			wp_send_json_error( __( 'Failed to save the abandoned cart.', 'quillcrm' ) );
+			wp_send_json_error( __( 'Failed to save the abandoned cart.', 'quill-crm' ) );
 		}
 	}
 

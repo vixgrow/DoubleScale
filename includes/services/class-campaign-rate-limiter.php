@@ -325,7 +325,7 @@ class Campaign_Rate_Limiter {
 		update_option( "quillcrm_daily_{$type}_count", 0, false );
 
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Daily %s count reset.', 'quillcrm' ), $type ),
+			sprintf( __( 'Daily %s count reset.', 'quill-crm' ), $type ),
 			array(
 				'code'    => "daily_{$type}_count_reset",
 				'channel' => $type,
@@ -345,7 +345,7 @@ class Campaign_Rate_Limiter {
 		$type = $this->normalize_channel_type( $type );
 
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Daily %s limit reached.', 'quillcrm' ), $type ),
+			sprintf( __( 'Daily %s limit reached.', 'quill-crm' ), $type ),
 			array(
 				'code'    => "daily_{$type}_limit_reached",
 				'channel' => $type,

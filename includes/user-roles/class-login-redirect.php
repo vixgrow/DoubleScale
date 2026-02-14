@@ -24,7 +24,7 @@ final class Login_Redirect {
 	/**
 	 * CRM dashboard page slug
 	 */
-	public const CRM_DASHBOARD_SLUG = 'quillcrm';
+	public const CRM_DASHBOARD_SLUG = 'quill-crm';
 
 	/**
 	 * Class Instance.

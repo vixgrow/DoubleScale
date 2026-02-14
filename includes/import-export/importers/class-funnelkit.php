@@ -85,19 +85,26 @@ class Funnelkit extends Importer {
 			$total,
 			$this->offset,
 			function ( $offset ) use ( $wpdb, $table_name, $pivot_table, $list_table, $tag_table ) {
+				$like_list = '%' . $wpdb->esc_like( 'List' ) . '%';
+				$like_tag  = '%' . $wpdb->esc_like( 'Tag' ) . '%';
+
 				return $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT s.*, 
-								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%List%' THEN l.title END) AS lists,
-								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%Tag%' THEN t.title END) AS tags
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE %s THEN l.title END) AS lists,
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE %s THEN t.title END) AS tags
 						 FROM $table_name AS s
 						 
 						 LEFT JOIN $pivot_table AS p ON s.id = p.subscriber_id
-						 LEFT JOIN $list_table AS l ON p.object_id = l.id AND p.object_type LIKE '%List%'
-						 LEFT JOIN $tag_table AS t ON p.object_id = t.id AND p.object_type LIKE '%Tag%'
+						 LEFT JOIN $list_table AS l ON p.object_id = l.id AND p.object_type LIKE %s
+						 LEFT JOIN $tag_table AS t ON p.object_id = t.id AND p.object_type LIKE %s
 						 
 						 GROUP BY s.id
 						 LIMIT %d, 20",
+						$like_list,
+						$like_tag,
+						$like_list,
+						$like_tag,
 						$offset
 					),
 					ARRAY_A
@@ -164,12 +171,12 @@ class Funnelkit extends Importer {
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'quillcrm' ),
+				'label'   => __( 'Lists', 'quill-crm' ),
 				'options' => $this->get_lists(),
 			),
 			'tags_mapping'  => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags', 'quillcrm' ),
+				'label'   => __( 'Tags', 'quill-crm' ),
 				'options' => $this->get_tags(),
 			),
 		);

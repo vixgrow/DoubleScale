@@ -73,7 +73,7 @@ class Add_To_Campaign extends Action {
 		$campaign_id = $step->get_setting( 'campaign_id', '' );
 		if ( empty( $campaign_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Campaign ID is required.', 'quillcrm' ),
+				__( 'Drip Campaign ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'drip_add_to_campaign',
 					'data' => array(
@@ -104,7 +104,7 @@ class Add_To_Campaign extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -125,7 +125,7 @@ class Add_To_Campaign extends Action {
 		$result = $api->add_subscriber_to_campaign( $campaign_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add subscriber to Drip Campaign.', 'quillcrm' ),
+				__( 'Failed to add subscriber to Drip Campaign.', 'quill-crm' ),
 				array(
 					'code'     => 'drip_add_to_campaign',
 					'data'     => array(
@@ -145,7 +145,7 @@ class Add_To_Campaign extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Subscriber added to Drip Campaign.', 'quillcrm' ),
+			__( 'Subscriber added to Drip Campaign.', 'quill-crm' ),
 			array(
 				'code' => 'drip_add_to_campaign',
 				'data' => array(
@@ -190,7 +190,7 @@ class Add_To_Campaign extends Action {
 		return array(
 			'campaign_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Campaign', 'quillcrm' ),
+				'label'    => __( 'Campaign', 'quill-crm' ),
 				'endpoint' => 'drip/campaigns',
 			),
 		);

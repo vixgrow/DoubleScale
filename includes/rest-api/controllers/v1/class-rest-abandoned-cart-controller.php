@@ -58,7 +58,7 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'The IDs of the items to delete.', 'quillcrm' ),
+							'description' => __( 'The IDs of the items to delete.', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
@@ -81,18 +81,18 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_analytics_permissions_check' ),
 					'args'                => array(
 						'interval'   => array(
-							'description' => __( 'Interval for the analytics.', 'quillcrm' ),
+							'description' => __( 'Interval for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => array( 'custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
 							'required'    => false,
 						),
 						'start_date' => array(
-							'description' => __( 'Start date for the analytics.', 'quillcrm' ),
+							'description' => __( 'Start date for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
 						'end_date'   => array(
-							'description' => __( 'End date for the analytics.', 'quillcrm' ),
+							'description' => __( 'End date for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
@@ -112,17 +112,17 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Search keyword.', 'quillcrm' ),
+				'description'       => __( 'Search keyword.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'page'     => array(
-				'description'       => __( 'Current page of the collection.', 'quillcrm' ),
+				'description'       => __( 'Current page of the collection.', 'quill-crm' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
 			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.', 'quillcrm' ),
+				'description'       => __( 'Maximum number of items to be returned in result set.', 'quill-crm' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
@@ -172,7 +172,7 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 		try {
 			$ids = $request->get_param( 'ids' );
 			if ( empty( $ids ) ) {
-				return new WP_Error( 'error', __( 'No IDs provided.', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'error', __( 'No IDs provided.', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			Abandoned_Cart_Model::destroy( $ids );
@@ -212,16 +212,16 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 			foreach ( $dates['dates'] as $date ) {
 				switch ( $type ) {
 					case 'hour':
-						$carts[ $date ] = Abandoned_Cart_Model::whereBetween( 'created_at', array( $date, date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
+						$carts[ $date ] = Abandoned_Cart_Model::whereBetween( 'created_at', array( $date, gmdate( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
 						break;
 					case 'day':
-						$carts[ $date ] = Abandoned_Cart_Model::whereDay( 'created_at', date( 'd', strtotime( $date ) ) )->count();
+						$carts[ $date ] = Abandoned_Cart_Model::whereDay( 'created_at', gmdate( 'd', strtotime( $date ) ) )->count();
 						break;
 					case 'month':
-						$carts[ $date ] = Abandoned_Cart_Model::whereMonth( 'created_at', date( 'm', strtotime( $date ) ) )->count();
+						$carts[ $date ] = Abandoned_Cart_Model::whereMonth( 'created_at', gmdate( 'm', strtotime( $date ) ) )->count();
 						break;
 					case 'year':
-						$carts[ $date ] = Abandoned_Cart_Model::whereYear( 'created_at', date( 'Y', strtotime( $date ) ) )->count();
+						$carts[ $date ] = Abandoned_Cart_Model::whereYear( 'created_at', gmdate( 'Y', strtotime( $date ) ) )->count();
 						break;
 				}
 			}
@@ -231,16 +231,16 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 			foreach ( $dates['dates'] as $date ) {
 				switch ( $dates['type'] ) {
 					case 'hour':
-						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereBetween( 'created_at', array( $date, date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->sum( 'total' );
+						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereBetween( 'created_at', array( $date, gmdate( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->sum( 'total' );
 						break;
 					case 'day':
-						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereDay( 'created_at', date( 'd', strtotime( $date ) ) )->sum( 'total' );
+						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereDay( 'created_at', gmdate( 'd', strtotime( $date ) ) )->sum( 'total' );
 						break;
 					case 'month':
-						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereMonth( 'created_at', date( 'm', strtotime( $date ) ) )->sum( 'total' );
+						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereMonth( 'created_at', gmdate( 'm', strtotime( $date ) ) )->sum( 'total' );
 						break;
 					case 'year':
-						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereYear( 'created_at', date( 'Y', strtotime( $date ) ) )->sum( 'total' );
+						$revenue_grouped_by_date[ $date ] = Abandoned_Cart_Model::whereYear( 'created_at', gmdate( 'Y', strtotime( $date ) ) )->sum( 'total' );
 						break;
 				}
 			}

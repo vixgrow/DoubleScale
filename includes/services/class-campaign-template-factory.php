@@ -315,7 +315,7 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 	 * @return string
 	 */
 	public function get_default_name() {
-		return __( 'Email Campaign Template', 'quillcrm' );
+		return __( 'Email Campaign Template', 'quill-crm' );
 	}
 
 	/**
@@ -427,7 +427,7 @@ class SMS_Template_Processor extends Abstract_Template_Processor {
 	 * @return string
 	 */
 	public function get_default_name() {
-		return __( 'SMS Campaign Template', 'quillcrm' );
+		return __( 'SMS Campaign Template', 'quill-crm' );
 	}
 
 	/**
@@ -458,7 +458,7 @@ class WhatsApp_Template_Processor extends Abstract_Template_Processor {
 	 * @return string
 	 */
 	public function get_default_name() {
-		return __( 'WhatsApp Campaign Template', 'quillcrm' );
+		return __( 'WhatsApp Campaign Template', 'quill-crm' );
 	}
 
 	/**

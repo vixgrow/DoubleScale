@@ -78,7 +78,7 @@ class ActiveCampaign extends Importer
 
 		$total = $api->get_contacts_count();
 		if ( ! $total['success'] ) {
-			throw new \Exception( __( 'Error fetching contacts count', 'quillcrm' ) );
+			throw new \Exception( __( 'Error fetching contacts count', 'quill-crm' ) );
 		}
 		$total = $total['data']['meta']['total'] ?? 0;
 		$total = intval( $total );
@@ -165,13 +165,13 @@ class ActiveCampaign extends Importer
 				}
 			} else {
 				quillcrm_get_logger()->error(
-					__('ActiveCampaign: Error fetching lists', 'quillcrm'),
+					__('ActiveCampaign: Error fetching lists', 'quill-crm'),
 					array(
 						'code' => 'activecampaign_get_lists',
 						'response' => $lists_response,
 					)
 				);
-				throw new \Exception(__('Error fetching lists', 'quillcrm'));
+				throw new \Exception(__('Error fetching lists', 'quill-crm'));
 			}
 		}
 
@@ -184,13 +184,13 @@ class ActiveCampaign extends Importer
 				}
 			} else {
 				quillcrm_get_logger()->error(
-					__('ActiveCampaign: Error fetching tags', 'quillcrm'),
+					__('ActiveCampaign: Error fetching tags', 'quill-crm'),
 					array(
 						'code' => 'activecampaign_get_tags',
 						'response' => $tags_response,
 					)
 				);
-				throw new \Exception(__('Error fetching tags', 'quillcrm'));
+				throw new \Exception(__('Error fetching tags', 'quill-crm'));
 			}
 		}
 	}
@@ -204,11 +204,11 @@ class ActiveCampaign extends Importer
 	{
 		return array(
 			'api_key' => array(
-				'label' => __( 'API Key', 'quillcrm' ),
+				'label' => __( 'API Key', 'quill-crm' ),
 				'type'  => 'text',
 			),
 			'api_url' => array(
-				'label' => __( 'API URL', 'quillcrm' ),
+				'label' => __( 'API URL', 'quill-crm' ),
 				'type'  => 'text',
 			),
 		);
@@ -226,7 +226,7 @@ class ActiveCampaign extends Importer
 			$response = $api->get_lists();
 			if (!$response['success']) {
 				quillcrm_get_logger()->error(
-					__('ActiveCampaign: Error fetching lists', 'quillcrm'),
+					__('ActiveCampaign: Error fetching lists', 'quill-crm'),
 					array(
 						'code' => 'activecampaign_get_lists',
 						'response' => $response,
@@ -246,7 +246,7 @@ class ActiveCampaign extends Importer
 			return $options;
 		} catch (\Exception $e) {
 			quillcrm_get_logger()->error(
-				__('ActiveCampaign: Exception fetching lists', 'quillcrm'),
+				__('ActiveCampaign: Exception fetching lists', 'quill-crm'),
 				array(
 					'code' => 'activecampaign_get_lists_exception',
 					'error' => $e->getMessage(),
@@ -268,7 +268,7 @@ class ActiveCampaign extends Importer
 			$response = $api->get_tags();
 			if (!$response['success']) {
 				quillcrm_get_logger()->error(
-					__('ActiveCampaign: Error fetching tags', 'quillcrm'),
+					__('ActiveCampaign: Error fetching tags', 'quill-crm'),
 					array(
 						'code' => 'activecampaign_get_tags',
 						'response' => $response,
@@ -288,7 +288,7 @@ class ActiveCampaign extends Importer
 			return $options;
 		} catch (\Exception $e) {
 			quillcrm_get_logger()->error(
-				__('ActiveCampaign: Exception fetching tags', 'quillcrm'),
+				__('ActiveCampaign: Exception fetching tags', 'quill-crm'),
 				array(
 					'code' => 'activecampaign_get_tags_exception',
 					'error' => $e->getMessage(),
@@ -307,7 +307,7 @@ class ActiveCampaign extends Importer
 	public function get_api()
 	{
 		if ( empty( $this->credentials['api_key'] ) || empty( $this->credentials['api_url'] ) ) {
-			throw new \Exception( __( 'API Key and API URL are required.', 'quillcrm' ) );
+			throw new \Exception( __( 'API Key and API URL are required.', 'quill-crm' ) );
 		}
 		return new API( $this->credentials['api_url'], $this->credentials['api_key'] );
 	}
@@ -322,12 +322,12 @@ class ActiveCampaign extends Importer
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'quillcrm' ),
+				'label'   => __( 'Lists', 'quill-crm' ),
 				'options' => $this->get_lists(),
 			),
 			'tags_mapping'  => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags', 'quillcrm' ),
+				'label'   => __( 'Tags', 'quill-crm' ),
 				'options' => $this->get_tags(),
 			),
 		);

@@ -30,7 +30,7 @@ class Button_Block extends Email_Block {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Button', 'quillcrm' );
+		return __( 'Button', 'quill-crm' );
 	}
 
 	/**

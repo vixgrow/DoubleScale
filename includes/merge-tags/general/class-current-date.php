@@ -66,7 +66,7 @@ class Current_Date extends Merge_Tag {
 	public function get_value( $contact, $merge_tag = '' ) {
 		// Merge tag will be like this: {{current_date}} or {{current_date format='Y-m-d'}}.
 		$format       = $this->get_format( $merge_tag );
-		$current_date = date( $format );
+		$current_date = wp_date( $format );
 
 		return $current_date;
 	}

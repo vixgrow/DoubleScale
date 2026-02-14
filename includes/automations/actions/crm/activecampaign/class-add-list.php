@@ -80,7 +80,7 @@ class Add_List extends Action {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign Add List: List is empty.', 'quillcrm' ),
+				__( 'ActiveCampaign Add List: List is empty.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_add_list',
 					'data' => array(
@@ -102,7 +102,7 @@ class Add_List extends Action {
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add list to ActiveCampaign. API connection failed.', 'quillcrm' ),
+				__( 'Failed to add list to ActiveCampaign. API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_connect',
 					'data' => array(
@@ -123,7 +123,7 @@ class Add_List extends Action {
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add list to ActiveCampaign. Failed to get contact.', 'quillcrm' ),
+				__( 'Failed to add list to ActiveCampaign. Failed to get contact.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_add_list',
 					'data'     => array(
@@ -145,7 +145,7 @@ class Add_List extends Action {
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add list to ActiveCampaign. Contact not found.', 'quillcrm' ),
+				__( 'Failed to add list to ActiveCampaign. Contact not found.', 'quill-crm' ),
 				array(
 					'code'     => 'activecampaign_add_list',
 					'data'     => array(
@@ -175,7 +175,7 @@ class Add_List extends Action {
 		$result = $api->sync_contact_list( $data );
 		if ( $result['success'] ) {
 			quillcrm_get_logger()->info(
-				__( 'List added to contact in ActiveCampaign.', 'quillcrm' ),
+				__( 'List added to contact in ActiveCampaign.', 'quill-crm' ),
 				array(
 					'code' => 'activecampaign_add_list',
 					'data' => array(
@@ -195,7 +195,7 @@ class Add_List extends Action {
 		}
 
 		quillcrm_get_logger()->error(
-			__( 'Failed to add list to contact in ActiveCampaign.', 'quillcrm' ),
+			__( 'Failed to add list to contact in ActiveCampaign.', 'quill-crm' ),
 			array(
 				'code'     => 'activecampaign_add_list',
 				'data'     => array(
@@ -241,7 +241,7 @@ class Add_List extends Action {
 		return array(
 			'list' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'List', 'quillcrm' ),
+				'label'    => __( 'List', 'quill-crm' ),
 				'endpoint' => 'activecampaign/lists',
 			),
 		);

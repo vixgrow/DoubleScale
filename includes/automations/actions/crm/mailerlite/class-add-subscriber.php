@@ -94,7 +94,7 @@ class Add_Subscriber extends Action {
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Add Subscriber: API is not connected.', 'quillcrm' ),
+				__( 'MailerLite Add Subscriber: API is not connected.', 'quill-crm' ),
 				array(
 					'code' => 'mailerlite_connect',
 					'data' => array(
@@ -114,7 +114,7 @@ class Add_Subscriber extends Action {
 		$result = $api->add_subscriber( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Add Subscriber: Failed to add subscriber.', 'quillcrm' ),
+				__( 'MailerLite Add Subscriber: Failed to add subscriber.', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_add_subscriber',
 					'data'     => array(
@@ -133,7 +133,7 @@ class Add_Subscriber extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'MailerLite Add Subscriber: Subscriber added successfully.', 'quillcrm' ),
+			__( 'MailerLite Add Subscriber: Subscriber added successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mailerlite_add_subscriber',
 				'response' => $result,
@@ -181,17 +181,17 @@ class Add_Subscriber extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'label'  => __( 'Mapped Fields', 'quill-crm' ),
 				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 			),

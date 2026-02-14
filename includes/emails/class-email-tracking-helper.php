@@ -93,7 +93,7 @@ class Email_Tracking_Helper {
 			// Check if link trigger quillcrm-link-trigger
 			if ( false !== strpos( $href, 'quillcrm-link-trigger' ) ) {
 				// Get query string
-				$query_string = parse_url( $href, PHP_URL_QUERY );
+				$query_string = wp_parse_url( $href, PHP_URL_QUERY );
 				parse_str( $query_string, $query_args );
 
 				// Get link trigger hash
@@ -132,7 +132,7 @@ class Email_Tracking_Helper {
 			// Add click tracking to original link
 			$click_url = add_query_arg(
 				array(
-					'quillcrm' => 'email_click',
+					'quill-crm' => 'email_click',
 					'hash_key' => $hash_key,
 					'original' => urlencode( $original_url ),
 				),

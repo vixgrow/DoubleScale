@@ -31,8 +31,8 @@ class Message_Direction {
 	 */
 	public static function get_all() {
 		return array(
-			self::OUTBOUND => __( 'Outbound', 'quillcrm' ),
-			self::INBOUND  => __( 'Inbound', 'quillcrm' ),
+			self::OUTBOUND => __( 'Outbound', 'quill-crm' ),
+			self::INBOUND  => __( 'Inbound', 'quill-crm' ),
 		);
 	}
 
@@ -44,7 +44,7 @@ class Message_Direction {
 	 */
 	public static function get_name( $direction ) {
 		$directions = self::get_all();
-		return $directions[ $direction ] ?? __( 'Unknown', 'quillcrm' );
+		return $directions[ $direction ] ?? __( 'Unknown', 'quill-crm' );
 	}
 
 	/**

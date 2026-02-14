@@ -101,18 +101,18 @@ class Pipedrive extends Importer
 		
 		
 		if (empty($first_page_response['success']) || $first_page_response['success'] !== true) {
-			$error_message = __('Pipedrive: Error fetching persons', 'quillcrm');
+			$error_message = __('Pipedrive: Error fetching persons', 'quill-crm');
 			$response_code = $first_page_response['code'] ?? 0;
 			
 			// Provide more specific error messages based on response code
 			if ($response_code === 401) {
-				$error_message = __('Pipedrive API Token is invalid or expired. Please verify your credentials.', 'quillcrm');
+				$error_message = __('Pipedrive API Token is invalid or expired. Please verify your credentials.', 'quill-crm');
 			} elseif ($response_code === 403) {
-				$error_message = __('Pipedrive API access denied. Please check your token permissions.', 'quillcrm');
+				$error_message = __('Pipedrive API access denied. Please check your token permissions.', 'quill-crm');
 			} elseif ($response_code === 404) {
-				$error_message = __('Pipedrive API endpoint not found. Please verify your domain format.', 'quillcrm');
+				$error_message = __('Pipedrive API endpoint not found. Please verify your domain format.', 'quill-crm');
 			} elseif (in_array($response_code, [0, 500, 502, 503, 504])) {
-				$error_message = __('Pipedrive API connection failed. Please check your domain and try again.', 'quillcrm');
+				$error_message = __('Pipedrive API connection failed. Please check your domain and try again.', 'quill-crm');
 			}
 			
 			$error_details = array(
@@ -181,7 +181,7 @@ class Pipedrive extends Importer
 			} else {
 				$this->cached_person_fields = array();
 				quillcrm_get_logger()->warning(
-					__('Pipedrive: Could not fetch person fields', 'quillcrm'),
+					__('Pipedrive: Could not fetch person fields', 'quill-crm'),
 					array(
 						'code' => 'pipedrive_get_person_fields',
 						'response' => $fields_response,
@@ -423,15 +423,15 @@ class Pipedrive extends Importer
 	{
 		return array(
 			'api_domain' => array(
-				'label' => __('API Domain', 'quillcrm'),
+				'label' => __('API Domain', 'quill-crm'),
 				'type' => 'text',
-				'description' => __('Your Pipedrive company domain (e.g., yourcompany.pipedrive.com)', 'quillcrm'),
+				'description' => __('Your Pipedrive company domain (e.g., yourcompany.pipedrive.com)', 'quill-crm'),
 				'placeholder' => 'yourcompany.pipedrive.com',
 			),
 			'api_token' => array(
-				'label' => __('API Token', 'quillcrm'),
+				'label' => __('API Token', 'quill-crm'),
 				'type' => 'text',
-				'description' => __('Your Pipedrive API token from Settings > Personal preferences > API', 'quillcrm'),
+				'description' => __('Your Pipedrive API token from Settings > Personal preferences > API', 'quill-crm'),
 			),
 		);
 	}
@@ -446,7 +446,7 @@ class Pipedrive extends Importer
 	public function get_api()
 	{
 		if (empty($this->credentials['api_domain']) || empty($this->credentials['api_token'])) {
-			throw new \Exception(__('Pipedrive API Domain and API Token are required.', 'quillcrm'));
+			throw new \Exception(__('Pipedrive API Domain and API Token are required.', 'quill-crm'));
 		}
 
 		$api_domain = trim($this->credentials['api_domain']);
@@ -458,12 +458,12 @@ class Pipedrive extends Importer
 
 		// Basic validation for domain format
 		if (!preg_match('/^[a-zA-Z0-9.-]+\.(pipedrive\.com|pipedrivecdn\.com)$/', $api_domain)) {
-			throw new \Exception(__('Pipedrive API Domain format appears to be invalid. Please use format: yourcompany.pipedrive.com', 'quillcrm'));
+			throw new \Exception(__('Pipedrive API Domain format appears to be invalid. Please use format: yourcompany.pipedrive.com', 'quill-crm'));
 		}
 
 		// Basic validation for API token
 		if (strlen($api_token) < 30) {
-			throw new \Exception(__('Pipedrive API Token appears to be invalid. Please verify your token.', 'quillcrm'));
+			throw new \Exception(__('Pipedrive API Token appears to be invalid. Please verify your token.', 'quill-crm'));
 		}
 
 		return new API($api_domain, $api_token);
@@ -482,7 +482,7 @@ class Pipedrive extends Importer
 			$test_response = $api->get_persons_first_page();
 			
 			if (empty($test_response['success']) || $test_response['success'] !== true) {
-				throw new \Exception(__('Invalid Pipedrive credentials. Please verify your API Domain and Token.', 'quillcrm'));
+				throw new \Exception(__('Invalid Pipedrive credentials. Please verify your API Domain and Token.', 'quill-crm'));
 			}
 		} catch (\Exception $e) {
 			// Re-throw the exception so the REST API catches it and returns error

@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Forms\QuillForms;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Forms\QuillForms\Form_Utils;
 use QuillCRM\Managers\Forms_Manager;
@@ -103,7 +107,7 @@ class Form extends Abstracts_Form {
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['form_id'] ) ) : null;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( array( 'message' => __( 'Form ID is required.', 'quillcrm' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Form ID is required.', 'quill-crm' ) ) );
 		}
 
 		$fields = $this->get_fields( $form_id );

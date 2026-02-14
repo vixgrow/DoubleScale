@@ -73,7 +73,7 @@ class Add_To_Campaign extends Action {
 		$campaign_id = $step->get_setting( 'campaign_id', '' );
 		if ( empty( $campaign_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To Campaign action is missing campaign_id', 'quillcrm' ),
+				__( 'Mautic Add To Campaign action is missing campaign_id', 'quill-crm' ),
 				array(
 					'code' => 'mautic_add_to_campaign',
 					'data' => array(
@@ -100,7 +100,7 @@ class Add_To_Campaign extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To Campaign: Could not connect to Mautic API.', 'quillcrm' ),
+				__( 'Mautic Add To Campaign: Could not connect to Mautic API.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -120,7 +120,7 @@ class Add_To_Campaign extends Action {
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To Campaign: Failed to get or create contact.', 'quillcrm' ),
+				__( 'Mautic Add To Campaign: Failed to get or create contact.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_get_or_create_contact',
 					'data'     => array(
@@ -142,7 +142,7 @@ class Add_To_Campaign extends Action {
 		$result     = $api->add_contact_to_campaign( $contact_id, $campaign_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add To Campaign: Failed to add contact to campaign.', 'quillcrm' ),
+				__( 'Mautic Add To Campaign: Failed to add contact to campaign.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_add_to_campaign',
 					'data'     => array(
@@ -161,7 +161,7 @@ class Add_To_Campaign extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Add To Campaign: Contact added to campaign.', 'quillcrm' ),
+			__( 'Mautic Add To Campaign: Contact added to campaign.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_add_to_campaign',
 				'response' => $result,
@@ -197,7 +197,7 @@ class Add_To_Campaign extends Action {
 		return array(
 			'campaign_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Campaign', 'quillcrm' ),
+				'label'    => __( 'Campaign', 'quill-crm' ),
 				'endpoint' => 'mautic/campaigns',
 			),
 		);

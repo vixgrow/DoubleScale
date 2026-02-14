@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Exception;
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Forms_Manager;
@@ -109,13 +113,14 @@ final class Triggers_Manager {
 	public function register( $trigger ) {
 		if ( ! $trigger instanceof Trigger ) {
 			throw new Exception(
-				__( 'Invalid trigger', 'quillcrm' )
+				__( 'Invalid trigger', 'quill-crm' )
 			);
 		}
 
 		if ( isset( $this->triggers[ $trigger->slug ] ) ) {
+			/* translators: %s: trigger name */
 			throw new Exception(
-				sprintf( __( 'Trigger %s already registered', 'quillcrm' ), $trigger->name )
+				sprintf( __( 'Trigger %s already registered', 'quill-crm' ), $trigger->name )
 			);
 		}
 
@@ -156,148 +161,148 @@ final class Triggers_Manager {
 	public function set_sources() {
 		 $this->sources = array(
 			 'crm'         => array(
-				 'label'  => __( 'CRM', 'quillcrm' ),
+				 'label'  => __( 'CRM', 'quill-crm' ),
 				 'groups' => array(
 					 'contact'       => array(
-						 'label'    => __( 'Contact', 'quillcrm' ),
+						 'label'    => __( 'Contact', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 					 'messaging'     => array(
-						 'label'    => __( 'Messaging', 'quillcrm' ),
+						 'label'    => __( 'Messaging', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 					 'link_triggers' => array(
-						 'label'    => __( 'Link Triggers', 'quillcrm' ),
+						 'label'    => __( 'Link Triggers', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 					 'webhooks'      => array(
-						 'label'    => __( 'Webhooks', 'quillcrm' ),
+						 'label'    => __( 'Webhooks', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 					 'deal'          => array(
-						 'label'    => __( 'Deal', 'quillcrm' ),
+						 'label'    => __( 'Deal', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 				 ),
 			 ),
 			 'woocommerce' => array(
-				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'label'  => __( 'WooCommerce', 'quill-crm' ),
 				 'groups' => array(
 					 'order'        => array(
-						 'label'       => __( 'Order', 'quillcrm' ),
+						 'label'       => __( 'Order', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'cart'         => array(
-						 'label'       => __( 'Cart', 'quillcrm' ),
+						 'label'       => __( 'Cart', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'review'       => array(
-						 'label'       => __( 'Review', 'quillcrm' ),
+						 'label'       => __( 'Review', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'subscription' => array(
-						 'label'       => __( 'Subscription', 'quillcrm' ),
+						 'label'       => __( 'Subscription', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 					 ),
 					 'wishlist'     => array(
-						 'label'       => __( 'Wishlist', 'quillcrm' ),
+						 'label'       => __( 'Wishlist', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
 					 ),
 					 'membership'   => array(
-						 'label'       => __( 'Membership', 'quillcrm' ),
+						 'label'       => __( 'Membership', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 					 ),
 				 ),
 			 ),
 			 'wp'          => array(
-				 'label'  => __( 'WordPress', 'quillcrm' ),
+				 'label'  => __( 'WordPress', 'quill-crm' ),
 				 'groups' => array(
 					 'user' => array(
-						 'label'    => __( 'User', 'quillcrm' ),
+						 'label'    => __( 'User', 'quill-crm' ),
 						 'triggers' => array(),
 					 ),
 				 ),
 			 ),
 			 'edd'         => array(
-				 'label'  => __( 'Easy Digital Downloads', 'quillcrm' ),
+				 'label'  => __( 'Easy Digital Downloads', 'quill-crm' ),
 				 'groups' => array(
 					 'order' => array(
-						 'label'       => __( 'Order', 'quillcrm' ),
+						 'label'       => __( 'Order', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
 					 ),
 				 ),
 			 ),
 			 'lms'         => array(
-				 'label'  => __( 'LMS', 'quillcrm' ),
+				 'label'  => __( 'LMS', 'quill-crm' ),
 				 'groups' => array(
 					 'learndash'  => array(
-						 'label'       => __( 'LearnDash', 'quillcrm' ),
+						 'label'       => __( 'LearnDash', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 					 ),
 					 'tutorlms'   => array(
-						 'label'       => __( 'Tutor LMS', 'quillcrm' ),
+						 'label'       => __( 'Tutor LMS', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'tutor/tutor.php' ),
 					 ),
 					 'lifterlms'  => array(
-						 'label'       => __( 'LifterLMS', 'quillcrm' ),
+						 'label'       => __( 'LifterLMS', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'lifterlms/lifterlms.php' ),
 					 ),
 					 'learnpress' => array(
-						 'label'       => __( 'LearnPress', 'quillcrm' ),
+						 'label'       => __( 'LearnPress', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'learnpress/learnpress.php' ),
 					 ),
 				 ),
 			 ),
 			 // 'memberpress' => array(
-			 // 'label'  => __( 'MemberPress', 'quillcrm' ),
+			 // 'label'  => __( 'MemberPress', 'quill-crm' ),
 			 // 'groups' => array(
 			 // 'memberpress' => array(
-			 // 'label'       => __( 'MemberPress', 'quillcrm' ),
+			 // 'label'       => __( 'MemberPress', 'quill-crm' ),
 			 // 'triggers'    => array(),
 			 // 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
 			 // ),
 			 // ),
 			 // ),
 			 'booking'     => array(
-				 'label'  => __( 'Booking', 'quillcrm' ),
+				 'label'  => __( 'Booking', 'quill-crm' ),
 				 'groups' => array(
 					 'quillbooking' => array(
-						 'label'       => __( 'QuillBooking', 'quillcrm' ),
+						 'label'       => __( 'QuillBooking', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'QuillBooking/quillbooking.php' ),
 					 ),
 				 ),
 			 ),
 			 'forms'       => array(
-				 'label'  => __( 'Forms', 'quillcrm' ),
+				 'label'  => __( 'Forms', 'quill-crm' ),
 				 'groups' => array(),
 			 ),
 			 'surecart'    => array(
-				 'label'  => __( 'SureCart', 'quillcrm' ),
+				 'label'  => __( 'SureCart', 'quill-crm' ),
 				 'groups' => array(
 					 'order' => array(
-						 'label'       => __( 'Order', 'quillcrm' ),
+						 'label'       => __( 'Order', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
 					 ),
 				 ),
 			 ),
 			 'video'       => array(
-				 'label'  => __( 'Video', 'quillcrm' ),
+				 'label'  => __( 'Video', 'quill-crm' ),
 				 'groups' => array(
 					 'prestoplayer' => array(
-						 'label'       => __( 'Presto Player', 'quillcrm' ),
+						 'label'       => __( 'Presto Player', 'quill-crm' ),
 						 'triggers'    => array(),
 						 'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
 					 ),
@@ -322,7 +327,7 @@ final class Triggers_Manager {
 				'is_disabled' => ! $form->is_enabled(),
 				'triggers'    => array(
 					$form->slug => array(
-						'label'       => __( 'Form Submitted', 'quillcrm' ),
+						'label'       => __( 'Form Submitted', 'quill-crm' ),
 						'description' => $form->description,
 						'fields'      => $form->get_form_options(),
 						'is_disabled' => ! $form->is_enabled(),

@@ -12,6 +12,10 @@
 
 namespace QuillCRM\Automations\Goals;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Managers\Goals_Manager;
 

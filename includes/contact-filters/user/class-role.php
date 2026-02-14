@@ -65,8 +65,8 @@ class Role extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Matches', 'quillcrm' ),
-			'is_not' => __( 'Does not match', 'quillcrm' ),
+			'is'     => __( 'Matches', 'quill-crm' ),
+			'is_not' => __( 'Does not match', 'quill-crm' ),
 		);
 	}
 

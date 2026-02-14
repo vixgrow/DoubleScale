@@ -78,10 +78,10 @@ class Admin {
 	 */
 	public function create_admin_menu_pages() {
 		add_menu_page(
-			__( 'QuillCRM', 'quillcrm' ),
-			__( 'QuillCRM', 'quillcrm' ),
+			__( 'QuillCRM', 'quill-crm' ),
+			__( 'QuillCRM', 'quill-crm' ),
 			'quillcrm_access',
-			'quillcrm',
+			'quill-crm',
 			array( Admin_Loader::class, 'page_wrapper' ),
 			'data:image/svg+xml;base64,' . base64_encode(
 				'<svg xmlns="http://www.w3.org/2000/svg" width="31" height="40" viewBox="0 0 31 40" fill="none">
@@ -100,19 +100,19 @@ class Admin {
 
 		// Home.
 		add_submenu_page(
-			'quillcrm',
-			__( 'Dashboard', 'quillcrm' ),
-			__( 'Dashboard', 'quillcrm' ),
+			'quill-crm',
+			__( 'Dashboard', 'quill-crm' ),
+			__( 'Dashboard', 'quill-crm' ),
 			'quillcrm_access',
-			'quillcrm',
+			'quill-crm',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 
 		// Contacts.
 		add_submenu_page(
-			'quillcrm',
-			__( 'Contacts', 'quillcrm' ),
-			__( 'Contacts', 'quillcrm' ),
+			'quill-crm',
+			__( 'Contacts', 'quill-crm' ),
+			__( 'Contacts', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=contacts',
 			array( Admin_Loader::class, 'page_wrapper' )
@@ -120,63 +120,63 @@ class Admin {
 
 		// Campaigns.
 		add_submenu_page(
-			'quillcrm',
-			__( 'Campaigns', 'quillcrm' ),
-			__( 'Campaigns', 'quillcrm' ),
+			'quill-crm',
+			__( 'Campaigns', 'quill-crm' ),
+			__( 'Campaigns', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=campaigns',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Pipelines
 		add_submenu_page(
-			'quillcrm',
-			__( 'Pipelines', 'quillcrm' ),
-			__( 'Pipelines', 'quillcrm' ),
+			'quill-crm',
+			__( 'Pipelines', 'quill-crm' ),
+			__( 'Pipelines', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=sales-pipeline',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Automations
 		add_submenu_page(
-			'quillcrm',
-			__( 'Automations', 'quillcrm' ),
-			__( 'Automations', 'quillcrm' ),
+			'quill-crm',
+			__( 'Automations', 'quill-crm' ),
+			__( 'Automations', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=automations',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Forms
 		add_submenu_page(
-			'quillcrm',
-			__( 'Forms', 'quillcrm' ),
-			__( 'Forms', 'quillcrm' ),
+			'quill-crm',
+			__( 'Forms', 'quill-crm' ),
+			__( 'Forms', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=forms',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Integrations
 		add_submenu_page(
-			'quillcrm',
-			__( 'Integrations', 'quillcrm' ),
-			__( 'Integrations', 'quillcrm' ),
+			'quill-crm',
+			__( 'Integrations', 'quill-crm' ),
+			__( 'Integrations', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=integrations',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Analytics
 		add_submenu_page(
-			'quillcrm',
-			__( 'Analytics', 'quillcrm' ),
-			__( 'Analytics', 'quillcrm' ),
+			'quill-crm',
+			__( 'Analytics', 'quill-crm' ),
+			__( 'Analytics', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=analytics',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 		// Settings
 		add_submenu_page(
-			'quillcrm',
-			__( 'Settings', 'quillcrm' ),
-			__( 'Settings', 'quillcrm' ),
+			'quill-crm',
+			__( 'Settings', 'quill-crm' ),
+			__( 'Settings', 'quill-crm' ),
 			'quillcrm_access',
 			'quillcrm&path=settings',
 			array( Admin_Loader::class, 'page_wrapper' )

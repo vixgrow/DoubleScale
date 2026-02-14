@@ -71,7 +71,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 							'additionalProperties' => true,
 						),
 						'filters' => array(
-							'description' => __('Filters to apply.', 'quillcrm'),
+							'description' => __('Filters to apply.', 'quill-crm'),
 							'type'        => 'array',
 						),
 					),
@@ -338,7 +338,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 			default:
 				return new WP_Error(
 					'invalid_provider',
-					__('Invalid OAuth provider', 'quillcrm'),
+					__('Invalid OAuth provider', 'quill-crm'),
 					array('status' => 400)
 				);
 		}
@@ -410,8 +410,8 @@ class Rest_Import_Export_Controller extends REST_Controller
 					array(
 						'success' => $result,
 						'message' => $result
-							? __('GoHighLevel connection cleared', 'quillcrm')
-							: __('No connection to clear', 'quillcrm'),
+							? __('GoHighLevel connection cleared', 'quill-crm')
+							: __('No connection to clear', 'quill-crm'),
 					),
 					200
 				);
@@ -456,11 +456,18 @@ class Rest_Import_Export_Controller extends REST_Controller
 
 		// Check if file exists.
 		if (file_exists($file)) {
+			global $wp_filesystem;
+			if (empty($wp_filesystem)) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				WP_Filesystem();
+			}
+
 			// Read file.
-			readfile($file);
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV file content output for download.
+			echo $wp_filesystem->get_contents($file);
 
 			// Delete file.
-			unlink($file);
+			wp_delete_file($file);
 		}
 
 		exit;
@@ -481,7 +488,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 		if (! class_exists('QuillCRM_Pro\Import_Export\Export')) {
 			return new WP_Error(
 				'pro_feature',
-				__('Contact export is a Pro feature. Please upgrade to QuillCRM Pro.', 'quillcrm'),
+				__('Contact export is a Pro feature. Please upgrade to QuillCRM Pro.', 'quill-crm'),
 				array('status' => 403)
 			);
 		}
@@ -571,14 +578,21 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 */
 	public function get_header_columns($file_path)
 	{
-		if (($handle = fopen($file_path, 'r')) !== false) {
-			$column_names = fgetcsv($handle);
-			fclose($handle);
-
-			return $column_names;
-		} else {
-			return null;
+		global $wp_filesystem;
+		if (empty($wp_filesystem)) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
 		}
+
+		$contents = $wp_filesystem->get_contents($file_path);
+		if (false !== $contents) {
+			$lines = explode("\n", $contents);
+			if (!empty($lines[0])) {
+				return str_getcsv($lines[0]);
+			}
+		}
+
+		return null;
 	}
 
 	/**

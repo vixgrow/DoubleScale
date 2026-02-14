@@ -125,7 +125,7 @@ class Activity_Comment_Model extends Model {
 	 * @return string
 	 */
 	public function getTimeAgoAttribute() {
-		return human_time_diff( $this->created_at->timestamp, current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'quillcrm' );
+		return human_time_diff( $this->created_at->timestamp, current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'quill-crm' );
 	}
 
 	/**

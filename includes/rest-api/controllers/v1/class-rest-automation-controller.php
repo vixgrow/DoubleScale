@@ -71,7 +71,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'The IDs of the items to delete.', 'quillcrm' ),
+							'description' => __( 'The IDs of the items to delete.', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
@@ -130,17 +130,17 @@ class Rest_Automation_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'per_page' => array(
-							'description'       => __( 'Maximum number of items to be returned in result set.', 'quillcrm' ),
+							'description'       => __( 'Maximum number of items to be returned in result set.', 'quill-crm' ),
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
 						'page'     => array(
-							'description'       => __( 'Current page of the collection.', 'quillcrm' ),
+							'description'       => __( 'Current page of the collection.', 'quill-crm' ),
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
 						'keyword'  => array(
-							'description'       => __( 'Search keyword.', 'quillcrm' ),
+							'description'       => __( 'Search keyword.', 'quill-crm' ),
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -225,12 +225,12 @@ class Rest_Automation_Controller extends REST_Controller {
 					'permission_callback' => '__return_true',
 					'args'                => array(
 						'quillcrm_id'  => array(
-							'description' => __( 'The automation ID.', 'quillcrm' ),
+							'description' => __( 'The automation ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'quillcrm_key' => array(
-							'description' => __( 'The automation key.', 'quillcrm' ),
+							'description' => __( 'The automation key.', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
@@ -250,17 +250,17 @@ class Rest_Automation_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'automation_id' => array(
-							'description' => __( 'The automation ID.', 'quillcrm' ),
+							'description' => __( 'The automation ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'is_check'      => array(
-							'description' => __( 'Whether to check conditions.', 'quillcrm' ),
+							'description' => __( 'Whether to check conditions.', 'quill-crm' ),
 							'type'        => 'boolean',
 							'default'     => true,
 						),
 						'is_delete'     => array(
-							'description' => __( 'Whether to delete conditions.', 'quillcrm' ),
+							'description' => __( 'Whether to delete conditions.', 'quill-crm' ),
 							'type'        => 'boolean',
 							'default'     => false,
 						),
@@ -280,27 +280,27 @@ class Rest_Automation_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Search keyword.', 'quillcrm' ),
+				'description'       => __( 'Search keyword.', 'quill-crm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'page'     => array(
-				'description'       => __( 'Current page of the collection.', 'quillcrm' ),
+				'description'       => __( 'Current page of the collection.', 'quill-crm' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
 			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.', 'quillcrm' ),
+				'description'       => __( 'Maximum number of items to be returned in result set.', 'quill-crm' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
 			'from'     => array(
-				'description' => __( 'Start date for filtering automations.', 'quillcrm' ),
+				'description' => __( 'Start date for filtering automations.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'to'       => array(
-				'description' => __( 'End date for filtering automations.', 'quillcrm' ),
+				'description' => __( 'End date for filtering automations.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
@@ -321,12 +321,12 @@ class Rest_Automation_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'         => array(
-					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
 				 'name'       => array(
-					 'description' => __( 'The name of the automation.', 'quillcrm' ),
+					 'description' => __( 'The name of the automation.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -334,7 +334,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'trigger'    => array(
-					 'description' => __( 'The trigger of the automation.', 'quillcrm' ),
+					 'description' => __( 'The trigger of the automation.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -342,23 +342,23 @@ class Rest_Automation_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'status'     => array(
-					 'description' => __( 'The status of the automation.', 'quillcrm' ),
+					 'description' => __( 'The status of the automation.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'enum'        => array( 'active', 'inactive' ),
 					 'default'     => 'active',
 				 ),
 				 'settings'   => array(
-					 'description' => __( 'The settings of the automation.', 'quillcrm' ),
+					 'description' => __( 'The settings of the automation.', 'quill-crm' ),
 					 'type'        => 'object',
 				 ),
 				 'created_at' => array(
-					 'description' => __( 'The date the automation was created.', 'quillcrm' ),
+					 'description' => __( 'The date the automation was created.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
 				 ),
 				 'updated_at' => array(
-					 'description' => __( 'The date the automation was last updated.', 'quillcrm' ),
+					 'description' => __( 'The date the automation was last updated.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'format'      => 'date-time',
 					 'readonly'    => true,
@@ -438,12 +438,12 @@ class Rest_Automation_Controller extends REST_Controller {
 
 		$automation = Automation_Model::find( $webhook_id );
 		if ( ! $automation ) {
-			return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		$webhook_key = $automation->get_setting( 'webhook_key' );
 		if ( $webhook_key !== $webhook_key ) {
-			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'quillcrm' ), array( 'status' => 401 ) );
+			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'quill-crm' ), array( 'status' => 401 ) );
 		}
 
 		do_action( 'quillcrm_webhook_received', $automation, $params );
@@ -578,7 +578,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			$steps = Automation_Step_Model::where( 'automation_id', $id )->get();
 
 			if ( ! $steps ) {
-				return new WP_Error( 'not_found', __( 'Steps not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Steps not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$steps = $steps->toArray();
@@ -648,7 +648,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			)->find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Check plugin dependencies and add warnings
@@ -676,7 +676,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation                    = Automation_Model::create( $automation_data );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'error', __( 'Failed to create automation.', 'quillcrm' ), array( 'status' => 500 ) );
+				return new WP_Error( 'error', __( 'Failed to create automation.', 'quill-crm' ), array( 'status' => 500 ) );
 			}
 
 			$is_form = false;
@@ -716,7 +716,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation = Automation_Model::find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$automation_data = $this->prepare_automation( $request );
@@ -752,7 +752,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation = Automation_Model::find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$automation->delete();
@@ -776,12 +776,12 @@ class Rest_Automation_Controller extends REST_Controller {
 		try {
 			$ids = $request->get_param( 'ids' );
 			if ( empty( $ids ) ) {
-				return new WP_Error( 'error', __( 'No IDs provided.', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'error', __( 'No IDs provided.', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			$automations = Automation_Model::find( $ids );
 			if ( ! $automations ) {
-				return new WP_Error( 'not_found', __( 'Automations not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automations not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			foreach ( $automations as $automation ) {
@@ -830,7 +830,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					$warnings[]   = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Form trigger requires QuillCRM Pro to be installed and activated.', 'quillcrm' ),
+						'message' => __( 'Form trigger requires QuillCRM Pro to be installed and activated.', 'quill-crm' ),
 					);
 					$update_trigger_settings( $automation->trigger, true );
 				} elseif ( empty( $form ) || ! $form->is_enabled() ) {
@@ -838,7 +838,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					$warnings[]   = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Trigger requires a plugin that is not currently active.', 'quillcrm' ),
+						'message' => __( 'Trigger requires a plugin that is not currently active.', 'quill-crm' ),
 					);
 					$update_trigger_settings( $automation->trigger, true );
 				} else {
@@ -903,7 +903,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					} catch ( \Exception $e ) {
 						// Action not found - plugin missing
 						$has_warnings    = true;
-						$warning_message = __( 'Action requires a plugin that is not currently active.', 'quillcrm' );
+						$warning_message = __( 'Action requires a plugin that is not currently active.', 'quill-crm' );
 						$warnings[]      = array(
 							'type'    => 'action',
 							'step_id' => $step->id,
@@ -979,7 +979,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					} catch ( \Exception $e ) {
 						// Goal not found - plugin missing
 						$has_warnings    = true;
-						$warning_message = __( 'Goal requires a plugin that is not currently active.', 'quillcrm' );
+						$warning_message = __( 'Goal requires a plugin that is not currently active.', 'quill-crm' );
 						$warnings[]      = array(
 							'type'    => 'goal',
 							'step_id' => $step->id,
@@ -1106,7 +1106,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_active'    => $is_active,
 						'is_pro'       => true,
 						'message'      => sprintf(
-							__( 'This trigger requires QuillCRM Pro to be installed and activated.', 'quillcrm' ),
+							__( 'This trigger requires QuillCRM Pro to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1118,7 +1118,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_active'    => false,
 						'is_pro'       => false,
 						'message'      => sprintf(
-							__( 'This trigger requires %s to be installed and activated.', 'quillcrm' ),
+							__( 'This trigger requires %s to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1228,7 +1228,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_active'    => $is_active,
 						'is_pro'       => $is_pro,
 						'message'      => sprintf(
-							__( 'This action requires QuillCRM Pro to be installed and activated.', 'quillcrm' ),
+							__( 'This action requires QuillCRM Pro to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1239,7 +1239,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_active'    => false,
 						'message'      => sprintf(
 							/* translators: %s: plugin name */
-							__( 'This action requires %s to be installed and activated.', 'quillcrm' ),
+							__( 'This action requires %s to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1368,13 +1368,13 @@ class Rest_Automation_Controller extends REST_Controller {
 			if ( $unavailable_count === 1 ) {
 				$message = sprintf(
 					/* translators: %s: plugin name */
-					__( 'This condition uses 1 rule that requires %s to be installed and activated.', 'quillcrm' ),
+					__( 'This condition uses 1 rule that requires %s to be installed and activated.', 'quill-crm' ),
 					$unique_groups
 				);
 			} else {
 				$message = sprintf(
 					/* translators: %1$d: number of rules, %2$s: plugin names */
-					__( 'This condition uses %1$d rules that require plugins (%2$s) to be installed and activated.', 'quillcrm' ),
+					__( 'This condition uses %1$d rules that require plugins (%2$s) to be installed and activated.', 'quill-crm' ),
 					$unavailable_count,
 					$unique_groups
 				);
@@ -1428,7 +1428,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_active'    => $is_active,
 						'is_pro'       => true,
 						'message'      => sprintf(
-							__( 'This goal requires QuillCRM Pro to be installed and activated.', 'quillcrm' ),
+							__( 'This goal requires QuillCRM Pro to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1441,7 +1441,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						'is_pro'       => false,
 						'message'      => sprintf(
 							/* translators: %s: plugin name */
-							__( 'This goal requires %s to be installed and activated.', 'quillcrm' ),
+							__( 'This goal requires %s to be installed and activated.', 'quill-crm' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1480,13 +1480,13 @@ class Rest_Automation_Controller extends REST_Controller {
 
 		$automation = Automation_Model::find( $automation_id );
 		if ( ! $automation ) {
-			return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		// get trigger
 		$trigger = Triggers_Manager::instance()->get_trigger( $automation->trigger );
 		if ( ! $trigger ) {
-			return new WP_Error( 'not_found', __( 'Trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Trigger not found.', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		$trigger_source = $trigger->source;

@@ -73,7 +73,7 @@ class Add_Contact extends Action {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add contact to list action failed. List ID is required.', 'quillcrm' ),
+				__( 'Mailchimp add contact to list action failed. List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_add_contact',
 					'data' => array(
@@ -94,7 +94,7 @@ class Add_Contact extends Action {
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add contact to list action failed. Mailchimp API connection failed.', 'quillcrm' ),
+				__( 'Mailchimp add contact to list action failed. Mailchimp API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_connect',
 					'data' => array(
@@ -121,7 +121,7 @@ class Add_Contact extends Action {
 		$result = $api->add_subscriber( $list, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add contact to list action failed. Failed to add contact to list.', 'quillcrm' ),
+				__( 'Mailchimp add contact to list action failed. Failed to add contact to list.', 'quill-crm' ),
 				array(
 					'code'     => 'mailchimp_add_contact',
 					'data'     => array(
@@ -140,7 +140,7 @@ class Add_Contact extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mailchimp add contact to list action completed successfully.', 'quillcrm' ),
+			__( 'Mailchimp add contact to list action completed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mailchimp_add_contact',
 				'response' => $result,
@@ -175,7 +175,7 @@ class Add_Contact extends Action {
 	public function get_fields() {
 		return array(
 			'list' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'mailchimp/lists',
 			),

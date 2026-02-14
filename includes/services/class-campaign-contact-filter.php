@@ -146,7 +146,7 @@ class Campaign_Contact_Filter {
 	 */
 	public function log_skipped_contact( $contact_id, $campaign_id, $type, $reason ) {
 		quillcrm_get_logger()->info(
-			sprintf( __( 'Contact skipped - %s', 'quillcrm' ), $reason ),
+			sprintf( __( 'Contact skipped - %s', 'quill-crm' ), $reason ),
 			array(
 				'contact_id'  => $contact_id,
 				'campaign_id' => $campaign_id,

@@ -75,7 +75,7 @@ class Add_Tags extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'List ID is required to add tags.', 'quillcrm' ),
+				__( 'List ID is required to add tags.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_add_tags',
 					'data' => array(
@@ -94,7 +94,7 @@ class Add_Tags extends Action {
 
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Tags are required to add tags.', 'quillcrm' ),
+				__( 'Tags are required to add tags.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_add_tags',
 					'data' => array(
@@ -115,7 +115,7 @@ class Add_Tags extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to connect to GetResponse.', 'quillcrm' ),
+				__( 'Failed to connect to GetResponse.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -148,7 +148,7 @@ class Add_Tags extends Action {
 		$result = $api->create_or_update_contact( $email, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add tags to GetResponse.', 'quillcrm' ),
+				__( 'Failed to add tags to GetResponse.', 'quill-crm' ),
 				array(
 					'code'     => 'getresponse_add_tags',
 					'data'     => array(
@@ -167,7 +167,7 @@ class Add_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Tags added to GetResponse.', 'quillcrm' ),
+			__( 'Tags added to GetResponse.', 'quill-crm' ),
 			array(
 				'code'     => 'getresponse_add_tags',
 				'data'     => array(
@@ -217,12 +217,12 @@ class Add_Tags extends Action {
 		return array(
 			'tags'    => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'getresponse/tags',
 				'multiple' => true,
 			),
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'getresponse/lists',
 			),

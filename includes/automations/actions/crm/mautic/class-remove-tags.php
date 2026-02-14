@@ -73,7 +73,7 @@ class Remove_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Tags action is missing tags.', 'quillcrm' ),
+				__( 'Mautic Remove Tags action is missing tags.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_remove_tags',
 					'data' => array(
@@ -108,7 +108,7 @@ class Remove_Tags extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Tags: Could not connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Remove Tags: Could not connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -128,7 +128,7 @@ class Remove_Tags extends Action {
 		$result = $api->create_or_update_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Tags: Could not create or update contact.', 'quillcrm' ),
+				__( 'Mautic Remove Tags: Could not create or update contact.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_create_or_update_contact',
 					'data'     => array(
@@ -147,7 +147,7 @@ class Remove_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			__( 'Mautic Remove Tags: Tags removed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_remove_tags',
 				'response' => $result,
@@ -185,7 +185,7 @@ class Remove_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'mautic/tags',
 				'multiple' => true,
 			),

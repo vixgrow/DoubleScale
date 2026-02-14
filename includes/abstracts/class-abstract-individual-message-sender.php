@@ -107,7 +107,7 @@ abstract class Abstract_Individual_Message_Sender {
 			// Validate contact exists
 			$contact = Contact_Model::find( $contact_id );
 			if ( ! $contact ) {
-				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Contact not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Validate recipient (channel-specific)
@@ -125,7 +125,7 @@ abstract class Abstract_Individual_Message_Sender {
 						'provider_not_configured',
 						sprintf(
 							/* translators: %s: channel name (SMS, WhatsApp, etc.) */
-							__( '%s provider not configured. Please configure a provider in settings.', 'quillcrm' ),
+							__( '%s provider not configured. Please configure a provider in settings.', 'quill-crm' ),
 							ucfirst( $channel )
 						),
 						array( 'status' => 500 )
@@ -326,7 +326,7 @@ abstract class Abstract_Individual_Message_Sender {
 		quillcrm_get_logger()->info(
 			sprintf(
 				/* translators: %s: channel name (SMS, WhatsApp, etc.) */
-				__( 'Individual %s sent successfully', 'quillcrm' ),
+				__( 'Individual %s sent successfully', 'quill-crm' ),
 				ucfirst( $this->get_channel_type() )
 			),
 			array(
@@ -346,7 +346,7 @@ abstract class Abstract_Individual_Message_Sender {
 				'success'     => true,
 				'message'     => sprintf(
 					/* translators: %s: channel name (SMS, WhatsApp, etc.) */
-					__( '%s sent successfully', 'quillcrm' ),
+					__( '%s sent successfully', 'quill-crm' ),
 					ucfirst( $this->get_channel_type() )
 				),
 				'activity_id' => $activity->id,
@@ -386,7 +386,7 @@ abstract class Abstract_Individual_Message_Sender {
 		quillcrm_get_logger()->error(
 			sprintf(
 				/* translators: %s: channel name (SMS, WhatsApp, etc.) */
-				__( 'Individual %s send exception', 'quillcrm' ),
+				__( 'Individual %s send exception', 'quill-crm' ),
 				ucfirst( $this->get_channel_type() )
 			),
 			array(

@@ -364,19 +364,19 @@ class Activity_Model extends Model
 	 */
 	public function getFormattedMessageAttribute()
 	{
-		$user_name = $this->user ? $this->user->display_name : __('Unknown User', 'quillcrm');
+		$user_name = $this->user ? $this->user->display_name : __('Unknown User', 'quill-crm');
 
 		switch ($this->activity_type) {
 			case 'created':
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s created this deal', 'quillcrm'),
+					__('%s created this deal', 'quill-crm'),
 					$user_name
 				);
 
 			case 'stage_changed':
-				$old_stage_name = __('Unknown Stage', 'quillcrm');
-				$new_stage_name = __('Unknown Stage', 'quillcrm');
+				$old_stage_name = __('Unknown Stage', 'quill-crm');
+				$new_stage_name = __('Unknown Stage', 'quill-crm');
 
 				if (class_exists('\QuillCRM_Pro\Models\Pipeline_Stage_Model')) {
 					$old_stage = \QuillCRM_Pro\Models\Pipeline_Stage_Model::find($this->data['old_stage_id'] ?? 0);
@@ -388,7 +388,7 @@ class Activity_Model extends Model
 
 				return sprintf(
 					/* translators: 1: user name, 2: old stage name, 3: new stage name */
-					__('%1$s moved deal from "%2$s" to "%3$s"', 'quillcrm'),
+					__('%1$s moved deal from "%2$s" to "%3$s"', 'quill-crm'),
 					$user_name,
 					$old_stage_name,
 					$new_stage_name
@@ -397,7 +397,7 @@ class Activity_Model extends Model
 			case 'value_changed':
 				return sprintf(
 					/* translators: 1: user name, 2: old value, 3: new value */
-					__('%1$s changed deal value from %2$s to %3$s', 'quillcrm'),
+					__('%1$s changed deal value from %2$s to %3$s', 'quill-crm'),
 					$user_name,
 					$this->data['old_value'] ?? 0,
 					$this->data['new_value'] ?? 0
@@ -408,21 +408,21 @@ class Activity_Model extends Model
 				if ('won' === $status) {
 					return sprintf(
 						/* translators: %s: user name */
-						__('%s marked deal as won', 'quillcrm'),
+						__('%s marked deal as won', 'quill-crm'),
 						$user_name
 					);
 				} elseif ('lost' === $status) {
 					$reason = ! empty($this->data['reason']) ? ' - ' . $this->data['reason'] : '';
 					return sprintf(
 						/* translators: 1: user name, 2: reason */
-						__('%1$s marked deal as lost%2$s', 'quillcrm'),
+						__('%1$s marked deal as lost%2$s', 'quill-crm'),
 						$user_name,
 						$reason
 					);
 				}
 				return sprintf(
 					/* translators: 1: user name, 2: status */
-					__('%1$s changed deal status to %2$s', 'quillcrm'),
+					__('%1$s changed deal status to %2$s', 'quill-crm'),
 					$user_name,
 					$status
 				);
@@ -430,7 +430,7 @@ class Activity_Model extends Model
 			case 'note':
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s added a note', 'quillcrm'),
+					__('%s added a note', 'quill-crm'),
 					$user_name
 				);
 
@@ -441,14 +441,14 @@ class Activity_Model extends Model
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__('%s sent an email', 'quillcrm'),
+					__('%s sent an email', 'quill-crm'),
 					$user_name
 				);
 
 				if (! empty($subject)) {
 					$message .= sprintf(
 						/* translators: %s: email subject */
-						__(' with subject "%s"', 'quillcrm'),
+						__(' with subject "%s"', 'quill-crm'),
 						$subject
 					);
 				}
@@ -457,7 +457,7 @@ class Activity_Model extends Model
 					$recipient = ! empty($contact_name) ? $contact_name : $contact_email;
 					$message  .= sprintf(
 						/* translators: %s: recipient */
-						__(' to %s', 'quillcrm'),
+						__(' to %s', 'quill-crm'),
 						$recipient
 					);
 				}
@@ -471,14 +471,14 @@ class Activity_Model extends Model
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__('%s logged a call', 'quillcrm'),
+					__('%s logged a call', 'quill-crm'),
 					$user_name
 				);
 
 				if (! empty($phone_number)) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__(' to %s', 'quillcrm'),
+						__(' to %s', 'quill-crm'),
 						$phone_number
 					);
 				}
@@ -486,7 +486,7 @@ class Activity_Model extends Model
 				if (! empty($outcome)) {
 					$message .= sprintf(
 						/* translators: %s: call outcome */
-						__(' with outcome: %s', 'quillcrm'),
+						__(' with outcome: %s', 'quill-crm'),
 						$outcome
 					);
 				}
@@ -494,7 +494,7 @@ class Activity_Model extends Model
 				if ($duration) {
 					$message .= sprintf(
 						/* translators: %d: duration in minutes */
-						__(' (Duration: %d minutes)', 'quillcrm'),
+						__(' (Duration: %d minutes)', 'quill-crm'),
 						$duration
 					);
 				}
@@ -508,7 +508,7 @@ class Activity_Model extends Model
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__('%s scheduled a meeting', 'quillcrm'),
+					__('%s scheduled a meeting', 'quill-crm'),
 					$user_name
 				);
 
@@ -519,7 +519,7 @@ class Activity_Model extends Model
 				if (! empty($attendee_name)) {
 					$message .= sprintf(
 						/* translators: %s: attendee name */
-						__(' with %s', 'quillcrm'),
+						__(' with %s', 'quill-crm'),
 						$attendee_name
 					);
 				}
@@ -528,7 +528,7 @@ class Activity_Model extends Model
 					$formatted_date = date_i18n('M j, Y \a\t g:i A', strtotime($scheduled_at));
 					$message       .= sprintf(
 						/* translators: %s: scheduled date */
-						__(' for %s', 'quillcrm'),
+						__(' for %s', 'quill-crm'),
 						$formatted_date
 					);
 				}
@@ -538,14 +538,14 @@ class Activity_Model extends Model
 			case 'sms_sent':
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s sent an SMS', 'quillcrm'),
+					__('%s sent an SMS', 'quill-crm'),
 					$user_name
 				);
 
 			case 'whatsapp_sent':
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s sent a WhatsApp message', 'quillcrm'),
+					__('%s sent a WhatsApp message', 'quill-crm'),
 					$user_name
 				);
 
@@ -553,14 +553,14 @@ class Activity_Model extends Model
 				$ip_address = $this->data['ip_address'] ?? '';
 				$message    = sprintf(
 					/* translators: %s: user name */
-					__('%s logged in', 'quillcrm'),
+					__('%s logged in', 'quill-crm'),
 					$user_name
 				);
 
 				if (! empty($ip_address)) {
 					$message .= sprintf(
 						/* translators: %s: IP address */
-						__(' from IP: %s', 'quillcrm'),
+						__(' from IP: %s', 'quill-crm'),
 						$ip_address
 					);
 				}
@@ -570,14 +570,14 @@ class Activity_Model extends Model
 			case 'logged_out':
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s logged out', 'quillcrm'),
+					__('%s logged out', 'quill-crm'),
 					$user_name
 				);
 
 			default:
 				return sprintf(
 					/* translators: %s: user name */
-					__('%s performed an action', 'quillcrm'),
+					__('%s performed an action', 'quill-crm'),
 					$user_name
 				);
 		}

@@ -139,30 +139,30 @@ class Send_Email extends Abstract_Send_Message {
 	public function get_fields() {
 		return array(
 			'subject'    => array(
-				'label'       => __( 'Subject', 'quillcrm' ),
+				'label'       => __( 'Subject', 'quill-crm' ),
 				'type'        => 'text',
 				'required'    => true,
-				'placeholder' => __( 'Enter email subject...', 'quillcrm' ),
+				'placeholder' => __( 'Enter email subject...', 'quill-crm' ),
 			),
 			'body'       => array(
-				'label'    => __( 'Body', 'quillcrm' ),
+				'label'    => __( 'Body', 'quill-crm' ),
 				'type'     => 'open_builder',
 				'required' => true,
 			),
 			'from_name'  => array(
-				'label'       => __( 'From Name', 'quillcrm' ),
+				'label'       => __( 'From Name', 'quill-crm' ),
 				'type'        => 'text',
 				'placeholder' => get_bloginfo( 'name' ),
 			),
 			'from_email' => array(
-				'label'       => __( 'From Email', 'quillcrm' ),
+				'label'       => __( 'From Email', 'quill-crm' ),
 				'type'        => 'from_email',
 				'placeholder' => get_option( 'admin_email' ),
 			),
 			'reply_to'   => array(
-				'label'       => __( 'Reply To', 'quillcrm' ),
+				'label'       => __( 'Reply To', 'quill-crm' ),
 				'type'        => 'email',
-				'placeholder' => __( 'Optional reply-to address', 'quillcrm' ),
+				'placeholder' => __( 'Optional reply-to address', 'quill-crm' ),
 			),
 		);
 	}
@@ -219,11 +219,11 @@ class Send_Email extends Abstract_Send_Message {
 		$reply_to   = $step->get_setting( 'reply_to' );
 
 		if ( empty( $subject ) ) {
-			throw new \Exception( __( 'Email subject is empty.', 'quillcrm' ) );
+			throw new \Exception( __( 'Email subject is empty.', 'quill-crm' ) );
 		}
 
 		if ( empty( $body ) ) {
-			throw new \Exception( __( 'Email body is empty.', 'quillcrm' ) );
+			throw new \Exception( __( 'Email body is empty.', 'quill-crm' ) );
 		}
 
 		return array(

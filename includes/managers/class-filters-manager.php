@@ -82,27 +82,27 @@ final class Filters_Manager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'name'    => __( 'Contact', 'quillcrm' ),
+				'name'    => __( 'Contact', 'quill-crm' ),
 				'filters' => array(),
 			),
 			'lead_scoring'   => array(
-				'name'    => __( 'Lead Scoring', 'quillcrm' ),
+				'name'    => __( 'Lead Scoring', 'quill-crm' ),
 				'filters' => array(),
 			),
 			'contact_fields' => array(
-				'name'    => __( 'Contact Fields', 'quillcrm' ),
+				'name'    => __( 'Contact Fields', 'quill-crm' ),
 				'filters' => array(),
 			),
 			'segments'       => array(
-				'name'    => __( 'Segments', 'quillcrm' ),
+				'name'    => __( 'Segments', 'quill-crm' ),
 				'filters' => array(),
 			),
 			'user'           => array(
-				'name'    => __( 'User', 'quillcrm' ),
+				'name'    => __( 'User', 'quill-crm' ),
 				'filters' => array(),
 			),
 			'activity'       => array(
-				'name'    => __( 'Activity', 'quillcrm' ),
+				'name'    => __( 'Activity', 'quill-crm' ),
 				'filters' => array(),
 			),
 		);

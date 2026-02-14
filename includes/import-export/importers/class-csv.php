@@ -73,7 +73,7 @@ class CSV extends Importer {
 	public function run() {
 		$mapping = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
-			throw new \Exception( __( 'Email field is required.', 'quillcrm' ) );
+			throw new \Exception( __( 'Email field is required.', 'quill-crm' ) );
 		}
 
 		$file_path = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/' . $this->file_name;
@@ -93,7 +93,7 @@ class CSV extends Importer {
 		);
 
 		if ( 'completed' === $result['status'] ) {
-			unlink( $file_path );
+			wp_delete_file( $file_path );
 		}
 
 		return $result;
@@ -107,7 +107,7 @@ class CSV extends Importer {
 	public function get_fields() {
 		return array(
 			'file_name' => array(
-				'label'      => __( 'File Name', 'quillcrm' ),
+				'label'      => __( 'File Name', 'quill-crm' ),
 				'type'       => 'file',
 				'conditions' => array(
 					'relation' => 'and',
@@ -120,7 +120,7 @@ class CSV extends Importer {
 				),
 			),
 			'mapping'   => array(
-				'label'      => __( 'Mapping', 'quillcrm' ),
+				'label'      => __( 'Mapping', 'quill-crm' ),
 				'type'       => 'contact_mapped_fields',
 				'conditions' => array(
 					'relation' => 'and',

@@ -72,17 +72,17 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			array(
 				'args' => array(
 					'id'       => array(
-						'description' => __( 'Campaign ID', 'quillcrm' ),
+						'description' => __( 'Campaign ID', 'quill-crm' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'per_page' => array(
-						'description' => __( 'Items per page', 'quillcrm' ),
+						'description' => __( 'Items per page', 'quill-crm' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'     => array(
-						'description' => __( 'Page number', 'quillcrm' ),
+						'description' => __( 'Page number', 'quill-crm' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -93,7 +93,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'status' => array(
-							'description' => __( 'Message status filter', 'quillcrm' ),
+							'description' => __( 'Message status filter', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed', 'pending', 'delivered', 'scheduled' ),
 							'required'    => false,
@@ -110,17 +110,17 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			array(
 				'args' => array(
 					'id'       => array(
-						'description' => __( 'Campaign ID', 'quillcrm' ),
+						'description' => __( 'Campaign ID', 'quill-crm' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'per_page' => array(
-						'description' => __( 'Items per page', 'quillcrm' ),
+						'description' => __( 'Items per page', 'quill-crm' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'     => array(
-						'description' => __( 'Page number', 'quillcrm' ),
+						'description' => __( 'Page number', 'quill-crm' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -144,12 +144,12 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'id'         => array(
-							'description' => __( 'Campaign ID', 'quillcrm' ),
+							'description' => __( 'Campaign ID', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'message_id' => array(
-							'description' => __( 'Message/Tracking ID', 'quillcrm' ),
+							'description' => __( 'Message/Tracking ID', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -169,40 +169,40 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array(
 						'channel'    => array(
-							'description' => __( 'Channel type', 'quillcrm' ),
+							'description' => __( 'Channel type', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						// Email parameters.
 						'email'      => array(
-							'description' => __( 'Email address (for email channel)', 'quillcrm' ),
+							'description' => __( 'Email address (for email channel)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						'subject'    => array(
-							'description' => __( 'Email subject (for email channel)', 'quillcrm' ),
+							'description' => __( 'Email subject (for email channel)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						'from_name'  => array(
-							'description' => __( 'From name (for email channel)', 'quillcrm' ),
+							'description' => __( 'From name (for email channel)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						'from_email' => array(
-							'description' => __( 'From email (for email channel)', 'quillcrm' ),
+							'description' => __( 'From email (for email channel)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						'reply_to'   => array(
-							'description' => __( 'Reply-to email (for email channel)', 'quillcrm' ),
+							'description' => __( 'Reply-to email (for email channel)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						// SMS/WhatsApp parameters.
 						'phone'      => array(
-							'description' => __( 'Phone number (for SMS/WhatsApp channels)', 'quillcrm' ),
+							'description' => __( 'Phone number (for SMS/WhatsApp channels)', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						// Common parameter.
 						'message'    => array(
-							'description' => __( 'Message content (body for email, message for SMS/WhatsApp)', 'quillcrm' ),
+							'description' => __( 'Message content (body for email, message for SMS/WhatsApp)', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
@@ -222,12 +222,12 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'id'     => array(
-							'description' => __( 'Campaign ID', 'quillcrm' ),
+							'description' => __( 'Campaign ID', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'emails' => array(
-							'description' => __( 'Array of email addresses to send test emails to', 'quillcrm' ),
+							'description' => __( 'Array of email addresses to send test emails to', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'string' ),
 							'required'    => true,
@@ -248,7 +248,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'permission_callback' => array( $this, 'bulk_delete_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'Array of campaign IDs to delete', 'quillcrm' ),
+							'description' => __( 'Array of campaign IDs to delete', 'quill-crm' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'integer' ),
 							'required'    => true,
@@ -300,7 +300,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		if ( $type === Campaign_Channel::STR_WHATSAPP ) {
 			return new WP_Error(
 				'whatsapp_campaigns_disabled',
-				__( 'WhatsApp campaigns are not available. WhatsApp messaging is supported for automations and individual contact messaging only.', 'quillcrm' ),
+				__( 'WhatsApp campaigns are not available. WhatsApp messaging is supported for automations and individual contact messaging only.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -310,7 +310,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		if ( ! in_array( $type, $valid_campaign_channels, true ) ) {
 			return new WP_Error(
 				'invalid_type',
-				__( 'Invalid campaign type. Must be "email" or "sms".', 'quillcrm' ),
+				__( 'Invalid campaign type. Must be "email" or "sms".', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -426,7 +426,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		if ( empty( $channel ) ) {
 			return new WP_Error(
 				'missing_channel',
-				__( 'Channel parameter is required', 'quillcrm' ),
+				__( 'Channel parameter is required', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -458,7 +458,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( empty( $email ) ) {
 				return new WP_Error(
 					'missing_email',
-					__( 'Email address is required for email channel', 'quillcrm' ),
+					__( 'Email address is required for email channel', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -466,7 +466,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( empty( $subject ) ) {
 				return new WP_Error(
 					'missing_subject',
-					__( 'Subject is required for email channel', 'quillcrm' ),
+					__( 'Subject is required for email channel', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -491,13 +491,13 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( ! $result ) {
 				return new WP_Error(
 					'send_failed',
-					__( 'Failed to send test email', 'quillcrm' ),
+					__( 'Failed to send test email', 'quill-crm' ),
 					array( 'status' => 500 )
 				);
 			}
 
 			return new WP_REST_Response(
-				array( 'message' => __( 'Test email sent successfully', 'quillcrm' ) ),
+				array( 'message' => __( 'Test email sent successfully', 'quill-crm' ) ),
 				200
 			);
 		} catch ( \Exception $e ) {
@@ -518,7 +518,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
 			// Validate emails array
 			if ( empty( $emails ) || ! is_array( $emails ) ) {
-				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'quillcrm' ), array( 'status' => 400 ) );
+				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'quill-crm' ), array( 'status' => 400 ) );
 			}
 
 			// Validate all email addresses
@@ -534,7 +534,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'invalid_emails',
 					sprintf(
 						/* translators: %s: comma-separated list of invalid email addresses */
-						__( 'Invalid email address(es): %s', 'quillcrm' ),
+						__( 'Invalid email address(es): %s', 'quill-crm' ),
 						implode( ', ', $invalid_emails )
 					),
 					array( 'status' => 400 )
@@ -544,7 +544,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			// Get campaign
 			$campaign = Campaign_Model::find( $campaign_id );
 			if ( ! $campaign ) {
-				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Get template ID from campaign
@@ -554,13 +554,13 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			$template_id = $campaign_settings['template_ids'][0] ?? $campaign_settings['templates'][0]['id'] ?? null;
 
 			if ( ! $template_id ) {
-				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Get template
 			$template = Template_Model::find( $template_id );
 			if ( ! $template ) {
-				return new WP_Error( 'template_not_found', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'template_not_found', __( 'Template not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Extract template settings
@@ -622,7 +622,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 								'Test email sent successfully to %d recipient',
 								'Test emails sent successfully to %d recipients',
 								$sent_count,
-								'quillcrm'
+								'quill-crm'
 							),
 							$sent_count
 						),
@@ -636,7 +636,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 						'success'       => true,
 						'message'       => sprintf(
 							/* translators: 1: number of successful sends, 2: number of failures */
-							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'quillcrm' ),
+							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'quill-crm' ),
 							$sent_count,
 							$failed_count
 						),
@@ -651,7 +651,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'send_failed',
 					sprintf(
 						/* translators: %s: comma-separated list of failed email addresses */
-						__( 'Failed to send test email to: %s', 'quillcrm' ),
+						__( 'Failed to send test email to: %s', 'quill-crm' ),
 						implode( ', ', $failed_emails )
 					),
 					array( 'status' => 500 )
@@ -673,7 +673,8 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		// SMS/WhatsApp test messages moved to Pro plugin
 		return new WP_Error(
 			'pro_feature_required',
-			sprintf( __( '%s messaging is available in QuillCRM Pro.', 'quillcrm' ), ucfirst( $channel ) ),
+			/* translators: %s: channel name (e.g., SMS, WhatsApp) */
+			sprintf( __( '%s messaging is available in QuillCRM Pro.', 'quill-crm' ), ucfirst( $channel ) ),
 			array( 'status' => 403 )
 		);
 	}
@@ -684,9 +685,17 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * @return string
 	 */
 	private function get_default_test_email_content() {
-		$default_content = sprintf(
-			__( '<div><p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p>Don\'t want to stay in the loop? We\'ll be sad to see you go, but you can click here to <a href="{{contact:unsubscribe_link}}" target="_blank">unsubscribe</a>.</p></div>', 'quillcrm' )
+		$greeting        = sprintf(
+			/* translators: %1$s: first name merge tag, %2$s: last name merge tag */
+			__( 'Hi %1$s %2$s,', 'quill-crm' ),
+			'{{contact:first_name}}',
+			'{{contact:last_name}}'
 		);
+		$thank_you       = __( 'Thank you for subscribing to our updates.', 'quill-crm' );
+		$unsubscribe_msg = __( "Don't want to stay in the loop? We'll be sad to see you go, but you can click here to", 'quill-crm' );
+		$unsubscribe_txt = __( 'unsubscribe', 'quill-crm' );
+
+		$default_content = '<div><p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p>' . esc_html( $unsubscribe_msg ) . ' <a href="{{contact:unsubscribe_link}}" target="_blank">' . esc_html( $unsubscribe_txt ) . '</a>.</p></div>';
 
 		return apply_filters( 'quillcrm_default_test_email_content', $default_content );
 	}
@@ -704,7 +713,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( empty( $campaign_ids ) || ! is_array( $campaign_ids ) ) {
 				return new WP_Error(
 					'invalid_ids',
-					__( 'Invalid campaign IDs provided', 'quillcrm' ),
+					__( 'Invalid campaign IDs provided', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -715,7 +724,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( $campaigns->isEmpty() ) {
 				return new WP_Error(
 					'campaigns_not_found',
-					__( 'No campaigns found with the provided IDs', 'quillcrm' ),
+					__( 'No campaigns found with the provided IDs', 'quill-crm' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -726,7 +735,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			return new WP_REST_Response(
 				array(
 					'deleted' => count( $campaign_ids ),
-					'message' => __( 'Campaigns deleted successfully', 'quillcrm' ),
+					'message' => __( 'Campaigns deleted successfully', 'quill-crm' ),
 				),
 				200
 			);
@@ -761,7 +770,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( ! $campaign ) {
 				return new WP_Error(
 					'campaign_not_found',
-					__( 'Campaign not found', 'quillcrm' ),
+					__( 'Campaign not found', 'quill-crm' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -771,7 +780,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( ! $tracking ) {
 				return new WP_Error(
 					'message_not_found',
-					__( 'Message not found', 'quillcrm' ),
+					__( 'Message not found', 'quill-crm' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -780,7 +789,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( (int) $tracking->source_id !== $campaign_id || (int) $tracking->source_type !== Message_Source_Types::CAMPAIGN ) {
 				return new WP_Error(
 					'invalid_message',
-					__( 'Message does not belong to this campaign', 'quillcrm' ),
+					__( 'Message does not belong to this campaign', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -790,7 +799,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			if ( ! $contact ) {
 				return new WP_Error(
 					'contact_not_found',
-					__( 'Contact not found', 'quillcrm' ),
+					__( 'Contact not found', 'quill-crm' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -811,7 +820,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					} else {
 						return new WP_Error(
 							'pro_feature_required',
-							__( 'SMS campaigns require QuillCRM Pro', 'quillcrm' ),
+							__( 'SMS campaigns require QuillCRM Pro', 'quill-crm' ),
 							array( 'status' => 403 )
 						);
 					}
@@ -823,7 +832,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					} else {
 						return new WP_Error(
 							'pro_feature_required',
-							__( 'WhatsApp campaigns require QuillCRM Pro', 'quillcrm' ),
+							__( 'WhatsApp campaigns require QuillCRM Pro', 'quill-crm' ),
 							array( 'status' => 403 )
 						);
 					}
@@ -831,7 +840,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				default:
 					return new WP_Error(
 						'invalid_campaign_type',
-						__( 'Invalid campaign type', 'quillcrm' ),
+						__( 'Invalid campaign type', 'quill-crm' ),
 						array( 'status' => 400 )
 					);
 			}
@@ -842,7 +851,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			return rest_ensure_response(
 				array(
 					'success' => true,
-					'message' => __( 'Message queued for resending', 'quillcrm' ),
+					'message' => __( 'Message queued for resending', 'quill-crm' ),
 				)
 			);
 		} catch ( \Exception $e ) {
@@ -872,7 +881,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			// Get campaign to determine channel type
 			$campaign = Campaign_Model::find( $campaign_id );
 			if ( ! $campaign ) {
-				return new WP_Error( 'not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Campaign not found', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			// Determine mode integer based on campaign type

@@ -74,7 +74,7 @@ class Add_To_Group extends Action {
 
 		if ( empty( $group_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Add To Group: Group ID is required.', 'quillcrm' ),
+				__( 'MailerLite Add To Group: Group ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'mailerlite_add_to_group',
 					'data' => array(
@@ -95,7 +95,7 @@ class Add_To_Group extends Action {
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Add To Group: API connection failed.', 'quillcrm' ),
+				__( 'MailerLite Add To Group: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'mailerlite_connect',
 					'data' => array(
@@ -123,7 +123,7 @@ class Add_To_Group extends Action {
 		$result = $api->add_subscriber( $subscriber );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add contact to MailerLite group.', 'quillcrm' ),
+				__( 'Failed to add contact to MailerLite group.', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_add_to_group',
 					'data'     => array(
@@ -142,7 +142,7 @@ class Add_To_Group extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact added to MailerLite group.', 'quillcrm' ),
+			__( 'Contact added to MailerLite group.', 'quill-crm' ),
 			array(
 				'code'     => 'mailerlite_add_to_group',
 				'response' => $result,
@@ -162,7 +162,7 @@ class Add_To_Group extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'group_id' => array(
-					'description' => __( 'Group ID', 'quillcrm' ),
+					'description' => __( 'Group ID', 'quill-crm' ),
 					'type'        => array( 'string', 'integer' ),
 					'required'    => true,
 				),
@@ -178,7 +178,7 @@ class Add_To_Group extends Action {
 	public function get_fields() {
 		return array(
 			'group_id' => array(
-				'label'    => __( 'Group ID', 'quillcrm' ),
+				'label'    => __( 'Group ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'mailerlite/groups',
 			),

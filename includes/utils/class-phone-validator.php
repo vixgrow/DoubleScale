@@ -63,14 +63,14 @@ class Phone_Validator {
 		if ( empty( $phone ) ) {
 			return array(
 				'valid' => false,
-				'error' => __( 'Phone number is required', 'quillcrm' ),
+				'error' => __( 'Phone number is required', 'quill-crm' ),
 			);
 		}
 
 		if ( ! self::is_valid( $phone ) ) {
 			$error_message = sprintf(
 				/* translators: %s: example phone number */
-				__( 'Invalid phone number format. Please use E.164 format (e.g., %s)', 'quillcrm' ),
+				__( 'Invalid phone number format. Please use E.164 format (e.g., %s)', 'quill-crm' ),
 				'+1234567890'
 			);
 
@@ -140,7 +140,7 @@ class Phone_Validator {
 	 * @return string Human-readable format description
 	 */
 	public static function get_format_description() {
-		return __( 'E.164 format: +[country code][number] (e.g., +1234567890)', 'quillcrm' );
+		return __( 'E.164 format: +[country code][number] (e.g., +1234567890)', 'quill-crm' );
 	}
 
 	/**

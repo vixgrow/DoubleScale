@@ -262,7 +262,7 @@ abstract class Form
 			$this->save_form_submission($data, $contact->id);
 
 			quillcrm_get_logger()->info(
-				__('Contact created successfully', 'quillcrm'),
+				__('Contact created successfully', 'quill-crm'),
 				array(
 					'id'     => $contact->id,
 					'email'  => $contact->email,
@@ -271,7 +271,7 @@ abstract class Form
 			);
 		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__('Error creating contact', 'quillcrm'),
+				__('Error creating contact', 'quill-crm'),
 				array(
 					'code'  => 'error_creating_contact',
 					'data'  => $data,
@@ -309,7 +309,7 @@ abstract class Form
 			do_action('quillcrm_form_submitted', $contact_id);
 		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__('Error saving form submission', 'quillcrm'),
+				__('Error saving form submission', 'quill-crm'),
 				array(
 					'code'  => 'error_saving_form_submission',
 					'data'  => $data,
@@ -567,7 +567,7 @@ abstract class Form
 			}
 		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__('Error processing automations', 'quillcrm'),
+				__('Error processing automations', 'quill-crm'),
 				array(
 					'code'  => 'error_processing_automations',
 					'data'  => $args,
@@ -651,7 +651,7 @@ abstract class Form
 			return $contact;
 		} catch (Exception $e) {
 			quillcrm_get_logger()->error(
-				__('Error creating contact', 'quillcrm'),
+				__('Error creating contact', 'quill-crm'),
 				array(
 					'code'  => 'error_creating_contact',
 					'data'  => $contact_data ?? array(),
@@ -695,7 +695,7 @@ abstract class Form
 	{
 		$options = array(
 			'form_id' => array(
-				'label'       => __('Form ID', 'quillcrm'),
+				'label'       => __('Form ID', 'quill-crm'),
 				'type'        => 'ajax_select',
 				'ajax_action' => "quillcrm_{$this->slug}_get_form_select_options",
 			),

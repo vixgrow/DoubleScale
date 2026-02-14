@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Import_Export\Importers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Importer;
 use QuillCRM\Import_Export\Importers\FluentCRM;
 use QuillCRM\Import_Export\Importers\Funnelkit;
@@ -153,7 +157,7 @@ class Manager {
 	 */
 	public function get_importer( $slug ) {
 		if ( ! isset( $this->importers[ $slug ] ) ) {
-			throw new \Exception( __( 'Importer not found', 'quillcrm' ) );
+			throw new \Exception( __( 'Importer not found', 'quill-crm' ) );
 		}
 
 		return $this->importers[ $slug ];

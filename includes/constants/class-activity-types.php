@@ -177,23 +177,32 @@ class Activity_Types
 	public static function get_activity_message( $type, $user_name = null )
 	{
 		if ( null === $user_name ) {
-			$user_name = __( 'Unknown User', 'quillcrm' );
+			$user_name = __( 'Unknown User', 'quill-crm' );
 		}
 
 		$messages = [
-			self::NOTE              => sprintf( __( '%s added a note', 'quillcrm' ), $user_name ),
-			self::EMAIL_SENT        => sprintf( __( '%s sent an email', 'quillcrm' ), $user_name ),
-			self::CALL_LOGGED       => sprintf( __( '%s logged a call', 'quillcrm' ), $user_name ),
-			self::MEETING_SCHEDULED => sprintf( __( '%s scheduled a meeting', 'quillcrm' ), $user_name ),
-			self::DEAL_CREATED      => sprintf( __( '%s created this record', 'quillcrm' ), $user_name ),
-			self::STAGE_CHANGED     => sprintf( __( '%s changed the stage', 'quillcrm' ), $user_name ),
-			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'quillcrm' ), $user_name ),
-			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'quillcrm' ), $user_name ),
-			self::LOGGED_IN         => __( 'Contact logged in', 'quillcrm' ),
-			self::LOGGED_OUT        => __( 'Contact logged out', 'quillcrm' ),
+			/* translators: %s: user name */
+			self::NOTE              => sprintf( __( '%s added a note', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::EMAIL_SENT        => sprintf( __( '%s sent an email', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::CALL_LOGGED       => sprintf( __( '%s logged a call', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::MEETING_SCHEDULED => sprintf( __( '%s scheduled a meeting', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::DEAL_CREATED      => sprintf( __( '%s created this record', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::STAGE_CHANGED     => sprintf( __( '%s changed the stage', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'quill-crm' ), $user_name ),
+			/* translators: %s: user name */
+			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'quill-crm' ), $user_name ),
+			self::LOGGED_IN         => __( 'Contact logged in', 'quill-crm' ),
+			self::LOGGED_OUT        => __( 'Contact logged out', 'quill-crm' ),
 		];
 
-		return isset( $messages[ $type ] ) ? $messages[ $type ] : sprintf( __( '%s performed an action', 'quillcrm' ), ucfirst( $user_name ) );
+		/* translators: %s: user name */
+		return isset( $messages[ $type ] ) ? $messages[ $type ] : sprintf( __( '%s performed an action', 'quill-crm' ), ucfirst( $user_name ) );
 	}
 
 	/**
@@ -208,22 +217,22 @@ class Activity_Types
 	public static function get_type_label( $type )
 	{
 		$labels = [
-			self::NOTE              => __( 'Note', 'quillcrm' ),
-			self::EMAIL_SENT        => __( 'Email Sent', 'quillcrm' ),
-			self::EMAIL_RECEIVED    => __( 'Email Received', 'quillcrm' ),
-			self::CALL_LOGGED       => __( 'Call Logged', 'quillcrm' ),
-			self::MEETING_SCHEDULED => __( 'Meeting Scheduled', 'quillcrm' ),
-			self::SMS_SENT          => __( 'SMS Sent', 'quillcrm' ),
-			self::SMS_RECEIVED      => __( 'SMS Received', 'quillcrm' ),
-			self::WHATSAPP_SENT     => __( 'WhatsApp Sent', 'quillcrm' ),
-			self::WHATSAPP_RECEIVED => __( 'WhatsApp Received', 'quillcrm' ),
-			self::CREATED           => __( 'Created', 'quillcrm' ),
-			self::DEAL_CREATED      => __( 'Deal Created', 'quillcrm' ),
-			self::STAGE_CHANGED     => __( 'Stage Changed', 'quillcrm' ),
-			self::VALUE_CHANGED     => __( 'Value Changed', 'quillcrm' ),
-			self::STATUS_CHANGED    => __( 'Status Changed', 'quillcrm' ),
-			self::LOGGED_IN         => __( 'Logged In', 'quillcrm' ),
-			self::LOGGED_OUT        => __( 'Logged Out', 'quillcrm' ),
+			self::NOTE              => __( 'Note', 'quill-crm' ),
+			self::EMAIL_SENT        => __( 'Email Sent', 'quill-crm' ),
+			self::EMAIL_RECEIVED    => __( 'Email Received', 'quill-crm' ),
+			self::CALL_LOGGED       => __( 'Call Logged', 'quill-crm' ),
+			self::MEETING_SCHEDULED => __( 'Meeting Scheduled', 'quill-crm' ),
+			self::SMS_SENT          => __( 'SMS Sent', 'quill-crm' ),
+			self::SMS_RECEIVED      => __( 'SMS Received', 'quill-crm' ),
+			self::WHATSAPP_SENT     => __( 'WhatsApp Sent', 'quill-crm' ),
+			self::WHATSAPP_RECEIVED => __( 'WhatsApp Received', 'quill-crm' ),
+			self::CREATED           => __( 'Created', 'quill-crm' ),
+			self::DEAL_CREATED      => __( 'Deal Created', 'quill-crm' ),
+			self::STAGE_CHANGED     => __( 'Stage Changed', 'quill-crm' ),
+			self::VALUE_CHANGED     => __( 'Value Changed', 'quill-crm' ),
+			self::STATUS_CHANGED    => __( 'Status Changed', 'quill-crm' ),
+			self::LOGGED_IN         => __( 'Logged In', 'quill-crm' ),
+			self::LOGGED_OUT        => __( 'Logged Out', 'quill-crm' ),
 		];
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

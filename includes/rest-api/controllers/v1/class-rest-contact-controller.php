@@ -66,32 +66,32 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'keyword'            => array(
-							'description' => __( 'Keyword to search.', 'quillcrm' ),
+							'description' => __( 'Keyword to search.', 'quill-crm' ),
 							'type'        => 'string',
 						),
 						'per_page'           => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'description' => __( 'Number of items to fetch.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'page'               => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
+							'description' => __( 'Page number.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'filters'            => array(
-							'description' => __( 'Filters to apply.', 'quillcrm' ),
+							'description' => __( 'Filters to apply.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 						'subscribed'         => array(
-							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
+							'description' => __( 'Subscribed contacts.', 'quill-crm' ),
 							'type'        => 'boolean',
 						),
 						'campaign_type'      => array(
-							'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
+							'description' => __( 'Campaign type for filtering contacts.', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						'has_whatsapp_phone' => array(
-							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'quillcrm' ),
+							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'quill-crm' ),
 							'type'        => 'boolean',
 						),
 					),
@@ -108,7 +108,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'description' => __( 'Contact IDs.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 					),
@@ -151,15 +151,15 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'description' => __( 'Number of items to fetch.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
+							'description' => __( 'Page number.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -178,7 +178,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'send_opt_in_email_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -197,28 +197,28 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'send_message_permissions_check' ),
 					'args'                => array(
 						'id'      => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'channel' => array(
-							'description' => __( 'Communication channel: email, sms, or whatsapp.', 'quillcrm' ),
+							'description' => __( 'Communication channel: email, sms, or whatsapp.', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						'to'      => array(
-							'description' => __( 'Recipient (email address or phone number in E.164 format).', 'quillcrm' ),
+							'description' => __( 'Recipient (email address or phone number in E.164 format).', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'body'    => array(
-							'description' => __( 'Message body (HTML for email, plain text for SMS/WhatsApp).', 'quillcrm' ),
+							'description' => __( 'Message body (HTML for email, plain text for SMS/WhatsApp).', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'subject' => array(
-							'description' => __( 'Email subject (required for email, ignored for SMS/WhatsApp).', 'quillcrm' ),
+							'description' => __( 'Email subject (required for email, ignored for SMS/WhatsApp).', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => false,
 						),
@@ -238,15 +238,15 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_automation_contacts_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'description' => __( 'Number of items to fetch.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
+							'description' => __( 'Page number.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -277,18 +277,18 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_analytics_permissions_check' ),
 					'args'                => array(
 						'interval'   => array(
-							'description' => __( 'Interval for the analytics.', 'quillcrm' ),
+							'description' => __( 'Interval for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => array( 'custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
 							'required'    => false,
 						),
 						'start_date' => array(
-							'description' => __( 'Start date for the analytics.', 'quillcrm' ),
+							'description' => __( 'Start date for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
 						'end_date'   => array(
-							'description' => __( 'End date for the analytics.', 'quillcrm' ),
+							'description' => __( 'End date for the analytics.', 'quill-crm' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
@@ -308,11 +308,11 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'add_to_lists_permissions_check' ),
 					'args'                => array(
 						'ids'      => array(
-							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'description' => __( 'Contact IDs.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 						'list_ids' => array(
-							'description' => __( 'Lists to add.', 'quillcrm' ),
+							'description' => __( 'Lists to add.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 					),
@@ -331,11 +331,11 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'remove_from_lists_permissions_check' ),
 					'args'                => array(
 						'ids'      => array(
-							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'description' => __( 'Contact IDs.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 						'list_ids' => array(
-							'description' => __( 'Lists to remove.', 'quillcrm' ),
+							'description' => __( 'Lists to remove.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 					),
@@ -354,11 +354,11 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'add_tags_permissions_check' ),
 					'args'                => array(
 						'ids'     => array(
-							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'description' => __( 'Contact IDs.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 						'tag_ids' => array(
-							'description' => __( 'Tags to add.', 'quillcrm' ),
+							'description' => __( 'Tags to add.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 					),
@@ -377,11 +377,11 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'remove_tags_permissions_check' ),
 					'args'                => array(
 						'ids'     => array(
-							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'description' => __( 'Contact IDs.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 						'tag_ids' => array(
-							'description' => __( 'Tags to remove.', 'quillcrm' ),
+							'description' => __( 'Tags to remove.', 'quill-crm' ),
 							'type'        => 'array',
 						),
 					),
@@ -404,24 +404,24 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_messages_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'mode'     => array(
-							'description' => __( 'Message channel: email, sms, or whatsapp.', 'quillcrm' ),
+							'description' => __( 'Message channel: email, sms, or whatsapp.', 'quill-crm' ),
 							'type'        => 'string',
 							'required'    => false,
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 							'default'     => 'email',
 						),
 						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'description' => __( 'Number of items to fetch.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 25,
 						),
 						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
+							'description' => __( 'Page number.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
@@ -441,36 +441,36 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_purchase_history_permissions_check' ),
 					'args'                => array(
 						'id'                => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 						'woo_page'          => array(
-							'description' => __( 'WooCommerce page number.', 'quillcrm' ),
+							'description' => __( 'WooCommerce page number.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'woo_per_page'      => array(
-							'description' => __( 'WooCommerce items per page.', 'quillcrm' ),
+							'description' => __( 'WooCommerce items per page.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
 						'edd_page'          => array(
-							'description' => __( 'EDD page number.', 'quillcrm' ),
+							'description' => __( 'EDD page number.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'edd_per_page'      => array(
-							'description' => __( 'EDD items per page.', 'quillcrm' ),
+							'description' => __( 'EDD items per page.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
 						'surecart_page'     => array(
-							'description' => __( 'SureCart page number.', 'quillcrm' ),
+							'description' => __( 'SureCart page number.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'surecart_per_page' => array(
-							'description' => __( 'SureCart items per page.', 'quillcrm' ),
+							'description' => __( 'SureCart items per page.', 'quill-crm' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
@@ -490,7 +490,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -509,7 +509,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'description' => __( 'Contact ID.', 'quill-crm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -532,26 +532,26 @@ class REST_Contact_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'              => array(
-					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
 				 'first_name'      => array(
-					 'description'  => __( 'First name of the contact.', 'quillcrm' ),
+					 'description'  => __( 'First name of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'last_name'       => array(
-					 'description'  => __( 'Last name of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Last name of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'email'           => array(
-					 'description'  => __( 'Email of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Email of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'required'     => true,
 					 'args_options' => array(
@@ -559,14 +559,14 @@ class REST_Contact_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'phone'           => array(
-					 'description'  => __( 'Phone number of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Phone number of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'whatsapp_phone'  => array(
-					 'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quillcrm' ),
+					 'description'  => __( 'WhatsApp phone number of the contact in E.164 format (e.g., +12025551234).', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
@@ -579,7 +579,7 @@ class REST_Contact_Controller extends REST_Controller {
 							if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
 								return new WP_Error(
 									'rest_invalid_param',
-									sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quillcrm' ), $param ),
+									sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quill-crm' ), $param ),
 									array( 'status' => 400 )
 								);
 							}
@@ -588,49 +588,49 @@ class REST_Contact_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'address_1'       => array(
-					 'description'  => __( 'Address line 1 of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Address line 1 of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'address_2'       => array(
-					 'description'  => __( 'Address line 2 of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Address line 2 of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'city'            => array(
-					 'description'  => __( 'City of the contact.', 'quillcrm' ),
+					 'description'  => __( 'City of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'state'           => array(
-					 'description'  => __( 'State of the contact.', 'quillcrm' ),
+					 'description'  => __( 'State of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'country'         => array(
-					 'description'  => __( 'Country of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Country of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'zip'             => array(
-					 'description'  => __( 'Zip code of the contact.', 'quillcrm' ),
+					 'description'  => __( 'Zip code of the contact.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'args_options' => array(
 						 'sanitize_callback' => 'sanitize_text_field',
 					 ),
 				 ),
 				 'email_status'    => array(
-					 'description'  => __( 'Email subscription status.', 'quillcrm' ),
+					 'description'  => __( 'Email subscription status.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified' ),
 					 'default'      => 'subscribed',
@@ -639,7 +639,7 @@ class REST_Contact_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'sms_status'      => array(
-					 'description'  => __( 'SMS subscription status.', 'quillcrm' ),
+					 'description'  => __( 'SMS subscription status.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					 'default'      => 'subscribed',
@@ -648,7 +648,7 @@ class REST_Contact_Controller extends REST_Controller {
 					 ),
 				 ),
 				 'whatsapp_status' => array(
-					 'description'  => __( 'WhatsApp subscription status.', 'quillcrm' ),
+					 'description'  => __( 'WhatsApp subscription status.', 'quill-crm' ),
 					 'type'         => 'string',
 					 'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					 'default'      => 'subscribed',
@@ -1365,7 +1365,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			return new WP_Error(
 				'invalid_mode',
-				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode_int ),
+				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode_int ),
 				array( 'status' => 400 )
 			);
 		}
@@ -1380,7 +1380,7 @@ class REST_Contact_Controller extends REST_Controller {
 		if ( ! isset( $mode_map[ $mode ] ) ) {
 			return new WP_Error(
 				'invalid_mode',
-				sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode ),
+				sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode ),
 				array( 'status' => 400 )
 			);
 		}
@@ -1417,6 +1417,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			$total_sent    = (int) ( $stats->total_sent ?? 0 );
@@ -1449,6 +1450,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			return array(
@@ -1472,7 +1474,7 @@ class REST_Contact_Controller extends REST_Controller {
 		if ( ! $contact ) {
 			return new WP_Error(
 				'contact_not_found',
-				__( 'Contact not found', 'quillcrm' ),
+				__( 'Contact not found', 'quill-crm' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -2026,7 +2028,7 @@ class REST_Contact_Controller extends REST_Controller {
 					// Check if custom field exists
 					$custom_field_model = \QuillCRM_Pro\Models\Custom_Field_Model::find( $custom_field['id'] );
 					if ( ! $custom_field_model ) {
-						return new WP_Error( 'error', __( 'Custom field not found', 'quillcrm' ), array( 'status' => 400 ) );
+						return new WP_Error( 'error', __( 'Custom field not found', 'quill-crm' ), array( 'status' => 400 ) );
 					}
 					$validated = $custom_field_model->validate_value( $custom_field['value'] );
 
@@ -2110,16 +2112,16 @@ class REST_Contact_Controller extends REST_Controller {
 			foreach ( $dates['dates'] as $date ) {
 				switch ( $type ) {
 					case 'hour':
-						$contacts[ $date ] = Contact_Model::whereBetween( 'created_at', array( $date, date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
+						$contacts[ $date ] = Contact_Model::whereBetween( 'created_at', array( $date, gmdate( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
 						break;
 					case 'day':
-						$contacts[ $date ] = Contact_Model::whereDay( 'created_at', date( 'd', strtotime( $date ) ) )->count();
+						$contacts[ $date ] = Contact_Model::whereDay( 'created_at', gmdate( 'd', strtotime( $date ) ) )->count();
 						break;
 					case 'month':
-						$contacts[ $date ] = Contact_Model::whereMonth( 'created_at', date( 'm', strtotime( $date ) ) )->count();
+						$contacts[ $date ] = Contact_Model::whereMonth( 'created_at', gmdate( 'm', strtotime( $date ) ) )->count();
 						break;
 					case 'year':
-						$contacts[ $date ] = Contact_Model::whereYear( 'created_at', date( 'Y', strtotime( $date ) ) )->count();
+						$contacts[ $date ] = Contact_Model::whereYear( 'created_at', gmdate( 'Y', strtotime( $date ) ) )->count();
 						break;
 				}
 			}
@@ -2156,7 +2158,7 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			$double_optin = Settings::get( 'double_optin', array() );
-			$subject      = $double_optin['email_subject'] ?? __( 'Confirm Subscription', 'quillcrm' );
+			$subject      = $double_optin['email_subject'] ?? __( 'Confirm Subscription', 'quill-crm' );
 			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
 			$body         = $double_optin['email_content'] ?? $this->default_opt_in_email_body();
 			$body         = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
@@ -2225,7 +2227,7 @@ class REST_Contact_Controller extends REST_Controller {
 		if ( ! in_array( $channel, Campaign_Channel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
-				__( 'Invalid channel. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				__( 'Invalid channel. Must be email, sms, or whatsapp.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -2234,7 +2236,7 @@ class REST_Contact_Controller extends REST_Controller {
 		if ( $channel === Campaign_Channel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
-				__( 'Subject is required for email messages.', 'quillcrm' ),
+				__( 'Subject is required for email messages.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -2250,14 +2252,14 @@ class REST_Contact_Controller extends REST_Controller {
 				// SMS/WhatsApp messaging moved to Pro plugin
 				return new WP_Error(
 					'pro_feature_required',
-					__( 'SMS and WhatsApp messaging are available in QuillCRM Pro.', 'quillcrm' ),
+					__( 'SMS and WhatsApp messaging are available in QuillCRM Pro.', 'quill-crm' ),
 					array( 'status' => 403 )
 				);
 
 			default:
 				return new WP_Error(
 					'invalid_channel',
-					__( 'Invalid channel specified.', 'quillcrm' ),
+					__( 'Invalid channel specified.', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 		}

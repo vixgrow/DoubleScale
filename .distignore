@@ -1,0 +1,34 @@
+# Directories
+/.git
+/.github
+/node_modules
+/tests
+/src
+
+# Files
+.distignore
+.editorconfig
+.gitattributes
+.gitignore
+.prettierrc.js
+.eslintrc.js
+.eslintignore
+.stylelintrc.json
+.nvmrc
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml
+phpcs.xml.dist
+phpunit.xml
+phpunit.xml.dist
+webpack.config.js
+Gruntfile.js
+gulpfile.js
+tsconfig.json
+*.map
+*.ts
+*.tsx
+*.scss
+*.less

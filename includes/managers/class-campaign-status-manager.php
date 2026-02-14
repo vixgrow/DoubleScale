@@ -83,16 +83,16 @@ final class Campaign_Status_Manager
   public function get_status_labels()
   {
     return [
-      self::DRAFT => __('Draft', 'quillcrm'),
-      self::INACTIVE => __('Inactive', 'quillcrm'),
-      self::ACTIVE => __('Active', 'quillcrm'),
-      self::SCHEDULED => __('Scheduled', 'quillcrm'),
-      self::PROCESSING => __('Processing', 'quillcrm'),
-      self::COMPLETED => __('Completed', 'quillcrm'),
-      self::RESENDING => __('Resending', 'quillcrm'),
-      self::PAUSED => __('Paused', 'quillcrm'),
-      self::CANCELLED => __('Cancelled', 'quillcrm'),
-      self::FAILED => __('Failed', 'quillcrm'),
+      self::DRAFT => __('Draft', 'quill-crm'),
+      self::INACTIVE => __('Inactive', 'quill-crm'),
+      self::ACTIVE => __('Active', 'quill-crm'),
+      self::SCHEDULED => __('Scheduled', 'quill-crm'),
+      self::PROCESSING => __('Processing', 'quill-crm'),
+      self::COMPLETED => __('Completed', 'quill-crm'),
+      self::RESENDING => __('Resending', 'quill-crm'),
+      self::PAUSED => __('Paused', 'quill-crm'),
+      self::CANCELLED => __('Cancelled', 'quill-crm'),
+      self::FAILED => __('Failed', 'quill-crm'),
     ];
   }
 

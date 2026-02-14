@@ -218,7 +218,7 @@ abstract class Importer {
 	 */
 	public function import() {
 		if ( ! $this->is_active() ) {
-			return new \WP_Error( 'importer_not_active', __( 'The importer is not active', 'quillcrm' ) );
+			return new \WP_Error( 'importer_not_active', __( 'The importer is not active', 'quill-crm' ) );
 		}
 		$this->start_time = microtime( true );
 		return $this->run();
@@ -342,7 +342,7 @@ abstract class Importer {
 
 			return 'skipped';
 		} catch ( \Exception $e ) {
-			$error_message = __( 'Error importing contact', 'quillcrm' ) . ': ' . $e->getMessage();
+			$error_message = __( 'Error importing contact', 'quill-crm' ) . ': ' . $e->getMessage();
 			quillcrm_get_logger()->error(
 				$error_message,
 				array(
@@ -542,7 +542,7 @@ abstract class Importer {
 
 		// If no group name provided, use default
 		if ( empty( $group_name ) ) {
-			$group_name = __( 'Imported Fields', 'quillcrm' );
+			$group_name = __( 'Imported Fields', 'quill-crm' );
 			$group_slug = 'imported-fields';
 		} else {
 			$group_slug = sanitize_title( $group_name );

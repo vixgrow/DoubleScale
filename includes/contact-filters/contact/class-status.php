@@ -79,9 +79,9 @@ class Status extends Filter {
 	 */
 	public function get_options() {
 		return array(
-			'subscribed'   => __( 'Subscribed', 'quillcrm' ),
-			'unsubscribed' => __( 'Unsubscribed', 'quillcrm' ),
-			'bounced'      => __( 'Bounced', 'quillcrm' ),
+			'subscribed'   => __( 'Subscribed', 'quill-crm' ),
+			'unsubscribed' => __( 'Unsubscribed', 'quill-crm' ),
+			'bounced'      => __( 'Bounced', 'quill-crm' ),
 		);
 	}
 }

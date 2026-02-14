@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Exception;
 use QuillCRM\Abstracts\Goal;
 
@@ -113,11 +117,12 @@ final class Goals_Manager {
 	 */
 	public function register( Goal $goal ) {
 		if ( ! $goal instanceof Goal ) {
-			throw new Exception( __( 'Invalid goal', 'quillcrm' ) );
+			throw new Exception( __( 'Invalid goal', 'quill-crm' ) );
 		}
 
 		if ( isset( $this->goals[ $goal->slug ] ) ) {
-			throw new Exception( sprintf( __( 'Goal %s already registered', 'quillcrm' ), $goal->name ) );
+			/* translators: %s: goal name */
+			throw new Exception( sprintf( __( 'Goal %s already registered', 'quill-crm' ), $goal->name ) );
 		}
 
 		$this->goals[ $goal->slug ] = $goal;
@@ -154,7 +159,8 @@ final class Goals_Manager {
 			return $this->goals[ $slug ];
 		}
 
-		throw new Exception( sprintf( __( 'Goal %s not found', 'quillcrm' ), $slug ) );
+		/* translators: %s: goal slug */
+		throw new Exception( sprintf( __( 'Goal %s not found', 'quill-crm' ), $slug ) );
 	}
 
 	/**
@@ -176,24 +182,24 @@ final class Goals_Manager {
 	public function set_sources() {
 		 $this->sources = array(
 			 'automation'  => array(
-				 'label'  => __( 'Automation', 'quillcrm' ),
+				 'label'  => __( 'Automation', 'quill-crm' ),
 				 'groups' => array(
 					 'contact' => array(
-						 'label' => __( 'Contact', 'quillcrm' ),
+						 'label' => __( 'Contact', 'quill-crm' ),
 						 'goals' => array(),
 					 ),
 				 ),
 			 ),
 			 'woocommerce' => array(
-				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'label'  => __( 'WooCommerce', 'quill-crm' ),
 				 'groups' => array(
 					 'coupon' => array(
-						 'label'       => __( 'Coupon', 'quillcrm' ),
+						 'label'       => __( 'Coupon', 'quill-crm' ),
 						 'goals'       => array(),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'cart'   => array(
-						 'label'       => __( 'Cart', 'quillcrm' ),
+						 'label'       => __( 'Cart', 'quill-crm' ),
 						 'goals'       => array(),
 						 'triggers'    => array( 'wc_abandoned_cart_created' ),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
@@ -201,10 +207,10 @@ final class Goals_Manager {
 				 ),
 			 ),
 			 'surecart'    => array(
-				 'label'  => __( 'SureCart', 'quillcrm' ),
+				 'label'  => __( 'SureCart', 'quill-crm' ),
 				 'groups' => array(
 					 'order' => array(
-						 'label'       => __( 'Order', 'quillcrm' ),
+						 'label'       => __( 'Order', 'quill-crm' ),
 						 'goals'       => array(),
 						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
 					 ),

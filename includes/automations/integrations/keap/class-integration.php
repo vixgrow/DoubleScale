@@ -108,11 +108,11 @@ class Integration extends Integration_Abstract {
 		$secret    = $settings['client_secret'] ?? '';
 
 		if ( empty( $client_id ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quill-crm' ) );
 		}
 
 		if ( empty( $secret ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API Secret is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API Secret is required.', 'quill-crm' ) );
 		}
 
 		return true;

@@ -73,7 +73,7 @@ class Remove_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Remove Tags: Tags is empty.', 'quillcrm' ),
+				__( 'Keap Remove Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'keap_remove_tags',
 					'data' => array(
@@ -94,7 +94,7 @@ class Remove_Tags extends Action {
 		$api  = $keap->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Remove Tags: API is not connected.', 'quillcrm' ),
+				__( 'Keap Remove Tags: API is not connected.', 'quill-crm' ),
 				array(
 					'code' => 'keap_connect',
 					'data' => array(
@@ -114,7 +114,7 @@ class Remove_Tags extends Action {
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Remove Tags: Failed to get contact.', 'quillcrm' ),
+				__( 'Keap Remove Tags: Failed to get contact.', 'quill-crm' ),
 				array(
 					'code'     => 'keap_get_contact',
 					'data'     => array(
@@ -140,7 +140,7 @@ class Remove_Tags extends Action {
 		$result = $api->remove_tags( $contact_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Remove Tags: Failed to remove tags.', 'quillcrm' ),
+				__( 'Keap Remove Tags: Failed to remove tags.', 'quill-crm' ),
 				array(
 					'code'     => 'keap_remove_tags',
 					'data'     => array(
@@ -159,7 +159,7 @@ class Remove_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Keap Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			__( 'Keap Remove Tags: Tags removed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'keap_remove_tags',
 				'data'     => array(
@@ -207,7 +207,7 @@ class Remove_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'keap/tags',
 				'multiple' => true,
 			),

@@ -74,7 +74,7 @@ class Add_To_List extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Add To List action failed. List ID is empty.', 'quillcrm' ),
+				__( 'Klaviyo Add To List action failed. List ID is empty.', 'quill-crm' ),
 				array(
 					'code' => 'klaviyo_add_to_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Add_To_List extends Action {
 		$api     = $klaviyo->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Add To List action failed. Unable to connect to Klaviyo.', 'quillcrm' ),
+				__( 'Klaviyo Add To List action failed. Unable to connect to Klaviyo.', 'quill-crm' ),
 				array(
 					'code' => 'klaviyo_connect',
 					'data' => array(
@@ -125,7 +125,7 @@ class Add_To_List extends Action {
 		$result = $api->create_or_update_profile( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Add To List action failed. Failed to create or update profile.', 'quillcrm' ),
+				__( 'Klaviyo Add To List action failed. Failed to create or update profile.', 'quill-crm' ),
 				array(
 					'code'     => 'klaviyo_create_or_update_profile',
 					'data'     => array(
@@ -156,7 +156,7 @@ class Add_To_List extends Action {
 		$result = $api->add_profile_to_list( $list_id, $list_data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Klaviyo Add To List action failed. Failed to add profile to list.', 'quillcrm' ),
+				__( 'Klaviyo Add To List action failed. Failed to add profile to list.', 'quill-crm' ),
 				array(
 					'code'     => 'klaviyo_add_profile_to_list',
 					'data'     => array(
@@ -175,7 +175,7 @@ class Add_To_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Klaviyo Add To List action completed successfully.', 'quillcrm' ),
+			__( 'Klaviyo Add To List action completed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'klaviyo_add_to_list',
 				'response' => $result,
@@ -195,7 +195,7 @@ class Add_To_List extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'list_id' => array(
-					'description' => __( 'List ID', 'quillcrm' ),
+					'description' => __( 'List ID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
@@ -211,7 +211,7 @@ class Add_To_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'klaviyo/lists',
 			),

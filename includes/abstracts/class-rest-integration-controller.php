@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Abstracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -110,7 +114,7 @@ class REST_Integration_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'settings' => array(
-					 'description' => __( 'Integration Settings', 'quillcrm' ),
+					 'description' => __( 'Integration Settings', 'quill-crm' ),
 					 'type'        => 'object',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -196,7 +200,7 @@ class REST_Integration_Controller extends REST_Controller {
 					return $validator;
 				}
 				if ( ! $validator ) {
-					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quill-crm' ), array( 'status' => 400 ) );
 				}
 			}
 

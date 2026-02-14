@@ -71,11 +71,12 @@ final class Integrations_Manager {
 	 */
 	public function register( Integration $integration, $override = false ) {
 		if ( ! $integration instanceof Integration ) {
-			throw new Exception( __( 'Invalid integration', 'quillcrm' ) );
+			throw new Exception( __( 'Invalid integration', 'quill-crm' ) );
 		}
 
 		if ( isset( $this->integrations[ $integration->slug ] ) && ! $override ) {
-			throw new Exception( sprintf( __( 'Integration %s already registered', 'quillcrm' ), $integration->name ) );
+			/* translators: %s: integration name */
+			throw new Exception( sprintf( __( 'Integration %s already registered', 'quill-crm' ), $integration->name ) );
 		}
 
 		$this->integrations[ $integration->slug ] = $integration;
@@ -102,7 +103,8 @@ final class Integrations_Manager {
 			return $this->integrations[ $slug ];
 		}
 
-		throw new Exception( sprintf( __( 'Integration %s not found', 'quillcrm' ), $slug ) );
+		/* translators: %s: integration slug */
+		throw new Exception( sprintf( __( 'Integration %s not found', 'quill-crm' ), $slug ) );
 	}
 
 	/**

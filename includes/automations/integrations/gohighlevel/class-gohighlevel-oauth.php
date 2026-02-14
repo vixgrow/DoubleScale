@@ -8,6 +8,10 @@
 
 namespace QuillCRM\Automations\Integrations\GoHighLevel;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Settings;
 
 /**
@@ -85,7 +89,7 @@ class GoHighLevel_OAuth {
 		$client_secret = $_GET['client_secret'] ?? '';
 		
 		if ( empty( $client_id ) || empty( $client_secret ) ) {
-			echo esc_html__( 'Cannot find client credentials!', 'quillcrm' );
+			echo esc_html__( 'Cannot find client credentials!', 'quill-crm' );
 			exit;
 		}
 
@@ -93,9 +97,8 @@ class GoHighLevel_OAuth {
 		set_transient('quillcrm_ghl_temp_client_secret', $client_secret, 600); // 10 minutes
 
 		$auth_url = self::get_authorization_url( $client_id );
-		error_log("GoHighLevel OAuth: Redirecting to: " . $auth_url);
-		error_log("GoHighLevel OAuth: Redirect URI: " . self::get_redirect_uri());
-		wp_redirect( $auth_url );
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect to external OAuth provider
+		wp_redirect( esc_url_raw( $auth_url ) );
 		exit;
 	}
 
@@ -113,7 +116,7 @@ class GoHighLevel_OAuth {
 		// ensure authorize code.
 		$code = $_GET['code'] ?? null;
 		if ( empty( $code ) ) {
-			echo esc_html__( 'Error, There is no authorize code passed!', 'quillcrm' );
+			echo esc_html__( 'Error, There is no authorize code passed!', 'quill-crm' );
 			exit;
 		}
 
@@ -122,7 +125,7 @@ class GoHighLevel_OAuth {
 		$client_secret = get_transient('quillcrm_ghl_temp_client_secret');
 
 		if ( ! $client_id || ! $client_secret ) {
-			echo esc_html__( 'Error, OAuth session expired!', 'quillcrm' );
+			echo esc_html__( 'Error, OAuth session expired!', 'quill-crm' );
 			exit;
 		}
 
@@ -141,14 +144,14 @@ class GoHighLevel_OAuth {
 		]);
 
 		if ( is_wp_error( $response ) ) {
-			echo esc_html__( 'Error, Cannot exchange code for tokens!', 'quillcrm' );
+			echo esc_html__( 'Error, Cannot exchange code for tokens!', 'quill-crm' );
 			exit;
 		}
 
 		$tokens = json_decode( wp_remote_retrieve_body( $response ), true );
 		
 		if ( empty( $tokens['access_token'] ) ) {
-			echo esc_html__( 'Error, Invalid token response!', 'quillcrm' );
+			echo esc_html__( 'Error, Invalid token response!', 'quill-crm' );
 			exit;
 		}
 
@@ -176,7 +179,7 @@ class GoHighLevel_OAuth {
 			<title>Authorization Complete</title>
 		</head>
 		<body>
-			<p><?php echo esc_html__( "The account is added successfully. If this window isn't closed automatically. Please close it and refresh your accounts select menu.", 'quillcrm' ); ?></p>
+			<p><?php echo esc_html__( "The account is added successfully. If this window isn't closed automatically. Please close it and refresh your accounts select menu.", 'quill-crm' ); ?></p>
 			<script>
 				if ( window.opener ) {
 					// Fallback: just close and refresh parent

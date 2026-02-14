@@ -73,7 +73,7 @@ class Remove_Subscriber_From_List extends Action {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Subscriber From List action is missing list_id.', 'quillcrm' ),
+				__( 'Mautic Remove Subscriber From List action is missing list_id.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_remove_contact_from_list',
 					'data' => array(
@@ -101,7 +101,7 @@ class Remove_Subscriber_From_List extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Subscriber From List: Could not connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Remove Subscriber From List: Could not connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -121,7 +121,7 @@ class Remove_Subscriber_From_List extends Action {
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Subscriber From List: Failed to get or create contact.', 'quillcrm' ),
+				__( 'Mautic Remove Subscriber From List: Failed to get or create contact.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_get_or_create_contact',
 					'data'     => array(
@@ -143,7 +143,7 @@ class Remove_Subscriber_From_List extends Action {
 		$result     = $api->remove_contact_from_list( $contact_id, $list_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Remove Subscriber From List: Failed to remove contact from list.', 'quillcrm' ),
+				__( 'Mautic Remove Subscriber From List: Failed to remove contact from list.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_remove_contact_from_list',
 					'data'     => array(
@@ -162,7 +162,7 @@ class Remove_Subscriber_From_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Remove Subscriber From List: Contact removed from list.', 'quillcrm' ),
+			__( 'Mautic Remove Subscriber From List: Contact removed from list.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_remove_contact_from_list',
 				'response' => $result,
@@ -198,7 +198,7 @@ class Remove_Subscriber_From_List extends Action {
 		return array(
 			'list_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'List', 'quillcrm' ),
+				'label'    => __( 'List', 'quill-crm' ),
 				'endpoint' => 'mautic/lists',
 			),
 		);

@@ -77,14 +77,14 @@ abstract class Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'               => __( 'Is', 'quillcrm' ),
-			'is_not'           => __( 'Is not', 'quillcrm' ),
-			'contains'         => __( 'Contains', 'quillcrm' ),
-			'does_not_contain' => __( 'Does not contain', 'quillcrm' ),
-			'starts_with'      => __( 'Starts with', 'quillcrm' ),
-			'ends_with'        => __( 'Ends with', 'quillcrm' ),
-			'is_empty'         => __( 'Is empty', 'quillcrm' ),
-			'is_not_empty'     => __( 'Is not empty', 'quillcrm' ),
+			'is'               => __( 'Is', 'quill-crm' ),
+			'is_not'           => __( 'Is not', 'quill-crm' ),
+			'contains'         => __( 'Contains', 'quill-crm' ),
+			'does_not_contain' => __( 'Does not contain', 'quill-crm' ),
+			'starts_with'      => __( 'Starts with', 'quill-crm' ),
+			'ends_with'        => __( 'Ends with', 'quill-crm' ),
+			'is_empty'         => __( 'Is empty', 'quill-crm' ),
+			'is_not_empty'     => __( 'Is not empty', 'quill-crm' ),
 		);
 	}
 

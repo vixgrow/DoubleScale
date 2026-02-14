@@ -29,25 +29,25 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'account_sid'  => array(
-					'label'       => __( 'Account SID', 'quillcrm' ),
+					'label'       => __( 'Account SID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'context'     => array( 'view' ),
-					'description' => __( 'Your Twilio Account SID. This feature requires QuillCRM Pro.', 'quillcrm' ),
+					'description' => __( 'Your Twilio Account SID. This feature requires QuillCRM Pro.', 'quill-crm' ),
 				),
 				'auth_token'   => array(
-					'label'       => __( 'Auth Token', 'quillcrm' ),
+					'label'       => __( 'Auth Token', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'context'     => array(),
-					'description' => __( 'Your Twilio Auth Token. This feature requires QuillCRM Pro.', 'quillcrm' ),
+					'description' => __( 'Your Twilio Auth Token. This feature requires QuillCRM Pro.', 'quill-crm' ),
 				),
 				'phone_number' => array(
-					'label'       => __( 'Phone Number', 'quillcrm' ),
+					'label'       => __( 'Phone Number', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'context'     => array( 'view' ),
-					'description' => __( 'Your Twilio Phone Number (with country code, e.g., +1234567890). This feature requires QuillCRM Pro.', 'quillcrm' ),
+					'description' => __( 'Your Twilio Phone Number (with country code, e.g., +1234567890). This feature requires QuillCRM Pro.', 'quill-crm' ),
 				),
 			),
 		);

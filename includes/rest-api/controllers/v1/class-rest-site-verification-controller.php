@@ -104,7 +104,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 		if ( ! is_ssl() ) {
 			return new WP_Error(
 				'ssl_required',
-				__( 'SSL is required for login.', 'quillcrm' ),
+				__( 'SSL is required for login.', 'quill-crm' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -117,7 +117,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 		if ( is_wp_error( $user ) ) {
 			return new WP_Error(
 				'login_failed',
-				__( 'Invalid username or password.', 'quillcrm' ),
+				__( 'Invalid username or password.', 'quill-crm' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -134,7 +134,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 				'user_id' => $user->ID,
 				'token'   => $token,
 				'expires' => $expires,
-				'message' => __( 'Login successful. Temporary token issued.', 'quillcrm' ),
+				'message' => __( 'Login successful. Temporary token issued.', 'quill-crm' ),
 			),
 			200
 		);
@@ -149,7 +149,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 			error_log( 'Application password is not available.' );
 			return new WP_Error(
 				'application_password_not_available',
-				__( 'Application password is not available. Please contact support.', 'quillcrm' ),
+				__( 'Application password is not available. Please contact support.', 'quill-crm' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -187,7 +187,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 		if ( ! $token ) {
 			return new WP_Error(
 				'missing_token',
-				__( 'Temporary token is required.', 'quillcrm' ),
+				__( 'Temporary token is required.', 'quill-crm' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -203,7 +203,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 		if ( empty( $users ) ) {
 			return new WP_Error(
 				'invalid_token',
-				__( 'Invalid token.', 'quillcrm' ),
+				__( 'Invalid token.', 'quill-crm' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -214,7 +214,7 @@ class REST_Site_Verification_Controller extends REST_Controller {
 		if ( time() > $expiry ) {
 			return new WP_Error(
 				'token_expired',
-				__( 'Token expired.', 'quillcrm' ),
+				__( 'Token expired.', 'quill-crm' ),
 				array( 'status' => 401 )
 			);
 		}

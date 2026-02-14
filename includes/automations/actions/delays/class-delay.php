@@ -120,15 +120,15 @@ class Delay extends Action {
 		return array(
 			'delay' => array(
 				'type'  => 'number',
-				'label' => __( 'Delay', 'quillcrm' ),
+				'label' => __( 'Delay', 'quill-crm' ),
 			),
 			'unit'  => array(
 				'type'    => 'select',
-				'label'   => __( 'Unit', 'quillcrm' ),
+				'label'   => __( 'Unit', 'quill-crm' ),
 				'options' => array(
-					'minutes' => __( 'Minutes', 'quillcrm' ),
-					'hours'   => __( 'Hours', 'quillcrm' ),
-					'days'    => __( 'Days', 'quillcrm' ),
+					'minutes' => __( 'Minutes', 'quill-crm' ),
+					'hours'   => __( 'Hours', 'quill-crm' ),
+					'days'    => __( 'Days', 'quill-crm' ),
 				),
 			),
 		);

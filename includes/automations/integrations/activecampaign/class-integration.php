@@ -92,11 +92,11 @@ class Integration extends Integration_Abstract {
 		$api_key = $settings['api_key'] ?? '';
 
 		if ( empty( $api_url ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API URL is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API URL is required.', 'quill-crm' ) );
 		}
 
 		if ( empty( $api_key ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quill-crm' ) );
 		}
 
 		$this->endpoint = $api_url;

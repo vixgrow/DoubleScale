@@ -90,7 +90,7 @@ class Integration extends Integration_Abstract {
 		$access_token = $settings['access_token'] ?? '';
 
 		if ( empty( $access_token ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quill-crm' ) );
 		}
 
 		$api    = new API( $access_token );

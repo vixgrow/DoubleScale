@@ -65,11 +65,11 @@ class Last_Email_Clicked extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'before'  => __( 'Before', 'quillcrm' ),
-			'after'   => __( 'After', 'quillcrm' ),
-			'on'      => __( 'On', 'quillcrm' ),
-			'between' => __( 'Between', 'quillcrm' ),
-			'within'  => __( 'Within', 'quillcrm' ),
+			'before'  => __( 'Before', 'quill-crm' ),
+			'after'   => __( 'After', 'quill-crm' ),
+			'on'      => __( 'On', 'quill-crm' ),
+			'between' => __( 'Between', 'quill-crm' ),
+			'within'  => __( 'Within', 'quill-crm' ),
 		);
 	}
 

@@ -73,7 +73,7 @@ class Add_To_List extends Action {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Add To List: List ID is required.', 'quillcrm' ),
+				__( 'Hubspot Add To List: List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_add_to_list',
 					'data' => array(
@@ -103,7 +103,7 @@ class Add_To_List extends Action {
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot API connection failed.', 'quillcrm' ),
+				__( 'Hubspot API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_connect',
 					'data' => array(
@@ -120,7 +120,7 @@ class Add_To_List extends Action {
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get or create contact in Hubspot.', 'quillcrm' ),
+				__( 'Failed to get or create contact in Hubspot.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_get_or_create_contact',
 					'data' => array(
@@ -138,7 +138,7 @@ class Add_To_List extends Action {
 		$result     = $api->add_contact_to_list( $contact_id, $list_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add contact to Hubspot list.', 'quillcrm' ),
+				__( 'Failed to add contact to Hubspot list.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_add_contact_to_list',
 					'data' => array(
@@ -153,7 +153,7 @@ class Add_To_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact added to Hubspot list.', 'quillcrm' ),
+			__( 'Contact added to Hubspot list.', 'quill-crm' ),
 			array(
 				'code' => 'hubspot_add_contact_to_list',
 				'data' => array(
@@ -193,7 +193,7 @@ class Add_To_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'hubspot/lists',
 			),

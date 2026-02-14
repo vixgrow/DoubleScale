@@ -116,7 +116,7 @@ class Form_Utils {
 			$field_label = $field['label'];
 			if ( empty( $field_label ) && null !== $field_label ) {
 				$field_label = sprintf( /* translators: %d - field ID. */
-					esc_html__( 'Field ID #%s', 'quillcrm' ),
+					esc_html__( 'Field ID #%s', 'quill-crm' ),
 					$field_id
 				);
 			}

@@ -93,46 +93,46 @@ class Contact_Fields {
 	private function setup_fields() {
 		$this->fields = array(
 			'first_name' => array(
-				'name'     => __( 'First Name', 'quillcrm' ),
+				'name'     => __( 'First Name', 'quill-crm' ),
 				'type'     => $this->types['text'],
 				'required' => true,
 			),
 			'last_name'  => array(
-				'name'     => __( 'Last Name', 'quillcrm' ),
+				'name'     => __( 'Last Name', 'quill-crm' ),
 				'type'     => $this->types['text'],
 				'required' => true,
 			),
 			'email'      => array(
-				'name'     => __( 'Email', 'quillcrm' ),
+				'name'     => __( 'Email', 'quill-crm' ),
 				'type'     => $this->types['email'],
 				'required' => true,
 			),
 			'address_1'  => array(
-				'name' => __( 'Address 1', 'quillcrm' ),
+				'name' => __( 'Address 1', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 			'address_2'  => array(
-				'name' => __( 'Address 2', 'quillcrm' ),
+				'name' => __( 'Address 2', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 			'city'       => array(
-				'name' => __( 'City', 'quillcrm' ),
+				'name' => __( 'City', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 			'state'      => array(
-				'name' => __( 'State', 'quillcrm' ),
+				'name' => __( 'State', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 			'country'    => array(
-				'name' => __( 'Country', 'quillcrm' ),
+				'name' => __( 'Country', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 			'zip'        => array(
-				'name' => __( 'Zip', 'quillcrm' ),
+				'name' => __( 'Zip', 'quill-crm' ),
 				'type' => $this->types['number'],
 			),
 			'phone'      => array(
-				'name' => __( 'Phone', 'quillcrm' ),
+				'name' => __( 'Phone', 'quill-crm' ),
 				'type' => $this->types['text'],
 			),
 		);

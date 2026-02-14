@@ -96,7 +96,7 @@ class Add_Subscriber extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -117,7 +117,7 @@ class Add_Subscriber extends Action {
 		$result = $api->add_subscriber( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add subscriber to Drip.', 'quillcrm' ),
+				__( 'Failed to add subscriber to Drip.', 'quill-crm' ),
 				array(
 					'code'     => 'drip_add_subscriber',
 					'data'     => array(
@@ -137,7 +137,7 @@ class Add_Subscriber extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Subscriber added to Drip.', 'quillcrm' ),
+			__( 'Subscriber added to Drip.', 'quill-crm' ),
 			array(
 				'code'     => 'drip_add_subscriber',
 				'data'     => array(
@@ -195,17 +195,17 @@ class Add_Subscriber extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'label'  => __( 'Mapped Fields', 'quill-crm' ),
 				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 			),

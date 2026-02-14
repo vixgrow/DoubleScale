@@ -72,7 +72,6 @@ class API extends Integration_API
 			// Extract authClassId which is the location ID
 			return $payload['authClassId'] ?? null;
 		} catch (\Exception $e) {
-			error_log("GoHighLevel: Could not extract location ID from token: " . $e->getMessage());
 			return null;
 		}
 	}
@@ -178,10 +177,6 @@ class API extends Integration_API
 	{
 		// GoHighLevel doesn't use version in URL, but in headers
 		$url = "{$this->endpoint}/$path";
-		
-		// Debug log the request
-		error_log("GoHighLevel API Request: $method $url");
-		error_log("GoHighLevel API Token: " . substr($this->api_token, 0, 10) . "...");
 
 		$response = wp_remote_request(
 			$url,
@@ -198,18 +193,6 @@ class API extends Integration_API
 				'timeout' => 30,
 			)
 		);
-
-		// Debug log the response
-		if (is_wp_error($response)) {
-			error_log("GoHighLevel API WP Error: " . $response->get_error_message());
-		} else {
-			$status_code = wp_remote_retrieve_response_code($response);
-			$body = wp_remote_retrieve_body($response);
-			error_log("GoHighLevel API Response Status: $status_code");
-			if ($status_code !== 200) {
-				error_log("GoHighLevel API Error Response: $body");
-			}
-		}
 
 		return $response;
 	}

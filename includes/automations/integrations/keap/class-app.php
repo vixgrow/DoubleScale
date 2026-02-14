@@ -8,6 +8,10 @@
 
 namespace QuillCRM\Automations\Integrations\Keap;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * App class.
  *
@@ -48,7 +52,7 @@ class App {
 		}
 
 		if ( empty( $app_credentials ) ) {
-			return new \WP_Error( 'no_app_credentials', esc_html__( 'No app credentials found!', 'quillcrm' ) );
+			return new \WP_Error( 'no_app_credentials', esc_html__( 'No app credentials found!', 'quill-crm' ) );
 		}
 
 		$auth_url = add_query_arg(
@@ -79,7 +83,7 @@ class App {
 		// ensure authorize code.
 		$code = $_GET['code'] ?? null;
 		if ( empty( $code ) ) {
-			echo esc_html__( 'Error, There is no authorize code passed!', 'quillcrm' );
+			echo esc_html__( 'Error, There is no authorize code passed!', 'quill-crm' );
 			exit;
 		}
 
@@ -96,7 +100,7 @@ class App {
 		);
 
 		if ( empty( $tokens ) ) {
-			echo esc_html__( 'Error, Cannot get tokens!', 'quillcrm' );
+			echo esc_html__( 'Error, Cannot get tokens!', 'quill-crm' );
 			exit;
 		}
 
@@ -108,7 +112,7 @@ class App {
 		$account = $api->get_account();
 
 		if ( ! $account['success'] ) {
-			echo esc_html__( 'Error, Cannot get account details!', 'quillcrm' );
+			echo esc_html__( 'Error, Cannot get account details!', 'quill-crm' );
 			exit;
 		}
 
@@ -117,7 +121,7 @@ class App {
 			$tokens
 		);
 
-		wp_redirect(
+		wp_safe_redirect(
 			admin_url(
 				"admin.php?page=quillcrm&path=integrations&id={$this->integration->slug}&tab=success"
 			)

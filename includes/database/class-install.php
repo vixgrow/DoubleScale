@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Database;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Database\Migrations\Automation_Contacts_Table;
 use QuillCRM\Database\Migrations\Automation_Steps_Table;
 use QuillCRM\Database\Migrations\Automations_Table;

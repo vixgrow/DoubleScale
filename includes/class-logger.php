@@ -65,7 +65,7 @@ class Logger implements Logger_Interface {
 						__METHOD__,
 						sprintf(
 							/* translators: 1: class name 2: Log_Handler_Interface */
-							__( 'The provided handler %1$s does not implement %2$s.', 'quillcrm' ),
+							__( 'The provided handler %1$s does not implement %2$s.', 'quill-crm' ),
 							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
 							'<code>Log_Handler_Interface</code>'
 						),
@@ -193,7 +193,7 @@ class Logger implements Logger_Interface {
 	public function log( $level, $message, $context = array() ) {
 		if ( ! Log_Levels::is_valid_level( $level ) ) {
 			/* translators: 1: Logger::log 2: level */
-			_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'quillcrm' ), '<code>Logger::log</code>', $level ), '1.0.0' );
+			_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'quill-crm' ), '<code>Logger::log</code>', $level ), '1.0.0' );
 		}
 
 		if ( $this->should_handle( $level ) ) {

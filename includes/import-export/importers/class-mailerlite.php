@@ -66,24 +66,24 @@ class MailerLite extends Importer {
 		$this->mapping = array_filter( $this->mapping );
 		$mapping       = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
-			throw new \Exception( __( 'Email field is required.', 'quillcrm' ) );
+			throw new \Exception( __( 'Email field is required.', 'quill-crm' ) );
 		}
 
 		$api             = $this->get_api();
 		$groups_response = $api->get_groups();
 		if ( ! $groups_response['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite: Error fetching groups', 'quillcrm' ),
+				__( 'MailerLite: Error fetching groups', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_get_groups',
 					'response' => $groups_response,
 				)
 			);
-			throw new \Exception( __( 'Error fetching groups', 'quillcrm' ) );
+			throw new \Exception( __( 'Error fetching groups', 'quill-crm' ) );
 		}
 
 		if ( empty( $groups_response['data'] ) ) {
-			throw new \Exception( __( 'There are no groups to import subscribers from', 'quillcrm' ) );
+			throw new \Exception( __( 'There are no groups to import subscribers from', 'quill-crm' ) );
 		}
 
 		$groups = $groups_response['data'];
@@ -188,7 +188,7 @@ class MailerLite extends Importer {
 	public function get_credentials() {
 		return array(
 			'api_key' => array(
-				'label' => __( 'API Key', 'quillcrm' ),
+				'label' => __( 'API Key', 'quill-crm' ),
 				'type'  => 'text',
 			),
 		);
@@ -204,13 +204,13 @@ class MailerLite extends Importer {
 		$response = $api->get_fields();
 		if ( ! $response['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite: Error fetching fields', 'quillcrm' ),
+				__( 'MailerLite: Error fetching fields', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_get_fields',
 					'response' => $response,
 				)
 			);
-			throw new \Exception( __( 'Error fetching fields', 'quillcrm' ) );
+			throw new \Exception( __( 'Error fetching fields', 'quill-crm' ) );
 		}
 
 		$fields = array();
@@ -233,13 +233,13 @@ class MailerLite extends Importer {
 		$response = $api->get_groups();
 		if ( ! $response['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite: Error fetching groups', 'quillcrm' ),
+				__( 'MailerLite: Error fetching groups', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_get_groups',
 					'response' => $response,
 				)
 			);
-			throw new \Exception( __( 'Error fetching groups', 'quillcrm' ) );
+			throw new \Exception( __( 'Error fetching groups', 'quill-crm' ) );
 		}
 
 		$groups = array();
@@ -261,7 +261,7 @@ class MailerLite extends Importer {
 	 */
 	public function get_api() {
 		if ( empty( $this->credentials['api_key'] ) ) {
-			throw new \Exception( __( 'API Key is required.', 'quillcrm' ) );
+			throw new \Exception( __( 'API Key is required.', 'quill-crm' ) );
 		}
 		return new API( $this->credentials['api_key'] );
 	}
@@ -274,13 +274,13 @@ class MailerLite extends Importer {
 	public function get_fields() {
 		return array(
 			'mapping'      => array(
-				'label'   => __( 'Mapped Fields', 'quillcrm' ),
+				'label'   => __( 'Mapped Fields', 'quill-crm' ),
 				'type'    => 'contact_mapped_fields',
 				'options' => $this->get_fields_options(),
 			),
 			'tags_mapping' => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Groups Mapping', 'quillcrm' ),
+				'label'   => __( 'Groups Mapping', 'quill-crm' ),
 				'options' => $this->get_groups(),
 			),
 		);

@@ -41,7 +41,7 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Metadata_BackEnd' ) ) {
 		 */
 		public function __construct( $group ) {
 			// Call parent constructor with generic parameters for backend usage
-			parent::__construct( '', __( 'Form Metadata', 'quillcrm' ), $group );
+			parent::__construct( '', __( 'Form Metadata', 'quill-crm' ), $group );
 
 			// Override slug for backend generic metadata tag
 			$this->slug = 'metadata:';

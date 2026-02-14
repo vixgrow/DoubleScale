@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use Exception;
 use QuillCRM\Abstracts\Form;
 use QuillCRM\QuillCRM;
@@ -82,13 +86,14 @@ final class Forms_Manager {
 	public function register( $form ) {
 		if ( ! $form instanceof Form ) {
 			throw new Exception(
-				__( 'Form must be an instance of Form', 'quillcrm' )
+				__( 'Form must be an instance of Form', 'quill-crm' )
 			);
 		}
 
 		if ( isset( $this->forms[ $form->slug ] ) ) {
+			/* translators: %s: form slug */
 			throw new Exception(
-				sprintf( __( 'Form with slug %s already exists', 'quillcrm' ), $form->slug )
+				sprintf( __( 'Form with slug %s already exists', 'quill-crm' ), $form->slug )
 			);
 		}
 
@@ -200,7 +205,7 @@ final class Forms_Manager {
 			$meta_id = $args['meta_id'];
 		} else {
 			quillcrm_get_logger()->error(
-				__( 'Async form processing failed: missing meta_id', 'quillcrm' ),
+				__( 'Async form processing failed: missing meta_id', 'quill-crm' ),
 				array(
 					'code' => 'async_form_missing_meta_id',
 					'args' => $args,
@@ -214,7 +219,7 @@ final class Forms_Manager {
 
 		if ( ! $meta_args ) {
 			quillcrm_get_logger()->error(
-				__( 'Async form processing failed: meta not found', 'quillcrm' ),
+				__( 'Async form processing failed: meta not found', 'quill-crm' ),
 				array(
 					'code'    => 'async_form_meta_not_found',
 					'meta_id' => $meta_id,
@@ -227,7 +232,7 @@ final class Forms_Manager {
 
 		if ( empty( $form_data ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Async form processing failed: empty form data', 'quillcrm' ),
+				__( 'Async form processing failed: empty form data', 'quill-crm' ),
 				array(
 					'code'    => 'async_form_empty_data',
 					'meta_id' => $meta_id,
@@ -240,7 +245,7 @@ final class Forms_Manager {
 
 		if ( empty( $form_slug ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Async form processing failed: missing form slug', 'quillcrm' ),
+				__( 'Async form processing failed: missing form slug', 'quill-crm' ),
 				array(
 					'code'    => 'async_form_missing_slug',
 					'meta_id' => $meta_id,
@@ -253,7 +258,7 @@ final class Forms_Manager {
 
 		if ( ! $form ) {
 			quillcrm_get_logger()->error(
-				__( 'Async form processing failed: form not found', 'quillcrm' ),
+				__( 'Async form processing failed: form not found', 'quill-crm' ),
 				array(
 					'code'      => 'async_form_not_found',
 					'form_slug' => $form_slug,

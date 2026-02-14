@@ -165,15 +165,15 @@ class Campaign_Analytics {
 
 		switch ( $period_type ) {
 			case 'hour':
-				return date( 'Y-m-d H:00:00', $timestamp );
+				return gmdate( 'Y-m-d H:00:00', $timestamp );
 			case 'day':
-				return date( 'Y-m-d', $timestamp );
+				return gmdate( 'Y-m-d', $timestamp );
 			case 'month':
-				return date( 'Y-m', $timestamp );
+				return gmdate( 'Y-m', $timestamp );
 			case 'year':
-				return date( 'Y', $timestamp );
+				return gmdate( 'Y', $timestamp );
 			default:
-				return date( 'Y-m-d', $timestamp );
+				return gmdate( 'Y-m-d', $timestamp );
 		}
 	}
 

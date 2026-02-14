@@ -72,7 +72,7 @@ class Add_To_Sequence extends Action {
 		$sequence_id = $step->get_setting( 'sequence_id' );
 		if ( empty( $sequence_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Sequence ID is required.', 'quillcrm' ),
+				__( 'Convertkit Sequence ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_add_sequence',
 					'data' => array(
@@ -94,7 +94,7 @@ class Add_To_Sequence extends Action {
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				__( 'Convertkit Add Tags: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_connect',
 					'data' => array(
@@ -116,7 +116,7 @@ class Add_To_Sequence extends Action {
 		$result = $api->add_subscriber_to_sequence( $email, $sequence_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add contact to Convertkit Sequence.', 'quillcrm' ),
+				__( 'Failed to add contact to Convertkit Sequence.', 'quill-crm' ),
 				array(
 					'code'     => 'convertkit_add_sequence',
 					'data'     => array(
@@ -136,7 +136,7 @@ class Add_To_Sequence extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact added to Convertkit Sequence.', 'quillcrm' ),
+			__( 'Contact added to Convertkit Sequence.', 'quill-crm' ),
 			array(
 				'code'     => 'convertkit_add_sequence',
 				'data'     => array(
@@ -180,7 +180,7 @@ class Add_To_Sequence extends Action {
 		return array(
 			'sequence_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Sequence', 'quillcrm' ),
+				'label'    => __( 'Sequence', 'quill-crm' ),
 				'endpoint' => 'convertkit/sequence',
 			),
 		);

@@ -80,7 +80,7 @@ class GoHighLevel extends Importer
 
 		$total_response = $api->get_contacts_count();
 		if (!$total_response['success']) {
-			$error_message = __('GoHighLevel: Error fetching contacts count', 'quillcrm');
+			$error_message = __('GoHighLevel: Error fetching contacts count', 'quill-crm');
 			$error_details = array(
 				'code' => 'gohighlevel_get_contacts_count',
 				'response' => $total_response,
@@ -320,7 +320,7 @@ class GoHighLevel extends Importer
 			return array(
 				'oauth_status' => array(
 					'type' => 'oauth_connected',
-					'label' => __('Connected to GoHighLevel', 'quillcrm'),
+					'label' => __('Connected to GoHighLevel', 'quill-crm'),
 					'connected_at' => date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $stored_tokens['created_at']),
 					'expires_in' => max(0, $stored_tokens['expires_at'] - time())
 				)
@@ -331,47 +331,47 @@ class GoHighLevel extends Importer
 		return array(
 			'oauth_setup' => array(
 				'type' => 'oauth_setup_required',
-				'label' => __('Setup OAuth Connection', 'quillcrm'),
-				'description' => __('Configure your GoHighLevel OAuth app credentials to connect and import contacts.', 'quillcrm'),
+				'label' => __('Setup OAuth Connection', 'quill-crm'),
+				'description' => __('Configure your GoHighLevel OAuth app credentials to connect and import contacts.', 'quill-crm'),
 				'fields' => array(
 					'client_id' => array(
-						'label' => __('Client ID', 'quillcrm'),
+						'label' => __('Client ID', 'quill-crm'),
 						'type' => 'text',
 						'required' => true,
-						'description' => __('Your GoHighLevel app Client ID from the marketplace', 'quillcrm'),
+						'description' => __('Your GoHighLevel app Client ID from the marketplace', 'quill-crm'),
 					),
 					'client_secret' => array(
-						'label' => __('Client Secret', 'quillcrm'),
+						'label' => __('Client Secret', 'quill-crm'),
 						'type' => 'password',
 						'required' => true,
-						'description' => __('Your GoHighLevel app Client Secret (keep this confidential)', 'quillcrm'),
+						'description' => __('Your GoHighLevel app Client Secret (keep this confidential)', 'quill-crm'),
 					),
 				),
 				'redirect_url' => \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_redirect_uri(),
 				'setup_instructions' => array(
-					'title' => __('Setup Instructions', 'quillcrm'),
+					'title' => __('Setup Instructions', 'quill-crm'),
 					'steps' => array(
 						array(
-							'title' => __('Create GoHighLevel App', 'quillcrm'),
+							'title' => __('Create GoHighLevel App', 'quill-crm'),
 							'details' => array(
-								__('Go to GoHighLevel Marketplace → My Apps → Create App', 'quillcrm'),
-								__('Set the app name and description', 'quillcrm'),
+								__('Go to GoHighLevel Marketplace → My Apps → Create App', 'quill-crm'),
+								__('Set the app name and description', 'quill-crm'),
 							),
 						),
 						array(
-							'title' => __('Configure Permissions', 'quillcrm'),
+							'title' => __('Configure Permissions', 'quill-crm'),
 							'details' => array(
-								__('Set scopes: contacts.readonly', 'quillcrm'),
-								__('Add redirect URL: ', 'quillcrm') . \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_redirect_uri(),
-								__('Note: The app will access contacts from all authorized locations', 'quillcrm'),
+								__('Set scopes: contacts.readonly', 'quill-crm'),
+								__('Add redirect URL: ', 'quill-crm') . \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_redirect_uri(),
+								__('Note: The app will access contacts from all authorized locations', 'quill-crm'),
 							),
 						),
 						array(
-							'title' => __('Get Credentials', 'quillcrm'),
+							'title' => __('Get Credentials', 'quill-crm'),
 							'details' => array(
-								__('Go to Client Keys section', 'quillcrm'),
-								__('Copy Client ID and Client Secret', 'quillcrm'),
-								__('Paste them in the form above', 'quillcrm'),
+								__('Go to Client Keys section', 'quill-crm'),
+								__('Copy Client ID and Client Secret', 'quill-crm'),
+								__('Paste them in the form above', 'quill-crm'),
 							),
 						),
 					),
@@ -393,14 +393,14 @@ class GoHighLevel extends Importer
 		// Get OAuth tokens from session storage
 		$stored_tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 		if (!$stored_tokens) {
-			throw new \Exception(__('Please connect to your GoHighLevel account using OAuth first', 'quillcrm'));
+			throw new \Exception(__('Please connect to your GoHighLevel account using OAuth first', 'quill-crm'));
 		}
 
 		// Check if tokens are expired
 		if ($stored_tokens['expires_at'] <= time()) {
 			// Clear expired tokens
 			\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
-			throw new \Exception(__('Your GoHighLevel OAuth connection has expired. Please reconnect.', 'quillcrm'));
+			throw new \Exception(__('Your GoHighLevel OAuth connection has expired. Please reconnect.', 'quill-crm'));
 		}
 
 		return new API($stored_tokens['access_token']);
@@ -428,7 +428,7 @@ class GoHighLevel extends Importer
 			$test_response = $api->get_contacts_count();
 
 			if (empty($test_response['success']) || $test_response['success'] !== true) {
-				$error_message = __('GoHighLevel OAuth connection has expired or is invalid. Please reconnect your account.', 'quillcrm');
+				$error_message = __('GoHighLevel OAuth connection has expired or is invalid. Please reconnect your account.', 'quill-crm');
 				if (isset($test_response['code']) && $test_response['code'] === 401) {
 					\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
 				}

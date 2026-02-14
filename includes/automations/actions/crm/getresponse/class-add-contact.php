@@ -85,7 +85,7 @@ class Add_Contact extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Add Contact: List ID is empty.', 'quillcrm' ),
+				__( 'GetResponse Add Contact: List ID is empty.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_add_contact',
 					'data' => array(
@@ -114,7 +114,7 @@ class Add_Contact extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to connect to GetResponse.', 'quillcrm' ),
+				__( 'Failed to connect to GetResponse.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -134,7 +134,7 @@ class Add_Contact extends Action {
 		$result = $api->add_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add contact to GetResponse.', 'quillcrm' ),
+				__( 'Failed to add contact to GetResponse.', 'quill-crm' ),
 				array(
 					'code'     => 'getresponse_add_contact',
 					'data'     => array(
@@ -153,7 +153,7 @@ class Add_Contact extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact added to GetResponse.', 'quillcrm' ),
+			__( 'Contact added to GetResponse.', 'quill-crm' ),
 			array(
 				'code'     => 'getresponse_add_contact',
 				'data'     => array(
@@ -199,7 +199,7 @@ class Add_Contact extends Action {
 					),
 				),
 				'list_id'       => array(
-					'description' => __( 'List ID', 'quillcrm' ),
+					'description' => __( 'List ID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
@@ -215,22 +215,22 @@ class Add_Contact extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'label'  => __( 'Mapped Fields', 'quill-crm' ),
 				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
+						'label' => __( 'Email', 'quill-crm' ),
 					),
 					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
+						'label' => __( 'First Name', 'quill-crm' ),
 					),
 					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
+						'label' => __( 'Last Name', 'quill-crm' ),
 					),
 				),
 			),
 			'list_id'       => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'getresponse/lists',
 			),

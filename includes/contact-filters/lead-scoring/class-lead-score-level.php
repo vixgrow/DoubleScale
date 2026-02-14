@@ -67,8 +67,8 @@ class Lead_Score_Level extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Is', 'quillcrm' ),
-			'is_not' => __( 'Is not', 'quillcrm' ),
+			'is'     => __( 'Is', 'quill-crm' ),
+			'is_not' => __( 'Is not', 'quill-crm' ),
 		);
 	}
 

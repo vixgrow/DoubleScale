@@ -75,7 +75,7 @@ class Remove_Tags extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove Tags: List ID is required.', 'quillcrm' ),
+				__( 'GetResponse Remove Tags: List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_tags',
 					'data' => array(
@@ -94,7 +94,7 @@ class Remove_Tags extends Action {
 
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove Tags: Tags are required.', 'quillcrm' ),
+				__( 'GetResponse Remove Tags: Tags are required.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_tags',
 					'data' => array(
@@ -115,7 +115,7 @@ class Remove_Tags extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse API connection failed.', 'quillcrm' ),
+				__( 'GetResponse API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -143,7 +143,7 @@ class Remove_Tags extends Action {
 		$contact = $result['data'];
 		if ( empty( $contact ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove Tags: Contact not found.', 'quillcrm' ),
+				__( 'GetResponse Remove Tags: Contact not found.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_tags',
 					'data' => array(
@@ -177,7 +177,7 @@ class Remove_Tags extends Action {
 		$result = $api->create_or_update_contact( $email, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse failed to remove tags.', 'quillcrm' ),
+				__( 'GetResponse failed to remove tags.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_tags',
 					'data' => array(
@@ -195,7 +195,7 @@ class Remove_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Tags removed from GetResponse.', 'quillcrm' ),
+			__( 'Tags removed from GetResponse.', 'quill-crm' ),
 			array(
 				'code'     => 'getresponse_remove_tags',
 				'data'     => array(
@@ -245,12 +245,12 @@ class Remove_Tags extends Action {
 		return array(
 			'tags'    => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'getresponse/tags',
 				'multiple' => true,
 			),
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'getresponse/lists',
 			),

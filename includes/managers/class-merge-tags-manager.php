@@ -12,6 +12,10 @@
 
 namespace QuillCRM\Managers;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Merge_Tags\Forms\Forms_Field_Backend;
 use QuillCRM\Merge_Tags\Forms\Forms_Metadata_BackEnd;
@@ -179,56 +183,56 @@ final class Merge_Tags_Manager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'name'      => __( 'Contact', 'quillcrm' ),
+				'name'      => __( 'Contact', 'quill-crm' ),
 				'mergeTags' => array(),
 			),
 			'general'        => array(
-				'name'      => __( 'General', 'quillcrm' ),
+				'name'      => __( 'General', 'quill-crm' ),
 				'mergeTags' => array(),
 			),
 			'order'          => array(
-				'name'        => __( 'Order', 'quillcrm' ),
+				'name'        => __( 'Order', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed', 'wc_cart_recovered' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'abandoned_cart' => array(
-				'name'        => __( 'Abandoned Cart', 'quillcrm' ),
+				'name'        => __( 'Abandoned Cart', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_abandoned_cart_created' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'edd_customer'   => array(
-				'name'        => __( 'Easy Digital Downloads Customer', 'quillcrm' ),
+				'name'        => __( 'Easy Digital Downloads Customer', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'edd_new_order_success' ),
 				'is_disabled' => ! defined( 'EDD_PLUGIN_FILE' ),
 			),
 			'edd_order'      => array(
-				'name'        => __( 'Easy Digital Downloads Order', 'quillcrm' ),
+				'name'        => __( 'Easy Digital Downloads Order', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'edd_new_order_success' ),
 				'is_disabled' => ! defined( 'EDD_PLUGIN_FILE' ),
 			),
 			'learndash'      => array(
-				'name'        => __( 'LearnDash', 'quillcrm' ),
+				'name'        => __( 'LearnDash', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 			'membership'     => array(
-				'name'        => __( 'Membership', 'quillcrm' ),
+				'name'        => __( 'Membership', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_membership_created', 'wc_membership_status_changed' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 			),
 			'wishlist'       => array(
-				'name'        => __( 'Wishlist', 'quillcrm' ),
+				'name'        => __( 'Wishlist', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
 			),
 			'subscription'   => array(
-				'name'        => __( 'Subscription', 'quillcrm' ),
+				'name'        => __( 'Subscription', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array(
 					'wc_subscription_created',
@@ -244,13 +248,13 @@ final class Merge_Tags_Manager {
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 			),
 			'review'         => array(
-				'name'        => __( 'Review', 'quillcrm' ),
+				'name'        => __( 'Review', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_review_received' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'coupon'         => array(
-				'name'        => __( 'Coupon', 'quillcrm' ),
+				'name'        => __( 'Coupon', 'quill-crm' ),
 				'mergeTags'   => array(),
 				'is_disabled' => true,
 			),
@@ -302,12 +306,10 @@ final class Merge_Tags_Manager {
 		// Check if contact has tracking context - if so, use stored values
 		if ( $contact && method_exists( $contact, 'has_tracking_context' ) && $contact->has_tracking_context() ) {
 			$tracking_context = $contact->get_tracking_context();
-			error_log( "QuillCRM: Contact has tracking context: {$tracking_context}" );
 			return $this->process_merge_tags_with_stored_values( $content, $tracking_context );
 		}
 
 		// Fall back to fresh processing for previews and non-tracking contexts
-		error_log( 'QuillCRM: Using fresh merge tag processing - no tracking context' );
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
 			function ( $matches ) use ( $contact ) {
@@ -338,14 +340,8 @@ final class Merge_Tags_Manager {
 	 * @return string Content with merge tags replaced by stored values
 	 */
 	private function process_merge_tags_with_stored_values( $content, $tracking_id ) {
-		// Debug: Log that we're using stored values
-		error_log( "QuillCRM: Using stored merge tag values for tracking ID: {$tracking_id}" );
-
 		// Use the Communication_Tracking_Meta_Model to render with stored values
 		$result = \QuillCRM\Models\Communication_Tracking_Meta_Model::render_with_stored_values( $tracking_id, $content );
-
-		// Debug: Log the result
-		error_log( 'QuillCRM: Stored values result length: ' . strlen( $result ) );
 
 		return $result;
 	}

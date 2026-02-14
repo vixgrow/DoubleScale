@@ -432,7 +432,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( ! is_email( $email['from_email'] ) ) {
 				return new WP_Error(
 					'invalid_email',
-					__( 'From email is not a valid email address', 'quillcrm' ),
+					__( 'From email is not a valid email address', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -444,7 +444,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( ! is_email( $email['reply_to'] ) ) {
 				return new WP_Error(
 					'invalid_email',
-					__( 'Reply-to is not a valid email address', 'quillcrm' ),
+					__( 'Reply-to is not a valid email address', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -457,7 +457,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second < 1 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max emails per second must be at least 1', 'quillcrm' ),
+					__( 'Max emails per second must be at least 1', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -465,7 +465,7 @@ class REST_Settings_Controller extends REST_Controller {
 			// if ( $max_in_second > 100 ) {
 			// return new WP_Error(
 			// 'invalid_rate_limit',
-			// __( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
+			// __( 'Max emails per second cannot exceed 100 (server limitation)', 'quill-crm' ),
 			// array( 'status' => 400 )
 			// );
 			// }
@@ -478,7 +478,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_day < 1 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max emails per day must be at least 1', 'quillcrm' ),
+					__( 'Max emails per day must be at least 1', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -486,7 +486,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_day > 1000000 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max emails per day cannot exceed 1,000,000', 'quillcrm' ),
+					__( 'Max emails per day cannot exceed 1,000,000', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -528,7 +528,7 @@ class REST_Settings_Controller extends REST_Controller {
 	private function check_quillsmtp_connection( $email ) {
 		// Check if QuillSMTP is available
 		if ( ! class_exists( '\QuillSMTP\Settings' ) ) {
-			return __( 'Warning: QuillSMTP plugin is not active. Emails may not be sent properly. Please install and activate QuillSMTP to ensure reliable email delivery.', 'quillcrm' );
+			return __( 'Warning: QuillSMTP plugin is not active. Emails may not be sent properly. Please install and activate QuillSMTP to ensure reliable email delivery.', 'quill-crm' );
 		}
 
 		// Check if the email has a connection configured
@@ -537,7 +537,7 @@ class REST_Settings_Controller extends REST_Controller {
 		if ( empty( $connection_id ) ) {
 			return sprintf(
 				/* translators: %s: email address */
-				__( 'Warning: No QuillSMTP connection configured for: %s. Emails may not be sent properly. Please configure an SMTP connection in QuillSMTP settings for reliable email delivery.', 'quillcrm' ),
+				__( 'Warning: No QuillSMTP connection configured for: %s. Emails may not be sent properly. Please configure an SMTP connection in QuillSMTP settings for reliable email delivery.', 'quill-crm' ),
 				$email
 			);
 		}
@@ -567,7 +567,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second < 1 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max SMS per second must be at least 1', 'quillcrm' ),
+					__( 'Max SMS per second must be at least 1', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -575,7 +575,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second > 10 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max SMS per second cannot exceed 10 (provider API limit)', 'quillcrm' ),
+					__( 'Max SMS per second cannot exceed 10 (provider API limit)', 'quill-crm' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -606,7 +606,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second > 10 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max WhatsApp per second cannot exceed 10 (provider API limit)', 'quillcrm' ),
+					__( 'Max WhatsApp per second cannot exceed 10 (provider API limit)', 'quill-crm' ),
 					array(
 						'status' => 400,
 					)
@@ -616,7 +616,7 @@ class REST_Settings_Controller extends REST_Controller {
 			if ( $max_in_second < 1 ) {
 				return new WP_Error(
 					'invalid_rate_limit',
-					__( 'Max WhatsApp per second must be at least 1', 'quillcrm' ),
+					__( 'Max WhatsApp per second must be at least 1', 'quill-crm' ),
 					array(
 						'status' => 400,
 					)
@@ -714,7 +714,7 @@ class REST_Settings_Controller extends REST_Controller {
 		}
 
 		// Check for other common empty HTML patterns.
-		$stripped = trim( strip_tags( $value ) );
+		$stripped = trim( wp_strip_all_tags( $value ) );
 		if ( '' === $stripped ) {
 			return true;
 		}
@@ -756,9 +756,9 @@ class REST_Settings_Controller extends REST_Controller {
 		$events[] = array(
 			'hook'       => 'quillcrm_campaigns_quillcrm_email_campaigns',
 			'is_overdue' => $this->is_task_overdue( $last_run, 90 ), // 90 seconds threshold.
-			'human_name' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
-			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+			'human_name' => __( 'Scheduled Email Sending Tasks', 'quill-crm' ),
+			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quill-crm' ),
+			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quill-crm' ) : __( 'Never', 'quill-crm' ),
 			'interval'   => 60,
 		);
 
@@ -781,9 +781,9 @@ class REST_Settings_Controller extends REST_Controller {
 			$events[] = array(
 				'hook'       => 'quillcrm_campaigns_quillcrm_sms_campaigns',
 				'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
-				'human_name' => __( 'Scheduled SMS Sending Tasks', 'quillcrm' ),
-				'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-				'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+				'human_name' => __( 'Scheduled SMS Sending Tasks', 'quill-crm' ),
+				'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quill-crm' ),
+				'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quill-crm' ) : __( 'Never', 'quill-crm' ),
 				'interval'   => 60,
 			);
 		}
@@ -796,9 +796,9 @@ class REST_Settings_Controller extends REST_Controller {
 		// $events[] = array(
 		// 'hook'       => 'quillcrm_campaigns_quillcrm_email_sequences',
 		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
-		// 'human_name' => __( 'Scheduled Email Processing', 'quillcrm' ),
-		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'human_name' => __( 'Scheduled Email Processing', 'quill-crm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quill-crm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quill-crm' ) : __( 'Never', 'quill-crm' ),
 		// 'interval'   => 60,
 		// 'run_count'  => $sequences_heartbeat['run_count'] ?? 0,
 		// );
@@ -812,9 +812,9 @@ class REST_Settings_Controller extends REST_Controller {
 		// $events[] = array(
 		// 'hook'       => 'quillcrm_campaigns_quillcrm_whatsapp_campaigns',
 		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
-		// 'human_name' => __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' ),
-		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'human_name' => __( 'Scheduled WhatsApp Sending Tasks', 'quill-crm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quill-crm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quill-crm' ) : __( 'Never', 'quill-crm' ),
 		// 'interval'   => 60,
 		// 'run_count'  => $whatsapp_heartbeat['run_count'] ?? 0,
 		// );
@@ -839,9 +839,9 @@ class REST_Settings_Controller extends REST_Controller {
 		$events[] = array(
 			'hook'       => 'quillcrm_daily_quillcrm_daily3',
 			'is_overdue' => $this->is_task_overdue( $last_run, 90000 ), // ~25 hours threshold.
-			'human_name' => __( 'Scheduled Automation Tasks', 'quillcrm' ),
-			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+			'human_name' => __( 'Scheduled Automation Tasks', 'quill-crm' ),
+			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quill-crm' ),
+			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quill-crm' ) : __( 'Never', 'quill-crm' ),
 			'interval'   => DAY_IN_SECONDS,
 		);
 
@@ -932,25 +932,25 @@ class REST_Settings_Controller extends REST_Controller {
 
 		// Whitelist of allowed hooks.
 		$valid_hooks = array(
-			'quillcrm_campaigns_quillcrm_email_campaigns' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
-			'quillcrm_daily_quillcrm_daily3'              => __( 'Scheduled Automation Tasks', 'quillcrm' ),
-			'quillcrm_daily_quillcrm_daily4'              => __( 'Daily Cleanup Tasks', 'quillcrm' ),
+			'quillcrm_campaigns_quillcrm_email_campaigns' => __( 'Scheduled Email Sending Tasks', 'quill-crm' ),
+			'quillcrm_daily_quillcrm_daily3'              => __( 'Scheduled Automation Tasks', 'quill-crm' ),
+			'quillcrm_daily_quillcrm_daily4'              => __( 'Daily Cleanup Tasks', 'quill-crm' ),
 		);
 
 		// Add Pro hooks if Pro plugin is active.
 		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
-			$valid_hooks['quillcrm_campaigns_quillcrm_sms_campaigns'] = __( 'Scheduled SMS Sending Tasks', 'quillcrm' );
+			$valid_hooks['quillcrm_campaigns_quillcrm_sms_campaigns'] = __( 'Scheduled SMS Sending Tasks', 'quill-crm' );
 			// WhatsApp not shipping in this version.
-			// $valid_hooks['quillcrm_campaigns_quillcrm_whatsapp_campaigns'] = __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' );
+			// $valid_hooks['quillcrm_campaigns_quillcrm_whatsapp_campaigns'] = __( 'Scheduled WhatsApp Sending Tasks', 'quill-crm' );
 		}
 
 		// Email sequences not shipping in this version.
-		// $valid_hooks['quillcrm_campaigns_quillcrm_email_sequences'] = __( 'Scheduled Email Processing', 'quillcrm' );
+		// $valid_hooks['quillcrm_campaigns_quillcrm_email_sequences'] = __( 'Scheduled Email Processing', 'quill-crm' );
 
 		if ( ! isset( $valid_hooks[ $hook ] ) ) {
 			return new WP_Error(
 				'invalid_hook',
-				__( 'The provided hook name is not valid', 'quillcrm' ),
+				__( 'The provided hook name is not valid', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -963,7 +963,7 @@ class REST_Settings_Controller extends REST_Controller {
 				'cron_execution_failed',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Failed to run task: %s', 'quillcrm' ),
+					__( 'Failed to run task: %s', 'quill-crm' ),
 					$e->getMessage()
 				),
 				array( 'status' => 500 )
@@ -974,7 +974,7 @@ class REST_Settings_Controller extends REST_Controller {
 				'cron_execution_failed',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Failed to run task: %s', 'quillcrm' ),
+					__( 'Failed to run task: %s', 'quill-crm' ),
 					$e->getMessage()
 				),
 				array( 'status' => 500 )
@@ -986,7 +986,7 @@ class REST_Settings_Controller extends REST_Controller {
 				'success' => true,
 				'message' => sprintf(
 					/* translators: %s: task name */
-					__( 'Successfully ran %s', 'quillcrm' ),
+					__( 'Successfully ran %s', 'quill-crm' ),
 					$valid_hooks[ $hook ]
 				),
 			),

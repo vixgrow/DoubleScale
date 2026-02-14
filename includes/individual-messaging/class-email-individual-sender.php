@@ -85,7 +85,7 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 		if ( ! filter_var( $recipient, FILTER_VALIDATE_EMAIL ) ) {
 			return new WP_Error(
 				'invalid_email',
-				__( 'Invalid email address', 'quillcrm' ),
+				__( 'Invalid email address', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -107,7 +107,7 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 		if ( empty( $subject ) || ! trim( $subject ) ) {
 			return new WP_Error(
 				'missing_subject',
-				__( 'Subject is required for email messages.', 'quillcrm' ),
+				__( 'Subject is required for email messages.', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}

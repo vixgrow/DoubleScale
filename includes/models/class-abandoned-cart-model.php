@@ -129,7 +129,7 @@ class Abandoned_Cart_Model extends Model {
 			return $cart;
 		}
 
-		throw new \WP_Error( 'failed_to_save_abandoned_cart', __( 'Failed to save the abandoned cart.', 'quillcrm' ) );
+		throw new \WP_Error( 'failed_to_save_abandoned_cart', __( 'Failed to save the abandoned cart.', 'quill-crm' ) );
 	}
 
 	/**
@@ -143,7 +143,7 @@ class Abandoned_Cart_Model extends Model {
 		$cart = self::where( 'hash_key', $hash_key )->first();
 
 		if ( ! $cart ) {
-			throw new \Exception( __( 'Abandoned cart not found.', 'quillcrm' ) );
+			throw new \Exception( __( 'Abandoned cart not found.', 'quill-crm' ) );
 		}
 
 		$cart->fill( $fields );
@@ -151,7 +151,7 @@ class Abandoned_Cart_Model extends Model {
 			return $cart;
 		}
 
-		throw new \Exception( __( 'Failed to save the abandoned cart.', 'quillcrm' ) );
+		throw new \Exception( __( 'Failed to save the abandoned cart.', 'quill-crm' ) );
 	}
 
 	/**

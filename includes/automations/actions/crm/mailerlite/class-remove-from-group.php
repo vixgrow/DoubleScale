@@ -74,7 +74,7 @@ class Remove_From_Group extends Action {
 
 		if ( empty( $group_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Remove From Group: Group ID is required', 'quillcrm' ),
+				__( 'MailerLite Remove From Group: Group ID is required', 'quill-crm' ),
 				array(
 					'code' => 'mailerlite_remove_from_group',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_From_Group extends Action {
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Remove From Group: API connection failed', 'quillcrm' ),
+				__( 'MailerLite Remove From Group: API connection failed', 'quill-crm' ),
 				array(
 					'code' => 'mailerlite_remove_from_group',
 					'data' => array(
@@ -116,7 +116,7 @@ class Remove_From_Group extends Action {
 		$result = $api->get_subscriber( $email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Remove From Group: Subscriber not found', 'quillcrm' ),
+				__( 'MailerLite Remove From Group: Subscriber not found', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_remove_from_group',
 					'data'     => array(
@@ -139,7 +139,7 @@ class Remove_From_Group extends Action {
 		$result        = $api->delete_subscriber_from_group( $group_id, $subscriber_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'MailerLite Remove From Group: Failed to remove subscriber from group', 'quillcrm' ),
+				__( 'MailerLite Remove From Group: Failed to remove subscriber from group', 'quill-crm' ),
 				array(
 					'code'     => 'mailerlite_remove_from_group',
 					'data'     => array(
@@ -158,7 +158,7 @@ class Remove_From_Group extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'MailerLite Remove From Group: Subscriber removed from group', 'quillcrm' ),
+			__( 'MailerLite Remove From Group: Subscriber removed from group', 'quill-crm' ),
 			array(
 				'code'     => 'mailerlite_remove_from_group',
 				'response' => $result,
@@ -178,7 +178,7 @@ class Remove_From_Group extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'group_id' => array(
-					'description' => __( 'Group ID', 'quillcrm' ),
+					'description' => __( 'Group ID', 'quill-crm' ),
 					'type'        => array( 'string', 'integer' ),
 					'required'    => true,
 				),
@@ -194,7 +194,7 @@ class Remove_From_Group extends Action {
 	public function get_fields() {
 		return array(
 			'group_id' => array(
-				'label'    => __( 'Group ID', 'quillcrm' ),
+				'label'    => __( 'Group ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'mailerlite/groups',
 			),

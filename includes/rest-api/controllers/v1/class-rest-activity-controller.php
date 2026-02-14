@@ -227,7 +227,7 @@ class REST_Activity_Controller extends REST_Controller {
 		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',
-				__( 'Deal activities require QuillCRM Pro plugin', 'quillcrm' ),
+				__( 'Deal activities require QuillCRM Pro plugin', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -260,7 +260,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$activities = Activity_Manager::instance()->get_activities( $filters, $per_page, $page );
 
 		if ( null === $activities ) {
-			return new WP_Error( 'access_denied', __( 'Access denied', 'quillcrm' ), array( 'status' => 403 ) );
+			return new WP_Error( 'access_denied', __( 'Access denied', 'quill-crm' ), array( 'status' => 403 ) );
 		}
 
 		// Transform to unified format for frontend compatibility.
@@ -307,7 +307,7 @@ class REST_Activity_Controller extends REST_Controller {
 		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',
-				__( 'Deal timeline requires QuillCRM Pro plugin', 'quillcrm' ),
+				__( 'Deal timeline requires QuillCRM Pro plugin', 'quill-crm' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -344,7 +344,7 @@ class REST_Activity_Controller extends REST_Controller {
 
 		// Check for access denied error in result.
 		if ( isset( $result['meta']['error'] ) && 'access_denied' === $result['meta']['error'] ) {
-			return new WP_Error( 'access_denied', __( 'Access denied', 'quillcrm' ), array( 'status' => 403 ) );
+			return new WP_Error( 'access_denied', __( 'Access denied', 'quill-crm' ), array( 'status' => 403 ) );
 		}
 
 		return new WP_REST_Response( $result, 200 );
@@ -404,55 +404,55 @@ class REST_Activity_Controller extends REST_Controller {
 		return array(
 			// Contact filtering.
 			'contact_id'  => array(
-				'description' => __( 'Filter by contact ID.', 'quillcrm' ),
+				'description' => __( 'Filter by contact ID.', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 			// Entity (deal) filtering.
 			'entity_id'   => array(
-				'description' => __( 'Filter by entity ID (e.g., deal ID).', 'quillcrm' ),
+				'description' => __( 'Filter by entity ID (e.g., deal ID).', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 			'entity_type' => array(
-				'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'quillcrm' ),
+				'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'quill-crm' ),
 				'type'        => array( 'string', 'integer' ),
 			),
 			// User filtering.
 			'user_id'     => array(
-				'description' => __( 'Filter by user ID.', 'quillcrm' ),
+				'description' => __( 'Filter by user ID.', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 			// Date filtering.
 			'date_from'   => array(
-				'description' => __( 'Filter by start date (YYYY-MM-DD).', 'quillcrm' ),
+				'description' => __( 'Filter by start date (YYYY-MM-DD).', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'date_to'     => array(
-				'description' => __( 'Filter by end date (YYYY-MM-DD).', 'quillcrm' ),
+				'description' => __( 'Filter by end date (YYYY-MM-DD).', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			// Sorting.
 			'sort_by'     => array(
-				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'quillcrm' ),
+				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'quill-crm' ),
 				'type'        => 'string',
 				'default'     => 'activity_date',
 				'enum'        => array( 'created_at', 'updated_at', 'activity_date' ),
 			),
 			'sort_order'  => array(
-				'description' => __( 'Sort order.', 'quillcrm' ),
+				'description' => __( 'Sort order.', 'quill-crm' ),
 				'type'        => 'string',
 				'default'     => 'desc',
 				'enum'        => array( 'asc', 'desc' ),
 			),
 			// Pagination.
 			'per_page'    => array(
-				'description' => __( 'Number of items per page.', 'quillcrm' ),
+				'description' => __( 'Number of items per page.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 20,
 			),
 			'page'        => array(
-				'description' => __( 'Page number.', 'quillcrm' ),
+				'description' => __( 'Page number.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
@@ -501,7 +501,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$activity = Activity_Manager::instance()->get_activity( $activity_id, $with_comments );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $activity, $request );
@@ -526,17 +526,17 @@ class REST_Activity_Controller extends REST_Controller {
 		);
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $data['content'] ) && empty( $data['title'] ) ) {
-			return new WP_Error( 'missing_content', __( 'Note content or title is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Note content or title is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->add_note( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -574,13 +574,13 @@ class REST_Activity_Controller extends REST_Controller {
 		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->log_email( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -611,13 +611,13 @@ class REST_Activity_Controller extends REST_Controller {
 		);
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->log_call( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -660,13 +660,13 @@ class REST_Activity_Controller extends REST_Controller {
 		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$activity = Activity_Manager::instance()->schedule_meeting( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -687,21 +687,21 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		// Get the activity to check its type.
 		$activity = Activity_Model::find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		// Check if activity is editable.
 		if ( ! $activity->is_editable() ) {
 			return new WP_Error(
 				'activity_not_editable',
-				__( 'This activity type cannot be edited. Only user-created activities (notes, calls, emails, meetings) can be modified.', 'quillcrm' ),
+				__( 'This activity type cannot be edited. Only user-created activities (notes, calls, emails, meetings) can be modified.', 'quill-crm' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -745,7 +745,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$updated_activity = Activity_Manager::instance()->update_activity( $activity_id, $data, $user_id );
 
 		if ( ! $updated_activity ) {
-			return new WP_Error( 'update_failed', __( 'Failed to update activity or access denied', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'update_failed', __( 'Failed to update activity or access denied', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$updated_activity->load( array( 'user' ) );
@@ -766,21 +766,21 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		// Get the activity to check its type.
 		$activity = Activity_Model::find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		// Check if activity is editable.
 		if ( ! $activity->is_editable() ) {
 			return new WP_Error(
 				'activity_not_deletable',
-				__( 'This activity type cannot be deleted. Only user-created activities (notes, calls, emails, meetings) can be removed.', 'quillcrm' ),
+				__( 'This activity type cannot be deleted. Only user-created activities (notes, calls, emails, meetings) can be removed.', 'quill-crm' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -788,7 +788,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$deleted = Activity_Manager::instance()->delete_activity( $activity_id, $user_id );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'delete_failed', __( 'Failed to delete activity or access denied', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'delete_failed', __( 'Failed to delete activity or access denied', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
@@ -806,7 +806,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id      = get_current_user_id();
 
 		if ( ! is_array( $activity_ids ) || empty( $activity_ids ) ) {
-			return new WP_Error( 'invalid_data', __( 'Activity IDs array is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_data', __( 'Activity IDs array is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$deleted_count = Activity_Manager::instance()->bulk_delete_activities( $activity_ids, $user_id );
@@ -827,7 +827,7 @@ class REST_Activity_Controller extends REST_Controller {
 		$activity = Activity_Model::with( 'comments.user' )->find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		$data = array();
@@ -851,17 +851,17 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $content ) ) {
-			return new WP_Error( 'missing_content', __( 'Comment content is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Comment content is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$comment = Activity_Manager::instance()->add_comment( $activity_id, $content, $user_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to add comment', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to add comment', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$comment->load( 'user' );
@@ -883,17 +883,17 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
-			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $content ) ) {
-			return new WP_Error( 'missing_content', __( 'Comment content is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Comment content is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$comment = Activity_Manager::instance()->update_comment( $comment_id, $content, $user_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'update_failed', __( 'Failed to update comment or access denied', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'update_failed', __( 'Failed to update comment or access denied', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		$comment->load( 'user' );
@@ -914,13 +914,13 @@ class REST_Activity_Controller extends REST_Controller {
 		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
-			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'quillcrm' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'quill-crm' ), array( 'status' => 400 ) );
 		}
 
 		$deleted = Activity_Manager::instance()->delete_comment( $comment_id, $user_id );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'delete_failed', __( 'Failed to delete comment or access denied', 'quillcrm' ), array( 'status' => 500 ) );
+			return new WP_Error( 'delete_failed', __( 'Failed to delete comment or access denied', 'quill-crm' ), array( 'status' => 500 ) );
 		}
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
@@ -1063,51 +1063,51 @@ class REST_Activity_Controller extends REST_Controller {
 		return array(
 			// Entity filtering.
 			'contact_id'        => array(
-				'description' => __( 'Filter by contact ID', 'quillcrm' ),
+				'description' => __( 'Filter by contact ID', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 			'entity_type'       => array(
-				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'quillcrm' ),
+				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'quill-crm' ),
 				'type'        => 'string',
 			),
 			'entity_id'         => array(
-				'description' => __( 'Entity ID (used with entity_type)', 'quillcrm' ),
+				'description' => __( 'Entity ID (used with entity_type)', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 
 			// User filtering.
 			'user_id'           => array(
-				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'quillcrm' ),
+				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 
 			// Activity type filtering (filters activities only, tasks are excluded when this is set).
 			'activity_type'     => array(
-				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'quillcrm' ),
+				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'quill-crm' ),
 				'type'        => 'string',
 			),
 
 			// Date filtering.
 			'date_from'         => array(
-				'description' => __( 'Filter from date (Y-m-d)', 'quillcrm' ),
+				'description' => __( 'Filter from date (Y-m-d)', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'date_to'           => array(
-				'description' => __( 'Filter to date (Y-m-d)', 'quillcrm' ),
+				'description' => __( 'Filter to date (Y-m-d)', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 
 			// Sorting.
 			'sort_by'           => array(
-				'description' => __( 'Sort field: activity_date (actual event time) or created_at (record creation)', 'quillcrm' ),
+				'description' => __( 'Sort field: activity_date (actual event time) or created_at (record creation)', 'quill-crm' ),
 				'type'        => 'string',
 				'enum'        => array( 'activity_date', 'created_at' ),
 				'default'     => 'activity_date',
 			),
 			'sort_order'        => array(
-				'description' => __( 'Sort direction: asc, desc', 'quillcrm' ),
+				'description' => __( 'Sort direction: asc, desc', 'quill-crm' ),
 				'type'        => 'string',
 				'enum'        => array( 'asc', 'desc' ),
 				'default'     => 'desc',
@@ -1115,14 +1115,14 @@ class REST_Activity_Controller extends REST_Controller {
 
 			// Pagination.
 			'per_page'          => array(
-				'description' => __( 'Items per page', 'quillcrm' ),
+				'description' => __( 'Items per page', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 20,
 				'minimum'     => 1,
 				'maximum'     => 100,
 			),
 			'page'              => array(
-				'description' => __( 'Page number', 'quillcrm' ),
+				'description' => __( 'Page number', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 				'minimum'     => 1,

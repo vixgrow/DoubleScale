@@ -129,12 +129,15 @@ abstract class Abstract_Tracking
 	 */
 	protected function handle_standard_tracking()
 	{
-		if (!isset($_GET['quillcrm']) || !isset($_GET['hash_key'])) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
+		if (!isset($_GET['quill-crm']) || !isset($_GET['hash_key'])) {
 			return;
 		}
 
-		$action = sanitize_text_field($_GET['quillcrm']);
-		$hash_key = sanitize_text_field($_GET['hash_key']);
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
+		$action = sanitize_text_field( wp_unslash( $_GET['quill-crm'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
+		$hash_key = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
 		$type = $this->channel;
 
 		switch ($action) {
@@ -509,16 +512,20 @@ abstract class Abstract_Tracking
 	{
 		$expected_action = "{$this->channel}_click";
 		
-		if (!isset($_GET['quillcrm']) || $_GET['quillcrm'] !== $expected_action) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+		if (!isset($_GET['quill-crm']) || $_GET['quill-crm'] !== $expected_action) {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
 		if (!isset($_GET['hash_key']) || !isset($_GET['original'])) {
 			return;
 		}
 
-		$hash_key = sanitize_text_field($_GET['hash_key']);
-		$original_url = urldecode($_GET['original']);
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+		$hash_key = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+		$original_url = urldecode( sanitize_url( wp_unslash( $_GET['original'] ) ) );
 
 		$this->handle_click_tracking($hash_key, $original_url);
 	}
@@ -541,7 +548,7 @@ abstract class Abstract_Tracking
 
 			// Create tracking URL
 			$tracking_url = add_query_arg([
-				'quillcrm' => static::get_tracking_action(),
+				'quill-crm' => static::get_tracking_action(),
 				'hash_key' => $hash_key,
 				'original' => urlencode($original_url)
 			], home_url());
@@ -561,7 +568,7 @@ abstract class Abstract_Tracking
 	public static function add_unsubscribe_link($message, $hash_key)
 	{
 		$unsubscribe_url = add_query_arg([
-			'quillcrm' => static::get_unsubscribe_action(),
+			'quill-crm' => static::get_unsubscribe_action(),
 			'hash_key' => $hash_key
 		], home_url());
 
@@ -595,49 +602,52 @@ abstract class Abstract_Tracking
 					'code' => "invalid_{$this->channel}_hash_key"
 				]);
 
-				if ($original_url) {
-					wp_redirect($original_url);
-					exit;
-				}
-				return;
-			}
-
-			// Update click tracking
-			if (!$campaign_record->clicked) {
-				$campaign_record->clicked = 1;
-				$campaign_record->clicked_at = current_time('mysql');
-				$campaign_record->save();
-
-				quillcrm_get_logger()->info("{$this->channel} click tracked", [
-					'campaign_record_id' => $campaign_record->id,
-					'contact_id' => $campaign_record->contact_id,
-					'source_id' => $campaign_record->source_id,
-					'source_type' => $campaign_record->source_type,
-					'code' => "{$this->channel}_click_tracked"
-				]);
-
-			// Trigger click automation if enabled
-			do_action("quillcrm_{$this->channel}_clicked", $campaign_record);
-		}
-
-		// Redirect to original URL
 			if ($original_url) {
-				wp_redirect($original_url);
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect to tracked external URL
+				wp_redirect( esc_url_raw( $original_url ) );
 				exit;
 			}
+			return;
+		}
 
-		} catch (\Exception $e) {
-			quillcrm_get_logger()->error("{$this->channel} click tracking error", [
-				'hash_key' => $hash_key,
-				'error' => $e->getMessage(),
-				'code' => "{$this->channel}_click_error"
+		// Update click tracking
+		if (!$campaign_record->clicked) {
+			$campaign_record->clicked = 1;
+			$campaign_record->clicked_at = current_time('mysql');
+			$campaign_record->save();
+
+			quillcrm_get_logger()->info("{$this->channel} click tracked", [
+				'campaign_record_id' => $campaign_record->id,
+				'contact_id' => $campaign_record->contact_id,
+				'source_id' => $campaign_record->source_id,
+				'source_type' => $campaign_record->source_type,
+				'code' => "{$this->channel}_click_tracked"
 			]);
 
-			if ($original_url) {
-				wp_redirect($original_url);
-				exit;
-			}
+		// Trigger click automation if enabled
+		do_action("quillcrm_{$this->channel}_clicked", $campaign_record);
+	}
+
+	// Redirect to original URL
+		if ($original_url) {
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect to tracked external URL
+			wp_redirect( esc_url_raw( $original_url ) );
+			exit;
 		}
+
+	} catch (\Exception $e) {
+		quillcrm_get_logger()->error("{$this->channel} click tracking error", [
+			'hash_key' => $hash_key,
+			'error' => $e->getMessage(),
+			'code' => "{$this->channel}_click_error"
+		]);
+
+		if ($original_url) {
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect to tracked external URL
+			wp_redirect( esc_url_raw( $original_url ) );
+			exit;
+		}
+	}
 	}
 
 	/**
@@ -683,7 +693,8 @@ abstract class Abstract_Tracking
 
 				// Redirect to unsubscribe page
 				$unsubscribe_page = apply_filters("quillcrm_{$this->channel}_unsubscribe_redirect", home_url());
-				wp_redirect($unsubscribe_page);
+				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect URL is filtered, may be external
+				wp_redirect( esc_url_raw( $unsubscribe_page ) );
 				exit;
 			}
 

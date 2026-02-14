@@ -73,7 +73,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Add Tags: Tags is empty.', 'quillcrm' ),
+				__( 'Drip Add Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'drip_add_tags',
 					'data' => array(
@@ -105,7 +105,7 @@ class Add_Tags extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -126,7 +126,7 @@ class Add_Tags extends Action {
 		$result = $api->add_subscriber( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to add subscriber to Drip.', 'quillcrm' ),
+				__( 'Failed to add subscriber to Drip.', 'quill-crm' ),
 				array(
 					'code'     => 'drip_add_subscriber',
 					'data'     => array(
@@ -146,7 +146,7 @@ class Add_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Tags added to Drip subscriber.', 'quillcrm' ),
+			__( 'Tags added to Drip subscriber.', 'quill-crm' ),
 			array(
 				'code' => 'drip_add_tags',
 				'data' => array(
@@ -193,7 +193,7 @@ class Add_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'drip/tags',
 				'multiple' => true,
 			),

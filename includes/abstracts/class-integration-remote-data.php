@@ -12,6 +12,10 @@
 
 namespace QuillCRM\Abstracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Abstracts\Integration;
 use QuillCRM\User_Roles\Permissions;
 
@@ -92,7 +96,7 @@ abstract class Integration_Remote_Data {
 					'permission_callback' => array( $this, 'get_entity_permissions_check' ),
 					'args'                => array(
 						'entity' => array(
-							'description' => __( 'The ID of the entity.', 'quillcrm' ),
+							'description' => __( 'The ID of the entity.', 'quill-crm' ),
 							'type'        => 'integer',
 							'required'    => false,
 						),

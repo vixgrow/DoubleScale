@@ -11,6 +11,10 @@
 
 namespace QuillCRM\Tracking;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\Models\Communication_Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 
@@ -66,11 +70,13 @@ class Email {
 	 */
 	public function email_opened_tracking() {
 		try {
-			if ( ! isset( $_GET['quillcrm'] ) || $_GET['quillcrm'] !== 'email_open' ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking pixel, nonce not applicable
+			if ( ! isset( $_GET['quill-crm'] ) || $_GET['quill-crm'] !== 'email_open' ) {
 				return;
 			}
 
-			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking pixel, nonce not applicable
+			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( wp_unslash( $_GET['hash_key'] ) ) : '';
 			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
 				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
@@ -95,10 +101,11 @@ class Email {
 			 header( 'Expires: Wed, 11 Jan 1984 05:00:00 GMT' );
 			 header( 'Last-Modified: Wed, 11 Jan 1984 05:00:00 GMT' );
 			 header( 'Pragma: no-cache' );
+			 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary GIF data for tracking pixel
 			 die( base64_decode( 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=' ) );
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Email Opened Tracking Error', 'quillcrm' ),
+				__( 'Email Opened Tracking Error', 'quill-crm' ),
 				array(
 					'code'  => 'email_opened_tracking',
 					'error' => array(
@@ -118,15 +125,18 @@ class Email {
 	 */
 	public function email_clicked_tracking() {
 		try {
-			if ( ! isset( $_GET['quillcrm'] ) || $_GET['quillcrm'] !== 'email_click' ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+			if ( ! isset( $_GET['quill-crm'] ) || $_GET['quill-crm'] !== 'email_click' ) {
 				return;
 			}
 
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
 			if ( ! isset( $_GET['hash_key'] ) || ! isset( $_GET['original'] ) ) {
 				return;
 			}
 
-			$hash_key       = sanitize_text_field( $_GET['hash_key'] );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+			$hash_key       = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
 			$tracking_entry = Communication_Tracking_Model::where( 'hash_key', $hash_key )
 				->where( 'mode', Communication_Tracking_Model::MODE_EMAIL )
 				->first();
@@ -155,7 +165,8 @@ class Email {
 
 			  do_action( 'quillcrm_email_clicked', $tracking_entry->contact );
 
-			  $original_url = urldecode( $_GET['original'] );
+			  // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public click tracking, nonce not applicable
+			  $original_url = urldecode( sanitize_url( wp_unslash( $_GET['original'] ) ) );
 
 			  // Handle broken unsubscribe merge tags (e.g., "unsubscribe_link}}" from unprocessed {{contact:unsubscribe_link}})
 			  if ( strpos( $original_url, 'unsubscribe_link' ) !== false || strpos( $original_url, '{{contact:' ) !== false ) {
@@ -170,16 +181,17 @@ class Email {
 						  ),
 						  home_url()
 					  );
-					  wp_redirect( $unsubscribe_url );
+					  wp_safe_redirect( $unsubscribe_url );
 					  exit;
 				  }
 			  }
 
-			  wp_redirect( $original_url );
+			  // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirect to tracked external URL
+			  wp_redirect( esc_url_raw( $original_url ) );
 			  exit;
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
-				__( 'Email Clicked Tracking Error', 'quillcrm' ),
+				__( 'Email Clicked Tracking Error', 'quill-crm' ),
 				array(
 					'code'  => 'email_clicked_tracking',
 					'error' => array(

@@ -56,7 +56,7 @@ class REST_Controller extends REST_Integration_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'api_key' => array(
-					 'label'       => __( 'API Key', 'quillcrm' ),
+					 'label'       => __( 'API Key', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -64,7 +64,7 @@ class REST_Controller extends REST_Integration_Controller {
 					 ),
 				 ),
 				 'list_id' => array(
-					 'label'       => __( 'List ID', 'quillcrm' ),
+					 'label'       => __( 'List ID', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 					 'arg_options' => array(
@@ -92,7 +92,7 @@ class REST_Controller extends REST_Integration_Controller {
 	public function update_list( $request ) {
 		$list_id = $request->get_param( 'list_id' );
 		if ( empty( $list_id ) ) {
-			return new WP_Error( 'invalid_list_id', __( 'List ID is required.', 'quillcrm' ) );
+			return new WP_Error( 'invalid_list_id', __( 'List ID is required.', 'quill-crm' ) );
 		}
 
 		$this->integration->update_setting( 'list_id', $list_id );
@@ -100,7 +100,7 @@ class REST_Controller extends REST_Integration_Controller {
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'List ID updated.', 'quillcrm' ),
+				'message' => __( 'List ID updated.', 'quill-crm' ),
 			),
 		);
 	}

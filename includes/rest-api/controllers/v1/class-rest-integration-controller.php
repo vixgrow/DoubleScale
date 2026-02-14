@@ -54,7 +54,7 @@ class REST_Integration_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'get_permissions_check' ),
 					'args'                => array(
 						'channel' => array(
-							'description' => __( 'Channel type to check', 'quillcrm' ),
+							'description' => __( 'Channel type to check', 'quill-crm' ),
 							'type'        => 'string',
 							'enum'        => array( 'sms', 'whatsapp' ),
 							'required'    => false,
@@ -99,12 +99,12 @@ class REST_Integration_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'slug'     => array(
-					 'description' => __( 'Integration Slug', 'quillcrm' ),
+					 'description' => __( 'Integration Slug', 'quill-crm' ),
 					 'type'        => 'string',
 					 'readonly'    => true,
 				 ),
 				 'settings' => array(
-					 'description' => __( 'Integration Settings', 'quillcrm' ),
+					 'description' => __( 'Integration Settings', 'quill-crm' ),
 					 'type'        => 'object',
 					 'required'    => true,
 					 'arg_options' => array(
@@ -196,7 +196,7 @@ class REST_Integration_Controller extends REST_Controller {
 					return $validator;
 				}
 				if ( ! $validator ) {
-					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quill-crm' ), array( 'status' => 400 ) );
 				}
 			}
 
@@ -289,7 +289,7 @@ class REST_Integration_Controller extends REST_Controller {
 				'provider_slug' => $default_provider_slug,
 				'error'         => sprintf(
 					/* translators: %s: Provider name */
-					__( '%s provider is not configured', 'quillcrm' ),
+					__( '%s provider is not configured', 'quill-crm' ),
 					$this->get_default_provider_name( $channel )
 				),
 				'help_link'     => admin_url( 'admin.php?page=quillcrm#/integrations' ),
@@ -304,7 +304,7 @@ class REST_Integration_Controller extends REST_Controller {
 			'provider_slug' => $provider->get_provider_slug(),
 			'error'         => $is_configured ? null : sprintf(
 				/* translators: %s: Provider name */
-				__( '%s provider is not connected', 'quillcrm' ),
+				__( '%s provider is not connected', 'quill-crm' ),
 				$provider->get_provider_name()
 			),
 			'help_link'     => admin_url( 'admin.php?page=quillcrm#/integrations' ),

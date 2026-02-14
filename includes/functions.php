@@ -9,6 +9,10 @@
  * @package QuillCRM
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\QuillCRM;
 
 use QuillCRM\Interfaces\Logger_Interface;
@@ -252,11 +256,12 @@ function quillcrm_get_logger() {
 		
 		$logger = is_object( $class ) ? $class : new $class( null, $threshold );
 	} else {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- _doing_it_wrong handles escaping
 		_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
 				/* translators: 1: class name 2: quillcrm_logging_class 3: Logger_Interface */
-				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'quillcrm' ),
+				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'quill-crm' ),
 				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
 				'<code>quillcrm_logging_class</code>',
 				'<code>Logger_Interface</code>'

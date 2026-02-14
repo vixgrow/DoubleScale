@@ -73,7 +73,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Tags: Tags are required.', 'quillcrm' ),
+				__( 'Keap Add Tags: Tags are required.', 'quill-crm' ),
 				array(
 					'code' => 'keap_add_tags',
 					'data' => array(
@@ -94,7 +94,7 @@ class Add_Tags extends Action {
 		$api  = $keap->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Tags: API connection failed.', 'quillcrm' ),
+				__( 'Keap Add Tags: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'keap_connect',
 					'data' => array(
@@ -114,7 +114,7 @@ class Add_Tags extends Action {
 		$result = $api->get_or_create_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Tags: Failed to get or create contact.', 'quillcrm' ),
+				__( 'Keap Add Tags: Failed to get or create contact.', 'quill-crm' ),
 				array(
 					'code'     => 'keap_get_or_create_contact',
 					'data'     => array(
@@ -140,7 +140,7 @@ class Add_Tags extends Action {
 		$result = $api->add_tags( $contact_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Keap Add Tags: Failed to add tags.', 'quillcrm' ),
+				__( 'Keap Add Tags: Failed to add tags.', 'quill-crm' ),
 				array(
 					'code'     => 'keap_add_tags',
 					'data'     => array(
@@ -160,7 +160,7 @@ class Add_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Keap Add Tags: Tags added successfully.', 'quillcrm' ),
+			__( 'Keap Add Tags: Tags added successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'keap_add_tags',
 				'data'     => array(
@@ -208,7 +208,7 @@ class Add_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'keap/tags',
 				'multiple' => true,
 			),

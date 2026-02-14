@@ -54,7 +54,7 @@ class Admin_Loader {
 	 */
 	public static function is_admin_page() : bool {
 		$current_screen = get_current_screen();
-		if ( false === strpos( $current_screen->id, 'quillcrm' ) ) {
+		if ( false === strpos( $current_screen->id, 'quill-crm' ) ) {
 			return false;
 		}
 		return true;

@@ -73,7 +73,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add Tags action is missing tags.', 'quillcrm' ),
+				__( 'Mautic Add Tags action is missing tags.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_add_tags',
 					'data' => array(
@@ -101,7 +101,7 @@ class Add_Tags extends Action {
 		$api    = $mautic->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add Tags: Could not connect to Mautic.', 'quillcrm' ),
+				__( 'Mautic Add Tags: Could not connect to Mautic.', 'quill-crm' ),
 				array(
 					'code' => 'mautic_connect',
 					'data' => array(
@@ -121,7 +121,7 @@ class Add_Tags extends Action {
 		$result = $api->create_or_update_contact( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mautic Add Tags: Failed to add tags.', 'quillcrm' ),
+				__( 'Mautic Add Tags: Failed to add tags.', 'quill-crm' ),
 				array(
 					'code'     => 'mautic_add_tags',
 					'data'     => array(
@@ -140,7 +140,7 @@ class Add_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mautic Add Tags: Tags added successfully.', 'quillcrm' ),
+			__( 'Mautic Add Tags: Tags added successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mautic_add_tags',
 				'response' => $result,
@@ -178,7 +178,7 @@ class Add_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'mautic/tags',
 				'multiple' => true,
 			),

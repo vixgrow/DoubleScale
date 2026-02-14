@@ -73,7 +73,7 @@ class Remove_Subscriber_From_Campaign extends Action {
 		$campaign_id = $step->get_setting( 'campaign_id', '' );
 		if ( empty( $campaign_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip Campaign ID is required.', 'quillcrm' ),
+				__( 'Drip Campaign ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'drip_remove_subscriber_from_campaign',
 					'data' => array(
@@ -104,7 +104,7 @@ class Remove_Subscriber_From_Campaign extends Action {
 		$api  = $drip->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Drip API connection failed.', 'quillcrm' ),
+				__( 'Drip API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'drip_connect',
 					'data' => array(
@@ -125,7 +125,7 @@ class Remove_Subscriber_From_Campaign extends Action {
 		$result = $api->remove_subscriber_from_campaign( $campaign_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to remove contact from Drip Campaign.', 'quillcrm' ),
+				__( 'Failed to remove contact from Drip Campaign.', 'quill-crm' ),
 				array(
 					'code' => 'drip_remove_subscriber_from_campaign',
 					'data' => array(
@@ -144,7 +144,7 @@ class Remove_Subscriber_From_Campaign extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Contact removed from Drip Campaign.', 'quillcrm' ),
+			__( 'Contact removed from Drip Campaign.', 'quill-crm' ),
 			array(
 				'code' => 'drip_remove_subscriber_from_campaign',
 				'data' => array(
@@ -189,7 +189,7 @@ class Remove_Subscriber_From_Campaign extends Action {
 		return array(
 			'campaign_id' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Campaign', 'quillcrm' ),
+				'label'    => __( 'Campaign', 'quill-crm' ),
 				'endpoint' => 'drip/campaigns',
 			),
 		);

@@ -73,7 +73,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Add Tags: Tags is empty.', 'quillcrm' ),
+				__( 'Convertkit Add Tags: Tags is empty.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_add_tags',
 					'data' => array(
@@ -95,7 +95,7 @@ class Add_Tags extends Action {
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				__( 'Convertkit Add Tags: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_connect',
 					'data' => array(
@@ -121,7 +121,7 @@ class Add_Tags extends Action {
 			$result = $api->add_subscriber_tag( $tag, $data );
 			if ( ! $result['success'] ) {
 				quillcrm_get_logger()->error(
-					__( 'Failed to add tag to Convertkit.', 'quillcrm' ),
+					__( 'Failed to add tag to Convertkit.', 'quill-crm' ),
 					array(
 						'code'     => 'convertkit_add_tags',
 						'data'     => array(
@@ -141,7 +141,7 @@ class Add_Tags extends Action {
 				continue;
 			} else {
 				quillcrm_get_logger()->info(
-					__( 'Tag added to Convertkit.', 'quillcrm' ),
+					__( 'Tag added to Convertkit.', 'quill-crm' ),
 					array(
 						'code'     => 'convertkit_add_tags',
 						'data'     => array(
@@ -192,7 +192,7 @@ class Add_Tags extends Action {
 		return array(
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'convertkit/tags',
 				'multiple' => true,
 			),

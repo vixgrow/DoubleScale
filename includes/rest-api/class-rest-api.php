@@ -10,6 +10,10 @@
 
 namespace QuillCRM\REST_API;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_List_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Tag_Controller;

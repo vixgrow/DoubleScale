@@ -216,11 +216,7 @@ class Communication_Tracking_Meta_Model extends Model {
 	public static function render_with_stored_values( $communication_tracking_id, $template_content ) {
 		$merge_tags = self::get_merge_tags( $communication_tracking_id );
 
-		// Debug: Log what we found
-		error_log( "QuillCRM: Retrieved merge tags for tracking ID {$communication_tracking_id}: " . print_r( $merge_tags, true ) );
-
 		if ( empty( $merge_tags ) ) {
-			error_log( "QuillCRM: No merge tags found for tracking ID {$communication_tracking_id}" );
 			return $template_content;
 		}
 
@@ -234,14 +230,8 @@ class Communication_Tracking_Meta_Model extends Model {
 				$merge_tag_slug = $slug_parts[0];
 				$full_tag       = "{$group}:{$merge_tag_slug}";
 
-				// Debug: Log what we're looking for
-				error_log( "QuillCRM: Looking for merge tag: {$full_tag}" );
-
 				// Return stored value if exists, otherwise return empty
-				$result = isset( $merge_tags[ $full_tag ] ) ? $merge_tags[ $full_tag ] : '';
-				error_log( "QuillCRM: Merge tag {$full_tag} result: " . $result );
-
-				return $result;
+				return isset( $merge_tags[ $full_tag ] ) ? $merge_tags[ $full_tag ] : '';
 			},
 			$template_content
 		);

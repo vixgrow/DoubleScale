@@ -74,7 +74,7 @@ class Remove_From_List extends Action {
 
 		if ( empty( $list_id ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove From List: List ID is required.', 'quillcrm' ),
+				__( 'GetResponse Remove From List: List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_from_list',
 					'data' => array(
@@ -95,7 +95,7 @@ class Remove_From_List extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse API connection failed.', 'quillcrm' ),
+				__( 'GetResponse API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -116,7 +116,7 @@ class Remove_From_List extends Action {
 		$contact = $api->get_contact( $email );
 		if ( ! $contact ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove From List: Contact not found.', 'quillcrm' ),
+				__( 'GetResponse Remove From List: Contact not found.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_from_list',
 					'data' => array(
@@ -137,7 +137,7 @@ class Remove_From_List extends Action {
 		$contact_list = $contact['campaign']['campaignId'];
 		if ( $contact_list !== $list_id ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove From List: Contact is not in the list.', 'quillcrm' ),
+				__( 'GetResponse Remove From List: Contact is not in the list.', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_remove_from_list',
 					'data' => array(
@@ -157,7 +157,7 @@ class Remove_From_List extends Action {
 		$result = $api->remove_contact( $contact['contactId'], $list_id );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Remove From List: Failed to remove contact from list.', 'quillcrm' ),
+				__( 'GetResponse Remove From List: Failed to remove contact from list.', 'quill-crm' ),
 				array(
 					'code'     => 'getresponse_remove_from_list',
 					'data'     => array(
@@ -176,7 +176,7 @@ class Remove_From_List extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'GetResponse Remove From List: Contact removed from list.', 'quillcrm' ),
+			__( 'GetResponse Remove From List: Contact removed from list.', 'quill-crm' ),
 			array(
 				'code'     => 'getresponse_remove_from_list',
 				'data'     => array(
@@ -205,7 +205,7 @@ class Remove_From_List extends Action {
 			'type'       => 'object',
 			'properties' => array(
 				'list_id' => array(
-					'description' => __( 'List ID', 'quillcrm' ),
+					'description' => __( 'List ID', 'quill-crm' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
@@ -221,7 +221,7 @@ class Remove_From_List extends Action {
 	public function get_fields() {
 		return array(
 			'list_id' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'getresponse/lists',
 			),

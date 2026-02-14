@@ -87,19 +87,26 @@ class FluentCRM extends Importer {
 			$total,
 			$this->offset,
 			function ( $offset ) use ( $wpdb, $table_name, $pivot_table, $list_table, $tag_table, $meta_table ) {
+				$like_list = '%' . $wpdb->esc_like( 'List' ) . '%';
+				$like_tag  = '%' . $wpdb->esc_like( 'Tag' ) . '%';
+
 				$subscribers = $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT s.*, 
-								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%List%' THEN l.title END) AS lists,
-								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%Tag%' THEN t.title END) AS tags
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE %s THEN l.title END) AS lists,
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE %s THEN t.title END) AS tags
 						 FROM $table_name AS s
 						 
 						 LEFT JOIN $pivot_table AS p ON s.id = p.subscriber_id
-						 LEFT JOIN $list_table AS l ON p.object_id = l.id AND p.object_type LIKE '%List%'
-						 LEFT JOIN $tag_table AS t ON p.object_id = t.id AND p.object_type LIKE '%Tag%'
+						 LEFT JOIN $list_table AS l ON p.object_id = l.id AND p.object_type LIKE %s
+						 LEFT JOIN $tag_table AS t ON p.object_id = t.id AND p.object_type LIKE %s
 						 
 						 GROUP BY s.id
 						 LIMIT %d, 20",
+						$like_list,
+						$like_tag,
+						$like_list,
+						$like_tag,
 						$offset
 					),
 					ARRAY_A
@@ -268,21 +275,21 @@ class FluentCRM extends Importer {
 		$fields = array(
 			'lists_mapping'         => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists Mapping', 'quillcrm' ),
+				'label'   => __( 'Lists Mapping', 'quill-crm' ),
 				'options' => $this->get_lists(),
-				'tooltip' => __( 'Map FluentCRM lists to QuillCRM lists. For each FluentCRM list, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM lists to add contacts to (useful for renaming or consolidating lists), or 2) "Auto Create" - Automatically create a new QuillCRM list with the same name as the FluentCRM list (useful for preserving your original list structure). Contacts will only be added to lists they belonged to in FluentCRM.', 'quillcrm' ),
+				'tooltip' => __( 'Map FluentCRM lists to QuillCRM lists. For each FluentCRM list, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM lists to add contacts to (useful for renaming or consolidating lists), or 2) "Auto Create" - Automatically create a new QuillCRM list with the same name as the FluentCRM list (useful for preserving your original list structure). Contacts will only be added to lists they belonged to in FluentCRM.', 'quill-crm' ),
 			),
 			'tags_mapping'          => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags Mapping', 'quillcrm' ),
+				'label'   => __( 'Tags Mapping', 'quill-crm' ),
 				'options' => $this->get_tags(),
-				'tooltip' => __( 'Map FluentCRM tags to QuillCRM tags. For each FluentCRM tag, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM tags to apply to contacts (useful for renaming or consolidating tags), or 2) "Auto Create" - Automatically create a new QuillCRM tag with the same name as the FluentCRM tag (useful for preserving your original tag structure). Contacts will only receive tags they had in FluentCRM.', 'quillcrm' ),
+				'tooltip' => __( 'Map FluentCRM tags to QuillCRM tags. For each FluentCRM tag, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM tags to apply to contacts (useful for renaming or consolidating tags), or 2) "Auto Create" - Automatically create a new QuillCRM tag with the same name as the FluentCRM tag (useful for preserving your original tag structure). Contacts will only receive tags they had in FluentCRM.', 'quill-crm' ),
 			),
 			'custom_fields_mapping' => array(
 				'type'    => 'custom_fields_mapping',
-				'label'   => __( 'Custom Fields Mapping', 'quillcrm' ),
+				'label'   => __( 'Custom Fields Mapping', 'quill-crm' ),
 				'options' => $this->get_custom_fields(),
-				'tooltip' => __( 'Map FluentCRM custom fields to QuillCRM custom fields. For each FluentCRM custom field, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM custom fields to map the data to (useful for renaming or consolidating fields), or 2) "Auto Create" - Automatically create a new QuillCRM custom field with the same name as the FluentCRM field (useful for preserving your original field structure). Only contacts with values in these fields will have them imported.', 'quillcrm' ),
+				'tooltip' => __( 'Map FluentCRM custom fields to QuillCRM custom fields. For each FluentCRM custom field, you can either: 1) "Assign to (QuillCRM)" - Choose one or more existing QuillCRM custom fields to map the data to (useful for renaming or consolidating fields), or 2) "Auto Create" - Automatically create a new QuillCRM custom field with the same name as the FluentCRM field (useful for preserving your original field structure). Only contacts with values in these fields will have them imported.', 'quill-crm' ),
 			),
 		);
 		return $fields;

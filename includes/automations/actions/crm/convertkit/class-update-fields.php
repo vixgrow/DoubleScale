@@ -73,7 +73,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Update Fields: Mapped Fields is empty.', 'quillcrm' ),
+				__( 'Convertkit Update Fields: Mapped Fields is empty.', 'quill-crm' ),
 				array(
 					'code'          => 'converkit_update_fields',
 					'data'          => array(
@@ -108,7 +108,7 @@ class Update_Fields extends Action {
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				__( 'Convertkit Add Tags: API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'convertkit_connect',
 					'data' => array(
@@ -130,7 +130,7 @@ class Update_Fields extends Action {
 		$result = $api->get_subscriber( $email );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to get subscriber from Convertkit.', 'quillcrm' ),
+				__( 'Failed to get subscriber from Convertkit.', 'quill-crm' ),
 				array(
 					'code'     => 'convertkit_get_subscriber',
 					'data'     => array(
@@ -152,7 +152,7 @@ class Update_Fields extends Action {
 		$subscriber = $result['data']['subscribers'][0] ?? null;
 		if ( ! $subscriber ) {
 			quillcrm_get_logger()->error(
-				__( 'Subscriber not found in Convertkit.', 'quillcrm' ),
+				__( 'Subscriber not found in Convertkit.', 'quill-crm' ),
 				array(
 					'code'     => 'convertkit_get_subscriber',
 					'data'     => array(
@@ -175,7 +175,7 @@ class Update_Fields extends Action {
 		$result        = $api->update_subscriber( $subscriber_id, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to update subscriber in Convertkit.', 'quillcrm' ),
+				__( 'Failed to update subscriber in Convertkit.', 'quill-crm' ),
 				array(
 					'code'     => 'convertkit_update_subscriber',
 					'data'     => array(
@@ -195,7 +195,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Subscriber updated in Convertkit.', 'quillcrm' ),
+			__( 'Subscriber updated in Convertkit.', 'quill-crm' ),
 			array(
 				'code'     => 'convertkit_update_subscriber',
 				'data'     => array(
@@ -239,7 +239,7 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(),
 				'endpoint' => 'convertkit/fields',

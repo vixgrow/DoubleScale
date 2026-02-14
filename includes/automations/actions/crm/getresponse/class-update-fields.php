@@ -73,7 +73,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Update Fields: Mapped Fields are empty', 'quillcrm' ),
+				__( 'GetResponse Update Fields: Mapped Fields are empty', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_update_fields',
 					'data' => array(
@@ -109,7 +109,7 @@ class Update_Fields extends Action {
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'GetResponse Update Fields: API connection failed', 'quillcrm' ),
+				__( 'GetResponse Update Fields: API connection failed', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_connect',
 					'data' => array(
@@ -130,7 +130,7 @@ class Update_Fields extends Action {
 		$result = $api->create_or_update_contact( $email, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Failed to update fields of contact in GetResponse', 'quillcrm' ),
+				__( 'Failed to update fields of contact in GetResponse', 'quill-crm' ),
 				array(
 					'code' => 'getresponse_update_fields',
 					'data' => array(
@@ -148,7 +148,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Fields of contact updated in GetResponse', 'quillcrm' ),
+			__( 'Fields of contact updated in GetResponse', 'quill-crm' ),
 			array(
 				'code' => 'getresponse_update_fields',
 				'data' => array(
@@ -191,7 +191,7 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(),
 				'endpoint' => 'getresponse/fields',

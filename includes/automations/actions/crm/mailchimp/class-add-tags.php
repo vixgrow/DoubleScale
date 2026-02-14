@@ -73,7 +73,7 @@ class Add_Tags extends Action {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add tags action failed. List ID is required.', 'quillcrm' ),
+				__( 'Mailchimp add tags action failed. List ID is required.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_add_tags',
 					'data' => array(
@@ -92,7 +92,7 @@ class Add_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add tags action failed. Tags are required.', 'quillcrm' ),
+				__( 'Mailchimp add tags action failed. Tags are required.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_add_tags',
 					'data' => array(
@@ -113,7 +113,7 @@ class Add_Tags extends Action {
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add tags action failed. Mailchimp API connection failed.', 'quillcrm' ),
+				__( 'Mailchimp add tags action failed. Mailchimp API connection failed.', 'quill-crm' ),
 				array(
 					'code' => 'mailchimp_connect',
 					'data' => array(
@@ -143,7 +143,7 @@ class Add_Tags extends Action {
 		$result = $api->add_tags( $list, $email, $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Mailchimp add tags action failed. Failed to add tags.', 'quillcrm' ),
+				__( 'Mailchimp add tags action failed. Failed to add tags.', 'quill-crm' ),
 				array(
 					'code'     => 'mailchimp_add_tags',
 					'data'     => array(
@@ -162,7 +162,7 @@ class Add_Tags extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Mailchimp add tags action completed successfully.', 'quillcrm' ),
+			__( 'Mailchimp add tags action completed successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'mailchimp_add_tags',
 				'response' => $result,
@@ -203,13 +203,13 @@ class Add_Tags extends Action {
 	public function get_fields() {
 		return array(
 			'list' => array(
-				'label'    => __( 'List ID', 'quillcrm' ),
+				'label'    => __( 'List ID', 'quill-crm' ),
 				'type'     => 'api_select',
 				'endpoint' => 'mailchimp/lists',
 			),
 			'tags' => array(
 				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'quillcrm' ),
+				'label'    => __( 'Tags', 'quill-crm' ),
 				'endpoint' => 'mailchimp/tags',
 				'multiple' => true,
 			),

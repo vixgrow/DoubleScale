@@ -83,12 +83,12 @@ class Lists extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'               => __( 'Matches', 'quillcrm' ),
-			'is_not'           => __( 'Does not match', 'quillcrm' ),
-			'contains'         => __( 'Has', 'quillcrm' ),
-			'does_not_contain' => __( 'Does not have', 'quillcrm' ),
-			'is_empty'         => __( 'Is empty', 'quillcrm' ),
-			'is_not_empty'     => __( 'Is not empty', 'quillcrm' ),
+			'is'               => __( 'Matches', 'quill-crm' ),
+			'is_not'           => __( 'Does not match', 'quill-crm' ),
+			'contains'         => __( 'Has', 'quill-crm' ),
+			'does_not_contain' => __( 'Does not have', 'quill-crm' ),
+			'is_empty'         => __( 'Is empty', 'quill-crm' ),
+			'is_not_empty'     => __( 'Is not empty', 'quill-crm' ),
 		);
 	}
 

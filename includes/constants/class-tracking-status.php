@@ -51,12 +51,12 @@ class Tracking_Status {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING   => __( 'Pending', 'quillcrm' ),
-			self::SENT      => __( 'Sent', 'quillcrm' ),
-			self::FAILED    => __( 'Failed', 'quillcrm' ),
-			self::DELIVERED => __( 'Delivered', 'quillcrm' ),
-			self::SCHEDULED => __( 'Scheduled', 'quillcrm' ),
-			self::READ      => __( 'Read', 'quillcrm' ),
+			self::PENDING   => __( 'Pending', 'quill-crm' ),
+			self::SENT      => __( 'Sent', 'quill-crm' ),
+			self::FAILED    => __( 'Failed', 'quill-crm' ),
+			self::DELIVERED => __( 'Delivered', 'quill-crm' ),
+			self::SCHEDULED => __( 'Scheduled', 'quill-crm' ),
+			self::READ      => __( 'Read', 'quill-crm' ),
 		);
 	}
 
@@ -68,7 +68,7 @@ class Tracking_Status {
 	 */
 	public static function get_name( $status ) {
 		$statuses = self::get_all();
-		return $statuses[ $status ] ?? __( 'Unknown', 'quillcrm' );
+		return $statuses[ $status ] ?? __( 'Unknown', 'quill-crm' );
 	}
 
 	/**

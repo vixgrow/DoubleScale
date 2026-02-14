@@ -92,11 +92,11 @@ class Integration extends Integration_Abstract {
 		$app_id  = $settings['app_id'] ?? '';
 
 		if ( empty( $api_key ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'API Key is required.', 'quill-crm' ) );
 		}
 
 		if ( empty( $app_id ) ) {
-			return new \WP_Error( 'invalid_settings', __( 'App ID is required.', 'quillcrm' ) );
+			return new \WP_Error( 'invalid_settings', __( 'App ID is required.', 'quill-crm' ) );
 		}
 
 		$api    = new API( $api_key, $app_id );

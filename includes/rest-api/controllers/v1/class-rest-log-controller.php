@@ -123,7 +123,7 @@ class REST_Log_Controller extends REST_Controller {
 	private function export_items( $format, $levels ) {
 		$logs = Log_Handler_DB::get_all( $levels );
 		if ( empty( $logs ) ) {
-			return new WP_Error( 'quillcrm_cannot_find_logs', esc_html__( 'Cannot find any logs', 'quillcrm' ), array( 'status' => 404 ) );
+			return new WP_Error( 'quillcrm_cannot_find_logs', esc_html__( 'Cannot find any logs', 'quill-crm' ), array( 'status' => 404 ) );
 		}
 
 		$rows = array();
@@ -143,7 +143,7 @@ class REST_Log_Controller extends REST_Controller {
 				$this->export_json( $rows );
 				break;
 			default:
-				return new WP_Error( 'quillcrm_unknown_logs_export_format', esc_html__( 'Unknown export format', 'quillcrm' ), array( 'status' => 422 ) );
+				return new WP_Error( 'quillcrm_unknown_logs_export_format', esc_html__( 'Unknown export format', 'quill-crm' ), array( 'status' => 422 ) );
 		}
 	}
 
@@ -154,7 +154,7 @@ class REST_Log_Controller extends REST_Controller {
 	 * @return void
 	 */
 	private function export_json( $rows ) {
-		$filename = esc_html__( 'Logs export', 'quillcrm' ) . '.json';
+		$filename = esc_html__( 'Logs export', 'quill-crm' ) . '.json';
 
 		if ( ini_get( 'display_errors' ) ) {
 			ini_set( 'display_errors', '0' );
@@ -204,7 +204,7 @@ class REST_Log_Controller extends REST_Controller {
 		$deleted = Log_Handler_DB::delete( $request->get_param( 'id' ) );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'quillcrm_logs_db_error_on_deleting_log', __( 'Error on deleting log in db!', 'quillcrm' ), array( 'status' => 422 ) );
+			return new WP_Error( 'quillcrm_logs_db_error_on_deleting_log', __( 'Error on deleting log in db!', 'quill-crm' ), array( 'status' => 422 ) );
 		}
 
 		return new WP_REST_Response();

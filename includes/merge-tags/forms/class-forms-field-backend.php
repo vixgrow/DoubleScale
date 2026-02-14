@@ -41,7 +41,7 @@ if ( ! class_exists( 'QuillCRM\Merge_Tags\Forms\Forms_Field_Backend' ) ) {
 		 */
 		public function __construct( $group ) {
 			// Call parent constructor with generic parameters for backend usage
-			parent::__construct( '', __( 'Form Field', 'quillcrm' ), $group );
+			parent::__construct( '', __( 'Form Field', 'quill-crm' ), $group );
 
 			// Override slug for backend generic field tag
 			$this->slug = 'field:';

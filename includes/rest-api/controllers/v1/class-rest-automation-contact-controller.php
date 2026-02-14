@@ -94,47 +94,47 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 			 'type'       => 'object',
 			 'properties' => array(
 				 'id'             => array(
-					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'readonly'    => true,
 				 ),
 				 'contact_id'     => array(
-					 'description' => __( 'The ID of the contact.', 'quillcrm' ),
+					 'description' => __( 'The ID of the contact.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'required'    => true,
 				 ),
 				 'automation_id'  => array(
-					 'description' => __( 'The ID of the automation.', 'quillcrm' ),
+					 'description' => __( 'The ID of the automation.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'required'    => true,
 				 ),
 				 'execution_time' => array(
-					 'description' => __( 'The time the automation should be executed.', 'quillcrm' ),
+					 'description' => __( 'The time the automation should be executed.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 				 ),
 				 'event'          => array(
-					 'description' => __( 'The event that triggered the automation.', 'quillcrm' ),
+					 'description' => __( 'The event that triggered the automation.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 				 ),
 				 'status'         => array(
-					 'description' => __( 'The status of the automation.', 'quillcrm' ),
+					 'description' => __( 'The status of the automation.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'required'    => true,
 				 ),
 				 'step_id'        => array(
-					 'description' => __( 'The ID of the step.', 'quillcrm' ),
+					 'description' => __( 'The ID of the step.', 'quill-crm' ),
 					 'type'        => 'integer',
 					 'required'    => true,
 				 ),
 				 'created_at'     => array(
-					 'description' => __( 'The date the contact was created.', 'quillcrm' ),
+					 'description' => __( 'The date the contact was created.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'readonly'    => true,
 				 ),
 				 'updated_at'     => array(
-					 'description' => __( 'The date the contact was last updated.', 'quillcrm' ),
+					 'description' => __( 'The date the contact was last updated.', 'quill-crm' ),
 					 'type'        => 'string',
 					 'readonly'    => true,
 				 ),
@@ -180,7 +180,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 			$automation_contact = Automation_Contact_Model::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$automation_contact->load( 'processes.step', 'current_step', 'next_step' );
@@ -205,7 +205,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 			$automation_contact = Automation_Contact_Model::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$data = $this->prepare_contact( $request );
@@ -232,7 +232,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 			$automation_contact = Automation_Contact_Model::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quill-crm' ), array( 'status' => 404 ) );
 			}
 
 			$automation_contact->delete();

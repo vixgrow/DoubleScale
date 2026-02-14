@@ -94,7 +94,7 @@ class Add_Lists extends Action {
 	public function get_fields() {
 		return array(
 			'lists' => array(
-				'label'    => __( 'Lists', 'quillcrm' ),
+				'label'    => __( 'Lists', 'quill-crm' ),
 				'type'     => 'lists',
 				'multiple' => true,
 			),

@@ -73,7 +73,7 @@ class Update_Fields extends Action {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Update Fields: Mapped Fields are empty.', 'quillcrm' ),
+				__( 'Hubspot Update Fields: Mapped Fields are empty.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_update_fields',
 					'data' => array(
@@ -113,7 +113,7 @@ class Update_Fields extends Action {
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Update Fields: Could not connect to Hubspot.', 'quillcrm' ),
+				__( 'Hubspot Update Fields: Could not connect to Hubspot.', 'quill-crm' ),
 				array(
 					'code' => 'hubspot_connect',
 					'data' => array(
@@ -133,7 +133,7 @@ class Update_Fields extends Action {
 		$result = $api->create_or_update( $data );
 		if ( ! $result['success'] ) {
 			quillcrm_get_logger()->error(
-				__( 'Hubspot Update Fields: Could not update fields.', 'quillcrm' ),
+				__( 'Hubspot Update Fields: Could not update fields.', 'quill-crm' ),
 				array(
 					'code'     => 'hubspot_update_fields',
 					'data'     => array(
@@ -152,7 +152,7 @@ class Update_Fields extends Action {
 		}
 
 		quillcrm_get_logger()->info(
-			__( 'Hubspot Update Fields: Fields updated successfully.', 'quillcrm' ),
+			__( 'Hubspot Update Fields: Fields updated successfully.', 'quill-crm' ),
 			array(
 				'code'     => 'hubspot_update_fields',
 				'data'     => array(
@@ -196,7 +196,7 @@ class Update_Fields extends Action {
 	public function get_fields() {
 		return array(
 			'mapped_fields' => array(
-				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'label'    => __( 'Mapped Fields', 'quill-crm' ),
 				'type'     => 'api_mapped_fields',
 				'fields'   => array(),
 				'endpoint' => 'hubspot/fields',

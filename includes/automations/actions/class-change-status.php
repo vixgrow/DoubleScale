@@ -94,13 +94,13 @@ class Change_Status extends Action {
 		return array(
 			'new_status' => array(
 				'type'     => 'select',
-				'label'    => __( 'New Status', 'quillcrm' ),
+				'label'    => __( 'New Status', 'quill-crm' ),
 				'required' => true,
 				'options'  => array(
-					'unverified'   => __( 'Unverified', 'quillcrm' ),
-					'subscribed'   => __( 'Subscribed', 'quillcrm' ),
-					'unsubscribed' => __( 'Unsubscribed', 'quillcrm' ),
-					'bounced'      => __( 'Bounced', 'quillcrm' ),
+					'unverified'   => __( 'Unverified', 'quill-crm' ),
+					'subscribed'   => __( 'Subscribed', 'quill-crm' ),
+					'unsubscribed' => __( 'Unsubscribed', 'quill-crm' ),
+					'bounced'      => __( 'Bounced', 'quill-crm' ),
 				),
 			),
 		);

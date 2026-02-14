@@ -89,7 +89,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => sprintf( __( '%s IDs.', 'quillcrm' ), $this->singular_name ),
+							'description' => sprintf( __( '%s IDs.', 'quill-crm' ), $this->singular_name ),
 							'type'        => 'array',
 							'required'    => true,
 						),
@@ -133,38 +133,38 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 	public function get_collection_params() {
 		return array(
 			'keyword'    => array(
-				'description' => __( 'Keyword to search.', 'quillcrm' ),
+				'description' => __( 'Keyword to search.', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'text-field',
 			),
 			'per_page'   => array(
-				'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+				'description' => __( 'Number of items to fetch.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 10,
 			),
 			'page'       => array(
-				'description' => __( 'Page number.', 'quillcrm' ),
+				'description' => __( 'Page number.', 'quill-crm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'ids'        => array(
-				'description' => sprintf( __( 'IDs of %s to fetch.', 'quillcrm' ), strtolower( $this->plural_name ) ),
+				'description' => sprintf( __( 'IDs of %s to fetch.', 'quill-crm' ), strtolower( $this->plural_name ) ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'integer',
 				),
 			),
 			'contact_id' => array(
-				'description' => __( 'Contact ID.', 'quillcrm' ),
+				'description' => __( 'Contact ID.', 'quill-crm' ),
 				'type'        => 'integer',
 			),
 			'from'       => array(
-				'description' => __( 'Start date for filtering (created_at >= from).', 'quillcrm' ),
+				'description' => __( 'Start date for filtering (created_at >= from).', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'to'         => array(
-				'description' => __( 'End date for filtering (created_at <= to).', 'quillcrm' ),
+				'description' => __( 'End date for filtering (created_at <= to).', 'quill-crm' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
@@ -185,12 +185,12 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					'description' => __( 'Unique identifier for the object.', 'quill-crm' ),
 					'type'        => 'integer',
 					'readonly'    => true,
 				),
 				'name'        => array(
-					'description' => sprintf( __( 'Name of the %s.', 'quillcrm' ), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Name of the %s.', 'quill-crm' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -198,34 +198,34 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 					),
 				),
 				'slug'        => array(
-					'description' => sprintf( __( 'An alphanumeric identifier for the %s.', 'quillcrm' ), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'An alphanumeric identifier for the %s.', 'quill-crm' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
 				),
 				'description' => array(
-					'description' => sprintf( __( 'Description of the %s.', 'quillcrm' ), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Description of the %s.', 'quill-crm' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'status'      => array(
-					'description' => sprintf( __( 'Status of the %s.', 'quillcrm' ), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Status of the %s.', 'quill-crm' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'enum'        => array( 'active', 'inactive' ),
 					'default'     => 'active',
 				),
 				'created_at'  => array(
 					'type'        => 'string',
-					'description' => __( 'Created at', 'quillcrm' ),
+					'description' => __( 'Created at', 'quill-crm' ),
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'updated_at'  => array(
 					'type'        => 'string',
-					'description' => __( 'Updated at', 'quillcrm' ),
+					'description' => __( 'Updated at', 'quill-crm' ),
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
@@ -359,7 +359,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			if ( ! $item ) {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
-					sprintf( __( '%s not found.', 'quillcrm' ), $this->singular_name ),
+					sprintf( __( '%s not found.', 'quill-crm' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -397,7 +397,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			if ( ! $item ) {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
-					sprintf( __( '%s not found.', 'quillcrm' ), $this->singular_name ),
+					sprintf( __( '%s not found.', 'quill-crm' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -433,7 +433,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			if ( ! $item ) {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
-					sprintf( __( '%s not found.', 'quillcrm' ), $this->singular_name ),
+					sprintf( __( '%s not found.', 'quill-crm' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -466,7 +466,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			if ( empty( $ids ) ) {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_missing_ids',
-					sprintf( __( 'No %s IDs provided.', 'quillcrm' ), strtolower( $this->plural_name ) ),
+					sprintf( __( 'No %s IDs provided.', 'quill-crm' ), strtolower( $this->plural_name ) ),
 					array( 'status' => 400 )
 				);
 			}
@@ -477,7 +477,7 @@ abstract class REST_Taxonomy_Controller extends REST_Controller {
 			if ( $items->isEmpty() ) {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
-					sprintf( __( '%s not found.', 'quillcrm' ), $this->plural_name ),
+					sprintf( __( '%s not found.', 'quill-crm' ), $this->plural_name ),
 					array( 'status' => 404 )
 				);
 			}

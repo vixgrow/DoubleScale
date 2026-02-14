@@ -122,7 +122,7 @@ abstract class Abstract_Send_Message extends Action {
 				);
 				return array(
 					'success' => false,
-					'message' => sprintf( __( 'Contact unsubscribed from %s', 'quillcrm' ), $channel_name ),
+					'message' => sprintf( __( 'Contact unsubscribed from %s', 'quill-crm' ), $channel_name ),
 					'code'    => 'contact_unsubscribed',
 				);
 			}

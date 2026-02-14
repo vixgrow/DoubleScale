@@ -994,7 +994,7 @@ final class Activity_Manager {
 		// Get total count.
 		$total = 0;
 		foreach ( $count_queries as $count_sql ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is built with prepared statements internally.
 			$count_result = $wpdb->get_var( $count_sql );
 			$total       += intval( $count_result );
 		}
@@ -1015,7 +1015,7 @@ final class Activity_Manager {
 			$offset
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 		$results = $wpdb->get_results( $final_sql );
 
 		// Batch load users.

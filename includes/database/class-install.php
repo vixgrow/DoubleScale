@@ -260,7 +260,7 @@ class Install {
 			return;
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is safely constructed from $wpdb->prefix.
 
 		// Add whatsapp_phone column after phone.
 		$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN whatsapp_phone VARCHAR(255) DEFAULT NULL AFTER phone" );
@@ -272,7 +272,7 @@ class Install {
 		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_phone (whatsapp_phone)" );
 		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX whatsapp_status (whatsapp_status)" );
 
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**
@@ -294,7 +294,7 @@ class Install {
 			return;
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are safely constructed from $wpdb->prefix.
 
 		// Add created_by column to campaigns table.
 		$campaigns_table = $wpdb->prefix . 'quillcrm_campaigns';
@@ -326,7 +326,7 @@ class Install {
 			}
 		}
 
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**
@@ -356,7 +356,7 @@ class Install {
 			return;
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is safely constructed from $wpdb->prefix.
 
 		// Check if column already exists to prevent duplicate column errors.
 		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'activity_date'" );
@@ -385,6 +385,6 @@ class Install {
 			WHERE activity_date IS NULL"
 		);
 
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 }

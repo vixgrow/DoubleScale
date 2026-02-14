@@ -578,9 +578,10 @@ class Communication_Tracking_Model extends Model {
 					self::MODE_WHATSAPP => 'quillcrm_campaign_whatsapp_status_changed',
 				);
 
-				if ( isset( $mode_actions[ $message->mode ] ) ) {
-					do_action( $mode_actions[ $message->mode ], $message );
-				}
+			if ( isset( $mode_actions[ $message->mode ] ) ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook names are prefixed with 'quillcrm_'.
+				do_action( $mode_actions[ $message->mode ], $message );
+			}
 			}
 		);
 	}

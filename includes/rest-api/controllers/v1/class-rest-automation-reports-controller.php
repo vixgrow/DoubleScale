@@ -529,6 +529,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 		// Use raw SQL for better performance
 		$table_name = $wpdb->prefix . 'quillcrm_communication_tracking';
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is safely constructed from $wpdb->prefix.
 		$metrics = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT 

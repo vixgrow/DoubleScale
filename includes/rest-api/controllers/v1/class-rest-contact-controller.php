@@ -954,6 +954,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 
 		// Get all course enrollments for user.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from LearnPress plugin.
 		$enrollments = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$table_name} WHERE user_id = %d AND item_type = %s ORDER BY start_time DESC",
@@ -1417,7 +1418,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above with $wpdb->prepare().
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			$total_sent    = (int) ( $stats->total_sent ?? 0 );
@@ -1450,7 +1451,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above with $wpdb->prepare().
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			return array(

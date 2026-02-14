@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$header_image = apply_filters( 'quillcrm_email_header_image', false );
+$quillcrm_header_image = apply_filters( 'quillcrm_email_header_image', false );
 ?>
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -264,9 +264,9 @@ $header_image = apply_filters( 'quillcrm_email_header_image', false );
 					<![endif]-->
 					<table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
 						<?php
-						if ( ! empty( $header_image ) ) {
+						if ( ! empty( $quillcrm_header_image ) ) {
 							echo '<tr><td valign="top" align="center" id="templateHeader" style="padding-bottom:20px;text-align:center;">';
-								echo '<img src="' . esc_url( $header_image ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" />';
+								echo '<img src="' . esc_url( $quillcrm_header_image ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" />';
 							echo '</td></tr>';
 						}
 						?>

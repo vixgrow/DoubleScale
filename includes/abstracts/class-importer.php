@@ -481,8 +481,11 @@ abstract class Importer {
 
 		$table_name = $wpdb->prefix . 'quillcrm_custom_field_relationship';
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is safely constructed from $wpdb->prefix.
+
 		// check table exists
 		if ( ! $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) ) {
+			// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
 			return;
 		}
 
@@ -494,6 +497,7 @@ abstract class Importer {
 				$custom_field_id
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( $existing ) {
 			// Update existing

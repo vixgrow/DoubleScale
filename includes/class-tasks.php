@@ -111,6 +111,7 @@ class Tasks {
 	 * @return void
 	 */
 	public function enqueue_sync( $hook, ...$args ) {
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook names are prefixed with the group name.
 		do_action( "{$this->group}_$hook", ...$args );
 	}
 

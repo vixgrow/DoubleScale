@@ -15,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$header_image     = apply_filters( 'quillcrm_email_header_image', false );
-$background_color = '#e9eaec';
-$text_direction   = is_rtl() ? 'rtl' : 'ltr';
+$quillcrm_header_image     = apply_filters( 'quillcrm_email_header_image', false );
+$quillcrm_background_color = '#e9eaec';
+$quillcrm_text_direction   = is_rtl() ? 'rtl' : 'ltr';
 ?>
 <!doctype html>
-<html dir="<?php echo esc_attr( $text_direction ); ?>" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html dir="<?php echo esc_attr( $quillcrm_text_direction ); ?>" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 	<!--[if gte mso 15]>
 	<xml>
@@ -120,7 +120,7 @@ $text_direction   = is_rtl() ? 'rtl' : 'ltr';
 		/***** Make theme edits below if needed *****/
 		/* Page - Background Style */
 		body,#bodyTable{
-			background-color:<?php echo esc_attr( $background_color ); ?>;
+			background-color:<?php echo esc_attr( $quillcrm_background_color ); ?>;
 		}
 		/* Page - Heading 1 */
 		h1{
@@ -195,7 +195,7 @@ $text_direction   = is_rtl() ? 'rtl' : 'ltr';
 		}
 		/* Footer - Footer Style */
 		#templateFooter{
-			background-color:<?php echo esc_attr( $background_color ); ?>;
+			background-color:<?php echo esc_attr( $quillcrm_background_color ); ?>;
 			border-top:0;
 			border-bottom:0;
 			padding-top:12px;
@@ -246,10 +246,10 @@ $text_direction   = is_rtl() ? 'rtl' : 'ltr';
 		}
 	</style>
 </head>
-<body style="height: 100%;margin: 0;padding: 0;width: 100%;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: <?php echo esc_attr( $background_color ); ?>;">
+<body style="height: 100%;margin: 0;padding: 0;width: 100%;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: <?php echo esc_attr( $quillcrm_background_color ); ?>;">
 	<!-- Don't forget to run final template through http://templates.mailchimp.com/resources/inline-css/ -->
 	<center>
-		<table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;height: 100%;margin: 0;padding: 0;width: 100%;background-color: <?php echo esc_attr( $background_color ); ?>;">
+		<table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;height: 100%;margin: 0;padding: 0;width: 100%;background-color: <?php echo esc_attr( $quillcrm_background_color ); ?>;">
 			<tr>
 				<td align="center" valign="top" id="bodyCell" style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;height: 100%;margin: 0;padding: 50px 50px;width: 100%;">
 					<!-- BEGIN TEMPLATE // -->
@@ -260,9 +260,9 @@ $text_direction   = is_rtl() ? 'rtl' : 'ltr';
 					<![endif]-->
 					<table border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer" style="border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;border: 0;max-width: 600px !important;">
 						<?php
-						if ( ! empty( $header_image ) ) {
+						if ( ! empty( $quillcrm_header_image ) ) {
 							echo '<tr><td valign="top" align="center" id="templateHeader" style="padding-bottom:20px;text-align:center;">';
-								echo '<img src="' . esc_url( $header_image ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" />';
+								echo '<img src="' . esc_url( $quillcrm_header_image ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" />';
 							echo '</td></tr>';
 						}
 						?>

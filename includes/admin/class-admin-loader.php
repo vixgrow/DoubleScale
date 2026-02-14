@@ -231,6 +231,7 @@ class Admin_Loader {
 		// Important to check for authentication.
 		wp_auth_check_load();
 
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Legacy hook name, kept for backward compatibility.
 		do_action( 'qcrm_admin_enqueue_scripts' );
 
 		// Add Pro client as dependency if Pro plugin is active and registered its script

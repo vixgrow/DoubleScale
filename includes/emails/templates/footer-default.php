@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$background_color = '#e9eaec';
+$quillcrm_background_color = '#e9eaec';
 ?>
 															</td>
 														</tr>
@@ -27,7 +27,7 @@ $background_color = '#e9eaec';
 							</td>
 						</tr>
 						<tr>
-							<td valign="top" id="templateFooter" style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: <?php echo esc_attr( $background_color ); ?>;border-top: 0;border-bottom: 0;padding-top: 12px;padding-bottom: 12px;">
+							<td valign="top" id="templateFooter" style="mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;background-color: <?php echo esc_attr( $quillcrm_background_color ); ?>;border-top: 0;border-bottom: 0;padding-top: 12px;padding-bottom: 12px;">
 								<table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock" style="min-width: 100%;border-collapse: collapse;mso-table-lspace: 0pt;mso-table-rspace: 0pt;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;">
 									<tbody class="mcnTextBlockOuter">
 										<tr>
@@ -39,14 +39,14 @@ $background_color = '#e9eaec';
 
 																<!-- Footer content -->
 															<?php
-															/* translators: %s - link to a site. */
-															$site_name = wp_specialchars_decode( get_bloginfo( 'name' ) );
-															if ( empty( $site_name ) ) {
-																$site_name = wp_parse_url( home_url(), PHP_URL_HOST );
-															}
-															$footer = sprintf( esc_html__( 'Sent from %s', 'quill-crm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $site_name ) . '</a>' );
+							/* translators: %s - link to a site. */
+							$quillcrm_site_name = wp_specialchars_decode( get_bloginfo( 'name' ) );
+							if ( empty( $quillcrm_site_name ) ) {
+								$quillcrm_site_name = wp_parse_url( home_url(), PHP_URL_HOST );
+							}
+							$quillcrm_footer = sprintf( esc_html__( 'Sent from %s', 'quill-crm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $quillcrm_site_name ) . '</a>' );
 															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $footer is escaped above, filter allows customization
-															echo apply_filters( 'quillcrm_email_footer_text', $footer );
+															echo apply_filters( 'quillcrm_email_footer_text', $quillcrm_footer );
 															?>
 
 															</td>

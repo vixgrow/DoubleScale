@@ -65,6 +65,7 @@ class Order_Billing_Address extends Merge_Tag {
 
 		// Formats available: default, comma, address_1, address_2.
 		$format           = $this->get_format( $merge_tag );
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core hook.
 		$address          = apply_filters( 'woocommerce_order_formatted_billing_address', $order->get_address( 'billing' ), $order );
 		$formated_address = '';
 		switch ( $format ) {

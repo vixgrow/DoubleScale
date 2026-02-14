@@ -438,13 +438,10 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 * Fixed some minor bugs
 
 = 1.1.0 =
-* Added WhatsApp automation feature as a pro feature
-* Added WhatsApp 2 way messaging feature as a pro feature
-* Added email sequence feature as a pro feature
-* Fixed some bugs in individual message sending
-* Fixed a bug in installing the pro version
-* Redirect sales rep and crm manager to their respective dashboards after login
-* Add support for Naira currency
+* Added WhatsApp automation and 2-way messaging (Pro)
+* Added email sequences (Pro)
+* Bug fixes for messaging and Pro installation
+* Dashboard redirect improvements, Naira currency support
 
 = 1.0.0 =
 Initial release of Quill CRM. Install now to start managing your customer relationships with email & SMS campaigns, powerful automations, and 12+ plugin integrations!

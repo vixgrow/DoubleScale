@@ -55,6 +55,8 @@ class WC_Customers extends Importer {
 	public function run() {
 		global $wpdb;
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from WooCommerce plugin.
+
 		$table_name = $wpdb->prefix . 'wc_customer_lookup';
 		$total      = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
 		$mapping    = array(
@@ -75,6 +77,8 @@ class WC_Customers extends Importer {
 			},
 			$mapping
 		);
+
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return $result;
 	}

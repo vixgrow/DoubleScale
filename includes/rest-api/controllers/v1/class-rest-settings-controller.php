@@ -957,6 +957,7 @@ class REST_Settings_Controller extends REST_Controller {
 
 		// Trigger the action immediately
 		try {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is validated against allowlist.
 			do_action( $hook );
 		} catch ( \Exception $e ) {
 			return new WP_Error(

@@ -7,7 +7,6 @@
 
 namespace QuillCRM\Site;
 use QuillCRM\Site\License;
-use QuillCRM\Site\Updater;
 
 /**
  * Site class
@@ -42,7 +41,6 @@ class Site {
 	 */
 	private function __construct() {
 		License::instance();
-		Updater::instance();
 	}
 
 	/**

@@ -156,6 +156,25 @@ class Email {
 			  do_action( 'quillcrm_email_clicked', $tracking_entry->contact );
 
 			  $original_url = urldecode( $_GET['original'] );
+
+			  // Handle broken unsubscribe merge tags (e.g., "unsubscribe_link}}" from unprocessed {{contact:unsubscribe_link}})
+			  if ( strpos( $original_url, 'unsubscribe_link' ) !== false || strpos( $original_url, '{{contact:' ) !== false ) {
+				  // Redirect to proper unsubscribe page for this contact
+				  $contact = $tracking_entry->contact;
+				  if ( $contact ) {
+					  $unsubscribe_url = add_query_arg(
+						  array(
+							  'quillcrm-unsubscribe' => '1',
+							  'id'                   => $contact->hash_id,
+							  'channel'              => 'email',
+						  ),
+						  home_url()
+					  );
+					  wp_redirect( $unsubscribe_url );
+					  exit;
+				  }
+			  }
+
 			  wp_redirect( $original_url );
 			  exit;
 		} catch ( \Exception $e ) {

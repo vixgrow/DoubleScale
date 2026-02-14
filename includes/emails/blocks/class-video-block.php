@@ -112,7 +112,12 @@ class Video_Block extends Email_Block {
 			return $this->render_placeholder( $container_style_string );
 		}
 
-		// If there's a thumbnail image, show it with play button (matches frontend)
+		// If no thumbnail provided, try to get YouTube thumbnail
+		if ( empty( $image_url ) ) {
+			$image_url = $this->get_youtube_thumbnail( $video_url );
+		}
+
+		// If there's a thumbnail image (provided or auto-fetched), show it with play button
 		if ( ! empty( $image_url ) ) {
 			return $this->render_with_thumbnail( $container_style_string, $image_url, $alt_text, $video_url, $props );
 		}
@@ -122,7 +127,54 @@ class Video_Block extends Email_Block {
 	}
 
 	/**
+	 * Extract YouTube video ID from URL
+	 *
+	 * @param string $url YouTube URL
+	 * @return string|null Video ID or null if not a YouTube URL
+	 */
+	private function get_youtube_video_id( string $url ): ?string {
+		// Match various YouTube URL formats
+		$patterns = array(
+			// Standard: https://www.youtube.com/watch?v=VIDEO_ID
+			'/(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/',
+			// Short: https://youtu.be/VIDEO_ID
+			'/(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+			// Embed: https://www.youtube.com/embed/VIDEO_ID
+			'/(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/',
+			// With additional params: https://www.youtube.com/watch?v=VIDEO_ID&list=...
+			'/(?:youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/',
+		);
+
+		foreach ( $patterns as $pattern ) {
+			if ( preg_match( $pattern, $url, $matches ) ) {
+				return $matches[1];
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get YouTube thumbnail URL from video URL
+	 *
+	 * @param string $video_url Video URL
+	 * @return string|null Thumbnail URL or null if not a YouTube video
+	 */
+	private function get_youtube_thumbnail( string $video_url ): ?string {
+		$video_id = $this->get_youtube_video_id( $video_url );
+
+		if ( ! $video_id ) {
+			return null;
+		}
+
+		// Use maxresdefault for high quality, falls back gracefully in browsers
+		// Alternative options: hqdefault (480x360), mqdefault (320x180), sddefault (640x480)
+		return "https://img.youtube.com/vi/{$video_id}/maxresdefault.jpg";
+	}
+
+	/**
 	 * Render placeholder when no video URL (matches frontend)
+	 * Uses table-based layout for email client compatibility
 	 *
 	 * @param string $container_style Container style string
 	 * @return string HTML output
@@ -134,24 +186,22 @@ class Video_Block extends Email_Block {
 			$container_style_with_height = $container_style . ' height: 300px;';
 		}
 
-		$placeholder_styles = array(
-			'display'         => 'flex',
-			'flex-direction'  => 'column',
-			'align-items'     => 'center',
-			'justify-content' => 'center',
-			'color'           => 'white',
-			'height'          => '100%',
-		);
-
-		$placeholder_style_string = $this->build_style_string( $placeholder_styles );
-
-		return "<div style=\"{$container_style_with_height}\">
-			<div style=\"{$placeholder_style_string}\">📹</div>
+		// Use table for centering - email compatible
+		return "
+		<div style=\"{$container_style_with_height}\">
+			<table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"300\" style=\"width: 100%; height: 300px;\">
+				<tr>
+					<td align=\"center\" valign=\"middle\" style=\"text-align: center; vertical-align: middle; color: #ffffff; font-size: 48px;\">
+						&#128249;
+					</td>
+				</tr>
+			</table>
 		</div>";
 	}
 
 	/**
 	 * Render with thumbnail image (matches frontend)
+	 * Uses table-based layout for email client compatibility
 	 *
 	 * @param string $container_style Container style string
 	 * @param string $image_url Image URL
@@ -161,45 +211,46 @@ class Video_Block extends Email_Block {
 	 * @return string HTML output
 	 */
 	private function render_with_thumbnail( string $container_style, string $image_url, string $alt_text, string $video_url, array $props ): string {
-		// Image styles (matches frontend)
-		$image_styles = array(
-			'width'         => '100%',
-			'height'        => '100%',
-			'object-fit'    => 'cover',
-			'border-radius' => $props['borderRadius'] . 'px',
-		);
+		$border_radius = $props['borderRadius'] . 'px';
 
-		// Play button styles (matches frontend)
-		$play_button_styles = array(
-			'position'         => 'absolute',
-			'top'              => '50%',
-			'left'             => '50%',
-			'transform'        => 'translate(-50%, -50%)',
-			'background-color' => 'rgba(0, 0, 0, 0.7)',
-			'border-radius'    => '50%',
-			'width'            => '60px',
-			'height'           => '60px',
-			'display'          => 'flex',
-			'align-items'      => 'center',
-			'justify-content'  => 'center',
-			'cursor'           => 'pointer',
-			'transition'       => 'all 0.3s ease',
-		);
+		// Escape URLs for HTML attributes
+		$video_url_escaped = esc_url( $video_url );
+		$image_url_escaped = esc_url( $image_url );
+		$alt_text_escaped  = esc_attr( $alt_text );
 
-		$image_style_string       = $this->build_style_string( $image_styles );
-		$play_button_style_string = $this->build_style_string( $play_button_styles );
-
-		// Simple structure matching frontend exactly
-		return "<div style=\"{$container_style}\">
-			<img src=\"{$image_url}\" alt=\"{$alt_text}\" style=\"{$image_style_string}\" />
-			<div style=\"{$play_button_style_string}\">
-				<a href=\"{$video_url}\" target=\"_blank\" style=\"color: white; text-decoration: none; font-size: 24px;\">▶</a>
-			</div>
+		// Use a table-based approach for email compatibility
+		// The entire thumbnail is wrapped in a link that opens in a new tab
+		// Play button is centered using absolute positioning with email-safe CSS
+		return "
+		<div style=\"{$container_style}\">
+			<a href=\"{$video_url_escaped}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display: block; position: relative; text-decoration: none;\">
+				<!--[if mso]>
+				<v:rect xmlns:v=\"urn:schemas-microsoft-com:vml\" fill=\"true\" stroke=\"false\" style=\"width:100%;height:auto;\">
+				<v:fill type=\"frame\" src=\"{$image_url_escaped}\" />
+				<![endif]-->
+				<img src=\"{$image_url_escaped}\" alt=\"{$alt_text_escaped}\" style=\"display: block; width: 100%; height: auto; border-radius: {$border_radius}; border: 0;\" />
+				<!--[if mso]>
+				</v:rect>
+				<![endif]-->
+				<!-- Play button overlay - centered using table for email compatibility -->
+				<div style=\"position: absolute; top: 0; left: 0; right: 0; bottom: 0;\">
+					<table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"100%\" style=\"width: 100%; height: 100%;\">
+						<tr>
+							<td align=\"center\" valign=\"middle\" style=\"text-align: center; vertical-align: middle;\">
+								<div style=\"display: inline-block; width: 70px; height: 70px; line-height: 70px; background-color: rgba(0, 0, 0, 0.7); border-radius: 50%; text-align: center; font-size: 28px; color: #ffffff;\">
+									&#9658;
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</a>
 		</div>";
 	}
 
 	/**
-	 * Render video link (fallback)
+	 * Render video link (fallback when no thumbnail available)
+	 * Uses table-based layout for email client compatibility
 	 *
 	 * @param string $container_style Container style string
 	 * @param string $video_url Video URL
@@ -207,22 +258,25 @@ class Video_Block extends Email_Block {
 	 * @return string HTML output
 	 */
 	private function render_video_link( string $container_style, string $video_url, string $alt_text ): string {
-		$link_styles = array(
-			'display'         => 'flex',
-			'align-items'     => 'center',
-			'justify-content' => 'center',
-			'color'           => 'white',
-			'text-decoration' => 'none',
-			'height'          => '200px',
-			'font-size'       => '16px',
-		);
+		$video_url_escaped = esc_url( $video_url );
+		$alt_text_escaped  = esc_html( $alt_text );
 
-		$link_style_string = $this->build_style_string( $link_styles );
-
-		return "<div style=\"{$container_style}\">
-			<a href=\"{$video_url}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"{$link_style_string}\">
-				▶ {$alt_text}
-			</a>
+		// Use table for centering - email compatible
+		return "
+		<div style=\"{$container_style} min-height: 200px;\">
+			<table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" height=\"200\" style=\"width: 100%; height: 200px;\">
+				<tr>
+					<td align=\"center\" valign=\"middle\" style=\"text-align: center; vertical-align: middle;\">
+						<a href=\"{$video_url_escaped}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: #ffffff; text-decoration: none; font-size: 16px;\">
+							<div style=\"display: inline-block; width: 70px; height: 70px; line-height: 70px; background-color: rgba(255, 255, 255, 0.2); border-radius: 50%; text-align: center; font-size: 28px; color: #ffffff; margin-bottom: 10px;\">
+								&#9658;
+							</div>
+							<br/>
+							{$alt_text_escaped}
+						</a>
+					</td>
+				</tr>
+			</table>
 		</div>";
 	}
 

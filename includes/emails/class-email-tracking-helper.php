@@ -118,8 +118,8 @@ class Email_Tracking_Helper {
 				continue;
 			}
 
-			// Skip if already a tracking URL or unsubscribe link
-			if ( strpos( $href, 'quillcrm=' ) !== false || strpos( $href, 'quillcrm-unsubscribe' ) !== false ) {
+			// Skip if already a tracking URL or unsubscribe link (processed or unprocessed merge tag)
+			if ( strpos( $href, 'quillcrm=' ) !== false || strpos( $href, 'quillcrm-unsubscribe' ) !== false || strpos( $href, '{{contact:unsubscribe_link}}' ) !== false ) {
 				continue;
 			}
 

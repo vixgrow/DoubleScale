@@ -149,6 +149,7 @@ final class Actions_Manager
 	public function register(Action $action)
 	{
 		if (! $action instanceof Action) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new Exception(__('Invalid action', 'quill-crm'));
 		}
 
@@ -181,6 +182,7 @@ final class Actions_Manager
 			return $this->actions[$slug];
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: action slug */
 		throw new Exception(sprintf(__('Action %s not found', 'quill-crm'), $slug));
 	}

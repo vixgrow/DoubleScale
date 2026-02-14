@@ -95,7 +95,6 @@ class Integration extends Integration_Abstract {
 
 		$api    = new API( $api_key );
 		$result = $api->get_accounts();
-		error_log( wp_json_encode( $result ) );
 		if ( $result['success'] ) {
 			return true;
 		} else {

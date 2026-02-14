@@ -96,7 +96,6 @@ class User_Role_Update extends Trigger {
 		);
 
 		$this->process( $data );
-		error_log( 'User Role Updated: ' . $user_id . ' - ' . $role . ' - ' . implode( ', ', $old_roles ) );
 	}
 }
 

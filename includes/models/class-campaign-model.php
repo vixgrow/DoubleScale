@@ -600,6 +600,7 @@ class Campaign_Model extends Model {
 		$manager = $this->get_status_manager();
 
 		if ( ! $manager->is_valid_status( $value ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \InvalidArgumentException( "Invalid campaign status: {$value}" );
 		}
 

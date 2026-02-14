@@ -147,10 +147,10 @@ class Import {
 		$lists_table = $wpdb->prefix . 'fc_lists';
 		$tags_table  = $wpdb->prefix . 'fc_tags';
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are from FluentCRM plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FluentCRM plugin.
 		$lists = $wpdb->get_results( "SELECT * FROM $lists_table" );
 		$tags  = $wpdb->get_results( "SELECT * FROM $tags_table" );
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$lists_array = array();
 		foreach ( $lists ?? array() as $list ) {
@@ -179,7 +179,7 @@ class Import {
 		global $wpdb;
 		$terms_table = $wpdb->prefix . 'bwfan_terms';
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FunnelKit plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FunnelKit plugin.
 		$terms = $wpdb->get_results( "SELECT * FROM $terms_table" );
 
 		$lists_array = array();
@@ -216,7 +216,7 @@ class Import {
 
 		$this->start_time = microtime( true );
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are from FluentCRM plugin tables.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FluentCRM plugin tables.
 
 		$table_name  = $wpdb->prefix . 'fc_subscribers';
 		$pivot_table = $wpdb->prefix . 'fc_subscriber_pivot';
@@ -277,7 +277,7 @@ class Import {
 			$mapping
 		);
 
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}
@@ -294,7 +294,7 @@ class Import {
 
 		$this->start_time = microtime( true );
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are from FunnelKit plugin tables.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FunnelKit plugin tables.
 
 		$table_name       = $wpdb->prefix . 'bwf_contact';
 		$terms_table      = $wpdb->prefix . 'bwfan_terms';
@@ -336,7 +336,7 @@ class Import {
 			$mapping
 		);
 
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}
@@ -353,7 +353,7 @@ class Import {
 
 		$this->start_time = microtime( true );
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from WooCommerce plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from WooCommerce plugin.
 
 		$table_name       = $wpdb->prefix . 'wc_customer_lookup';
 		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
@@ -376,7 +376,7 @@ class Import {
 			$mapping
 		);
 
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}

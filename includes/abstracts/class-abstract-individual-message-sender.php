@@ -310,6 +310,7 @@ abstract class Abstract_Individual_Message_Sender {
 		// Validate send result
 		if ( ! isset( $result['success'] ) || ! $result['success'] ) {
 			$error_message = $result['error'] ?? sprintf( '%s sending failed', ucfirst( $this->get_channel_type() ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( $error_message );
 		}
 

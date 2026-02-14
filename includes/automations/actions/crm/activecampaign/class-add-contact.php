@@ -125,7 +125,6 @@ class Add_Contact extends Action {
 
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
-		error_log( 'email1: ' . $email );
 		if ( ! $api ) {
 			quillcrm_get_logger()->error(
 				__( 'Failed to connect to ActiveCampaign.', 'quill-crm' ),
@@ -175,7 +174,6 @@ class Add_Contact extends Action {
 					),
 				)
 			);
-			error_log( 'email2: ' . $email );
 			return true;
 		}
 
@@ -202,7 +200,6 @@ class Add_Contact extends Action {
 					),
 				)
 			);
-			error_log( 'email3: ' . $email );
 			return true;
 		}
 
@@ -228,7 +225,6 @@ class Add_Contact extends Action {
 				),
 			)
 		);
-		error_log( 'email4: ' . $email );
 		return false;
 	}
 

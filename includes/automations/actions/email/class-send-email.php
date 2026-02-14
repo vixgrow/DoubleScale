@@ -219,10 +219,12 @@ class Send_Email extends Abstract_Send_Message {
 		$reply_to   = $step->get_setting( 'reply_to' );
 
 		if ( empty( $subject ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Email subject is empty.', 'quill-crm' ) );
 		}
 
 		if ( empty( $body ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Email body is empty.', 'quill-crm' ) );
 		}
 

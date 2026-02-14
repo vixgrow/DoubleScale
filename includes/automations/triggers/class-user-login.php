@@ -92,7 +92,6 @@ class User_Login extends Trigger {
 			),
 		);
 		$this->process( $data );
-		error_log( 'Logged in User ID: ' . $user->ID );
 	}
 }
 

@@ -54,7 +54,7 @@ class Funnelkit extends Importer {
 	public function run() {
 		global $wpdb;
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are from FunnelKit plugin tables.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FunnelKit plugin tables.
 
 		$table_name  = $wpdb->prefix . 'fc_subscribers';
 		$pivot_table = $wpdb->prefix . 'fc_subscriber_pivot';
@@ -115,7 +115,7 @@ class Funnelkit extends Importer {
 			$mapping
 		);
 
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}
@@ -129,7 +129,7 @@ class Funnelkit extends Importer {
 		global $wpdb;
 		$terms_table = $wpdb->prefix . 'bwfan_terms';
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FunnelKit plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FunnelKit plugin.
 		$terms = $wpdb->get_results( "SELECT * FROM $terms_table WHERE type = 2" );
 
 		$lists_array = array();
@@ -153,7 +153,7 @@ class Funnelkit extends Importer {
 		global $wpdb;
 		$terms_table = $wpdb->prefix . 'bwfan_terms';
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FunnelKit plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FunnelKit plugin.
 		$terms = $wpdb->get_results( "SELECT * FROM $terms_table WHERE type = 1" );
 
 		$tags_array = array();

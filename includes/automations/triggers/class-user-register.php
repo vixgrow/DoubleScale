@@ -93,7 +93,6 @@ class User_Register extends Trigger {
 			),
 		);
 		$this->process( $data );
-		error_log( 'User ID: ' . $user_id );
 	}
 }
 

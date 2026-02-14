@@ -86,13 +86,15 @@ final class Forms_Manager {
 	public function register( $form ) {
 		if ( ! $form instanceof Form ) {
 			throw new Exception(
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				__( 'Form must be an instance of Form', 'quill-crm' )
 			);
 		}
 
 		if ( isset( $this->forms[ $form->slug ] ) ) {
-			/* translators: %s: form slug */
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new Exception(
+				/* translators: %s: form slug */
 				sprintf( __( 'Form with slug %s already exists', 'quill-crm' ), $form->slug )
 			);
 		}

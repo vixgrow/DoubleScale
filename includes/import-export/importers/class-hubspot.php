@@ -83,6 +83,7 @@ class HubSpot extends Importer
 			}
 
 			quillcrm_get_logger()->error($error_message, $error_details);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception($error_message);
 		}
 
@@ -328,6 +329,7 @@ class HubSpot extends Importer
 	public function get_api()
 	{
 		if (empty($this->credentials['access_token'])) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('HubSpot Access Token is required.', 'quill-crm'));
 		}
 
@@ -335,6 +337,7 @@ class HubSpot extends Importer
 
 		// Basic validation for HubSpot access token format
 		if (strlen($access_token) < 20) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('HubSpot Access Token appears to be invalid. Please verify your token.', 'quill-crm'));
 		}
 

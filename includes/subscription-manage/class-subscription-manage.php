@@ -156,6 +156,7 @@ class Subscription_Manage {
 		$double_optin       = Settings::get( 'double_optin', array() );
 		$after_confirmation = $double_optin['after_confirmation'] ?? 'message';
 		if ( 'message' === $after_confirmation ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_subscribe_message() is escaped internally.
 			echo $this->get_subscribe_message();
 			exit;
 		}
@@ -176,16 +177,19 @@ class Subscription_Manage {
 		$message      = $double_optin['confirmation_message'] ?? '';
 
 		ob_start();
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_head() method
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_head() is escaped internally.
 		echo $this->get_head();
 		?>
 		<div class="quillcrm-subscribe-message-container">
 			<div class="quillcrm-subscribe-message">
-				<?php echo ! empty( $message ) ? wp_kses_post( $message ) : $this->get_default_message(); ?>
+				<?php
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Either wp_kses_post() filtered message or get_default_message() which is escaped internally.
+					echo ! empty( $message ) ? wp_kses_post( $message ) : $this->get_default_message();
+				?>
 			</div>
 		</div>
 		<?php
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_footer() method
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_footer() is escaped internally.
 		echo $this->get_footer();
 		return ob_get_clean();
 	}
@@ -298,6 +302,7 @@ class Subscription_Manage {
 		}
 
 		// Not yet unsubscribed - show confirmation form
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML from get_unsubscribe_form() is escaped internally.
 		echo $this->get_unsubscribe_form( $contact, $channel );
 		exit;
 	}
@@ -317,7 +322,10 @@ class Subscription_Manage {
 		?>
 		<div class="quillcrm-unsubscribe-message-container">
 			<div class="quillcrm-unsubscribe-message">
-				<p><?php echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'quill-crm' ), esc_html( $channel_label ) ); ?></p>
+				<p><?php
+					/* translators: %s: channel name (email, SMS, WhatsApp) */
+					echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'quill-crm' ), esc_html( $channel_label ) );
+				?></p>
 				<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'quill-crm' ); ?></a>
 			</div>
 		</div>
@@ -347,7 +355,10 @@ class Subscription_Manage {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
-			<title><?php echo esc_html( sprintf( __( 'Unsubscribe - %s', 'quill-crm' ), $site_name ) ); ?></title>
+			<title><?php
+				/* translators: %s: site name */
+				echo esc_html( sprintf( __( 'Unsubscribe - %s', 'quill-crm' ), $site_name ) );
+			?></title>
 			<?php wp_head(); ?>
 			<style>
 				* {
@@ -543,7 +554,10 @@ class Subscription_Manage {
 					</svg>
 				</div>
 
-				<h3><?php echo sprintf( esc_html__( 'Unsubscribe from %s', 'quill-crm' ), $channel_label ); ?></h3>
+				<h3><?php
+					/* translators: %s: channel name (email, SMS, WhatsApp) */
+					echo sprintf( esc_html__( 'Unsubscribe from %s', 'quill-crm' ), esc_html( $channel_label ) );
+				?></h3>
 				
 				<p class="intro-text">
 					<?php esc_html_e( 'We\'re sorry to see you go. Please let us know why you\'re unsubscribing.', 'quill-crm' ); ?>
@@ -574,11 +588,17 @@ class Subscription_Manage {
 						<div class="quillcrm-form-radio-group">
 							<label>
 								<input type="radio" name="reason" value="spam">
-								<?php echo esc_html( sprintf( __( 'I consider these %s to be spam', 'quill-crm' ), $channel_label ) ); ?>
+								<?php
+									/* translators: %s: channel name (emails, messages, etc.) */
+									echo esc_html( sprintf( __( 'I consider these %s to be spam', 'quill-crm' ), $channel_label ) );
+								?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="not-interested">
-								<?php echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'quill-crm' ), $channel_label ) ); ?>
+								<?php
+									/* translators: %s: channel name (emails, messages, etc.) */
+									echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'quill-crm' ), $channel_label ) );
+								?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="other" checked>
@@ -603,7 +623,7 @@ class Subscription_Manage {
 					button.textContent = '<?php esc_html_e( 'Processing...', 'quill-crm' ); ?>';
 					errorDiv.classList.remove('show');
 					
-					fetch('<?php echo admin_url( 'admin-ajax.php' ); ?>', {
+					fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
 						method: 'POST',
 						body: formData
 					})
@@ -707,7 +727,10 @@ class Subscription_Manage {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
-			<title><?php echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quill-crm' ), $site_name ) ); ?></title>
+			<title><?php
+				/* translators: %s: site name */
+				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quill-crm' ), $site_name ) );
+			?></title>
 			<style>
 				* {
 					margin: 0;

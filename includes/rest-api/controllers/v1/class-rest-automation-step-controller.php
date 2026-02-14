@@ -254,21 +254,14 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function create_item( $request ) {
-		error_log( 'Step data: ' . print_r( $request->get_json_params(), true ) );
 		try {
 			$step_data     = $this->prepare_step( $request );
 			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
 
-			error_log( 'Prepared step data: ' . print_r( $step_data, true ) );
-			error_log( 'Updated steps: ' . print_r( $updated_steps, true ) );
-
 			$automation_step = Automation_Step_Model::create( $step_data );
 
 			if ( ! empty( $updated_steps ) ) {
-				error_log( 'Updating orders for ' . count( $updated_steps ) . ' steps' );
 				$this->update_orders( $updated_steps );
-			} else {
-				error_log( 'No steps to update orders for' );
 			}
 
 			$automation_step = Automation_Step_Model::find( $automation_step->id );

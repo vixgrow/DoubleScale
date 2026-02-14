@@ -338,6 +338,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
+				/* translators: %s: campaign channel type (e.g. Email, SMS) */
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
@@ -390,6 +391,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
+				/* translators: %s: campaign channel type (e.g. Email, SMS) */
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
@@ -448,6 +450,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
+				/* translators: %s: campaign channel type (e.g. Email, SMS) */
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
@@ -472,6 +475,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaigns    = $this->get_campaign_query()->whereIn( 'id', $campaign_ids )->get();
 
 			if ( $campaigns->isEmpty() ) {
+				/* translators: %s: campaign channel type (e.g. Email, SMS) */
 				return new WP_Error( 'error', sprintf( __( '%s Campaigns not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
@@ -496,6 +500,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
+				/* translators: %s: campaign channel type (e.g. Email, SMS) */
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quill-crm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
@@ -812,6 +817,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		if ( ! $status_manager->is_valid_status( $status ) ) {
 			return new WP_Error(
 				'invalid_campaign_status',
+				/* translators: %s: invalid campaign status value */
 				sprintf( __( 'Invalid campaign status: %s', 'quill-crm' ), $status ),
 				array( 'status' => 400 )
 			);

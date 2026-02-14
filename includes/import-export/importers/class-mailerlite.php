@@ -66,6 +66,7 @@ class MailerLite extends Importer {
 		$this->mapping = array_filter( $this->mapping );
 		$mapping       = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Email field is required.', 'quill-crm' ) );
 		}
 
@@ -79,10 +80,12 @@ class MailerLite extends Importer {
 					'response' => $groups_response,
 				)
 			);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Error fetching groups', 'quill-crm' ) );
 		}
 
 		if ( empty( $groups_response['data'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'There are no groups to import subscribers from', 'quill-crm' ) );
 		}
 
@@ -210,6 +213,7 @@ class MailerLite extends Importer {
 					'response' => $response,
 				)
 			);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Error fetching fields', 'quill-crm' ) );
 		}
 
@@ -239,6 +243,7 @@ class MailerLite extends Importer {
 					'response' => $response,
 				)
 			);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Error fetching groups', 'quill-crm' ) );
 		}
 
@@ -261,6 +266,7 @@ class MailerLite extends Importer {
 	 */
 	public function get_api() {
 		if ( empty( $this->credentials['api_key'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'API Key is required.', 'quill-crm' ) );
 		}
 		return new API( $this->credentials['api_key'] );

@@ -95,7 +95,6 @@ class Integration extends Integration_Abstract {
 
 		$api    = new API( $access_token );
 		$result = $api->get_companies();
-		error_log( wp_json_encode( $result ) );
 		if ( $result['success'] ) {
 			return true;
 		} else {

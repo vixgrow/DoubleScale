@@ -39,12 +39,12 @@ $quillcrm_background_color = '#e9eaec';
 
 																<!-- Footer content -->
 															<?php
-							/* translators: %s - link to a site. */
-							$quillcrm_site_name = wp_specialchars_decode( get_bloginfo( 'name' ) );
-							if ( empty( $quillcrm_site_name ) ) {
-								$quillcrm_site_name = wp_parse_url( home_url(), PHP_URL_HOST );
-							}
-							$quillcrm_footer = sprintf( esc_html__( 'Sent from %s', 'quill-crm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $quillcrm_site_name ) . '</a>' );
+						$quillcrm_site_name = wp_specialchars_decode( get_bloginfo( 'name' ) );
+						if ( empty( $quillcrm_site_name ) ) {
+							$quillcrm_site_name = wp_parse_url( home_url(), PHP_URL_HOST );
+						}
+						/* translators: %s: site name */
+						$quillcrm_footer = sprintf( esc_html__( 'Sent from %s', 'quill-crm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $quillcrm_site_name ) . '</a>' );
 															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $footer is escaped above, filter allows customization
 															echo apply_filters( 'quillcrm_email_footer_text', $quillcrm_footer );
 															?>

@@ -370,10 +370,6 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				$debug_info
 			);
 
-			// Also log to WordPress debug log for immediate visibility
-			if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-				error_log( 'QuillCRM Email Send Error: ' . json_encode( $debug_info ) );
-			}
 
 			return array(
 				'success' => false,

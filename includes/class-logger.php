@@ -61,16 +61,17 @@ class Logger implements Logger_Interface {
 				if ( is_object( $handler ) && is_array( $implements ) && in_array( Log_Handler_Interface::class, $implements, true ) ) {
 					$register_handlers[] = $handler;
 				} else {
-					_doing_it_wrong(
-						__METHOD__,
-						sprintf(
-							/* translators: 1: class name 2: Log_Handler_Interface */
-							__( 'The provided handler %1$s does not implement %2$s.', 'quill-crm' ),
-							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
-							'<code>Log_Handler_Interface</code>'
-						),
-						'1.0.0'
-					);
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- _doing_it_wrong handles escaping internally.
+				_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: 1: class name 2: Log_Handler_Interface */
+						__( 'The provided handler %1$s does not implement %2$s.', 'quill-crm' ),
+						'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
+						'<code>Log_Handler_Interface</code>'
+					),
+					'1.0.0'
+				);
 				}
 			}
 		}
@@ -192,8 +193,17 @@ class Logger implements Logger_Interface {
 	 */
 	public function log( $level, $message, $context = array() ) {
 		if ( ! Log_Levels::is_valid_level( $level ) ) {
-			/* translators: 1: Logger::log 2: level */
-			_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'quill-crm' ), '<code>Logger::log</code>', $level ), '1.0.0' );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- _doing_it_wrong handles escaping internally.
+			_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: Logger::log 2: level */
+					__( '%1$s was called with an invalid level "%2$s".', 'quill-crm' ),
+					'<code>Logger::log</code>',
+					$level
+				),
+				'1.0.0'
+			);
 		}
 
 		if ( $this->should_handle( $level ) ) {

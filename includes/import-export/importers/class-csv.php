@@ -73,6 +73,7 @@ class CSV extends Importer {
 	public function run() {
 		$mapping = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Email field is required.', 'quill-crm' ) );
 		}
 

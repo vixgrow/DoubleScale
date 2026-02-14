@@ -117,10 +117,12 @@ final class Goals_Manager {
 	 */
 	public function register( Goal $goal ) {
 		if ( ! $goal instanceof Goal ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new Exception( __( 'Invalid goal', 'quill-crm' ) );
 		}
 
 		if ( isset( $this->goals[ $goal->slug ] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			/* translators: %s: goal name */
 			throw new Exception( sprintf( __( 'Goal %s already registered', 'quill-crm' ), $goal->name ) );
 		}
@@ -159,6 +161,7 @@ final class Goals_Manager {
 			return $this->goals[ $slug ];
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: goal slug */
 		throw new Exception( sprintf( __( 'Goal %s not found', 'quill-crm' ), $slug ) );
 	}

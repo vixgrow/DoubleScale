@@ -94,6 +94,7 @@ class GoHighLevel extends Importer
 			}
 
 			quillcrm_get_logger()->error($error_message, $error_details);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception($error_message);
 		}
 
@@ -393,6 +394,7 @@ class GoHighLevel extends Importer
 		// Get OAuth tokens from session storage
 		$stored_tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 		if (!$stored_tokens) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('Please connect to your GoHighLevel account using OAuth first', 'quill-crm'));
 		}
 
@@ -400,6 +402,7 @@ class GoHighLevel extends Importer
 		if ($stored_tokens['expires_at'] <= time()) {
 			// Clear expired tokens
 			\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('Your GoHighLevel OAuth connection has expired. Please reconnect.', 'quill-crm'));
 		}
 

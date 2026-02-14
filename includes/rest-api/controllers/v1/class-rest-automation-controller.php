@@ -1114,13 +1114,11 @@ class Rest_Automation_Controller extends REST_Controller {
 				}
 
 				if ( ! $is_active ) {
-					return array(
-						'is_active'    => false,
-						'is_pro'       => false,
-						'message'      => sprintf(
-							__( 'This trigger requires %s to be installed and activated.', 'quill-crm' ),
-							$dependency['label']
-						),
+			return array(
+				'is_active'    => false,
+				'is_pro'       => false,
+				/* translators: %s: plugin name */
+				'message'      => sprintf( __( 'This trigger requires %s to be installed and activated.', 'quill-crm' ), $dependency['label'] ),
 						'plugin_label' => $dependency['label'],
 					);
 				}

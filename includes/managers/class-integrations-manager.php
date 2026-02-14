@@ -71,10 +71,12 @@ final class Integrations_Manager {
 	 */
 	public function register( Integration $integration, $override = false ) {
 		if ( ! $integration instanceof Integration ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new Exception( __( 'Invalid integration', 'quill-crm' ) );
 		}
 
 		if ( isset( $this->integrations[ $integration->slug ] ) && ! $override ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			/* translators: %s: integration name */
 			throw new Exception( sprintf( __( 'Integration %s already registered', 'quill-crm' ), $integration->name ) );
 		}
@@ -103,6 +105,7 @@ final class Integrations_Manager {
 			return $this->integrations[ $slug ];
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: integration slug */
 		throw new Exception( sprintf( __( 'Integration %s not found', 'quill-crm' ), $slug ) );
 	}

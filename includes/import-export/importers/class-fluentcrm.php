@@ -55,7 +55,7 @@ class FluentCRM extends Importer {
 	public function run() {
 		 global $wpdb;
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are from FluentCRM plugin tables.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FluentCRM plugin tables.
 
 		$table_name  = $wpdb->prefix . 'fc_subscribers';
 		$pivot_table = $wpdb->prefix . 'fc_subscriber_pivot';
@@ -135,7 +135,7 @@ class FluentCRM extends Importer {
 			$mapping
 		);
 
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $result;
 	}
@@ -149,7 +149,7 @@ class FluentCRM extends Importer {
 		global $wpdb;
 
 		$tags_table = $wpdb->prefix . 'fc_tags';
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FluentCRM plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FluentCRM plugin.
 		$tags       = $wpdb->get_results( "SELECT * FROM $tags_table" );
 
 		$tags_array = array();
@@ -172,7 +172,7 @@ class FluentCRM extends Importer {
 		global $wpdb;
 
 		$lists_table = $wpdb->prefix . 'fc_lists';
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FluentCRM plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FluentCRM plugin.
 		$lists       = $wpdb->get_results( "SELECT * FROM $lists_table" );
 
 		$lists_array = array();
@@ -197,7 +197,7 @@ class FluentCRM extends Importer {
 		$fc_meta_table = $wpdb->prefix . 'fc_meta';
 
 		// Get custom field definitions from FluentCRM meta table
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from FluentCRM plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FluentCRM plugin.
 		$custom_fields_data = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT value FROM $fc_meta_table WHERE object_type = %s AND `key` = %s",

@@ -157,6 +157,7 @@ class Manager {
 	 */
 	public function get_importer( $slug ) {
 		if ( ! isset( $this->importers[ $slug ] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Importer not found', 'quill-crm' ) );
 		}
 

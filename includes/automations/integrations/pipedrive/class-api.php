@@ -54,9 +54,6 @@ class API extends Integration_API
 		$this->endpoint = 'https://' . $api_domain . '/api/v2';
 		$this->api_domain = $api_domain;
 		$this->api_token = $api_token;
-		
-		// Debug log the constructed endpoint
-		error_log('Pipedrive API v2 constructed: ' . $this->endpoint . ', Token length: ' . strlen($this->api_token));
 	}
 
 	/**

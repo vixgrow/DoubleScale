@@ -78,6 +78,7 @@ class ActiveCampaign extends Importer
 
 		$total = $api->get_contacts_count();
 		if ( ! $total['success'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'Error fetching contacts count', 'quill-crm' ) );
 		}
 		$total = $total['data']['meta']['total'] ?? 0;
@@ -171,6 +172,7 @@ class ActiveCampaign extends Importer
 						'response' => $lists_response,
 					)
 				);
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				throw new \Exception(__('Error fetching lists', 'quill-crm'));
 			}
 		}
@@ -190,6 +192,7 @@ class ActiveCampaign extends Importer
 						'response' => $tags_response,
 					)
 				);
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				throw new \Exception(__('Error fetching tags', 'quill-crm'));
 			}
 		}
@@ -307,6 +310,7 @@ class ActiveCampaign extends Importer
 	public function get_api()
 	{
 		if ( empty( $this->credentials['api_key'] ) || empty( $this->credentials['api_url'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception( __( 'API Key and API URL are required.', 'quill-crm' ) );
 		}
 		return new API( $this->credentials['api_url'], $this->credentials['api_key'] );

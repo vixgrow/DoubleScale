@@ -5,6 +5,8 @@
  * @package ActionScheduler.
  */
 
+// phpcs:disable WordPress.WP.I18n.TextDomainMismatch -- Third-party library uses its own text domain.
+
 /**
  * Enqueue an action to run one time, as soon as possible
  *

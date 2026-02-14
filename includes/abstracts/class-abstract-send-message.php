@@ -120,11 +120,12 @@ abstract class Abstract_Send_Message extends Action {
 						'code'          => "send_{$channel_type}_unsubscribed",
 					)
 				);
-				return array(
-					'success' => false,
-					'message' => sprintf( __( 'Contact unsubscribed from %s', 'quill-crm' ), $channel_name ),
-					'code'    => 'contact_unsubscribed',
-				);
+			return array(
+				'success' => false,
+				/* translators: %s: channel name (email, SMS, WhatsApp) */
+				'message' => sprintf( __( 'Contact unsubscribed from %s', 'quill-crm' ), $channel_name ),
+				'code'    => 'contact_unsubscribed',
+			);
 			}
 
 			// 1. Validate recipient

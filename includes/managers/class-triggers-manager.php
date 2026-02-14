@@ -113,13 +113,15 @@ final class Triggers_Manager {
 	public function register( $trigger ) {
 		if ( ! $trigger instanceof Trigger ) {
 			throw new Exception(
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				__( 'Invalid trigger', 'quill-crm' )
 			);
 		}
 
 		if ( isset( $this->triggers[ $trigger->slug ] ) ) {
-			/* translators: %s: trigger name */
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new Exception(
+				/* translators: %s: trigger name */
 				sprintf( __( 'Trigger %s already registered', 'quill-crm' ), $trigger->name )
 			);
 		}

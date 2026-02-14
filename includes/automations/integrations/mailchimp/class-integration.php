@@ -97,7 +97,6 @@ class Integration extends Integration_Abstract {
 		$result = $api->get_lists();
 		if ( $result['success'] ) {
 			$list_id = $result['data']['lists'][0]['id'];
-			error_log( 'List ID: ' . $list_id );
 			$this->update_setting( 'list_id', $list_id );
 			return true;
 		} else {

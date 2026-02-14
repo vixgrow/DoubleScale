@@ -405,7 +405,7 @@ class Tasks {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $group_slugs ), '%s' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Using spread operator for dynamic placeholders.
 		$group_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT group_id FROM {$wpdb->prefix}actionscheduler_groups WHERE slug IN ($placeholders)",
@@ -417,7 +417,7 @@ class Tasks {
 			$group_placeholders = implode( ', ', array_fill( 0, count( $group_ids ), '%d' ) );
 
 			// Delete old completed/failed actions and their associated logs
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Using spread operator for dynamic placeholders with action scheduler tables.
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE a, l

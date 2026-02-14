@@ -83,7 +83,10 @@ class Unsubscribe_Page {
 			<meta charset="<?php bloginfo( 'charset' ); ?>">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex, nofollow">
-			<title><?php echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quill-crm' ), $site_name ) ); ?></title>
+			<title><?php
+				/* translators: %s: site name */
+				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'quill-crm' ), $site_name ) );
+			?></title>
 			<?php wp_head(); ?>
 			<style>
 				* {

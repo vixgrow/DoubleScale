@@ -146,7 +146,6 @@ class REST_Site_Verification_Controller extends REST_Controller {
 	public function create_application_password( WP_REST_Request $request ) {
 
 		if ( ! $this->is_application_password_available() ) {
-			error_log( 'Application password is not available.' );
 			return new WP_Error(
 				'application_password_not_available',
 				__( 'Application password is not available. Please contact support.', 'quill-crm' ),

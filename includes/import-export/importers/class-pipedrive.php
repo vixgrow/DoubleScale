@@ -122,6 +122,7 @@ class Pipedrive extends Importer
 			);
 
 			quillcrm_get_logger()->error($error_message, $error_details);
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception($error_message);
 		}
 
@@ -141,8 +142,6 @@ class Pipedrive extends Importer
 			$cursor = $response['data']['additional_data']['next_cursor'] ?? null;
 			
 		} while ($cursor && $total < 10000); // Safety limit
-
-		error_log('Pipedrive v2: Calculated total count: ' . $total);
 
 		if ($total === 0) {
 			return array(
@@ -446,6 +445,7 @@ class Pipedrive extends Importer
 	public function get_api()
 	{
 		if (empty($this->credentials['api_domain']) || empty($this->credentials['api_token'])) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('Pipedrive API Domain and API Token are required.', 'quill-crm'));
 		}
 
@@ -458,11 +458,13 @@ class Pipedrive extends Importer
 
 		// Basic validation for domain format
 		if (!preg_match('/^[a-zA-Z0-9.-]+\.(pipedrive\.com|pipedrivecdn\.com)$/', $api_domain)) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('Pipedrive API Domain format appears to be invalid. Please use format: yourcompany.pipedrive.com', 'quill-crm'));
 		}
 
 		// Basic validation for API token
 		if (strlen($api_token) < 30) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			throw new \Exception(__('Pipedrive API Token appears to be invalid. Please verify your token.', 'quill-crm'));
 		}
 

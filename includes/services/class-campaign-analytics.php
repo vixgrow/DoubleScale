@@ -73,6 +73,7 @@ class Campaign_Analytics {
 			case Campaign_Channel::CHANNEL_WHATSAPP:
 				return Communication_Tracking_Model::whatsapp();
 			default:
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				throw new \InvalidArgumentException( "Unsupported campaign type: {$type}" );
 		}
 	}

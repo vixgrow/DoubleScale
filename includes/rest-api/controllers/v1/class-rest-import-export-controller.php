@@ -638,7 +638,6 @@ class Rest_Import_Export_Controller extends REST_Controller
 
 		try {
 			$importer = Manager::instance()->get_importer($source);
-			error_log('args: ' . wp_json_encode($args));
 			$importer = new $importer($args);
 			$result   = $importer->import();
 

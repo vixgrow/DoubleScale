@@ -124,6 +124,7 @@ class Campaign_Template_Factory {
 			case Campaign_Channel::STR_WHATSAPP:
 				return new WhatsApp_Template_Processor();
 			default:
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 				throw new \InvalidArgumentException( "Unsupported campaign type: {$campaign_type}" );
 		}
 	}

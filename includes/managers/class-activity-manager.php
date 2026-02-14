@@ -1006,7 +1006,7 @@ final class Activity_Manager {
 
 		$union_sql = '(' . implode( ') UNION ALL (', $select_queries ) . ')';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Variables are sanitized; $union_sql from prepared queries, $sort_by sanitized by sanitize_sort_field().
 		$final_sql = $wpdb->prepare(
 			"SELECT * FROM ({$union_sql}) AS combined
 			ORDER BY {$sort_by} {$sort_order}
@@ -1286,7 +1286,7 @@ final class Activity_Manager {
 
 		$placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Using spread operator for dynamic placeholders.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ID, display_name, user_email FROM {$wpdb->users} WHERE ID IN ({$placeholders})",

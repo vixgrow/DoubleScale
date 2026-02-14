@@ -575,14 +575,15 @@ class REST_Contact_Controller extends REST_Controller {
 							if ( is_null( $value ) || $value === '' || $value === false ) {
 								return true;
 							}
-							 // Validate E.164 format if value is provided
-							if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
-								return new WP_Error(
-									'rest_invalid_param',
-									sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quill-crm' ), $param ),
-									array( 'status' => 400 )
-								);
-							}
+						 // Validate E.164 format if value is provided
+						if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
+							return new WP_Error(
+								'rest_invalid_param',
+								/* translators: %s: field name (phone, mobile, etc.) */
+								sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'quill-crm' ), $param ),
+								array( 'status' => 400 )
+							);
+						}
 							 return true;
 						 },
 					 ),
@@ -954,7 +955,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 
 		// Get all course enrollments for user.
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is from LearnPress plugin.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from LearnPress plugin.
 		$enrollments = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$table_name} WHERE user_id = %d AND item_type = %s ORDER BY start_time DESC",
@@ -1364,11 +1365,12 @@ class REST_Contact_Controller extends REST_Controller {
 				return $mode_int;
 			}
 
-			return new WP_Error(
-				'invalid_mode',
-				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode_int ),
-				array( 'status' => 400 )
-			);
+		return new WP_Error(
+			'invalid_mode',
+			/* translators: %d: invalid mode number */
+			sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode_int ),
+			array( 'status' => 400 )
+		);
 		}
 
 		// Map string modes to tracking mode constants
@@ -1379,11 +1381,12 @@ class REST_Contact_Controller extends REST_Controller {
 		);
 
 		if ( ! isset( $mode_map[ $mode ] ) ) {
-			return new WP_Error(
-				'invalid_mode',
-				sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode ),
-				array( 'status' => 400 )
-			);
+		return new WP_Error(
+			'invalid_mode',
+			/* translators: %s: invalid mode string */
+			sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quill-crm' ), $mode ),
+			array( 'status' => 400 )
+		);
 		}
 
 		return $mode_map[ $mode ];
@@ -1418,7 +1421,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			$total_sent    = (int) ( $stats->total_sent ?? 0 );
@@ -1451,7 +1454,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tracking_mode
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row( $query );
 
 			return array(
@@ -1624,7 +1627,6 @@ class REST_Contact_Controller extends REST_Controller {
 				200
 			);
 		} catch ( Exception $e ) {
-			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
@@ -1673,7 +1675,6 @@ class REST_Contact_Controller extends REST_Controller {
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
-			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}

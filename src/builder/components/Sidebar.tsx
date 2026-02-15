@@ -11,7 +11,8 @@ import { useSelect } from '@wordpress/data';
 import {
 	DashboardIcon,
 	GlobalEmailSettingsIcon,
-	MyTemplatesIcon,
+	MyTemplatesSidebarIcon,
+	ReadyToUseIcon,
 } from '@/components/icons';
 import MyTemplatesPanel from './MyTemplatesPanel';
 import TemplateSuggestionsPanel from './TemplateSuggestionsPanel';
@@ -102,12 +103,13 @@ const BlockSidebar = ({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<div
-										className={`flex flex-col items-center cursor-pointer ${view.type === 'myTemplates' ? 'text-[#1E3A8A]' : ''}`}
+										className="flex flex-col items-center cursor-pointer"
 										onClick={HandleMyTemplates}
 									>
-										<MyTemplatesIcon
+										<MyTemplatesSidebarIcon
 											width={32}
 											height={32}
+											active={view.type === 'myTemplates'}
 										/>
 									</div>
 								</TooltipTrigger>
@@ -123,12 +125,13 @@ const BlockSidebar = ({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<div
-										className={`flex flex-col items-center cursor-pointer ${view.type === 'templateSuggestions' ? 'text-[#1E3A8A]' : ''}`}
+										className="flex flex-col items-center cursor-pointer"
 										onClick={HandleTemplateSuggestions}
 									>
-										<MyTemplatesIcon
+										<ReadyToUseIcon
 											width={32}
 											height={32}
+											active={view.type === 'templateSuggestions'}
 										/>
 									</div>
 								</TooltipTrigger>

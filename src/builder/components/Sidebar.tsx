@@ -14,6 +14,7 @@ import {
 	MyTemplatesIcon,
 } from '@/components/icons';
 import MyTemplatesPanel from './MyTemplatesPanel';
+import TemplateSuggestionsPanel from './TemplateSuggestionsPanel';
 import {
 	Tooltip,
 	TooltipTrigger,
@@ -37,6 +38,7 @@ interface BlockSidebarProps {
 type SidebarView =
 	| { type: 'none' }
 	| { type: 'myTemplates' }
+	| { type: 'templateSuggestions' }
 	| { type: 'active'; item: SidebarItem };
 
 const BlockSidebar = ({
@@ -45,6 +47,8 @@ const BlockSidebar = ({
 	openGlobalSettings = () => {},
 }: BlockSidebarProps = {}) => {
 	const [view, setView] = useState<SidebarView>({ type: 'none' });
+	const [suggestionActiveItem, setSuggestionActiveItem] =
+		useState<SidebarItem | null>(null);
 
 	const isGlobalSettingsClosed = useSelect(
 		(select) =>
@@ -60,14 +64,25 @@ const BlockSidebar = ({
 	useEffect(() => {
 		if (sidebarCloseTrigger && sidebarCloseTrigger > 0) {
 			setView({ type: 'none' });
+			setSuggestionActiveItem(null);
 		}
 	}, [sidebarCloseTrigger]);
 
 	const HandleMyTemplates = () => {
+		setSuggestionActiveItem(null);
 		setView((prev) =>
 			prev.type === 'myTemplates'
 				? { type: 'none' }
 				: { type: 'myTemplates' }
+		);
+	};
+
+	const HandleTemplateSuggestions = () => {
+		setSuggestionActiveItem(null);
+		setView((prev) =>
+			prev.type === 'templateSuggestions'
+				? { type: 'none' }
+				: { type: 'templateSuggestions' }
 		);
 	};
 
@@ -98,6 +113,27 @@ const BlockSidebar = ({
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>{__('My Templates', 'quillcrm')}</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+
+					<div>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<div
+										className={`flex flex-col items-center cursor-pointer ${view.type === 'templateSuggestions' ? 'text-[#1E3A8A]' : ''}`}
+										onClick={HandleTemplateSuggestions}
+									>
+										<MyTemplatesIcon
+											width={32}
+											height={32}
+										/>
+									</div>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>{__('Ready-To-Use', 'quillcrm')}</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -196,6 +232,52 @@ const BlockSidebar = ({
 					isOpen={view.type === 'myTemplates'}
 					onClose={() => setView({ type: 'none' })}
 					refreshKey={templatesRefreshKey}
+				/>
+
+				{/* Template Suggestions Active Sidebar */}
+				{view.type === 'templateSuggestions' &&
+					suggestionActiveItem && (
+						<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-40 bg-white shadow-lg active-sidebar-scrollbar">
+							<div className="flex flex-col px-8 pt-7">
+								<div className="flex items-center justify-between w-full pb-4">
+									<h2 className="text-base font-bold text-primary text-start flex-1">
+										{suggestionActiveItem.title}
+									</h2>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() =>
+											setSuggestionActiveItem(null)
+										}
+										className="h-6 w-6 p-0 hover:bg-gray-100"
+									>
+										<X className="h-4 w-4" />
+									</Button>
+								</div>
+								<div className="border-b-2 border-gray-200 w-full"></div>
+							</div>
+							<div
+								className="overflow-y-auto p-4 flex-1 active-sidebar-scrollbar"
+								style={{ zIndex: 100000 }}
+							>
+								<suggestionActiveItem.component
+									onSidebarClose={() =>
+										setSuggestionActiveItem(null)
+									}
+								/>
+							</div>
+						</div>
+					)}
+
+				{/* Template Suggestions Panel */}
+				<TemplateSuggestionsPanel
+					isOpen={view.type === 'templateSuggestions'}
+					onClose={() => {
+						setSuggestionActiveItem(null);
+						setView({ type: 'none' });
+					}}
+					activeSidebar={suggestionActiveItem}
+					setActiveSidebar={setSuggestionActiveItem}
 				/>
 			</div>
 		</div>

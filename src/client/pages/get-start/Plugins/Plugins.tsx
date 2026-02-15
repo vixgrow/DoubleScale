@@ -28,7 +28,7 @@ import QuillBookingIcon from '@quillcrm/components/icons/quillBooking';
 import OptionalPluginIcon from '@quillcrm/components/icons/optional-icon';
 import ButtonComponent from '../component/button';
 import { Input } from '../../../../components/ui/input';
-import { PluginsLoadingSkeleton } from './Plugin-Skeleton ';
+import { PluginsLoadingSkeleton } from './Plugin-Skeleton';
 
 interface Plugin {
 	id: string;

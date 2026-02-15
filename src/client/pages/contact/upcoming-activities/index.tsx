@@ -14,7 +14,6 @@ import { User, ArrowRight } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
 /**
  * Internal dependencies
@@ -34,7 +33,9 @@ import MeetingDialog from '../meetings/meeting-dialog';
 import type { Note } from '@quillcrm/client';
 
 interface UpcomingActivitiesProps {
-    contact_id: number;
+    contact_id?: number;
+    entity_type?: string | number;
+    entity_id?: number;
 }
 
 /**
@@ -105,7 +106,7 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
 // Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
 const getProTaskService = () => applyFilters('quillcrm_pro_component', null, 'TaskService') as any;
 
-const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) => {
+const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, entity_type, entity_id }) => {
     const { deleteActivity } = useActivityOperations();
     const { contact } = useContactContext();
     const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -122,22 +123,20 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
 
     dayjs.extend(utc);
     dayjs.extend(timezone);
-    dayjs.extend(isSameOrAfter);
 
     const fetchUpcomingActivities = async () => {
-        if (!contact_id) return;
+        if (!contact_id && !entity_id) return;
 
         setLoading(true);
         try {
-            const today = dayjs().format('YYYY-MM-DD');
-
-            // Use timeline endpoint to get activities + tasks
-            // Backend filters by scheduled date for activities and due_date for tasks
-            const response = await ActivitiesService.getTimeline({
+            // Dedicated upcoming endpoint - backend handles date filtering
+            // (today onward) and sort order (ascending, nearest first).
+            const response = await ActivitiesService.getUpcoming({
                 contact_id,
+                entity_type,
+                entity_id,
                 per_page: 100,
                 page: 1,
-                date_from: today,
             });
 
             if (response && response.data) {
@@ -154,7 +153,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
 
     useEffect(() => {
         fetchUpcomingActivities();
-    }, [contact_id]);
+    }, [contact_id, entity_id]);
 
     const handleEditActivity = (activity: EditableActivity) => {
         if (activity.activity_type === 'note') {
@@ -591,7 +590,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                     setNoteDialogOpen(false);
                     setSelectedNote(null);
                 }}
-                contact_id={contact_id}
+                contact_id={contact_id ?? 0}
                 selectedNote={selectedNote}
                 onSave={handleNoteSave}
                 onUpdate={handleNoteUpdate}
@@ -606,7 +605,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                         setCallDialogOpen(false);
                         setSelectedCall(null);
                     }}
-                    contact_id={contact_id}
+                    contact_id={contact_id ?? 0}
                     selectedCall={{
                         id: selectedCall.id,
                         contact_id: selectedCall.contact_id,
@@ -639,7 +638,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id }) =
                         setMeetingDialogOpen(false);
                         setSelectedMeeting(null);
                     }}
-                    contact_id={contact_id}
+                    contact_id={contact_id ?? 0}
                     selectedMeeting={{
                         id: selectedMeeting.id,
                         contact_id: selectedMeeting.contact_id,

@@ -18,6 +18,8 @@ export const ACTIVITIES_ENDPOINTS = {
 	ACTIVITIES: '/qc/v1/activities',
 	/** Timeline endpoint - for unified timeline (activities + tasks when Pro active) */
 	TIMELINE: '/qc/v1/timeline',
+	/** Upcoming activities - today onward, sorted ascending (nearest first) */
+	UPCOMING: '/qc/v1/activities/upcoming',
 } as const;
 
 /**
@@ -262,6 +264,25 @@ export const ActivitiesService = {
 
 		return apiFetch({
 			path: `${ACTIVITIES_ENDPOINTS.TIMELINE}?${searchParams.toString()}`,
+		}) as Promise<ActivitiesResponse>;
+	},
+
+	/**
+	 * Get upcoming activities and tasks (today onward, nearest first).
+	 * Backend handles date filtering and sort order.
+	 */
+	async getUpcoming(params: Pick<TimelineParams, 'contact_id' | 'entity_id' | 'entity_type' | 'user_id' | 'per_page' | 'page'> = {}): Promise<ActivitiesResponse> {
+		const searchParams = buildParams({
+			contact_id: params.contact_id,
+			entity_id: params.entity_id,
+			entity_type: params.entity_type,
+			user_id: params.user_id,
+			per_page: params.per_page,
+			page: params.page,
+		});
+
+		return apiFetch({
+			path: `${ACTIVITIES_ENDPOINTS.UPCOMING}?${searchParams.toString()}`,
 		}) as Promise<ActivitiesResponse>;
 	},
 

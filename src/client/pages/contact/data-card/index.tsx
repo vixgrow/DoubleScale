@@ -34,7 +34,7 @@ import {
 	PhoneIcon,
 	DealActivityIcon,
 	CalendarIcon,
-	// UpcomingActivitiesIcon,
+	UpcomingActivitiesIcon,
 	WebsiteIcon,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
@@ -43,7 +43,7 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
-// import UpcomingActivities from '../upcoming-activities';
+import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@quillcrm/components/icons/whatsapp-icon';
 
 interface DataCardProps {
@@ -95,11 +95,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	}>;
 
 	const tabsList = [
-		// {
-		// 	value: 'upcoming-activities',
-		// 	label: 'Upcoming Activities',
-		// 	icon: <UpcomingActivitiesIcon />,
-		// },
+		{
+			value: 'upcoming-activities',
+			label: 'Upcoming Activities',
+			icon: <UpcomingActivitiesIcon />,
+		},
 		{
 			value: 'activities',
 			label: 'Activities',
@@ -192,14 +192,14 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 				</CardContent>
 			),
 		},
-		// {
-		// 	value: 'upcoming-activities',
-		// 	children: (
-		// 		<CardContent className="pt-6">
-		// 			<UpcomingActivities contact_id={contact.id} />
-		// 		</CardContent>
-		// 	),
-		// },
+		{
+			value: 'upcoming-activities',
+			children: (
+				<CardContent className="pt-6">
+					<UpcomingActivities contact_id={contact.id} />
+				</CardContent>
+			),
+		},
 		{
 			value: 'emails',
 			children: (

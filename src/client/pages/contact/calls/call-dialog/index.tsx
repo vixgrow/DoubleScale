@@ -353,7 +353,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                 </Label>
                                 <Input
                                     placeholder={__(
-                                        'Enter phone number',
+                                        'No phone number',
                                         'quillcrm'
                                     )}
                                     value={formData.phoneNumber}

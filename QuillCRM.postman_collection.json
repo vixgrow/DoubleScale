@@ -4794,12 +4794,12 @@
 									"disabled": true,
 									"description": "Filter to date (YYYY-MM-DD)"
 								},
-							{
-								"key": "sort_by",
-								"value": "activity_date",
-								"disabled": true,
-								"description": "Sort by: activity_date (default), created_at, updated_at"
-							},
+								{
+									"key": "sort_by",
+									"value": "activity_date",
+									"disabled": true,
+									"description": "Sort by: activity_date (default), created_at, updated_at"
+								},
 								{
 									"key": "sort_order",
 									"value": "desc",
@@ -4820,7 +4820,66 @@
 								}
 							]
 						},
-						"description": "Get unified timeline (activities + tasks when Pro is active). Use this for the 'All Activity' tab."
+						"description": "Get unified timeline (activities + tasks when Pro is active). Use this for the 'All Activity' tab. Each item includes a 'display_status' field: 'upcoming', 'due_today', 'completed' for activities; 'upcoming', 'due_today', 'overdue', 'completed' for tasks. For upcoming-only view, use GET /activities/upcoming instead."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Upcoming Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{site}}/wp-json/qc/v1/activities/upcoming?contact_id={{contactId}}",
+							"host": [
+								"{{site}}"
+							],
+							"path": [
+								"wp-json",
+								"qc",
+								"v1",
+								"activities",
+								"upcoming"
+							],
+							"query": [
+								{
+									"key": "contact_id",
+									"value": "{{contactId}}",
+									"description": "Filter by contact ID"
+								},
+								{
+									"key": "entity_type",
+									"value": "deal",
+									"disabled": true,
+									"description": "Entity type: 'deal' or 1 for deals"
+								},
+								{
+									"key": "entity_id",
+									"value": "{{dealId}}",
+									"disabled": true,
+									"description": "Entity ID (e.g., deal ID)"
+								},
+								{
+									"key": "user_id",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter by user ID"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"disabled": true,
+									"description": "Items per page"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true,
+									"description": "Page number"
+								}
+							]
+						},
+						"description": "Get upcoming activities and tasks (today onward, sorted ascending by nearest first). Backend handles date filtering and sort order automatically. Each item includes a 'display_status' field: 'upcoming', 'due_today', or 'completed'. Also supports deal filtering via entity_type and entity_id."
 					},
 					"response": []
 				},

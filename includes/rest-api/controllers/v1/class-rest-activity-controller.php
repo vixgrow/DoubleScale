@@ -181,6 +181,47 @@ class REST_Activity_Controller extends REST_Controller {
 			)
 		);
 
+		// Upcoming activities (today onward, sorted ascending).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/upcoming',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_upcoming' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'contact_id'  => array(
+							'description' => __( 'Filter by contact ID.', 'quill-crm' ),
+							'type'        => 'integer',
+						),
+						'entity_id'   => array(
+							'description' => __( 'Filter by entity ID (e.g., deal ID).', 'quill-crm' ),
+							'type'        => 'integer',
+						),
+						'entity_type' => array(
+							'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'quill-crm' ),
+							'type'        => array( 'string', 'integer' ),
+						),
+						'user_id'     => array(
+							'description' => __( 'Filter by user ID.', 'quill-crm' ),
+							'type'        => 'integer',
+						),
+						'per_page'    => array(
+							'description' => __( 'Number of items per page.', 'quill-crm' ),
+							'type'        => 'integer',
+							'default'     => 20,
+						),
+						'page'        => array(
+							'description' => __( 'Page number.', 'quill-crm' ),
+							'type'        => 'integer',
+							'default'     => 1,
+						),
+					),
+				),
+			)
+		);
+
 		// Activity statistics.
 		register_rest_route(
 			$this->namespace,
@@ -343,6 +384,63 @@ class REST_Activity_Controller extends REST_Controller {
 		);
 
 		// Check for access denied error in result.
+		if ( isset( $result['meta']['error'] ) && 'access_denied' === $result['meta']['error'] ) {
+			return new WP_Error( 'access_denied', __( 'Access denied', 'quill-crm' ), array( 'status' => 403 ) );
+		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Get upcoming activities and tasks (today onward, nearest first).
+	 *
+	 * @since 1.x.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_upcoming( $request ) {
+		// Normalize entity_type to integer constant.
+		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
+
+		// Check Pro availability for deal entity type.
+		$pro_active = class_exists( '\QuillCRM_Pro\Models\Task_Model' );
+		if ( $entity_type === \QuillCRM\Models\Activity_Association_Model::ENTITY_TYPE_DEAL && ! $pro_active ) {
+			return new WP_Error(
+				'pro_required',
+				__( 'Deal timeline requires QuillCRM Pro plugin', 'quill-crm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$filters = array(
+			'contact_id'  => $request->get_param( 'contact_id' ),
+			'entity_id'   => $request->get_param( 'entity_id' ),
+			'entity_type' => $entity_type,
+			'user_id'     => $request->get_param( 'user_id' ),
+			'date_from'   => gmdate( 'Y-m-d' ),
+			'sort_by'     => 'activity_date',
+			'sort_order'  => 'asc',
+		);
+
+		// Remove null values.
+		$filters = array_filter(
+			$filters,
+			function ( $value ) {
+				return null !== $value && '' !== $value;
+			}
+		);
+
+		$per_page = intval( $request->get_param( 'per_page' ) ) ?: 20;
+		$page     = intval( $request->get_param( 'page' ) ) ?: 1;
+
+		$result = Activity_Manager::instance()->get_unified_timeline(
+			$filters,
+			$per_page,
+			$page
+		);
+
 		if ( isset( $result['meta']['error'] ) && 'access_denied' === $result['meta']['error'] ) {
 			return new WP_Error( 'access_denied', __( 'Access denied', 'quill-crm' ), array( 'status' => 403 ) );
 		}

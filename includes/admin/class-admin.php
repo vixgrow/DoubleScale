@@ -81,7 +81,7 @@ class Admin {
 			__( 'QuillCRM', 'quill-crm' ),
 			__( 'QuillCRM', 'quill-crm' ),
 			'quillcrm_access',
-			'quill-crm',
+			'quillcrm',
 			array( Admin_Loader::class, 'page_wrapper' ),
 			'data:image/svg+xml;base64,' . base64_encode(
 				'<svg xmlns="http://www.w3.org/2000/svg" width="31" height="40" viewBox="0 0 31 40" fill="none">
@@ -100,17 +100,17 @@ class Admin {
 
 		// Home.
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Dashboard', 'quill-crm' ),
 			__( 'Dashboard', 'quill-crm' ),
 			'quillcrm_access',
-			'quill-crm',
+			'quillcrm',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
 
 		// Contacts.
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Contacts', 'quill-crm' ),
 			__( 'Contacts', 'quill-crm' ),
 			'quillcrm_access',
@@ -120,7 +120,7 @@ class Admin {
 
 		// Campaigns.
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Campaigns', 'quill-crm' ),
 			__( 'Campaigns', 'quill-crm' ),
 			'quillcrm_access',
@@ -129,7 +129,7 @@ class Admin {
 		);
 		// Pipelines
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Pipelines', 'quill-crm' ),
 			__( 'Pipelines', 'quill-crm' ),
 			'quillcrm_access',
@@ -138,7 +138,7 @@ class Admin {
 		);
 		// Automations
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Automations', 'quill-crm' ),
 			__( 'Automations', 'quill-crm' ),
 			'quillcrm_access',
@@ -147,7 +147,7 @@ class Admin {
 		);
 		// Forms
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Forms', 'quill-crm' ),
 			__( 'Forms', 'quill-crm' ),
 			'quillcrm_access',
@@ -156,7 +156,7 @@ class Admin {
 		);
 		// Integrations
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Integrations', 'quill-crm' ),
 			__( 'Integrations', 'quill-crm' ),
 			'quillcrm_access',
@@ -165,7 +165,7 @@ class Admin {
 		);
 		// Analytics
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Analytics', 'quill-crm' ),
 			__( 'Analytics', 'quill-crm' ),
 			'quillcrm_access',
@@ -174,7 +174,7 @@ class Admin {
 		);
 		// Settings
 		add_submenu_page(
-			'quill-crm',
+			'quillcrm',
 			__( 'Settings', 'quill-crm' ),
 			__( 'Settings', 'quill-crm' ),
 			'quillcrm_access',

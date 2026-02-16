@@ -254,6 +254,11 @@ final class Merge_Tags_Manager {
 				'mergeTags'   => array(),
 				'is_disabled' => true,
 			),
+			'deal'           => array(
+				'name'      => __( 'Deal', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
+			),
 		);
 		// get forms slug to set in groups
 		$forms = Forms_Manager::instance()->get_all_forms();

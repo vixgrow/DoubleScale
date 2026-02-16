@@ -169,7 +169,7 @@ abstract class Abstract_Campaign_Processing {
 	public function continue_campaign_processing( $campaign_id ) {
 		// === CONCURRENCY LOCK (Database-based, works without Redis/Memcached) ===
 		// IMPORTANT: Uses the SAME lock key as process_campaign() to prevent overlap
-		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign_id}";
+		$lock_key      = "quillcrm_{$this->channel}_campaign_lock_{$campaign_id}";
 		$lock_duration = apply_filters(
 			'quillcrm_campaign_lock_duration',
 			300, // 5 minutes default
@@ -235,8 +235,14 @@ abstract class Abstract_Campaign_Processing {
 							'attempts'    => $no_progress_count,
 						)
 					);
+					// Calculate duration even for failed campaigns
+					$campaign_duration = $this->calculate_campaign_duration( $campaign );
+
 					$campaign->status = 'failed';
 					$campaign->save();
+
+					// Clean up the campaign start time
+					delete_option( "quillcrm_{$this->channel}_campaign_start_time_{$campaign->id}" );
 
 					/**
 					 * Fires when a campaign fails.
@@ -612,7 +618,7 @@ abstract class Abstract_Campaign_Processing {
 
 		// === CONCURRENCY LOCK (Database-based, works without Redis/Memcached) ===
 		// Prevent multiple cron workers from processing the same campaign simultaneously
-		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_key      = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
 		$lock_duration = apply_filters(
 			'quillcrm_campaign_lock_duration',
 			300, // 5 minutes default
@@ -644,17 +650,17 @@ abstract class Abstract_Campaign_Processing {
 
 	/**
 	 * Acquire a campaign processing lock (database-based)
-	 * 
+	 *
 	 * Uses timestamp-based approach for simplicity and reliability.
 	 * This approach is simpler than transient-based locking and avoids race conditions.
-	 * 
+	 *
 	 * How it works:
 	 * 1. Check if lock timestamp exists and is recent (< 55 seconds old)
 	 * 2. If yes, another process is running - skip
 	 * 3. If no, atomically UPDATE the timestamp using conditional UPDATE
 	 * 4. If UPDATE affects 1 row, we got the lock
 	 * 5. If UPDATE affects 0 rows, another process got it first
-	 * 
+	 *
 	 * Advantages:
 	 * - UPDATE operations are atomic in MySQL
 	 * - No complex INSERT IGNORE logic
@@ -669,8 +675,8 @@ abstract class Abstract_Campaign_Processing {
 		global $wpdb;
 
 		// Lock key already includes 'quillcrm_' prefix, use it directly
-		$option_name = $lock_key;
-		$current_time = time();
+		$option_name         = $lock_key;
+		$current_time        = time();
 		$lock_expiry_seconds = 55; // If process hasn't updated in 55 seconds, consider it dead
 
 		// Step 1: Check if lock exists and is still active (recent timestamp)
@@ -690,7 +696,7 @@ abstract class Abstract_Campaign_Processing {
 		// This UPDATE will only succeed if:
 		// - The option doesn't exist (INSERT via UPDATE won't work, so we handle that separately)
 		// - OR the timestamp is expired (older than 55 seconds)
-		// 
+		//
 		// We use a two-step approach:
 		// 1. Try INSERT (if option doesn't exist)
 		// 2. Try UPDATE with WHERE condition (if option exists but is expired)
@@ -712,7 +718,7 @@ abstract class Abstract_Campaign_Processing {
 		// If INSERT didn't succeed (option already exists), try conditional UPDATE
 		// Only update if the timestamp is expired (older than 55 seconds) or doesn't exist
 		$expired_threshold = $current_time - $lock_expiry_seconds;
-		$updated = $wpdb->query(
+		$updated           = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->options} 
 				SET option_value = %d 
@@ -735,7 +741,7 @@ abstract class Abstract_Campaign_Processing {
 
 	/**
 	 * Release a campaign processing lock
-	 * 
+	 *
 	 * Sets timestamp to 0 to clear the lock
 	 *
 	 * @param string $lock_key Lock identifier
@@ -757,7 +763,7 @@ abstract class Abstract_Campaign_Processing {
 
 	/**
 	 * Refresh/extend a campaign processing lock
-	 * 
+	 *
 	 * Updates timestamp to current time to keep lock alive.
 	 * Call this periodically during long-running operations to prevent
 	 * the lock from expiring while processing is still active.
@@ -768,11 +774,11 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function refresh_campaign_lock( $lock_key, $lock_duration = 300 ) {
 		global $wpdb;
-		
+
 		// Lock key already includes 'quillcrm_' prefix, use it directly
-		$option_name = $lock_key;
+		$option_name  = $lock_key;
 		$current_time = time();
-		
+
 		// Update the timestamp to current time to keep the lock alive
 		$updated = $wpdb->update(
 			$wpdb->options,
@@ -781,7 +787,7 @@ abstract class Abstract_Campaign_Processing {
 			array( '%d' ),
 			array( '%s' )
 		);
-		
+
 		return $updated !== false;
 	}
 
@@ -795,7 +801,7 @@ abstract class Abstract_Campaign_Processing {
 		wp_raise_memory_limit( 'admin' );
 
 		// Lock key for refreshing during long operations
-		$lock_key = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
+		$lock_key      = "quillcrm_{$this->channel}_campaign_lock_{$campaign->id}";
 		$lock_duration = apply_filters(
 			'quillcrm_campaign_lock_duration',
 			300, // 5 minutes default
@@ -1624,6 +1630,42 @@ abstract class Abstract_Campaign_Processing {
 		delete_transient( "quillcrm_{$this->channel}_campaign_last_offset_{$campaign->id}" );
 		delete_transient( "quillcrm_{$this->channel}_campaign_no_progress_count_{$campaign->id}" );
 
+		// Calculate and log campaign duration
+		$campaign_duration = $this->calculate_campaign_duration( $campaign );
+
+		// Log to PHP error log for debugging
+		error_log(
+			sprintf(
+				'[QuillCRM] %s Campaign completed. Campaign ID: %d, Name: %s, Recipients: %d, Duration: %s (%s), Start: %s, End: %s',
+				ucfirst( $this->channel ),
+				$campaign->id,
+				$campaign->name,
+				$recipients_count,
+				$campaign_duration['formatted'],
+				$campaign_duration['human_readable'],
+				$campaign_duration['start_time'],
+				$campaign_duration['end_time']
+			)
+		);
+
+		quillcrm_get_logger()->info(
+			sprintf( __( '%s Campaign completed.', 'quillcrm' ), ucfirst( $this->channel ) ),
+			array(
+				'code'       => "{$this->channel}_campaign_completed",
+				'campaign'   => array(
+					'id'   => $campaign->id,
+					'name' => $campaign->name,
+				),
+				'duration'   => $campaign_duration['formatted'],
+				'start_time' => $campaign_duration['start_time'],
+				'end_time'   => $campaign_duration['end_time'],
+				'recipients' => $recipients_count,
+			)
+		);
+
+		// Clean up the campaign start time
+		delete_option( "quillcrm_{$this->channel}_campaign_start_time_{$campaign->id}" );
+
 		quillcrm_get_logger()->info(
 			/* translators: %s: channel name */
 			sprintf( __( '%s Campaign completed.', 'quill-crm' ), ucfirst( $this->channel ) ),
@@ -2192,4 +2234,80 @@ abstract class Abstract_Campaign_Processing {
 
 		return true;
 	}
+
+
+	/**
+	 * Calculate campaign duration from start to completion
+	 *
+	 * @param Campaign_Model $campaign
+	 * @return array Duration breakdown with total_seconds, formatted, and human_readable
+	 */
+	protected function calculate_campaign_duration( Campaign_Model $campaign ) {
+		$start_time_key      = "quillcrm_{$this->channel}_campaign_start_time_{$campaign->id}";
+		$campaign_start_time = get_option( $start_time_key );
+
+		if ( ! $campaign_start_time ) {
+			// If no start time found, try to use execute_at from campaign
+			if ( $campaign->execute_at ) {
+				$campaign_start_time = strtotime( $campaign->execute_at );
+			} else {
+				// Fallback to created_at
+				$campaign_start_time = strtotime( $campaign->created_at );
+			}
+		}
+
+		$end_time      = microtime( true );
+		$total_seconds = $end_time - (float) $campaign_start_time;
+		$total_seconds = max( 0, $total_seconds ); // Ensure non-negative
+
+		// Calculate hours, minutes, seconds
+		$hours   = floor( $total_seconds / 3600 );
+		$minutes = floor( ( $total_seconds % 3600 ) / 60 );
+		$seconds = floor( $total_seconds % 60 );
+
+		// Format duration string
+		$formatted = '';
+		if ( $hours > 0 ) {
+			$formatted .= $hours . 'h ';
+		}
+		if ( $minutes > 0 || $hours > 0 ) {
+			$formatted .= $minutes . 'm ';
+		}
+		$formatted .= $seconds . 's';
+
+		// Human-readable format
+		$human_readable = '';
+		if ( $hours > 0 ) {
+			$human_readable = sprintf(
+				/* translators: 1: hours, 2: minutes, 3: seconds */
+				__( '%1$d hours, %2$d minutes, %3$d seconds', 'quillcrm' ),
+				$hours,
+				$minutes,
+				$seconds
+			);
+		} elseif ( $minutes > 0 ) {
+			$human_readable = sprintf(
+				/* translators: 1: minutes, 2: seconds */
+				__( '%1$d minutes, %2$d seconds', 'quillcrm' ),
+				$minutes,
+				$seconds
+			);
+		} else {
+			$human_readable = sprintf(
+				/* translators: %d: seconds */
+				__( '%d seconds', 'quillcrm' ),
+				$seconds
+			);
+		}
+
+		return array(
+			'total_seconds'  => round( $total_seconds, 2 ),
+			'formatted'      => trim( $formatted ),
+			'human_readable' => $human_readable,
+			'start_time'     => gmdate( 'Y-m-d H:i:s', (int) $campaign_start_time ),
+			'end_time'       => gmdate( 'Y-m-d H:i:s', (int) $end_time ),
+		);
+	}
+
+
 }

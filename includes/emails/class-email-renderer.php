@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
+use QuillCRM\Contact_Filters\Condition_Evaluator;
 
 /**
  * Renderer for email templates
@@ -404,7 +405,7 @@ class Email_Renderer {
 		// Check if Pro is active via filter (Pro plugin sets this to true)
 		$is_pro_active = quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
 		if ( ! $is_pro_active ) {
-				return true;
+			return true;
 		}
 
 		// Extract actual Contact_Model if Automation_Contact_Model is passed
@@ -416,16 +417,8 @@ class Email_Renderer {
 			return false;
 		}
 
-		// Pro is active - evaluate conditions using Contact_Filters_Process
-		// Start with a query for this specific contact
-		$query = \QuillCRM\Models\Contact_Model::where( 'id', $actual_contact->id );
-
-		// Apply the section conditions (same format as campaigns use)
-		$contact_filters = new \QuillCRM\Contact_Filters\Process( $query, $section['conditions'] );
-		$filtered_query  = $contact_filters->filter();
-
-		// Check if the contact matches the conditions
-		$matches = $filtered_query->count() > 0;
+		// Pro is active - use shared Condition_Evaluator for in-memory evaluation
+		$matches = Condition_Evaluator::instance()->evaluate( $section['conditions'], $actual_contact );
 
 		// Log conditional section evaluation for debugging
 		quillcrm_get_logger()->debug(
@@ -437,7 +430,6 @@ class Email_Renderer {
 				'contact_email' => $actual_contact->email ?? 'N/A',
 				'conditions'    => $section['conditions'],
 				'matches'       => $matches,
-				'query_count'   => $filtered_query->count(),
 			)
 		);
 

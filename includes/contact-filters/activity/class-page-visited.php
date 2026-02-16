@@ -95,6 +95,10 @@ class Page_Visited extends Filter {
 	  * @return array
 	  */
 	public function get_options() {
+		if ( ! isset( $GLOBALS['wp_rewrite'] ) ) {
+			global $wp_rewrite;
+			$GLOBALS['wp_rewrite'] = $wp_rewrite ?? new \WP_Rewrite();
+		}
 		$pages   = get_pages();
 		$options = array();
 		foreach ( $pages as $page ) {

@@ -572,6 +572,12 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load all deal merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/deal/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
 		foreach ( $goals_files as $file ) {

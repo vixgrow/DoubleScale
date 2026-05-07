@@ -20,6 +20,11 @@
     "require": {
         "composer/installers": "~1.0"
     },
+    "autoload": {
+        "psr-4": {
+            "DoubleScale\\": "includes/"
+        }
+    },
     "config": {
         "process-timeout": 0,
         "platform": {

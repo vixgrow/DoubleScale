@@ -1,0 +1,112 @@
+<?php
+/**
+ * Runs migration files registered by modules, tracking what has already run
+ * in a dedicated `{prefix}doublescale_migrations` table.
+ *
+	 * `Install::install()` delegates here: each enabled module’s `Migrations/*.php`
+	 * runs in dependency order; tracked in `{prefix}doublescale_migrations`.
+ *
+ * @package DoubleScale\Pro
+ */
+
+namespace DoubleScale\Core\Database;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\ModuleRegistry;
+
+class MigrationRunner {
+
+	private const TABLE = 'doublescale_migrations';
+
+	public static function ensure_tracking_table(): void {
+		global $wpdb;
+
+		$table           = $wpdb->prefix . self::TABLE;
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE IF NOT EXISTS {$table} (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			module VARCHAR(64) NOT NULL,
+			migration VARCHAR(191) NOT NULL,
+			ran_at DATETIME NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY module_migration (module, migration)
+		) {$charset_collate};";
+
+		if ( ! function_exists( 'dbDelta' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		}
+		dbDelta( $sql );
+	}
+
+	/**
+	 * Execute every module's pending migrations in dependency order.
+	 */
+	public static function run_all( ModuleRegistry $registry ): void {
+		self::ensure_tracking_table();
+
+		foreach ( $registry->all_sorted_by_dependencies() as $module ) {
+			if ( ! $module->is_enabled() ) {
+				continue;
+			}
+
+			foreach ( $module->migrations() as $file ) {
+				self::run_one( $module->slug(), $file );
+			}
+		}
+	}
+
+	private static function run_one( string $module_slug, string $file ): void {
+		global $wpdb;
+
+		$migration_name = basename( $file, '.php' );
+		$table          = $wpdb->prefix . self::TABLE;
+
+		$already = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT COUNT(*) FROM {$table} WHERE module = %s AND migration = %s",
+				$module_slug,
+				$migration_name
+			)
+		);
+		if ( $already > 0 ) {
+			return;
+		}
+
+		require_once $file;
+
+		$class = self::class_from_file( $file );
+		if ( $class && class_exists( $class ) ) {
+			$instance = new $class();
+			if ( method_exists( $instance, 'run' ) ) {
+				$instance->run();
+			}
+		}
+
+		$wpdb->insert(
+			$table,
+			array(
+				'module'    => $module_slug,
+				'migration' => $migration_name,
+				'ran_at'    => current_time( 'mysql', true ),
+			),
+			array( '%s', '%s', '%s' )
+		);
+	}
+
+	private static function class_from_file( string $file ): ?string {
+		$contents = file_get_contents( $file );
+		if ( false === $contents ) {
+			return null;
+		}
+		if ( ! preg_match( '/^namespace\s+([^;]+);/m', $contents, $ns ) ) {
+			return null;
+		}
+		if ( ! preg_match( '/^\s*(?:final\s+|abstract\s+)?class\s+(\w+)/m', $contents, $cls ) ) {
+			return null;
+		}
+		return trim( $ns[1] ) . '\\' . $cls[1];
+	}
+}

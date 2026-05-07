@@ -9,8 +9,9 @@ import { createRoot } from '@wordpress/element';
 import { ConfigProvider } from 'antd';
 
 /**
- * Internal dependencies
+ * Internal dependencies — align entry CSS with DoubleScale Pro (Tailwind + globals).
  */
+import './style.scss';
 import PageLayout from './layout';
 import '../stores';
 export * from './types';

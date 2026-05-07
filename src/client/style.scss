@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inline email body rendering — used for plain/partial HTML emails (replies, inbound) */
+.doublescale-email-body {
+	font-size: 14px;
+	line-height: 1.65;
+	color: #1a1a1a;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+
+	p {
+		margin: 0 0 0.5em;
+	}
+
+	a {
+		color: #2563eb;
+		text-decoration: underline;
+	}
+
+	blockquote {
+		margin: 0.75em 0;
+		padding: 0.5em 0.75em;
+		border-left: 3px solid #d1d5db;
+		color: #6b7280;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
+
+	table {
+		max-width: 100%;
+		border-collapse: collapse;
+	}
+
+	hr {
+		border: none;
+		border-top: 1px solid #e5e7eb;
+		margin: 1em 0;
+	}
+}

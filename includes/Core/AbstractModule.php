@@ -99,6 +99,12 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 
 		foreach ( $files as $file ) {
+			if ( ! is_string( $file ) || '' === $file ) {
+				continue;
+			}
+			if ( ! $this->is_path_under_doublescale_plugin( $file ) ) {
+				continue;
+			}
 			if ( is_file( $file ) ) {
 				require_once $file;
 			}
@@ -113,8 +119,12 @@ abstract class AbstractModule implements ModuleInterface {
 
 		$manifest_path = doublescale_get_manifest_path( $cache_key );
 		if ( $manifest_path && is_file( $manifest_path ) ) {
-			$this->loadManifest( $manifest_path );
-			return;
+			$manifest_files = require $manifest_path;
+			if ( is_array( $manifest_files ) && $this->manifest_paths_are_only_this_plugin( $manifest_files ) ) {
+				$this->loadManifest( $manifest_path );
+				return;
+			}
+			// Stale manifest (e.g. paths from another plugin directory) — fall through to rebuild or glob.
 		}
 
 		if ( $manifest_path && $this->buildManifest( $patterns, $manifest_path ) ) {
@@ -123,6 +133,44 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 
 		$this->loadGlobs( $patterns );
+	}
+
+	/**
+	 * Whether every manifest entry is a PHP file under this plugin's root (prevents loading another plugin's tree).
+	 *
+	 * @param array $files File paths from manifest.
+	 */
+	protected function manifest_paths_are_only_this_plugin( array $files ): bool {
+		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
+			return false;
+		}
+		if ( array() === $files ) {
+			return false;
+		}
+		foreach ( $files as $file ) {
+			if ( ! is_string( $file ) || '' === $file ) {
+				return false;
+			}
+			if ( ! $this->is_path_under_doublescale_plugin( $file ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param string $path Absolute filesystem path.
+	 */
+	protected function is_path_under_doublescale_plugin( string $path ): bool {
+		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
+			return false;
+		}
+		$root = rtrim( wp_normalize_path( DOUBLESCALE_PLUGIN_DIR ), '/' ) . '/';
+		$norm = wp_normalize_path( $path );
+		if ( '' === $norm ) {
+			return false;
+		}
+		return strpos( $norm, $root ) === 0;
 	}
 
 	protected function loadModuleMergeTagFiles(): void {

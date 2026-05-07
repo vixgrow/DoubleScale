@@ -1676,7 +1676,7 @@ class RestContactController extends RestController {
 			$total_count        = $query->count();
 
 			// Start with base query and load relationships
-			// Load custom_fields only if Pro plugin is active
+			// Load custom_fields when the CustomField model is available.
 			$relationships = array('lists', 'tags', 'notes');
 			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
 				$relationships[] = 'custom_fields';
@@ -1916,7 +1916,7 @@ class RestContactController extends RestController {
 				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
 			}
 
-			// Load relationships - custom_fields only if Pro plugin is active
+			// Load relationships — include custom_fields when the model is available.
 			$contact->load(array('lists', 'tags'));
 			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
 				$contact->load('custom_fields');
@@ -1970,7 +1970,7 @@ class RestContactController extends RestController {
 				return $sync_notes;
 			}
 
-			// Load relationships - custom_fields only if Pro plugin is active
+			// Load relationships — include custom_fields when the model is available.
 			$contact->load(array('lists', 'tags'));
 			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
 				$contact->load('custom_fields');

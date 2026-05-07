@@ -41,10 +41,15 @@ final class CoreModule extends AbstractModule {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 			return array();
 		}
-		$base  = DOUBLESCALE_PLUGIN_DIR;
-		$files = (array) glob( $base . 'includes/Core/Logger/Migrations/*.php' );
-		sort( $files );
-		return $files;
+		$base = DOUBLESCALE_PLUGIN_DIR;
+		$logger = (array) glob( $base . 'includes/Core/Logger/Migrations/*.php' );
+		sort( $logger );
+		$custom_fields = array(
+			$base . 'includes/Core/CustomFields/Migrations/CustomFieldsGroupsTable.php',
+			$base . 'includes/Core/CustomFields/Migrations/CustomFieldsTable.php',
+			$base . 'includes/Core/CustomFields/Migrations/CustomFieldRelationshipTable.php',
+		);
+		return array_merge( $custom_fields, $logger );
 	}
 
 	public function register( Container $container ): void {

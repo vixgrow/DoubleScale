@@ -154,11 +154,14 @@ class Fields extends Filter
 	}
 }
 
-$custom_fields = CustomFieldModel::all();
-
-if (! empty($custom_fields)) {
-	foreach ($custom_fields as $custom_field) {
-		$filter = new Fields($custom_field);
-		FiltersManager::instance()->register($filter);
+try {
+	$custom_fields = CustomFieldModel::all();
+	if ( ! empty( $custom_fields ) ) {
+		foreach ( $custom_fields as $custom_field ) {
+			$filter = new Fields( $custom_field );
+			FiltersManager::instance()->register( $filter );
+		}
 	}
+} catch ( \Throwable $e ) {
+	// Tables may not exist yet before migrations.
 }

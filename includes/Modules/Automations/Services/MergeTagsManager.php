@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**

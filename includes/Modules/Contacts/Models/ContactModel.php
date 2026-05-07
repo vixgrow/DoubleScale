@@ -20,7 +20,7 @@ use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Modules\Deals\Models\DealModel; // Moved to Pro
-// use DoubleScale\Core\CustomFields\Models\CustomFieldModel; // Moved to Pro
+// use DoubleScale\Core\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads from Core.
 use DoubleScale\Core\Utils\Utils;
 
 /**
@@ -161,8 +161,7 @@ class ContactModel extends Model
 	}
 
 	/**
-	 * Get the custom fields
-	 * Custom fields are PRO-only feature - uses PRO model if available
+	 * Get the custom fields (definitions + pivot values).
 	 *
 	 * @since 1.0.0
 	 *
@@ -236,8 +235,7 @@ class ContactModel extends Model
 	}
 
 	/**
-	 * Get the contact custom field value
-	 * Custom fields are PRO-only feature
+	 * Get the contact custom field value from the pivot.
 	 *
 	 * @since 1.0.0
 	 *

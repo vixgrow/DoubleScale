@@ -32,11 +32,6 @@ class ListModel extends TaxonomyModel {
 				$builder->where( ( new static() )->getTable() . '.type', 'list' );
 			}
 		);
-		static::creating(
-			function ( $model ) {
-				$model->type = 'list';
-			}
-		);
 		parent::boot();
 	}
 

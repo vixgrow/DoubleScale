@@ -32,11 +32,6 @@ class TagModel extends TaxonomyModel {
 				$builder->where( ( new static() )->getTable() . '.type', 'tag' );
 			}
 		);
-		static::creating(
-			function ( $model ) {
-				$model->type = 'tag';
-			}
-		);
 		parent::boot();
 	}
 

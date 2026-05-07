@@ -89,7 +89,7 @@ abstract class RestTaxonomyController extends RestController {
 					'args'                => array(
 						'ids' => array(
 							/* translators: %s: Singular taxonomy name (e.g. Tag, Category). */
-							'description' => sprintf( __( '%s IDs.', 'doublescale'), $this->singular_name ),
+							'description' => sprintf( __( '%s IDs.', 'doublescale' ), $this->singular_name ),
 							'type'        => 'array',
 							'required'    => true,
 						),
@@ -133,39 +133,39 @@ abstract class RestTaxonomyController extends RestController {
 	public function get_collection_params() {
 		return array(
 			'keyword'    => array(
-				'description' => __( 'Keyword to search.', 'doublescale'),
+				'description' => __( 'Keyword to search.', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'text-field',
 			),
 			'per_page'   => array(
-				'description' => __( 'Number of items to fetch.', 'doublescale'),
+				'description' => __( 'Number of items to fetch.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 10,
 			),
 			'page'       => array(
-				'description' => __( 'Page number.', 'doublescale'),
+				'description' => __( 'Page number.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'ids'        => array(
 				/* translators: %s: Plural taxonomy name in lowercase. */
-				'description' => sprintf( __( 'IDs of %s to fetch.', 'doublescale'), strtolower( $this->plural_name ) ),
+				'description' => sprintf( __( 'IDs of %s to fetch.', 'doublescale' ), strtolower( $this->plural_name ) ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'integer',
 				),
 			),
 			'contact_id' => array(
-				'description' => __( 'Contact ID.', 'doublescale'),
+				'description' => __( 'Contact ID.', 'doublescale' ),
 				'type'        => 'integer',
 			),
 			'from'       => array(
-				'description' => __( 'Start date for filtering (created_at >= from).', 'doublescale'),
+				'description' => __( 'Start date for filtering (created_at >= from).', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'to'         => array(
-				'description' => __( 'End date for filtering (created_at <= to).', 'doublescale'),
+				'description' => __( 'End date for filtering (created_at <= to).', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
@@ -186,13 +186,13 @@ abstract class RestTaxonomyController extends RestController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Unique identifier for the object.', 'doublescale'),
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
 					'type'        => 'integer',
 					'readonly'    => true,
 				),
 				'name'        => array(
 					/* translators: %s: Singular taxonomy name in lowercase. */
-					'description' => sprintf( __( 'Name of the %s.', 'doublescale'), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Name of the %s.', 'doublescale' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -201,7 +201,7 @@ abstract class RestTaxonomyController extends RestController {
 				),
 				'slug'        => array(
 					/* translators: %s: Singular taxonomy name in lowercase. */
-					'description' => sprintf( __( 'An alphanumeric identifier for the %s.', 'doublescale'), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'An alphanumeric identifier for the %s.', 'doublescale' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
@@ -209,7 +209,7 @@ abstract class RestTaxonomyController extends RestController {
 				),
 				'description' => array(
 					/* translators: %s: Singular taxonomy name in lowercase. */
-					'description' => sprintf( __( 'Description of the %s.', 'doublescale'), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Description of the %s.', 'doublescale' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -217,20 +217,20 @@ abstract class RestTaxonomyController extends RestController {
 				),
 				'status'      => array(
 					/* translators: %s: Singular taxonomy name in lowercase. */
-					'description' => sprintf( __( 'Status of the %s.', 'doublescale'), strtolower( $this->singular_name ) ),
+					'description' => sprintf( __( 'Status of the %s.', 'doublescale' ), strtolower( $this->singular_name ) ),
 					'type'        => 'string',
 					'enum'        => array( 'active', 'inactive' ),
 					'default'     => 'active',
 				),
 				'created_at'  => array(
 					'type'        => 'string',
-					'description' => __( 'Created at', 'doublescale'),
+					'description' => __( 'Created at', 'doublescale' ),
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'updated_at'  => array(
 					'type'        => 'string',
-					'description' => __( 'Updated at', 'doublescale'),
+					'description' => __( 'Updated at', 'doublescale' ),
 					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
@@ -259,7 +259,8 @@ abstract class RestTaxonomyController extends RestController {
 
 			$model_class = $this->model_class;
 			$query       = $model_class::query();
-			$total_count = $query->count();
+			// Total rows for this taxonomy type (unfiltered) — used by admin UI `total_count`.
+			$total_count = (int) $model_class::query()->count();
 
 			// Handle specific IDs query
 			if ( ! empty( $ids ) ) {
@@ -267,7 +268,16 @@ abstract class RestTaxonomyController extends RestController {
 					->orderBy( 'created_at', 'desc' )
 					->paginate( $per_page, array( '*' ), 'page', $page );
 
-				return new WP_REST_Response( $items, 200 );
+				foreach ( $items->items() as $item ) {
+					if ( ! isset( $item->contacts_count ) || is_null( $item->contacts_count ) ) {
+						$item->contacts_count = $item->contacts()->distinct()->count();
+					}
+				}
+
+				return new WP_REST_Response(
+					$items->toArray() + array( 'total_count' => $total_count ),
+					200
+				);
 			}
 
 			// Apply keyword search
@@ -335,7 +345,14 @@ abstract class RestTaxonomyController extends RestController {
 		try {
 			$item_data   = $this->prepare_item_for_database( $request );
 			$model_class = $this->model_class;
-			$item        = $model_class::create( $item_data );
+
+			// Unified terms table requires `type`; set explicitly so inserts succeed even if
+			// eloquent `creating` listeners do not run (e.g. TaxonomyModel::save() re-registration path).
+			if ( is_subclass_of( $model_class, TaxonomyModel::class, true ) ) {
+				$item_data['type'] = $model_class::type_value();
+			}
+
+			$item = $model_class::create( $item_data );
 
 			return new WP_REST_Response( $item, 201 );
 		} catch ( \Exception $e ) {
@@ -365,7 +382,7 @@ abstract class RestTaxonomyController extends RestController {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
 					/* translators: %s: Singular taxonomy name. */
-					sprintf( __( '%s not found.', 'doublescale'), $this->singular_name ),
+					sprintf( __( '%s not found.', 'doublescale' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -404,7 +421,7 @@ abstract class RestTaxonomyController extends RestController {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
 					/* translators: %s: Singular taxonomy name. */
-					sprintf( __( '%s not found.', 'doublescale'), $this->singular_name ),
+					sprintf( __( '%s not found.', 'doublescale' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -441,7 +458,7 @@ abstract class RestTaxonomyController extends RestController {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
 					/* translators: %s: Singular taxonomy name. */
-					sprintf( __( '%s not found.', 'doublescale'), $this->singular_name ),
+					sprintf( __( '%s not found.', 'doublescale' ), $this->singular_name ),
 					array( 'status' => 404 )
 				);
 			}
@@ -475,7 +492,7 @@ abstract class RestTaxonomyController extends RestController {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_missing_ids',
 					/* translators: %s: Plural taxonomy name in lowercase. */
-					sprintf( __( 'No %s IDs provided.', 'doublescale'), strtolower( $this->plural_name ) ),
+					sprintf( __( 'No %s IDs provided.', 'doublescale' ), strtolower( $this->plural_name ) ),
 					array( 'status' => 400 )
 				);
 			}
@@ -487,7 +504,7 @@ abstract class RestTaxonomyController extends RestController {
 				return new WP_Error(
 					'rest_' . $this->rest_base . '_not_found',
 					/* translators: %s: Plural taxonomy name. */
-					sprintf( __( '%s not found.', 'doublescale'), $this->plural_name ),
+					sprintf( __( '%s not found.', 'doublescale' ), $this->plural_name ),
 					array( 'status' => 404 )
 				);
 			}

@@ -109,6 +109,17 @@ class TaxonomyModel extends Model {
 	}
 
 	/**
+	 * Discriminator for unified `doublescale_terms.type` (e.g. list, tag).
+	 * Always set on insert — do not rely only on model events (may not fire in all stacks).
+	 *
+	 * @since 1.0.0
+	 */
+	public static function type_value(): string {
+		$instance = new static();
+		return $instance->model_slug;
+	}
+
+	/**
 	 * Get by name
 	 *
 	 * @param string $name Taxonomy name
@@ -164,10 +175,14 @@ class TaxonomyModel extends Model {
 	 * @return void
 	 */
 	private function registerEventsOnDispatcher( $dispatcher, $model_name ) {
-		// Creating event
+		// Creating event — always set `type` first (unified `doublescale_terms` table).
 		$dispatcher->listen(
 			"eloquent.creating: {$model_name}",
 			function ( $taxonomy ) {
+				$class = get_class( $taxonomy );
+				if ( is_subclass_of( $class, TaxonomyModel::class, true ) ) {
+					$taxonomy->setAttribute( 'type', $class::type_value() );
+				}
 				$originalSlug = $slug = Str::slug( $taxonomy->name );
 				$count        = 1;
 

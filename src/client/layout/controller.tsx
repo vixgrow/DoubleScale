@@ -120,8 +120,8 @@ export const HeaderBar = ({ page }: { page: any }) => {
 	useEffect(() => {
 		let isMounted = true;
 		const fetchCurrentUser = async () => {
-			const globalUser = (window as Window & { qcData?: { currentUser?: any } })
-				.qcData?.currentUser;
+			const globalUser = (window as Window & { doublescaleData?: { currentUser?: any } })
+				.doublescaleData?.currentUser;
 			if (globalUser) {
 				setCurrentUser({
 					id: Number(globalUser.id),

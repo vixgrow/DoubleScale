@@ -34,7 +34,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts"
 							],
@@ -70,7 +70,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts"
 							],
@@ -147,7 +147,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"1195"
@@ -177,7 +177,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"8"
@@ -210,7 +210,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"10"
@@ -243,7 +243,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"search"
@@ -264,7 +264,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"9",
@@ -298,7 +298,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"filters"
@@ -319,7 +319,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"{{contactId}}",
@@ -341,7 +341,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"{{contactId}}",
@@ -363,7 +363,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"1001",
@@ -390,7 +390,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns"
 							],
@@ -426,7 +426,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns"
 							]
@@ -446,7 +446,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns",
 								"1"
@@ -476,7 +476,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns",
 								"3"
@@ -509,7 +509,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns",
 								"3"
@@ -542,7 +542,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns"
 							],
@@ -568,7 +568,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"campaigns",
 								"6",
@@ -595,7 +595,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations"
 							],
@@ -631,7 +631,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations"
 							]
@@ -651,7 +651,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"8"
@@ -681,7 +681,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"13"
@@ -714,7 +714,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"3"
@@ -747,7 +747,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations"
 							],
@@ -773,7 +773,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"2",
@@ -795,7 +795,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"6",
@@ -817,7 +817,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"triggers"
@@ -838,7 +838,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"actions"
@@ -859,7 +859,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"merge-tags"
@@ -880,7 +880,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"rules"
@@ -901,7 +901,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automations",
 								"goals"
@@ -927,7 +927,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates"
 							],
@@ -963,7 +963,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates"
 							]
@@ -983,7 +983,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates",
 								"6"
@@ -1013,7 +1013,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates",
 								"14"
@@ -1046,7 +1046,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates",
 								"3"
@@ -1079,7 +1079,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"templates"
 							],
@@ -1110,7 +1110,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"lists"
 							],
@@ -1145,7 +1145,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"lists"
 							]
@@ -1165,7 +1165,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"lists",
 								"4"
@@ -1195,7 +1195,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"lists",
 								"2"
@@ -1216,7 +1216,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"lists",
 								"2"
@@ -1242,7 +1242,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"forms"
 							],
@@ -1278,7 +1278,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"forms"
 							]
@@ -1298,7 +1298,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"forms",
 								"4"
@@ -1328,7 +1328,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"forms",
 								"8"
@@ -1349,7 +1349,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"forms",
 								"1"
@@ -1384,7 +1384,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-steps"
 							]
@@ -1404,7 +1404,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-steps",
 								"4"
@@ -1434,7 +1434,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-steps",
 								"8"
@@ -1455,7 +1455,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-steps",
 								"3"
@@ -1490,7 +1490,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-contacts"
 							]
@@ -1510,7 +1510,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-contacts",
 								"3"
@@ -1540,7 +1540,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-contacts",
 								"1"
@@ -1561,7 +1561,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"automation-contacts",
 								"55"
@@ -1587,7 +1587,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups"
 							]
@@ -1616,7 +1616,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups"
 							]
@@ -1636,7 +1636,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups",
 								"4"
@@ -1666,7 +1666,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups",
 								"2"
@@ -1687,7 +1687,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups",
 								"2"
@@ -1708,7 +1708,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields-groups",
 								"1",
@@ -1735,7 +1735,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields"
 							]
@@ -1779,7 +1779,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields"
 							]
@@ -1799,7 +1799,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields",
 								"4"
@@ -1829,7 +1829,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields",
 								"3"
@@ -1850,7 +1850,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"custom-fields",
 								"2"
@@ -1876,7 +1876,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tags"
 							],
@@ -1912,7 +1912,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tags"
 							]
@@ -1932,7 +1932,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tags",
 								"2"
@@ -1962,7 +1962,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tags",
 								"1"
@@ -1983,7 +1983,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tags",
 								"2"
@@ -2009,7 +2009,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"link-triggers"
 							],
@@ -2045,7 +2045,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"link-triggers"
 							]
@@ -2065,7 +2065,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"link-triggers",
 								"3"
@@ -2095,7 +2095,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"link-triggers",
 								"1"
@@ -2116,7 +2116,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"link-triggers",
 								"1"
@@ -2142,7 +2142,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contact-notes"
 							],
@@ -2178,7 +2178,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contact-notes"
 							]
@@ -2198,7 +2198,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contact-notes",
 								"3"
@@ -2228,7 +2228,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contact-notes",
 								"3"
@@ -2249,7 +2249,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contact-notes",
 								"3"
@@ -2270,7 +2270,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"{{contactId}}",
@@ -2997,7 +2997,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"activecampaign"
@@ -3018,7 +3018,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"activecampaign",
@@ -3054,7 +3054,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"convertkit"
@@ -3075,7 +3075,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"convertkit",
@@ -3097,7 +3097,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"convertkit",
@@ -3119,7 +3119,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"convertkit",
@@ -3155,7 +3155,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailchimp"
@@ -3176,7 +3176,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailchimp",
@@ -3198,7 +3198,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailchimp",
@@ -3229,7 +3229,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailchimp",
@@ -3265,7 +3265,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip"
@@ -3286,7 +3286,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip",
@@ -3308,7 +3308,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip",
@@ -3330,7 +3330,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip",
@@ -3352,7 +3352,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip",
@@ -3383,7 +3383,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"drip",
@@ -3419,7 +3419,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"getresponse"
@@ -3440,7 +3440,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"getresponse",
@@ -3462,7 +3462,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"getresponse",
@@ -3484,7 +3484,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"getresponse",
@@ -3515,7 +3515,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"getresponse",
@@ -3551,7 +3551,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"klaviyo"
@@ -3572,7 +3572,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"klaviyo",
@@ -3608,7 +3608,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailerlite"
@@ -3629,7 +3629,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mailerlite",
@@ -3665,7 +3665,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"ontraport"
@@ -3686,7 +3686,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"ontraport",
@@ -3722,7 +3722,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"keap"
@@ -3743,7 +3743,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"keap",
@@ -3765,7 +3765,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"keap",
@@ -3787,7 +3787,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"keap",
@@ -3823,7 +3823,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"slack"
@@ -3844,7 +3844,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"slack",
@@ -3878,7 +3878,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"slack",
@@ -3900,7 +3900,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"slack",
@@ -3936,7 +3936,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"twilio"
@@ -3971,7 +3971,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic"
@@ -3992,7 +3992,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic",
@@ -4014,7 +4014,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic",
@@ -4036,7 +4036,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic",
@@ -4058,7 +4058,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic",
@@ -4080,7 +4080,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"mautic",
@@ -4116,7 +4116,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"hubspot"
@@ -4137,7 +4137,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"hubspot",
@@ -4159,7 +4159,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"hubspot",
@@ -4181,7 +4181,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"hubspot",
@@ -4217,7 +4217,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"pipedrive"
@@ -4238,7 +4238,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"pipedrive",
@@ -4260,7 +4260,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"pipedrive",
@@ -4282,7 +4282,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"pipedrive",
@@ -4318,7 +4318,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"gohighlevel"
@@ -4339,7 +4339,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"gohighlevel",
@@ -4361,7 +4361,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"gohighlevel",
@@ -4383,7 +4383,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"integrations",
 										"gohighlevel",
@@ -4418,7 +4418,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"site",
 								"verify"
@@ -4454,7 +4454,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"site",
 								"login"
@@ -4501,7 +4501,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"site",
 								"create-app-password"
@@ -4540,7 +4540,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals"
 							]
@@ -4573,7 +4573,7 @@
 					"path": [
 						"wp",
 						"wp-json",
-						"qc",
+						"doublescale",
 						"v1",
 						"automations",
 						"webhook",
@@ -4614,7 +4614,7 @@
 					],
 					"path": [
 						"wp-json",
-						"qc",
+						"doublescale",
 						"v1",
 						"automations",
 						"webhook"
@@ -4645,7 +4645,7 @@
 					],
 					"path": [
 						"wp-json",
-						"qc",
+						"doublescale",
 						"v1",
 						"abandoned-carts"
 					]
@@ -4668,7 +4668,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities"
 							],
@@ -4754,7 +4754,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"timeline"
 							],
@@ -4836,7 +4836,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"upcoming"
@@ -4895,7 +4895,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"timeline"
 							],
@@ -4938,7 +4938,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -4968,7 +4968,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -4998,7 +4998,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -5028,7 +5028,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -5058,7 +5058,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -5079,7 +5079,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}"
@@ -5109,7 +5109,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"bulk-delete"
@@ -5130,7 +5130,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"statistics"
@@ -5166,7 +5166,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"notes"
@@ -5196,7 +5196,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"emails"
@@ -5226,7 +5226,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"calls"
@@ -5256,7 +5256,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"meetings"
@@ -5277,7 +5277,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}",
@@ -5308,7 +5308,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities",
 								"{{activityId}}",
@@ -5339,7 +5339,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"comments",
 								"{{commentId}}"
@@ -5360,7 +5360,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"comments",
 								"{{commentId}}"
@@ -5390,7 +5390,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"{{contactId}}",
@@ -5412,7 +5412,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"contacts",
 								"{{contactId}}",
@@ -5441,7 +5441,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities"
 							],
@@ -5477,7 +5477,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities"
 							],
@@ -5507,7 +5507,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities"
 							],
@@ -5537,7 +5537,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"activities"
 							],
@@ -5572,7 +5572,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines"
 							],
@@ -5611,7 +5611,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines"
 							]
@@ -5631,7 +5631,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}"
@@ -5671,7 +5671,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}"
@@ -5692,7 +5692,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}"
@@ -5720,7 +5720,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5751,7 +5751,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5782,7 +5782,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5805,7 +5805,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5828,7 +5828,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5871,7 +5871,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"{{pipelineId}}",
@@ -5902,7 +5902,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"pipelines",
 								"sort-order"
@@ -5928,7 +5928,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals"
 							],
@@ -5990,7 +5990,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals"
 							],
@@ -6044,7 +6044,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals"
 							]
@@ -6073,7 +6073,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals"
 							]
@@ -6094,7 +6094,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"{{dealId}}"
@@ -6130,7 +6130,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"{{dealId}}"
@@ -6151,7 +6151,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"{{dealId}}"
@@ -6181,7 +6181,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"{{dealId}}",
@@ -6212,7 +6212,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"{{dealId}}",
@@ -6234,7 +6234,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"overdue"
@@ -6262,7 +6262,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"statistics"
@@ -6309,7 +6309,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"bulk"
@@ -6339,7 +6339,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"deals",
 								"bulk-delete"
@@ -6365,7 +6365,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"stages",
 								"{{stageId}}"
@@ -6405,7 +6405,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"stages",
 								"{{stageId}}"
@@ -6426,7 +6426,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"stages",
 								"{{stageId}}"
@@ -6459,7 +6459,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							],
@@ -6527,7 +6527,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							],
@@ -6571,7 +6571,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							],
@@ -6624,7 +6624,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							]
@@ -6653,7 +6653,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							]
@@ -6683,7 +6683,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks"
 							]
@@ -6704,7 +6704,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"{{taskId}}"
@@ -6734,7 +6734,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"{{taskId}}"
@@ -6755,7 +6755,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"{{taskId}}"
@@ -6776,7 +6776,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"{{taskId}}",
@@ -6798,7 +6798,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"{{taskId}}",
@@ -6829,7 +6829,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"bulk-complete"
@@ -6860,7 +6860,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"bulk-pending"
@@ -6891,7 +6891,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"tasks",
 								"bulk-delete"
@@ -6918,7 +6918,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences"
 							],
@@ -6974,7 +6974,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences"
 							]
@@ -6994,7 +6994,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}"
@@ -7024,7 +7024,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}"
@@ -7045,7 +7045,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}"
@@ -7066,7 +7066,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}",
@@ -7088,7 +7088,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}",
@@ -7119,7 +7119,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"{{emailSequenceId}}",
@@ -7150,7 +7150,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"email-sequences",
 								"bulk"
@@ -7176,7 +7176,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"contacts-deals"
@@ -7219,7 +7219,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"deals-by-date"
@@ -7251,7 +7251,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"deals-leaderboard"
@@ -7284,7 +7284,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"sales-rep"
@@ -7322,7 +7322,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"sales-rep",
@@ -7356,7 +7356,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"sales-rep",
@@ -7400,7 +7400,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"reports",
 								"all-sales-rep"
@@ -7438,7 +7438,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"settings"
 							]
@@ -7467,7 +7467,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"settings"
 							]
@@ -7492,7 +7492,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"logs"
 							],
@@ -7529,7 +7529,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"logs",
 								"1"
@@ -7550,7 +7550,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"logs",
 								"1"
@@ -7576,7 +7576,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"import-export",
 								"export"
@@ -7629,7 +7629,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"import-export",
 								"import"
@@ -7655,7 +7655,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"notifications"
 							],
@@ -7689,7 +7689,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"notifications",
 								"count"
@@ -7720,7 +7720,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"notifications",
 								"read"
@@ -7751,7 +7751,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"notifications",
 								"read"
@@ -7773,7 +7773,7 @@
 							],
 							"path": [
 								"wp-json",
-								"qc",
+								"doublescale",
 								"v1",
 								"notifications",
 								"{{notificationId}}"
@@ -7798,7 +7798,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"notification-preferences"
 									]
@@ -7828,7 +7828,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"notification-preferences"
 									]
@@ -7849,7 +7849,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"notification-preferences",
 										"defaults"
@@ -7871,7 +7871,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"notification-preferences",
 										"categories"
@@ -7893,7 +7893,7 @@
 									],
 									"path": [
 										"wp-json",
-										"qc",
+										"doublescale",
 										"v1",
 										"notification-preferences",
 										"subcategories",

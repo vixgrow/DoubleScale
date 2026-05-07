@@ -134,14 +134,14 @@ export default function ListTagFilter({
 						onClick={handleApplyFilters}
 						disabled={loading}
 					>
-						{__('Apply Filters', 'quillcrm')}
+						{__('Apply Filters', 'doublescale')}
 					</Button>
 					<Button
 						variant="destructive"
 						onClick={handleClearFilters}
 						disabled={loading || isApplying}
 					>
-						{__('Clear Filters', 'quillcrm')}
+						{__('Clear Filters', 'doublescale')}
 					</Button>
 				</div>
 			)}

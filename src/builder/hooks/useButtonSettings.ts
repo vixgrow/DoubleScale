@@ -18,7 +18,7 @@ export const useButtonSettings = () => {
 
   // Get existing template data from campaign store (contains template_id)
   const existingTemplateData = useSelect(
-    (select: any) => select('quillcrm/campaign').getStepData('template'),
+    (select: any) => select('doublescale/campaign').getStepData('template'),
     []
   );
 

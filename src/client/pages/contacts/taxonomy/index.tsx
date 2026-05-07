@@ -22,15 +22,15 @@ import type {
 	TagsResponse,
 	DataTableConfig,
 	NoticeMessage,
-} from '@quillcrm/client';
-import { NoticeBanner, NoData, GradientListIcon, GradientTagIcon } from '@quillcrm/components';
+} from '@doublescale/client';
+import { NoticeBanner, NoData, GradientListIcon, GradientTagIcon } from '@doublescale/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { TaxonomyDialog } from './taxonomy-dialog';
 import { getTaxonomyColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { formatDateForAPI } from '@quillcrm/utils';
+import { formatDateForAPI } from '@doublescale/utils';
 
 export type TaxonomyType = 'list' | 'tag';
 export type TaxonomyItem = ContactList | ContactTag;
@@ -76,43 +76,43 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 	const config = {
 		list: {
 			apiPath: '/qc/v1/lists',
-			itemName: __('List', 'quillcrm'),
-			itemNamePlural: __('Lists', 'quillcrm'),
+			itemName: __('List', 'doublescale'),
+			itemNamePlural: __('Lists', 'doublescale'),
 			icon: <GradientListIcon width={120} height={120} />,
-			noDataTitle: __('No lists yet', 'quillcrm'),
+			noDataTitle: __('No lists yet', 'doublescale'),
 			noDataSubtitle: __(
 				'Get started by creating your first list to organize your contacts',
-				'quillcrm'
+				'doublescale'
 			),
-			buttonLabel: __('Create List', 'quillcrm'),
-			searchPlaceholder: __('Search Lists', 'quillcrm'),
+			buttonLabel: __('Create List', 'doublescale'),
+			searchPlaceholder: __('Search Lists', 'doublescale'),
 			createSuccessMessage: __(
 				'Your List was successfully added — check it out!',
-				'quillcrm'
+				'doublescale'
 			),
-			updateSuccessMessage: __('List updated successfully', 'quillcrm'),
-			deleteSuccessMessage: __('Selected lists deleted successfully', 'quillcrm'),
-			nameRequiredMessage: __('List name is required', 'quillcrm'),
+			updateSuccessMessage: __('List updated successfully', 'doublescale'),
+			deleteSuccessMessage: __('Selected lists deleted successfully', 'doublescale'),
+			nameRequiredMessage: __('List name is required', 'doublescale'),
 		},
 		tag: {
 			apiPath: '/qc/v1/tags',
-			itemName: __('Tag', 'quillcrm'),
-			itemNamePlural: __('Tags', 'quillcrm'),
+			itemName: __('Tag', 'doublescale'),
+			itemNamePlural: __('Tags', 'doublescale'),
 			icon: <GradientTagIcon width={120} height={120} />,
-			noDataTitle: __('No tags yet', 'quillcrm'),
+			noDataTitle: __('No tags yet', 'doublescale'),
 			noDataSubtitle: __(
 				'Get started by creating your first tag to organize your contacts',
-				'quillcrm'
+				'doublescale'
 			),
-			buttonLabel: __('Create Tag', 'quillcrm'),
-			searchPlaceholder: __('Search Tags', 'quillcrm'),
+			buttonLabel: __('Create Tag', 'doublescale'),
+			searchPlaceholder: __('Search Tags', 'doublescale'),
 			createSuccessMessage: __(
 				'Your Tag was successfully added  — check it out!',
-				'quillcrm'
+				'doublescale'
 			),
-			updateSuccessMessage: __('Tag updated successfully', 'quillcrm'),
-			deleteSuccessMessage: __('Selected tags deleted successfully', 'quillcrm'),
-			nameRequiredMessage: __('Tag name is required', 'quillcrm'),
+			updateSuccessMessage: __('Tag updated successfully', 'doublescale'),
+			deleteSuccessMessage: __('Selected tags deleted successfully', 'doublescale'),
+			nameRequiredMessage: __('Tag name is required', 'doublescale'),
 		},
 	};
 
@@ -322,7 +322,7 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 			enabled: true,
 			value: dateRange,
 			onDateChange: setDateRange,
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 	};
 

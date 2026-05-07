@@ -18,15 +18,15 @@ import type {
 	ListsResponse,
 	DataTableConfig,
 	NoticeMessage,
-} from '@quillcrm/client';
-import { GradientListIcon, NoticeBanner, NoData } from '@quillcrm/components';
+} from '@doublescale/client';
+import { GradientListIcon, NoticeBanner, NoData } from '@doublescale/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { getListColumns } from './columns';
 import { ListDialog } from './lists-dialog';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { formatDateForAPI } from '@quillcrm/utils';
+import { formatDateForAPI } from '@doublescale/utils';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -83,7 +83,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const validate = (list: Partial<ContactList>) => {
 		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
 			setVisible(false);
-			showNotice('error', __('List name is required', 'quillcrm'));
+			showNotice('error', __('List name is required', 'doublescale'));
 			return false;
 		}
 		return true;
@@ -141,7 +141,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				'success',
 				__(
 					'Your List was successfully added — check it out!',
-					'quillcrm'
+					'doublescale'
 				)
 			);
 			fetchLists();
@@ -174,7 +174,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 			setVisible(false);
 			setSelectedList(null);
-			showNotice('success', __('List updated successfully', 'quillcrm'));
+			showNotice('success', __('List updated successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -202,7 +202,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Selected lists deleted successfully', 'quillcrm')
+				__('Selected lists deleted successfully', 'doublescale')
 			);
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -258,7 +258,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const tableConfig: DataTableConfig<ContactList> = {
 		manageColumns: { enabled: false },
 		search: {
-			placeholder: __('Search Lists', 'quillcrm'),
+			placeholder: __('Search Lists', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -278,7 +278,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			enabled: true,
 			value: dateRange,
 			onDateChange: setDateRange,
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 	};
 
@@ -307,12 +307,12 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			) : (
 				<NoData
 					icon={<GradientListIcon width={120} height={120} />}
-					title={__('No lists yet', 'quillcrm')}
+					title={__('No lists yet', 'doublescale')}
 					subtitle={__(
 						'Get started by creating your first list to organize your contacts',
-						'quillcrm'
+						'doublescale'
 					)}
-					buttonLabel={__('Create List', 'quillcrm')}
+					buttonLabel={__('Create List', 'doublescale')}
 					onClick={handleOpenCreateModal}
 				/>
 			)}

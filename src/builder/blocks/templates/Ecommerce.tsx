@@ -11,12 +11,12 @@ import abandonedCart from '../../../../assets/images/templates/Abandoned-Cart.pn
 const templateItems = [
 	{
 		id: 'order-confirmation',
-		title: __('Order Confirmation', 'quillcrm'),
+		title: __('Order Confirmation', 'doublescale'),
 		image: orderConfirmation,
 	},
 	{
 		id: 'abandoned-cart',
-		title: __('Abandoned Cart', 'quillcrm'),
+		title: __('Abandoned Cart', 'doublescale'),
 		image: abandonedCart,
 	},
 ];

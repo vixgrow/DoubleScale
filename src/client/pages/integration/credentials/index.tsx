@@ -7,7 +7,7 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import type { Integration as IntegrationType } from '@quillcrm/config';
+import type { Integration as IntegrationType } from '@doublescale/config';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SelectField from '../select-field';

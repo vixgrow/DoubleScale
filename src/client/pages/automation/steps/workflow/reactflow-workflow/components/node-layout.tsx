@@ -89,7 +89,7 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 				<div className="qcrm-reactflow-node__footer-row">
 					<div className="text-sm">
 						<span className="text-[#667085]">
-							{__('Contact:', 'quillcrm')}{' '}
+							{__('Contact:', 'doublescale')}{' '}
 						</span>
 						<span className="font-semibold text-[#344054]">
 							{analytics.contacts || 0}
@@ -97,7 +97,7 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 					</div>
 					<div className="text-sm">
 						<span className="text-[#667085]">
-							{__('Conversion Rate:', 'quillcrm')}{' '}
+							{__('Conversion Rate:', 'doublescale')}{' '}
 						</span>
 						<span className="font-semibold text-[#344054]">
 							{analytics.conversion_rate || 0}%

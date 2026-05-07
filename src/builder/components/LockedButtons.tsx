@@ -22,7 +22,7 @@ const LockecButtons = () => {
 					<div className="border rounded-lg border-[#616161] p-1.5">
 						<div className="border-t border-[#616161] w-[18px]"></div>
 					</div>
-					<div>{__('Buttons', 'quillcrm')}</div>
+					<div>{__('Buttons', 'doublescale')}</div>
 				</div>
 				<PremiumIcon />
 			</button>
@@ -31,7 +31,7 @@ const LockecButtons = () => {
 				<h3 className="text-base text-[#333333] font-medium">
 					{__(
 						'Unlock advanced features with Pro upgrade',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 				<Button

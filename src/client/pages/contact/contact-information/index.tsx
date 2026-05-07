@@ -27,7 +27,7 @@ import {
 	ContactTotalEmailsIcon,
 	OpenRateIcon,
 	ProcessingEmailsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
 import LeadScoreCard from './lead-score-card';
@@ -74,21 +74,21 @@ const getContactInitials = (firstName?: string, lastName?: string): string => {
 const getChannelStatusLabel = (channel: string, status: string): string => {
 	const labels: Record<string, Record<string, string>> = {
 		email: {
-			subscribed: __('Subscribed', 'quillcrm'),
-			unsubscribed: __('Unsubscribed', 'quillcrm'),
-			bounced: __('Bounced', 'quillcrm'),
-			blocked: __('Blocked', 'quillcrm'),
-			unverified: __('Unverified', 'quillcrm'),
+			subscribed: __('Subscribed', 'doublescale'),
+			unsubscribed: __('Unsubscribed', 'doublescale'),
+			bounced: __('Bounced', 'doublescale'),
+			blocked: __('Blocked', 'doublescale'),
+			unverified: __('Unverified', 'doublescale'),
 		},
 		sms: {
-			subscribed: __('Subscribed', 'quillcrm'),
-			unsubscribed: __('Unsubscribed', 'quillcrm'),
-			blocked: __('Blocked', 'quillcrm'),
+			subscribed: __('Subscribed', 'doublescale'),
+			unsubscribed: __('Unsubscribed', 'doublescale'),
+			blocked: __('Blocked', 'doublescale'),
 		},
 		whatsapp: {
-			subscribed: __('Subscribed', 'quillcrm'),
-			unsubscribed: __('Unsubscribed', 'quillcrm'),
-			blocked: __('Blocked', 'quillcrm'),
+			subscribed: __('Subscribed', 'doublescale'),
+			unsubscribed: __('Unsubscribed', 'doublescale'),
+			blocked: __('Blocked', 'doublescale'),
 		},
 	};
 
@@ -98,9 +98,9 @@ const getChannelStatusLabel = (channel: string, status: string): string => {
 // Helper function to get channel display label
 const getChannelDisplayLabel = (channel: string): string => {
 	const channels: Record<string, string> = {
-		email: __('Email', 'quillcrm'),
-		sms: __('SMS', 'quillcrm'),
-		whatsapp: __('WhatsApp', 'quillcrm'),
+		email: __('Email', 'doublescale'),
+		sms: __('SMS', 'doublescale'),
+		whatsapp: __('WhatsApp', 'doublescale'),
 	};
 
 	return channels[channel] || channel;
@@ -190,13 +190,13 @@ const ContactInformation: React.FC = () => {
 			if (showNotice) {
 				showNotice({
 					type: 'success',
-					message: __('Opt-in email sent successfully', 'quillcrm'),
+					message: __('Opt-in email sent successfully', 'doublescale'),
 				});
 			}
 		} catch (error: any) {
 			// Show error notification
 			const errorMessage =
-				error.message || __('Failed to send opt-in email', 'quillcrm');
+				error.message || __('Failed to send opt-in email', 'doublescale');
 			if (showNotice) {
 				showNotice({
 					type: 'error',
@@ -244,7 +244,7 @@ const ContactInformation: React.FC = () => {
 			<Card className="flex-1 bg-[#F8F8F8] shadow-none">
 				<CardContent>
 					<div className="qcrm-contact-information">
-						{__('No contact information available', 'quillcrm')}
+						{__('No contact information available', 'doublescale')}
 					</div>
 				</CardContent>
 			</Card>
@@ -329,12 +329,12 @@ const ContactInformation: React.FC = () => {
 									>
 										<Mail className="w-3 h-3" />
 										{isSendingOptIn
-											? __('Sending...', 'quillcrm')
+											? __('Sending...', 'doublescale')
 											: optInSent
-												? __('Email Sent', 'quillcrm')
+												? __('Email Sent', 'doublescale')
 												: __(
 														'Send Opt-in Email',
-														'quillcrm'
+														'doublescale'
 													)}
 									</Button>
 								</div>

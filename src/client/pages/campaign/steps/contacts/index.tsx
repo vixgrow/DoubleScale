@@ -17,8 +17,8 @@ import {
 	PlayIcon,
 	Stepper,
 	ListTagFilter,
-} from '@quillcrm/components';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
+} from '@doublescale/components';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -34,13 +34,13 @@ const Contacts: React.FC = () => {
 
 	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
 	// Get existing step data
 	const existingContactsData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('contacts'),
+		(select: any) => select('doublescale/campaign').getStepData('contacts'),
 		[]
 	);
 
@@ -78,7 +78,7 @@ const Contacts: React.FC = () => {
 	useEffect(() => {
 		if (applyRequested && totalRecipients === 0) {
 			setInlineError(
-				__('No recipients match the current filters.', 'quillcrm')
+				__('No recipients match the current filters.', 'doublescale')
 			);
 			setApplyRequested(false);
 		}
@@ -108,7 +108,7 @@ const Contacts: React.FC = () => {
 	const handleFilterModeChange = (newMode: string) => {
 		// Check if trying to select advanced filter without Pro
 		if (newMode === 'advanced' && !isProActive) {
-			setProFeatureName(__('Advanced Filter', 'quillcrm'));
+			setProFeatureName(__('Advanced Filter', 'doublescale'));
 			setShowProModal(true);
 			return;
 		}
@@ -171,7 +171,7 @@ const Contacts: React.FC = () => {
 		// Block when zero recipients
 		if (totalRecipients === 0) {
 			setInlineError(
-				__('No recipients match the current filters.', 'quillcrm')
+				__('No recipients match the current filters.', 'doublescale')
 			);
 			return;
 		}
@@ -184,19 +184,19 @@ const Contacts: React.FC = () => {
 		<PanelLayout
 			items={[
 				{
-					label: __('Create Campaign', 'quillcrm'),
+					label: __('Create Campaign', 'doublescale'),
 					href: 'campaigns',
 				},
 				{
 					label: campaign?.settings.ab_test
-						? __('A/B Test Campaign', 'quillcrm')
-						: __('Standard Campaign', 'quillcrm'),
+						? __('A/B Test Campaign', 'doublescale')
+						: __('Standard Campaign', 'doublescale'),
 				},
 			]}
 			panelbtns={[
 				<Button variant="secondaryDeepBlue">
 					<PlayIcon />
-					{__('Watch Tutorial', 'quillcrm')}
+					{__('Watch Tutorial', 'doublescale')}
 				</Button>,
 			]}
 			type="campaign"
@@ -221,10 +221,10 @@ const Contacts: React.FC = () => {
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-2/3">
 					<PanelSettings
-						title={__('Recipients', 'quillcrm')}
+						title={__('Recipients', 'doublescale')}
 						description={__(
 							'Select who will receive this campaign and how your audience will be split for testing',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<ContactsIcon />}
 						className="flex flex-col"
@@ -267,7 +267,7 @@ const Contacts: React.FC = () => {
 							)}
 							<div>
 								<p className="text-base font-bold mb-2 text-black">
-									{__('Filter By', 'quillcrm')}
+									{__('Filter By', 'doublescale')}
 								</p>
 								<RadioGroup
 									value={filterBy}
@@ -287,7 +287,7 @@ const Contacts: React.FC = () => {
 											id="list-tags"
 										/>
 										<span>
-											{__('Lists and Tags', 'quillcrm')}
+											{__('Lists and Tags', 'doublescale')}
 										</span>
 									</Label>
 									<Label
@@ -300,7 +300,7 @@ const Contacts: React.FC = () => {
 												setProFeatureName(
 													__(
 														'Advanced Filter',
-														'quillcrm'
+														'doublescale'
 													)
 												);
 												setShowProModal(true);
@@ -322,7 +322,7 @@ const Contacts: React.FC = () => {
 											disabled={!isProActive}
 										/>
 										<span className="flex items-center gap-2">
-											{__('Advanced Filter', 'quillcrm')}
+											{__('Advanced Filter', 'doublescale')}
 											{!isProActive && (
 												<Lock className="h-4 w-4 text-orange-500" />
 											)}
@@ -360,7 +360,7 @@ const Contacts: React.FC = () => {
 											}}
 											disabled={isLoading || isApplying}
 										>
-											{__('Apply Filters', 'quillcrm')}
+											{__('Apply Filters', 'doublescale')}
 										</Button>
 										<Button
 											variant="destructive"
@@ -379,7 +379,7 @@ const Contacts: React.FC = () => {
 											}}
 											disabled={isLoading || isApplying}
 										>
-											{__('Clear Filters', 'quillcrm')}
+											{__('Clear Filters', 'doublescale')}
 										</Button>
 									</div>
 								</>

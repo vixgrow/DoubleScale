@@ -19,8 +19,8 @@ import {
     LicenseExpiryDateIcon,
     LicenseLastUpdateIcon,
     PlanIcon,
-} from '@quillcrm/components';
-import ConfigAPI from '@quillcrm/config';
+} from '@doublescale/components';
+import ConfigAPI from '@doublescale/config';
 
 const License: React.FC = () => {
     const license = ConfigAPI.getLicense();
@@ -40,13 +40,13 @@ const License: React.FC = () => {
     const status = license ? license.status === 'valid' : false;
 
     // dispatch notices.
-    const { createNotice } = useDispatch('quillcrm/core');
+    const { createNotice } = useDispatch('doublescale/core');
 
     const activate = () => {
         if (isDeactivating || isUpdating || isActivating) return;
         setIsActivating(true);
         const data = new FormData();
-        data.append('action', 'quillcrm_license_activate');
+        data.append('action', 'doublescale_license_activate');
         data.append('_nonce', ConfigAPI.getNonce());
         data.append('license_key', licenseKey?.trim());
 
@@ -64,7 +64,7 @@ const License: React.FC = () => {
                         type: 'success',
                         message: __(
                             'License activated successfully.',
-                            'quillcrm'
+                            'doublescale'
                         ),
                     });
 
@@ -85,7 +85,7 @@ const License: React.FC = () => {
                 setIsActivating(false);
                 createNotice({
                     type: 'error',
-                    message: __('Something went wrong', 'quillcrm'),
+                    message: __('Something went wrong', 'doublescale'),
                 });
             });
     };
@@ -94,7 +94,7 @@ const License: React.FC = () => {
         if (isDeactivating || isUpdating || isActivating) return;
         setIsUpdating(true);
         const data = new FormData();
-        data.append('action', 'quillcrm_license_update');
+        data.append('action', 'doublescale_license_update');
         data.append('_nonce', ConfigAPI.getNonce());
 
         fetch(ajaxUrl, {
@@ -111,7 +111,7 @@ const License: React.FC = () => {
                         type: 'success',
                         message: __(
                             'License updated successfully.',
-                            'quillcrm'
+                            'doublescale'
                         ),
                     });
                 } else {
@@ -125,7 +125,7 @@ const License: React.FC = () => {
             .catch(() => {
                 createNotice({
                     type: 'error',
-                    message: __('Something went wrong', 'quillcrm'),
+                    message: __('Something went wrong', 'doublescale'),
                 });
                 setIsUpdating(false);
             });
@@ -135,7 +135,7 @@ const License: React.FC = () => {
         if (isDeactivating || isUpdating || isActivating) return;
         setIsDeactivating(true);
         const data = new FormData();
-        data.append('action', 'quillcrm_license_deactivate');
+        data.append('action', 'doublescale_license_deactivate');
         data.append('_nonce', ConfigAPI.getNonce());
 
         fetch(ajaxUrl, {
@@ -152,7 +152,7 @@ const License: React.FC = () => {
                         type: 'success',
                         message: __(
                             'License deactivated successfully.',
-                            'quillcrm'
+                            'doublescale'
                         ),
                     });
                 } else {
@@ -167,7 +167,7 @@ const License: React.FC = () => {
             .catch(() => {
                 createNotice({
                     type: 'error',
-                    message: __('Something went wrong', 'quillcrm'),
+                    message: __('Something went wrong', 'doublescale'),
                 });
 
                 setIsDeactivating(false);
@@ -178,7 +178,7 @@ const License: React.FC = () => {
         if (isDeactivating || isUpdating || isActivating) return;
         setIsInstalling(true);
         const data = new FormData();
-        data.append('action', 'quillcrm_install_pro');
+        data.append('action', 'doublescale_install_pro');
         data.append('_nonce', ConfigAPI.getNonce());
 
         fetch(ajaxUrl, {
@@ -206,7 +206,7 @@ const License: React.FC = () => {
             .catch(() => {
                 createNotice({
                     type: 'error',
-                    message: __('Something went wrong', 'quillcrm'),
+                    message: __('Something went wrong', 'doublescale'),
                 });
                 setIsInstalling(false);
             });
@@ -216,7 +216,7 @@ const License: React.FC = () => {
         if (isDeactivating || isUpdating || isActivating || isInstalling) return;
         setIsActivatingPlugin(true);
         const data = new FormData();
-        data.append('action', 'quillcrm_activate_pro');
+        data.append('action', 'doublescale_activate_pro');
         data.append('_nonce', ConfigAPI.getNonce());
 
         fetch(ajaxUrl, {
@@ -232,7 +232,7 @@ const License: React.FC = () => {
                         type: 'success',
                         message: __(
                             'Plugin activated successfully.',
-                            'quillcrm'
+                            'doublescale'
                         ),
                     });
                     ConfigAPI.setProPluginData({
@@ -250,7 +250,7 @@ const License: React.FC = () => {
             .catch(() => {
                 createNotice({
                     type: 'error',
-                    message: __('Something went wrong', 'quillcrm'),
+                    message: __('Something went wrong', 'doublescale'),
                 });
                 setIsActivatingPlugin(false);
             });
@@ -269,7 +269,7 @@ const License: React.FC = () => {
         return (
             <div className="business-settings qcrm-fields">
                 <div className="text-[#09090B] font-semibold text-2xl mb-6">
-                    {__('License Management', 'quillcrm')}
+                    {__('License Management', 'doublescale')}
                 </div>
                 <Skeleton active paragraph={{ rows: 6 }} />
             </div>
@@ -279,32 +279,32 @@ const License: React.FC = () => {
     return (
         <div className="business-settings qcrm-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
-                {__('License Management', 'quillcrm')}
+                {__('License Management', 'doublescale')}
             </div>
             {!isActive ? (
                 <div className="mt-6">
                     <div className="mb-4">
                         <label className="block text-base text-[#09090B] mb-2">
-                            {__('Please Provide a license key of QuillCRM', 'quillcrm')}
+                            {__('Please Provide a license key of DoubleScale', 'doublescale')}
                         </label>
                         <Input
                             className="w-full h-[48px] rounded-lg"
-                            placeholder={__('Enter license key', 'quillcrm')}
+                            placeholder={__('Enter license key', 'doublescale')}
                             value={licenseKey}
                             onChange={(e) => setLicenseKey(e.target.value)}
                         />
                     </div>
                     <div className="text-base text-[#818181] flex items-center gap-1 mt-2">
-                        {__('By Activating this license, you agree to the', 'quillcrm')}
+                        {__('By Activating this license, you agree to the', 'doublescale')}
                         <a 
-                            href="https://quillcrm.io/terms" 
+                            href="https://doublescale.io/terms" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="font-semibold text-[#CB5301] underline"
                         >
-                            {__('terms of use', 'quillcrm')}
+                            {__('terms of use', 'doublescale')}
                         </a>
-                        {__('for this product.', 'quillcrm')}
+                        {__('for this product.', 'doublescale')}
                     </div>
                     <div className="flex justify-end mt-4">
                         <Button
@@ -314,7 +314,7 @@ const License: React.FC = () => {
                             loading={isActivating}
                             disabled={isActivating || !licenseKey.trim()}
                         >
-                            {__('Activate License', 'quillcrm')}
+                            {__('Activate License', 'doublescale')}
                         </Button>
                     </div>
                 </div>
@@ -329,14 +329,14 @@ const License: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="text-lg font-medium text-[#777]">
-                                        {__('Status', 'quillcrm')}
+                                        {__('Status', 'doublescale')}
                                     </div>
                                 </div>
                             </div>
                             <div className={`text-xl font-bold ${status ? 'text-[#34C759]' : 'text-[#EF4444]'}`}>
                                 {license?.status_label || (status
-                                    ? __('Activated', 'quillcrm')
-                                    : __('Invalid', 'quillcrm'))}
+                                    ? __('Activated', 'doublescale')
+                                    : __('Invalid', 'doublescale'))}
                             </div>
                         </div>
 
@@ -348,12 +348,12 @@ const License: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="text-lg font-medium text-[#777]">
-                                        {__('Your Plan', 'quillcrm')}
+                                        {__('Your Plan', 'doublescale')}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xl text-[#09090B] font-bold">
-                                {license?.plan_label || __('N/A', 'quillcrm')}
+                                {license?.plan_label || __('N/A', 'doublescale')}
                             </div>
                         </div>
 
@@ -365,12 +365,12 @@ const License: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="text-lg font-medium text-[#777]">
-                                        {__('Last Update', 'quillcrm')}
+                                        {__('Last Update', 'doublescale')}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xl text-[#09090B] font-bold">
-                                {license?.last_update || __('N/A', 'quillcrm')}
+                                {license?.last_update || __('N/A', 'doublescale')}
                             </div>
                         </div>
 
@@ -382,12 +382,12 @@ const License: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="text-lg font-medium text-[#777]">
-                                        {__('Expiry Date', 'quillcrm')}
+                                        {__('Expiry Date', 'doublescale')}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xl text-[#09090B] font-bold">
-                                {license?.expires || __('N/A', 'quillcrm')}
+                                {license?.expires || __('N/A', 'doublescale')}
                             </div>
                         </div>
 
@@ -399,12 +399,12 @@ const License: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="text-lg font-medium text-[#777]">
-                                        {__('Last Check', 'quillcrm')}
+                                        {__('Last Check', 'doublescale')}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-xl text-[#09090B] font-bold">
-                                {license?.last_check || __('N/A', 'quillcrm')}
+                                {license?.last_check || __('N/A', 'doublescale')}
                             </div>
                         </div>
 
@@ -415,7 +415,7 @@ const License: React.FC = () => {
                                     <div className="flex gap-2 items-center">
                                         <div>
                                             <div className="text-lg font-medium text-[#777]">
-                                                {__('Pro Plugin', 'quillcrm')}
+                                                {__('Pro Plugin', 'doublescale')}
                                             </div>
                                         </div>
                                     </div>
@@ -428,7 +428,7 @@ const License: React.FC = () => {
                                                 loading={isInstalling}
                                                 disabled={isDeactivating || isUpdating || isActivating || isInstalling}
                                             >
-                                                {isInstalling ? __('Installing...', 'quillcrm') : __('Install Plugin', 'quillcrm')}
+                                                {isInstalling ? __('Installing...', 'doublescale') : __('Install Plugin', 'doublescale')}
                                             </Button>
                                         )}
                                         {pluginData.is_installed && !pluginData.is_active && (
@@ -439,7 +439,7 @@ const License: React.FC = () => {
                                                 loading={isActivatingPlugin}
                                                 disabled={isDeactivating || isUpdating || isActivating || isInstalling || isActivatingPlugin}
                                             >
-                                                {isActivatingPlugin ? __('Activating...', 'quillcrm') : __('Activate Plugin', 'quillcrm')}
+                                                {isActivatingPlugin ? __('Activating...', 'doublescale') : __('Activate Plugin', 'doublescale')}
                                             </Button>
                                         )}
                                     </div>
@@ -454,7 +454,7 @@ const License: React.FC = () => {
                     {license?.upgrades && Object.values(license.upgrades).length > 0 && (
                         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                             <div className="text-base font-semibold text-[#71717A] mb-2">
-                                {__('Available Upgrades:', 'quillcrm')}
+                                {__('Available Upgrades:', 'doublescale')}
                             </div>
                             <div className="flex flex-col gap-2">
                                 {Object.values(license.upgrades).map((upgrade: any, index: number) => (
@@ -465,7 +465,7 @@ const License: React.FC = () => {
                                         rel="noopener noreferrer"
                                         className="text-[#CB5301] underline"
                                     >
-                                        {__('Upgrade to', 'quillcrm')} {upgrade.plan_label} {__('plan', 'quillcrm')}
+                                        {__('Upgrade to', 'doublescale')} {upgrade.plan_label} {__('plan', 'doublescale')}
                                     </a>
                                 ))}
                             </div>
@@ -481,7 +481,7 @@ const License: React.FC = () => {
                             loading={isUpdating}
                             disabled={isDeactivating || isUpdating || isActivating}
                         >
-                            {__('Update', 'quillcrm')}
+                            {__('Update', 'doublescale')}
                         </Button>
                         <Button
                             danger
@@ -490,7 +490,7 @@ const License: React.FC = () => {
                             loading={isDeactivating}
                             disabled={isDeactivating || isUpdating || isActivating}
                         >
-                            {__('Deactivate', 'quillcrm')}
+                            {__('Deactivate', 'doublescale')}
                         </Button>
                     </div>
                 </>

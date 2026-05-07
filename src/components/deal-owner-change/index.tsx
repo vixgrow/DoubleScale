@@ -16,17 +16,17 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 	const [loadingUsers, setLoadingUsers] = useState(false);
 	const anyValue = 'any-value';
 	const specificValue = 'specific-value';
-	const labelForAnyOwner = __('Any Owner', 'quillcrm');
-	const labelForSpecificOwner = __('Specific Owner', 'quillcrm');
-	const placeholderForSelect = __('Select option', 'quillcrm');
+	const labelForAnyOwner = __('Any Owner', 'doublescale');
+	const labelForSpecificOwner = __('Specific Owner', 'doublescale');
+	const placeholderForSelect = __('Select option', 'doublescale');
 
 	const conditionOptions = [
 		{
-			label: __('Equal To', 'quillcrm'),
+			label: __('Equal To', 'doublescale'),
 			value: 'equal_to',
 		},
 		{
-			label: __('Not Equal To', 'quillcrm'),
+			label: __('Not Equal To', 'doublescale'),
 			value: 'not_equal_to',
 		},
 	];
@@ -178,7 +178,7 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 						options={users}
 						placeholder={
 							loadingUsers
-								? __('Loading users...', 'quillcrm')
+								? __('Loading users...', 'doublescale')
 								: placeholderForSelect
 						}
 						isLoading={loadingUsers}

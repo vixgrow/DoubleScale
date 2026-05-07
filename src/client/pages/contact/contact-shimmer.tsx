@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Skeleton } from '@quillcrm/components/ui/skeleton';
+import { Skeleton } from '@doublescale/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const ContactShimmer: React.FC = () => {

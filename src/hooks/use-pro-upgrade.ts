@@ -14,7 +14,7 @@ import config from '../config';
 export const useProUpgrade = () => {
 	const license = config.getLicense();
 	const pluginData = config.getProPluginData();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [isInstalling, setIsInstalling] = useState(false);
 	const [isActivating, setIsActivating] = useState(false);
 	const ajaxUrl = config.getAjaxUrl();
@@ -40,7 +40,7 @@ export const useProUpgrade = () => {
 		if (isInstalling || isActivating) return;
 		setIsInstalling(true);
 		const data = new FormData();
-		data.append('action', 'quillcrm_install_pro');
+		data.append('action', 'doublescale_install_pro');
 		data.append('_nonce', config.getNonce());
 
 		fetch(ajaxUrl, {
@@ -57,14 +57,14 @@ export const useProUpgrade = () => {
 					});
 					createNotice({
 						type: 'success',
-						message: __('Pro plugin installed successfully.', 'quillcrm'),
+						message: __('Pro plugin installed successfully.', 'doublescale'),
 					});
 					// Auto-activate after installation
 					activatePlugin();
 				} else {
 					createNotice({
 						type: 'error',
-						message: res.data || __('Failed to install Pro plugin.', 'quillcrm'),
+						message: res.data || __('Failed to install Pro plugin.', 'doublescale'),
 					});
 				}
 				setIsInstalling(false);
@@ -72,7 +72,7 @@ export const useProUpgrade = () => {
 			.catch(() => {
 				createNotice({
 					type: 'error',
-					message: __('Something went wrong', 'quillcrm'),
+					message: __('Something went wrong', 'doublescale'),
 				});
 				setIsInstalling(false);
 			});
@@ -83,7 +83,7 @@ export const useProUpgrade = () => {
 		if (isInstalling || isActivating) return;
 		setIsActivating(true);
 		const data = new FormData();
-		data.append('action', 'quillcrm_activate_pro');
+		data.append('action', 'doublescale_activate_pro');
 		data.append('_nonce', config.getNonce());
 
 		fetch(ajaxUrl, {
@@ -100,7 +100,7 @@ export const useProUpgrade = () => {
 					});
 					createNotice({
 						type: 'success',
-						message: __('Pro plugin activated successfully.', 'quillcrm'),
+						message: __('Pro plugin activated successfully.', 'doublescale'),
 					});
 					// Reload page after activation
 					setTimeout(() => {
@@ -109,7 +109,7 @@ export const useProUpgrade = () => {
 				} else {
 					createNotice({
 						type: 'error',
-						message: res.data || __('Failed to activate Pro plugin.', 'quillcrm'),
+						message: res.data || __('Failed to activate Pro plugin.', 'doublescale'),
 					});
 				}
 				setIsActivating(false);
@@ -117,7 +117,7 @@ export const useProUpgrade = () => {
 			.catch(() => {
 				createNotice({
 					type: 'error',
-					message: __('Something went wrong', 'quillcrm'),
+					message: __('Something went wrong', 'doublescale'),
 				});
 				setIsActivating(false);
 			});
@@ -139,32 +139,32 @@ export const useProUpgrade = () => {
 
 		if (isLicenseExpired) {
 			// Renew license -> same as upgrade URL
-			const url = upgradeUrl || config.getUrlQuillCRMPro();
+			const url = upgradeUrl || config.getUrlDoubleScalePro();
 			window.open(url, '_blank', 'noopener,noreferrer');
 			return;
 		}
 
 		// Default: Upgrade to Pro (no license or invalid license)
-		const url = upgradeUrl || config.getUrlQuillCRMPro();
+		const url = upgradeUrl || config.getUrlDoubleScalePro();
 		window.open(url, '_blank', 'noopener,noreferrer');
 	};
 
 	// Get primary button text
 	const getUpgradeButtonText = () => {
 		if (isProInstalled && !isProActive) {
-			return __('Activate Pro Addon', 'quillcrm');
+			return __('Activate Pro Addon', 'doublescale');
 		}
 
 		if (!isProInstalled && hasValidLicense) {
-			return isInstalling ? __('Installing...', 'quillcrm') : __('Install Pro', 'quillcrm');
+			return isInstalling ? __('Installing...', 'doublescale') : __('Install Pro', 'doublescale');
 		}
 
 		if (isLicenseExpired) {
-			return __('Renew License', 'quillcrm');
+			return __('Renew License', 'doublescale');
 		}
 
 		// Default when plugin not installed and license invalid/missing
-		return __('Upgrade to Pro', 'quillcrm');
+		return __('Upgrade to Pro', 'doublescale');
 	};
 
 	return {

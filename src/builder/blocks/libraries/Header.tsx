@@ -6,13 +6,13 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * internal dependencies
  */
-import { CursorIcon } from '@quillcrm/components';
+import { CursorIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 //@ts-ignore
 import logo from '../../../../assets/images/header-logo.png';
 
 const HeaderLibrary = () => {
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 
 	// Logo template - single image block with centered logo
 	const logoTemplate = {
@@ -197,7 +197,7 @@ const HeaderLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Logo', 'quillcrm')}</label>
+				<label className="text-sm">{__('Logo', 'doublescale')}</label>
 				<DraggableTemplate
 					template={logoTemplate}
 					id="header-logo"
@@ -207,7 +207,7 @@ const HeaderLibrary = () => {
 					<div className="flex gap-2 justify-center items-center border rounded-lg py-3 px-4">
 						<CursorIcon />
 						<div className="text-primary text-sm text-center">
-							{__('Company', 'quillcrm')}
+							{__('Company', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -215,7 +215,7 @@ const HeaderLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Logo + Navigation', 'quillcrm')}
+					{__('Logo + Navigation', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={logoNavigationTemplate}
@@ -227,14 +227,14 @@ const HeaderLibrary = () => {
 						<div className="flex gap-2 justify-center items-center">
 							<CursorIcon />
 							<div className="text-primary text-sm text-center">
-								{__('Company', 'quillcrm')}
+								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="flex gap-2 items-center justify-center text-[10px] text-[#9197A4]">
-							<div className="">{__('Item 1', 'quillcrm')}</div>
-							<div className="">{__('Item 2', 'quillcrm')}</div>
-							<div className="">{__('Item 3', 'quillcrm')}</div>
-							<div className="">{__('Item 4', 'quillcrm')}</div>
+							<div className="">{__('Item 1', 'doublescale')}</div>
+							<div className="">{__('Item 2', 'doublescale')}</div>
+							<div className="">{__('Item 3', 'doublescale')}</div>
+							<div className="">{__('Item 4', 'doublescale')}</div>
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -242,7 +242,7 @@ const HeaderLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Logo + Button', 'quillcrm')}
+					{__('Logo + Button', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={logoButtonTemplate}
@@ -254,12 +254,12 @@ const HeaderLibrary = () => {
 						<div className="flex gap-2 justify-center items-center w-1/2">
 							<CursorIcon />
 							<div className="text-primary text-sm">
-								{__('Company', 'quillcrm')}
+								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="flex gap-2 justify-center items-center w-1/2">
 							<div className="text-white bg-primary py-1 text-xs px-3 rounded-lg text-[10px]">
-								{__('Click here', 'quillcrm')}
+								{__('Click here', 'doublescale')}
 							</div>
 						</div>
 					</div>

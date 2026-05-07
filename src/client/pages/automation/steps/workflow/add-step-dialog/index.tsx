@@ -34,8 +34,8 @@ import {
 	GradientArrowIcon,
 	PlusIcon,
 	TimerBlockIcon,
-} from '@quillcrm/components';
-import { ProAutomationModal } from '@quillcrm/components/pro-automation-modal';
+} from '@doublescale/components';
+import { ProAutomationModal } from '@doublescale/components/pro-automation-modal';
 
 interface StepTypeOption {
 	label: string;
@@ -58,40 +58,40 @@ interface AddStepDialogProps {
 
 const defaultTypesOptions: Record<string, StepTypeOption> = {
 	action: {
-		label: __('Action', 'quillcrm'),
+		label: __('Action', 'doublescale'),
 		description: __(
 			'Select one of the Actions to continue your workflow.',
-			'quillcrm'
+			'doublescale'
 		),
 		icon: <ActionIcon />,
 	},
 	condition: {
-		label: __('Condition', 'quillcrm'),
+		label: __('Condition', 'doublescale'),
 		description: __(
 			'Select one of the Conditions to continue your workflow.',
-			'quillcrm'
+			'doublescale'
 		),
 		icon: <ConditionsIcon />,
 	},
 	delay: {
-		label: __('Delay', 'quillcrm'),
+		label: __('Delay', 'doublescale'),
 		description: __(
 			'A pause or waiting period introduced into a sequence of automated actions.',
-			'quillcrm'
+			'doublescale'
 		),
 		icon: <TimerBlockIcon />,
 	},
 	goal: {
-		label: __('Goal', 'quillcrm'),
+		label: __('Goal', 'doublescale'),
 		description: __(
 			'Select one of the Goals to continue your workflow.',
-			'quillcrm'
+			'doublescale'
 		),
 		icon: <GoalIcon />,
 	},
 	end_automation: {
-		label: __('End Automation', 'quillcrm'),
-		description: __('End your Automation workflow.', 'quillcrm'),
+		label: __('End Automation', 'doublescale'),
+		description: __('End your Automation workflow.', 'doublescale'),
 		icon: <EndLinkIcon />,
 	},
 };
@@ -104,7 +104,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 	disabled = false,
 }) => {
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -126,7 +126,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 							variant="secondary"
 							size="icon"
 							className="h-8 w-8 rounded-full bg-white"
-							title={__('Add step here', 'quillcrm')}
+							title={__('Add step here', 'doublescale')}
 						>
 							<PlusIcon />
 						</Button>
@@ -137,10 +137,10 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 					<DialogContent className="max-w-[800px] z-[150200] p-6">
 						<DialogHeader>
 							<DialogTitle>
-								{__('Add Step', 'quillcrm')}
+								{__('Add Step', 'doublescale')}
 							</DialogTitle>
 							<DialogDescription className="mt-1">
-								{__('Select one of the Steps', 'quillcrm')}
+								{__('Select one of the Steps', 'doublescale')}
 							</DialogDescription>
 						</DialogHeader>
 						<div className="flex flex-col gap-5">
@@ -190,7 +190,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 			<ProAutomationModal
 				visible={showProModal}
 				onClose={() => setShowProModal(false)}
-				featureName={__('Condition Step', 'quillcrm')}
+				featureName={__('Condition Step', 'doublescale')}
 			/>
 		</>
 	);

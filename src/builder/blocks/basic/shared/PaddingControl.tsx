@@ -11,7 +11,7 @@ import {
     PaddingLeftIcon,
     PaddingRightIcon,
     PaddingTopIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 
 export interface PaddingValue {
@@ -30,7 +30,7 @@ export interface PaddingControlProps {
 export const PaddingControl: React.FC<PaddingControlProps> = ({
     value,
     onChange,
-    label = __('Padding', 'quillcrm'),
+    label = __('Padding', 'doublescale'),
 }) => {
     const handlePaddingChange = (
         direction: keyof PaddingValue,

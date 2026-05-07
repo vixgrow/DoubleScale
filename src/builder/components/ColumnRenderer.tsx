@@ -56,7 +56,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 			id: `block-${Date.now()}`,
 			type: 'text' as const,
 			props: {
-				content: __('Your text here', 'quillcrm'),
+				content: __('Your text here', 'doublescale'),
 				fontSize: 16,
 				color: '#333',
 				align: 'left',
@@ -93,7 +93,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 									height={24}
 								/>
 								<p className="text-sm text-secondary">
-									{__('Drop Content Here', 'quillcrm')}
+									{__('Drop Content Here', 'doublescale')}
 								</p>
 							</div>
 						</div>
@@ -1012,7 +1012,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 									onClick={addTextBlock}
 								>
 									<Plus className="w-4 h-4 mr-2" />
-									{__('Add Text Block', 'quillcrm')}
+									{__('Add Text Block', 'doublescale')}
 								</Button>
 							</div>
 						)}

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ActiveAutomationIcon: React.FC<IconProps> = ({
 	width = 31,

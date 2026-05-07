@@ -22,7 +22,7 @@ import {
 	DialogOverlay,
 	DialogHeader,
 } from '@/components/ui/dialog';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { MergeTagsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -30,8 +30,8 @@ import { Card, CardContent } from '@/components/ui/card';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
-import type { MergeTags, AutomationMergeTags } from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
+import type { MergeTags, AutomationMergeTags } from '@doublescale/config';
 import CustomDialogHeader from '../dialog-header';
 
 interface EnhancedMergeTagsSelectorProps {
@@ -60,8 +60,8 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	const [loading, setLoading] = useState(false);
 
 	const { currentTrigger, formContext } = useSelect((select) => ({
-		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
-		formContext: select('quillcrm/core').getFormContext(),
+		currentTrigger: select('doublescale/core').getCurrentTrigger(),
+		formContext: select('doublescale/core').getFormContext(),
 	}));
 
 	// Use triggerId prop, or fallback to formContext, or currentTrigger from store
@@ -133,10 +133,10 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 				<DialogContent className="max-w-4xl min-w-[800px] z-[150500]">
 					<DialogHeader>
 						<CustomDialogHeader
-							title={__('Loading Merge Tags...', 'quillcrm')}
+							title={__('Loading Merge Tags...', 'doublescale')}
 							subtitle={__(
 								'Loading merge tags for your selected form...',
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<MergeTagsIcon />}
 						/>
@@ -155,10 +155,10 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 			<DialogContent className="max-w-4xl min-w-[800px] z-[150500]">
 				<DialogHeader>
 					<CustomDialogHeader
-						title={__('Merge Tags', 'quillcrm')}
+						title={__('Merge Tags', 'doublescale')}
 						subtitle={__(
 							'Choose your Merge tags type and Select one of them related to your input.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<MergeTagsIcon />}
 					/>
@@ -212,7 +212,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 											<div className="text-xs text-[#9197A4]">
 												{__(
 													'Select one of Merge tags that related to your input.',
-													'quillcrm'
+													'doublescale'
 												)}
 											</div>
 										</CardContent>
@@ -249,7 +249,7 @@ const MergeTagsGroupRender: React.FC<{
 	formId?: string | number;
 	activeTrigger?: string;
 }> = ({ mergeTags, onInsertTag, isDynamic, formId, activeTrigger }) => {
-	const { createNotice, setMergeTagsVisible } = useDispatch('quillcrm/core');
+	const { createNotice, setMergeTagsVisible } = useDispatch('doublescale/core');
 
 	// Filter merge tags based on required_triggers
 	const filteredMergeTags = filter(mergeTags, (tag) => {
@@ -273,7 +273,7 @@ const MergeTagsGroupRender: React.FC<{
 			// Fallback to clipboard behavior
 			navigator.clipboard.writeText(tagValue);
 			createNotice({
-				message: __('Merge tag copied to clipboard', 'quillcrm'),
+				message: __('Merge tag copied to clipboard', 'doublescale'),
 				type: 'info',
 			});
 		}
@@ -289,13 +289,13 @@ const MergeTagsGroupRender: React.FC<{
 							<p>
 								{__(
 									'No fields found for the selected form.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 							<p className="text-sm mt-2">
 								{__(
 									'Make sure the form has visible fields configured.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						</>
@@ -303,7 +303,7 @@ const MergeTagsGroupRender: React.FC<{
 						<p>
 							{__(
 								'No merge tags available for this trigger.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					)}

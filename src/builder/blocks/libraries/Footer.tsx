@@ -6,14 +6,14 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * internal dependencies
  */
-import { CursorIcon } from '@quillcrm/components';
+import { CursorIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 //@ts-ignore
 import logo from '../../../../assets/images/header-logo.png';
 
 const FooterLibrary = () => {
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 	// Centered Footer template
@@ -226,7 +226,7 @@ const FooterLibrary = () => {
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Centered Footer', 'quillcrm')}
+					{__('Centered Footer', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={centeredFooterTemplate}
@@ -238,26 +238,26 @@ const FooterLibrary = () => {
 						<div className="flex gap-2 justify-center items-center mb-2">
 							<CursorIcon />
 							<div className="text-primary text-sm">
-								{__('Company', 'quillcrm')}
+								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="mb-2 font-medium">
 							{__(
 								'Copyright © {{general:business_name}}',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'quillcrm')}
+							{__('{{general:business_address}}', 'doublescale')}
 						</div>
 						<div className="">
 							{__(
 								'Lorem ipsum dolor sit amet, consectetur elit.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Unsubscribe', 'quillcrm')}
+							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -265,7 +265,7 @@ const FooterLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Centered Footer & Items', 'quillcrm')}
+					{__('Centered Footer & Items', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={centeredFooterWithItemsTemplate}
@@ -277,33 +277,33 @@ const FooterLibrary = () => {
 						<div className="flex gap-2 justify-center items-center mb-2">
 							<CursorIcon />
 							<div className="text-primary text-sm">
-								{__('Company', 'quillcrm')}
+								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="flex gap-4 justify-center items-center mb-2 font-medium">
-							<div className="">{__('Item 1', 'quillcrm')}</div>
-							<div className="">{__('Item 2', 'quillcrm')}</div>
-							<div className="">{__('Item 3', 'quillcrm')}</div>
-							<div className="">{__('Item 4', 'quillcrm')}</div>
+							<div className="">{__('Item 1', 'doublescale')}</div>
+							<div className="">{__('Item 2', 'doublescale')}</div>
+							<div className="">{__('Item 3', 'doublescale')}</div>
+							<div className="">{__('Item 4', 'doublescale')}</div>
 						</div>
 						<div className="mb-2 font-medium">
 							{__(
 								'Copyright © {{general:business_name}}',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'quillcrm')}
+							{__('{{general:business_address}}', 'doublescale')}
 						</div>
 						<div className="">
 							{__(
 								'Lorem ipsum dolor sit amet, consectetur elit.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Unsubscribe', 'quillcrm')}
+							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -311,7 +311,7 @@ const FooterLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Basic Footer', 'quillcrm')}
+					{__('Basic Footer', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={basicFooterTemplate}
@@ -323,26 +323,26 @@ const FooterLibrary = () => {
 						<div className="flex gap-2 justify-start items-center mb-2">
 							<CursorIcon />
 							<div className="text-primary text-sm">
-								{__('Company', 'quillcrm')}
+								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="mb-2 font-medium">
 							{__(
 								'Copyright © {{general:business_name}}',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="mb-2 font-medium">
-							{__('{{general:business_address}}', 'quillcrm')}
+							{__('{{general:business_address}}', 'doublescale')}
 						</div>
 						<div className="">
 							{__(
 								'Lorem ipsum dolor sit amet, consectetur elit.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Unsubscribe', 'quillcrm')}
+							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>

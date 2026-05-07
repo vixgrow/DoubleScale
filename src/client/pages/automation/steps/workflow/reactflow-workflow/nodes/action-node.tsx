@@ -17,7 +17,7 @@ import type {
 	AutomationStep,
 	Automation,
 	OrganizedStep,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
@@ -25,8 +25,8 @@ import AnalyticsPopup from '../components/analytics-popup';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { getActionLabel, hasActionWarning } from '@quillcrm/utils';
-import { ActionIcon, ViewIcon } from '@quillcrm/components';
+import { getActionLabel, hasActionWarning } from '@doublescale/utils';
+import { ActionIcon, ViewIcon } from '@doublescale/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
 import { supportsAnalytics, getChannelType } from '../constants/action-types';
 import {
@@ -57,7 +57,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	} = data as unknown as ActionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	// Use custom analytics hook
 	const {
@@ -93,12 +93,12 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">
-								{__('Plugin Required', 'quillcrm')}
+								{__('Plugin Required', 'doublescale')}
 							</p>
 							<p className="text-xs mt-1">
 								{__(
 									'This action requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						</TooltipContent>
@@ -108,7 +108,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 		</div>
 	) : (
 		<span className="qcrm-reactflow-action__not-configured">
-			{__('Not Configured', 'quillcrm')}
+			{__('Not Configured', 'doublescale')}
 		</span>
 	);
 
@@ -142,10 +142,10 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				<button
 					className="qcrm-reactflow-node__analytics-link text-primary"
 					onClick={handleViewAnalytics}
-					title={__('View Analytics', 'quillcrm')}
+					title={__('View Analytics', 'doublescale')}
 				>
 					<ViewIcon width={16} height={16} />
-					<span>{__('View Analytics', 'quillcrm')}</span>
+					<span>{__('View Analytics', 'doublescale')}</span>
 				</button>
 			</div>
 		) : undefined;
@@ -171,16 +171,16 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 					<NodeLayout
 						icon={<ActionIcon width={23} height={23} />}
-						title={__('Action', 'quillcrm')}
+						title={__('Action', 'doublescale')}
 						subtitle={subtitle}
 						onEdit={handleEdit}
 						onDelete={handleDelete}
-						editLabel={__('Edit Action', 'quillcrm')}
-						deleteLabel={__('Delete Action', 'quillcrm')}
-						deleteTitle={__('Delete this action?', 'quillcrm')}
+						editLabel={__('Edit Action', 'doublescale')}
+						deleteLabel={__('Delete Action', 'doublescale')}
+						deleteTitle={__('Delete this action?', 'doublescale')}
 						deleteDescription={__(
 							'This will remove the action from your workflow.',
-							'quillcrm'
+							'doublescale'
 						)}
 						viewMode={viewMode}
 						analytics={analytics}

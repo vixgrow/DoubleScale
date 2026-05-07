@@ -21,8 +21,8 @@ import type {
 	FilterSettings,
 	ReactSelectOptions,
 	Response,
-} from '@quillcrm/client';
-import { DeleteIcon } from '@quillcrm/components';
+} from '@doublescale/client';
+import { DeleteIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 import { DateRangePicker } from '../ui/date-range-picker';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -182,9 +182,9 @@ const Filter: React.FC<FilterProps> = ({
 								onSearchChange={(value) => setKeyword(value)}
 								placeholder={__(
 									'Select options...',
-									'quillcrm'
+									'doublescale'
 								)}
-								searchPlaceholder={__('Search...', 'quillcrm')}
+								searchPlaceholder={__('Search...', 'doublescale')}
 							/>
 						)}
 					{filterSettings.type === 'date' && (
@@ -222,7 +222,7 @@ const Filter: React.FC<FilterProps> = ({
 									}}
 									placeholder={__(
 										'Select date range',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							) : (
@@ -236,7 +236,7 @@ const Filter: React.FC<FilterProps> = ({
 									onChange={(value) => {
 										onChange('value', value);
 									}}
-									placeholder={__('Select date', 'quillcrm')}
+									placeholder={__('Select date', 'doublescale')}
 									outputFormat="display"
 								/>
 							)}

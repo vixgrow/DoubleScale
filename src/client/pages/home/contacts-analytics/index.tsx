@@ -35,14 +35,14 @@ ChartJS.register(
  * Internal dependencies
  */
 import './style.scss';
-import type { DashboardData } from '@quillcrm/client';
+import type { DashboardData } from '@doublescale/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContactStatsCards } from './contacts-stats-card';
 import { RecentContactsList } from '../recent-contacts-list';
 import { ContactAnalyticsChart } from '../contacts-chart';
 import { UnsubscribedContactsTable } from './unsubscribed-contacts-list';
 import { useContactAnalytics } from '../use-analytics';
-import { DashboardContentCard, PageHeader } from '@quillcrm/components';
+import { DashboardContentCard, PageHeader } from '@doublescale/components';
 import ContactAnalyticsSkeleton from './ContactAnalyticsSkeleton';
 
 interface ContactAnalyticsProps {
@@ -71,8 +71,8 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 	return (
 		<>
 			<PageHeader
-				title={__('Contacts Analytics', 'quillcrm')}
-				subtitle={__('Contacts Analytics', 'quillcrm')}
+				title={__('Contacts Analytics', 'doublescale')}
+				subtitle={__('Contacts Analytics', 'doublescale')}
 				actions={[]}
 			/>
 			<div className="flex flex-col gap-5">
@@ -82,7 +82,7 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 				  <ContactStatsCards data={data} />
 				</div> */}
 					<DashboardContentCard
-						title={__('Cart Analytics Overview', 'quillcrm')}
+						title={__('Cart Analytics Overview', 'doublescale')}
 						cardClassName='h-full col-span-1'
 					>
 						<ContactStatsCards data={data} />

@@ -17,19 +17,19 @@ import {
 	Stepper,
 	MergeTagsIcon,
 	NoticeBanner,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { SMSTemplate, NoticeMessage, Campaign } from '@quillcrm/client';
+import type { SMSTemplate, NoticeMessage, Campaign } from '@doublescale/client';
 import type { ExtendedCampaign } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { getCampaignEndpoint } from '@quillcrm/utils';
+import { getCampaignEndpoint } from '@doublescale/utils';
 import SMSDevice from './sms-device';
 
 const SMSTemplateStep: React.FC = () => {
 	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
 	const { setMergeTagsVisible, setMergeTagCallback } =
-		useDispatch('quillcrm/core');
+		useDispatch('doublescale/core');
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,7 +46,7 @@ const SMSTemplateStep: React.FC = () => {
 
 	// Initialize default SMS template
 	const defaultTemplate: SMSTemplate = {
-		name: __('SMS Message', 'quillcrm'),
+		name: __('SMS Message', 'doublescale'),
 		type: CAMPAIGN_CHANNEL.SMS,
 		body: '',
 		settings: {},
@@ -88,7 +88,7 @@ const SMSTemplateStep: React.FC = () => {
 		if (!template.body || template.body.trim().length === 0) {
 			setNotice({
 				type: 'error',
-				message: __('Message content is required', 'quillcrm'),
+				message: __('Message content is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -98,7 +98,7 @@ const SMSTemplateStep: React.FC = () => {
 				type: 'error',
 				message: __(
 					'Message is too long. Maximum 1600 characters.',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return false;
@@ -131,7 +131,7 @@ const SMSTemplateStep: React.FC = () => {
 
 			const endpoint = getCampaignEndpoint(campaign.type);
 			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
+				throw new Error(__('Invalid campaign type', 'doublescale'));
 			}
 
 			const response = await apiFetch({
@@ -158,7 +158,7 @@ const SMSTemplateStep: React.FC = () => {
 					error.message ||
 					__(
 						'Failed to save template. Please try again.',
-						'quillcrm'
+						'doublescale'
 					),
 			});
 		} finally {
@@ -197,19 +197,19 @@ const SMSTemplateStep: React.FC = () => {
 		<PanelLayout
 			items={[
 				{
-					label: __('Create Campaign', 'quillcrm'),
+					label: __('Create Campaign', 'doublescale'),
 					href: 'campaigns',
 				},
 				{
 					label: campaign?.settings.ab_test
-						? __('A/B Test Campaign', 'quillcrm')
-						: __('Standard Campaign', 'quillcrm'),
+						? __('A/B Test Campaign', 'doublescale')
+						: __('Standard Campaign', 'doublescale'),
 				},
 			]}
 			panelbtns={[
 				<Button variant="secondaryDeepBlue">
 					<PlayIcon />
-					{__('Watch Tutorial', 'quillcrm')}
+					{__('Watch Tutorial', 'doublescale')}
 				</Button>,
 			]}
 			type="campaign"
@@ -223,17 +223,17 @@ const SMSTemplateStep: React.FC = () => {
 			<div className="w-full flex gap-6">
 				<div className="w-2/3">
 					<PanelSettings
-						title={__('Set-up Info', 'quillcrm')}
+						title={__('Set-up Info', 'doublescale')}
 						description={__(
 							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<SetUpInfoIcon />}
 						onNext={save}
 						nextLabel={
 							saving || isSavingTemplate
-								? __('Saving...', 'quillcrm')
-								: __('Next', 'quillcrm')
+								? __('Saving...', 'doublescale')
+								: __('Next', 'doublescale')
 						}
 						showButtons={true}
 						isLoading={saving || isSavingTemplate}
@@ -252,7 +252,7 @@ const SMSTemplateStep: React.FC = () => {
 							<div className="space-y-2">
 								<div className="flex items-center justify-between">
 									<label className="text-base font-medium text-[#333333]">
-										{__('Message', 'quillcrm')}
+										{__('Message', 'doublescale')}
 										<span className="text-red-500">
 											*
 										</span>
@@ -278,13 +278,13 @@ const SMSTemplateStep: React.FC = () => {
 									}
 									placeholder={__(
 										'Type your message here...',
-										'quillcrm'
+										'doublescale'
 									)}
 									rows={8}
 									className="bg-white resize-none"
 								/>
 								<p className="text-sm text-[#71717A]">
-									{__('Maximum 1600 characters', 'quillcrm')}
+									{__('Maximum 1600 characters', 'doublescale')}
 								</p>
 							</div>
 
@@ -292,11 +292,11 @@ const SMSTemplateStep: React.FC = () => {
 							<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
 								<p className="text-sm text-gray-700">
 									<strong>
-										{__('Unsubscribe:', 'quillcrm')}
+										{__('Unsubscribe:', 'doublescale')}
 									</strong>{' '}
 									{__(
 										'A "Reply STOP to unsubscribe" footer will be automatically added to your message. Recipients can reply STOP to unsubscribe.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 							</div>

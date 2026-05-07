@@ -5,7 +5,7 @@ import React, { useRef, useEffect } from 'react';
 /**
  * internal dependencies
  */
-import { NoticeBanner } from '@quillcrm/components';
+import { NoticeBanner } from '@doublescale/components';
 import { useContactsContext } from '../contexts';
 
 export const NoticeSection: React.FC = () => {

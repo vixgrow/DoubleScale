@@ -15,13 +15,13 @@ import type {
 	AutomationContact,
 	AutomationContactsResponse,
 	DataTableConfig,
-} from '@quillcrm/client';
-import { useParams } from '@quillcrm/navigation';
+} from '@doublescale/client';
+import { useParams } from '@doublescale/navigation';
 import Result from '../workflow/result';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
-import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 
 const ContactsList: React.FC = () => {
 	const { id } = useParams<{ id: string; tab: string }>();
@@ -32,7 +32,7 @@ const ContactsList: React.FC = () => {
 	const [contacts, setContacts] = useState<AutomationContact[]>([]);
 	const [contact, setContact] = useState<AutomationContact | null>(null);
 	const [keyword, setKeyword] = useState('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const serverSideTable = useServerSideTable({
 		page,
@@ -60,7 +60,7 @@ const ContactsList: React.FC = () => {
 			createNotice({
 				type: 'error',
 				message:
-					error.message || __('Failed to fetch contacts', 'quillcrm'),
+					error.message || __('Failed to fetch contacts', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -77,7 +77,7 @@ const ContactsList: React.FC = () => {
 
 	const tableConfig: DataTableConfig<AutomationContact> = {
 		search: {
-			placeholder: __('Search Contacts', 'quillcrm'),
+			placeholder: __('Search Contacts', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -86,7 +86,7 @@ const ContactsList: React.FC = () => {
 	return (
 		<div className="qcrm-contacts-list px-8 py-5 h-screen">
 			<div className="mb-4">
-				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Contacts', 'quillcrm')}</h1>
+				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Contacts', 'doublescale')}</h1>
 			</div>
 			<div className="qcrm-contacts-list__table">
 				<DataTable

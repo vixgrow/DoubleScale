@@ -40,7 +40,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						{/* Text Content */}
 						<div className="flex flex-col gap-2">
 							<div className="text-[#333333] text-sm mb-1">
-								{__('Text Content', 'quillcrm')}
+								{__('Text Content', 'doublescale')}
 							</div>
 							<RichTextEditor
 								content={props.content}
@@ -72,7 +72,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						{/* Line Height & Letter Spacing */}
 						<div className="flex gap-3 items-center w-full">
 							<div className="flex flex-col gap-2 text-[#333333] w-1/2">
-								<div>{__('Line Height', 'quillcrm')}</div>
+								<div>{__('Line Height', 'doublescale')}</div>
 								<Select
 									value={props.lineHeight}
 									onValueChange={(value) =>
@@ -83,7 +83,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 										<SelectValue
 											placeholder={__(
 												'Select line height',
-												'quillcrm'
+												'doublescale'
 											)}
 										/>
 									</SelectTrigger>
@@ -117,7 +117,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						<StyleControls.ColorPickerControl
 							value={props.color}
 							onChange={(color) => onChange({ color })}
-							label={__('Text Color', 'quillcrm')}
+							label={__('Text Color', 'doublescale')}
 							id="text-color"
 						/>
 
@@ -126,14 +126,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							onChange={(backgroundColor) =>
 								onChange({ backgroundColor })
 							}
-							label={__('Background Color', 'quillcrm')}
+							label={__('Background Color', 'doublescale')}
 							id="bg-color"
 						/>
 
 						<StyleControls.ColorPickerControl
 							value={props.linkColor}
 							onChange={(linkColor) => onChange({ linkColor })}
-							label={__('Link Color', 'quillcrm')}
+							label={__('Link Color', 'doublescale')}
 							id="link-color"
 						/>
 

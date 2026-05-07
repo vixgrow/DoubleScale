@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       DoubleScale
  * Plugin URI:        https://www.doublescale.io/
- * Description:       DoubleScale (free) — modular CRM core. Smoke-test this entry during migration; production uses this after cutover from QuillCRM.
+ * Description:       DoubleScale (free) — modular CRM core. Smoke-test this entry during migration; production uses this after cutover from DoubleScale.
  * Version:           0.1.0-alpha
  * Author:            doublescale.io
  * Author URI:        https://www.doublescale.io
@@ -87,8 +87,8 @@ function doublescale_bootstrap_register() {
 			 */
 			do_action( 'doublescale_loaded' );
 
-			// Legacy listeners on quillcrm_loaded (deprecated in favor of doublescale_loaded).
-			do_action_deprecated( 'quillcrm_loaded', array(), '2.0', 'doublescale_loaded' );
+			// Legacy listeners on doublescale_loaded (deprecated in favor of doublescale_loaded).
+			do_action_deprecated( 'doublescale_loaded', array(), '2.0', 'doublescale_loaded' );
 		},
 		5
 	);

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import { Switch } from '@/components/ui/switch';
 
 interface ListsMappingProps {
@@ -39,13 +39,13 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 			{/* Header */}
 			<div className="grid grid-cols-3 gap-4 p-4 border-b font-medium bg-gray-50">
 				<div className="text-sm font-semibold">
-					{__('Source List', 'quillcrm')}
+					{__('Source List', 'doublescale')}
 				</div>
 				<div className="text-sm font-semibold">
-					{__('Assign to (QuillCRM)', 'quillcrm')}
+					{__('Assign to (DoubleScale)', 'doublescale')}
 				</div>
 				<div className="text-sm font-semibold">
-					{__('Auto Create', 'quillcrm')}
+					{__('Auto Create', 'doublescale')}
 				</div>
 			</div>
 
@@ -65,13 +65,13 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 							{/* Source List */}
 							<div className="text-sm">{record.list}</div>
 
-							{/* Assign to QuillCRM */}
+							{/* Assign to DoubleScale */}
 							<div>
 								{assigned?.auto ? (
 									<div className="text-sm text-gray-600">
 										{__(
 											'List will be created automatically',
-											'quillcrm'
+											'doublescale'
 										)}
 									</div>
 								) : (

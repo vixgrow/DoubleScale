@@ -15,7 +15,7 @@ import Select from 'react-select';
 import './style.scss';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ReactSelectOptions } from '@quillcrm/client';
+import { ReactSelectOptions } from '@doublescale/client';
 
 interface DiscountTypeWithAmountProps {
 	value?: {
@@ -69,7 +69,7 @@ const DiscountTypeWithAmount: React.FC<DiscountTypeWithAmountProps> = ({
 					value={selectedOption}
 					onChange={handleTypeChange}
 					options={selectOptions}
-					placeholder={__('Select discount type', 'quillcrm')}
+					placeholder={__('Select discount type', 'doublescale')}
 					styles={{
 						control: (styles) => ({
 							...styles,
@@ -96,7 +96,7 @@ const DiscountTypeWithAmount: React.FC<DiscountTypeWithAmountProps> = ({
 						borderRadius: '8px',
 					}}
 					placeholder={
-						type === 'percent' ? '%' : __('Amount', 'quillcrm')
+						type === 'percent' ? '%' : __('Amount', 'doublescale')
 					}
 				/>
 			</div>

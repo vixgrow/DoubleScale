@@ -101,7 +101,7 @@ export const useContactMessages = ({
 	const [loading, setLoading] = useState<boolean>(true);
 	const [data, setData] = useState<MessagesResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	/**
 	 * Fetch messages from API
@@ -130,7 +130,7 @@ export const useContactMessages = ({
 		} catch (err: any) {
 			const errorMsg =
 				err.message ||
-				__(`Failed to fetch ${mode} messages`, 'quillcrm');
+				__(`Failed to fetch ${mode} messages`, 'doublescale');
 
 			setError(errorMsg);
 

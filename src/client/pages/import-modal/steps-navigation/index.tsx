@@ -79,10 +79,10 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 							>
 								<span>
 									{isFetching
-										? __('Validating...', 'quillcrm')
+										? __('Validating...', 'doublescale')
 										: __(
 												'Connect & Fetch Data',
-												'quillcrm'
+												'doublescale'
 											)}
 								</span>
 								<ArrowRight className="w-4 h-4" />
@@ -104,7 +104,7 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 									className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
 								>
 									<ArrowLeft className="w-4 h-4" />
-									<span>{__('Back', 'quillcrm')}</span>
+									<span>{__('Back', 'doublescale')}</span>
 								</Button>
 								<Button
 									onClick={onImportContacts}
@@ -113,7 +113,7 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 									}
 									className="flex items-center space-x-2"
 								>
-									<span>{__('Import Contacts', 'quillcrm')}</span>
+									<span>{__('Import Contacts', 'doublescale')}</span>
 									<ArrowRight className="w-4 h-4" />
 								</Button>
 							</div>
@@ -134,10 +134,10 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 					>
 						<span>
 							{isFetching
-								? __('Loading...', 'quillcrm')
+								? __('Loading...', 'doublescale')
 								: source === 'csv'
-									? __('Next', 'quillcrm')
-									: __('Import Contacts', 'quillcrm')}
+									? __('Next', 'doublescale')
+									: __('Import Contacts', 'doublescale')}
 						</span>
 						<ArrowRight className="w-4 h-4" />
 					</Button>
@@ -156,12 +156,12 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 				className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
 			>
 				<ArrowLeft className="w-4 h-4" />
-				<span>{__('Back', 'quillcrm')}</span>
+				<span>{__('Back', 'doublescale')}</span>
 			</Button>
 			<Button onClick={onImportContacts} disabled={importing}>
 				{importing
-					? __('Importing...', 'quillcrm')
-					: __('Import Contacts', 'quillcrm')}
+					? __('Importing...', 'doublescale')
+					: __('Import Contacts', 'doublescale')}
 				<ArrowRight className="w-4 h-4" />
 			</Button>
 		</div>

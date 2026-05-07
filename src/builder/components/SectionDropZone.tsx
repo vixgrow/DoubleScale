@@ -51,7 +51,7 @@ export const SectionDropZone: React.FC<SectionDropZoneProps> = ({
 
 						{/* Text label */}
 						<div className="absolute left-1/2 -translate-x-1/2 -top-6 bg-blue-500 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap">
-							{__('Drop here to add section', 'quillcrm')}
+							{__('Drop here to add section', 'doublescale')}
 						</div>
 					</div>
 				</div>

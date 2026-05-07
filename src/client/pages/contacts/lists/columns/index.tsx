@@ -9,11 +9,11 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * internal dependencies
  */
-import type { List as ContactList } from '@quillcrm/client';
-import { SortIcon, TimeAgoCell } from '@quillcrm/components';
+import type { List as ContactList } from '@doublescale/client';
+import { SortIcon, TimeAgoCell } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 
 interface ListColumnsProps {
 	onEditList: (list: ContactList) => void;
@@ -55,7 +55,7 @@ export const getListColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Name', 'quillcrm')}
+					{__('Name', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -70,7 +70,7 @@ export const getListColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Description', 'quillcrm')}
+					{__('Description', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -85,7 +85,7 @@ export const getListColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Contacts No', 'quillcrm')}
+					{__('Contacts No', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -100,7 +100,7 @@ export const getListColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -108,7 +108,7 @@ export const getListColumns = ({
 		},
 		{
 			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					onClick={() => onEditList(row.original)}
@@ -116,7 +116,7 @@ export const getListColumns = ({
 					className="p-0"
 				>
 					<EditHeaderIcon/>
-					{__('Edit', 'quillcrm')}
+					{__('Edit', 'doublescale')}
 				</Button>
 			),
 		},

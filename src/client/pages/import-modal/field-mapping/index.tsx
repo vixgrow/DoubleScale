@@ -14,12 +14,12 @@ import {
 	ContactMappedFields,
 	Field,
 	ProFeatureNotice,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ListsMapping from '../lists-mapping';
 import TagsMapping from '../tags-mapping';
 import CustomFieldsMapping from '../custom-fields ';
-import type { ImporterField } from '@quillcrm/config';
+import type { ImporterField } from '@doublescale/config';
 import {
 	TooltipProvider,
 	Tooltip,
@@ -37,7 +37,7 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 	const { state, updateValues } = useImportContext();
 	const { sourceData, values, source, fileData } = state;
 
-	const isProActive = applyFilters('quillcrm_is_pro_active', false);
+	const isProActive = applyFilters('doublescale_is_pro_active', false);
 
 	const renderLabelWithTooltip = (label: string, tooltip: string) => {
 		return (
@@ -143,7 +143,7 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 			case 'custom_fields_mapping':
 				if (isProActive) {
 					fieldContent = applyFilters(
-						'quillcrm_field_mapping_custom_fields',
+						'doublescale_field_mapping_custom_fields',
 						field.options,
 						values[key] || [],
 						(value) => updateValues(key, value)
@@ -153,11 +153,11 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 						<ProFeatureNotice
 							featureName={__(
 								'Custom Fields Mapping',
-								'quillcrm'
+								'doublescale'
 							)}
 							description={__(
-								'Custom fields mapping is only available in QuillCRM Pro.',
-								'quillcrm'
+								'Custom fields mapping is only available in DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					);
@@ -250,22 +250,22 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 		<Card className="shadow-none rounded-2xl">
 			<CardHeader>
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
-					{__(`${importer.name} Data Import Tool`, 'quillcrm')}
+					{__(`${importer.name} Data Import Tool`, 'doublescale')}
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
 					{source === 'csv'
 						? __(
 								'Select the column field you want to map it on the system to import.',
-								'quillcrm'
+								'doublescale'
 							)
 						: source === 'pipedrive'
 							? __(
-									'Configure how Pipedrive data will be imported into QuillCRM.',
-									'quillcrm'
+									'Configure how Pipedrive data will be imported into DoubleScale.',
+									'doublescale'
 								)
 							: __(
-									'Configure how your data will be imported into QuillCRM.',
-									'quillcrm'
+									'Configure how your data will be imported into DoubleScale.',
+									'doublescale'
 								)}
 				</div>
 			</CardHeader>

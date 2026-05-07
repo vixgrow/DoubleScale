@@ -11,8 +11,8 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { LMSCourse } from '@quillcrm/client';
-import { FormattedDateCell } from '@quillcrm/components';
+import type { LMSCourse } from '@doublescale/client';
+import { FormattedDateCell } from '@doublescale/components';
 
 const STATUS_STYLES: Record<
     'completed' | 'in_progress' | 'not_started',
@@ -58,17 +58,17 @@ const getStatusContent = (status?: string) => {
 export const getColumns = (): ColumnDef<LMSCourse>[] => [
     {
         accessorKey: 'id',
-        header: __('ID', 'quillcrm'),
+        header: __('ID', 'doublescale'),
         cell: ({ row }) => row.original.id,
     },
     {
         accessorKey: 'name',
-        header: __('Course', 'quillcrm'),
+        header: __('Course', 'doublescale'),
         cell: ({ row }) => row.original.name,
     },
     {
         accessorKey: 'status',
-        header: __('Status', 'quillcrm'),
+        header: __('Status', 'doublescale'),
         cell: ({ row }) => {
             const statusContent = getStatusContent(row.original.status);
 
@@ -83,21 +83,21 @@ export const getColumns = (): ColumnDef<LMSCourse>[] => [
     },
     {
         accessorKey: 'started_on',
-        header: __('Enrolled', 'quillcrm'),
+        header: __('Enrolled', 'doublescale'),
         cell: ({ row }) => (
             row.original.started_on ? <FormattedDateCell value={row.original.started_on} /> : <span>-</span>
         ),
     },
     {
         accessorKey: 'completed_on',
-        header: __('Completed', 'quillcrm'),
+        header: __('Completed', 'doublescale'),
         cell: ({ row }) => (
             row.original.completed_on ? <FormattedDateCell value={row.original.completed_on} /> : <span>-</span>
         ),
     },
     {
         accessorKey: 'lms',
-        header: __('LMS', 'quillcrm'),
+        header: __('LMS', 'doublescale'),
         cell: ({ row }) => {
             const lms = row.original.lms;
             if (!lms) return <span>-</span>;

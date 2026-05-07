@@ -23,7 +23,7 @@ import {
 	SET_COURSES
 } from './constants';
 import type { EmailAnalytics, PurchaseHistory } from './types';
-import type { Contact, Note, AutomationContact, LMSCourse } from '@quillcrm/client';
+import type { Contact, Note, AutomationContact, LMSCourse } from '@doublescale/client';
 import type {
 	ContactAction,
 	NoteAction,

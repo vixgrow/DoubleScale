@@ -78,8 +78,8 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						{initialUrl
-							? __('Edit Link', 'quillcrm')
-							: __('Add Link', 'quillcrm')}
+							? __('Edit Link', 'doublescale')
+							: __('Add Link', 'doublescale')}
 					</DialogTitle>
 				</DialogHeader>
 
@@ -87,7 +87,7 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 					{/* URL Input */}
 					<div className="space-y-2">
 						<Label htmlFor="link-url">
-							{__('URL', 'quillcrm')}{' '}
+							{__('URL', 'doublescale')}{' '}
 							<span className="text-red-500">*</span>
 						</Label>
 						<Input
@@ -103,12 +103,12 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 
 				<DialogFooter>
 					<Button variant="outline" onClick={handleCancel}>
-						{__('Cancel', 'quillcrm')}
+						{__('Cancel', 'doublescale')}
 					</Button>
 					<Button onClick={handleConfirm} disabled={!url.trim()}>
 						{initialUrl
-							? __('Update Link', 'quillcrm')
-							: __('Add Link', 'quillcrm')}
+							? __('Update Link', 'doublescale')
+							: __('Add Link', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

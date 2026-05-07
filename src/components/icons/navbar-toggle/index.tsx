@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NavbarToggleIcon: React.FC<IconProps> = ({ width = 17, height = 14 }) => {
 	return (

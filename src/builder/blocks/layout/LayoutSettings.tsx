@@ -59,7 +59,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 
 	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -89,7 +89,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 				onChange={(value) =>
 					handleInputChange('backgroundColor', value)
 				}
-				label={__('Background Color', 'quillcrm')}
+				label={__('Background Color', 'doublescale')}
 				id="layout-bg-color"
 			/>
 
@@ -108,11 +108,11 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 					>
 						<Filter className="w-4 h-4 mr-2" />
 						{hasConditions
-							? __('Edit Conditions', 'quillcrm')
-							: __('Add Conditions', 'quillcrm')}
+							? __('Edit Conditions', 'doublescale')
+							: __('Add Conditions', 'doublescale')}
 						{!isProActive && (
 							<span className="ml-2 text-xs text-blue-600">
-								({__('Pro', 'quillcrm')})
+								({__('Pro', 'doublescale')})
 							</span>
 						)}
 					</Button>
@@ -120,7 +120,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 						<p className="text-xs text-gray-600 mt-2 text-center">
 							{__(
 								'This section has conditional rendering',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					)}

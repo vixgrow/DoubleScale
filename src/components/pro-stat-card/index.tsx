@@ -43,7 +43,7 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 			/>
 			<div className="qcrm-pro-stat-card__pro-feature">
 				<span className="text-lg text-[#CB5301] font-bold">
-					{__('Pro feature', 'quillcrm')}
+					{__('Pro feature', 'doublescale')}
 				</span>
 			</div>
 		</div>

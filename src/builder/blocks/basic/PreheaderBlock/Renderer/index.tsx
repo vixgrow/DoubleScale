@@ -117,11 +117,11 @@ export const PreheaderRenderer: React.FC<PreheaderRendererProps> = ({ props }) =
     return (
         <Tag style={containerStyle}>
             <span style={textStyle}>
-                {text || __('If you cannot see images, Please', 'quillcrm')}
+                {text || __('If you cannot see images, Please', 'doublescale')}
             </span>
             <span style={{ marginLeft: '4px', marginRight: '2px' }}> </span>
             <a href={linkUrl} style={linkStyle} target="_blank" rel="noopener noreferrer">
-                {linkText || __('Click here', 'quillcrm')}
+                {linkText || __('Click here', 'doublescale')}
             </a>
         </Tag>
     );

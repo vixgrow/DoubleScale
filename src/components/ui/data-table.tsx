@@ -20,10 +20,10 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import DataTablePagination from './data-table-pagination';
-import { useDataTable } from '@quillcrm/hooks/use-dataTable';
+import { useDataTable } from '@doublescale/hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
 import { DataTableActions } from './data-table-actions';
-import { DataTableConfig } from '@quillcrm/client';
+import { DataTableConfig } from '@doublescale/client';
 import { TableSkeleton } from './table-skeleton';
 
 interface DataTableProps<TData> {
@@ -141,7 +141,7 @@ export function DataTable<TData>({
 									colSpan={columns.length}
 									className="h-24 text-center"
 								>
-									{__('No results found.', 'quillcrm')}
+									{__('No results found.', 'doublescale')}
 								</TableCell>
 							</TableRow>
 						)}

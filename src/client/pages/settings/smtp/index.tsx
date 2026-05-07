@@ -7,10 +7,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { QuillSMTPInstaller } from '@/components/quillsmtp-installer';
-import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
-import Config from '@quillcrm/config';
-import { Card } from '@quillcrm/components/ui/card';
-import { Button } from '@quillcrm/components/ui/button';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import Config from '@doublescale/config';
+import { Card } from '@doublescale/components/ui/card';
+import { Button } from '@doublescale/components/ui/button';
 
 const SMTPSettings: React.FC = () => {
 	const smtpConfig = Config.getQuillSMTPInfo();
@@ -19,14 +19,14 @@ const SMTPSettings: React.FC = () => {
 	return (
 		<div className="smtp-settings">
 			<div className="text-[#09090B] font-semibold text-2xl mb-6">
-				{__('SMTP / Email Sending Service Settings', 'quillcrm')}
+				{__('SMTP / Email Sending Service Settings', 'doublescale')}
 			</div>
 			{smtpConfig.configured ? (
 				<Card className="p-6 bg-[#D1FAE5] border border-[#10B981] rounded-lg">
 					<div className="flex items-start justify-between">
 						<div className="flex-1">
 							<h3 className="text-lg font-semibold text-[#065F46] mb-2 flex items-center gap-2">
-								Quill SMTP {__('Active', 'quillcrm')}
+								Quill SMTP {__('Active', 'doublescale')}
 								<svg
 									className="w-5 h-5 text-[#10B981]"
 									fill="currentColor"
@@ -41,7 +41,7 @@ const SMTPSettings: React.FC = () => {
 							</h3>
 							<div className="flex items-center gap-3 mt-3">
 								<p className="text-sm text-[#065F46]">
-									{__('Connections', 'quillcrm')}: <span className="font-semibold">{connectionCount}</span>
+									{__('Connections', 'doublescale')}: <span className="font-semibold">{connectionCount}</span>
 								</p>
 								{connectionCount === 0 && (
 									<svg
@@ -65,7 +65,7 @@ const SMTPSettings: React.FC = () => {
 										}}
 										className="ml-auto"
 									>
-										{__('Manage Connections', 'quillcrm')}
+										{__('Manage Connections', 'doublescale')}
 									</Button>
 								)}
 							</div>
@@ -79,13 +79,13 @@ const SMTPSettings: React.FC = () => {
 			{/* Bounce Handler - Pro Feature */}
 			<div className="mt-8 pt-8 border-t border-gray-200">
 				<div className="text-[#09090B] font-semibold text-xl mb-4">
-					{__('Bounce Handler', 'quillcrm')}
+					{__('Bounce Handler', 'doublescale')}
 				</div>
 				<ProFeatureNotice
-					featureName={__('Email Bounce Handler', 'quillcrm')}
+					featureName={__('Email Bounce Handler', 'doublescale')}
 					description={__(
 						'Automatically handle bounced emails with webhook integrations for SendGrid, Mailgun, Amazon SES, Postmark, and other major email service providers. Keep your contact list clean by automatically marking hard bounces and tracking soft bounces.',
-						'quillcrm'
+						'doublescale'
 					)}
 				/>
 			</div>

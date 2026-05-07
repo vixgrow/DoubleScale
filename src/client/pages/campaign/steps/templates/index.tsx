@@ -20,8 +20,8 @@ import {
 	Stepper,
 	SetUpInfoIcon,
 	NoticeBanner,
-} from '@quillcrm/components';
-import type { EmailTemplate, NoticeMessage } from '@quillcrm/client';
+} from '@doublescale/components';
+import type { EmailTemplate, NoticeMessage } from '@doublescale/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,28 +32,28 @@ import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
 import { saveTemplate } from '@/builder/api/templates';
 import { campaignSteps } from '../shared/stepsConfig';
-import { FromEmailSelector } from '@quillcrm/components/from-email-selector';
+import { FromEmailSelector } from '@doublescale/components/from-email-selector';
 
 const templateSchema = z
 	.object({
 		settings: z.object({
-			subject: z.string().min(1, __('Subject is required', 'quillcrm')),
+			subject: z.string().min(1, __('Subject is required', 'doublescale')),
 			preview_text: z
 				.string()
-				.min(1, __('Preview text is required', 'quillcrm')),
+				.min(1, __('Preview text is required', 'doublescale')),
 			from_name: z
 				.string()
-				.min(1, __('From name is required', 'quillcrm')),
+				.min(1, __('From name is required', 'doublescale')),
 			from_email: z.email(
 				__(
 					'Please enter a valid email address for From Email',
-					'quillcrm'
+					'doublescale'
 				)
 			),
 			reply_to: z.email(
 				__(
 					'Please enter a valid email address for Reply To',
-					'quillcrm'
+					'doublescale'
 				)
 			),
 			enable_utm: z.boolean().optional(),
@@ -80,7 +80,7 @@ const templateSchema = z
 		{
 			message: __(
 				'All UTM fields are required when UTM is enabled',
-				'quillcrm'
+				'doublescale'
 			),
 			path: ['settings', 'utm_source'],
 		}
@@ -94,7 +94,7 @@ const Templates: React.FC = () => {
 	}>({});
 	const [isSaving, setIsSaving] = useState(false);
 	const { campaign, goToStep } = useCampaignStep();
-	const { updateCampaign } = useDispatch('quillcrm/campaign');
+	const { updateCampaign } = useDispatch('doublescale/campaign');
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -117,7 +117,7 @@ const Templates: React.FC = () => {
 
 	// Single template object - matches backend structure
 	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
-		name: campaign?.name || __('Email Template', 'quillcrm'),
+		name: campaign?.name || __('Email Template', 'doublescale'),
 		type: CAMPAIGN_CHANNEL.EMAIL,
 		body: '',
 		settings: {
@@ -205,7 +205,7 @@ const Templates: React.FC = () => {
 				type: 'error',
 				message: __(
 					'No template data found. Please refresh the page and try again.',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return;
@@ -217,7 +217,7 @@ const Templates: React.FC = () => {
 				type: 'error',
 				message: __(
 					'Please fix the validation errors before proceeding',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return;
@@ -252,7 +252,7 @@ const Templates: React.FC = () => {
 
 			showNotice({
 				type: 'success',
-				message: __('Template saved successfully', 'quillcrm'),
+				message: __('Template saved successfully', 'doublescale'),
 			});
 
 			goToStep('builder');
@@ -265,7 +265,7 @@ const Templates: React.FC = () => {
 					errorMessage ||
 					__(
 						'An error occurred while saving. Please try again.',
-						'quillcrm'
+						'doublescale'
 					),
 			});
 		} finally {
@@ -278,19 +278,19 @@ const Templates: React.FC = () => {
 			<PanelLayout
 				items={[
 					{
-						label: __('Create Campaign', 'quillcrm'),
+						label: __('Create Campaign', 'doublescale'),
 						href: 'campaigns',
 					},
 					{
 						label: campaign?.settings.ab_test
-							? __('A/B Test Campaign', 'quillcrm')
-							: __('Standard Campaign', 'quillcrm'),
+							? __('A/B Test Campaign', 'doublescale')
+							: __('Standard Campaign', 'doublescale'),
 					},
 				]}
 				panelbtns={[
 					<Button variant="secondaryDeepBlue">
 						<PlayIcon />
-						{__('Watch Tutorial', 'quillcrm')}
+						{__('Watch Tutorial', 'doublescale')}
 					</Button>,
 				]}
 				type="campaign"
@@ -303,10 +303,10 @@ const Templates: React.FC = () => {
 
 				<div className="flex gap-6">
 					<PanelSettings
-						title={__('Set-up info', 'quillcrm')}
+						title={__('Set-up info', 'doublescale')}
 						description={__(
 							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<SetUpInfoIcon />}
 						className="w-2/3 h-full"
@@ -314,8 +314,8 @@ const Templates: React.FC = () => {
 						onNext={saveTemplateStepAndNavigate}
 						nextLabel={
 							isSaving
-								? __('Saving...', 'quillcrm')
-								: __('Next', 'quillcrm')
+								? __('Saving...', 'doublescale')
+								: __('Next', 'doublescale')
 						}
 						isLoading={isSaving}
 					>
@@ -330,12 +330,12 @@ const Templates: React.FC = () => {
 
 						<div className="flex gap-4">
 							<FormField
-								label={__('From Name', 'quillcrm')}
+								label={__('From Name', 'doublescale')}
 								required={true}
 								className="flex-1"
 							>
 								<Input
-									placeholder={__('Name here', 'quillcrm')}
+									placeholder={__('Name here', 'doublescale')}
 									value={template.settings?.from_name || ''}
 									onChange={(e) => {
 										clearError('from_name');
@@ -360,7 +360,7 @@ const Templates: React.FC = () => {
 							</FormField>
 
 							<FormField
-								label={__('From Email', 'quillcrm')}
+								label={__('From Email', 'doublescale')}
 								required={true}
 								className="flex-1"
 							>
@@ -389,7 +389,7 @@ const Templates: React.FC = () => {
 
 						<div className="flex gap-4">
 							<FormField
-								label={__('Reply To', 'quillcrm')}
+								label={__('Reply To', 'doublescale')}
 								required={true}
 								className="flex-1"
 							>
@@ -397,7 +397,7 @@ const Templates: React.FC = () => {
 									type="email"
 									placeholder={__(
 										'name@gmail.com',
-										'quillcrm'
+										'doublescale'
 									)}
 									value={template.settings?.reply_to || ''}
 									onChange={(e) => {
@@ -423,12 +423,12 @@ const Templates: React.FC = () => {
 							</FormField>
 
 							<FormField
-								label={__('Subject', 'quillcrm')}
+								label={__('Subject', 'doublescale')}
 								required={true}
 								className="flex-1"
 							>
 								<Input
-									placeholder={__('Subject here', 'quillcrm')}
+									placeholder={__('Subject here', 'doublescale')}
 									value={template.settings?.subject || ''}
 									onChange={(e) => {
 										clearError('subject');
@@ -454,13 +454,13 @@ const Templates: React.FC = () => {
 						</div>
 
 						<FormField
-							label={__('Preview Text', 'quillcrm')}
+							label={__('Preview Text', 'doublescale')}
 							required={true}
 						>
 							<Textarea
 								placeholder={__(
 									'Preview text here',
-									'quillcrm'
+									'doublescale'
 								)}
 								value={template.settings?.preview_text || ''}
 								onChange={(e) => {
@@ -491,12 +491,12 @@ const Templates: React.FC = () => {
 							<div className="flex items-center justify-between mb-4">
 								<div>
 									<p className="text-lg font-semibold text-foreground">
-										{__('Enable UTM', 'quillcrm')}
+										{__('Enable UTM', 'doublescale')}
 									</p>
 									<p>
 										{__(
 											'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
-											'quillcrm'
+											'doublescale'
 										)}
 									</p>
 								</div>
@@ -516,13 +516,13 @@ const Templates: React.FC = () => {
 								<div className="space-y-4">
 									<div className="grid grid-cols-2 gap-4">
 										<FormField
-											label={__('UTM Source', 'quillcrm')}
+											label={__('UTM Source', 'doublescale')}
 											required={true}
 										>
 											<Input
 												placeholder={__(
 													'Source',
-													'quillcrm'
+													'doublescale'
 												)}
 												value={
 													template.settings
@@ -554,13 +554,13 @@ const Templates: React.FC = () => {
 										</FormField>
 
 										<FormField
-											label={__('UTM Medium', 'quillcrm')}
+											label={__('UTM Medium', 'doublescale')}
 											required={true}
 										>
 											<Input
 												placeholder={__(
 													'Medium',
-													'quillcrm'
+													'doublescale'
 												)}
 												value={
 													template.settings
@@ -594,13 +594,13 @@ const Templates: React.FC = () => {
 
 									<div className="grid grid-cols-2 gap-4">
 										<FormField
-											label={__('UTM Name', 'quillcrm')}
+											label={__('UTM Name', 'doublescale')}
 											required={true}
 										>
 											<Input
 												placeholder={__(
 													'Name',
-													'quillcrm'
+													'doublescale'
 												)}
 												value={
 													template.settings
@@ -630,12 +630,12 @@ const Templates: React.FC = () => {
 										</FormField>
 
 										<FormField
-											label={__('UTM Term', 'quillcrm')}
+											label={__('UTM Term', 'doublescale')}
 										>
 											<Input
 												placeholder={__(
 													'Term',
-													'quillcrm'
+													'doublescale'
 												)}
 												value={
 													template.settings
@@ -660,12 +660,12 @@ const Templates: React.FC = () => {
 									</div>
 
 									<FormField
-										label={__('UTM Content', 'quillcrm')}
+										label={__('UTM Content', 'doublescale')}
 									>
 										<Input
 											placeholder={__(
 												'Content',
-												'quillcrm'
+												'doublescale'
 											)}
 											value={
 												template.settings

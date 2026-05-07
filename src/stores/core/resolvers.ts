@@ -1,7 +1,7 @@
 /**
  * QuillSMTP Dependencies.
  */
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 /**
  * Internal Dependencies.

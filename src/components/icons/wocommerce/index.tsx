@@ -1,4 +1,4 @@
-import { IconProps } from "@quillcrm/config";
+import { IconProps } from "@doublescale/config";
 
 const WocommerceIcon: React.FC<IconProps> = ({ width = 59, height = 35}) => {
 	return (

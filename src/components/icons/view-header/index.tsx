@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ViewIcon: React.FC<IconProps> = ({ width = 24, height = 14 ,color='#1E3A8A' }) => {
 	return (

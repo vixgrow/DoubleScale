@@ -4,7 +4,7 @@
  * Main wrapper with nested tabs for Cron Jobs and Debugging
  *
  * @since 1.0.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 import { useState } from '@wordpress/element';
@@ -20,12 +20,12 @@ const SystemSettings: React.FC = () => {
 	const tabsList = [
 		{
 			value: 'cron',
-			label: __('Cron Jobs', 'quillcrm'),
+			label: __('Cron Jobs', 'doublescale'),
 			icon: <Clock className="h-4 w-4" />,
 		},
 		{
 			value: 'debugging',
-			label: __('Debugging', 'quillcrm'),
+			label: __('Debugging', 'doublescale'),
 			icon: <Bug className="h-4 w-4" />,
 		},
 	];
@@ -33,7 +33,7 @@ const SystemSettings: React.FC = () => {
 	return (
 		<div className="system-settings">
 			<div className="text-[#09090B] font-semibold text-2xl mb-6">
-				{__('System', 'quillcrm')}
+				{__('System', 'doublescale')}
 			</div>
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 				<div className="border px-5 py-3 rounded-lg mb-6">

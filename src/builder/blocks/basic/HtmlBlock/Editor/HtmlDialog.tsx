@@ -61,27 +61,27 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 				<Button className="w-full h-10">
 					{triggerText ||
 						(content === ''
-							? __('Click to edit HTML content', 'quillcrm')
-							: __('Edit HTML content', 'quillcrm'))}
+							? __('Click to edit HTML content', 'doublescale')
+							: __('Edit HTML content', 'doublescale'))}
 				</Button>
 			</DialogTrigger>
 			<DialogOverlay />
 			<DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="text-3xl font-bold">
-						{__('HTML Editor', 'quillcrm')}
+						{__('HTML Editor', 'doublescale')}
 					</DialogTitle>
 					<div className="text-sm text-[#333333]">
 						{__(
 							'Insert here your own html that you want to preview.',
-							'quillcrm'
+							'doublescale'
 						)}
 					</div>
 				</DialogHeader>
 				<div className="grid gap-4">
 					<div className="flex flex-col gap-2 text-[#333333]">
 						<label className="text-sm font-medium">
-							{__('HTML Content', 'quillcrm')}
+							{__('HTML Content', 'doublescale')}
 						</label>
 						<div className="relative flex w-full bg-gray-100 rounded-lg">
 							{/* Line numbers */}
@@ -109,7 +109,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 					</div>
 					<div className="flex flex-col gap-2 text-[#333333]">
 						<label className="text-sm font-medium">
-							{__('Custom CSS', 'quillcrm')}
+							{__('Custom CSS', 'doublescale')}
 						</label>
 						<div className="relative flex w-full bg-gray-100 rounded-lg">
 							{/* Line numbers */}
@@ -135,7 +135,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 						<p className="text-xs text-gray-500">
 							{__(
 								'Enter CSS with selectors and properties. Example: .my-class { color: #333; font-size: 16px; }',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					</div>
@@ -145,7 +145,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 							className="w-full"
 							onClick={handleSaveDialog}
 						>
-							{__('Apply The Code', 'quillcrm')}
+							{__('Apply The Code', 'doublescale')}
 						</Button>
 					</div>
 				</div>

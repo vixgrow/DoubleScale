@@ -10,7 +10,7 @@ import { ManagerRole, ManagerRoleOptions } from './types';
 import {
 	CustomDialogHeader,
 	GradientAddContactIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { InfiniteScrollSelect } from '@/components/infinite-scroll-select';
 
 interface ManagerModalProps {
@@ -100,12 +100,12 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 		// For add mode, require user selection
 		if (!isEditMode && !selectedUserId) {
-			setError(__('Please select a user', 'quillcrm'));
+			setError(__('Please select a user', 'doublescale'));
 			return;
 		}
 
 		if (!selectedRole) {
-			setError(__('Please select a role', 'quillcrm'));
+			setError(__('Please select a role', 'doublescale'));
 			return;
 		}
 
@@ -146,9 +146,9 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			const defaultMessage = isEditMode
 				? __(
 						'Failed to update manager role. Please try again.',
-						'quillcrm'
+						'doublescale'
 					)
-				: __('Failed to add manager. Please try again.', 'quillcrm');
+				: __('Failed to add manager. Please try again.', 'doublescale');
 
 			setError(error?.message || defaultMessage);
 			// Don't close the modal on error so user can retry
@@ -168,31 +168,31 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 	const getTitle = () => {
 		return isEditMode
-			? __('Edit Manager Role', 'quillcrm')
-			: __('Add new Manager', 'quillcrm');
+			? __('Edit Manager Role', 'doublescale')
+			: __('Add new Manager', 'doublescale');
 	};
 
 	const getSubtitle = () => {
 		return isEditMode
-			? __('Update the manager role information below.', 'quillcrm')
-			: __('Add basic information below to add new Manager.', 'quillcrm');
+			? __('Update the manager role information below.', 'doublescale')
+			: __('Add basic information below to add new Manager.', 'doublescale');
 	};
 
 	const getSubmitButtonText = () => {
 		if (isSubmitting) {
 			return isEditMode
-				? __('Updating...', 'quillcrm')
-				: __('Adding...', 'quillcrm');
+				? __('Updating...', 'doublescale')
+				: __('Adding...', 'doublescale');
 		}
 		return isEditMode
-			? __('Update Role', 'quillcrm')
-			: __('Add Manager', 'quillcrm');
+			? __('Update Role', 'doublescale')
+			: __('Add Manager', 'doublescale');
 	};
 
 	const getUserHelperText = () => {
 		return isEditMode
-			? __('User cannot be changed', 'quillcrm')
-			: __('Please select an existing WordPress user', 'quillcrm');
+			? __('User cannot be changed', 'doublescale')
+			: __('Please select an existing WordPress user', 'doublescale');
 	};
 
 	return (
@@ -219,7 +219,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					{/* User Selection Section */}
 					<div className="mb-6">
 						<label className="block text-[#09090B] font-normal text-base mb-2">
-							{__('Select User', 'quillcrm')}
+							{__('Select User', 'doublescale')}
 							{!isEditMode && (
 								<span className="text-red-500 ml-1">*</span>
 							)}
@@ -240,7 +240,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 									onValueChange={handleUserChange}
 									placeholder={__(
 										'Select a WordPress user',
-										'quillcrm'
+										'doublescale'
 									)}
 									apiEndpoint="/qc/v1/user-management/users/frontend"
 									searchParamName="search"
@@ -266,8 +266,8 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					<div className="">
 						<div className="text-[#09090B] font-normal text-base">
 							{isEditMode
-								? __('Role', 'quillcrm')
-								: __('Roles', 'quillcrm')}
+								? __('Role', 'doublescale')
+								: __('Roles', 'doublescale')}
 						</div>
 
 						<RadioGroup
@@ -289,7 +289,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 										htmlFor={role.id}
 										className="text-sm font-normal text-gray-700 cursor-pointer"
 									>
-										{__(role.label, 'quillcrm')}
+										{__(role.label, 'doublescale')}
 									</Label>
 								</div>
 							))}

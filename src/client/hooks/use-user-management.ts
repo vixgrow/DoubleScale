@@ -27,7 +27,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const { createNotice } = useDispatch('quillcrm/core');
+    const { createNotice } = useDispatch('doublescale/core');
 
     /**
      * Fetch all CRM users
@@ -40,7 +40,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
         } catch (error) {
             createNotice({
                 type: 'error',
-                message: __('Failed to fetch CRM users', 'quillcrm'),
+                message: __('Failed to fetch CRM users', 'doublescale'),
             });
         } finally {
             setIsLoading(false);
@@ -58,7 +58,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
             if (response.success) {
                 createNotice({
                     type: 'success',
-                    message: response.message || __('User added successfully', 'quillcrm'),
+                    message: response.message || __('User added successfully', 'doublescale'),
                 });
 
                 // Add user to local state
@@ -69,7 +69,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
             }
         } catch (error: any) {
             // Extract error message from WordPress REST API error format
-            let errorMessage = __('Failed to add user', 'quillcrm');
+            let errorMessage = __('Failed to add user', 'doublescale');
 
             if (error?.data?.message) {
                 errorMessage = error.data.message;
@@ -101,7 +101,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
             if (response.success) {
                 createNotice({
                     type: 'success',
-                    message: response.message || __('User role updated successfully', 'quillcrm'),
+                    message: response.message || __('User role updated successfully', 'doublescale'),
                 });
 
                 // Update user in local state
@@ -123,7 +123,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
         } catch (error: any) {
             createNotice({
                 type: 'error',
-                message: error?.message || __('Failed to update user role', 'quillcrm'),
+                message: error?.message || __('Failed to update user role', 'doublescale'),
             });
             return false;
         } finally {
@@ -142,7 +142,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
             if (response.success) {
                 createNotice({
                     type: 'success',
-                    message: response.message || __('User CRM access removed successfully', 'quillcrm'),
+                    message: response.message || __('User CRM access removed successfully', 'doublescale'),
                 });
 
                 // Remove user from local state
@@ -154,7 +154,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
         } catch (error: any) {
             createNotice({
                 type: 'error',
-                message: error?.message || __('Failed to remove user', 'quillcrm'),
+                message: error?.message || __('Failed to remove user', 'doublescale'),
             });
             return false;
         } finally {

@@ -40,9 +40,9 @@ import {
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import { Automation } from '@quillcrm/client';
-import ConfigAPI from '@quillcrm/config';
-import { convertDate } from '@quillcrm/utils';
+import { Automation } from '@doublescale/client';
+import ConfigAPI from '@doublescale/config';
+import { convertDate } from '@doublescale/utils';
 
 interface WebhookFieldsProps {
 	values: { [key: string]: any };
@@ -55,7 +55,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 	const { webhook_key, payload, received_at, mapped_fields } = values;
 	const contactFieldsGroups = ConfigAPI.getContactFieldsGroups();
 	const adminUrl = ConfigAPI.getSiteUrl();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchAutomation = async () => {
 		setLoading(true);
@@ -69,7 +69,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch automation', 'quillcrm'),
+				message: __('Failed to fetch automation', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -81,11 +81,11 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 			<div className="flex flex-col gap-2.5">
 				<p className="text-base font-normal text-[#09090B]">{__('Webhook URL')}</p>
 				<Input
-					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?quillcrm_key=${webhook_key}&quillcrm_id=${automation?.id}`}
+					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?doublescale_key=${webhook_key}&doublescale_id=${automation?.id}`}
 					readOnly
 				/>
 				<p className="text-sm text-muted-foreground">
-					{__('Use this URL to send data to QuillCRM.')}
+					{__('Use this URL to send data to DoubleScale.')}
 				</p>
 			</div>
 			<div className="flex flex-col gap-2.5">
@@ -145,7 +145,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 											value={mapped_fields?.[key] || ''}
 										>
 											<SelectTrigger className="flex-1">
-												<SelectValue placeholder={__('Select field', 'quillcrm')} />
+												<SelectValue placeholder={__('Select field', 'doublescale')} />
 											</SelectTrigger>
 											<SelectContent className="max-h-[250px] overflow-y-auto">
 												{map(

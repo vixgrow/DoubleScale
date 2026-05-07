@@ -1,5 +1,5 @@
 /**
- * QuillCRM Website Tracking
+ * DoubleScale Website Tracking
  *
  * Tracks page visits and stores them for known/anonymous contacts.
  *
@@ -8,7 +8,7 @@
 (function () {
     'use strict';
 
-    const config = window.quillcrm_tracking_config || {};
+    const config = window.doublescale_tracking_config || {};
 
     const {
         rest_url,
@@ -126,7 +126,7 @@
                 storePageVisitInCookie(false);
             }
         } catch (error) {
-            console.warn('QuillCRM tracking error:', error);
+            console.warn('DoubleScale tracking error:', error);
             storePageVisitInCookie(false);
         }
     };
@@ -152,7 +152,7 @@
     }
 
     // Expose for external use
-    window.QuillCRMTracking = {
+    window.DoubleScaleTracking = {
         init,
         sendPageView,
         getVisitedPages,

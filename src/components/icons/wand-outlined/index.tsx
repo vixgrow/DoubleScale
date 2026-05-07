@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const WandOutlinedIcon: React.FC<IconProps> = ({ width = 21, height = 20 }) => {
 	return (

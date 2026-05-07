@@ -14,12 +14,12 @@ import { map, mapValues } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
-import type { Form } from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
+import type { Form } from '@doublescale/config';
 import AjaxSelect from './ajax-select';
-import type { MappedFields } from '@quillcrm/client';
-import { Card, CardContent } from '@quillcrm/components/ui/card';
-import { Skeleton } from '@quillcrm/components/ui/skeleton';
+import type { MappedFields } from '@doublescale/client';
+import { Card, CardContent } from '@doublescale/components/ui/card';
+import { Skeleton } from '@doublescale/components/ui/skeleton';
 import MappingDialog from './mapping-dialog';
 
 interface FormFieldsProps {
@@ -41,7 +41,7 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 	const fieldsSettings = form_type ? forms[form_type]?.fields_settings : null;
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const formOptions = form_type ? forms[form_type]?.options : {};
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const checkConditions = (conditions) => {
 		if (!conditions) {
@@ -121,7 +121,7 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch form fields', 'quillcrm'),
+				message: __('Failed to fetch form fields', 'doublescale'),
 			});
 		} finally {
 			setIsFetching(false);

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ActionIcon: React.FC<IconProps> = ({ width = 28, height = 28 }) => {
 	return (

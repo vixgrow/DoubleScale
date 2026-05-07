@@ -9,7 +9,7 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { useRegisteredBlocks } from '../../stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
-import { DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@doublescale/components';
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '../utils/templateUtils';
 import { ImageResizeHandles } from './ImageResizeHandles';
@@ -174,7 +174,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 					/>
 				) : (
 					<div className="text-muted-foreground">
-						{__('No renderer available', 'quillcrm')}
+						{__('No renderer available', 'doublescale')}
 					</div>
 				)}
 			</div>

@@ -16,8 +16,8 @@ import { applyFilters } from '@wordpress/hooks';
  * Internal dependencies
  */
 import './style.scss';
-import type { Integration as IntegrationType } from '@quillcrm/config';
-import type { NoticeMessage } from '@quillcrm/client';
+import type { Integration as IntegrationType } from '@doublescale/config';
+import type { NoticeMessage } from '@doublescale/client';
 import {
 	Dialog,
 	DialogContent,
@@ -32,9 +32,9 @@ import {
 import Credentials from './credentials';
 import App from './app';
 import Instructions from './instructions';
-import { Button } from '@quillcrm/components/ui/button';
-import { NoticeBanner } from '@quillcrm/components';
-import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
+import { Button } from '@doublescale/components/ui/button';
+import { NoticeBanner } from '@doublescale/components';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 
 interface IntegrationProps {
 	open: boolean;
@@ -78,7 +78,7 @@ const Integration: React.FC<IntegrationProps> = ({
 }) => {
 	const { fields, label, description, is_pro } = integration;
 	const isAppBased = !!fields.app;
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	const isProFeature = is_pro === true && !isProActive;
 
 	const [fieldsValue, setFieldsValue] = useState<Record<string, any>>({});
@@ -145,7 +145,7 @@ const Integration: React.FC<IntegrationProps> = ({
 				onSuccess?.(label);
 			}
 		} catch (error) {
-			showError(error, __('Failed to save settings', 'quillcrm'));
+			showError(error, __('Failed to save settings', 'doublescale'));
 		} finally {
 			setIsSaving(false);
 		}
@@ -158,7 +158,7 @@ const Integration: React.FC<IntegrationProps> = ({
 			});
 			window.location.href = response.auth_uri;
 		} catch (error) {
-			showError(error, __('Failed to get auth url', 'quillcrm'));
+			showError(error, __('Failed to get auth url', 'doublescale'));
 		} finally {
 			setIsSaving(false);
 		}
@@ -177,7 +177,7 @@ const Integration: React.FC<IntegrationProps> = ({
 				<DialogHeader className="pb-0 border-b border-[#E4E7EC] h-14">
 					<DialogTitle className="px-12 pb-4 pt-2">
 						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
-							{__('Integrations', 'quillcrm')}
+							{__('Integrations', 'doublescale')}
 							<ChevronRight className="w-4 h-4 text-[#667085]" />
 							{label}
 						</h1>
@@ -221,7 +221,7 @@ const Integration: React.FC<IntegrationProps> = ({
 										// Allow Pro plugin to override credentials component
 										// Pro plugin provides custom components for Twilio and Meta WhatsApp
 										const CredentialsComponent = applyFilters(
-											'quillcrm_integration_credentials_component',
+											'doublescale_integration_credentials_component',
 											Credentials,
 											slug
 										) as React.ComponentType<{
@@ -255,8 +255,8 @@ const Integration: React.FC<IntegrationProps> = ({
 									variant="gradient"
 								>
 										{isSaving
-											? __('Connecting...', 'quillcrm')
-											: __(`Connect ${label}`, 'quillcrm')}
+											? __('Connecting...', 'doublescale')
+											: __(`Connect ${label}`, 'doublescale')}
 									</Button>
 								</CardFooter>
 							</Card>

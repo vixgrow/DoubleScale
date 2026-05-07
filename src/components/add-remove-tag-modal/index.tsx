@@ -22,8 +22,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import './style.scss';
-import type { Tag as TagType, TagsResponse } from '@quillcrm/client';
-import { CustomDialogHeader, GradientTagIcon, Tag } from '@quillcrm/components';
+import type { Tag as TagType, TagsResponse } from '@doublescale/client';
+import { CustomDialogHeader, GradientTagIcon, Tag } from '@doublescale/components';
 
 // Define the option type for react-select
 interface SelectOption {
@@ -122,27 +122,27 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 	const getModalContent = () => {
 		if (mode === 'remove') {
 			return {
-				title: __('Remove Tags', 'quillcrm'),
-				subtitle: __('Select tags to remove from contacts', 'quillcrm'),
+				title: __('Remove Tags', 'doublescale'),
+				subtitle: __('Select tags to remove from contacts', 'doublescale'),
 				description: __(
 					`Remove selected tag(s) from ${selectedCount} contact(s)`,
-					'quillcrm'
+					'doublescale'
 				),
-				selectLabel: __('Select Tag to Remove', 'quillcrm'),
-				selectPlaceholder: __('Select Tag to Remove', 'quillcrm'),
-				buttonText: __('Remove Tags', 'quillcrm'),
+				selectLabel: __('Select Tag to Remove', 'doublescale'),
+				selectPlaceholder: __('Select Tag to Remove', 'doublescale'),
+				buttonText: __('Remove Tags', 'doublescale'),
 			};
 		} else {
 			return {
-				title: __('Add Tags', 'quillcrm'),
-				subtitle: __('Select tags to add to contacts', 'quillcrm'),
+				title: __('Add Tags', 'doublescale'),
+				subtitle: __('Select tags to add to contacts', 'doublescale'),
 				description: __(
 					`Add selected tag(s) to ${selectedCount} contact(s)`,
-					'quillcrm'
+					'doublescale'
 				),
-				selectLabel: __('Select Tag', 'quillcrm'),
-				selectPlaceholder: __('Select Tag', 'quillcrm'),
-				buttonText: __('Add Tags', 'quillcrm'),
+				selectLabel: __('Select Tag', 'doublescale'),
+				selectPlaceholder: __('Select Tag', 'doublescale'),
+				buttonText: __('Add Tags', 'doublescale'),
 			};
 		}
 	};

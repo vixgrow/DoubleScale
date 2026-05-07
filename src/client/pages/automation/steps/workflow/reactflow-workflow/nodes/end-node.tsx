@@ -15,7 +15,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import StepReorderControls from '../components/step-reorder-controls';
 import NodeActionsDropdown from '../components/node-actions-dropdown';
@@ -31,7 +31,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	const { step, selectedStepId, viewMode = false } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const getNewSteps = () => {
 		const updatedOrdersSteps = {};
@@ -88,7 +88,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 			createNotice({
 				type: 'success',
-				message: __('Step deleted', 'quillcrm'),
+				message: __('Step deleted', 'doublescale'),
 			});
 		} catch (error: any) {
 			createNotice({
@@ -121,20 +121,20 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 				<NodeActionsDropdown
 					onDelete={handleDelete}
 					showEdit={false}
-					deleteLabel={__('Delete End Node', 'quillcrm')}
-					deleteTitle={__('Delete this end node?', 'quillcrm')}
+					deleteLabel={__('Delete End Node', 'doublescale')}
+					deleteTitle={__('Delete this end node?', 'doublescale')}
 					deleteDescription={__(
 						'This action cannot be undone.',
-						'quillcrm'
+						'doublescale'
 					)}
 				/>
 
 				<div className="qcrm-reactflow-node__content">
 					<div className="qcrm-reactflow-node__title">
-						{__('End Automation', 'quillcrm')}
+						{__('End Automation', 'doublescale')}
 					</div>
 					<div className="qcrm-reactflow-node__subtitle">
-						{__('Stop', 'quillcrm')}
+						{__('Stop', 'doublescale')}
 					</div>
 				</div>
 			</div>

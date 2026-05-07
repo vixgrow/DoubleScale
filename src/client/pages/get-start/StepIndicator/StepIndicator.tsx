@@ -1,5 +1,5 @@
 
-import NextStepIcon from "@quillcrm/components/icons/next-step";
+import NextStepIcon from "@doublescale/components/icons/next-step";
 export const StepIndicator = ({ step, currentStep, label, icon, isLast }) => {
   const isActive = currentStep === step;
   const isCompleted = currentStep > step;

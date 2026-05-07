@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import type { Tag as ContactTag, TagsResponse } from '@quillcrm/client';
+import type { Tag as ContactTag, TagsResponse } from '@doublescale/client';
 import { isEmpty } from 'validator';
 
 /**
@@ -28,7 +28,7 @@ type TagsProps = Readonly<{
 }>;
 
 export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [newSegment, setNewSegment] = useState<NewSegment>({
 		name: '',
 		slug: '',
@@ -86,7 +86,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('Tag created successfully', 'quillcrm'),
+				message: __('Tag created successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -98,7 +98,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to create tag', 'quillcrm')
+					__('Failed to create tag', 'doublescale')
 				),
 			});
 		} finally {
@@ -147,7 +147,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('Tag updated successfully', 'quillcrm'),
+				message: __('Tag updated successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -159,7 +159,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to update tag', 'quillcrm')
+					__('Failed to update tag', 'doublescale')
 				),
 			});
 		} finally {
@@ -179,7 +179,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('Tag deleted successfully', 'quillcrm'),
+				message: __('Tag deleted successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -191,7 +191,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to delete tag', 'quillcrm')
+					__('Failed to delete tag', 'doublescale')
 				),
 			});
 		} finally {
@@ -205,13 +205,13 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				<h3 className="text-[#170F49] text-[32px] font-semibold">
 					{__(
 						'Tag Your Contacts—Organize CRM Segments with Ease',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 				<p className="text-[#777] text-lg font-normal leading-7">
 					{__(
 						'Add tags to your contacts to label VIPs, product users, and more—making it easier to filter, track, and personalize your CRM outreach. Smart tagging helps you stay organized and automate actions with precision.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>
@@ -254,25 +254,25 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				onChangePage={setPage}
 				emptyMessage={__(
 					'No tags yet. Create your first tag above.',
-					'quillcrm'
+					'doublescale'
 				)}
 				deleteConfirmationMessage={__(
 					'Are you sure you want to delete this tag?',
-					'quillcrm'
+					'doublescale'
 				)}
 			/>
 
 			<div className="flex justify-between pt-8">
 				<div className="flex gap-2">
 					<ButtonComponent onClick={onPrevious} type="" disabled={isSaving}>
-						{__('Previous', 'quillcrm')}
+						{__('Previous', 'doublescale')}
 					</ButtonComponent>
 					<ButtonComponent type="no" onClick={onSkip} disabled={isSaving}>
-						{__('Skip →', 'quillcrm')}
+						{__('Skip →', 'doublescale')}
 					</ButtonComponent>
 				</div>
 				<ButtonComponent type="go" onClick={onNext} disabled={isSaving}>
-					{__('Next Step', 'quillcrm')}
+					{__('Next Step', 'doublescale')}
 				</ButtonComponent>
 			</div>
 		</div>

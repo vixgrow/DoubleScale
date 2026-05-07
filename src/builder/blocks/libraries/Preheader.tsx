@@ -9,7 +9,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 
 const PreheaderLibrary = () => {
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 
 	// Text & Link template
 	const textAndLinkTemplate = {
@@ -38,7 +38,7 @@ const PreheaderLibrary = () => {
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Text & Link', 'quillcrm')}
+					{__('Text & Link', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={textAndLinkTemplate}
@@ -48,10 +48,10 @@ const PreheaderLibrary = () => {
 				>
 					<div className="flex gap-1 items-center border rounded-lg p-3 text-[10px]">
 						<div className="text-[#9197A4]">
-							{__('If you cannot see images, Please', 'quillcrm')}
+							{__('If you cannot see images, Please', 'doublescale')}
 						</div>
 						<div className="text-secondary underline font-extrabold">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
-import { CopyIcon, DeleteIcon } from '@quillcrm/components';
+import { CopyIcon, DeleteIcon } from '@doublescale/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { DropIndicator } from './DropIndicator';
 import ConditionalSectionGate from './ConditionalSectionGate';
@@ -55,7 +55,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -131,7 +131,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
 						<path d="M16 3.13a4 4 0 0 1 0 7.75" />
 					</svg>
-					{__('Conditional', 'quillcrm')}
+					{__('Conditional', 'doublescale')}
 				</div>
 			)}
 
@@ -143,7 +143,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						size="lg"
 						className="h-6 w-6 p-0 text-secondary-foreground hover:text-red-700"
 						onClick={handleDeleteSection}
-						title={__('Delete', 'quillcrm')}
+						title={__('Delete', 'doublescale')}
 					>
 						<DeleteIcon width={24} height={24} />
 					</Button>
@@ -153,7 +153,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						size="lg"
 						className="h-6 w-6 p-0 text-secondary-foreground"
 						onClick={handleDuplicateSection}
-						title={__('Duplicate', 'quillcrm')}
+						title={__('Duplicate', 'doublescale')}
 					>
 						<CopyIcon width={24} height={24} />
 					</Button>
@@ -168,8 +168,8 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						}}
 						title={
 							isProActive
-								? __('Conditions', 'quillcrm')
-								: __('Conditions (Pro Feature)', 'quillcrm')
+								? __('Conditions', 'doublescale')
+								: __('Conditions (Pro Feature)', 'doublescale')
 						}
 					>
 						<Filter className="w-6 h-6" />
@@ -180,7 +180,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						size="lg"
 						className="h-6 w-6 p-0 text-secondary-foreground"
 						onClick={handleMoveSectionUp}
-						title={__('Move Up', 'quillcrm')}
+						title={__('Move Up', 'doublescale')}
 					>
 						<ArrowUp className="w-6 h-6" />
 					</Button>
@@ -190,7 +190,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						size="lg"
 						className="h-6 w-6 p-0 text-secondary-foreground"
 						onClick={handleMoveSectionDown}
-						title={__('Move Down', 'quillcrm')}
+						title={__('Move Down', 'doublescale')}
 					>
 						<ArrowDown className="w-6 h-6" />
 					</Button>

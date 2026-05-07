@@ -6,9 +6,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { Settings } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
-import ConfigAPI from '@quillcrm/config';
+import type { Settings } from '@doublescale/client';
+import { Field } from '@doublescale/components';
+import ConfigAPI from '@doublescale/config';
 
 interface BusinessSettingsProps {
     settings: Settings;
@@ -31,15 +31,15 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
     };
     return (
         <div className="business-settings qcrm-fields">
-            <div className="text-[#09090B] font-semibold text-2xl">{__('Business', 'quillcrm')}</div>
+            <div className="text-[#09090B] font-semibold text-2xl">{__('Business', 'doublescale')}</div>
             <Field
-                label={__('Business Name', 'quillcrm')}
+                label={__('Business Name', 'doublescale')}
                 value={business_name || ConfigAPI.getBlogName()}
                 onChange={(value) => handleFieldChange('business_name', value)}
                 type="text"
             />
             <Field
-                label={__('Business Address', 'quillcrm')}
+                label={__('Business Address', 'doublescale')}
                 value={business_address}
                 onChange={(value) =>
                     handleFieldChange('business_address', value)

@@ -22,7 +22,7 @@ import {
 	Field,
 	CustomDialogHeader,
 	GradientAddContactIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { useContactsContext } from '../contexts';
 import { useContactsAPI } from '../useContactsAPI';
 import ImportModal from '../../../import-modal';
@@ -66,10 +66,10 @@ export const CreateContactModal: React.FC = () => {
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={__('Create Contact', 'quillcrm')}
+							title={__('Create Contact', 'doublescale')}
 							subtitle={__(
 								'Add basic information below to add new Contact',
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<GradientAddContactIcon />}
 						/>
@@ -78,8 +78,8 @@ export const CreateContactModal: React.FC = () => {
 
 				<div className="qcrm-fields space-y-5 h-[calc(90vh-13rem)] overflow-y-auto">
 					<Field
-						label={__('First Name', 'quillcrm')}
-						placeholder={__('Enter First Name', 'quillcrm')}
+						label={__('First Name', 'doublescale')}
+						placeholder={__('Enter First Name', 'doublescale')}
 						value={contactForm.first_name}
 						onChange={(value) =>
 							setContactForm((prev) => ({
@@ -90,7 +90,7 @@ export const CreateContactModal: React.FC = () => {
 						type="text"
 					/>
 					<Field
-						label={__('Last Name', 'quillcrm')}
+						label={__('Last Name', 'doublescale')}
 						value={contactForm.last_name}
 						onChange={(value) =>
 							setContactForm((prev) => ({
@@ -99,11 +99,11 @@ export const CreateContactModal: React.FC = () => {
 							}))
 						}
 						type="text"
-						placeholder={__('Enter Last Name', 'quillcrm')}
+						placeholder={__('Enter Last Name', 'doublescale')}
 					/>
 
 					<Field
-						label={__('Email', 'quillcrm')}
+						label={__('Email', 'doublescale')}
 						value={contactForm.email}
 						onChange={(value) =>
 							setContactForm((prev) => ({
@@ -112,10 +112,10 @@ export const CreateContactModal: React.FC = () => {
 							}))
 						}
 						type="email"
-						placeholder={__('Enter Email', 'quillcrm')}
+						placeholder={__('Enter Email', 'doublescale')}
 					/>
 					<Field
-						label={__('Phone', 'quillcrm')}
+						label={__('Phone', 'doublescale')}
 						value={contactForm.phone}
 						onChange={(value) => {
 							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
@@ -128,10 +128,10 @@ export const CreateContactModal: React.FC = () => {
 							}
 						}}
 						type="tel"
-						placeholder={__('Enter Phone Number', 'quillcrm')}
+						placeholder={__('Enter Phone Number', 'doublescale')}
 					/>
 					<Field
-						label={__('WhatsApp Phone', 'quillcrm')}
+						label={__('WhatsApp Phone', 'doublescale')}
 						value={contactForm.whatsapp_phone}
 						onChange={(value) => {
 							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
@@ -144,8 +144,8 @@ export const CreateContactModal: React.FC = () => {
 							}
 						}}
 						type="tel"
-						placeholder={__('Enter WhatsApp Phone Number', 'quillcrm')}
-						helperText={__('Phone number for WhatsApp messaging (e.g., +1234567890)', 'quillcrm')}
+						placeholder={__('Enter WhatsApp Phone Number', 'doublescale')}
+						helperText={__('Phone number for WhatsApp messaging (e.g., +1234567890)', 'doublescale')}
 					/>
 				</div>
 
@@ -158,8 +158,8 @@ export const CreateContactModal: React.FC = () => {
 						className="w-full"
 					>
 						{isSaving
-							? __('Submitting...', 'quillcrm')
-							: __('Submit', 'quillcrm')}
+							? __('Submitting...', 'doublescale')
+							: __('Submit', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -194,7 +194,7 @@ export const ContactsExportModal: React.FC = () => {
 
 	// Apply filter to allow Pro plugin to override
 	const ExportModalComponent = applyFilters(
-		'quillcrm_export_modal_component',
+		'doublescale_export_modal_component',
 		ExportModal,
 		'contacts'
 	) as React.FC<{ open: boolean; onClose: () => void }>;

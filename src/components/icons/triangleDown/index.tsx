@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const TriangleDownIcon: React.FC<IconProps> = ({ width = 13, height = 11 }) => {
 	return (

@@ -6,7 +6,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * internal dependencies
  */
-import { MerageTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
 
 export interface InputWithMergeTagsProps {
@@ -35,7 +35,7 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
     fieldName,
 }) => {
     const { setMergeTagsVisible, setMergeTagCallback } =
-        useDispatch('quillcrm/core');
+        useDispatch('doublescale/core');
 
     const handleMergeTagClick = () => {
         setMergeTagCallback((tagValue: string) => {

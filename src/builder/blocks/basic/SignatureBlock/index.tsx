@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { SignatureBlockIcon } from '@quillcrm/components';
+import { SignatureBlockIcon } from '@doublescale/components';
 import { SignatureBlockRenderer } from './Renderer';
 import { SignatureBlockEditor } from './Editor';
 
@@ -20,7 +20,7 @@ export interface SignatureBlockProps {
 
 const SignatureBlock = {
 	type: 'signature',
-	name: __('Signature', 'quillcrm'),
+	name: __('Signature', 'doublescale'),
 	icon: SignatureBlockIcon,
 	isProActivated: false,
 	isPro: false,

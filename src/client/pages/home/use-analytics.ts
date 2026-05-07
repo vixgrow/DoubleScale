@@ -19,13 +19,13 @@ import type {
 	DashboardData,
 	ContactAnalytics,
 	EmailsAnalytics,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 // Dashboard data hook
 export const useDashboardData = () => {
 	const [data, setData] = useState<DashboardData | null>(null);
 	const [loading, setLoading] = useState(true);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchDashboardData = useCallback(async () => {
 		setLoading(true);
@@ -38,7 +38,7 @@ export const useDashboardData = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching dashboard data', 'quillcrm'),
+				message: __('Error fetching dashboard data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -59,7 +59,7 @@ export const useContactAnalytics = () => {
 	const [interval, setInterval] = useState<string>('today');
 	const [startDate, setStartDate] = useState<Date>(new Date());
 	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchContactAnalytics = useCallback(async () => {
 		setLoading(true);
@@ -76,7 +76,7 @@ export const useContactAnalytics = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
+				message: __('Error fetching analytics data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -107,7 +107,7 @@ export const useEmailAnalytics = () => {
 	const [interval, setInterval] = useState<string>('today');
 	const [startDate, setStartDate] = useState<Date>(new Date());
 	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchEmailAnalytics = useCallback(async () => {
 		setLoading(true);
@@ -125,7 +125,7 @@ export const useEmailAnalytics = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
+				message: __('Error fetching analytics data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);

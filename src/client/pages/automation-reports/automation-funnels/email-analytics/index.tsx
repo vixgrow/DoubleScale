@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import React from 'react';
-import { Automation } from '@quillcrm/client';
+import { Automation } from '@doublescale/client';
 
 interface EmailAnalyticsProps {
 	automation: Automation | null;

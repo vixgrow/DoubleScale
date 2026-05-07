@@ -19,7 +19,7 @@ interface UsePluginInstallerReturn {
 }
 
 export function usePluginInstaller(): UsePluginInstallerReturn {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
 	const checkPluginStatus = async (
@@ -52,7 +52,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 			const errorMessage =
 				error?.message ||
 				error?.data?.message ||
-				__('Failed to check plugin status', 'quillcrm');
+				__('Failed to check plugin status', 'doublescale');
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -67,7 +67,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 				type: 'error',
 				message: __(
 					'Plugin information is incomplete. Cannot install.',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return false;
@@ -88,7 +88,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 
 			createNotice({
 				type: 'success',
-				message: __('Plugin installed successfully', 'quillcrm'),
+				message: __('Plugin installed successfully', 'doublescale'),
 			});
 
 			// Return the actual plugin file path from the server response
@@ -99,7 +99,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 			const errorMessage =
 				error?.message ||
 				error?.data?.message ||
-				__('Failed to install plugin', 'quillcrm');
+				__('Failed to install plugin', 'doublescale');
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -123,7 +123,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 
 			createNotice({
 				type: 'success',
-				message: __('Plugin activated successfully', 'quillcrm'),
+				message: __('Plugin activated successfully', 'doublescale'),
 			});
 
 			return true;
@@ -132,7 +132,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 			const errorMessage =
 				error?.message ||
 				error?.data?.message ||
-				__('Failed to activate plugin', 'quillcrm');
+				__('Failed to activate plugin', 'doublescale');
 			createNotice({
 				type: 'error',
 				message: errorMessage,

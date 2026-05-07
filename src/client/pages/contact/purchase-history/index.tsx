@@ -13,7 +13,7 @@ import { useDispatch } from '@wordpress/data';
 import './style.scss';
 import type { PurchaseHistory as PurchaseHistoryType } from '../state/types';
 import { useContactContext } from '../state/context';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import {
 	TotalOrdersIcon,
 	TotalRevenueIcon,
@@ -21,10 +21,10 @@ import {
 	AnalyticsReportsIcon,
 	MessageStatsCard,
 	NoData,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getWooColumns, getEddColumns, getSurecartColumns } from './columns';
 
 interface PurchaseHistoryProps {
@@ -46,7 +46,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 	const isEddActive = ConfigAPI.isEddActive();
 	const isWooActive = ConfigAPI.isWoocommerceActive();
 	const isSurecartActive = ConfigAPI.isSurecartActive();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const wooServerSideTable = useServerSideTable({
 		page: wooPage,
@@ -119,14 +119,14 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 			{isWooActive && (
 				<div className="flex flex-col gap-5">
 					<h3 className="text-2xl font-semibold">
-						{__('WooCommerce Purchase History', 'quillcrm')}
+						{__('WooCommerce Purchase History', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
 						<div className="flex gap-5">
 							<MessageStatsCard
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.wc.total}
-								label={__('Total Orders', 'quillcrm')}
+								label={__('Total Orders', 'doublescale')}
 								iconBgClass="bg-[#E4EEFD]"
 								borderColorClass="border-l-secondary"
 								iconColor="text-[#458DC7]"
@@ -134,7 +134,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
 								value={`${purchaseHistory.wc.revenue} ${purchaseHistory.wc.currency}`}
-								label={__('Total Revenue', 'quillcrm')}
+								label={__('Total Revenue', 'doublescale')}
 								iconBgClass="bg-[#D1F6DF]"
 								borderColorClass="border-l-[#16A34A]"
 								iconColor="text-[#16A34A]"
@@ -142,7 +142,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.wc.average || '0'} ${purchaseHistory.wc.currency}`}
-								label={__('Average Order Value', 'quillcrm')}
+								label={__('Average Order Value', 'doublescale')}
 								iconBgClass="bg-[#EEE4FF]"
 								borderColorClass="border-l-[#660FF1]"
 								iconColor="text-[#660FF1]"
@@ -155,8 +155,8 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							purchaseHistory.wc.orders.length === 0 ? (
 							<NoData
 								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
-								title={__('No purchase history', 'quillcrm')}
-								subtitle={__('No WooCommerce purchase history found for this contact.', 'quillcrm')}
+								title={__('No purchase history', 'doublescale')}
+								subtitle={__('No WooCommerce purchase history found for this contact.', 'doublescale')}
 							/>
 						) : (
 							purchaseHistory &&
@@ -186,14 +186,14 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 			{isEddActive && (
 				<div className="flex flex-col gap-5 border-t border-gray-200 pt-5">
 					<h3 className="text-2xl font-semibold">
-						{__('Easy Digital Downloads', 'quillcrm')}
+						{__('Easy Digital Downloads', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
 						<div className="flex gap-5">
 							<MessageStatsCard
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.edd.total}
-								label={__('Total Orders', 'quillcrm')}
+								label={__('Total Orders', 'doublescale')}
 								iconBgClass="bg-[#E4EEFD]"
 								borderColorClass="border-l-secondary"
 								iconColor="text-[#458DC7]"
@@ -201,7 +201,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
 								value={`${purchaseHistory.edd.revenue} ${purchaseHistory.edd.currency}`}
-								label={__('Total Revenue', 'quillcrm')}
+								label={__('Total Revenue', 'doublescale')}
 								iconBgClass="bg-[#D1F6DF]"
 								borderColorClass="border-l-[#16A34A]"
 								iconColor="text-[#16A34A]"
@@ -209,7 +209,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.edd.average || '0'} ${purchaseHistory.edd.currency}`}
-								label={__('Average Order Value', 'quillcrm')}
+								label={__('Average Order Value', 'doublescale')}
 								iconBgClass="bg-[#EEE4FF]"
 								borderColorClass="border-l-[#660FF1]"
 								iconColor="text-[#660FF1]"
@@ -222,8 +222,8 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							purchaseHistory.edd.orders.length === 0 ? (
 							<NoData
 								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
-								title={__('No purchase history', 'quillcrm')}
-								subtitle={__('No Easy Digital Downloads purchase history found for this contact.', 'quillcrm')}
+								title={__('No purchase history', 'doublescale')}
+								subtitle={__('No Easy Digital Downloads purchase history found for this contact.', 'doublescale')}
 							/>
 						) : (
 							purchaseHistory &&
@@ -253,14 +253,14 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 			{isSurecartActive && (
 				<div className="flex flex-col gap-5 border-t border-gray-200 pt-5">
 					<h3 className="text-2xl font-semibold">
-						{__('SureCart', 'quillcrm')}
+						{__('SureCart', 'doublescale')}
 					</h3>
 					{purchaseHistory && (
 						<div className="flex gap-5">
 							<MessageStatsCard
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.surecart.total}
-								label={__('Total Orders', 'quillcrm')}
+								label={__('Total Orders', 'doublescale')}
 								iconBgClass="bg-[#E4EEFD]"
 								borderColorClass="border-l-secondary"
 								iconColor="text-[#458DC7]"
@@ -268,7 +268,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
 								value={`${purchaseHistory.surecart.revenue?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
-								label={__('Total Revenue', 'quillcrm')}
+								label={__('Total Revenue', 'doublescale')}
 								iconBgClass="bg-[#D1F6DF]"
 								borderColorClass="border-l-[#16A34A]"
 								iconColor="text-[#16A34A]"
@@ -276,7 +276,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.surecart.average?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
-								label={__('Average Order Value', 'quillcrm')}
+								label={__('Average Order Value', 'doublescale')}
 								iconBgClass="bg-[#EEE4FF]"
 								borderColorClass="border-l-[#660FF1]"
 								iconColor="text-[#660FF1]"
@@ -289,8 +289,8 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 							purchaseHistory.surecart.orders.length === 0 ? (
 							<NoData
 								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
-								title={__('No purchase history', 'quillcrm')}
-								subtitle={__('No SureCart purchase history found for this contact.', 'quillcrm')}
+								title={__('No purchase history', 'doublescale')}
+								subtitle={__('No SureCart purchase history found for this contact.', 'doublescale')}
 							/>
 						) : (
 							purchaseHistory &&
@@ -320,8 +320,8 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 			{!loading && !isWooActive && !isEddActive && !isSurecartActive && (
 				<NoData
 					icon={<NoPurchaseHistoryIcon width={120} height={120} />}
-					title={__('No eCommerce platform active', 'quillcrm')}
-					subtitle={__('Activate WooCommerce, Easy Digital Downloads, or SureCart to track purchase history.', 'quillcrm')}
+					title={__('No eCommerce platform active', 'doublescale')}
+					subtitle={__('Activate WooCommerce, Easy Digital Downloads, or SureCart to track purchase history.', 'doublescale')}
 				/>
 			)}
 		</div>

@@ -10,9 +10,9 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { Order, EddOrder, SurecartOrder } from '@quillcrm/client';
-import { Button } from '@quillcrm/components/ui/button';
-import { ViewIcon } from '@quillcrm/components';
+import type { Order, EddOrder, SurecartOrder } from '@doublescale/client';
+import { Button } from '@doublescale/components/ui/button';
+import { ViewIcon } from '@doublescale/components';
 
 /**
  * Format date to "Month Day, Year" format
@@ -38,23 +38,23 @@ export function getWooColumns() {
 	const columns: ColumnDef<Order>[] = [
 		{
 			accessorKey: 'id',
-			header: __('Order ID', 'quillcrm'),
+			header: __('Order ID', 'doublescale'),
 			cell: ({ row }) => row.original.id,
 		},
 		{
 			accessorKey: 'date',
-			header: __('Date', 'quillcrm'),
+			header: __('Date', 'doublescale'),
 			cell: ({ row }) => formatDate(row.original.date.date),
 		},
 		{
 			accessorKey: 'total',
-			header: __('Total', 'quillcrm'),
+			header: __('Total', 'doublescale'),
 			cell: ({ row }) =>
 				`${row.original.total_amount} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'status',
-			header: __('Status', 'quillcrm'),
+			header: __('Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
@@ -75,7 +75,7 @@ export function getWooColumns() {
 
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					size="sm"
@@ -83,7 +83,7 @@ export function getWooColumns() {
 					onClick={() => window.open(row.original.url, '_blank')}
 				>
 					<ViewIcon />
-					{__('View', 'quillcrm')}
+					{__('View', 'doublescale')}
 				</Button>
 			),
 		},
@@ -96,12 +96,12 @@ export function getEddColumns() {
 	const columns: ColumnDef<EddOrder>[] = [
 		{
 			accessorKey: 'id',
-			header: __('Order ID', 'quillcrm'),
+			header: __('Order ID', 'doublescale'),
 			cell: ({ row }) => row.original.id,
 		},
 		{
 			accessorKey: 'date',
-			header: __('Date', 'quillcrm'),
+			header: __('Date', 'doublescale'),
 			cell: ({ row }) =>
 				formatDate(
 					row.original.date_completed || row.original.date_created
@@ -109,7 +109,7 @@ export function getEddColumns() {
 		},
 		{
 			accessorKey: 'status',
-			header: __('Status', 'quillcrm'),
+			header: __('Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
@@ -129,12 +129,12 @@ export function getEddColumns() {
 		},
 		{
 			accessorKey: 'total',
-			header: __('Total', 'quillcrm'),
+			header: __('Total', 'doublescale'),
 			cell: ({ row }) => `${row.original.total} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					size="sm"
@@ -142,7 +142,7 @@ export function getEddColumns() {
 					onClick={() => window.open(row.original.url, '_blank')}
 				>
 					<ViewIcon />
-					{__('View', 'quillcrm')}
+					{__('View', 'doublescale')}
 				</Button>
 			),
 		},
@@ -155,22 +155,22 @@ export function getSurecartColumns() {
 	const columns: ColumnDef<SurecartOrder>[] = [
 		{
 			accessorKey: 'number',
-			header: __('Order #', 'quillcrm'),
+			header: __('Order #', 'doublescale'),
 			cell: ({ row }) => `#${row.original.number}`,
 		},
 		{
 			accessorKey: 'date',
-			header: __('Date', 'quillcrm'),
+			header: __('Date', 'doublescale'),
 			cell: ({ row }) => formatDate(row.original.date),
 		},
 		{
 			accessorKey: 'order_type',
-			header: __('Type', 'quillcrm'),
+			header: __('Type', 'doublescale'),
 			cell: ({ row }) => row.original.order_type,
 		},
 		{
 			accessorKey: 'status',
-			header: __('Status', 'quillcrm'),
+			header: __('Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
@@ -191,13 +191,13 @@ export function getSurecartColumns() {
 		},
 		{
 			accessorKey: 'total_amount',
-			header: __('Total', 'quillcrm'),
+			header: __('Total', 'doublescale'),
 			cell: ({ row }) =>
 				`${row.original.total_amount.toFixed(2)} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					size="sm"
@@ -205,7 +205,7 @@ export function getSurecartColumns() {
 					onClick={() => window.open(row.original.url, '_blank')}
 				>
 					<ViewIcon />
-					{__('View', 'quillcrm')}
+					{__('View', 'doublescale')}
 				</Button>
 			),
 		},

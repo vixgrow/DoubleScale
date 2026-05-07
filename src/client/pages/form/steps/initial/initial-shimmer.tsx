@@ -6,14 +6,14 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Skeleton } from '@quillcrm/components/ui/skeleton';
+import { Skeleton } from '@doublescale/components/ui/skeleton';
 
 const InitialShimmer: React.FC = () => {
     return (
         <div className="qcrm-fields">
             {/* Basic Information Header */}
             <div className="text-[#09090B] font-bold text-2xl mb-4">
-                {__('Basic Information', 'quillcrm')}
+                {__('Basic Information', 'doublescale')}
             </div>
 
             {/* Form Name and Form Selection Row */}

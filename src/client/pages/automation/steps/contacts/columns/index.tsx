@@ -11,15 +11,15 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * internal dependencies
  */
-import type { AutomationContact } from '@quillcrm/client';
+import type { AutomationContact } from '@doublescale/client';
 import {
     SortIcon,
     TimeAgoCell,
     FormattedDateCell,
     ViewIcon,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
-import { NavLink } from '@quillcrm/navigation';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
+import { NavLink } from '@doublescale/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // Helper function to generate contact initials
@@ -40,7 +40,7 @@ export function getColumns({ onViewJourney }) {
                         column.toggleSorting(column.getIsSorted() === 'asc')
                     }
                 >
-                    {__('Contact', 'quillcrm')}
+                    {__('Contact', 'doublescale')}
                     <SortIcon />
                 </div>
             ),
@@ -85,7 +85,7 @@ export function getColumns({ onViewJourney }) {
                         column.toggleSorting(column.getIsSorted() === 'asc')
                     }
                 >
-                    {__('Started At', 'quillcrm')}
+                    {__('Started At', 'doublescale')}
                     <SortIcon />
                 </div>
             ),
@@ -102,7 +102,7 @@ export function getColumns({ onViewJourney }) {
                         column.toggleSorting(column.getIsSorted() === 'asc')
                     }
                 >
-                    {__('Last Run', 'quillcrm')}
+                    {__('Last Run', 'doublescale')}
                     <SortIcon />
                 </div>
             ),
@@ -119,7 +119,7 @@ export function getColumns({ onViewJourney }) {
                         column.toggleSorting(column.getIsSorted() === 'asc')
                     }
                 >
-                    {__('Status', 'quillcrm')}
+                    {__('Status', 'doublescale')}
                     <SortIcon />
                 </div>
             ),
@@ -140,7 +140,7 @@ export function getColumns({ onViewJourney }) {
         },
         {
             accessorKey: 'actions',
-            header: () => __('Actions', 'quillcrm'),
+            header: () => __('Actions', 'doublescale'),
             cell: ({ row }) => {
                 return (
                     <Button
@@ -148,7 +148,7 @@ export function getColumns({ onViewJourney }) {
                         className="text-primary p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
                     >
                         <ViewIcon />
-                        {__('View Journey', 'quillcrm')}
+                        {__('View Journey', 'doublescale')}
                     </Button>
                 );
             },

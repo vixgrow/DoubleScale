@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash';
 /**
  * internal dependencies
  */
-import { DashboardContentCard, ThreeDotsIcon } from '@quillcrm/components';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { DashboardContentCard, ThreeDotsIcon } from '@doublescale/components';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
 	Table,
 	TableBody,
@@ -18,9 +18,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@quillcrm/components/ui/table';
+} from '@doublescale/components/ui/table';
 import { Button } from '@/components/ui/button';
-import type { DashboardData } from '@quillcrm/client';
+import type { DashboardData } from '@doublescale/client';
 import { EmptyState } from '../../no-data';
 
 interface RecentAutomationsTableProps {
@@ -34,7 +34,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 
 	return (
 		<DashboardContentCard
-			title={__('Recent Automations', 'quillcrm')}
+			title={__('Recent Automations', 'doublescale')}
 			cardClassName="w-3/5 h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="automations"
@@ -46,16 +46,16 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 					<Table className="border">
 						<TableHeader className="bg-[#DEE1E666]">
 							<TableRow>
-								<TableHead>{__('ID', 'quillcrm')}</TableHead>
-								<TableHead>{__('Title', 'quillcrm')}</TableHead>
+								<TableHead>{__('ID', 'doublescale')}</TableHead>
+								<TableHead>{__('Title', 'doublescale')}</TableHead>
 								<TableHead>
-									{__('Trigger', 'quillcrm')}
+									{__('Trigger', 'doublescale')}
 								</TableHead>
 								<TableHead>
-									{__('Status', 'quillcrm')}
+									{__('Status', 'doublescale')}
 								</TableHead>
 								<TableHead>
-									{__('Action', 'quillcrm')}
+									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
 						</TableHeader>

@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
-import { getToLink } from '@quillcrm/navigation';
+import { getToLink } from '@doublescale/navigation';
 
 interface DashboardContentProps {
 	title: string;
@@ -51,7 +51,7 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 							to={getToLink(viewAllLinkUrl)}
 							className="text-primary shadow-none text-base bg-transparent hover:bg-transparent p-0 flex items-center gap-1 hover:text-primary/80 transition-colors"
 						>
-							{__('View All', 'quillcrm')}
+							{__('View All', 'doublescale')}
 							<ArrowRight className="size-4" />
 						</Link>
 					</div>

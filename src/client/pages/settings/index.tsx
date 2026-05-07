@@ -13,15 +13,15 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
- * QuillCRM dependencies
+ * DoubleScale dependencies
  */
-import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
+import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Settings, NoticeMessage } from '@quillcrm/client';
+import type { Settings, NoticeMessage } from '@doublescale/client';
 import {
 	PageHeader,
 	NoticeBanner,
@@ -40,10 +40,10 @@ import {
 	LinkTriggersIcon,
 	WhatsAppIcon,
 	WebsiteIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Bell } from 'lucide-react';
-import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
@@ -130,7 +130,7 @@ const SettingsPage: React.FC = () => {
 		} catch (error) {
 			setNotice({
 				type: 'error',
-				message: __('Failed to fetch settings', 'quillcrm'),
+				message: __('Failed to fetch settings', 'doublescale'),
 			});
 		} finally {
 			setIsLoading(false);
@@ -166,12 +166,12 @@ const SettingsPage: React.FC = () => {
 				// Show success message if no warnings
 				setNotice({
 					type: 'success',
-					message: __('Settings updated successfully', 'quillcrm'),
+					message: __('Settings updated successfully', 'doublescale'),
 				});
 			}
 		} catch (error: any) {
 			// Extract error message from API response
-			let errorMessage = __('Failed to update settings', 'quillcrm');
+			let errorMessage = __('Failed to update settings', 'doublescale');
 
 			if (error?.message) {
 				errorMessage = error.message;
@@ -237,7 +237,7 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'email':
 				const EmailComponent = applyFilters(
-					'quillcrm_settings_email_settings',
+					'doublescale_settings_email_settings',
 					EmailSettings
 				) as React.ComponentType<{
 					settings: Settings;
@@ -251,19 +251,19 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'smtp':
 				const SMTPComponent = applyFilters(
-					'quillcrm_settings_smtp_settings',
+					'doublescale_settings_smtp_settings',
 					SMTPSettings
 				) as React.ComponentType;
 				return <SMTPComponent />;
 			case 'sms':
 				const SMSComponent = applyFilters(
-					'quillcrm_settings_sms_settings',
+					'doublescale_settings_sms_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('SMS Settings', 'quillcrm')}
+							featureName={__('SMS Settings', 'doublescale')}
 							description={__(
-								'Configure SMS sending rate limits and manage SMS campaign settings with QuillCRM Pro.',
-								'quillcrm'
+								'Configure SMS sending rate limits and manage SMS campaign settings with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -276,13 +276,13 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'whatsapp':
 				const WhatsAppComponent = applyFilters(
-					'quillcrm_settings_whatsapp_settings',
+					'doublescale_settings_whatsapp_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('WhatsApp Settings', 'quillcrm')}
+							featureName={__('WhatsApp Settings', 'doublescale')}
 							description={__(
-								'Configure WhatsApp sending rate limits and manage Meta WhatsApp Business templates with QuillCRM Pro.',
-								'quillcrm'
+								'Configure WhatsApp sending rate limits and manage Meta WhatsApp Business templates with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -305,13 +305,13 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'cart':
 				const CartComponent = applyFilters(
-					'quillcrm_settings_cart_settings',
+					'doublescale_settings_cart_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Cart Settings', 'quillcrm')}
+							featureName={__('Cart Settings', 'doublescale')}
 							description={__(
-								'Track abandoned carts, set up GDPR compliance, and automate cart recovery with QuillCRM Pro.',
-								'quillcrm'
+								'Track abandoned carts, set up GDPR compliance, and automate cart recovery with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -338,13 +338,13 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'website_tracking':
 				const WebsiteTrackingComponent = applyFilters(
-					'quillcrm_settings_website_tracking_settings',
+					'doublescale_settings_website_tracking_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Website Tracking', 'quillcrm')}
+							featureName={__('Website Tracking', 'doublescale')}
 							description={__(
-								'Track page visits for contacts on your website and manage data retention settings with QuillCRM Pro.',
-								'quillcrm'
+								'Track page visits for contacts on your website and manage data retention settings with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -362,13 +362,13 @@ const SettingsPage: React.FC = () => {
 				return <License />;
 			case 'custom_fields':
 				const CustomFieldsComponent = applyFilters(
-					'quillcrm_settings_custom_fields_settings',
+					'doublescale_settings_custom_fields_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Custom Fields', 'quillcrm')}
+							featureName={__('Custom Fields', 'doublescale')}
 							description={__(
 								'Create and manage custom fields to capture additional contact information tailored to your business needs.',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 					)
@@ -376,13 +376,13 @@ const SettingsPage: React.FC = () => {
 				return <CustomFieldsComponent />;
 			case 'link_triggers':
 				const LinkTriggersComponent = applyFilters(
-					'quillcrm_settings_link_triggers_settings',
+					'doublescale_settings_link_triggers_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Link Triggers', 'quillcrm')}
+							featureName={__('Link Triggers', 'doublescale')}
 							description={__(
-								'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
-								'quillcrm'
+								'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -390,13 +390,13 @@ const SettingsPage: React.FC = () => {
 				return <LinkTriggersComponent />;
 			case 'notifications':
 				const NotificationsComponent = applyFilters(
-					'quillcrm_settings_notifications_settings',
+					'doublescale_settings_notifications_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Notification Preferences', 'quillcrm')}
+							featureName={__('Notification Preferences', 'doublescale')}
 							description={__(
-								'Configure how you receive notifications via bell icon and email with QuillCRM Pro.',
-								'quillcrm'
+								'Configure how you receive notifications via bell icon and email with DoubleScale Pro.',
+								'doublescale'
 							)}
 						/>
 					)
@@ -535,8 +535,8 @@ const SettingsPage: React.FC = () => {
 								variant="gradient"
 							>
 								{isUpdating
-									? __('Saving...', 'quillcrm')
-									: __('Save Settings', 'quillcrm')}
+									? __('Saving...', 'doublescale')
+									: __('Save Settings', 'doublescale')}
 							</Button>
 						</CardFooter>
 					) : null}
@@ -546,10 +546,10 @@ const SettingsPage: React.FC = () => {
 	});
 
 	return (
-		<div className="quillcrm-settings">
+		<div className="doublescale-settings">
 			<PageHeader
-				title={__('Settings', 'quillcrm')}
-				subtitle={__('Settings', 'quillcrm')}
+				title={__('Settings', 'doublescale')}
+				subtitle={__('Settings', 'doublescale')}
 				actions={[]}
 			/>
 

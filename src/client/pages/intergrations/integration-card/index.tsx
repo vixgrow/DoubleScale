@@ -7,25 +7,25 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { PlusIcon } from '@quillcrm/components';
-import { Card, CardContent } from '@quillcrm/components/ui/card';
-import { Button } from '@quillcrm/components/ui/button';
-import { Skeleton } from '@quillcrm/components/ui/skeleton';
+import { PlusIcon } from '@doublescale/components';
+import { Card, CardContent } from '@doublescale/components/ui/card';
+import { Button } from '@doublescale/components/ui/button';
+import { Skeleton } from '@doublescale/components/ui/skeleton';
 import { Check, Lock } from 'lucide-react';
-import config from '@quillcrm/config';
+import config from '@doublescale/config';
 
 /**
  * Helper function to get button text based on state
  */
 const getButtonText = (isLoading: boolean, isConnected: boolean) => {
 	if (isLoading && isConnected) {
-		return __('Updating...', 'quillcrm');
+		return __('Updating...', 'doublescale');
 	}
 	if (isConnected) {
-		return __('Settings', 'quillcrm');
+		return __('Settings', 'doublescale');
 	}
 	if (isLoading) {
-		return __('Connecting...', 'quillcrm');
+		return __('Connecting...', 'doublescale');
 	}
 	return null; // Will show "Connect Now" with icon
 };
@@ -52,11 +52,11 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 }) => {
 	const buttonText = getButtonText(isLoading, integration.is_connected);
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 	const isProFeature = integration.is_pro && !isProActive;
-	const upgradeUrl = config.getUrlQuillCRMPro();
+	const upgradeUrl = config.getUrlDoubleScalePro();
 
 	return (
 		<Card className="shadow-none max-w-md relative overflow-hidden">
@@ -103,7 +103,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 					>
 						{buttonText || (
 							<>
-								{__('Connect Now', 'quillcrm')}
+								{__('Connect Now', 'doublescale')}
 								<PlusIcon />
 							</>
 						)}
@@ -116,8 +116,8 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 							disabled={isLoading || isProFeature}
 						>
 							{isLoading
-								? __('Disconnecting...', 'quillcrm')
-								: __('Disconnect', 'quillcrm')}
+								? __('Disconnecting...', 'doublescale')
+								: __('Disconnect', 'doublescale')}
 						</Button>
 					)}
 				</div>

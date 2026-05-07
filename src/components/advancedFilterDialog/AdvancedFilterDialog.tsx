@@ -7,12 +7,12 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-} from '@quillcrm/components/ui/dialog';
+} from '@doublescale/components/ui/dialog';
 import {
 	CustomDialogHeader,
 	FiltersIcon,
 	InfiniteScrollSelect,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import {
 	Select,
 	SelectTrigger,
@@ -21,8 +21,8 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Input } from '@quillcrm/components/ui/input';
-import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+import { Input } from '@doublescale/components/ui/input';
+import { DateRangePicker } from '@doublescale/components/ui/date-range-picker';
 
 interface AdvancedFiltersDialogProps {
 	open: boolean;
@@ -82,10 +82,10 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={__('Filter', 'quillcrm')}
+							title={__('Filter', 'doublescale')}
 							subtitle={__(
 								'Select Groups of filters about data you want to view.',
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<FiltersIcon />}
 						/>
@@ -95,7 +95,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 					<div className=" w-full grid grid-cols-1 md:grid-cols-2 gap-6 ">
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1  font-normal text-[#09090B] text-base">
-								{__('Deal Owner', 'quillcrm')}
+								{__('Deal Owner', 'doublescale')}
 							</label>
 
 							<InfiniteScrollSelect
@@ -106,7 +106,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										value ? Number(value) : null
 									)
 								}
-								placeholder={__('Select All Owner', 'quillcrm')}
+								placeholder={__('Select All Owner', 'doublescale')}
 								apiEndpoint="/qc/v1/user-management/users/frontend"
 								getOptionLabel={(u) => u.display_name || u.name}
 								getOptionValue={(u) => u.id}
@@ -120,7 +120,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						{/* Pipeline Filter */}
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1 font-normal text-[#09090B] text-base">
-								{__('Pipeline', 'quillcrm')}
+								{__('Pipeline', 'doublescale')}
 							</label>
 
 							<Select
@@ -137,7 +137,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									<SelectValue
 										placeholder={__(
 											'Select Stage',
-											'quillcrm'
+											'doublescale'
 										)}
 									/>
 								</SelectTrigger>
@@ -156,7 +156,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										<div className="px-3 py-2 text-sm text-gray-500">
 											{__(
 												'No stages available',
-												'quillcrm'
+												'doublescale'
 											)}
 										</div>
 									)}
@@ -166,7 +166,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						{/* Expected Close Date */}
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1 font-normal text-[#09090B] text-base">
-								{__('Expected Close Date', 'quillcrm')}
+								{__('Expected Close Date', 'doublescale')}
 							</label>
 							<DateRangePicker
 								value={
@@ -188,7 +188,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						{/* Created Date */}
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1 font-normal text-[#09090B] text-base">
-								{__('Created Date', 'quillcrm')}
+								{__('Created Date', 'doublescale')}
 							</label>
 							<DateRangePicker
 								value={
@@ -210,7 +210,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						{/* Priority */}
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1 font-normal text-[#09090B] text-base">
-								{__('Priority', 'quillcrm')}
+								{__('Priority', 'doublescale')}
 							</label>
 
 							<Select
@@ -226,14 +226,14 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									<SelectValue
 										placeholder={__(
 											'All priorities',
-											'quillcrm'
+											'doublescale'
 										)}
 									/>
 								</SelectTrigger>
 
 								<SelectContent>
 									<SelectItem value="__all__">
-										{__('All priorities', 'quillcrm')}
+										{__('All priorities', 'doublescale')}
 									</SelectItem>
 									{Object.keys(priorities).map((key) => (
 										<SelectItem key={key} value={key}>
@@ -246,7 +246,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						{/* Deal Value Range */}
 						<div className="flex flex-col gap-2">
 							<label className="block mb-1 font-normal text-[#09090B] text-base">
-								{__('Deal Value Range', 'quillcrm')}
+								{__('Deal Value Range', 'doublescale')}
 							</label>
 							<div className=" flex gap-2">
 								<Input
@@ -265,7 +265,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										})
 									}
 									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
-									placeholder={__('Min', 'quillcrm')}
+									placeholder={__('Min', 'doublescale')}
 								/>
 								<Input
 									type="number"
@@ -283,7 +283,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										})
 									}
 									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
-									placeholder={__('Max', 'quillcrm')}
+									placeholder={__('Max', 'doublescale')}
 								/>
 							</div>
 						</div>
@@ -297,9 +297,9 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									: '!text-[#777] !border-[#777] bg-white'
 							}`}
 							onClick={clearFilters}
-							title={__('Clear all filters', 'quillcrm')}
+							title={__('Clear all filters', 'doublescale')}
 						>
-							{__('Clear Filter', 'quillcrm')}
+							{__('Clear Filter', 'doublescale')}
 						</Button>
 					</div>
 				</div>
@@ -312,9 +312,9 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 							// setIsFilterExpanded(false);
 							onOpenChange(false);
 						}}
-						title={__('Apply Filters', 'quillcrm')}
+						title={__('Apply Filters', 'doublescale')}
 					>
-						{__('Apply Filters', 'quillcrm')}
+						{__('Apply Filters', 'doublescale')}
 					</Button>
 				</div>
 			</DialogContent>

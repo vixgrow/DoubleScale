@@ -1,5 +1,5 @@
 //@ts-ignore
-import welcomepage from '@quillcrm/assets/images/get-start/welcomepage.png';
+import welcomepage from '@doublescale/assets/images/get-start/welcomepage.png';
 import ButtonComponent from '../component/button';
 export default function WelcomePage({ onNext, onSkip}) {
   return (

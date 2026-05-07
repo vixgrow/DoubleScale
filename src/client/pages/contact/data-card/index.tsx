@@ -36,15 +36,15 @@ import {
 	CalendarIcon,
 	UpcomingActivitiesIcon,
 	WebsiteIcon,
-} from '@quillcrm/components';
-import ConfigAPI from '@quillcrm/config';
+} from '@doublescale/components';
+import ConfigAPI from '@doublescale/config';
 import Courses from '../courses';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
-import WhatsAppIcon from '@quillcrm/components/icons/whatsapp-icon';
+import WhatsAppIcon from '@doublescale/components/icons/whatsapp-icon';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -63,22 +63,22 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 
 	// Apply filters to allow Pro version to override components
 	const SMS = applyFilters(
-		'quillcrm_contact_tab_component',
+		'doublescale_contact_tab_component',
 		SMSBase,
 		'sms'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const Deals = applyFilters(
-		'quillcrm_contact_tab_component',
+		'doublescale_contact_tab_component',
 		DealsBase,
 		'deals'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const Tasks = applyFilters(
-		'quillcrm_contact_tab_component',
+		'doublescale_contact_tab_component',
 		TasksBase,
 		'tasks'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const WhatsApp = applyFilters(
-		'quillcrm_contact_tab_component',
+		'doublescale_contact_tab_component',
 		null,
 		'whatsapp'
 	) as React.FC<{
@@ -86,7 +86,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		navigate?: (path: string) => void;
 	}> | null;
 	const WebsiteTracking = applyFilters(
-		'quillcrm_contact_tab_component',
+		'doublescale_contact_tab_component',
 		WebsiteTrackingBase,
 		'website_tracking'
 	) as React.FC<{

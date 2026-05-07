@@ -9,13 +9,13 @@ import { useState } from '@wordpress/element';
  */
 import { Card, List as AntList, Typography, Flex, Popover, Button } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 const Overview: React.FC = () => {
 	const { form, isLoading, saveForm } = useFormContext();
 	const [deactivating, setDeactivating] = useState(false);
@@ -42,7 +42,7 @@ const Overview: React.FC = () => {
 			title={
 				<Flex justify="space-between">
 					<Typography.Text strong>
-						{__('Overview', 'quillcrm')}
+						{__('Overview', 'doublescale')}
 					</Typography.Text>
 					<Popover
 						content={
@@ -51,7 +51,7 @@ const Overview: React.FC = () => {
 								loading={deactivating}
 								onClick={deactivateForm}
 							>
-								{__('Deactivate', 'quillcrm')}
+								{__('Deactivate', 'doublescale')}
 							</Button>
 						}
 						trigger="click"
@@ -68,7 +68,7 @@ const Overview: React.FC = () => {
 						<AntList.Item>
 							<Flex>
 								<Typography.Text strong>
-									{__('Name', 'quillcrm')}
+									{__('Name', 'doublescale')}
 								</Typography.Text>
 								<Typography.Text>{form.name}</Typography.Text>
 							</Flex>
@@ -76,7 +76,7 @@ const Overview: React.FC = () => {
 						<AntList.Item>
 							<Flex>
 								<Typography.Text strong>
-									{__('Form Type', 'quillcrm')}
+									{__('Form Type', 'doublescale')}
 								</Typography.Text>
 								<Typography.Text>
 									{formsData[form.form_type]?.label}
@@ -86,7 +86,7 @@ const Overview: React.FC = () => {
 						<AntList.Item>
 							<Flex>
 								<Typography.Text strong>
-									{__('Form ID', 'quillcrm')}
+									{__('Form ID', 'doublescale')}
 								</Typography.Text>
 								<Typography.Text>
 									{form.form_id}
@@ -96,7 +96,7 @@ const Overview: React.FC = () => {
 						<AntList.Item>
 							<Flex>
 								<Typography.Text strong>
-									{__('Status', 'quillcrm')}
+									{__('Status', 'doublescale')}
 								</Typography.Text>
 								<Typography.Text>{form.status}</Typography.Text>
 							</Flex>

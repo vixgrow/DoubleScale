@@ -21,9 +21,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
-import type { TriggersGroup } from '@quillcrm/config';
-import config from '@quillcrm/config';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
+import type { TriggersGroup } from '@doublescale/config';
+import config from '@doublescale/config';
 
 interface TriggersGroupRenderProps {
 	groups: TriggersGroup[];
@@ -54,60 +54,60 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		if (groupLabel === 'QuillBooking') {
 			return __(
 				'QuillBooking plugin is not installed or activated. Install QuillBooking to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LearnDash') {
 			return __(
 				'LearnDash plugin is not installed or activated. Install LearnDash to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Tutor LMS') {
 			return __(
 				'Tutor LMS plugin is not installed or activated. Install Tutor LMS to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LifterLMS') {
 			return __(
 				'LifterLMS plugin is not installed or activated. Install LifterLMS to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LearnPress') {
 			return __(
 				'LearnPress plugin is not installed or activated. Install LearnPress to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Order' || groupLabel === 'SureCart') {
 			return __(
 				'SureCart plugin is not installed or activated. Install SureCart to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Presto Player') {
 			return __(
 				'Presto Player plugin is not installed or activated. Install Presto Player to use these triggers.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		return __(
 			'This integration is not available. Please install the required plugin.',
-			'quillcrm'
+			'doublescale'
 		);
 	};
 
@@ -152,7 +152,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 														(
 														{__(
 															'Not Available',
-															'quillcrm'
+															'doublescale'
 														)}
 														)
 													</span>
@@ -218,7 +218,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 													>
 														{__(
 															'Select',
-															'quillcrm'
+															'doublescale'
 														)}
 													</Button>
 												</div>

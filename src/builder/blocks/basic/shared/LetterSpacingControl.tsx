@@ -79,7 +79,7 @@ export const LetterSpacingControl: React.FC<LetterSpacingControlProps> = ({
         <div className={className}>
             <div className="flex flex-col gap-2 text-[#333333]">
                 <label className="text-sm">
-                    {__('Letter Spacing', 'quillcrm')}
+                    {__('Letter Spacing', 'doublescale')}
                 </label>
                 <Select
                     value={value}
@@ -87,7 +87,7 @@ export const LetterSpacingControl: React.FC<LetterSpacingControlProps> = ({
                 >
                     <SelectTrigger className="w-full border-border h-10">
                         <SelectValue
-                            placeholder={__('Select spacing', 'quillcrm')}
+                            placeholder={__('Select spacing', 'doublescale')}
                         />
                     </SelectTrigger>
                     <SelectContent>

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ThreeDotsIcon: React.FC<IconProps> = ({ width = 14, height = 14 }) => {
 	return (

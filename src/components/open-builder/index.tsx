@@ -40,7 +40,7 @@ export interface OpenBuilderProps {
 const OpenBuilder: React.FC<OpenBuilderProps> = ({
 	initialEmailBody,
 	onSave,
-	buttonText = __('Open Builder', 'quillcrm'),
+	buttonText = __('Open Builder', 'doublescale'),
 	buttonVariant = 'default',
 	buttonClassName = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2',
 	builderKey = 'default',
@@ -83,8 +83,8 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 				const dialogElement = dialog as HTMLElement;
 				// Don't make the builder itself inert
 				if (
-					!dialogElement.querySelector('#quillcrm-email-builder') &&
-					!dialogElement.closest('#quillcrm-email-builder')
+					!dialogElement.querySelector('#doublescale-email-builder') &&
+					!dialogElement.closest('#doublescale-email-builder')
 				) {
 					// Store original inert state
 					const wasInert = dialogElement.hasAttribute('inert');
@@ -97,7 +97,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 
 			// Also set the workflow sidebar to inert if it exists
 			const sidebar = document.querySelector('.qcrm-workflow-sidebar');
-			if (sidebar && !sidebar.closest('#quillcrm-email-builder')) {
+			if (sidebar && !sidebar.closest('#doublescale-email-builder')) {
 				const sidebarElement = sidebar as HTMLElement;
 				sidebarElement.setAttribute('inert', '');
 				inertElements.push(sidebarElement);
@@ -189,8 +189,8 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 				: true);
 
 		return hasContent
-			? __('Edit Template', 'quillcrm')
-			: __('Open Builder', 'quillcrm');
+			? __('Edit Template', 'doublescale')
+			: __('Open Builder', 'doublescale');
 	};
 
 	return (

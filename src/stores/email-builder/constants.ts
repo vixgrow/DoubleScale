@@ -1,4 +1,4 @@
-export const STORE_KEY = 'quillcrm/email-builder';
+export const STORE_KEY = 'doublescale/email-builder';
 
 // Block actions
 export const ADD_BLOCK = 'ADD_BLOCK';

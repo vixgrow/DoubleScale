@@ -26,7 +26,7 @@ import {
  */
 import { useAutomationContext } from '../../../../state/context';
 import { reorderStep, canMoveStep } from '../utils/step-reorder-utils';
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 
 interface StepReorderControlsProps {
 	step: AutomationStep;
@@ -38,7 +38,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	className = '',
 }) => {
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [isMoving, setIsMoving] = useState<'up' | 'down' | null>(null);
 
 	// Enhanced logic to check if step can move considering condition branches and complex scenarios
@@ -119,59 +119,59 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 			// Add context-aware enabled tooltips
 			if (reason === 'between_conditions_root') {
 				return direction === 'up'
-					? __('Move up (between conditions)', 'quillcrm')
-					: __('Move down (between conditions)', 'quillcrm');
+					? __('Move up (between conditions)', 'doublescale')
+					: __('Move down (between conditions)', 'doublescale');
 			}
 			return direction === 'up'
-				? __('Move step up', 'quillcrm')
-				: __('Move step down', 'quillcrm');
+				? __('Move step up', 'doublescale')
+				: __('Move step down', 'doublescale');
 		}
 
 		// Disabled tooltip explanations based on reason
 		switch (reason) {
 			case 'single_step_in_branch':
-				return __('Only step in this branch', 'quillcrm');
+				return __('Only step in this branch', 'doublescale');
 
 			case 'single_condition_in_branch':
 				return direction === 'up'
-					? __('Move condition up', 'quillcrm')
-					: __('Move condition down', 'quillcrm');
+					? __('Move condition up', 'doublescale')
+					: __('Move condition down', 'doublescale');
 
 			case 'between_conditions_in_branch':
 				return __(
 					'Cannot move when between conditions in branch',
-					'quillcrm'
+					'doublescale'
 				);
 
 			case 'after_condition_in_branch':
 				return direction === 'up'
-					? __('Cannot move above condition in branch', 'quillcrm')
-					: __('Cannot move below this branch', 'quillcrm');
+					? __('Cannot move above condition in branch', 'doublescale')
+					: __('Cannot move below this branch', 'doublescale');
 
 			case 'before_condition_in_branch':
 				return direction === 'up'
-					? __('Cannot move above this branch', 'quillcrm')
-					: __('Cannot move below condition in branch', 'quillcrm');
+					? __('Cannot move above this branch', 'doublescale')
+					: __('Cannot move below condition in branch', 'doublescale');
 
 			case 'before_condition_root':
 				return direction === 'up'
-					? __('Move step up', 'quillcrm')
-					: __('Cannot move down past condition', 'quillcrm');
+					? __('Move step up', 'doublescale')
+					: __('Cannot move down past condition', 'doublescale');
 
 			case 'after_condition_root':
 				return direction === 'up'
-					? __('Cannot move up past condition', 'quillcrm')
-					: __('Move step down', 'quillcrm');
+					? __('Cannot move up past condition', 'doublescale')
+					: __('Move step down', 'doublescale');
 
 			case 'between_conditions_root':
-				return __('Cannot move past conditions', 'quillcrm');
+				return __('Cannot move past conditions', 'doublescale');
 
 			case 'root_level':
 			default:
 				// Simple boundary restrictions for root level and other cases
 				return direction === 'up'
-					? __('Already at top', 'quillcrm')
-					: __('Already at bottom', 'quillcrm');
+					? __('Already at top', 'doublescale')
+					: __('Already at bottom', 'doublescale');
 		}
 	};
 

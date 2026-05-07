@@ -25,9 +25,9 @@ import {
     CustomDialogHeader,
     GradientAddMeetingIcon,
     PlusIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { useContactContext } from '../../state/context';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -37,19 +37,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DateTimePicker } from '@quillcrm/components/date-time-picker';
+import { DateTimePicker } from '@doublescale/components/date-time-picker';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import TrashIcon from '@quillcrm/components/icons/trash';
+import TrashIcon from '@doublescale/components/icons/trash';
 
 /**
  * Pro plugin TaskService - loaded via WordPress filters at runtime.
- * Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
+ * Pro plugin registers this via addFilter('doublescale_pro_component', ...)
  */
 const getProTaskService = () =>
-    applyFilters('quillcrm_pro_component', null, 'TaskService') as {
+    applyFilters('doublescale_pro_component', null, 'TaskService') as {
         createTask: (data: {
             title: string;
             description?: string;
@@ -227,7 +227,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
         const newErrors: { meetingTitle?: string } = {};
 
         if (!formData.meetingTitle.trim()) {
-            newErrors.meetingTitle = __('Meeting title is required', 'quillcrm');
+            newErrors.meetingTitle = __('Meeting title is required', 'doublescale');
         }
 
         setErrors(newErrors);
@@ -265,7 +265,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                 onUpdate(response);
                 showNotice(
                     'success',
-                    __('Meeting updated successfully', 'quillcrm')
+                    __('Meeting updated successfully', 'doublescale')
                 );
             } else {
                 // Create new meeting
@@ -284,13 +284,13 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                 const TaskService = getProTaskService();
                 if (formData.createTask && formData.dueDate && TaskService) {
                     try {
-                        const currentUserId = (window as any).quillcrmData?.currentUserId || 1;
+                        const currentUserId = (window as any).doublescaleData?.currentUserId || 1;
                         const reminderAt = formData.setReminder && formData.reminderDates.length > 0
                             ? dayjs(formData.reminderDates[0]).format('YYYY-MM-DD') + ' 09:00:00'
                             : undefined;
 
                         await TaskService.createTask({
-                            title: __('Follow up: Meeting - ', 'quillcrm') + formData.meetingTitle.trim(),
+                            title: __('Follow up: Meeting - ', 'doublescale') + formData.meetingTitle.trim(),
                             description: formData.description.trim() || undefined,
                             contact_id: contact_id,
                             assigned_to: currentUserId,
@@ -299,13 +299,13 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             due_date: dayjs(formData.dueDate).format('YYYY-MM-DD'),
                             reminder_at: reminderAt,
                         });
-                        showNotice('success', __('Meeting scheduled and follow-up task created', 'quillcrm'));
+                        showNotice('success', __('Meeting scheduled and follow-up task created', 'doublescale'));
                     } catch (taskError) {
                         console.error('Failed to create follow-up task:', taskError);
-                        showNotice('success', __('Meeting scheduled (task creation failed)', 'quillcrm'));
+                        showNotice('success', __('Meeting scheduled (task creation failed)', 'doublescale'));
                     }
                 } else {
-                    showNotice('success', __('Meeting scheduled successfully', 'quillcrm'));
+                    showNotice('success', __('Meeting scheduled successfully', 'doublescale'));
                 }
             }
 
@@ -313,7 +313,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
         } catch (error: any) {
             showNotice(
                 'error',
-                error.message || __('Failed to save meeting', 'quillcrm')
+                error.message || __('Failed to save meeting', 'doublescale')
             );
         } finally {
             setIsSaving(false);
@@ -330,18 +330,18 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             <CustomDialogHeader
                                 title={
                                     selectedMeeting
-                                        ? __('Edit Meeting', 'quillcrm')
-                                        : __('Schedule Meeting', 'quillcrm')
+                                        ? __('Edit Meeting', 'doublescale')
+                                        : __('Schedule Meeting', 'doublescale')
                                 }
                                 subtitle={
                                     selectedMeeting
                                         ? __(
                                             'Update the meeting details',
-                                            'quillcrm'
+                                            'doublescale'
                                         )
                                         : __(
                                             'Schedule a new meeting for this contact',
-                                            'quillcrm'
+                                            'doublescale'
                                         )
                                 }
                                 icon={
@@ -358,12 +358,12 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Related Contact */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Contact Name', 'quillcrm')}
+                                    {__('Contact Name', 'doublescale')}
                                 </Label>
                                 <Input
                                     placeholder={__(
                                         'Enter contact name',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     value={formData.contactName}
                                     disabled
@@ -374,13 +374,13 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Meeting Title */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Meeting Title', 'quillcrm')}{' '}
+                                    {__('Meeting Title', 'doublescale')}{' '}
                                     <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     placeholder={__(
                                         'Enter meeting title',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     value={formData.meetingTitle}
                                     onChange={(e) => {
@@ -406,7 +406,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Duration */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Duration', 'quillcrm')}
+                                    {__('Duration', 'doublescale')}
                                 </Label>
                                 <Select
                                     value={formData.duration.toString()}
@@ -421,22 +421,22 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="15">
-                                            15 {__('minutes', 'quillcrm')}
+                                            15 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="30">
-                                            30 {__('minutes', 'quillcrm')}
+                                            30 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="45">
-                                            45 {__('minutes', 'quillcrm')}
+                                            45 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="60">
-                                            1 {__('hour', 'quillcrm')}
+                                            1 {__('hour', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="90">
-                                            1.5 {__('hours', 'quillcrm')}
+                                            1.5 {__('hours', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="120">
-                                            2 {__('hours', 'quillcrm')}
+                                            2 {__('hours', 'doublescale')}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -445,12 +445,12 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Location */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Location', 'quillcrm')}
+                                    {__('Location', 'doublescale')}
                                 </Label>
                                 <Input
                                     placeholder={__(
                                         'Enter location',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     value={formData.location}
                                     onChange={(e) =>
@@ -465,7 +465,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Date & Time */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Date & Time', 'quillcrm')}
+                                    {__('Date & Time', 'doublescale')}
                                 </Label>
                                 <DateTimePicker
                                     value={formData.meetingDateTime}
@@ -474,7 +474,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                     }
                                     placeholder={__(
                                         'Select date & time',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     className="h-12"
                                 />
@@ -483,12 +483,12 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             {/* Meeting Description */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Meeting Description', 'quillcrm')}
+                                    {__('Meeting Description', 'doublescale')}
                                 </Label>
                                 <Textarea
                                     placeholder={__(
                                         'Type Meeting agenda, topics to discuss....',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     value={formData.description}
                                     onChange={(e) =>
@@ -515,7 +515,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                     htmlFor="create-task"
                                     className="text-base font-normal text-[#09090B] cursor-pointer"
                                 >
-                                    {__('Create a task to follow up', 'quillcrm')}
+                                    {__('Create a task to follow up', 'doublescale')}
                                 </Label>
                             </div>
                         )}
@@ -524,7 +524,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                         {formData.createTask && (
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Due date', 'quillcrm')}
+                                    {__('Due date', 'doublescale')}
                                 </Label>
                                 <DatePicker
                                     value={formData.dueDate}
@@ -535,7 +535,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                     }}
                                     placeholder={__(
                                         'DD/MM/YYYY',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     className="h-12"
                                     buttonClassName="h-12 w-full bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
@@ -548,7 +548,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                         {formData.createTask && (
                             <div className="flex items-center justify-between">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Set Reminder', 'quillcrm')}
+                                    {__('Set Reminder', 'doublescale')}
                                 </Label>
                                 <Switch
                                     checked={formData.setReminder}
@@ -582,7 +582,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                             <Label className="text-base font-normal text-[#09090B]">
                                                 {__(
                                                     'Reminder Date',
-                                                    'quillcrm'
+                                                    'doublescale'
                                                 )}{' '}
                                                 {index > 0
                                                     ? `#${index + 1}`
@@ -601,7 +601,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                                     }
                                                     placeholder={__(
                                                         'DD/MM/YYYY',
-                                                        'quillcrm'
+                                                        'doublescale'
                                                     )}
                                                     className="h-12 flex-1"
                                                     buttonClassName="h-12 flex-1 bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
@@ -650,10 +650,10 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             className="w-full"
                         >
                             {isSaving
-                                ? __('Saving...', 'quillcrm')
+                                ? __('Saving...', 'doublescale')
                                 : selectedMeeting
-                                    ? __('Update Meeting', 'quillcrm')
-                                    : __('Schedule Meeting', 'quillcrm')}
+                                    ? __('Update Meeting', 'doublescale')
+                                    : __('Schedule Meeting', 'doublescale')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const MeetingDealIcon: React.FC<IconProps> = ({ width = 19, height = 20 ,color='#CB5301' }) => {
 	return (

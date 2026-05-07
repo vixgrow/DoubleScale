@@ -22,44 +22,44 @@ export const registerAdminPage = (id: string, settings: PageSettings) => {
   }
 
   settings = applyFilters(
-    "quillcrm_navigation_page_settings",
+    "doublescale_navigation_page_settings",
     settings,
     id
   ) as PageSettings;
 
   if (adminPages[id]) {
-    console.error(__("This page id is already registered", "quillcrm"));
+    console.error(__("This page id is already registered", "doublescale"));
     return;
   }
 
   if (!settings.path) {
-    console.error(__("Path property is mandatory!", "quillcrm"));
+    console.error(__("Path property is mandatory!", "doublescale"));
     return;
   }
 
   if (typeof settings.path !== "string") {
-    console.error(__('The "path" property must be a string!', "quillcrm"));
+    console.error(__('The "path" property must be a string!', "doublescale"));
     return;
   }
 
   if (some(Object.values(adminPages), (page) => page.path === settings.path)) {
-    console.error(__("This path is already registered!", "quillcrm"));
+    console.error(__("This path is already registered!", "doublescale"));
     return;
   }
 
   if (typeof settings.exact !== "boolean") {
-    console.error(__('The "exact" property must be a boolean!', "quillcrm"));
+    console.error(__('The "exact" property must be a boolean!', "doublescale"));
     return;
   }
 
   if (!settings.component) {
-    console.error(__("Component property is mandatory!", "quillcrm"));
+    console.error(__("Component property is mandatory!", "doublescale"));
     return;
   }
 
   if (!isFunction(settings.component)) {
     console.error(
-      __('The "component" property must be a valid function!', "quillcrm")
+      __('The "component" property must be a valid function!', "doublescale")
     );
     return;
   }

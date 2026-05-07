@@ -1,5 +1,5 @@
 /**
- * QuillCRM dependencies
+ * DoubleScale dependencies
  */
 import {
 	getAdminPages,
@@ -7,7 +7,7 @@ import {
 	Route,
 	getHistory,
 	Routes,
-} from '@quillcrm/navigation';
+} from '@doublescale/navigation';
 
 /**
  * WordPress Dependencies
@@ -27,18 +27,18 @@ import { notification } from 'antd';
 /**
  * Internal dependencies
  */
-import { NavBar } from '@quillcrm/components';
+import { NavBar } from '@doublescale/components';
 import { Controller } from './controller';
 import ProtectedRoute from './protected-route';
 import './style.scss';
-import { MergeTagsModal } from '@quillcrm/components';
-import { SidebarProvider } from '@quillcrm/components/ui/sidebar';
+import { MergeTagsModal } from '@doublescale/components';
+import { SidebarProvider } from '@doublescale/components/ui/sidebar';
 
 const Notices: React.FC = () => {
 	const { notices } = useSelect((select) => ({
-		notices: select('quillcrm/core').getNotices(),
+		notices: select('doublescale/core').getNotices(),
 	}));
-	const { deleteNotice } = useDispatch('quillcrm/core');
+	const { deleteNotice } = useDispatch('doublescale/core');
 	const [api, contextHolder] = notification.useNotification();
 
 	useEffect(() => {
@@ -63,13 +63,13 @@ const Notices: React.FC = () => {
 export const Layout = (props) => {
 	const { mergeTagsVisible, mergeTagCallback, formContext } = useSelect(
 		(select) => ({
-			mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
-			mergeTagCallback: select('quillcrm/core').getMergeTagCallback(),
-			formContext: select('quillcrm/core').getFormContext(),
+			mergeTagsVisible: select('doublescale/core').getMergeTagsVisible(),
+			mergeTagCallback: select('doublescale/core').getMergeTagCallback(),
+			formContext: select('doublescale/core').getFormContext(),
 		})
 	);
 	const { setMergeTagsVisible, setMergeTagCallback } =
-		useDispatch('quillcrm/core');
+		useDispatch('doublescale/core');
 
 	const handleCloseMergeTags = () => {
 		setMergeTagsVisible(false);

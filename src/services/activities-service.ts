@@ -5,7 +5,7 @@
  * Provides type-safe API calls and consistent data transformation.
  *
  * @since 1.x.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 import apiFetch from '@wordpress/api-fetch';

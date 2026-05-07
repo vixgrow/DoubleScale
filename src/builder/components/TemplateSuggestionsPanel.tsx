@@ -38,7 +38,7 @@ const TemplateSuggestionsPanel = ({
 			<div className="flex flex-col h-full">
 				<div className="flex items-center justify-between p-6 border-b border-gray-200 mx-2">
 					<h2 className="text-lg font-semibold text-gray-900">
-						{__('Ready-To-Use', 'quillcrm')}
+						{__('Ready-To-Use', 'doublescale')}
 					</h2>
 					<Button
 						variant="ghost"

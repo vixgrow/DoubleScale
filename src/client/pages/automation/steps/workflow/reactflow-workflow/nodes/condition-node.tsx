@@ -13,14 +13,14 @@ import { AlertTriangle } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { ConditionsIcon } from '@quillcrm/components';
+import { ConditionsIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -48,10 +48,10 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 	} = data as unknown as ConditionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -89,8 +89,8 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 				}}
 			>
 				{!isProActive
-					? __('This is a PRO Feature', 'quillcrm')
-					: __('Configured', 'quillcrm')}
+					? __('This is a PRO Feature', 'doublescale')
+					: __('Configured', 'doublescale')}
 			</span>
 			{hasWarning && unavailableRulesCount > 0 && (
 				<TooltipProvider>
@@ -100,21 +100,21 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">
-								{__('Plugin Required', 'quillcrm')}
+								{__('Plugin Required', 'doublescale')}
 							</p>
 							<p className="text-xs mt-1">
 								{unavailableRulesCount === 1
 									? sprintf(
 											__(
 												'This condition uses 1 rule that requires %s to be installed and activated.',
-												'quillcrm'
+												'doublescale'
 											),
 											uniquePlugins
 										)
 									: sprintf(
 											__(
 												'This condition uses %d rules that require plugins (%s) to be installed and activated.',
-												'quillcrm'
+												'doublescale'
 											),
 											unavailableRulesCount,
 											uniquePlugins
@@ -128,8 +128,8 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 	) : (
 		<span className="qcrm-reactflow-condition__not-configured">
 			{!isProActive
-				? __('This is a PRO Feature', 'quillcrm')
-				: __('Not Configured', 'quillcrm')}
+				? __('This is a PRO Feature', 'doublescale')
+				: __('Not Configured', 'doublescale')}
 		</span>
 	);
 
@@ -171,16 +171,16 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 
 				<NodeLayout
 					icon={<ConditionsIcon width={23} height={23} />}
-					title={__('Condition', 'quillcrm')}
+					title={__('Condition', 'doublescale')}
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
-					editLabel={__('Edit Condition', 'quillcrm')}
-					deleteLabel={__('Delete Condition', 'quillcrm')}
-					deleteTitle={__('Delete this condition?', 'quillcrm')}
+					editLabel={__('Edit Condition', 'doublescale')}
+					deleteLabel={__('Delete Condition', 'doublescale')}
+					deleteTitle={__('Delete this condition?', 'doublescale')}
 					deleteDescription={__(
 						'This will also remove all connected steps in both branches.',
-						'quillcrm'
+						'doublescale'
 					)}
 					viewMode={viewMode}
 					analytics={analytics}

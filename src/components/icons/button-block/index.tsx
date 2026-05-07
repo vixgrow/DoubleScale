@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ButtonBlockIcon: React.FC<IconProps> = ({ width = 40, height = 24 }) => {
 	return (

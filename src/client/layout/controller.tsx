@@ -1,12 +1,12 @@
 /**
- * QuillCRM dependencies
+ * DoubleScale dependencies
  */
 import {
 	registerAdminPage,
 	useNavigate,
 	useParams,
 	getToLink,
-} from '@quillcrm/navigation';
+} from '@doublescale/navigation';
 
 /**
  * WordPress dependencies
@@ -47,7 +47,7 @@ import { useDashboardData } from '../pages/home/use-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 // import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
-import { ProFeatureNotice } from '@quillcrm/components';
+import { ProFeatureNotice } from '@doublescale/components';
 import { ProUpgradeButton } from '@/components/pro-upgrade-button';
 import {
 	AnalyticsReportsIcon,
@@ -63,14 +63,14 @@ import {
 	EmailSequenceIcon,
 	PiplelinesIcon,
 	WordPressIcon,
-} from '@quillcrm/components';
-import { TaskDoneIcon as TasksIcon } from '@quillcrm/components';
+} from '@doublescale/components';
+import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
 import GetStart from '../pages/get-start';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
 import Campaigns_EmailSequences from '../pages/campaigns';
@@ -113,7 +113,7 @@ export const Controller = ({ page }) => {
 
 	// Check if Pro is active
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -219,7 +219,7 @@ export const Controller = ({ page }) => {
 		return undefined;
 	}, [currentUser]);
 
-	const displayName = currentUser?.display_name || __('Guest', 'quillcrm');
+	const displayName = currentUser?.display_name || __('Guest', 'doublescale');
 
 	const avatarInitials = useMemo(() => {
 		if (!currentUser?.display_name) {
@@ -251,11 +251,11 @@ export const Controller = ({ page }) => {
 					onClick={handleBackToDashboard}
 				>
 					<WordPressIcon />
-					{__('Back to WordPress Dashboard', 'quillcrm')}
+					{__('Back to WordPress Dashboard', 'doublescale')}
 				</div>
 			<div className="flex items-center gap-3 justify-end w-1/2">
 				{!isProActive && <ProUpgradeButton />}
-				{applyFilters('quillcrm_header_before_avatar', null) as React.ReactNode}
+				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
 				<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 					{avatarUrl ? (
 						<AvatarImage src={avatarUrl} alt={displayName} />
@@ -277,48 +277,48 @@ export const Controller = ({ page }) => {
 registerAdminPage('dashboard', {
 	path: '/',
 	component: () => <Dashboard />,
-	label: __('Dashboard', 'quillcrm'),
+	label: __('Dashboard', 'doublescale'),
 	icon: <DashboardIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
-	label: __('Contacts', 'quillcrm'),
+	label: __('Contacts', 'doublescale'),
 	icon: <ContactsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('start', {
 	path: 'start',
 	component: () => <GetStart />,
-	label: __('Get Started', 'quillcrm'),
+	label: __('Get Started', 'doublescale'),
 	icon: <DashboardIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true,
 });
 
 registerAdminPage('contact', {
 	path: 'contacts/:id/:tab?',
 	component: () => <Contact />,
-	label: __('Contact', 'quillcrm'),
+	label: __('Contact', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('lists', {
 	path: 'lists',
 	component: () => <Lists />,
-	label: __('Lists', 'quillcrm'),
+	label: __('Lists', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('tags', {
 	path: 'tags',
 	component: () => <Tags />,
-	label: __('Tags', 'quillcrm'),
+	label: __('Tags', 'doublescale'),
 	hidden: true,
 });
 
@@ -327,40 +327,40 @@ registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Custom Fields', 'quillcrm')}
+			featureName={__('Custom Fields', 'doublescale')}
 			description={__(
 				'Custom Fields is a Pro feature. Please upgrade to the Pro plan to access this feature.',
-				'quillcrm'
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Custom Fields', 'quillcrm'),
+	label: __('Custom Fields', 'doublescale'),
 	icon: <CustomFieldsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true,
 });
 
 registerAdminPage('campaigns', {
 	path: 'campaigns',
 	component: () => <Campaigns_EmailSequences path="campaigns" />,
-	label: __('Campaigns', 'quillcrm'),
+	label: __('Campaigns', 'doublescale'),
 	icon: <CampaignsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('campaign', {
 	path: 'campaigns/:id/:tab?/:subtab?',
 	component: () => <Campaign />,
-	label: __('Campaign', 'quillcrm'),
+	label: __('Campaign', 'doublescale'),
 	hidden: true,
 });
 
 registerAdminPage('email-sequences', {
 	path: 'email-sequences',
 	component: () => <Campaigns_EmailSequences path="email-sequences" />,
-	label: __('Email Sequences', 'quillcrm'),
+	label: __('Email Sequences', 'doublescale'),
 	icon: <EmailSequenceIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true,
 });
 
@@ -368,41 +368,41 @@ registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Email Sequence', 'quillcrm')}
+			featureName={__('Email Sequence', 'doublescale')}
 			description={__(
-				'View and manage email sequences with QuillCRM Pro.',
-				'quillcrm'
+				'View and manage email sequences with DoubleScale Pro.',
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Email Sequence', 'quillcrm'),
+	label: __('Email Sequence', 'doublescale'),
 	hidden: true,
 });
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
-// The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component
+// The Pro plugin uses addFilter('DoubleScale.Navigation.PageSettings') to replace the component
 // If Pro is not active, shows upgrade notice instead of blank page
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Sales Pipeline', 'quillcrm')}
+			featureName={__('Sales Pipeline', 'doublescale')}
 			description={__(
-				'Manage your sales pipeline, track deals through stages, and close more sales with QuillCRM Pro.',
-				'quillcrm'
+				'Manage your sales pipeline, track deals through stages, and close more sales with DoubleScale Pro.',
+				'doublescale'
 			)}
 			features={[
-				__('Advanced Sales Pipeline Management', 'quillcrm'),
-				__('Deal Tracking & Analytics', 'quillcrm'),
-				__('Activity Timeline & Notes', 'quillcrm'),
-				__('Custom Pipeline Stages', 'quillcrm'),
-				__('Deal Automation Triggers & Actions', 'quillcrm'),
+				__('Advanced Sales Pipeline Management', 'doublescale'),
+				__('Deal Tracking & Analytics', 'doublescale'),
+				__('Activity Timeline & Notes', 'doublescale'),
+				__('Custom Pipeline Stages', 'doublescale'),
+				__('Deal Automation Triggers & Actions', 'doublescale'),
 			]}
 		/>
 	), // Pro plugin overrides with actual pipeline
-	label: __('Pipelines', 'quillcrm'),
+	label: __('Pipelines', 'doublescale'),
 	icon: <PiplelinesIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 // Deal Detail - stub registration that Pro plugin will override
@@ -410,52 +410,52 @@ registerAdminPage('deal-detail', {
 	path: 'pipeline/deal/:id',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Deal Details', 'quillcrm')}
+			featureName={__('Deal Details', 'doublescale')}
 			description={__(
-				'View and manage deal details with QuillCRM Pro.',
-				'quillcrm'
+				'View and manage deal details with DoubleScale Pro.',
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Deal Details', 'quillcrm'),
+	label: __('Deal Details', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,
-	label: __('Automations', 'quillcrm'),
+	label: __('Automations', 'doublescale'),
 	icon: <AutomationsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('automation', {
 	path: 'automations/:id/:tab?',
 	component: () => <Automation />,
-	label: __('Automation', 'quillcrm'),
+	label: __('Automation', 'doublescale'),
 	hidden: true,
 });
 
 registerAdminPage('automation-reports', {
 	path: 'automations/:id/reports',
 	component: () => <AutomationReports />,
-	label: __('Automation Reports', 'quillcrm'),
+	label: __('Automation Reports', 'doublescale'),
 	hidden: true,
 });
 
 registerAdminPage('forms', {
 	path: 'forms',
 	component: () => <Forms />,
-	label: __('Forms', 'quillcrm'),
+	label: __('Forms', 'doublescale'),
 	icon: <FormsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('form', {
 	path: 'forms/:id/:tab?',
 	component: () => <Form />,
-	label: __('Form', 'quillcrm'),
+	label: __('Form', 'doublescale'),
 	hidden: true,
 });
 
@@ -464,16 +464,16 @@ registerAdminPage('link-triggers', {
 	path: 'link-triggers',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Link Triggers', 'quillcrm')}
+			featureName={__('Link Triggers', 'doublescale')}
 			description={__(
-				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
-				'quillcrm'
+				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with DoubleScale Pro.',
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Link Triggers', 'quillcrm'),
+	label: __('Link Triggers', 'doublescale'),
 	icon: <ToolsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true, // Hidden from sidebar - accessible via Settings
 });
 
@@ -482,36 +482,36 @@ registerAdminPage('link-trigger', {
 	path: 'link-triggers/:id',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Link Triggers', 'quillcrm')}
+			featureName={__('Link Triggers', 'doublescale')}
 			description={__(
-				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
-				'quillcrm'
+				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with DoubleScale Pro.',
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Link Trigger', 'quillcrm'),
+	label: __('Link Trigger', 'doublescale'),
 	hidden: true,
 });
 
 registerAdminPage('integrations', {
 	path: 'integrations/:id?/:tab?',
 	component: () => <Integrations />,
-	label: __('Integrations', 'quillcrm'),
+	label: __('Integrations', 'doublescale'),
 	icon: <IntegrationsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('templates', {
 	path: 'templates',
 	component: () => <Templates />,
-	label: __('Templates', 'quillcrm'),
+	label: __('Templates', 'doublescale'),
 	hidden: true,
 });
 
 registerAdminPage('template', {
 	path: 'templates/:id',
 	component: () => <Template />,
-	label: __('Template', 'quillcrm'),
+	label: __('Template', 'doublescale'),
 	hidden: true,
 });
 
@@ -519,16 +519,16 @@ registerAdminPage('abandoned-carts', {
 	path: 'abandoned-carts',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Abandoned Carts', 'quillcrm')}
+			featureName={__('Abandoned Carts', 'doublescale')}
 			description={__(
 				'Abandoned Carts is a Pro feature. Please upgrade to the Pro plan to access this feature.',
-				'quillcrm'
+				'doublescale'
 			)}
 		/>
 	),
-	label: __('Abandoned Carts', 'quillcrm'),
+	label: __('Abandoned Carts', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 // Tasks - stub registration that Pro plugin will override via filter
@@ -536,39 +536,39 @@ registerAdminPage('tasks', {
 	path: 'tasks',
 	component: () => (
 		<ProFeatureNotice
-			featureName={__('Tasks', 'quillcrm')}
+			featureName={__('Tasks', 'doublescale')}
 			description={__(
-				'Manage your CRM tasks, schedule follow-ups, and track activities with QuillCRM Pro.',
-				'quillcrm'
+				'Manage your CRM tasks, schedule follow-ups, and track activities with DoubleScale Pro.',
+				'doublescale'
 			)}
 			features={[
-				__('Task Management & Scheduling', 'quillcrm'),
-				__('Contact & Deal Task Association', 'quillcrm'),
-				__('Priority & Status Tracking', 'quillcrm'),
-				__('Task Reminders & Due Dates', 'quillcrm'),
-				__('Assigned User Management', 'quillcrm'),
+				__('Task Management & Scheduling', 'doublescale'),
+				__('Contact & Deal Task Association', 'doublescale'),
+				__('Priority & Status Tracking', 'doublescale'),
+				__('Task Reminders & Due Dates', 'doublescale'),
+				__('Assigned User Management', 'doublescale'),
 			]}
 		/>
 	),
-	label: __('Tasks', 'quillcrm'),
+	label: __('Tasks', 'doublescale'),
 	icon: <TasksIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('analytics-and-reports', {
 	path: 'analytics-and-reports',
 	component: (props) => <AnalyticsAndReports {...props} />,
-	label: __('Analytics', 'quillcrm'),
+	label: __('Analytics', 'doublescale'),
 	icon: <AnalyticsReportsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('deals-analytics', {
 	path: 'deals-analytics',
 	component: (props) => <AnalyticsAndReports {...props} defaultTab="deals" />,
-	label: __('Deals Analytics', 'quillcrm'),
+	label: __('Deals Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 });
 
 registerAdminPage('sales-rep-analytics', {
@@ -576,9 +576,9 @@ registerAdminPage('sales-rep-analytics', {
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="sales-rep" />
 	),
-	label: __('Sales Rep Analytics', 'quillcrm'),
+	label: __('Sales Rep Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 });
 
 registerAdminPage('pipeline-analytics', {
@@ -586,9 +586,9 @@ registerAdminPage('pipeline-analytics', {
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="pipeline-analysis" />
 	),
-	label: __('Pipeline Analytics', 'quillcrm'),
+	label: __('Pipeline Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 });
 
 registerAdminPage('my-reports', {
@@ -596,9 +596,9 @@ registerAdminPage('my-reports', {
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="my-reports" />
 	),
-	label: __('My Reports', 'quillcrm'),
+	label: __('My Reports', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_sales_rep', 'quillcrm_sales_manager', 'quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_sales_rep', 'doublescale_sales_manager', 'doublescale_crm_manager'],
 });
 
 registerAdminPage('cart-analytics', {
@@ -606,9 +606,9 @@ registerAdminPage('cart-analytics', {
 	component: (props) => (
 		<AnalyticsAndReports {...props} defaultTab="cart-analytics" />
 	),
-	label: __('Cart Analytics', 'quillcrm'),
+	label: __('Cart Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 const ContactAnalyticsWrapper = () => {
@@ -624,37 +624,37 @@ const EmailAnalyticsWrapper = () => {
 registerAdminPage('contacts-analytics', {
 	path: 'contacts-analytics',
 	component: () => <ContactAnalyticsWrapper />,
-	label: __('Contacts Analytics', 'quillcrm'),
+	label: __('Contacts Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
 	component: () => <EmailAnalyticsWrapper />,
-	label: __('Emails Analytics', 'quillcrm'),
+	label: __('Emails Analytics', 'doublescale'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 // registerAdminPage('tools', {
 // 	path: 'tools',
 // 	component: () => <Tools />,
-// 	label: __('Tools', 'quillcrm'),
+// 	label: __('Tools', 'doublescale'),
 // 	icon: <ToolsIcon />,
 // });
 
 registerAdminPage('settings', {
 	path: 'settings/:tab?',
 	component: () => <Setting />,
-	label: __('Settings', 'quillcrm'),
+	label: __('Settings', 'doublescale'),
 	icon: <SettingsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_manager', 'quillcrm_sales_rep'],
+	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 });
 
 registerAdminPage('debug', {
 	path: 'debug',
 	component: () => <Debug />,
-	label: __('Debug', 'quillcrm'),
+	label: __('Debug', 'doublescale'),
 	hidden: true,
 });

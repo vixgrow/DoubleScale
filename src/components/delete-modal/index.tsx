@@ -18,7 +18,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ColoredDeleteIcon } from '@quillcrm/components';
+import { ColoredDeleteIcon } from '@doublescale/components';
 
 interface DeleteConfirmationModalProps {
 	isOpen: boolean;
@@ -42,43 +42,43 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 
 		switch (activeTab) {
 			case 'all':
-				itemType = __('contact', 'quillcrm');
-				itemTypePlural = __('contacts', 'quillcrm');
+				itemType = __('contact', 'doublescale');
+				itemTypePlural = __('contacts', 'doublescale');
 				break;
 			case 'lists':
-				itemType = __('list', 'quillcrm');
-				itemTypePlural = __('lists', 'quillcrm');
+				itemType = __('list', 'doublescale');
+				itemTypePlural = __('lists', 'doublescale');
 				break;
 			case 'tags':
-				itemType = __('tag', 'quillcrm');
-				itemTypePlural = __('tags', 'quillcrm');
+				itemType = __('tag', 'doublescale');
+				itemTypePlural = __('tags', 'doublescale');
 				break;
 			case 'custom-fields':
-				itemType = __('field', 'quillcrm');
-				itemTypePlural = __('fields', 'quillcrm');
+				itemType = __('field', 'doublescale');
+				itemTypePlural = __('fields', 'doublescale');
 				break;
 			case 'notes':
-				itemType = __('note', 'quillcrm');
-				itemTypePlural = __('notes', 'quillcrm');
+				itemType = __('note', 'doublescale');
+				itemTypePlural = __('notes', 'doublescale');
 				break;
 			case 'page_visits':
-				itemType = __('page visit', 'quillcrm');
-				itemTypePlural = __('page visits', 'quillcrm');
+				itemType = __('page visit', 'doublescale');
+				itemTypePlural = __('page visits', 'doublescale');
 				break;
 			default:
-				itemType = __('item', 'quillcrm');
-				itemTypePlural = __('items', 'quillcrm');
+				itemType = __('item', 'doublescale');
+				itemTypePlural = __('items', 'doublescale');
 		}
 
 		const displayType = selectedCount === 1 ? itemType : itemTypePlural;
 
 		return {
-			title: __('Confirm Deletion', 'quillcrm'),
+			title: __('Confirm Deletion', 'doublescale'),
 			message:
 				selectedCount === 1
-					? `${__('Do you really want to delete the selected', 'quillcrm')} ${displayType}?`
-					: `${__('Do you really want to delete the selected', 'quillcrm')} ${selectedCount} ${displayType}?`,
-			warning: __('This action cannot be undone.', 'quillcrm'),
+					? `${__('Do you really want to delete the selected', 'doublescale')} ${displayType}?`
+					: `${__('Do you really want to delete the selected', 'doublescale')} ${selectedCount} ${displayType}?`,
+			warning: __('This action cannot be undone.', 'doublescale'),
 		};
 	};
 
@@ -110,7 +110,7 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 						onClick={onClose}
 						className="flex-1"
 					>
-						{__('Back', 'quillcrm')}
+						{__('Back', 'doublescale')}
 					</Button>
 					<Button
 						type="button"
@@ -118,7 +118,7 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 						onClick={handleConfirm}
 						className="flex-1"
 					>
-						{__('Yes, Delete', 'quillcrm')}
+						{__('Yes, Delete', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

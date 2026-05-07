@@ -13,12 +13,12 @@ import { useReducer, useRef } from 'react';
 /**
  * Internal dependencies
  */
-import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
+import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import { Automation as AutomationType } from '@quillcrm/client';
+import { Automation as AutomationType } from '@doublescale/client';
 import Workflow from './steps/workflow';
 import Contacts from './steps/contacts';
 import AutomationFunnel from '../automation-reports/automation-funnels';
@@ -36,7 +36,7 @@ import {
 	WorkflowIcon,
 	AutomationContactsIcon,
 	AutomationAnalyticsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
 
 const Automation: React.FC = () => {
@@ -56,7 +56,7 @@ const Automation: React.FC = () => {
 	const [analyticsData, setAnalyticsData] = useState<any[]>([]);
 	const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
 	const navigate = useNavigate();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	useEffect(() => {
 		fetchAutomation();
@@ -86,7 +86,7 @@ const Automation: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch automation', 'quillcrm'),
+				message: __('Failed to fetch automation', 'doublescale'),
 			});
 			return undefined;
 		} finally {
@@ -174,17 +174,17 @@ const Automation: React.FC = () => {
 	const tabs = [
 		{
 			id: 'workflow',
-			label: __('Workflow', 'quillcrm'),
+			label: __('Workflow', 'doublescale'),
 			icon: WorkflowIcon,
 		},
 		{
 			id: 'reports',
-			label: __('Reports', 'quillcrm'),
+			label: __('Reports', 'doublescale'),
 			icon: AutomationAnalyticsIcon,
 		},
 		{
 			id: 'contacts',
-			label: __('Contacts', 'quillcrm'),
+			label: __('Contacts', 'doublescale'),
 			icon: AutomationContactsIcon,
 		},
 	];
@@ -293,7 +293,7 @@ const Automation: React.FC = () => {
 											>
 												{__(
 													'Create Automation',
-													'quillcrm'
+													'doublescale'
 												)}
 											</span>
 											<ChevronRight className="h-4 w-4" />
@@ -319,7 +319,7 @@ const Automation: React.FC = () => {
 												>
 													{__(
 														'Save & Publish',
-														'quillcrm'
+														'doublescale'
 													)}
 												</Button>
 											)}

@@ -134,13 +134,13 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 									clipRule="evenodd"
 								/>
 							</svg>
-							{plugin.name} {__('Active', 'quillcrm')}
+							{plugin.name} {__('Active', 'doublescale')}
 						</h3>
 						{variant === 'default' && (
 							<p className="text-sm text-[#166534]">
 								{__(
 									'Plugin is active and ready to use.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						)}
@@ -152,7 +152,7 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 							onClick={handleConfigure}
 							className="border-[#166534] text-[#166534] hover:bg-[#DCFCE7]"
 						>
-							{__('Configure', 'quillcrm')}
+							{__('Configure', 'doublescale')}
 						</Button>
 					)}
 				</div>
@@ -180,13 +180,13 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 									clipRule="evenodd"
 								/>
 							</svg>
-							{plugin.name} {__('Not Active', 'quillcrm')}
+							{plugin.name} {__('Not Active', 'doublescale')}
 						</h3>
 						{variant === 'default' && (
 							<p className="text-sm text-[#92400E]">
 								{__(
 									'Plugin is installed but not active. Activate it to use its features.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						)}
@@ -199,8 +199,8 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 						className="bg-[#D97706] text-white hover:bg-[#B45309]"
 					>
 						{isProcessing
-							? __('Activating...', 'quillcrm')
-							: __('Activate', 'quillcrm')}
+							? __('Activating...', 'doublescale')
+							: __('Activate', 'doublescale')}
 					</Button>
 				</div>
 			</Card>
@@ -233,7 +233,7 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 							{plugin.description ||
 								__(
 									'Plugin is not installed. Install it to use its features.',
-									'quillcrm'
+									'doublescale'
 								)}
 						</p>
 					)}
@@ -246,8 +246,8 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 					className="bg-[#DC2626] text-white hover:bg-[#B91C1C]"
 				>
 					{isProcessing
-						? __('Installing...', 'quillcrm')
-						: __('Install', 'quillcrm')}
+						? __('Installing...', 'doublescale')
+						: __('Install', 'doublescale')}
 				</Button>
 			</div>
 		</Card>

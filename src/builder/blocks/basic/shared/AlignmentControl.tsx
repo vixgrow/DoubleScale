@@ -27,7 +27,7 @@ export interface AlignmentControlProps {
 export const AlignmentControl: React.FC<AlignmentControlProps> = ({
     value,
     onChange,
-    label = __('Alignment on desktop', 'quillcrm'),
+    label = __('Alignment on desktop', 'doublescale'),
     includeFull = false,
 }) => {
     return (

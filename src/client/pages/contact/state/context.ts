@@ -12,7 +12,7 @@ import type {
 	AutomationContact,
 	LMSCourse,
 	NoticeMessage,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import type { EmailAnalytics, PurchaseHistory } from './types';
 
 /**

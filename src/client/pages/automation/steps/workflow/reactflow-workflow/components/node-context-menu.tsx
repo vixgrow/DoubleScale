@@ -29,7 +29,7 @@ import {
 	AlertDialogOverlay,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface NodeContextMenuProps {
@@ -84,21 +84,21 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 				<AlertDialogContent className="z-[150000]">
 					<AlertDialogHeader>
 						<AlertDialogTitle>
-							{__('Are you sure?', 'quillcrm')}
+							{__('Are you sure?', 'doublescale')}
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							{__('This action cannot be undone.', 'quillcrm')}
+							{__('This action cannot be undone.', 'doublescale')}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>
-							{__('No', 'quillcrm')}
+							{__('No', 'doublescale')}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={handleDeleteConfirm}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
-							{__('Yes', 'quillcrm')}
+							{__('Yes', 'doublescale')}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

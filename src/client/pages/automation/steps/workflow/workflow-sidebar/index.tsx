@@ -19,7 +19,7 @@ import type {
 	OrganizedStep,
 	AutomationStep,
 	NoticeMessage,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import { getTitle } from './titles';
 import SidebarHeader from './sidebar-header';
 import TriggerContent from './trigger-content';
@@ -28,14 +28,14 @@ import StepFieldsModal from '../step-fields-modal';
 import ActionSelector from '../action-selector';
 import GoalSelector from '../goal-selector';
 import DelaySelector from '../delay-selector';
-import { NoticeBanner } from '@quillcrm/components';
+import { NoticeBanner } from '@doublescale/components';
 import ProAutomationModal from '../../../../../../components/pro-automation-modal';
 import {
 	SidebarLayoutProvider,
 	SidebarFooter,
 } from './sidebar-layout-context';
 import { applyFilters } from '@wordpress/hooks';
-import { getApiErrorMessage } from '@quillcrm/utils';
+import { getApiErrorMessage } from '@doublescale/utils';
 
 interface WorkflowSidebarProps {
 	currentStep: OrganizedStep | null;
@@ -57,7 +57,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const closeNotice = () => setNotice(null);
 
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -127,7 +127,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!id) {
 			setNotice({
 				type: 'error',
-				message: __('Invalid step data', 'quillcrm'),
+				message: __('Invalid step data', 'doublescale'),
 			});
 			return;
 		}
@@ -159,7 +159,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		} catch (error: any) {
 			// Use utility to extract detailed error message from WordPress REST API
 			// This handles validation errors (rest_invalid_param) with detailed params
-			const errorMessage = getApiErrorMessage(error, __('Failed to save', 'quillcrm'));
+			const errorMessage = getApiErrorMessage(error, __('Failed to save', 'doublescale'));
 
 			setNotice({
 				type: 'error',
@@ -175,12 +175,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!currentStep || !goalKey) {
 			setNotice({
 				type: 'error',
-				message: __('Please select a goal', 'quillcrm'),
+				message: __('Please select a goal', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave({ action: goalKey }, __('Goal saved', 'quillcrm'), {
+		await handleSave({ action: goalKey }, __('Goal saved', 'doublescale'), {
 			clearTempAction: true,
 		});
 	};
@@ -189,14 +189,14 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!currentStep || !actionKey) {
 			setNotice({
 				type: 'error',
-				message: __('Please select an action', 'quillcrm'),
+				message: __('Please select an action', 'doublescale'),
 			});
 			return;
 		}
 
 		await handleSave(
 			{ action: actionKey },
-			__('Action saved', 'quillcrm'),
+			__('Action saved', 'doublescale'),
 			{ clearTempAction: true }
 		);
 	};
@@ -205,12 +205,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!currentStep || !delayKey) {
 			setNotice({
 				type: 'error',
-				message: __('Please select a delay type', 'quillcrm'),
+				message: __('Please select a delay type', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave({ action: delayKey }, __('Delay saved', 'quillcrm'), {
+		await handleSave({ action: delayKey }, __('Delay saved', 'doublescale'), {
 			clearTempAction: true,
 		});
 	};
@@ -219,12 +219,12 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!stepData.id) {
 			setNotice({
 				type: 'error',
-				message: __('Invalid step data', 'quillcrm'),
+				message: __('Invalid step data', 'doublescale'),
 			});
 			return;
 		}
 
-		await handleSave(stepData, __('Step saved', 'quillcrm'), {
+		await handleSave(stepData, __('Step saved', 'doublescale'), {
 			stepId: stepData.id,
 		});
 	};
@@ -234,7 +234,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 		await handleSave(
 			{ settings: data.settings },
-			__('Conditions saved', 'quillcrm')
+			__('Conditions saved', 'doublescale')
 		);
 	};
 
@@ -372,7 +372,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			<ProAutomationModal
 				visible={showProConditionModal}
 				onClose={() => setShowProConditionModal(false)}
-				featureName={__('Condition Step', 'quillcrm')}
+				featureName={__('Condition Step', 'doublescale')}
 			/>
 		</>
 	);

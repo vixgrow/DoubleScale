@@ -25,9 +25,9 @@ import {
     CustomDialogHeader,
     GradientAddCallIcon,
     PlusIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { useContactContext } from '../../state/context';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -37,19 +37,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { DateTimePicker } from '@quillcrm/components/date-time-picker';
+import { DateTimePicker } from '@doublescale/components/date-time-picker';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import TrashIcon from '@quillcrm/components/icons/trash';
+import TrashIcon from '@doublescale/components/icons/trash';
 
 /**
  * Pro plugin TaskService - loaded via WordPress filters at runtime.
- * Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
+ * Pro plugin registers this via addFilter('doublescale_pro_component', ...)
  */
 const getProTaskService = () =>
-    applyFilters('quillcrm_pro_component', null, 'TaskService') as {
+    applyFilters('doublescale_pro_component', null, 'TaskService') as {
         createTask: (data: {
             title: string;
             description?: string;
@@ -218,7 +218,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
         const newErrors: { notes?: string } = {};
 
         if (!formData.notes.trim()) {
-            newErrors.notes = __('Call notes are required', 'quillcrm');
+            newErrors.notes = __('Call notes are required', 'doublescale');
         }
 
         setErrors(newErrors);
@@ -256,7 +256,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                 onUpdate(response);
                 showNotice(
                     'success',
-                    __('Call updated successfully', 'quillcrm')
+                    __('Call updated successfully', 'doublescale')
                 );
             } else {
                 // Create new call
@@ -275,13 +275,13 @@ const CallDialog: React.FC<CallDialogProps> = ({
                 const TaskService = getProTaskService();
                 if (formData.createTask && formData.dueDate && TaskService) {
                     try {
-                        const currentUserId = (window as any).quillcrmData?.currentUserId || 1;
+                        const currentUserId = (window as any).doublescaleData?.currentUserId || 1;
                         const reminderAt = formData.setReminder && formData.reminderDates.length > 0
                             ? dayjs(formData.reminderDates[0]).format('YYYY-MM-DD') + ' 09:00:00'
                             : undefined;
 
                         await TaskService.createTask({
-                            title: __('Follow up: Call with ', 'quillcrm') + (contact?.first_name || contact?.email || 'Contact'),
+                            title: __('Follow up: Call with ', 'doublescale') + (contact?.first_name || contact?.email || 'Contact'),
                             description: formData.notes.trim(),
                             contact_id: contact_id,
                             assigned_to: currentUserId,
@@ -290,13 +290,13 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             due_date: dayjs(formData.dueDate).format('YYYY-MM-DD'),
                             reminder_at: reminderAt,
                         });
-                        showNotice('success', __('Call logged and follow-up task created', 'quillcrm'));
+                        showNotice('success', __('Call logged and follow-up task created', 'doublescale'));
                     } catch (taskError) {
                         console.error('Failed to create follow-up task:', taskError);
-                        showNotice('success', __('Call logged successfully (task creation failed)', 'quillcrm'));
+                        showNotice('success', __('Call logged successfully (task creation failed)', 'doublescale'));
                     }
                 } else {
-                    showNotice('success', __('Call logged successfully', 'quillcrm'));
+                    showNotice('success', __('Call logged successfully', 'doublescale'));
                 }
             }
 
@@ -304,7 +304,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
         } catch (error: any) {
             showNotice(
                 'error',
-                error.message || __('Failed to save call', 'quillcrm')
+                error.message || __('Failed to save call', 'doublescale')
             );
         } finally {
             setIsSaving(false);
@@ -321,18 +321,18 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             <CustomDialogHeader
                                 title={
                                     selectedCall
-                                        ? __('Edit Log Call', 'quillcrm')
-                                        : __('Add Log Call', 'quillcrm')
+                                        ? __('Edit Log Call', 'doublescale')
+                                        : __('Add Log Call', 'doublescale')
                                 }
                                 subtitle={
                                     selectedCall
                                         ? __(
                                             'Update the call details',
-                                            'quillcrm'
+                                            'doublescale'
                                         )
                                         : __(
                                             'Log a new call for this contact',
-                                            'quillcrm'
+                                            'doublescale'
                                         )
                                 }
                                 icon={
@@ -349,12 +349,12 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             {/* Phone Number */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Phone Number', 'quillcrm')}
+                                    {__('Phone Number', 'doublescale')}
                                 </Label>
                                 <Input
                                     placeholder={__(
                                         'No phone number',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     value={formData.phoneNumber}
                                     onChange={(e) =>
@@ -368,7 +368,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             </div>
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Duration (minutes)', 'quillcrm')}
+                                    {__('Duration (minutes)', 'doublescale')}
                                 </Label>
                                 <Select
                                     value={formData.duration.toString()}
@@ -383,22 +383,22 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="15">
-                                            15 {__('minutes', 'quillcrm')}
+                                            15 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="30">
-                                            30 {__('minutes', 'quillcrm')}
+                                            30 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="45">
-                                            45 {__('minutes', 'quillcrm')}
+                                            45 {__('minutes', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="60">
-                                            1 {__('hour', 'quillcrm')}
+                                            1 {__('hour', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="90">
-                                            1.5 {__('hours', 'quillcrm')}
+                                            1.5 {__('hours', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="120">
-                                            2 {__('hours', 'quillcrm')}
+                                            2 {__('hours', 'doublescale')}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -409,7 +409,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             {/* Call Outcome */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Call Outcome', 'quillcrm')}
+                                    {__('Call Outcome', 'doublescale')}
                                 </Label>
                                 <Select
                                     value={formData.outcome}
@@ -422,28 +422,28 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="completed">
-                                            {__('Completed', 'quillcrm')}
+                                            {__('Completed', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="no_answer">
-                                            {__('No Answer', 'quillcrm')}
+                                            {__('No Answer', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="busy">
-                                            {__('Busy', 'quillcrm')}
+                                            {__('Busy', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="voicemail">
-                                            {__('Voicemail', 'quillcrm')}
+                                            {__('Voicemail', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="callback_requested">
                                             {__(
                                                 'Callback Requested',
-                                                'quillcrm'
+                                                'doublescale'
                                             )}
                                         </SelectItem>
                                         <SelectItem value="not_interested">
-                                            {__('Not Interested', 'quillcrm')}
+                                            {__('Not Interested', 'doublescale')}
                                         </SelectItem>
                                         <SelectItem value="follow_up">
-                                            {__('Follow Up', 'quillcrm')}
+                                            {__('Follow Up', 'doublescale')}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -451,7 +451,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             {/* Call Date & Time */}
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Call Date & Time', 'quillcrm')}
+                                    {__('Call Date & Time', 'doublescale')}
                                 </Label>
                                 <DateTimePicker
                                     value={formData.callDate}
@@ -460,7 +460,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                     }
                                     placeholder={__(
                                         'Select date & time',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     className="h-12"
                                 />
@@ -470,13 +470,13 @@ const CallDialog: React.FC<CallDialogProps> = ({
                         {/* Call Notes */}
                         <div className="flex flex-col gap-2">
                             <Label className="text-base font-normal text-[#09090B]">
-                                {__('Call Notes', 'quillcrm')}{' '}
+                                {__('Call Notes', 'doublescale')}{' '}
                                 <span className="text-red-500">*</span>
                             </Label>
                             <Textarea
                                 placeholder={__(
                                     'Enter call notes, discussion points, next steps...',
-                                    'quillcrm'
+                                    'doublescale'
                                 )}
                                 value={formData.notes}
                                 onChange={(e) => {
@@ -514,7 +514,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                     htmlFor="create-task"
                                     className="text-base font-normal text-[#09090B] cursor-pointer"
                                 >
-                                    {__('Create a task to follow up', 'quillcrm')}
+                                    {__('Create a task to follow up', 'doublescale')}
                                 </Label>
                             </div>
                         )}
@@ -523,7 +523,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                         {formData.createTask && (
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Due date', 'quillcrm')}
+                                    {__('Due date', 'doublescale')}
                                 </Label>
                                 <DatePicker
                                     value={formData.dueDate}
@@ -534,7 +534,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                     }}
                                     placeholder={__(
                                         'Select due date',
-                                        'quillcrm'
+                                        'doublescale'
                                     )}
                                     className="h-12"
                                     buttonClassName="h-12 w-full bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
@@ -547,7 +547,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                         {formData.createTask && (
                             <div className="flex items-center justify-between">
                                 <Label className="text-base font-normal text-[#09090B]">
-                                    {__('Set Reminder', 'quillcrm')}
+                                    {__('Set Reminder', 'doublescale')}
                                 </Label>
                                 <Switch
                                     checked={formData.setReminder}
@@ -581,7 +581,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                             <Label className="text-base font-normal text-[#09090B]">
                                                 {__(
                                                     'Reminder Date',
-                                                    'quillcrm'
+                                                    'doublescale'
                                                 )}{' '}
                                                 {index > 0
                                                     ? `#${index + 1}`
@@ -600,7 +600,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
                                                     }
                                                     placeholder={__(
                                                         'Select reminder date',
-                                                        'quillcrm'
+                                                        'doublescale'
                                                     )}
                                                     className="h-12 flex-1"
                                                     buttonClassName="h-12 flex-1 bg-white border border-[#DEE1E6] rounded-[8px] text-[#09090B] font-normal"
@@ -649,10 +649,10 @@ const CallDialog: React.FC<CallDialogProps> = ({
                             className="w-full"
                         >
                             {isSaving
-                                ? __('Saving...', 'quillcrm')
+                                ? __('Saving...', 'doublescale')
                                 : selectedCall
-                                    ? __('Update Log Call', 'quillcrm')
-                                    : __('Add Log Call', 'quillcrm')}
+                                    ? __('Update Log Call', 'doublescale')
+                                    : __('Add Log Call', 'doublescale')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

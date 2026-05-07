@@ -112,7 +112,7 @@ const Fields: React.FC<FieldsProps> = ({
 									value={key}
 									className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
-									{__(field.label, '@quillcrm')}
+									{__(field.label, '@doublescale')}
 								</TabsTrigger>
 							))}
 						</TabsList>

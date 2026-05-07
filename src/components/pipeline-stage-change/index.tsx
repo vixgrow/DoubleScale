@@ -38,9 +38,9 @@ const PipelineStageChange = ({
 	const anyPipelineValue = 'any-pipeline';
 	const endpointForStages = 'pipeline-stages';
 	const endpointForPipelines = 'pipelines';
-	const labelForAnyPipeline = __('Any Pipeline', 'quillcrm');
-	const labelForAnyStage = __('Any Stage', 'quillcrm');
-	const placeholderForSelect = __('Select option', 'quillcrm');
+	const labelForAnyPipeline = __('Any Pipeline', 'doublescale');
+	const labelForAnyStage = __('Any Stage', 'doublescale');
+	const placeholderForSelect = __('Select option', 'doublescale');
 
 	const buildApiPath = () => {
 		if (endpoint === endpointForPipelines) {

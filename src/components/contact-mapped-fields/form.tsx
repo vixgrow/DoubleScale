@@ -14,7 +14,7 @@ import { Hash, Plus } from 'lucide-react';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import { map } from 'lodash';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -113,7 +113,7 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={
 					placeholder ||
-					__('Enter value or use merge tags', 'quillcrm')
+					__('Enter value or use merge tags', 'doublescale')
 				}
 			/>
 			<Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={false}>
@@ -122,7 +122,7 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 						type="button"
 						size="icon"
 						className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-transparent border-none hover:bg-transparent text-primary p-0 shadow-none"
-						title={__('Insert merge tag', 'quillcrm')}
+						title={__('Insert merge tag', 'doublescale')}
 					>
 						<Hash className="h-4 w-4" />
 					</Button>
@@ -133,12 +133,12 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 				>
 					<div className="space-y-2">
 						<h4 className="font-semibold text-sm text-[#3F4254]">
-							{__('Insert Form Field', 'quillcrm')}
+							{__('Insert Form Field', 'doublescale')}
 						</h4>
 						<p className="text-xs text-[#9197A4]">
 							{__(
 								'Click to insert a merge tag from form fields',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 						<div className="space-y-1 mt-3">
@@ -437,13 +437,13 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 			<div className="flex flex-col gap-[10px] mt-6">
 				<div className="flex items-center gap-2">
 					<h3 className="text-[#09090B] font-medium text-base">
-						{__('Other Fields', 'quillcrm')}
+						{__('Other Fields', 'doublescale')}
 					</h3>
 					<div
 						className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center cursor-help"
 						title={__(
 							'Map additional contact fields to form fields or custom values',
-							'quillcrm'
+							'doublescale'
 						)}
 					>
 						<span className="text-white text-xs">i</span>
@@ -453,10 +453,10 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 				{otherFields.length > 0 && (
 					<div className="flex gap-5">
 						<div className="flex flex-1 text-[#09090B] font-normal text-base">
-							{__('Field Label', 'quillcrm')}
+							{__('Field Label', 'doublescale')}
 						</div>
 						<div className="flex flex-1 text-[#09090B] font-normal text-base ml-[14px]">
-							{__('Field Value', 'quillcrm')}
+							{__('Field Value', 'doublescale')}
 						</div>
 						<div className="w-12"></div>
 					</div>
@@ -512,7 +512,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 										color: 'black',
 									}),
 								}}
-								placeholder={__('Select', 'quillcrm')}
+								placeholder={__('Select', 'doublescale')}
 								isSearchable={true}
 							/>
 						</div>
@@ -528,7 +528,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 							}
 							placeholder={__(
 								'Select a Field or Type Custom value',
-								'quillcrm'
+								'doublescale'
 							)}
 							formFieldMergeTags={formFieldMergeTags}
 						/>
@@ -538,7 +538,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 							size="icon"
 							className="shrink-0 text-destructive shadow-none border-none hover:bg-transparent hover:text-destructive p-0 bg-transparent h-12"
 							onClick={() => removeOtherField(field.id)}
-							title={__('Remove field', 'quillcrm')}
+							title={__('Remove field', 'doublescale')}
 						>
 							<TrashIcon width={20} height={20} />
 						</Button>
@@ -552,7 +552,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 					onClick={addOtherField}
 				>
 					<Plus className="h-4 w-4" />
-					{__('Add Field', 'quillcrm')}
+					{__('Add Field', 'doublescale')}
 				</Button>
 			</div>
 		</div>

@@ -46,7 +46,7 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 	const [isVisible, setIsVisible] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [cache, setCache] = useState<Record<number, CachedAnalytics>>({});
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchAnalytics = useCallback(
 		async (stepId: number, forceRefresh = false) => {
@@ -88,7 +88,7 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 			} catch (err) {
 				const errorMessage = __(
 					'Failed to load analytics. Please try again.',
-					'quillcrm'
+					'doublescale'
 				);
 				setError(errorMessage);
 

@@ -72,7 +72,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 				};
 
 	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		(select: any) => select('doublescale/campaign').getStepData('template'),
 		[]
 	);
 
@@ -258,25 +258,25 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			{/* Builder-specific styles */}
 			<style>{`
 				/* Hide background scrollbars when builder is active */
-				body:has(#quillcrm-email-builder),
-				html:has(#quillcrm-email-builder) {
+				body:has(#doublescale-email-builder),
+				html:has(#doublescale-email-builder) {
 					overflow: hidden !important;
 				}
 
 				/* Increase z-index for all Radix UI portals when used in builder */
-				body:has(#quillcrm-email-builder) [data-radix-portal] {
+				body:has(#doublescale-email-builder) [data-radix-portal] {
 					z-index: 160020 !important;
 				}
 				
 				/* Specific overrides for dialog/popover content */
-				body:has(#quillcrm-email-builder) [role="dialog"],
-				body:has(#quillcrm-email-builder) [role="alertdialog"],
-				body:has(#quillcrm-email-builder) [data-radix-popper-content-wrapper] {
+				body:has(#doublescale-email-builder) [role="dialog"],
+				body:has(#doublescale-email-builder) [role="alertdialog"],
+				body:has(#doublescale-email-builder) [data-radix-popper-content-wrapper] {
 					z-index: 160021 !important;
 				}
 			`}</style>
 			<div
-				id="quillcrm-email-builder"
+				id="doublescale-email-builder"
 				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
 				style={{
 					zIndex: 160000,

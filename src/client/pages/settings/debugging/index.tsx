@@ -4,7 +4,7 @@
  * Displays debugging logs with configurable log level filtering
  *
  * @since 1.0.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 import { useState, useEffect } from '@wordpress/element';
@@ -114,7 +114,7 @@ const DebuggingLogs: React.FC = () => {
 			console.error('Failed to fetch logs:', err);
 			setError(
 				err?.message ||
-					__('Failed to load logs. Please refresh the page.', 'quillcrm')
+					__('Failed to load logs. Please refresh the page.', 'doublescale')
 			);
 		} finally {
 			setIsLoading(false);
@@ -242,19 +242,19 @@ const DebuggingLogs: React.FC = () => {
 				<div className="flex items-center gap-2 mb-2">
 					<AlertTriangle className="h-5 w-5 text-primary" />
 					<h3 className="text-[#09090B] font-semibold text-lg">
-						{__('Log Level Settings', 'quillcrm')}
+						{__('Log Level Settings', 'doublescale')}
 					</h3>
 				</div>
 				<p className="text-sm text-muted-foreground mb-4">
 					{__(
 						'Configure which log levels should be stored in the system. This setting controls what gets logged and saved to the database, not just what is displayed. Only logs matching the selected level(s) will be stored.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 				<div className="space-y-4 p-4 border rounded-lg bg-primary/5 border-primary/20">
 					<div>
 						<label className="text-sm font-medium mb-2 block text-[#09090B]">
-							{__('Store Logs For:', 'quillcrm')}
+							{__('Store Logs For:', 'doublescale')}
 						</label>
 						<Select value={logLevel} onValueChange={handleLogLevelChange}>
 							<SelectTrigger className="w-full max-w-[400px]">
@@ -262,13 +262,13 @@ const DebuggingLogs: React.FC = () => {
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="error">
-									{__('Error Only', 'quillcrm')} - {__('Only error, critical, alert, and emergency logs will be stored', 'quillcrm')}
+									{__('Error Only', 'doublescale')} - {__('Only error, critical, alert, and emergency logs will be stored', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="error,debug">
-									{__('Error & Debug', 'quillcrm')} - {__('Error and debug logs will be stored', 'quillcrm')}
+									{__('Error & Debug', 'doublescale')} - {__('Error and debug logs will be stored', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="error,debug,info">
-									{__('Error, Debug & Info', 'quillcrm')} - {__('Error, debug, info, and notice logs will be stored', 'quillcrm')}
+									{__('Error, Debug & Info', 'doublescale')} - {__('Error, debug, info, and notice logs will be stored', 'doublescale')}
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -276,18 +276,18 @@ const DebuggingLogs: React.FC = () => {
 					<Alert>
 						<AlertTriangle className="h-4 w-4" />
 						<AlertDescription className="text-sm">
-							<strong>{__('Current Setting:', 'quillcrm')}</strong>{' '}
+							<strong>{__('Current Setting:', 'doublescale')}</strong>{' '}
 							{logLevel === 'error' && __(
 								'Only error-level logs and above (error, critical, alert, emergency) are being stored in the system.',
-								'quillcrm'
+								'doublescale'
 							)}
 							{logLevel === 'error,debug' && __(
 								'Error and debug logs are being stored in the system. Info and notice logs are not stored.',
-								'quillcrm'
+								'doublescale'
 							)}
 							{logLevel === 'error,debug,info' && __(
 								'Error, debug, info, and notice logs are being stored in the system.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</AlertDescription>
 					</Alert>
@@ -298,7 +298,7 @@ const DebuggingLogs: React.FC = () => {
 			<div className="mb-6">
 				<div className="flex items-center justify-between mb-4">
 					<h3 className="text-[#09090B] font-semibold text-lg">
-						{__('Log Management', 'quillcrm')}
+						{__('Log Management', 'doublescale')}
 					</h3>
 					<div className="flex items-center gap-2">
 						<Button
@@ -310,7 +310,7 @@ const DebuggingLogs: React.FC = () => {
 							<RefreshCw
 								className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
 							/>
-							{__('Refresh', 'quillcrm')}
+							{__('Refresh', 'doublescale')}
 						</Button>
 						<Button
 							variant="outline"
@@ -319,7 +319,7 @@ const DebuggingLogs: React.FC = () => {
 							disabled={logs.length === 0}
 						>
 							<Download className="h-4 w-4 mr-2" />
-							{__('Export', 'quillcrm')}
+							{__('Export', 'doublescale')}
 						</Button>
 						<Button
 							variant="outline"
@@ -330,13 +330,13 @@ const DebuggingLogs: React.FC = () => {
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
 							{isDeleting
-								? __('Deleting...', 'quillcrm')
-								: __('Clear All', 'quillcrm')}
+								? __('Deleting...', 'doublescale')
+								: __('Clear All', 'doublescale')}
 						</Button>
 					</div>
 				</div>
 				<p className="text-sm text-muted-foreground mb-4">
-					{__('View, export, and manage stored logs', 'quillcrm')}
+					{__('View, export, and manage stored logs', 'doublescale')}
 				</p>
 			</div>
 
@@ -352,19 +352,19 @@ const DebuggingLogs: React.FC = () => {
 			<div className="mb-6">
 				<div className="mb-4">
 					<h3 className="text-[#09090B] font-semibold text-lg">
-						{__('Logs', 'quillcrm')} ({totalItems})
+						{__('Logs', 'doublescale')} ({totalItems})
 					</h3>
 					<p className="text-sm text-muted-foreground">
-						{__('View and manage debugging logs', 'quillcrm')}
+						{__('View and manage debugging logs', 'doublescale')}
 					</p>
 				</div>
 				{isLoading ? (
 					<div className="p-6 text-center border rounded-lg">
-						{__('Loading logs...', 'quillcrm')}
+						{__('Loading logs...', 'doublescale')}
 					</div>
 				) : logs.length === 0 ? (
 					<div className="p-6 text-center text-muted-foreground border rounded-lg">
-						{__('No logs found for the selected level.', 'quillcrm')}
+						{__('No logs found for the selected level.', 'doublescale')}
 					</div>
 				) : (
 					<>
@@ -373,20 +373,20 @@ const DebuggingLogs: React.FC = () => {
 								<TableHeader>
 									<TableRow>
 										<TableHead className="w-[80px]">
-											{__('Level', 'quillcrm')}
+											{__('Level', 'doublescale')}
 										</TableHead>
 										<TableHead className="w-[100px]">
-											{__('Plugin', 'quillcrm')}
+											{__('Plugin', 'doublescale')}
 										</TableHead>
-										<TableHead>{__('Message', 'quillcrm')}</TableHead>
+										<TableHead>{__('Message', 'doublescale')}</TableHead>
 										<TableHead className="w-[200px]">
-											{__('Source', 'quillcrm')}
+											{__('Source', 'doublescale')}
 										</TableHead>
 										<TableHead className="w-[180px]">
-											{__('Date & Time', 'quillcrm')}
+											{__('Date & Time', 'doublescale')}
 										</TableHead>
 										<TableHead className="w-[120px]">
-											{__('Actions', 'quillcrm')}
+											{__('Actions', 'doublescale')}
 										</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -427,7 +427,7 @@ const DebuggingLogs: React.FC = () => {
 															setSelectedLog(log);
 															setIsModalOpen(true);
 														}}
-														title={__('View Details', 'quillcrm')}
+														title={__('View Details', 'doublescale')}
 													>
 														<Eye className="h-4 w-4" />
 													</Button>
@@ -437,7 +437,7 @@ const DebuggingLogs: React.FC = () => {
 														onClick={() => deleteLogs([log.id])}
 														disabled={isDeleting}
 														className="text-destructive hover:text-destructive"
-														title={__('Delete', 'quillcrm')}
+														title={__('Delete', 'doublescale')}
 													>
 														<Trash2 className="h-4 w-4" />
 													</Button>
@@ -453,7 +453,7 @@ const DebuggingLogs: React.FC = () => {
 						{totalPages > 1 && (
 							<div className="flex items-center justify-between mt-4">
 								<div className="text-sm text-muted-foreground">
-									{__('Page', 'quillcrm')} {page} {__('of', 'quillcrm')}{' '}
+									{__('Page', 'doublescale')} {page} {__('of', 'doublescale')}{' '}
 									{totalPages}
 								</div>
 								<div className="flex gap-2">
@@ -463,7 +463,7 @@ const DebuggingLogs: React.FC = () => {
 										onClick={() => setPage((p) => Math.max(1, p - 1))}
 										disabled={page === 1}
 									>
-										{__('Previous', 'quillcrm')}
+										{__('Previous', 'doublescale')}
 									</Button>
 									<Button
 										variant="outline"
@@ -473,7 +473,7 @@ const DebuggingLogs: React.FC = () => {
 										}
 										disabled={page === totalPages}
 									>
-										{__('Next', 'quillcrm')}
+										{__('Next', 'doublescale')}
 									</Button>
 								</div>
 							</div>
@@ -486,9 +486,9 @@ const DebuggingLogs: React.FC = () => {
 			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
 				<DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
 					<DialogHeader>
-						<DialogTitle>{__('Log Details', 'quillcrm')}</DialogTitle>
+						<DialogTitle>{__('Log Details', 'doublescale')}</DialogTitle>
 						<DialogDescription>
-							{__('View complete log entry information', 'quillcrm')}
+							{__('View complete log entry information', 'doublescale')}
 						</DialogDescription>
 					</DialogHeader>
 					{selectedLog && (
@@ -496,7 +496,7 @@ const DebuggingLogs: React.FC = () => {
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Level', 'quillcrm')}
+										{__('Level', 'doublescale')}
 									</label>
 									<div className="mt-1">
 										<Badge
@@ -510,7 +510,7 @@ const DebuggingLogs: React.FC = () => {
 								</div>
 								<div>
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Plugin', 'quillcrm')}
+										{__('Plugin', 'doublescale')}
 									</label>
 									<div className="mt-1">
 										<Badge variant="outline">{selectedLog.plugin}</Badge>
@@ -518,7 +518,7 @@ const DebuggingLogs: React.FC = () => {
 								</div>
 								<div className="col-span-2">
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Message', 'quillcrm')}
+										{__('Message', 'doublescale')}
 									</label>
 									<div className="mt-1 p-3 bg-muted rounded-md text-sm">
 										{selectedLog.message}
@@ -526,7 +526,7 @@ const DebuggingLogs: React.FC = () => {
 								</div>
 								<div className="col-span-2">
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Source', 'quillcrm')}
+										{__('Source', 'doublescale')}
 									</label>
 									<div className="mt-1 p-3 bg-muted rounded-md text-sm font-mono text-xs">
 										{selectedLog.source}
@@ -534,7 +534,7 @@ const DebuggingLogs: React.FC = () => {
 								</div>
 								<div>
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Date & Time (UTC)', 'quillcrm')}
+										{__('Date & Time (UTC)', 'doublescale')}
 									</label>
 									<div className="mt-1 p-3 bg-muted rounded-md text-sm">
 										{selectedLog.datetime}
@@ -542,7 +542,7 @@ const DebuggingLogs: React.FC = () => {
 								</div>
 								<div>
 									<label className="text-sm font-semibold text-muted-foreground">
-										{__('Date & Time (Local)', 'quillcrm')}
+										{__('Date & Time (Local)', 'doublescale')}
 									</label>
 									<div className="mt-1 p-3 bg-muted rounded-md text-sm">
 										{selectedLog.local_datetime}
@@ -551,7 +551,7 @@ const DebuggingLogs: React.FC = () => {
 								{selectedLog.context && Object.keys(selectedLog.context).length > 0 && (
 									<div className="col-span-2">
 										<label className="text-sm font-semibold text-muted-foreground">
-											{__('Context / Additional Data', 'quillcrm')}
+											{__('Context / Additional Data', 'doublescale')}
 										</label>
 										<div className="mt-1 p-3 bg-muted rounded-md">
 											<pre className="text-xs overflow-x-auto whitespace-pre-wrap">

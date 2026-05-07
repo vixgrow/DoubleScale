@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { AutomationStep } from "@quillcrm/client";
+import { AutomationStep } from "@doublescale/client";
 import { SPACING_CONSTANTS, LAYOUT_CONSTANTS } from "../config";
 import { PositionCalculationParams } from "../types";
 import { getContextSteps } from "./step-utils";

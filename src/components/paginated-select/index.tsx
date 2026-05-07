@@ -20,7 +20,7 @@ import Select from 'react-select';
 /**
  * Internal dependencies
  */
-import { Tag } from '@quillcrm/components';
+import { Tag } from '@doublescale/components';
 import './style.scss';
 
 interface SelectOption {
@@ -422,14 +422,14 @@ const PaginatedSelect = ({
 		// Add loading indicator at the end if we're loading more and have more data
 		if (isLoadingMore && hasMore) {
 			allOptions.push({
-				label: __('Loading more...', 'quillcrm'),
+				label: __('Loading more...', 'doublescale'),
 				value: -1,
 				isDisabled: true,
 			} as SelectOption & { isDisabled: boolean });
 		} else if (!isLoadingMore && hasMore && options.length > 0) {
 			// Add "Load more" indicator when not loading but more data is available
 			allOptions.push({
-				label: __('Scroll down for more...', 'quillcrm'),
+				label: __('Scroll down for more...', 'doublescale'),
 				value: -2,
 				isDisabled: true,
 			} as SelectOption & { isDisabled: boolean });
@@ -492,7 +492,7 @@ const PaginatedSelect = ({
 							components={{
 								LoadingMessage: () => (
 									<div className="px-3 py-2 text-gray-500">
-										{__('Loading...', 'quillcrm')}
+										{__('Loading...', 'doublescale')}
 									</div>
 								),
 								NoOptionsMessage: () => (
@@ -500,7 +500,7 @@ const PaginatedSelect = ({
 										{noOptionsMessage ||
 											__(
 												'No options available',
-												'quillcrm'
+												'doublescale'
 											)}
 									</div>
 								),

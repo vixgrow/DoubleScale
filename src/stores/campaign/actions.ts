@@ -96,7 +96,7 @@ export const fetchCampaign =
 			} catch (error: any) {
 				dispatch(
 					setError(
-						error.message || __('Failed to fetch campaign', 'quillcrm')
+						error.message || __('Failed to fetch campaign', 'doublescale')
 					)
 				);
 			} finally {
@@ -113,7 +113,7 @@ export const saveCampaign =
 			const campaign = select.getCampaign();
 
 			if (!campaign) {
-				throw new Error(__('Campaign not loaded', 'quillcrm'));
+				throw new Error(__('Campaign not loaded', 'doublescale'));
 			}
 
 			dispatch(setSaving(true));
@@ -210,7 +210,7 @@ export const saveCampaignStep =
 						error.message ||
 						__(
 							'Failed to save step data. Please try again.',
-							'quillcrm'
+							'doublescale'
 						)
 					)
 				);

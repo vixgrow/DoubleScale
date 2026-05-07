@@ -4,7 +4,7 @@
  * Extracted from SystemSettings for nested tabs
  *
  * @since 1.0.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 import { useState, useEffect } from '@wordpress/element';
@@ -67,7 +67,7 @@ const CronJobs: React.FC = () => {
 			setError(
 				__(
 					'Failed to load system status. Please refresh the page.',
-					'quillcrm'
+					'doublescale'
 				)
 			);
 		} finally {
@@ -89,7 +89,7 @@ const CronJobs: React.FC = () => {
 			console.error('Failed to run cron:', error);
 			const errorMessage =
 				error?.message ||
-				__('Failed to run the scheduled task. Please try again.', 'quillcrm');
+				__('Failed to run the scheduled task. Please try again.', 'doublescale');
 			setRunError(errorMessage);
 			setTimeout(() => setRunError(null), 5000);
 		} finally {
@@ -140,7 +140,7 @@ const CronJobs: React.FC = () => {
 	if (isLoading) {
 		return (
 			<div className="cron-jobs">
-				<div className="p-6">{__('Loading system status...', 'quillcrm')}</div>
+				<div className="p-6">{__('Loading system status...', 'doublescale')}</div>
 			</div>
 		);
 	}
@@ -150,13 +150,13 @@ const CronJobs: React.FC = () => {
 			<div className="cron-jobs">
 				<Alert variant="destructive">
 					<AlertTriangle className="h-4 w-4" />
-					<AlertTitle>{__('Error Loading Status', 'quillcrm')}</AlertTitle>
+					<AlertTitle>{__('Error Loading Status', 'doublescale')}</AlertTitle>
 					<AlertDescription>
 						{error}
 						<div className="mt-4">
 							<Button onClick={fetchCronStatus} variant="outline" size="sm">
 								<RefreshCw className="h-3 w-3 mr-1" />
-								{__('Try Again', 'quillcrm')}
+								{__('Try Again', 'doublescale')}
 							</Button>
 						</div>
 					</AlertDescription>
@@ -168,7 +168,7 @@ const CronJobs: React.FC = () => {
 	if (!cronStatus) {
 		return (
 			<div className="cron-jobs">
-				<div className="p-6">{__('No status data available.', 'quillcrm')}</div>
+				<div className="p-6">{__('No status data available.', 'doublescale')}</div>
 			</div>
 		);
 	}
@@ -187,7 +187,7 @@ const CronJobs: React.FC = () => {
 			{runError && (
 				<Alert variant="destructive" className="mb-6">
 					<AlertTriangle className="h-4 w-4" />
-					<AlertTitle>{__('Task Execution Failed', 'quillcrm')}</AlertTitle>
+					<AlertTitle>{__('Task Execution Failed', 'doublescale')}</AlertTitle>
 					<AlertDescription>{runError}</AlertDescription>
 				</Alert>
 			)}
@@ -195,16 +195,16 @@ const CronJobs: React.FC = () => {
 			{hasOverdue && (
 				<Alert variant="destructive" className="mb-6">
 					<AlertTriangle className="h-4 w-4" />
-					<AlertTitle>{__('Attention Required', 'quillcrm')}</AlertTitle>
+					<AlertTitle>{__('Attention Required', 'doublescale')}</AlertTitle>
 					<AlertDescription>
 						{__(
 							'Some scheduled jobs are overdue. This may affect email delivery and automation processing. ',
-							'quillcrm'
+							'doublescale'
 						)}
 						{!hasServerCron &&
 							__(
 								'Consider enabling server-side cron for better reliability.',
-								'quillcrm'
+								'doublescale'
 							)}
 					</AlertDescription>
 				</Alert>
@@ -214,12 +214,12 @@ const CronJobs: React.FC = () => {
 				<Alert className="mb-6">
 					<AlertTriangle className="h-4 w-4" />
 					<AlertTitle>
-						{__('Server Side Cron Not Enabled', 'quillcrm')}
+						{__('Server Side Cron Not Enabled', 'doublescale')}
 					</AlertTitle>
 					<AlertDescription>
 						{__(
 							'Server side cron is not enabled. Please consider enabling it for better performance and reliability.',
-							'quillcrm'
+							'doublescale'
 						)}{' '}
 						<a
 							href="https://developer.wordpress.org/plugins/cron/hooking-wp-cron-into-the-system-task-scheduler/"
@@ -227,7 +227,7 @@ const CronJobs: React.FC = () => {
 							rel="noopener noreferrer"
 							className="inline-flex items-center gap-1 underline hover:no-underline"
 						>
-							{__('Read more about server side cron', 'quillcrm')}
+							{__('Read more about server side cron', 'doublescale')}
 							<ExternalLink className="h-3 w-3" />
 						</a>
 					</AlertDescription>
@@ -240,7 +240,7 @@ const CronJobs: React.FC = () => {
 					<div className="flex items-center gap-2">
 						<Clock className="h-5 w-5" />
 						<h3 className="text-[#09090B] font-semibold text-lg">
-							{__('CRON Job Status', 'quillcrm')}
+							{__('CRON Job Status', 'doublescale')}
 						</h3>
 					</div>
 					<div className="flex items-center gap-2">
@@ -255,8 +255,8 @@ const CronJobs: React.FC = () => {
 								}`}
 							/>
 							{autoRefresh
-								? __('Auto-refresh: On', 'quillcrm')
-								: __('Auto-refresh: Off', 'quillcrm')}
+								? __('Auto-refresh: On', 'doublescale')
+								: __('Auto-refresh: Off', 'doublescale')}
 						</Button>
 						<Button
 							size="sm"
@@ -265,12 +265,12 @@ const CronJobs: React.FC = () => {
 							disabled={isLoading}
 						>
 							<RefreshCw className={`h-3 w-3 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-							{__('Refresh Now', 'quillcrm')}
+							{__('Refresh Now', 'doublescale')}
 						</Button>
 					</div>
 				</div>
 				<p className="text-sm text-muted-foreground mb-4">
-					{__('Monitoring scheduled background tasks', 'quillcrm')}
+					{__('Monitoring scheduled background tasks', 'doublescale')}
 				</p>
 
 				<div className="space-y-3 mb-4">
@@ -286,21 +286,21 @@ const CronJobs: React.FC = () => {
 									</h4>
 									{event.is_overdue ? (
 										<Badge variant="destructive" className="text-xs">
-											{__('Overdue', 'quillcrm')}
+											{__('Overdue', 'doublescale')}
 										</Badge>
 									) : (
 										<Badge variant="outline" className="text-xs">
-											{__('On Schedule', 'quillcrm')}
+											{__('On Schedule', 'doublescale')}
 										</Badge>
 									)}
 								</div>
 								<div className="flex items-center gap-4 text-xs text-muted-foreground">
 									<span>
-										{__('Next Run:', 'quillcrm')} {event.next_run}
+										{__('Next Run:', 'doublescale')} {event.next_run}
 									</span>
 									<span>•</span>
 									<span>
-										{__('Last Run:', 'quillcrm')} {event.last_run}
+										{__('Last Run:', 'doublescale')} {event.last_run}
 									</span>
 								</div>
 							</div>
@@ -313,8 +313,8 @@ const CronJobs: React.FC = () => {
 							>
 								<Play className="h-3 w-3 mr-1" />
 								{runningHook === event.hook
-									? __('Running...', 'quillcrm')
-									: __('Run Now', 'quillcrm')}
+									? __('Running...', 'doublescale')
+									: __('Run Now', 'doublescale')}
 							</Button>
 						</div>
 					))}
@@ -322,11 +322,11 @@ const CronJobs: React.FC = () => {
 
 				<div className="pt-4 border-t text-sm text-muted-foreground">
 					<p>
-						<strong>{__('Server Memory Limit:', 'quillcrm')}</strong>{' '}
+						<strong>{__('Server Memory Limit:', 'doublescale')}</strong>{' '}
 						{cronStatus.server.memory_limit}.{' '}
-						<strong>{__('Current usage:', 'quillcrm')}</strong>{' '}
+						<strong>{__('Current usage:', 'doublescale')}</strong>{' '}
 						{cronStatus.server.usage_percent}%.{' '}
-						<strong>{__('Max Execution Time:', 'quillcrm')}</strong>{' '}
+						<strong>{__('Max Execution Time:', 'doublescale')}</strong>{' '}
 						{cronStatus.server.max_execution_time}
 					</p>
 				</div>
@@ -338,13 +338,13 @@ const CronJobs: React.FC = () => {
 					<div className="flex items-center gap-2 mb-4">
 						<Terminal className="h-5 w-5" />
 						<h3 className="text-[#09090B] font-semibold text-lg">
-							{__('Setup Server-Side Cron', 'quillcrm')}
+							{__('Setup Server-Side Cron', 'doublescale')}
 						</h3>
 					</div>
 					<p className="text-sm text-muted-foreground mb-6">
 						{__(
 							'Follow these steps to enable server-side cron for better reliability and performance',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 
@@ -354,12 +354,12 @@ const CronJobs: React.FC = () => {
 								<span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs">
 									1
 								</span>
-								{__('Add to wp-config.php', 'quillcrm')}
+								{__('Add to wp-config.php', 'doublescale')}
 							</h4>
 							<p className="text-sm text-muted-foreground mb-3">
 								{__(
 									'Add this line to your wp-config.php file (before "That\'s all, stop editing!" line):',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 							<div className="relative">
@@ -376,8 +376,8 @@ const CronJobs: React.FC = () => {
 								>
 									<Copy className="h-3 w-3 mr-1" />
 									{copiedText === 'wp-config'
-										? __('Copied!', 'quillcrm')
-										: __('Copy', 'quillcrm')}
+										? __('Copied!', 'doublescale')
+										: __('Copy', 'doublescale')}
 								</Button>
 							</div>
 						</div>
@@ -387,18 +387,18 @@ const CronJobs: React.FC = () => {
 								<span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs">
 									2
 								</span>
-								{__('Add Cron Job to Server', 'quillcrm')}
+								{__('Add Cron Job to Server', 'doublescale')}
 							</h4>
 							<p className="text-sm text-muted-foreground mb-3">
 								{__(
 									'Add one of these commands to your server cron (using cPanel, Plesk, or crontab -e):',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 
 							<div className="mb-4">
 								<p className="text-xs font-medium text-muted-foreground mb-2">
-									{__('Using wget (recommended):', 'quillcrm')}
+									{__('Using wget (recommended):', 'doublescale')}
 								</p>
 								<div className="relative">
 									<pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
@@ -412,15 +412,15 @@ const CronJobs: React.FC = () => {
 									>
 										<Copy className="h-3 w-3 mr-1" />
 										{copiedText === 'wget'
-											? __('Copied!', 'quillcrm')
-											: __('Copy', 'quillcrm')}
+											? __('Copied!', 'doublescale')
+											: __('Copy', 'doublescale')}
 									</Button>
 								</div>
 							</div>
 
 							<div>
 								<p className="text-xs font-medium text-muted-foreground mb-2">
-									{__('Using curl (alternative):', 'quillcrm')}
+									{__('Using curl (alternative):', 'doublescale')}
 								</p>
 								<div className="relative">
 									<pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
@@ -436,18 +436,18 @@ const CronJobs: React.FC = () => {
 									>
 										<Copy className="h-3 w-3 mr-1" />
 										{copiedText === 'curl'
-											? __('Copied!', 'quillcrm')
-											: __('Copy', 'quillcrm')}
+											? __('Copied!', 'doublescale')
+											: __('Copy', 'doublescale')}
 									</Button>
 								</div>
 							</div>
 
 							<Alert className="mt-4">
 								<AlertDescription className="text-xs">
-									<strong>{__('Note:', 'quillcrm')}</strong>{' '}
+									<strong>{__('Note:', 'doublescale')}</strong>{' '}
 									{__(
 										'The command runs every minute (*/1 * * * *). This ensures your scheduled tasks run on time.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</AlertDescription>
 							</Alert>
@@ -458,12 +458,12 @@ const CronJobs: React.FC = () => {
 								<span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs">
 									3
 								</span>
-								{__('Verify Setup', 'quillcrm')}
+								{__('Verify Setup', 'doublescale')}
 							</h4>
 							<p className="text-sm text-muted-foreground mb-3">
 								{__(
 									'After setting up, wait a few minutes and refresh this page. The "Cron Type" above should change to "Server Cron".',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 							<Button
@@ -472,7 +472,7 @@ const CronJobs: React.FC = () => {
 								className="w-full"
 							>
 								<RefreshCw className="h-4 w-4 mr-2" />
-								{__('Refresh Status', 'quillcrm')}
+								{__('Refresh Status', 'doublescale')}
 							</Button>
 						</div>
 
@@ -481,7 +481,7 @@ const CronJobs: React.FC = () => {
 								<span className="text-sm">
 									{__(
 										'Need help? Read the complete guide on WordPress cron configuration.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</span>
 								<Button size="sm" variant="outline" asChild>
@@ -491,7 +491,7 @@ const CronJobs: React.FC = () => {
 										rel="noopener noreferrer"
 										className="flex items-center gap-1"
 									>
-										{__('Learn More', 'quillcrm')}
+										{__('Learn More', 'doublescale')}
 										<ExternalLink className="h-3 w-3" />
 									</a>
 								</Button>

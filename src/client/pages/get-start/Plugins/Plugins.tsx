@@ -23,9 +23,9 @@ import {
 	AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import RecommendedPluginIcon from '@quillcrm/components/icons/recommended-plugin';
-import QuillBookingIcon from '@quillcrm/components/icons/quillBooking';
-import OptionalPluginIcon from '@quillcrm/components/icons/optional-icon';
+import RecommendedPluginIcon from '@doublescale/components/icons/recommended-plugin';
+import QuillBookingIcon from '@doublescale/components/icons/quillBooking';
+import OptionalPluginIcon from '@doublescale/components/icons/optional-icon';
 import ButtonComponent from '../component/button';
 import { Input } from '../../../../components/ui/input';
 import { PluginsLoadingSkeleton } from './Plugin-Skeleton';
@@ -49,7 +49,7 @@ const RecommendedPlugins: Plugin[] = [
 		icon: QuillSMTP,
 		description: __(
 			'Quill SMTP helps you send reliable, trackable emails directly from your CRM.',
-			'quillcrm'
+			'doublescale'
 		),
 		// Main plugin file is "quillsmtp.php" inside the "quill-smtp" folder.
 		pluginFile: 'quill-smtp/quillsmtp.php',
@@ -65,7 +65,7 @@ const OptionalPlugins: Plugin[] = [
 		icon: QuillBooking,
 		description: __(
 			'Quill Booking empowers you with seamless appointment scheduling.',
-			'quillcrm'
+			'doublescale'
 		),
 		pluginFile: 'quillbooking/quillbooking.php',
 		downloadUrl:
@@ -77,7 +77,7 @@ const OptionalPlugins: Plugin[] = [
 		icon: QuillForms,
 		description: __(
 			'Quill Forms lets you build powerful forms and connect submissions to your CRM.',
-			'quillcrm'
+			'doublescale'
 		),
 		pluginFile: 'quillforms/quillforms.php',
 		downloadUrl:
@@ -94,14 +94,14 @@ interface PluginCardProps {
 function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 	const isInstalled = plugin.isInstalled || false;
 	const isActive = plugin.isActive || false;
-	let actionText = __('Install Now', 'quillcrm');
+	let actionText = __('Install Now', 'doublescale');
 	let actionType: 'install' | 'activate' | 'active' = 'install';
 
 	if (isInstalled && !isActive) {
-		actionText = __('Activate', 'quillcrm');
+		actionText = __('Activate', 'doublescale');
 		actionType = 'activate';
 	} else if (isActive) {
-		actionText = __('Activated', 'quillcrm');
+		actionText = __('Activated', 'doublescale');
 		actionType = 'active';
 	}
 
@@ -119,7 +119,7 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 
 					{actionType === 'active' ? (
 						<span className="text-xs font-medium leading-[26px] text-[#10B981]">
-							{__('Activated', 'quillcrm')}
+							{__('Activated', 'doublescale')}
 						</span>
 					) : (
 						<Button
@@ -130,7 +130,7 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 							disabled={isProcessing}
 						>
 							{isProcessing
-								? __('Processing...', 'quillcrm')
+								? __('Processing...', 'doublescale')
 								: actionText}
 						</Button>
 					)}
@@ -155,7 +155,7 @@ export default function PluginComplete({
 	onPrevious,
 	onNext,
 }: PluginCompleteProps) {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [recommendedPlugins, setRecommendedPlugins] =
 		useState<Plugin[]>(RecommendedPlugins);
 	const [optionalPlugins, setOptionalPlugins] =
@@ -225,7 +225,7 @@ export default function PluginComplete({
 				const errorMessage =
 					error?.message ||
 					error?.data?.message ||
-					__('Failed to check plugin status', 'quillcrm');
+					__('Failed to check plugin status', 'doublescale');
 				createNotice({
 					type: 'error',
 					message: errorMessage,
@@ -243,7 +243,7 @@ export default function PluginComplete({
 			console.warn(`Plugin file not defined for ${plugin.name}`);
 			createNotice({
 				type: 'error',
-				message: __('Plugin information not defined', 'quillcrm'),
+				message: __('Plugin information not defined', 'doublescale'),
 			});
 			return;
 		}
@@ -285,7 +285,7 @@ export default function PluginComplete({
 
 			createNotice({
 				type: 'success',
-				message: __(`Plugin ${action}d successfully`, 'quillcrm'),
+				message: __(`Plugin ${action}d successfully`, 'doublescale'),
 			});
 
 			// Refresh plugin status after action.
@@ -346,7 +346,7 @@ export default function PluginComplete({
 				error?.data?.message ||
 				__(
 					`Failed to ${plugin.isInstalled ? 'activate' : 'install'} plugin`,
-					'quillcrm'
+					'doublescale'
 				);
 			createNotice({
 				type: 'error',
@@ -363,13 +363,13 @@ export default function PluginComplete({
 				<h3 className="text-[#170F49] text-[32px] font-semibold">
 					{__(
 						'Complete Your Setup—Install Recommended & Optional Plugins',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 				<p className="text-[#777] text-lg font-normal leading-7">
 					{__(
 						'Enhance your CRM experience by installing Quill SMTP (recommended) and optional Quill Booking / Quill Forms integrations.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>
@@ -395,7 +395,7 @@ export default function PluginComplete({
 							<div className="flex items-center gap-2">
 								<RecommendedPluginIcon />
 								<span className="text-lg font-medium leading-7 text-[#09090B]">
-									{__('Recommended Plugins', 'quillcrm')}
+									{__('Recommended Plugins', 'doublescale')}
 								</span>
 							</div>
 						</AccordionTrigger>
@@ -424,7 +424,7 @@ export default function PluginComplete({
 							<div className="flex items-center gap-2">
 								<OptionalPluginIcon />
 								<span className="text-lg font-medium leading-7 text-[#09090B]">
-									{__('Optional Plugins', 'quillcrm')}
+									{__('Optional Plugins', 'doublescale')}
 								</span>
 							</div>
 						</AccordionTrigger>
@@ -452,12 +452,12 @@ export default function PluginComplete({
 
 			{/* <div className=" !p-0 !m-0">
 				<label className="text-base leading-6 text-[#09090B] block mb-[2px]">
-					{__('Email Address', 'quillcrm')}
+					{__('Email Address', 'doublescale')}
 				</label>
 
 				<Input
 					type="email"
-					placeholder={__('Email Address', 'quillcrm')}
+					placeholder={__('Email Address', 'doublescale')}
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					className="w-full border !border-[#DEE1E6] rounded-lg h-12 py-[5px] px-4 !m-0"
@@ -466,7 +466,7 @@ export default function PluginComplete({
 				<p className="text-xs text-[#CB5301] font-semibold leading-[26px] !m-0">
 					{__(
 						'We will send marketing tips and advanced usage of Quill CRM',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div> */}
@@ -474,15 +474,15 @@ export default function PluginComplete({
 			<div className="flex justify-between pt-8">
 				<div className="flex gap-2">
 					<ButtonComponent onClick={onPrevious} type="">
-						{__('Previous', 'quillcrm')}
+						{__('Previous', 'doublescale')}
 					</ButtonComponent>
 
 					<ButtonComponent type="no" onClick={onSkip}>
-						{__('Skip →', 'quillcrm')}
+						{__('Skip →', 'doublescale')}
 					</ButtonComponent>
 				</div>
 				<ButtonComponent type="go" onClick={onNext}>
-					{__('Next Step', 'quillcrm')}
+					{__('Next Step', 'doublescale')}
 				</ButtonComponent>
 			</div>
 		</div>

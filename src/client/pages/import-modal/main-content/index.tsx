@@ -18,10 +18,10 @@ import FieldMapping from '../field-mapping';
 import ContactProfile from '../contact-profile';
 import StepNavigation from '../steps-navigation';
 import ImportProgress from '../import-progress';
-import { ContactMappedFields } from '@quillcrm/components';
+import { ContactMappedFields } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import { useImportActions } from '../use-importActions';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 interface MainContentProps {
 	onImportComplete: () => void;
@@ -85,7 +85,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 								<h3 className="text-lg font-semibold mb-4">
 									{__(
 										'Step 1: Enter API Credentials',
-										'quillcrm'
+										'doublescale'
 									)}
 								</h3>
 								<ApiCredentials importer={importer} />
@@ -148,7 +148,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 			return (
 				<div className="space-y-6">
 					<h3 className="text-lg font-semibold mb-4">
-						{__('Step 2: Configure Import Settings', 'quillcrm')}
+						{__('Step 2: Configure Import Settings', 'doublescale')}
 					</h3>
 					<FieldMapping importer={importer} />
 					<ContactProfile />
@@ -168,12 +168,12 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 						<Card className="shadow-none rounded-2xl mb-8">
 							<div className="p-6">
 								<h3 className="text-2xl font-normal text-[#09090B] mb-2">
-									{__('Mapping the file', 'quillcrm')}
+									{__('Mapping the file', 'doublescale')}
 								</h3>
 								<p className="text-lg text-[#71717A] mb-6">
 									{__(
 										'Select the column field you want to map it on the system to import.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 

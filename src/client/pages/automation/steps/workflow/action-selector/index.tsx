@@ -18,7 +18,7 @@ import {
 	DialogOverlay,
 	DialogDescription,
 } from "@/components/ui/dialog";
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 interface ActionSelectorProps {
 	value: string;
@@ -90,7 +90,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Automate your CRM workflows and tasks', 'quillcrm')
+			description: __('Automate your CRM workflows and tasks', 'doublescale')
 		},
 		'lms': {
 			image: (
@@ -135,7 +135,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Learning management system automation', 'quillcrm')
+			description: __('Learning management system automation', 'doublescale')
 		},
 		'woocommerce': {
 			image: (
@@ -156,7 +156,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					/>
 				</svg>
 			),
-			description: __('E-commerce and order automation', 'quillcrm')
+			description: __('E-commerce and order automation', 'doublescale')
 		},
 		'wp': {
 			image: (
@@ -173,7 +173,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					/>
 				</svg>
 			),
-			description: __('WordPress user and content automation', 'quillcrm')
+			description: __('WordPress user and content automation', 'doublescale')
 		},
 		'send_data': {
 			image: (
@@ -193,7 +193,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 				</svg>
 
 			),
-			description: __('Send data to external services', 'quillcrm')
+			description: __('Send data to external services', 'doublescale')
 		},
 		'email': {
 			image: (
@@ -212,7 +212,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Send email to users', 'quillcrm')
+			description: __('Send email to users', 'doublescale')
 		},
 		'message': {
 			image: (
@@ -241,7 +241,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Send message to users', 'quillcrm')
+			description: __('Send message to users', 'doublescale')
 		},
 		'video': {
 			image: (
@@ -260,7 +260,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Video player automation', 'quillcrm')
+			description: __('Video player automation', 'doublescale')
 		}
 	};
 
@@ -271,8 +271,8 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 			<DialogOverlay className="z-[150200]" />
 			<DialogContent className="z-[150200] h-[90vh] max-w-[1000px] flex flex-col overflow-hidden">
 				<DialogHeader className="shrink-0">
-					<DialogTitle>{__('Action Library', 'quillcrm')}</DialogTitle>
-					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'quillcrm')}</DialogDescription>
+					<DialogTitle>{__('Action Library', 'doublescale')}</DialogTitle>
+					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'doublescale')}</DialogDescription>
 				</DialogHeader>
 				<div className="qcrm-fields flex-1 flex flex-col overflow-hidden min-h-0">
 					<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">

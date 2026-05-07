@@ -6,10 +6,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { Settings } from '@quillcrm/client';
-import { Field, Editor } from '@quillcrm/components';
-import { RadioGroup, RadioGroupItem } from '@quillcrm/components/ui/radio-group';
-import { Label } from '@quillcrm/components/ui/label';
+import type { Settings } from '@doublescale/client';
+import { Field, Editor } from '@doublescale/components';
+import { RadioGroup, RadioGroupItem } from '@doublescale/components/ui/radio-group';
+import { Label } from '@doublescale/components/ui/label';
 
 interface DoubleOptInSettingsProps {
     settings: Settings;
@@ -40,12 +40,12 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
     return (
         <div className="double-optin-settings qcrm-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
-                {__('Double Optin', 'quillcrm')}
+                {__('Double Optin', 'doublescale')}
             </div>
             <div className="flex gap-5 items-start pb-5 border-b">
                 <div className="w-full">
                     <Field
-                        label={__('Email Subject', 'quillcrm')}
+                        label={__('Email Subject', 'doublescale')}
                         value={email_subject}
                         onChange={(value) =>
                             handleFieldChange('email_subject', value)
@@ -55,7 +55,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                 </div>
                 <div className="w-full">
                     <Label className="text-[#09090B] font-normal text-base">
-                        {__('Email Content', 'quillcrm')}
+                        {__('Email Content', 'doublescale')}
                     </Label>
                     <div className="mt-2">
                         <Editor
@@ -71,7 +71,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                 <div className="w-full">
                     <div className="qcrm-field">
                         <div className="qcrm-field-label text-[#09090B] font-normal text-base">
-                            {__('After Confirmation', 'quillcrm')}
+                            {__('After Confirmation', 'doublescale')}
                         </div>
                         <RadioGroup
                             value={after_confirmation}
@@ -83,13 +83,13 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="message" id="radio-message" />
                                     <Label htmlFor="radio-message" className="font-normal cursor-pointer">
-                                        {__('Show Message', 'quillcrm')}
+                                        {__('Show Message', 'doublescale')}
                                     </Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="url" id="radio-url" />
                                     <Label htmlFor="radio-url" className="font-normal cursor-pointer">
-                                        {__('Redirect to URL', 'quillcrm')}
+                                        {__('Redirect to URL', 'doublescale')}
                                     </Label>
                                 </div>
                             </div>
@@ -100,7 +100,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                     {after_confirmation === 'message' ? (
                         <>
                             <Label className="text-[#09090B] font-normal text-base">
-                                {__('Confirmation Message', 'quillcrm')}
+                                {__('Confirmation Message', 'doublescale')}
                             </Label>
                             <div className="mt-2">
                                 <Editor
@@ -113,7 +113,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                         </>
                     ) : (
                         <Field
-                            label={__('Confirmation Redirect', 'quillcrm')}
+                            label={__('Confirmation Redirect', 'doublescale')}
                             value={confirmation_redirect}
                             onChange={(value) =>
                                 handleFieldChange('confirmation_redirect', value)

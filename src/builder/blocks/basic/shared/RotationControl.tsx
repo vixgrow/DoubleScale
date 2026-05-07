@@ -37,7 +37,7 @@ export const RotationControl: React.FC<RotationControlProps> = ({
 
     return (
         <div className="flex justify-between items-center text-[#333333]">
-            <label className="text-sm">{__('Rotation', 'quillcrm')}</label>
+            <label className="text-sm">{__('Rotation', 'doublescale')}</label>
             <div className="flex items-center gap-2 border rounded-lg p-1">
                 <Button
                     variant="outline"

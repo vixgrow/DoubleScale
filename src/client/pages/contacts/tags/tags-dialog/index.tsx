@@ -6,13 +6,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { Tag as ContactTag } from '@quillcrm/client';
+import type { Tag as ContactTag } from '@doublescale/client';
 import {
 	CustomDialogHeader,
 	Field,
 	GradientTagIcon,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -58,12 +58,12 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 						<CustomDialogHeader
 							title={
 								selectedTag
-									? __('Edit Tag', 'quillcrm')
-									: __('Create Tag', 'quillcrm')
+									? __('Edit Tag', 'doublescale')
+									: __('Create Tag', 'doublescale')
 							}
 							subtitle={__(
 								'Add basic information below to add new Tag',
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<GradientTagIcon />}
 						/>
@@ -72,7 +72,7 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 
 				<div className="qcrm-fields space-y-4 mt-4">
 					<Field
-						label={__('Tag Name', 'quillcrm')}
+						label={__('Tag Name', 'doublescale')}
 						value={selectedTag ? selectedTag.name : tag.name}
 						onChange={(value) => {
 							selectedTag
@@ -83,10 +83,10 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 								: onTagChange({ ...tag, name: value });
 						}}
 						type="text"
-						placeholder={__('Enter Tag Name', 'quillcrm')}
+						placeholder={__('Enter Tag Name', 'doublescale')}
 					/>
 					<Field
-						label={__('Tag Description', 'quillcrm')}
+						label={__('Tag Description', 'doublescale')}
 						value={
 							selectedTag
 								? (selectedTag.description ?? '')
@@ -101,7 +101,7 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 								: onTagChange({ ...tag, description: value });
 						}}
 						type="textarea"
-						placeholder={__('Enter Tag description', 'quillcrm')}
+						placeholder={__('Enter Tag description', 'doublescale')}
 					/>
 				</div>
 
@@ -114,8 +114,8 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 						className="w-full"
 					>
 						{isSaving
-							? __('Submitting...', 'quillcrm')
-							: __('Submit', 'quillcrm')}
+							? __('Submitting...', 'doublescale')
+							: __('Submit', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

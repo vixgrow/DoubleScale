@@ -1,7 +1,7 @@
 /**
  * QuillSMTP Dependencies.
  */
-import type { InitialPayload } from '@quillcrm/config';
+import type { InitialPayload } from '@doublescale/config';
 
 /**
  * Internal Dependencies.

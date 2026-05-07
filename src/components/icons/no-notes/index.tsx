@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NoNotesIcon: React.FC<IconProps> = ({ width = 109, height = 131 }) => {
 	return (

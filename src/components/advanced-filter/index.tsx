@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
 import { useRef, useState, useEffect } from 'react';
 import Filters from '../filters';
-import type { Filter as FilterType } from '@quillcrm/client';
+import type { Filter as FilterType } from '@doublescale/client';
 import { DeleteIcon } from '../icons';
 
 interface FilterBlock {
@@ -105,7 +105,7 @@ export default function AdvancedFilter({
 						{index > 0 && (
 							<div className="flex items-center justify-between mb-2">
 								<span className="text-sm font-bold text-gray-600">
-									{__('OR', 'quillcrm')}
+									{__('OR', 'doublescale')}
 								</span>
 								<Button
 									variant="ghost"
@@ -129,21 +129,21 @@ export default function AdvancedFilter({
 
 			<div className="flex gap-2">
 				<Button variant="default" onClick={handleAddFilter}>
-					{__('Add Filter', 'quillcrm')}
+					{__('Add Filter', 'doublescale')}
 				</Button>
 				<Button
 					variant="secondaryDeepBlue"
 					onClick={handleApplyFilters}
 					disabled={loading}
 				>
-					{__('Apply Filters', 'quillcrm')}
+					{__('Apply Filters', 'doublescale')}
 				</Button>
 				<Button
 					variant="destructive"
 					onClick={handleClearFilters}
 					disabled={loading}
 				>
-					{__('Clear Filters', 'quillcrm')}
+					{__('Clear Filters', 'doublescale')}
 				</Button>
 			</div>
 		</div>

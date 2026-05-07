@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const RedoIcon: React.FC<IconProps> = ({ width = 20, height = 20 }) => {
 	return (

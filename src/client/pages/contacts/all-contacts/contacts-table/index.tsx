@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 /**
  * internal dependencies
  */
-import type { DataTableConfig } from '@quillcrm/client';
+import type { DataTableConfig } from '@doublescale/client';
 import { DataTable } from '@/components/ui/data-table';
 import { useContactsContext } from '../contexts';
 import { useContactsAPI } from '../useContactsAPI';
 import { useContactsColumns } from '../columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
-import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -71,7 +71,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			enabled: true,
 		},
 		search: {
-			placeholder: __('Search contacts...', 'quillcrm'),
+			placeholder: __('Search contacts...', 'doublescale'),
 			onChange: (value) => {
 				setKeywords(value);
 				if (page > 1) {
@@ -119,7 +119,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 					setPage(1);
 				}
 			},
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 		initialColumnVisibility: {
 			contact: true,

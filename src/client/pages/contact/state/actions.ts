@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Contact, Note, AutomationContact, LMSCourse } from '@quillcrm/client';
+import type { Contact, Note, AutomationContact, LMSCourse } from '@doublescale/client';
 import type { EmailAnalytics, PurchaseHistory } from './types';
 import {
 	SET_CONTACT,

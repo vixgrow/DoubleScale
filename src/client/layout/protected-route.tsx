@@ -7,8 +7,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 
 interface ProtectedRouteProps {
 	page: {
@@ -42,11 +42,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	) {
 		return (
 			<div className="qcrm-access-denied">
-				<h2>{__('Access Denied', 'quillcrm')}</h2>
+				<h2>{__('Access Denied', 'doublescale')}</h2>
 				<p>
 					{__(
 						'You do not have permission to access this page.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>

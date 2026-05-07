@@ -27,10 +27,10 @@ export const UnknownRenderer: React.FC<UnknownRendererProps> = ({ props }) => {
 				</div>
 				<div>
 					<p className="font-semibold text-gray-700">
-						{__('Unknown Block', 'quillcrm')}
+						{__('Unknown Block', 'doublescale')}
 					</p>
 					<p className="text-sm text-gray-500">
-						{__('Type:', 'quillcrm')}{' '}
+						{__('Type:', 'doublescale')}{' '}
 						<code className="bg-gray-200 px-1 rounded">
 							{originalType}
 						</code>
@@ -38,7 +38,7 @@ export const UnknownRenderer: React.FC<UnknownRendererProps> = ({ props }) => {
 					<p className="text-sm text-gray-600 mt-1">
 						{__(
 							'This block is a Pro feature. Please install and activate the Pro version of the plugin to use it.',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>

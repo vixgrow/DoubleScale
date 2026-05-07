@@ -9,11 +9,11 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * internal dependencies
  */
-import type { Contact } from '@quillcrm/client';
-import { convertDate } from '@quillcrm/utils';
+import type { Contact } from '@doublescale/client';
+import { convertDate } from '@doublescale/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { SortIcon, TimeAgoCell } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell } from '@doublescale/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 import { useContactsContext } from '../contexts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -62,7 +62,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Contact', 'quillcrm')}
+					{__('Contact', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -121,7 +121,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Phone', 'quillcrm')}
+					{__('Phone', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -136,7 +136,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('WhatsApp Phone', 'quillcrm')}
+					{__('WhatsApp Phone', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -151,7 +151,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Country', 'quillcrm')}
+					{__('Country', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -159,7 +159,7 @@ export const useContactsColumns = () => {
 		},
 		{
 			accessorKey: 'city',
-			header: __('City', 'quillcrm'),
+			header: __('City', 'doublescale'),
 			cell: ({ row }) => row.original.city || '-',
 		},
 		{
@@ -171,7 +171,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Status', 'quillcrm')}
+					{__('Status', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -240,22 +240,22 @@ export const useContactsColumns = () => {
 		},
 		{
 			accessorKey: 'address_1',
-			header: __('Address 1', 'quillcrm'),
+			header: __('Address 1', 'doublescale'),
 			cell: ({ row }) => row.original.address_1 || '-',
 		},
 		{
 			accessorKey: 'address_2',
-			header: __('Address 2', 'quillcrm'),
+			header: __('Address 2', 'doublescale'),
 			cell: ({ row }) => row.original.address_2 || '-',
 		},
 		{
 			accessorKey: 'state',
-			header: __('State', 'quillcrm'),
+			header: __('State', 'doublescale'),
 			cell: ({ row }) => row.original.state || '-',
 		},
 		{
 			accessorKey: 'zip',
-			header: __('Postal Code', 'quillcrm'),
+			header: __('Postal Code', 'doublescale'),
 			cell: ({ row }) => row.original.zip || '-',
 		},
 		{
@@ -267,7 +267,7 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -281,7 +281,7 @@ export const useContactsColumns = () => {
 		baseColumns.push(
 			{
 				accessorKey: 'total_orders',
-				header: __('Total Orders', 'quillcrm'),
+				header: __('Total Orders', 'doublescale'),
 				cell: ({ row }) => {
 					const details = getContactOrderDetails(row.original);
 					return <>{details.orders}</>;
@@ -289,7 +289,7 @@ export const useContactsColumns = () => {
 			},
 			{
 				accessorKey: 'total_revenue',
-				header: __('Total Revenue', 'quillcrm'),
+				header: __('Total Revenue', 'doublescale'),
 				cell: ({ row }) => {
 					const details = getContactOrderDetails(row.original);
 					return <>{details.revenue}</>;
@@ -297,7 +297,7 @@ export const useContactsColumns = () => {
 			},
 			{
 				accessorKey: 'last_order_date',
-				header: __('Last Order Date', 'quillcrm'),
+				header: __('Last Order Date', 'doublescale'),
 				cell: ({ row }) => {
 					const details = getContactOrderDetails(row.original);
 					return (

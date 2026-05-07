@@ -14,8 +14,8 @@ import { Lock } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getAction } from '@quillcrm/utils';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
+import { getAction } from '@doublescale/utils';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import './style.scss';
 
 interface DelaySelectorProps {
@@ -77,7 +77,7 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 								<CardTitle className="text-base font-semibold text-[#1F2937]">
 									<div className="flex items-center gap-2">
 										{action?.label ||
-											__('Delay', 'quillcrm')}
+											__('Delay', 'doublescale')}
 										{action?.is_pro && (
 											<Lock className="h-4 w-4 text-orange-500" />
 										)}
@@ -100,8 +100,8 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 									}`}
 								>
 									{isSaving && value === key
-										? __('Saving...', 'quillcrm')
-										: __('Select', 'quillcrm')}
+										? __('Saving...', 'doublescale')
+										: __('Select', 'doublescale')}
 								</Button>
 							</CardContent>
 						</Card>

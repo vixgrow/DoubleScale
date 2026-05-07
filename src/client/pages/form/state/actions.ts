@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Form } from '@quillcrm/client';
+import type { Form } from '@doublescale/client';
 import { SET_FORM, UPDATE_FORM, UPDATE_SETTINGS } from './constants';
 import type { FormAction } from './types';
 

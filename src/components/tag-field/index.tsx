@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import PaginatedSelect from '@quillcrm/components/paginated-select';
+import PaginatedSelect from '@doublescale/components/paginated-select';
 
 interface Props {
 	value: number[];
@@ -20,8 +20,8 @@ const TagField = ({ value, onChange }: Props) => {
 			value={value}
 			onChange={onChange}
 			endpoint="/qc/v1/tags"
-			placeholder={__('Select tag', 'quillcrm')}
-			noOptionsMessage={__('No tags available', 'quillcrm')}
+			placeholder={__('Select tag', 'doublescale')}
+			noOptionsMessage={__('No tags available', 'doublescale')}
 			className="qcrm-tag-field"
 		/>
 	);

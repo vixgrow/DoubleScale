@@ -59,7 +59,7 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 				<DialogTitle>
 					<div className="flex items-center justify-between">
 						<h1 className="text-3xl font-normal text-[#09090B]">
-							{__('Import Contacts', 'quillcrm')}
+							{__('Import Contacts', 'doublescale')}
 						</h1>
 						<div className="text-base text-[#979797] pr-12">
 							{[

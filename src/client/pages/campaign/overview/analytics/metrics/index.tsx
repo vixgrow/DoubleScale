@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Campaign as CampaignType } from '@quillcrm/client';
+import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL, isEmailChannel } from '@/constants/campaign-channel';
 import {
 	MessageStatsCard,
@@ -26,7 +26,7 @@ import {
 	ProcessingSMSIcon,
 	FailedSMSIcon,
 	UnsubscribeSMSIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 
 interface MetricsProps {
 	campaign: CampaignType | null;
@@ -60,7 +60,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 				<MessageStatsCard
 					icon={<ContactTotalEmailsIcon width={40} height={40} />}
 					value={totalMessages}
-					label={__('Total Emails', 'quillcrm')}
+					label={__('Total Emails', 'doublescale')}
 					iconBgClass="bg-[#E4EEFD]"
 					borderColorClass="border-l-[#458DC7]"
 					iconColor="text-[#458DC7]"
@@ -77,7 +77,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								/>
 							}
 							value={campaign.contacts_count - totalMessages}
-							label={__('Scheduled Emails', 'quillcrm')}
+							label={__('Scheduled Emails', 'doublescale')}
 							iconBgClass="bg-[#FAF3DF]"
 							borderColorClass="border-l-[#A67D0A]"
 							iconColor="text-[#A67D0A]"
@@ -92,7 +92,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								/>
 							}
 							value={campaign.sent_count}
-							label={__('Processing Emails', 'quillcrm')}
+							label={__('Processing Emails', 'doublescale')}
 							iconBgClass="bg-[#FAEADF]"
 							borderColorClass="border-l-[#CB5301]"
 							iconColor="text-[#CB5301]"
@@ -106,7 +106,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								<FailedEmailsIcon width={40} height={40} />
 							}
 							value={campaign.failed_count}
-							label={__('Failed Emails', 'quillcrm')}
+							label={__('Failed Emails', 'doublescale')}
 							iconBgClass="bg-[#FBE8E8]"
 							borderColorClass="border-l-destructive"
 							iconColor="text-destructive"
@@ -116,7 +116,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={<OpenRateIcon width={40} height={40} />}
 							value={`${campaign.open_rate?.toFixed(2) || '0.00'}%`}
-							label={__('Open Rate', 'quillcrm')}
+							label={__('Open Rate', 'doublescale')}
 							iconBgClass="bg-[#E4FAEC]"
 							borderColorClass="border-l-[#16A34A]"
 							iconColor="text-[#16A34A]"
@@ -126,7 +126,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={<ClickRateIcon width={40} height={40} />}
 							value={`${campaign.click_rate?.toFixed(2) || '0.00'}%`}
-							label={__('Click Rate', 'quillcrm')}
+							label={__('Click Rate', 'doublescale')}
 							iconBgClass="bg-[#EEE4FF]"
 							borderColorClass="border-l-[#660FF1]"
 							iconColor="text-[#660FF1]"
@@ -141,7 +141,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								/>
 							}
 							value={`${clickToOpenRate}%`}
-							label={__('Click to Open Rate', 'quillcrm')}
+							label={__('Click to Open Rate', 'doublescale')}
 							iconBgClass="bg-[#FAEADF]"
 							borderColorClass="border-l-[#CB5301]"
 							iconColor="text-[#CB5301]"
@@ -155,7 +155,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							value={
 								(campaign as any).unsubscribed_count || 0
 							}
-							label={__('Unsubscribed', 'quillcrm')}
+							label={__('Unsubscribed', 'doublescale')}
 							iconBgClass="bg-[#FBE8E8]"
 							borderColorClass="border-l-[#A61919]"
 							iconColor="text-[#A61919]"
@@ -174,7 +174,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 				<MessageStatsCard
 					icon={<ContactSMSIcon width={40} height={40} />}
 					value={totalMessages}
-					label={__('Total SMS', 'quillcrm')}
+					label={__('Total SMS', 'doublescale')}
 					iconBgClass="bg-[#E4EEFD]"
 					borderColorClass="border-l-[#458DC7]"
 					iconColor="text-[#458DC7]"
@@ -191,7 +191,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								/>
 							}
 							value={campaign.contacts_count - totalMessages}
-							label={__('Scheduled SMS', 'quillcrm')}
+							label={__('Scheduled SMS', 'doublescale')}
 							iconBgClass="bg-[#FAF3DF]"
 							borderColorClass="border-l-[#A67D0A]"
 							iconColor="text-[#A67D0A]"
@@ -206,7 +206,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								/>
 							}
 							value={campaign.sent_count}
-							label={__('Processing SMS', 'quillcrm')}
+							label={__('Processing SMS', 'doublescale')}
 							iconBgClass="bg-[#FAEADF]"
 							borderColorClass="border-l-[#CB5301]"
 							iconColor="text-[#CB5301]"
@@ -220,7 +220,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								<FailedSMSIcon width={40} height={40} />
 							}
 							value={campaign.failed_count}
-							label={__('Failed SMS', 'quillcrm')}
+							label={__('Failed SMS', 'doublescale')}
 							iconBgClass="bg-[#FBE8E8]"
 							borderColorClass="border-l-destructive"
 							iconColor="text-destructive"
@@ -232,7 +232,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								<DeliveryRateIcon width={40} height={40} />
 							}
 							value={`${campaign.delivery_rate || 0}%`}
-							label={__('Delivery Rate', 'quillcrm')}
+							label={__('Delivery Rate', 'doublescale')}
 							iconBgClass="bg-[#E4FAEC]"
 							borderColorClass="border-l-[#16A34A]"
 							iconColor="text-[#16A34A]"
@@ -242,7 +242,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						<MessageStatsCard
 							icon={<ClickRateIcon width={40} height={40} />}
 							value={`${campaign.click_rate || 0}%`}
-							label={__('Click Rate', 'quillcrm')}
+							label={__('Click Rate', 'doublescale')}
 							iconBgClass="bg-[#EEE4FF]"
 							borderColorClass="border-l-[#660FF1]"
 							iconColor="text-[#660FF1]"
@@ -256,7 +256,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							value={
 								(campaign as any).unsubscribed_count || 0
 							}
-							label={__('Unsubscribed', 'quillcrm')}
+							label={__('Unsubscribed', 'doublescale')}
 							iconBgClass="bg-[#FBE8E8]"
 							borderColorClass="border-l-[#A61919]"
 							iconColor="text-[#A61919]"
@@ -273,10 +273,10 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 			<div className="flex flex-col items-center justify-center p-8 text-center bg-muted rounded-lg">
 				<ContactWhatsAppIcon width={48} height={48} />
 				<p className="mt-4 text-base font-medium text-foreground">
-					{__('WhatsApp Analytics', 'quillcrm')}
+					{__('WhatsApp Analytics', 'doublescale')}
 				</p>
 				<p className="mt-2 text-sm text-muted-foreground">
-					{__('WhatsApp campaign analytics coming soon', 'quillcrm')}
+					{__('WhatsApp campaign analytics coming soon', 'doublescale')}
 				</p>
 			</div>
 		);
@@ -290,7 +290,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// // 			<MessageStatsCard
 	// // 				icon={<ContactWhatsAppIcon width={40} height={40} />}
 	// // 				value={totalMessages}
-	// // 				label={__('Total WhatsApp', 'quillcrm')}
+	// // 				label={__('Total WhatsApp', 'doublescale')}
 	// // 				iconBgClass="bg-[#E4EEFD]"
 	// 				borderColorClass="border-l-[#458DC7]"
 	// 				iconColor="text-[#458DC7]"
@@ -307,7 +307,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 							/>
 	// 						}
 	// 						value={campaign.contacts_count - totalMessages}
-	// 						label={__('Scheduled Messages', 'quillcrm')}
+	// 						label={__('Scheduled Messages', 'doublescale')}
 	// 						iconBgClass="bg-[#FAF3DF]"
 	// 						borderColorClass="border-l-[#A67D0A]"
 	// 						iconColor="text-[#A67D0A]"
@@ -322,7 +322,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 							/>
 	// 						}
 	// 						value={campaign.sent_count}
-	// 						label={__('Processing Messages', 'quillcrm')}
+	// 						label={__('Processing Messages', 'doublescale')}
 	// 						iconBgClass="bg-[#FAEADF]"
 	// 						borderColorClass="border-l-[#CB5301]"
 	// 						iconColor="text-[#CB5301]"
@@ -336,7 +336,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 							<FailedEmailsIcon width={40} height={40} />
 	// 						}
 	// 						value={campaign.failed_count}
-	// 						label={__('Failed Messages', 'quillcrm')}
+	// 						label={__('Failed Messages', 'doublescale')}
 	// 						iconBgClass="bg-[#FBE8E8]"
 	// 						borderColorClass="border-l-destructive"
 	// 						iconColor="text-destructive"
@@ -348,7 +348,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 							<DeliveryRateIcon width={40} height={40} />
 	// 						}
 	// 						value={`${campaign.delivery_rate || 0}%`}
-	// 						label={__('Delivery Rate', 'quillcrm')}
+	// 						label={__('Delivery Rate', 'doublescale')}
 	// 						iconBgClass="bg-[#E4FAEC]"
 	// 						borderColorClass="border-l-[#16A34A]"
 	// 						iconColor="text-[#16A34A]"
@@ -358,7 +358,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 					<MessageStatsCard
 	// 						icon={<ReadRateIcon width={40} height={40} />}
 	// 						value={`${campaign.read_rate || 0}%`}
-	// 						label={__('Read Rate', 'quillcrm')}
+	// 						label={__('Read Rate', 'doublescale')}
 	// 						iconBgClass="bg-[#FAEADF]"
 	// 						borderColorClass="border-l-[#CB5301]"
 	// 						iconColor="text-[#CB5301]"
@@ -368,7 +368,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 					<MessageStatsCard
 	// 						icon={<ClickRateIcon width={40} height={40} />}
 	// 						value={`${campaign.click_rate || 0}%`}
-	// 						label={__('Click Rate', 'quillcrm')}
+	// 						label={__('Click Rate', 'doublescale')}
 	// 						iconBgClass="bg-[#EEE4FF]"
 	// 						borderColorClass="border-l-[#660FF1]"
 	// 						iconColor="text-[#660FF1]"

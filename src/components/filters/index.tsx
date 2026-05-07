@@ -20,11 +20,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import type { Filter as FilterType } from '@quillcrm/client';
-import { getFilterBySlug } from '@quillcrm/utils';
-import ConfigAPI from '@quillcrm/config';
+import type { Filter as FilterType } from '@doublescale/client';
+import { getFilterBySlug } from '@doublescale/utils';
+import ConfigAPI from '@doublescale/config';
 import FilterItem from '../filter';
-import { PlusIcon, InfoIcon } from '@quillcrm/components';
+import { PlusIcon, InfoIcon } from '@doublescale/components';
 
 interface FiltersProps {
 	filters: FilterType[];
@@ -110,7 +110,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 				{/* Header with Add Filter */}
 				<div className="flex items-center justify-between gap-3 pb-3">
 					<h3 className="font-bold text-lg w-[15%]">
-						{__('And', 'quillcrm')}
+						{__('And', 'doublescale')}
 					</h3>
 
 					<div className="w-[85%] flex items-center gap-3">
@@ -120,7 +120,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 						>
 							<SelectTrigger className="border-gray-300 focus:border-[#3B82F6] focus:ring-[#3B82F6]">
 								<SelectValue
-									placeholder={__('Select group', 'quillcrm')}
+									placeholder={__('Select group', 'doublescale')}
 								/>
 							</SelectTrigger>
 							<SelectContent>
@@ -144,7 +144,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 								<SelectValue
 									placeholder={__(
 										'Select filter',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							</SelectTrigger>
@@ -174,7 +174,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 					<InfoIcon />
 					{__(
 						'This add new filter to narrow down your contact based on different prosperities. is required by default',
-						'quillcrm'
+						'doublescale'
 					)}
 				</div>
 
@@ -208,7 +208,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 						</div>
 					) : (
 						<p className="text-sm text-center text-muted-foreground">
-							{__('No filters applied', 'quillcrm')}
+							{__('No filters applied', 'doublescale')}
 						</p>
 					)}
 				</div>

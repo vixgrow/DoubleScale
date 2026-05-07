@@ -11,8 +11,8 @@ import {
 	AllContactsIcon,
 	EmailSequenceOutlinedIcon,
 	PremiumIcon,
-} from '@quillcrm/components';
-import { CampaignType } from '@quillcrm/client';
+} from '@doublescale/components';
+import { CampaignType } from '@doublescale/client';
 import { Label } from '@/components/ui/label';
 
 interface CampaignTypesProps {
@@ -26,19 +26,19 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 }) => {
 	const campaignTypesRows = [
 		{
-			label: __('Standard Campaign', 'quillcrm'),
+			label: __('Standard Campaign', 'doublescale'),
 			description: __(
 				'One-time mass email sent to a large, segmented list.',
-				'quillcrm'
+				'doublescale'
 			),
 			type: 'standard',
 			icon: <AllContactsIcon width={24} height={24} />,
 		},
 		// {
-		// 	label: __('A/B Split Campaign', 'quillcrm'),
+		// 	label: __('A/B Split Campaign', 'doublescale'),
 		// 	description: __(
 		// 		'Split audience to test one variable; send winner to the rest.',
-		// 		'quillcrm'
+		// 		'doublescale'
 		// 	),
 		// 	type: 'ab_test',
 		// 	icon: <ABSplitIcon width={24} height={24} />,
@@ -51,7 +51,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			{/* Campaign Type Selection */}
 			<div className="grid gap-2">
 				<Label className="text-[#09090B] font-normal text-base">
-					{__('Select a campaign type', 'quillcrm')}
+					{__('Select a campaign type', 'doublescale')}
 				</Label>
 				<div className="flex flex-col gap-3">
 					{campaignTypesRows.map((campaignType) => (
@@ -84,7 +84,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 										{/* {campaignType.isPremium && (
 											<span className="bg-orange-50 text-[#CB5301] text-base px-2 py-0.5 rounded-md flex items-center gap-1 absolute right-0 top-0">
 												<PremiumIcon />
-												{__('Premium', 'quillcrm')}
+												{__('Premium', 'doublescale')}
 											</span>
 										)} */}
 									</div>

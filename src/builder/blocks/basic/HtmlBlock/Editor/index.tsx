@@ -48,7 +48,7 @@ export const HtmlBlockEditor: React.FC<HtmlBlockEditorProps> = ({
 					<>
 						{/* HTML Content Dialog */}
 						<div className="flex flex-col gap-2 text-[#333333]">
-							<div>{__('HTML Content', 'quillcrm')}</div>
+							<div>{__('HTML Content', 'doublescale')}</div>
 							<HtmlDialog
 								content={props.content}
 								customCss={props.customCss}

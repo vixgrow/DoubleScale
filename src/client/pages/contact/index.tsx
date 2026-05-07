@@ -9,13 +9,13 @@ import { useState } from '@wordpress/element';
  * External dependencies
  */
 import { useReducer, useRef, useEffect } from 'react';
-import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
+import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { Contact as ContactType, NoticeMessage } from '@quillcrm/client';
+import { Contact as ContactType, NoticeMessage } from '@doublescale/client';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import { Provider } from './state/context';
@@ -28,7 +28,7 @@ import {
 import ContactInformation from './contact-information';
 import DataCard from './data-card';
 import ContactShimmer from './contact-shimmer';
-import { NoticeBanner } from '@quillcrm/components';
+import { NoticeBanner } from '@doublescale/components';
 import { ChevronRight } from 'lucide-react';
 
 interface ContactProps {
@@ -152,7 +152,7 @@ const Contact: React.FC<ContactProps> = ({
 
 			setNotice({
 				type: 'success',
-				message: __('Contact updated successfully', 'quillcrm'),
+				message: __('Contact updated successfully', 'doublescale'),
 			});
 		} catch (error: any) {
 			console.error('Update contact error:', error);
@@ -227,10 +227,10 @@ const Contact: React.FC<ContactProps> = ({
 								onClick={() => navigate(getToLink('contacts'))}
 								className="hover:text-[#344054] cursor-pointer transition-colors"
 							>
-								{__('Contacts List', 'quillcrm')}
+								{__('Contacts List', 'doublescale')}
 							</button>
 							<ChevronRight className="w-4 h-4 text-[#667085]" />
-							{__('Contact Details', 'quillcrm')}
+							{__('Contact Details', 'doublescale')}
 						</h1>
 					</DialogTitle>
 				</DialogHeader>
@@ -267,8 +267,8 @@ const Contact: React.FC<ContactProps> = ({
 					<div className="flex items-center justify-center h-64">
 						<div className="text-lg text-red-500">
 							{!id
-								? __('No contact ID provided', 'quillcrm')
-								: __('Contact not found', 'quillcrm')}
+								? __('No contact ID provided', 'doublescale')
+								: __('Contact not found', 'doublescale')}
 						</div>
 					</div>
 				)}

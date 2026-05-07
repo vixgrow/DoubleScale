@@ -17,7 +17,7 @@ import React, {
  * internal dependencies
  */
 import { ImageBlockProps } from '..';
-import { ImageBlockIcon } from '@quillcrm/components';
+import { ImageBlockIcon } from '@doublescale/components';
 
 export interface ImageBlockRendererProps {
 	props: ImageBlockProps & {

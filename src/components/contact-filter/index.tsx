@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Info, Loader2 } from 'lucide-react';
-import { AlertIcon, DeleteIcon } from '@quillcrm/components';
+import { AlertIcon, DeleteIcon } from '@doublescale/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -159,7 +159,7 @@ export const ContactFilterSection = forwardRef<
 			setListsHasMore(page < totalPages);
 			setListsPage(page);
 		} catch (error: any) {
-			setError(error.message || __('Failed to fetch lists', 'quillcrm'));
+			setError(error.message || __('Failed to fetch lists', 'doublescale'));
 			console.error('Error fetching lists:', error);
 		} finally {
 			setLoadingLists(false);
@@ -189,7 +189,7 @@ export const ContactFilterSection = forwardRef<
 			setTagsHasMore(page < totalPages);
 			setTagsPage(page);
 		} catch (error: any) {
-			setError(error.message || __('Failed to fetch tags', 'quillcrm'));
+			setError(error.message || __('Failed to fetch tags', 'doublescale'));
 			console.error('Error fetching tags:', error);
 		} finally {
 			setLoadingTags(false);
@@ -272,10 +272,10 @@ export const ContactFilterSection = forwardRef<
 				<CardContent className="space-y-4 p-0">
 					<div className="bg-gray-100 px-3 flex justify-between items-center">
 						<p className="font-semibold">
-							{__('Select List', 'quillcrm')}
+							{__('Select List', 'doublescale')}
 						</p>
 						<p className="font-semibold">
-							{__('Select Tag', 'quillcrm')}
+							{__('Select Tag', 'doublescale')}
 						</p>
 						{/* Add Row */}
 						<div
@@ -288,7 +288,7 @@ export const ContactFilterSection = forwardRef<
 					<div className="p-3 space-y-4">
 						{rows.length === 0 ? (
 							<div className="py-4 text-center text-sm text-gray-500">
-								{__('No filters added yet.', 'quillcrm')}
+								{__('No filters added yet.', 'doublescale')}
 							</div>
 						) : (
 							rows.map((row, index) => (
@@ -346,7 +346,7 @@ export const ContactFilterSection = forwardRef<
 															<span>
 																{__(
 																	'Loading more...',
-																	'quillcrm'
+																	'doublescale'
 																)}
 															</span>
 														</div>
@@ -406,7 +406,7 @@ export const ContactFilterSection = forwardRef<
 															<span>
 																{__(
 																	'Loading more...',
-																	'quillcrm'
+																	'doublescale'
 																)}
 															</span>
 														</div>
@@ -430,7 +430,7 @@ export const ContactFilterSection = forwardRef<
 											<AlertIcon width={20} height={20} />
 											{__(
 												'This Question Is Required By Default',
-												'quillcrm'
+												'doublescale'
 											)}
 										</div>
 									)}

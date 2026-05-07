@@ -9,8 +9,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import ContactAddIcon from '@quillcrm/components/icons/contact-add';
-import { CustomDialogHeader } from '@quillcrm/components';
+import ContactAddIcon from '@doublescale/components/icons/contact-add';
+import { CustomDialogHeader } from '@doublescale/components';
 import { useState } from 'react';
 import { NoticeMessage } from '@/client/types';
 import { __ } from '@wordpress/i18n';
@@ -121,10 +121,10 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {__('Creating...', 'quillcrm')}
+                  {__('Creating...', 'doublescale')}
                 </>
               ) : (
-                __('Submit', 'quillcrm')
+                __('Submit', 'doublescale')
               )}
             </Button>
           </div>

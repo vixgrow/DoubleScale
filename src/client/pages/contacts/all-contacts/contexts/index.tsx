@@ -3,9 +3,9 @@
  */
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 /**
- * QuillCRM dependencies
+ * DoubleScale dependencies
  */
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 /**
  * internal dependencies
  */
@@ -13,7 +13,7 @@ import type {
 	Contact,
 	Filter as FilterType,
 	NoticeMessage,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 export interface ContactsState {
 	// Data state

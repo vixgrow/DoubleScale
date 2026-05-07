@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { StepIndicator } from "./StepIndicator/StepIndicator";
-import WelcomeStart from "@quillcrm/components/icons/start-welcome";
-import BusinessInfo from "@quillcrm/components/icons/start-businessinfo";
-import StartList from "@quillcrm/components/icons/start-list";
-import StartTag from "@quillcrm/components/icons/start-tags";
-import StartContact from "@quillcrm/components/icons/start-contact";
-import StartComplete from "@quillcrm/components/icons/start-complete";
+import WelcomeStart from "@doublescale/components/icons/start-welcome";
+import BusinessInfo from "@doublescale/components/icons/start-businessinfo";
+import StartList from "@doublescale/components/icons/start-list";
+import StartTag from "@doublescale/components/icons/start-tags";
+import StartContact from "@doublescale/components/icons/start-contact";
+import StartComplete from "@doublescale/components/icons/start-complete";
 import WelcomePage from "./WelcomePage/WelcomePage";
 import BusindessInformation from "./BusinessInformation/BusindessInformation";
 import Tags from "./Tags/Tags";

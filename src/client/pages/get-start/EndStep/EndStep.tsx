@@ -1,6 +1,6 @@
-import { Button } from '@quillcrm/components/ui/button'
+import { Button } from '@doublescale/components/ui/button'
 
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 
 export default function EndStep() {

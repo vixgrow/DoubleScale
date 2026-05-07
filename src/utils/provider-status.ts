@@ -3,7 +3,7 @@
  * Shared utilities for checking message provider status
  * 
  * @since 1.0.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 import apiFetch from '@wordpress/api-fetch';

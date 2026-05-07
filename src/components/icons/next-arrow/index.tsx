@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NextArrowIcon: React.FC<IconProps> = ({ width = 7, height = 12 }) => {
 	return (

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 interface ExtendedIconProps extends IconProps {
 	className?: string;

@@ -16,7 +16,7 @@ import {
 	Stepper,
 	ReviewIcon,
 	NoticeBanner,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
 	CampaignSettingsCard,
@@ -31,7 +31,7 @@ import type {
 	EmailTemplate,
 	SMSTemplate,
 	WhatsAppTemplate,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 const Review: React.FC = () => {
 	const {
@@ -166,7 +166,7 @@ const Review: React.FC = () => {
 					);
 					setIncludedLists(lists);
 				} else {
-					setIncludedLists([__('All Lists', 'quillcrm')]);
+					setIncludedLists([__('All Lists', 'doublescale')]);
 				}
 
 				if (excludeListIds.length > 0) {
@@ -194,7 +194,7 @@ const Review: React.FC = () => {
 					setIncludedTags(tags);
 				} else {
 					setIncludedTags([
-						__('All Contact on Selected list Segment', 'quillcrm'),
+						__('All Contact on Selected list Segment', 'doublescale'),
 					]);
 				}
 
@@ -228,7 +228,7 @@ const Review: React.FC = () => {
 		if (!sendNow && !scheduledAt) {
 			showNotice({
 				type: 'error',
-				message: __('Please set a schedule date and time', 'quillcrm'),
+				message: __('Please set a schedule date and time', 'doublescale'),
 			});
 			return;
 		}
@@ -275,7 +275,7 @@ const Review: React.FC = () => {
 				type: 'error',
 				message: __(
 					'Failed to save campaign. Please try again.',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 		}
@@ -285,19 +285,19 @@ const Review: React.FC = () => {
 		<PanelLayout
 			items={[
 				{
-					label: __('Create Campaign', 'quillcrm'),
+					label: __('Create Campaign', 'doublescale'),
 					href: 'campaigns',
 				},
 				{
 					label: campaign?.settings.ab_test
-						? __('A/B Test Campaign', 'quillcrm')
-						: __('Standard Campaign', 'quillcrm'),
+						? __('A/B Test Campaign', 'doublescale')
+						: __('Standard Campaign', 'doublescale'),
 				},
 			]}
 			panelbtns={[
 				<Button variant="secondaryDeepBlue">
 					<PlayIcon />
-					{__('Watch Tutorial', 'quillcrm')}
+					{__('Watch Tutorial', 'doublescale')}
 				</Button>,
 			]}
 			type="campaign"
@@ -317,10 +317,10 @@ const Review: React.FC = () => {
 			<div className="qcrm-review-step flex gap-6 items-start">
 				<div className="w-2/3">
 					<PanelSettings
-						title={__('Review and Confirm', 'quillcrm')}
+						title={__('Review and Confirm', 'doublescale')}
 						description={__(
 							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<ReviewIcon />}
 						showButtons={true}
@@ -328,8 +328,8 @@ const Review: React.FC = () => {
 						onBack={() => goToStep('contacts')}
 						nextLabel={
 							sendNow
-								? __('Send Campaign Now', 'quillcrm')
-								: __('Create Campaign', 'quillcrm')
+								? __('Send Campaign Now', 'doublescale')
+								: __('Create Campaign', 'doublescale')
 						}
 						isLoading={saving}
 					>

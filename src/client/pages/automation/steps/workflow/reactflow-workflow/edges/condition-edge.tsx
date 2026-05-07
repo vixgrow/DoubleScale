@@ -11,7 +11,7 @@ import { EdgeProps, BaseEdge } from '@xyflow/react';
 /**
  * Internal dependencies
  */
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 
 interface ConditionEdgeData {
 	sourceStep?: AutomationStep;

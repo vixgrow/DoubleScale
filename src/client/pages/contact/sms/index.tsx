@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 
 interface SMSProps {
 	contact_id: number;
@@ -15,10 +15,10 @@ interface SMSProps {
 const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 	return (
 		<ProFeatureNotice
-			featureName={__('SMS Messaging', 'quillcrm')}
+			featureName={__('SMS Messaging', 'doublescale')}
 			description={__(
 				'Send personalized SMS messages to your contacts, create bulk SMS campaigns, and automate SMS communication through workflows.',
-				'quillcrm'
+				'doublescale'
 			)}
 		/>
 	);

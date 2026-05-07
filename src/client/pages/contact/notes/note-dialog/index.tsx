@@ -8,7 +8,7 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import type { Note } from '@quillcrm/client';
+import type { Note } from '@doublescale/client';
 import {
     Dialog,
     DialogContent,
@@ -22,8 +22,8 @@ import {
     CustomDialogHeader,
     Field,
     GradientNotesIcon,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
 
 interface NoteDialogProps {
     open: boolean;
@@ -71,11 +71,11 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
         const newErrors: { title?: string; note?: string } = {};
 
         if (!title.trim()) {
-            newErrors.title = __('Title is required', 'quillcrm');
+            newErrors.title = __('Title is required', 'doublescale');
         }
 
         if (!note.trim()) {
-            newErrors.note = __('Note is required', 'quillcrm');
+            newErrors.note = __('Note is required', 'doublescale');
         }
 
         setErrors(newErrors);
@@ -102,7 +102,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                 })) as Note;
 
                 onUpdate(response);
-                showNotice('success', __('Note updated successfully', 'quillcrm'));
+                showNotice('success', __('Note updated successfully', 'doublescale'));
             } else {
                 // Create new note
                 const response = (await apiFetch({
@@ -116,12 +116,12 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                 })) as Note;
 
                 onSave(response);
-                showNotice('success', __('Note saved successfully', 'quillcrm'));
+                showNotice('success', __('Note saved successfully', 'doublescale'));
             }
 
             onClose();
         } catch (error: any) {
-            showNotice('error', error.message || __('Failed to save note', 'quillcrm'));
+            showNotice('error', error.message || __('Failed to save note', 'doublescale'));
         } finally {
             setIsSaving(false);
         }
@@ -137,15 +137,15 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         <CustomDialogHeader
                             title={
                                 selectedNote
-                                    ? __('Edit Note', 'quillcrm')
-                                    : __('Add Note', 'quillcrm')
+                                    ? __('Edit Note', 'doublescale')
+                                    : __('Add Note', 'doublescale')
                             }
                             subtitle={
                                 selectedNote
-                                    ? __('Update the note details', 'quillcrm')
+                                    ? __('Update the note details', 'doublescale')
                                     : __(
                                         'Add a new note to the contact',
-                                        'quillcrm'
+                                        'doublescale'
                                     )
                             }
                             icon={<GradientNotesIcon width={24} height={24} />}
@@ -154,8 +154,8 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                     <Field
-                        label={__('Title', 'quillcrm')}
-                        placeholder={__('Enter title', 'quillcrm')}
+                        label={__('Title', 'doublescale')}
+                        placeholder={__('Enter title', 'doublescale')}
                         value={title}
                         onChange={(value) => {
                             setTitle(value);
@@ -168,19 +168,19 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         helperText={errors.title}
                     />
                     {/* <Field
-                        label={__('Type', 'quillcrm')}
-                        placeholder={__('Select type', 'quillcrm')}
+                        label={__('Type', 'doublescale')}
+                        placeholder={__('Select type', 'doublescale')}
                         value={type}
                         onChange={(value) => setType(value)}
                         type="select"
                         options={[
-                            { label: __('Note', 'quillcrm'), value: 'note' },
-                            { label: __('Reminder', 'quillcrm'), value: 'reminder' },
+                            { label: __('Note', 'doublescale'), value: 'note' },
+                            { label: __('Reminder', 'doublescale'), value: 'reminder' },
                         ]}
                     /> */}
                     <Field
-                        label={__('Note', 'quillcrm')}
-                        placeholder={__('Enter note', 'quillcrm')}
+                        label={__('Note', 'doublescale')}
+                        placeholder={__('Enter note', 'doublescale')}
                         value={note}
                         onChange={(value) => {
                             setNote(value);
@@ -202,10 +202,10 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         className="w-full"
                     >
                         {isSaving
-                            ? __('Saving...', 'quillcrm')
+                            ? __('Saving...', 'doublescale')
                             : selectedNote
-                                ? __('Update Note', 'quillcrm')
-                                : __('Save Note', 'quillcrm')}
+                                ? __('Update Note', 'doublescale')
+                                : __('Save Note', 'doublescale')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

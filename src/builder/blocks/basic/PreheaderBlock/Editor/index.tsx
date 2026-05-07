@@ -48,17 +48,17 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 					<>
 						{/* Text Content */}
 						<MediaControls.InputWithMergeTags
-							label={__('Text Content', 'quillcrm')}
+							label={__('Text Content', 'doublescale')}
 							value={props.text}
 							onChange={(text) => onChange({ text })}
-							placeholder={__('Enter text content', 'quillcrm')}
+							placeholder={__('Enter text content', 'doublescale')}
 							fieldName="text"
 						/>
 
 						{/* Link Content */}
 						<div className="flex flex-col gap-2">
 							<div className="flex justify-between items-center text-[#333333]">
-								<div>{__('Link Text', 'quillcrm')}</div>
+								<div>{__('Link Text', 'doublescale')}</div>
 								<ExternalLink className="size-5" />
 							</div>
 							<Input
@@ -67,7 +67,7 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 								onChange={(e) =>
 									onChange({ linkText: e.target.value })
 								}
-								placeholder={__('Enter link text', 'quillcrm')}
+								placeholder={__('Enter link text', 'doublescale')}
 								className="pr-8 h-10"
 								style={{
 									borderColor: '#e5e5e5',
@@ -77,10 +77,10 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 						</div>
 
 						<MediaControls.LinkInput
-							label={__('Link URL', 'quillcrm')}
+							label={__('Link URL', 'doublescale')}
 							value={props.linkUrl}
 							onChange={(linkUrl) => onChange({ linkUrl })}
-							placeholder={__('https://example.com', 'quillcrm')}
+							placeholder={__('https://example.com', 'doublescale')}
 						/>
 
 						{/* Text Formatting */}
@@ -103,7 +103,7 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 									| 'full'
 							}
 							onChange={(textAlign) => onChange({ textAlign })}
-							label={__('Text Alignment', 'quillcrm')}
+							label={__('Text Alignment', 'doublescale')}
 						/>
 
 						{/* Text Style */}
@@ -138,7 +138,7 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 						<StyleControls.ColorPickerControl
 							value={props.textColor}
 							onChange={(textColor) => onChange({ textColor })}
-							label={__('Text Color', 'quillcrm')}
+							label={__('Text Color', 'doublescale')}
 							id="text-color"
 						/>
 
@@ -146,7 +146,7 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 						<StyleControls.ColorPickerControl
 							value={props.linkColor}
 							onChange={(linkColor) => onChange({ linkColor })}
-							label={__('Link Color', 'quillcrm')}
+							label={__('Link Color', 'doublescale')}
 							id="link-color"
 						/>
 

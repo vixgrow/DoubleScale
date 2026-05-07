@@ -11,7 +11,7 @@ import { useState, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import type { Contact, CampaignEmail } from '@quillcrm/client';
+import type { Contact, CampaignEmail } from '@doublescale/client';
 import { useSendMessage } from './use-send-message';
 
 /**
@@ -71,7 +71,7 @@ export const useResendEmail = ({
 	onError,
 }: UseResendEmailOptions): UseResendEmailReturn => {
 	const [isResending, setIsResending] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	// Use the send message hook for individual emails
 	const { sendMessage, isSending: isSendingIndividual } = useSendMessage({
@@ -101,14 +101,14 @@ export const useResendEmail = ({
 
 			createNotice({
 				type: 'success',
-				message: __('Email queued for resending!', 'quillcrm'),
+				message: __('Email queued for resending!', 'doublescale'),
 			});
 
 			onSuccess?.();
 			return true;
 		} catch (err: any) {
 			const errorMessage =
-				err.message || __('Failed to resend campaign email', 'quillcrm');
+				err.message || __('Failed to resend campaign email', 'doublescale');
 
 			createNotice({
 				type: 'error',
@@ -142,7 +142,7 @@ export const useResendEmail = ({
 		if (!subject || !body || !to) {
 			const errorMessage = __(
 				'Missing required email data (subject, body, or recipient)',
-				'quillcrm'
+				'doublescale'
 			);
 			createNotice({
 				type: 'error',
@@ -166,7 +166,7 @@ export const useResendEmail = ({
 	const resendEmail = useCallback(
 		async (campaignEmail: CampaignEmail): Promise<boolean> => {
 			if (!campaignEmail) {
-				const errorMessage = __('No email selected to resend', 'quillcrm');
+				const errorMessage = __('No email selected to resend', 'doublescale');
 				createNotice({
 					type: 'error',
 					message: errorMessage,
@@ -192,7 +192,7 @@ export const useResendEmail = ({
 				}
 			} catch (error: any) {
 				const errorMessage =
-					error.message || __('Failed to resend email', 'quillcrm');
+					error.message || __('Failed to resend email', 'doublescale');
 
 				createNotice({
 					type: 'error',

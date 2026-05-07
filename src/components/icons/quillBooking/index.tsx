@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const QuillBookingIcon: React.FC<IconProps> = ({ width = 40, height = 35 }) => {
 	return (

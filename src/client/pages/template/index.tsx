@@ -15,9 +15,9 @@ import { Card, Button, Flex } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import { CustomTemplate as TemplateType } from '@quillcrm/client';
-import { useParams } from '@quillcrm/navigation';
-import { Field } from '@quillcrm/components';
+import { CustomTemplate as TemplateType } from '@doublescale/client';
+import { useParams } from '@doublescale/navigation';
+import { Field } from '@doublescale/components';
 
 const Template: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -31,7 +31,7 @@ const Template: React.FC = () => {
 		preview_text: '',
 	};
 
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	useEffect(() => {
 		fetchTemplate();
@@ -88,7 +88,7 @@ const Template: React.FC = () => {
 			setTemplate(response);
 			createNotice({
 				type: 'success',
-				message: __('Template saved', 'quillcrm'),
+				message: __('Template saved', 'doublescale'),
 			});
 		} catch (error: any) {
 			createNotice({
@@ -116,7 +116,7 @@ const Template: React.FC = () => {
 		if (!template.settings.from_name) {
 			createNotice({
 				type: 'error',
-				message: __('From name is required', 'quillcrm'),
+				message: __('From name is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -124,7 +124,7 @@ const Template: React.FC = () => {
 		if (!template.settings.from_email) {
 			createNotice({
 				type: 'error',
-				message: __('From email is required', 'quillcrm'),
+				message: __('From email is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -132,7 +132,7 @@ const Template: React.FC = () => {
 		if (!template.settings.subject) {
 			createNotice({
 				type: 'error',
-				message: __('Subject is required', 'quillcrm'),
+				message: __('Subject is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -140,7 +140,7 @@ const Template: React.FC = () => {
 		if (!template.body) {
 			createNotice({
 				type: 'error',
-				message: __('Body is required', 'quillcrm'),
+				message: __('Body is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -151,14 +151,14 @@ const Template: React.FC = () => {
 	return (
 		<div className="qcrm-template-trigger">
 			<Card
-				title={template?.name || __('Template', 'quillcrm')}
+				title={template?.name || __('Template', 'doublescale')}
 				extra={
 					<Button
 						type="primary"
 						onClick={() => saveTemplate()}
 						loading={isSaving}
 					>
-						{__('Save', 'quillcrm')}
+						{__('Save', 'doublescale')}
 					</Button>
 				}
 				loading={loading}
@@ -174,7 +174,7 @@ const Template: React.FC = () => {
 								>
 									<Flex gap={20}>
 										<Field
-											label={__('From Name', 'quillcrm')}
+											label={__('From Name', 'doublescale')}
 											value={template.settings.from_name}
 											onChange={(value) =>
 												updateSettings({
@@ -189,7 +189,7 @@ const Template: React.FC = () => {
 											}
 										/>
 										<Field
-											label={__('From Email', 'quillcrm')}
+											label={__('From Email', 'doublescale')}
 											value={template.settings.from_email}
 											onChange={(value) =>
 												updateSettings({
@@ -205,7 +205,7 @@ const Template: React.FC = () => {
 										/>
 									</Flex>
 									<Field
-										label={__('Reply To', 'quillcrm')}
+										label={__('Reply To', 'doublescale')}
 										value={template.settings.reply_to}
 										onChange={(value) =>
 											updateSettings({
@@ -215,7 +215,7 @@ const Template: React.FC = () => {
 										type="email"
 									/>
 									<Field
-										label={__('Subject', 'quillcrm')}
+										label={__('Subject', 'doublescale')}
 										value={template.settings.subject}
 										onChange={(value) =>
 											updateSettings({
@@ -230,7 +230,7 @@ const Template: React.FC = () => {
 										}
 									/>
 									<Field
-										label={__('Preview Text', 'quillcrm')}
+										label={__('Preview Text', 'doublescale')}
 										value={template.settings.preview_text}
 										onChange={(value) =>
 											updateSettings({
@@ -259,7 +259,7 @@ const Template: React.FC = () => {
 											<Button type="primary" size="large">
 												{__(
 													'Create with email designer',
-													'quillcrm'
+													'doublescale'
 												)}
 											</Button>
 										</Flex>

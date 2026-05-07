@@ -53,7 +53,7 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 					<>
 						{/* Button Text with Merge Tags */}
 						<MediaControls.InputWithMergeTags
-							label={__('Button Text', 'quillcrm')}
+							label={__('Button Text', 'doublescale')}
 							value={props.text}
 							onChange={(text) => onChange({ text })}
 							placeholder="Click Here"
@@ -62,7 +62,7 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 
 						{/* Link URL */}
 						<MediaControls.LinkInput
-							label={__('Link URL', 'quillcrm')}
+							label={__('Link URL', 'doublescale')}
 							value={props.url}
 							onChange={(url) => onChange({ url })}
 							placeholder="https://example.com"
@@ -70,7 +70,7 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 
 						{/* Button Style */}
 						<div className="flex flex-col gap-2 text-[#333333]">
-							<div>{__('Button Style', 'quillcrm')}</div>
+							<div>{__('Button Style', 'doublescale')}</div>
 							<Select
 								value={props.buttonStyle}
 								onValueChange={(value) =>
@@ -86,19 +86,19 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 									<SelectValue
 										placeholder={__(
 											'Select button style',
-											'quillcrm'
+											'doublescale'
 										)}
 									/>
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="primary">
-										{__('Primary Button', 'quillcrm')}
+										{__('Primary Button', 'doublescale')}
 									</SelectItem>
 									<SelectItem value="secondary">
-										{__('Secondary Button', 'quillcrm')}
+										{__('Secondary Button', 'doublescale')}
 									</SelectItem>
 									<SelectItem value="tertiary">
-										{__('Tertiary Button', 'quillcrm')}
+										{__('Tertiary Button', 'doublescale')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -123,7 +123,7 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 							onChange={(containerBackgroundColor) =>
 								onChange({ containerBackgroundColor })
 							}
-							label={__('Background Color', 'quillcrm')}
+							label={__('Background Color', 'doublescale')}
 							id="container-bg-color"
 						/>
 
@@ -140,7 +140,7 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 							onChange={(containerPadding) =>
 								onChange({ containerPadding })
 							}
-							label={__('Padding', 'quillcrm')}
+							label={__('Padding', 'doublescale')}
 						/>
 					</>
 				)}

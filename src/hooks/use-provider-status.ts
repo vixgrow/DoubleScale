@@ -33,29 +33,29 @@ export function useProviderStatus(
 ): UseProviderStatusReturn {
 	const [status, setStatus] = useState<ProviderStatus | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	/**
 	 * Fetch provider status from API using shared utility
 	 */
 	const fetchStatus = useCallback(async () => {
 		setIsLoading(true);
-		console.log(`[QuillCRM] Fetching provider status for ${channel}`);
+		console.log(`[DoubleScale] Fetching provider status for ${channel}`);
 		try {
 			const response = await checkProviderStatus(channel);
-			console.log(`[QuillCRM] Provider status response for ${channel}:`, response);
+			console.log(`[DoubleScale] Provider status response for ${channel}:`, response);
 			setStatus(response);
 			return response.connected;
 		} catch (error: any) {
-			console.error(`[QuillCRM] Failed to check provider status for ${channel}:`, error);
+			console.error(`[DoubleScale] Failed to check provider status for ${channel}:`, error);
 			setStatus({
 				connected: false,
 				provider_name: 'Unknown',
 				provider_slug: '',
 				error:
 					error.message ||
-					__('Failed to check provider status', 'quillcrm'),
-				help_link: '/wp-admin/admin.php?page=quillcrm#/integrations',
+					__('Failed to check provider status', 'doublescale'),
+				help_link: '/wp-admin/admin.php?page=doublescale#/integrations',
 			});
 			return false;
 		} finally {
@@ -75,16 +75,16 @@ export function useProviderStatus(
 	 * Note: This is now handled by inline UI in the component
 	 */
 	const showConnectionError = useCallback(() => {
-		console.log('[QuillCRM] showConnectionError called', { status, channel });
-		
+		console.log('[DoubleScale] showConnectionError called', { status, channel });
+
 		if (!status || status.connected) {
-			console.log('[QuillCRM] Skipping error - no status or already connected');
+			console.log('[DoubleScale] Skipping error - no status or already connected');
 			return;
 		}
 
 		// Inline notification will be shown in the UI component
 		// This is just here for backward compatibility
-		console.log('[QuillCRM] Provider not configured - inline notification should be visible');
+		console.log('[DoubleScale] Provider not configured - inline notification should be visible');
 	}, [status, channel]);
 
 	// Fetch status on mount

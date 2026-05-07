@@ -16,8 +16,8 @@ import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import './style.scss';
-import config from '@quillcrm/config';
-import { getFilteredGoalsByTrigger } from '@quillcrm/utils';
+import config from '@doublescale/config';
+import { getFilteredGoalsByTrigger } from '@doublescale/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Tooltip,
@@ -25,7 +25,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 
 interface GoalSelectorProps {
 	value: string;
@@ -54,7 +54,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 
 	// Get current trigger from store
 	const currentTrigger = useSelect((select: any) => {
-		return select('quillcrm/core').getCurrentTrigger();
+		return select('doublescale/core').getCurrentTrigger();
 	}, []);
 
 	// Get filtered goals based on current trigger
@@ -65,30 +65,30 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these goals.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LearnDash') {
 			return __(
 				'LearnDash plugin is not installed or activated. Install LearnDash to use these goals.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these goals.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Order' || groupLabel === 'SureCart') {
 			return __(
 				'SureCart plugin is not installed or activated. Install SureCart to use these goals.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		return __(
 			'This integration is not available. Please install the required plugin.',
-			'quillcrm'
+			'doublescale'
 		);
 	};
 
@@ -225,11 +225,11 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 																		goalKey
 																		? __(
 																				'Saving...',
-																				'quillcrm'
+																				'doublescale'
 																			)
 																		: __(
 																				'Select',
-																				'quillcrm'
+																				'doublescale'
 																			)}
 																</Button>
 															</div>

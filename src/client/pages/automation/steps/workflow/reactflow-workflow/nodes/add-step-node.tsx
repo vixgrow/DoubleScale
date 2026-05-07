@@ -15,7 +15,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 import { AddStepDialog } from '../../add-step-dialog';
 
 interface AddStepNodeData {
@@ -68,7 +68,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	if (!automation) {
 		return null;
@@ -165,7 +165,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 
 			createNotice({
 				type: 'success',
-				message: __('Step added', 'quillcrm'),
+				message: __('Step added', 'doublescale'),
 			});
 
 			// Close dialog first
@@ -194,7 +194,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to add step', 'quillcrm'),
+				message: error.message || __('Failed to add step', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);

@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from '@wordpress/element';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { useContactMessages } from './use-contact-messages';
 
 /**

@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 /**
  * internal dependencies
  */
-import { DataTableConfig } from '@quillcrm/client';
+import { DataTableConfig } from '@doublescale/client';
 import {
 	ColumnDef,
 	ColumnFiltersState,

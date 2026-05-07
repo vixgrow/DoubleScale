@@ -28,12 +28,12 @@ export const UnknownEditor: React.FC<UnknownEditorProps> = ({ props }) => {
 				</div>
 				<div className="flex-1 space-y-2">
 					<h4 className="font-semibold text-gray-900">
-						{__('Unknown Block', 'quillcrm')}
+						{__('Unknown Block', 'doublescale')}
 					</h4>
 					<p className="text-sm text-gray-600">
 						{__(
 							'This block type is not available. It requires the Pro version of the plugin to be installed and activated.',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -43,14 +43,14 @@ export const UnknownEditor: React.FC<UnknownEditorProps> = ({ props }) => {
 				<div className="flex items-center gap-2 text-sm text-gray-700">
 					<Info className="w-4 h-4" />
 					<span className="font-medium">
-						{__('Block Information', 'quillcrm')}
+						{__('Block Information', 'doublescale')}
 					</span>
 				</div>
 
 				<div className="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
 					<div className="flex justify-between text-sm">
 						<span className="text-gray-600">
-							{__('Block Type:', 'quillcrm')}
+							{__('Block Type:', 'doublescale')}
 						</span>
 						<code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
 							{originalType}
@@ -61,12 +61,12 @@ export const UnknownEditor: React.FC<UnknownEditorProps> = ({ props }) => {
 
 			<div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
 				<p className="font-medium mb-1">
-					{__('Data Preserved', 'quillcrm')}
+					{__('Data Preserved', 'doublescale')}
 				</p>
 				<p>
 					{__(
 						"This block's original configuration is preserved. If the Pro version of the plugin is installed or the block becomes available again, it will be restored automatically.",
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>

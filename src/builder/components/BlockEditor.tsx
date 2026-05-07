@@ -18,7 +18,7 @@ import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import {
 	GlobalEmailSettingsIcon,
 	LayoutSettingsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
 import BackgroundSettings from './BackgroudSettings';
 import ButtonSettings from './ButtonSettings';
@@ -114,12 +114,12 @@ const BlockEditor: React.FC = () => {
 							</div>
 							<h3 className="text-base font-semibold text-primary">
 								{isBlockSelected && blockDefinition?.name
-									? `${blockDefinition.name} ${__('Settings', 'quillcrm')}`
+									? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
 									: isSectionSelected
-										? __('Layout Settings', 'quillcrm')
+										? __('Layout Settings', 'doublescale')
 										: __(
 											'Global Email Settings',
-											'quillcrm'
+											'doublescale'
 										)}
 							</h3>
 						</div>
@@ -149,7 +149,7 @@ const BlockEditor: React.FC = () => {
 									<p className="text-muted-foreground">
 										{__(
 											'No editor available for this block type.',
-											'quillcrm'
+											'doublescale'
 										)}
 									</p>
 								)
@@ -205,7 +205,7 @@ const BlockEditor: React.FC = () => {
 										dispatch(STORE_KEY).clearSelection();
 									}}
 								>
-									{__('Delete Block', 'quillcrm')}
+									{__('Delete Block', 'doublescale')}
 								</Button>
 							</div>
 						)}

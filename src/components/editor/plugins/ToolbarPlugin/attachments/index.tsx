@@ -34,7 +34,7 @@ import { Input } from '@/components/ui/input';
  * Internal dependencies
  */
 import { INSERT_IMAGE_COMMAND } from '../../../plugins/image-plugin';
-import { MergeTagsModal, MergeTagsIcon } from '@quillcrm/components';
+import { MergeTagsModal, MergeTagsIcon } from '@doublescale/components';
 import { Link } from 'lucide-react';
 
 interface AttachmentsProps {
@@ -359,19 +359,19 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 					<DialogContent className="sm:max-w-[500px] z-[150500]">
 						<DialogHeader>
 							<DialogTitle>
-								{__('Add Link', 'quillcrm')}
+								{__('Add Link', 'doublescale')}
 							</DialogTitle>
 							<DialogDescription>
 								{__(
 									'Enter the URL of the link you want to add.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</DialogDescription>
 						</DialogHeader>
 						<div className="flex flex-col gap-4">
 							<div>
 								<label className="text-[#09090B] text-base font-semibold">
-									{__('Link', 'quillcrm')}
+									{__('Link', 'doublescale')}
 									<span className="text-red-500 ml-1">*</span>
 								</label>
 								<div className="relative mt-2">
@@ -405,7 +405,7 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 								variant="gradient"
 								size="xl"
 							>
-								{__('Insert', 'quillcrm')}
+								{__('Insert', 'doublescale')}
 							</Button>
 						</DialogFooter>
 					</DialogContent>

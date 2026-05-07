@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const SettingsOutlinedIcon: React.FC<IconProps> = ({
 	width = 18,

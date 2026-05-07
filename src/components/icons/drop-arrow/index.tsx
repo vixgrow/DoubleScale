@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const DropArrowIcon: React.FC<IconProps> = ({ width = 15, height = 8 }) => {
 	return (

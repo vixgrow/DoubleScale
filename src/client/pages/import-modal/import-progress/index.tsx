@@ -14,9 +14,9 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { ImportProgressIcon, LoadingSpinner } from '@quillcrm/components';
+import { ImportProgressIcon, LoadingSpinner } from '@doublescale/components';
 import { useImportContext } from '../contexts';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 //@ts-ignore
@@ -25,7 +25,7 @@ import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
 import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
 //@ts-ignore
 import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
-import { getToLink } from '@quillcrm/navigation';
+import { getToLink } from '@doublescale/navigation';
 
 interface ImportProgressProps {
 	onComplete?: () => void;
@@ -50,16 +50,16 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 		<div className="w-full h-full flex flex-col items-start justify-start">
 			<p className="text-[#09090B] text-2xl text-start">
 				{showingCompletion
-					? __(`Import Completed!`, 'quillcrm')
+					? __(`Import Completed!`, 'doublescale')
 					: __(
 							`Importing ${importer?.name || source} Contacts`,
-							'quillcrm'
+							'doublescale'
 						)}
 			</p>
 			<span className="text-lg text-[#71717A]">
 				{__(
 					'the list, tags will be assigned to contacts and status of Quill CRM contacts profile.',
-					'quillcrm'
+					'doublescale'
 				)}
 			</span>
 
@@ -96,8 +96,8 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 					</div>
 					<CardTitle className="text-2xl text-[#09090B] font-normal">
 						{importing && progressPercentage < 100
-							? __('Importing Contacts...', 'quillcrm')
-							: __('Import Completed!', 'quillcrm')}
+							? __('Importing Contacts...', 'doublescale')
+							: __('Import Completed!', 'doublescale')}
 					</CardTitle>
 				</CardHeader>
 
@@ -110,8 +110,8 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 						)}
 						<span>
 							{importing && progressPercentage < 100
-								? __('In Progress', 'quillcrm')
-								: __('Completed Successfully!', 'quillcrm')}
+								? __('In Progress', 'doublescale')
+								: __('Completed Successfully!', 'doublescale')}
 						</span>
 					</div>
 
@@ -119,11 +119,11 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 						{importing && progressPercentage < 100
 							? __(
 									'Please wait while we import your contacts...',
-									'quillcrm'
+									'doublescale'
 								)
 							: __(
 									'All contacts have been processed. You will be redirected shortly.',
-									'quillcrm'
+									'doublescale'
 								)}
 					</div>
 
@@ -144,7 +144,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 					{showingCompletion && (importStats.imported > 0 || importStats.skipped > 0 || importStats.failed > 0) && (
 						<div className="mt-4 pt-4 border-t border-gray-200">
 							<h4 className="text-sm font-medium text-gray-700 mb-3 text-center">
-								{__('Import Summary', 'quillcrm')}
+								{__('Import Summary', 'doublescale')}
 							</h4>
 							<div className="grid grid-cols-3 gap-4">
 								<div className="flex flex-col items-center p-3 bg-green-50 rounded-lg">
@@ -153,7 +153,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 										{importStats.imported}
 									</span>
 									<span className="text-xs text-green-600">
-										{__('Imported', 'quillcrm')}
+										{__('Imported', 'doublescale')}
 									</span>
 								</div>
 								<div className="flex flex-col items-center p-3 bg-yellow-50 rounded-lg">
@@ -162,7 +162,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 										{importStats.skipped}
 									</span>
 									<span className="text-xs text-yellow-600">
-										{__('Skipped', 'quillcrm')}
+										{__('Skipped', 'doublescale')}
 									</span>
 								</div>
 								<div className="flex flex-col items-center p-3 bg-red-50 rounded-lg">
@@ -171,19 +171,19 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 										{importStats.failed}
 									</span>
 									<span className="text-xs text-red-600">
-										{__('Failed', 'quillcrm')}
+										{__('Failed', 'doublescale')}
 									</span>
 								</div>
 							</div>
 							{importStats.skipped > 0 && (
 								<p className="text-xs text-gray-500 text-center mt-2">
-									{__('Skipped contacts already exist and "Update existing" was not enabled.', 'quillcrm')}
+									{__('Skipped contacts already exist and "Update existing" was not enabled.', 'doublescale')}
 								</p>
 							)}
 							{importStats.failed > 0 && (
 								<div className="text-center mt-3">
 									<p className="text-xs text-gray-500 mb-2">
-										{__('Failed contacts may have invalid email addresses or other data issues.', 'quillcrm')}
+										{__('Failed contacts may have invalid email addresses or other data issues.', 'doublescale')}
 									</p>
 									<Link to={getToLink('settings/system')}>
 										<Button
@@ -192,7 +192,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 											className="text-xs"
 										>
 											<ExternalLink className="w-3 h-3 mr-1" />
-											{__('View Log Management', 'quillcrm')}
+											{__('View Log Management', 'doublescale')}
 										</Button>
 									</Link>
 								</div>
@@ -207,7 +207,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 								onClick={onComplete}
 								className="px-8"
 							>
-								{__('Close', 'quillcrm')}
+								{__('Close', 'doublescale')}
 							</Button>
 						</div>
 					)}

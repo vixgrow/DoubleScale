@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const GradientGroupIcon: React.FC<IconProps> = ({
 	width = 24,

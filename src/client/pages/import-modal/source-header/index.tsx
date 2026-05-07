@@ -12,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
  */
 import { CardHeader } from '@/components/ui/card';
 import { useImportContext } from '../contexts';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 //@ts-ignore
@@ -105,7 +105,7 @@ const SourceHeader: React.FC = () => {
 					/>
 					{source === 'csv' && (
 						<div className="text-[#09090B] text-2xl">
-							{__('CSV', 'quillcrm')}
+							{__('CSV', 'doublescale')}
 						</div>
 					)}
 				</div>

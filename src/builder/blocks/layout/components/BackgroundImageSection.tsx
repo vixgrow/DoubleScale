@@ -6,7 +6,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@quillcrm/components/ui/select';
+} from '@doublescale/components/ui/select';
 import { ImageUploadControl } from '../../basic/shared';
 
 interface BackgroundImage {
@@ -40,10 +40,10 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 	return (
 		<>
 			<ImageUploadControl
-				label={__('Background Image', 'quillcrm')}
+				label={__('Background Image', 'doublescale')}
 				description={__(
 					'You can use JPG, PNG, and GIF formats, each under 2000px in dimension.',
-					'quillcrm'
+					'doublescale'
 				)}
 				value={backgroundImage?.url || ''}
 				alt={backgroundImage?.name || 'Background Image'}
@@ -60,14 +60,14 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 					}
 				}}
 				uploadId="layout-bg-upload"
-				placeholder={__('No background image selected', 'quillcrm')}
+				placeholder={__('No background image selected', 'doublescale')}
 			/>
 
 			{backgroundImage && (
 				<div className="space-y-4">
 					<div className="space-y-2">
 						<label className="text-sm text-[#333333]">
-							{__('Background Repeat', 'quillcrm')}
+							{__('Background Repeat', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundRepeat}
@@ -77,22 +77,22 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 								<SelectValue
 									placeholder={__(
 										'Background Repeat',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="no-repeat">
-									{__('No Repeat', 'quillcrm')}
+									{__('No Repeat', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="repeat">
-									{__('Repeat', 'quillcrm')}
+									{__('Repeat', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="repeat-x">
-									{__('Repeat X', 'quillcrm')}
+									{__('Repeat X', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="repeat-y">
-									{__('Repeat Y', 'quillcrm')}
+									{__('Repeat Y', 'doublescale')}
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -100,7 +100,7 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 
 					<div className="space-y-2">
 						<label className="text-sm text-[#333333]">
-							{__('Background Size', 'quillcrm')}
+							{__('Background Size', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundSize}
@@ -110,19 +110,19 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 								<SelectValue
 									placeholder={__(
 										'Background Size',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="cover">
-									{__('Cover', 'quillcrm')}
+									{__('Cover', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="contain">
-									{__('Contain', 'quillcrm')}
+									{__('Contain', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="auto">
-									{__('Auto', 'quillcrm')}
+									{__('Auto', 'doublescale')}
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -130,7 +130,7 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 
 					<div className="space-y-2">
 						<label className="text-sm text-[#333333]">
-							{__('Background Position', 'quillcrm')}
+							{__('Background Position', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundPosition}
@@ -140,37 +140,37 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 								<SelectValue
 									placeholder={__(
 										'Background Position',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="center">
-									{__('Center', 'quillcrm')}
+									{__('Center', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="top">
-									{__('Top', 'quillcrm')}
+									{__('Top', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="bottom">
-									{__('Bottom', 'quillcrm')}
+									{__('Bottom', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="left">
-									{__('Left', 'quillcrm')}
+									{__('Left', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="right">
-									{__('Right', 'quillcrm')}
+									{__('Right', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="top left">
-									{__('Top Left', 'quillcrm')}
+									{__('Top Left', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="top right">
-									{__('Top Right', 'quillcrm')}
+									{__('Top Right', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="bottom left">
-									{__('Bottom Left', 'quillcrm')}
+									{__('Bottom Left', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="bottom right">
-									{__('Bottom Right', 'quillcrm')}
+									{__('Bottom Right', 'doublescale')}
 								</SelectItem>
 							</SelectContent>
 						</Select>

@@ -6,7 +6,7 @@ import { Edge, Node } from '@xyflow/react';
 /**
  * Internal dependencies
  */
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 
 /**
  * Edge types

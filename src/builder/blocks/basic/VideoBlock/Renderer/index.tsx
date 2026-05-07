@@ -10,7 +10,7 @@ import { PlayIcon } from 'lucide-react';
 /**
  * internal dependencies
  */
-import { VideoBlockIcon } from '@quillcrm/components';
+import { VideoBlockIcon } from '@doublescale/components';
 import { VideoBlockProps } from '..';
 
 export interface VideoBlockRendererProps {
@@ -129,7 +129,7 @@ export const VideoBlockRenderer: React.FC<VideoBlockRendererProps> = ({ props })
 			controls
 			preload="metadata"
 		>
-			{__('Your browser does not support the video tag.', 'quillcrm')}
+			{__('Your browser does not support the video tag.', 'doublescale')}
 		</video>
 	);
 

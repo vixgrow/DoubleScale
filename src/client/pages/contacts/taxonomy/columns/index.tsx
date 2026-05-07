@@ -11,10 +11,10 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { List as ContactList, Tag as ContactTag } from '@quillcrm/client';
-import { EditIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
+import type { List as ContactList, Tag as ContactTag } from '@doublescale/client';
+import { EditIcon, SortIcon, TimeAgoCell } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import type { TaxonomyItem, TaxonomyType } from '../index';
 
 interface TaxonomyColumnsProps {
@@ -47,7 +47,7 @@ export const getTaxonomyColumns = ({
 	};
 
 	const contactsCountLabel =
-		type === 'list' ? __('Contacts No', 'quillcrm') : __('Contacts', 'quillcrm');
+		type === 'list' ? __('Contacts No', 'doublescale') : __('Contacts', 'doublescale');
 
 	return [
 		selectionColumn,
@@ -58,7 +58,7 @@ export const getTaxonomyColumns = ({
 					className="flex items-center gap-1"
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
-					{__('Name', 'quillcrm')}
+					{__('Name', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -71,7 +71,7 @@ export const getTaxonomyColumns = ({
 					className="flex items-center gap-1"
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
-					{__('Description', 'quillcrm')}
+					{__('Description', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -100,7 +100,7 @@ export const getTaxonomyColumns = ({
 					className="flex items-center gap-1"
 					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -108,7 +108,7 @@ export const getTaxonomyColumns = ({
 		},
 		{
 			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					onClick={() => onEditItem(row.original)}
@@ -116,7 +116,7 @@ export const getTaxonomyColumns = ({
 					className="p-0"
 				>
 					<EditIcon />
-					{__('Edit', 'quillcrm')}
+					{__('Edit', 'doublescale')}
 				</Button>
 			),
 		},

@@ -15,12 +15,12 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
-import type { AutomationStep } from '@quillcrm/client';
-import ConfigAPI from '@quillcrm/config';
+import type { AutomationStep } from '@doublescale/client';
+import ConfigAPI from '@doublescale/config';
 import {
 	CustomDialogHeader,
 	GradientConditionIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import {
 	Dialog,
 	DialogContent,
@@ -52,11 +52,11 @@ const ConditionsModal: React.FC<RulesProps> = ({
 
 	// Get form context and current trigger from store
 	const formContext = useSelect((select: any) => {
-		return select('quillcrm/core').getFormContext();
+		return select('doublescale/core').getFormContext();
 	}, []);
 
 	const currentTrigger = useSelect((select: any) => {
-		return select('quillcrm/core').getCurrentTrigger();
+		return select('doublescale/core').getCurrentTrigger();
 	}, []);
 
 	// Check for condition warning
@@ -257,10 +257,10 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			<DialogContent className="max-w-[1100px] max-h-[90vh] z-[150300] overflow-y-auto">
 				<DialogHeader>
 					<CustomDialogHeader
-						title={__('Create a condition', 'quillcrm')}
+						title={__('Create a condition', 'doublescale')}
 						subtitle={__(
 							'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<GradientConditionIcon />}
 					/>
@@ -282,7 +282,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 										<span className="block mt-1 font-medium">
 											{__(
 												'Required plugins:',
-												'quillcrm'
+												'doublescale'
 											)}{' '}
 											{conditionWarning.plugin_labels.join(
 												', '
@@ -294,7 +294,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 										<p className="font-medium mb-1">
 											{__(
 												'Unavailable rules:',
-												'quillcrm'
+												'doublescale'
 											)}
 										</p>
 										<ul className="list-disc list-inside space-y-1">
@@ -332,8 +332,8 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						variant="gradient"
 					>
 						{isSaving
-							? __('Adding...', 'quillcrm')
-							: __('Add condition', 'quillcrm')}
+							? __('Adding...', 'doublescale')
+							: __('Add condition', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

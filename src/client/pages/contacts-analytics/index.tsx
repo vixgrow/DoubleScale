@@ -21,10 +21,10 @@ import { Line } from 'react-chartjs-2';
  * Internal dependencies
  */
 import './style.scss';
-import type { ContactAnalytics as ContactAnalyticsData } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate, formatDate } from '@quillcrm/utils';
-import { DateFilter } from '@quillcrm/components';
+import type { ContactAnalytics as ContactAnalyticsData } from '@doublescale/client';
+import { NavLink } from '@doublescale/navigation';
+import { convertDate, formatDate } from '@doublescale/utils';
+import { DateFilter } from '@doublescale/components';
 
 const ContactAnalytics: React.FC = () => {
 	const [data, setData] = useState<ContactAnalyticsData | null>(null);
@@ -32,7 +32,7 @@ const ContactAnalytics: React.FC = () => {
 	const [interval, setInterval] = useState<string>('today');
 	const [startDate, setStartDate] = useState<Date>(new Date());
 	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchContactAnalytics = async () => {
 		setLoading(true);
@@ -49,7 +49,7 @@ const ContactAnalytics: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
+				message: __('Error fetching analytics data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -74,7 +74,7 @@ const ContactAnalytics: React.FC = () => {
 								<UserOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Contacts', 'quillcrm')}
+								{__('Total Contacts', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -89,7 +89,7 @@ const ContactAnalytics: React.FC = () => {
 								<UserOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Subscribers', 'quillcrm')}
+								{__('Total Subscribers', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -104,7 +104,7 @@ const ContactAnalytics: React.FC = () => {
 								<UserDeleteOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Unsubscribers', 'quillcrm')}
+								{__('Total Unsubscribers', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -126,10 +126,10 @@ const ContactAnalytics: React.FC = () => {
 			</Flex>
 			<Flex gap={20}>
 				<Card
-					title={__('Contact Analytics', 'quillcrm')}
+					title={__('Contact Analytics', 'doublescale')}
 					extra={
 						<NavLink to="contacts">
-							{__('View All', 'quillcrm')}
+							{__('View All', 'doublescale')}
 						</NavLink>
 					}
 					style={{ flex: 1 }}
@@ -141,7 +141,7 @@ const ContactAnalytics: React.FC = () => {
 							}),
 							datasets: [
 								{
-									label: __('Contacts', 'quillcrm'),
+									label: __('Contacts', 'doublescale'),
 									data: map(data.data.dates, (date) => {
 										return data.contacts[date]
 											? data.contacts[date]

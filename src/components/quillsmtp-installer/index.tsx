@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { PluginStatusCard } from '@/components/plugin-installer';
-import config from '@quillcrm/config';
+import config from '@doublescale/config';
 
 export const QuillSMTPInstaller: React.FC = () => {
 	const adminUrl = config.getAdminUrl();
@@ -17,10 +17,10 @@ export const QuillSMTPInstaller: React.FC = () => {
 		<PluginStatusCard
 			plugin={{
 				id: 'quillsmtp',
-				name: __('QuillSMTP', 'quillcrm'),
+				name: __('QuillSMTP', 'doublescale'),
 				description: __(
 					'QuillSMTP is not installed. Install and configure QuillSMTP for reliable email delivery with support for multiple SMTP providers including SendGrid, Mailgun, SES, and more.',
-					'quillcrm'
+					'doublescale'
 				),
 				pluginFile: 'quillsmtp/quillsmtp.php',
 				downloadUrl:

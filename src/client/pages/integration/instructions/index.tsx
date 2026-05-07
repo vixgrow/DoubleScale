@@ -18,7 +18,7 @@ interface InstructionsProps {
 const Instructions: React.FC<InstructionsProps> = ({ slug, label, description }) => {
     // Allow Pro plugin to override instruction components
     const OverrideComponent = applyFilters(
-        'quillcrm_integration_instructions_component',
+        'doublescale_integration_instructions_component',
         null,
         slug
     ) as React.ComponentType | null;
@@ -36,7 +36,7 @@ const Instructions: React.FC<InstructionsProps> = ({ slug, label, description })
             return (
                 <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-destructive">
-                        {label} {__('Instructions:', 'quillcrm')}
+                        {label} {__('Instructions:', 'doublescale')}
                     </h2>
                     <p className="text-sm text-gray-600">
                         {description}

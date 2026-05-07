@@ -9,15 +9,15 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
-import { Button } from '@quillcrm/components/ui/button';
+import type { CampaignEmail } from '@doublescale/client';
+import { Button } from '@doublescale/components/ui/button';
 import {
 	NotOpenedIcon,
 	OpenedIcon,
 	ResendIcon,
 	TimeAgoCell,
 	ViewIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 
 interface ColumnsProps {
 	onViewTemplate: (email: CampaignEmail) => void;
@@ -27,7 +27,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 	const columns: ColumnDef<CampaignEmail>[] = [
 		{
 			accessorKey: 'subject',
-			header: __('Subject', 'quillcrm'),
+			header: __('Subject', 'doublescale'),
 			cell: ({ row }) => {
 				// Try template subject first (for campaign emails)
 				const templateSubject = row.original.template?.subject;
@@ -38,18 +38,18 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 				return (
 					(templateSubject && templateSubject.trim()) ||
 					(activitySubject && activitySubject.trim()) ||
-					__('No Subject', 'quillcrm')
+					__('No Subject', 'doublescale')
 				);
 			},
 		},
 		{
 			accessorKey: 'sent_at',
-			header: __('Sent On', 'quillcrm'),
+			header: __('Sent On', 'doublescale'),
 			cell: ({ row }) => <TimeAgoCell value={row.getValue('sent_at')} />,
 		},
 		{
 			accessorKey: 'clicked',
-			header: __('Clicked', 'quillcrm'),
+			header: __('Clicked', 'doublescale'),
 			cell: ({ row }) => {
 				const isClicked = row.original.clicked != '0';
 				return (
@@ -65,8 +65,8 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 						</div>
 						<span>
 							{isClicked
-								? __('Yes', 'quillcrm')
-								: __('No', 'quillcrm')}
+								? __('Yes', 'doublescale')
+								: __('No', 'doublescale')}
 						</span>
 					</div>
 				);
@@ -74,7 +74,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'opened',
-			header: __('Opened', 'quillcrm'),
+			header: __('Opened', 'doublescale'),
 			cell: ({ row }) => {
 				const isOpened = row.original.opened != '0';
 				return (
@@ -88,8 +88,8 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 						</div>
 						<span>
 							{isOpened
-								? __('Yes', 'quillcrm')
-								: __('No', 'quillcrm')}
+								? __('Yes', 'doublescale')
+								: __('No', 'doublescale')}
 						</span>
 					</div>
 				);
@@ -97,7 +97,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'status',
-			header: __('Sent Status', 'quillcrm'),
+			header: __('Sent Status', 'doublescale'),
 			cell: ({ row }) => {
 				const statusSlug = row.original.status_slug || 'unknown';
 				const isSent = statusSlug === 'sent';
@@ -111,8 +111,8 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 							}`}
 						>
 							{isSent
-								? __('Sent', 'quillcrm')
-								: __('Failed', 'quillcrm')}
+								? __('Sent', 'doublescale')
+								: __('Failed', 'doublescale')}
 						</span>
 					</div>
 				);
@@ -120,7 +120,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
 					<Button
@@ -129,7 +129,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 						onClick={() => onViewTemplate(row.original)}
 					>
 						<ViewIcon />
-						{__('View', 'quillcrm')}
+						{__('View', 'doublescale')}
 					</Button>
 					<Button
 						size="sm"
@@ -137,7 +137,7 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 						onClick={() => onViewTemplate(row.original)}
 					>
 						<ResendIcon />
-						{__('Resend', 'quillcrm')}
+						{__('Resend', 'doublescale')}
 					</Button>
 				</div>
 			),

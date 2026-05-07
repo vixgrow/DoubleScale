@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { Breadcrumb } from '@quillcrm/components';
+import { Breadcrumb } from '@doublescale/components';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import ArrowLeft from '../icons/arrow-left';
@@ -33,8 +33,8 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	onNext,
 	onBack,
 	onSaveDraft,
-	nextLabel = __('Next', 'quillcrm'),
-	backLabel = __('Back', 'quillcrm'),
+	nextLabel = __('Next', 'doublescale'),
+	backLabel = __('Back', 'doublescale'),
 	showSaveDraft = false,
 	isLoading = false,
 	children,
@@ -101,7 +101,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 									disabled={isLoading}
 									className="rounded-lg"
 								>
-									{__('Save as Draft', 'quillcrm')}
+									{__('Save as Draft', 'doublescale')}
 								</Button>
 							)}
 

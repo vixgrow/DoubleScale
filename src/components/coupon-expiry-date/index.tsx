@@ -59,7 +59,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 							htmlFor="expiry-days"
 							className="text-sm font-medium text-gray-900 cursor-pointer"
 						>
-							{__('Expiry after Specific Days', 'quillcrm')}
+							{__('Expiry after Specific Days', 'doublescale')}
 						</label>
 					</div>
 
@@ -70,7 +70,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 							htmlFor="expiry-date"
 							className="text-sm font-medium text-gray-900 cursor-pointer"
 						>
-							{__('Expiry on Specific Date', 'quillcrm')}
+							{__('Expiry on Specific Date', 'doublescale')}
 						</label>
 					</div>
 
@@ -81,7 +81,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 							htmlFor="never-expire"
 							className="text-sm font-medium text-gray-900 cursor-pointer"
 						>
-							{__('Never Expire', 'quillcrm')}
+							{__('Never Expire', 'doublescale')}
 						</label>
 					</div>
 				</RadioGroup>
@@ -104,7 +104,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 								placeholder="0"
 							/>
 							<span className="text-sm text-gray-600 bg-gray-100 px-3 py-3.5 rounded-lg">
-								{__('Days', 'quillcrm')}
+								{__('Days', 'doublescale')}
 							</span>
 						</div>
 					</div>
@@ -118,7 +118,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 							onChange={(dateValue) =>
 								handleValueChange(dateValue)
 							}
-							placeholder={__('Select expiry date', 'quillcrm')}
+							placeholder={__('Select expiry date', 'doublescale')}
 							outputFormat="iso"
 							buttonClassName='bg-white border shadow-none text-[#333333] w-full'
 						/>

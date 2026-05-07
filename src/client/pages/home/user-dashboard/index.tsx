@@ -34,7 +34,7 @@ ChartJS.register(
 /**
  * Internal dependencies
  */
-import type { DashboardData } from '@quillcrm/client';
+import type { DashboardData } from '@doublescale/client';
 import { DashboardCards } from './dashboard-cards';
 import { RecentContactsList } from '../recent-contacts-list';
 import { ContactAnalyticsChart } from '../contacts-chart';

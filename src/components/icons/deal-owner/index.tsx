@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const DealOwnerIcon: React.FC<IconProps> = ({ width =22, height = 22,color='#2E2C2F' }) => {
 	return (

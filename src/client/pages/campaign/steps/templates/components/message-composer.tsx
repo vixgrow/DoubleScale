@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Textarea } from '@/components/ui/textarea';
-import { FormField } from '@quillcrm/components';
+import { FormField } from '@doublescale/components';
 
 interface MessageComposerProps {
 	value: string;
@@ -22,8 +22,8 @@ interface MessageComposerProps {
 const MessageComposer: React.FC<MessageComposerProps> = ({
 	value,
 	onChange,
-	label = __('Message', 'quillcrm'),
-	placeholder = __('Enter your message here...', 'quillcrm'),
+	label = __('Message', 'doublescale'),
+	placeholder = __('Enter your message here...', 'doublescale'),
 	maxLength = 1600,
 	required = true,
 	helpText,
@@ -57,7 +57,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
 									: 'text-muted-foreground'
 						}`}
 					>
-						{characterCount} / {maxLength} {__('characters', 'quillcrm')}
+						{characterCount} / {maxLength} {__('characters', 'doublescale')}
 					</div>
 				</div>
 			</div>

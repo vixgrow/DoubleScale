@@ -6,8 +6,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { Settings } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import type { Settings } from '@doublescale/client';
+import { Field } from '@doublescale/components';
 
 interface CurrenciesSettingsProps {
     settings: Settings;
@@ -69,14 +69,14 @@ const CurrenciesSettings: React.FC<CurrenciesSettingsProps> = ({
     };
     return (
         <div className="business-settings qcrm-fields">
-            <div className="text-[#09090B] font-semibold text-2xl">{__('Currencies', 'quillcrm')}</div>
+            <div className="text-[#09090B] font-semibold text-2xl">{__('Currencies', 'doublescale')}</div>
             <Field
-                label={__('Currency', 'quillcrm')}
+                label={__('Currency', 'doublescale')}
                 value={currency || 'USD'}
                 onChange={(value) => handleFieldChange('currency', value)}
                 type="select"
                 options={currencyOptions}
-                placeholder={__('Select a currency', 'quillcrm')}
+                placeholder={__('Select a currency', 'doublescale')}
             />
         </div>
     );

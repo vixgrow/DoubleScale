@@ -19,13 +19,13 @@ export function ProviderNotConnectedWarning({
 	channel,
 	onConfigureClick,
 }: ProviderNotConnectedWarningProps) {
-	const channelName = channel === 'sms' ? __('SMS', 'quillcrm') : __('WhatsApp', 'quillcrm');
+	const channelName = channel === 'sms' ? __('SMS', 'doublescale') : __('WhatsApp', 'doublescale');
 
 	// For SMS, only Twilio is available
 	// For WhatsApp, both Twilio and Meta WhatsApp are available
 	const providerOptions = channel === 'sms' 
-		? __('Twilio', 'quillcrm')
-		: __('Twilio or Meta WhatsApp', 'quillcrm');
+		? __('Twilio', 'doublescale')
+		: __('Twilio or Meta WhatsApp', 'doublescale');
 
 	return (
 		<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
@@ -35,11 +35,11 @@ export function ProviderNotConnectedWarning({
 					{channel === 'sms'
 						? __(
 								'No SMS provider is configured. Please configure Twilio to send SMS messages.',
-								'quillcrm'
+								'doublescale'
 						  )
 						: __(
 								'No WhatsApp provider is configured. Please configure Twilio or Meta WhatsApp to send messages.',
-								'quillcrm'
+								'doublescale'
 						  )}
 				</p>
 				<Button
@@ -49,8 +49,8 @@ export function ProviderNotConnectedWarning({
 					className="bg-white hover:bg-yellow-50"
 				>
 					{channel === 'sms'
-						? __('Configure SMS Provider', 'quillcrm')
-						: __('Configure WhatsApp Provider', 'quillcrm')}
+						? __('Configure SMS Provider', 'doublescale')
+						: __('Configure WhatsApp Provider', 'doublescale')}
 				</Button>
 			</div>
 		</div>
@@ -76,7 +76,7 @@ export function ContactNoPhoneWarning({
 	onAddPhoneClick,
 }: ContactNoPhoneWarningProps) {
 	const isWhatsApp = channel === 'whatsapp';
-	const channelName = isWhatsApp ? __('WhatsApp', 'quillcrm') : __('SMS', 'quillcrm');
+	const channelName = isWhatsApp ? __('WhatsApp', 'doublescale') : __('SMS', 'doublescale');
 
 	return (
 		<div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 flex items-start gap-3">
@@ -86,17 +86,17 @@ export function ContactNoPhoneWarning({
 					{isWhatsApp
 						? __(
 								'This contact does not have a WhatsApp phone number. Please add a WhatsApp phone number in the contact details to send WhatsApp messages.',
-								'quillcrm'
+								'doublescale'
 						  )
 						: __(
 								'This contact does not have a phone number. Please add a phone number to send SMS messages.',
-								'quillcrm'
+								'doublescale'
 						  )}
 				</p>
 				<p className="text-xs text-orange-600">
 					{__(
 						'Phone numbers should be in E.164 format (e.g., +1234567890)',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 				{onAddPhoneClick && (
@@ -107,8 +107,8 @@ export function ContactNoPhoneWarning({
 						className="bg-white hover:bg-orange-50 mt-2"
 					>
 						{isWhatsApp
-							? __('Add WhatsApp Phone Number', 'quillcrm')
-							: __('Add Phone Number', 'quillcrm')}
+							? __('Add WhatsApp Phone Number', 'doublescale')
+							: __('Add Phone Number', 'doublescale')}
 					</Button>
 				)}
 			</div>

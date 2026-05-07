@@ -20,7 +20,7 @@ import {
 	DialogOverlay,
 	DialogHeader,
 } from '@/components/ui/dialog';
-import { GradientMergeTagsIcon } from '@quillcrm/components';
+import { GradientMergeTagsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -28,8 +28,8 @@ import { Card, CardContent } from '@/components/ui/card';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
-import type { MergeTags } from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
+import type { MergeTags } from '@doublescale/config';
 import CustomDialogHeader from '../dialog-header';
 import EnhancedMergeTagsSelector from './enhanced-selector';
 
@@ -57,8 +57,8 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
 	const { currentTrigger, formContext } = useSelect((select) => ({
-		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
-		formContext: select('quillcrm/core').getFormContext(),
+		currentTrigger: select('doublescale/core').getCurrentTrigger(),
+		formContext: select('doublescale/core').getFormContext(),
 	}));
 
 	// If we have form context (from props or store), use the enhanced selector
@@ -100,10 +100,10 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 			<DialogContent className="max-w-4xl min-w-[800px] z-[150500]">
 				<DialogHeader>
 					<CustomDialogHeader
-						title={__('Merge Tags', 'quillcrm')}
+						title={__('Merge Tags', 'doublescale')}
 						subtitle={__(
 							'Choose your Merge tags type and Select one of them related to your input.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<GradientMergeTagsIcon />}
 					/>
@@ -134,7 +134,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 											<div className="text-xs text-[#9197A4]">
 												{__(
 													'Select one of Merge tags that related to your input.',
-													'quillcrm'
+													'doublescale'
 												)}
 											</div>
 										</CardContent>
@@ -167,7 +167,7 @@ const MergeTagsGroupRender: React.FC<{
 	onInsertTag?: (tagValue: string) => void;
 	activeTrigger?: string;
 }> = ({ mergeTags, onInsertTag, activeTrigger }) => {
-	const { createNotice, setMergeTagsVisible } = useDispatch('quillcrm/core');
+	const { createNotice, setMergeTagsVisible } = useDispatch('doublescale/core');
 
 	// Filter merge tags based on required_triggers
 	const filteredMergeTags = filter(mergeTags, (tag) => {
@@ -191,7 +191,7 @@ const MergeTagsGroupRender: React.FC<{
 			// Fallback to clipboard behavior
 			navigator.clipboard.writeText(tagValue);
 			createNotice({
-				message: __('Merge tag copied to clipboard', 'quillcrm'),
+				message: __('Merge tag copied to clipboard', 'doublescale'),
 				type: 'info',
 			});
 		}

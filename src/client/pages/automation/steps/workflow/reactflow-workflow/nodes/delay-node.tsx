@@ -17,20 +17,20 @@ import type {
 	AutomationStep,
 	Automation,
 	OrganizedStep,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { TimerBlockIcon } from '@quillcrm/components';
+import { TimerBlockIcon } from '@doublescale/components';
 import {
 	getAction,
 	getActionLabel,
 	getActionWarningMessage,
 	hasActionWarning,
-} from '@quillcrm/utils';
+} from '@doublescale/utils';
 import {
 	Tooltip,
 	TooltipContent,
@@ -59,7 +59,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 	} = data as unknown as DelayNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	// Check if a delay action has been selected
 	const hasActionSelected = !!step.action;
@@ -68,7 +68,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 
 	// Get delay label and warning status from backend
 	const actionLabel =
-		getActionLabel(step) || actionConfig?.label || __('Delay', 'quillcrm');
+		getActionLabel(step) || actionConfig?.label || __('Delay', 'doublescale');
 	const hasWarning = hasActionWarning(step);
 	const warningMessage = getActionWarningMessage(step);
 	const isDelayUntil = actionKey === 'delay-until-datetime';
@@ -112,8 +112,8 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 					style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
 				>
 					{isDelayUntil
-						? __('Delays until', 'quillcrm')
-						: __('Sets to delay', 'quillcrm')}{' '}
+						? __('Delays until', 'doublescale')
+						: __('Sets to delay', 'doublescale')}{' '}
 					{delayText}
 				</span>
 				{hasWarning && (
@@ -124,7 +124,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 							</TooltipTrigger>
 							<TooltipContent side="right" className="max-w-xs">
 								<p className="font-semibold">
-									{__('Plugin Required', 'quillcrm')}
+									{__('Plugin Required', 'doublescale')}
 								</p>
 								<p className="text-xs mt-1">{warningMessage}</p>
 							</TooltipContent>
@@ -135,13 +135,13 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		) : (
 			<span className="qcrm-reactflow-delay__not-configured">
 				<span className="text-[#333333B2] mr-1">
-					{__('Need to', 'quillcrm')}
+					{__('Need to', 'doublescale')}
 				</span>
 				{!hasActionSelected
-					? __('Select Delay Type', 'quillcrm')
+					? __('Select Delay Type', 'doublescale')
 					: isDelayUntil
-						? __('Set Datetime', 'quillcrm')
-						: __('Set Delay Time', 'quillcrm')}
+						? __('Set Datetime', 'doublescale')
+						: __('Set Delay Time', 'doublescale')}
 			</span>
 		);
 
@@ -194,19 +194,19 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
-					editLabel={sprintf(__('Edit %s', 'quillcrm'), actionLabel)}
+					editLabel={sprintf(__('Edit %s', 'doublescale'), actionLabel)}
 					deleteLabel={sprintf(
-						__('Delete %s', 'quillcrm'),
+						__('Delete %s', 'doublescale'),
 						actionLabel
 					)}
 					deleteTitle={sprintf(
-						__('Delete this %s?', 'quillcrm'),
+						__('Delete this %s?', 'doublescale'),
 						actionLabel
 					)}
 					deleteDescription={sprintf(
 						__(
 							'This will remove the %s from your workflow.',
-							'quillcrm'
+							'doublescale'
 						),
 						actionLabel
 					)}

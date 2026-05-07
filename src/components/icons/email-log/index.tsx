@@ -1,5 +1,5 @@
 
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const EmailLogIcon: React.FC<IconProps> = ({ width = 24, height = 24 ,color='#16A34A' }) => {
 	return (

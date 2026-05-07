@@ -9,7 +9,7 @@ import { useState, useCallback } from '@wordpress/element';
  */
 import './style.scss';
 import { Button } from '@/components/ui/button';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 interface TestButtonProps {
 	label?: string;
@@ -106,7 +106,7 @@ const TestButton: React.FC<TestButtonProps> = ({
 			disabled={isLoading}
 		>
 			{isLoading
-				? __('Loading...', 'quillcrm')
+				? __('Loading...', 'doublescale')
 				: settings?.button_text || label}
 		</Button>
 	);

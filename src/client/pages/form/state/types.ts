@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { SET_FORM, UPDATE_FORM, UPDATE_SETTINGS } from './constants';
-import type { Form } from '@quillcrm/client';
+import type { Form } from '@doublescale/client';
 
 export type setForm = {
 	type: typeof SET_FORM;

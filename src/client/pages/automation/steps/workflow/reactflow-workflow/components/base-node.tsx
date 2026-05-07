@@ -13,7 +13,7 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import NodeContextMenu from './node-context-menu';
 import NodeActionsDropdown from './node-actions-dropdown';
 import StepReorderControls from './step-reorder-controls';
@@ -43,12 +43,12 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 		icon,
 		title,
 		subtitle,
-		editLabel = __('Edit Step', 'quillcrm'),
-		deleteLabel = __('Delete Step', 'quillcrm'),
-		deleteTitle = __('Delete this step?', 'quillcrm'),
+		editLabel = __('Edit Step', 'doublescale'),
+		deleteLabel = __('Delete Step', 'doublescale'),
+		deleteTitle = __('Delete this step?', 'doublescale'),
 		deleteDescription = __(
 			'This will remove the step from your workflow.',
-			'quillcrm'
+			'doublescale'
 		),
 		showSourceHandle = true,
 		showTargetHandle = true,
@@ -57,7 +57,7 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 	} = data as unknown as BaseNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const handleEdit = () => {
 		if (onStepClick) {

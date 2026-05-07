@@ -6,7 +6,7 @@ import React from 'react';
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { PlusIcon } from '@quillcrm/components';
+import { PlusIcon } from '@doublescale/components';
 
 interface NoDataProps {
 	icon: React.ReactNode;

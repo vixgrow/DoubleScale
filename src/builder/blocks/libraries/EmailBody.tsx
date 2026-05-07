@@ -9,7 +9,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 
 const EmailBodyLibrary = () => {
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	// Title 1 template - creates 2 blocks: heading text and lorem text
 	const title1Template = {
 		type: 'title-1',
@@ -666,7 +666,7 @@ const EmailBodyLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 1', 'quillcrm')}</label>
+				<label className="text-sm">{__('Title 1', 'doublescale')}</label>
 				<DraggableTemplate
 					template={title1Template}
 					id="email-body-title-1"
@@ -675,12 +675,12 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 						<div className="text-[#141B34] text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview .',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 					</div>
@@ -688,7 +688,7 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 2', 'quillcrm')}</label>
+				<label className="text-sm">{__('Title 2', 'doublescale')}</label>
 				<DraggableTemplate
 					template={title2Template}
 					id="email-body-title-2"
@@ -699,18 +699,18 @@ const EmailBodyLibrary = () => {
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use,',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-[#141B34] text-sm font-bold">
-							{__('title 1', 'quillcrm')}
+							{__('title 1', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 3', 'quillcrm')}</label>
+				<label className="text-sm">{__('Title 3', 'doublescale')}</label>
 				<DraggableTemplate
 					template={title3Template}
 					id="email-body-title-3"
@@ -719,14 +719,14 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] text-sm font-bold">
-							{__('Title 1', 'quillcrm')}
+							{__('Title 1', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 4', 'quillcrm')}</label>
+				<label className="text-sm">{__('Title 4', 'doublescale')}</label>
 				<DraggableTemplate
 					template={title4Template}
 					id="email-body-title-4"
@@ -735,12 +735,12 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-3 text-sm text-[#141B34]">
 						<div className="font-bold">
-							{__('title 1', 'quillcrm')}
+							{__('title 1', 'doublescale')}
 						</div>
 						<div className="text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use,',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 					</div>
@@ -749,7 +749,7 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title & Button 1', 'quillcrm')}
+					{__('Title & Button 1', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={titleButton1Template}
@@ -759,16 +759,16 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] font-bold text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -776,7 +776,7 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title & Button 2', 'quillcrm')}
+					{__('Title & Button 2', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={titleButton2Template}
@@ -788,14 +788,14 @@ const EmailBodyLibrary = () => {
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-[#141B34] font-bold text-sm">
-							{__('title 1', 'quillcrm')}
+							{__('title 1', 'doublescale')}
 						</div>
 						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -803,7 +803,7 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title & 2 Buttons', 'quillcrm')}
+					{__('Title & 2 Buttons', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={titleButton5Template}
@@ -813,22 +813,22 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
-							{__('title 1', 'quillcrm')}
+							{__('title 1', 'doublescale')}
 						</div>
 						<div className="text-[#141B34] font-bold text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-white w-fit bg-primary py-2 px-8 rounded-lg">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 						<div className="text-white w-fit bg-secondary py-2 px-8 rounded-lg">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -836,7 +836,7 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title, Paragraph & Button', 'quillcrm')}
+					{__('Title, Paragraph & Button', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={titleParagraphButtonTemplate}
@@ -846,19 +846,19 @@ const EmailBodyLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
-							{__('title 1', 'quillcrm')}
+							{__('title 1', 'doublescale')}
 						</div>
 						<div className="text-[#141B34] font-bold text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4]">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>

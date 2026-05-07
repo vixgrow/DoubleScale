@@ -15,12 +15,12 @@ import { map } from 'lodash';
 /**
  * Internal dependencies
  */
-import type { NoticeMessage } from '@quillcrm/client';
-import { getToLink, useNavigate, useParams } from '@quillcrm/navigation';
-import ConfigAPI from '@quillcrm/config';
+import type { NoticeMessage } from '@doublescale/client';
+import { getToLink, useNavigate, useParams } from '@doublescale/navigation';
+import ConfigAPI from '@doublescale/config';
 import Integration from '../integration';
-import { PageHeader, NoticeBanner } from '@quillcrm/components';
-import { Card, CardContent } from '@quillcrm/components/ui/card';
+import { PageHeader, NoticeBanner } from '@doublescale/components';
+import { Card, CardContent } from '@doublescale/components/ui/card';
 import { IntegrationCard } from './integration-card';
 import './style.scss';
 
@@ -107,7 +107,7 @@ const Integrations: React.FC = () => {
 		setIntegrationLoading(integrationKey, true);
 		showNotice(
 			'success',
-			sprintf(__('You have successfully connected %s', 'quillcrm'), integrationLabel)
+			sprintf(__('You have successfully connected %s', 'doublescale'), integrationLabel)
 		);
 
 		try {
@@ -130,14 +130,14 @@ const Integrations: React.FC = () => {
 
 			showNotice(
 				'success',
-				sprintf(__('You have successfully disconnected %s', 'quillcrm'), integrationLabel)
+				sprintf(__('You have successfully disconnected %s', 'doublescale'), integrationLabel)
 			);
 
 			await refreshIntegration(integrationKey);
 		} catch (error) {
 			showNotice(
 				'error',
-				sprintf(__('Failed to disconnect %s', 'quillcrm'), integrationLabel)
+				sprintf(__('Failed to disconnect %s', 'doublescale'), integrationLabel)
 			);
 		} finally {
 			setIntegrationLoading(integrationKey, false);
@@ -151,7 +151,7 @@ const Integrations: React.FC = () => {
 			setIntegrationLoading(id, true);
 			showNotice(
 				'success',
-				sprintf(__('You have successfully connected %s', 'quillcrm'), integration.label)
+				sprintf(__('You have successfully connected %s', 'doublescale'), integration.label)
 			);
 
 			refreshIntegration(id).finally(() => {
@@ -165,8 +165,8 @@ const Integrations: React.FC = () => {
 	return (
 		<div className="qcrm-integrations">
 			<PageHeader
-				title={__('Integrations', 'quillcrm')}
-				subtitle={__('Integrations', 'quillcrm')}
+				title={__('Integrations', 'doublescale')}
+				subtitle={__('Integrations', 'doublescale')}
 				actions={[]}
 			/>
 

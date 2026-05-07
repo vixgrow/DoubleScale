@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import { PaginatedSelect } from '@quillcrm/components';
+import { PaginatedSelect } from '@doublescale/components';
 
 interface Props {
 	value: number[];
@@ -22,8 +22,8 @@ const ListField = ({ value, onChange }: Props) => {
 					value={value}
 					onChange={onChange}
 					endpoint="/qc/v1/lists"
-					placeholder={__('Select list', 'quillcrm')}
-					noOptionsMessage={__('No lists available', 'quillcrm')}
+					placeholder={__('Select list', 'doublescale')}
+					noOptionsMessage={__('No lists available', 'doublescale')}
 					className="qcrm-list-field"
 				/>
 			</div>

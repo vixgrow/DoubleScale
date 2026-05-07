@@ -33,7 +33,7 @@ export const TextStyleControl: React.FC<TextStyleControlProps> = ({
 	value,
 	onChange,
 	className,
-	label = __('Text Style', 'quillcrm'),
+	label = __('Text Style', 'doublescale'),
 }) => {
 	return (
 		<div className={className}>
@@ -42,7 +42,7 @@ export const TextStyleControl: React.FC<TextStyleControlProps> = ({
 				<Select value={value} onValueChange={onChange}>
 					<SelectTrigger className="w-full rounded-lg border-border h-10">
 						<SelectValue
-							placeholder={__('Select heading style', 'quillcrm')}
+							placeholder={__('Select heading style', 'doublescale')}
 						/>
 					</SelectTrigger>
 					<SelectContent>

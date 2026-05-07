@@ -42,7 +42,7 @@ export const FontControl: React.FC<FontControlProps> = ({
             <div className="flex gap-3 items-end w-full">
                 <div className="flex flex-col gap-2 text-[#333333] w-2/3">
                     <label className="text-sm">
-                        {__('Font', 'quillcrm')}
+                        {__('Font', 'doublescale')}
                     </label>
                     <Select
                         value={fontFamily}
@@ -50,7 +50,7 @@ export const FontControl: React.FC<FontControlProps> = ({
                     >
                         <SelectTrigger className="w-full rounded-lg border-border h-10">
                             <SelectValue
-                                placeholder={__('Select font', 'quillcrm')}
+                                placeholder={__('Select font', 'doublescale')}
                             />
                         </SelectTrigger>
                         <SelectContent>
@@ -64,7 +64,7 @@ export const FontControl: React.FC<FontControlProps> = ({
                 </div>
                 <div className="flex flex-col gap-2 text-[#333333] w-1/3">
                     <label className="text-sm">
-                        {__('Size', 'quillcrm')}
+                        {__('Size', 'doublescale')}
                     </label>
                     <Input
                         type="number"

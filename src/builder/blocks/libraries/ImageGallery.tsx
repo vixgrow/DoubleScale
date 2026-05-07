@@ -6,11 +6,11 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * internal dependencies
  */
-import { ImageBlockIcon } from '@quillcrm/components';
+import { ImageBlockIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 
 const ImageGalleryLibrary = () => {
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	// Grid 1 template - 1 large image + 2 small images
 	const grid1Template = {
 		type: 'grid-1',
@@ -751,7 +751,7 @@ const ImageGalleryLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 1', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 1', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid1Template}
 					id="image-gallery-grid-1"
@@ -775,7 +775,7 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 2', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 2', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid2Template}
 					id="image-gallery-grid-2"
@@ -807,7 +807,7 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 3', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 3', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid3Template}
 					id="image-gallery-grid-3"
@@ -839,7 +839,7 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 4', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 4', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid4Template}
 					id="image-gallery-grid-4"
@@ -871,7 +871,7 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 5', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 5', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid5Template}
 					id="image-gallery-grid-5"
@@ -908,7 +908,7 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Grid 6', 'quillcrm')}</label>
+				<label className="text-sm">{__('Grid 6', 'doublescale')}</label>
 				<DraggableTemplate
 					template={grid6Template}
 					id="image-gallery-grid-6"

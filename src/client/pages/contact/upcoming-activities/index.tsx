@@ -22,15 +22,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@quillcrm/services/activities-service';
-import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
+import { ActivitiesService, transformApiItemsToTimeline, TimelineItem } from '@doublescale/services/activities-service';
+import { NoData, TaskDoneIcon, GradientUpcomingActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@doublescale/components';
 import { ActivityActionsDropdown } from '../activities/activity-action-dropdown';
-import { useActivityOperations } from '@quillcrm/hooks/use-activity-operations';
+import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
-import type { Note } from '@quillcrm/client';
+import type { Note } from '@doublescale/client';
 
 interface UpcomingActivitiesProps {
     contact_id?: number;
@@ -103,8 +103,8 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
 };
 
 // Pro plugin TaskService - loaded via WordPress filters at runtime
-// Pro plugin registers this via addFilter('quillcrm_pro_component', ...)
-const getProTaskService = () => applyFilters('quillcrm_pro_component', null, 'TaskService') as any;
+// Pro plugin registers this via addFilter('doublescale_pro_component', ...)
+const getProTaskService = () => applyFilters('doublescale_pro_component', null, 'TaskService') as any;
 
 const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, entity_type, entity_id }) => {
     const { deleteActivity } = useActivityOperations();
@@ -191,36 +191,36 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
     };
 
     const handleDeleteActivity = async (activityId: number) => {
-        if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'quillcrm'))) {
+        if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'doublescale'))) {
             return;
         }
 
         try {
             await deleteActivity(activityId);
             fetchUpcomingActivities();
-            showNotice('success', __('Activity deleted successfully', 'quillcrm'));
+            showNotice('success', __('Activity deleted successfully', 'doublescale'));
         } catch (error) {
             console.error('Failed to delete activity:', error);
-            showNotice('error', __('Failed to delete activity', 'quillcrm'));
+            showNotice('error', __('Failed to delete activity', 'doublescale'));
         }
     };
 
     const handleDeleteTask = async (taskId: number) => {
-        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'quillcrm'))) {
+        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'doublescale'))) {
             return;
         }
         try {
             const TaskService = getProTaskService();
             if (!TaskService) {
-                showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
+                showNotice('error', __('Task deletion requires Pro plugin.', 'doublescale'));
                 return;
             }
             await TaskService.deleteTask(taskId);
             fetchUpcomingActivities();
-            showNotice('success', __('Task deleted successfully', 'quillcrm'));
+            showNotice('success', __('Task deleted successfully', 'doublescale'));
         } catch (error) {
             console.error('Failed to delete task:', error);
-            showNotice('error', __('Failed to delete task', 'quillcrm'));
+            showNotice('error', __('Failed to delete task', 'doublescale'));
         }
     };
 
@@ -234,10 +234,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                 },
             });
             fetchUpcomingActivities();
-            showNotice('success', __('Task marked as complete', 'quillcrm'));
+            showNotice('success', __('Task marked as complete', 'doublescale'));
         } catch (error) {
             console.error('Failed to mark task as complete:', error);
-            showNotice('error', __('Failed to mark task as complete', 'quillcrm'));
+            showNotice('error', __('Failed to mark task as complete', 'doublescale'));
         }
     };
 
@@ -296,7 +296,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
                                             <StartDateIcon />
                                             <span>
-                                                {__('Start Date', 'quillcrm')}:
+                                                {__('Start Date', 'doublescale')}:
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {format(
                                                         new Date(
@@ -312,7 +312,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
                                             <LocationIcon />
                                             <span>
-                                                {__('Location', 'quillcrm')}:{' '}
+                                                {__('Location', 'doublescale')}:{' '}
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {activity.data.location}
                                                 </span>
@@ -323,10 +323,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         <div className="flex justify-center gap-2  font-medium text-[#777]">
                                             <DurationIcon />
                                             <span>
-                                                {__('Duration', 'quillcrm')}:{' '}
+                                                {__('Duration', 'doublescale')}:{' '}
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {activity.data.duration}{' '}
-                                                    {__('minutes', 'quillcrm')}
+                                                    {__('minutes', 'doublescale')}
                                                 </span>
                                             </span>
                                         </div>
@@ -335,7 +335,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                 {activity.data.description && (
                                     <div className="flex flex-col gap-2  ">
                                         <h4 className="text-[#09090B]  text-base font-medium">
-                                            {__('Meeting Description', 'quillcrm')}
+                                            {__('Meeting Description', 'doublescale')}
                                         </h4>
                                         <p className=" text-base font-normal text-[#777] leading-[26px]">
                                             {activity.data.description}
@@ -354,7 +354,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                             {activity.data.subject && (
                                 <div>
                                     <h4 className="text-[#09090B] text-base font-medium">
-                                        {__('Subject', 'quillcrm')}
+                                        {__('Subject', 'doublescale')}
                                     </h4>
                                     <p className="text-base font-normal text-[#777] leading-[26px]">
                                         {activity.data.subject}
@@ -364,7 +364,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                             {activity.data.body && (
                                 <div>
                                     <h4 className="text-[#09090B] text-base font-medium">
-                                        {__('Email Body', 'quillcrm')}
+                                        {__('Email Body', 'doublescale')}
                                     </h4>
                                     <div
                                         className="text-base font-normal text-[#777] leading-[26px]"
@@ -386,10 +386,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                     activity.data && (
                         <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
                             <h4 className="text-[#09090B] text-base font-medium">
-                                {__('Call Notes', 'quillcrm')}
+                                {__('Call Notes', 'doublescale')}
                             </h4>
                             <p className="text-base font-normal text-[#777] leading-[26px]">
-                                {activity.data.notes || __('No notes available', 'quillcrm')}
+                                {activity.data.notes || __('No notes available', 'doublescale')}
                             </p>
                         </div>
                     )
@@ -414,7 +414,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
             )}
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">
-                    {__('Upcoming Activities', 'quillcrm')}
+                    {__('Upcoming Activities', 'doublescale')}
                 </h2>
             </div>
             <div className="upcoming-activities-list mt-6">
@@ -507,10 +507,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                                             )}
                                                         >
                                                             {item.display_status === 'due_today'
-                                                                ? __('Due Today', 'quillcrm')
+                                                                ? __('Due Today', 'doublescale')
                                                                 : item.display_status === 'upcoming'
-                                                                ? __('Upcoming', 'quillcrm')
-                                                                : __('Completed', 'quillcrm')
+                                                                ? __('Upcoming', 'doublescale')
+                                                                : __('Completed', 'doublescale')
                                                             }
                                                         </Badge>
                                                     )}
@@ -528,7 +528,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                                                     className="flex items-center gap-2 text-[#16A34A]"
                                                                 >
                                                                     <CheckCircleIcon width={16} height={16} />
-                                                                    {__('Mark Complete', 'quillcrm')}
+                                                                    {__('Mark Complete', 'doublescale')}
                                                                 </Button>
                                                             )}
                                                             {item.status && (
@@ -561,7 +561,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
 
                                                 {isTask && item.due_date && (
                                                     <p className="text-xs text-gray-600">
-                                                        {__('Due', 'quillcrm')}: {item.due_date} {item.due_time}
+                                                        {__('Due', 'doublescale')}: {item.due_date} {item.due_time}
                                                     </p>
                                                 )}
 
@@ -577,8 +577,8 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                 ) : (
                     <NoData
                         icon={<GradientUpcomingActivitiesIcon />}
-                        title={__('No upcoming activities found yet', 'quillcrm')}
-                        subtitle={__('No upcoming activities yet—this space is ready for your next move, Add emails, notes, or tasks to stay connected and organized.', 'quillcrm')}
+                        title={__('No upcoming activities found yet', 'doublescale')}
+                        subtitle={__('No upcoming activities yet—this space is ready for your next move, Add emails, notes, or tasks to stay connected and organized.', 'doublescale')}
                     />
                 )}
             </div>

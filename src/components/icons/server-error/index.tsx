@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ServerErrorIcon: React.FC<IconProps> = ({ width = 607, height = 584 }) => {
 	return (

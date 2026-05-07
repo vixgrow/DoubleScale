@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Skeleton } from '@quillcrm/components/ui/skeleton';
+import { Skeleton } from '@doublescale/components/ui/skeleton';
 
 const SettingsShimmer: React.FC = () => {
     return (

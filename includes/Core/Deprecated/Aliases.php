@@ -1,6 +1,6 @@
 <?php
 /**
- * Lazy backward-compatible class aliases (legacy QuillCRM\ → DoubleScale\).
+ * Lazy backward-compatible class aliases (legacy DoubleScale\ → DoubleScale\).
  *
  * @package DoubleScale\Core\Deprecated
  */

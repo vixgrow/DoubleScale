@@ -86,7 +86,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'add note',
 				error,
-				__('Failed to add note. Please try again.', 'quillcrm')
+				__('Failed to add note. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -111,7 +111,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'log call',
 				error,
-				__('Failed to log call. Please try again.', 'quillcrm')
+				__('Failed to log call. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -136,7 +136,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'log email',
 				error,
-				__('Failed to log email. Please try again.', 'quillcrm')
+				__('Failed to log email. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -162,7 +162,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				const errorMessage = handleApiError(
 					'schedule meeting',
 					error,
-					__('Failed to schedule meeting. Please try again.', 'quillcrm')
+					__('Failed to schedule meeting. Please try again.', 'doublescale')
 				);
 				throw new Error(errorMessage);
 			}
@@ -207,7 +207,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				const errorMessage = handleApiError(
 					'update activity',
 					error,
-					__('Failed to update activity. Please try again.', 'quillcrm')
+					__('Failed to update activity. Please try again.', 'doublescale')
 				);
 				throw new Error(errorMessage);
 			}
@@ -228,7 +228,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'delete activity',
 				error,
-				__('Failed to delete activity. Please try again.', 'quillcrm')
+				__('Failed to delete activity. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -252,7 +252,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				const errorMessage = handleApiError(
 					'add comment',
 					error,
-					__('Failed to add comment. Please try again.', 'quillcrm')
+					__('Failed to add comment. Please try again.', 'doublescale')
 				);
 				throw new Error(errorMessage);
 			}
@@ -278,7 +278,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				const errorMessage = handleApiError(
 					'update comment',
 					error,
-					__('Failed to update comment. Please try again.', 'quillcrm')
+					__('Failed to update comment. Please try again.', 'doublescale')
 				);
 				throw new Error(errorMessage);
 			}
@@ -299,7 +299,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'delete comment',
 				error,
-				__('Failed to delete comment. Please try again.', 'quillcrm')
+				__('Failed to delete comment. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -319,7 +319,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'fetch comments',
 				error,
-				__('Failed to load comments. Please try again.', 'quillcrm')
+				__('Failed to load comments. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}
@@ -350,7 +350,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			const errorMessage = handleApiError(
 				'fetch activity statistics',
 				error,
-				__('Failed to load statistics. Please try again.', 'quillcrm')
+				__('Failed to load statistics. Please try again.', 'doublescale')
 			);
 			throw new Error(errorMessage);
 		}

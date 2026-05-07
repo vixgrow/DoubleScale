@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
 import { layoutsStyles } from '../data/layouts';
-import { DragDropIcon } from '@quillcrm/components';
+import { DragDropIcon } from '@doublescale/components';
 import { LayoutTemplate } from '../types';
 
 interface AddNewSectionModalProps {
@@ -34,12 +34,12 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<div className="text-3xl mb-1">
-							{__('Add New Section', 'quillcrm')}
+							{__('Add New Section', 'doublescale')}
 						</div>
 						<div className="text-sm font-normal">
 							{__(
 								'Select one of this Sections Depending on the shape you want to work on.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 					</DialogTitle>

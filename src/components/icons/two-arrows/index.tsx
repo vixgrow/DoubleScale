@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const TwoArrows: React.FC<IconProps> = ({ width = 15, height = 12 }) => {
 	return (

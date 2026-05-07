@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const WinRateIcon: React.FC<IconProps> = ({ width = 29, height = 29 }) => {
 	return (

@@ -2,7 +2,7 @@
 import { __ } from '@wordpress/i18n';
 
 // Internal dependencies
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 
 interface ActionConfig {
 	label: string;
@@ -61,7 +61,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 												{icon}
 											</span>
 										)}
-										{__(label, '@quillcrm')}
+										{__(label, '@doublescale')}
 									</Button>
 								)
 							);

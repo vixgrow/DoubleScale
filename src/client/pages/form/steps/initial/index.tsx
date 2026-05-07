@@ -13,9 +13,9 @@ import { map } from 'lodash';
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import AjaxSelect from '../ajax-select';
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import FormTypeSelector from '../form-types-cards';
 import InitialShimmer from './initial-shimmer';
 
@@ -84,11 +84,11 @@ const Initial: React.FC = () => {
 			) : form ? (
 				<div className="qcrm-fields">
 					<div className="text-[#09090B] font-bold text-2xl">
-						{__('Basic Information', 'quillcrm')}
+						{__('Basic Information', 'doublescale')}
 					</div>
 					<div className="flex gap-5 items-start">
 						<Field
-							label={__('Form Name', 'quillcrm')}
+							label={__('Form Name', 'doublescale')}
 							value={form.name}
 							onChange={(value) => {
 								updateForm({
@@ -96,7 +96,7 @@ const Initial: React.FC = () => {
 								});
 							}}
 							type="text"
-							placeholder={__('Enter Form Name', 'quillcrm')}
+							placeholder={__('Enter Form Name', 'doublescale')}
 							required={true}
 						/>
 						{form.form_type &&

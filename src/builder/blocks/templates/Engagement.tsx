@@ -11,12 +11,12 @@ import customerFeedbackSurvey from '../../../../assets/images/templates/Customer
 const templateItems = [
 	{
 		id: 'new-blog-post',
-		title: __('New Blog Post', 'quillcrm'),
+		title: __('New Blog Post', 'doublescale'),
 		image: newBlogPost,
 	},
 	{
 		id: 'customer-survey',
-		title: __('Customer Survey', 'quillcrm'),
+		title: __('Customer Survey', 'doublescale'),
 		image: customerFeedbackSurvey,
 	},
 ];

@@ -10,18 +10,18 @@ import { useNavigate } from 'react-router-dom';
 /**
  * internal dependencies
  */
-import { AddDealsIcon, CreateFormsIcon, DashboardContentCard, GradientAddContactIcon, GradientAutomationsIcon, GradientCampaignsIcon } from '@quillcrm/components';
+import { AddDealsIcon, CreateFormsIcon, DashboardContentCard, GradientAddContactIcon, GradientAutomationsIcon, GradientCampaignsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
-import { getToLink } from '@quillcrm/navigation';
+import { getToLink } from '@doublescale/navigation';
 
 export const QuickLinks: React.FC = () => {
 	const navigate = useNavigate();
 
 	return (
 		<DashboardContentCard
-			title={__('Quick Links', 'quillcrm')}
+			title={__('Quick Links', 'doublescale')}
 			cardClassName="w-2/5"
-			headerContent={__('(Most Used Functions)', 'quillcrm')}
+			headerContent={__('(Most Used Functions)', 'doublescale')}
 		>
 			<div className='border-t'></div>
 			<div>
@@ -36,7 +36,7 @@ export const QuickLinks: React.FC = () => {
 								<GradientAddContactIcon width={24} height={24} />
 							</div>
 							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Contact', 'quillcrm')}
+								{__('Add New Contact', 'doublescale')}
 							</span>
 						</div>
 						<ArrowRight className="size-12 text-primary" />
@@ -54,7 +54,7 @@ export const QuickLinks: React.FC = () => {
 								<AddDealsIcon width={24} height={24} />
 							</div>
 							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Deals', 'quillcrm')}
+								{__('Add New Deals', 'doublescale')}
 							</span>
 						</div>
 						<ArrowRight className="size-12 text-primary" />
@@ -72,7 +72,7 @@ export const QuickLinks: React.FC = () => {
 								<GradientCampaignsIcon width={24} height={24} />
 							</div>
 							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Campaign', 'quillcrm')}
+								{__('Add New Campaign', 'doublescale')}
 							</span>
 						</div>
 						<ArrowRight className="size-12 text-primary" />
@@ -90,7 +90,7 @@ export const QuickLinks: React.FC = () => {
 								<GradientAutomationsIcon width={24} height={24} />
 							</div>
 							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Automation', 'quillcrm')}
+								{__('Add New Automation', 'doublescale')}
 							</span>
 						</div>
 						<ArrowRight className="size-12 text-primary" />
@@ -108,7 +108,7 @@ export const QuickLinks: React.FC = () => {
 								<CreateFormsIcon width={24} height={24} />
 							</div>
 							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Forms', 'quillcrm')}
+								{__('Add New Forms', 'doublescale')}
 							</span>
 						</div>
 						<ArrowRight className="size-12 text-primary" />

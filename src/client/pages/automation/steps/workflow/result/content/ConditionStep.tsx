@@ -41,8 +41,8 @@ const ConditionStep: React.FC<ConditionStepProps> = ({
                             }`}
                     >
                         {conditionResult === 'yes'
-                            ? __('Yes', 'quillcrm')
-                            : __('No', 'quillcrm')}
+                            ? __('Yes', 'doublescale')
+                            : __('No', 'doublescale')}
                     </span>
                 )}
             </div>

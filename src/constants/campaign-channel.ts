@@ -5,7 +5,7 @@
  * The backend automatically converts them to integers for database storage.
  *
  * @since 1.0.0
- * @package QuillCRM
+ * @package DoubleScale
  */
 
 /**

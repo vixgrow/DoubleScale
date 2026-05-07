@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 
 /**
  * Helper function to calculate new step orders when moving a step
@@ -136,15 +136,15 @@ export const reorderStep = async (
         createNotice({
             type: 'success',
             message: direction === 'up'
-                ? __('Step moved up', 'quillcrm')
-                : __('Step moved down', 'quillcrm'),
+                ? __('Step moved up', 'doublescale')
+                : __('Step moved down', 'doublescale'),
         });
 
         return true;
     } catch (error: any) {
         createNotice({
             type: 'error',
-            message: error.message || __('Failed to reorder step', 'quillcrm'),
+            message: error.message || __('Failed to reorder step', 'doublescale'),
         });
         return false;
     }

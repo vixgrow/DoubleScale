@@ -16,11 +16,11 @@ import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import './style.scss';
-import type { OrganizedStep } from '@quillcrm/client';
-import { Fields } from '@quillcrm/components';
-import { getAction, getGoal } from '@quillcrm/utils';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
-import ConfigAPI from '@quillcrm/config';
+import type { OrganizedStep } from '@doublescale/client';
+import { Fields } from '@doublescale/components';
+import { getAction, getGoal } from '@doublescale/utils';
+import { getToLink, useNavigate } from '@doublescale/navigation';
+import ConfigAPI from '@doublescale/config';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 import { useProviderStatus } from '@/hooks/use-provider-status';
@@ -55,7 +55,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [showMergeTagNotice, setShowMergeTagNotice] = useState(false);
 	const navigate = useNavigate();
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
-		useDispatch('quillcrm/core');
+		useDispatch('doublescale/core');
 	const { steps, setSteps } = useAutomationContext();
 
 	// Determine if this is a messaging action that requires provider
@@ -129,8 +129,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					size="lg"
 				>
 					{isSaving
-						? __('Saving...', 'quillcrm')
-						: __('Save Changes', 'quillcrm')}
+						? __('Saving...', 'doublescale')
+						: __('Save Changes', 'doublescale')}
 				</Button>
 				<Button
 					onClick={handleDelete}
@@ -140,8 +140,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					size="lg"
 				>
 					{isDeleting
-						? __('Deleting...', 'quillcrm')
-						: __('Delete', 'quillcrm')}
+						? __('Deleting...', 'doublescale')
+						: __('Delete', 'doublescale')}
 				</Button>
 			</div>
 		);
@@ -162,7 +162,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				type: 'success',
 				message: __(
 					'Merge tag copied to clipboard. You can now paste it in any field.',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 		});
@@ -211,17 +211,17 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				? step.settings?._goal_warning_message ||
 				__(
 					'Goal requires a plugin that is not currently active.',
-					'quillcrm'
+					'doublescale'
 				)
 				: step.settings?._action_warning_message ||
 				__(
 					'Action requires a plugin that is not currently active.',
-					'quillcrm'
+					'doublescale'
 				);
 		const labelText =
 			step.type === 'goal'
-				? __('Goal:', 'quillcrm')
-				: __('Action:', 'quillcrm');
+				? __('Goal:', 'doublescale')
+				: __('Action:', 'doublescale');
 
 		return (
 			<div className="qcrm-step-fields-content flex flex-col">
@@ -247,8 +247,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						size="lg"
 					>
 						{isDeleting
-							? __('Deleting...', 'quillcrm')
-							: __('Delete', 'quillcrm')}
+							? __('Deleting...', 'doublescale')
+							: __('Delete', 'doublescale')}
 					</Button>
 				</div>
 			</div>
@@ -287,7 +287,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						className="w-full mb-4"
 						size="lg"
 					>
-						{__('Merge Tags', 'quillcrm')}
+						{__('Merge Tags', 'doublescale')}
 					</Button>
 					{showMergeTagNotice && (
 						<Alert className="mb-4 border-green-500 bg-green-50">
@@ -295,7 +295,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 							<AlertDescription className="text-sm text-green-800">
 								{__(
 									'Merge tag copied to clipboard. You can now paste it in any field.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</AlertDescription>
 						</Alert>

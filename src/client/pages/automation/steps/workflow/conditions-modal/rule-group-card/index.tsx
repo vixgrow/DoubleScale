@@ -13,8 +13,8 @@ import { AlertTriangle } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import { Rule, PlusIcon } from '@quillcrm/components';
-import { getRuleBySlug } from '@quillcrm/utils';
+import { Rule, PlusIcon } from '@doublescale/components';
+import { getRuleBySlug } from '@doublescale/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -110,7 +110,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 						>
 							<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
 							<span className="absolute -left-7 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
-								{__('And', 'quillcrm')}
+								{__('And', 'doublescale')}
 							</span>
 						</div>
 					)}
@@ -154,7 +154,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										<SelectValue
 											placeholder={__(
 												'Select a group',
-												'quillcrm'
+												'doublescale'
 											)}
 										/>
 									</SelectTrigger>
@@ -185,7 +185,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											<SelectValue
 												placeholder={__(
 													'Select a rule',
-													'quillcrm'
+													'doublescale'
 												)}
 											/>
 										</SelectTrigger>
@@ -213,7 +213,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 												<div className="relative flex items-center justify-center py-2 pl-2 pr-8 text-sm text-gray-500">
 													{__(
 														'No options available',
-														'quillcrm'
+														'doublescale'
 													)}
 												</div>
 											)}
@@ -225,7 +225,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										<span className="text-sm text-orange-700">
 											{__(
 												'This rule requires an inactive plugin',
-												'quillcrm'
+												'doublescale'
 											)}
 										</span>
 									</div>
@@ -303,7 +303,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 						className="text-[#414141] bg-[#CECECE] border border-[#D3D3D3] rounded-md p-0 px-2 shadow-none hover:bg-transparent font-semibold"
 					>
 						<PlusIcon />
-						{__('Add another condition (And)', 'quillcrm')}
+						{__('Add another condition (And)', 'doublescale')}
 					</Button>
 				</div>
 			</CardContent>

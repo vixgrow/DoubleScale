@@ -20,16 +20,16 @@ import type {
 	Automation,
 	AutomationsResponse,
 	DataTableConfig,
-} from '@quillcrm/client';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner, NoData } from '@quillcrm/components';
+} from '@doublescale/client';
+import { getToLink, useNavigate } from '@doublescale/navigation';
+import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner, NoData } from '@doublescale/components';
 import { isEmpty } from 'validator';
-import { NoticeMessage } from '@quillcrm/client';
-import { formatDateForAPI } from '@quillcrm/utils';
+import { NoticeMessage } from '@doublescale/client';
+import { formatDateForAPI } from '@doublescale/utils';
 import CreateAutomationModal from './create-automation-modal';
 import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 
 const AutomationsList: React.FC = () => {
@@ -142,7 +142,7 @@ const AutomationsList: React.FC = () => {
 				type: 'success',
 				message: __(
 					'Selected automations deleted successfully',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 		} catch (error: any) {
@@ -157,7 +157,7 @@ const AutomationsList: React.FC = () => {
 		if (isEmpty(automation.name || '', { ignore_whitespace: true })) {
 			setCreateError({
 				type: 'error',
-				message: __('Automation name is required', 'quillcrm'),
+				message: __('Automation name is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -165,7 +165,7 @@ const AutomationsList: React.FC = () => {
 		if (isEmpty(automation.trigger || '')) {
 			setCreateError({
 				type: 'error',
-				message: __('Automation trigger is required', 'quillcrm'),
+				message: __('Automation trigger is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -200,7 +200,7 @@ const AutomationsList: React.FC = () => {
 				type: 'success',
 				message: __(
 					'Automation status updated successfully',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 		} catch (error: any) {
@@ -223,7 +223,7 @@ const AutomationsList: React.FC = () => {
 			fetchAutomations();
 			setListError({
 				type: 'success',
-				message: __('Automation deleted successfully', 'quillcrm'),
+				message: __('Automation deleted successfully', 'doublescale'),
 			});
 		} catch (error: any) {
 			setListError({
@@ -255,7 +255,7 @@ const AutomationsList: React.FC = () => {
 	const tableConfig: DataTableConfig<Automation> = {
 		manageColumns: { enabled: false },
 		search: {
-			placeholder: __('Search Automations', 'quillcrm'),
+			placeholder: __('Search Automations', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -274,18 +274,18 @@ const AutomationsList: React.FC = () => {
 			enabled: true,
 			value: dateRange,
 			onDateChange: setDateRange,
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 	};
 
 	return (
 		<div className="qcrm-automations-list">
 			<PageHeader
-				title={__('Automations List', 'quillcrm')}
-				subtitle={__('Automations', 'quillcrm')}
+				title={__('Automations List', 'doublescale')}
+				subtitle={__('Automations', 'doublescale')}
 				actions={[
 					{
-						label: __('Create Automation', 'quillcrm'),
+						label: __('Create Automation', 'doublescale'),
 						onClick: () => {
 							setVisible(true);
 							setCreateError(null);
@@ -321,12 +321,12 @@ const AutomationsList: React.FC = () => {
 		) : (
 			<NoData
 				icon={<GradientAutomationsIcon />}
-				title={__('No automations yet', 'quillcrm')}
+				title={__('No automations yet', 'doublescale')}
 				subtitle={__(
 					'Create Automation to build your first workflow and start streamlining your process',
-					'quillcrm'
+					'doublescale'
 				)}
-				buttonLabel={__('Create Automation', 'quillcrm')}
+				buttonLabel={__('Create Automation', 'doublescale')}
 				onClick={() => {
 					setVisible(true);
 					setCreateError(null);

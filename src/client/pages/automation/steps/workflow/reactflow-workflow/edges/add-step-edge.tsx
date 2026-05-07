@@ -20,7 +20,7 @@ import {
 /**
  * Internal dependencies
  */
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 import { useAutomationContext } from '../../../../state/context';
 import { AddStepDialog } from '../../add-step-dialog';
 import './style.scss';
@@ -107,7 +107,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	if (!automation) {
 		return null;
@@ -281,7 +281,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 			createNotice({
 				type: 'success',
-				message: __('Step added', 'quillcrm'),
+				message: __('Step added', 'doublescale'),
 			});
 
 			// Close dialog first
@@ -310,7 +310,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to add step', 'quillcrm'),
+				message: error.message || __('Failed to add step', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);

@@ -60,11 +60,11 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 					fontSize: '14px',
 					cursor: 'pointer',
 				}}
-				title={__('Click to edit HTML content', 'quillcrm')}
+				title={__('Click to edit HTML content', 'doublescale')}
 			>
 				{isDefaultContent ? (
 					<span className="text-2xl font-semibold text-primary font-mono">
-						{__('Add your own html here', 'quillcrm')}
+						{__('Add your own html here', 'doublescale')}
 					</span>
 				) : (
 					<div

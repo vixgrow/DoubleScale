@@ -63,7 +63,7 @@ export const useGoHighLevelOAuth = ({
 			console.error('GoHighLevel: Failed to fetch source data:', error);
 			const errorMessage =
 				error.message ||
-				__('Failed to fetch GoHighLevel data', 'quillcrm');
+				__('Failed to fetch GoHighLevel data', 'doublescale');
 			oauth.setError(errorMessage);
 			throw new Error(errorMessage);
 		}
@@ -75,11 +75,11 @@ export const useGoHighLevelOAuth = ({
 				console.log('GoHighLevel: Validating credentials...');
 				// Validate credentials
 				if (!credentials.client_id) {
-					throw new Error(__('Client ID is required', 'quillcrm'));
+					throw new Error(__('Client ID is required', 'doublescale'));
 				}
 				if (!credentials.client_secret) {
 					throw new Error(
-						__('Client Secret is required', 'quillcrm')
+						__('Client Secret is required', 'doublescale')
 					);
 				}
 
@@ -109,7 +109,7 @@ export const useGoHighLevelOAuth = ({
 				);
 				const errorMessage =
 					error.message ||
-					__('Failed to connect to GoHighLevel', 'quillcrm');
+					__('Failed to connect to GoHighLevel', 'doublescale');
 				oauth.setError(errorMessage);
 				throw error;
 			}
@@ -126,7 +126,7 @@ export const useGoHighLevelOAuth = ({
 			} catch (error: any) {
 				const errorMessage =
 					error.message ||
-					__('Failed to reconnect to GoHighLevel', 'quillcrm');
+					__('Failed to reconnect to GoHighLevel', 'doublescale');
 				oauth.setError(errorMessage);
 				throw error;
 			}
@@ -145,7 +145,7 @@ export const useGoHighLevelOAuth = ({
 		} catch (error: any) {
 			oauth.setError(
 				error.message ||
-					__('Failed to get connection status', 'quillcrm')
+				__('Failed to get connection status', 'doublescale')
 			);
 			return null;
 		}
@@ -157,11 +157,11 @@ export const useGoHighLevelOAuth = ({
 	}, []);
 
 	const formatTimeRemaining = useCallback((seconds?: number): string => {
-		if (!seconds || seconds <= 0) return __('Expired', 'quillcrm');
+		if (!seconds || seconds <= 0) return __('Expired', 'doublescale');
 
 		const minutes = Math.floor(seconds / 60);
-		if (minutes < 1) return __('Less than 1 minute', 'quillcrm');
-		if (minutes === 1) return __('1 minute', 'quillcrm');
+		if (minutes < 1) return __('Less than 1 minute', 'doublescale');
+		if (minutes === 1) return __('1 minute', 'doublescale');
 		return `${minutes} minutes`;
 	}, []);
 

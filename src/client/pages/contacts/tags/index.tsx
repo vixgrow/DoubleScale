@@ -20,15 +20,15 @@ import type {
 	TagsResponse,
 	DataTableConfig,
 	NoticeMessage,
-} from '@quillcrm/client';
-import { NoticeBanner, NoData, GradientTagIcon } from '@quillcrm/components';
+} from '@doublescale/client';
+import { NoticeBanner, NoData, GradientTagIcon } from '@doublescale/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { TagsDialog } from './tags-dialog';
 import { useTagsColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { formatDateForAPI } from '@quillcrm/utils';
+import { formatDateForAPI } from '@doublescale/utils';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -156,7 +156,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				'success',
 				__(
 					'Your Tag was successfully added  — check it out!',
-					'quillcrm'
+					'doublescale'
 				)
 			);
 			fetchTags();
@@ -187,7 +187,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 			setVisible(false);
 			setSelectedTag(null);
-			showNotice('success', __('Tag updated successfully', 'quillcrm'));
+			showNotice('success', __('Tag updated successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -215,7 +215,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Selected tags deleted successfully', 'quillcrm')
+				__('Selected tags deleted successfully', 'doublescale')
 			);
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -237,7 +237,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const validate = (tag: Partial<ContactTag>) => {
 		if (isEmpty(tag.name || '', { ignore_whitespace: true })) {
 			setVisible(false);
-			showNotice('error', __('Tag name is required', 'quillcrm'));
+			showNotice('error', __('Tag name is required', 'doublescale'));
 			return false;
 		}
 		return true;
@@ -259,7 +259,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			enabled: false,
 		},
 		search: {
-			placeholder: __('Search Tags', 'quillcrm'),
+			placeholder: __('Search Tags', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -279,7 +279,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			enabled: true,
 			value: dateRange,
 			onDateChange: setDateRange,
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 	};
 
@@ -307,12 +307,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			) : (
 				<NoData
 					icon={<GradientTagIcon width={120} height={120} />}
-					title={__('No tags yet', 'quillcrm')}
+					title={__('No tags yet', 'doublescale')}
 					subtitle={__(
 						'Get started by creating your first tag to organize your contacts',
-						'quillcrm'
+						'doublescale'
 					)}
-					buttonLabel={__('Create Tag', 'quillcrm')}
+					buttonLabel={__('Create Tag', 'doublescale')}
 					onClick={() => {
 						setSelectedTag(null);
 						setTag({

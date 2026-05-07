@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { TimerBlockIcon } from '@quillcrm/components';
+import { TimerBlockIcon } from '@doublescale/components';
 
 const TimerBlock = {
 	type: 'timer',
-	name: __('Timer', 'quillcrm'),
+	name: __('Timer', 'doublescale'),
 	icon: TimerBlockIcon,
 	isProActivated: false,
 	isPro: true,

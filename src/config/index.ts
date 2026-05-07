@@ -76,9 +76,9 @@ const configData: ConfigData = {
 	mergeTags: {},
 	importers: {},
 	userCapabilities: {
-		quillcrm_crm_manager: false,
-		quillcrm_sales_manager: false,
-		quillcrm_sales_rep: false,
+		doublescale_crm_manager: false,
+		doublescale_sales_manager: false,
+		doublescale_sales_rep: false,
 	},
 	defaultStages: [],
 	dealPriorities: [],
@@ -86,7 +86,7 @@ const configData: ConfigData = {
 		configured: false,
 	},
 	currency: 'USD',
-	urlQuillCRMPro: '',
+	urlDoubleScalePro: '',
 	proPluginData: {
 		is_installed: false,
 		is_active: false,
@@ -668,24 +668,24 @@ export const setQuillSMTPInfo = (data: ConfigData) => (value: QuillSMTPInfo) => 
 };
 
 /**
- * Get QuillCRM Pro URL
+ * Get DoubleScale Pro URL
  *
  * @param data the json environment configuration to use for getting config values
  *
  * @returns string
  */
-export const getUrlQuillCRMPro = (data: ConfigData): string => {
-	return data.urlQuillCRMPro;
+export const getUrlDoubleScalePro = (data: ConfigData): string => {
+	return data.urlDoubleScalePro;
 };
 
 /**
- * Set QuillCRM Pro URL
+ * Set DoubleScale Pro URL
  *
  * @param data the json environment configuration to use for getting config values
  * @param value the value to set
  */
-export const setUrlQuillCRMPro = (data: ConfigData) => (value: string) => {
-	data.urlQuillCRMPro = value;
+export const setUrlDoubleScalePro = (data: ConfigData) => (value: string) => {
+	data.urlDoubleScalePro = value;
 };
 
 /**
@@ -716,7 +716,7 @@ export const setCurrency = (data: ConfigData) => (value: string) => {
  * @returns {License | false} license
  */
 export const setLicense = (data: ConfigData) => (value: License | false) => {
-    data.license = value;
+	data.license = value;
 };
 
 /**
@@ -727,7 +727,7 @@ export const setLicense = (data: ConfigData) => (value: License | false) => {
  * @returns {License | false} license
  */
 export const getLicense = (data: ConfigData) => (): License | false => {
-    return data.license;
+	return data.license;
 };
 
 /**
@@ -738,7 +738,7 @@ export const getLicense = (data: ConfigData) => (): License | false => {
  * @returns {ProPluginData} proPluginData
  */
 export const setProPluginData = (data: ConfigData) => (value: ProPluginData) => {
-    data.proPluginData = value;
+	data.proPluginData = value;
 };
 
 /**
@@ -749,7 +749,7 @@ export const setProPluginData = (data: ConfigData) => (value: ProPluginData) => 
  * @returns {ProPluginData} proPluginData
  */
 export const getProPluginData = (data: ConfigData) => (): ProPluginData => {
-    return data.proPluginData as unknown as ProPluginData;
+	return data.proPluginData as unknown as ProPluginData;
 };
 
 export interface ConfigApi {
@@ -812,8 +812,8 @@ export interface ConfigApi {
 	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
 	getCurrency: () => string;
 	setCurrency: (value: string) => void;
-	getUrlQuillCRMPro: () => string;
-	setUrlQuillCRMPro: (value: string) => void;
+	getUrlDoubleScalePro: () => string;
+	setUrlDoubleScalePro: (value: string) => void;
 	getProPluginData: () => ProPluginData;
 	setProPluginData: (value: ProPluginData) => void;
 }
@@ -880,8 +880,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
 	configApi.getCurrency = () => getCurrency(data);
 	configApi.setCurrency = setCurrency(data);
-	configApi.getUrlQuillCRMPro = () => getUrlQuillCRMPro(data);
-	configApi.setUrlQuillCRMPro = setUrlQuillCRMPro(data);
+	configApi.getUrlDoubleScalePro = () => getUrlDoubleScalePro(data);
+	configApi.setUrlDoubleScalePro = setUrlDoubleScalePro(data);
 	return configApi;
 };
 

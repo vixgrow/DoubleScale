@@ -30,32 +30,32 @@ const TemplateSuggestionsItems = ({
 	const templateItems = [
 		{
 			id: 'announcements',
-			title: __('Announcements', 'quillcrm'),
+			title: __('Announcements', 'doublescale'),
 			component: AnnouncementsTemplates,
 		},
 		{
 			id: 'holiday',
-			title: __('Holiday', 'quillcrm'),
+			title: __('Holiday', 'doublescale'),
 			component: HolidayTemplates,
 		},
 		{
 			id: 'greeting',
-			title: __('Greeting', 'quillcrm'),
+			title: __('Greeting', 'doublescale'),
 			component: GreetingTemplates,
 		},
 		{
 			id: 'ecommerce',
-			title: __('Ecommerce', 'quillcrm'),
+			title: __('Ecommerce', 'doublescale'),
 			component: EcommerceTemplates,
 		},
 		{
 			id: 'plain-text',
-			title: __('Plain Text', 'quillcrm'),
+			title: __('Plain Text', 'doublescale'),
 			component: PlainTextTemplates,
 		},
 		{
 			id: 'engagement',
-			title: __('Engagement', 'quillcrm'),
+			title: __('Engagement', 'doublescale'),
 			component: EngagementTemplates,
 		},
 	];

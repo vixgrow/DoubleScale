@@ -10,13 +10,13 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail, CampaignEmailsResponse, Campaign } from '@quillcrm/client';
-import { useParams } from '@quillcrm/navigation';
+import type { CampaignEmail, CampaignEmailsResponse, Campaign } from '@doublescale/client';
+import { useParams } from '@doublescale/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getColumns } from './columns';
-import { NoData, UnsubscribesIcon, UnsubscribeSMSIcon } from '@quillcrm/components';
+import { NoData, UnsubscribesIcon, UnsubscribeSMSIcon } from '@doublescale/components';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const UnsubscribesTab: React.FC = () => {
@@ -27,10 +27,10 @@ const UnsubscribesTab: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<CampaignEmail[]>([]);
 	const [keywords, setKeywords] = useState('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	) as Campaign | null;
 
@@ -62,7 +62,7 @@ const UnsubscribesTab: React.FC = () => {
 				type: 'error',
 				message:
 					error.message ||
-					__('Failed to fetch unsubscribes', 'quillcrm'),
+					__('Failed to fetch unsubscribes', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -79,7 +79,7 @@ const UnsubscribesTab: React.FC = () => {
 		<div className="flex flex-col gap-5">
 			<div className="flex justify-between items-center">
 				<h2 className="text-2xl font-semibold">
-					{__('Unsubscribes', 'quillcrm')} ({total})
+					{__('Unsubscribes', 'doublescale')} ({total})
 				</h2>
 			</div>
 
@@ -94,10 +94,10 @@ const UnsubscribesTab: React.FC = () => {
 								<UnsubscribesIcon width={48} height={48} />
 							)
 						}
-						title={__('No unsubscribes yet', 'quillcrm')}
+						title={__('No unsubscribes yet', 'doublescale')}
 						subtitle={__(
 							'When contacts unsubscribe from this campaign, they will appear here.',
-							'quillcrm'
+							'doublescale'
 						)}
 					/>
 				) : (
@@ -112,8 +112,8 @@ const UnsubscribesTab: React.FC = () => {
 							config={{
 								search: {
 									placeholder: campaign?.type === CAMPAIGN_CHANNEL.SMS
-										? __('Search by name or phone...', 'quillcrm')
-										: __('Search by name or email...', 'quillcrm'),
+										? __('Search by name or phone...', 'doublescale')
+										: __('Search by name or email...', 'doublescale'),
 									onChange: setKeywords,
 									value: keywords,
 								},

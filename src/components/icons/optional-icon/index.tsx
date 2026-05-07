@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const OptionalPluginIcon: React.FC<IconProps> = ({ width = 27, height = 26 }) => {
 	return (

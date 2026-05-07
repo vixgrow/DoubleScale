@@ -58,7 +58,7 @@ export function CampaignFilters({
 				{/* Status Filter */}
 				<div className="space-y-2">
 					<Label className="text-[#3F4254] font-semibold text-base">
-						{__('Status', 'quillcrm')}
+						{__('Status', 'doublescale')}
 					</Label>
 					<Select
 						value={filters.status}
@@ -68,30 +68,30 @@ export function CampaignFilters({
 					>
 						<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
 							<SelectValue
-								placeholder={__('Select Status', 'quillcrm')}
+								placeholder={__('Select Status', 'doublescale')}
 							/>
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="all">
-								{__('All Status', 'quillcrm')}
+								{__('All Status', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="draft">
-								{__('Draft', 'quillcrm')}
+								{__('Draft', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="schedule">
-								{__('Schedule', 'quillcrm')}
+								{__('Schedule', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="sending">
-								{__('Sending', 'quillcrm')}
+								{__('Sending', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="sent">
-								{__('Sent', 'quillcrm')}
+								{__('Sent', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="paused">
-								{__('Paused', 'quillcrm')}
+								{__('Paused', 'doublescale')}
 							</SelectItem>
 							<SelectItem value="cancelled">
-								{__('Cancelled', 'quillcrm')}
+								{__('Cancelled', 'doublescale')}
 							</SelectItem>
 						</SelectContent>
 					</Select>
@@ -101,7 +101,7 @@ export function CampaignFilters({
 				{activeTab === 'email' && (
 					<div className="space-y-2">
 						<Label className="text-[#3F4254] font-semibold text-base">
-							{__('Type', 'quillcrm')}
+							{__('Type', 'doublescale')}
 						</Label>
 						<Select
 							value={filters.type}
@@ -111,18 +111,18 @@ export function CampaignFilters({
 						>
 							<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
 								<SelectValue
-									placeholder={__('Select Type', 'quillcrm')}
+									placeholder={__('Select Type', 'doublescale')}
 								/>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">
-									{__('All Types', 'quillcrm')}
+									{__('All Types', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="standard">
-									{__('Standard Campaign', 'quillcrm')}
+									{__('Standard Campaign', 'doublescale')}
 								</SelectItem>
 								<SelectItem value="ab_test">
-									{__('A/B Split Campaign', 'quillcrm')}
+									{__('A/B Split Campaign', 'doublescale')}
 								</SelectItem>
 							</SelectContent>
 						</Select>
@@ -132,14 +132,14 @@ export function CampaignFilters({
 				{/* Create Date Filter */}
 				<div className="flex flex-col gap-1">
 					<Label className="text-[#3F4254] font-semibold text-base">
-						{__('Create Date', 'quillcrm')}
+						{__('Create Date', 'doublescale')}
 					</Label>
 					<DateRangePicker
 						value={filters.createDate}
 						onChange={(range) =>
 							handleFilterChange('createDate', range)
 						}
-						placeholder={__('From - To', 'quillcrm')}
+						placeholder={__('From - To', 'doublescale')}
 						className="w-full bg-white rounded-lg shadow-none border"
 
 					/>
@@ -148,14 +148,14 @@ export function CampaignFilters({
 				{/* Updated At Filter */}
 				<div className="flex flex-col gap-1">
 					<Label className="text-[#3F4254] font-semibold text-base">
-						{__('Updated At', 'quillcrm')}
+						{__('Updated At', 'doublescale')}
 					</Label>
 					<DateRangePicker
 						value={filters.updatedAt}
 						onChange={(range) =>
 							handleFilterChange('updatedAt', range)
 						}
-						placeholder={__('From - To', 'quillcrm')}
+						placeholder={__('From - To', 'doublescale')}
 						className="w-full bg-white rounded-lg shadow-none border"
 					/>
 				</div>
@@ -168,7 +168,7 @@ export function CampaignFilters({
 					onClick={onClear}
 					className="text-gray-500 shadow-none rounded-lg"
 				>
-					{__('Clear Filters', 'quillcrm')}
+					{__('Clear Filters', 'doublescale')}
 				</Button>
 			</div>
 		</div>

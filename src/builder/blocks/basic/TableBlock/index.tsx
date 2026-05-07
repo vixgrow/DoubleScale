@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { TableBlockIcon } from '@quillcrm/components';
+import { TableBlockIcon } from '@doublescale/components';
 import { TableBlockRenderer } from './Renderer';
 import { TableBlockEditor } from './Editor';
 
@@ -20,7 +20,7 @@ export interface TableBlockProps {
 
 const TableBlock = {
 	type: 'table',
-	name: __('Table', 'quillcrm'),
+	name: __('Table', 'doublescale'),
 	icon: TableBlockIcon,
 	isProActivated: false,
 	isPro: false,

@@ -16,13 +16,13 @@ import {
 	Stepper,
 	Field,
 	NoticeBanner,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { Campaign, NoticeMessage } from '@quillcrm/client';
+import type { Campaign, NoticeMessage } from '@doublescale/client';
 import type { ExtendedCampaign } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { getCampaignEndpoint } from '@quillcrm/utils';
+import { getCampaignEndpoint } from '@doublescale/utils';
 import { AlertCircle, MessageCircle, FileText } from 'lucide-react';
 
 /**
@@ -103,7 +103,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 			}
 		} catch (error: any) {
 			console.error('[WhatsApp Campaign] Failed to fetch templates:', error);
-			const errorMessage = error.message || __('Failed to load WhatsApp templates', 'quillcrm');
+			const errorMessage = error.message || __('Failed to load WhatsApp templates', 'doublescale');
 			setFetchError(errorMessage);
 			setTemplates([]);
 		} finally {
@@ -160,7 +160,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 		if (!selectedTemplate) {
 			setNotice({
 				type: 'error',
-				message: __('Please select a WhatsApp template', 'quillcrm'),
+				message: __('Please select a WhatsApp template', 'doublescale'),
 			});
 			return false;
 		}
@@ -200,7 +200,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 				if (saveResponse.success && saveResponse.template_id) {
 					templateId = saveResponse.template_id;
 				} else {
-					throw new Error(__('Failed to save template', 'quillcrm'));
+					throw new Error(__('Failed to save template', 'doublescale'));
 				}
 			}
 
@@ -219,7 +219,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 
 			const endpoint = getCampaignEndpoint(campaign.type);
 			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
+				throw new Error(__('Invalid campaign type', 'doublescale'));
 			}
 
 			const response = await apiFetch({
@@ -239,14 +239,14 @@ const WhatsAppTemplateStep: React.FC = () => {
 
 			setNotice({
 				type: 'success',
-				message: __('Template saved successfully', 'quillcrm'),
+				message: __('Template saved successfully', 'doublescale'),
 			});
 
 			goToStep('contacts');
 		} catch (error: any) {
 			setNotice({
 				type: 'error',
-				message: error.message || __('Failed to save template. Please try again.', 'quillcrm'),
+				message: error.message || __('Failed to save template. Please try again.', 'doublescale'),
 			});
 		} finally {
 			setIsSaving(false);
@@ -260,17 +260,17 @@ const WhatsAppTemplateStep: React.FC = () => {
 		<PanelLayout
 			items={[
 				{
-					label: __('Create Campaign', 'quillcrm'),
+					label: __('Create Campaign', 'doublescale'),
 					href: 'campaigns',
 				},
 				{
-					label: __('WhatsApp Campaign', 'quillcrm'),
+					label: __('WhatsApp Campaign', 'doublescale'),
 				},
 			]}
 			panelbtns={[
 				<Button variant="secondaryDeepBlue" key="tutorial">
 					<PlayIcon />
-					{__('Watch Tutorial', 'quillcrm')}
+					{__('Watch Tutorial', 'doublescale')}
 				</Button>,
 			]}
 			type="campaign"
@@ -293,10 +293,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 				)}
 
 				<PanelSettings
-					title={__('WhatsApp Template', 'quillcrm')}
+					title={__('WhatsApp Template', 'doublescale')}
 					description={__(
 						'Select an approved WhatsApp Business template for your campaign. Templates must be pre-approved in your Meta Business Suite.',
-						'quillcrm'
+						'doublescale'
 					)}
 					icon={
 						<div className="w-10 h-10 bg-gradient-to-br from-[#25D366] to-[#128C7E] rounded-full flex items-center justify-center">
@@ -311,10 +311,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 								<AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
 								<div>
 									<p className="text-sm font-medium text-amber-900 mb-1">
-									{__('WhatsApp Business Templates Required', 'quillcrm')}
+									{__('WhatsApp Business Templates Required', 'doublescale')}
 								</p>
 								<p className="text-sm text-amber-800">
-									{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your Meta Business Suite before using them here.', 'quillcrm')}
+									{__('WhatsApp campaigns require pre-approved business templates. Create and approve templates in your Meta Business Suite before using them here.', 'doublescale')}
 								</p>
 								</div>
 							</div>
@@ -323,12 +323,12 @@ const WhatsAppTemplateStep: React.FC = () => {
 						{/* Template Selector */}
 						<div>
 							<label className="block text-sm font-medium text-gray-700 mb-2">
-								{__('Select Template', 'quillcrm')} *
+								{__('Select Template', 'doublescale')} *
 							</label>
 							{isLoadingTemplates ? (
 								<div className="flex items-center gap-2 text-sm text-gray-500 py-4">
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-									{__('Loading templates...', 'quillcrm')}
+									{__('Loading templates...', 'doublescale')}
 								</div>
 							) : fetchError ? (
 								/* API Error - Failed to fetch templates */
@@ -337,7 +337,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 										<AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
 										<div>
 											<p className="text-sm font-medium text-red-900 mb-1">
-												{__('Failed to load templates', 'quillcrm')}
+												{__('Failed to load templates', 'doublescale')}
 											</p>
 											<p className="text-sm text-red-800 mb-2">
 												{fetchError}
@@ -347,7 +347,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 												size="sm"
 												onClick={loadTemplates}
 											>
-												{__('Try Again', 'quillcrm')}
+												{__('Try Again', 'doublescale')}
 											</Button>
 										</div>
 									</div>
@@ -359,10 +359,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 										<AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
 										<div>
 											<p className="text-sm font-medium text-yellow-900 mb-1">
-												{__('No WhatsApp templates found', 'quillcrm')}
+												{__('No WhatsApp templates found', 'doublescale')}
 											</p>
 											<p className="text-sm text-yellow-800">
-												{__('Create and approve templates in your Meta Business Suite, then import them via Settings > WhatsApp Templates.', 'quillcrm')}
+												{__('Create and approve templates in your Meta Business Suite, then import them via Settings > WhatsApp Templates.', 'doublescale')}
 											</p>
 											<Button
 												variant="outline"
@@ -370,7 +370,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 												className="mt-2"
 												onClick={loadTemplates}
 											>
-												{__('Refresh Templates', 'quillcrm')}
+												{__('Refresh Templates', 'doublescale')}
 											</Button>
 										</div>
 									</div>
@@ -389,7 +389,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 									}}
 								>
 									<option value="">
-										{__('Select a template...', 'quillcrm')}
+										{__('Select a template...', 'doublescale')}
 									</option>
 									{templates.map((template) => (
 										<option key={template.sid || template.id} value={template.sid || template.id}>
@@ -407,7 +407,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 									<div className="flex items-center gap-2 mb-2">
 										<FileText className="w-4 h-4 text-gray-500" />
 										<p className="text-xs font-medium text-gray-500 uppercase">
-											{__('Template Preview', 'quillcrm')}
+											{__('Template Preview', 'doublescale')}
 										</p>
 									</div>
 									<p className="text-sm text-gray-700 whitespace-pre-wrap">
@@ -415,7 +415,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 									</p>
 									{selectedTemplate.category && (
 										<p className="text-xs text-gray-500 mt-2">
-											{__('Category:', 'quillcrm')} {selectedTemplate.category}
+											{__('Category:', 'doublescale')} {selectedTemplate.category}
 										</p>
 									)}
 								</div>
@@ -425,23 +425,23 @@ const WhatsAppTemplateStep: React.FC = () => {
 									<div className="space-y-4">
 										<div>
 											<p className="text-sm font-medium text-gray-700 mb-1">
-												{__('Template Variables', 'quillcrm')}
+												{__('Template Variables', 'doublescale')}
 											</p>
 											<p className="text-xs text-gray-500">
-												{__('Map each variable to a value or merge tag. Use merge tags like {{contact:first_name}} for personalization.', 'quillcrm')}
+												{__('Map each variable to a value or merge tag. Use merge tags like {{contact:first_name}} for personalization.', 'doublescale')}
 											</p>
 										</div>
 										{templateVars.map((variable) => (
 											<Field
 												key={variable.index}
 												label={`{{${variable.index}}}`}
-												placeholder={__('Enter value or merge tag...', 'quillcrm')}
+												placeholder={__('Enter value or merge tag...', 'doublescale')}
 												value={templateVariables[variable.index.toString()] || ''}
 												onChange={(value) =>
 													handleVariableChange(variable.index.toString(), value)
 												}
 												type="text"
-												helperText={__('Example: {{contact:first_name}} or static text', 'quillcrm')}
+												helperText={__('Example: {{contact:first_name}} or static text', 'doublescale')}
 											/>
 										))}
 									</div>
@@ -454,20 +454,20 @@ const WhatsAppTemplateStep: React.FC = () => {
 						{/* Info boxes */}
 						<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
 							<p className="text-sm text-gray-700">
-								<strong>{__('Unsubscribe:', 'quillcrm')}</strong>{' '}
+								<strong>{__('Unsubscribe:', 'doublescale')}</strong>{' '}
 								{__(
 									'Recipients can reply STOP to unsubscribe from WhatsApp messages. This is handled automatically.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						</div>
 
 						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
 							<p className="text-sm text-blue-800">
-								<strong>{__('Recipient Requirements:', 'quillcrm')}</strong>{' '}
+								<strong>{__('Recipient Requirements:', 'doublescale')}</strong>{' '}
 								{__(
 									'Contacts must have a WhatsApp phone number set. Contacts without a valid WhatsApp phone will be skipped.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						</div>
@@ -481,8 +481,8 @@ const WhatsAppTemplateStep: React.FC = () => {
 								className="px-6"
 							>
 								{isSaving || saving
-									? __('Saving...', 'quillcrm')
-									: __('Save & Continue', 'quillcrm')}
+									? __('Saving...', 'doublescale')
+									: __('Save & Continue', 'doublescale')}
 							</Button>
 						</div>
 					</div>

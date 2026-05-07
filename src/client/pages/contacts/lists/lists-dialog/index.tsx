@@ -9,13 +9,13 @@ import React from 'react';
 /**
  * internal dependencies
  */
-import type { List as ContactList } from '@quillcrm/client';
+import type { List as ContactList } from '@doublescale/client';
 import {
 	CustomDialogHeader,
 	Field,
 	GradientListIcon,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -75,12 +75,12 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						<CustomDialogHeader
 							title={
 								selectedList
-									? __('Edit List', 'quillcrm')
-									: __('Create List', 'quillcrm')
+									? __('Edit List', 'doublescale')
+									: __('Create List', 'doublescale')
 							}
 							subtitle={__(
 								'Add basic information below to add new List',
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<GradientListIcon />}
 						/>
@@ -89,14 +89,14 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 
 				<div className="qcrm-fields space-y-4 mt-4">
 					<Field
-						label={__('List Name', 'quillcrm')}
+						label={__('List Name', 'doublescale')}
 						value={selectedList ? selectedList.name : list.name}
 						onChange={handleNameChange}
 						type="text"
-						placeholder={__('Enter List Name', 'quillcrm')}
+						placeholder={__('Enter List Name', 'doublescale')}
 					/>
 					<Field
-						label={__('List Description', 'quillcrm')}
+						label={__('List Description', 'doublescale')}
 						value={
 							selectedList
 								? (selectedList.description ?? '')
@@ -104,7 +104,7 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						}
 						onChange={handleDescriptionChange}
 						type="textarea"
-						placeholder={__('Enter List Description', 'quillcrm')}
+						placeholder={__('Enter List Description', 'doublescale')}
 					/>
 				</div>
 
@@ -117,8 +117,8 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						className="w-full"
 					>
 						{isSaving
-							? __('Submitting...', 'quillcrm')
-							: __('Submit', 'quillcrm')}
+							? __('Submitting...', 'doublescale')
+							: __('Submit', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

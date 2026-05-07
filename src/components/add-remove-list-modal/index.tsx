@@ -22,12 +22,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import './style.scss';
-import type { List, ListsResponse } from '@quillcrm/client';
+import type { List, ListsResponse } from '@doublescale/client';
 import {
 	CustomDialogHeader,
 	GradientListIcon,
 	Tag,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 
 // Define the option type for react-select
 interface SelectOption {
@@ -126,33 +126,33 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 	const getModalContent = () => {
 		if (mode === 'remove') {
 			return {
-				title: __('Remove From Lists', 'quillcrm'),
+				title: __('Remove From Lists', 'doublescale'),
 				subtitle: __(
 					'Select lists to remove contacts from',
-					'quillcrm'
+					'doublescale'
 				),
 				description: __(
 					`Remove ${selectedCount} contact(s) from the selected list(s)`,
-					'quillcrm'
+					'doublescale'
 				),
-				selectLabel: __('Select List to Remove From', 'quillcrm'),
-				selectPlaceholder: __('Select List to Remove From', 'quillcrm'),
-				buttonText: __('Remove from Lists', 'quillcrm'),
+				selectLabel: __('Select List to Remove From', 'doublescale'),
+				selectPlaceholder: __('Select List to Remove From', 'doublescale'),
+				buttonText: __('Remove from Lists', 'doublescale'),
 			};
 		} else {
 			return {
-				title: __('Add To Lists', 'quillcrm'),
+				title: __('Add To Lists', 'doublescale'),
 				subtitle: __(
 					'Add basic information below to add new List',
-					'quillcrm'
+					'doublescale'
 				),
 				description: __(
 					`Add ${selectedCount} contact(s) to the selected list(s)`,
-					'quillcrm'
+					'doublescale'
 				),
-				selectLabel: __('Select List', 'quillcrm'),
-				selectPlaceholder: __('Select List', 'quillcrm'),
-				buttonText: __('Add to Lists', 'quillcrm'),
+				selectLabel: __('Select List', 'doublescale'),
+				selectPlaceholder: __('Select List', 'doublescale'),
+				buttonText: __('Add to Lists', 'doublescale'),
 			};
 		}
 	};

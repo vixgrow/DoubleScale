@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { OutlinedCalendarIcon } from '@quillcrm/components';
+import { OutlinedCalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';

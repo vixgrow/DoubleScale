@@ -16,7 +16,7 @@ import {
     Card,
     CardContent,
 } from '@/components/ui/card';
-import type { AutomationTriggers } from '@quillcrm/config';
+import type { AutomationTriggers } from '@doublescale/config';
 
 interface TriggerCategorySelectorProps {
     triggers: AutomationTriggers;

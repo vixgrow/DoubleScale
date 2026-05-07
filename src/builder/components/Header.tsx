@@ -5,7 +5,7 @@ import { RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useTemplateActions } from '../hooks/useTemplateActions';
@@ -32,9 +32,9 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const navigate = handleNavigate ? handleNavigate : useNavigate();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	);
 
@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({
 			type: 'error',
 			message: __(
 				'The builder cannot be empty. Please add at least one block before saving.',
-				'quillcrm'
+				'doublescale'
 			),
 		});
 
@@ -117,12 +117,12 @@ const Header: React.FC<HeaderProps> = ({
 				{campaign && (
 					<BreadcrumbComponent
 						items={[
-							{ label: __('Create Campaign', 'quillcrm') },
+							{ label: __('Create Campaign', 'doublescale') },
 							{
-								label: __('Standard Campaign', 'quillcrm'),
+								label: __('Standard Campaign', 'doublescale'),
 								href: `campaigns/${campaign.id}/template`,
 							},
-							{ label: __('Email Template', 'quillcrm') },
+							{ label: __('Email Template', 'doublescale') },
 						]}
 					/>
 				)}
@@ -140,7 +140,7 @@ const Header: React.FC<HeaderProps> = ({
 					className="px-3"
 					onClick={() => dispatch(STORE_KEY).undo()}
 					disabled={!canUndo}
-					title={__('Undo last action', 'quillcrm')}
+					title={__('Undo last action', 'doublescale')}
 				>
 					<UndoIcon />
 				</Button>
@@ -149,7 +149,7 @@ const Header: React.FC<HeaderProps> = ({
 					className="px-3"
 					onClick={() => dispatch(STORE_KEY).redo()}
 					disabled={!canRedo}
-					title={__('Redo last action', 'quillcrm')}
+					title={__('Redo last action', 'doublescale')}
 				>
 					<RedoIcon />
 				</Button>
@@ -161,9 +161,9 @@ const Header: React.FC<HeaderProps> = ({
 							className="px-3"
 							onClick={() => setIsTemplateDialogOpen(true)}
 							disabled={isSavingTemplate || isBuilderEmpty}
-							title={__('Save as template', 'quillcrm')}
+							title={__('Save as template', 'doublescale')}
 						>
-							{__('Save as Template', 'quillcrm')}
+							{__('Save as Template', 'doublescale')}
 						</Button>
 
 						<Button
@@ -173,8 +173,8 @@ const Header: React.FC<HeaderProps> = ({
 							disabled={isSaving || isBuilderEmpty}
 						>
 							{isSaving
-								? __('Saving...', 'quillcrm')
-								: __('Save & choose recipients', 'quillcrm')}
+								? __('Saving...', 'doublescale')
+								: __('Save & choose recipients', 'doublescale')}
 						</Button>
 					</>
 				)}
@@ -188,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({
 								onClick={onClose}
 								disabled={isSaving}
 							>
-								{__('Cancel', 'quillcrm')}
+								{__('Cancel', 'doublescale')}
 							</Button>
 						)}
 						<Button
@@ -201,8 +201,8 @@ const Header: React.FC<HeaderProps> = ({
 							disabled={isSaving || isBuilderEmpty}
 						>
 							{isSaving
-								? __('Saving...', 'quillcrm')
-								: __('Save', 'quillcrm')}
+								? __('Saving...', 'doublescale')
+								: __('Save', 'doublescale')}
 						</Button>
 					</>
 				)}

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NotFoundIcon: React.FC<IconProps> = ({ width = 607, height = 591 }) => {
 	return (

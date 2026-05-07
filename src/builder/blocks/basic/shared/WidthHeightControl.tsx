@@ -36,8 +36,8 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 	height = '',
 	onWidthChange,
 	onHeightChange = () => { },
-	widthLabel = __('Width', 'quillcrm'),
-	heightLabel = __('Height', 'quillcrm'),
+	widthLabel = __('Width', 'doublescale'),
+	heightLabel = __('Height', 'doublescale'),
 	widthOptions,
 	heightOptions,
 	widthUnit,
@@ -48,20 +48,20 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 }) => {
 	// Default width options if not provided
 	const defaultWidthOptions = widthOptions || [
-		{ value: '100%', label: __('100%', 'quillcrm') },
-		{ value: '75%', label: __('75%', 'quillcrm') },
-		{ value: '50%', label: __('50%', 'quillcrm') },
-		{ value: '25%', label: __('25%', 'quillcrm') },
+		{ value: '100%', label: __('100%', 'doublescale') },
+		{ value: '75%', label: __('75%', 'doublescale') },
+		{ value: '50%', label: __('50%', 'doublescale') },
+		{ value: '25%', label: __('25%', 'doublescale') },
 	];
 
 	// Default height options if not provided
 	const defaultHeightOptions = heightOptions || [
-		{ value: 'auto', label: __('Auto', 'quillcrm') },
-		{ value: '600px', label: __('600px', 'quillcrm') },
-		{ value: '400px', label: __('400px', 'quillcrm') },
-		{ value: '300px', label: __('300px', 'quillcrm') },
-		{ value: '200px', label: __('200px', 'quillcrm') },
-		{ value: '150px', label: __('150px', 'quillcrm') },
+		{ value: 'auto', label: __('Auto', 'doublescale') },
+		{ value: '600px', label: __('600px', 'doublescale') },
+		{ value: '400px', label: __('400px', 'doublescale') },
+		{ value: '300px', label: __('300px', 'doublescale') },
+		{ value: '200px', label: __('200px', 'doublescale') },
+		{ value: '150px', label: __('150px', 'doublescale') },
 	];
 
 	return (
@@ -76,7 +76,7 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 					<Select value={width} onValueChange={onWidthChange}>
 						<SelectTrigger className="rounded-lg border-border h-10">
 							<SelectValue
-								placeholder={__('Select width', 'quillcrm')}
+								placeholder={__('Select width', 'doublescale')}
 							/>
 						</SelectTrigger>
 						<SelectContent>
@@ -130,7 +130,7 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 								<SelectValue
 									placeholder={__(
 										'Select height',
-										'quillcrm'
+										'doublescale'
 									)}
 								/>
 							</SelectTrigger>

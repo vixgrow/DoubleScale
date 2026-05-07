@@ -17,8 +17,8 @@ import {
 	CampaignsResponse,
 	CampaignType,
 	NoticeMessage,
-} from '@quillcrm/client';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+} from '@doublescale/client';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import { emailCampaignColumns, smsCampaignColumns } from './columns';
 import {
@@ -32,12 +32,12 @@ import {
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
-import { formatDateForAPI } from '@quillcrm/utils';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable'; // Import the hook
+import { formatDateForAPI } from '@doublescale/utils';
 import PageTabs from '@/components/page-tabs';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
-import { useProviderStatus } from '@quillcrm/hooks/use-provider-status';
+import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -164,7 +164,7 @@ const Campaigns: React.FC = () => {
 		} catch (error) {
 			setNotice({
 				type: 'error',
-				message: __('Failed to fetch campaigns', 'quillcrm'),
+				message: __('Failed to fetch campaigns', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -177,7 +177,7 @@ const Campaigns: React.FC = () => {
 		if (!name) {
 			return {
 				success: false,
-				error: __('Campaign name is required', 'quillcrm'),
+				error: __('Campaign name is required', 'doublescale'),
 			};
 		}
 
@@ -191,7 +191,7 @@ const Campaigns: React.FC = () => {
 				if (!campaignType) {
 					return {
 						success: false,
-						error: __('Campaign type is required', 'quillcrm'),
+						error: __('Campaign type is required', 'doublescale'),
 					};
 				}
 				channelType = 'email';
@@ -210,7 +210,7 @@ const Campaigns: React.FC = () => {
 					settings: {
 						ab_test: isAbTest,
 					},
-					description: __('New campaign', 'quillcrm'),
+					description: __('New campaign', 'doublescale'),
 					status: 'draft',
 				},
 			})) as Campaign;
@@ -268,7 +268,7 @@ const Campaigns: React.FC = () => {
 	const duplicateCampaign = async (id: number) => {
 		setNotice({
 			type: 'success',
-			message: __('Duplicating campaign...', 'quillcrm'),
+			message: __('Duplicating campaign...', 'doublescale'),
 		});
 
 		try {
@@ -333,7 +333,7 @@ const Campaigns: React.FC = () => {
 				type: 'error',
 				message: __(
 					'Please configure Twilio before creating SMS campaigns',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return;
@@ -372,7 +372,7 @@ const Campaigns: React.FC = () => {
 						activeTab={activeTab}
 						config={{
 							search: {
-								placeholder: __('Search', 'quillcrm'),
+								placeholder: __('Search', 'doublescale'),
 								onChange: (value) => setKeywords(value),
 								value: keywords,
 							},
@@ -425,7 +425,7 @@ const Campaigns: React.FC = () => {
 	// Apply filters to allow Pro version to override tab content
 	// If filter returns null, it means PRO wants to use the regular CampaignContent
 	const SMSTabContentOverride = applyFilters(
-		'quillcrm_campaigns_tab_content',
+		'doublescale_campaigns_tab_content',
 		'default', // Pass a signal value, not a component
 		'sms'
 	);
@@ -436,10 +436,10 @@ const Campaigns: React.FC = () => {
 		) : (
 			// Free version - show PRO notice
 			<ProFeatureNotice
-				featureName={__('SMS Campaigns', 'quillcrm')}
+				featureName={__('SMS Campaigns', 'doublescale')}
 				description={__(
 					'Create and send bulk SMS campaigns to your contacts with full tracking and analytics.',
-					'quillcrm'
+					'doublescale'
 				)}
 			/>
 		);
@@ -464,13 +464,13 @@ const Campaigns: React.FC = () => {
 	return (
 		<div className="qcrm-campaigns">
 			<PageHeader
-				title={__('Campaigns List', 'quillcrm')}
-				subtitle={__('Campaigns', 'quillcrm')}
+				title={__('Campaigns List', 'doublescale')}
+				subtitle={__('Campaigns', 'doublescale')}
 				actions={
 					showCreateButton
 						? [
 								{
-									label: __('Create Campaign', 'quillcrm'),
+									label: __('Create Campaign', 'doublescale'),
 									icon: <PlusIcon />,
 									onClick: handleCreateCampaign,
 								},

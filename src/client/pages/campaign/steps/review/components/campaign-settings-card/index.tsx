@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import CardLayout from '../card-layout';
-import { CampaignsIcon, EditIcon } from '@quillcrm/components';
+import { CampaignsIcon, EditIcon } from '@doublescale/components';
 
 interface CampaignSettingsCardProps {
 	campaignType?: string;
@@ -43,7 +43,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 			return (
 				<div className="text-center py-4">
 					<p className="text-base text-gray-500">
-						{__('SMS campaigns use the phone number configured in Twilio integration settings.', 'quillcrm')}
+						{__('SMS campaigns use the phone number configured in Twilio integration settings.', 'doublescale')}
 					</p>
 				</div>
 			);
@@ -55,7 +55,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 				<div className="space-y-4">
 					<div>
 						<p className="text-base text-gray-500 mb-1">
-							{__('Template', 'quillcrm')}
+							{__('Template', 'doublescale')}
 						</p>
 						<p className="text-base font-semibold text-gray-900">
 							{templateName || '-'}
@@ -64,7 +64,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 					{templateBody && (
 						<div>
 							<p className="text-base text-gray-500 mb-1">
-								{__('Message Preview', 'quillcrm')}
+								{__('Message Preview', 'doublescale')}
 							</p>
 							<p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
 								{templateBody}
@@ -73,7 +73,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 					)}
 					<div className="text-sm text-gray-500 bg-green-50 border border-green-200 rounded-lg p-3">
 						<p>
-							{__('WhatsApp campaigns use the phone number configured in Twilio integration settings.', 'quillcrm')}
+							{__('WhatsApp campaigns use the phone number configured in Twilio integration settings.', 'doublescale')}
 						</p>
 					</div>
 				</div>
@@ -86,7 +86,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 				<div className="grid grid-cols-2 gap-2">
 					<div>
 						<p className="text-base text-gray-500 mb-1">
-							{__('From Name', 'quillcrm')}
+							{__('From Name', 'doublescale')}
 						</p>
 						<p className="text-base font-semibold text-gray-900">
 							{fromName}
@@ -94,7 +94,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 					</div>
 					<div>
 						<p className="text-base text-gray-500 mb-1">
-							{__('From Email', 'quillcrm')}
+							{__('From Email', 'doublescale')}
 						</p>
 						<p className="text-base font-semibold text-gray-900">
 							{fromEmail}
@@ -105,7 +105,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 				<div className="grid grid-cols-2 gap-2">
 					<div>
 						<p className="text-base text-gray-500 mb-1">
-							{__('Reply to', 'quillcrm')}
+							{__('Reply to', 'doublescale')}
 						</p>
 						<p className="text-base font-semibold text-gray-900">
 							{replyTo}
@@ -114,7 +114,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 
 					<div>
 						<p className="text-base text-gray-500 mb-1">
-							{__('Subject', 'quillcrm')}
+							{__('Subject', 'doublescale')}
 						</p>
 						<p className="text-base font-semibold text-gray-900">
 							{emailSubject}
@@ -124,7 +124,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 
 				<div>
 					<p className="text-base text-gray-500 mb-1">
-						{__('Preview Text', 'quillcrm')}
+						{__('Preview Text', 'doublescale')}
 					</p>
 					<p className="text-base font-semibold text-gray-900">{previewText}</p>
 				</div>
@@ -135,9 +135,9 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 	return (
 		<CardLayout
 			icon={<CampaignsIcon />}
-			header={__('Campaign Settings', 'quillcrm')}
+			header={__('Campaign Settings', 'doublescale')}
 			buttonIcon={<EditIcon />}
-			buttonText={__('Edit', 'quillcrm')}
+			buttonText={__('Edit', 'doublescale')}
 			onButtonClick={onEdit}
 			button={button}
 		>

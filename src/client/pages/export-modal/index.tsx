@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { ProFeatureNotice } from '@quillcrm/components';
+import { ProFeatureNotice } from '@doublescale/components';
 
 export interface Props {
 	open: boolean;
@@ -26,10 +26,10 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 		>
 			<DialogContent className="z-[150000] max-w-3xl p-0">
 				<ProFeatureNotice
-					featureName={__('Contact Export', 'quillcrm')}
+					featureName={__('Contact Export', 'doublescale')}
 					description={__(
-						'Export your contacts to CSV with advanced filtering, custom field selection, and automated scheduling. Upgrade to QuillCRM Pro to unlock this powerful feature.',
-						'quillcrm'
+						'Export your contacts to CSV with advanced filtering, custom field selection, and automated scheduling. Upgrade to DoubleScale Pro to unlock this powerful feature.',
+						'doublescale'
 					)}
 				/>
 			</DialogContent>

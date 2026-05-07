@@ -15,7 +15,7 @@ import AsyncSelect from 'react-select/async';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 interface Props {
 	label: string;
@@ -98,7 +98,7 @@ const AjaxSelect: React.FC<Props> = ({
 							label: value,
 							value: key,
 						})).find((option) => option.value == values[slug]) || {
-							label: __('Select Option', 'quillcrm'),
+							label: __('Select Option', 'doublescale'),
 							value: '',
 						}
 					}

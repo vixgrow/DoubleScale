@@ -11,9 +11,9 @@ import { isEmail } from 'validator';
 /**
  * internal dependencies
  */
-import type { Contact, ContactsResponse } from '@quillcrm/client';
-import ConfigAPI from '@quillcrm/config';
-import { formatDateForAPI } from '@quillcrm/utils';
+import type { Contact, ContactsResponse } from '@doublescale/client';
+import ConfigAPI from '@doublescale/config';
+import { formatDateForAPI } from '@doublescale/utils';
 import { useContactsContext } from './contexts';
 
 interface ContactPayload {
@@ -69,7 +69,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			setHasRecords((response.total_count || 0) > 0);
 			response.data && setData(response.data);
 		} catch (error) {
-			showNotice('error', __('Failed to fetch contacts', 'quillcrm'));
+			showNotice('error', __('Failed to fetch contacts', 'doublescale'));
 		} finally {
 			setLoading(false);
 			setIsFiltering(false);
@@ -79,7 +79,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 	const createContact = async (contactPayload: ContactPayload) => {
 		if (!isEmail(contactPayload.email)) {
 			setCreateContactVisible(false);
-			showNotice('error', __('Invalid email', 'quillcrm'));
+			showNotice('error', __('Invalid email', 'doublescale'));
 			return;
 		}
 
@@ -98,7 +98,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			// Show success message
 			showNotice(
 				'success',
-				__('Contact created successfully', 'quillcrm')
+				__('Contact created successfully', 'doublescale')
 			);
 
 			// Open the contact dialog with the newly created contact (configurable)
@@ -112,7 +112,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			setCreateContactVisible(false);
 			showNotice(
 				'error',
-				error.message || __('Failed to create Contact', 'quillcrm')
+				error.message || __('Failed to create Contact', 'doublescale')
 			);
 		} finally {
 			setIsSaving(false);
@@ -132,7 +132,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Contacts deleted successfully', 'quillcrm')
+				__('Contacts deleted successfully', 'doublescale')
 			);
 			fetchContacts();
 		} catch (error: any) {
@@ -144,7 +144,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 	const addToListWithData = async (lists: string[]) => {
 		if (lists.length === 0) {
-			showNotice('error', __('Please select a list', 'quillcrm'));
+			showNotice('error', __('Please select a list', 'doublescale'));
 			return;
 		}
 		setIsApplying(true);
@@ -164,7 +164,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 				'success',
 				__(
 					'Contacts were successfully added to list  — check it out!',
-					'quillcrm'
+					'doublescale'
 				)
 			);
 			fetchContacts();
@@ -177,7 +177,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 	const removeFromListWithData = async (lists: string[]) => {
 		if (lists.length === 0) {
-			showNotice('error', __('Please select a list', 'quillcrm'));
+			showNotice('error', __('Please select a list', 'doublescale'));
 			return;
 		}
 		setIsApplying(true);
@@ -195,7 +195,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Contacts removed from list successfully', 'quillcrm')
+				__('Contacts removed from list successfully', 'doublescale')
 			);
 			fetchContacts();
 		} catch (error: any) {
@@ -207,7 +207,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 	const addTagWithData = async (tags: string[]) => {
 		if (tags.length === 0) {
-			showNotice('error', __('Please select a tag', 'quillcrm'));
+			showNotice('error', __('Please select a tag', 'doublescale'));
 			return;
 		}
 		setIsApplying(true);
@@ -223,7 +223,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 			setSelectedRowKeys([]);
 			setBulkAction('');
-			showNotice('success', __('Tags added successfully', 'quillcrm'));
+			showNotice('success', __('Tags added successfully', 'doublescale'));
 			fetchContacts();
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -234,7 +234,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 	const removeTagWithData = async (tags: string[]) => {
 		if (tags.length === 0) {
-			showNotice('error', __('Please select a tag', 'quillcrm'));
+			showNotice('error', __('Please select a tag', 'doublescale'));
 			return;
 		}
 		setIsApplying(true);
@@ -250,7 +250,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 			setSelectedRowKeys([]);
 			setBulkAction('');
-			showNotice('success', __('Tags removed successfully', 'quillcrm'));
+			showNotice('success', __('Tags removed successfully', 'doublescale'));
 			fetchContacts();
 		} catch (error: any) {
 			showNotice('error', error.message);

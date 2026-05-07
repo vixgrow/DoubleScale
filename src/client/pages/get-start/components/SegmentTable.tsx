@@ -1,8 +1,8 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { PlusIcon } from '@quillcrm/components';
-import TrashIcon from '@quillcrm/components/icons/trash';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
+import { PlusIcon } from '@doublescale/components';
+import TrashIcon from '@doublescale/components/icons/trash';
+import EditHeaderIcon from '@doublescale/components/icons/edit-header';
 import {
 	Pagination,
 	PaginationContent,
@@ -11,7 +11,7 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-} from '@quillcrm/components/ui/pagination';
+} from '@doublescale/components/ui/pagination';
 
 type SegmentTableItem = {
 	id: number;
@@ -91,13 +91,13 @@ export function SegmentTable({
 				<thead>
 					<tr className="bg-[#F8F8F8] border-b border-[#DEE1E6]">
 						<th className="text-left px-6 py-4 text-sm font-medium text-[#09090B]">
-							{__('Segment Name', 'quillcrm')}
+							{__('Segment Name', 'doublescale')}
 						</th>
 						<th className="text-left px-6 py-4 text-sm font-medium text-[#09090B]">
-							{__('Slug', 'quillcrm')}
+							{__('Slug', 'doublescale')}
 						</th>
 						<th className="text-center px-6 py-4 text-sm font-medium text-[#09090B]">
-							{__('Actions', 'quillcrm')}
+							{__('Actions', 'doublescale')}
 						</th>
 					</tr>
 				</thead>
@@ -106,7 +106,7 @@ export function SegmentTable({
 						<td className="px-6 py-3">
 							<input
 								type="text"
-								placeholder={__('EG User Type', 'quillcrm')}
+								placeholder={__('EG User Type', 'doublescale')}
 								value={newSegment.name}
 								onChange={(event) => onChangeNewName(event.target.value)}
 								onKeyDown={(event) => {
@@ -121,7 +121,7 @@ export function SegmentTable({
 						<td className="px-6 py-3">
 							<input
 								type="text"
-								placeholder={__('Slug', 'quillcrm')}
+								placeholder={__('Slug', 'doublescale')}
 								value={newSegment.slug}
 								onChange={(event) => onChangeNewSlug(event.target.value)}
 								onKeyDown={(event) => {
@@ -140,7 +140,7 @@ export function SegmentTable({
 									onClick={onAdd}
 									disabled={isSaving || !newSegment.name}
 									className="flex items-center justify-center rounded-full border p-2 border-[#374151] text-[#374151] disabled:opacity-50 disabled:cursor-not-allowed"
-									aria-label={__('Add segment', 'quillcrm')}
+									aria-label={__('Add segment', 'doublescale')}
 								>
 									<PlusIcon color="#374151" width={16} height={16} />
 								</button>
@@ -151,7 +151,7 @@ export function SegmentTable({
 					{loading && (
 						<tr>
 							<td colSpan={3} className="px-6 py-8 text-center text-[#777]">
-								{__('Loading...', 'quillcrm')}
+								{__('Loading...', 'doublescale')}
 							</td>
 						</tr>
 					)}
@@ -204,7 +204,7 @@ export function SegmentTable({
 												disabled={isSaving}
 												className="px-4 py-2 border border-[#458DC7] text-[#458DC7] rounded-md text-sm font-medium disabled:opacity-50"
 											>
-												{__('Save', 'quillcrm')}
+												{__('Save', 'doublescale')}
 											</button>
 											<button
 												type="button"
@@ -212,7 +212,7 @@ export function SegmentTable({
 												disabled={isSaving}
 												className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium disabled:opacity-50"
 											>
-												{__('Cancel', 'quillcrm')}
+												{__('Cancel', 'doublescale')}
 											</button>
 										</div>
 									) : (
@@ -221,7 +221,7 @@ export function SegmentTable({
 												type="button"
 												onClick={() => onStartEdit(item)}
 												className="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:bg-blue-50 rounded"
-												aria-label={__('Edit segment', 'quillcrm')}
+												aria-label={__('Edit segment', 'doublescale')}
 											>
 												<EditHeaderIcon color="#458DC7" />
 											</button>
@@ -230,7 +230,7 @@ export function SegmentTable({
 												onClick={() => handleDelete(item.id)}
 												disabled={isSaving}
 												className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
-												aria-label={__('Delete segment', 'quillcrm')}
+												aria-label={__('Delete segment', 'doublescale')}
 											>
 												<TrashIcon />
 											</button>
@@ -254,9 +254,9 @@ export function SegmentTable({
 				<div className="flex items-center justify-between px-6 py-4 border-t border-[#E4E4E7]">
 					<div className="flex justify-center items-center gap-4">
 						<p className="text-sm text-[#3F3F46]">
-							{__('Showing', 'quillcrm')} {startRecord} {__('to', 'quillcrm')}{' '}
-							{endRecord} {__('of', 'quillcrm')} {totalRecords}{' '}
-							{__('results', 'quillcrm')}
+							{__('Showing', 'doublescale')} {startRecord} {__('to', 'doublescale')}{' '}
+							{endRecord} {__('of', 'doublescale')} {totalRecords}{' '}
+							{__('results', 'doublescale')}
 						</p>
 						<div
 							className="flex items-center gap-4 bg-[#FFF] rounded-[8px] py-2 px-3"
@@ -266,7 +266,7 @@ export function SegmentTable({
 							}}
 						>
 							<span className="text-sm text-[#71717A] pr-2 border-r border-[#6B7280]">
-								{__('Per page', 'quillcrm')}
+								{__('Per page', 'doublescale')}
 							</span>
 							<select
 								value={perPage}

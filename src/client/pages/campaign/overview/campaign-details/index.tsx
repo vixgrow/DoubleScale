@@ -9,22 +9,22 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import type { Campaign as CampaignType } from '@quillcrm/client';
+import type { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Button } from '@/components/ui/button';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
 	NoData,
 	ContactTotalEmailsIcon,
 	EditIcon,
 	FormattedDateCell,
 	ContactSMSIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import SMSDevice from '../../steps/templates/sms-device';
 
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	) as CampaignType | null;
 
@@ -83,7 +83,7 @@ const CampaignDetails: React.FC = () => {
 		return (
 			<div className="flex items-center justify-center py-12">
 				<p className="text-gray-500">
-					{__('No campaign data available', 'quillcrm')}
+					{__('No campaign data available', 'doublescale')}
 				</p>
 			</div>
 		);
@@ -99,7 +99,7 @@ const CampaignDetails: React.FC = () => {
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-1">
 					<span className="text-base text-gray-500">
-						{__('Title', 'quillcrm')}
+						{__('Title', 'doublescale')}
 					</span>
 					<p className="text-base font-semibold text-[#09090B]">
 						{campaign.name}
@@ -114,7 +114,7 @@ const CampaignDetails: React.FC = () => {
 					campaign.settings.templates[0].settings.subject && (
 						<div className="space-y-1">
 							<span className="text-base text-gray-500">
-								{__('Subject', 'quillcrm')}
+								{__('Subject', 'doublescale')}
 							</span>
 							<p className="text-base font-semibold text-[#09090B]">
 								{
@@ -130,7 +130,7 @@ const CampaignDetails: React.FC = () => {
 				{campaign.execute_at && (
 					<div className="space-y-1">
 						<span className="text-base text-gray-500">
-							{__('Scheduled On', 'quillcrm')}
+							{__('Scheduled On', 'doublescale')}
 						</span>
 						<p className="text-base font-semibold text-[#09090B]">
 							<FormattedDateCell value={campaign.execute_at} />
@@ -140,7 +140,7 @@ const CampaignDetails: React.FC = () => {
 
 				<div className="space-y-1">
 					<span className="text-base text-gray-500">
-						{__('Total Recipients', 'quillcrm')}
+						{__('Total Recipients', 'doublescale')}
 					</span>
 					<p className="text-base font-semibold text-[#09090B]">
 						{campaign.contacts_count}
@@ -153,8 +153,8 @@ const CampaignDetails: React.FC = () => {
 				<div className="flex items-center justify-between">
 					<h3 className="text-2xl font-medium">
 						{campaign.type === CAMPAIGN_CHANNEL.EMAIL
-							? __('Email Template', 'quillcrm')
-							: __('SMS Template', 'quillcrm')}
+							? __('Email Template', 'doublescale')
+							: __('SMS Template', 'doublescale')}
 					</h3>
 					{campaign.status === 'draft' && hasTemplates && (
 						<Button
@@ -169,8 +169,8 @@ const CampaignDetails: React.FC = () => {
 						>
 							<EditIcon />
 							{campaign.type === CAMPAIGN_CHANNEL.EMAIL
-								? __('Edit Email Template', 'quillcrm')
-								: __('Edit SMS Template', 'quillcrm')}
+								? __('Edit Email Template', 'doublescale')
+								: __('Edit SMS Template', 'doublescale')}
 						</Button>
 					)}
 				</div>
@@ -212,7 +212,7 @@ const CampaignDetails: React.FC = () => {
 									/>
 								) : (
 									<div className="flex items-center justify-center py-8 text-gray-500">
-										{__('Loading template...', 'quillcrm')}
+										{__('Loading template...', 'doublescale')}
 									</div>
 								)}
 							</div>
@@ -232,18 +232,18 @@ const CampaignDetails: React.FC = () => {
 						}
 						title={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
-								? __('No Email Template', 'quillcrm')
-								: __('No SMS Template', 'quillcrm')
+								? __('No Email Template', 'doublescale')
+								: __('No SMS Template', 'doublescale')
 						}
 						subtitle={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __(
 										'Create an email template to get started with your campaign.',
-										'quillcrm'
+										'doublescale'
 									)
 								: __(
 										'Create a template to get started with your campaign.',
-										'quillcrm'
+										'doublescale'
 									)
 						}
 						onClick={() => {
@@ -253,8 +253,8 @@ const CampaignDetails: React.FC = () => {
 						}}
 						buttonLabel={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
-								? __('Edit Email Template', 'quillcrm')
-								: __('Edit SMS Template', 'quillcrm')
+								? __('Edit Email Template', 'doublescale')
+								: __('Edit SMS Template', 'doublescale')
 						}
 						buttonIcon={<EditIcon />}
 					/>

@@ -12,9 +12,9 @@ import timezone from 'dayjs/plugin/timezone';
 /**
  * Internal dependencies
  */
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import EditHeaderIcon from '@/components/icons/edit-header';
-import TrashIcon from '@quillcrm/components/icons/trash';
+import TrashIcon from '@doublescale/components/icons/trash';
 
 interface Meeting {
     id: number;
@@ -55,21 +55,21 @@ const formatMeetingDateTime = (dateString: string) => {
 const formatDuration = (duration?: number) => {
     if (!duration) return '-';
     if (duration < 60) {
-        return `${duration} ${__('minutes', 'quillcrm')}`;
+        return `${duration} ${__('minutes', 'doublescale')}`;
     }
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
     if (minutes === 0) {
-        return `${hours} ${hours === 1 ? __('hour', 'quillcrm') : __('hours', 'quillcrm')}`;
+        return `${hours} ${hours === 1 ? __('hour', 'doublescale') : __('hours', 'doublescale')}`;
     }
-    return `${hours} ${hours === 1 ? __('hour', 'quillcrm') : __('hours', 'quillcrm')} ${minutes} ${__('minutes', 'quillcrm')}`;
+    return `${hours} ${hours === 1 ? __('hour', 'doublescale') : __('hours', 'doublescale')} ${minutes} ${__('minutes', 'doublescale')}`;
 };
 
 export function getColumns({ onEdit, onDelete }: ColumnsProps) {
     const columns: ColumnDef<Meeting>[] = [
         {
             accessorKey: 'meeting_date_time',
-            header: __('Meeting Date & Time', 'quillcrm'),
+            header: __('Meeting Date & Time', 'doublescale'),
             cell: ({ row }) => {
                 const dateTime = row.original.data?.scheduled_at || row.original.data?.meeting_date_time || row.original.created_at;
                 return (
@@ -81,7 +81,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'location',
-            header: __('Location', 'quillcrm'),
+            header: __('Location', 'doublescale'),
             cell: ({ row }) => (
                 <span className="text-[#09090B]">
                     {row.original.data?.location || '-'}
@@ -90,7 +90,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'duration',
-            header: __('Duration', 'quillcrm'),
+            header: __('Duration', 'doublescale'),
             cell: ({ row }) => {
                 const duration = row.original.data?.duration || 0;
                 return (
@@ -102,7 +102,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'actions',
-            header: __('Actions', 'quillcrm'),
+            header: __('Actions', 'doublescale'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-4">
                     <Button

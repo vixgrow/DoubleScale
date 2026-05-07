@@ -26,7 +26,7 @@ import '@xyflow/react/dist/style.css';
  * Internal dependencies
  */
 import './style.scss';
-import type { Automation, AutomationStep } from '@quillcrm/client';
+import type { Automation, AutomationStep } from '@doublescale/client';
 import { useAutomationContext } from '../../../state/context';
 
 // Configuration constants
@@ -518,7 +518,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	if (isLoading) {
 		return (
 			<div className="qcrm-reactflow-loading">
-				{__('Loading workflow...', 'quillcrm')}
+				{__('Loading workflow...', 'doublescale')}
 			</div>
 		);
 	}

@@ -15,7 +15,7 @@ import { DeleteOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import type { ReactSelectOptions } from '@quillcrm/client';
+import type { ReactSelectOptions } from '@doublescale/client';
 import { map } from 'lodash';
 
 interface APIMappedFieldsProps {
@@ -36,7 +36,7 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 	fields: initialFields = {},
 }) => {
 	initialFields = initialFields || {};
-	initialFields = { '': { label: __('Select', 'quillcrm') }, ...initialFields };
+	initialFields = { '': { label: __('Select', 'doublescale') }, ...initialFields };
 	const preloadedFields = map(initialFields, (field, key) => ({
 		label: field.label,
 		value: key,
@@ -94,10 +94,10 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 		<Flex gap={10} vertical>
 			<Flex gap={20}>
 				<Typography.Text style={{ flex: 1 }} strong>
-					{__('Field', 'quillcrm')}
+					{__('Field', 'doublescale')}
 				</Typography.Text>
 				<Typography.Text style={{ flex: 1 }} strong>
-					{__('Value', 'quillcrm')}
+					{__('Value', 'doublescale')}
 				</Typography.Text>
 			</Flex>
 			{fields.length > 0 && map(values, (field, index) => {
@@ -124,7 +124,7 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 			})}
 
 			<Button onClick={addNewField}>
-				{__('Add New Field', 'quillcrm')}
+				{__('Add New Field', 'doublescale')}
 			</Button>
 		</Flex>
 	);

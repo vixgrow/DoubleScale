@@ -9,7 +9,7 @@ import { useState, useMemo } from 'react';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
+import type { CampaignEmail } from '@doublescale/client';
 import {
 	ClickRateIcon,
 	NoEmailsIcon,
@@ -17,7 +17,7 @@ import {
 	OpenedIcon,
 	OpenRateIcon,
 	TimeAgoCell,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import MessageDetailsDialog from '@/components/message-details-dialog';
 
@@ -49,38 +49,38 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 
 	const getDialogTitle = () => {
 		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
-			return __('Email Details', 'quillcrm');
+			return __('Email Details', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
-			return __('SMS Details', 'quillcrm');
+			return __('SMS Details', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
-			return __('WhatsApp Details', 'quillcrm');
+			return __('WhatsApp Details', 'doublescale');
 		}
-		return __('Message Details', 'quillcrm');
+		return __('Message Details', 'doublescale');
 	};
 
 	const getDialogSubtitle = () => {
 		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
-			return __('View the details of the email', 'quillcrm');
+			return __('View the details of the email', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
-			return __('View the details of the SMS', 'quillcrm');
+			return __('View the details of the SMS', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
-			return __('View the details of the WhatsApp message', 'quillcrm');
+			return __('View the details of the WhatsApp message', 'doublescale');
 		}
-		return __('View the details of the message', 'quillcrm');
+		return __('View the details of the message', 'doublescale');
 	};
 
 	const getResendButtonText = () => {
 		if (isResending) {
-			return __('Resending...', 'quillcrm');
+			return __('Resending...', 'doublescale');
 		}
 		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
-			return __('Resend Email again', 'quillcrm');
+			return __('Resend Email again', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
-			return __('Resend SMS again', 'quillcrm');
+			return __('Resend SMS again', 'doublescale');
 		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
-			return __('Resend WhatsApp again', 'quillcrm');
+			return __('Resend WhatsApp again', 'doublescale');
 		}
-		return __('Resend Message again', 'quillcrm');
+		return __('Resend Message again', 'doublescale');
 	};
 
 	const detailFields = useMemo(() => {
@@ -99,24 +99,24 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 			(campaignEmail.template?.subject || campaignEmail.activity?.data?.subject)
 		) {
 			fields.push({
-				label: __('Subject', 'quillcrm'),
+				label: __('Subject', 'doublescale'),
 				value:
 					campaignEmail.template?.subject ||
 					campaignEmail.activity?.data?.subject ||
-					__('No Subject', 'quillcrm'),
+					__('No Subject', 'doublescale'),
 			});
 		}
 
 		// Sent On
 		fields.push({
-			label: __('Sent On', 'quillcrm'),
+			label: __('Sent On', 'doublescale'),
 			value: <TimeAgoCell value={campaignEmail.sent_at} />,
 		});
 
 		// Email specific metrics
 		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
 			fields.push({
-				label: __('Opened', 'quillcrm'),
+				label: __('Opened', 'doublescale'),
 				icon: (
 					<div className="bg-[#D1F6DF] p-1.5 rounded-full text-[#16A34A]">
 						<OpenRateIcon width={22} height={22} />
@@ -129,14 +129,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
@@ -144,7 +144,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 			});
 
 			fields.push({
-				label: __('Clicked', 'quillcrm'),
+				label: __('Clicked', 'doublescale'),
 				icon: (
 					<div className="bg-[#EEE4FF] p-1.5 rounded-full text-[#660FF1]">
 						<ClickRateIcon width={22} height={22} />
@@ -157,14 +157,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
@@ -175,7 +175,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 		// WhatsApp specific metrics
 		if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
 			fields.push({
-				label: __('Read', 'quillcrm'),
+				label: __('Read', 'doublescale'),
 				icon: (
 					<div className="bg-[#D1F6DF] p-1.5 rounded-full text-[#16A34A]">
 						<OpenRateIcon width={22} height={22} />
@@ -188,14 +188,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
@@ -203,7 +203,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 			});
 
 			fields.push({
-				label: __('Clicked', 'quillcrm'),
+				label: __('Clicked', 'doublescale'),
 				icon: (
 					<div className="bg-[#EEE4FF] p-1.5 rounded-full text-[#660FF1]">
 						<ClickRateIcon width={22} height={22} />
@@ -216,14 +216,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
@@ -234,7 +234,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 		// SMS - Show clicked
 		if (campaignType === CAMPAIGN_CHANNEL.SMS) {
 			fields.push({
-				label: __('Clicked', 'quillcrm'),
+				label: __('Clicked', 'doublescale'),
 				icon: (
 					<div className="bg-[#EEE4FF] p-1.5 rounded-full text-[#660FF1]">
 						<ClickRateIcon width={22} height={22} />
@@ -247,14 +247,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
@@ -264,7 +264,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 
 		// Status
 		fields.push({
-			label: __('Status', 'quillcrm'),
+			label: __('Status', 'doublescale'),
 			value: (
 				<span
 					className={`border rounded-md px-2 py-1 ${
@@ -288,18 +288,18 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 			campaignEmail.error_info
 		) {
 			fields.push({
-				label: __('Failure Reason', 'quillcrm'),
+				label: __('Failure Reason', 'doublescale'),
 				value: (
 					<div className="flex flex-col gap-1 text-right">
 						{campaignEmail.error_info.code && (
 							<span className="text-sm text-gray-500">
-								{__('Code:', 'quillcrm')}{' '}
+								{__('Code:', 'doublescale')}{' '}
 								{campaignEmail.error_info.code}
 							</span>
 						)}
 						<span className="text-sm text-destructive max-w-[400px]">
 							{campaignEmail.error_info.message ||
-								__('Unknown error', 'quillcrm')}
+								__('Unknown error', 'doublescale')}
 						</span>
 					</div>
 				),
@@ -311,13 +311,13 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 
 	const messageLabel =
 		campaignType === CAMPAIGN_CHANNEL.EMAIL
-			? __('Email Message', 'quillcrm')
-			: __('Message', 'quillcrm');
+			? __('Email Message', 'doublescale')
+			: __('Message', 'doublescale');
 
 	const messageContent =
 		campaignEmail?.template?.body ||
 		campaignEmail?.activity?.data?.body ||
-		__('No content available', 'quillcrm');
+		__('No content available', 'doublescale');
 
 	return (
 		<MessageDetailsDialog

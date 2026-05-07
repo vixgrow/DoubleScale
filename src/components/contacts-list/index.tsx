@@ -11,7 +11,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Filter as FilterType, Contact } from '@quillcrm/client';
+import type { Filter as FilterType, Contact } from '@doublescale/client';
 import { SearchIcon } from 'lucide-react';
 
 interface ContactListProps {
@@ -36,7 +36,7 @@ const getContactInitials = (firstName: string, lastName: string): string => {
 const ContactList: React.FC<ContactListProps> = ({
 	filters = [],
 	loading = false,
-	searchPlaceholder = __('Search Recipients', 'quillcrm'),
+	searchPlaceholder = __('Search Recipients', 'doublescale'),
 	maxHeight = 0,
 	shouldFetch = false,
 	onFetchComplete,
@@ -166,7 +166,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				<div className="w-1/2">
 					<div className="flex items-center gap-2 mb-2">
 						<h3 className="text-lg font-semibold text-gray-900">
-							{__('Recipients', 'quillcrm')}
+							{__('Recipients', 'doublescale')}
 						</h3>
 						<span className="text-sm font-semibold text-secondary px-3 py-1 bg-[#C6DFF333] rounded-full">
 							{total.toLocaleString()}
@@ -175,7 +175,7 @@ const ContactList: React.FC<ContactListProps> = ({
 					<p className="text-sm font-semibold text-gray-500">
 						{__(
 							'Recipients Total Contacts based on filters',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -206,7 +206,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				{(isLoading || loading) && contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
-							{__('Loading contacts...', 'quillcrm')}
+							{__('Loading contacts...', 'doublescale')}
 						</div>
 					</div>
 				) : error ? (
@@ -216,7 +216,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				) : contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
-							{__('No contacts found', 'quillcrm')}
+							{__('No contacts found', 'doublescale')}
 						</div>
 					</div>
 				) : (
@@ -273,7 +273,7 @@ const ContactList: React.FC<ContactListProps> = ({
 						{isLoading && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-500 text-sm">
-									{__('Loading more contacts...', 'quillcrm')}
+									{__('Loading more contacts...', 'doublescale')}
 								</div>
 							</div>
 						)}
@@ -282,7 +282,7 @@ const ContactList: React.FC<ContactListProps> = ({
 						{!hasMore && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-400 text-sm">
-									{__('No more contacts to load', 'quillcrm')}
+									{__('No more contacts to load', 'doublescale')}
 								</div>
 							</div>
 						)}

@@ -16,16 +16,16 @@ import { AlertTriangle } from 'lucide-react';
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import {
 	getGoalLabel,
 	hasGoalWarning,
 	getGoalWarningMessage,
-} from '@quillcrm/utils';
+} from '@doublescale/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
-import { GoalIcon } from '@quillcrm/components';
+import { GoalIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -50,7 +50,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		analytics,
 	} = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	// Check if goal is configured - a goal is configured if it has an action slug
 	const isConfigured = !!step.action;
@@ -76,7 +76,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">
-								{__('Plugin Required', 'quillcrm')}
+								{__('Plugin Required', 'doublescale')}
 							</p>
 							<p className="text-xs mt-1">{warningMessage}</p>
 						</TooltipContent>
@@ -86,7 +86,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		</div>
 	) : (
 		<span className="qcrm-reactflow-goal__not-configured">
-			{__('Goal not set', 'quillcrm')}
+			{__('Goal not set', 'doublescale')}
 		</span>
 	);
 
@@ -152,7 +152,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 
 			createNotice({
 				type: 'success',
-				message: __('Step deleted', 'quillcrm'),
+				message: __('Step deleted', 'doublescale'),
 			});
 		} catch (error: any) {
 			createNotice({
@@ -185,16 +185,16 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 
 				<NodeLayout
 					icon={<GoalIcon width={23} height={23} />}
-					title={__('Goal', 'quillcrm')}
+					title={__('Goal', 'doublescale')}
 					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
-					editLabel={__('Edit Goal', 'quillcrm')}
-					deleteLabel={__('Delete Goal', 'quillcrm')}
-					deleteTitle={__('Delete this goal?', 'quillcrm')}
+					editLabel={__('Edit Goal', 'doublescale')}
+					deleteLabel={__('Delete Goal', 'doublescale')}
+					deleteTitle={__('Delete this goal?', 'doublescale')}
 					deleteDescription={__(
 						'This will remove the goal from your workflow.',
-						'quillcrm'
+						'doublescale'
 					)}
 					viewMode={viewMode}
 					analytics={analytics}

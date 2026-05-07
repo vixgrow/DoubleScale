@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { EditIcon } from '@quillcrm/components/icons';
+import { EditIcon } from '@doublescale/components/icons';
 import { __ } from '@wordpress/i18n';
 
 interface CardLayoutProps {
@@ -15,7 +15,7 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 	icon,
 	header,
 	buttonIcon = <EditIcon />,
-	buttonText = __('Edit', 'quillcrm'),
+	buttonText = __('Edit', 'doublescale'),
 	children,
 	onButtonClick,
 	button = true,

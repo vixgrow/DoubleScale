@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const StartComplete: React.FC<IconProps> = ({ width = 18, height = 20 }) => {
 	return (

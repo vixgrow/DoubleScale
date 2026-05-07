@@ -17,8 +17,8 @@ import {
 	Field,
 	GradientListIcon,
 	GradientTagIcon,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
 import {
 	Dialog,
 	DialogContent,
@@ -53,23 +53,23 @@ export const TaxonomyDialog: React.FC<TaxonomyDialogProps> = ({
 	const config = {
 		list: {
 			icon: <GradientListIcon />,
-			editTitle: __('Edit List', 'quillcrm'),
-			createTitle: __('Create List', 'quillcrm'),
-			subtitle: __('Add basic information below to add new List', 'quillcrm'),
-			nameLabel: __('List Name', 'quillcrm'),
-			namePlaceholder: __('Enter List Name', 'quillcrm'),
-			descriptionLabel: __('List Description', 'quillcrm'),
-			descriptionPlaceholder: __('Enter List Description', 'quillcrm'),
+			editTitle: __('Edit List', 'doublescale'),
+			createTitle: __('Create List', 'doublescale'),
+			subtitle: __('Add basic information below to add new List', 'doublescale'),
+			nameLabel: __('List Name', 'doublescale'),
+			namePlaceholder: __('Enter List Name', 'doublescale'),
+			descriptionLabel: __('List Description', 'doublescale'),
+			descriptionPlaceholder: __('Enter List Description', 'doublescale'),
 		},
 		tag: {
 			icon: <GradientTagIcon />,
-			editTitle: __('Edit Tag', 'quillcrm'),
-			createTitle: __('Create Tag', 'quillcrm'),
-			subtitle: __('Add basic information below to add new Tag', 'quillcrm'),
-			nameLabel: __('Tag Name', 'quillcrm'),
-			namePlaceholder: __('Enter Tag Name', 'quillcrm'),
-			descriptionLabel: __('Tag Description', 'quillcrm'),
-			descriptionPlaceholder: __('Enter Tag description', 'quillcrm'),
+			editTitle: __('Edit Tag', 'doublescale'),
+			createTitle: __('Create Tag', 'doublescale'),
+			subtitle: __('Add basic information below to add new Tag', 'doublescale'),
+			nameLabel: __('Tag Name', 'doublescale'),
+			namePlaceholder: __('Enter Tag Name', 'doublescale'),
+			descriptionLabel: __('Tag Description', 'doublescale'),
+			descriptionPlaceholder: __('Enter Tag description', 'doublescale'),
 		},
 	};
 
@@ -140,8 +140,8 @@ export const TaxonomyDialog: React.FC<TaxonomyDialogProps> = ({
 						className="w-full"
 					>
 						{isSaving
-							? __('Submitting...', 'quillcrm')
-							: __('Submit', 'quillcrm')}
+							? __('Submitting...', 'doublescale')
+							: __('Submit', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

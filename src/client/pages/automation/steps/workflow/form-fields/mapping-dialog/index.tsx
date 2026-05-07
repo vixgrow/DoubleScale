@@ -6,9 +6,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Label } from '@quillcrm/components/ui/label';
-import { Switch } from '@quillcrm/components/ui/switch';
-import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
+import { Label } from '@doublescale/components/ui/label';
+import { Switch } from '@doublescale/components/ui/switch';
+import { ListField, TagField, ContactMappedFields } from '@doublescale/components';
 
 interface MappingDialogProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -41,7 +41,7 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-col gap-4">
 				<h3 className="text-base font-semibold mb-2">
-					{__('Map Fields', 'quillcrm')}
+					{__('Map Fields', 'doublescale')}
 				</h3>
 				<ContactMappedFields
 					values={values}
@@ -52,12 +52,12 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 			
 			<div className="border-t pt-4 mt-4">
 				<h3 className="text-base font-semibold mb-2">
-					{__('Contact Settings', 'quillcrm')}
+					{__('Contact Settings', 'doublescale')}
 				</h3>
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-4 w-full">
 						<div className="flex flex-col gap-2.5">
-							<Label>{__('Lists', 'quillcrm')}</Label>
+							<Label>{__('Lists', 'doublescale')}</Label>
 							<ListField
 								value={lists}
 								onChange={(value) => {
@@ -69,7 +69,7 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 							/>
 						</div>
 						<div className="flex flex-col gap-2.5">
-							<Label>{__('Tags', 'quillcrm')}</Label>
+							<Label>{__('Tags', 'doublescale')}</Label>
 							<TagField
 								value={tags}
 								onChange={(value) => {
@@ -83,7 +83,7 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 					</div>
 					<div className="flex gap-2.5 justify-between items-center">
 						<Label>
-							{__('Update existing contact', 'quillcrm')}
+							{__('Update existing contact', 'doublescale')}
 						</Label>
 						<Switch
 							checked={update_existing_contact}
@@ -97,7 +97,7 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 					</div>
 					<div className="flex gap-2.5 justify-between items-center">
 						<Label>
-							{__('Update blank fields', 'quillcrm')}
+							{__('Update blank fields', 'doublescale')}
 						</Label>
 						<Switch
 							checked={update_blank_fields}
@@ -111,7 +111,7 @@ const MappingDialog: React.FC<MappingDialogProps> = ({
 					</div>
 					<div className="flex gap-2.5 justify-between items-center">
 						<Label>
-							{__('Mark as Subscribed', 'quillcrm')}
+							{__('Mark as Subscribed', 'doublescale')}
 						</Label>
 						<Switch
 							checked={mark_as_subscribed}

@@ -6,11 +6,11 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * internal dependencies
  */
-import { ImageBlockIcon } from '@quillcrm/components';
+import { ImageBlockIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 
 const HeroImageLibrary = () => {
-	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 	// Standard Hero template - creates 4 blocks: image, heading text, lorem text, button
 	const standardHeroTemplate = {
 		type: 'standard-hero',
@@ -574,7 +574,7 @@ const HeroImageLibrary = () => {
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Standard Hero', 'quillcrm')}
+					{__('Standard Hero', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={standardHeroTemplate}
@@ -587,16 +587,16 @@ const HeroImageLibrary = () => {
 							<ImageBlockIcon />
 						</div>
 						<div className="text-[#141B34] text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4] text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -604,7 +604,7 @@ const HeroImageLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Extended Hero', 'quillcrm')}
+					{__('Extended Hero', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={extendedHeroTemplate}
@@ -617,24 +617,24 @@ const HeroImageLibrary = () => {
 							<ImageBlockIcon />
 						</div>
 						<div className="text-[#141B34] text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4] text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="flex gap-3 items-center justify-center text-[10px]">
 							<div className="font-bold text-primary">
-								{__('$30', 'quillcrm')}
+								{__('$30', 'doublescale')}
 							</div>
 							<div className="text-[#9197A4]">
-								{__('$48', 'quillcrm')}
+								{__('$48', 'doublescale')}
 							</div>
 						</div>
 						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -642,7 +642,7 @@ const HeroImageLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title + Image', 'quillcrm')}
+					{__('Title + Image', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={titleImageTemplate}
@@ -652,22 +652,22 @@ const HeroImageLibrary = () => {
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#141B34] text-sm font-bold">
-							{__('Title 1', 'quillcrm')}
+							{__('Title 1', 'doublescale')}
 						</div>
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
 							<ImageBlockIcon />
 						</div>
 						<div className="text-[#141B34] text-sm">
-							{__('heading 1', 'quillcrm')}
+							{__('heading 1', 'doublescale')}
 						</div>
 						<div className="text-[#9197A4] text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
-							{__('Click here', 'quillcrm')}
+							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -675,7 +675,7 @@ const HeroImageLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Side by Side Image + Text', 'quillcrm')}
+					{__('Side by Side Image + Text', 'doublescale')}
 				</label>
 				<DraggableTemplate
 					template={sideBySideTemplate}
@@ -689,19 +689,19 @@ const HeroImageLibrary = () => {
 						</div>
 						<div className="grid gap-2 w-1/2">
 							<div className="text-[#141B34] text-sm font-bold">
-								{__('Title 1', 'quillcrm')}
+								{__('Title 1', 'doublescale')}
 							</div>
 							<div className="text-[#141B34] text-sm">
-								{__('heading 1', 'quillcrm')}
+								{__('heading 1', 'doublescale')}
 							</div>
 							<div className="text-[#9197A4]">
 								{__(
 									'Lorem ipsum contains the typefaces more in use, an aspect that.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</div>
 							<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg text-[10px]">
-								{__('Click here', 'quillcrm')}
+								{__('Click here', 'doublescale')}
 							</div>
 						</div>
 					</div>

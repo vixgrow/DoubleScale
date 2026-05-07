@@ -114,7 +114,7 @@ const PageTabs: React.FC<PageTabsProps> = ({
 								className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
 							>
 								{tab?.icon}
-								{__(tab.label, '@quillcrm')}
+								{__(tab.label, '@doublescale')}
 							</TabsTrigger>
 						))}
 					</TabsList>

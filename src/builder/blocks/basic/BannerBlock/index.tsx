@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { BannerBlockIcon } from '@quillcrm/components';
+import { BannerBlockIcon } from '@doublescale/components';
 
 const BannerBlock = {
 	type: 'banner' as const,
-	name: __('Banner', 'quillcrm'),
+	name: __('Banner', 'doublescale'),
 	icon: BannerBlockIcon,
 	isProActivated: false,
 	isPro: true,

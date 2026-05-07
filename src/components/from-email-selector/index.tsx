@@ -53,7 +53,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	try {
 		quillsmtpInfo = config.getQuillSMTPInfo() as QuillSMTPInfo | undefined;
 	} catch (e) {
-		console.warn('[QuillCRM] Failed to get QuillSMTP info:', e);
+		console.warn('[DoubleScale] Failed to get QuillSMTP info:', e);
 		quillsmtpInfo = undefined;
 	}
 
@@ -78,7 +78,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 			<div className={className}>
 				<Input
 					type="email"
-					placeholder={__('name@gmail.com', 'quillcrm')}
+					placeholder={__('name@gmail.com', 'doublescale')}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
 					className={cn('h-12 bg-white', error && '!border-red-500 focus-visible:!ring-red-500')}
@@ -89,7 +89,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				/>
 				{!quillsmtpInfo?.configured && quillsmtpInfo?.plugin_url && (
 					<p className="text-sm text-gray-500 mt-1">
-						{__('Install', 'quillcrm')}{' '}
+						{__('Install', 'doublescale')}{' '}
 						<a
 							href={quillsmtpInfo.plugin_url}
 							target="_blank"
@@ -98,7 +98,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 						>
 							QuillSMTP
 						</a>{' '}
-						{__('for easier email management', 'quillcrm')}
+						{__('for easier email management', 'doublescale')}
 					</p>
 				)}
 			</div>
@@ -112,7 +112,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				<div className="flex-1 min-w-0">
 					<Input
 						type="email"
-						placeholder={__('name@gmail.com', 'quillcrm')}
+						placeholder={__('name@gmail.com', 'doublescale')}
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 						className={cn(
@@ -141,9 +141,9 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 						<Command>
 							<CommandList>
 								<CommandEmpty>
-									{__('No verified senders found.', 'quillcrm')}
+									{__('No verified senders found.', 'doublescale')}
 								</CommandEmpty>
-								<CommandGroup heading={__('QuillSMTP Connections', 'quillcrm')}>
+								<CommandGroup heading={__('QuillSMTP Connections', 'doublescale')}>
 									{quillsmtpInfo?.verified_senders?.map((sender) => (
 										<CommandItem
 											key={sender.connection_id}
@@ -177,7 +177,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				</Popover>
 			</div>
 			<p className="text-xs text-gray-500 mt-1">
-				{__('Type an email as per your domain/SMTP settings. Email mismatch settings may not deliver emails as expected', 'quillcrm')}
+				{__('Type an email as per your domain/SMTP settings. Email mismatch settings may not deliver emails as expected', 'doublescale')}
 			</p>
 		</div>
 	);

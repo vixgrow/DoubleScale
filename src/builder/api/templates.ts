@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { EmailTemplate } from '@quillcrm/client';
+import { EmailTemplate } from '@doublescale/client';
 
 /**
  * Render a template to HTML
@@ -28,7 +28,7 @@ export const renderTemplate = async (
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to render template', 'quillcrm')
+			errorMessage || __('Failed to render template', 'doublescale')
 		);
 	}
 };
@@ -49,7 +49,7 @@ export const createTemplate = async (
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to create template', 'quillcrm')
+			errorMessage || __('Failed to create template', 'doublescale')
 		);
 	}
 };
@@ -72,7 +72,7 @@ export const updateTemplate = async (
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to update template', 'quillcrm')
+			errorMessage || __('Failed to update template', 'doublescale')
 		);
 	}
 };
@@ -98,7 +98,7 @@ export const saveTemplate = async (
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to save template', 'quillcrm')
+			errorMessage || __('Failed to save template', 'doublescale')
 		);
 	}
 };
@@ -118,7 +118,7 @@ export const getTemplate = async (
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to fetch template', 'quillcrm')
+			errorMessage || __('Failed to fetch template', 'doublescale')
 		);
 	}
 };
@@ -135,7 +135,7 @@ export const getTemplates = async (): Promise<EmailTemplate[]> => {
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to fetch templates', 'quillcrm')
+			errorMessage || __('Failed to fetch templates', 'doublescale')
 		);
 	}
 };
@@ -171,7 +171,7 @@ export const getUserTemplates = async (params?: {
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to fetch user templates', 'quillcrm')
+			errorMessage || __('Failed to fetch user templates', 'doublescale')
 		);
 	}
 };
@@ -188,7 +188,7 @@ export const deleteTemplate = async (templateId: number): Promise<void> => {
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			errorMessage || __('Failed to delete template', 'quillcrm')
+			errorMessage || __('Failed to delete template', 'doublescale')
 		);
 	}
 };

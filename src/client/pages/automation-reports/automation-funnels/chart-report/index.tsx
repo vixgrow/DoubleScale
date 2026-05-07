@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Card, CardContent } from '@/components/ui/card';
 import './style.scss';
-import { Automation } from '@quillcrm/client';
+import { Automation } from '@doublescale/client';
 // @ts-ignore
 import D3Funnel from 'd3-funnel';
 
@@ -68,7 +68,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			setFunnelData([]);
 			setLoading(false);
 			setError(
-				error.message || __('Failed to fetch funnel data', 'quillcrm')
+				error.message || __('Failed to fetch funnel data', 'doublescale')
 			);
 		}
 	}, [automation?.id]);
@@ -271,10 +271,10 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 		return (
 			<div className="chart-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Automation Funnel Chart', 'doublescale')}</h2>
 				</div>
 				<div className="loading-spinner">
-					{__('Loading funnel data...', 'quillcrm')}
+					{__('Loading funnel data...', 'doublescale')}
 				</div>
 			</div>
 		);
@@ -284,7 +284,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 		return (
 			<div className="chart-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Automation Funnel Chart', 'doublescale')}</h2>
 				</div>
 				<div className="error-message">{error}</div>
 			</div>
@@ -295,10 +295,10 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 		return (
 			<div className="chart-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Automation Funnel Chart', 'doublescale')}</h2>
 				</div>
 				<div className="empty-state">
-					{__('No funnel data available', 'quillcrm')}
+					{__('No funnel data available', 'doublescale')}
 				</div>
 			</div>
 		);
@@ -307,17 +307,17 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	return (
 		<div className="chart-report-container">
 			<div className="report-header">
-				<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+				<h2 className="report-title">{__('Automation Funnel Chart', 'doublescale')}</h2>
 				<div className="stats-container">
 					<div className="stat-box bg-[#E3EEFF99] text-secondary border border-secondary">
 						<span className="stat-label">
-							{__('Total Contacts:', 'quillcrm')}
+							{__('Total Contacts:', 'doublescale')}
 						</span>
 						<span className="stat-value">{totalContacts}</span>
 					</div>
 					<div className="stat-box bg-[#E4FAEC] text-[#16A34A] border border-[#16A34A]">
 						<span className="stat-label">
-							{__('Completion Rate:', 'quillcrm')}
+							{__('Completion Rate:', 'doublescale')}
 						</span>
 						<span className="stat-value">{completionRate}%</span>
 					</div>

@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const AlignVerticalCenterIcon: React.FC<IconProps> = ({ width = 16, height = 16 }) => {
 	return (

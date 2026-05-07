@@ -36,7 +36,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
 import { LinkDialog, LinkData } from './LinkDialog';
-import { MerageTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@doublescale/components';
 import MergeTagsSelector from '@/components/merge-tags';
 
 interface RichTextEditorProps {
@@ -947,7 +947,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					className="p-2 h-8 w-8"
 					onClick={() => setIsMergeTagsModalOpen(true)}
 					onMouseDown={(e) => e.preventDefault()}
-					title={__('Insert Merge Tags', 'quillcrm')}
+					title={__('Insert Merge Tags', 'doublescale')}
 				>
 					<MerageTagsIcon />
 				</Button>
@@ -1007,7 +1007,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				createPortal(
 					<div className="fixed bottom-2 right-4 z-[999999] bg-green-500 text-white text-base font-medium px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300 ease-out">
 						<Copy className="h-4 w-4" />
-						<span>{__('Merge tag copied to clipboard', 'quillcrm')}</span>
+						<span>{__('Merge tag copied to clipboard', 'doublescale')}</span>
 					</div>,
 					document.body
 				)}

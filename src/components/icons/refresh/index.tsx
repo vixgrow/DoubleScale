@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const RefreshIcon: React.FC<IconProps> = ({ width = 22, height = 22 }) => {
 	return (

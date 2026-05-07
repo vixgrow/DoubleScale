@@ -1,6 +1,6 @@
 class CheckoutFormHandler {
     constructor() {
-        this.quillcrmAbandonedCart = window?.['quillcrm_abandoned_cart'] || {};
+        this.doublescaleAbandonedCart = window?.['doublescale_abandoned_cart'] || {};
         this.checkoutForm = null;
         this.fieldsValues = {};
         this.previousValues = {};
@@ -58,14 +58,14 @@ class CheckoutFormHandler {
     }
 
     maybeAddGDPRConsent() {
-        if (!this.quillcrmAbandonedCart.gdpr_compliance) return;
-        if (document.querySelector('.quillcrm-gdpr-message')) return;
+        if (!this.doublescaleAbandonedCart.gdpr_compliance) return;
+        if (document.querySelector('.doublescale-gdpr-message')) return;
 
         const gdprMessageEl = document.createElement('div');
-        gdprMessageEl.className = 'quillcrm-gdpr-message';
+        gdprMessageEl.className = 'doublescale-gdpr-message';
         gdprMessageEl.style.marginTop = '10px';
         gdprMessageEl.style.fontSize = 'small';
-        gdprMessageEl.innerHTML = `<p>${this.quillcrmAbandonedCart.gdpr_message}</p>`;
+        gdprMessageEl.innerHTML = `<p>${this.doublescaleAbandonedCart.gdpr_message}</p>`;
 
         const emailField = document.querySelector('#billing_email_field, .wc-block-components-address-form__email');
         if (emailField) emailField.insertAdjacentElement('afterend', gdprMessageEl);
@@ -76,9 +76,9 @@ class CheckoutFormHandler {
             Object.keys(this.checkoutFields).forEach(key => {
                 for (const selector of this.checkoutFields[key]) {
                     const input = document.querySelector(selector);
-                    if (input && !input.dataset.quillcrmListener) {
-                        input.dataset.quillcrmListener = 'true';
-                        input.dataset.quillcrmFieldKey = key;
+                    if (input && !input.dataset.doublescaleListener) {
+                        input.dataset.doublescaleListener = 'true';
+                        input.dataset.doublescaleFieldKey = key;
                         const eventType = (input.type === 'checkbox' || input.type === 'radio' || input.tagName === 'SELECT') ? 'change' : 'input';
                         input.addEventListener(eventType, this.debouncedChangeHandler.bind(this));
                         if (eventType === 'input') input.addEventListener('blur', this.debouncedChangeHandler.bind(this));
@@ -98,7 +98,7 @@ class CheckoutFormHandler {
 
     debouncedChangeHandler(e) {
         const input = e.target;
-        const key = input.dataset.quillcrmFieldKey;
+        const key = input.dataset.doublescaleFieldKey;
         const value = input.value;
 
 
@@ -120,12 +120,12 @@ class CheckoutFormHandler {
 
         this.isLoading = true;
 
-        const { ajax_url, nonce } = this.quillcrmAbandonedCart;
+        const { ajax_url, nonce } = this.doublescaleAbandonedCart;
         fetch(ajax_url, {
             method: 'POST',
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
-                action: 'quillcrm_save_abandoned_cart',
+                action: 'doublescale_save_abandoned_cart',
                 nonce,
                 fields: JSON.stringify(this.fieldsValues)
             })

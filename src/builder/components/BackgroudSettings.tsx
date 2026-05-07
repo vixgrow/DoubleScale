@@ -18,7 +18,7 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@quillcrm/components/ui/select';
+} from '@doublescale/components/ui/select';
 import { ImageUploadControl, ColorPickerControl } from '../blocks/basic/shared';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 
@@ -64,7 +64,7 @@ const BackgroundSettings: React.FC<{
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
 					<h3 className="text-base text-[#333333]">
-						{__('Background', 'quillcrm')}
+						{__('Background', 'doublescale')}
 					</h3>
 				</div>
 			</div>
@@ -72,10 +72,10 @@ const BackgroundSettings: React.FC<{
 			<div className="space-y-4 p-4">
 				{/* Background Image Upload */}
 				<ImageUploadControl
-					label={__('Background Image', 'quillcrm')}
+					label={__('Background Image', 'doublescale')}
 					description={__(
 						'You can use JPG, PNG, and GIF formats, each under 2000px in dimension.',
-						'quillcrm'
+						'doublescale'
 					)}
 					value={settings.backgroundImage?.url || ''}
 					alt={settings.backgroundImage?.name || 'Background Image'}
@@ -88,7 +88,7 @@ const BackgroundSettings: React.FC<{
 					<div className="space-y-4">
 						<div className="space-y-2">
 							<label className="text-sm text-[#333333]">
-								{__('Background Repeat', 'quillcrm')}
+								{__('Background Repeat', 'doublescale')}
 							</label>
 							<Select
 								value={settings.backgroundRepeat}
@@ -100,16 +100,16 @@ const BackgroundSettings: React.FC<{
 									<SelectValue
 										placeholder={__(
 											'Background Repeat',
-											'quillcrm'
+											'doublescale'
 										)}
 									/>
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="no-repeat">
-										{__('No Repeat', 'quillcrm')}
+										{__('No Repeat', 'doublescale')}
 									</SelectItem>
 									<SelectItem value="repeat">
-										{__('Repeat', 'quillcrm')}
+										{__('Repeat', 'doublescale')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -118,7 +118,7 @@ const BackgroundSettings: React.FC<{
 						{/* Background Size */}
 						<div className="space-y-2">
 							<label className="text-sm text-[#333333]">
-								{__('Background Size', 'quillcrm')}
+								{__('Background Size', 'doublescale')}
 							</label>
 							<Select
 								value={settings.backgroundSize}
@@ -130,19 +130,19 @@ const BackgroundSettings: React.FC<{
 									<SelectValue
 										placeholder={__(
 											'Background Size',
-											'quillcrm'
+											'doublescale'
 										)}
 									/>
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="cover">
-										{__('Cover', 'quillcrm')}
+										{__('Cover', 'doublescale')}
 									</SelectItem>
 									<SelectItem value="contain">
-										{__('Contain', 'quillcrm')}
+										{__('Contain', 'doublescale')}
 									</SelectItem>
 									<SelectItem value="auto">
-										{__('Auto', 'quillcrm')}
+										{__('Auto', 'doublescale')}
 									</SelectItem>
 								</SelectContent>
 							</Select>
@@ -152,7 +152,7 @@ const BackgroundSettings: React.FC<{
 
 				{/* Canvas Color */}
 				<ColorPickerControl
-					label={__('Canvas Color', 'quillcrm')}
+					label={__('Canvas Color', 'doublescale')}
 					value={settings.canvasColor}
 					onChange={(value) => handleInputChange('canvasColor', value)}
 					id="canvas-color"

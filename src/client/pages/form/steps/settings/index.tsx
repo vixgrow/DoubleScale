@@ -15,10 +15,10 @@ import { map, mapValues } from 'lodash';
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import ConfigAPI from '@quillcrm/config';
-import type { Form } from '@quillcrm/config';
-import type { MappedFields } from '@quillcrm/client';
-import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
+import ConfigAPI from '@doublescale/config';
+import type { Form } from '@doublescale/config';
+import type { MappedFields } from '@doublescale/client';
+import { ListField, TagField, ContactMappedFields } from '@doublescale/components';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -33,7 +33,7 @@ const Settings: React.FC = () => {
 		: null;
 	const [isFetching, setIsFetching] = useState(true);
 	const { getAjaxUrl, getNonce } = ConfigAPI;
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
@@ -65,7 +65,7 @@ const Settings: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch form fields', 'quillcrm'),
+				message: __('Failed to fetch form fields', 'doublescale'),
 			});
 		} finally {
 			setIsFetching(false);
@@ -101,14 +101,14 @@ const Settings: React.FC = () => {
 
 					<div className="qcrm-field">
 						<div className="text-[#09090B] font-bold text-2xl my-5">
-							{__('Contact', 'quillcrm')}
+							{__('Contact', 'doublescale')}
 						</div>
 						<div className="qcrm-field-input">
 							<div className="flex flex-col gap-5">
 								<div className="flex justify-between gap-[10px]">
 									<div className="flex flex-col gap-[10px] flex-1">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Lists', 'quillcrm')}
+											{__('Lists', 'doublescale')}
 										</div>
 										<ListField
 											value={settings?.lists || []}
@@ -119,7 +119,7 @@ const Settings: React.FC = () => {
 									</div>
 									<div className="flex flex-col flex-1 gap-[10px]">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Tags', 'quillcrm')}
+											{__('Tags', 'doublescale')}
 										</div>
 										<TagField
 											value={settings?.tags || []}
@@ -136,7 +136,7 @@ const Settings: React.FC = () => {
 											<Label className="text-base text-[#09090B]">
 												{__(
 													'Update existing contact',
-													'quillcrm'
+													'doublescale'
 												)}
 											</Label>
 											<Switch
@@ -157,7 +157,7 @@ const Settings: React.FC = () => {
 											<Label className="text-base text-[#09090B]">
 												{__(
 													'Update blank fields',
-													'quillcrm'
+													'doublescale'
 												)}
 											</Label>
 											<Switch
@@ -178,7 +178,7 @@ const Settings: React.FC = () => {
 											<Label className="text-base text-[#09090B]">
 												{__(
 													'Mark as Subscribed',
-													'quillcrm'
+													'doublescale'
 												)}
 											</Label>
 											<Switch

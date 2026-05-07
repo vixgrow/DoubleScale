@@ -7,7 +7,7 @@ import { useDispatch } from '@wordpress/data';
  * external dependencies
  */
 import { useRef } from 'react';
-import { MerageTagsIcon } from '@quillcrm/components';
+import { MerageTagsIcon } from '@doublescale/components';
 /**
  * internal dependencies
  */
@@ -34,7 +34,7 @@ export const LinkInput: React.FC<LinkInputProps> = ({
     },
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const { setMergeTagsVisible, setMergeTagCallback } = useDispatch('quillcrm/core');
+    const { setMergeTagsVisible, setMergeTagCallback } = useDispatch('doublescale/core');
 
     const handleChange = (inputValue: string) => {
         // If the input is empty, just pass it through
@@ -90,7 +90,7 @@ export const LinkInput: React.FC<LinkInputProps> = ({
                 <div
                     className="cursor-pointer hover:opacity-80"
                     onClick={handleMergeTagClick}
-                    title={__('Insert Merge Tag', 'quillcrm')}
+                    title={__('Insert Merge Tag', 'doublescale')}
                 >
                     <MerageTagsIcon />
                 </div>

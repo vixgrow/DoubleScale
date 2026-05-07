@@ -22,7 +22,7 @@ interface ProFeatureNoticeProps {
 export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
-	upgradeUrl = config.getUrlQuillCRMPro(),
+	upgradeUrl = config.getUrlDoubleScalePro(),
 }) => {
 	const {
 		isInstalling,
@@ -40,7 +40,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 				</div>
 				<div className="qcrm-pro-feature-notice__content">
 					<h2 className="qcrm-pro-feature-notice__title">
-						{featureName} {__('is a Pro Feature', 'quillcrm')}
+						{featureName} {__('is a Pro Feature', 'doublescale')}
 					</h2>
 					{description && (
 						<p className="qcrm-pro-feature-notice__description">
@@ -51,13 +51,13 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						<div className="mt-3 text-sm text-[#b91c1c] bg-[#FEF2F2] border border-[#FECACA] rounded-md px-3 py-2">
 							{__(
 								'Your license has expired. Renew to continue using Pro features.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</div>
 					)}
 					{/* {features.length > 0 && (
 						<div className="qcrm-pro-feature-notice__features">
-							<h3>{__('Pro Features Include:', 'quillcrm')}</h3>
+							<h3>{__('Pro Features Include:', 'doublescale')}</h3>
 							<ul>
 								{features.map((feature) => (
 									<li key={feature}>
@@ -75,7 +75,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							{__('Try a Free demo', 'quillcrm')}
+							{__('Try a Free demo', 'doublescale')}
 						</a>
 						<button
 							onClick={() => handleUpgradeClick(upgradeUrl)}

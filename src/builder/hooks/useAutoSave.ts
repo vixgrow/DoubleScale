@@ -46,7 +46,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 
 	// Get campaign data
 	const campaign = useSelect(
-		(select) => select('quillcrm/campaign').getCampaign(),
+		(select) => select('doublescale/campaign').getCampaign(),
 		[]
 	);
 

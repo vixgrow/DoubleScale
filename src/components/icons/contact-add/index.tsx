@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ContactAddIcon: React.FC<IconProps> = ({ width = 55, height = 55 }) => {
 	return (

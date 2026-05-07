@@ -1,13 +1,13 @@
 /**
- * QuillCRM dependencies
+ * DoubleScale dependencies
  */
 import {
 	getAdminPages,
 	useNavigate,
 	getToLink,
 	useLocation,
-} from '@quillcrm/navigation';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+} from '@doublescale/navigation';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 /**
  * WordPress dependencies
  */
@@ -30,7 +30,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-} from '@quillcrm/components/ui/sidebar';
+} from '@doublescale/components/ui/sidebar';
 import { LogoIcon } from '../icons';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -124,7 +124,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						navItem.subMenu = [
 							{
 								path: 'my-reports',
-								label: __('My Reports', 'quillcrm'),
+								label: __('My Reports', 'doublescale'),
 							},
 						];
 					} else if (canManageAllDeals() && !isCrmManager()) {
@@ -132,19 +132,19 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						navItem.subMenu = [
 							{
 								path: 'deals-analytics',
-								label: __('Deals Analytics', 'quillcrm'),
+								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',
-								label: __('Sales Rep Analytics', 'quillcrm'),
+								label: __('Sales Rep Analytics', 'doublescale'),
 							},
 							{
 								path: 'pipeline-analytics',
-								label: __('Pipeline Analytics', 'quillcrm'),
+								label: __('Pipeline Analytics', 'doublescale'),
 							},
 							{
 								path: 'my-reports',
-								label: __('My Reports', 'quillcrm'),
+								label: __('My Reports', 'doublescale'),
 							},
 						];
 					} else {
@@ -152,31 +152,31 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						const submenu = [
 							{
 								path: 'deals-analytics',
-								label: __('Deals Analytics', 'quillcrm'),
+								label: __('Deals Analytics', 'doublescale'),
 							},
 							{
 								path: 'sales-rep-analytics',
-								label: __('Sales Rep Analytics', 'quillcrm'),
+								label: __('Sales Rep Analytics', 'doublescale'),
 							},
 							{
 								path: 'pipeline-analytics',
-								label: __('Pipeline Analytics', 'quillcrm'),
+								label: __('Pipeline Analytics', 'doublescale'),
 							},
 							{
 								path: 'my-reports',
-								label: __('My Reports', 'quillcrm'),
+								label: __('My Reports', 'doublescale'),
 							},
 							{
 								path: 'emails-analytics',
-								label: __('Emails Analytics', 'quillcrm'),
+								label: __('Emails Analytics', 'doublescale'),
 							},
 							{
 								path: 'contacts-analytics',
-								label: __('Contacts Analytics', 'quillcrm'),
+								label: __('Contacts Analytics', 'doublescale'),
 							},
 							{
 								path: 'cart-analytics',
-								label: __('Cart Analytics', 'quillcrm'),
+								label: __('Cart Analytics', 'doublescale'),
 							},
 						];
 
@@ -189,11 +189,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					navItem.subMenu = [
 						{
 							path: 'campaigns',
-							label: __('Campaigns', 'quillcrm'),
+							label: __('Campaigns', 'doublescale'),
 						},
 						{
 							path: 'email-sequences',
-							label: __('Email Sequences', 'quillcrm'),
+							label: __('Email Sequences', 'doublescale'),
 						},
 					];
 				}
@@ -378,7 +378,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						<div className="qcrm-navbar__brand">
 							<LogoIcon width={30} height={40} />
 							<span className="qcrm-navbar__brand-text">
-								{__('Quill CRM', 'quillcrm')}
+								{__('Quill CRM', 'doublescale')}
 							</span>
 						</div>
 					</SidebarHeader>
@@ -388,7 +388,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								type="button"
 								className="qcrm-navbar__chevron qcrm-navbar__chevron--top"
 								onClick={() => handleScrollBy('up')}
-								aria-label={__('Scroll up', 'quillcrm')}
+								aria-label={__('Scroll up', 'doublescale')}
 							>
 								<ChevronUp />
 							</button>
@@ -408,7 +408,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								type="button"
 								className="qcrm-navbar__chevron qcrm-navbar__chevron--bottom"
 								onClick={() => handleScrollBy('down')}
-								aria-label={__('Scroll down', 'quillcrm')}
+								aria-label={__('Scroll down', 'doublescale')}
 							>
 								<ChevronDown />
 							</button>

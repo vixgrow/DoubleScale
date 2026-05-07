@@ -15,7 +15,7 @@ import '@xyflow/react/dist/style.css';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { OrganizedStep } from '@quillcrm/client';
+import type { OrganizedStep } from '@doublescale/client';
 import WorkflowVisualization from './workflow-visualization';
 
 interface ReactFlowWorkflowProps {

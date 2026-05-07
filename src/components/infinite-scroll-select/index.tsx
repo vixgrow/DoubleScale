@@ -30,7 +30,7 @@ const getNestedValue = (obj: any, path?: string): any => {
 export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	value,
 	onValueChange,
-	placeholder = __('Select an option', 'quillcrm'),
+	placeholder = __('Select an option', 'doublescale'),
 	apiEndpoint,
 	apiParams = {},
 	searchParamName = 'search',
@@ -101,7 +101,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 			setHasMore(hasMorePages);
 			setPage(pageNum);
 		} catch (err: any) {
-			setError(err.message || __('Failed to load data', 'quillcrm'));
+			setError(err.message || __('Failed to load data', 'doublescale'));
 		} finally {
 			setLoading(false);
 		}
@@ -308,7 +308,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 				>
 					{loading && items.length === 0 && (
 						<div className="px-3 py-2 text-sm text-gray-500">
-							{__('Loading...', 'quillcrm')}
+							{__('Loading...', 'doublescale')}
 						</div>
 					)}
 
@@ -320,7 +320,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 
 					{!loading && !displayError && items.length === 0 && (
 						<div className="px-3 py-2 text-sm text-gray-500">
-							{__('No items found', 'quillcrm')}
+							{__('No items found', 'doublescale')}
 						</div>
 					)}
 
@@ -359,7 +359,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 							})}
 							{loading && (
 								<div className="px-3 py-2 text-sm text-center text-gray-500">
-									{__('Loading more...', 'quillcrm')}
+									{__('Loading more...', 'doublescale')}
 								</div>
 							)}
 						</>

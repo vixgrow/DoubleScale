@@ -26,13 +26,13 @@ const ConditionalSectionGate: React.FC<ConditionalSectionGateProps> = ({
 }) => {
 	// Check if Pro is active
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
 	// Try to get Pro component via filter
 	const ProComponent = applyFilters(
-		'quillcrm_conditional_section_modal',
+		'doublescale_conditional_section_modal',
 		null
 	) as React.ComponentType<ConditionalSectionGateProps> | null;
 
@@ -54,10 +54,10 @@ const ConditionalSectionGate: React.FC<ConditionalSectionGateProps> = ({
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
 			<div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
 				<ProFeatureNotice
-					featureName={__('Conditional Sections', 'quillcrm')}
+					featureName={__('Conditional Sections', 'doublescale')}
 					description={__(
 						'Create dynamic email sections that display conditionally based on contact filters. Show different content to different segments of your audience.',
-						'quillcrm'
+						'doublescale'
 					)}
 				/>
 				<div className="mt-4 flex justify-end">
@@ -65,7 +65,7 @@ const ConditionalSectionGate: React.FC<ConditionalSectionGateProps> = ({
 						onClick={onClose}
 						className="px-4 py-2 text-gray-600 hover:text-gray-800"
 					>
-						{__('Close', 'quillcrm')}
+						{__('Close', 'doublescale')}
 					</button>
 				</div>
 			</div>

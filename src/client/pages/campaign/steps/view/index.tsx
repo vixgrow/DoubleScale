@@ -22,7 +22,7 @@ import {
 	PanelLayout,
 	PanelSettings,
 	ReviewIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -33,7 +33,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { convertToWordPressTimezone } from '@/utils/index';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import { useCampaignStep } from '../shared';
 import {
 	CardLayout,
@@ -46,7 +46,7 @@ import type {
 	EmailTemplate,
 	SMSTemplate,
 	WhatsAppTemplate,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 dayjs.extend(utc);
 
@@ -64,21 +64,21 @@ const OtherInfoCard: React.FC<OtherInfoCardProps> = ({
 	return (
 		<CardLayout
 			icon={<OtherInfoIcon />}
-			header={__('Other Info', 'quillcrm')}
+			header={__('Other Info', 'doublescale')}
 			button={false}
 		>
 			<div className="grid grid-cols-2 gap-4">
 				<div>
 					<p className="text-base text-gray-500 mb-1">
-						{__('Status', 'quillcrm')}
+						{__('Status', 'doublescale')}
 					</p>
 					<p className="text-base font-semibold text-gray-900">
-						{__('Scheduled', 'quillcrm')}
+						{__('Scheduled', 'doublescale')}
 					</p>
 				</div>
 				<div>
 					<p className="text-base text-gray-500 mb-1">
-						{__('Estimated Contacts', 'quillcrm')}
+						{__('Estimated Contacts', 'doublescale')}
 					</p>
 					<p className="text-base font-semibold text-gray-900">
 						{estimatedContacts}
@@ -86,7 +86,7 @@ const OtherInfoCard: React.FC<OtherInfoCardProps> = ({
 				</div>
 				<div>
 					<p className="text-base text-gray-500 mb-1">
-						{__('Scheduled On', 'quillcrm')}
+						{__('Scheduled On', 'doublescale')}
 					</p>
 					<p className="text-base font-semibold text-gray-900">
 						{scheduledOn ?? '-'}
@@ -196,13 +196,13 @@ const View: React.FC = () => {
 	const breadcrumbItems = useMemo(
 		() => [
 			{
-				label: __('Campaign List', 'quillcrm'),
+				label: __('Campaign List', 'doublescale'),
 				href: 'campaigns',
 			},
 			{
 				label: campaign?.name
-					? sprintf(__('%s Details', 'quillcrm'), campaign.name)
-					: __('Campaign Details', 'quillcrm'),
+					? sprintf(__('%s Details', 'doublescale'), campaign.name)
+					: __('Campaign Details', 'doublescale'),
 			},
 		],
 		[campaign?.name]
@@ -214,7 +214,7 @@ const View: React.FC = () => {
 			variant="ghost"
 			size="icon"
 			onClick={handleClose}
-			aria-label={__('Close view', 'quillcrm')}
+			aria-label={__('Close view', 'doublescale')}
 		>
 			<X className="h-12 w-12" />
 		</Button>,
@@ -270,15 +270,15 @@ const View: React.FC = () => {
 					<div className="flex gap-6 items-start">
 						<div className="w-3/5">
 							<PanelSettings
-								title={__('Review', 'quillcrm')}
+								title={__('Review', 'doublescale')}
 								description={__(
 									'Review your campaign configuration and scheduled delivery details.',
-									'quillcrm'
+									'doublescale'
 								)}
 								icon={<ReviewIcon />}
 								showButtons={true}
 								onBack={handleClose}
-								backLabel={__('Cancel Schedule', 'quillcrm')}
+								backLabel={__('Cancel Schedule', 'doublescale')}
 								onNext={() =>
 									setDialogChannel(
 										campaign?.type === CAMPAIGN_CHANNEL.SMS
@@ -288,8 +288,8 @@ const View: React.FC = () => {
 								}
 								nextLabel={
 									campaign?.type === CAMPAIGN_CHANNEL.EMAIL
-										? __('Send Test Email', 'quillcrm')
-										: __('Send Test SMS', 'quillcrm')
+										? __('Send Test Email', 'doublescale')
+										: __('Send Test SMS', 'doublescale')
 								}
 							>
 								<div className="space-y-6">
@@ -316,8 +316,8 @@ const View: React.FC = () => {
 						<div className="w-2/5 border rounded-lg bg-[#f8f8f8] p-4">
 							<div className="text-[#333333] font-medium text-2xl">
 								{campaign.type === CAMPAIGN_CHANNEL.EMAIL
-									? __('Email Preview', 'quillcrm')
-									: __('SMS Preview', 'quillcrm')}
+									? __('Email Preview', 'doublescale')
+									: __('SMS Preview', 'doublescale')}
 							</div>
 							<div className="flex items-center justify-center">
 								{campaign.type === CAMPAIGN_CHANNEL.EMAIL ? (
@@ -327,7 +327,7 @@ const View: React.FC = () => {
 											<span>
 												{__(
 													'Loading template...',
-													'quillcrm'
+													'doublescale'
 												)}
 											</span>
 										</div>
@@ -342,7 +342,7 @@ const View: React.FC = () => {
 										<div className="text-center text-gray-500 text-base">
 											{__(
 												'No template content available.',
-												'quillcrm'
+												'doublescale'
 											)}
 										</div>
 									)
@@ -357,7 +357,7 @@ const View: React.FC = () => {
 					</div>
 				) : (
 					<div className="flex items-center justify-center h-full py-20 text-gray-500">
-						{__('Loading campaign details...', 'quillcrm')}
+						{__('Loading campaign details...', 'doublescale')}
 					</div>
 				)}
 			</PanelLayout>
@@ -376,18 +376,18 @@ const View: React.FC = () => {
 						<CustomDialogHeader
 							title={
 								dialogChannel === CAMPAIGN_CHANNEL.SMS
-									? __('Send Test SMS', 'quillcrm')
-									: __('Send Test Email', 'quillcrm')
+									? __('Send Test SMS', 'doublescale')
+									: __('Send Test Email', 'doublescale')
 							}
 							subtitle={
 								dialogChannel === CAMPAIGN_CHANNEL.SMS
 									? __(
 											'Who do you want to test your SMS with?',
-											'quillcrm'
+											'doublescale'
 										)
 									: __(
 											'Who do you want to test your email with?',
-											'quillcrm'
+											'doublescale'
 										)
 							}
 							icon={<GradientLinkIcon />}

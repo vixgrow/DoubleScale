@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertIcon, SendTestEmailIcon } from '@quillcrm/components/icons';
+import { AlertIcon, SendTestEmailIcon } from '@doublescale/components/icons';
 import { cn } from '@/lib/utils';
 
 interface SendTestEmailCardProps {
@@ -31,7 +31,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 	buttonClassName = '',
 	buttonVariant = 'secondary',
 }) => {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [testEmails, setTestEmails] = useState('');
 	const [isSendingTest, setIsSendingTest] = useState(false);
 	const isMountedRef = useRef(true);
@@ -53,7 +53,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				type: 'error',
 				message: __(
 					'Please enter at least one email address',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 			return;
@@ -62,7 +62,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 		if (!campaignId) {
 			createNotice({
 				type: 'error',
-				message: __('Campaign ID is missing', 'quillcrm'),
+				message: __('Campaign ID is missing', 'doublescale'),
 			});
 			return;
 		}
@@ -91,7 +91,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					type: 'error',
 					message: __(
 						'Please enter valid email addresses',
-						'quillcrm'
+						'doublescale'
 					),
 				});
 				return;
@@ -114,7 +114,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				type: 'success',
 				message:
 					response.message ||
-					__('Test email sent successfully', 'quillcrm'),
+					__('Test email sent successfully', 'doublescale'),
 			});
 
 			setTestEmails('');
@@ -132,7 +132,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				type: 'error',
 				message:
 					error.message ||
-					__('Failed to send test email', 'quillcrm'),
+					__('Failed to send test email', 'doublescale'),
 			});
 		} finally {
 			// Only update state if component is still mounted
@@ -149,7 +149,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					<div className="flex items-center gap-2 justify-center text-[#660FF1]">
 						<SendTestEmailIcon />
 						<h3 className="text-lg text-[#660FF1]">
-							{__('Send test email', 'quillcrm')}
+							{__('Send test email', 'doublescale')}
 						</h3>
 					</div>
 				</div>
@@ -161,14 +161,14 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					<h4 className="text-base text-[#09090B]">
 						{__(
 							'Who do you want to test your email with?',
-							'quillcrm'
+							'doublescale'
 						)}
 					</h4>
 				)}
 
 				<div>
 					<label className="block text-base text-[#09090B] mb-2">
-						{__('Send a test email to', 'quillcrm')}
+						{__('Send a test email to', 'doublescale')}
 					</label>
 					<Textarea
 						value={testEmails}
@@ -180,7 +180,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					<p className="text-base font-medium text-secondary mt-2">
 						{__(
 							'If you enter multiple emails, separate them with a comma',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -194,7 +194,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 						<p className="text-base text-destructive">
 							{__(
 								"Your test email could land in a spam folder. But don't worry, once you send the actual campaign, the emails will successfully reach your recipients.",
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					</div>
@@ -209,8 +209,8 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 						className={cn(buttonClassName)}
 					>
 						{isSendingTest
-							? __('Sending...', 'quillcrm')
-							: __('Send Test', 'quillcrm')}
+							? __('Sending...', 'doublescale')
+							: __('Send Test', 'doublescale')}
 					</Button>
 				</div>
 			</div>

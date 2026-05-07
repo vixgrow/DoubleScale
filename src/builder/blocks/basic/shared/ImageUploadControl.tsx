@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
-import { DeleteIcon, FileUploadIcon } from '@quillcrm/components';
+import { DeleteIcon, FileUploadIcon } from '@doublescale/components';
 import { generateRandomString } from '@/builder/utils/idGenerator';
 import { LinkInput } from './LinkInput';
 
@@ -75,7 +75,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 	// Check if merge tags modal is visible to prevent popover from closing
 	const mergeTagsVisible = useSelect(
-		(select) => select('quillcrm/core').getMergeTagsVisible(),
+		(select) => select('doublescale/core').getMergeTagsVisible(),
 		[]
 	);
 
@@ -124,9 +124,9 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 			);
 			// Create the media frame
 			const frame = window.wp.media({
-				title: __('Select Image', 'quillcrm'),
+				title: __('Select Image', 'doublescale'),
 				button: {
-					text: __('Use this image', 'quillcrm'),
+					text: __('Use this image', 'doublescale'),
 				},
 				multiple: false,
 				library: {
@@ -213,9 +213,9 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 		// Same logic for replacing image
 		if (typeof window.wp !== 'undefined' && window.wp.media) {
 			const frame = window.wp.media({
-				title: __('Replace Image', 'quillcrm'),
+				title: __('Replace Image', 'doublescale'),
 				button: {
-					text: __('Use this image', 'quillcrm'),
+					text: __('Use this image', 'doublescale'),
 				},
 				multiple: false,
 				library: {
@@ -396,20 +396,20 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 						className="w-full justify-start px-2"
 						onClick={handleUploadClick}
 					>
-						{__('Upload from Media Library', 'quillcrm')}
+						{__('Upload from Media Library', 'doublescale')}
 					</Button>
 					<Button
 						variant="ghost"
 						className="w-full justify-start px-2"
 						onClick={handleUrlClick}
 					>
-						{__('Insert URL', 'quillcrm')}
+						{__('Insert URL', 'doublescale')}
 					</Button>
 				</div>
 			) : mode === 'url' ? (
 				<div className="p-2 space-y-4">
 					<LinkInput
-						label={__('Image URL', 'quillcrm')}
+						label={__('Image URL', 'doublescale')}
 						value={urlValue}
 						onChange={setUrlValue}
 						placeholder="https://example.com/image.jpg"
@@ -423,14 +423,14 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 								setUrlValue(value || '');
 							}}
 						>
-							{__('Cancel', 'quillcrm')}
+							{__('Cancel', 'doublescale')}
 						</Button>
 						<Button
 							size="sm"
 							onClick={handleUrlSubmit}
 							disabled={!urlValue || urlValue.trim() === ''}
 						>
-							{__('Insert', 'quillcrm')}
+							{__('Insert', 'doublescale')}
 						</Button>
 					</div>
 				</div>
@@ -486,7 +486,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 										disabled={disabled}
 										onClick={handleTriggerClick}
 									>
-										{__('Replace', 'quillcrm')}
+										{__('Replace', 'doublescale')}
 									</Button>
 								</PopoverAnchor>
 								{renderPopoverContent()}
@@ -499,7 +499,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 								onClick={handleReplaceImage}
 								disabled={disabled}
 							>
-								{__('Replace', 'quillcrm')}
+								{__('Replace', 'doublescale')}
 							</Button>
 						)}
 						<Button
@@ -541,14 +541,14 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 									</div>
 									<div className="flex items-center gap-1">
 										<div className="text-primary">
-											{__('Click to Upload', 'quillcrm')}
+											{__('Click to Upload', 'doublescale')}
 										</div>
 										<div className="text-sm text-[#353535]">
-											{__('or drag and drop', 'quillcrm')}
+											{__('or drag and drop', 'doublescale')}
 										</div>
 									</div>
 									<div className="text-xs text-[#353535]">
-										{__('(Max. File size: 25 MB)', 'quillcrm')}
+										{__('(Max. File size: 25 MB)', 'doublescale')}
 									</div>
 								</div>
 							</button>
@@ -584,14 +584,14 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 							</div>
 							<div className="flex items-center gap-1">
 								<div className="text-primary">
-									{__('Click to Upload', 'quillcrm')}
+									{__('Click to Upload', 'doublescale')}
 								</div>
 								<div className="text-sm text-[#353535]">
-									{__('or drag and drop', 'quillcrm')}
+									{__('or drag and drop', 'doublescale')}
 								</div>
 							</div>
 							<div className="text-xs text-[#353535]">
-								{__('(Max. File size: 25 MB)', 'quillcrm')}
+								{__('(Max. File size: 25 MB)', 'doublescale')}
 							</div>
 						</div>
 					</div>

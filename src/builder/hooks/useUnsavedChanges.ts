@@ -8,7 +8,7 @@ interface UseUnsavedChangesOptions {
 
 export const useUnsavedChanges = ({
   hasUnsavedChanges,
-  message = __('You have unsaved changes. Are you sure you want to leave?', 'quillcrm'),
+  message = __('You have unsaved changes. Are you sure you want to leave?', 'doublescale'),
 }: UseUnsavedChangesOptions) => {
   // Handle browser navigation (back/forward/refresh/close)
   useEffect(() => {

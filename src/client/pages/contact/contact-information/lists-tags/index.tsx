@@ -19,12 +19,12 @@ import {
 	AddRemoveTagsModal,
 	ListsIcon,
 	TagsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContactContext } from '../../state/context';
-import type { List, Tag } from '@quillcrm/client';
+import type { List, Tag } from '@doublescale/client';
 
 const ListsTagsCards: React.FC = () => {
 	const { contact, updateContact } = useContactContext();
@@ -157,7 +157,7 @@ const ListsTagsCards: React.FC = () => {
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
 								<ListsIcon width={26} height={26} />
-								{__('Lists', 'quillcrm')}
+								{__('Lists', 'doublescale')}
 							</div>
 							<Button
 								variant="ghost"
@@ -223,7 +223,7 @@ const ListsTagsCards: React.FC = () => {
 										))
 									) : (
 										<p className="text-sm text-muted-foreground">
-											{__('No lists found', 'quillcrm')}
+											{__('No lists found', 'doublescale')}
 										</p>
 									)}
 									<Button
@@ -233,7 +233,7 @@ const ListsTagsCards: React.FC = () => {
 										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
 									>
 										<Plus className="h-4 w-4 mr-1" />
-										{__('Add Lists', 'quillcrm')}
+										{__('Add Lists', 'doublescale')}
 									</Button>
 								</div>
 							)}
@@ -245,7 +245,7 @@ const ListsTagsCards: React.FC = () => {
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
 								<TagsIcon width={26} height={26} />
-								{__('Tags', 'quillcrm')}
+								{__('Tags', 'doublescale')}
 							</div>
 							<Button
 								variant="ghost"
@@ -309,7 +309,7 @@ const ListsTagsCards: React.FC = () => {
 										))
 									) : (
 										<p className="text-sm text-muted-foreground">
-											{__('No tags found', 'quillcrm')}
+											{__('No tags found', 'doublescale')}
 										</p>
 									)}
 									<Button
@@ -319,7 +319,7 @@ const ListsTagsCards: React.FC = () => {
 										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
 									>
 										<Plus className="h-4 w-4 mr-1" />
-										{__('Add Tags', 'quillcrm')}
+										{__('Add Tags', 'doublescale')}
 									</Button>
 								</div>
 							)}

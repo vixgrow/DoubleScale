@@ -8,7 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
+import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
 
 /**
  * Internal dependencies
@@ -33,19 +33,19 @@ const Campaign: React.FC = () => {
 
 	// Use WordPress data store instead of local state
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	);
 	const loading = useSelect(
-		(select: any) => select('quillcrm/campaign').isLoading(),
+		(select: any) => select('doublescale/campaign').isLoading(),
 		[]
 	);
 	const currentStep = useSelect(
-		(select: any) => select('quillcrm/campaign').getCurrentStep(),
+		(select: any) => select('doublescale/campaign').getCurrentStep(),
 		[]
 	);
 	const { template_id } = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		(select: any) => select('doublescale/campaign').getStepData('template'),
 		[]
 	);
 
@@ -55,7 +55,7 @@ const Campaign: React.FC = () => {
 	>(undefined);
 
 	const { fetchCampaign, saveCampaignStep, resetCampaign } =
-		useDispatch('quillcrm/campaign');
+		useDispatch('doublescale/campaign');
 
 	useEffect(() => {
 		isMountedRef.current = true;

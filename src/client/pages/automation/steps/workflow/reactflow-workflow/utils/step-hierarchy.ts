@@ -15,7 +15,7 @@ import type {
 	AutomationStep,
 	OrganizedStep,
 	Automation,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import { createMergeNodeData } from './merge-utils';
 import { calculateBranchWidth } from './helper';
 import { LAYOUT_CONSTANTS_VIEW_MODE } from '../config';
@@ -382,7 +382,7 @@ const processStepHierarchy = (
 				sourceHandle: 'yes',
 				target: yesNodeId,
 				type: 'conditionEdge',
-				label: __('Yes', 'quillcrm'),
+				label: __('Yes', 'doublescale'),
 				style: {
 					stroke: '#D7D7DA',
 					strokeWidth: 3,
@@ -402,7 +402,7 @@ const processStepHierarchy = (
 				sourceHandle: 'no',
 				target: noNodeId,
 				type: 'conditionEdge',
-				label: __('No', 'quillcrm'),
+				label: __('No', 'doublescale'),
 				style: {
 					stroke: '#D7D7DA',
 					strokeWidth: 3,

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Automation, AutomationStep } from '@quillcrm/client';
+import type { Automation, AutomationStep } from '@doublescale/client';
 import {
 	SET_AUTOMATION,
 	UPDATE_AUTOMATION,

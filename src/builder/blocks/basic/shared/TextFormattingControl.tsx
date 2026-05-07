@@ -30,7 +30,7 @@ export const TextFormattingControl: React.FC<TextFormattingControlProps> = ({
     return (
         <div className={cn('flex flex-col gap-2 text-[#333333]', className)}>
             <label className="text-sm">
-                {__('Decoration', 'quillcrm')}
+                {__('Decoration', 'doublescale')}
             </label>
             <div className="flex items-center justify-between border rounded-lg">
                 <Bold

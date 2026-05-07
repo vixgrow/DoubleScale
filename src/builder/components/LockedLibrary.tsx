@@ -25,7 +25,7 @@ const LockedLibrary = () => {
 					<h3 className="text-base text-[#333333] font-medium">
 						{__(
 							'Unlock advanced features with Pro upgrade',
-							'quillcrm'
+							'doublescale'
 						)}
 					</h3>
 				</div>

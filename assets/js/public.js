@@ -1,6 +1,6 @@
-const ajaxUrl = window['quillcrm_public_config'].ajaxUrl;
+const ajaxUrl = window['doublescale_public_config'].ajaxUrl;
 
-const form = document.querySelector('form#quillcrm-unsubscribe-form');
+const form = document.querySelector('form#doublescale-unsubscribe-form');
 if (form) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();

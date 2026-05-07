@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const LogoIcon: React.FC<IconProps> = ({ width = 31, height = 40 }) => {
 	return (

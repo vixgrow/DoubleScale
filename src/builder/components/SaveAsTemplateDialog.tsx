@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { CustomDialogHeader, SaveAsTemplateIcon } from '@quillcrm/components';
+import { CustomDialogHeader, SaveAsTemplateIcon } from '@doublescale/components';
 
 interface SaveAsTemplateDialogProps {
 	isOpen: boolean;
@@ -73,7 +73,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 					setExistingTemplates(templates);
 				})
 				.catch(() => {
-					setError(__('Failed to load templates', 'quillcrm'));
+					setError(__('Failed to load templates', 'doublescale'));
 				})
 				.finally(() => {
 					setIsLoadingTemplates(false);
@@ -84,12 +84,12 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 	const handleSave = async () => {
 		// Validate based on mode
 		if (saveMode === 'update' && !selectedTemplateId) {
-			setError(__('Please select a template to update', 'quillcrm'));
+			setError(__('Please select a template to update', 'doublescale'));
 			return;
 		}
 
 		if (saveMode === 'new' && !templateName.trim()) {
-			setError(__('Please enter a template name', 'quillcrm'));
+			setError(__('Please enter a template name', 'doublescale'));
 			return;
 		}
 
@@ -110,7 +110,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 			setSelectedTemplateId(null);
 			onClose();
 		} catch (err: any) {
-			setError(err.message || __('Failed to save template', 'quillcrm'));
+			setError(err.message || __('Failed to save template', 'doublescale'));
 		}
 	};
 
@@ -144,10 +144,10 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 			<DialogOverlay />
 			<DialogContent className="top-[39%]">
 				<CustomDialogHeader
-					title={__('Save as Template', 'quillcrm')}
+					title={__('Save as Template', 'doublescale')}
 					subtitle={__(
 						'Save this email design as a template so you could re-use it.',
-						'quillcrm'
+						'doublescale'
 					)}
 					icon={<SaveAsTemplateIcon />}
 				/>
@@ -172,7 +172,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 								htmlFor="save-new"
 								className="font-normal cursor-pointer"
 							>
-								{__('Save as a new template', 'quillcrm')}
+								{__('Save as a new template', 'doublescale')}
 							</Label>
 						</div>
 
@@ -183,7 +183,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 								htmlFor="save-update"
 								className="font-normal cursor-pointer"
 							>
-								{__('Update an existing template', 'quillcrm')}
+								{__('Update an existing template', 'doublescale')}
 							</Label>
 						</div>
 					</RadioGroup>
@@ -194,7 +194,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 							{/* Template Name */}
 							<div className="flex flex-col gap-2">
 								<Label htmlFor="template-name">
-									{__('Template Name', 'quillcrm')}
+									{__('Template Name', 'doublescale')}
 								</Label>
 								<Input
 									id="template-name"
@@ -206,7 +206,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 									onKeyDown={handleKeyDown}
 									placeholder={__(
 										'Enter template name',
-										'quillcrm'
+										'doublescale'
 									)}
 									disabled={isSaving}
 									className="h-12"
@@ -224,11 +224,11 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 							<ImageUploadControl
 								label={__(
 									'Template Thumbnail (Optional)',
-									'quillcrm'
+									'doublescale'
 								)}
 								description={__(
 									'Upload a thumbnail image to represent your template. This will help you identify it later.',
-									'quillcrm'
+									'doublescale'
 								)}
 								value={thumbnailUrl}
 								onChange={({ src }) => setThumbnailUrl(src)}
@@ -243,7 +243,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 							{/* Template Selection */}
 							<div className="flex flex-col gap-2">
 								<Label htmlFor="template-select">
-									{__('Select Template', 'quillcrm')}
+									{__('Select Template', 'doublescale')}
 								</Label>
 								<Select
 									value={selectedTemplateId?.toString() || ''}
@@ -262,11 +262,11 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 												isLoadingTemplates
 													? __(
 															'Loading templates...',
-															'quillcrm'
+															'doublescale'
 														)
 													: __(
 															'Select a template to update',
-															'quillcrm'
+															'doublescale'
 														)
 											}
 										/>
@@ -285,7 +285,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 												<div className="px-2 py-1.5 text-sm text-muted-foreground">
 													{__(
 														'No templates found',
-														'quillcrm'
+														'doublescale'
 													)}
 												</div>
 											)}
@@ -310,10 +310,10 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 						className="w-full"
 					>
 						{isSaving
-							? __('Saving...', 'quillcrm')
+							? __('Saving...', 'doublescale')
 							: saveMode === 'update'
-								? __('Update Template', 'quillcrm')
-								: __('Save Template', 'quillcrm')}
+								? __('Update Template', 'doublescale')
+								: __('Save Template', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

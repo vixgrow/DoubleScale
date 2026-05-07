@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const UnsubscribeSMSIcon: React.FC<IconProps> = ({
 	width = 24,

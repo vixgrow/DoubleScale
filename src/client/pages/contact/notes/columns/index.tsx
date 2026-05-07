@@ -9,9 +9,9 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { Note } from '@quillcrm/client';
-import { Button } from '@quillcrm/components/ui/button';
-import { DeleteIcon } from '@quillcrm/components';
+import type { Note } from '@doublescale/client';
+import { Button } from '@doublescale/components/ui/button';
+import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface ColumnsProps {
@@ -23,12 +23,12 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 	const columns: ColumnDef<Note>[] = [
 		{
 			accessorKey: 'title',
-			header: __('Title', 'quillcrm'),
+			header: __('Title', 'doublescale'),
 			cell: ({ row }) => row.original.title,
 		},
 		{
 			accessorKey: 'note',
-			header: __('Note', 'quillcrm'),
+			header: __('Note', 'doublescale'),
 			cell: ({ row }) => (
 				<span className="line-clamp-2">
 					{row.original.note}
@@ -37,7 +37,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'source',
-			header: __('Source', 'quillcrm'),
+			header: __('Source', 'doublescale'),
 			cell: ({ row }) => {
 				const isDealNote = row.original.deal_id !== null && row.original.deal_id !== undefined;
 				const sourceColors: Record<string, string> = {
@@ -52,14 +52,14 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 					<span
 						className={`border rounded-md px-2 py-1 ${colorClass}`}
 					>
-						{isDealNote ? __('Deal', 'quillcrm') : __('Contact', 'quillcrm')}
+						{isDealNote ? __('Deal', 'doublescale') : __('Contact', 'doublescale')}
 					</span>
 				);
 			},
 		},
 		{
 			accessorKey: 'type',
-			header: __('Type', 'quillcrm'),
+			header: __('Type', 'doublescale'),
 			cell: ({ row }) => {
 				const type = row.original.type;
 				const typeColors: Record<string, string> = {
@@ -80,7 +80,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-4">
 					<Button

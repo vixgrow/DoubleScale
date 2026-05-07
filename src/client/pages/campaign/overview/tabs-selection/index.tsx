@@ -12,13 +12,13 @@ import PageTabs from '@/components/page-tabs';
 import CampaignDetails from '../campaign-details';
 import EmailsTab from '../emails';
 import UnsubscribesTab from '../unsubscribes';
-import { CampaignsIcon, ContactTotalEmailsIcon, UnsubscribesIcon, UnsubscribeSMSIcon } from '@quillcrm/components';
-import { Campaign as CampaignType } from '@quillcrm/client';
+import { CampaignsIcon, ContactTotalEmailsIcon, UnsubscribesIcon, UnsubscribeSMSIcon } from '@doublescale/components';
+import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const TabsSelection: React.FC = () => {
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	) as CampaignType | null;
 

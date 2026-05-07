@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import AddNewSectionModal from './AddNewSectionModal';
 //@ts-ignore
 import emailBuilder from '../../../assets/images/email-builder.png';
-import { ColumnsLayout } from '@quillcrm/components';
+import { ColumnsLayout } from '@doublescale/components';
 import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
@@ -65,8 +65,8 @@ const Canvas = () => {
 		<div className="flex-1 overflow-auto h-full">
 			<style>{`
 				/* Disable pointer events on links and buttons in canvas content only */
-				#quillcrm-email-builder [data-block-id] a,
-				#quillcrm-email-builder [data-block-id] button {
+				#doublescale-email-builder [data-block-id] a,
+				#doublescale-email-builder [data-block-id] button {
 					pointer-events: none !important;
 					cursor: default !important;
 				}
@@ -77,7 +77,7 @@ const Canvas = () => {
 			>
 				{(sections.length > 0 || isLoading) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
-						{__('Email Page', 'quillcrm')}
+						{__('Email Page', 'doublescale')}
 					</div>
 				)}
 				{/* Email Template Container */}
@@ -116,7 +116,7 @@ const Canvas = () => {
 										<div className="text-blue-600 font-semibold text-lg">
 											{__(
 												'Drop here to add section',
-												'quillcrm'
+												'doublescale'
 											)}
 										</div>
 									</div>
@@ -132,12 +132,12 @@ const Canvas = () => {
 									<p className="text-2xl text-secondary-foreground font-medium leading-10 text-center">
 										{__(
 											'There are no sections at the moment. Start adding',
-											'quillcrm'
+											'doublescale'
 										)}
 										<br />
 										{__(
 											'Or drag blocks from the library',
-											'quillcrm'
+											'doublescale'
 										)}
 									</p>
 								</div>
@@ -148,7 +148,7 @@ const Canvas = () => {
 									className="px-5"
 								>
 									<ColumnsLayout />
-									{__('Add New Section', 'quillcrm')}
+									{__('Add New Section', 'doublescale')}
 								</Button>
 							</div>
 						) : (
@@ -185,7 +185,7 @@ const Canvas = () => {
 										className="w-full shadow-none border-dashed border-primary text-primary bg-transparent"
 										onClick={handleOpenModal}
 									>
-										{__('Add New Section', 'quillcrm')}
+										{__('Add New Section', 'doublescale')}
 									</Button>
 								</div>
 							</>

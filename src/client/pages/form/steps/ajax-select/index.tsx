@@ -15,7 +15,7 @@ import AsyncSelect from 'react-select/async';
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 
 interface Props {
 	label: string;
@@ -97,7 +97,7 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 				<AsyncSelect
 					className="react-select-container"
 					classNamePrefix="react-select"
-					placeholder={__('Select Option', 'quillcrm')}
+					placeholder={__('Select Option', 'doublescale')}
 					loadOptions={(_inputValue, callback) => {
 						fetchOptions().then((data) => {
 							if (!data) {

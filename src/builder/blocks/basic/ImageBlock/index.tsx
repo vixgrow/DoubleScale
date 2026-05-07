@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { ImageBlockIcon } from '@quillcrm/components';
+import { ImageBlockIcon } from '@doublescale/components';
 import { ImageBlockRenderer } from './Renderer';
 import { ImageBlockEditor } from './Editor';
 
@@ -31,7 +31,7 @@ export interface ImageBlockProps {
 
 const ImageBlock = {
 	type: 'image',
-	name: __('Image', 'quillcrm'),
+	name: __('Image', 'doublescale'),
 	icon: ImageBlockIcon,
 	isProActivated: false,
 	isPro: false,

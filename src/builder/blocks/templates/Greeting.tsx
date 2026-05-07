@@ -15,22 +15,22 @@ import accountVerification from '../../../../assets/images/templates/Account-Ver
 const templateItems = [
 	{
 		id: 'welcome',
-		title: __('Welcome', 'quillcrm'),
+		title: __('Welcome', 'doublescale'),
 		image: welcomeSeries,
 	},
 	{
 		id: 'thank-you-joining',
-		title: __('Thank You for Joining', 'quillcrm'),
+		title: __('Thank You for Joining', 'doublescale'),
 		image: thankYouJoining,
 	},
 	{
 		id: 'onboarding-guide',
-		title: __('Onboarding Guide', 'quillcrm'),
+		title: __('Onboarding Guide', 'doublescale'),
 		image: onboardingGuide,
 	},
 	{
 		id: 'account-verification',
-		title: __('Account Verification', 'quillcrm'),
+		title: __('Account Verification', 'doublescale'),
 		image: accountVerification,
 	},
 ];

@@ -36,7 +36,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 	onClose,
 	featureName,
 }) => {
-	const upgradeUrl = config.getUrlQuillCRMPro();
+	const upgradeUrl = config.getUrlDoubleScalePro();
 	const { isInstalling, isActivating, handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
@@ -45,7 +45,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 					<DialogTitle className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
 							<Lock className="h-5 w-5" />
-							{__('This is a PRO Feature', 'quillcrm')}
+							{__('This is a PRO Feature', 'doublescale')}
 						</div>
 					</DialogTitle>
 				</DialogHeader>
@@ -54,7 +54,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 					<p className="text-gray-600 mb-6">
 						{__(
 							"We're sorry, this feature is not available on your plan. Please upgrade to the PRO plan to unlock all these awesome features.",
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 					<div className="qcrm-pro-modal__feature-info mb-6">
@@ -65,7 +65,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 									{featureName}
 								</div>
 								<div className="text-sm text-blue-700">
-									{__('Available in PRO version', 'quillcrm')}
+									{__('Available in PRO version', 'doublescale')}
 								</div>
 							</div>
 						</div>
@@ -77,7 +77,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 							onClick={onClose}
 							className="flex-1"
 						>
-							{__('Cancel', 'quillcrm')}
+							{__('Cancel', 'doublescale')}
 						</Button>
 						<div className="qcrm-pro-modal__action">
 							<Button

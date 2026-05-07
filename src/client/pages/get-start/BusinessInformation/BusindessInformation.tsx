@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import type { Settings } from '@quillcrm/client';
+import type { Settings } from '@doublescale/client';
 
 import {
 	Form,
@@ -15,11 +15,11 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from '@quillcrm/components/ui/form';
-import { Input } from '@quillcrm/components/ui/input';
-import { Textarea } from '@quillcrm/components/ui/textarea';
+} from '@doublescale/components/ui/form';
+import { Input } from '@doublescale/components/ui/input';
+import { Textarea } from '@doublescale/components/ui/textarea';
 import ButtonComponent from '../component/button';
-import UploadImageIcon from '@quillcrm/components/icons/upload-image';
+import UploadImageIcon from '@doublescale/components/icons/upload-image';
 import { BusinessFormSkeleton } from './BusinessFormSkeleton';
 
 export const formSchema = z.object({
@@ -92,21 +92,21 @@ function LogoUpload({
 							className="w-32 h-32 object-contain rounded-lg border"
 						/>
 						<p className="text-sm text-gray-600">
-							{__('Click or drag to replace', 'quillcrm')}
+							{__('Click or drag to replace', 'doublescale')}
 						</p>
 					</div>
 				) : (
 					<>
 						<UploadImageIcon />
 						<p className="text-xl leading-[30px] font-medium text-[#458DC7]">
-							{__('Browse images', 'quillcrm')}
+							{__('Browse images', 'doublescale')}
 							<span className="text-[#09090B]">
 								{' '}
-								{__('to upload', 'quillcrm')}
+								{__('to upload', 'doublescale')}
 							</span>
 						</p>
 						<p className="text-base leading-[26px] text-[#979797] mt-1">
-							{__('or drag and drop it here', 'quillcrm')}
+							{__('or drag and drop it here', 'doublescale')}
 						</p>
 					</>
 				)}
@@ -125,7 +125,7 @@ export default function BusindessInformation({
 }>) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [existingLogoUrl, setExistingLogoUrl] = useState<string>('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const form = useForm<FormType>({
 		resolver: zodResolver(formSchema),
@@ -168,7 +168,7 @@ export default function BusindessInformation({
 				const errorMessage =
 					error?.message ||
 					error?.data?.message ||
-					__('Failed to fetch business information', 'quillcrm');
+					__('Failed to fetch business information', 'doublescale');
 				createNotice({
 					type: 'error',
 					message: errorMessage,
@@ -215,7 +215,7 @@ export default function BusindessInformation({
 			const errorMessage =
 				error?.message ||
 				error?.data?.message ||
-				__('Failed to upload image', 'quillcrm');
+				__('Failed to upload image', 'doublescale');
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -263,7 +263,7 @@ export default function BusindessInformation({
 				type: 'success',
 				message: __(
 					'Business information saved successfully',
-					'quillcrm'
+					'doublescale'
 				),
 			});
 
@@ -274,7 +274,7 @@ export default function BusindessInformation({
 			const errorMessage =
 				error?.message ||
 				error?.data?.message ||
-				__('Failed to save business information', 'quillcrm');
+				__('Failed to save business information', 'doublescale');
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -300,12 +300,12 @@ export default function BusindessInformation({
 			{/* Header */}
 			<div>
 				<h3 className="text-[#170F49] text-[32px] font-semibold">
-					{__('Please provide your business information', 'quillcrm')}
+					{__('Please provide your business information', 'doublescale')}
 				</h3>
 				<p className="text-[#777] text-lg font-normal leading-7">
 					{__(
 						"This will be used for your email campaign, Subscriber's front pages",
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>
@@ -319,13 +319,13 @@ export default function BusindessInformation({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel className="text-base text-[#09090B] leading-[150%]">
-									{__('Business Name', 'quillcrm')}
+									{__('Business Name', 'doublescale')}
 								</FormLabel>
 								<FormControl>
 									<Input
 										placeholder={__(
 											'Enter your business name',
-											'quillcrm'
+											'doublescale'
 										)}
 										{...field}
 										className="border border-[#DEE1E6] rounded-[8px] h-12 py-[5px] px-4"
@@ -345,13 +345,13 @@ export default function BusindessInformation({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="text-base text-[#09090B] leading-[150%]">
-										{__('Business Address', 'quillcrm')}
+										{__('Business Address', 'doublescale')}
 									</FormLabel>
 									<FormControl>
 										<Textarea
 											placeholder={__(
 												'Type here business address....',
-												'quillcrm'
+												'doublescale'
 											)}
 											{...field}
 											className="border border-[#DEE1E6] rounded-[8px]  py-3 px-4 min-h-[190px] resize-none"
@@ -370,7 +370,7 @@ export default function BusindessInformation({
 								return (
 									<FormItem>
 										<FormLabel className="text-base text-[#09090B] leading-[150%]">
-											{__('Logo', 'quillcrm')}
+											{__('Logo', 'doublescale')}
 										</FormLabel>
 										<FormControl>
 											<LogoUpload
@@ -408,7 +408,7 @@ export default function BusindessInformation({
 							type=""
 							disabled={isSubmitting}
 						>
-							{__('Previous', 'quillcrm')}
+							{__('Previous', 'doublescale')}
 						</ButtonComponent>
 						<ButtonComponent
 							type="go"
@@ -416,8 +416,8 @@ export default function BusindessInformation({
 							disabled={isSubmitting}
 						>
 							{isSubmitting
-								? __('Saving...', 'quillcrm')
-								: __('Next Step', 'quillcrm')}
+								? __('Saving...', 'doublescale')
+								: __('Next Step', 'doublescale')}
 						</ButtonComponent>
 					</div>
 		</div>

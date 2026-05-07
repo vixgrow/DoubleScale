@@ -10,7 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import './style.scss';
-import type { Note, NotesResponse, NoticeMessage } from '@quillcrm/client';
+import type { Note, NotesResponse, NoticeMessage } from '@doublescale/client';
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
 import { useRef } from 'react';
@@ -20,10 +20,10 @@ import {
 	DeleteModal,
 	GradientNotesIcon,
 	NoData,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getColumns } from './columns';
 import NoteDialog from './note-dialog';
 
@@ -90,7 +90,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		} catch (error: any) {
 			showNotice(
 				'error',
-				error.message || __('Failed to fetch notes', 'quillcrm')
+				error.message || __('Failed to fetch notes', 'doublescale')
 			);
 		} finally {
 			setLoading(false);
@@ -121,9 +121,9 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 
 			removeNote(noteToDelete);
 			fetchNotes();
-			showNotice('success', __('Note deleted successfully', 'quillcrm'));
+			showNotice('success', __('Note deleted successfully', 'doublescale'));
 		} catch (error) {
-			showNotice('error', __('Failed to delete note', 'quillcrm'));
+			showNotice('error', __('Failed to delete note', 'doublescale'));
 		} finally {
 			setNoteToDelete(null);
 		}
@@ -143,7 +143,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		<div className="qcrm-notes flex flex-col gap-5">
 			<div className="flex justify-between items-center">
 				<h2 className="text-2xl font-semibold">
-					{__('Notes', 'quillcrm')}
+					{__('Notes', 'doublescale')}
 				</h2>
 				<Button
 					variant="secondary"
@@ -152,7 +152,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 					onClick={handleAddNote}
 				>
 					<PlusIcon />
-					{__('Add Note', 'quillcrm')}
+					{__('Add Note', 'doublescale')}
 				</Button>
 			</div>
 			{notice && (
@@ -162,10 +162,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				{!loading && (!notes || notes.length === 0) ? (
 					<NoData
 						icon={<GradientNotesIcon />}
-						title={__('No notes yet', 'quillcrm')}
-						subtitle={__('Track subscriber growth, open rates, and conversion trends in real time.', 'quillcrm')}
+						title={__('No notes yet', 'doublescale')}
+						subtitle={__('Track subscriber growth, open rates, and conversion trends in real time.', 'doublescale')}
 						onClick={handleAddNote}
-						buttonLabel={__('Add Note', 'quillcrm')}
+						buttonLabel={__('Add Note', 'doublescale')}
 					/>
 				) : (
 					<>

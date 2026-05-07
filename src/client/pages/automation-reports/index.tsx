@@ -9,19 +9,19 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useParams } from '@quillcrm/navigation';
+import { useParams } from '@doublescale/navigation';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Automation } from '@quillcrm/client';
+import type { Automation } from '@doublescale/client';
 import AutomationFunnel from './automation-funnels';
 
 const AutomationReports: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const [automation, setAutomation] = useState<Automation | null>(null);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	useEffect(() => {
 		if (id) {
@@ -41,7 +41,7 @@ const AutomationReports: React.FC = () => {
 				type: 'error',
 				message:
 					error.message ||
-					__('Failed to fetch automation', 'quillcrm'),
+					__('Failed to fetch automation', 'doublescale'),
 			});
 		}
 	};

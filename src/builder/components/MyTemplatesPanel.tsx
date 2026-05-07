@@ -10,7 +10,7 @@ import {
 import { getUserTemplates, renderTemplate } from '../api/templates';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import type { EmailTemplate } from '@quillcrm/client';
+import type { EmailTemplate } from '@doublescale/client';
 import {
 	Dialog,
 	DialogContent,
@@ -62,14 +62,14 @@ const TemplateCard = ({
 							onClick={() => onUseTemplate(template)}
 							className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-full font-medium text-sm shadow-lg"
 						>
-							{__('Use template', 'quillcrm')}
+							{__('Use template', 'doublescale')}
 						</Button>
 						<Button
 							onClick={() => onPreview(template)}
 							variant="outline"
 							className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
 						>
-							{__('Preview', 'quillcrm')}
+							{__('Preview', 'doublescale')}
 						</Button>
 					</div>
 				</div>
@@ -218,7 +218,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 			<div className="flex flex-col items-center justify-center h-full">
 				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
 				<p className="text-gray-500 text-center mt-4">
-					{__('Loading templates...', 'quillcrm')}
+					{__('Loading templates...', 'doublescale')}
 				</p>
 			</div>
 		);
@@ -241,7 +241,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 					</div>
 				</div>
 				<p className="text-gray-500 text-center">
-					{__('No saved templates til now', 'quillcrm')}
+					{__('No saved templates til now', 'doublescale')}
 				</p>
 			</div>
 		);
@@ -269,7 +269,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
 						<DialogTitle className="text-center">
-							{__('Preview template', 'quillcrm')}
+							{__('Preview template', 'doublescale')}
 						</DialogTitle>
 					</DialogHeader>
 					<div className="flex-1 overflow-auto mt-4">
@@ -277,14 +277,14 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 							<div className="flex flex-col items-center justify-center h-full min-h-[400px]">
 								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
 								<p className="text-gray-500 text-center mt-4">
-									{__('Loading preview...', 'quillcrm')}
+									{__('Loading preview...', 'doublescale')}
 								</p>
 							</div>
 						) : previewHtml ? (
 							<iframe
 								srcDoc={previewHtml}
 								className="w-full min-h-[600px] border-0"
-								title={__('Template Preview', 'quillcrm')}
+								title={__('Template Preview', 'doublescale')}
 								sandbox="allow-same-origin"
 								style={{ backgroundColor: '#fff' }}
 							/>
@@ -294,7 +294,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 									<MyTemplatesIcon width={64} height={64} />
 								</div>
 								<p className="text-gray-500 text-center">
-									{__('No preview available', 'quillcrm')}
+									{__('No preview available', 'doublescale')}
 								</p>
 							</div>
 						)}
@@ -322,14 +322,14 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 								<p className="text-base text-destructive leading-relaxed">
 									{__(
 										'Selecting this template will permanently replace your current design.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 							</div>
 							<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
 								{__(
 									'Are you sure you want to miss this current template?',
-									'quillcrm'
+									'doublescale'
 								)}
 							</DialogTitle>
 						</div>
@@ -341,14 +341,14 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 							onClick={() => setConfirmTemplate(null)}
 							className="flex-1"
 						>
-							{__('Back', 'quillcrm')}
+							{__('Back', 'doublescale')}
 						</Button>
 						<Button
 							type="button"
 							onClick={handleConfirmUseTemplate}
 							className="flex-1 bg-destructive hover:bg-destructive/90"
 						>
-							{__('Yes', 'quillcrm')}
+							{__('Yes', 'doublescale')}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -369,7 +369,7 @@ const MyTemplatesPanel = ({
 			<div className="flex flex-col h-full">
 				<div className="flex items-center justify-between p-6 border-b border-gray-200 mx-2">
 					<h2 className="text-lg font-semibold text-gray-900">
-						{__('My Templates', 'quillcrm')}
+						{__('My Templates', 'doublescale')}
 					</h2>
 					<Button
 						variant="ghost"

@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { useCallback } from '@wordpress/element';
-import Config from '@quillcrm/config';
+import Config from '@doublescale/config';
 
 /**
  * Custom hook for checking user capabilities
@@ -31,7 +31,7 @@ export const useCapabilities = () => {
      */
     const isSalesRep = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
-        return userCapabilities.quillcrm_sales_rep || false;
+        return userCapabilities.doublescale_sales_rep || false;
     }, []);
 
     /**
@@ -39,7 +39,7 @@ export const useCapabilities = () => {
      */
     const isSalesManager = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
-        return userCapabilities.quillcrm_sales_manager || false;
+        return userCapabilities.doublescale_sales_manager || false;
     }, []);
 
     /**
@@ -48,7 +48,7 @@ export const useCapabilities = () => {
      */
     const canManageAllDeals = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
-        return userCapabilities.quillcrm_crm_manager || userCapabilities.quillcrm_sales_manager || false;
+        return userCapabilities.doublescale_crm_manager || userCapabilities.doublescale_sales_manager || false;
     }, []);
 
     /**
@@ -56,7 +56,7 @@ export const useCapabilities = () => {
      */
     const isCrmManager = useCallback((): boolean => {
         const userCapabilities = Config.getUserCapabilities();
-        return userCapabilities.quillcrm_crm_manager || false;
+        return userCapabilities.doublescale_crm_manager || false;
     }, []);
 
     return {

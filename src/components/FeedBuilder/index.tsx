@@ -9,11 +9,11 @@ const FeedBuilder: React.FC<{
 	previewText?: string;
 }> = ({ fromName, subject, previewText }) => {
 	const displayFromName =
-		fromName?.trim() || __('From Name', 'quillcrm');
+		fromName?.trim() || __('From Name', 'doublescale');
 	const displaySubject =
-		subject?.trim() || __('Message Subject...', 'quillcrm');
+		subject?.trim() || __('Message Subject...', 'doublescale');
 	const displayPreview =
-		previewText?.trim() || __('Your preview text here...', 'quillcrm');
+		previewText?.trim() || __('Your preview text here...', 'doublescale');
 	const avatarLetter = displayFromName.charAt(0).toUpperCase();
 
 	return (
@@ -21,7 +21,7 @@ const FeedBuilder: React.FC<{
 			<div className="relative w-full flex items-center justify-center">
 				<img
 					src={device}
-					alt={__('Mobile preview', 'quillcrm')}
+					alt={__('Mobile preview', 'doublescale')}
 					className="w-full max-w-[260px] sm:max-w-[300px] select-none pointer-events-none"
 				/>
 
@@ -37,7 +37,7 @@ const FeedBuilder: React.FC<{
 									{displayFromName}
 								</span>
 								<span className="text-[9px] sm:text-[10px] text-[#9c9595] shrink-0">
-									{__('9:01 AM', 'quillcrm')}
+									{__('9:01 AM', 'doublescale')}
 								</span>
 							</div>
 							<span className="text-[10px] sm:text-xs text-[#09090B] max-w-[180px] font-medium truncate">

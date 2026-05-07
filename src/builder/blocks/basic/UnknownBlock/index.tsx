@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { UnknownBlockIcon } from '@quillcrm/components';
+import { UnknownBlockIcon } from '@doublescale/components';
 import { UnknownRenderer } from './Renderer';
 import { UnknownEditor } from './Editor';
 
@@ -16,7 +16,7 @@ export interface UnknownBlockProps {
 
 const UnknownBlock = {
 	type: 'unknown',
-	name: __('Unknown Block', 'quillcrm'),
+	name: __('Unknown Block', 'doublescale'),
 	icon: UnknownBlockIcon,
 	defaultProps: {
 		originalType: '',

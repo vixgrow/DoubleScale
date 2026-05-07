@@ -20,7 +20,7 @@ export interface ShapeSelectorControlProps {
 export const ShapeSelectorControl: React.FC<ShapeSelectorControlProps> = ({
     value,
     onChange,
-    label = __('Shape', 'quillcrm'),
+    label = __('Shape', 'doublescale'),
     showCustomInput = true,
     onShapeChange,
 }) => {

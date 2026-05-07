@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { DashboardContentCard } from '@quillcrm/components';
+import { DashboardContentCard } from '@doublescale/components';
 import { Skeleton } from '@/components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
 
@@ -10,7 +10,7 @@ export const UserDashboardShimmer: React.FC = () => {
 		<div className="flex flex-col gap-5 mt-5">
 			{/* Dashboard Cards - Analytics Overview */}
 			<DashboardContentCard
-				title={__('Analytics Overview', 'quillcrm')}
+				title={__('Analytics Overview', 'doublescale')}
 				cardClassName="w-full"
 			>
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
@@ -33,7 +33,7 @@ export const UserDashboardShimmer: React.FC = () => {
 			<div className="flex gap-5">
 				{/* Recent Contacts */}
 				<DashboardContentCard
-					title={__('Recent Contacts', 'quillcrm')}
+					title={__('Recent Contacts', 'doublescale')}
 					cardClassName="w-1/2"
 					viewAllLink={true}
 					viewAllLinkUrl="contacts"
@@ -61,7 +61,7 @@ export const UserDashboardShimmer: React.FC = () => {
 
 				{/* Contact Analytics Chart */}
 				<DashboardContentCard
-					title={__('Contact Analytics', 'quillcrm')}
+					title={__('Contact Analytics', 'doublescale')}
 					cardClassName="w-1/2"
 				>
 					<div className="space-y-4">
@@ -80,7 +80,7 @@ export const UserDashboardShimmer: React.FC = () => {
 			<div className="flex gap-5">
 				{/* Recent Automations */}
 				<DashboardContentCard
-					title={__('Recent Automations', 'quillcrm')}
+					title={__('Recent Automations', 'doublescale')}
 					cardClassName="w-3/5"
 					viewAllLink={true}
 					viewAllLinkUrl="automations"
@@ -116,9 +116,9 @@ export const UserDashboardShimmer: React.FC = () => {
 
 				{/* Quick Links */}
 				<DashboardContentCard
-					title={__('Quick Links', 'quillcrm')}
+					title={__('Quick Links', 'doublescale')}
 					cardClassName="w-2/5"
-					headerContent={__('(Most Used Functions)', 'quillcrm')}
+					headerContent={__('(Most Used Functions)', 'doublescale')}
 				>
 					<div className="border-t"></div>
 					<div>
@@ -144,7 +144,7 @@ export const UserDashboardShimmer: React.FC = () => {
 
 			{/* Recent Campaigns */}
 			<DashboardContentCard
-				title={__('Recent Campaigns', 'quillcrm')}
+				title={__('Recent Campaigns', 'doublescale')}
 				cardClassName="w-full"
 				viewAllLink={true}
 				viewAllLinkUrl="campaigns"

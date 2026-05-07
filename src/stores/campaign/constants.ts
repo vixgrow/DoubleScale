@@ -1,4 +1,4 @@
-export const STORE_KEY = 'quillcrm/campaign';
+export const STORE_KEY = 'doublescale/campaign';
 
 // Action constants
 export const SET_CAMPAIGN = 'SET_CAMPAIGN';

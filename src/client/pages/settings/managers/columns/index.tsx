@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { CRMUser } from '../../../../services/user-management';
 import { Button } from '@/components/ui/button';
 import { ManagerRoleLabels } from '../components/types';
-import { DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface ManagerColumnsProps {
@@ -31,25 +31,25 @@ export const getManagerColumns = ({
     return [
         {
             accessorKey: 'id',
-            header: () => __('ID', 'quillcrm'),
+            header: () => __('ID', 'doublescale'),
             cell: ({ row }) => <span className="font-medium">{row.original.id}</span>,
         },
         {
             accessorKey: 'name',
-            header: () => __('Name', 'quillcrm'),
+            header: () => __('Name', 'doublescale'),
             cell: ({ row }) => row.original.name,
         },
         {
             accessorKey: 'email',
-            header: () => __('Email', 'quillcrm'),
+            header: () => __('Email', 'doublescale'),
             cell: ({ row }) => row.original.email,
         },
         {
             accessorKey: 'crm_role',
-            header: () => __('Role', 'quillcrm'),
+            header: () => __('Role', 'doublescale'),
             cell: ({ row }) => (
                 <div
-                    className={`text-base py-1 px-2 rounded-md capitalize border w-fit ${row.original.crm_role === 'quillcrm_crm_manager'
+                    className={`text-base py-1 px-2 rounded-md capitalize border w-fit ${row.original.crm_role === 'doublescale_crm_manager'
                         ? 'bg-secondary/10 text-secondary border-secondary'
                         : 'bg-[#E6F7EE] text-[#166534] border-[#166534]'
                         }`}
@@ -60,7 +60,7 @@ export const getManagerColumns = ({
         },
         {
             id: 'actions',
-            header: () => __('Actions', 'quillcrm'),
+            header: () => __('Actions', 'doublescale'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-4">
                     <Button
@@ -68,7 +68,7 @@ export const getManagerColumns = ({
                         onClick={() => onEdit(row.original.id)}
                         disabled={isUpdating}
                         className="border-none bg-transparent text-[#09090B] p-0 shadow-none hover:bg-transparent"
-                        title={__('Edit role', 'quillcrm')}
+                        title={__('Edit role', 'doublescale')}
                     >
                         <EditHeaderIcon/>
                     </Button>
@@ -77,7 +77,7 @@ export const getManagerColumns = ({
                         onClick={() => onDelete(row.original.id)}
                         disabled={isDeleting}
                         className="text-destructive bg-transparent border-none shadow-none p-0 hover:bg-transparent"
-                        title={__('Remove CRM access', 'quillcrm')}
+                        title={__('Remove CRM access', 'doublescale')}
                     >
                         <DeleteIcon />
                     </Button>

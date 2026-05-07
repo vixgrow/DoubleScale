@@ -6,10 +6,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { Settings } from '@quillcrm/client';
-import { Field, Editor } from '@quillcrm/components';
-import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
-import ConfigAPI from '@quillcrm/config';
+import type { Settings } from '@doublescale/client';
+import { Field, Editor } from '@doublescale/components';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import ConfigAPI from '@doublescale/config';
 import { FromEmailSelector } from '@/components/from-email-selector';
 
 interface EmailSettingsProps {
@@ -42,12 +42,12 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
     return (
         <div className="email-settings qcrm-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
-                {__('Email', 'quillcrm')}
+                {__('Email', 'doublescale')}
             </div>
             <div className="flex gap-5 items-start mb-3">
                 <div className="flex-1">
                     <Field
-                        label={__('From Name', 'quillcrm')}
+                        label={__('From Name', 'doublescale')}
                         value={from_name || ConfigAPI.getBlogName()}
                         onChange={(value) => handleFieldChange('from_name', value)}
                         type="text"
@@ -55,7 +55,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                 </div>
                 <div className="flex-1">
                     <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
-                        {__('From Email', 'quillcrm')}
+                        {__('From Email', 'doublescale')}
                     </div>
                     <div className="qcrm-field-input">
                         <FromEmailSelector
@@ -72,7 +72,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                 </div>
                 <div className="flex-1">
                     <Field
-                        label={__('Reply To', 'quillcrm')}
+                        label={__('Reply To', 'doublescale')}
                         value={reply_to || ConfigAPI.getBlogName()}
                         onChange={(value) => handleFieldChange('reply_to', value)}
                         type="email"
@@ -82,7 +82,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full flex flex-col gap-5">
                     <Field
-                        label={__('Max Emails in Second', 'quillcrm')}
+                        label={__('Max Emails in Second', 'doublescale')}
                         value={max_in_second}
                         onChange={(value) =>
                             handleFieldChange('max_in_second', value)
@@ -93,7 +93,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                 </div>
                 <div className="w-full">
                     <div className="text-[#09090B] font-normal text-base mb-2">
-                        {__('Email Footer', 'quillcrm')}
+                        {__('Email Footer', 'doublescale')}
                     </div>
                     <div>
                         <Editor

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { Automation } from '@quillcrm/client';
+import type { Automation } from '@doublescale/client';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
 import ReactFlowWorkflow from '../../automation/steps/workflow/reactflow-workflow';
@@ -32,7 +32,7 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 		return (
 			<div className="flex items-center justify-center h-screen">
 				<div className="text-lg">
-					{__('Loading analytics...', 'quillcrm')}
+					{__('Loading analytics...', 'doublescale')}
 				</div>
 			</div>
 		);

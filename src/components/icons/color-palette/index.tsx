@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const ColorPaletteIcon: React.FC<IconProps> = ({ width = 20, height = 19 }) => {
 	return (

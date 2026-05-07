@@ -9,9 +9,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import MoreHorizantail from '@quillcrm/components/icons/moreHorizantal-header';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import TrashIcon from '@quillcrm/components/icons/trash';
+import MoreHorizantail from '@doublescale/components/icons/moreHorizantal-header';
+import EditHeaderIcon from '@doublescale/components/icons/edit-header';
+import TrashIcon from '@doublescale/components/icons/trash';
 
 interface Props {
 	onEdit: () => void;
@@ -44,7 +44,7 @@ export const ActivityActionsDropdown: React.FC<Props> = ({
 					onClick={onEdit}
 				>
 					<EditHeaderIcon color="#458DC7"/>
-					<span>{__('Edit', 'quillcrm')}</span>
+					<span>{__('Edit', 'doublescale')}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -52,7 +52,7 @@ export const ActivityActionsDropdown: React.FC<Props> = ({
 					onClick={onDelete}
 				>
 					<TrashIcon />
-					<span>{__('Delete', 'quillcrm')}</span>
+					<span>{__('Delete', 'doublescale')}</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

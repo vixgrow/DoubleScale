@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { HtmlBlockIcon } from '@quillcrm/components';
+import { HtmlBlockIcon } from '@doublescale/components';
 import { HtmlBlockRenderer } from './Renderer';
 import { HtmlBlockEditor } from './Editor';
 
@@ -25,7 +25,7 @@ export interface HtmlBlockProps {
 
 const HtmlBlock = {
 	type: 'html' as const,
-	name: __('HTML', 'quillcrm'),
+	name: __('HTML', 'doublescale'),
 	icon: HtmlBlockIcon,
 	isProActivated: false,
 	isPro: false,

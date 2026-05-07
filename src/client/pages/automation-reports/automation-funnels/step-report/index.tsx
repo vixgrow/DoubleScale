@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
-import { Automation } from '@quillcrm/client';
+import { Automation } from '@doublescale/client';
 import CircularProgress from './circular-progress';
 
 interface StepReportProps {
@@ -66,7 +66,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 		return (
 			<div className="step-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Step Report', 'doublescale')}</h2>
 				</div>
 				<div className="loading-state">Loading step data...</div>
 			</div>
@@ -77,7 +77,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 		return (
 			<div className="step-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Step Report', 'doublescale')}</h2>
 				</div>
 				<div className="error-state">Error: {error}</div>
 			</div>
@@ -88,7 +88,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 		return (
 			<div className="step-report-container">
 				<div className="report-header">
-					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+					<h2 className="report-title">{__('Step Report', 'doublescale')}</h2>
 				</div>
 				<div className="empty-state">No step data available</div>
 			</div>
@@ -98,7 +98,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	return (
 		<div className="step-report-container">
 			<div className="report-header">
-				<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+				<h2 className="report-title">{__('Step Report', 'doublescale')}</h2>
 			</div>
 			<div className="step-flex">
 				{stepData.map((step, index) => (
@@ -114,7 +114,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 							</div>
 							<div className="step-info">
 								<h3 className="step-title">
-									{index === 0 ? __('Entrance', 'quillcrm') : `${__('Step', 'quillcrm')} ${index}`}
+									{index === 0 ? __('Entrance', 'doublescale') : `${__('Step', 'doublescale')} ${index}`}
 								</h3>
 								<div className="step-stats">
 									<div className="stat-row">

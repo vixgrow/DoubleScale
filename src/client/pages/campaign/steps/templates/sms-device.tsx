@@ -7,14 +7,14 @@ const SMSDevice: React.FC<{
     body?: string;
     className?: string;
 }> = ({ body, className }) => {
-    const displayBody = body?.trim() || __('Message Here...', 'quillcrm');
+    const displayBody = body?.trim() || __('Message Here...', 'doublescale');
 
     return (
         <div className={cn("flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-full lg:w-1/3 py-8 sm:py-10", className)}>
             <div className="relative w-full flex items-center justify-center">
                 <img
                     src={device}
-                    alt={__('Mobile preview', 'quillcrm')}
+                    alt={__('Mobile preview', 'doublescale')}
                     className="w-full max-w-[260px] sm:max-w-[300px] select-none pointer-events-none"
                 />
 

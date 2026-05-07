@@ -19,10 +19,10 @@ import './style.scss';
 import type {
 	CustomTemplate as Template,
 	TemplatesResponse,
-} from '@quillcrm/client';
-import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
-import { Field } from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
+} from '@doublescale/client';
+import { NavLink, getToLink, useNavigate } from '@doublescale/navigation';
+import { Field } from '@doublescale/components';
+import { convertDate } from '@doublescale/utils';
 
 const { Column } = Table;
 
@@ -41,7 +41,7 @@ const TemplatesList: React.FC = () => {
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const navigate = useNavigate();
 
 	const fetchTemplates = async (clear: boolean = false) => {
@@ -76,7 +76,7 @@ const TemplatesList: React.FC = () => {
 		if (!template.name) {
 			createNotice({
 				type: 'error',
-				message: __('Template name is required', 'quillcrm'),
+				message: __('Template name is required', 'doublescale'),
 			});
 			return;
 		}
@@ -136,11 +136,11 @@ const TemplatesList: React.FC = () => {
 						<Select
 							options={[
 								{
-									label: __('Bulk Actions', 'quillcrm'),
+									label: __('Bulk Actions', 'doublescale'),
 									value: '',
 								},
 								{
-									label: __('Delete', 'quillcrm'),
+									label: __('Delete', 'doublescale'),
 									value: 'delete',
 								},
 							]}
@@ -158,11 +158,11 @@ const TemplatesList: React.FC = () => {
 							disabled={selectedRowKeys.length === 0}
 							loading={isApplying}
 						>
-							{__('Apply', 'quillcrm')}
+							{__('Apply', 'doublescale')}
 						</Button>
 					</Flex>
 					<Input.Search
-						placeholder={__('Search', 'quillcrm')}
+						placeholder={__('Search', 'doublescale')}
 						allowClear
 						onSearch={(_value, _e, source) => {
 							if (source?.source === 'clear') {
@@ -183,7 +183,7 @@ const TemplatesList: React.FC = () => {
 					/>
 				</Flex>
 				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Template', 'quillcrm')}
+					{__('Create Template', 'doublescale')}
 				</Button>
 			</Flex>
 			<Table
@@ -206,7 +206,7 @@ const TemplatesList: React.FC = () => {
 				}}
 			>
 				<Column
-					title={__('Name', 'quillcrm')}
+					title={__('Name', 'doublescale')}
 					dataIndex="name"
 					key="name"
 					render={(_, record: Template) => (
@@ -216,19 +216,19 @@ const TemplatesList: React.FC = () => {
 					)}
 				/>
 				<Column
-					title={__('Subject', 'quillcrm')}
+					title={__('Subject', 'doublescale')}
 					dataIndex="subject"
 					key="subject"
 				/>
 				<Column
-					title={__('Created At', 'quillcrm')}
+					title={__('Created At', 'doublescale')}
 					dataIndex="created_at"
 					key="created_at"
 					render={(date: string) => convertDate(date)}
 				/>
 			</Table>
 			<Modal
-				title={__('Create Template', 'quillcrm')}
+				title={__('Create Template', 'doublescale')}
 				open={visible}
 				onOk={createTemplate}
 				onCancel={() => setVisible(false)}
@@ -236,7 +236,7 @@ const TemplatesList: React.FC = () => {
 			>
 				<div className="qcrm-fields">
 					<Field
-						label={__('Name', 'quillcrm')}
+						label={__('Name', 'doublescale')}
 						value={template.name}
 						onChange={(value) =>
 							setTemplate({

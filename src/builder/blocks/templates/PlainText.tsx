@@ -9,7 +9,7 @@ import plainText from '../../../../assets/images/templates/plain-Text.png';
 const templateItems = [
 	{
 		id: 'plain-text',
-		title: __('Plain Text', 'quillcrm'),
+		title: __('Plain Text', 'doublescale'),
 		image: plainText,
 	},
 ];

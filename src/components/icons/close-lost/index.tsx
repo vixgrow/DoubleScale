@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const CloseLostIcon: React.FC<IconProps> = ({ width = 24, height = 25 }) => {
 	return (

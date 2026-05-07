@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const CallLogIcon: React.FC<IconProps> = ({ width = 24, height = 24,color='#660FF1' }) => {
 	return (

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Campaign } from '@quillcrm/client';
+import type { Campaign } from '@doublescale/client';
 import { RESET_CAMPAIGN, SET_CAMPAIGN, SET_ERROR, SET_LOADING, SET_SAVING, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
 
 // Contacts step data

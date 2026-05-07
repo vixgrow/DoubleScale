@@ -26,7 +26,7 @@ import {
 	AddRemoveListsModal,
 	AddRemoveTagsModal,
 	DeleteModal,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 
 interface BulkActionSelectProps {
 	bulkAction: string;
@@ -138,27 +138,27 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				return [
 					{
 						value: 'delete',
-						label: __('Delete', 'quillcrm'),
+						label: __('Delete', 'doublescale'),
 						icon: <DeleteIcon />,
 					},
 					{
 						value: 'add_to_list',
-						label: __('Add to List', 'quillcrm'),
+						label: __('Add to List', 'doublescale'),
 						icon: <AddToListIcon />,
 					},
 					{
 						value: 'add_tag',
-						label: __('Add Tag', 'quillcrm'),
+						label: __('Add Tag', 'doublescale'),
 						icon: <AddTagIcon />,
 					},
 					{
 						value: 'remove_from_list',
-						label: __('Remove from List', 'quillcrm'),
+						label: __('Remove from List', 'doublescale'),
 						icon: <RemoveFromListIcon />,
 					},
 					{
 						value: 'remove_tag',
-						label: __('Remove Tag', 'quillcrm'),
+						label: __('Remove Tag', 'doublescale'),
 						icon: <RemoveTagIcon />,
 					},
 				];
@@ -166,7 +166,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				return [
 					{
 						value: 'delete',
-						label: __('Delete Lists', 'quillcrm'),
+						label: __('Delete Lists', 'doublescale'),
 						icon: <DeleteIcon />,
 					},
 				];
@@ -174,19 +174,19 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				return [
 					{
 						value: 'delete',
-						label: __('Delete Tags', 'quillcrm'),
+						label: __('Delete Tags', 'doublescale'),
 						icon: <DeleteIcon />,
 					},
 				];
 			case 'custom-fields': // Custom Fields tab
 				return [
-					{ value: 'delete', label: __('Delete Fields', 'quillcrm') },
+					{ value: 'delete', label: __('Delete Fields', 'doublescale') },
 				];
 			default:
 				return [
 					{
 						value: 'delete',
-						label: __('Delete', 'quillcrm'),
+						label: __('Delete', 'doublescale'),
 						icon: <DeleteIcon />,
 					},
 				];

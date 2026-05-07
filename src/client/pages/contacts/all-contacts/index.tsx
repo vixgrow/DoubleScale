@@ -17,7 +17,7 @@ import {
 	ContactsImportModal,
 	ContactsExportModal,
 } from './contacts-modals';
-import { NoData, GradientContactsIcon } from '@quillcrm/components';
+import { NoData, GradientContactsIcon } from '@doublescale/components';
 
 export interface AllContactsRef {
 	openCreateContactModal: () => void;
@@ -68,12 +68,12 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 				) : (
 					<NoData
 						icon={<GradientContactsIcon width={120} height={120} />}
-						title={__('No contacts yet', 'quillcrm')}
+						title={__('No contacts yet', 'doublescale')}
 						subtitle={__(
 							'Get started by creating your first contact or import contacts from a CSV file',
-							'quillcrm'
+							'doublescale'
 						)}
-						buttonLabel={__('Create Contact', 'quillcrm')}
+						buttonLabel={__('Create Contact', 'doublescale')}
 						onClick={handleOpenCreateContactModal}
 					/>
 				)}

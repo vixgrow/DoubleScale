@@ -21,22 +21,22 @@ import type {
 	FormsResponse,
 	DataTableConfig,
 	NoticeMessage,
-} from '@quillcrm/client';
-import ConfigAPI from '@quillcrm/config';
+} from '@doublescale/client';
+import ConfigAPI from '@doublescale/config';
 import {
 	PageHeader,
 	PlusIcon,
 	NoticeBanner,
 	NoData,
 	CreateFormsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
-import { formatDateForAPI } from '@quillcrm/utils';
-import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { formatDateForAPI } from '@doublescale/utils';
+import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 import Form from '../form';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -54,9 +54,9 @@ const FormsList: React.FC = () => {
 	const urlParams = new URLSearchParams(window.location.search);
 	const successParam = urlParams.get('success');
 	const initialNotice = successParam === 'created'
-		? { type: 'success' as const, message: __('Form created successfully', 'quillcrm') }
+		? { type: 'success' as const, message: __('Form created successfully', 'doublescale') }
 		: successParam === 'updated'
-			? { type: 'success' as const, message: __('Form updated successfully', 'quillcrm') }
+			? { type: 'success' as const, message: __('Form updated successfully', 'doublescale') }
 			: null;
 
 	// Remove success parameter from URL if present
@@ -156,7 +156,7 @@ const FormsList: React.FC = () => {
 				},
 			});
 
-			showNotice('success', __('Forms deleted', 'quillcrm'));
+			showNotice('success', __('Forms deleted', 'doublescale'));
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			fetchForms();
@@ -175,7 +175,7 @@ const FormsList: React.FC = () => {
 			});
 
 			fetchForms();
-			showNotice('success', __('Form deleted', 'quillcrm'));
+			showNotice('success', __('Form deleted', 'doublescale'));
 		} catch (error: any) {
 			showNotice('error', error.message);
 		}
@@ -197,8 +197,8 @@ const FormsList: React.FC = () => {
 			showNotice(
 				'success',
 				currentStatus === 'active'
-					? __('Form deactivated', 'quillcrm')
-					: __('Form activated', 'quillcrm')
+					? __('Form deactivated', 'doublescale')
+					: __('Form activated', 'doublescale')
 			);
 
 			fetchForms();
@@ -215,7 +215,7 @@ const FormsList: React.FC = () => {
 
 	const tableConfig: DataTableConfig<FormData> = {
 		search: {
-			placeholder: __('Search Forms', 'quillcrm'),
+			placeholder: __('Search Forms', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -234,18 +234,18 @@ const FormsList: React.FC = () => {
 			enabled: true,
 			value: dateRange,
 			onDateChange: setDateRange,
-			placeholder: __('Date Range', 'quillcrm'),
+			placeholder: __('Date Range', 'doublescale'),
 		},
 	};
 
 	return (
 		<div className="qcrm-forms-list">
 			<PageHeader
-				title={__('Forms List', 'quillcrm')}
-				subtitle={__('Forms', 'quillcrm')}
+				title={__('Forms List', 'doublescale')}
+				subtitle={__('Forms', 'doublescale')}
 				actions={[
 					{
-						label: __('Create Forms', 'quillcrm'),
+						label: __('Create Forms', 'doublescale'),
 						onClick: () => setShowCreateForm(true),
 						type: 'primary',
 						icon: <PlusIcon />,
@@ -276,12 +276,12 @@ const FormsList: React.FC = () => {
 			) : (
 				<NoData
 					icon={<CreateFormsIcon width={120} height={120} />}
-					title={__('No forms yet', 'quillcrm')}
+					title={__('No forms yet', 'doublescale')}
 					subtitle={__(
 						'Get started by creating your first form to capture leads and grow your contact list',
-						'quillcrm'
+						'doublescale'
 					)}
-					buttonLabel={__('Create Form', 'quillcrm')}
+					buttonLabel={__('Create Form', 'doublescale')}
 					onClick={() => setShowCreateForm(true)}
 				/>
 			)}

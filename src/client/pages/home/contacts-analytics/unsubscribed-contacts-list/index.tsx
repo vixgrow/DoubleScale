@@ -11,8 +11,8 @@ import { format } from 'date-fns';
 /**
  * internal dependencies
  */
-import { DashboardContentCard, ManageIcon } from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
+import { DashboardContentCard, ManageIcon } from '@doublescale/components';
+import { NavLink } from '@doublescale/navigation';
 import {
 	Table,
 	TableBody,
@@ -20,8 +20,8 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@quillcrm/components/ui/table';
-import type { DashboardData } from '@quillcrm/client';
+} from '@doublescale/components/ui/table';
+import type { DashboardData } from '@doublescale/client';
 import { EmptyState } from '../../no-data';
 
 interface UnsubscribedContactsTableProps {
@@ -33,7 +33,7 @@ export const UnsubscribedContactsTable: React.FC<
 > = ({ contacts }) => {
 	return (
 		<DashboardContentCard
-			title={__('Recent Unsubscribed Contacts', 'quillcrm')}
+			title={__('Recent Unsubscribed Contacts', 'doublescale')}
 			cardClassName='h-full'
 		>
 			{isEmpty(contacts) ? (
@@ -44,19 +44,19 @@ export const UnsubscribedContactsTable: React.FC<
 						<TableHeader>
 							<TableRow>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('ID', 'quillcrm')}
+									{__('ID', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Title / Email', 'quillcrm')}
+									{__('Title / Email', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Date', 'quillcrm')}
+									{__('Date', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Unsubscribe Reason', 'quillcrm')}
+									{__('Unsubscribe Reason', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Action', 'quillcrm')}
+									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -92,13 +92,13 @@ export const UnsubscribedContactsTable: React.FC<
 										)}
 									</TableCell>
 									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
-										{__('No reason', 'quillcrm')}
+										{__('No reason', 'doublescale')}
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm">
 										<NavLink to={`contacts/${contact.id}`}>
 											<div className="flex items-center gap-2">
 												<ManageIcon />
-												{__('Manage', 'quillcrm')}
+												{__('Manage', 'doublescale')}
 											</div>
 										</NavLink>
 									</TableCell>

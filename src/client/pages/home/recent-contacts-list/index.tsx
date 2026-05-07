@@ -13,9 +13,9 @@ import {
 	CalendarIcon,
 	DashboardContentCard,
 	FormattedDateCell,
-} from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
-import type { DashboardData } from '@quillcrm/client';
+} from '@doublescale/components';
+import { NavLink } from '@doublescale/navigation';
+import type { DashboardData } from '@doublescale/client';
 import { EmptyState } from '../no-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -28,7 +28,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 }) => {
 	return (
 		<DashboardContentCard
-			title={__('Recent Contacts', 'quillcrm')}
+			title={__('Recent Contacts', 'doublescale')}
 			cardClassName="w-1/2 h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="contacts"

@@ -7,8 +7,8 @@ import { find, flatMap } from 'lodash';
  * Internal dependencies
  */
 import type { RuleItem } from '@/components/rules-builder';
-import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
-import ConfigAPI from '@quillcrm/config';
+import type { Action, Goal, Rule, Trigger } from '@doublescale/config';
+import ConfigAPI from '@doublescale/config';
 import {
 	__experimentalGetSettings as experimentalGetDateSettings,
 	getSettings as getDateSettings,
@@ -431,7 +431,7 @@ export const getTriggerLabel = (automation: any): string => {
 	}
 
 	// Fallback to trigger slug
-	return automation?.trigger || __('No trigger selected', 'quillcrm');
+	return automation?.trigger || __('No trigger selected', 'doublescale');
 };
 
 /**
@@ -455,7 +455,7 @@ export const getActionLabel = (step: any): string => {
 	}
 
 	// Fallback to action slug
-	return step?.action || __('Unknown Action', 'quillcrm');
+	return step?.action || __('Unknown Action', 'doublescale');
 };
 
 /**
@@ -481,7 +481,7 @@ export const getActionWarningMessage = (step: any): string => {
 	// Fallback message
 	return __(
 		'This action requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-		'quillcrm'
+		'doublescale'
 	);
 };
 
@@ -497,7 +497,7 @@ export const getGoalLabel = (step: any): string => {
 	}
 
 	// Fallback to action slug
-	return step?.action || __('Unknown Goal', 'quillcrm');
+	return step?.action || __('Unknown Goal', 'doublescale');
 };
 
 /**
@@ -523,7 +523,7 @@ export const getGoalWarningMessage = (step: any): string => {
 	// Fallback message
 	return __(
 		'This goal requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-		'quillcrm'
+		'doublescale'
 	);
 };
 
@@ -586,7 +586,7 @@ export const getApiErrorMessage = (
 				return `${field}: ${message}`;
 			})
 			.join('; ');
-		
+
 		if (paramErrors) {
 			return paramErrors;
 		}

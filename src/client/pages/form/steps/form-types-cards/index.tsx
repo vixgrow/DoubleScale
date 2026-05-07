@@ -14,7 +14,7 @@ import { useState } from 'react';
  * Internal dependencies
  */
 import { Card } from '@/components/ui/card';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 //@ts-ignore
 import contact from '../../../../../../assets/images/form-types/contact.png';
 //@ts-ignore
@@ -102,7 +102,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 			<div className="w-full">
 				<div className="mb-4">
 					<div className="text-[#09090B] font-bold text-2xl">
-						{__('Select Form Type', 'quillcrm')}
+						{__('Select Form Type', 'doublescale')}
 					</div>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -147,7 +147,7 @@ const FormTypeSelector: React.FC<FormTypeSelectorProps> = ({
 										>
 											{formType.description || __(
 												'There are many variations of passages of Lorem available, but the majority have suffered alteration in some form',
-												'quillcrm'
+												'doublescale'
 											)}
 										</p>
 									</div>

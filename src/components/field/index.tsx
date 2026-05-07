@@ -21,8 +21,8 @@ import {
 	TagField,
 	DynamicKeyValueInput,
 	TestButton,
-} from '@quillcrm/components';
-import type { ReactSelectOptions } from '@quillcrm/client';
+} from '@doublescale/components';
+import type { ReactSelectOptions } from '@doublescale/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
 import { Input } from '@/components/ui/input';
@@ -111,12 +111,12 @@ const Field: React.FC<FieldProps> = ({
 	disabled,
 	compact = false,
 }) => {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const handleCopyToClipboard = (text: string) => {
 		navigator.clipboard.writeText(text);
 		createNotice({
-			message: __('Copied to clipboard', 'quillcrm'),
+			message: __('Copied to clipboard', 'doublescale'),
 			type: 'success',
 		});
 	};
@@ -165,7 +165,7 @@ const Field: React.FC<FieldProps> = ({
 						key={`tag-${i}`}
 						className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-mono cursor-pointer hover:bg-blue-100"
 						onClick={() => handleCopyToClipboard(matches[i])}
-						title={__('Click to copy', 'quillcrm')}
+						title={__('Click to copy', 'doublescale')}
 					>
 						{matches[i]}
 						<Copy className="h-3 w-3" />
@@ -239,7 +239,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'link-triggers':
 			// Get LinkTriggerField from Pro plugin via filter
 			const LinkTriggerFieldComponent = applyFilters(
-				'quillcrm_pro_component',
+				'doublescale_pro_component',
 				null,
 				'LinkTriggerField'
 			) as React.ComponentType<{
@@ -266,10 +266,10 @@ const Field: React.FC<FieldProps> = ({
 							color: '#856404',
 						}}
 					>
-						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
+						<strong>{__('Pro Feature:', 'doublescale')}</strong>{' '}
 						{__(
-							'Link Triggers require QuillCRM Pro to be installed and activated.',
-							'quillcrm'
+							'Link Triggers require DoubleScale Pro to be installed and activated.',
+							'doublescale'
 						)}
 					</div>
 				);
@@ -527,8 +527,8 @@ const Field: React.FC<FieldProps> = ({
 				<DynamicKeyValueInput
 					value={value || []}
 					onChange={onChange}
-					keyPlaceholder={__('Enter key', 'quillcrm')}
-					valuePlaceholder={__('Enter value', 'quillcrm')}
+					keyPlaceholder={__('Enter key', 'doublescale')}
+					valuePlaceholder={__('Enter value', 'doublescale')}
 				/>
 			);
 			break;
@@ -536,7 +536,7 @@ const Field: React.FC<FieldProps> = ({
 			// Get WhatsAppTemplateField from Pro plugin via filter
 			// Templates are fetched from Meta API and use template_sid (external ID) as identifier
 			const WhatsAppTemplateFieldComponent = applyFilters(
-				'quillcrm_pro_component',
+				'doublescale_pro_component',
 				null,
 				'WhatsAppTemplateField'
 			) as React.ComponentType<{
@@ -579,10 +579,10 @@ const Field: React.FC<FieldProps> = ({
 							color: '#856404',
 						}}
 					>
-						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
+						<strong>{__('Pro Feature:', 'doublescale')}</strong>{' '}
 						{__(
-							'WhatsApp Template Field requires QuillCRM Pro.',
-							'quillcrm'
+							'WhatsApp Template Field requires DoubleScale Pro.',
+							'doublescale'
 						)}
 					</div>
 				);

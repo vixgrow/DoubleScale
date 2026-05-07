@@ -19,9 +19,9 @@ import {
 	CustomDialogHeader,
 	GradientFilterIcon,
 	GradientColumnsIcon,
-} from '@quillcrm/components';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
-import { DataTableConfig } from '@quillcrm/client';
+} from '@doublescale/components';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
+import { DataTableConfig } from '@doublescale/client';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './date-range-picker';
 import {
@@ -66,7 +66,7 @@ export function DataTableActions<TData>({
 
 	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
@@ -238,17 +238,17 @@ export function DataTableActions<TData>({
 								onClick={handleCampaignFiltersDialogOpen}
 							>
 								<FiltersIcon />
-								{__('Filters', 'quillcrm')}
+								{__('Filters', 'doublescale')}
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="sm:max-w-[800px]">
 							<DialogHeader>
 								<DialogTitle>
 									<CustomDialogHeader
-										title={__('Filter', 'quillcrm')}
+										title={__('Filter', 'doublescale')}
 										subtitle={__(
 											'Select Groups of filters about data you want to view.',
-											'quillcrm'
+											'doublescale'
 										)}
 										icon={<GradientFilterIcon />}
 									/>
@@ -269,7 +269,7 @@ export function DataTableActions<TData>({
 									variant="gradient"
 									size="xl"
 								>
-									{__('Apply Filters', 'quillcrm')}
+									{__('Apply Filters', 'doublescale')}
 								</Button>
 							</DialogFooter>
 						</DialogContent>
@@ -297,7 +297,7 @@ export function DataTableActions<TData>({
 								onClick={handleAdvancedFiltersDialogOpen}
 							>
 								<FiltersIcon />
-								{__('Advanced Filters', 'quillcrm')}
+								{__('Advanced Filters', 'doublescale')}
 								{!isProActive && (
 									<Lock className="h-4 w-4 text-orange-500 ml-2" />
 								)}
@@ -309,11 +309,11 @@ export function DataTableActions<TData>({
 									<CustomDialogHeader
 										title={__(
 											'Advanced Filters',
-											'quillcrm'
+											'doublescale'
 										)}
 										subtitle={__(
 											'Manage your filters for better data insights',
-											'quillcrm'
+											'doublescale'
 										)}
 										icon={<GradientFilterIcon />}
 									/>
@@ -335,8 +335,8 @@ export function DataTableActions<TData>({
 									size="xl"
 								>
 									{config.filters?.isApplying
-										? __('Applying...', 'quillcrm')
-										: __('Apply Filters', 'quillcrm')}
+										? __('Applying...', 'doublescale')
+										: __('Apply Filters', 'doublescale')}
 								</Button>
 							</DialogFooter>
 						</DialogContent>
@@ -347,7 +347,7 @@ export function DataTableActions<TData>({
 						<ProAutomationModal
 							visible={showProModal}
 							onClose={() => setShowProModal(false)}
-							featureName={__('Advanced Filters', 'quillcrm')}
+							featureName={__('Advanced Filters', 'doublescale')}
 						/>
 					)}
 				</>
@@ -365,7 +365,7 @@ export function DataTableActions<TData>({
 							onClick={handleDialogOpen}
 						>
 							<ColumnsIcon />
-							{__('Manage Columns', 'quillcrm')}
+							{__('Manage Columns', 'doublescale')}
 						</Button>
 					</DialogTrigger>
 
@@ -373,10 +373,10 @@ export function DataTableActions<TData>({
 						<DialogHeader>
 							<DialogTitle>
 								<CustomDialogHeader
-									title={__('Manage Columns', 'quillcrm')}
+									title={__('Manage Columns', 'doublescale')}
 									subtitle={__(
 										'Select Columns that you want to be added on the Table.',
-										'quillcrm'
+										'doublescale'
 									)}
 									icon={<GradientColumnsIcon />}
 								/>
@@ -423,7 +423,7 @@ export function DataTableActions<TData>({
 									variant="gradient"
 									size="xl"
 								>
-									{__('Submit', 'quillcrm')}
+									{__('Submit', 'doublescale')}
 								</Button>
 							</DialogClose>
 						</DialogFooter>

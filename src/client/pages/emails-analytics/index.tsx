@@ -21,10 +21,10 @@ import { Line } from 'react-chartjs-2';
  * Internal dependencies
  */
 import './style.scss';
-import type { EmailsAnalytics as EmailAnalyticsData } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate, formatDate } from '@quillcrm/utils';
-import { DateFilter } from '@quillcrm/components';
+import type { EmailsAnalytics as EmailAnalyticsData } from '@doublescale/client';
+import { NavLink } from '@doublescale/navigation';
+import { convertDate, formatDate } from '@doublescale/utils';
+import { DateFilter } from '@doublescale/components';
 
 const EmailAnalytics: React.FC = () => {
 	const [data, setData] = useState<EmailAnalyticsData | null>(null);
@@ -32,7 +32,7 @@ const EmailAnalytics: React.FC = () => {
 	const [interval, setInterval] = useState<string>('today');
 	const [startDate, setStartDate] = useState<Date>(new Date());
 	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchEmailAnalytics = async () => {
 		setLoading(true);
@@ -50,7 +50,7 @@ const EmailAnalytics: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
+				message: __('Error fetching analytics data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -75,7 +75,7 @@ const EmailAnalytics: React.FC = () => {
 								<MailOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Sent', 'quillcrm')}
+								{__('Total Sent', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -90,7 +90,7 @@ const EmailAnalytics: React.FC = () => {
 								<EyeOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Opened', 'quillcrm')}
+								{__('Total Opened', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -105,7 +105,7 @@ const EmailAnalytics: React.FC = () => {
 								<LinkOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Clicked', 'quillcrm')}
+								{__('Total Clicked', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -125,10 +125,10 @@ const EmailAnalytics: React.FC = () => {
 			/>
 			<Flex gap={20}>
 				<Card
-					title={__('Email Analytics', 'quillcrm')}
+					title={__('Email Analytics', 'doublescale')}
 					extra={
 						<NavLink to="campaigns">
-							{__('View All', 'quillcrm')}
+							{__('View All', 'doublescale')}
 						</NavLink>
 					}
 					style={{ flex: 1 }}
@@ -140,7 +140,7 @@ const EmailAnalytics: React.FC = () => {
 							}),
 							datasets: [
 								{
-									label: __('Emails', 'quillcrm'),
+									label: __('Emails', 'doublescale'),
 									data: map(data.data.dates, (date) => {
 										return data.email[date]
 											? data.email[date]

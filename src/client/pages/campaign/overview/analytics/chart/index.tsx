@@ -12,7 +12,7 @@ import { Chart } from 'react-chartjs-2';
 /**
  * Internal dependencies
  */
-import { Campaign as CampaignType } from '@quillcrm/client';
+import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL, isEmailChannel } from '@/constants/campaign-channel';
 
 interface ChartProps {
@@ -36,10 +36,10 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 
 		chartData = {
 			labels: [
-				__('Sent Emails', 'quillcrm'),
-				__('Open Rate', 'quillcrm'),
-				__('Click Rate', 'quillcrm'),
-				__('Failed Emails', 'quillcrm'),
+				__('Sent Emails', 'doublescale'),
+				__('Open Rate', 'doublescale'),
+				__('Click Rate', 'doublescale'),
+				__('Failed Emails', 'doublescale'),
 			],
 			data: [sentCount, openCount, clickCount, failedCount],
 			colors: ['#458DC7', '#16A34A', '#660FF1', '#E13B3B'],
@@ -47,10 +47,10 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 	} else if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
 		chartData = {
 			labels: [
-				__('Sent', 'quillcrm'),
-				__('Failed', 'quillcrm'),
-				__('Delivered', 'quillcrm'),
-				__('Clicked', 'quillcrm'),
+				__('Sent', 'doublescale'),
+				__('Failed', 'doublescale'),
+				__('Delivered', 'doublescale'),
+				__('Clicked', 'doublescale'),
 			],
 			data: [
 				campaign.sent_count,
@@ -64,11 +64,11 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 		// WhatsApp
 		chartData = {
 			labels: [
-				__('Sent', 'quillcrm'),
-				__('Failed', 'quillcrm'),
-				__('Delivered', 'quillcrm'),
-				__('Read', 'quillcrm'),
-				__('Clicked', 'quillcrm'),
+				__('Sent', 'doublescale'),
+				__('Failed', 'doublescale'),
+				__('Delivered', 'doublescale'),
+				__('Read', 'doublescale'),
+				__('Clicked', 'doublescale'),
 			],
 			data: [
 				campaign.sent_count,

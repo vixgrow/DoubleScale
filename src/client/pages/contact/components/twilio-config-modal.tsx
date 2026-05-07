@@ -18,7 +18,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import { Settings, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface TwilioConfigModalProps {
@@ -46,7 +46,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 	onClose,
 	onSuccess,
 }) => {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [accountSid, setAccountSid] = useState('');
 	const [authToken, setAuthToken] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
@@ -59,7 +59,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 		if (!accountSid || !authToken || !phoneNumber) {
 			createNotice({
 				type: 'error',
-				message: __('Please fill in all fields', 'quillcrm'),
+				message: __('Please fill in all fields', 'doublescale'),
 			});
 			return;
 		}
@@ -82,7 +82,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 
 			createNotice({
 				type: 'success',
-				message: __('Twilio configured successfully!', 'quillcrm'),
+				message: __('Twilio configured successfully!', 'doublescale'),
 			});
 
 			// Reset form
@@ -97,7 +97,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 
 			onClose();
 		} catch (error: any) {
-			let errorMessage = __('Failed to save Twilio configuration', 'quillcrm');
+			let errorMessage = __('Failed to save Twilio configuration', 'doublescale');
 
 			if (error.message) {
 				errorMessage = error.message;
@@ -119,7 +119,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 		if (!accountSid || !authToken || !phoneNumber) {
 			createNotice({
 				type: 'error',
-				message: __('Please fill in all fields before testing', 'quillcrm'),
+				message: __('Please fill in all fields before testing', 'doublescale'),
 			});
 			return;
 		}
@@ -152,7 +152,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 				});
 			}
 		} catch (error: any) {
-			let errorMessage = __('Failed to test connection', 'quillcrm');
+			let errorMessage = __('Failed to test connection', 'doublescale');
 
 			if (error.message) {
 				errorMessage = error.message;
@@ -209,7 +209,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Settings className="w-5 h-5" />
-						{__('Configure Twilio Integration', 'quillcrm')}
+						{__('Configure Twilio Integration', 'doublescale')}
 					</DialogTitle>
 				</DialogHeader>
 
@@ -219,7 +219,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							<p className="text-sm text-blue-800">
 								{__(
 									'To send SMS and WhatsApp messages, you need to configure your Twilio account credentials. You can find these in your Twilio Console.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 							<a
@@ -228,12 +228,12 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 								rel="noopener noreferrer"
 								className="text-sm text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
 							>
-								{__('Open Twilio Console →', 'quillcrm')}
+								{__('Open Twilio Console →', 'doublescale')}
 							</a>
 						</div>
 
 						<Field
-							label={__('Account SID', 'quillcrm')}
+							label={__('Account SID', 'doublescale')}
 							type="text"
 							value={accountSid}
 							onChange={(value) => setAccountSid(value)}
@@ -241,12 +241,12 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							required
 							helperText={__(
 								'Your Twilio Account SID (starts with AC)',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 
 						<Field
-							label={__('Auth Token', 'quillcrm')}
+							label={__('Auth Token', 'doublescale')}
 							type="password"
 							value={authToken}
 							onChange={(value) => setAuthToken(value)}
@@ -254,12 +254,12 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							required
 							helperText={__(
 								'Your Twilio Auth Token (keep this secret)',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 
 						<Field
-							label={__('Phone Number', 'quillcrm')}
+							label={__('Phone Number', 'doublescale')}
 							type="text"
 							value={phoneNumber}
 							onChange={(value) => setPhoneNumber(value)}
@@ -267,7 +267,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							required
 							helperText={__(
 								'Your Twilio phone number in E.164 format (e.g., +1234567890)',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 
@@ -283,12 +283,12 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 								{isTesting ? (
 									<>
 										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-										{__('Testing Connection...', 'quillcrm')}
+										{__('Testing Connection...', 'doublescale')}
 									</>
 								) : (
 									<>
 										<Settings className="w-4 h-4 mr-2" />
-										{__('Test WhatsApp Connection', 'quillcrm')}
+										{__('Test WhatsApp Connection', 'doublescale')}
 									</>
 								)}
 							</Button>
@@ -342,14 +342,14 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 														rel="noopener noreferrer"
 														className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
 													>
-														{__('Learn More →', 'quillcrm')}
+														{__('Learn More →', 'doublescale')}
 													</a>
 												)}
 												{check.details && (
 													<div className="mt-2 text-xs text-gray-600">
 														{check.details.template_count !== undefined && (
 															<span>
-																{__('Templates: ', 'quillcrm')}
+																{__('Templates: ', 'doublescale')}
 																{check.details.template_count}
 															</span>
 														)}
@@ -370,7 +370,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							onClick={onClose}
 							disabled={isSaving}
 						>
-							{__('Cancel', 'quillcrm')}
+							{__('Cancel', 'doublescale')}
 						</Button>
 						<Button
 							type="submit"
@@ -378,8 +378,8 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 							className="bg-primary"
 						>
 							{isSaving
-								? __('Saving...', 'quillcrm')
-								: __('Save Configuration', 'quillcrm')}
+								? __('Saving...', 'doublescale')
+								: __('Save Configuration', 'doublescale')}
 						</Button>
 					</DialogFooter>
 				</form>

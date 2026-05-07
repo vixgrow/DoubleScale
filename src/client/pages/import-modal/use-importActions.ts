@@ -13,13 +13,13 @@ import { useEffect, useRef } from 'react';
 /**
  * internal dependencies
  */
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import { useImportContext, type ImportStats } from './contexts';
 import { useGoHighLevelOAuth } from './hooks/use-gohighlevel-oauth';
 
 export const useImportActions = () => {
 	const { state, dispatch } = useImportContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const importers = ConfigAPI.getImporters();
 	const importer = importers[state.source] || null;
 
@@ -171,7 +171,7 @@ export const useImportActions = () => {
 						type: 'error',
 						message:
 							error.message ||
-							__('Failed to fetch GoHighLevel data', 'quillcrm'),
+							__('Failed to fetch GoHighLevel data', 'doublescale'),
 					});
 					dispatch({ type: 'SET_IS_FETCHING', payload: false });
 				}
@@ -202,17 +202,17 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Invalid ActiveCampaign API credentials. Please check your API Key and URL.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('404')) {
 					errorMessage = __(
 						'ActiveCampaign API endpoint not found. Please verify your API URL format.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('403')) {
 					errorMessage = __(
 						'Access denied. Please ensure your API key has the necessary permissions.',
-						'quillcrm'
+						'doublescale'
 					);
 				}
 			} else if (state.source === 'mailerlite') {
@@ -222,12 +222,12 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Invalid MailerLite API token. Please check your credentials.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('403')) {
 					errorMessage = __(
 						'MailerLite API token lacks required permissions. Please generate a new token with read access.',
-						'quillcrm'
+						'doublescale'
 					);
 				}
 			} else if (state.source === 'hubspot') {
@@ -237,17 +237,17 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Invalid HubSpot access token. Please verify your Private App token.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('403')) {
 					errorMessage = __(
 						'HubSpot access denied. Please ensure your Private App has crm.objects.contacts.read and crm.lists.read scopes.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('404')) {
 					errorMessage = __(
 						'HubSpot API endpoint not found. Please check your access token.',
-						'quillcrm'
+						'doublescale'
 					);
 				}
 			} else if (state.source === 'pipedrive') {
@@ -257,17 +257,17 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Invalid Pipedrive credentials. Please verify your API Domain and Token.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('403')) {
 					errorMessage = __(
 						'Pipedrive API access denied. Please check your API token permissions.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('404')) {
 					errorMessage = __(
 						'Pipedrive API endpoint not found. Please check your domain format.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (
 					error.message.includes('Pipedrive API Domain') ||
@@ -275,7 +275,7 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Invalid Pipedrive API Domain or Token. Please check your credentials.',
-						'quillcrm'
+						'doublescale'
 					);
 				}
 				// Always reset sourceData for Pipedrive credential errors to go back to step 1
@@ -290,12 +290,12 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'GoHighLevel OAuth connection has expired. Please reconnect your account.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (error.message.includes('403')) {
 					errorMessage = __(
 						'GoHighLevel API access denied. Please check your OAuth permissions.',
-						'quillcrm'
+						'doublescale'
 					);
 				} else if (
 					error.message.includes(
@@ -304,7 +304,7 @@ export const useImportActions = () => {
 				) {
 					errorMessage = __(
 						'Please connect to your GoHighLevel account using OAuth first.',
-						'quillcrm'
+						'doublescale'
 					);
 				}
 				// Always reset sourceData for GoHighLevel OAuth errors to go back to step 1
@@ -408,23 +408,23 @@ export const useImportActions = () => {
 
 		const hasStats = stats.imported > 0 || stats.skipped > 0 || stats.failed > 0;
 
-		let message = __('Import completed', 'quillcrm');
+		let message = __('Import completed', 'doublescale');
 		if (hasStats) {
 			const parts: string[] = [];
 			if (stats.imported > 0) {
-				parts.push(`${stats.imported} ${__('imported', 'quillcrm')}`);
+				parts.push(`${stats.imported} ${__('imported', 'doublescale')}`);
 			}
 			if (stats.skipped > 0) {
-				parts.push(`${stats.skipped} ${__('skipped', 'quillcrm')}`);
+				parts.push(`${stats.skipped} ${__('skipped', 'doublescale')}`);
 			}
 			if (stats.failed > 0) {
-				parts.push(`${stats.failed} ${__('failed', 'quillcrm')}`);
+				parts.push(`${stats.failed} ${__('failed', 'doublescale')}`);
 			}
-			message = `${__('Import completed', 'quillcrm')}: ${parts.join(', ')}`;
+			message = `${__('Import completed', 'doublescale')}: ${parts.join(', ')}`;
 
 			// Add hint about log management if there are failures
 			if (stats.failed > 0) {
-				message += `. ${__('Check Settings > System for error logs.', 'quillcrm')}`;
+				message += `. ${__('Check Settings > System for error logs.', 'doublescale')}`;
 			}
 		}
 
@@ -450,7 +450,7 @@ export const useImportActions = () => {
 
 		// Platform-specific import error handling
 		let errorMessage =
-			error.message || __('Failed to import contacts', 'quillcrm');
+			error.message || __('Failed to import contacts', 'doublescale');
 
 		if (state.source === 'activecampaign') {
 			if (
@@ -459,12 +459,12 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'ActiveCampaign API rate limit reached. Please wait a few minutes and try again.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('timeout')) {
 				errorMessage = __(
 					'ActiveCampaign connection timeout. The import will resume from where it left off.',
-					'quillcrm'
+					'doublescale'
 				);
 			}
 		} else if (state.source === 'mailerlite') {
@@ -474,12 +474,12 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'MailerLite API rate limit reached. Please wait and try again.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('no groups')) {
 				errorMessage = __(
 					'No MailerLite groups found to import from. Please create groups in your MailerLite account first.',
-					'quillcrm'
+					'doublescale'
 				);
 			}
 		} else if (state.source === 'hubspot') {
@@ -489,17 +489,17 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'HubSpot API rate limit reached. Please wait and try again later.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('timeout')) {
 				errorMessage = __(
 					'HubSpot connection timeout. The import will resume from where it left off.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('no contacts')) {
 				errorMessage = __(
 					'No HubSpot contacts found to import. Please ensure you have contacts in your HubSpot account.',
-					'quillcrm'
+					'doublescale'
 				);
 			}
 		} else if (state.source === 'pipedrive') {
@@ -509,12 +509,12 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'Pipedrive API rate limit reached. Please wait and try again later.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('timeout')) {
 				errorMessage = __(
 					'Pipedrive connection timeout. The import will resume from where it left off.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (
 				error.message?.includes('invalid') ||
@@ -526,7 +526,7 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'Invalid Pipedrive credentials. Please check your API Domain and Token.',
-					'quillcrm'
+					'doublescale'
 				);
 				// Reset sourceData to force user back to credentials step
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
@@ -537,7 +537,7 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'No Pipedrive contacts found to import. Please ensure you have contacts in your Pipedrive account.',
-					'quillcrm'
+					'doublescale'
 				);
 			}
 		} else if (state.source === 'gohighlevel') {
@@ -549,7 +549,7 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'GoHighLevel OAuth connection has expired. Please reconnect your account.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (
 				error.message?.includes('rate limit') ||
@@ -557,12 +557,12 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'GoHighLevel API rate limit reached. Please wait and try again later.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (error.message?.includes('timeout')) {
 				errorMessage = __(
 					'GoHighLevel connection timeout. The import will resume from where it left off.',
-					'quillcrm'
+					'doublescale'
 				);
 			} else if (
 				error.message?.includes('no contacts') ||
@@ -570,7 +570,7 @@ export const useImportActions = () => {
 			) {
 				errorMessage = __(
 					'Please connect to your GoHighLevel account using OAuth first.',
-					'quillcrm'
+					'doublescale'
 				);
 			}
 			// For GoHighLevel, always reset sourceData on ANY import error to go back to step 1

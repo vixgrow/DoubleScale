@@ -14,7 +14,7 @@ import { find, flatMap } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import { isObject, map } from 'lodash';
 import { Input } from '@/components/ui/input';
 
@@ -55,7 +55,7 @@ const ContactMappedFieldsCsv: React.FC<ContactMappedFieldsCsvProps> = ({
 
 	// @ts-ignore The none option not a group.
 	options.unshift({
-		label: __('None', 'quillcrm'),
+		label: __('None', 'doublescale'),
 		value: '',
 	});
 

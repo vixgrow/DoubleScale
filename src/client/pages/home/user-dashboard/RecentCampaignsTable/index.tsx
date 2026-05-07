@@ -13,8 +13,8 @@ import {
 	DashboardContentCard,
 	ThreeDotsIcon,
 	TimeAgoCell,
-} from '@quillcrm/components';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+} from '@doublescale/components';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import {
 	Table,
 	TableBody,
@@ -22,10 +22,10 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@quillcrm/components/ui/table';
-import type { DashboardData } from '@quillcrm/client';
+} from '@doublescale/components/ui/table';
+import type { DashboardData } from '@doublescale/client';
 import { EmptyState } from '../../no-data';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 
 interface RecentCampaignsTableProps {
 	campaigns: DashboardData['top_campaigns'];
@@ -37,7 +37,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 	const navigate = useNavigate();
 	return (
 		<DashboardContentCard
-			title={__('Recent Campaigns', 'quillcrm')}
+			title={__('Recent Campaigns', 'doublescale')}
 			cardClassName="w-full max-h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="campaigns"
@@ -50,22 +50,22 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 						<TableHeader className="bg-[#DEE1E666]">
 							<TableRow>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('ID', 'quillcrm')}
+									{__('ID', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Title', 'quillcrm')}
+									{__('Title', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Status', 'quillcrm')}
+									{__('Status', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Created At', 'quillcrm')}
+									{__('Created At', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Recipients', 'quillcrm')}
+									{__('Recipients', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Action', 'quillcrm')}
+									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
 						</TableHeader>

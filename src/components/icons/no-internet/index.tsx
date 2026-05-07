@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NoInternetIcon: React.FC<IconProps> = ({ width = 607, height = 530 }) => {
 	return (

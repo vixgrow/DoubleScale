@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import type { List as ContactList, ListsResponse } from '@quillcrm/client';
+import type { List as ContactList, ListsResponse } from '@doublescale/client';
 import { isEmpty } from 'validator';
 
 /**
@@ -28,7 +28,7 @@ type ListsProps = Readonly<{
 }>;
 
 export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [newSegment, setNewSegment] = useState<NewSegment>({
 		name: '',
 		slug: '',
@@ -86,7 +86,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('List created successfully', 'quillcrm'),
+				message: __('List created successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -98,7 +98,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to create list', 'quillcrm')
+					__('Failed to create list', 'doublescale')
 				),
 			});
 		} finally {
@@ -152,7 +152,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('List updated successfully', 'quillcrm'),
+				message: __('List updated successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -164,7 +164,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to update list', 'quillcrm')
+					__('Failed to update list', 'doublescale')
 				),
 			});
 		} finally {
@@ -184,7 +184,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 
 			createNotice({
 				type: 'success',
-				message: __('List deleted successfully', 'quillcrm'),
+				message: __('List deleted successfully', 'doublescale'),
 			});
 
 			await refetch();
@@ -196,7 +196,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				type: 'error',
 				message: getApiErrorMessage(
 					error,
-					__('Failed to delete list', 'quillcrm')
+					__('Failed to delete list', 'doublescale')
 				),
 			});
 		} finally {
@@ -210,13 +210,13 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				<h3 className="text-[#170F49] text-[32px] font-semibold">
 					{__(
 						'Segment Your Contacts—Create Smart Lists for Better Targeting',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 				<p className="text-[#777] text-lg font-normal leading-7">
 					{__(
 						'Create smart contact segments to organize leads, customers, and users by type, behavior. From VIPs to WordPress users, segmenting helps you personalize outreach and automate with precision.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>
@@ -259,11 +259,11 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				onChangePage={setPage}
 				emptyMessage={__(
 					'No lists yet. Create your first list above.',
-					'quillcrm'
+					'doublescale'
 				)}
 				deleteConfirmationMessage={__(
 					'Are you sure you want to delete this list?',
-					'quillcrm'
+					'doublescale'
 				)}
 			/>
 
@@ -274,18 +274,18 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 						type=""
 						disabled={isSaving}
 					>
-						{__('Previous', 'quillcrm')}
+						{__('Previous', 'doublescale')}
 					</ButtonComponent>
 					<ButtonComponent
 						type="no"
 						onClick={onSkip}
 						disabled={isSaving}
 					>
-						{__('Skip →', 'quillcrm')}
+						{__('Skip →', 'doublescale')}
 					</ButtonComponent>
 				</div>
 				<ButtonComponent type="go" onClick={onNext} disabled={isSaving}>
-					{__('Next Step', 'quillcrm')}
+					{__('Next Step', 'doublescale')}
 				</ButtonComponent>
 			</div>
 		</div>

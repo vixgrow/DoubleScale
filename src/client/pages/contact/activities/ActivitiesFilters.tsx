@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+import { DateRangePicker } from '@doublescale/components/ui/date-range-picker';
 
 interface ActivitiesFiltersProps {
 	filters: {
@@ -37,7 +37,7 @@ const ActivitiesFilters: React.FC<ActivitiesFiltersProps> = ({
 						range?.to?.toISOString() || ''
 					);
 				}}
-				placeholder={__('Date Range', 'quillcrm')}
+				placeholder={__('Date Range', 'doublescale')}
 				className="w-[206px] h-11 shadow-none rounded-[8px] border border-[#DEE1E6] text-[#777777] bg-white font-normal text-base tracking-[-.5px]"
 			/>
 		</div>

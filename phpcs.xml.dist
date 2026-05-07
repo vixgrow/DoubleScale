@@ -16,7 +16,7 @@
 	<rule ref="WordPress-Core"/>
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress.WP.I18n"/>
-	<config name="text_domain" value="quillcrm,default"/>
+	<config name="text_domain" value="doublescale,default"/>
 
 	<!-- These special comments are markers for the build process -->
 	<rule ref="Squiz.Commenting.InlineComment.WrongStyle" />

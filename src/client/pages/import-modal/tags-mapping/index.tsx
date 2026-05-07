@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { Field } from '@quillcrm/components';
-import { Switch } from '@quillcrm/components/ui/switch';
+import { Field } from '@doublescale/components';
+import { Switch } from '@doublescale/components/ui/switch';
 
 interface TagsMappingProps {
 	tags: string[];
@@ -35,13 +35,13 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 			{/* Header */}
 			<div className="grid grid-cols-3 gap-4 p-4 border-b font-medium bg-gray-50">
 				<div className="text-sm font-semibold">
-					{__('Source Tag', 'quillcrm')}
+					{__('Source Tag', 'doublescale')}
 				</div>
 				<div className="text-sm font-semibold">
-					{__('Assign to (QuillCRM)', 'quillcrm')}
+					{__('Assign to (DoubleScale)', 'doublescale')}
 				</div>
 				<div className="text-sm font-semibold">
-					{__('Auto Create', 'quillcrm')}
+					{__('Auto Create', 'doublescale')}
 				</div>
 			</div>
 
@@ -61,13 +61,13 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 							{/* Source Tag */}
 							<div className="text-sm">{record.tag}</div>
 
-							{/* Assign to QuillCRM */}
+							{/* Assign to DoubleScale */}
 							<div>
 								{getOrAddTagToMapped(record.tag).auto ? (
 									<div className="text-sm text-gray-600">
 										{__(
 											'Tag will be created automatically',
-											'quillcrm'
+											'doublescale'
 										)}
 									</div>
 								) : (

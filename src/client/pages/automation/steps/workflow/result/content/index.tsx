@@ -14,20 +14,20 @@ import { Power } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import '../style.scss';
 import { useAutomationContext } from '../../../../state/context';
-import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
+import { getAction, getGoal, getTrigger } from '@doublescale/utils';
 import type {
 	AutomationContact,
 	AutomationStep,
 	OrganizedStep,
-} from '@quillcrm/client';
-import { convertDate } from '@quillcrm/utils';
+} from '@doublescale/client';
+import { convertDate } from '@doublescale/utils';
 import {
 	ActionIcon,
 	ConditionsIcon,
 	GoalIcon,
 	TimerBlockIcon,
 	ClockIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import ConditionStep from './ConditionStep';
 import RegularStep from './RegularStep';
 
@@ -45,23 +45,23 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	const trigger = getTrigger(automation.trigger);
 	const typesOptions = {
 		action: {
-			label: __('Action', 'quillcrm'),
+			label: __('Action', 'doublescale'),
 			icon: <ActionIcon />,
 		},
 		condition: {
-			label: __('Condition', 'quillcrm'),
+			label: __('Condition', 'doublescale'),
 			icon: <ConditionsIcon />,
 		},
 		delay: {
-			label: __('Delay', 'quillcrm'),
+			label: __('Delay', 'doublescale'),
 			icon: <TimerBlockIcon />,
 		},
 		goal: {
-			label: __('Goal', 'quillcrm'),
+			label: __('Goal', 'doublescale'),
 			icon: <GoalIcon />,
 		},
 		end_automation: {
-			label: __('End Automation', 'quillcrm'),
+			label: __('End Automation', 'doublescale'),
 			icon: <Power className="h-6 w-6" />,
 		},
 	};
@@ -142,10 +142,10 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	});
 
 	const statuses = {
-		completed: __('Completed', 'quillcrm'),
-		failed: __('Failed', 'quillcrm'),
-		pending: __('Pending', 'quillcrm'),
-		skipped: __('Skipped', 'quillcrm'),
+		completed: __('Completed', 'doublescale'),
+		failed: __('Failed', 'doublescale'),
+		pending: __('Pending', 'doublescale'),
+		skipped: __('Skipped', 'doublescale'),
 	};
 
 	const organizedSteps = processSteps(0, steps) as OrganizedStep[];
@@ -343,7 +343,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 				timelineItems.push({
 					id: `condition-${step.id}`,
 					type: 'condition',
-					label: __('Condition', 'quillcrm'),
+					label: __('Condition', 'doublescale'),
 					icon: <ConditionsIcon />,
 					status,
 					date,
@@ -396,9 +396,9 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 		if (!branchLabel) return undefined;
 
 		const branchLabelMap = {
-			started: __('Condition Started', 'quillcrm'),
-			ended: __('Condition Ended', 'quillcrm'),
-			both: `${__('Condition Started', 'quillcrm')} & ${__('Ended', 'quillcrm')}`,
+			started: __('Condition Started', 'doublescale'),
+			ended: __('Condition Ended', 'doublescale'),
+			both: `${__('Condition Started', 'doublescale')} & ${__('Ended', 'doublescale')}`,
 		};
 
 		return branchLabelMap[branchLabel];
@@ -440,7 +440,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 										<div className="qcrm-timeline-timestamp">
 											<ClockIcon />
 											<span>
-												{__('Started on', 'quillcrm')}:
+												{__('Started on', 'doublescale')}:
 											</span>
 											<span className="font-semibold">
 												{convertDate(item.date!, true)}

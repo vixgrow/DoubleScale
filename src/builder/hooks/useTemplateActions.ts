@@ -98,7 +98,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
         const errorMessage =
           err instanceof Error
             ? err.message
-            : __('Failed to save template', 'quillcrm');
+            : __('Failed to save template', 'doublescale');
 
         setError(errorMessage);
         throw err;
@@ -135,7 +135,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
         } else {
           // Create new template
           if (!templateName || templateName.trim() === '') {
-            throw new Error(__('Template name is required', 'quillcrm'));
+            throw new Error(__('Template name is required', 'doublescale'));
           }
 
           savedTemplate = await saveEmailAsTemplate(
@@ -150,7 +150,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
         const errorMessage =
           err instanceof Error
             ? err.message
-            : __('Failed to save as template', 'quillcrm');
+            : __('Failed to save as template', 'doublescale');
 
         setError(errorMessage);
         throw err;

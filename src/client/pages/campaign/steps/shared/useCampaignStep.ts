@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
-import type { Campaign } from '@quillcrm/client';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { getCampaignEndpoint } from '@quillcrm/utils';
+import type { Campaign } from '@doublescale/client';
+import { getToLink, useNavigate } from '@doublescale/navigation';
+import { getCampaignEndpoint } from '@doublescale/utils';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -17,27 +17,27 @@ export const useCampaignStep = () => {
 
   // Selectors
   const campaign = useSelect(
-    (select: any) => select('quillcrm/campaign').getCampaign(),
+    (select: any) => select('doublescale/campaign').getCampaign(),
     []
   ) as Campaign | null;
 
   const loading = useSelect(
-    (select: any) => select('quillcrm/campaign').isLoading(),
+    (select: any) => select('doublescale/campaign').isLoading(),
     []
   );
 
   const saving = useSelect(
-    (select: any) => select('quillcrm/campaign').isSaving(),
+    (select: any) => select('doublescale/campaign').isSaving(),
     []
   );
 
   const currentStep = useSelect(
-    (select: any) => select('quillcrm/campaign').getCurrentStep(),
+    (select: any) => select('doublescale/campaign').getCurrentStep(),
     []
   );
 
   // Actions
-  const dispatch = useDispatch('quillcrm/campaign');
+  const dispatch = useDispatch('doublescale/campaign');
   const { updateSettings, updateCampaign } = dispatch;
 
   /**
@@ -87,12 +87,12 @@ export const useCampaignStep = () => {
    */
   const saveCampaignSettings = async (data: Partial<Campaign>) => {
     if (!campaign) {
-      throw new Error(__('Campaign not loaded', 'quillcrm'));
+      throw new Error(__('Campaign not loaded', 'doublescale'));
     }
 
     const endpoint = getCampaignEndpoint(campaign.type);
     if (!endpoint) {
-      throw new Error(__('Invalid campaign type', 'quillcrm'));
+      throw new Error(__('Invalid campaign type', 'doublescale'));
     }
 
     const response = await apiFetch({

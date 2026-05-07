@@ -47,7 +47,7 @@ interface MessageStatsCardProps {
  * <MessageStatsCard
  *   icon={<ContactTotalEmailsIcon width={38} height={22} />}
  *   value={totalMessages}
- *   label={__('Total Emails', 'quillcrm')}
+ *   label={__('Total Emails', 'doublescale')}
  *   iconBgClass="bg-[#E4EEFD]"
  *   borderColorClass="border-l-secondary"
  * />
@@ -58,7 +58,7 @@ interface MessageStatsCardProps {
  * <MessageStatsCard
  *   icon={<OpenRateIcon />}
  *   value={`${openRate}%`}
- *   label={__('Open Rate', 'quillcrm')}
+ *   label={__('Open Rate', 'doublescale')}
  *   percentage={75}
  *   iconBgClass="bg-[#D1F6DF]"
  *   borderColorClass="border-l-[#16A34A]"

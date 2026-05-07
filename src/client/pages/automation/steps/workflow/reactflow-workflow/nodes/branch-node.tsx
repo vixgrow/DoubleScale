@@ -40,7 +40,7 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 				<div
 					className={`qcrm-reactflow-branch__label qcrm-reactflow-branch__label--${condition}`}
 				>
-					{isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm')}
+					{isYes ? __('Yes', 'doublescale') : __('No', 'doublescale')}
 				</div>
 			</div>
 

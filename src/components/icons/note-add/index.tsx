@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NoteAddIcon: React.FC<IconProps> = ({ width = 24, height = 26,color='#458DC7' }) => {
 	return (

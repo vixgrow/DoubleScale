@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@doublescale/components';
 
 export interface KeyValuePair {
 	key: string;
@@ -47,8 +47,8 @@ export interface DynamicKeyValueInputProps {
 const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 	value = [],
 	onChange,
-	keyPlaceholder = __('Enter key', 'quillcrm'),
-	valuePlaceholder = __('Enter value', 'quillcrm'),
+	keyPlaceholder = __('Enter key', 'doublescale'),
+	valuePlaceholder = __('Enter value', 'doublescale'),
 	className = '',
 	readonlyKeys = false,
 	allowAdd = true,
@@ -98,7 +98,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 							<CardHeader className="p-4">
 								<div className="flex items-center justify-between">
 									<CardTitle className="text-sm font-medium">
-										{__('Key-Value Pair', 'quillcrm')} {index + 1}
+										{__('Key-Value Pair', 'doublescale')} {index + 1}
 									</CardTitle>
 									<div className="flex items-center gap-1">
 										<CollapsibleTrigger asChild>
@@ -118,7 +118,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 												size="icon"
 												onClick={() => removePair(pair.id)}
 												className="h-8 w-8 text-destructive hover:text-destructive"
-												title={__('Remove pair', 'quillcrm')}
+												title={__('Remove pair', 'doublescale')}
 											>
 												<DeleteIcon />
 											</Button>
@@ -131,7 +131,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 									<div className="flex flex-col gap-3">
 										<div className="flex flex-col gap-2">
 											<label className="text-sm font-medium">
-												{__('Key', 'quillcrm')}
+												{__('Key', 'doublescale')}
 											</label>
 											<Input
 												type="text"
@@ -146,7 +146,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 										</div>
 										<div className="flex flex-col gap-2">
 											<label className="text-sm font-medium">
-												{__('Value', 'quillcrm')}
+												{__('Value', 'doublescale')}
 											</label>
 											<Input
 												type="text"
@@ -167,7 +167,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 				{value.length === 0 && (
 					<div className="dynamic-keyvalue-input__empty text-center py-6 text-muted-foreground">
 						<p className="text-sm">
-							{__('No key-value pairs added yet.', 'quillcrm')}
+							{__('No key-value pairs added yet.', 'doublescale')}
 						</p>
 					</div>
 				)}
@@ -182,7 +182,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 						className="w-full"
 					>
 						<PlusIcon className="h-5 w-5" />
-						{__('Add New', 'quillcrm')}
+						{__('Add New', 'doublescale')}
 					</Button>
 				</div>
 			)}

@@ -22,7 +22,7 @@ import {
 	UPDATE_STEP,
 	SET_UPDATED_STEPS,
 } from './constants';
-import type { Automation, AutomationStep } from '@quillcrm/client';
+import type { Automation, AutomationStep } from '@doublescale/client';
 import type { AutomationAction, StepAction, setUpdatedSteps } from './types';
 
 const automation = (

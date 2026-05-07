@@ -6,8 +6,8 @@ import { X, CircleX, AlertTriangle } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import { NoticeMessage } from '@quillcrm/client';
-import { CheckCircleIcon } from '@quillcrm/components';
+import { NoticeMessage } from '@doublescale/client';
+import { CheckCircleIcon } from '@doublescale/components';
 
 interface NoticeBannerProps {
 	notice: NoticeMessage;

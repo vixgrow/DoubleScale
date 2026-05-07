@@ -18,8 +18,8 @@ import {
 	CardContent,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { InstallIcon } from '@quillcrm/components';
-import ConfigAPI from '@quillcrm/config';
+import { InstallIcon } from '@doublescale/components';
+import ConfigAPI from '@doublescale/config';
 import { useImportContext } from '../contexts';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
@@ -156,12 +156,12 @@ const SourceSelector: React.FC = () => {
 		<Card className="p-6 shadow-none rounded-[20px] flex flex-col h-full">
 			<CardHeader className="mb-6 p-0">
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
-					{__('Import From', 'quillcrm')}
+					{__('Import From', 'doublescale')}
 				</CardTitle>
 				<CardDescription className="text-[#979797] text-base">
 					{__(
 						'Select Source from where you want to import your contacts',
-						'quillcrm'
+						'doublescale'
 					)}
 				</CardDescription>
 			</CardHeader>
@@ -198,7 +198,7 @@ const SourceSelector: React.FC = () => {
 										<p className="text-sm text-[#979797]">
 											{__(
 												'Select Source from where you want to import your contacts',
-												'quillcrm'
+												'doublescale'
 											)}
 										</p>
 									</div>
@@ -206,7 +206,7 @@ const SourceSelector: React.FC = () => {
 									{s.disabled && !['wpfunnelkit', 'fluentcrm'].includes(s.value) && (
 										<Button className="bg-[#3B82F6] rounded-full text-xs px-2 py-1">
 											<InstallIcon />
-											{__('INSTALL NOW', 'quillcrm')}
+											{__('INSTALL NOW', 'doublescale')}
 										</Button>
 									)}
 								</div>

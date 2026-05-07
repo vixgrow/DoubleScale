@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Automation } from '@quillcrm/client';
+import type { Automation } from '@doublescale/client';
 import ChartReport from './chart-report';
 import StepReport from './step-report';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
@@ -27,7 +27,7 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({ automation }) => {
 	return (
 		<div className="qcrm-automation-reports__automation-funnels px-8 py-5 h-screen">
 			<div className="qcrm-automation-reports__automation-funnels__header mb-4">
-				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Analytics', 'quillcrm')}</h1>
+				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Analytics', 'doublescale')}</h1>
 			</div>
 
 			<div className="reports-container">
@@ -45,7 +45,7 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({ automation }) => {
 
 				{/* <div className="report-card">
 					<div className="report-card__header">
-						<h2 className="report-card__title">{__('Emails Analytics', 'quillcrm')}</h2>
+						<h2 className="report-card__title">{__('Emails Analytics', 'doublescale')}</h2>
 					</div>
 					<div className="report-card__content">
 						{renderEmailAnalytics()}

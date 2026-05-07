@@ -27,9 +27,9 @@ import {
 	CheckCircleIcon,
 	DeleteIcon,
 	LoadingSpinner,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { useImportContext } from '../contexts';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 
@@ -186,10 +186,10 @@ const CsvUpload: React.FC = () => {
 				</div>
 				<div>
 					<h3 className="text-2xl font-normal text-[#09090B]">
-						{__('Select CSV file to import', 'quillcrm')}
+						{__('Select CSV file to import', 'doublescale')}
 					</h3>
 					<p className="text-base text-[#979797]">
-						{__('or drag and drop it here', 'quillcrm')}
+						{__('or drag and drop it here', 'doublescale')}
 					</p>
 				</div>
 			</div>
@@ -230,7 +230,7 @@ const CsvUpload: React.FC = () => {
 									</div>
 									<LoadingSpinner size={24} />
 									<div className="text-[#292D32]">
-										{__('Uploading...', 'quillcrm')}
+										{__('Uploading...', 'doublescale')}
 									</div>
 								</div>
 								<Progress
@@ -245,7 +245,7 @@ const CsvUpload: React.FC = () => {
 								</div>
 								<CheckCircleIcon />
 								<div className="text-[#292D32]">
-									{__('Completed', 'quillcrm')}
+									{__('Completed', 'doublescale')}
 								</div>
 							</div>
 						)}
@@ -259,12 +259,12 @@ const CsvUpload: React.FC = () => {
 		<div>
 			<div className="mb-6">
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
-					{__('Upload CSV file', 'quillcrm')}
+					{__('Upload CSV file', 'doublescale')}
 				</CardTitle>
 				<CardDescription className="text-[#71717A] text-base mb-4">
 					{__(
 						'Your file must include a column with either first name, last name and email addresses for each contact. (Maximum file size 12 MB.)',
-						'quillcrm'
+						'doublescale'
 					)}
 				</CardDescription>
 			</div>
@@ -277,12 +277,12 @@ const CsvUpload: React.FC = () => {
 
 			{/* <div className="mt-6 text-center">
 				<p className="text-lg text-[#71717A] mb-2">
-					{__('Learn more or', 'quillcrm')}
+					{__('Learn more or', 'doublescale')}
 					<a
 						href="#"
 						className="text-[#3B82F6] hover:text-blue-700 ml-1"
 					>
-						{__('Download example file', 'quillcrm')}
+						{__('Download example file', 'doublescale')}
 					</a>
 				</p>
 			</div> */}

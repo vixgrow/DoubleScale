@@ -215,7 +215,7 @@ class AdminLoader {
 				'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
 				'restUrl'   => rest_url( 'doublescale/v1/' ),
 				'nonce'     => wp_create_nonce( 'wp_rest' ),
-				'isPro'     => is_plugin_active( 'QuillCRM-Pro/doublescale-pro.php' ) || is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' ),
+				'isPro'     => is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' ) || is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' ),
 			)
 		);
 

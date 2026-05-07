@@ -12,7 +12,7 @@ import { map } from 'lodash';
 /**
  * Internal dependencies
  */
-import { PlusIcon } from '@quillcrm/components';
+import { PlusIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import RuleGroupCard from '@/client/pages/automation/steps/workflow/conditions-modal/rule-group-card';
 
@@ -116,7 +116,7 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 					>
 						<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
 						<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
-							{__('OR', 'quillcrm')}
+							{__('OR', 'doublescale')}
 						</span>
 					</div>
 				)}
@@ -140,7 +140,7 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 						className="text-[#414141] bg-[#CECECE] border border-[#D3D3D3] rounded-md p-0 px-2 shadow-none hover:bg-transparent font-semibold"
 					>
 						<PlusIcon />
-						{__('Add another condition (Or)', 'quillcrm')}
+						{__('Add another condition (Or)', 'doublescale')}
 					</Button>
 				</div>
 			</div>

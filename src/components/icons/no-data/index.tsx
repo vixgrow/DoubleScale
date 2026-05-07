@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NoDataIcon: React.FC<IconProps> = ({ width = 167, height = 127 }) => {
 	return (

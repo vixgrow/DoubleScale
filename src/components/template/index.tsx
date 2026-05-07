@@ -13,9 +13,9 @@ import { Button, Card, Flex, Popconfirm } from 'antd';
 /**
  * Internal dependencies
  */
-import type { EmailTemplate } from '@quillcrm/client';
+import type { EmailTemplate } from '@doublescale/client';
 import React, { useRef, useState } from 'react';
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import { isEmail, isEmpty } from 'validator';
 // import TemplateBuilder from '../template-builder';
 
@@ -33,7 +33,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 	// Now type-safe because we know template is EmailTemplate
 	const { settings, subject, body } = template;
 	const { from_name, from_email, reply_to, preview_text } = settings;
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const sendTestEmail = async () => {
 		if (!validate()) {
@@ -58,12 +58,12 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 
 			createNotice({
 				type: 'success',
-				message: __('Email sent successfully', 'quillcrm'),
+				message: __('Email sent successfully', 'doublescale'),
 			});
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to send email', 'quillcrm'),
+				message: __('Failed to send email', 'doublescale'),
 			});
 		} finally {
 			setIsSending(false);
@@ -74,7 +74,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (!isEmail(toEmail)) {
 			createNotice({
 				type: 'error',
-				message: __('Invalid email address', 'quillcrm'),
+				message: __('Invalid email address', 'doublescale'),
 			});
 			return false;
 		}
@@ -82,7 +82,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (isEmpty(from_name, { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
-				message: __('From name is required', 'quillcrm'),
+				message: __('From name is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -90,7 +90,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (isEmpty(from_email, { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
-				message: __('From email is required', 'quillcrm'),
+				message: __('From email is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -98,7 +98,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (!isEmail(from_email)) {
 			createNotice({
 				type: 'error',
-				message: __('From email is not valid', 'quillcrm'),
+				message: __('From email is not valid', 'doublescale'),
 			});
 			return false;
 		}
@@ -106,7 +106,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (isEmpty(subject, { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
-				message: __('Subject is required', 'quillcrm'),
+				message: __('Subject is required', 'doublescale'),
 			});
 			return false;
 		}
@@ -114,7 +114,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		if (isEmpty(body, { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
-				message: __('Body is required', 'quillcrm'),
+				message: __('Body is required', 'doublescale'),
 			});
 
 			return false;
@@ -139,7 +139,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 				<Flex className="qcrm-fields" vertical style={{ flex: 1 }}>
 					<Flex gap={20}>
 						<Field
-							label={__('From Name', 'quillcrm')}
+							label={__('From Name', 'doublescale')}
 							value={from_name}
 							onChange={(value) =>
 								updateTemplate({
@@ -153,7 +153,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							status={from_name ? '' : 'error'}
 						/>
 						<Field
-							label={__('From Email', 'quillcrm')}
+							label={__('From Email', 'doublescale')}
 							value={from_email}
 							onChange={(value) =>
 								updateTemplate({
@@ -168,7 +168,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 						/>
 					</Flex>
 					<Field
-						label={__('Reply To', 'quillcrm')}
+						label={__('Reply To', 'doublescale')}
 						value={reply_to}
 						onChange={(value) =>
 							updateTemplate({
@@ -181,7 +181,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 						type="email"
 					/>
 					<Field
-						label={__('Subject', 'quillcrm')}
+						label={__('Subject', 'doublescale')}
 						value={subject}
 						onChange={(value) =>
 							updateTemplate({
@@ -192,7 +192,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 						status={subject ? '' : 'error'}
 					/>
 					<Field
-						label={__('Preview Text', 'quillcrm')}
+						label={__('Preview Text', 'doublescale')}
 						value={preview_text}
 						onChange={(value) =>
 							updateTemplate({
@@ -228,7 +228,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 									setIsBuilderVisible(true);
 								}}
 							>
-								{__('Create with email designer', 'quillcrm')}
+								{__('Create with email designer', 'doublescale')}
 							</Button>
 						</Flex>
 					</Card>
@@ -236,7 +236,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 			</Flex>
 			<Flex justify="start" gap={10} style={{ marginTop: 20 }}>
 				<Popconfirm
-					title={__('Test Email', 'quillcrm')}
+					title={__('Test Email', 'doublescale')}
 					trigger="click"
 					description={
 						<Flex
@@ -245,7 +245,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							style={{ width: 400, padding: '10px 20px' }}
 						>
 							<Field
-								label={__('To Email', 'quillcrm')}
+								label={__('To Email', 'doublescale')}
 								value={toEmail}
 								onChange={(value) => setToEmail(value)}
 								type="email"
@@ -253,12 +253,12 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 						</Flex>
 					}
 					onConfirm={sendTestEmail}
-					okText={__('Send', 'quillcrm')}
+					okText={__('Send', 'doublescale')}
 					icon={null}
 					style={{ width: 400 }}
 				>
 					<Button type="primary">
-						{__('Send Test Email', 'quillcrm')}
+						{__('Send Test Email', 'doublescale')}
 					</Button>
 				</Popconfirm>
 			</Flex>

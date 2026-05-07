@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const TableIcon: React.FC<IconProps> = ({ width = 24, height = 25 }) => {
 	return (

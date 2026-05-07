@@ -14,7 +14,7 @@ const LeadScoreCard: React.FC = () => {
 	// Allow Pro version to provide the lead score card content
 	// The filter receives the default content (null) and the contact
 	const leadScoreContent = applyFilters(
-		'quillcrm_contact_lead_score_card',
+		'doublescale_contact_lead_score_card',
 		null,
 		contact
 	) as React.ReactNode;

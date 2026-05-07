@@ -9,9 +9,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
 import { PlayIcon } from '@/components';
 // @ts-ignore
-import EmptyCampaignListImage from '@quillcrm/assets/images/campaign.png';
+import EmptyCampaignListImage from '@doublescale/assets/images/campaign.png';
 import './style.scss';
-import { CampaignModalStep } from '@quillcrm/client';
+import { CampaignModalStep } from '@doublescale/client';
 
 interface EmptyCampaignListProps {
 	setStep: (step: CampaignModalStep) => void;
@@ -37,8 +37,8 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 	};
 	
 	const stepThreeContent = {
-		email: __('You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!', 'quillcrm'),
-		sms: __('Compose your SMS message and reach your contacts instantly!', 'quillcrm'),
+		email: __('You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!', 'doublescale'),
+		sms: __('Compose your SMS message and reach your contacts instantly!', 'doublescale'),
 	};
 	
 	return (
@@ -55,13 +55,13 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 						<h2 className="text-2xl font-semibold">
 							{
 								/* translators: %s: Campaign channel name (Email, SMS, etc.) */
-								sprintf(__("Let's Start %s Campaign!", 'quillcrm'), channelName)
+								sprintf(__("Let's Start %s Campaign!", 'doublescale'), channelName)
 							}
 						</h2>
 						<p className="text-base text-gray-400">
 							{__(
 								'Start organizing your workspace for stunning design creation.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					</div>
@@ -69,13 +69,13 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 						<li>
 							{__(
 								'Click "Create Campaign" and Select one of the campaign types depending on your campaign goals.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</li>
 						<li>
 							{__(
 								'Add Your Campaign Settings and information.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</li>
 						<li>
@@ -84,11 +84,11 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 					</ol>
 					<div className="flex gap-4 items-center">
 						<Button onClick={handleCreateClick}>
-							{__('Create Campaign', 'quillcrm')}
+							{__('Create Campaign', 'doublescale')}
 						</Button>
 						<Button variant="secondaryDeepBlue">
 							<PlayIcon />
-							{__('Watch Tutorial', 'quillcrm')}
+							{__('Watch Tutorial', 'doublescale')}
 						</Button>
 					</div>
 				</div>

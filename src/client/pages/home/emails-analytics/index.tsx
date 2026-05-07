@@ -33,12 +33,12 @@ ChartJS.register(
  * Internal dependencies
  */
 import './style.scss';
-import type { DashboardData } from '@quillcrm/client';
+import type { DashboardData } from '@doublescale/client';
 import { EmailStatsCards } from './email-stats-cards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecentEmailsTable } from './recent-emails-list';
 import { useEmailAnalytics } from '../use-analytics';
-import { DashboardContentCard, PageHeader } from '@quillcrm/components';
+import { DashboardContentCard, PageHeader } from '@doublescale/components';
 import EmailAnalyticsSkeleton from './EmailAnalyticsSkeleton';
 
 interface EmailAnalyticsProps {
@@ -65,12 +65,12 @@ const EmailAnalytics: React.FC<EmailAnalyticsProps> = ({ dashboardData }) => {
 	return (
 		<>
 			<PageHeader
-				title={__('Emails Analytics', 'quillcrm')}
-				subtitle={__('Emails Analytics', 'quillcrm')}
+				title={__('Emails Analytics', 'doublescale')}
+				subtitle={__('Emails Analytics', 'doublescale')}
 				actions={[]}
 			/>
 			<div className="flex flex-col gap-5">
-				<DashboardContentCard title={__('Emails Analytics Overview', 'quillcrm')}>
+				<DashboardContentCard title={__('Emails Analytics Overview', 'doublescale')}>
 				<EmailStatsCards data={data} />
 				</DashboardContentCard>
 				

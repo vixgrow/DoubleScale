@@ -14,12 +14,12 @@ import { useAutomationContext } from '../../../state/context';
 import type {
 	OrganizedStep,
 	AutomationStep,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import StepFieldsModal from '../step-fields-modal';
 import GoalSelector from '../goal-selector';
 import ActionSelector from '../action-selector';
 import ConditionsModal from '../conditions-modal';
-import { getAction, getGoal } from '@quillcrm/utils';
+import { getAction, getGoal } from '@doublescale/utils';
 import { isEmpty } from 'lodash';
 
 interface StepModalProps {
@@ -32,7 +32,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 		useAutomationContext();
 	const [actionModalVisible, setActionModalVisible] = useState(true);
 	const [value, setValue] = useState('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	if (step.action && step.type !== 'condition') {
 		const action =
@@ -64,7 +64,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 			setStep(organizedStep);
 			createNotice({
 				type: 'success',
-				message: __('Automation updated', 'quillcrm'),
+				message: __('Automation updated', 'doublescale'),
 			});
 		} catch (error: any) {
 			createNotice({
@@ -79,7 +79,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 		if (!valueToSave) {
 			createNotice({
 				type: 'error',
-				message: __('Please select an action', 'quillcrm'),
+				message: __('Please select an action', 'doublescale'),
 			});
 			return;
 		}

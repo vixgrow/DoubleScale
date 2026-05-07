@@ -6,8 +6,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import ConfigAPI from '@quillcrm/config';
-import type { OrganizedStep } from '@quillcrm/client';
+import ConfigAPI from '@doublescale/config';
+import type { OrganizedStep } from '@doublescale/client';
 
 /**
  * Find action label from the automation actions configuration
@@ -45,24 +45,24 @@ export const findGoalLabel = (goalKey: string): string | null => {
  * Title map for different step types
  */
 const titleMap: Record<string, (currentStep: OrganizedStep | null) => string> =
-	{
-		action: (currentStep) =>
-			currentStep?.action
-				? findActionLabel(currentStep.action) ||
-					__('Action Settings', 'quillcrm')
-				: __('Action Settings', 'quillcrm'),
-		goal: (currentStep) =>
-			currentStep?.action
-				? findGoalLabel(currentStep.action) ||
-					__('Goal Settings', 'quillcrm')
-				: __('Goal Settings', 'quillcrm'),
-		condition: () => __('Condition Settings', 'quillcrm'),
-		delay: (currentStep) =>
-			currentStep?.action
-				? findActionLabel(currentStep.action) ||
-					__('Delay Settings', 'quillcrm')
-				: __('Select Delay Type', 'quillcrm'),
-	};
+{
+	action: (currentStep) =>
+		currentStep?.action
+			? findActionLabel(currentStep.action) ||
+			__('Action Settings', 'doublescale')
+			: __('Action Settings', 'doublescale'),
+	goal: (currentStep) =>
+		currentStep?.action
+			? findGoalLabel(currentStep.action) ||
+			__('Goal Settings', 'doublescale')
+			: __('Goal Settings', 'doublescale'),
+	condition: () => __('Condition Settings', 'doublescale'),
+	delay: (currentStep) =>
+		currentStep?.action
+			? findActionLabel(currentStep.action) ||
+			__('Delay Settings', 'doublescale')
+			: __('Select Delay Type', 'doublescale'),
+};
 
 /**
  * Get the title for the sidebar based on current state
@@ -71,7 +71,7 @@ export const getTitle = (
 	isTriggerVisible: boolean,
 	currentStep: OrganizedStep | null
 ): string => {
-	if (isTriggerVisible) return __('Trigger Settings', 'quillcrm');
+	if (isTriggerVisible) return __('Trigger Settings', 'doublescale');
 	if (!currentStep) return '';
 
 	const getTitleFn = titleMap[currentStep.type];

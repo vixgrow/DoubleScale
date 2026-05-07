@@ -16,8 +16,8 @@ import {
 	DialogPortal,
 } from '@/components/ui/dialog';
 import { EnvelopeIcon, RepeatIcon } from '@/components';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
-import type { Campaign } from '@quillcrm/client';
+import { getToLink, useNavigate } from '@doublescale/navigation';
+import type { Campaign } from '@doublescale/client';
 
 interface CampaignTypesProps {
 	setVisible: (visible: boolean) => void;
@@ -33,7 +33,7 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 	const navigate = useNavigate();
 	const campaignTypesRows = [
 		{
-			label: __('Start From Scratch', 'quillcrm'),
+			label: __('Start From Scratch', 'doublescale'),
 			description: __(
 				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
 			),
@@ -44,7 +44,7 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 			},
 		},
 		{
-			label: __('Choose A Pre-built Template', 'quillcrm'),
+			label: __('Choose A Pre-built Template', 'doublescale'),
 			description: __(
 				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
 			),
@@ -55,7 +55,7 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 			},
 		},
 		{
-			label: __('Generate With AI', 'quillcrm'),
+			label: __('Generate With AI', 'doublescale'),
 			beta: true,
 			description: __(
 				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
@@ -79,13 +79,13 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 						<DialogTitle className="text-3xl font-bold mb-1">
 							{__(
 								'Choose how you`d like to build your Email',
-								'quillcrm'
+								'doublescale'
 							)}
 						</DialogTitle>
 						<DialogDescription className="text-foreground">
 							{__(
 								'Select one of the Type to start creating your own template',
-								'quillcrm'
+								'doublescale'
 							)}
 						</DialogDescription>
 					</DialogHeader>
@@ -107,7 +107,7 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 									</p>
 									{campaignType.beta && (
 										<span className="text-xs text-primary bg-secondary-background rounded-full px-2 py-1 font-semibold">
-											{__('Beta', 'quillcrm')}
+											{__('Beta', 'doublescale')}
 										</span>
 									)}
 								</div>

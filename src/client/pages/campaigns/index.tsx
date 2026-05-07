@@ -1,6 +1,6 @@
 import Campaigns from './campaigns';
 import { applyFilters } from '@wordpress/hooks';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 import { ProFeatureNotice } from '@/components/pro-feature-notice';
 import { __ } from '@wordpress/i18n';
 
@@ -12,12 +12,12 @@ const Campaigns_EmailSequences: React.FC<{ path: string }> = ({ path }) => {
 	};
 
 	const isProActive = applyFilters(
-		'quillcrm_is_pro_active',
+		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
 	const EmailSequences = applyFilters(
-		'quillcrm_email_sequences_component',
+		'doublescale_email_sequences_component',
 		handleNavigate
 	) as React.ComponentType<{ handleNavigate: (path: string) => void }>;
 
@@ -30,10 +30,10 @@ const Campaigns_EmailSequences: React.FC<{ path: string }> = ({ path }) => {
 					<>
 						{!isProActive ? (
 							<ProFeatureNotice
-								featureName={__('Email Sequences', 'quillcrm')}
+								featureName={__('Email Sequences', 'doublescale')}
 								description={__(
 									'Create automated email sequences to nurture your contacts and drive engagement.',
-									'quillcrm'
+									'doublescale'
 								)}
 							/>
 						) : (

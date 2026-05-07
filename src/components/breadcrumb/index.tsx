@@ -1,4 +1,4 @@
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 import {
 	Breadcrumb,

@@ -17,7 +17,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 
 interface ContactProfileProps {
@@ -32,10 +32,10 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 		state;
 
 	const statusOptions = [
-		{ label: __('Subscribed', 'quillcrm'), value: 'subscribed' },
-		{ label: __('Unsubscribed', 'quillcrm'), value: 'unsubscribed' },
-		{ label: __('Bounced', 'quillcrm'), value: 'bounced' },
-		{ label: __('Unverified', 'quillcrm'), value: 'unverified' },
+		{ label: __('Subscribed', 'doublescale'), value: 'subscribed' },
+		{ label: __('Unsubscribed', 'doublescale'), value: 'unsubscribed' },
+		{ label: __('Bounced', 'doublescale'), value: 'bounced' },
+		{ label: __('Unverified', 'doublescale'), value: 'unverified' },
 	];
 
 	const shouldShowStatus =
@@ -45,7 +45,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 		<Card className="shadow-none rounded-2xl">
 			<CardHeader>
 				<CardTitle className="text-2xl font-normal text-[#09090B] flex items-center gap-2">
-					<span>{__('Contact Profile', 'quillcrm')}</span>
+					<span>{__('Contact Profile', 'doublescale')}</span>
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -55,7 +55,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 								<p>
 									{__(
 										'Contact Profile settings help you organize and manage imported contacts efficiently. Assign contacts to lists for targeted campaigns, add tags for segmentation, set their subscription status, and control how duplicate contacts are handled. These settings ensure your contacts are properly categorized from the moment they enter your CRM.',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 							</TooltipContent>
@@ -65,7 +65,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 				<div className="text-lg text-[#71717A]">
 					{__(
 						'Configure how contacts will be organized in Quill CRM',
-						'quillcrm'
+						'doublescale'
 					)}
 				</div>
 			</CardHeader>
@@ -73,7 +73,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 			<CardContent className="space-y-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 					<Field
-						label={__('Assign to Lists', 'quillcrm')}
+						label={__('Assign to Lists', 'doublescale')}
 						type="lists"
 						value={assignedLists}
 						onChange={(value) =>
@@ -85,11 +85,11 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 						required={false}
 						tooltip={__(
 							'Automatically add all imported contacts to specific lists. This helps organize contacts by source or campaign for targeted email marketing.',
-							'quillcrm'
+							'doublescale'
 						)}
 					/>
 					<Field
-						label={__('Assign to Tags', 'quillcrm')}
+						label={__('Assign to Tags', 'doublescale')}
 						type="tags"
 						value={assignedTags}
 						onChange={(value) =>
@@ -101,7 +101,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 						required={false}
 						tooltip={__(
 							'Tag all imported contacts with specific labels. Tags help categorize and segment contacts for better filtering and automation.',
-							'quillcrm'
+							'doublescale'
 						)}
 					/>
 				</div>
@@ -109,7 +109,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 				<div className="space-y-4">
 					{shouldShowStatus && (
 						<Field
-							label={__('Status', 'quillcrm')}
+							label={__('Status', 'doublescale')}
 							type="select"
 							value={newStatus}
 							onChange={(value) =>
@@ -122,7 +122,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 							required={false}
 							tooltip={__(
 								'Set the subscription status for imported contacts. Subscribed contacts can receive emails, while unsubscribed or bounced contacts will be excluded from campaigns.',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 					)}
@@ -140,11 +140,11 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 							required={false}
 							tooltip={__(
 								'When enabled, existing contacts with matching emails will be updated with new data. When disabled, duplicate contacts will be skipped during import.',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 						<div className="text-[#09090B] font-normal text-base">
-							{__('Update Existing Contacts', 'quillcrm')}
+							{__('Update Existing Contacts', 'doublescale')}
 						</div>
 					</div>
 				</div>

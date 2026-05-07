@@ -63,7 +63,7 @@ const ButtonSettings: React.FC<{
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
 					<h3 className="text-base text-[#333333]">
-						{__('Buttons', 'quillcrm')}
+						{__('Buttons', 'doublescale')}
 					</h3>
 				</div>
 			</div>
@@ -75,9 +75,9 @@ const ButtonSettings: React.FC<{
 				>
 					<div className="flex items-center gap-[14px]">
 						<div style={getPreview('primary')}>
-							{__('Button', 'quillcrm')}
+							{__('Button', 'doublescale')}
 						</div>
-						<div>{__('Primary button', 'quillcrm')}</div>
+						<div>{__('Primary button', 'doublescale')}</div>
 					</div>
 					<ChevronRight />
 				</div>
@@ -87,9 +87,9 @@ const ButtonSettings: React.FC<{
 				>
 					<div className="flex items-center gap-[14px]">
 						<div style={getPreview('secondary')}>
-							{__('Button', 'quillcrm')}
+							{__('Button', 'doublescale')}
 						</div>
-						<div>{__('Secondary button', 'quillcrm')}</div>
+						<div>{__('Secondary button', 'doublescale')}</div>
 					</div>
 					<ChevronRight />
 				</div>
@@ -99,9 +99,9 @@ const ButtonSettings: React.FC<{
 				>
 					<div className="flex items-center gap-[14px]">
 						<div style={getPreview('tertiary')}>
-							{__('Button', 'quillcrm')}
+							{__('Button', 'doublescale')}
 						</div>
-						<div>{__('Tertiary button', 'quillcrm')}</div>
+						<div>{__('Tertiary button', 'doublescale')}</div>
 					</div>
 					<ChevronRight />
 				</div>

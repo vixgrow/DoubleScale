@@ -24,19 +24,19 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		);
 
 		if (seconds < 10) {
-			return __('just now', 'quillcrm');
+			return __('just now', 'doublescale');
 		} else if (seconds < 60) {
-			return __('a few seconds ago', 'quillcrm');
+			return __('a few seconds ago', 'doublescale');
 		} else if (seconds < 3600) {
 			const minutes = Math.floor(seconds / 60);
 			return minutes === 1
-				? __('1 minute ago', 'quillcrm')
-				: `${minutes} ${__('minutes ago', 'quillcrm')}`;
+				? __('1 minute ago', 'doublescale')
+				: `${minutes} ${__('minutes ago', 'doublescale')}`;
 		} else {
 			const hours = Math.floor(seconds / 3600);
 			return hours === 1
-				? __('1 hour ago', 'quillcrm')
-				: `${hours} ${__('hours ago', 'quillcrm')}`;
+				? __('1 hour ago', 'doublescale')
+				: `${hours} ${__('hours ago', 'doublescale')}`;
 		}
 	};
 
@@ -44,7 +44,7 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		if (error) {
 			return {
 				icon: <AlertCircle className="h-4 w-4" />,
-				text: __('Save failed', 'quillcrm'),
+				text: __('Save failed', 'doublescale'),
 				color: 'text-red-600',
 			};
 		}
@@ -52,7 +52,7 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		if (isSaving) {
 			return {
 				icon: <Loader2 className="h-4 w-4 animate-spin" />,
-				text: __('Saving...', 'quillcrm'),
+				text: __('Saving...', 'doublescale'),
 				color: 'text-blue-600',
 			};
 		}
@@ -60,7 +60,7 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		if (hasUnsavedChanges) {
 			return {
 				icon: <AlertCircle className="h-4 w-4" />,
-				text: __('Unsaved changes', 'quillcrm'),
+				text: __('Unsaved changes', 'doublescale'),
 				color: 'text-orange-600',
 			};
 		}
@@ -68,14 +68,14 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		if (lastSaved) {
 			return {
 				icon: <Check className="h-4 w-4" />,
-				text: `${__('Saved', 'quillcrm')} ${getTimeAgo(lastSaved)}`,
+				text: `${__('Saved', 'doublescale')} ${getTimeAgo(lastSaved)}`,
 				color: 'text-green-600',
 			};
 		}
 
 		return {
 			icon: <Check className="h-4 w-4" />,
-			text: __('No changes', 'quillcrm'),
+			text: __('No changes', 'doublescale'),
 			color: 'text-green-600',
 		};
 	};

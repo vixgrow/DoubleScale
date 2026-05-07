@@ -1,5 +1,5 @@
 
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const EmailActivityIcon: React.FC<IconProps> = ({ width = 32, height = 32 ,color='#16A34A' }) => {
 	return (

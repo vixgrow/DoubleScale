@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 /**
  * Internal dependencies
  */
-import type { Contact } from '@quillcrm/client';
+import type { Contact } from '@doublescale/client';
 import {
 	Dialog,
 	DialogContent,
@@ -25,10 +25,10 @@ import {
 	Field,
 	GradientEmailIcon,
 	Editor,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
-import { Label } from '@quillcrm/components/ui/label';
-import { useSendMessage } from '@quillcrm/hooks/use-send-message';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
+import { Label } from '@doublescale/components/ui/label';
+import { useSendMessage } from '@doublescale/hooks/use-send-message';
 
 interface SendEmailDialogProps {
 	open: boolean;
@@ -154,10 +154,10 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 					<DialogHeader>
 						<DialogTitle>
 							<CustomDialogHeader
-								title={__('Send Email', 'quillcrm')}
+								title={__('Send Email', 'doublescale')}
 								subtitle={__(
 									'Send an email to the contact',
-									'quillcrm'
+									'doublescale'
 								)}
 								icon={<GradientEmailIcon />}
 							/>
@@ -170,23 +170,23 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							</div>
 						)}
 						<Field
-							label={__('To', 'quillcrm')}
-							placeholder={__('Enter To Email', 'quillcrm')}
+							label={__('To', 'doublescale')}
+							placeholder={__('Enter To Email', 'doublescale')}
 							value={toEmail || contact?.email || ''}
 							onChange={(value) => setToEmail(value)}
 							type="text"
 							disabled={true}
 						/>
 						<Field
-							label={__('Subject', 'quillcrm')}
-							placeholder={__('Enter Subject', 'quillcrm')}
+							label={__('Subject', 'doublescale')}
+							placeholder={__('Enter Subject', 'doublescale')}
 							value={subject}
 							onChange={(value) => setSubject(value)}
 							type="text"
 						/>
 						<div>
 							<Label className="text-[#09090B] font-normal text-base">
-								{__('Body', 'quillcrm')}
+								{__('Body', 'doublescale')}
 							</Label>
 							<div className="mt-2 border rounded-lg">
 								<Editor
@@ -205,8 +205,8 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 						className="w-full"
 					>
 						{isSending
-							? __('Sending...', 'quillcrm')
-							: __('Send Email', 'quillcrm')}
+							? __('Sending...', 'doublescale')
+							: __('Send Email', 'doublescale')}
 					</Button>
 				</DialogFooter>
 				</DialogContent>

@@ -27,7 +27,7 @@ export const AltTextInput: React.FC<AltTextInputProps> = ({
 }) => {
     return (
         <div className="flex flex-col gap-2 text-[#333333]">
-            <label className="text-sm">{__('Alt Text', 'quillcrm')}</label>
+            <label className="text-sm">{__('Alt Text', 'doublescale')}</label>
             <Input
                 type="text"
                 value={value}

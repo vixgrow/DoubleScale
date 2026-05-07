@@ -9,7 +9,7 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
+import type { CampaignEmail } from '@doublescale/client';
 import { Button } from '@/components/ui/button';
 import {
 	NotOpenedIcon,
@@ -17,8 +17,8 @@ import {
 	ResendIcon,
 	TimeAgoCell,
 	ViewIcon,
-} from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
+} from '@doublescale/components';
+import { NavLink } from '@doublescale/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -43,7 +43,7 @@ export function getColumns({
 	const baseColumns: ColumnDef<CampaignEmail>[] = [
 		{
 			accessorKey: 'contact',
-			header: __('Contact', 'quillcrm'),
+			header: __('Contact', 'doublescale'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
 				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
@@ -82,31 +82,31 @@ export function getColumns({
 		},
 		{
 			accessorKey: 'sent_at',
-			header: __('Sent On', 'quillcrm'),
+			header: __('Sent On', 'doublescale'),
 			cell: ({ row }) => <TimeAgoCell value={row.getValue('sent_at')} />,
 		},
 		{
 			accessorKey: 'status',
-			header: __('Sent Status', 'quillcrm'),
+			header: __('Sent Status', 'doublescale'),
 			cell: ({ row }) => {
 				const statusSlug = row.original.status_slug || 'unknown';
 				let statusDisplay = statusSlug;
 				let statusClass = 'text-gray-600 bg-gray-100 border-gray-600';
 
 				if (statusSlug === 'sent' || statusSlug === 'delivered') {
-					statusDisplay = __('Sent', 'quillcrm');
+					statusDisplay = __('Sent', 'doublescale');
 					statusClass =
 						'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
 				} else if (statusSlug === 'failed') {
-					statusDisplay = __('Failed', 'quillcrm');
+					statusDisplay = __('Failed', 'doublescale');
 					statusClass =
 						'text-destructive bg-[#EF444429] border-destructive';
 				} else if (statusSlug === 'pending') {
-					statusDisplay = __('Pending', 'quillcrm');
+					statusDisplay = __('Pending', 'doublescale');
 					statusClass =
 						'text-yellow-600 bg-yellow-50 border-yellow-600';
 				} else if (statusSlug === 'read') {
-					statusDisplay = __('Read', 'quillcrm');
+					statusDisplay = __('Read', 'doublescale');
 					statusClass =
 						'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
 				}
@@ -131,7 +131,7 @@ export function getColumns({
 		typeSpecificColumns.push(
 			{
 				accessorKey: 'opened',
-				header: __('Opened', 'quillcrm'),
+				header: __('Opened', 'doublescale'),
 				cell: ({ row }) => {
 					const isOpened = row.original.opened != '0';
 					return (
@@ -151,8 +151,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isOpened
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -160,7 +160,7 @@ export function getColumns({
 			},
 			{
 				accessorKey: 'clicked',
-				header: __('Clicked', 'quillcrm'),
+				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
 					return (
@@ -180,8 +180,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isClicked
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -192,7 +192,7 @@ export function getColumns({
 		typeSpecificColumns.push(
 			{
 				accessorKey: 'delivered',
-				header: __('Delivered', 'quillcrm'),
+				header: __('Delivered', 'doublescale'),
 				cell: ({ row }) => {
 					const isDelivered =
 						row.original.status_slug === 'delivered';
@@ -213,8 +213,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isDelivered
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -222,7 +222,7 @@ export function getColumns({
 			},
 			{
 				accessorKey: 'clicked',
-				header: __('Clicked', 'quillcrm'),
+				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
 					return (
@@ -242,8 +242,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isClicked
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -254,7 +254,7 @@ export function getColumns({
 		typeSpecificColumns.push(
 			{
 				accessorKey: 'delivered',
-				header: __('Delivered', 'quillcrm'),
+				header: __('Delivered', 'doublescale'),
 				cell: ({ row }) => {
 					const isDelivered =
 						row.original.status_slug === 'delivered' ||
@@ -276,8 +276,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isDelivered
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -285,7 +285,7 @@ export function getColumns({
 			},
 			{
 				accessorKey: 'read',
-				header: __('Read', 'quillcrm'),
+				header: __('Read', 'doublescale'),
 				cell: ({ row }) => {
 					const isRead = row.original.status_slug === 'read';
 					return (
@@ -301,8 +301,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isRead
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -310,7 +310,7 @@ export function getColumns({
 			},
 			{
 				accessorKey: 'clicked',
-				header: __('Clicked', 'quillcrm'),
+				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
 					return (
@@ -330,8 +330,8 @@ export function getColumns({
 							</div>
 							<span>
 								{isClicked
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')}
+									? __('Yes', 'doublescale')
+									: __('No', 'doublescale')}
 							</span>
 						</div>
 					);
@@ -343,7 +343,7 @@ export function getColumns({
 	// Actions column
 	const actionsColumn: ColumnDef<CampaignEmail> = {
 		accessorKey: 'actions',
-		header: __('Actions', 'quillcrm'),
+		header: __('Actions', 'doublescale'),
 		cell: ({ row }) => (
 			<div className="flex items-center gap-2">
 				<Button
@@ -352,7 +352,7 @@ export function getColumns({
 					onClick={() => onViewTemplate(row.original)}
 				>
 					<ViewIcon />
-					{__('View', 'quillcrm')}
+					{__('View', 'doublescale')}
 				</Button>
 				<Button
 					size="sm"
@@ -360,7 +360,7 @@ export function getColumns({
 					onClick={() => onResendMessage(row.original)}
 				>
 					<ResendIcon />
-					{__('Resend', 'quillcrm')}
+					{__('Resend', 'doublescale')}
 				</Button>
 			</div>
 		),

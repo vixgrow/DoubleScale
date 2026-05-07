@@ -16,7 +16,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
-import { OutlinedCalendarIcon } from '@quillcrm/components';
+import { OutlinedCalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 
 interface DateRangePickerProps {
@@ -46,7 +46,7 @@ export function DateRangePicker({
 
 	const formatDateRange = () => {
 		if (!internalRange.from)
-			return placeholder || __('Pick a date range', 'quillcrm');
+			return placeholder || __('Pick a date range', 'doublescale');
 
 		const fromDate = internalRange.from.toLocaleDateString();
 		const toDate = internalRange.to
@@ -126,10 +126,10 @@ export function DateRangePicker({
 							size="sm"
 							onClick={clearDateRange}
 						>
-							{__('Clear', 'quillcrm')}
+							{__('Clear', 'doublescale')}
 						</Button>
 						<Button size="sm" onClick={() => setOpen(false)}>
-							{__('Close', 'quillcrm')}
+							{__('Close', 'doublescale')}
 						</Button>
 					</div>
 				</div>

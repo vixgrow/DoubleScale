@@ -23,7 +23,7 @@ export interface UseOAuthOptions {
 }
 
 export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOAuthOptions) => {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [state, setState] = useState<OAuthState>({
 		connecting: false,
 		connected: false,
@@ -56,7 +56,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 		} else if (event.data.type === 'QUILLCRM_OAUTH_ERROR') {
 			if (event.data.provider === provider) {
 				setConnecting(false);
-				setError(event.data.message || __('OAuth authorization failed', 'quillcrm'));
+				setError(event.data.message || __('OAuth authorization failed', 'doublescale'));
 				onError?.(event.data);
 			}
 		}
@@ -78,7 +78,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 
 		if (!popup) {
 			throw new Error(
-				__('Failed to open OAuth popup. Please allow popups for this site.', 'quillcrm')
+				__('Failed to open OAuth popup. Please allow popups for this site.', 'doublescale')
 			);
 		}
 
@@ -113,7 +113,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 
 			if (!authResponse.authorization_url) {
 				throw new Error(
-					__('Failed to get OAuth authorization URL', 'quillcrm')
+					__('Failed to get OAuth authorization URL', 'doublescale')
 				);
 			}
 
@@ -129,9 +129,9 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 			};
 		} catch (error: any) {
 			setConnecting(false);
-			const errorMessage = error.message || __('Failed to initiate OAuth authorization', 'quillcrm');
+			const errorMessage = error.message || __('Failed to initiate OAuth authorization', 'doublescale');
 			setError(errorMessage);
-			
+
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -151,15 +151,15 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 
 			setConnected(false);
 			setError(null);
-			
+
 			createNotice({
 				type: 'success',
-				message: __('Successfully disconnected', 'quillcrm'),
+				message: __('Successfully disconnected', 'doublescale'),
 			});
 		} catch (error: any) {
-			const errorMessage = error.message || __('Failed to disconnect', 'quillcrm');
+			const errorMessage = error.message || __('Failed to disconnect', 'doublescale');
 			setError(errorMessage);
-			
+
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -177,7 +177,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 			setConnected(response.connected);
 			return response.connected;
 		} catch (error: any) {
-			setError(error.message || __('Failed to check OAuth status', 'quillcrm'));
+			setError(error.message || __('Failed to check OAuth status', 'doublescale'));
 			return false;
 		}
 	}, [provider, setConnected, setError]);

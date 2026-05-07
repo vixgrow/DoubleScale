@@ -10,8 +10,8 @@ import { format } from 'date-fns';
 /**
  * internal dependencies
  */
-import { DashboardContentCard, ManageIcon } from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
+import { DashboardContentCard, ManageIcon } from '@doublescale/components';
+import { NavLink } from '@doublescale/navigation';
 import {
 	Table,
 	TableBody,
@@ -20,7 +20,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import type { DashboardData } from '@quillcrm/client';
+import type { DashboardData } from '@doublescale/client';
 import { EmptyState } from '../../no-data';
 
 interface RecentEmailsTableProps {
@@ -31,7 +31,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 	emails,
 }) => {
 	return (
-		<DashboardContentCard title={__('Recent Emails', 'quillcrm')} cardClassName='h-full'>
+		<DashboardContentCard title={__('Recent Emails', 'doublescale')} cardClassName='h-full'>
 			{isEmpty(emails) ? (
 				<EmptyState />
 			) : (
@@ -40,28 +40,28 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 						<TableHeader>
 							<TableRow>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('ID', 'quillcrm')}
+									{__('ID', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Name', 'quillcrm')}
+									{__('Name', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Created On', 'quillcrm')}
+									{__('Created On', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Execution Date', 'quillcrm')}
+									{__('Execution Date', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Contacts', 'quillcrm')}
+									{__('Contacts', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Sent', 'quillcrm')}
+									{__('Sent', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Status', 'quillcrm')}
+									{__('Status', 'doublescale')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Action', 'quillcrm')}
+									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -72,7 +72,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 										{index + 1}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{email.template?.subject || email.activity?.data?.subject || __('No Subject', 'quillcrm')}
+										{email.template?.subject || email.activity?.data?.subject || __('No Subject', 'doublescale')}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										{format(
@@ -109,7 +109,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 										>
 											<div className="flex items-center gap-2">
 												<ManageIcon />
-												{__('Manage', 'quillcrm')}
+												{__('Manage', 'doublescale')}
 											</div>
 										</NavLink>
 									</TableCell>

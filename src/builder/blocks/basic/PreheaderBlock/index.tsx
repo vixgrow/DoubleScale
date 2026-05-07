@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { TextBlockIcon } from '@quillcrm/components';
+import { TextBlockIcon } from '@doublescale/components';
 import { PreheaderRenderer } from './Renderer';
 import { PreheaderEditor } from './Editor';
 
@@ -45,7 +45,7 @@ const PreheaderBlock: {
 	}>;
 } = {
 	type: 'preheader',
-	name: __('Preheader', 'quillcrm'),
+	name: __('Preheader', 'doublescale'),
 	icon: TextBlockIcon,
 	isProActivated: false,
 	isPro: false,

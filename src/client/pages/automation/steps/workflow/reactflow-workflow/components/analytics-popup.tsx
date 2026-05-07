@@ -42,13 +42,13 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	const getActionLabel = () => {
 		switch (actionType) {
 			case 'email':
-				return __('Email', 'quillcrm');
+				return __('Email', 'doublescale');
 			case 'sms':
-				return __('SMS', 'quillcrm');
+				return __('SMS', 'doublescale');
 			case 'whatsapp':
-				return __('WhatsApp', 'quillcrm');
+				return __('WhatsApp', 'doublescale');
 			default:
-				return __('Message', 'quillcrm');
+				return __('Message', 'doublescale');
 		}
 	};
 
@@ -58,13 +58,13 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	const getSentLabel = () => {
 		switch (actionType) {
 			case 'email':
-				return __('Sent Emails', 'quillcrm');
+				return __('Sent Emails', 'doublescale');
 			case 'sms':
-				return __('Sent SMS', 'quillcrm');
+				return __('Sent SMS', 'doublescale');
 			case 'whatsapp':
-				return __('Sent WhatsApp', 'quillcrm');
+				return __('Sent WhatsApp', 'doublescale');
 			default:
-				return __('Sent Messages', 'quillcrm');
+				return __('Sent Messages', 'doublescale');
 		}
 	};
 
@@ -136,7 +136,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{clickRate.toFixed(1)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Click Rate', 'quillcrm')}
+						{__('Click Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -171,7 +171,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Unsubscribed', 'quillcrm')}
+						{__('Unsubscribed', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -199,7 +199,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{openRate}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Open Rate', 'quillcrm')}
+						{__('Open Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -248,7 +248,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{clickToOpenRate.toFixed(1)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Click to open rate', 'quillcrm')}
+						{__('Click to open rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -331,7 +331,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{clickRate.toFixed(1)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Click Rate', 'quillcrm')}
+						{__('Click Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -378,7 +378,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Unsubscribed', 'quillcrm')}
+						{__('Unsubscribed', 'doublescale')}
 					</div>
 				</div>
 			</div>
@@ -393,12 +393,12 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 			>
 				<div className="qcrm-analytics-popup__header">
 					<h3 className="qcrm-analytics-popup__title">
-						{__('View Analytics', 'quillcrm')} ({actionLabel})
+						{__('View Analytics', 'doublescale')} ({actionLabel})
 					</h3>
 					<button
 						className="qcrm-analytics-popup__close"
 						onClick={onClose}
-						aria-label={__('Close', 'quillcrm')}
+						aria-label={__('Close', 'doublescale')}
 					>
 						<X size={20} />
 					</button>

@@ -14,11 +14,11 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import type { Automation } from '@quillcrm/client';
-import { getTriggerLabel, hasTriggerWarning } from '@quillcrm/utils';
+import type { Automation } from '@doublescale/client';
+import { getTriggerLabel, hasTriggerWarning } from '@doublescale/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
-import { ActionIcon } from '@quillcrm/components';
+import { ActionIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -49,7 +49,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 
 	const { saveAutomation, refetchAutomation, isSaving } =
 		useAutomationContext();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [showChangeTriggerModal, setShowChangeTriggerModal] = useState(false);
 	const [tempAutomation, setTempAutomation] = useState({
 		name: automation.name || '',
@@ -91,7 +91,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 					const confirm = window.confirm(
 						__(
 							'This trigger requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-							'quillcrm'
+							'doublescale'
 						)
 					);
 					if (confirm) {
@@ -117,7 +117,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 			console.error('Failed to change trigger:', error);
 			createNotice({
 				type: 'error',
-				message: __('Failed to update trigger', 'quillcrm'),
+				message: __('Failed to update trigger', 'doublescale'),
 			});
 		}
 	};
@@ -142,7 +142,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 		// Show success notification
 		createNotice({
 			type: 'success',
-			message: __('Trigger updated successfully', 'quillcrm'),
+			message: __('Trigger updated successfully', 'doublescale'),
 		});
 	};
 
@@ -168,12 +168,12 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 						</TooltipTrigger>
 						<TooltipContent side="right" className="max-w-xs">
 							<p className="font-semibold">
-								{__('Plugin Required', 'quillcrm')}
+								{__('Plugin Required', 'doublescale')}
 							</p>
 							<p className="text-xs mt-1">
 								{__(
 									'This trigger requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</p>
 						</TooltipContent>
@@ -195,15 +195,15 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				>
 					<NodeLayout
 						icon={<ActionIcon width={23} height={23} />}
-						title={__('Start Workflow (Trigger)', 'quillcrm')}
+						title={__('Start Workflow (Trigger)', 'doublescale')}
 						subtitle={subtitle}
 						onEdit={handleEdit}
 						onDelete={() => {}}
 						onChangeTrigger={
 							!viewMode ? handleChangeTrigger : undefined
 						}
-						editLabel={__('Edit Trigger', 'quillcrm')}
-						changeTriggerLabel={__('Change Trigger', 'quillcrm')}
+						editLabel={__('Edit Trigger', 'doublescale')}
+						changeTriggerLabel={__('Change Trigger', 'doublescale')}
 						deleteLabel=""
 						deleteTitle=""
 						deleteDescription=""

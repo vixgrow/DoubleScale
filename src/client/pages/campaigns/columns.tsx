@@ -32,8 +32,8 @@ import {
 	SortedHeaderCell,
 	TimeAgoCell,
 	ViewOutlinedIcon,
-} from '@quillcrm/components';
-import { getToLink } from '@quillcrm/navigation';
+} from '@doublescale/components';
+import { getToLink } from '@doublescale/navigation';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 // Add interface for column props
@@ -79,7 +79,7 @@ const getCommonColumns = ({
 		header: ({ column }) =>
 			SortedHeaderCell({
 				column,
-				header: __('Campaign Name', 'quillcrm'),
+				header: __('Campaign Name', 'doublescale'),
 			}),
 		cell: ({ row }) => {
 			const campaign = row.original;
@@ -115,7 +115,7 @@ const getCommonColumns = ({
 	const statusColumn: ColumnDef<Campaign> = {
 		accessorKey: 'status',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Status', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Status', 'doublescale') }),
 		cell: ({ row }) => {
 			const status = row.getValue('status') as CampaignStatus;
 			const colorClasses =
@@ -135,21 +135,21 @@ const getCommonColumns = ({
 	const broadcastColumn: ColumnDef<Campaign> = {
 		accessorKey: 'execute_at',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Broadcast', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Broadcast', 'doublescale') }),
 		cell: ({ row }) => <TimeAgoCell value={row.getValue('execute_at')} />,
 	};
 
 	const createdAtColumn: ColumnDef<Campaign> = {
 		accessorKey: 'created_at',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Created At', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Created At', 'doublescale') }),
 		cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
 	};
 
 	const updatedAtColumn: ColumnDef<Campaign> = {
 		accessorKey: 'updated_at',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Updated At', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Updated At', 'doublescale') }),
 		cell: ({ row }) => (
 			<FormattedDateCell value={row.getValue('updated_at')} />
 		),
@@ -158,7 +158,7 @@ const getCommonColumns = ({
 	const actionsColumn: ColumnDef<Campaign> = {
 		accessorKey: 'actions',
 		header: () => (
-			<div className="text-center">{__('Actions', 'quillcrm')}</div>
+			<div className="text-center">{__('Actions', 'doublescale')}</div>
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
@@ -195,13 +195,13 @@ const getCommonColumns = ({
 								}}
 							>
 								<ViewOutlinedIcon />
-								{__('Overview', 'quillcrm')}
+								{__('Overview', 'doublescale')}
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={() => duplicate(campaign.id)}
 							>
 								<CopyIcon />
-								{__('Duplicate', 'quillcrm')}
+								{__('Duplicate', 'doublescale')}
 							</DropdownMenuItem>
 							{canEdit && (
 								<DropdownMenuItem
@@ -214,7 +214,7 @@ const getCommonColumns = ({
 									}}
 								>
 									<EditHeaderIcon />
-									{__('Edit', 'quillcrm')}
+									{__('Edit', 'doublescale')}
 								</DropdownMenuItem>
 							)}
 							<DropdownMenuItem
@@ -222,7 +222,7 @@ const getCommonColumns = ({
 								className="text-red-500 hover:text-red-500 focus:text-red-500"
 							>
 								<DeleteIcon />
-								{__('Delete', 'quillcrm')}
+								{__('Delete', 'doublescale')}
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -261,7 +261,7 @@ export const emailCampaignColumns = ({
 	const typeColumn: ColumnDef<Campaign> = {
 		accessorKey: 'type',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Type', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Type', 'doublescale') }),
 		cell: ({ row }) => {
 			const campaign = row.original;
 			const isAbTest = campaign.settings?.ab_test || false;
@@ -279,8 +279,8 @@ export const emailCampaignColumns = ({
 					)}
 					<span>
 						{isAbTest
-							? __('A/B Split Campaign', 'quillcrm')
-							: __('Standard Campaign', 'quillcrm')}
+							? __('A/B Split Campaign', 'doublescale')
+							: __('Standard Campaign', 'doublescale')}
 					</span>
 				</div>
 			);
@@ -290,14 +290,14 @@ export const emailCampaignColumns = ({
 	const openRateColumn: ColumnDef<Campaign> = {
 		accessorKey: 'open_rate',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Open Rate', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Open Rate', 'doublescale') }),
 		cell: ({ row }) => <FallbackCell value={row.getValue('open_rate')} />,
 	};
 
 	const recipientsColumn: ColumnDef<Campaign> = {
 		accessorKey: 'contacts_count',
 		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Recipients', 'quillcrm') }),
+			SortedHeaderCell({ column, header: __('Recipients', 'doublescale') }),
 		cell: ({ row }) => <FallbackCell value={row.getValue('contacts_count')} />,
 	};
 
@@ -336,7 +336,7 @@ export const smsCampaignColumns = ({
 		header: ({ column }) =>
 			SortedHeaderCell({
 				column,
-				header: __('Delivery Rate', 'quillcrm'),
+				header: __('Delivery Rate', 'doublescale'),
 			}),
 		cell: ({ row }) => (
 			<FallbackCell value={row.getValue('delivery_rate')} />

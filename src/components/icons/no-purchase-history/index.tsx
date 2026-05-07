@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NoPurchaseHistoryIcon: React.FC<IconProps> = ({
 	width = 71,

@@ -12,10 +12,10 @@ import timezone from 'dayjs/plugin/timezone';
 /**
  * Internal dependencies
  */
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import EditHeaderIcon from '@/components/icons/edit-header';
 import { Badge } from '@/components/ui/badge';
-import TrashIcon from '@quillcrm/components/icons/trash';
+import TrashIcon from '@doublescale/components/icons/trash';
 
 interface Call {
     id: number;
@@ -78,7 +78,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
     const columns: ColumnDef<Call>[] = [
         {
             accessorKey: 'phone_number',
-            header: __('Phone Number', 'quillcrm'),
+            header: __('Phone Number', 'doublescale'),
             cell: ({ row }) => (
                 <span className="text-[#09090B]">
                     {formatPhoneNumber(row.original.data?.phone_number)}
@@ -87,7 +87,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'call_date_time',
-            header: __('Call Date & Time', 'quillcrm'),
+            header: __('Call Date & Time', 'doublescale'),
             cell: ({ row }) => {
                 const dateTime = row.original.data?.called_at || row.original.created_at;
                 return (
@@ -99,7 +99,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'outcome',
-            header: __('Call Outcome', 'quillcrm'),
+            header: __('Call Outcome', 'doublescale'),
             cell: ({ row }) => {
                 const outcome = row.original.data?.outcome || 'completed';
                 const colorClass = getOutcomeBadgeColor(outcome);
@@ -114,19 +114,19 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
         },
         {
             accessorKey: 'duration',
-            header: __('Duration (min)', 'quillcrm'),
+            header: __('Duration (min)', 'doublescale'),
             cell: ({ row }) => {
                 const duration = row.original.data?.duration || 0;
                 return (
                     <span className="text-[#09090B]">
-                        {duration} {__('M', 'quillcrm')}
+                        {duration} {__('M', 'doublescale')}
                     </span>
                 );
             },
         },
         {
             accessorKey: 'actions',
-            header: __('Actions', 'quillcrm'),
+            header: __('Actions', 'doublescale'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-4">
                     <Button

@@ -21,10 +21,10 @@ import { Line } from 'react-chartjs-2';
  * Internal dependencies
  */
 import './style.scss';
-import type { CartAnalytics as CartAnalyticsData } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate, formatDate } from '@quillcrm/utils';
-import { DateFilter } from '@quillcrm/components';
+import type { CartAnalytics as CartAnalyticsData } from '@doublescale/client';
+import { NavLink } from '@doublescale/navigation';
+import { convertDate, formatDate } from '@doublescale/utils';
+import { DateFilter } from '@doublescale/components';
 
 const CartAnalytics: React.FC = () => {
 	const [data, setData] = useState<CartAnalyticsData | null>(null);
@@ -32,7 +32,7 @@ const CartAnalytics: React.FC = () => {
 	const [interval, setInterval] = useState<string>('today');
 	const [startDate, setStartDate] = useState<Date>(new Date());
 	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchCartAnalytics = async () => {
 		setLoading(true);
@@ -49,7 +49,7 @@ const CartAnalytics: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
+				message: __('Error fetching analytics data', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -74,7 +74,7 @@ const CartAnalytics: React.FC = () => {
 								<UserOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Carts', 'quillcrm')}
+								{__('Total Carts', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -89,7 +89,7 @@ const CartAnalytics: React.FC = () => {
 								<MailOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
-								{__('Total Revenue', 'quillcrm')}
+								{__('Total Revenue', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
@@ -109,10 +109,10 @@ const CartAnalytics: React.FC = () => {
 			/>
 			<Flex gap={20}>
 				<Card
-					title={__('Cart Analytics', 'quillcrm')}
+					title={__('Cart Analytics', 'doublescale')}
 					extra={
 						<NavLink to="abandoned-carts">
-							{__('View All', 'quillcrm')}
+							{__('View All', 'doublescale')}
 						</NavLink>
 					}
 					style={{ flex: 1 }}
@@ -124,7 +124,7 @@ const CartAnalytics: React.FC = () => {
 							}),
 							datasets: [
 								{
-									label: __('Carts', 'quillcrm'),
+									label: __('Carts', 'doublescale'),
 									data: map(data.data.dates, (date) => {
 										return data.carts[date]
 											? data.carts[date]
@@ -164,10 +164,10 @@ const CartAnalytics: React.FC = () => {
 					/>
 				</Card>
 				<Card
-					title={__('Revenue', 'quillcrm')}
+					title={__('Revenue', 'doublescale')}
 					extra={
 						<NavLink to="abandoned-carts">
-							{__('View All', 'quillcrm')}
+							{__('View All', 'doublescale')}
 						</NavLink>
 					}
 					style={{ flex: 1 }}
@@ -179,7 +179,7 @@ const CartAnalytics: React.FC = () => {
 							}),
 							datasets: [
 								{
-									label: __('Revenue', 'quillcrm'),
+									label: __('Revenue', 'doublescale'),
 									data: map(data.data.dates, (date) => {
 										return data.revenue[date]
 											? data.revenue[date]

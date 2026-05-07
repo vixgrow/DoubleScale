@@ -197,7 +197,7 @@ const DealCustomFieldChange = ({
 			{customFieldEntries.length > 0 && (
 				<div className="mb-6 border rounded p-4">
 					<h3 className="font-medium mb-2">
-						{__('Custom Fields', 'quillcrm')}
+						{__('Custom Fields', 'doublescale')}
 					</h3>
 					{customFieldEntries.map((entry, index) => {
 						const fieldOption = options.find(
@@ -238,7 +238,7 @@ const DealCustomFieldChange = ({
 												)
 											}
 										>
-											{__('Edit', 'quillcrm')}
+											{__('Edit', 'doublescale')}
 										</Button>
 									)}
 									<Button
@@ -250,7 +250,7 @@ const DealCustomFieldChange = ({
 											)
 										}
 									>
-										{__('Remove', 'quillcrm')}
+										{__('Remove', 'doublescale')}
 									</Button>
 								</div>
 							</div>
@@ -263,11 +263,11 @@ const DealCustomFieldChange = ({
 				<>
 					<h3>
 						{isEditing
-							? __('Edit Custom Field', 'quillcrm')
-							: __('Add Custom Field', 'quillcrm')}
+							? __('Edit Custom Field', 'doublescale')
+							: __('Add Custom Field', 'doublescale')}
 					</h3>
 					<div className="mb-4">
-						<h4>{__('Field', 'quillcrm')}</h4>
+						<h4>{__('Field', 'doublescale')}</h4>
 						<Select
 							options={customFields}
 							value={selectedValue}
@@ -280,14 +280,14 @@ const DealCustomFieldChange = ({
 								customFields.length === 0
 									? __(
 											'All custom fields have been added',
-											'quillcrm'
+											'doublescale'
 										)
-									: __('Select a field', 'quillcrm')
+									: __('Select a field', 'doublescale')
 							}
 							noOptionsMessage={() =>
 								__(
 									'All custom fields have been added',
-									'quillcrm'
+									'doublescale'
 								)
 							}
 						/>
@@ -295,7 +295,7 @@ const DealCustomFieldChange = ({
 							<div className="text-amber-600 text-sm mb-2">
 								{__(
 									'This field already exists. Adding will update its value.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</div>
 						)}
@@ -303,7 +303,7 @@ const DealCustomFieldChange = ({
 
 					{currentFieldId && (
 						<div className="mb-4">
-							<h4>{__('Value', 'quillcrm')}</h4>
+							<h4>{__('Value', 'doublescale')}</h4>
 							<Field
 								type={fieldType}
 								value={currentFieldValue}
@@ -336,15 +336,15 @@ const DealCustomFieldChange = ({
 							disabled={!currentFieldId}
 						>
 							{isEditing
-								? __('Save Changes', 'quillcrm')
+								? __('Save Changes', 'doublescale')
 								: fieldExists
-									? __('Update Field', 'quillcrm')
-									: __('Add Field', 'quillcrm')}
+									? __('Update Field', 'doublescale')
+									: __('Add Field', 'doublescale')}
 						</Button>
 
 						{isEditing && (
 							<Button variant="outline" onClick={cancelEditing}>
-								{__('Cancel', 'quillcrm')}
+								{__('Cancel', 'doublescale')}
 							</Button>
 						)}
 					</div>
@@ -353,12 +353,12 @@ const DealCustomFieldChange = ({
 				<div className="text-green-600 p-3 bg-green-50 rounded border border-green-100">
 					{__(
 						'All available custom fields have been added.',
-						'quillcrm'
+						'doublescale'
 					)}
 				</div>
 			) : (
 				<div className="text-blue-600 p-3 bg-blue-50 rounded border border-blue-100">
-					{__('No custom fields available to add.', 'quillcrm')}
+					{__('No custom fields available to add.', 'doublescale')}
 				</div>
 			)}
 		</div>

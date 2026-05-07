@@ -9,8 +9,8 @@ import { __ } from '@wordpress/i18n';
 import WebhookFields from '../../webhook-fields';
 import FormFields from '../../form-fields';
 import Fields from '@/components/fields';
-import { getTrigger } from '@quillcrm/utils';
-import type { Automation } from '@quillcrm/client';
+import { getTrigger } from '@doublescale/utils';
+import type { Automation } from '@doublescale/client';
 import { Switch } from '@/components/ui/switch';
 import {
 	Tooltip,
@@ -85,7 +85,7 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 						{triggerWarning.message}
 						{triggerWarning.plugin_label && (
 							<span className="block mt-1 font-medium">
-								{__('Required plugin:', 'quillcrm')}{' '}
+								{__('Required plugin:', 'doublescale')}{' '}
 								{triggerWarning.plugin_label}
 							</span>
 						)}
@@ -105,7 +105,7 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<span className="text-sm font-medium text-[#333333]">
-						{__('Run Multiple Times', 'quillcrm')}
+						{__('Run Multiple Times', 'doublescale')}
 					</span>
 					<TooltipProvider>
 						<Tooltip>
@@ -116,7 +116,7 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 								<p>
 									{__(
 										'If you want to restart the automation for the same contact',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 							</TooltipContent>

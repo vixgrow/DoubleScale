@@ -217,7 +217,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 								<AlertCircle className="mt-[2px] h-4 w-4" />
 								<div>
 									<AlertTitle>
-										{__('Connection error', 'quillcrm')}
+										{__('Connection error', 'doublescale')}
 									</AlertTitle>
 									<AlertDescription>
 										{goHighLevelOAuth.error}
@@ -236,12 +236,12 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 								{goHighLevelOAuth.connecting ? (
 									<>
 										<Loader2 className="h-4 w-4 animate-spin" />
-										{__('Connecting...', 'quillcrm')}
+										{__('Connecting...', 'doublescale')}
 									</>
 								) : (
 									<>
 										<Link2 className="h-4 w-4" />
-										{__('Connect to GoHighLevel', 'quillcrm')}
+										{__('Connect to GoHighLevel', 'doublescale')}
 									</>
 								)}
 							</Button>
@@ -251,7 +251,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 
 				<div className="redirect-url-section mt-4">
 					<span className="mb-2 block text-sm font-semibold text-gray-900">
-						{__('Redirect URL for your GoHighLevel app:', 'quillcrm')}
+						{__('Redirect URL for your GoHighLevel app:', 'doublescale')}
 					</span>
 					<div className="flex items-center gap-2 p-2 bg-gray-100 border rounded">
 						<code className="flex-1 text-sm">
@@ -264,7 +264,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 								navigator.clipboard.writeText(setup.redirect_url)
 							}
 						>
-							{__('Copy', 'quillcrm')}
+							{__('Copy', 'doublescale')}
 						</Button>
 					</div>
 				</div>
@@ -297,12 +297,12 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 						<div className="space-y-1 text-sm text-gray-600">
 							{status.location_name && (
 								<div>
-									<strong>{__('Location:', 'quillcrm')}</strong>{' '}
+									<strong>{__('Location:', 'doublescale')}</strong>{' '}
 									{status.location_name}
 								</div>
 							)}
 							<div>
-								<strong>{__('Connected:', 'quillcrm')}</strong>{' '}
+								<strong>{__('Connected:', 'doublescale')}</strong>{' '}
 								{status.connected_at}
 							</div>
 							<div
@@ -312,7 +312,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 										: ''
 								}
 							>
-								<strong>{__('Expires:', 'quillcrm')}</strong>{' '}
+								<strong>{__('Expires:', 'doublescale')}</strong>{' '}
 								{timeRemaining}
 							</div>
 						</div>
@@ -321,7 +321,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 							<div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded text-sm text-yellow-800">
 								{__(
 									'Connection expires soon. Please reconnect if import takes longer.',
-									'quillcrm'
+									'doublescale'
 								)}
 							</div>
 						)}
@@ -332,7 +332,7 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 							size="sm"
 							onClick={handleDisconnect}
 						>
-							{__('Disconnect', 'quillcrm')}
+							{__('Disconnect', 'doublescale')}
 						</Button>
 					</div>
 				</div>

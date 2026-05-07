@@ -18,13 +18,13 @@ import {
     GradientMeetingsIcon,
     NoData,
     AddMeetingIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getColumns } from './columns';
 import MeetingDialog from './meeting-dialog';
-import type { NoticeMessage } from '@quillcrm/client';
+import type { NoticeMessage } from '@doublescale/client';
 
 interface Meeting {
     id: number;
@@ -110,7 +110,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
         } catch (error: any) {
             showNotice(
                 'error',
-                error.message || __('Failed to fetch meetings', 'quillcrm')
+                error.message || __('Failed to fetch meetings', 'doublescale')
             );
         } finally {
             setLoading(false);
@@ -141,9 +141,9 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
 
             setMeetings(meetings.filter((m) => m.id !== meetingToDelete.id));
             fetchMeetings();
-            showNotice('success', __('Meeting deleted successfully', 'quillcrm'));
+            showNotice('success', __('Meeting deleted successfully', 'doublescale'));
         } catch (error) {
-            showNotice('error', __('Failed to delete meeting', 'quillcrm'));
+            showNotice('error', __('Failed to delete meeting', 'doublescale'));
         } finally {
             setMeetingToDelete(null);
         }
@@ -163,7 +163,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
         <div className="qcrm-meetings flex flex-col gap-5">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">
-                    {__('Meetings', 'quillcrm')}
+                    {__('Meetings', 'doublescale')}
                 </h2>
                 <Button
                     variant="secondary"
@@ -172,7 +172,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
                     onClick={handleAddMeeting}
                 >
                     <AddMeetingIcon />
-                    {__('Log Meeting', 'quillcrm')}
+                    {__('Log Meeting', 'doublescale')}
                 </Button>
             </div>
             {notice && (
@@ -182,10 +182,10 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
                 {!loading && (!meetings || meetings.length === 0) ? (
                     <NoData
                         icon={<GradientMeetingsIcon />}
-                        title={__('No meetings found yet', 'quillcrm')}
-                        subtitle={__('No meetings found—this space is waiting for your plans. Add a time to talk and stay connected.', 'quillcrm')}
+                        title={__('No meetings found yet', 'doublescale')}
+                        subtitle={__('No meetings found—this space is waiting for your plans. Add a time to talk and stay connected.', 'doublescale')}
                         onClick={handleAddMeeting}
-                        buttonLabel={__('Schedule Meeting', 'quillcrm')}
+                        buttonLabel={__('Schedule Meeting', 'doublescale')}
                     />
                 ) : (
                     <>

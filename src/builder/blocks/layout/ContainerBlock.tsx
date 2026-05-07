@@ -26,7 +26,7 @@ const ContainerBlock = ({
 			<Collapsible className="group/collapsible mb-4">
 				<CollapsibleTrigger asChild>
 					<div className={defaultStyle}>
-						{__('Library', 'quillcrm')}
+						{__('Library', 'doublescale')}
 						<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
 					</div>
 				</CollapsibleTrigger>
@@ -41,7 +41,7 @@ const ContainerBlock = ({
 			<Collapsible defaultOpen className="group/collapsible">
 				<CollapsibleTrigger asChild>
 					<div className={defaultStyle}>
-						{__('Blocks', 'quillcrm')}
+						{__('Blocks', 'doublescale')}
 						<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
 					</div>
 				</CollapsibleTrigger>

@@ -7,8 +7,8 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import type { Rule as RuleSettings } from '@quillcrm/config';
-import { Rule as RuleType } from '@quillcrm/client';
+import type { Rule as RuleSettings } from '@doublescale/config';
+import { Rule as RuleType } from '@doublescale/client';
 import { Button } from '@/components/ui/button';
 import Field from '../field';
 import {

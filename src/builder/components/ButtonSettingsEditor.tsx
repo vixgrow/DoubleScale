@@ -48,13 +48,13 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 	const getButtonTitle = () => {
 		switch (buttonType) {
 			case 'primary':
-				return __('Primary button', 'quillcrm');
+				return __('Primary button', 'doublescale');
 			case 'secondary':
-				return __('Secondary button', 'quillcrm');
+				return __('Secondary button', 'doublescale');
 			case 'tertiary':
-				return __('Tertiary button', 'quillcrm');
+				return __('Tertiary button', 'doublescale');
 			default:
-				return __('Button', 'quillcrm');
+				return __('Button', 'doublescale');
 		}
 	};
 
@@ -103,17 +103,17 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				{/* Preview Section */}
 				<div>
 					<div className="text-sm text-[#333333] mb-2">
-						{__('Preview', 'quillcrm')}
+						{__('Preview', 'doublescale')}
 					</div>
 					<div className="bg-muted p-6 border rounded-lg flex justify-center">
 						<div style={getButtonStyle()}>
-							{__('Button', 'quillcrm')}
+							{__('Button', 'doublescale')}
 						</div>
 					</div>
 					<p className="text-xs text-[#616161] mt-2">
 						{__(
 							'Changes made to this button will be reflected throughout the whole email.',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -138,7 +138,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				<div className="flex gap-3 items-end w-full">
 					<div className="flex flex-col gap-2 text-[#333333] w-2/3">
 						<label className="text-sm">
-							{__('Shape', 'quillcrm')}
+							{__('Shape', 'doublescale')}
 						</label>
 						<div className="flex items-center justify-between border rounded-lg">
 							<div
@@ -220,7 +220,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 
 				{/* Text Color */}
 				<ColorPickerControl
-					label={__('Text color', 'quillcrm')}
+					label={__('Text color', 'doublescale')}
 					value={settings.textColor}
 					onChange={(value) => updateSettings({ textColor: value })}
 					id="text-color"
@@ -228,7 +228,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 
 				{/* Background Color */}
 				<ColorPickerControl
-					label={__('Background color', 'quillcrm')}
+					label={__('Background color', 'doublescale')}
 					value={settings.backgroundColor}
 					onChange={(value) =>
 						updateSettings({ backgroundColor: value })
@@ -239,7 +239,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				{/* Border Width */}
 				<div>
 					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Border Width', 'quillcrm')}
+						{__('Border Width', 'doublescale')}
 					</label>
 					<div className="relative flex items-center">
 						<Input
@@ -266,7 +266,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 
 				{/* Border Color */}
 				<ColorPickerControl
-					label={__('Border color', 'quillcrm')}
+					label={__('Border color', 'doublescale')}
 					value={settings.borderColor}
 					onChange={(value) => updateSettings({ borderColor: value })}
 					id="border-color"

@@ -25,32 +25,32 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 	const layoutItems = [
 		{
 			id: 'preheader',
-			title: __('Preheader', 'quillcrm'),
+			title: __('Preheader', 'doublescale'),
 			component: PreheaderLibrary,
 		},
 		{
 			id: 'header',
-			title: __('Header', 'quillcrm'),
+			title: __('Header', 'doublescale'),
 			component: HeaderLibrary,
 		},
 		{
 			id: 'hero-image',
-			title: __('Hero Image', 'quillcrm'),
+			title: __('Hero Image', 'doublescale'),
 			component: HeroImageLibrary,
 		},
 		{
 			id: 'email-body',
-			title: __('Email Body', 'quillcrm'),
+			title: __('Email Body', 'doublescale'),
 			component: EmailBodyLibrary,
 		},
 		{
 			id: 'image-gallery',
-			title: __('Image Gallery', 'quillcrm'),
+			title: __('Image Gallery', 'doublescale'),
 			component: ImageGalleryLibrary,
 		},
 		{
 			id: 'footer',
-			title: __('Footer', 'quillcrm'),
+			title: __('Footer', 'doublescale'),
 			component: FooterLibrary,
 		},
 	];

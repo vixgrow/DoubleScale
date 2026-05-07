@@ -16,8 +16,8 @@ import { Table, Card, Flex, Typography, Modal, Button } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { Log } from '@quillcrm/client';
-import { convertDate } from '@quillcrm/utils';
+import type { Log } from '@doublescale/client';
+import { convertDate } from '@doublescale/utils';
 
 const Debug: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
@@ -25,7 +25,7 @@ const Debug: React.FC = () => {
     const [page, setPage] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
     const [logs, setLogs] = useState<Log[]>([]);
-    const { createNotice } = useDispatch('quillcrm/core');
+    const { createNotice } = useDispatch('doublescale/core');
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     const fetchLogs = async () => {
@@ -100,28 +100,28 @@ const Debug: React.FC = () => {
 
     const columns = [
         {
-            title: __('Source', 'quillcrm'),
+            title: __('Source', 'doublescale'),
             dataIndex: 'source',
             key: 'source',
         },
         {
-            title: __('Level', 'quillcrm'),
+            title: __('Level', 'doublescale'),
             dataIndex: 'level',
             key: 'level',
         },
         {
-            title: __('Message', 'quillcrm'),
+            title: __('Message', 'doublescale'),
             dataIndex: 'message',
             key: 'message',
         },
         {
-            title: __('Date', 'quillcrm'),
+            title: __('Date', 'doublescale'),
             dataIndex: 'local_datetime',
             key: 'local_datetime',
             render: (text: string) => convertDate(text, true),
         },
         {
-            title: __('Actions', 'quillcrm'),
+            title: __('Actions', 'doublescale'),
             key: 'actions',
             render: (text: string, record: Log) => (
                 <Flex>
@@ -129,7 +129,7 @@ const Debug: React.FC = () => {
                         type="link"
                         onClick={() => {
                             Modal.info({
-                                title: __('Log Details', 'quillcrm'),
+                                title: __('Log Details', 'doublescale'),
                                 content: (
                                     <Flex style={{ height: '600px', overflowY: 'auto' }}>
                                         <pre>{JSON.stringify(record.context, null, 2)}</pre>
@@ -139,7 +139,7 @@ const Debug: React.FC = () => {
                             });
                         }}
                     >
-                        {__('View', 'quillcrm')}
+                        {__('View', 'doublescale')}
                     </Button>
                 </Flex>
             ),
@@ -153,13 +153,13 @@ const Debug: React.FC = () => {
                 gap={20}
             >
                 <Button type="primary" onClick={() => deleteAll()}>
-                    {__('Delete All', 'quillcrm')}
+                    {__('Delete All', 'doublescale')}
                 </Button>
                 <Button type="primary" onClick={() => exportLogs()}>
-                    {__('Export', 'quillcrm')}
+                    {__('Export', 'doublescale')}
                 </Button>
             </Flex>
-            <Card title={__('Logs', 'quillcrm')}>
+            <Card title={__('Logs', 'doublescale')}>
                 <Table
                     columns={columns}
                     dataSource={logs}

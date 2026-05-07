@@ -9,8 +9,8 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
-import { TimeAgoCell } from '@quillcrm/components';
+import type { CampaignEmail } from '@doublescale/client';
+import { TimeAgoCell } from '@doublescale/components';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { cn } from '@/lib/utils';
 
@@ -20,17 +20,17 @@ export function getColumns(campaignType?: string) {
 	const columns: ColumnDef<CampaignEmail>[] = [
 		{
 			accessorKey: 'name',
-			header: __('Name', 'quillcrm'),
+			header: __('Name', 'doublescale'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
 				const fullName =
 					`${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-				return fullName || __('N/A', 'quillcrm');
+				return fullName || __('N/A', 'doublescale');
 			},
 		},
 		{
 			accessorKey: 'sent_at',
-			header: __('Sent On', 'quillcrm'),
+			header: __('Sent On', 'doublescale'),
 			cell: ({ row }) => <TimeAgoCell value={row.getValue('sent_at')} />,
 		},
 	];
@@ -39,19 +39,19 @@ export function getColumns(campaignType?: string) {
 	if (isSMS) {
 		columns.push({
 			accessorKey: 'phone',
-			header: __('Phone', 'quillcrm'),
+			header: __('Phone', 'doublescale'),
 			cell: ({ row }) => {
 				const phone = row.original.contact?.phone;
-				return phone || __('N/A', 'quillcrm');
+				return phone || __('N/A', 'doublescale');
 			},
 		});
 	} else {
 		columns.push({
 			accessorKey: 'email',
-			header: __('Email', 'quillcrm'),
+			header: __('Email', 'doublescale'),
 			cell: ({ row }) => {
 				const email = row.original.contact?.email;
-				return email || __('N/A', 'quillcrm');
+				return email || __('N/A', 'doublescale');
 			},
 		});
 	}
@@ -60,7 +60,7 @@ export function getColumns(campaignType?: string) {
 	if (isSMS) {
 		columns.push({
 			accessorKey: 'status_slug',
-			header: __('Delivery Status', 'quillcrm'),
+			header: __('Delivery Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status_slug;
 				const isFailed = status === 'failed' || status === 'undelivered';
@@ -73,7 +73,7 @@ export function getColumns(campaignType?: string) {
 								'bg-[#EF444429] w-fit text-destructive border-destructive px-2 py-1 rounded-md'
 							)}
 						>
-							{__('Failed', 'quillcrm')}
+							{__('Failed', 'doublescale')}
 						</div>
 					);
 				}
@@ -85,12 +85,12 @@ export function getColumns(campaignType?: string) {
 								'bg-[#EFFFF5] w-fit text-[#16A34A] border-[#16A34A] px-2 py-1 rounded-md'
 							)}
 						>
-							{__('Delivered', 'quillcrm')}
+							{__('Delivered', 'doublescale')}
 						</div>
 					);
 				}
 
-				return __('N/A', 'quillcrm');
+				return __('N/A', 'doublescale');
 			},
 		});
 	}
@@ -98,10 +98,10 @@ export function getColumns(campaignType?: string) {
 	// Add unsubscribe reason column
 	columns.push({
 		accessorKey: 'unsubscribe_reason',
-		header: __('Unsubscribe Reason', 'quillcrm'),
+		header: __('Unsubscribe Reason', 'doublescale'),
 		cell: ({ row }) => {
 			const reason = row.original.unsubscribe_reason;
-			return reason || __('Not specified', 'quillcrm');
+			return reason || __('Not specified', 'doublescale');
 		},
 	});
 

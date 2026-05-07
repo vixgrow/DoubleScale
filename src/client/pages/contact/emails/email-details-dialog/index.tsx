@@ -9,7 +9,7 @@ import { useMemo, useCallback } from 'react';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
+import type { CampaignEmail } from '@doublescale/client';
 import {
 	ClickRateIcon,
 	NoEmailsIcon,
@@ -17,7 +17,7 @@ import {
 	OpenedIcon,
 	OpenRateIcon,
 	TimeAgoCell,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import MessageDetailsDialog from '@/components/message-details-dialog';
 import { useResendEmail } from '@/hooks/use-resend-email';
 import { useContactContext } from '../../state/context';
@@ -53,7 +53,7 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 
 		return [
 			{
-				label: __('Subject', 'quillcrm'),
+				label: __('Subject', 'doublescale'),
 				value: (() => {
 					// Try template subject first (for campaign emails)
 					const templateSubject = campaignEmail.template?.subject;
@@ -64,16 +64,16 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 					return (
 						(templateSubject && templateSubject.trim()) ||
 						(activitySubject && activitySubject.trim()) ||
-						__('No Subject', 'quillcrm')
+						__('No Subject', 'doublescale')
 					);
 				})(),
 			},
 			{
-				label: __('Sent On', 'quillcrm'),
+				label: __('Sent On', 'doublescale'),
 				value: <TimeAgoCell value={campaignEmail.sent_at} />,
 			},
 			{
-				label: __('Opened', 'quillcrm'),
+				label: __('Opened', 'doublescale'),
 				icon: (
 					<div className="bg-[#D1F6DF] p-1.5 rounded-full text-[#16A34A]">
 						<OpenRateIcon width={22} height={22} />
@@ -86,21 +86,21 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
 				),
 			},
 			{
-				label: __('Clicked', 'quillcrm'),
+				label: __('Clicked', 'doublescale'),
 				icon: (
 					<div className="bg-[#EEE4FF] p-1.5 rounded-full text-[#660FF1]">
 						<ClickRateIcon width={22} height={22} />
@@ -113,21 +113,21 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'quillcrm')}
+								{__('Yes', 'doublescale')}
 							</>
 						) : (
 							<>
 								<div className="text-destructive">
 									<NotOpenedIcon />
 								</div>
-								{__('No', 'quillcrm')}
+								{__('No', 'doublescale')}
 							</>
 						)}
 					</div>
 				),
 			},
 			{
-				label: __('Status', 'quillcrm'),
+				label: __('Status', 'doublescale'),
 				value: (
 					<span
 						className={`border rounded-md px-2 py-1 ${
@@ -137,13 +137,13 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 						}`}
 					>
 						{campaignEmail.status_slug === 'sent'
-							? __('Sent', 'quillcrm')
-							: __('Failed', 'quillcrm')}
+							? __('Sent', 'doublescale')
+							: __('Failed', 'doublescale')}
 					</span>
 				),
 			},
 			{
-				label: __('Campaign', 'quillcrm'),
+				label: __('Campaign', 'doublescale'),
 				value: campaignEmail.campaign?.name,
 				hidden: !campaignEmail.campaign,
 			},
@@ -153,22 +153,22 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 	const messageContent =
 		campaignEmail?.template?.body ||
 		campaignEmail?.activity?.data?.body ||
-		__('No content available', 'quillcrm');
+		__('No content available', 'doublescale');
 
 	return (
 		<MessageDetailsDialog
 			campaignEmail={campaignEmail}
 			open={!!campaignEmail}
 			onClose={onClose}
-			title={__('Email Details', 'quillcrm')}
-			subtitle={__('View the details of the email', 'quillcrm')}
+			title={__('Email Details', 'doublescale')}
+			subtitle={__('View the details of the email', 'doublescale')}
 			detailFields={detailFields}
-			messageLabel={__('Email Message', 'quillcrm')}
+			messageLabel={__('Email Message', 'doublescale')}
 			messageContent={messageContent}
 			footerButton={{
 				text: isResending
-					? __('Resending...', 'quillcrm')
-					: __('Resend Email again', 'quillcrm'),
+					? __('Resending...', 'doublescale')
+					: __('Resend Email again', 'doublescale'),
 				onClick: handleResendClick,
 				disabled: isResending,
 			}}

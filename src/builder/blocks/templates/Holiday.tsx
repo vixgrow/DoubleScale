@@ -9,7 +9,7 @@ import BlackFriday from '../../../../assets/images/templates/Black-Friday.png';
 const templateItems = [
 	{
 		id: 'black-friday',
-		title: __('Black Friday', 'quillcrm'),
+		title: __('Black Friday', 'doublescale'),
 		image: BlackFriday,
 	},
 ];

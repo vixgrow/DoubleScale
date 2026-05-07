@@ -6,18 +6,18 @@ import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { AutomationContactsResponse, AutomationContact } from '@quillcrm/client';
+import type { AutomationContactsResponse, AutomationContact } from '@doublescale/client';
 import { useContactContext } from '../state/context';
-import { GradientAutomationsIcon, NoData } from '@quillcrm/components';
+import { GradientAutomationsIcon, NoData } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getColumns } from './columns';
 import Result from '../../automation/steps/workflow/result';
 import { Provider as AutomationProvider } from '../../automation/state/context';
@@ -34,7 +34,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedContact, setSelectedContact] = useState<AutomationContact | null>(null);
 	const [isResultDialogOpen, setIsResultDialogOpen] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const navigate = useNavigate();
 
 	const serverSideTable = useServerSideTable({
@@ -64,7 +64,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch automation', 'quillcrm'),
+				message: __('Failed to fetch automation', 'doublescale'),
 			});
 		} finally {
 			setLoading(false);
@@ -88,14 +88,14 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	return (
 		<div className="qcrm-automation flex flex-col gap-5">
 			<h3 className="text-2xl font-semibold">
-				{__('Automation', 'quillcrm')}
+				{__('Automation', 'doublescale')}
 			</h3>
 			<div>
 				{!loading && (!automationContacts || automationContacts.length === 0) ? (
 					<NoData
 						icon={<GradientAutomationsIcon />}
-						title={__('No automations yet', 'quillcrm')}
-						subtitle={__('Automations help you engage smarter—send emails, assign deals, or trigger actions based on behavior.', 'quillcrm')}
+						title={__('No automations yet', 'doublescale')}
+						subtitle={__('Automations help you engage smarter—send emails, assign deals, or trigger actions based on behavior.', 'doublescale')}
 					/>
 				) : (
 					<>

@@ -30,8 +30,8 @@ const PanelSettings: React.FC<PanelSettingsProps> = ({
 	className,
 	onNext,
 	onBack,
-	nextLabel = __('Next', 'quillcrm'),
-	backLabel = __('Back', 'quillcrm'),
+	nextLabel = __('Next', 'doublescale'),
+	backLabel = __('Back', 'doublescale'),
 	isLoading = false,
 	showButtons = false,
 }) => {

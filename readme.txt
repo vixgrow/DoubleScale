@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 A native WordPress CRM with pipelines, contact management, email/SMS/WhatsApp campaigns, automations, and integrations with 20+ plugins.
 == Description ==
 
-**[Quill CRM](https://quillcrm.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
+**[Quill CRM](https://doublescale.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
 
 ### 🚀 KEY FEATURES
 
@@ -240,7 +240,7 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 
 ### 🥊 QUILL CRM VS. COMPETITORS
 
-[Compare Quill CRM with FluentCRM](https://quillcrm.io/compare/vs-fluentcrm/)
+[Compare Quill CRM with FluentCRM](https://doublescale.io/compare/vs-fluentcrm/)
 
 **Perfect For Businesses That Are:**
 * Outgrowing spreadsheets and need professional CRM
@@ -254,7 +254,7 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 
 ### 📚 DOCUMENTATION
 
-Comprehensive documentation with 70+ articles is available at [quillcrm.io/docs](https://quillcrm.io/docs)
+Comprehensive documentation with 70+ articles is available at [doublescale.io/docs](https://doublescale.io/docs)
 
 
 == Source Code ==
@@ -262,7 +262,7 @@ Comprehensive documentation with 70+ articles is available at [quillcrm.io/docs]
 This plugin includes compiled/minified JavaScript and CSS files in the `build/` directory. The complete human-readable source code is included in the `src/` directory of this plugin.
 
 **GitHub Repository:**
-The full source code is also publicly available on GitHub: [https://github.com/QuillCRM/QuillCRM](https://github.com/QuillCRM/QuillCRM)
+The full source code is also publicly available on GitHub: [https://github.com/DoubleScale/DoubleScale](https://github.com/DoubleScale/DoubleScale)
 
 To build from source:
 1. Install Node.js (v16 or higher recommended)
@@ -368,7 +368,7 @@ Yes! Quill CRM includes WhatsApp marketing features allowing you to send WhatsAp
 
 = How do I get support? =
 
-You can get support through the WordPress.org forums, our comprehensive documentation at quillcrm.io/docs with 70+ articles, and video tutorials.
+You can get support through the WordPress.org forums, our comprehensive documentation at doublescale.io/docs with 70+ articles, and video tutorials.
 
 = Does it work with LearnDash? =
 
@@ -410,8 +410,8 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 - Improved action hooks with appropriate comments for clarity and compliance with naming conventions.
 - Fixed minor bugs and improved overall code readability.
 
-*Update text domain from 'quillcrm' to 'quill-crm' and add ABSPATH check in multiple files
-- Changed the text domain in quillcrm.php and various other files to 'quill-crm' for consistency.
+*Update text domain from 'doublescale' to 'quill-crm' and add ABSPATH check in multiple files
+- Changed the text domain in doublescale.php and various other files to 'quill-crm' for consistency.
 - Added a check for ABSPATH in several classes and functions to enhance security by preventing direct access.
 
 
@@ -561,8 +561,8 @@ Quill CRM may connect to external third-party services for specific optional fea
 
 Quill CRM is developed and maintained by the Quill Forms team.
 
-* **Website**: [quillcrm.io](https://quillcrm.io)
-* **Documentation**: [quillcrm.io/docs](https://quillcrm.io/docs)
+* **Website**: [doublescale.io](https://doublescale.io)
+* **Documentation**: [doublescale.io/docs](https://doublescale.io/docs)
 
 **Our Other Products:**
 * **Quill Forms**: [quillforms.com](https://quillforms.com) - Advanced WordPress form builder
@@ -570,11 +570,11 @@ Quill CRM is developed and maintained by the Quill Forms team.
 
 == Support ==
 
-* **Documentation**: [quillcrm.io/docs](https://quillcrm.io/docs) - 70+ detailed articles
-* **Support Forum**: [WordPress.org Forums](https://wordpress.org/support/plugin/quillcrm/)
-* **Website**: [quillcrm.io](https://quillcrm.io)
+* **Documentation**: [doublescale.io/docs](https://doublescale.io/docs) - 70+ detailed articles
+* **Support Forum**: [WordPress.org Forums](https://wordpress.org/support/plugin/doublescale/)
+* **Website**: [doublescale.io](https://doublescale.io)
 * **Video Tutorials**: Coming soon
-* **Affiliate Program**: [quillcrm.io/affiliate-program](https://quillcrm.io/affiliate-program)
+* **Affiliate Program**: [doublescale.io/affiliate-program](https://doublescale.io/affiliate-program)
 
 == Contribute ==
 

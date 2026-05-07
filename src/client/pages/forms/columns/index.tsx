@@ -9,7 +9,7 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * internal dependencies
  */
-import type { Form } from '@quillcrm/client';
+import type { Form } from '@doublescale/client';
 import {
 	SortIcon,
 	DeleteIcon,
@@ -18,16 +18,16 @@ import {
 	DisactivateIcon,
 	TimeAgoCell,
 	FormattedDateCell,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@quillcrm/components/ui/dropdown-menu';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+} from '@doublescale/components/ui/dropdown-menu';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 export const selectionColumn: ColumnDef<Form> = {
 	id: 'select',
@@ -64,7 +64,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Form Name', 'quillcrm')}
+					{__('Form Name', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -79,7 +79,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Type', 'quillcrm')}
+					{__('Type', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -94,7 +94,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Form ID', 'quillcrm')}
+					{__('Form ID', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -109,7 +109,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Status', 'quillcrm')}
+					{__('Status', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -136,7 +136,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -153,7 +153,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Updated At', 'quillcrm')}
+					{__('Updated At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -163,7 +163,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 		},
 		{
 			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'doublescale'),
 			cell: ({ row }) => {
 				const form = row.original;
 				return (
@@ -182,8 +182,8 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 								>
 									<DisactivateIcon />
 									{form.status === 'active'
-										? __('Deactivate', 'quillcrm')
-										: __('Activate', 'quillcrm')}
+										? __('Deactivate', 'doublescale')
+										: __('Activate', 'doublescale')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => {
@@ -196,14 +196,14 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 									}}
 								>
 									<ViewOutlinedIcon />
-									{__('View', 'quillcrm')}
+									{__('View', 'doublescale')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(form.id)}
 									className="text-red-500 hover:text-red-500 focus:text-red-500"
 								>
 									<DeleteIcon />
-									{__('Delete', 'quillcrm')}
+									{__('Delete', 'doublescale')}
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>

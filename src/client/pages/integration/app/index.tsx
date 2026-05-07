@@ -7,8 +7,8 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import type { Integration as IntegrationType } from '@quillcrm/config';
-import { Field } from '@quillcrm/components';
+import type { Integration as IntegrationType } from '@doublescale/config';
+import { Field } from '@doublescale/components';
 
 interface AppProps {
 	integration: IntegrationType;

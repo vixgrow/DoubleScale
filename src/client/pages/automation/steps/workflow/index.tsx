@@ -39,9 +39,9 @@ import type {
 	OrganizedSteps,
 	OrganizedStep,
 	Automation,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 import AddStep from './add-step';
-import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
+import { getAction, getGoal, getTrigger } from '@doublescale/utils';
 import ReactFlowWorkflow from './reactflow-workflow';
 import WorkflowSidebar from './workflow-sidebar';
 import {
@@ -50,7 +50,7 @@ import {
 	DeleteIcon,
 	GoalIcon,
 	TimerBlockIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 
 const Workflow: React.FC = () => {
 	const { automation, steps, isLoading, setSteps } = useAutomationContext();
@@ -58,7 +58,7 @@ const Workflow: React.FC = () => {
 	const [visible, setVisible] = useState<boolean>(false);
 	const useReactFlow = true;
 	const { createNotice, setCurrentTrigger, setFormContext } =
-		useDispatch('quillcrm/core');
+		useDispatch('doublescale/core');
 
 	useEffect(() => {
 		if (automation) {
@@ -110,23 +110,23 @@ const Workflow: React.FC = () => {
 	const trigger = automation ? getTrigger(automation.trigger) : null;
 	const typesOptions = {
 		action: {
-			label: __('Action', 'quillcrm'),
+			label: __('Action', 'doublescale'),
 			icon: <ActionIcon width={23} height={23} />,
 		},
 		condition: {
-			label: __('Condition', 'quillcrm'),
+			label: __('Condition', 'doublescale'),
 			icon: <ConditionsIcon width={23} height={23} />,
 		},
 		delay: {
-			label: __('Delay', 'quillcrm'),
+			label: __('Delay', 'doublescale'),
 			icon: <TimerBlockIcon width={23} height={23} />,
 		},
 		goal: {
-			label: __('Goal', 'quillcrm'),
+			label: __('Goal', 'doublescale'),
 			icon: <GoalIcon width={23} height={23} />,
 		},
 		end_automation: {
-			label: __('End Automation', 'quillcrm'),
+			label: __('End Automation', 'doublescale'),
 			icon: <Power className="w-6 h-6" />,
 		},
 	};
@@ -258,7 +258,7 @@ const Workflow: React.FC = () => {
 											>
 												{__(
 													'Action not set',
-													'quillcrm'
+													'doublescale'
 												)}
 											</Badge>
 										)}
@@ -281,24 +281,24 @@ const Workflow: React.FC = () => {
 											<AlertDialogTitle>
 												{__(
 													'Are you sure?',
-													'quillcrm'
+													'doublescale'
 												)}
 											</AlertDialogTitle>
 											<AlertDialogDescription>
 												{__(
 													'This action cannot be undone.',
-													'quillcrm'
+													'doublescale'
 												)}
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
 											<AlertDialogCancel>
-												{__('No', 'quillcrm')}
+												{__('No', 'doublescale')}
 											</AlertDialogCancel>
 											<AlertDialogAction
 												onClick={() => deleteStep(step)}
 											>
-												{__('Yes', 'quillcrm')}
+												{__('Yes', 'doublescale')}
 											</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
@@ -322,7 +322,7 @@ const Workflow: React.FC = () => {
 							<CardContent className="p-4">
 								<div className="flex flex-col gap-2.5">
 									<h4 className="font-semibold">
-										{__('Yes', 'quillcrm')}
+										{__('Yes', 'doublescale')}
 									</h4>
 									<AddStep
 										setStep={setCurrentStep}
@@ -339,7 +339,7 @@ const Workflow: React.FC = () => {
 							<CardContent className="p-4">
 								<div className="flex flex-col gap-2.5">
 									<h4 className="font-semibold">
-										{__('No', 'quillcrm')}
+										{__('No', 'doublescale')}
 									</h4>
 									<AddStep
 										setStep={setCurrentStep}

@@ -20,7 +20,7 @@ import './style.scss';
 import type {
 	IntegrationSelectOptions,
 	ReactSelectOptions,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 interface SelectFieldProps {
 	integration: string;
@@ -37,7 +37,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
 	const [options, setOptions] = useState<ReactSelectOptions>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const fetchOptions = async () => {
 		setIsLoading(true);
@@ -59,7 +59,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch options', 'quillcrm'),
+				message: __('Failed to fetch options', 'doublescale'),
 			});
 		} finally {
 			setIsLoading(false);

@@ -15,7 +15,7 @@ import '../../../../lib/chart-setup';
  * Internal dependencies
  */
 import './style.scss';
-import { Campaign as CampaignType } from '@quillcrm/client';
+import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -25,12 +25,12 @@ import { RenderChart } from './chart';
 
 const Analytics: React.FC = () => {
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	) as CampaignType | null;
 
 	const { updateCampaign: updateCampaignAction } =
-		useDispatch('quillcrm/campaign');
+		useDispatch('doublescale/campaign');
 	const totalMessages = campaign
 		? (campaign.sent_count || 0) + (campaign.failed_count || 0)
 		: 0;
@@ -72,7 +72,7 @@ const Analytics: React.FC = () => {
 			setError(
 				__(
 					'Failed to load campaign analytics. Retrying...',
-					'quillcrm'
+					'doublescale'
 				)
 			);
 		} finally {
@@ -126,7 +126,7 @@ const Analytics: React.FC = () => {
 			<Card className="bg-[#F8F8F8] shadow-none w-full px-5">
 				<CardHeader className="border-b pb-4 px-0">
 					<CardTitle className="text-xl font-medium text-[#09090B]">
-						{__('Campaign Performance (Analytics)', 'quillcrm')}
+						{__('Campaign Performance (Analytics)', 'doublescale')}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-5 pt-5">
@@ -151,7 +151,7 @@ const Analytics: React.FC = () => {
 							<Card className="shadow-none bg-white p-4">
 								<CardHeader>
 									<CardTitle className="text-xl font-medium text-[#09090B]">
-										{__('Process Sending', 'quillcrm')}
+										{__('Process Sending', 'doublescale')}
 									</CardTitle>
 								</CardHeader>
 								<CardContent className="flex flex-col gap-2">
@@ -160,7 +160,7 @@ const Analytics: React.FC = () => {
 											{sprintf(
 												__(
 													'%d %s sent',
-													'quillcrm'
+													'doublescale'
 												),
 												totalMessages,
 												messageTypeLabel
@@ -193,7 +193,7 @@ const Analytics: React.FC = () => {
 										{sprintf(
 											__(
 												'your %s are being sent right now...',
-												'quillcrm'
+												'doublescale'
 											),
 											messageTypeLabel
 										)}
@@ -211,7 +211,7 @@ const Analytics: React.FC = () => {
 								<span className="text-sm">
 									{__(
 										'Campaign is being processed...',
-										'quillcrm'
+										'doublescale'
 									)}
 								</span>
 							</div>
@@ -225,7 +225,7 @@ const Analytics: React.FC = () => {
 					<Card className="bg-[#F8F8F8] shadow-none w-full px-5">
 						<CardHeader className="px-0">
 							<CardTitle className="text-xl font-medium text-[#09090B]">
-								{__('Statistics', 'quillcrm')}
+								{__('Statistics', 'doublescale')}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="px-0">

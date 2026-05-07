@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type { AutomationStep, OrganizedStep } from '@doublescale/client';
 import { AddStepDialog } from '../add-step-dialog';
 
 const updateStepOrderRecursive = (
@@ -88,7 +88,7 @@ const AddStep: React.FC<AddStepProps> = ({
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	if (!automation) {
 		return null;
@@ -143,7 +143,7 @@ const AddStep: React.FC<AddStepProps> = ({
 
 			createNotice({
 				type: 'success',
-				message: __('Step added', 'quillcrm'),
+				message: __('Step added', 'doublescale'),
 			});
 
 			// Close dialog first

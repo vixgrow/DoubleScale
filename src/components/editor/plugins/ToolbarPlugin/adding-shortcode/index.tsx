@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
  *  Internal dependencies
  */
 import { $createMentionNode } from '../../../nodes/mention-node';
-import { MergeTagsIcon, MergeTagsModal } from '@quillcrm/components';
+import { MergeTagsIcon, MergeTagsModal } from '@doublescale/components';
 
 interface AddingShortCodeProps {
 	activeEditor: any;

@@ -14,7 +14,7 @@ import {
 import { CustomDialogHeader, Field, GradientCampaignsIcon, NoticeBanner } from '@/components';
 import { Button } from '@/components/ui/button';
 import CampaignTypes from './campaign-types';
-import { CampaignModalStep, CampaignType, NoticeMessage } from '@quillcrm/client';
+import { CampaignModalStep, CampaignType, NoticeMessage } from '@doublescale/client';
 
 interface AddCampaignProps {
 	setCampaignType: (campaignType: CampaignType) => void;
@@ -45,7 +45,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 		if (!campaignName.trim()) {
 			setNotice({
 				type: 'error',
-				message: __('Campaign name is required', 'quillcrm'),
+				message: __('Campaign name is required', 'doublescale'),
 			});
 			return;
 		}
@@ -88,10 +88,10 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 		>
 			<DialogContent className="max-w-[740px] w-full mx-auto">
 				<CustomDialogHeader
-					title={__('Create Campaign', 'quillcrm')}
+					title={__('Create Campaign', 'doublescale')}
 					subtitle={__(
 						"Name your campaign to help you remember what it's about. only you will see this.",
-						'quillcrm'
+						'doublescale'
 					)}
 					icon={<GradientCampaignsIcon />}
 				/>
@@ -107,9 +107,9 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 				{/* Campaign Name Input */}
 				<div>
 					<Field
-						label={__('Campaign Name', 'quillcrm')}
+						label={__('Campaign Name', 'doublescale')}
 						type="text"
-						placeholder={__('Enter Campaign Name', 'quillcrm')}
+						placeholder={__('Enter Campaign Name', 'doublescale')}
 						value={campaignName}
 						onChange={(value) => setCampaignName(value)}
 						required={true}
@@ -133,7 +133,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					disabled={!campaignName.trim() || isSubmitting}
 					className="w-full"
 				>
-					{__('Create Campaign', 'quillcrm')}
+					{__('Create Campaign', 'doublescale')}
 				</Button>
 			</DialogContent>
 		</Dialog>

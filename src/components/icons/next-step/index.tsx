@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const NextStepIcon: React.FC<IconProps> = ({ width = 14, height = 12 }) => {
 	return (

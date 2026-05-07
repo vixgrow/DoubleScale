@@ -21,8 +21,8 @@ import { useUserManagement } from '../../../hooks/use-user-management';
 import { CRMUser } from '../../../services/user-management';
 import { ManagerRole } from './components/types';
 import { getManagerColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
-import { ColoredDeleteIcon } from '@quillcrm/components';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import { ColoredDeleteIcon } from '@doublescale/components';
 
 const Managers: React.FC = () => {
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -100,7 +100,7 @@ const Managers: React.FC = () => {
 			setManagerToEdit(null);
 		} else {
 			// Throw error so the child component knows it failed
-			throw new Error(__('Failed to update user role', 'quillcrm'));
+			throw new Error(__('Failed to update user role', 'doublescale'));
 		}
 	};
 
@@ -131,12 +131,12 @@ const Managers: React.FC = () => {
 			<div className="flex items-center justify-between">
 				<div>
 					<div className="text-[#09090B] font-semibold text-2xl">
-						{__('CRM Managers', 'quillcrm')}
+						{__('CRM Managers', 'doublescale')}
 					</div>
 					<p className="text-sm text-gray-400">
 						{__(
-							'All WordPress Administrators automatically get full access to QuillCRM',
-							'quillcrm'
+							'All WordPress Administrators automatically get full access to DoubleScale',
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -149,7 +149,7 @@ const Managers: React.FC = () => {
 					) : (
 						<Plus className="w-4 h-4 mr-2" />
 					)}
-					{__('Add New Manager', 'quillcrm')}
+					{__('Add New Manager', 'doublescale')}
 				</Button>
 			</div>
 
@@ -198,12 +198,12 @@ const Managers: React.FC = () => {
 								<ColoredDeleteIcon />
 							</div>
 							<AlertDialogTitle className="text-2xl font-bold text-[#09090B] text-center">
-								{__('Remove CRM Access', 'quillcrm')}
+								{__('Remove CRM Access', 'doublescale')}
 							</AlertDialogTitle>
 							<AlertDialogDescription className="text-center text-[#6B7280]">
 								{__(
 									"Are you sure you want to remove this user's CRM access? This action cannot be undone.",
-									'quillcrm'
+									'doublescale'
 								)}
 							</AlertDialogDescription>
 						</div>
@@ -213,13 +213,13 @@ const Managers: React.FC = () => {
 							onClick={() => setDeleteConfirmOpen(false)}
 							className="flex-1"
 						>
-							{__('Back', 'quillcrm')}
+							{__('Back', 'doublescale')}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={confirmDeleteManager}
 							className="flex-1 bg-destructive hover:bg-destructive/90 text-white"
 						>
-							{__('Yes, Remove', 'quillcrm')}
+							{__('Yes, Remove', 'doublescale')}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

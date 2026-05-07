@@ -1,6 +1,6 @@
 // contexts/ImportContext.tsx
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import type { ImporterField } from '@quillcrm/config';
+import type { ImporterField } from '@doublescale/config';
 
 export interface ImportStats {
 	imported: number;

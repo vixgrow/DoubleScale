@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { ButtonBlockIcon } from '@quillcrm/components';
+import { ButtonBlockIcon } from '@doublescale/components';
 import { ButtonRenderer } from './Renderer';
 import { ButtonEditor } from './Editor';
 
@@ -27,7 +27,7 @@ export interface ButtonBlockProps {
 
 const ButtonBlock = {
 	type: 'button' as const,
-	name: __('Button', 'quillcrm'),
+	name: __('Button', 'doublescale'),
 	icon: ButtonBlockIcon,
 	isProActivated: false,
 	isPro: false,

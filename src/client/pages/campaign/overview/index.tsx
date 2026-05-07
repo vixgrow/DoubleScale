@@ -12,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
+import { useParams, useNavigate, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import Analytics from './analytics';
 import TabsSelection from './tabs-selection';
@@ -23,16 +23,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { Campaign as CampaignType } from '@quillcrm/client';
+import { Campaign as CampaignType } from '@doublescale/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CampaignsIcon } from '@quillcrm/components';
+import { CampaignsIcon } from '@doublescale/components';
 
 const Overview: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select: any) => select('doublescale/campaign').getCampaign(),
 		[]
 	) as CampaignType | null;
 
@@ -63,9 +63,9 @@ const Overview: React.FC = () => {
 				<DialogHeader className="pb-0 border-b border-[#E4E7EC] h-12">
 					<DialogTitle className="px-12 pb-4 pt-2">
 						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
-							{__('Campaigns List', 'quillcrm')}
+							{__('Campaigns List', 'doublescale')}
 							<ChevronRight className="w-4 h-4 text-[#667085]" />
-							{campaign?.name || __('Campaign Overview', 'quillcrm')}
+							{campaign?.name || __('Campaign Overview', 'doublescale')}
 						</h1>
 					</DialogTitle>
 				</DialogHeader>
@@ -77,7 +77,7 @@ const Overview: React.FC = () => {
 								<CardHeader className="border-b pb-4 px-0">
 									<CardTitle className="text-xl font-medium text-[#09090B] flex items-center gap-2">
 										<CampaignsIcon width={24} height={24} />
-										{__('Campaign Details', 'quillcrm')}
+										{__('Campaign Details', 'doublescale')}
 									</CardTitle>
 								</CardHeader>
 								<CardContent className="pt-6 px-0">
@@ -96,8 +96,8 @@ const Overview: React.FC = () => {
 					<div className="flex items-center justify-center h-64">
 						<div className="text-lg text-red-500">
 							{!id
-								? __('No campaign ID provided', 'quillcrm')
-								: __('Campaign not found', 'quillcrm')}
+								? __('No campaign ID provided', 'doublescale')
+								: __('Campaign not found', 'doublescale')}
 						</div>
 					</div>
 				)}

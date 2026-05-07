@@ -9,9 +9,9 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { AutomationContact } from '@quillcrm/client';
-import { Button } from '@quillcrm/components/ui/button';
-import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import type { AutomationContact } from '@doublescale/client';
+import { Button } from '@doublescale/components/ui/button';
+import { TimeAgoCell, ViewIcon } from '@doublescale/components';
 import { getTriggerLabel } from '../../../../../utils';
 
 interface ColumnsProps {
@@ -23,7 +23,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 	const columns: ColumnDef<AutomationContact>[] = [
 		{
 			accessorKey: 'automation',
-			header: __('Automation Name', 'quillcrm'),
+			header: __('Automation Name', 'doublescale'),
 			cell: ({ row }) => {
 				// The API loads the automation relationship, but it's not in the type
 				const automation = (row.original as any).automation;
@@ -32,7 +32,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'trigger',
-			header: __('Trigger', 'quillcrm'),
+			header: __('Trigger', 'doublescale'),
 			cell: ({ row }) => {
 				const automation = (row.original as any).automation;
 				return getTriggerLabel(automation);
@@ -40,14 +40,14 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'created_at',
-			header: __('Created At', 'quillcrm'),
+			header: __('Created At', 'doublescale'),
 			cell: ({ row }) => (
 				<TimeAgoCell value={row.getValue('created_at')} />
 			),
 		},
 		{
 			accessorKey: 'status',
-			header: __('Status', 'quillcrm'),
+			header: __('Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status;
 				let statusColor = 'text-gray-600 bg-gray-100 border-gray-600';
@@ -68,7 +68,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 						<span
 							className={`border rounded-md px-2 py-1 capitalize ${statusColor}`}
 						>
-							{status || __('N/A', 'quillcrm')}
+							{status || __('N/A', 'doublescale')}
 						</span>
 					</div>
 				);
@@ -76,11 +76,11 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'next_step',
-			header: __('Next Step', 'quillcrm'),
+			header: __('Next Step', 'doublescale'),
 			cell: ({ row }) => {
 				const nextStep = row.original.next_step;
 				if (!nextStep) {
-					return __('N/A', 'quillcrm');
+					return __('N/A', 'doublescale');
 				}
 				return (
 					<div className="flex flex-col">
@@ -93,7 +93,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<div className="flex items-center gap-2">
 					<Button
@@ -102,7 +102,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 						onClick={() => onViewJourney(row.original)}
 					>
 						<ViewIcon />
-						{__('Journey', 'quillcrm')}
+						{__('Journey', 'doublescale')}
 					</Button>
 					<Button
 						size="sm"
@@ -110,7 +110,7 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 						onClick={() => onViewAutomation(row.original)}
 					>
 						<ViewIcon />
-						{__('Automation', 'quillcrm')}
+						{__('Automation', 'doublescale')}
 					</Button>
 				</div>
 			),

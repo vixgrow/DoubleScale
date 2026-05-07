@@ -114,7 +114,7 @@ const BlockSidebar = ({
 									</div>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>{__('My Templates', 'quillcrm')}</p>
+									<p>{__('My Templates', 'doublescale')}</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -136,7 +136,7 @@ const BlockSidebar = ({
 									</div>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>{__('Ready-To-Use', 'quillcrm')}</p>
+									<p>{__('Ready-To-Use', 'doublescale')}</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
@@ -158,7 +158,7 @@ const BlockSidebar = ({
 								</div>
 							</TooltipTrigger>
 							<TooltipContent>
-								<p>{__('Global Email Settings', 'quillcrm')}</p>
+								<p>{__('Global Email Settings', 'doublescale')}</p>
 							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
@@ -172,10 +172,10 @@ const BlockSidebar = ({
 					<div className="border-b border-border w-full flex flex-col items-center py-4 flex-shrink-0">
 						<TabsList className="px-4 h-16">
 							<TabsTrigger value="elements" className={tabStyles}>
-								{__('Elements', 'quillcrm')}
+								{__('Elements', 'doublescale')}
 							</TabsTrigger>
 							<TabsTrigger value="layouts" className={tabStyles}>
-								{__('Layouts', 'quillcrm')}
+								{__('Layouts', 'doublescale')}
 							</TabsTrigger>
 						</TabsList>
 					</div>

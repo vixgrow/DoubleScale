@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { TextBlockIcon } from '@quillcrm/components';
+import { TextBlockIcon } from '@doublescale/components';
 import { TextRenderer } from './Renderer';
 import { TextEditor } from './Editor';
 
@@ -41,7 +41,7 @@ export interface TextBlockProps {
 
 const TextBlock = {
 	type: 'text',
-	name: __('Text', 'quillcrm'),
+	name: __('Text', 'doublescale'),
 	icon: TextBlockIcon,
 	isProActivated: false,
 	isPro: false,

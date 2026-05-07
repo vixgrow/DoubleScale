@@ -4,7 +4,7 @@ import { map } from 'lodash';
 import { ArrowUpLeft, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Field } from '@quillcrm/components';
+import { Field } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import { useImportActions } from '../use-importActions';
 import GoHighLevelOAuth from '../components/gohighlevel-oauth';
@@ -51,7 +51,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 							isValid: false,
 							message: __(
 								'API URL should be in format: https://yoursubdomain.api-us1.com',
-								'quillcrm'
+								'doublescale'
 							),
 						};
 					}
@@ -67,7 +67,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 							isValid: false,
 							message: __(
 								'HubSpot access token appears to be too short. Please verify your token.',
-								'quillcrm'
+								'doublescale'
 							),
 						};
 					}
@@ -80,7 +80,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 							isValid: false,
 							message: __(
 								'API Domain should be in format: yourcompany.pipedrive.com (without https://)',
-								'quillcrm'
+								'doublescale'
 							),
 						};
 					}
@@ -89,7 +89,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 							isValid: false,
 							message: __(
 								'Pipedrive API token appears to be too short. Please verify your token.',
-								'quillcrm'
+								'doublescale'
 							),
 						};
 					}
@@ -145,12 +145,12 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 			<Card className="space-y-4 p-6 shadow-none rounded-2xl">
 				<CardHeader className="p-0 mb-4">
 					<CardTitle className="text-2xl font-normal text-[#09090B]">
-						{importer.name} {__('Data Import Tool', 'quillcrm')}
+						{importer.name} {__('Data Import Tool', 'doublescale')}
 					</CardTitle>
 					<div className="text-[#71717A] text-lg">
 						{__(
 							'Start syncing your contacts to the Quill CRM using your API credentials.',
-							'quillcrm'
+							'doublescale'
 						)}
 					</div>
 				</CardHeader>
@@ -228,25 +228,25 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
 		if (fieldKey === 'api_url' && source === 'activecampaign') {
 			return __(
 				'Format: https://yoursubdomain.api-us1.com or https://yoursubdomain.activehosted.com',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (fieldKey === 'access_token' && source === 'hubspot') {
 			return __(
 				'Private App access token from HubSpot Developer settings. Requires crm.objects.contacts.read and crm.lists.read scopes.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (fieldKey === 'api_domain' && source === 'pipedrive') {
 			return __(
 				'Your Pipedrive company domain without https:// (e.g., yourcompany.pipedrive.com)',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (fieldKey === 'api_token' && source === 'pipedrive') {
 			return __(
 				'Personal API token from Settings > Personal preferences > API in your Pipedrive account',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		return null;
@@ -311,76 +311,76 @@ interface PlatformInstructions {
 const PLATFORM_INSTRUCTIONS: Record<string, PlatformInstructions> = {
 	activecampaign: {
 		steps: [
-			__('Sign in to your ActiveCampaign account', 'quillcrm'),
-			__('Go to Settings → Developer', 'quillcrm'),
+			__('Sign in to your ActiveCampaign account', 'doublescale'),
+			__('Go to Settings → Developer', 'doublescale'),
 			__(
 				'Copy your API URL and Key from the API Access section',
-				'quillcrm'
+				'doublescale'
 			),
 			__(
 				'Your API URL format should be: https://yoursubdomain.api-us1.com',
-				'quillcrm'
+				'doublescale'
 			),
 		],
 		docUrl: 'https://help.activecampaign.com/hc/en-us/articles/207317590-Getting-started-with-the-API',
-		docText: __('ActiveCampaign API Documentation', 'quillcrm'),
+		docText: __('ActiveCampaign API Documentation', 'doublescale'),
 	},
 	mailerlite: {
 		steps: [
-			__('Sign in to your MailerLite account', 'quillcrm'),
-			__('Go to Integrations → Developer API', 'quillcrm'),
-			__('Generate a new API token or copy an existing one', 'quillcrm'),
+			__('Sign in to your MailerLite account', 'doublescale'),
+			__('Go to Integrations → Developer API', 'doublescale'),
+			__('Generate a new API token or copy an existing one', 'doublescale'),
 			__(
 				'Make sure the token has read permissions for subscribers and groups',
-				'quillcrm'
+				'doublescale'
 			),
 		],
 		docUrl: 'https://developers.mailerlite.com/docs/authentication',
-		docText: __('MailerLite API Documentation', 'quillcrm'),
+		docText: __('MailerLite API Documentation', 'doublescale'),
 	},
 	hubspot: {
 		steps: [
-			__('Sign in to your HubSpot account', 'quillcrm'),
-			__('Go to Settings → Integrations → Private Apps', 'quillcrm'),
+			__('Sign in to your HubSpot account', 'doublescale'),
+			__('Go to Settings → Integrations → Private Apps', 'doublescale'),
 			__(
 				'Create a new Private App or select an existing one',
-				'quillcrm'
+				'doublescale'
 			),
 			__(
 				'Enable these scopes: crm.objects.contacts.read and crm.lists.read',
-				'quillcrm'
+				'doublescale'
 			),
-			__('Copy the Access Token from the Auth tab', 'quillcrm'),
+			__('Copy the Access Token from the Auth tab', 'doublescale'),
 		],
 		docUrl: 'https://developers.hubspot.com/docs/api/private-apps',
-		docText: __('HubSpot Private Apps Documentation', 'quillcrm'),
+		docText: __('HubSpot Private Apps Documentation', 'doublescale'),
 	},
 	pipedrive: {
 		steps: [
-			__('Sign in to your Pipedrive account', 'quillcrm'),
-			__('Go to Settings → Personal preferences → API', 'quillcrm'),
-			__('Copy your Personal API token', 'quillcrm'),
+			__('Sign in to your Pipedrive account', 'doublescale'),
+			__('Go to Settings → Personal preferences → API', 'doublescale'),
+			__('Copy your Personal API token', 'doublescale'),
 			__(
 				'Note your company domain from the browser URL (e.g., yourcompany.pipedrive.com)',
-				'quillcrm'
+				'doublescale'
 			),
 		],
 		docUrl: 'https://developers.pipedrive.com/docs/api/v1',
-		docText: __('Pipedrive API Documentation', 'quillcrm'),
+		docText: __('Pipedrive API Documentation', 'doublescale'),
 	},
 	gohighlevel: {
 		steps: [
-			__('OAuth authentication is configured automatically', 'quillcrm'),
+			__('OAuth authentication is configured automatically', 'doublescale'),
 			__(
 				'Click the "Connect GoHighLevel Account" button above',
-				'quillcrm'
+				'doublescale'
 			),
-			__('Authorize QuillCRM in the popup window', 'quillcrm'),
-			__('Select your GoHighLevel location', 'quillcrm'),
-			__('The connection will be established automatically', 'quillcrm'),
+			__('Authorize DoubleScale in the popup window', 'doublescale'),
+			__('Select your GoHighLevel location', 'doublescale'),
+			__('The connection will be established automatically', 'doublescale'),
 		],
 		docUrl: 'https://highlevel.stoplight.io/docs/integrations/0443d7d1a4bd0-overview',
-		docText: __('GoHighLevel API Documentation', 'quillcrm'),
+		docText: __('GoHighLevel API Documentation', 'doublescale'),
 	},
 };
 
@@ -402,9 +402,9 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 
 	const getDefaultInstructions = (): PlatformInstructions => ({
 		steps: [
-			__(`Sign in to your ${importer.name} account`, 'quillcrm'),
-			__('Navigate to API settings or Developer section', 'quillcrm'),
-			__('Generate or copy your API credentials', 'quillcrm'),
+			__(`Sign in to your ${importer.name} account`, 'doublescale'),
+			__('Navigate to API settings or Developer section', 'doublescale'),
+			__('Generate or copy your API credentials', 'doublescale'),
 		],
 	});
 
@@ -414,7 +414,7 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 				steps: [infoField.description || ''],
 				docUrl: infoField.docs_url,
 				docText: infoField.docs_url
-					? __('Documentation', 'quillcrm')
+					? __('Documentation', 'doublescale')
 					: undefined,
 			}
 		: instructions || getDefaultInstructions();
@@ -426,7 +426,7 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 					{infoField?.title ||
 						__(
 							`Find your ${importer.name} credentials`,
-							'quillcrm'
+							'doublescale'
 						)}
 				</CardTitle>
 

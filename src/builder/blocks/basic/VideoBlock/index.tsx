@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { VideoBlockIcon } from '@quillcrm/components';
+import { VideoBlockIcon } from '@doublescale/components';
 import { VideoBlockRenderer } from './Renderer';
 import { VideoBlockEditor } from './Editor';
 
@@ -31,7 +31,7 @@ export interface VideoBlockProps {
 
 const VideoBlock = {
 	type: 'video',
-	name: __('Video', 'quillcrm'),
+	name: __('Video', 'doublescale'),
 	icon: VideoBlockIcon,
 	isProActivated: false,
 	isPro: false,

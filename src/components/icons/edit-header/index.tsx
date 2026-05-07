@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const EditHeaderIcon: React.FC<IconProps> = ({
 	width = 24,

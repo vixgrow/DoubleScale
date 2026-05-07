@@ -23,23 +23,23 @@ import {
     ActivitiesService,
     ACTIVITY_TYPES,
     type TimelineItem,
-} from '@quillcrm/services/activities-service';
+} from '@doublescale/services/activities-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import './style.scss';
-import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@quillcrm/components';
+import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@doublescale/components';
 import { ActivityActionsDropdown } from './activity-action-dropdown';
-import { useActivityOperations } from '@quillcrm/hooks/use-activity-operations';
+import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
 import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
-import type { Note } from '@quillcrm/client';
+import type { Note } from '@doublescale/client';
 
 // Pro plugin components - loaded via WordPress filters at runtime
-// Pro plugin registers these via addFilter('quillcrm_pro_component', ...)
-const getProTaskDialog = () => applyFilters('quillcrm_pro_component', null, 'TaskDialog') as React.ComponentType<any> | null;
-const getProTaskService = () => applyFilters('quillcrm_pro_component', null, 'TaskService') as any;
+// Pro plugin registers these via addFilter('doublescale_pro_component', ...)
+const getProTaskDialog = () => applyFilters('doublescale_pro_component', null, 'TaskDialog') as React.ComponentType<any> | null;
+const getProTaskService = () => applyFilters('doublescale_pro_component', null, 'TaskService') as any;
 
 
 interface ActivitiesProps {
@@ -131,11 +131,11 @@ const TaskDialogWrapper: React.FC<{
                 setIsSubmitting(true);
                 try {
                     await TaskService.updateTask(task.id, data);
-                    showNotice('success', __('Task updated successfully', 'quillcrm'));
+                    showNotice('success', __('Task updated successfully', 'doublescale'));
                     onClose(false);
                     onSuccess();
                 } catch (error: any) {
-                    showNotice('error', error?.message || __('Failed to update task', 'quillcrm'));
+                    showNotice('error', error?.message || __('Failed to update task', 'doublescale'));
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -243,7 +243,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         try {
             const TaskService = getProTaskService();
             if (!TaskService) {
-                showNotice('error', __('Task editing is not available. Pro plugin may not be installed.', 'quillcrm'));
+                showNotice('error', __('Task editing is not available. Pro plugin may not be installed.', 'doublescale'));
                 return;
             }
             const task = await TaskService.getTask(taskId);
@@ -251,7 +251,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             setTaskDialogOpen(true);
         } catch (error) {
             console.error('Failed to fetch task:', error);
-            showNotice('error', __('Failed to load task', 'quillcrm'));
+            showNotice('error', __('Failed to load task', 'doublescale'));
         }
     };
 
@@ -271,7 +271,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const handleDeleteActivity = async (activityId: number) => {
-        if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'quillcrm'))) {
+        if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'doublescale'))) {
             return;
         }
 
@@ -284,21 +284,21 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     };
 
     const handleDeleteTask = async (taskId: number) => {
-        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'quillcrm'))) {
+        if (!window.confirm(__('Are you sure you want to delete this task? This action cannot be undone.', 'doublescale'))) {
             return;
         }
         try {
             const TaskService = getProTaskService();
             if (!TaskService) {
-                showNotice('error', __('Task deletion requires Pro plugin.', 'quillcrm'));
+                showNotice('error', __('Task deletion requires Pro plugin.', 'doublescale'));
                 return;
             }
             await TaskService.deleteTask(taskId);
             fetchActivities();
-            showNotice('success', __('Task deleted successfully', 'quillcrm'));
+            showNotice('success', __('Task deleted successfully', 'doublescale'));
         } catch (error) {
             console.error('Failed to delete task:', error);
-            showNotice('error', __('Failed to delete task', 'quillcrm'));
+            showNotice('error', __('Failed to delete task', 'doublescale'));
         }
     };
 
@@ -312,10 +312,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 },
             });
             fetchActivities();
-            showNotice('success', __('Task marked as complete', 'quillcrm'));
+            showNotice('success', __('Task marked as complete', 'doublescale'));
         } catch (error) {
             console.error('Failed to mark task as complete:', error);
-            showNotice('error', __('Failed to mark task as complete', 'quillcrm'));
+            showNotice('error', __('Failed to mark task as complete', 'doublescale'));
         }
     };
 
@@ -386,7 +386,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
                                             <StartDateIcon />
                                             <span>
-                                                {__('Start Date', 'quillcrm')}:
+                                                {__('Start Date', 'doublescale')}:
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {format(
                                                         new Date(
@@ -402,7 +402,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
                                             <LocationIcon />
                                             <span>
-                                                {__('Location', 'quillcrm')}:{' '}
+                                                {__('Location', 'doublescale')}:{' '}
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {activity.data.location}
                                                 </span>
@@ -413,10 +413,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         <div className="flex justify-center gap-2  font-medium text-[#777]">
                                             <DurationIcon />
                                             <span>
-                                                {__('Duration', 'quillcrm')}:{' '}
+                                                {__('Duration', 'doublescale')}:{' '}
                                                 <span className=" text-[#CB5301] text-base font-semibold">
                                                     {activity.data.duration}{' '}
-                                                    {__('minutes', 'quillcrm')}
+                                                    {__('minutes', 'doublescale')}
                                                 </span>
                                             </span>
                                         </div>
@@ -425,7 +425,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                 {activity.data.description && (
                                     <div className="flex flex-col gap-2  ">
                                         <h4 className="text-[#09090B]  text-base font-medium">
-                                            {__('Meeting Description', 'quillcrm')}
+                                            {__('Meeting Description', 'doublescale')}
                                         </h4>
                                         <p className=" text-base font-normal text-[#777] leading-[26px]">
                                             {activity.data.description}
@@ -444,7 +444,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             {activity.data.subject && (
                                 <div>
                                     <h4 className="text-[#09090B] text-base font-medium">
-                                        {__('Subject', 'quillcrm')}
+                                        {__('Subject', 'doublescale')}
                                     </h4>
                                     <p className="text-base font-normal text-[#777] leading-[26px]">
                                         {activity.data.subject}
@@ -454,7 +454,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             {activity.data.body && (
                                 <div>
                                     <h4 className="text-[#09090B] text-base font-medium">
-                                        {__('Email Body', 'quillcrm')}
+                                        {__('Email Body', 'doublescale')}
                                     </h4>
                                     <div
                                         className="text-base font-normal text-[#777] leading-[26px]"
@@ -476,10 +476,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     activity.data && (
                         <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
                             <h4 className="text-[#09090B] text-base font-medium">
-                                {__('Call Notes', 'quillcrm')}
+                                {__('Call Notes', 'doublescale')}
                             </h4>
                             <p className="text-base font-normal text-[#777] leading-[26px]">
-                                {activity.data.notes || __('No notes available', 'quillcrm')}
+                                {activity.data.notes || __('No notes available', 'doublescale')}
                             </p>
                         </div>
                     )
@@ -489,12 +489,12 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     activity.data && (
                         <div className="activity-value-content flex items-center gap-2 text-base text-[#09090B]">
                             <span>
-                                {__('Value changed from', 'quillcrm')}
+                                {__('Value changed from', 'doublescale')}
                             </span>
                             <span className="line-through text-[#6B7280]">
                                 {activity.data.old_value}
                             </span>
-                            <span>{__('to', 'quillcrm')}</span>
+                            <span>{__('to', 'doublescale')}</span>
                             <span className="font-semibold text-[#09090B]">
                                 {activity.data.new_value}
                             </span>
@@ -515,7 +515,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         <div className="activity-container">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">
-                    {__('Activities', 'quillcrm')}
+                    {__('Activities', 'doublescale')}
                 </h2>
                 <ActivitiesFilters
                     filters={filters}
@@ -614,7 +614,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                                     className="flex items-center gap-2 text-[#16A34A]"
                                                                 >
                                                                     <CheckCircleIcon width={16} height={16} />
-                                                                    {__('Mark Complete', 'quillcrm')}
+                                                                    {__('Mark Complete', 'doublescale')}
                                                                 </Button>
                                                             )}
                                                             {item.status && (
@@ -646,7 +646,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
                                                 {isTask && item.due_date && (
                                                     <p className="text-xs text-gray-600">
-                                                        {__('Due', 'quillcrm')}: {item.due_date} {item.due_time}
+                                                        {__('Due', 'doublescale')}: {item.due_date} {item.due_time}
                                                     </p>
                                                 )}
 
@@ -662,8 +662,8 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 ) : (
                     <NoData
                         icon={<GradientActivitiesIcon />}
-                        title={__('No activities found—this space is ready for your next action.', 'quillcrm')}
-                        subtitle={__('Use it to add emails, notes, or tasks that keep your contact flow organized and proactive.', 'quillcrm')}
+                        title={__('No activities found—this space is ready for your next action.', 'doublescale')}
+                        subtitle={__('Use it to add emails, notes, or tasks that keep your contact flow organized and proactive.', 'doublescale')}
                     />
                 )}
             </div>

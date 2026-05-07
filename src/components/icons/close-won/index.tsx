@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const CloseWinIcon: React.FC<IconProps> = ({ width = 19, height = 24 }) => {
 	return (

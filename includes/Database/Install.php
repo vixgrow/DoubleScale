@@ -120,7 +120,7 @@ class Install {
 	}
 
 	/**
-	 * Rename wp_{prefix}quillcrm_* tables to wp_{prefix}doublescale_* when the target is absent.
+	 * Rename wp_{prefix}doublescale_* tables to wp_{prefix}doublescale_* when the target is absent.
 	 */
 	public static function migrate_legacy_tables(): void {
 		if ( get_option( 'doublescale_legacy_renamed' ) ) {
@@ -129,11 +129,11 @@ class Install {
 
 		global $wpdb;
 
-		$pattern = $wpdb->esc_like( $wpdb->prefix . 'quillcrm_' ) . '%';
+		$pattern = $wpdb->esc_like( $wpdb->prefix . 'doublescale_' ) . '%';
 		$tables  = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pattern ) );
 
 		foreach ( (array) $tables as $old_table ) {
-			$new_table = str_replace( $wpdb->prefix . 'quillcrm_', $wpdb->prefix . 'doublescale_', $old_table );
+			$new_table = str_replace( $wpdb->prefix . 'doublescale_', $wpdb->prefix . 'doublescale_', $old_table );
 			$exists    = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $new_table ) );
 			if ( $exists === $new_table ) {
 				continue;
@@ -164,7 +164,7 @@ class Install {
 		$tables  = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $pattern ) );
 
 		foreach ( (array) $tables as $new_table ) {
-			$old_table = str_replace( $wpdb->prefix . 'doublescale_', $wpdb->prefix . 'quillcrm_', $new_table );
+			$old_table = str_replace( $wpdb->prefix . 'doublescale_', $wpdb->prefix . 'doublescale_', $new_table );
 			$exists    = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $old_table ) );
 			if ( $exists === $old_table ) {
 				continue;
@@ -186,7 +186,7 @@ class Install {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "UPDATE {$groups} SET slug = REPLACE(slug, 'quillcrm_', 'doublescale_') WHERE slug LIKE 'quillcrm\_%'" );
+		$wpdb->query( "UPDATE {$groups} SET slug = REPLACE(slug, 'doublescale_', 'doublescale_') WHERE slug LIKE 'doublescale\_%'" );
 	}
 
 	public static function migrate_settings_option(): void {
@@ -194,7 +194,7 @@ class Install {
 			return;
 		}
 
-		$legacy = get_option( 'quillcrm_settings', '__DOUBLESCALE_NO_LEGACY_SETTINGS__' );
+		$legacy = get_option( 'doublescale_settings', '__DOUBLESCALE_NO_LEGACY_SETTINGS__' );
 		if ( '__DOUBLESCALE_NO_LEGACY_SETTINGS__' !== $legacy ) {
 			$missing = '__DOUBLESCALE_SENTINEL__';
 			if ( $missing === get_option( 'doublescale_settings', $missing ) ) {
@@ -219,8 +219,8 @@ class Install {
 					continue;
 				}
 				foreach ( array_keys( $role->capabilities ) as $cap ) {
-					if ( 0 === strpos( (string) $cap, 'quillcrm_' ) ) {
-						$new_cap = 'doublescale_' . substr( (string) $cap, strlen( 'quillcrm_' ) );
+					if ( 0 === strpos( (string) $cap, 'doublescale_' ) ) {
+						$new_cap = 'doublescale_' . substr( (string) $cap, strlen( 'doublescale_' ) );
 						$role->remove_cap( $cap );
 						$role->add_cap( $new_cap );
 					}
@@ -244,8 +244,8 @@ class Install {
 			$new_caps = array();
 			$changed  = false;
 			foreach ( $caps as $cap => $grant ) {
-				if ( 0 === strpos( (string) $cap, 'quillcrm_' ) ) {
-					$new_cap             = 'doublescale_' . substr( (string) $cap, strlen( 'quillcrm_' ) );
+				if ( 0 === strpos( (string) $cap, 'doublescale_' ) ) {
+					$new_cap             = 'doublescale_' . substr( (string) $cap, strlen( 'doublescale_' ) );
 					$new_caps[ $new_cap ] = $grant;
 					$changed             = true;
 				} else {

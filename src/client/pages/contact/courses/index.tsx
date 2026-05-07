@@ -11,12 +11,12 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import './style.scss';
 import { useContactContext } from '../state/context';
-import type { LMSCoursesResponse, NoticeMessage } from '@quillcrm/client';
+import type { LMSCoursesResponse, NoticeMessage } from '@doublescale/client';
 import { DataTable } from '@/components/ui/data-table';
-import { GradientCoursesIcon, NoData, NoticeBanner } from '@quillcrm/components';
+import { GradientCoursesIcon, NoData, NoticeBanner } from '@doublescale/components';
 import { getColumns } from './columns';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
-import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
+import DataTablePagination from '@doublescale/components/ui/data-table-pagination';
 
 interface CoursesProps {
     contact_id: number;
@@ -76,7 +76,7 @@ const Courses = ({ contact_id }: CoursesProps) => {
         } catch (error: any) {
             showNotice(
                 'error',
-                error?.message || __('Failed to fetch courses', 'quillcrm')
+                error?.message || __('Failed to fetch courses', 'doublescale')
             );
         } finally {
             setLoading(false);
@@ -93,7 +93,7 @@ const Courses = ({ contact_id }: CoursesProps) => {
         <div className="qcrm-courses flex flex-col gap-5">
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold">
-                    {__('Courses', 'quillcrm')}
+                    {__('Courses', 'doublescale')}
                 </h2>
             </div>
             {notice && (
@@ -107,10 +107,10 @@ const Courses = ({ contact_id }: CoursesProps) => {
                 {!loading && (!courses || courses.length === 0) ? (
                     <NoData
                         icon={<GradientCoursesIcon />}
-                        title={__('No courses yet', 'quillcrm')}
+                        title={__('No courses yet', 'doublescale')}
                         subtitle={__(
                             'No courses have been registered for this contact yet. Course activity will appear here once enrollment begins.',
-                            'quillcrm'
+                            'doublescale'
                         )}
                     />
                 ) : (

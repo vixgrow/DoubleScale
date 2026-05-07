@@ -20,13 +20,13 @@ import {
 	GradientCallsIcon,
 	NoData,
     AddLogIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { getColumns } from './columns';
 import CallDialog from './call-dialog';
-import type { NoticeMessage } from '@quillcrm/client';
+import type { NoticeMessage } from '@doublescale/client';
 
 interface Call {
 	id: number;
@@ -114,7 +114,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 		} catch (error: any) {
 			showNotice(
 				'error',
-				error.message || __('Failed to fetch calls', 'quillcrm')
+				error.message || __('Failed to fetch calls', 'doublescale')
 			);
 		} finally {
 			setLoading(false);
@@ -145,9 +145,9 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 
 			setCalls(calls.filter((c) => c.id !== callToDelete.id));
 			fetchCalls();
-			showNotice('success', __('Call deleted successfully', 'quillcrm'));
+			showNotice('success', __('Call deleted successfully', 'doublescale'));
 		} catch (error) {
-			showNotice('error', __('Failed to delete call', 'quillcrm'));
+			showNotice('error', __('Failed to delete call', 'doublescale'));
 		} finally {
 			setCallToDelete(null);
 		}
@@ -167,7 +167,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 		<div className="qcrm-calls flex flex-col gap-5">
 			<div className="flex justify-between items-center">
 				<h2 className="text-2xl font-semibold">
-					{__('Calls', 'quillcrm')}
+					{__('Calls', 'doublescale')}
 				</h2>
 				<Button
 					variant="secondary"
@@ -176,7 +176,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 					onClick={handleAddCall}
 				>
 					<AddLogIcon />
-					{__('Log Call', 'quillcrm')}
+					{__('Log Call', 'doublescale')}
 				</Button>
 			</div>
 			{notice && (
@@ -186,10 +186,10 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 				{!loading && (!calls || calls.length === 0) ? (
 					<NoData
 						icon={<GradientCallsIcon />}
-						title={__('No calls found yet', 'quillcrm')}
-						subtitle={__('No calls logged yet—this space is quiet for now. Add a call to keep the conversation going and stay in touch.', 'quillcrm')}
+						title={__('No calls found yet', 'doublescale')}
+						subtitle={__('No calls logged yet—this space is quiet for now. Add a call to keep the conversation going and stay in touch.', 'doublescale')}
 						onClick={handleAddCall}
-						buttonLabel={__('Add Log Call', 'quillcrm')}
+						buttonLabel={__('Add Log Call', 'doublescale')}
 					/>
 				) : (
 					<>

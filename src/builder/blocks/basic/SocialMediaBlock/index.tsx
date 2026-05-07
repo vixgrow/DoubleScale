@@ -5,11 +5,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { SocialMediaBlockIcon } from '@quillcrm/components';
+import { SocialMediaBlockIcon } from '@doublescale/components';
 
 const SocialMediaBlock = {
 	type: 'social_media',
-	name: __('Social Media', 'quillcrm'),
+	name: __('Social Media', 'doublescale'),
 	icon: SocialMediaBlockIcon,
 	isProActivated: false,
 	isPro: true,

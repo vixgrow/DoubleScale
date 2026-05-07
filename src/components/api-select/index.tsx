@@ -14,7 +14,7 @@ import Select from 'react-select';
 /**
  * Internal dependencies
  */
-import PaginatedSelect from '@quillcrm/components/paginated-select';
+import PaginatedSelect from '@doublescale/components/paginated-select';
 
 interface Props {
 	endpoint: string;
@@ -81,8 +81,8 @@ const API_Select = ({ endpoint, value, onChange, multiple = false }: Props) => {
 				value={normalizedValue}
 				onChange={handleChange}
 				endpoint={normalizedEndpoint}
-				placeholder={__('Select option', 'quillcrm')}
-				noOptionsMessage={__('No options available', 'quillcrm')}
+				placeholder={__('Select option', 'doublescale')}
+				noOptionsMessage={__('No options available', 'doublescale')}
 			/>
 		);
 	}
@@ -219,13 +219,13 @@ const SingleAPISelect = ({
 
 		if (isLoadingMore && hasMore) {
 			allOptions.push({
-				label: __('Loading more...', 'quillcrm'),
+				label: __('Loading more...', 'doublescale'),
 				value: -1,
 				isDisabled: true,
 			} as SelectOption & { isDisabled: boolean });
 		} else if (!isLoadingMore && hasMore && options.length > 0) {
 			allOptions.push({
-				label: __('Scroll down for more...', 'quillcrm'),
+				label: __('Scroll down for more...', 'doublescale'),
 				value: -2,
 				isDisabled: true,
 			} as SelectOption & { isDisabled: boolean });
@@ -257,7 +257,7 @@ const SingleAPISelect = ({
 						}}
 						onInputChange={handleInputChange}
 						onMenuScrollToBottom={loadMoreOptions}
-						placeholder={__('Select option', 'quillcrm')}
+						placeholder={__('Select option', 'doublescale')}
 						isLoading={isLoading}
 						filterOption={() => true}
 						isOptionDisabled={(option) => (option as any).isDisabled || false}
@@ -287,12 +287,12 @@ const SingleAPISelect = ({
 						components={{
 							LoadingMessage: () => (
 								<div className="px-3 py-2 text-gray-500">
-									{__('Loading...', 'quillcrm')}
+									{__('Loading...', 'doublescale')}
 								</div>
 							),
 							NoOptionsMessage: () => (
 								<div className="px-3 py-2 text-gray-500">
-									{__('No options available', 'quillcrm')}
+									{__('No options available', 'doublescale')}
 								</div>
 							),
 						}}

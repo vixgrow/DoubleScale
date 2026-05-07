@@ -32,7 +32,7 @@ export type ConfigData = Record<string, unknown> & {
 	license: License | false;
 	proPluginData: ProPluginData;
 	currency: string;
-	urlQuillCRMPro: string;
+	urlDoubleScalePro: string;
 };
 export type License = {
 	upgrades: {
@@ -52,9 +52,9 @@ export type ProPluginData = {
 
 
 export type UserCapabilities = {
-	quillcrm_crm_manager: boolean;
-	quillcrm_sales_manager: boolean;
-	quillcrm_sales_rep: boolean;
+	doublescale_crm_manager: boolean;
+	doublescale_sales_manager: boolean;
+	doublescale_sales_rep: boolean;
 };
 
 export type DefaultStage = {
@@ -399,12 +399,12 @@ export type FiltersGroups = {
 };
 
 export const SOURCE_OPTIONS = [
-	{ value: 'website', label: __('Website', 'quillcrm') },
-	{ value: 'referral', label: __('Referral', 'quillcrm') },
-	{ value: 'social_media', label: __('Social Media', 'quillcrm') },
-	{ value: 'email_campaign', label: __('Email Campaign', 'quillcrm') },
-	{ value: 'cold_call', label: __('Cold Call', 'quillcrm') },
-	{ value: 'trade_show', label: __('Trade Show', 'quillcrm') },
-	{ value: 'partner', label: __('Partner', 'quillcrm') },
-	{ value: 'other', label: __('Other', 'quillcrm') },
+	{ value: 'website', label: __('Website', 'doublescale') },
+	{ value: 'referral', label: __('Referral', 'doublescale') },
+	{ value: 'social_media', label: __('Social Media', 'doublescale') },
+	{ value: 'email_campaign', label: __('Email Campaign', 'doublescale') },
+	{ value: 'cold_call', label: __('Cold Call', 'doublescale') },
+	{ value: 'trade_show', label: __('Trade Show', 'doublescale') },
+	{ value: 'partner', label: __('Partner', 'doublescale') },
+	{ value: 'other', label: __('Other', 'doublescale') },
 ] as const;

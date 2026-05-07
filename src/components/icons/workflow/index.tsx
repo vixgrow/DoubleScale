@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const WorkflowIcon: React.FC<IconProps> = ({ width = 34, height = 34 }) => {
 	return (

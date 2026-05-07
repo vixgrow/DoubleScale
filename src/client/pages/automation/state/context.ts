@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Automation, AutomationStep } from '@quillcrm/client';
+import { Automation, AutomationStep } from '@doublescale/client';
 
 export interface StepAnalytics {
 	step_id: number | null;

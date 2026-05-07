@@ -15,17 +15,17 @@ import { Skeleton } from 'antd';
  * Internal dependencies
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useContactContext } from '../../state/context';
 import {
 	OutlinedCustomFieldsIcon,
 	ProFeatureNotice,
-} from '@quillcrm/components';
-import Field from '@quillcrm/components/field';
-import { getToLink } from '@quillcrm/navigation';
-import { useNavigate } from '@quillcrm/navigation';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
+} from '@doublescale/components';
+import Field from '@doublescale/components/field';
+import { getToLink } from '@doublescale/navigation';
+import { useNavigate } from '@doublescale/navigation';
+import EditHeaderIcon from '@doublescale/components/icons/edit-header';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -48,7 +48,7 @@ const InfoCard: React.FC = () => {
 	// Get useCustomFields hook from Pro plugin via filter
 	// If Pro plugin is not active, this will return null
 	const useCustomFieldsHook = applyFilters(
-		'quillcrm_use_custom_fields_hook',
+		'doublescale_use_custom_fields_hook',
 		null
 	) as any;
 
@@ -75,12 +75,12 @@ const InfoCard: React.FC = () => {
 		useState<boolean>(false);
 	const navigate = useNavigate();
 	const tabs = [
-		{ id: 'basic' as TabType, label: __('Basic Information', 'quillcrm') },
+		{ id: 'basic' as TabType, label: __('Basic Information', 'doublescale') },
 		{
 			id: 'address' as TabType,
-			label: __('Address Information', 'quillcrm'),
+			label: __('Address Information', 'doublescale'),
 		},
-		{ id: 'custom' as TabType, label: __('Custom Fields', 'quillcrm') },
+		{ id: 'custom' as TabType, label: __('Custom Fields', 'doublescale') },
 	];
 
 	const handleEdit = (field: EditingField, currentValue: string) => {
@@ -279,13 +279,13 @@ const InfoCard: React.FC = () => {
 		options?: { value: string; label: string }[]
 	) => {
 		if (value === '' || value === null || value === undefined) {
-			return __('—', 'quillcrm');
+			return __('—', 'doublescale');
 		}
 
 		if (fieldType === 'boolean' || fieldType === 'checkbox') {
 			return value === true || value === 'true'
-				? __('Yes', 'quillcrm')
-				: __('No', 'quillcrm');
+				? __('Yes', 'doublescale')
+				: __('No', 'doublescale');
 		}
 
 		if (fieldType === 'select' && options) {
@@ -294,7 +294,7 @@ const InfoCard: React.FC = () => {
 		}
 
 		if (fieldType === 'multiselect' && Array.isArray(value)) {
-			if (value.length === 0) return __('—', 'quillcrm');
+			if (value.length === 0) return __('—', 'doublescale');
 			if (options) {
 				return value
 					.map((val) => {
@@ -387,7 +387,7 @@ const InfoCard: React.FC = () => {
 					/>
 				) : (
 					<div className="text-lg font-semibold truncate max-w-[400px]">
-						{value || __('—', 'quillcrm')}
+						{value || __('—', 'doublescale')}
 					</div>
 				)}
 			</div>
@@ -401,27 +401,27 @@ const InfoCard: React.FC = () => {
 					<div className="flex flex-col gap-4">
 						{renderField(
 							'first_name',
-							__('First Name', 'quillcrm'),
+							__('First Name', 'doublescale'),
 							contact?.first_name || ''
 						)}
 						{renderField(
 							'last_name',
-							__('Last Name', 'quillcrm'),
+							__('Last Name', 'doublescale'),
 							contact?.last_name || ''
 						)}
 						{renderField(
 							'email',
-							__('Email', 'quillcrm'),
+							__('Email', 'doublescale'),
 							contact?.email || ''
 						)}
 						{renderField(
 							'phone',
-							__('Phone', 'quillcrm'),
+							__('Phone', 'doublescale'),
 							contact?.phone || ''
 						)}
 						{renderField(
 							'whatsapp_phone',
-							__('WhatsApp Phone', 'quillcrm'),
+							__('WhatsApp Phone', 'doublescale'),
 							contact?.whatsapp_phone || ''
 						)}
 					</div>
@@ -431,32 +431,32 @@ const InfoCard: React.FC = () => {
 					<div className="flex flex-col gap-4">
 						{renderField(
 							'address_1',
-							__('Address 1', 'quillcrm'),
+							__('Address 1', 'doublescale'),
 							contact?.address_1 || ''
 						)}
 						{renderField(
 							'address_2',
-							__('Address 2', 'quillcrm'),
+							__('Address 2', 'doublescale'),
 							contact?.address_2 || ''
 						)}
 						{renderField(
 							'country',
-							__('Country', 'quillcrm'),
+							__('Country', 'doublescale'),
 							contact?.country || ''
 						)}
 						{renderField(
 							'city',
-							__('City', 'quillcrm'),
+							__('City', 'doublescale'),
 							contact?.city || ''
 						)}
 						{renderField(
 							'state',
-							__('State', 'quillcrm'),
+							__('State', 'doublescale'),
 							contact?.state || ''
 						)}
 						{renderField(
 							'zip',
-							__('Zip', 'quillcrm'),
+							__('Zip', 'doublescale'),
 							contact?.zip || ''
 						)}
 					</div>
@@ -466,10 +466,10 @@ const InfoCard: React.FC = () => {
 				if (!useCustomFieldsHook) {
 					return (
 						<ProFeatureNotice
-							featureName={__('Custom Fields', 'quillcrm')}
+							featureName={__('Custom Fields', 'doublescale')}
 							description={__(
 								'Create unlimited custom fields to capture any information you need about your contacts. Organize fields into groups, use various field types (text, number, date, select, checkbox, etc.), and leverage custom fields in automations and campaigns.',
-								'quillcrm'
+								'doublescale'
 							)}
 						/>
 					);
@@ -499,7 +499,7 @@ const InfoCard: React.FC = () => {
 						<div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-500">
 							<OutlinedCustomFieldsIcon />
 							<p className="text-lg font-medium">
-								{__('No custom fields', 'quillcrm')}
+								{__('No custom fields', 'doublescale')}
 							</p>
 							<Button
 								onClick={() => {
@@ -509,7 +509,7 @@ const InfoCard: React.FC = () => {
 								variant="secondary"
 								size="lg"
 							>
-								{__('Manage Custom Fields', 'quillcrm')}
+								{__('Manage Custom Fields', 'doublescale')}
 							</Button>
 						</div>
 					);

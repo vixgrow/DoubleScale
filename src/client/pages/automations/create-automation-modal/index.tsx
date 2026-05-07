@@ -11,14 +11,14 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 /**
  * Internal dependencies
  */
-import ConfigAPI from '@quillcrm/config';
-import type { NoticeMessage } from '@quillcrm/client';
+import ConfigAPI from '@doublescale/config';
+import type { NoticeMessage } from '@doublescale/client';
 import {
 	CustomDialogHeader,
 	Field,
 	NoticeBanner,
 	GradientAutomationsIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import {
 	Dialog,
 	DialogContent,
@@ -181,7 +181,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Trigger automations based on booking events',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		crm: {
@@ -214,7 +214,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Automate your CRM workflows and tasks',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		forms: {
@@ -293,7 +293,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Trigger actions when forms are submitted',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		lms: {
@@ -341,7 +341,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Learning management system automation',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		woocommerce: {
@@ -363,7 +363,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					/>
 				</svg>
 			),
-			description: __('E-commerce and order automation', 'quillcrm'),
+			description: __('E-commerce and order automation', 'doublescale'),
 		},
 		wp: {
 			image: (
@@ -382,7 +382,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'WordPress user and content automation',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		edd: {
@@ -410,7 +410,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 			),
 			description: __(
 				'Easy Digital Downloads order automation',
-				'quillcrm'
+				'doublescale'
 			),
 		},
 		surecart: {
@@ -445,7 +445,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					/>
 				</svg>
 			),
-			description: __('SureCart e-commerce automation', 'quillcrm'),
+			description: __('SureCart e-commerce automation', 'doublescale'),
 		},
 		video: {
 			image: (
@@ -491,7 +491,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					</defs>
 				</svg>
 			),
-			description: __('Video player automation', 'quillcrm'),
+			description: __('Video player automation', 'doublescale'),
 		},
 	};
 
@@ -517,13 +517,13 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					<CustomDialogHeader
 						title={
 							isEditAutomation
-								? __('Edit Automation', 'quillcrm')
-								: __('Create Automation', 'quillcrm')
+								? __('Edit Automation', 'doublescale')
+								: __('Create Automation', 'doublescale')
 						}
 						subtitle={
 							isEditAutomation
-								? __('Edit Automation', 'quillcrm')
-								: __('Add New Automation', 'quillcrm')
+								? __('Edit Automation', 'doublescale')
+								: __('Add New Automation', 'doublescale')
 						}
 						icon={
 							<GradientAutomationsIcon width={32} height={32} />
@@ -545,7 +545,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					<div className="qcrm-fields qcrm-automation-modal-fields flex-1 flex flex-col overflow-hidden">
 						<div className="shrink-0">
 							<Field
-								label={__('Automation Name', 'quillcrm')}
+								label={__('Automation Name', 'doublescale')}
 								value={automation.name}
 								onChange={(value) =>
 									onAutomationChange({
@@ -560,7 +560,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
 						<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">
 							<div className="qcrm-field-label flex items-center text-base text-[#09090B] shrink-0">
-								{__('Trigger', 'quillcrm')}
+								{__('Trigger', 'doublescale')}
 								<span className="text-destructive">*</span>
 							</div>
 
@@ -602,11 +602,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					>
 						{isSaving
 							? isEditAutomation
-								? __('Updating...', 'quillcrm')
-								: __('Creating...', 'quillcrm')
+								? __('Updating...', 'doublescale')
+								: __('Creating...', 'doublescale')
 							: isEditAutomation
-								? __('Update Automation', 'quillcrm')
-								: __('Create Automation', 'quillcrm')}
+								? __('Update Automation', 'doublescale')
+								: __('Create Automation', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -27,10 +27,10 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { ContactMappedFields, Field } from '@quillcrm/components';
+import { ContactMappedFields, Field } from '@doublescale/components';
 import { useEffect } from 'react';
-import ConfigAPI from '@quillcrm/config';
-import type { ImporterField } from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
+import type { ImporterField } from '@doublescale/config';
 import { isEmpty, map, trim } from 'lodash';
 
 interface Props {
@@ -43,7 +43,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 	const [importing, setImporting] = useState(false);
 	const [count, setCount] = useState(0);
 	const [source, setSource] = useState('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [offset, setOffset] = useState(0);
 	const [fileData, setFileData] = useState<{
 		file_name: string;
@@ -72,10 +72,10 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 	}));
 
 	const statusOptions = [
-		{ label: __('Subscribed', 'quillcrm'), value: 'subscribed' },
-		{ label: __('Unsubscribed', 'quillcrm'), value: 'unsubscribed' },
-		{ label: __('Bounced', 'quillcrm'), value: 'bounced' },
-		{ label: __('Unverified', 'quillcrm'), value: 'unverified' },
+		{ label: __('Subscribed', 'doublescale'), value: 'subscribed' },
+		{ label: __('Unsubscribed', 'doublescale'), value: 'unsubscribed' },
+		{ label: __('Bounced', 'doublescale'), value: 'bounced' },
+		{ label: __('Unverified', 'doublescale'), value: 'unverified' },
 	];
 
 	const importContacts = async (currentOffset = 0) => {
@@ -104,7 +104,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 			} else {
 				createNotice({
 					type: 'success',
-					message: __('Import completed', 'quillcrm'),
+					message: __('Import completed', 'doublescale'),
 				});
 				setImporting(false);
 				setCount(0);
@@ -116,7 +116,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to import contacts', 'quillcrm'),
+				message: error.message || __('Failed to import contacts', 'doublescale'),
 			});
 			setImporting(false);
 		}
@@ -396,7 +396,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 
 	return (
 		<Modal
-			title={__('Import Contacts', 'quillcrm')}
+			title={__('Import Contacts', 'doublescale')}
 			open={open}
 			onCancel={() => {
 				resetState();
@@ -407,7 +407,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 		>
 			<Flex vertical gap={10}>
 				<Typography.Title level={4}>
-					{__('Import Contacts', 'quillcrm')}
+					{__('Import Contacts', 'doublescale')}
 				</Typography.Title>
 				{!importing && (
 					<Flex gap={10}>
@@ -446,7 +446,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 									onClick={getSourceData}
 									disabled={!validateCredentials()}
 								>
-									{__('Fetch Data', 'quillcrm')}
+									{__('Fetch Data', 'doublescale')}
 								</Button>
 							</Flex>
 						)}
@@ -463,29 +463,29 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 							<>
 								<Flex vertical gap={20} style={{ margin: '30px 0' }}>
 									<Typography.Title level={5}>
-										{__('Contact Profile', 'quillcrm')}
+										{__('Contact Profile', 'doublescale')}
 									</Typography.Title>
 									<Flex gap={20}>
 										<Field
-											label={__('Assign to QuillCRM List', 'quillcrm')}
+											label={__('Assign to DoubleScale List', 'doublescale')}
 											type="lists"
 											value={assignedLists}
 											onChange={(value) => setAssignedLists(value)}
-											helperText={__('Select the list to assign the contacts to', 'quillcrm')}
+											helperText={__('Select the list to assign the contacts to', 'doublescale')}
 											style={{ flex: 1 }}
 										/>
 										<Field
-											label={__('Assign to QuillCRM Tags', 'quillcrm')}
+											label={__('Assign to DoubleScale Tags', 'doublescale')}
 											type="tags"
 											value={assignedTags}
 											onChange={(value) => setAssignedTags(value)}
-											helperText={__('Select the tags to assign the contacts to', 'quillcrm')}
+											helperText={__('Select the tags to assign the contacts to', 'doublescale')}
 											style={{ flex: 1 }}
 										/>
 									</Flex>
 									{['csv', 'wpusers', 'wc'].includes(source) && (
 										<Field
-											label={__('Status', 'quillcrm')}
+											label={__('Status', 'doublescale')}
 											type="select"
 											value={newStatus}
 											onChange={(value) => setNewStatus(value)}
@@ -493,7 +493,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 										/>
 									)}
 									<Field
-										label={__('Update Existing Contacts', 'quillcrm')}
+										label={__('Update Existing Contacts', 'doublescale')}
 										type="switch"
 										value={updateExisting}
 										onChange={(value) => setUpdateExisting(value)}
@@ -557,15 +557,15 @@ const ListsMapping: React.FC<ListsMapping> = ({ lists, mapping, onChange }) => {
 			pagination={false}
 			columns={[
 				{
-					title: __('Source List', 'quillcrm'),
+					title: __('Source List', 'doublescale'),
 					dataIndex: 'list',
 				},
 				{
-					title: __('Assign to (QuillCRM)', 'quillcrm'),
+					title: __('Assign to (DoubleScale)', 'doublescale'),
 					render: (record) => (
 						<>
 							{getOrAddListToMapped(record.list).auto ? (
-								<Typography.Text>{__('List will be created automatically', 'quillcrm')}</Typography.Text>
+								<Typography.Text>{__('List will be created automatically', 'doublescale')}</Typography.Text>
 							) : (
 								<Field
 									type="lists"
@@ -585,7 +585,7 @@ const ListsMapping: React.FC<ListsMapping> = ({ lists, mapping, onChange }) => {
 					),
 				},
 				{
-					title: __('Auto Create', 'quillcrm'),
+					title: __('Auto Create', 'doublescale'),
 					render: (record) => (
 						<Switch
 							checked={mapping.find((item) => item.list === record.list)?.auto}
@@ -629,15 +629,15 @@ const TagsMapping: React.FC<TagsMapping> = ({ tags, mapping, onChange }) => {
 			pagination={false}
 			columns={[
 				{
-					title: __('Source Tag', 'quillcrm'),
+					title: __('Source Tag', 'doublescale'),
 					dataIndex: 'tag',
 				},
 				{
-					title: __('Assign to (QuillCRM)', 'quillcrm'),
+					title: __('Assign to (DoubleScale)', 'doublescale'),
 					render: (record) => (
 						<>
 							{getOrAddTagToMapped(record.tag).auto ? (
-								<Typography.Text>{__('Tag will be created automatically', 'quillcrm')}</Typography.Text>
+								<Typography.Text>{__('Tag will be created automatically', 'doublescale')}</Typography.Text>
 							) : (
 								<Field
 									type="tags"
@@ -657,7 +657,7 @@ const TagsMapping: React.FC<TagsMapping> = ({ tags, mapping, onChange }) => {
 					),
 				},
 				{
-					title: __('Auto Create', 'quillcrm'),
+					title: __('Auto Create', 'doublescale'),
 					render: (record) => (
 						<Switch
 							checked={mapping.find((item) => item.tag === record.tag)?.auto}

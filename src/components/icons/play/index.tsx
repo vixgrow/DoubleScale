@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const PlayIcon: React.FC<IconProps> = ({ width = 25, height = 25 }) => {
 	return (

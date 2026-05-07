@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertIcon, SendTestEmailIcon } from '@quillcrm/components/icons';
+import { AlertIcon, SendTestEmailIcon } from '@doublescale/components/icons';
 import { cn } from '@/lib/utils';
 import { MessageCircle } from 'lucide-react';
 
@@ -32,7 +32,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 	buttonClassName = '',
 	buttonVariant = 'secondary',
 }) => {
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const [testPhone, setTestPhone] = useState('');
 	const [isSendingTest, setIsSendingTest] = useState(false);
 	const isMountedRef = useRef(true);
@@ -52,7 +52,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 		if (!testPhone.trim()) {
 			createNotice({
 				type: 'error',
-				message: __('Please enter a phone number', 'quillcrm'),
+				message: __('Please enter a phone number', 'doublescale'),
 			});
 			return;
 		}
@@ -60,7 +60,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 		if (!campaignId) {
 			createNotice({
 				type: 'error',
-				message: __('Campaign ID is missing', 'quillcrm'),
+				message: __('Campaign ID is missing', 'doublescale'),
 			});
 			return;
 		}
@@ -83,7 +83,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 					type: 'error',
 					message: __(
 						'Please enter a valid phone number in E.164 format (e.g., +1234567890)',
-						'quillcrm'
+						'doublescale'
 					),
 				});
 				return;
@@ -104,7 +104,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 					type: 'error',
 					message: __(
 						'No WhatsApp template configured for this campaign',
-						'quillcrm'
+						'doublescale'
 					),
 				});
 				return;
@@ -130,7 +130,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 				type: 'success',
 				message:
 					response.message ||
-					__('Test WhatsApp message sent successfully', 'quillcrm'),
+					__('Test WhatsApp message sent successfully', 'doublescale'),
 			});
 
 			setTestPhone('');
@@ -148,7 +148,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 				type: 'error',
 				message:
 					error.message ||
-					__('Failed to send test WhatsApp message', 'quillcrm'),
+					__('Failed to send test WhatsApp message', 'doublescale'),
 			});
 		} finally {
 			// Only update state if component is still mounted
@@ -171,7 +171,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 					<div className="flex items-center gap-2 justify-center text-[#25D366]">
 						<MessageCircle className="w-5 h-5" />
 						<h3 className="text-lg text-[#25D366]">
-							{__('Send test WhatsApp', 'quillcrm')}
+							{__('Send test WhatsApp', 'doublescale')}
 						</h3>
 					</div>
 				</div>
@@ -183,13 +183,13 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 					<h4 className="text-base text-[#09090B]">
 						{__(
 							'Who do you want to test your WhatsApp message with?',
-							'quillcrm'
+							'doublescale'
 						)}
 					</h4>
 				)}
 				<div>
 					<label className="block text-base text-[#09090B] mb-2">
-						{__('Send a test WhatsApp to', 'quillcrm')}
+						{__('Send a test WhatsApp to', 'doublescale')}
 					</label>
 					<Textarea
 						value={testPhone}
@@ -201,7 +201,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 					<p className="text-base font-medium text-secondary mt-2">
 						{__(
 							'Enter phone number in E.164 format (e.g., +1234567890)',
-							'quillcrm'
+							'doublescale'
 						)}
 					</p>
 				</div>
@@ -215,7 +215,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 						<p className="text-base text-amber-800">
 							{__(
 								'WhatsApp test messages use approved templates from your Twilio account. The recipient must have a valid WhatsApp account.',
-								'quillcrm'
+								'doublescale'
 							)}
 						</p>
 					</div>
@@ -230,8 +230,8 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 						className={buttonClassName}
 					>
 						{isSendingTest
-							? __('Sending...', 'quillcrm')
-							: __('Send Test', 'quillcrm')}
+							? __('Sending...', 'doublescale')
+							: __('Send Test', 'doublescale')}
 					</Button>
 				</div>
 			</div>

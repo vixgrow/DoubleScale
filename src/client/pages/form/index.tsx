@@ -17,7 +17,7 @@ import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import { Form as FormType, NoticeMessage } from '@quillcrm/client';
+import { Form as FormType, NoticeMessage } from '@doublescale/client';
 import InitialStep from './steps/initial';
 import SettingsStep from './steps/settings';
 import Overview from './overview';
@@ -27,9 +27,9 @@ import {
 	PanelSettings,
 	PlayIcon,
 	NoticeBanner,
-} from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
-import { getToLink, useNavigate, useParams } from '@quillcrm/navigation';
+} from '@doublescale/components';
+import { Button } from '@doublescale/components/ui/button';
+import { getToLink, useNavigate, useParams } from '@doublescale/navigation';
 
 interface FormProps {
 	isNewForm?: boolean;
@@ -194,7 +194,7 @@ const Form: React.FC<FormProps> = ({
 			if (!form?.name || !form?.form_type || !form?.form_id) {
 				showNotice(
 					'error',
-					__('Please fill all required fields', 'quillcrm')
+					__('Please fill all required fields', 'doublescale')
 				);
 				return;
 			}
@@ -223,7 +223,7 @@ const Form: React.FC<FormProps> = ({
 					'error',
 					__(
 						'Please map all required contact fields (Email) before activating',
-						'quillcrm'
+						'doublescale'
 					)
 				);
 				return;
@@ -235,16 +235,16 @@ const Form: React.FC<FormProps> = ({
 
 				// Show appropriate notice based on whether it's a new form or edit
 				const successMessage = isNewForm
-					? __('Form created successfully', 'quillcrm')
-					: __('Form updated successfully', 'quillcrm');
+					? __('Form created successfully', 'doublescale')
+					: __('Form updated successfully', 'doublescale');
 
 				showNotice('success', successMessage);
 
 				// Call onSuccess first to refresh the forms list before closing
 				if (onSuccess) {
 					const onSuccessMessage = isNewForm
-						? __('Form created successfully', 'quillcrm')
-						: __('Form updated successfully', 'quillcrm');
+						? __('Form created successfully', 'doublescale')
+						: __('Form updated successfully', 'doublescale');
 					onSuccess(onSuccessMessage);
 				}
 
@@ -275,8 +275,8 @@ const Form: React.FC<FormProps> = ({
 				// Form was saved during this session, show success message and refresh
 				if (onSuccess) {
 					const onSuccessMessage = isNewForm
-						? __('Form created successfully', 'quillcrm')
-						: __('Form updated successfully', 'quillcrm');
+						? __('Form created successfully', 'doublescale')
+						: __('Form updated successfully', 'doublescale');
 					onSuccess(onSuccessMessage);
 				}
 			}
@@ -306,16 +306,16 @@ const Form: React.FC<FormProps> = ({
 
 			// Show appropriate notice based on whether it's a new form or edit
 			const successMessage = isNewForm
-				? __('Form created successfully', 'quillcrm')
-				: __('Form updated successfully', 'quillcrm');
+				? __('Form created successfully', 'doublescale')
+				: __('Form updated successfully', 'doublescale');
 
 			showNotice('success', successMessage);
 
 			// Call onSuccess first to refresh the forms list before closing
 			if (onSuccess) {
 				const onSuccessMessage = isNewForm
-					? __('Form created successfully', 'quillcrm')
-					: __('Form updated successfully', 'quillcrm');
+					? __('Form created successfully', 'doublescale')
+					: __('Form updated successfully', 'doublescale');
 				onSuccess(onSuccessMessage);
 			}
 
@@ -330,14 +330,14 @@ const Form: React.FC<FormProps> = ({
 	};
 
 	const stepTitles = [
-		__('Form Information', 'quillcrm'),
-		__('Mappping Fields', 'quillcrm'),
+		__('Form Information', 'doublescale'),
+		__('Mappping Fields', 'doublescale'),
 	];
 
 	const breadcrumbItems = isNewForm
 		? [
 				{
-					label: __('Create Forms', 'quillcrm'),
+					label: __('Create Forms', 'doublescale'),
 					href: 'forms',
 				},
 				{
@@ -346,7 +346,7 @@ const Form: React.FC<FormProps> = ({
 			]
 		: [
 				{
-					label: __('Edit Form', 'quillcrm'),
+					label: __('Edit Form', 'doublescale'),
 					href: 'forms',
 				},
 				{
@@ -404,7 +404,7 @@ const Form: React.FC<FormProps> = ({
 				panelbtns={[
 					<Button key="tutorial" variant="secondaryDeepBlue">
 						<PlayIcon />
-						{__('Watch Tutorial', 'quillcrm')}
+						{__('Watch Tutorial', 'doublescale')}
 					</Button>,
 				]}
 				totalSteps={2}
@@ -414,15 +414,15 @@ const Form: React.FC<FormProps> = ({
 				onSaveDraft={handleSaveDraft}
 				nextLabel={
 					currentStep === 1
-						? __('Activate', 'quillcrm')
+						? __('Activate', 'doublescale')
 						: isEditMode
-							? __('Update Form', 'quillcrm')
-							: __('Create Form', 'quillcrm')
+							? __('Update Form', 'doublescale')
+							: __('Create Form', 'doublescale')
 				}
 				backLabel={
 					currentStep === 0
-						? __('Cancel', 'quillcrm')
-						: __('Back', 'quillcrm')
+						? __('Cancel', 'doublescale')
+						: __('Back', 'doublescale')
 				}
 				showSaveDraft={true}
 				isLoading={isSaving}
@@ -432,8 +432,8 @@ const Form: React.FC<FormProps> = ({
 						// If form was saved during this session, show success message and refresh
 						if (formWasSaved && onSuccess) {
 							const onSuccessMessage = isNewForm
-								? __('Form created successfully', 'quillcrm')
-								: __('Form updated successfully', 'quillcrm');
+								? __('Form created successfully', 'doublescale')
+								: __('Form updated successfully', 'doublescale');
 							onSuccess(onSuccessMessage);
 						}
 						// Close the form if it's a new form in modal, otherwise navigate
@@ -473,7 +473,7 @@ const Form: React.FC<FormProps> = ({
 						title={stepTitles[currentStep]}
 						description={__(
 							'Add The Following data below to continue creating new form.',
-							'quillcrm'
+							'doublescale'
 						)}
 						icon={<CreateFormsIcon />}
 						iconVariant={'white'}

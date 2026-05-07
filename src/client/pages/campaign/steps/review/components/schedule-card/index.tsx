@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ScheduleIcon } from '@quillcrm/components';
+import { ScheduleIcon } from '@doublescale/components';
 import { DateTimePicker } from '@/components/date-time-picker';
 
 interface ScheduleCardProps {
@@ -36,7 +36,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 				<h3 className="text-lg font-semibold text-[#660FF1]">
 					{__(
 						'When would you like to send the campaign?',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 			</div>
@@ -57,7 +57,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 					>
 						<RadioGroupItem value="now" id="send-now" />
 						<span className="text-base font-semibold">
-							{__('Send now', 'quillcrm')}
+							{__('Send now', 'doublescale')}
 						</span>
 					</Label>
 
@@ -70,7 +70,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 					>
 						<RadioGroupItem value="later" id="schedule-later" />
 						<span className="text-base font-semibold">
-							{__('Schedule for later', 'quillcrm')}
+							{__('Schedule for later', 'doublescale')}
 						</span>
 					</Label>
 				</RadioGroup>
@@ -80,14 +80,14 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 					<>
 						<div>
 							<label className="block text-base text-[#09090B] mb-2">
-								{__('Schedule date & time', 'quillcrm')}
+								{__('Schedule date & time', 'doublescale')}
 							</label>
 							<DateTimePicker
 								value={scheduledAt ?? undefined}
 								onChange={(value) => setScheduledAt(new Date(value))}
 								placeholder={__(
 									'Select date & time',
-									'quillcrm'
+									'doublescale'
 								)}
 							/>
 						</div>
@@ -95,7 +95,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 						{/* Based on section */}
 						<div>
 							<h4 className="text-base text-[#09090B] mb-3">
-								{__('Based on', 'quillcrm')}
+								{__('Based on', 'doublescale')}
 							</h4>
 							<RadioGroup
 								value={timezoneMode}
@@ -116,7 +116,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 									<span className="text-base font-semibold">
 										{__(
 											'Based on the Subscribers time zone',
-											'quillcrm'
+											'doublescale'
 										)}
 									</span>
 								</Label>
@@ -132,7 +132,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 										id="user-timezone"
 									/>
 									<span className="text-base font-semibold">
-										{__('Your time zone GMT+3', 'quillcrm')}
+										{__('Your time zone GMT+3', 'doublescale')}
 									</span>
 								</Label>
 							</RadioGroup>
@@ -140,7 +140,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 								<p className="text-base text-destructive mt-2">
 									{__(
 										'(Applies only to subscribers with location data)',
-										'quillcrm'
+										'doublescale'
 									)}
 								</p>
 							)}

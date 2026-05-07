@@ -11,7 +11,7 @@ import {
 	UPDATE_STEP,
 	SET_UPDATED_STEPS,
 } from './constants';
-import type { Automation, AutomationStep } from '@quillcrm/client';
+import type { Automation, AutomationStep } from '@doublescale/client';
 
 export type setAutomation = {
 	type: typeof SET_AUTOMATION;

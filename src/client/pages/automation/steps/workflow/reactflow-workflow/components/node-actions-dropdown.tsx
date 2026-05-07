@@ -31,7 +31,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { DeleteIcon } from '@quillcrm/components';
+import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 interface NodeActionsDropdownProps {
@@ -53,11 +53,11 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	onEdit,
 	onDelete,
 	onChangeTrigger,
-	editLabel = __('Edit', 'quillcrm'),
-	deleteLabel = __('Delete', 'quillcrm'),
-	changeTriggerLabel = __('Change Trigger', 'quillcrm'),
-	deleteTitle = __('Delete this item?', 'quillcrm'),
-	deleteDescription = __('This action cannot be undone.', 'quillcrm'),
+	editLabel = __('Edit', 'doublescale'),
+	deleteLabel = __('Delete', 'doublescale'),
+	changeTriggerLabel = __('Change Trigger', 'doublescale'),
+	deleteTitle = __('Delete this item?', 'doublescale'),
+	deleteDescription = __('This action cannot be undone.', 'doublescale'),
 	showEdit = true,
 	showDelete = true,
 	showChangeTrigger = false,
@@ -164,7 +164,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 										<AlertDialogCancel
 											disabled={isDeleting}
 										>
-											{__('Cancel', 'quillcrm')}
+											{__('Cancel', 'doublescale')}
 										</AlertDialogCancel>
 										<AlertDialogAction
 											onClick={(e) => {
@@ -174,8 +174,8 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 											disabled={isDeleting}
 										>
 											{isDeleting
-												? __('Deleting...', 'quillcrm')
-												: __('Delete', 'quillcrm')}
+												? __('Deleting...', 'doublescale')
+												: __('Delete', 'doublescale')}
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>

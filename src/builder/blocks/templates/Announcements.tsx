@@ -15,22 +15,22 @@ import offers from '../../../../assets/images/templates/Offers.png';
 const templateItems = [
 	{
 		id: 'new-feature-release',
-		title: __('New Feature Release', 'quillcrm'),
+		title: __('New Feature Release', 'doublescale'),
 		image: newFeatureRelease,
 	},
 	{
 		id: 'product-launch',
-		title: __('Product Launch', 'quillcrm'),
+		title: __('Product Launch', 'doublescale'),
 		image: productLaunch,
 	},
 	{
 		id: 'policy-terms-updates',
-		title: __('Company or Policy & Terms Updates', 'quillcrm'),
+		title: __('Company or Policy & Terms Updates', 'doublescale'),
 		image: policyTermsUpdates,
 	},
 	{
 		id: 'offers',
-		title: __('Offers', 'quillcrm'),
+		title: __('Offers', 'doublescale'),
 		image: offers,
 	},
 ];

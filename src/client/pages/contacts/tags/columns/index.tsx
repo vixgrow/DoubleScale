@@ -11,10 +11,10 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { Tag as ContactTag } from '@quillcrm/client';
-import { SortIcon, TimeAgoCell } from '@quillcrm/components';
+import type { Tag as ContactTag } from '@doublescale/client';
+import { SortIcon, TimeAgoCell } from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
 const selectionColumn: ColumnDef<ContactTag> = {
@@ -57,7 +57,7 @@ export const useTagsColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Name', 'quillcrm')}
+					{__('Name', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -72,7 +72,7 @@ export const useTagsColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Description', 'quillcrm')}
+					{__('Description', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -87,7 +87,7 @@ export const useTagsColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Contacts', 'quillcrm')}
+					{__('Contacts', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -102,7 +102,7 @@ export const useTagsColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -110,7 +110,7 @@ export const useTagsColumns = ({
 		},
 		{
 			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'doublescale'),
 			cell: ({ row }) => (
 				<Button
 					onClick={() => onEditTag(row.original)}
@@ -118,7 +118,7 @@ export const useTagsColumns = ({
 					className="p-0"
 				>
 					<EditHeaderIcon/>
-					{__('Edit', 'quillcrm')}
+					{__('Edit', 'doublescale')}
 				</Button>
 			),
 		},

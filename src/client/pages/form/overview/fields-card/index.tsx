@@ -19,21 +19,21 @@ import {
 	Tag as AntTag,
 } from 'antd';
 import { map, isEmpty } from 'lodash';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI from '@doublescale/config';
 import type {
 	Tag,
 	List,
 	Form,
 	ListsResponse,
 	TagsResponse,
-} from '@quillcrm/client';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
+} from '@doublescale/client';
+import EditHeaderIcon from '@doublescale/components/icons/edit-header';
 const FieldsCard: React.FC = () => {
 	const { form, isLoading } = useFormContext();
 	const { getForms } = ConfigAPI;
@@ -49,7 +49,7 @@ const FieldsCard: React.FC = () => {
 	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 	const [savedLists, setSavedLists] = useState<List[]>([]);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 	const navigate = useNavigate();
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
@@ -78,7 +78,7 @@ const FieldsCard: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch form fields', 'quillcrm'),
+				message: __('Failed to fetch form fields', 'doublescale'),
 			});
 		} finally {
 			setIsFetching(false);
@@ -103,7 +103,7 @@ const FieldsCard: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch lists', 'quillcrm'),
+				message: __('Failed to fetch lists', 'doublescale'),
 			});
 			return [];
 		}
@@ -127,7 +127,7 @@ const FieldsCard: React.FC = () => {
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch tags', 'quillcrm'),
+				message: __('Failed to fetch tags', 'doublescale'),
 			});
 			return [];
 		}
@@ -162,7 +162,7 @@ const FieldsCard: React.FC = () => {
 			title={
 				<Flex justify="space-between">
 					<Typography.Text strong>
-						{__('Fields', 'quillcrm')}
+						{__('Fields', 'doublescale')}
 					</Typography.Text>
 					<Button
 						type="link"
@@ -171,7 +171,7 @@ const FieldsCard: React.FC = () => {
 						}}
 					>
 						<EditHeaderIcon />
-						{__('Edit', 'quillcrm')}
+						{__('Edit', 'doublescale')}
 					</Button>
 				</Flex>
 			}
@@ -181,7 +181,7 @@ const FieldsCard: React.FC = () => {
 				<AntList
 					header={
 						<Typography.Text strong>
-							{__('Mapped Fields', 'quillcrm')}
+							{__('Mapped Fields', 'doublescale')}
 						</Typography.Text>
 					}
 					size="small"
@@ -191,10 +191,10 @@ const FieldsCard: React.FC = () => {
 					<AntList.Item>
 						<Flex>
 							<Typography.Text strong>
-								{__('Form Fields', 'quillcrm')}
+								{__('Form Fields', 'doublescale')}
 							</Typography.Text>
 							<Typography.Text strong>
-								{__('Contact Fields', 'quillcrm')}
+								{__('Contact Fields', 'doublescale')}
 							</Typography.Text>
 						</Flex>
 					</AntList.Item>
@@ -215,7 +215,7 @@ const FieldsCard: React.FC = () => {
 			<AntList
 				header={
 					<Typography.Text strong>
-						{__('Contact', 'quillcrm')}
+						{__('Contact', 'doublescale')}
 					</Typography.Text>
 				}
 				size="small"
@@ -225,11 +225,11 @@ const FieldsCard: React.FC = () => {
 				<AntList.Item>
 					<Flex>
 						<Typography.Text strong>
-							{__('Lists', 'quillcrm')}
+							{__('Lists', 'doublescale')}
 						</Typography.Text>
 						<Typography.Text>
 							{isEmpty(savedLists)
-								? __('No lists', 'quillcrm')
+								? __('No lists', 'doublescale')
 								: // @ts-ignore
 									savedLists.map((list) => (
 										<AntTag>{list.name}</AntTag>
@@ -240,11 +240,11 @@ const FieldsCard: React.FC = () => {
 				<AntList.Item>
 					<Flex>
 						<Typography.Text strong>
-							{__('Tags', 'quillcrm')}
+							{__('Tags', 'doublescale')}
 						</Typography.Text>
 						<Typography.Text>
 							{isEmpty(savedTags)
-								? __('No tags', 'quillcrm')
+								? __('No tags', 'doublescale')
 								: // @ts-ignore
 									savedTags.map((tag) => (
 										<AntTag>{tag.name}</AntTag>
@@ -255,36 +255,36 @@ const FieldsCard: React.FC = () => {
 				<AntList.Item>
 					<Flex>
 						<Typography.Text strong>
-							{__('Update existing contact', 'quillcrm')}
+							{__('Update existing contact', 'doublescale')}
 						</Typography.Text>
 						<Typography.Text>
 							{form?.data.update_existing_contact
-								? __('Yes', 'quillcrm')
-								: __('No', 'quillcrm')}
+								? __('Yes', 'doublescale')
+								: __('No', 'doublescale')}
 						</Typography.Text>
 					</Flex>
 				</AntList.Item>
 				<AntList.Item>
 					<Flex>
 						<Typography.Text strong>
-							{__('Update blank fields', 'quillcrm')}
+							{__('Update blank fields', 'doublescale')}
 						</Typography.Text>
 						<Typography.Text>
 							{form?.data.update_blank_fields
-								? __('Yes', 'quillcrm')
-								: __('No', 'quillcrm')}
+								? __('Yes', 'doublescale')
+								: __('No', 'doublescale')}
 						</Typography.Text>
 					</Flex>
 				</AntList.Item>
 				<AntList.Item>
 					<Flex>
 						<Typography.Text strong>
-							{__('Mark as subscribed', 'quillcrm')}
+							{__('Mark as subscribed', 'doublescale')}
 						</Typography.Text>
 						<Typography.Text>
 							{form?.data.mark_as_subscribed
-								? __('Yes', 'quillcrm')
-								: __('No', 'quillcrm')}
+								? __('Yes', 'doublescale')
+								: __('No', 'doublescale')}
 						</Typography.Text>
 					</Flex>
 				</AntList.Item>

@@ -10,15 +10,15 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import type { AutomationContact } from '@quillcrm/client';
-import { CustomDialogHeader, GradientViewIcon } from '@quillcrm/components';
+import type { AutomationContact } from '@doublescale/client';
+import { CustomDialogHeader, GradientViewIcon } from '@doublescale/components';
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogOverlay,
 	DialogPortal,
-} from '@quillcrm/components/ui/dialog';
+} from '@doublescale/components/ui/dialog';
 import ResultContent from './content';
 
 interface ResultProps {
@@ -39,10 +39,10 @@ const Result: React.FC<ResultProps> = ({ contact, open, onOpenChange }) => {
 				<DialogContent className="max-w-[1000px] max-h-[90vh] overflow-y-auto z-[150200]">
 					<DialogHeader>
 						<CustomDialogHeader
-							title={__('View Journey', 'quillcrm')}
+							title={__('View Journey', 'doublescale')}
 							subtitle={__(
 								`View journey of contact ${contact?.contact.email}`,
-								'quillcrm'
+								'doublescale'
 							)}
 							icon={<GradientViewIcon />}
 						/>

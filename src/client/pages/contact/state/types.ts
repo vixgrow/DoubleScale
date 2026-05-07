@@ -21,7 +21,7 @@ import type {
 	EddOrder,
 	SurecartOrder,
 	LMSCourse,
-} from '@quillcrm/client';
+} from '@doublescale/client';
 
 export type setContact = {
 	type: typeof SET_CONTACT;

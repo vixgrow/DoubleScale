@@ -13,24 +13,24 @@ interface DealValueChangeProps {
 const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 	const anyValue = 'any-value';
 	const specificValue = 'specific-value';
-	const labelForAnyValue = __('Any Value', 'quillcrm');
-	const labelForSpecificValue = __('Specific Value', 'quillcrm');
-	const placeholderForSelect = __('Select option', 'quillcrm');
+	const labelForAnyValue = __('Any Value', 'doublescale');
+	const labelForSpecificValue = __('Specific Value', 'doublescale');
+	const placeholderForSelect = __('Select option', 'doublescale');
 	const conditionOptions = [
 		{
-			label: __('Equal To', 'quillcrm'),
+			label: __('Equal To', 'doublescale'),
 			value: 'equal_to',
 		},
 		{
-			label: __('Not Equal To', 'quillcrm'),
+			label: __('Not Equal To', 'doublescale'),
 			value: 'not_equal_to',
 		},
 		{
-			label: __('Greater Than', 'quillcrm'),
+			label: __('Greater Than', 'doublescale'),
 			value: 'greater_than',
 		},
 		{
-			label: __('Lower Than', 'quillcrm'),
+			label: __('Lower Than', 'doublescale'),
 			value: 'lower_than',
 		},
 	];

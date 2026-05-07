@@ -52,10 +52,10 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 					<>
 						{/* Image Upload Section with URL Support */}
 						<MediaControls.ImageUploadControl
-							label={__('Image', 'quillcrm')}
+							label={__('Image', 'doublescale')}
 							description={__(
 								'You can use JPG, PNG, and GIF formats, each under 2000px in dimension.',
-								'quillcrm'
+								'doublescale'
 							)}
 							value={props.src}
 							alt={props.alt}
@@ -74,7 +74,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 
 						{/* Link Input */}
 						<MediaControls.LinkInput
-							label={__('Link when image is clicked', 'quillcrm')}
+							label={__('Link when image is clicked', 'doublescale')}
 							value={props.link}
 							onChange={(link) => onChange({ link })}
 							placeholder="https://example.com"
@@ -89,36 +89,36 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							widthOptions={[
 								{
 									value: '100%',
-									label: __('100%', 'quillcrm'),
+									label: __('100%', 'doublescale'),
 								},
-								{ value: '75%', label: __('75%', 'quillcrm') },
-								{ value: '50%', label: __('50%', 'quillcrm') },
-								{ value: '25%', label: __('25%', 'quillcrm') },
+								{ value: '75%', label: __('75%', 'doublescale') },
+								{ value: '50%', label: __('50%', 'doublescale') },
+								{ value: '25%', label: __('25%', 'doublescale') },
 							]}
 							heightOptions={[
 								{
 									value: 'auto',
-									label: __('Auto', 'quillcrm'),
+									label: __('Auto', 'doublescale'),
 								},
 								{
 									value: '600px',
-									label: __('600px', 'quillcrm'),
+									label: __('600px', 'doublescale'),
 								},
 								{
 									value: '400px',
-									label: __('400px', 'quillcrm'),
+									label: __('400px', 'doublescale'),
 								},
 								{
 									value: '300px',
-									label: __('300px', 'quillcrm'),
+									label: __('300px', 'doublescale'),
 								},
 								{
 									value: '200px',
-									label: __('200px', 'quillcrm'),
+									label: __('200px', 'doublescale'),
 								},
 								{
 									value: '150px',
-									label: __('150px', 'quillcrm'),
+									label: __('150px', 'doublescale'),
 								},
 							]}
 						/>
@@ -150,7 +150,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							onChange={(backgroundColor) =>
 								onChange({ backgroundColor })
 							}
-							label={__('Background Color', 'quillcrm')}
+							label={__('Background Color', 'doublescale')}
 							id="bg-color"
 						/>
 

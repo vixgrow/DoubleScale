@@ -35,39 +35,39 @@ const DateFilter: React.FC<DateFilterProps> = ({
 }) => {
 	const intervalOptions = [
 		{
-			label: __('Today', 'quillcrm'),
+			label: __('Today', 'doublescale'),
 			value: 'today',
 		},
 		{
-			label: __('Yesterday', 'quillcrm'),
+			label: __('Yesterday', 'doublescale'),
 			value: 'yesterday',
 		},
 		{
-			label: __('Last 7 days', 'quillcrm'),
+			label: __('Last 7 days', 'doublescale'),
 			value: 'last_7_days',
 		},
 		{
-			label: __('Last 30 days', 'quillcrm'),
+			label: __('Last 30 days', 'doublescale'),
 			value: 'last_30_days',
 		},
 		{
-			label: __('This month', 'quillcrm'),
+			label: __('This month', 'doublescale'),
 			value: 'this_month',
 		},
 		{
-			label: __('Last month', 'quillcrm'),
+			label: __('Last month', 'doublescale'),
 			value: 'last_month',
 		},
 		{
-			label: __('This year', 'quillcrm'),
+			label: __('This year', 'doublescale'),
 			value: 'this_year',
 		},
 		{
-			label: __('Last year', 'quillcrm'),
+			label: __('Last year', 'doublescale'),
 			value: 'last_year',
 		},
 		{
-			label: __('Custom', 'quillcrm'),
+			label: __('Custom', 'doublescale'),
 			value: 'custom',
 		},
 	];
@@ -110,7 +110,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 						to: endDate,
 					}}
 					onChange={handleDateRangeChange}
-					placeholder={__('Select date range', 'quillcrm')}
+					placeholder={__('Select date range', 'doublescale')}
 					className="bg-[#FFFFFF80] text-[#2E2C2F] px-2 py-0 rounded-md"
 				/>
 			)}

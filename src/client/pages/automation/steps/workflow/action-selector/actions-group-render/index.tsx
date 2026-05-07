@@ -13,8 +13,8 @@ import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import type { ActionsGroup } from '@quillcrm/config';
-import config from '@quillcrm/config';
+import type { ActionsGroup } from '@doublescale/config';
+import config from '@doublescale/config';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +23,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
+import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 
 interface ActionsGroupRenderProps {
 	groups: { [key: string]: ActionsGroup };
@@ -56,48 +56,48 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LearnDash') {
 			return __(
 				'LearnDash plugin is not installed or activated. Install LearnDash to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Tutor LMS') {
 			return __(
 				'Tutor LMS plugin is not installed or activated. Install Tutor LMS to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LifterLMS') {
 			return __(
 				'LifterLMS plugin is not installed or activated. Install LifterLMS to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'LearnPress') {
 			return __(
 				'LearnPress plugin is not installed or activated. Install LearnPress to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		if (groupLabel === 'Presto Player') {
 			return __(
 				'Presto Player plugin is not installed or activated. Install Presto Player to use these actions.',
-				'quillcrm'
+				'doublescale'
 			);
 		}
 		return __(
 			'This integration is not available. Please install the required plugin.',
-			'quillcrm'
+			'doublescale'
 		);
 	};
 
@@ -142,7 +142,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 														(
 														{__(
 															'Not Available',
-															'quillcrm'
+															'doublescale'
 														)}
 														)
 													</span>
@@ -205,11 +205,11 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 													value === actionKey
 														? __(
 																'Selecting...',
-																'quillcrm'
+																'doublescale'
 															)
 														: __(
 																'Select',
-																'quillcrm'
+																'doublescale'
 															)}
 												</Button>
 											</div>

@@ -4,7 +4,7 @@
  */
 
 import type { Node, Edge } from '@xyflow/react';
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 import { createEdge, EdgeType, addEdgeIfNotExists, findConditionLevel } from './edge-utils';
 
 /**

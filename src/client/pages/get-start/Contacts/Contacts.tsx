@@ -12,9 +12,9 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import ContactAddIcon from '@quillcrm/components/icons/contact-add';
-import CheckTrue from '@quillcrm/components/icons/checkTrue';
-import ImportContact from '@quillcrm/components/icons/import-contact';
+import ContactAddIcon from '@doublescale/components/icons/contact-add';
+import CheckTrue from '@doublescale/components/icons/checkTrue';
+import ImportContact from '@doublescale/components/icons/import-contact';
 import { AddContactDialog } from './AddContactDialog';
 import ButtonComponent from '../component/button';
 import ImportModal from '../../import-modal';
@@ -44,7 +44,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 	const { fetchContacts, createContact } = useContactsAPI({
 		openDialogOnCreate: false,
 	});
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const handleContactSubmit = async (data: ContactFormData) => {
 		setIsCreating(true);
@@ -65,7 +65,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 			// Show a success notice in the onboarding flow
 			createNotice({
 				type: 'success',
-				message: __('Contact created successfully', 'quillcrm'),
+				message: __('Contact created successfully', 'doublescale'),
 			});
 
 			// Close dialog after successful creation
@@ -76,7 +76,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 				type: 'error',
 				message:
 					error?.message ||
-					__('Failed to create contact', 'quillcrm'),
+					__('Failed to create contact', 'doublescale'),
 			});
 		} finally {
 			setIsCreating(false);
@@ -106,13 +106,13 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 				<h3 className="text-[#170F49] text-[32px] font-semibold">
 					{__(
 						'Add Your Contacts—Start Building Meaningful CRM Connections',
-						'quillcrm'
+						'doublescale'
 					)}
 				</h3>
 				<p className="text-[#777] text-lg font-normal leading-7">
 					{__(
 						"Add or import your contacts to start building your CRM database—whether it's leads, customers, or team members. Organizing contacts now helps you track interactions, personalize outreach, and automate smarter.",
-						'quillcrm'
+						'doublescale'
 					)}
 				</p>
 			</div>
@@ -128,7 +128,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 					<ContactAddIcon />
 
 					<span className="text-xl font-semibold leading-[30px]">
-						{__('Add Contact Individual', 'quillcrm')}
+						{__('Add Contact Individual', 'doublescale')}
 					</span>
 				</button>
 
@@ -142,7 +142,7 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 					<ImportContact />
 
 					<span className="text-xl font-semibold leading-[30px]">
-						{__('Import Contacts', 'quillcrm')}
+						{__('Import Contacts', 'doublescale')}
 					</span>
 				</button>
 			</div>
@@ -150,15 +150,15 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 			<div className="flex justify-between pt-8">
 				<div className="flex gap-2">
 					<ButtonComponent onClick={onPrevious} type="">
-						{__('Previous', 'quillcrm')}
+						{__('Previous', 'doublescale')}
 					</ButtonComponent>
 
 					<ButtonComponent type="no" onClick={onSkip}>
-						{__('Skip →', 'quillcrm')}
+						{__('Skip →', 'doublescale')}
 					</ButtonComponent>
 				</div>
 				<ButtonComponent type="go" onClick={onNext}>
-					{__('Next Step', 'quillcrm')}
+					{__('Next Step', 'doublescale')}
 				</ButtonComponent>
 			</div>
 

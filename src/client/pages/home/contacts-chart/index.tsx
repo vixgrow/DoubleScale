@@ -11,9 +11,9 @@ import { Line } from 'react-chartjs-2';
 /**
  * internal dependencies
  */
-import { DashboardContentCard, DateFilter } from '@quillcrm/components';
-import { formatDate, convertDate } from '@quillcrm/utils';
-import type { ContactAnalytics as ContactAnalyticsData } from '@quillcrm/client';
+import { DashboardContentCard, DateFilter } from '@doublescale/components';
+import { formatDate, convertDate } from '@doublescale/utils';
+import type { ContactAnalytics as ContactAnalyticsData } from '@doublescale/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ContactAnalyticsChartProps {
@@ -82,7 +82,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 
 	return (
 		<DashboardContentCard
-			title={__('Contact Analytics', 'quillcrm')}
+			title={__('Contact Analytics', 'doublescale')}
 			dateFilter={true}
 			dateFilterComponent={
 				<DateFilter
@@ -118,7 +118,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 						}),
 						datasets: [
 							{
-								label: __('Contacts', 'quillcrm'),
+								label: __('Contacts', 'doublescale'),
 								data: map(data.data.dates, (date) => {
 									return data.contacts[date]
 										? data.contacts[date]

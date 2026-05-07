@@ -1,4 +1,4 @@
-import { IconProps } from '@quillcrm/config';
+import { IconProps } from '@doublescale/config';
 
 const DiscordIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle', color }) => {
 	const getBorderRadius = () => {

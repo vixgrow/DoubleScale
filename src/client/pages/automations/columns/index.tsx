@@ -10,31 +10,31 @@ import { AlertTriangle } from 'lucide-react';
 /**
  * internal dependencies
  */
-import type { Automation } from '@quillcrm/client';
+import type { Automation } from '@doublescale/client';
 import {
 	SortIcon,
 	TimeAgoCell,
 	SettingsOutlinedIcon,
 	ThreeDotsIcon,
 	DeleteIcon,
-} from '@quillcrm/components';
+} from '@doublescale/components';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
+import { Button } from '@doublescale/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { NavLink, getToLink } from '@quillcrm/navigation';
+import { NavLink, getToLink } from '@doublescale/navigation';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '@quillcrm/components/ui/dropdown-menu';
+} from '@doublescale/components/ui/dropdown-menu';
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { getAutomationWarnings } from '@quillcrm/utils';
+import { getAutomationWarnings } from '@doublescale/utils';
 
 interface AutomationColumnsProps {
 	onStatusChange: (automation: Automation, newStatus: string) => void;
@@ -82,7 +82,7 @@ export const getAutomationColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Title', 'quillcrm')}
+					{__('Title', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -142,7 +142,7 @@ export const getAutomationColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Trigger', 'quillcrm')}
+					{__('Trigger', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -157,7 +157,7 @@ export const getAutomationColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Created At', 'quillcrm')}
+					{__('Created At', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -174,7 +174,7 @@ export const getAutomationColumns = ({
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Status', 'quillcrm')}
+					{__('Status', 'doublescale')}
 					<SortIcon />
 				</div>
 			),
@@ -192,7 +192,7 @@ export const getAutomationColumns = ({
 		},
 		{
 			accessorKey: 'toggle_status',
-			header: () => __('Pause/Run', 'quillcrm'),
+			header: () => __('Pause/Run', 'doublescale'),
 			cell: ({ row }) => {
 				const isUpdating = updatingAutomationId === row.original.id;
 				return (
@@ -210,7 +210,7 @@ export const getAutomationColumns = ({
 		},
 		{
 			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'doublescale'),
 			cell: ({ row }) => {
 				const automation = row.original;
 				return (
@@ -232,14 +232,14 @@ export const getAutomationColumns = ({
 									}}
 								>
 									<SettingsOutlinedIcon />
-									{__('Setup', 'quillcrm')}
+									{__('Setup', 'doublescale')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(automation.id)}
 									className="text-red-500 hover:text-red-500 focus:text-red-500"
 								>
 									<DeleteIcon />
-									{__('Delete', 'quillcrm')}
+									{__('Delete', 'doublescale')}
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>

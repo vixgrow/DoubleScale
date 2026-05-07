@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import { PageHeader } from '@quillcrm/components';
+import { PageHeader } from '@doublescale/components';
 import UserDashboard from './user-dashboard';
 import { UserDashboardShimmer } from './user-dashboard/UserDashboardShimmer';
 import { useDashboardData } from './use-analytics';
@@ -18,17 +18,17 @@ const Dashboard: React.FC = () => {
 	const { data, loading } = useDashboardData();
 
 	const tabTitles = {
-		user: __('Dashboard', 'quillcrm'),
-		contacts: __('Contacts Analytics', 'quillcrm'),
-		emails: __('Emails Analytics', 'quillcrm'),
-		cart: __('Cart Analytics', 'quillcrm'),
+		user: __('Dashboard', 'doublescale'),
+		contacts: __('Contacts Analytics', 'doublescale'),
+		emails: __('Emails Analytics', 'doublescale'),
+		cart: __('Cart Analytics', 'doublescale'),
 	};
 
 	if (!data || loading) {
 		return (
 			<div className="qcrm-dashboard">
 				<PageHeader
-					title={__('Dashboard', 'quillcrm')}
+					title={__('Dashboard', 'doublescale')}
 					subtitle={tabTitles[activeTab]}
 					actions={[]}
 				/>
@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
 	return (
 		<div className="qcrm-dashboard">
 			<PageHeader
-				title={__('Dashboard', 'quillcrm')}
+				title={__('Dashboard', 'doublescale')}
 				subtitle={tabTitles[activeTab]}
 				actions={[]}
 			/>

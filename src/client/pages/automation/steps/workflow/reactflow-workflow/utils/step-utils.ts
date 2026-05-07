@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep } from '@doublescale/client';
 
 /**
  * Filter steps in the same context (same parent and condition)
@@ -106,12 +106,12 @@ export const deleteStep = async (
 
         createNotice({
             type: 'success',
-            message: __('Step deleted', 'quillcrm'),
+            message: __('Step deleted', 'doublescale'),
         });
     } catch (error: any) {
         createNotice({
             type: 'error',
-            message: error.message || __('Failed to delete step', 'quillcrm'),
+            message: error.message || __('Failed to delete step', 'doublescale'),
         });
     }
 };
@@ -244,15 +244,15 @@ export const reorderStep = async (
         createNotice({
             type: 'success',
             message: direction === 'up'
-                ? __('Step moved up', 'quillcrm')
-                : __('Step moved down', 'quillcrm'),
+                ? __('Step moved up', 'doublescale')
+                : __('Step moved down', 'doublescale'),
         });
 
         return true;
     } catch (error: any) {
         createNotice({
             type: 'error',
-            message: error.message || __('Failed to reorder step', 'quillcrm'),
+            message: error.message || __('Failed to reorder step', 'doublescale'),
         });
         return false;
     }

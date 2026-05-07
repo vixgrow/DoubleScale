@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import type { CampaignEmail } from '@quillcrm/client';
+import type { CampaignEmail } from '@doublescale/client';
 import {
 	Dialog,
 	DialogContent,
@@ -18,7 +18,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CustomDialogHeader, NoEmailsIcon } from '@quillcrm/components';
+import { CustomDialogHeader, NoEmailsIcon } from '@doublescale/components';
 
 interface DetailField {
 	label: string;
@@ -153,7 +153,7 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 								</div>
 								{isLoading ? (
 									<div className="flex items-center justify-center py-8 text-gray-500">
-										{__('Loading template...', 'quillcrm')}
+										{__('Loading template...', 'doublescale')}
 									</div>
 								) : (
 									<div

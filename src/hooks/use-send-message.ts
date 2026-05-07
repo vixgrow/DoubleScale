@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import type { Contact } from '@quillcrm/client';
+import type { Contact } from '@doublescale/client';
 
 /**
  * Message channel types
@@ -37,7 +37,7 @@ interface EmailMessageData extends BaseMessageData {
 /**
  * SMS/WhatsApp message data
  */
-interface PhoneMessageData extends BaseMessageData {}
+interface PhoneMessageData extends BaseMessageData { }
 
 /**
  * Union type for all message data
@@ -77,15 +77,15 @@ const validateEmailData = (data: MessageData): string | null => {
 	const emailData = data as EmailMessageData;
 
 	if (!emailData.to || !emailData.to.trim()) {
-		return __('Please enter a recipient email address', 'quillcrm');
+		return __('Please enter a recipient email address', 'doublescale');
 	}
 
 	if (!emailData.subject || !emailData.subject.trim()) {
-		return __('Please enter an email subject', 'quillcrm');
+		return __('Please enter an email subject', 'doublescale');
 	}
 
 	if (!emailData.body || !emailData.body.trim()) {
-		return __('Please enter an email body', 'quillcrm');
+		return __('Please enter an email body', 'doublescale');
 	}
 
 	return null;
@@ -98,18 +98,18 @@ const validatePhoneData = (data: MessageData): string | null => {
 	const phoneData = data as PhoneMessageData;
 
 	if (!phoneData.to || !phoneData.to.trim()) {
-		return __('Please enter a phone number', 'quillcrm');
+		return __('Please enter a phone number', 'doublescale');
 	}
 
 	if (phoneData.to.length < 10) {
 		return __(
 			'Please enter a valid phone number (E.164 format: +1234567890)',
-			'quillcrm'
+			'doublescale'
 		);
 	}
 
 	if (!phoneData.body || !phoneData.body.trim()) {
-		return __('Please enter a message', 'quillcrm');
+		return __('Please enter a message', 'doublescale');
 	}
 
 	return null;
@@ -166,7 +166,7 @@ export const useSendMessage = ({
 }: UseSendMessageOptions): UseSendMessageReturn => {
 	const [isSending, setIsSending] = useState<boolean>(false);
 	const [validationError, setValidationError] = useState<string | null>(null);
-	const { createNotice } = useDispatch('quillcrm/core');
+	const { createNotice } = useDispatch('doublescale/core');
 
 	/**
 	 * Send message to contact
@@ -179,7 +179,7 @@ export const useSendMessage = ({
 
 		// Validate contact
 		if (!contact?.id) {
-			const error = __('Contact ID is missing', 'quillcrm');
+			const error = __('Contact ID is missing', 'doublescale');
 			setValidationError(error);
 			createNotice({
 				type: 'error',
@@ -236,9 +236,9 @@ export const useSendMessage = ({
 
 			// Show success notification
 			const successMessages = {
-				email: __('Email sent successfully', 'quillcrm'),
-				sms: __('SMS sent successfully!', 'quillcrm'),
-				whatsapp: __('WhatsApp message sent successfully!', 'quillcrm'),
+				email: __('Email sent successfully', 'doublescale'),
+				sms: __('SMS sent successfully!', 'doublescale'),
+				whatsapp: __('WhatsApp message sent successfully!', 'doublescale'),
 			};
 
 			createNotice({
@@ -252,7 +252,7 @@ export const useSendMessage = ({
 			return true;
 		} catch (err: any) {
 			// Extract error message from various WordPress REST API error formats
-			let errorMessage = __(`Failed to send ${channel}`, 'quillcrm');
+			let errorMessage = __(`Failed to send ${channel}`, 'doublescale');
 
 			// Try different error formats in order of specificity
 			if (err.message && typeof err.message === 'string') {

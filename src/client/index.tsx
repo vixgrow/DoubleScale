@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { addFilter } from '@wordpress/hooks';
 import { createRoot } from '@wordpress/element';
 
 /**
@@ -16,6 +17,20 @@ import PageLayout from './layout';
 import '../stores';
 export * from './types';
 import '../styles/react-select-global.css';
+import LinkTriggers from './pages/link-triggers';
+
+/**
+ * Link triggers REST + DB live in the free plugin; register the real settings UI here.
+ * DoubleScale Pro re-registers this filter at priority 100 when present.
+ */
+addFilter(
+	'doublescale_settings_link_triggers_settings',
+	'doublescale/free-link-triggers-settings',
+	() => {
+		return () => <LinkTriggers />;
+	},
+	5
+);
 
 const appRoot = document.getElementById( 'doublescale-admin-root' );
 

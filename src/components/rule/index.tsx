@@ -38,8 +38,8 @@ const Rule: React.FC<RuleProps> = ({
 		Object.keys(ruleSettings.operators).length > 0;
 
 	return (
-		<div className="qcrm-rule">
-			<div className="qcrm-rule-row w-full">
+		<div className="doublescale-rule">
+			<div className="doublescale-rule-row w-full">
 				{hasOperators && (
 					<Select
 						value={rule.operator}

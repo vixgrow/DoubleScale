@@ -30,7 +30,7 @@ export const SidebarFooter: React.FC = () => {
 	const context = useSidebarLayout();
 	if (!context?.footer) return null;
 	return (
-		<div className="qcrm-workflow-sidebar__footer shrink-0 border-t border-[#E4E7EC] p-4 bg-white">
+		<div className="doublescale-workflow-sidebar__footer shrink-0 border-t border-[#E4E7EC] p-4 bg-white">
 			{context.footer}
 		</div>
 	);

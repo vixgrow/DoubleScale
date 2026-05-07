@@ -353,7 +353,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	// Use CSS class for edge styling and ensure proper z-index
 	const edgeStyle = {
 		...style,
-		className: 'qcrm-edge',
+		className: 'doublescale-edge',
 		zIndex: 1,
 	};
 
@@ -365,7 +365,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 					style={{
 						transform: `translate(${labelX}px,${labelY}px) translate(-50%, -50%)`,
 					}}
-					className={`qcrm-edge-add-button ${viewMode ? 'qcrm-edge-add-button--disabled' : ''}`}
+					className={`doublescale-edge-add-button ${viewMode ? 'doublescale-edge-add-button--disabled' : ''}`}
 				>
 					<AddStepDialog
 						visible={visible}

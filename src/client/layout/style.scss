@@ -40,7 +40,7 @@ body.js.is-fullscreen-mode {
 	display: none !important;
 }
 
-.qcrm-layout {
+.doublescale-layout {
 	font-size: 13px;
 	width: 100%;
 	min-height: 100vh;
@@ -60,19 +60,19 @@ div#wpcontent {
 	//min-height: calc(100vh - 32px);
 }
 
-.qcrm-layout * {
+.doublescale-layout * {
 	box-sizing: border-box;
 	width: 100%;
 }
 
-.qcrm-layout__main {
+.doublescale-layout__main {
 	display: flex;
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 100vh;
 	background: linear-gradient(to right, #1e3a8a 20%, #3b82f6 80%);
 
-	.qcrm-layout__workspace {
+	.doublescale-layout__workspace {
 		width: calc(100% - 140px);
 		flex: 1;
 		display: flex;
@@ -81,7 +81,7 @@ div#wpcontent {
 		padding: 24px 24px 24px 0;
 	}
 	
-	.qcrm-page-component-wrapper {
+	.doublescale-page-component-wrapper {
 		width: 100%;
 		height: 100%;
 		flex: 1;
@@ -98,23 +98,23 @@ div#wpcontent {
 	@media (max-width: 1023px) {
 		flex-direction: column;
 
-		.qcrm-layout__header {
+		.doublescale-layout__header {
 			padding: 24px 24px 110px;
 		}
 
-		.qcrm-layout__content {
+		.doublescale-layout__content {
 			padding: 0 24px 32px;
 			margin-top: -86px;
 		}
 
-		.qcrm-page-component-wrapper {
+		.doublescale-page-component-wrapper {
 			padding: 28px;
 		}
 	}
 }
 
 // Hide all wordpress admin notices
-#qcrm-admin-root {
+#doublescale-admin-root {
 	.notice {
 		display: none !important;
 	}

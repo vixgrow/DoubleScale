@@ -42,7 +42,7 @@ const PageVisited = ({ value, onChange, options }: PageVisitedProps) => {
 
 	return (
 		<>
-			<div className="qcrm-page-visited-row">
+			<div className="doublescale-page-visited-row">
 				<Field
 					type="select"
 					value={value?.guid || ''}

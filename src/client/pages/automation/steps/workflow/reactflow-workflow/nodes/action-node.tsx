@@ -80,7 +80,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
 			<span
-				className="qcrm-reactflow-action__configured"
+				className="doublescale-reactflow-action__configured"
 				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
 			>
 				{actionName}
@@ -107,7 +107,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			)}
 		</div>
 	) : (
-		<span className="qcrm-reactflow-action__not-configured">
+		<span className="doublescale-reactflow-action__not-configured">
 			{__('Not Configured', 'doublescale')}
 		</span>
 	);
@@ -138,9 +138,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Custom footer for analytics
 	const customFooter =
 		!viewMode && hasAnalytics && isConfigured ? (
-			<div className="qcrm-reactflow-node__footer-row">
+			<div className="doublescale-reactflow-node__footer-row">
 				<button
-					className="qcrm-reactflow-node__analytics-link text-primary"
+					className="doublescale-reactflow-node__analytics-link text-primary"
 					onClick={handleViewAnalytics}
 					title={__('View Analytics', 'doublescale')}
 				>
@@ -158,12 +158,12 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				disabled={viewMode}
 			>
 				<div
-					className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--action ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<Handle
 						type="target"
 						position={Position.Top}
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 					/>
 
 					{/* Step Reorder Controls - hide in view mode */}
@@ -190,7 +190,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 					<Handle
 						type="source"
 						position={Position.Bottom}
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 					/>
 				</div>
 			</NodeContextMenu>

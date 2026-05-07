@@ -67,47 +67,47 @@ const ContactAnalytics: React.FC = () => {
 	return (
 		<Flex gap={20} vertical>
 			<Flex gap={20}>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<UserOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Contacts', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total}
 						</Typography.Text>
 					</Flex>
 				</Card>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<UserOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Subscribers', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total_subscribed}
 						</Typography.Text>
 					</Flex>
 				</Card>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<UserDeleteOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Unsubscribers', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total_unsubscribed}
 						</Typography.Text>
 					</Flex>

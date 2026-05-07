@@ -74,25 +74,25 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className={`qcrm-reactflow-node ${className}`}>
+			<div className={`doublescale-reactflow-node ${className}`}>
 				{showTargetHandle && (
 					<Handle
 						type="target"
 						position={Position.Top}
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 					/>
 				)}
 
 				{/* Step Reorder Controls */}
 				<StepReorderControls step={step} />
 
-				<div className="qcrm-reactflow-node__icon">{icon}</div>
+				<div className="doublescale-reactflow-node__icon">{icon}</div>
 				<div
-					className="qcrm-reactflow-node__content"
+					className="doublescale-reactflow-node__content"
 					style={{ flex: 1, marginRight: '60px' }}
 				>
-					<div className="qcrm-reactflow-node__title">{title}</div>
-					<div className="qcrm-reactflow-node__subtitle">
+					<div className="doublescale-reactflow-node__title">{title}</div>
+					<div className="doublescale-reactflow-node__subtitle">
 						{subtitle}
 					</div>
 				</div>
@@ -111,7 +111,7 @@ const BaseNode: React.FC<NodeProps> = ({ data }) => {
 					<Handle
 						type="source"
 						position={Position.Bottom}
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 					/>
 				)}
 

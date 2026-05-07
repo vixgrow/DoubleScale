@@ -327,7 +327,7 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 	};
 
 	return (
-		<div className={`qcrm-contacts-${type}s-list`}>
+		<div className={`doublescale-contacts-${type}s-list`}>
 			{/* Notice Banner */}
 			{notice && (
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />

@@ -274,8 +274,8 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 					<DialogTitle>{__('Action Library', 'doublescale')}</DialogTitle>
 					<DialogDescription className='mt-1'>{__('Select an action to add to your workflow', 'doublescale')}</DialogDescription>
 				</DialogHeader>
-				<div className="qcrm-fields flex-1 flex flex-col overflow-hidden min-h-0">
-					<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">
+				<div className="doublescale-fields flex-1 flex flex-col overflow-hidden min-h-0">
+					<div className="doublescale-field flex-1 flex flex-col overflow-hidden min-h-0">
 						<div className="flex flex-1 gap-5 overflow-hidden min-h-0">
 							<div className="w-1/2 overflow-y-auto pr-1">
 								<ActionSelectorCard

@@ -94,8 +94,8 @@ const Filter: React.FC<FilterProps> = ({
 	}, [fetchOptions]);
 
 	return (
-		<div className="qcrm-filter">
-			<div className="qcrm-filter-row">
+		<div className="doublescale-filter">
+			<div className="doublescale-filter-row">
 				<div className="w-[15%] text-muted-foreground font-medium">
 					{filterSettings.name}
 				</div>

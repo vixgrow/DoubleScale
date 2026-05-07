@@ -33,17 +33,17 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	} = useProUpgrade();
 
 	return (
-		<div className="qcrm-pro-feature-notice">
-			<div className="qcrm-pro-feature-notice__container">
+		<div className="doublescale-pro-feature-notice">
+			<div className="doublescale-pro-feature-notice__container">
 				<div className="bg-[#FAEADF] text-[#CB5301] rounded-full p-2">
 					<PremiumIcon width={54} height={54} />
 				</div>
-				<div className="qcrm-pro-feature-notice__content">
-					<h2 className="qcrm-pro-feature-notice__title">
+				<div className="doublescale-pro-feature-notice__content">
+					<h2 className="doublescale-pro-feature-notice__title">
 						{featureName} {__('is a Pro Feature', 'doublescale')}
 					</h2>
 					{description && (
-						<p className="qcrm-pro-feature-notice__description">
+						<p className="doublescale-pro-feature-notice__description">
 							{description}
 						</p>
 					)}
@@ -56,7 +56,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						</div>
 					)}
 					{/* {features.length > 0 && (
-						<div className="qcrm-pro-feature-notice__features">
+						<div className="doublescale-pro-feature-notice__features">
 							<h3>{__('Pro Features Include:', 'doublescale')}</h3>
 							<ul>
 								{features.map((feature) => (
@@ -68,10 +68,10 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							</ul>
 						</div>
 					)} */}
-					<div className="qcrm-pro-feature-notice__actions mt-5">
+					<div className="doublescale-pro-feature-notice__actions mt-5">
 						<a
 							href={`${upgradeUrl}#features`}
-							className="qcrm-pro-feature-notice__button qcrm-pro-feature-notice__button--secondary"
+							className="doublescale-pro-feature-notice__button doublescale-pro-feature-notice__button--secondary"
 							target="_blank"
 							rel="noopener noreferrer"
 						>
@@ -79,7 +79,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						</a>
 						<button
 							onClick={() => handleUpgradeClick(upgradeUrl)}
-							className="qcrm-pro-feature-notice__button qcrm-pro-feature-notice__button--primary"
+							className="doublescale-pro-feature-notice__button doublescale-pro-feature-notice__button--primary"
 							disabled={isInstalling || isActivating}
 						>
 							<RocketIcon />

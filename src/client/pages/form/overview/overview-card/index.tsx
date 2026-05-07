@@ -62,7 +62,7 @@ const Overview: React.FC = () => {
 			}
 			loading={isLoading}
 		>
-			<AntList size="small" className="qcrm-overview-list">
+			<AntList size="small" className="doublescale-overview-list">
 				{form && (
 					<>
 						<AntList.Item>

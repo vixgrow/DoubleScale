@@ -102,7 +102,7 @@ const Fields: React.FC<FieldsProps> = ({
 		const defaultTab = tabFields[0]?.[0] || '';
 
 		return (
-			<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
+			<div className="doublescale-fields" style={{ marginBottom: '20px' }}>
 				<Tabs defaultValue={defaultTab}>
 					<div className="border px-5 py-3 rounded-lg">
 						<TabsList className="bg-transparent text-foreground gap-3">
@@ -121,7 +121,7 @@ const Fields: React.FC<FieldsProps> = ({
 					{tabFields.map(([key, field]) => (
 						<TabsContent key={key} value={key}>
 							<div
-								className="qcrm-tab-content"
+								className="doublescale-tab-content"
 								style={{ padding: '20px 0' }}
 							>
 								{field.fields &&
@@ -173,7 +173,7 @@ const Fields: React.FC<FieldsProps> = ({
 
 	// Fallback to regular field rendering if no tabs
 	return (
-		<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
+		<div className="doublescale-fields" style={{ marginBottom: '20px' }}>
 			{map(fields, (field, key) => {
 				return (
 					<Field

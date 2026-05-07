@@ -676,14 +676,14 @@ const Field: React.FC<FieldProps> = ({
 	// Special layout for switch - label before the switch with justify-between
 	if (type === 'switch') {
 		return (
-			<div className="qcrm-field" style={style || {}}>
+			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center justify-between">
 					{label && (
-						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
-					<div className="qcrm-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">{fieldContent}</div>
 				</div>
 				{helperText && renderHelperText(helperText)}
 			</div>
@@ -693,11 +693,11 @@ const Field: React.FC<FieldProps> = ({
 	// Special layout for checkbox - checkbox before label
 	if (type === 'checkbox') {
 		return (
-			<div className="qcrm-field" style={style || {}}>
+			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center gap-3">
-					<div className="qcrm-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">{fieldContent}</div>
 					{label && (
-						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
@@ -710,11 +710,11 @@ const Field: React.FC<FieldProps> = ({
 	// Special layout for radio - radio before label (like checkbox)
 	if (type === 'radio') {
 		return (
-			<div className="qcrm-field" style={style || {}}>
+			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center gap-3">
-					<div className="qcrm-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">{fieldContent}</div>
 					{label && (
-						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
@@ -739,13 +739,13 @@ const Field: React.FC<FieldProps> = ({
 	// Compact layout for complex fields or when compact prop is true
 	if (isComplexField || compact) {
 		return (
-			<div className={cn('qcrm-field qcrm-field-compact', compact && 'qcrm-field-compact-mode')} style={style || {}}>
+			<div className={cn('doublescale-field doublescale-field-compact', compact && 'doublescale-field-compact-mode')} style={style || {}}>
 				{label && !compact && (
-					<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+					<div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
 						{renderLabelWithTooltip()}
 					</div>
 				)}
-				<div className={cn('qcrm-field-input qcrm-field-input-compact', className)}>
+				<div className={cn('doublescale-field-input doublescale-field-input-compact', className)}>
 					{fieldContent}
 				</div>
 				{helperText && !compact && renderHelperText(helperText)}
@@ -755,13 +755,13 @@ const Field: React.FC<FieldProps> = ({
 
 	// Default layout - label above the field
 	return (
-		<div className="qcrm-field" style={style || {}}>
+		<div className="doublescale-field" style={style || {}}>
 			{label && (
-				<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between">
+				<div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between">
 					{renderLabelWithTooltip()}
 				</div>
 			)}
-			<div className={cn('qcrm-field-input', className)}>
+			<div className={cn('doublescale-field-input', className)}>
 				{fieldContent}
 			</div>
 			{helperText && renderHelperText(helperText)}

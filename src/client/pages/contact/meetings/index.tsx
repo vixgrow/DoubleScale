@@ -160,7 +160,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
     });
 
     return (
-        <div className="qcrm-meetings flex flex-col gap-5">
+        <div className="doublescale-meetings flex flex-col gap-5">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-semibold">
                     {__('Meetings', 'doublescale')}

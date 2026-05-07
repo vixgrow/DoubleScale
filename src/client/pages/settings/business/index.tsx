@@ -30,7 +30,7 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
         });
     };
     return (
-        <div className="business-settings qcrm-fields">
+        <div className="business-settings doublescale-fields">
             <div className="text-[#09090B] font-semibold text-2xl">{__('Business', 'doublescale')}</div>
             <Field
                 label={__('Business Name', 'doublescale')}

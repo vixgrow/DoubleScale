@@ -183,7 +183,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 
 	return (
 		<TooltipProvider>
-			<div className={`qcrm-step-reorder-controls ${className}`}>
+			<div className={`doublescale-step-reorder-controls ${className}`}>
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
@@ -194,7 +194,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 								e.stopPropagation();
 								handleMove('up');
 							}}
-							className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--up h-8 w-8"
+							className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--up h-8 w-8"
 						>
 							{isMoving === 'up' ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
@@ -217,7 +217,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 								e.stopPropagation();
 								handleMove('down');
 							}}
-							className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--down h-8 w-8"
+							className="doublescale-step-reorder-controls__button doublescale-step-reorder-controls__button--down h-8 w-8"
 						>
 							{isMoving === 'down' ? (
 								<Loader2 className="h-4 w-4 animate-spin" />

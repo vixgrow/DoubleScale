@@ -236,7 +236,7 @@ const DebuggingLogs: React.FC = () => {
 	}, [logLevel, page]);
 
 	return (
-		<div className="debugging-logs qcrm-fields">
+		<div className="debugging-logs doublescale-fields">
 			{/* Log Level Settings */}
 			<div className="mb-6">
 				<div className="flex items-center gap-2 mb-2">

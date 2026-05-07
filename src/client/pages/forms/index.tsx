@@ -239,7 +239,7 @@ const FormsList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-forms-list">
+		<div className="doublescale-forms-list">
 			<PageHeader
 				title={__('Forms List', 'doublescale')}
 				subtitle={__('Forms', 'doublescale')}
@@ -261,7 +261,7 @@ const FormsList: React.FC = () => {
 			)}
 
 			{loading || hasRecords ? (
-				<div className="qcrm-contacts-forms-list__actions">
+				<div className="doublescale-contacts-forms-list__actions">
 					<DataTable
 						columns={columns}
 						data={forms}

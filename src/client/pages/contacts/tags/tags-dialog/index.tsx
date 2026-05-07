@@ -70,7 +70,7 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-4 mt-4">
+				<div className="doublescale-fields space-y-4 mt-4">
 					<Field
 						label={__('Tag Name', 'doublescale')}
 						value={selectedTag ? selectedTag.name : tag.name}

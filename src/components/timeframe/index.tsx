@@ -129,7 +129,7 @@ const Timeframe = ({ value, onChange }: TimeframeProps) => {
 	};
 
 	return (
-		<div className="qcrm-timeframe">
+		<div className="doublescale-timeframe">
 			<Field
 				type="select"
 				value={selectedTimeframe}

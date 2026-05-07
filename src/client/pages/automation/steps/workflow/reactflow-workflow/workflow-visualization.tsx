@@ -517,16 +517,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 	if (isLoading) {
 		return (
-			<div className="qcrm-reactflow-loading">
+			<div className="doublescale-reactflow-loading">
 				{__('Loading workflow...', 'doublescale')}
 			</div>
 		);
 	}
 
 	return (
-		<div className="qcrm-reactflow-workflow">
-			<div className="qcrm-reactflow-workflow__layout">
-				<div className="qcrm-reactflow-workflow__canvas">
+		<div className="doublescale-reactflow-workflow">
+			<div className="doublescale-reactflow-workflow__layout">
+				<div className="doublescale-reactflow-workflow__canvas">
 					<ReactFlow
 						nodes={nodesState}
 						edges={edgesState}

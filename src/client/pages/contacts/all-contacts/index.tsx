@@ -61,7 +61,7 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 		}));
 
 		return (
-			<div className="qcrm-all-contacts w-full">
+			<div className="doublescale-all-contacts w-full">
 				<NoticeSection />
 				{loading || hasRecords ? (
 					<ContactsTable activeTab={activeTab} />

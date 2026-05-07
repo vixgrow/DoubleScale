@@ -126,9 +126,9 @@ const TemplatesList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-templates-list">
+		<div className="doublescale-templates-list">
 			<Flex
-				className="qcrm-contacts-list__actions"
+				className="doublescale-contacts-list__actions"
 				justify="space-between"
 			>
 				<Flex gap={10}>
@@ -234,7 +234,7 @@ const TemplatesList: React.FC = () => {
 				onCancel={() => setVisible(false)}
 				confirmLoading={isSaving}
 			>
-				<div className="qcrm-fields">
+				<div className="doublescale-fields">
 					<Field
 						label={__('Name', 'doublescale')}
 						value={template.name}

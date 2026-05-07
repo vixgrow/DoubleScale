@@ -40,7 +40,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
     };
 
     return (
-        <div className="email-settings qcrm-fields">
+        <div className="email-settings doublescale-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Email', 'doublescale')}
             </div>
@@ -54,10 +54,10 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     />
                 </div>
                 <div className="flex-1">
-                    <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
+                    <div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
                         {__('From Email', 'doublescale')}
                     </div>
-                    <div className="qcrm-field-input">
+                    <div className="doublescale-field-input">
                         <FromEmailSelector
                             value={from_email || ConfigAPI.getAdminEmail()}
                             onChange={(email, name) => {

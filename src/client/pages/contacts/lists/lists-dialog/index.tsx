@@ -87,7 +87,7 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-4 mt-4">
+				<div className="doublescale-fields space-y-4 mt-4">
 					<Field
 						label={__('List Name', 'doublescale')}
 						value={selectedList ? selectedList.name : list.name}

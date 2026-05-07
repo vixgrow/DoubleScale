@@ -1,4 +1,4 @@
-.qcrm-automation-workflow-timeline {
+.doublescale-automation-workflow-timeline {
 	position: relative;
 	padding: 20px 0;
 	width: 100%;
@@ -19,7 +19,7 @@
 		z-index: 0;
 	}
 
-	.qcrm-timeline-item {
+	.doublescale-timeline-item {
 		position: relative;
 		margin-bottom: 40px;
 		width: 100%;
@@ -29,13 +29,13 @@
 		&:last-child {
 			margin-bottom: 0;
 
-			.qcrm-timeline-marker::after {
+			.doublescale-timeline-marker::after {
 				display: none;
 			}
 		}
 
 		// Marker (numbered circle)
-		.qcrm-timeline-marker {
+		.doublescale-timeline-marker {
 			position: absolute;
 			left: 50%;
 			transform: translateX(-50%);
@@ -48,7 +48,7 @@
 			background-color: #458dc7;
 			border-radius: 4px;
 
-			.qcrm-timeline-number {
+			.doublescale-timeline-number {
 				color: white;
 				font-weight: 600;
 				font-size: 16px;
@@ -57,11 +57,11 @@
 		}
 
 		// Content wrapper
-		.qcrm-timeline-content {
+		.doublescale-timeline-content {
 			width: calc(50% - 60px);
 			position: relative;
 
-			.qcrm-timeline-timestamp {
+			.doublescale-timeline-timestamp {
 				display: flex;
 				align-items: center;
 				gap: 4px;
@@ -70,13 +70,13 @@
 				margin-bottom: 8px;
 			}
 
-			.qcrm-timeline-card {
+			.doublescale-timeline-card {
 				background-color: #f8f8f8;
 				border: 1px solid #dee1e6;
 				border-radius: 8px;
 				min-height: 64px;
 
-				.qcrm-timeline-card-icon {
+				.doublescale-timeline-card-icon {
 					display: flex;
 					align-items: center;
 					justify-content: center;
@@ -94,7 +94,7 @@
 					}
 				}
 
-				.qcrm-timeline-card-title {
+				.doublescale-timeline-card-title {
 					font-size: 18px;
 					font-weight: 500;
 					color: #09090b;
@@ -107,11 +107,11 @@
 			display: flex;
 			justify-content: flex-start;
 
-			.qcrm-timeline-content {
+			.doublescale-timeline-content {
 				margin-left: 0;
 				text-align: left;
 
-				.qcrm-timeline-timestamp {
+				.doublescale-timeline-timestamp {
 					text-align: left;
 				}
 			}
@@ -122,10 +122,10 @@
 			display: flex;
 			justify-content: flex-end;
 
-			.qcrm-timeline-content {
+			.doublescale-timeline-content {
 				margin-right: 0;
 
-				.qcrm-timeline-timestamp {
+				.doublescale-timeline-timestamp {
 					text-align: left;
 				}
 			}
@@ -135,41 +135,41 @@
 		&--condition-result {
 			margin-bottom: 20px;
 
-			.qcrm-timeline-marker {
+			.doublescale-timeline-marker {
 				width: 30px;
 				height: 30px;
 				background-color: #10b981;
 
-				.qcrm-timeline-number {
+				.doublescale-timeline-number {
 					font-size: 12px;
 				}
 			}
 
-			.qcrm-timeline-content {
+			.doublescale-timeline-content {
 				width: calc(50% - 50px);
 
-				.qcrm-timeline-card {
+				.doublescale-timeline-card {
 					min-height: 60px;
 					background-color: #f3f4f6;
 				}
 			}
 
-			&.qcrm-timeline-item--left {
+			&.doublescale-timeline-item--left {
 				display: flex;
 				justify-content: flex-start;
 
-				.qcrm-timeline-content {
+				.doublescale-timeline-content {
 					margin-left: 0;
 					text-align: right;
 					padding-right: 20px;
 				}
 			}
 
-			&.qcrm-timeline-item--right {
+			&.doublescale-timeline-item--right {
 				display: flex;
 				justify-content: flex-end;
 
-				.qcrm-timeline-content {
+				.doublescale-timeline-content {
 					margin-right: 0;
 					padding-left: 20px;
 				}
@@ -185,33 +185,33 @@
 			left: 30px;
 		}
 
-		.qcrm-timeline-item {
+		.doublescale-timeline-item {
 			flex-direction: row !important;
 
-			.qcrm-timeline-marker {
+			.doublescale-timeline-marker {
 				left: 30px;
 				width: 32px;
 				height: 32px;
 
-				.qcrm-timeline-number {
+				.doublescale-timeline-number {
 					font-size: 12px;
 				}
 			}
 
-			.qcrm-timeline-content {
+			.doublescale-timeline-content {
 				width: calc(100% - 80px);
 				margin-left: 60px !important;
 				padding-left: 20px !important;
 				padding-right: 0 !important;
 
-				.qcrm-timeline-timestamp {
+				.doublescale-timeline-timestamp {
 					text-align: left !important;
 				}
 			}
 
 			&--left,
 			&--right {
-				.qcrm-timeline-content {
+				.doublescale-timeline-content {
 					margin-left: 60px !important;
 					text-align: left !important;
 				}

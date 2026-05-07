@@ -243,7 +243,7 @@ const ContactInformation: React.FC = () => {
 		return (
 			<Card className="flex-1 bg-[#F8F8F8] shadow-none">
 				<CardContent>
-					<div className="qcrm-contact-information">
+					<div className="doublescale-contact-information">
 						{__('No contact information available', 'doublescale')}
 					</div>
 				</CardContent>

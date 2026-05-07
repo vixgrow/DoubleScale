@@ -86,7 +86,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 
 	return (
 		<div
-			className="qcrm-reactflow-node__dropdown"
+			className="doublescale-reactflow-node__dropdown"
 			onClick={(e) => {
 				e.stopPropagation();
 				e.preventDefault();
@@ -106,7 +106,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					<Button
 						variant="ghost"
 						size="icon"
-						className="qcrm-reactflow-node__dropdown-btn h-8 w-8"
+						className="doublescale-reactflow-node__dropdown-btn h-8 w-8"
 					>
 						<MoreVertical className="h-4 w-4" />
 					</Button>

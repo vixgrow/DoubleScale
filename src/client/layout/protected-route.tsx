@@ -41,7 +41,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 		!hasRequiredCapability(page.requiredCapability)
 	) {
 		return (
-			<div className="qcrm-access-denied">
+			<div className="doublescale-access-denied">
 				<h2>{__('Access Denied', 'doublescale')}</h2>
 				<p>
 					{__(

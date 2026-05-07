@@ -76,11 +76,11 @@ const AjaxSelect: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="qcrm-field">
-			<div className="qcrm-field-label">
+		<div className="doublescale-field">
+			<div className="doublescale-field-label">
 				<Typography.Text>{label}</Typography.Text>
 			</div>
-			<div className="qcrm-field-input">
+			<div className="doublescale-field-input">
 				<AsyncSelect
 					className="react-select-container"
 					classNamePrefix="react-select"

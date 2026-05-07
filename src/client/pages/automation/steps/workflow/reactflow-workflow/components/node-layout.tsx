@@ -56,16 +56,16 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 		<>
 			<div
 				className={
-					hasFooter ? 'qcrm-reactflow-node__header-row border-b' : ''
+					hasFooter ? 'doublescale-reactflow-node__header-row border-b' : ''
 				}
 			>
-				<div className="qcrm-reactflow-node__header-left">
-					<div className="qcrm-reactflow-node__icon">{icon}</div>
-					<div className="qcrm-reactflow-node__content">
-						<div className="qcrm-reactflow-node__title">
+				<div className="doublescale-reactflow-node__header-left">
+					<div className="doublescale-reactflow-node__icon">{icon}</div>
+					<div className="doublescale-reactflow-node__content">
+						<div className="doublescale-reactflow-node__title">
 							{title}
 						</div>
-						<div className="qcrm-reactflow-node__subtitle">
+						<div className="doublescale-reactflow-node__subtitle">
 							{subtitle}
 						</div>
 					</div>
@@ -86,7 +86,7 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 
 			{/* Footer: Analytics or Custom */}
 			{viewMode && analytics && (
-				<div className="qcrm-reactflow-node__footer-row">
+				<div className="doublescale-reactflow-node__footer-row">
 					<div className="text-sm">
 						<span className="text-[#667085]">
 							{__('Contact:', 'doublescale')}{' '}

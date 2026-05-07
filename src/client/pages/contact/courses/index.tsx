@@ -90,7 +90,7 @@ const Courses = ({ contact_id }: CoursesProps) => {
     const columns = useMemo(() => getColumns(), []);
 
     return (
-        <div className="qcrm-courses flex flex-col gap-5">
+        <div className="doublescale-courses flex flex-col gap-5">
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold">
                     {__('Courses', 'doublescale')}

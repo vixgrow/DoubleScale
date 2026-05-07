@@ -25,8 +25,8 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({ automation }) => {
 	// };
 
 	return (
-		<div className="qcrm-automation-reports__automation-funnels px-8 py-5 h-screen">
-			<div className="qcrm-automation-reports__automation-funnels__header mb-4">
+		<div className="doublescale-automation-reports__automation-funnels px-8 py-5 h-screen">
+			<div className="doublescale-automation-reports__automation-funnels__header mb-4">
 				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Analytics', 'doublescale')}</h1>
 			</div>
 

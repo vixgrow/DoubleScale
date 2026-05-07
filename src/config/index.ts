@@ -888,15 +888,15 @@ const createConfig = (data: ConfigData): ConfigApi => {
 const ConfigAPI = createConfig(configData);
 
 // @ts-ignore
-if (window.qcrm === undefined) {
+if (window.doublescale === undefined) {
 	// @ts-ignore
-	window.qcrm = {
+	window.doublescale = {
 		config: ConfigAPI,
 	};
 }
 
 // @ts-ignore
-export default window.qcrm.config as ConfigApi;
+export default window.doublescale.config as ConfigApi;
 export * from './types/config-data';
 export * from './types/icons-type';
 export * from './types/initial-payload';

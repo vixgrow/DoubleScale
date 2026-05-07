@@ -22,7 +22,7 @@ const TagField = ({ value, onChange }: Props) => {
 			endpoint="/qc/v1/tags"
 			placeholder={__('Select tag', 'doublescale')}
 			noOptionsMessage={__('No tags available', 'doublescale')}
-			className="qcrm-tag-field"
+			className="doublescale-tag-field"
 		/>
 	);
 };

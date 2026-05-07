@@ -86,9 +86,6 @@ function doublescale_bootstrap_register() {
 			 * Fires after DoubleScale (free) modular stack is initialized.
 			 */
 			do_action( 'doublescale_loaded' );
-
-			// Legacy listeners on doublescale_loaded (deprecated in favor of doublescale_loaded).
-			do_action_deprecated( 'doublescale_loaded', array(), '2.0', 'doublescale_loaded' );
 		},
 		5
 	);

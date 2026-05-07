@@ -71,8 +71,8 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	// Render email-specific metrics
 	const renderEmailMetrics = () => (
 		<>
-			<div className="qcrm-analytics-popup__metric" data-color="blue">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--blue">
+			<div className="doublescale-analytics-popup__metric" data-color="blue">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--blue">
 					<svg
 						width="24"
 						height="24"
@@ -97,17 +97,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{sent.toLocaleString()}
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{getSentLabel()}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="purple">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--purple">
+			<div className="doublescale-analytics-popup__metric" data-color="purple">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--purple">
 					<svg
 						width="24"
 						height="24"
@@ -132,17 +132,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{clickRate.toFixed(1)}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Click Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="red">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--red">
+			<div className="doublescale-analytics-popup__metric" data-color="red">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--red">
 					<svg
 						width="24"
 						height="24"
@@ -167,17 +167,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{unsubscribedRate.toFixed(2)}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Unsubscribed', 'doublescale')}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="green">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--green">
+			<div className="doublescale-analytics-popup__metric" data-color="green">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--green">
 					<svg
 						width="24"
 						height="24"
@@ -195,17 +195,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{openRate}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Open Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="orange">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--orange">
+			<div className="doublescale-analytics-popup__metric" data-color="orange">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--orange">
 					<svg
 						width="24"
 						height="24"
@@ -244,10 +244,10 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{clickToOpenRate.toFixed(1)}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Click to open rate', 'doublescale')}
 					</div>
 				</div>
@@ -258,8 +258,8 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	// Render SMS/WhatsApp metrics
 	const renderSMSMetrics = () => (
 		<>
-			<div className="qcrm-analytics-popup__metric" data-color="blue">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--blue">
+			<div className="doublescale-analytics-popup__metric" data-color="blue">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--blue">
 					<svg
 						width="24"
 						height="24"
@@ -284,17 +284,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{sent.toLocaleString()}
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{getSentLabel()}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="purple">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--purple">
+			<div className="doublescale-analytics-popup__metric" data-color="purple">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--purple">
 					<svg
 						width="24"
 						height="24"
@@ -327,17 +327,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{clickRate.toFixed(1)}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Click Rate', 'doublescale')}
 					</div>
 				</div>
 			</div>
 
-			<div className="qcrm-analytics-popup__metric" data-color="red">
-				<div className="qcrm-analytics-popup__metric-icon qcrm-analytics-popup__metric-icon--red">
+			<div className="doublescale-analytics-popup__metric" data-color="red">
+				<div className="doublescale-analytics-popup__metric-icon doublescale-analytics-popup__metric-icon--red">
 					<svg
 						width="24"
 						height="24"
@@ -374,10 +374,10 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</svg>
 				</div>
 				<div>
-					<div className="qcrm-analytics-popup__metric-value">
+					<div className="doublescale-analytics-popup__metric-value">
 						{unsubscribedRate.toFixed(2)}%
 					</div>
-					<div className="qcrm-analytics-popup__metric-label">
+					<div className="doublescale-analytics-popup__metric-label">
 						{__('Unsubscribed', 'doublescale')}
 					</div>
 				</div>
@@ -386,17 +386,17 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	);
 
 	return (
-		<div className="qcrm-analytics-popup">
-			<div className="qcrm-analytics-popup__overlay" onClick={onClose} />
+		<div className="doublescale-analytics-popup">
+			<div className="doublescale-analytics-popup__overlay" onClick={onClose} />
 			<div
-				className={`qcrm-analytics-popup__content ${actionType === 'email' ? 'qcrm-analytics-popup__content--email' : ''}`}
+				className={`doublescale-analytics-popup__content ${actionType === 'email' ? 'doublescale-analytics-popup__content--email' : ''}`}
 			>
-				<div className="qcrm-analytics-popup__header">
-					<h3 className="qcrm-analytics-popup__title">
+				<div className="doublescale-analytics-popup__header">
+					<h3 className="doublescale-analytics-popup__title">
 						{__('View Analytics', 'doublescale')} ({actionLabel})
 					</h3>
 					<button
-						className="qcrm-analytics-popup__close"
+						className="doublescale-analytics-popup__close"
 						onClick={onClose}
 						aria-label={__('Close', 'doublescale')}
 					>
@@ -404,7 +404,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 					</button>
 				</div>
 				<div
-					className={`qcrm-analytics-popup__body ${actionType === 'email' ? 'qcrm-analytics-popup__body--grid' : ''}`}
+					className={`doublescale-analytics-popup__body ${actionType === 'email' ? 'doublescale-analytics-popup__body--grid' : ''}`}
 				>
 					{actionType === 'email'
 						? renderEmailMetrics()

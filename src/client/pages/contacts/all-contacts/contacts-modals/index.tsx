@@ -76,7 +76,7 @@ export const CreateContactModal: React.FC = () => {
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-5 h-[calc(90vh-13rem)] overflow-y-auto">
+				<div className="doublescale-fields space-y-5 h-[calc(90vh-13rem)] overflow-y-auto">
 					<Field
 						label={__('First Name', 'doublescale')}
 						placeholder={__('Enter First Name', 'doublescale')}

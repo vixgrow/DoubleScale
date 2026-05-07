@@ -63,7 +63,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
 			<span
-				className="qcrm-reactflow-goal__configured"
+				className="doublescale-reactflow-goal__configured"
 				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
 			>
 				{goalName}
@@ -85,7 +85,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 			)}
 		</div>
 	) : (
-		<span className="qcrm-reactflow-goal__not-configured">
+		<span className="doublescale-reactflow-goal__not-configured">
 			{__('Goal not set', 'doublescale')}
 		</span>
 	);
@@ -172,12 +172,12 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+				className={`doublescale-reactflow-node doublescale-reactflow-node--goal ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
 					type="target"
 					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 
 				{/* Step Reorder Controls - hide in view mode */}
@@ -203,7 +203,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				<Handle
 					type="source"
 					position={Position.Bottom}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 				/>
 			</div>
 		</NodeContextMenu>

@@ -10,9 +10,9 @@ import { Skeleton } from '@doublescale/components/ui/skeleton';
 
 const SettingsShimmer: React.FC = () => {
     return (
-        <div className="qcrm-fields">
+        <div className="doublescale-fields">
             {/* Form Fields Mapping Section */}
-            <div className="qcrm-field">
+            <div className="doublescale-field">
                 <Skeleton className="h-6 w-48 mb-4" />
                 <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, index) => (
@@ -28,9 +28,9 @@ const SettingsShimmer: React.FC = () => {
             </div>
 
             {/* Contact Settings Section */}
-            <div className="qcrm-field">
+            <div className="doublescale-field">
                 <Skeleton className="h-8 w-32 my-5" />
-                <div className="qcrm-field-input">
+                <div className="doublescale-field-input">
                     <div className="flex flex-col gap-5">
                         {/* Lists and Tags Row */}
                         <div className="flex justify-between gap-[10px]">

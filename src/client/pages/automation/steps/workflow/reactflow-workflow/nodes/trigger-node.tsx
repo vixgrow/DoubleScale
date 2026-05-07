@@ -191,7 +191,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				disabled={viewMode}
 			>
 				<div
-					className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--trigger ${isTriggerVisible ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<NodeLayout
 						icon={<ActionIcon width={23} height={23} />}
@@ -216,7 +216,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 					<Handle
 						type="source"
 						position={Position.Bottom}
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 					/>
 				</div>
 			</NodeContextMenu>

@@ -84,11 +84,11 @@ const ContactsList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-contacts-list px-8 py-5 h-screen">
+		<div className="doublescale-contacts-list px-8 py-5 h-screen">
 			<div className="mb-4">
 				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Contacts', 'doublescale')}</h1>
 			</div>
-			<div className="qcrm-contacts-list__table">
+			<div className="doublescale-contacts-list__table">
 				<DataTable
 					columns={columns}
 					data={contacts}

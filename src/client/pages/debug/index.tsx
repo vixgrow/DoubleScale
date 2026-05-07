@@ -147,9 +147,9 @@ const Debug: React.FC = () => {
     ];
 
     return (
-        <div className="qcrm-debug">
+        <div className="doublescale-debug">
             <Flex
-                className="qcrm-contacts-list__actions"
+                className="doublescale-contacts-list__actions"
                 gap={20}
             >
                 <Button type="primary" onClick={() => deleteAll()}>

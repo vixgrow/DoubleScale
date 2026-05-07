@@ -244,7 +244,7 @@ export const Controller = ({ page }) => {
 
 	return (
 		// Using motion div with layoutScroll to reevaluate positions when the user scrolls.
-		<motion.div layoutScroll className="qcrm-page-component-wrapper">
+		<motion.div layoutScroll className="doublescale-page-component-wrapper">
 			<div className="flex justify-between items-center w-full">
 				<div
 					className="text-[#CB5301] flex items-center gap-2 cursor-pointer text-base p-0 bg-transparent"

@@ -111,9 +111,9 @@ export const Layout = (props) => {
 					formId={formContext?.formId}
 					automationId={formContext?.automationId}
 				/>
-				<div className="qcrm-layout__main">
+				<div className="doublescale-layout__main">
 					<NavBar />
-					<div className="qcrm-layout__workspace">
+					<div className="doublescale-layout__workspace">
 						<ProtectedRoute page={props.page}>
 							<Controller {...props} />
 						</ProtectedRoute>

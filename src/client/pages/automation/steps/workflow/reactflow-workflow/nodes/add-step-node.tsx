@@ -203,12 +203,12 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<div 
-			className={`qcrm-reactflow-node qcrm-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'qcrm-reactflow-node--disabled' : ''}`}
+			className={`doublescale-reactflow-node doublescale-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'doublescale-reactflow-node--disabled' : ''}`}
 		>
 		<Handle
 			type="target"
 			position={Position.Top}
-			className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+			className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 		/>
 
 		<AddStepDialog
@@ -222,7 +222,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 		<Handle
 			type="source"
 			position={Position.Bottom}
-			className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+			className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 		/>
 		</div>
 	);

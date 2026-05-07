@@ -38,7 +38,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
     };
 
     return (
-        <div className="double-optin-settings qcrm-fields">
+        <div className="double-optin-settings doublescale-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Double Optin', 'doublescale')}
             </div>
@@ -69,8 +69,8 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
             </div>
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full">
-                    <div className="qcrm-field">
-                        <div className="qcrm-field-label text-[#09090B] font-normal text-base">
+                    <div className="doublescale-field">
+                        <div className="doublescale-field-label text-[#09090B] font-normal text-base">
                             {__('After Confirmation', 'doublescale')}
                         </div>
                         <RadioGroup

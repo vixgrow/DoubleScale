@@ -105,17 +105,17 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-			<div className={`qcrm-reactflow-node qcrm-reactflow-node--end ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
+			<div className={`doublescale-reactflow-node doublescale-reactflow-node--end ${isSelected ? 'doublescale-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 
 				{/* Step Reorder Controls - hide in view mode */}
 				{!viewMode && <StepReorderControls step={step} />}
 
-				<div className="qcrm-reactflow-node__icon"><Power className='w-6 h-6' /></div>
+				<div className="doublescale-reactflow-node__icon"><Power className='w-6 h-6' /></div>
 
 				{/* Three dots dropdown menu */}
 				<NodeActionsDropdown
@@ -129,11 +129,11 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 					)}
 				/>
 
-				<div className="qcrm-reactflow-node__content">
-					<div className="qcrm-reactflow-node__title">
+				<div className="doublescale-reactflow-node__content">
+					<div className="doublescale-reactflow-node__title">
 						{__('End Automation', 'doublescale')}
 					</div>
-					<div className="qcrm-reactflow-node__subtitle">
+					<div className="doublescale-reactflow-node__subtitle">
 						{__('Stop', 'doublescale')}
 					</div>
 				</div>

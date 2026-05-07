@@ -1,10 +1,10 @@
-.qcrm-reactflow-container {
+.doublescale-reactflow-container {
 	width: 100%;
 	height: 100%;
 	min-height: 0;
 	background-color: #fff;
 	border-radius: 8px;
-	border: 1px solid var(--qcrm-border-color);
+	border: 1px solid var(--doublescale-border-color);
 	overflow: hidden;
 	position: relative;
 	display: flex;
@@ -12,7 +12,7 @@
 }
 
 // ReactFlow Workflow Styles
-.qcrm-reactflow-workflow {
+.doublescale-reactflow-workflow {
 	height: 100%;
 	min-height: 400px;
 	width: 100%;
@@ -104,7 +104,7 @@
 }
 
 // Loading State Styles
-.qcrm-reactflow-loading {
+.doublescale-reactflow-loading {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -114,7 +114,7 @@
 }
 
 // Base node styles
-.qcrm-reactflow-node {
+.doublescale-reactflow-node {
 	background: #fff;
 	border: 2px solid #e8e8e8;
 	border-radius: 12px;
@@ -155,7 +155,7 @@
 		border-bottom: 1px solid #f0f0f0;
 		flex-shrink: 0;
 
-		.qcrm-reactflow-node__actions {
+		.doublescale-reactflow-node__actions {
 			opacity: 0;
 			transition: opacity 0.2s ease;
 			display: flex;
@@ -163,7 +163,7 @@
 		}
 	}
 
-	&:hover &__header .qcrm-reactflow-node__actions {
+	&:hover &__header .doublescale-reactflow-node__actions {
 		opacity: 1;
 	}
 
@@ -199,8 +199,8 @@
 	}
 
 	// Only apply margin when not in header-row layout
-	&:not(.qcrm-reactflow-node--action-with-analytics) {
-		.qcrm-reactflow-node__content {
+	&:not(.doublescale-reactflow-node--action-with-analytics) {
+		.doublescale-reactflow-node__content {
 			margin-right: 60px;
 		}
 	}
@@ -309,12 +309,12 @@
 	&--action {
 
 		// Action configuration status
-		.qcrm-reactflow-action__configured {
+		.doublescale-reactflow-action__configured {
 			color: #52c41a;
 			font-weight: 500;
 		}
 
-		.qcrm-reactflow-action__not-configured {
+		.doublescale-reactflow-action__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
 		}
@@ -401,18 +401,18 @@
 	}
 
 	&--delay {
-		.qcrm-reactflow-node__icon svg {
+		.doublescale-reactflow-node__icon svg {
 			width: 28px;
 			height: 28px;
 		}
 
 		// Delay configuration status
-		.qcrm-reactflow-delay__configured {
+		.doublescale-reactflow-delay__configured {
 			color: #52c41a;
 			font-weight: 500;
 		}
 
-		.qcrm-reactflow-delay__not-configured {
+		.doublescale-reactflow-delay__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
 		}
@@ -423,36 +423,36 @@
 		background: #ffffff;
 		overflow: visible;
 
-		.qcrm-reactflow-node__content {
+		.doublescale-reactflow-node__content {
 			margin-right: 20px;
 			overflow: hidden;
 		}
 
-		.qcrm-reactflow-node__title {
+		.doublescale-reactflow-node__title {
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
 
-		.qcrm-reactflow-node__subtitle {
+		.doublescale-reactflow-node__subtitle {
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
 
 		// Condition configuration status
-		.qcrm-reactflow-condition__configured {
+		.doublescale-reactflow-condition__configured {
 			color: #52c41a;
 			font-weight: 500;
 		}
 
-		.qcrm-reactflow-condition__not-configured {
+		.doublescale-reactflow-condition__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
 		}
 
 		// Override actions positioning for condition
-		.qcrm-reactflow-node__actions {
+		.doublescale-reactflow-node__actions {
 			right: 12px;
 			width: 40px;
 			height: 40px;
@@ -488,12 +488,12 @@
 	&--goal {
 
 		// Goal configuration status
-		.qcrm-reactflow-goal__configured {
+		.doublescale-reactflow-goal__configured {
 			color: #52c41a;
 			font-weight: 500;
 		}
 
-		.qcrm-reactflow-goal__not-configured {
+		.doublescale-reactflow-goal__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
 		}
@@ -523,7 +523,7 @@
 			transform: scale(0.95);
 		}
 
-		.qcrm-reactflow-node__add-button {
+		.doublescale-reactflow-node__add-button {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -604,7 +604,7 @@
 				display: none;
 			}
 
-			.qcrm-merge-add-button {
+			.doublescale-merge-add-button {
 				position: relative;
 				z-index: 10;
 			}
@@ -628,7 +628,7 @@
 
 	// Show reorder controls on node hover
 	&:hover {
-		.qcrm-step-reorder-controls {
+		.doublescale-step-reorder-controls {
 			opacity: 1;
 			visibility: visible;
 			transform: translateY(-50%) translateX(0);
@@ -638,28 +638,28 @@
 	// Hide reorder controls on certain node types
 	&--trigger,
 	&--add-step {
-		.qcrm-step-reorder-controls {
+		.doublescale-step-reorder-controls {
 			display: none !important;
 		}
 	}
 }
 
 // Merge node content styles
-.qcrm-reactflow-merge__content {
+.doublescale-reactflow-merge__content {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	text-align: center;
 
-	.qcrm-reactflow-merge__icon {
+	.doublescale-reactflow-merge__icon {
 		font-size: 16px;
 		margin-bottom: 1px;
 		font-weight: 900;
 		line-height: 1;
 	}
 
-	.qcrm-reactflow-merge__label {
+	.doublescale-reactflow-merge__label {
 		font-size: 8px;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -670,42 +670,42 @@
 }
 
 // Merge node placeholder for view mode
-.qcrm-reactflow-merge__placeholder {
+.doublescale-reactflow-merge__placeholder {
 	width: 32px;
 	height: 32px;
 }
 
 // Merge node dialog disabled in view mode
-.qcrm-reactflow-merge__dialog--disabled {
+.doublescale-reactflow-merge__dialog--disabled {
 	pointer-events: none;
 }
 
 // Disabled nodes in view mode
-.qcrm-reactflow-node--disabled {
+.doublescale-reactflow-node--disabled {
 	pointer-events: none;
 }
 
 // Branch node content styles
-.qcrm-reactflow-branch__content {
+.doublescale-reactflow-branch__content {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	width: 100%;
 	height: 100%;
 
-	.qcrm-reactflow-branch__label {
+	.doublescale-reactflow-branch__label {
 		text-align: center;
 	}
 }
 
 // Handle Styles - Force centered positioning
-.qcrm-reactflow-handle {
+.doublescale-reactflow-handle {
 	border: none !important;
 	background: transparent;
 }
 
 // Step Reorder Controls - Show on hover, positioned outside node on the right
-.qcrm-step-reorder-controls {
+.doublescale-step-reorder-controls {
 	position: absolute;
 	top: 50%;
 	right: -40px; // Position outside the node box
@@ -718,7 +718,7 @@
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 10;
 
-	.qcrm-step-reorder-controls__button {
+	.doublescale-step-reorder-controls__button {
 		background: rgba(255, 255, 255, 0.98);
 		border: 1px solid #d9d9d9;
 		border-radius: 6px;
@@ -769,7 +769,7 @@
 }
 
 // Context Menu Styles
-.qcrm-reactflow-context-menu {
+.doublescale-reactflow-context-menu {
 	.ant-dropdown-menu {
 		min-width: 120px;
 		border-radius: 6px;
@@ -796,7 +796,7 @@
 }
 
 // Add Step Edge Button Styling
-.qcrm-edge-add-button {
+.doublescale-edge-add-button {
 	z-index: 1000;
 
 	.ant-btn {
@@ -861,7 +861,7 @@
 }
 
 // Analytics Popup Styles
-.qcrm-analytics-popup {
+.doublescale-analytics-popup {
 	position: absolute;
 	top: 30px;
 	left: 500px;
@@ -926,16 +926,16 @@
 			grid-template-rows: auto auto;
 			gap: 16px;
 
-			.qcrm-analytics-popup__metric:nth-child(4),
-			.qcrm-analytics-popup__metric:nth-child(5) {
+			.doublescale-analytics-popup__metric:nth-child(4),
+			.doublescale-analytics-popup__metric:nth-child(5) {
 				grid-column: span 1;
 			}
 
-			.qcrm-analytics-popup__metric:nth-child(4) {
+			.doublescale-analytics-popup__metric:nth-child(4) {
 				grid-column-start: 1;
 			}
 
-			.qcrm-analytics-popup__metric:nth-child(5) {
+			.doublescale-analytics-popup__metric:nth-child(5) {
 				grid-column-start: 2;
 			}
 		}

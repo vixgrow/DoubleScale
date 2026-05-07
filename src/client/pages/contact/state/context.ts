@@ -17,7 +17,7 @@ import type { EmailAnalytics, PurchaseHistory } from './types';
 
 /**
  * Context type definition for contact page state.
- * Shared between free and Pro plugin bundles via window.qcrm.contexts.
+ * Shared between free and Pro plugin bundles via window.doublescale.contexts.
  */
 export type ContactContextType = {
 	contact: Contact | null;
@@ -85,7 +85,7 @@ const defaultContextValue: ContactContextType = {
 // Extend Window interface for TypeScript.
 declare global {
 	interface Window {
-		qcrm?: {
+		doublescale?: {
 			config?: unknown;
 			contexts?: {
 				ContactContext?: React.Context<ContactContextType>;
@@ -101,22 +101,22 @@ declare global {
  * causing the Pro plugin's useContactContext() to return defaults instead of Provider values.
  */
 function getContactContext(): React.Context<ContactContextType> {
-	// Ensure window.qcrm.contexts exists.
-	if (!window.qcrm) {
-		window.qcrm = {};
+	// Ensure window.doublescale.contexts exists.
+	if (!window.doublescale) {
+		window.doublescale = {};
 	}
-	if (!window.qcrm.contexts) {
-		window.qcrm.contexts = {};
+	if (!window.doublescale.contexts) {
+		window.doublescale.contexts = {};
 	}
 
 	// Return existing context if already created (by free plugin).
-	if (window.qcrm.contexts.ContactContext) {
-		return window.qcrm.contexts.ContactContext;
+	if (window.doublescale.contexts.ContactContext) {
+		return window.doublescale.contexts.ContactContext;
 	}
 
 	// Create and store the context singleton.
 	const context = createContext<ContactContextType>(defaultContextValue);
-	window.qcrm.contexts.ContactContext = context;
+	window.doublescale.contexts.ContactContext = context;
 	return context;
 }
 

@@ -163,7 +163,7 @@ const Integrations: React.FC = () => {
 	}, [tab, id]);
 
 	return (
-		<div className="qcrm-integrations">
+		<div className="doublescale-integrations">
 			<PageHeader
 				title={__('Integrations', 'doublescale')}
 				subtitle={__('Integrations', 'doublescale')}

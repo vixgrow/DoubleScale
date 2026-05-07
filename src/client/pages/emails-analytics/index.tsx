@@ -68,47 +68,47 @@ const EmailAnalytics: React.FC = () => {
 	return (
 		<Flex gap={20} vertical>
 			<Flex gap={20}>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<MailOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Sent', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total}
 						</Typography.Text>
 					</Flex>
 				</Card>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<EyeOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Opened', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total_opened || 0}
 						</Typography.Text>
 					</Flex>
 				</Card>
-				<Card className="qcrm-dashboard-card">
+				<Card className="doublescale-dashboard-card">
 					<Flex gap={10} vertical>
 						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
+							<div className="doublescale-dashboard-card-icon">
 								<LinkOutlined style={{ fontSize: 16 }} />
 							</div>
 							<Typography.Text strong>
 								{__('Total Clicked', 'doublescale')}
 							</Typography.Text>
 						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
+						<Typography.Text className="doublescale-dashboard-card-value">
 							{data.total_clicked || 0}
 						</Typography.Text>
 					</Flex>

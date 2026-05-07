@@ -16,15 +16,15 @@ interface Props {
 
 const ListField = ({ value, onChange }: Props) => {
 	return (
-		<div className="qcrm-field">
-			<div className="qcrm-field-input">
+		<div className="doublescale-field">
+			<div className="doublescale-field-input">
 				<PaginatedSelect
 					value={value}
 					onChange={onChange}
 					endpoint="/qc/v1/lists"
 					placeholder={__('Select list', 'doublescale')}
 					noOptionsMessage={__('No lists available', 'doublescale')}
-					className="qcrm-list-field"
+					className="doublescale-list-field"
 				/>
 			</div>
 		</div>

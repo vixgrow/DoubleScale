@@ -111,7 +111,7 @@ const ContactsList: React.FC = () => {
 						: [];
 
 	return (
-		<div className="qcrm-contacts-list w-full">
+		<div className="doublescale-contacts-list w-full">
 			<PageHeader
 				title={tabTitles[activeTab]}
 				subtitle={__('Contacts', 'doublescale')}

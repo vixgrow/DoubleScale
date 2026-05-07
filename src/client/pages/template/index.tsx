@@ -149,7 +149,7 @@ const Template: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-template-trigger">
+		<div className="doublescale-template-trigger">
 			<Card
 				title={template?.name || __('Template', 'doublescale')}
 				extra={
@@ -168,7 +168,7 @@ const Template: React.FC = () => {
 						<Card>
 							<Flex gap={40}>
 								<Flex
-									className="qcrm-fields"
+									className="doublescale-fields"
 									vertical
 									style={{ flex: 1 }}
 								>
@@ -251,7 +251,7 @@ const Template: React.FC = () => {
 										}}
 									>
 										<Flex
-											className="qcrm-preview-content"
+											className="doublescale-preview-content"
 											align="center"
 											justify="center"
 											style={{ height: '100%' }}

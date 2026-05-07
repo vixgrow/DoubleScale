@@ -16,7 +16,7 @@ import '../stores';
 export * from './types';
 import '../styles/react-select-global.css';
 
-const appRoot = document.getElementById('qcrm-admin-root');
+const appRoot = document.getElementById( 'doublescale-admin-root' );
 
 if (appRoot) {
 	setTimeout(() => {

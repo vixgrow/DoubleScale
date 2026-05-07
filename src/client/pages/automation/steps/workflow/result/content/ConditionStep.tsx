@@ -31,8 +31,8 @@ const ConditionStep: React.FC<ConditionStepProps> = ({
     return (
         <>
             <div className="flex gap-2.5 items-center mb-3">
-                <div className="qcrm-timeline-card-icon">{icon}</div>
-                <div className="qcrm-timeline-card-title flex-1">{label}</div>
+                <div className="doublescale-timeline-card-icon">{icon}</div>
+                <div className="doublescale-timeline-card-title flex-1">{label}</div>
                 {conditionResult && (
                     <span
                         className={`text-xl font-semibold ${conditionResult === 'yes'

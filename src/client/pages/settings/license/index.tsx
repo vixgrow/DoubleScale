@@ -267,7 +267,7 @@ const License: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="business-settings qcrm-fields">
+            <div className="business-settings doublescale-fields">
                 <div className="text-[#09090B] font-semibold text-2xl mb-6">
                     {__('License Management', 'doublescale')}
                 </div>
@@ -277,7 +277,7 @@ const License: React.FC = () => {
     }
 
     return (
-        <div className="business-settings qcrm-fields">
+        <div className="business-settings doublescale-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('License Management', 'doublescale')}
             </div>

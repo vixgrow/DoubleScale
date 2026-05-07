@@ -134,7 +134,7 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 
 	return (
 		<div className="flex flex-col gap-5">
-			<div className="qcrm-fields">
+			<div className="doublescale-fields">
 				{form_type &&
 					map(formOptions, (options, key) => {
 						const {

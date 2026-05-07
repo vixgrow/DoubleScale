@@ -279,7 +279,7 @@ const AutomationsList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-automations-list">
+		<div className="doublescale-automations-list">
 			<PageHeader
 				title={__('Automations List', 'doublescale')}
 				subtitle={__('Automations', 'doublescale')}

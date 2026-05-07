@@ -96,7 +96,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 			});
 
 			// Also set the workflow sidebar to inert if it exists
-			const sidebar = document.querySelector('.qcrm-workflow-sidebar');
+			const sidebar = document.querySelector('.doublescale-workflow-sidebar');
 			if (sidebar && !sidebar.closest('#doublescale-email-builder')) {
 				const sidebarElement = sidebar as HTMLElement;
 				sidebarElement.setAttribute('inert', '');

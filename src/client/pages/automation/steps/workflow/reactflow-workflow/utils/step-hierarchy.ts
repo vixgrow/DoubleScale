@@ -392,7 +392,7 @@ const processStepHierarchy = (
 					sourceStep: step,
 					targetStep: { id: yesNodeId, type: 'branch' },
 				},
-				className: 'qcrm-condition-edge qcrm-condition-edge--yes',
+				className: 'doublescale-condition-edge doublescale-condition-edge--yes',
 			});
 
 			// Connect condition to No branch node with explicit handle
@@ -412,7 +412,7 @@ const processStepHierarchy = (
 					sourceStep: step,
 					targetStep: { id: noNodeId, type: 'branch' },
 				},
-				className: 'qcrm-condition-edge qcrm-condition-edge--no',
+				className: 'doublescale-condition-edge doublescale-condition-edge--no',
 			});
 
 			// Connect Yes branch node to its children or merge

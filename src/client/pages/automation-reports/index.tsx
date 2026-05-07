@@ -47,7 +47,7 @@ const AutomationReports: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-automation-reports">
+		<div className="doublescale-automation-reports">
 			<AutomationFunnel automation={automation} />
 		</div>
 	);

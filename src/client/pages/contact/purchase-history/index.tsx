@@ -114,7 +114,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 	const surecartColumns = getSurecartColumns();
 
 	return (
-		<div className="qcrm-purchase-history flex flex-col gap-5">
+		<div className="doublescale-purchase-history flex flex-col gap-5">
 			{/* WooCommerce Section */}
 			{isWooActive && (
 				<div className="flex flex-col gap-5">

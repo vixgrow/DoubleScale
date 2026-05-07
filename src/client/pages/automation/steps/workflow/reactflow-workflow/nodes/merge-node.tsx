@@ -264,7 +264,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<div
-			className={`qcrm-reactflow-node qcrm-reactflow-node--merge qcrm-reactflow-node--merge-${condition}`}
+			className={`doublescale-reactflow-node doublescale-reactflow-node--merge doublescale-reactflow-node--merge-${condition}`}
 			onClick={!isMerge ? handleClick : undefined} // Only allow clicks for non-merge nodes
 			title={isMerge ? getMergeTooltip() : ''}
 			data-merge-level={mergeLevel}
@@ -277,7 +277,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Top}
 						id="top"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-input"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target doublescale-reactflow-handle--merge-input"
 						style={{
 							top: -6,
 							left: '50%',
@@ -289,7 +289,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Left}
 						id="yes"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 						style={{
 							left: -6,
 							top: '50%',
@@ -300,7 +300,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Right}
 						id="no"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 						style={{
 							right: -6,
 							top: '50%',
@@ -312,7 +312,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Left}
 						id="left"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 						style={{
 							left: '50%',
 							top: '50%',
@@ -325,7 +325,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Right}
 						id="right"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+						className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 						style={{
 							right: '50%',
 							top: '50%',
@@ -339,13 +339,13 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				<Handle
 					type="target"
 					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 			)}
 
 			{/* Make merge node function as add-step node */}
 			{isMerge ? (
-				<div className={viewMode ? 'qcrm-reactflow-merge__dialog--disabled' : ''}>
+				<div className={viewMode ? 'doublescale-reactflow-merge__dialog--disabled' : ''}>
 					<AddStepDialog
 						visible={visible}
 						onVisibleChange={setVisible}
@@ -355,11 +355,11 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 					/>
 				</div>
 			) : (
-				<div className="qcrm-reactflow-merge__content">
-					<div className="qcrm-reactflow-merge__icon">
+				<div className="doublescale-reactflow-merge__content">
+					<div className="doublescale-reactflow-merge__icon">
 						{isYes ? <CheckCircle /> : <XCircle />}
 					</div>
-					<div className="qcrm-reactflow-merge__label">
+					<div className="doublescale-reactflow-merge__label">
 						{isYes ? __('Yes', 'doublescale') : __('No', 'doublescale')}
 					</div>
 				</div>
@@ -368,7 +368,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+				className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 				style={{ bottom: -6 }}
 			/>
 		</div>

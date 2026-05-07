@@ -140,7 +140,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 	});
 
 	return (
-		<div className="qcrm-notes flex flex-col gap-5">
+		<div className="doublescale-notes flex flex-col gap-5">
 			<div className="flex justify-between items-center">
 				<h2 className="text-2xl font-semibold">
 					{__('Notes', 'doublescale')}

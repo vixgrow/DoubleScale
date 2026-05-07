@@ -224,7 +224,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				: __('Action:', 'doublescale');
 
 		return (
-			<div className="qcrm-step-fields-content flex flex-col">
+			<div className="doublescale-step-fields-content flex flex-col">
 				<Alert
 					variant="destructive"
 					className="border-orange-500 bg-orange-50"
@@ -256,7 +256,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	}
 
 	return (
-		<div className="qcrm-step-fields-content flex flex-col min-h-0">
+		<div className="doublescale-step-fields-content flex flex-col min-h-0">
 			{/* Provider not configured warning for SMS/WhatsApp actions (non-blocking) */}
 			{/* SMS: Open quick Twilio config modal */}
 			{/* WhatsApp: Navigate to integrations page (supports Twilio and Meta WhatsApp) */}

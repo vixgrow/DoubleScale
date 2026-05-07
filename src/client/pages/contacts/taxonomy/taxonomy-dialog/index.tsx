@@ -110,7 +110,7 @@ export const TaxonomyDialog: React.FC<TaxonomyDialogProps> = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="qcrm-fields space-y-4 mt-4">
+				<div className="doublescale-fields space-y-4 mt-4">
 					<Field
 						label={currentConfig.nameLabel}
 						value={selectedItem ? selectedItem.name : item.name}

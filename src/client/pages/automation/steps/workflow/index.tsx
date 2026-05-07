@@ -236,18 +236,18 @@ const Workflow: React.FC = () => {
 		};
 
 		return (
-			<div key={step.id} className="qcrm-automation-workflow__item">
-				<Card className="qcrm-automation-workflow__card hover:bg-accent cursor-pointer transition-colors">
+			<div key={step.id} className="doublescale-automation-workflow__item">
+				<Card className="doublescale-automation-workflow__card hover:bg-accent cursor-pointer transition-colors">
 					<CardContent className="p-4">
 						<div className="flex justify-between items-center">
 							<div
 								className="flex gap-2 items-center"
 								onClick={() => setStepHandler(step)}
 							>
-								<div className="qcrm-automation-workflow__card-icon">
+								<div className="doublescale-automation-workflow__card-icon">
 									{typesOptions[step.type].icon}
 								</div>
-								<div className="qcrm-automation-workflow__card-title">
+								<div className="doublescale-automation-workflow__card-title">
 									{label}
 									{!step.action &&
 										step.type !== 'end_automation' &&
@@ -318,7 +318,7 @@ const Workflow: React.FC = () => {
 					)}
 				{step.type === 'condition' && (
 					<div className="flex gap-5 mt-2.5">
-						<Card className="qcrm-automation-workflow__condition-yes flex-1">
+						<Card className="doublescale-automation-workflow__condition-yes flex-1">
 							<CardContent className="p-4">
 								<div className="flex flex-col gap-2.5">
 									<h4 className="font-semibold">
@@ -335,7 +335,7 @@ const Workflow: React.FC = () => {
 								</div>
 							</CardContent>
 						</Card>
-						<Card className="qcrm-automation-workflow__condition-no flex-1">
+						<Card className="doublescale-automation-workflow__condition-no flex-1">
 							<CardContent className="p-4">
 								<div className="flex flex-col gap-2.5">
 									<h4 className="font-semibold">
@@ -375,7 +375,7 @@ const Workflow: React.FC = () => {
 					automation && (
 						<div
 							className={cn(
-								'qcrm-automation-workflow flex-1 min-h-0 flex flex-col',
+								'doublescale-automation-workflow flex-1 min-h-0 flex flex-col',
 								currentStep || visible ? 'has-sidebar' : ''
 							)}
 						>
@@ -404,18 +404,18 @@ const Workflow: React.FC = () => {
 								/>
 							) : (
 								<div className="flex flex-col items-center justify-center gap-5 w-full mx-5 mt-5">
-									<div className="qcrm-automation-workflow flex flex-col gap-5 w-full">
-										<div className="qcrm-automation-workflow__item">
+									<div className="doublescale-automation-workflow flex flex-col gap-5 w-full">
+										<div className="doublescale-automation-workflow__item">
 											<Card
-												className="qcrm-automation-workflow__card hover:bg-accent cursor-pointer transition-colors"
+												className="doublescale-automation-workflow__card hover:bg-accent cursor-pointer transition-colors"
 												onClick={() => setVisible(true)}
 											>
 												<CardContent className="p-4">
 													<div className="flex gap-2 items-center">
-														<div className="qcrm-automation-workflow__card-icon">
+														<div className="doublescale-automation-workflow__card-icon">
 															<Rocket className="h-4 w-4" />
 														</div>
-														<div className="qcrm-automation-workflow__card-title">
+														<div className="doublescale-automation-workflow__card-title">
 															{trigger?.label}
 														</div>
 													</div>

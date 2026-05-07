@@ -108,7 +108,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		isConfigured && delayText ? (
 			<div className="flex items-center gap-2">
 				<span
-					className="qcrm-reactflow-delay__configured"
+					className="doublescale-reactflow-delay__configured"
 					style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
 				>
 					{isDelayUntil
@@ -133,7 +133,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 				)}
 			</div>
 		) : (
-			<span className="qcrm-reactflow-delay__not-configured">
+			<span className="doublescale-reactflow-delay__not-configured">
 				<span className="text-[#333333B2] mr-1">
 					{__('Need to', 'doublescale')}
 				</span>
@@ -170,11 +170,11 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`qcrm-reactflow-node qcrm-reactflow-node--delay ${
-					isSelected ? 'qcrm-reactflow-node--selected' : ''
+				className={`doublescale-reactflow-node doublescale-reactflow-node--delay ${
+					isSelected ? 'doublescale-reactflow-node--selected' : ''
 				} ${
 					viewMode && analytics
-						? 'qcrm-reactflow-node--action-with-analytics'
+						? 'doublescale-reactflow-node--action-with-analytics'
 						: ''
 				}`}
 				onClick={viewMode ? undefined : handleEdit}
@@ -182,7 +182,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 				<Handle
 					type="target"
 					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 
 				{/* Step Reorder Controls - hide in view mode */}
@@ -217,7 +217,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 				<Handle
 					type="source"
 					position={Position.Bottom}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 				/>
 			</div>
 		</NodeContextMenu>

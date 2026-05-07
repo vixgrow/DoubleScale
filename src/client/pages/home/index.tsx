@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
 
 	if (!data || loading) {
 		return (
-			<div className="qcrm-dashboard">
+			<div className="doublescale-dashboard">
 				<PageHeader
 					title={__('Dashboard', 'doublescale')}
 					subtitle={tabTitles[activeTab]}
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
 	}
 
 	return (
-		<div className="qcrm-dashboard">
+		<div className="doublescale-dashboard">
 			<PageHeader
 				title={__('Dashboard', 'doublescale')}
 				subtitle={tabTitles[activeTab]}

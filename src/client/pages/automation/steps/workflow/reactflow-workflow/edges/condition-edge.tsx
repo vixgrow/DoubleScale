@@ -68,7 +68,7 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 				id={id}
 				path={edgePath}
 				style={edgeStyle}
-				className={`qcrm-condition-edge qcrm-condition-edge--${condition}`}
+				className={`doublescale-condition-edge doublescale-condition-edge--${condition}`}
 			/>
 		</>
 	);

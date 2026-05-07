@@ -71,7 +71,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 	}, []);
 
 	return (
-		<div className="qcrm-integration-select-field">
+		<div className="doublescale-integration-select-field">
 			<Select
 				className="react-select-container"
 				classNamePrefix="react-select"

@@ -79,7 +79,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
 			<span
-				className="qcrm-reactflow-condition__configured"
+				className="doublescale-reactflow-condition__configured"
 				style={{
 					color: hasWarning
 						? '#f59e0b'
@@ -126,7 +126,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 			)}
 		</div>
 	) : (
-		<span className="qcrm-reactflow-condition__not-configured">
+		<span className="doublescale-reactflow-condition__not-configured">
 			{!isProActive
 				? __('This is a PRO Feature', 'doublescale')
 				: __('Not Configured', 'doublescale')}
@@ -158,12 +158,12 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`qcrm-reactflow-node qcrm-reactflow-node--condition ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+				className={`doublescale-reactflow-node doublescale-reactflow-node--condition ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
 					type="target"
 					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 
 				{/* Step Reorder Controls - hide in view mode */}
@@ -191,13 +191,13 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 					type="source"
 					position={Position.Bottom}
 					id="yes"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--source doublescale-reactflow-handle--yes"
 				/>
 				<Handle
 					type="source"
 					position={Position.Bottom}
 					id="no"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
+					className="doublescale-reactflow-handle doublescale-reactflow-handle--source doublescale-reactflow-handle--no"
 				/>
 			</div>
 		</NodeContextMenu>

@@ -185,7 +185,7 @@ const FieldsCard: React.FC = () => {
 						</Typography.Text>
 					}
 					size="small"
-					className="qcrm-overview-fields-list"
+					className="doublescale-overview-fields-list"
 					loading={isFetching}
 				>
 					<AntList.Item>
@@ -219,7 +219,7 @@ const FieldsCard: React.FC = () => {
 					</Typography.Text>
 				}
 				size="small"
-				className="qcrm-overview-fields-list"
+				className="doublescale-overview-fields-list"
 				loading={isFetching}
 			>
 				<AntList.Item>

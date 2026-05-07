@@ -462,7 +462,7 @@ const Campaigns: React.FC = () => {
 		(activeTab === 'sms' && isSmsProviderConnected);
 
 	return (
-		<div className="qcrm-campaigns">
+		<div className="doublescale-campaigns">
 			<PageHeader
 				title={__('Campaigns List', 'doublescale')}
 				subtitle={__('Campaigns', 'doublescale')}

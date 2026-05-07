@@ -115,7 +115,7 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 			<Dialog open={visible} onOpenChange={onVisibleChange}>
 				<DialogTrigger asChild>
 					<div
-						className={`qcrm-automation-workflow__add-step flex items-center justify-center ${!disabled ? 'pointer-events-auto' : ''}`}
+						className={`doublescale-automation-workflow__add-step flex items-center justify-center ${!disabled ? 'pointer-events-auto' : ''}`}
 						onClick={(e) => {
 							if (disabled) return;
 							e.stopPropagation();

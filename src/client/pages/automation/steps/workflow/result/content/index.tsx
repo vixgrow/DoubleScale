@@ -416,7 +416,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	return (
 		<Card className="shadow-none">
 			<CardContent className="pt-6">
-				<div className="qcrm-automation-workflow-timeline">
+				<div className="doublescale-automation-workflow-timeline">
 					{timelineItems.map((item, index) => {
 						const isLeft = index % 2 === 1;
 						const isCondition = item.type === 'condition';
@@ -424,20 +424,20 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 						return (
 							<div
 								key={item.id}
-								className={`qcrm-timeline-item ${
+								className={`doublescale-timeline-item ${
 									isLeft
-										? 'qcrm-timeline-item--left'
-										: 'qcrm-timeline-item--right'
+										? 'doublescale-timeline-item--left'
+										: 'doublescale-timeline-item--right'
 								}`}
 							>
-								<div className="qcrm-timeline-marker">
-									<div className="qcrm-timeline-number">
+								<div className="doublescale-timeline-marker">
+									<div className="doublescale-timeline-number">
 										{index + 1}
 									</div>
 								</div>
-								<div className="qcrm-timeline-content">
+								<div className="doublescale-timeline-content">
 									{shouldShowTimestamp(item) && (
-										<div className="qcrm-timeline-timestamp">
+										<div className="doublescale-timeline-timestamp">
 											<ClockIcon />
 											<span>
 												{__('Started on', 'doublescale')}:
@@ -447,7 +447,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 											</span>
 										</div>
 									)}
-									<Card className="qcrm-timeline-card shadow-none transition-shadow">
+									<Card className="doublescale-timeline-card shadow-none transition-shadow">
 										<CardContent className="p-4">
 											{isCondition ? (
 												<ConditionStep

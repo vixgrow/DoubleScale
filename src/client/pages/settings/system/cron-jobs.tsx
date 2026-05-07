@@ -183,7 +183,7 @@ const CronJobs: React.FC = () => {
 	const wpConfigCode = `define('DISABLE_WP_CRON', true);`;
 
 	return (
-		<div className="cron-jobs qcrm-fields">
+		<div className="cron-jobs doublescale-fields">
 			{runError && (
 				<Alert variant="destructive" className="mb-6">
 					<AlertTriangle className="h-4 w-4" />

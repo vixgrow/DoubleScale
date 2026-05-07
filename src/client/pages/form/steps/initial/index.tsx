@@ -82,7 +82,7 @@ const Initial: React.FC = () => {
 			{isLoading ? (
 				<InitialShimmer />
 			) : form ? (
-				<div className="qcrm-fields">
+				<div className="doublescale-fields">
 					<div className="text-[#09090B] font-bold text-2xl">
 						{__('Basic Information', 'doublescale')}
 					</div>

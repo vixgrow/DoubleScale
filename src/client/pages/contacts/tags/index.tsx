@@ -284,7 +284,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	};
 
 	return (
-		<div className="qcrm-contacts-tags-list">
+		<div className="doublescale-contacts-tags-list">
 			{/* Notice Banner */}
 			{notice && (
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />

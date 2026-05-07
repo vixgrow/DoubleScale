@@ -32,7 +32,7 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 	iconColor,
 }) => {
 	return (
-		<div className="qcrm-pro-stat-card">
+		<div className="doublescale-pro-stat-card">
 			<MessageStatsCard
 				label={label}
 				value={value}
@@ -41,7 +41,7 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 				borderColorClass={borderColorClass}
 				iconColor={iconColor}
 			/>
-			<div className="qcrm-pro-stat-card__pro-feature">
+			<div className="doublescale-pro-stat-card__pro-feature">
 				<span className="text-lg text-[#CB5301] font-bold">
 					{__('Pro feature', 'doublescale')}
 				</span>

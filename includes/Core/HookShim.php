@@ -1,6 +1,6 @@
 <?php
 /**
- * Whitelist-based hook compatibility: canonical `doublescale_*` also invokes legacy `doublescale_*`.
+ * Whitelist-based hook compatibility: canonical `doublescale_*` filters/actions also fire legacy `quillcrm_*` hooks via deprecated API.
  *
  * @package DoubleScale\Core
  */
@@ -16,6 +16,9 @@ final class HookShim {
 	public static function register(): void {
 		foreach ( self::filter_hooks() as $legacy ) {
 			$new = self::to_new( $legacy );
+			if ( $legacy === $new ) {
+				continue;
+			}
 			add_filter(
 				$new,
 				static function ( $value ) use ( $legacy, $new ) {
@@ -28,6 +31,9 @@ final class HookShim {
 
 		foreach ( self::action_hooks() as $legacy ) {
 			$new = self::to_new( $legacy );
+			if ( $legacy === $new ) {
+				continue;
+			}
 			add_action(
 				$new,
 				static function ( ...$args ) use ( $legacy, $new ) {
@@ -40,7 +46,11 @@ final class HookShim {
 	}
 
 	private static function to_new( string $legacy ): string {
-		return preg_replace( '/^doublescale_/', 'doublescale_', $legacy, 1 );
+		// Legacy QuillCRM / QuillCRM hook prefix → DoubleScale canonical prefix.
+		if ( 0 === strpos( $legacy, 'quillcrm_' ) ) {
+			return 'doublescale_' . substr( $legacy, strlen( 'quillcrm_' ) );
+		}
+		return $legacy;
 	}
 
 	/**
@@ -49,44 +59,45 @@ final class HookShim {
 	 * @return string[]
 	 */
 	private static function filter_hooks(): array {
+		// Legacy hook names (quillcrm_*) bridged to canonical doublescale_* via register().
 		return array(
-			'doublescale_actions',
-			'doublescale_actions_sources',
-			'doublescale_bulk_campaign_batch_size',
-			'doublescale_campaign_batch_size',
-			'doublescale_campaign_channel_labels',
-			'doublescale_campaign_channels_requiring_phone',
-			'doublescale_curl_multi_campaign_batch_size',
-			'doublescale_current_channel_context',
-			'doublescale_default_email_content',
-			'doublescale_default_test_email_content',
-			'doublescale_email_cc',
-			'doublescale_email_content_type',
-			'doublescale_email_default_content_type',
-			'doublescale_email_footer_text',
-			'doublescale_email_from_address',
-			'doublescale_email_from_name',
-			'doublescale_email_header_image',
-			'doublescale_email_headers',
-			'doublescale_email_message',
-			'doublescale_email_reply_to',
-			'doublescale_email_template',
-			'doublescale_email_template_paths',
-			'doublescale_enable_ajax_continuation',
-			'doublescale_enable_provider_webhooks',
-			'doublescale_forms',
-			'doublescale_goals',
-			'doublescale_goals_sources',
-			'doublescale_logger_add_message',
-			'doublescale_logger_days_to_retain_logs',
-			'doublescale_logger_log_message',
-			'doublescale_logging_class',
-			'doublescale_max_execution_time',
-			'doublescale_memory_limit',
-			'doublescale_merge_tag_groups',
-			'doublescale_register_log_handlers',
-			'doublescale_triggers',
-			'doublescale_triggers_sources',
+			'quillcrm_actions',
+			'quillcrm_actions_sources',
+			'quillcrm_bulk_campaign_batch_size',
+			'quillcrm_campaign_batch_size',
+			'quillcrm_campaign_channel_labels',
+			'quillcrm_campaign_channels_requiring_phone',
+			'quillcrm_curl_multi_campaign_batch_size',
+			'quillcrm_current_channel_context',
+			'quillcrm_default_email_content',
+			'quillcrm_default_test_email_content',
+			'quillcrm_email_cc',
+			'quillcrm_email_content_type',
+			'quillcrm_email_default_content_type',
+			'quillcrm_email_footer_text',
+			'quillcrm_email_from_address',
+			'quillcrm_email_from_name',
+			'quillcrm_email_header_image',
+			'quillcrm_email_headers',
+			'quillcrm_email_message',
+			'quillcrm_email_reply_to',
+			'quillcrm_email_template',
+			'quillcrm_email_template_paths',
+			'quillcrm_enable_ajax_continuation',
+			'quillcrm_enable_provider_webhooks',
+			'quillcrm_forms',
+			'quillcrm_goals',
+			'quillcrm_goals_sources',
+			'quillcrm_logger_add_message',
+			'quillcrm_logger_days_to_retain_logs',
+			'quillcrm_logger_log_message',
+			'quillcrm_logging_class',
+			'quillcrm_max_execution_time',
+			'quillcrm_memory_limit',
+			'quillcrm_merge_tag_groups',
+			'quillcrm_register_log_handlers',
+			'quillcrm_triggers',
+			'quillcrm_triggers_sources',
 		);
 	}
 
@@ -97,47 +108,48 @@ final class HookShim {
 	 */
 	private static function action_hooks(): array {
 		return array(
-			'doublescale_abandoned_cart_created',
-			'doublescale_abandoned_cart_recovered',
-			'doublescale_activities_bulk_deleted',
-			'doublescale_activity_before_delete',
-			'doublescale_activity_comment_added',
-			'doublescale_activity_comment_before_delete',
-			'doublescale_activity_comment_deleted',
-			'doublescale_activity_comment_updated',
-			'doublescale_activity_deleted',
-			'doublescale_activity_updated',
-			'doublescale_automation_contact_completed',
-			'doublescale_automation_contact_entered',
-			'doublescale_automation_step_failed',
-			'doublescale_call_logged',
-			'doublescale_campaign_completed',
-			'doublescale_campaign_failed',
-			'doublescale_campaign_scheduled',
-			'doublescale_contact_lists_applied',
-			'doublescale_contact_lists_removed',
-			'doublescale_contact_subscribed',
-			'doublescale_contact_tags_applied',
-			'doublescale_contact_tags_removed',
-			'doublescale_contact_unsubscribed',
-			'doublescale_contact_updated',
-			'doublescale_email_body',
-			'doublescale_email_clicked',
-			'doublescale_email_header',
-			'doublescale_email_logged',
-			'doublescale_email_opened',
-			'doublescale_email_send_after',
-			'doublescale_email_send_before',
-			'doublescale_form_submitted',
-			'doublescale_import_completed',
-			'doublescale_meeting_scheduled',
-			'doublescale_note_added',
-			'doublescale_process_incoming_message',
-			'doublescale_register_email_blocks',
-			'doublescale_register_message_providers',
-			'doublescale_run_version_migrations',
-			'doublescale_updated',
-			'doublescale_webhook_received',
+			'quillcrm_abandoned_cart_created',
+			'quillcrm_abandoned_cart_recovered',
+			'quillcrm_activities_bulk_deleted',
+			'quillcrm_activity_before_delete',
+			'quillcrm_activity_comment_added',
+			'quillcrm_activity_comment_before_delete',
+			'quillcrm_activity_comment_deleted',
+			'quillcrm_activity_comment_updated',
+			'quillcrm_activity_deleted',
+			'quillcrm_activity_updated',
+			'quillcrm_automation_contact_completed',
+			'quillcrm_automation_contact_entered',
+			'quillcrm_automation_step_failed',
+			'quillcrm_call_logged',
+			'quillcrm_campaign_completed',
+			'quillcrm_campaign_failed',
+			'quillcrm_campaign_scheduled',
+			'quillcrm_contact_lists_applied',
+			'quillcrm_contact_lists_removed',
+			'quillcrm_contact_subscribed',
+			'quillcrm_contact_tags_applied',
+			'quillcrm_contact_tags_removed',
+			'quillcrm_contact_unsubscribed',
+			'quillcrm_contact_updated',
+			'quillcrm_email_body',
+			'quillcrm_email_clicked',
+			'quillcrm_email_header',
+			'quillcrm_email_logged',
+			'quillcrm_email_opened',
+			'quillcrm_email_send_after',
+			'quillcrm_email_send_before',
+			'quillcrm_form_submitted',
+			'quillcrm_import_completed',
+			'quillcrm_loaded',
+			'quillcrm_meeting_scheduled',
+			'quillcrm_note_added',
+			'quillcrm_process_incoming_message',
+			'quillcrm_register_email_blocks',
+			'quillcrm_register_message_providers',
+			'quillcrm_run_version_migrations',
+			'quillcrm_updated',
+			'quillcrm_webhook_received',
 		);
 	}
 }

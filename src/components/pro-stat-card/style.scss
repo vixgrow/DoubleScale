@@ -1,4 +1,4 @@
-.qcrm-pro-stat-card {
+.doublescale-pro-stat-card {
 	position: relative;
 	flex: 1;
 	min-width: 0;
@@ -14,7 +14,7 @@
 }
 
 // Global style to blur value in pro stat cards
-.qcrm-pro-stat-card .text-2xl {
+.doublescale-pro-stat-card .text-2xl {
 	filter: blur(4px) !important;
 	-webkit-user-select: none;
 	user-select: none;
@@ -22,7 +22,7 @@
 
 // Responsive adjustments
 @media (max-width: 768px) {
-	.qcrm-pro-stat-card {
+	.doublescale-pro-stat-card {
 		&__content {
 			padding: 0.75rem;
 		}

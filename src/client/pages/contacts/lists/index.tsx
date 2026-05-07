@@ -283,7 +283,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	};
 
 	return (
-		<div className="qcrm-contacts-lists-list">
+		<div className="doublescale-contacts-lists-list">
 			{/* Notice Banner */}
 			{notice && (
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />

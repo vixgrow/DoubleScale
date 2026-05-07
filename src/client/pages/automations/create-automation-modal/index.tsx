@@ -542,7 +542,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 					)}
 
-					<div className="qcrm-fields qcrm-automation-modal-fields flex-1 flex flex-col overflow-hidden">
+					<div className="doublescale-fields doublescale-automation-modal-fields flex-1 flex flex-col overflow-hidden">
 						<div className="shrink-0">
 							<Field
 								label={__('Automation Name', 'doublescale')}
@@ -558,8 +558,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 							/>
 						</div>
 
-						<div className="qcrm-field flex-1 flex flex-col overflow-hidden min-h-0">
-							<div className="qcrm-field-label flex items-center text-base text-[#09090B] shrink-0">
+						<div className="doublescale-field flex-1 flex flex-col overflow-hidden min-h-0">
+							<div className="doublescale-field-label flex items-center text-base text-[#09090B] shrink-0">
 								{__('Trigger', 'doublescale')}
 								<span className="text-destructive">*</span>
 							</div>

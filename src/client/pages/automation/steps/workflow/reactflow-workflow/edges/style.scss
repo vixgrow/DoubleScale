@@ -1,4 +1,4 @@
-.qcrm-edge-add-button {
+.doublescale-edge-add-button {
     position: absolute;
     transform: translate(-50%, -50%);
     pointer-events: all;
@@ -17,14 +17,14 @@
 }
 
 // Ensure edges stay below buttons
-.qcrm-edge {
+.doublescale-edge {
     stroke: #D7D7DA;
     stroke-width: 2;
     z-index: 0 !important;
 }
 
 // Ensure the button is centered on the edge
-.qcrm-automation-workflow__add-step {
+.doublescale-automation-workflow__add-step {
     position: relative;
     display: flex;
     align-items: center;

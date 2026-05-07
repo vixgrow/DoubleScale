@@ -10,7 +10,7 @@ import { Skeleton } from '@doublescale/components/ui/skeleton';
 
 const InitialShimmer: React.FC = () => {
     return (
-        <div className="qcrm-fields">
+        <div className="doublescale-fields">
             {/* Basic Information Header */}
             <div className="text-[#09090B] font-bold text-2xl mb-4">
                 {__('Basic Information', 'doublescale')}

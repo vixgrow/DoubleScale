@@ -136,7 +136,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 	return (
 		<Card>
 			<Flex gap={40}>
-				<Flex className="qcrm-fields" vertical style={{ flex: 1 }}>
+				<Flex className="doublescale-fields" vertical style={{ flex: 1 }}>
 					<Flex gap={20}>
 						<Field
 							label={__('From Name', 'doublescale')}
@@ -216,7 +216,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 						}}
 					>
 						<Flex
-							className="qcrm-preview-content"
+							className="doublescale-preview-content"
 							align="center"
 							justify="center"
 							style={{ height: '100%' }}
@@ -240,7 +240,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 					trigger="click"
 					description={
 						<Flex
-							className="qcrm-fields"
+							className="doublescale-fields"
 							justify="start"
 							style={{ width: 400, padding: '10px 20px' }}
 						>

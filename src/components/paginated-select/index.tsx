@@ -439,7 +439,7 @@ const PaginatedSelect = ({
 	}, [options, isLoadingMore, hasMore]);
 
 	return (
-		<div className={`qcrm-paginated-select ${className}`}>
+		<div className={`doublescale-paginated-select ${className}`}>
 			<div className="flex flex-col gap-[10px]">
 				<div className="flex justify-between gap-[10px]">
 					<div className="flex flex-col gap-[10px] flex-1">

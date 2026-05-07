@@ -84,8 +84,8 @@ const Settings: React.FC = () => {
 			{form && isFetching ? (
 				<SettingsShimmer />
 			) : form && !isFetching ? (
-				<div className="qcrm-fields">
-					<div className="qcrm-field">
+				<div className="doublescale-fields">
+					<div className="doublescale-field">
 						{formFields && (
 							<ContactMappedFields
 								values={mappedFields}
@@ -99,11 +99,11 @@ const Settings: React.FC = () => {
 						)}
 					</div>
 
-					<div className="qcrm-field">
+					<div className="doublescale-field">
 						<div className="text-[#09090B] font-bold text-2xl my-5">
 							{__('Contact', 'doublescale')}
 						</div>
-						<div className="qcrm-field-input">
+						<div className="doublescale-field-input">
 							<div className="flex flex-col gap-5">
 								<div className="flex justify-between gap-[10px]">
 									<div className="flex flex-col gap-[10px] flex-1">

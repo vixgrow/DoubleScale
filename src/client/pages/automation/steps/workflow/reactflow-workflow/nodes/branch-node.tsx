@@ -28,17 +28,17 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<div
-			className={`qcrm-reactflow-node qcrm-reactflow-node--branch qcrm-reactflow-node--branch-${condition} ${colorClasses}`}
+			className={`doublescale-reactflow-node doublescale-reactflow-node--branch doublescale-reactflow-node--branch-${condition} ${colorClasses}`}
 		>
 			<Handle
 				type="target"
 				position={Position.Top}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+				className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 			/>
 
-			<div className="qcrm-reactflow-branch__content">
+			<div className="doublescale-reactflow-branch__content">
 				<div
-					className={`qcrm-reactflow-branch__label qcrm-reactflow-branch__label--${condition}`}
+					className={`doublescale-reactflow-branch__label doublescale-reactflow-branch__label--${condition}`}
 				>
 					{isYes ? __('Yes', 'doublescale') : __('No', 'doublescale')}
 				</div>
@@ -47,7 +47,7 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+				className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
 			/>
 		</div>
 	);

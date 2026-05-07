@@ -314,7 +314,7 @@ const Review: React.FC = () => {
 				currentStep={campaign?.type === 'email' ? 4 : 3}
 			/>
 
-			<div className="qcrm-review-step flex gap-6 items-start">
+			<div className="doublescale-review-step flex gap-6 items-start">
 				<div className="w-2/3">
 					<PanelSettings
 						title={__('Review and Confirm', 'doublescale')}

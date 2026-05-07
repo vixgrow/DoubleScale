@@ -57,7 +57,7 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 	}, [onTriggerClick]);
 
 	return (
-		<div className="qcrm-reactflow-container">
+		<div className="doublescale-reactflow-container">
 			<ReactFlowProvider>
 				<WorkflowVisualization
 					automation={automation || undefined}

@@ -273,7 +273,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				onClick={() => handleNavigation(item.path)}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
-				className="qcrm-navbar__item"
+				className="doublescale-navbar__item"
 				style={{
 					transitionDelay: `${Math.min(index * 100, 300)}ms`,
 				}}
@@ -281,11 +281,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				<SidebarMenuButton
 					size="xl"
 					isActive={selectedKey === item.path}
-					className="qcrm-navbar__link"
+					className="doublescale-navbar__link"
 				>
-					<div className="qcrm-navbar__link-inner">
-						<span className="qcrm-navbar__icon">{item.icon}</span>
-						<span className="qcrm-navbar__label">{item.label}</span>
+					<div className="doublescale-navbar__link-inner">
+						<span className="doublescale-navbar__icon">{item.icon}</span>
+						<span className="doublescale-navbar__label">{item.label}</span>
 					</div>
 				</SidebarMenuButton>
 			</SidebarMenuItem>
@@ -370,23 +370,23 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<>
 			<Sidebar
 				collapsible="icon"
-				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+				className={`doublescale-navbar${isMounted ? ' doublescale-navbar--mounted' : ''
 					}`}
 			>
-				<div className="qcrm-navbar__surface">
-					<SidebarHeader className="qcrm-navbar__header">
-						<div className="qcrm-navbar__brand">
+				<div className="doublescale-navbar__surface">
+					<SidebarHeader className="doublescale-navbar__header">
+						<div className="doublescale-navbar__brand">
 							<LogoIcon width={30} height={40} />
-							<span className="qcrm-navbar__brand-text">
+							<span className="doublescale-navbar__brand-text">
 								{__('Quill CRM', 'doublescale')}
 							</span>
 						</div>
 					</SidebarHeader>
-					<SidebarContent className="qcrm-navbar__content">
+					<SidebarContent className="doublescale-navbar__content">
 						{!isAtTop && (
 							<button
 								type="button"
-								className="qcrm-navbar__chevron qcrm-navbar__chevron--top"
+								className="doublescale-navbar__chevron doublescale-navbar__chevron--top"
 								onClick={() => handleScrollBy('up')}
 								aria-label={__('Scroll up', 'doublescale')}
 							>
@@ -395,9 +395,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						)}
 						<div
 							ref={scrollContainerRef}
-							className="qcrm-navbar__scroll-container"
+							className="doublescale-navbar__scroll-container"
 						>
-							<SidebarMenu className="qcrm-navbar__menu">
+							<SidebarMenu className="doublescale-navbar__menu">
 								{navigationItems.map((item, index) =>
 									renderMenuItem(item, index)
 								)}
@@ -406,7 +406,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						{!isAtBottom && (
 							<button
 								type="button"
-								className="qcrm-navbar__chevron qcrm-navbar__chevron--bottom"
+								className="doublescale-navbar__chevron doublescale-navbar__chevron--bottom"
 								onClick={() => handleScrollBy('down')}
 								aria-label={__('Scroll down', 'doublescale')}
 							>
@@ -419,7 +419,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			{hoveredItem &&
 				createPortal(
 					<div
-						className="qcrm-navbar__submenu-portal"
+						className="doublescale-navbar__submenu-portal"
 						style={{
 							position: 'fixed',
 							top: `${hoveredItem.rect.top - getSubmenuTopOffset(hoveredItem.path)}px`,
@@ -438,7 +438,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							setHoveredItem(null);
 						}}
 					>
-						<div className="qcrm-navbar__submenu">
+						<div className="doublescale-navbar__submenu">
 							{hoveredItem.subMenu.map((subItem) => (
 								<button
 									key={subItem.path}
@@ -446,7 +446,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 										handleNavigation(subItem.path);
 										setHoveredItem(null);
 									}}
-									className="qcrm-navbar__submenu-item"
+									className="doublescale-navbar__submenu-item"
 								>
 									{subItem.label}
 								</button>

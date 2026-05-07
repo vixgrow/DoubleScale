@@ -64,7 +64,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 	const total = analytics?.messages?.total || 0;
 
 	return (
-		<div className="qcrm-emails flex flex-col gap-5">
+		<div className="doublescale-emails flex flex-col gap-5">
 			<div className="flex justify-between items-center">
 				<h2 className="text-2xl font-semibold">
 					{__('Emails', 'doublescale')}

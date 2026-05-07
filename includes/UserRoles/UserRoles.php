@@ -209,6 +209,17 @@ final class UserRoles {
 	}
 
 	/**
+	 * All CRM caps as associative array (cap => true) for multisite super-admin grants.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<string, bool>
+	 */
+	public static function get_all_caps() {
+		return array_fill_keys( self::all_capabilities(), true );
+	}
+
+	/**
 	 * Get CRM manager capabilities
 	 *
 	 * @since 1.0.0

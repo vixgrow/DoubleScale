@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/tooltip';
 import WordPressLogoIcon from '../icons/woedpress-logo';
 import { createPortal } from 'react-dom';
+import config from '@doublescale/config';
 
 interface SubMenuItem {
 	path: string;
@@ -99,6 +100,48 @@ const PATH_TO_SECTION: Record<string, string> = {
 	extensions: 'system',
 };
 
+/** Top-level admin page ids shown in the free (non-Pro) sidebar. */
+const FREE_CORE_PAGE_IDS = new Set([
+	'dashboard',
+	'contacts',
+	'automations',
+	'settings',
+]);
+
+/**
+ * Maps `registerAdminPage` path (PageSettings.path) to a Pro module slug for
+ * sidebar visibility when Pro is active. Paths with no entry are not module-gated.
+ */
+const PATH_TO_MODULE: Record<string, string> = {
+	'sales-pipeline': 'deals',
+	'pipeline/deal/:id': 'deals',
+	tasks: 'tasks',
+	campaigns: 'campaigns',
+	'sms-campaigns': 'campaigns',
+	forms: 'forms',
+	'email-sequences': 'campaigns',
+	'analytics-and-reports': 'analytics',
+	integrations: 'integrations',
+	'smtp/:tab?': 'smtp',
+	booking: 'booking',
+	'abandoned-carts': 'campaigns',
+	'ai-hub': 'automations',
+	extensions: 'integrations',
+};
+
+/** Submenu routes gated by a Pro module (when Pro is active). */
+const SUB_PATH_TO_MODULE: Record<string, string> = {
+	campaigns: 'campaigns',
+	'email-sequences': 'campaigns',
+	'deals-analytics': 'analytics',
+	'sales-rep-analytics': 'analytics',
+	'pipeline-analytics': 'analytics',
+	'my-reports': 'analytics',
+	'emails-analytics': 'analytics',
+	'contacts-analytics': 'analytics',
+	'cart-analytics': 'analytics',
+};
+
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -118,16 +161,56 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } =
 		useCapabilities();
 
+	const filterSubMenuByModules = useCallback(
+		(items: SubMenuItem[] | undefined, isPro: boolean): SubMenuItem[] | undefined => {
+			if (!items?.length) {
+				return items;
+			}
+			if (!isPro) {
+				return items;
+			}
+			return items.filter((sub) => {
+				const mod = SUB_PATH_TO_MODULE[sub.path];
+				return !mod || config.isModuleEnabled(mod);
+			});
+		},
+		[]
+	);
+
 	const navigationItems = useMemo(() => {
 		const pages = getAdminPages();
-		return Object.values(pages)
-			.filter(
-				(item) =>
+		const isProActive = applyFilters(
+			'doublescale_is_pro_active',
+			false
+		) as boolean;
+
+		return Object.entries(pages)
+			.filter(([, item]) => {
+				return (
 					!item.hidden &&
 					item.path &&
 					hasRequiredCapability(item.requiredCapability)
-			)
-			.map<NavigationItem>((item) => {
+				);
+			})
+			.filter(([pageId, item]) => {
+				const defaultSidebar =
+					isProActive || FREE_CORE_PAGE_IDS.has(pageId);
+				const show = applyFilters(
+					'doublescale_show_admin_page_in_sidebar',
+					defaultSidebar,
+					pageId,
+					item
+				) as boolean;
+				if (!show) {
+					return false;
+				}
+				if (!isProActive) {
+					return true;
+				}
+				const moduleSlug = PATH_TO_MODULE[item.path];
+				return !moduleSlug || config.isModuleEnabled(moduleSlug);
+			})
+			.map<NavigationItem>(([, item]) => {
 				const navItem: NavigationItem = {
 					path: item.path,
 					label: item.label,
@@ -220,6 +303,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					navItem.subMenu = subMenu;
 				}
 
+				if (navItem.subMenu) {
+					const filtered = filterSubMenuByModules(
+						navItem.subMenu,
+						isProActive
+					);
+					navItem.subMenu =
+						filtered && filtered.length > 0 ? filtered : undefined;
+				}
+
 				return navItem;
 			});
 	}, [
@@ -227,6 +319,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		isSalesRep,
 		canManageAllDeals,
 		isCrmManager,
+		filterSubMenuByModules,
 	]);
 
 	const sectionGroups = useMemo<SectionGroup[]>(() => {

@@ -33,6 +33,16 @@ export type ConfigData = Record<string, unknown> & {
 	proPluginData: ProPluginData;
 	currency: string;
 	urlDoubleScalePro: string;
+	modules: ModuleInfo[];
+};
+
+export type ModuleInfo = {
+	slug: string;
+	label: string;
+	description: string;
+	enabled: boolean;
+	is_toggleable: boolean;
+	dependencies: string[];
 };
 export type License = {
 	upgrades: {

@@ -15,6 +15,7 @@ import type {
 	Importers,
 	Integrations,
 	License,
+	ModuleInfo,
 	ProPluginData,
 	QuillSMTPInfo,
 	UserCapabilities,
@@ -124,6 +125,7 @@ const configData: ConfigData = {
 			is_installed: false,
 			is_active: false,
 		},
+	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
 };
 
 /**
@@ -741,6 +743,21 @@ export const setCurrency = (data: ConfigData) => (value: string) => {
 	data.currency = value;
 };
 
+export const getModules = (data: ConfigData) => (): ModuleInfo[] => {
+	return data.modules;
+};
+
+export const setModules = (data: ConfigData) => (value: ModuleInfo[]) => {
+	data.modules = value;
+};
+
+export const isModuleEnabled =
+	(data: ConfigData) =>
+	(slug: string): boolean => {
+		const mod = data.modules.find((m) => m.slug === slug);
+		return mod ? mod.enabled : true;
+	};
+
 /**
  * Set license
  *
@@ -849,6 +866,9 @@ export interface ConfigApi {
 	setUrlDoubleScalePro: (value: string) => void;
 	getProPluginData: () => ProPluginData;
 	setProPluginData: (value: ProPluginData) => void;
+	isModuleEnabled: (slug: string) => boolean;
+	getModules: () => ModuleInfo[];
+	setModules: (value: ModuleInfo[]) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -915,6 +935,9 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setCurrency = setCurrency(data);
 	configApi.getUrlDoubleScalePro = () => getUrlDoubleScalePro(data);
 	configApi.setUrlDoubleScalePro = setUrlDoubleScalePro(data);
+	configApi.getModules = getModules(data);
+	configApi.setModules = setModules(data);
+	configApi.isModuleEnabled = isModuleEnabled(data);
 	return configApi;
 };
 

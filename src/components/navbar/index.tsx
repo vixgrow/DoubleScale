@@ -284,11 +284,13 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				if (item.path === 'automations') {
 					navItem.subMenu = [
 						{ path: 'automations', label: __('Workflow', 'doublescale') },
-						{
+					];
+					if (isProActive) {
+						navItem.subMenu.push({
 							path: 'email-sequences',
 							label: __('Email Sequences', 'doublescale'),
-						},
-					];
+						});
+					}
 				}
 
 				if (item.path === 'contacts') {

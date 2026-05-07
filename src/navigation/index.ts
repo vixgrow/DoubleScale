@@ -1,5 +1,5 @@
 export {
-	BrowserRouter, unstable_HistoryRouter as HistoryRouter, matchPath, Route, Routes, useLocation, useMatch, useNavigate, useParams
+	BrowserRouter, unstable_HistoryRouter as HistoryRouter, matchPath, Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams
 } from 'react-router-dom';
 export * from './api';
 export { getHistory } from './history';

@@ -9,11 +9,13 @@ import { __ } from '@wordpress/i18n';
  */
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import config from '@doublescale/config';
 
 interface ProtectedRouteProps {
 	page: {
-		/** User needs at least one of these caps (see `useCapabilities.hasRequiredCapability`). */
 		requiredCapability?: string[];
+		/** When set, user is redirected away unless this module is enabled in admin config. */
+		requiresModule?: string;
 		component?: React.ComponentType;
 	};
 	children?: React.ReactNode;
@@ -25,15 +27,31 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	const navigate = useNavigate();
 	const { hasRequiredCapability } = useCapabilities();
+
 	useEffect(() => {
 		if (
 			page.requiredCapability &&
 			!hasRequiredCapability(page.requiredCapability)
 		) {
-			// Redirect to dashboard if user doesn't have permission using navigation
 			navigate(getToLink('/'));
 		}
 	}, [page.requiredCapability, navigate, hasRequiredCapability]);
+
+	useEffect(() => {
+		if (
+			page.requiresModule &&
+			!config.isModuleToggleEnabled(page.requiresModule)
+		) {
+			navigate(getToLink('/'), { replace: true });
+		}
+	}, [page.requiresModule, navigate]);
+
+	if (
+		page.requiresModule &&
+		!config.isModuleToggleEnabled(page.requiresModule)
+	) {
+		return null;
+	}
 
 	// If user doesn't have permission, return null or loading state
 	if (

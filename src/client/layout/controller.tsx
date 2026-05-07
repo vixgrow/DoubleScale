@@ -310,6 +310,7 @@ registerAdminPage('campaigns', {
 	label: __('Campaigns', 'doublescale'),
 	icon: <CampaignsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'campaigns',
 });
 
 registerAdminPage('campaign', {
@@ -317,6 +318,7 @@ registerAdminPage('campaign', {
 	component: () => <Campaign />,
 	label: __('Campaign', 'doublescale'),
 	hidden: true,
+	requiresModule: 'campaigns',
 });
 
 registerAdminPage('email-sequences', {
@@ -326,6 +328,7 @@ registerAdminPage('email-sequences', {
 	icon: <EmailSequenceIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
 	hidden: true,
+	requiresModule: 'campaigns',
 });
 
 registerAdminPage('email-sequence', {
@@ -341,6 +344,7 @@ registerAdminPage('email-sequence', {
 	),
 	label: __('Email Sequence', 'doublescale'),
 	hidden: true,
+	requiresModule: 'campaigns',
 });
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
@@ -367,6 +371,7 @@ registerAdminPage('sales-pipeline', {
 	label: __('Pipelines', 'doublescale'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiresModule: 'deals',
 });
 
 // Deal Detail - stub registration that Pro plugin will override
@@ -384,6 +389,7 @@ registerAdminPage('deal-detail', {
 	label: __('Deal Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiresModule: 'deals',
 });
 
 registerAdminPage('automations', {
@@ -392,6 +398,7 @@ registerAdminPage('automations', {
 	label: __('Automations', 'doublescale'),
 	icon: <AutomationsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'automations',
 });
 
 registerAdminPage('automation', {
@@ -399,6 +406,7 @@ registerAdminPage('automation', {
 	component: () => <Automation />,
 	label: __('Automation', 'doublescale'),
 	hidden: true,
+	requiresModule: 'automations',
 });
 
 registerAdminPage('automation-reports', {
@@ -406,6 +414,7 @@ registerAdminPage('automation-reports', {
 	component: () => <AutomationReports />,
 	label: __('Automation Reports', 'doublescale'),
 	hidden: true,
+	requiresModule: 'automations',
 });
 
 registerAdminPage('forms', {
@@ -414,6 +423,7 @@ registerAdminPage('forms', {
 	label: __('Forms', 'doublescale'),
 	icon: <FormsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'forms',
 });
 
 registerAdminPage('form', {
@@ -421,6 +431,7 @@ registerAdminPage('form', {
 	component: () => <Form />,
 	label: __('Form', 'doublescale'),
 	hidden: true,
+	requiresModule: 'forms',
 });
 
 registerAdminPage('link-triggers', {
@@ -445,6 +456,7 @@ registerAdminPage('integrations', {
 	label: __('Integrations', 'doublescale'),
 	icon: <IntegrationsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'integrations',
 });
 
 registerAdminPage('templates', {
@@ -452,6 +464,7 @@ registerAdminPage('templates', {
 	component: () => <Templates />,
 	label: __('Templates', 'doublescale'),
 	hidden: true,
+	requiresModule: 'campaigns',
 });
 
 registerAdminPage('template', {
@@ -459,6 +472,7 @@ registerAdminPage('template', {
 	component: () => <Template />,
 	label: __('Template', 'doublescale'),
 	hidden: true,
+	requiresModule: 'campaigns',
 });
 
 registerAdminPage('abandoned-carts', {
@@ -475,6 +489,7 @@ registerAdminPage('abandoned-carts', {
 	label: __('Abandoned Carts', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'campaigns',
 });
 
 // Tasks - stub registration that Pro plugin will override via filter
@@ -499,6 +514,7 @@ registerAdminPage('tasks', {
 	label: __('Tasks', 'doublescale'),
 	icon: <TasksIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiresModule: 'tasks',
 });
 
 registerAdminPage('analytics-and-reports', {
@@ -507,6 +523,7 @@ registerAdminPage('analytics-and-reports', {
 	label: __('Analytics', 'doublescale'),
 	icon: <AnalyticsReportsIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('deals-analytics', {
@@ -515,6 +532,7 @@ registerAdminPage('deals-analytics', {
 	label: __('Deals Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('sales-rep-analytics', {
@@ -525,6 +543,7 @@ registerAdminPage('sales-rep-analytics', {
 	label: __('Sales Rep Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('pipeline-analytics', {
@@ -535,6 +554,7 @@ registerAdminPage('pipeline-analytics', {
 	label: __('Pipeline Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('my-reports', {
@@ -545,6 +565,7 @@ registerAdminPage('my-reports', {
 	label: __('My Reports', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_sales_rep', 'doublescale_sales_manager', 'doublescale_crm_manager'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('cart-analytics', {
@@ -555,6 +576,7 @@ registerAdminPage('cart-analytics', {
 	label: __('Cart Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'analytics',
 });
 
 const ContactAnalyticsWrapper = () => {
@@ -573,6 +595,7 @@ registerAdminPage('contacts-analytics', {
 	label: __('Contacts Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'analytics',
 });
 
 registerAdminPage('emails-analytics', {
@@ -581,6 +604,7 @@ registerAdminPage('emails-analytics', {
 	label: __('Emails Analytics', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'analytics',
 });
 
 // registerAdminPage('tools', {

@@ -759,6 +759,17 @@ export const isModuleEnabled =
 	};
 
 /**
+ * True only when the slug exists in {@link ConfigData.modules} and is enabled.
+ * Used for route registration and strict gating (unknown slugs are treated as off).
+ */
+export const isModuleToggleEnabled =
+	(data: ConfigData) =>
+	(slug: string): boolean => {
+		const mod = data.modules.find((m) => m.slug === slug);
+		return Boolean(mod && mod.enabled);
+	};
+
+/**
  * Set license
  *
  * @param data the json environment configuration to use for getting config values
@@ -867,6 +878,7 @@ export interface ConfigApi {
 	getProPluginData: () => ProPluginData;
 	setProPluginData: (value: ProPluginData) => void;
 	isModuleEnabled: (slug: string) => boolean;
+	isModuleToggleEnabled: (slug: string) => boolean;
 	getModules: () => ModuleInfo[];
 	setModules: (value: ModuleInfo[]) => void;
 }
@@ -938,6 +950,7 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.getModules = getModules(data);
 	configApi.setModules = setModules(data);
 	configApi.isModuleEnabled = isModuleEnabled(data);
+	configApi.isModuleToggleEnabled = isModuleToggleEnabled(data);
 	return configApi;
 };
 

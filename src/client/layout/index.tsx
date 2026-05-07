@@ -7,6 +7,7 @@ import {
 	Route,
 	getHistory,
 	Routes,
+	Navigate,
 } from '@doublescale/navigation';
 
 /**
@@ -146,6 +147,7 @@ const _PageLayout = () => {
 							/>
 						);
 					})}
+					<Route path="*" element={<Navigate to="/" replace />} />
 				</Routes>
 			</HistoryRouter>
 		</>

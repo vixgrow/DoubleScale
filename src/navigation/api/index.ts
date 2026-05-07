@@ -13,8 +13,20 @@ import { __ } from "@wordpress/i18n";
  * Internal Dependencies
  */
 import { Pages, PageSettings } from "../types";
+import config from "@doublescale/config";
 
 const adminPages: Pages = {};
+
+/**
+ * Whether a page tied to {@link PageSettings.requiresModule} should be registered.
+ */
+export const adminPagePassesModuleGate = (settings: PageSettings): boolean => {
+	const slug = settings.requiresModule;
+	if (!slug) {
+		return true;
+	}
+	return config.isModuleToggleEnabled(slug);
+};
 
 export const registerAdminPage = (id: string, settings: PageSettings) => {
   if (settings.exact === undefined) {
@@ -61,6 +73,10 @@ export const registerAdminPage = (id: string, settings: PageSettings) => {
     console.error(
       __('The "component" property must be a valid function!', "doublescale")
     );
+    return;
+  }
+
+  if (!adminPagePassesModuleGate(settings)) {
     return;
   }
 

@@ -171,7 +171,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			}
 			return items.filter((sub) => {
 				const mod = SUB_PATH_TO_MODULE[sub.path];
-				return !mod || config.isModuleEnabled(mod);
+				return !mod || config.isModuleToggleEnabled(mod);
 			});
 		},
 		[]
@@ -207,8 +207,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				if (!isProActive) {
 					return true;
 				}
-				const moduleSlug = PATH_TO_MODULE[item.path];
-				return !moduleSlug || config.isModuleEnabled(moduleSlug);
+				const moduleSlug =
+					item.requiresModule ?? PATH_TO_MODULE[item.path];
+				return !moduleSlug || config.isModuleToggleEnabled(moduleSlug);
 			})
 			.map<NavigationItem>(([, item]) => {
 				const navItem: NavigationItem = {

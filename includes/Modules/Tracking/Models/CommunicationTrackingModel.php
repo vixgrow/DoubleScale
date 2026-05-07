@@ -10,10 +10,11 @@
 namespace DoubleScale\Modules\Tracking\Models;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Modules\Campaigns\Models\CampaignModel;
+use DoubleScale\Modules\Tracking\Models\TrackingCampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Campaigns\Models\TemplateModel;
+use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
+use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Constants\MessageDirection;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
@@ -33,6 +34,36 @@ class CommunicationTrackingModel extends Model {
 	const MODE_EMAIL    = 1;
 	const MODE_SMS      = 2;
 	const MODE_WHATSAPP = 3;
+
+	/**
+	 * Campaign model for Eloquent relations when full Campaigns module is present (Pro or future free).
+	 *
+	 * @return string
+	 */
+	protected static function resolve_campaign_relation_class() {
+		if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel' ) ) {
+			return \DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel::class;
+		}
+		if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\CampaignModel' ) ) {
+			return \DoubleScale\Modules\Campaigns\Models\CampaignModel::class;
+		}
+		return TrackingCampaignModel::class;
+	}
+
+	/**
+	 * Template model for Eloquent relations when full Campaigns module is present.
+	 *
+	 * @return string
+	 */
+	protected static function resolve_template_relation_class() {
+		if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\TemplateModel' ) ) {
+			return \DoubleScale\Pro\Modules\Campaigns\Models\TemplateModel::class;
+		}
+		if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\TemplateModel' ) ) {
+			return \DoubleScale\Modules\Campaigns\Models\TemplateModel::class;
+		}
+		return TrackingTemplateModel::class;
+	}
 
 	/**
 	 * Table name
@@ -134,7 +165,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function campaign() {
-		return $this->belongsTo( CampaignModel::class, 'source_id' );
+		return $this->belongsTo( static::resolve_campaign_relation_class(), 'source_id' );
 	}
 
 	/**
@@ -156,7 +187,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function template() {
-		return $this->belongsTo( TemplateModel::class, 'template_id' );
+		return $this->belongsTo( static::resolve_template_relation_class(), 'template_id' );
 	}
 
 	/**
@@ -408,7 +439,13 @@ class CommunicationTrackingModel extends Model {
 	 */
 	public function get_campaign() {
 		if ( $this->source_type === MessageSourceTypes::CAMPAIGN ) {
-			return CampaignModel::find( $this->source_id );
+			if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel' ) ) {
+				return \DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel::find( $this->source_id );
+			}
+			if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\CampaignModel' ) ) {
+				return \DoubleScale\Modules\Campaigns\Models\CampaignModel::find( $this->source_id );
+			}
+			return TrackingCampaignModel::find( $this->source_id );
 		}
 		return null;
 	}
@@ -662,6 +699,10 @@ class CommunicationTrackingModel extends Model {
 	 * @return array
 	 */
 	public static function get_campaign_stats( $campaign_id, $mode = null ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Services\CampaignAnalytics' ) ) {
+			return array();
+		}
+
 		$analytics = \DoubleScale\Modules\Campaigns\Services\CampaignAnalytics::instance();
 
 		if ( $mode ) {
@@ -738,6 +779,10 @@ class CommunicationTrackingModel extends Model {
 	 */
 	public function render_original_template() {
 		if ( ! $this->template_id ) {
+			return '';
+		}
+
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\EmailRenderer' ) ) {
 			return '';
 		}
 

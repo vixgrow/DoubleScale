@@ -24,7 +24,7 @@ class SubscriptionBeforeEnd extends Trigger
 	/**
 	 * Tasks instance for scheduling cron jobs
 	 *
-	 * @var \DoubleScale\Modules\Tasks\Tasks
+	 * @var \DoubleScale\Core\Tasks
 	 */
 	private $tasks;
 
@@ -78,7 +78,7 @@ class SubscriptionBeforeEnd extends Trigger
 	public function __construct()
 	{
 		parent::__construct();
-		$this->tasks = new \DoubleScale\Modules\Tasks\Tasks('doublescale_subscription_end');
+		$this->tasks = new \DoubleScale\Core\Tasks('doublescale_subscription_end');
 	}
 
 	/**

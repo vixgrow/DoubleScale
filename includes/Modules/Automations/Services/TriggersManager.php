@@ -17,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Exception;
 use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use DoubleScale\Modules\Forms\Services\FormsManager;
 
 /**
  * Triggers class
@@ -330,7 +329,10 @@ final class TriggersManager {
 	 * @return void
 	 */
 	public function set_forms_sources() {
-		$forms = FormsManager::instance()->get_all_forms();
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			return;
+		}
+		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 
 		foreach ( $forms as $form ) {
 			$this->sources['forms']['groups'][ $form->slug ] = array(

@@ -22,11 +22,8 @@ use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;
-// use DoubleScale\Modules\Deals\Models\DealModel; // Moved to Pro
-use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Constants\CampaignChannel;
 
@@ -82,7 +79,7 @@ class RestGeneralController extends RestController {
 		$total_tags            = TagModel::count();
 		$total_lists           = ListModel::count();
 		$total_automations     = AutomationModel::where( 'status', 'active' )->count();
-		$total_email_templates = TemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
+		$total_email_templates = \DoubleScale\Modules\Tracking\Models\TrackingTemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
 
 		// Deal statistics - only if PRO plugin is active
 		if ( class_exists( 'DoubleScale\Modules\Deals\Models\DealModel' ) ) {
@@ -97,7 +94,7 @@ class RestGeneralController extends RestController {
 
 		$recent_contacts              = ContactModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = ContactModel::where( 'email_status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$top_campaigns                = CampaignModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
+		$top_campaigns                = \DoubleScale\Modules\Tracking\Models\TrackingCampaignModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_automations              = AutomationModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_emails                = CommunicationTrackingModel::emails()->with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 

@@ -15,7 +15,6 @@ namespace DoubleScale\Modules\Contacts\Filters\Submission;
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Traits\TimeframeContactFilter;
-use DoubleScale\Modules\Forms\Models\FormModel;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -80,7 +79,11 @@ class FormSubmission extends Filter {
 	public function get_options() {
 		$options = array();
 
-		$forms = FormModel::all();
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Models\FormModel' ) ) {
+			return $options;
+		}
+
+		$forms = \DoubleScale\Modules\Forms\Models\FormModel::all();
 
 		foreach ( $forms as $form ) {
 			$options[ $form->id ] = $form->name;
@@ -155,4 +158,6 @@ class FormSubmission extends Filter {
 	}
 }
 
-FiltersManager::instance()->register( new FormSubmission() );
+if ( class_exists( '\DoubleScale\Modules\Forms\Models\FormModel' ) ) {
+	FiltersManager::instance()->register( new FormSubmission() );
+}

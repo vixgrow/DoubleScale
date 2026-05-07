@@ -17,7 +17,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\Modules\Tracking\Models\LinkTriggerModel;
 
 /**
@@ -25,7 +24,6 @@ use DoubleScale\Modules\Tracking\Models\LinkTriggerModel;
  */
 class RestLinkTriggerController extends RestController {
 
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

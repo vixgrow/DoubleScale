@@ -18,7 +18,6 @@ use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
-use DoubleScale\Modules\Campaigns\Services\CampaignRateLimiter;
 
 /**
  * RestSettingsController class.
@@ -153,11 +152,11 @@ class RestSettingsController extends RestController {
 						),
 						'max_in_second' => array(
 							'type'    => 'integer',
-							'default' => CampaignRateLimiter::instance()->get_default_per_second_limit( 'email' ),
+							'default' => 10,
 						),
 						'max_in_day'    => array(
 							'type'    => 'integer',
-							'default' => CampaignRateLimiter::instance()->get_default_daily_limit( 'email' ),
+							'default' => 10000,
 						),
 					),
 				),
@@ -167,7 +166,7 @@ class RestSettingsController extends RestController {
 					'properties'           => array(
 						'max_in_second' => array(
 							'type'    => 'integer',
-							'default' => CampaignRateLimiter::instance()->get_default_per_second_limit( 'sms' ),
+							'default' => 10,
 						),
 					),
 				),
@@ -177,7 +176,7 @@ class RestSettingsController extends RestController {
 					'properties'           => array(
 						'max_in_second' => array(
 							'type'    => 'integer',
-							'default' => CampaignRateLimiter::instance()->get_default_per_second_limit( 'whatsapp' ),
+							'default' => 10,
 						),
 					),
 				),

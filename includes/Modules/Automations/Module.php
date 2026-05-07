@@ -4,8 +4,7 @@
  *
  * Owns: automation models, triggers, actions, goals, rules, conditions, REST,
  * WooCommerce abandoned-cart capture/recovery hooks, abandoned-cart REST,
- * and automation processing. CRM vendor integrations live under the separate
- * Integrations module (`includes/Modules/Integrations/`).
+ * and automation processing. CRM vendor integrations are provided by the Pro add-on.
  *
  * @package DoubleScale\Pro
  */
@@ -37,7 +36,7 @@ final class Module extends AbstractModule {
 	}
 
 	public function dependencies(): array {
-		return array( 'core', 'contacts', 'deals', 'campaigns' );
+		return array( 'core', 'contacts', 'activities' );
 	}
 
 	public function register( Container $container ): void {
@@ -114,7 +113,6 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Woocommerce/*/*.php',
 				'includes/Modules/Automations/Triggers/Learndash/*.php',
 				'includes/Modules/Automations/Triggers/Edd/*.php',
-				'includes/Modules/Automations/Triggers/Deal/*.php',
 				'includes/Modules/Automations/Triggers/Tutorlms/*.php',
 				'includes/Modules/Automations/Triggers/Lifterlms/*.php',
 				'includes/Modules/Automations/Triggers/Learnpress/*.php',
@@ -122,15 +120,12 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Pmpro/*.php',
 				'includes/Modules/Automations/Triggers/Surecart/*/*.php',
 				'includes/Modules/Automations/Triggers/Prestoplayer/*.php',
-				'includes/Modules/Automations/Actions/Messaging/*.php',
 				'includes/Modules/Automations/Actions/*.php',
 				'includes/Modules/Automations/Actions/Delays/*.php',
 				'includes/Modules/Automations/Actions/Woocommerce/*.php',
 				'includes/Modules/Automations/Actions/Wordpress/*.php',
 				'includes/Modules/Automations/Actions/Crm/Slack/*.php',
 				'includes/Modules/Automations/Actions/Learndash/*.php',
-				'includes/Modules/Automations/Actions/Email/*.php',
-				'includes/Modules/Automations/Actions/Deal/*.php',
 				'includes/Modules/Automations/Actions/Webhooks/*.php',
 				'includes/Modules/Automations/Actions/Tutorlms/*.php',
 				'includes/Modules/Automations/Actions/Lifterlms/*.php',
@@ -160,19 +155,14 @@ final class Module extends AbstractModule {
 	public function register_triggers( $triggers ) {
 		$triggers['contact_subscribed']                       = new Triggers\ContactSubscribed();
 		$triggers['contact_unsubscribed']                     = new Triggers\ContactUnsubscribed();
-		$triggers['deal_owner_change']                        = new Triggers\Deal\DealOwnerChange();
-		$triggers['deal_stage_change']                        = new Triggers\Deal\DealStageChange();
-		$triggers['deal_status_change']                       = new Triggers\Deal\DealStatusChange();
-		$triggers['deal_value_change']                        = new Triggers\Deal\DealValueChange();
-		$triggers['link_trigger_clicked']                     = new Triggers\LinkTriggerClicked();
+		$triggers['user_login']                              = new Triggers\UserLogin();
+		$triggers['user_register']                           = new Triggers\UserRegister();
+		$triggers['user_role_update']                        = new Triggers\UserRoleUpdate();
 		$triggers['lists_applied']                            = new Triggers\ListsApplied();
 		$triggers['lists_removed']                            = new Triggers\ListsRemoved();
 		$triggers['tags_applied']                             = new Triggers\TagsApplied();
 		$triggers['tags_removed']                             = new Triggers\TagsRemoved();
 		$triggers['webhook_received']                         = new Triggers\WebhookReceived();
-		$triggers['sms_received']                             = new Triggers\SmsReceived();
-		$triggers['whatsapp_received']                        = new Triggers\WhatsappReceived();
-		$triggers['email_received']                           = new Triggers\EmailReceived();
 		$triggers['wp_customer_before_card_expiry']           = new Triggers\Woocommerce\Subscription\CustomerBeforeCardExpiry();
 		$triggers['wp_subscription_before_end']               = new Triggers\Woocommerce\Subscription\SubscriptionBeforeEnd();
 		$triggers['wp_subscription_before_renewal']           = new Triggers\Woocommerce\Subscription\SubscriptionBeforeRenewal();
@@ -246,16 +236,6 @@ final class Module extends AbstractModule {
 	}
 
 	public function register_actions( $actions ) {
-		$actions['add_new_deal']             = new Actions\Deal\AddNewDeal();
-		$actions['add_note_deal']            = new Actions\Deal\AddNoteDeal();
-		$actions['update_custom_field_deal'] = new Actions\Deal\UpdateCustomFieldDeal();
-		$actions['update_owner_deal']        = new Actions\Deal\UpdateOwnerDeal();
-		$actions['update_stage_deal']        = new Actions\Deal\UpdateStageDeal();
-		$actions['update_status_deal']       = new Actions\Deal\UpdateStatusDeal();
-		$actions['update_title_deal']        = new Actions\Deal\UpdateTitleDeal();
-		$actions['update_value_deal']        = new Actions\Deal\UpdateValueDeal();
-		$actions['send_sms']                 = new Actions\Messaging\SendSms();
-		$actions['send_whatsapp']            = new Actions\Messaging\SendWhatsapp();
 		$actions['learndash_add_user_to_course']      = new Actions\Learndash\AddUserToCourse();
 		$actions['learndash_add_user_to_group']       = new Actions\Learndash\AddUserToGroup();
 		$actions['learndash_remove_user_from_course'] = new Actions\Learndash\RemoveUserFromCourse();
@@ -267,8 +247,6 @@ final class Module extends AbstractModule {
 		$actions['remove_user_role']                  = new Actions\Wordpress\RemoveUserRole();
 		$actions['update_user_role']                  = new Actions\Wordpress\UpdateUserRole();
 		$actions['update_user_meta']                  = new Actions\Wordpress\UpdateUserMeta();
-		$actions['send_campaign_email']               = new Actions\Email\SendCampaignEmail();
-		$actions['send_email_sequence']               = new Actions\Email\SendEmailSequence();
 		$actions['delay-until-datetime']              = new Actions\Delays\DelayUntilDatetime();
 		$actions['http_request_webhook']              = new Actions\Webhooks\HttpRequestWebhook();
 		$actions['zapier_webhook']                    = new Actions\Webhooks\ZapierWebhook();
@@ -299,7 +277,7 @@ final class Module extends AbstractModule {
 		$groups['messaging'] = array(
 			'name'      => __( 'Messaging', 'doublescale' ),
 			'mergeTags' => array(),
-			'triggers'  => array( 'whatsapp_received', 'sms_received', 'email_received' ),
+			'triggers'  => array(),
 		);
 
 		$acf_disabled = ! doublescale_is_plugin_active( 'advanced-custom-fields/acf.php' )

@@ -10,7 +10,6 @@
 namespace DoubleScale\Modules\Tracking\Abstracts;
 
 use DoubleScale\Core\Utils\Utils;
-use DoubleScale\Modules\Inbox\Services\MessageProviderRegistry;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\MessageSourceTypes;
@@ -263,7 +262,8 @@ abstract class AbstractTracking {
 	 */
 	protected function process_incoming_message( $provider, $webhook_data ) {
 		// Check if MessagingIncoming class exists (Pro feature).
-		if ( ! class_exists( '\DoubleScale\Modules\Inbox\Incoming\MessagingIncoming' ) ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Inbox\Incoming\MessagingIncoming' )
+			&& ! class_exists( '\DoubleScale\Modules\Inbox\Incoming\MessagingIncoming' ) ) {
 			doublescale_get_logger()->debug(
 				ucfirst( $this->channel ) . ' incoming message received but MessagingIncoming not available',
 				array(
@@ -341,10 +341,15 @@ abstract class AbstractTracking {
 	/**
 	 * Detect provider from webhook request format
 	 *
-	 * @return \DoubleScale\Modules\Inbox\MessageProviderInterface|null
+	 * @return object|null Provider instance or null.
 	 */
 	protected function detect_provider_from_request() {
-		 $registry = MessageProviderRegistry::instance();
+		$registry_class = '\DoubleScale\Pro\Modules\Inbox\Services\MessageProviderRegistry';
+		if ( ! class_exists( $registry_class ) ) {
+			return null;
+		}
+		/** @var object $registry */
+		$registry = $registry_class::instance();
 
 		// Check for Meta webhook signature header
 		if ( ! empty( $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ) ) {

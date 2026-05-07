@@ -6,7 +6,7 @@
  * models/migrations, and link-trigger REST API. Website/page-visit tracking is
  * in the Website Tracking module.
  *
- * @package DoubleScale\Pro
+ * @package DoubleScale\Modules\Tracking
  */
 
 namespace DoubleScale\Modules\Tracking;
@@ -14,7 +14,6 @@ namespace DoubleScale\Modules\Tracking;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\AbstractModule;
-use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Container;
 
 final class Module extends AbstractModule {
@@ -36,7 +35,7 @@ final class Module extends AbstractModule {
 	}
 
 	public function dependencies(): array {
-		return array( 'core', 'contacts', 'campaigns' );
+		return array( 'core', 'contacts', 'automations' );
 	}
 
 	public function register( Container $container ): void {
@@ -71,23 +70,6 @@ final class Module extends AbstractModule {
 
 	public function boot( Container $container ): void {
 		parent::boot( $container );
-
-		$legacy_controllers = $this->restControllers();
-		add_action(
-			'rest_api_init',
-			static function () use ( $legacy_controllers ) {
-				foreach ( $legacy_controllers as $class ) {
-					if ( ! is_string( $class ) || ! is_subclass_of( $class, RestController::class, true ) ) {
-						continue;
-					}
-					if ( ! method_exists( $class, 'register_routes_legacy' ) ) {
-						continue;
-					}
-					( new $class() )->register_routes_legacy();
-				}
-			},
-			11
-		);
 
 		$container->get( Email::class );
 		$container->get( Sms::class );

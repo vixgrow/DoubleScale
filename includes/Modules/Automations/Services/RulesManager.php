@@ -14,9 +14,6 @@ namespace DoubleScale\Modules\Automations\Services;
 
 use Exception;
 use DoubleScale\Modules\Automations\Abstracts\Rule;
-use DoubleScale\Modules\Forms\Services\FormsManager;
-
-use DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend;
 
 /**
  * Rules class
@@ -82,9 +79,13 @@ final class RulesManager
 	 */
 	public function register_forms_rules()
 	{
-		$forms = FormsManager::instance()->get_all_forms();
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			|| ! class_exists( '\DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend' ) ) {
+			return;
+		}
+		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 		foreach ($forms as $form) {
-			$this->register(new FormFieldRuleBackend($form));
+			$this->register(new \DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend($form));
 		}
 	}
 
@@ -263,16 +264,17 @@ final class RulesManager
 			),
 		);
 
-		// get forms slug to set in groups
-		$forms = FormsManager::instance()->get_all_forms();
-		foreach ($forms as $form) {
-			$this->groups[$form->slug] = array(
-				'name'        => $form->name,
-				'rules'       => array(),
-				'key'         => $form->slug,
-				'triggers'    => array($form->slug),
-				'is_disabled' => ! $form->is_enabled(),
-			);
+		if ( class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+			foreach ($forms as $form) {
+				$this->groups[$form->slug] = array(
+					'name'        => $form->name,
+					'rules'       => array(),
+					'key'         => $form->slug,
+					'triggers'    => array($form->slug),
+					'is_disabled' => ! $form->is_enabled(),
+				);
+			}
 		}
 	}
 

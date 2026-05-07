@@ -9,7 +9,7 @@ namespace DoubleScale\Core;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Tasks\Tasks;
+use DoubleScale\Core\Tasks;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container as IlluminateContainer;

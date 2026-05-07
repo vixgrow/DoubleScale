@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
-use DoubleScale\Modules\Forms\Services\FormsManager;
 use DoubleScale\Managers\IntegrationsManager;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
@@ -101,7 +100,9 @@ final class AdminConfig {
 				'nonce'               => $nonce,
 				'pluginDirUrl'        => DOUBLESCALE_PLUGIN_URL,
 				'siteUrl'             => site_url(),
-				'forms'               => FormsManager::instance()->get_options(),
+				'forms'               => class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_options()
+					: array(),
 				'filtersGroups'       => FiltersManager::instance()->get_groups(),
 				'customFieldsTypes'   => class_exists( 'DoubleScale\Managers\CustomFieldsManager' ) ? \DoubleScale\Managers\CustomFieldsManager::instance()->get_options() : array(),
 				'contactFieldsGroups' => Utils::get_contact_fields(),

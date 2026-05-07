@@ -25,7 +25,6 @@ use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Managers\MergeTagsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
-use DoubleScale\Modules\Forms\Services\FormsManager;
 use DoubleScale\UserRoles\Permissions;
 
 /**
@@ -398,7 +397,9 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = FormsManager::instance()->get_all_forms();
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+			: array();
 
 		// If we have a specific form_id and trigger_id, register field rules for that form only
 		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
@@ -502,7 +503,9 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = FormsManager::instance()->get_all_forms();
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+			: array();
 
 		// If we have a specific form_id and trigger_id, register merge tags for that form only
 		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
@@ -683,7 +686,11 @@ class RestAutomationController extends RestController {
 			$is_form = false;
 			$trigger = TriggersManager::instance()->get_trigger( $automation->trigger );
 			if ( empty( $trigger ) ) {
-				$form = FormsManager::instance()->get_form( $automation->trigger );
+				if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+					$automation->delete();
+					throw new \Exception( 'Trigger not found.' );
+				}
+				$form = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger );
 				if ( empty( $form ) ) {
 					$automation->delete();
 					throw new \Exception( 'Trigger not found.' );
@@ -830,7 +837,9 @@ class RestAutomationController extends RestController {
 			};
 
 			if ( empty( $trigger ) ) {
-				$form = FormsManager::instance()->get_form( $automation->trigger );
+				$form = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger )
+					: null;
 
 				if ( ! empty( $form ) && ! empty( $form->is_pro ) && $form->is_pro ) {
 					$has_warnings = true;
@@ -1358,7 +1367,9 @@ class RestAutomationController extends RestController {
 		);
 
 		// set forms
-		$forms = FormsManager::instance()->get_all_forms();
+		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+			: array();
 		foreach ( $forms as $form ) {
 			$plugin_dependencies[ $form->slug ] = array(
 				'plugin'     => $form->slug,

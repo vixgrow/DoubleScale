@@ -30,10 +30,8 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Core\Settings\Settings;
-use DoubleScale\Modules\Campaigns\Emails\Emails;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Modules\Campaigns\Emails\EmailTrackingHelper;
 use DoubleScale\Managers\MergeTagsManager;
 use DoubleScale\Modules\LeadScoring\LeadScoringManager;
 
@@ -1729,9 +1727,10 @@ class RestContactController extends RestController {
 					$channel_status_field = $campaign_type_string . '_status';
 					$contacts             = $contacts->where($channel_status_field, 'subscribed');
 
-					// Apply recipient field filter (phone/email availability)
-					$campaign_contact_filter = \DoubleScale\Modules\Campaigns\Services\CampaignContactFilter::instance();
-					$contacts                = $campaign_contact_filter->apply_campaign_type_filter($contacts, $campaign_type_int);
+					if ( class_exists( '\DoubleScale\Modules\Campaigns\Services\CampaignContactFilter' ) ) {
+						$campaign_contact_filter = \DoubleScale\Modules\Campaigns\Services\CampaignContactFilter::instance();
+						$contacts                = $campaign_contact_filter->apply_campaign_type_filter($contacts, $campaign_type_int);
+					}
 				}
 			}
 
@@ -2337,7 +2336,15 @@ class RestContactController extends RestController {
 				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
 			}
 
-			$result = Emails::send_double_optin_email($contact);
+			if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\Emails' ) ) {
+				return new WP_Error(
+					'campaigns_unavailable',
+					__( 'Double opt-in email is not available in this build.', 'doublescale' ),
+					array( 'status' => 501 )
+				);
+			}
+
+			$result = \DoubleScale\Modules\Campaigns\Emails\Emails::send_double_optin_email($contact);
 
 			// Log the result for troubleshooting and audit trail.
 			if (! $result) {

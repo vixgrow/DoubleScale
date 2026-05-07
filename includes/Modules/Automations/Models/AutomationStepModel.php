@@ -12,9 +12,7 @@
 namespace DoubleScale\Modules\Automations\Models;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Modules\Campaigns\Services\CampaignTemplateFactory;
-use DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 
 /**
  * AutomationStepModel class
@@ -269,6 +267,9 @@ class AutomationStepModel extends Model {
 
 
 	protected static function process_template_update( $step, $channel_type, &$settings ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer' ) ) {
+			return;
+		}
 		// WhatsApp: Check if template_id changed (user selected different template)
 		// WhatsApp uses pre-approved Meta templates, so we just link to the new one
 		if ( $channel_type === 'whatsapp' && isset( $settings['template_id'] ) ) {
@@ -295,8 +296,8 @@ class AutomationStepModel extends Model {
 
 		$template_id = reset( $settings['template_ids'] );
 
-		if ( TemplateDataPreparer::has_raw_template_fields( $settings, $channel_type ) ) {
-			if ( TemplateModel::is_used_in_tracking( $template_id ) ) {
+		if ( \DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer::has_raw_template_fields( $settings, $channel_type ) ) {
+			if ( TrackingTemplateModel::is_used_in_tracking( $template_id ) ) {
 				unset( $settings['template_ids'] );
 				$step->settings = $settings;
 
@@ -311,9 +312,9 @@ class AutomationStepModel extends Model {
 					)
 				);
 			} else {
-				$template = TemplateModel::find( $template_id );
+				$template = TrackingTemplateModel::find( $template_id );
 				if ( $template ) {
-					$template_data = TemplateDataPreparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
+					$template_data = \DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
 					if ( $template_data ) {
 						// Add subject to settings array since setSubjectAttribute stores it there
 						if ( ! empty( $template_data['subject'] ) ) {
@@ -343,6 +344,10 @@ class AutomationStepModel extends Model {
 	}
 
 	protected static function process_template_create( $step, $channel_type, &$settings ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer' )
+			|| ! class_exists( '\DoubleScale\Modules\Campaigns\Services\CampaignTemplateFactory' ) ) {
+			return;
+		}
 		doublescale_get_logger()->debug(
 			'Automation step: Starting template creation',
 			array(
@@ -355,7 +360,7 @@ class AutomationStepModel extends Model {
 		);
 
 		try {
-			$template_data = TemplateDataPreparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
+			$template_data = \DoubleScale\Modules\Campaigns\Services\TemplateDataPreparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
 
 			if ( empty( $template_data ) ) {
 				doublescale_get_logger()->warning(
@@ -380,7 +385,7 @@ class AutomationStepModel extends Model {
 				)
 			);
 
-			$template_factory = CampaignTemplateFactory::instance();
+			$template_factory = \DoubleScale\Modules\Campaigns\Services\CampaignTemplateFactory::instance();
 			$template_ids     = $template_factory->process_templates_data(
 				array( $template_data ),
 				$channel_type,

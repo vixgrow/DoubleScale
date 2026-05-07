@@ -49,13 +49,6 @@ final class CoreModule extends AbstractModule {
 
 	public function register( Container $container ): void {
 		$container->singleton(
-			\DoubleScale\Modules\Integrations\Services\IntegrationsManager::class,
-			static function () {
-				return \DoubleScale\Modules\Integrations\Services\IntegrationsManager::instance();
-			}
-		);
-
-		$container->singleton(
 			\DoubleScale\Modules\Automations\Services\MergeTagsManager::class,
 			static function () {
 				return \DoubleScale\Modules\Automations\Services\MergeTagsManager::instance();
@@ -121,7 +114,7 @@ final class CoreModule extends AbstractModule {
 			999
 		);
 
-		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Modules\Tasks\Tasks::class, 'cleanup_old_tasks' ) );
+		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
 	}
 
 	/**
@@ -175,7 +168,7 @@ final class CoreModule extends AbstractModule {
 		}
 		set_transient( 'doublescale_register_tasks_lock_daily', 1, MINUTE_IN_SECONDS );
 
-		$daily = new \DoubleScale\Modules\Tasks\Tasks( 'doublescale_daily' );
+		$daily = new \DoubleScale\Core\Tasks( 'doublescale_daily' );
 
 		if ( $daily->get_next_timestamp( 'doublescale_daily3' ) === false ) {
 			$daily->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_daily3' );

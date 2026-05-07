@@ -16,12 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use DoubleScale\Modules\Automations\Abstracts\MergeTag;
-use DoubleScale\Modules\Forms\MergeTags\Forms\FormsFieldBackend;
-use DoubleScale\Modules\Forms\MergeTags\Forms\FormsMetadataBackEnd;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Modules\Forms\Services\FormsManager;
 
 /**
  * Merge Tag Manager
@@ -140,7 +135,10 @@ final class MergeTagsManager {
 	 * Register Forms Merge Tags
 	 */
 	public function register_forms_merge_tags() {
-		$forms = FormsManager::instance()->get_all_forms();
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			return;
+		}
+		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			// Ensure the form group is properly initialized with its name
 			// This handles the case where set_groups() ran before forms were loaded
@@ -153,8 +151,8 @@ final class MergeTagsManager {
 				);
 			}
 
-			$this->register( new FormsFieldBackend( $form->slug ) );
-			$this->register( new FormsMetadataBackEnd( $form->slug ) );
+			$this->register( new \DoubleScale\Modules\Forms\MergeTags\Forms\FormsFieldBackend( $form->slug ) );
+			$this->register( new \DoubleScale\Modules\Forms\MergeTags\Forms\FormsMetadataBackEnd( $form->slug ) );
 		}
 	}
 
@@ -357,15 +355,16 @@ final class MergeTagsManager {
 				'triggers'  => array( 'post_published' ),
 			),
 		);
-		// get forms slug to set in groups
-		$forms = FormsManager::instance()->get_all_forms();
-		foreach ( $forms as $form ) {
-			$this->groups[ $form->slug ] = array(
-				'name'        => $form->name,
-				'mergeTags'   => array(),
-				'triggers'    => array( $form->slug ),
-				'is_disabled' => ! $form->is_enabled(),
-			);
+		if ( class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+			$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+			foreach ( $forms as $form ) {
+				$this->groups[ $form->slug ] = array(
+					'name'        => $form->name,
+					'mergeTags'   => array(),
+					'triggers'    => array( $form->slug ),
+					'is_disabled' => ! $form->is_enabled(),
+				);
+			}
 		}
 
 		/**
@@ -442,7 +441,9 @@ final class MergeTagsManager {
 	 * @return string Content with merge tags replaced by stored values
 	 */
 	private function process_merge_tags_with_stored_values( $content, $tracking_id ) {
-		// Use the CommunicationTrackingMetaModel to render with stored values
+		if ( ! class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel' ) ) {
+			return $content;
+		}
 		$result = \DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel::render_with_stored_values( $tracking_id, $content );
 
 		return $result;

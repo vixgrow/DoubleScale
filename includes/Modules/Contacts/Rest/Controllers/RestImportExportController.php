@@ -366,6 +366,14 @@ class RestImportExportController extends RestController {
 
 		switch ( $provider ) {
 			case 'gohighlevel':
+				if ( ! class_exists( '\DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth' ) ) {
+					return new WP_REST_Response(
+						array(
+							'connected' => false,
+						),
+						200
+					);
+				}
 				$tokens = \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_stored_tokens();
 				if ( $tokens ) {
 					return new WP_REST_Response(
@@ -411,6 +419,15 @@ class RestImportExportController extends RestController {
 
 		switch ( $provider ) {
 			case 'gohighlevel':
+				if ( ! class_exists( '\DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth' ) ) {
+					return new WP_REST_Response(
+						array(
+							'success' => false,
+							'message' => __( 'GoHighLevel integration is not available.', 'doublescale' ),
+						),
+						200
+					);
+				}
 				$result = \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::clear_stored_tokens();
 				return new WP_REST_Response(
 					array(

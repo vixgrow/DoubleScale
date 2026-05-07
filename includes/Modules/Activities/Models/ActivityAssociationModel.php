@@ -152,6 +152,10 @@ class ActivityAssociationModel extends Model {
 			return $this->belongsTo( '\DoubleScale\Modules\Campaigns\Models\CampaignModel', 'entity_id', 'id' )
 				->where( 'entity_type', self::ENTITY_TYPE_CAMPAIGN );
 		}
+		if ( class_exists( '\DoubleScale\Modules\Tracking\Models\TrackingCampaignModel' ) ) {
+			return $this->belongsTo( \DoubleScale\Modules\Tracking\Models\TrackingCampaignModel::class, 'entity_id', 'id' )
+				->where( 'entity_type', self::ENTITY_TYPE_CAMPAIGN );
+		}
 		return null;
 	}
 

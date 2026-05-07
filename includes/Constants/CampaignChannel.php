@@ -10,8 +10,6 @@
 
 namespace DoubleScale\Constants;
 
-use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-
 /**
  * CampaignChannel class
  *

@@ -16,21 +16,23 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
-use DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel;
 
 class TrackingService {
 
 	/**
-	 * Record a page visit for a contact.
+	 * Record a page visit for a contact (requires Website Tracking in Pro).
 	 *
 	 * @param int    $contact_id Contact ID.
 	 * @param string $url        Visited URL.
 	 * @param string $referrer   Optional referrer URL.
 	 * @param string $user_agent Optional User-Agent header.
-	 * @return PageVisitModel
+	 * @return object|null Page visit model instance or null when not available.
 	 */
-	public function record_page_visit( int $contact_id, string $url, string $referrer = '', string $user_agent = '' ): PageVisitModel {
-		return PageVisitModel::create(
+	public function record_page_visit( int $contact_id, string $url, string $referrer = '', string $user_agent = '' ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\WebsiteTracking\Models\PageVisitModel' ) ) {
+			return null;
+		}
+		return \DoubleScale\Pro\Modules\WebsiteTracking\Models\PageVisitModel::create(
 			array(
 				'contact_id' => $contact_id,
 				'url'        => $url,
@@ -51,6 +53,7 @@ class TrackingService {
 		if ( ! $tracking ) {
 			return false;
 		}
+		$tracking->opened    = true;
 		$tracking->opened_at = current_time( 'mysql', true );
 		return $tracking->save();
 	}
@@ -67,14 +70,15 @@ class TrackingService {
 		if ( ! $tracking ) {
 			return false;
 		}
+		$tracking->clicked    = true;
 		$tracking->clicked_at = current_time( 'mysql', true );
 		$tracking->save();
 
 		CommunicationTrackingMetaModel::create(
 			array(
-				'tracking_id' => $tracking_id,
-				'meta_key'    => 'clicked_url',
-				'meta_value'  => $url,
+				'communication_tracking_id' => $tracking_id,
+				'meta_key'                  => 'clicked_url',
+				'meta_value'                => $url,
 			)
 		);
 

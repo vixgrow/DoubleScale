@@ -17,13 +17,8 @@ use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Core\Models\UserModel;
-use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Modules\Campaigns\Models\WcOrderModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
-use DoubleScale\Modules\Forms\Models\FormSubmissionModel;
-use DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel;
-use DoubleScale\Modules\Campaigns\Models\EddOrderModel;
 // use DoubleScale\Modules\Deals\Models\DealModel; // Moved to Pro
 // use DoubleScale\Core\CustomFields\Models\CustomFieldModel; // Moved to Pro
 use DoubleScale\Core\Utils\Utils;
@@ -204,7 +199,10 @@ class ContactModel extends Model
 	 */
 	public function campaign_emails()
 	{
-		return $this->hasMany(CommunicationTrackingModel::class, 'contact_id', 'id')->emails();
+		if ( ! class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel' ) ) {
+			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
+		}
+		return $this->hasMany( \DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel::class, 'contact_id', 'id' )->emails();
 	}
 
 	/**
@@ -216,7 +214,10 @@ class ContactModel extends Model
 	 */
 	public function orders()
 	{
-		return $this->hasMany(WcOrderModel::class, 'billing_email', 'email');
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' ) ) {
+			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
+		}
+		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\WcOrderModel::class, 'billing_email', 'email' );
 	}
 
 	/**
@@ -228,7 +229,10 @@ class ContactModel extends Model
 	 */
 	public function edd_orders()
 	{
-		return $this->hasMany(EddOrderModel::class, 'email', 'email');
+		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\EddOrderModel' ) ) {
+			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
+		}
+		return $this->hasMany( \DoubleScale\Modules\Campaigns\Models\EddOrderModel::class, 'email', 'email' );
 	}
 
 	/**
@@ -288,7 +292,10 @@ class ContactModel extends Model
 	 */
 	public function communication_tracking()
 	{
-		return $this->hasMany(CommunicationTrackingModel::class, 'contact_id', 'id');
+		if ( ! class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel' ) ) {
+			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
+		}
+		return $this->hasMany( \DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -300,10 +307,10 @@ class ContactModel extends Model
 	 */
 	public function form_submissions()
 	{
-		if (class_exists('DoubleScale\Modules\Forms\Models\FormSubmissionModel')) {
-			return $this->hasMany(FormSubmissionModel::class, 'contact_id', 'id');
+		if ( ! class_exists( '\DoubleScale\Modules\Forms\Models\FormSubmissionModel' ) ) {
+			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return null;
+		return $this->hasMany( \DoubleScale\Modules\Forms\Models\FormSubmissionModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -317,9 +324,9 @@ class ContactModel extends Model
 	public function page_visits()
 	{
 		if ( class_exists( 'DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel' ) ) {
-			return $this->hasMany(PageVisitModel::class, 'contact_id', 'id');
+			return $this->hasMany( \DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel::class, 'contact_id', 'id' );
 		}
-		return null;
+		return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 	}
 
 	/**

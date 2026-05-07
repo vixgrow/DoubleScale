@@ -21,11 +21,6 @@ use DoubleScale\Modules\Contacts\ImportExport\Importers\Funnelkit;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Csv;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Wpusers;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\WcCustomers;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Activecampaign;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Mailerlite;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Hubspot;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Pipedrive;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Gohighlevel;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Memberpress;
 use Exception;
 
@@ -98,12 +93,7 @@ class Manager {
 			new Csv(),
 			new Wpusers(),
 			new WcCustomers(),
-			new ActiveCampaign(),
-			new MailerLite(),
-			new Hubspot(),
-			new Pipedrive(),
-			new GoHighLevel(),
-			new MemberPress(),
+			new Memberpress(),
 		);
 
 		foreach ( $importers as $importer ) {

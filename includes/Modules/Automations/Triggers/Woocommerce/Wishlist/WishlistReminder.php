@@ -23,7 +23,7 @@ class WishlistReminder extends Trigger
 	/**
 	 * Tasks instance for scheduling cron jobs
 	 *
-	 * @var \DoubleScale\Modules\Tasks\Tasks
+	 * @var \DoubleScale\Core\Tasks
 	 */
 	private $tasks;
 
@@ -77,7 +77,7 @@ class WishlistReminder extends Trigger
 	public function __construct()
 	{
 		parent::__construct();
-		$this->tasks = new \DoubleScale\Modules\Tasks\Tasks('doublescale_wishlist_reminder');
+		$this->tasks = new \DoubleScale\Core\Tasks('doublescale_wishlist_reminder');
 	}
 
 	/**

@@ -17,19 +17,14 @@ import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
- * External Dependencies
- */
-import { motion } from 'framer-motion';
-
-/**
  * Internal dependencies
  */
+import config from '@doublescale/config';
 import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 // import CustomFields from '../pages/custom-fields'; // Moved to Pro
-import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 // import LinkTriggers from '../pages/link-triggers'; // Moved to Pro
 // import LinkTrigger from '../pages/link-trigger'; // Moved to Pro
@@ -62,10 +57,10 @@ import {
 	CustomFieldsIcon,
 	EmailSequenceIcon,
 	PiplelinesIcon,
-	WordPressIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
-import { User as UserIcon } from 'lucide-react';
+import { RocketIcon } from '@/components/icons';
+import AvatarIcon from '@/components/icons/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -106,171 +101,140 @@ const useOnboardingRedirect = () => {
 	}, [navigate]);
 };
 
-export const Controller = ({ page }) => {
+export const HeaderBar = ({ page }: { page: any }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const navigate = useNavigate();
-	const params = useParams();
 
-	// Check if Pro is active
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
-	const { isCrmManager } = useCapabilities();
-	if (isCrmManager()) {
-		useOnboardingRedirect();
-	}
-
-	// Navigation helper for Pro components
-	const handleNavigate = (path: string) => navigate(getToLink(path));
-
-	const handleBackToDashboard = () => {
-		const ajaxUrl = (window as Window & { ajaxurl?: string }).ajaxurl ?? '';
-
-		if (ajaxUrl.includes('admin-ajax.php')) {
-			window.location.href = ajaxUrl.replace(
-				'admin-ajax.php',
-				'index.php'
-			);
-			return;
-		}
-
-		window.location.href = `${window.location.origin}/wp-admin/`;
-	};
-
-	useEffect(() => {
-		window.document.documentElement.scrollTop = 0;
-	}, []);
+	const license = config.getLicense();
+	const hasValidLicense =
+		Boolean(license) &&
+		typeof license === 'object' &&
+		'status' in license &&
+		(license as unknown as { status: string }).status === 'valid';
 
 	useEffect(() => {
 		let isMounted = true;
-
-		const normalizeUser = (user: any): User | null => {
-			if (!user) {
-				return null;
-			}
-
-			const displayName =
-				user.display_name ||
-				user.name ||
-				user.username ||
-				(user.id ? `User ${user.id}` : '');
-
-			return {
-				id: Number(user.id),
-				display_name: displayName,
-				email: user.email || '',
-				name: user.name,
-				username: user.username,
-				avatar_urls: user.avatar_urls,
-			};
-		};
-
 		const fetchCurrentUser = async () => {
-			const globalUser = (
-				window as Window & {
-					qcData?: { currentUser?: any };
-				}
-			).qcData?.currentUser;
-
+			const globalUser = (window as Window & { qcData?: { currentUser?: any } })
+				.qcData?.currentUser;
 			if (globalUser) {
-				const normalizedUser = normalizeUser(globalUser);
-
-				if (isMounted && normalizedUser) {
-					setCurrentUser(normalizedUser);
-				}
-
+				setCurrentUser({
+					id: Number(globalUser.id),
+					display_name:
+						globalUser.display_name ||
+						globalUser.name ||
+						globalUser.username ||
+						'',
+					email: globalUser.email || '',
+					name: globalUser.name,
+					username: globalUser.username,
+					avatar_urls: globalUser.avatar_urls,
+				});
 				return;
 			}
-
 			try {
 				const user = await UserService.getCurrentUser();
-
-				if (isMounted && user) {
-					setCurrentUser(user);
-				}
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.error('Failed to load current user', error);
+				if (isMounted && user) setCurrentUser(user);
+			} catch {
+				// silently fail
 			}
 		};
-
 		fetchCurrentUser();
-
 		return () => {
 			isMounted = false;
 		};
 	}, []);
 
 	const avatarUrl = useMemo(() => {
-		if (!currentUser?.avatar_urls) {
-			return undefined;
-		}
-
-		const preferredSizes = ['96', '64', '48', '24'];
-
-		for (const size of preferredSizes) {
-			if (currentUser.avatar_urls[size]) {
-				return currentUser.avatar_urls[size];
+		if (!currentUser?.avatar_urls) return undefined;
+		for (const size of ['48', '96', '64', '24']) {
+			const url = currentUser.avatar_urls[size];
+			if (!url) {
+				continue;
+			}
+			const normalized = String(url).toLowerCase();
+			const isPlaceholderAvatar =
+				normalized.includes('gravatar.com/avatar') &&
+				(normalized.includes('d=mm') ||
+					normalized.includes('d=mystery') ||
+					normalized.includes('d=blank') ||
+					normalized.includes('d=identicon') ||
+					normalized.includes('d=monsterid') ||
+					normalized.includes('d=wavatar') ||
+					normalized.includes('d=retro'));
+			if (!isPlaceholderAvatar) {
+				return url;
 			}
 		}
-
 		return undefined;
 	}, [currentUser]);
 
 	const displayName = currentUser?.display_name || __('Guest', 'doublescale');
 
-	const avatarInitials = useMemo(() => {
-		if (!currentUser?.display_name) {
-			return '';
-		}
-
-		const parts = currentUser.display_name
-			.split(' ')
-			.map((part) => part.trim())
-			.filter(Boolean);
-
-		if (!parts.length) {
-			return currentUser.display_name.slice(0, 2).toUpperCase();
-		}
-
-		return parts
-			.slice(0, 2)
-			.map((part) => part[0])
-			.join('')
-			.toUpperCase();
-	}, [currentUser]);
-
 	return (
-		// Using motion div with layoutScroll to reevaluate positions when the user scrolls.
-		<motion.div layoutScroll className="doublescale-page-component-wrapper">
-			<div className="flex justify-between items-center w-full">
-				<div
-					className="text-[#CB5301] flex items-center gap-2 cursor-pointer text-base p-0 bg-transparent"
-					onClick={handleBackToDashboard}
-				>
-					<WordPressIcon />
-					{__('Back to WordPress Dashboard', 'doublescale')}
-				</div>
-			<div className="flex items-center gap-3 justify-end w-1/2">
+		<div className="doublescale-layout__header-bar">
+			<div className="doublescale-layout__header-left">
+				<span className="doublescale-layout__page-title">{page.label}</span>
+			</div>
+			<div className="doublescale-layout__header-right">
+				{Boolean(
+					applyFilters('doublescale_show_activate_license', !hasValidLicense)
+				) && (
+					<a
+						href="#"
+						onClick={(e) => {
+							e.preventDefault();
+							navigate(getToLink('settings/license'));
+						}}
+						className="doublescale-layout__license-link"
+					>
+						<RocketIcon />
+						{__('Activate License', 'doublescale')}
+					</a>
+				)}
 				{!isProActive && <ProUpgradeButton />}
 				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
-				<Avatar className="w-10 h-10 bg-[#F5F5F5]">
-					{avatarUrl ? (
-						<AvatarImage src={avatarUrl} alt={displayName} />
-					) : null}
-					<AvatarFallback className="text-[#1D1F2C] flex items-center justify-center uppercase">
-						{avatarInitials || <UserIcon className="w-5 h-5" />}
-					</AvatarFallback>
-				</Avatar>
-				<div className="text-lg font-semibold text-[#333333]">
-					{displayName}
+				<div className="doublescale-layout__header-divider"></div>
+				<div className="doublescale-layout__header-user-info">
+					<Avatar className="doublescale-layout__header-avatar">
+						{avatarUrl ? (
+							<AvatarImage src={avatarUrl} alt={displayName} />
+						) : null}
+						<AvatarFallback className="doublescale-layout__header-avatar-fallback">
+							<AvatarIcon />
+						</AvatarFallback>
+					</Avatar>
+					<span className="doublescale-layout__header-user-name">{displayName}</span>
 				</div>
 			</div>
-			</div>
+		</div>
+	);
+};
+
+export const Controller = ({ page }) => {
+	const navigate = useNavigate();
+	const params = useParams();
+
+	const { isCrmManager } = useCapabilities();
+	if (isCrmManager()) {
+		useOnboardingRedirect();
+	}
+
+	const handleNavigate = (path: string) => navigate(getToLink(path));
+
+	useEffect(() => {
+		window.document.documentElement.scrollTop = 0;
+	}, []);
+
+	return (
+		<div className="doublescale-page-component-wrapper">
 			<page.component navigate={handleNavigate} params={params} />
-		</motion.div>
+		</div>
 	);
 };
 

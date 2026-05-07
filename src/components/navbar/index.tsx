@@ -8,6 +8,7 @@ import {
 	useLocation,
 } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+
 /**
  * WordPress dependencies
  */
@@ -19,6 +20,9 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
+import { Button } from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
@@ -26,13 +30,22 @@ import './style.scss';
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from '@doublescale/components/ui/sidebar';
 import { LogoIcon } from '../icons';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
+import WordPressLogoIcon from '../icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 
 interface SubMenuItem {
@@ -45,61 +58,65 @@ interface NavigationItem {
 	label: string;
 	icon: React.ReactNode;
 	subMenu?: SubMenuItem[];
+	section?: string;
+}
+
+interface SectionGroup {
+	key: string;
+	label: string;
+	items: NavigationItem[];
 }
 
 interface NavBarProps {
 	defaultSelectedPath?: string;
 }
 
+const SECTION_ORDER: Record<string, { label: string; order: number }> = {
+	main: { label: __('Main', 'doublescale'), order: 0 },
+	crm: { label: __('CRM', 'doublescale'), order: 1 },
+	marketing: { label: __('Marketing', 'doublescale'), order: 2 },
+	ai: { label: __('AI', 'doublescale'), order: 3 },
+	insights: { label: __('Insights', 'doublescale'), order: 4 },
+	system: { label: __('System', 'doublescale'), order: 5 },
+};
+
+const PATH_TO_SECTION: Record<string, string> = {
+	'/': 'main',
+	contacts: 'crm',
+	'sales-pipeline': 'crm',
+	booking: 'crm',
+	tasks: 'crm',
+	campaigns: 'marketing',
+	'sms-campaigns': 'marketing',
+	forms: 'marketing',
+	automations: 'marketing',
+	'email-sequences': 'marketing',
+	'ai-hub': 'ai',
+	'analytics-and-reports': 'insights',
+	integrations: 'system',
+	'smtp/:tab?': 'system',
+	'settings/:tab?': 'system',
+	extensions: 'system',
+};
+
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { state: sidebarState, toggleSidebar } = useSidebar();
+	const isCollapsed = sidebarState === 'collapsed';
 
-	// Get current path from location (handled by WordPress custom history)
-	// location.pathname will be like '/contacts' or '/contacts/123'
-	// navigation items have paths like 'contacts' (no leading slash)
 	const getCurrentPathFromLocation = useCallback(() => {
 		const pathname = location.pathname;
-		// Remove leading slash to normalize
 		const normalizedPath = pathname.replace(/^\//, '') || '';
 		return normalizedPath;
 	}, [location.pathname]);
 
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
-	const [isAtTop, setIsAtTop] = useState(true);
-	const [isAtBottom, setIsAtBottom] = useState(false);
-	const [isMounted, setIsMounted] = useState(false);
-	const [hoveredItem, setHoveredItem] = useState<{
-		path: string;
-		subMenu: SubMenuItem[];
-		rect: DOMRect;
-	} | null>(null);
-	const hoverTimeoutRef = useRef<number | null>(null);
-	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } = useCapabilities();
-
-	// Submenu top offset configuration for different menu items
-	const getSubmenuTopOffset = (path: string): number => {
-		const offsetMap: Record<string, number> = {
-			'campaigns': 10,
-			'analytics-and-reports': 120,
-		};
-		return offsetMap[path] ?? 120; // Default to 120 if not specified
-	};
-
-	useEffect(() => {
-		const frameId = requestAnimationFrame(() => setIsMounted(true));
-		return () => cancelAnimationFrame(frameId);
-	}, []);
-
-	useEffect(() => {
-		// Cleanup timeout on unmount
-		return () => {
-			if (hoverTimeoutRef.current) {
-				clearTimeout(hoverTimeoutRef.current);
-			}
-		};
-	}, []);
+	const [expandedSubMenus, setExpandedSubMenus] = useState<Set<string>>(
+		new Set()
+	);
+	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } =
+		useCapabilities();
 
 	const navigationItems = useMemo(() => {
 		const pages = getAdminPages();
@@ -115,20 +132,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					path: item.path,
 					label: item.label,
 					icon: item.icon,
+					section: PATH_TO_SECTION[item.path] || 'system',
 				};
 
-				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
 					if (isSalesRep() && !canManageAllDeals()) {
-						// Sales reps see only their reports
 						navItem.subMenu = [
-							{
-								path: 'my-reports',
-								label: __('My Reports', 'doublescale'),
-							},
+							{ path: 'my-reports', label: __('My Reports', 'doublescale') },
 						];
 					} else if (canManageAllDeals() && !isCrmManager()) {
-						// Sales Managers see deal-related analytics plus their own reports
 						navItem.subMenu = [
 							{
 								path: 'deals-analytics',
@@ -142,14 +154,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								path: 'pipeline-analytics',
 								label: __('Pipeline Analytics', 'doublescale'),
 							},
-							{
-								path: 'my-reports',
-								label: __('My Reports', 'doublescale'),
-							},
+							{ path: 'my-reports', label: __('My Reports', 'doublescale') },
 						];
 					} else {
-						// CRM Managers and Administrators see all analytics
-						const submenu = [
+						navItem.subMenu = [
 							{
 								path: 'deals-analytics',
 								label: __('Deals Analytics', 'doublescale'),
@@ -162,10 +170,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								path: 'pipeline-analytics',
 								label: __('Pipeline Analytics', 'doublescale'),
 							},
-							{
-								path: 'my-reports',
-								label: __('My Reports', 'doublescale'),
-							},
+							{ path: 'my-reports', label: __('My Reports', 'doublescale') },
 							{
 								path: 'emails-analytics',
 								label: __('Emails Analytics', 'doublescale'),
@@ -179,18 +184,12 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								label: __('Cart Analytics', 'doublescale'),
 							},
 						];
-
-						navItem.subMenu = submenu;
 					}
 				}
 
-				// Add submenu for Campaigns
 				if (item.path === 'campaigns') {
 					navItem.subMenu = [
-						{
-							path: 'campaigns',
-							label: __('Campaigns', 'doublescale'),
-						},
+						{ path: 'campaigns', label: __('Campaigns', 'doublescale') },
 						{
 							path: 'email-sequences',
 							label: __('Email Sequences', 'doublescale'),
@@ -198,132 +197,100 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					];
 				}
 
+				if (item.path === 'automations') {
+					navItem.subMenu = [
+						{ path: 'automations', label: __('Workflow', 'doublescale') },
+						{
+							path: 'email-sequences',
+							label: __('Email Sequences', 'doublescale'),
+						},
+					];
+				}
+
+				if (item.path === 'contacts') {
+					const subMenu: SubMenuItem[] = [
+						{ path: 'contacts', label: __('Contacts', 'doublescale') },
+					];
+					if (isCrmManager()) {
+						subMenu.push(
+							{ path: 'lists', label: __('Lists', 'doublescale') },
+							{ path: 'tags', label: __('Tags', 'doublescale') }
+						);
+					}
+					navItem.subMenu = subMenu;
+				}
+
 				return navItem;
 			});
-	}, [hasRequiredCapability, isSalesRep]);
+	}, [
+		hasRequiredCapability,
+		isSalesRep,
+		canManageAllDeals,
+		isCrmManager,
+	]);
+
+	const sectionGroups = useMemo<SectionGroup[]>(() => {
+		const grouped: Record<string, NavigationItem[]> = {};
+		navigationItems.forEach((item) => {
+			const section = item.section || 'system';
+			if (!grouped[section]) grouped[section] = [];
+			grouped[section].push(item);
+		});
+		return Object.entries(SECTION_ORDER)
+			.sort(([, a], [, b]) => a.order - b.order)
+			.filter(([key]) => grouped[key]?.length)
+			.map(([key, { label }]) => ({
+				key,
+				label,
+				items: grouped[key],
+			}));
+	}, [navigationItems]);
 
 	const handleNavigation = (path: string) => {
 		setSelectedKey(path);
-		// Strip optional route params (e.g., ':tab?' from 'settings/:tab?')
 		const cleanPath = path.replace(/\/:[^/]+\?/g, '');
 		navigate(getToLink(cleanPath));
 	};
 
-	const updateScrollIndicators = useCallback(() => {
-		const container = scrollContainerRef.current;
-		if (!container) {
-			return;
-		}
-
-		const { scrollTop, scrollHeight, clientHeight } = container;
-
-		const atTop = scrollTop <= 2;
-		const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
-
-		setIsAtTop(atTop || scrollHeight <= clientHeight);
-		setIsAtBottom(atBottom || scrollHeight <= clientHeight);
-	}, []);
-
-	const handleScrollBy = (direction: 'up' | 'down') => {
-		const container = scrollContainerRef.current;
-		if (!container) {
-			return;
-		}
-
-		const scrollAmount = direction === 'up' ? -220 : 220;
-
-		container.scrollBy({
-			top: scrollAmount,
-			behavior: 'smooth',
+	const toggleSubMenu = (path: string) => {
+		setExpandedSubMenus((prev) => {
+			const next = new Set(prev);
+			if (next.has(path)) {
+				next.delete(path);
+			} else {
+				next.add(path);
+			}
+			return next;
 		});
 	};
 
-	const renderMenuItem = (item: NavigationItem, index: number) => {
-		const itemRef = useRef<HTMLLIElement>(null);
-
-		const handleMouseEnter = () => {
-			if (item.subMenu && itemRef.current) {
-				// Clear any pending timeout
-				if (hoverTimeoutRef.current) {
-					clearTimeout(hoverTimeoutRef.current);
-					hoverTimeoutRef.current = null;
-				}
-				const rect = itemRef.current.getBoundingClientRect();
-				setHoveredItem({
-					path: item.path,
-					subMenu: item.subMenu,
-					rect,
-				});
-			}
-		};
-
-		const handleMouseLeave = () => {
-			if (item.subMenu) {
-				// Delay closing to allow mouse to reach submenu
-				hoverTimeoutRef.current = window.setTimeout(() => {
-					setHoveredItem(null);
-				}, 300);
-			}
-		};
-
-		return (
-			<SidebarMenuItem
-				key={item.path}
-				ref={itemRef}
-				onClick={() => handleNavigation(item.path)}
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}
-				className="doublescale-navbar__item"
-				style={{
-					transitionDelay: `${Math.min(index * 100, 300)}ms`,
-				}}
-			>
-				<SidebarMenuButton
-					size="xl"
-					isActive={selectedKey === item.path}
-					className="doublescale-navbar__link"
-				>
-					<div className="doublescale-navbar__link-inner">
-						<span className="doublescale-navbar__icon">{item.icon}</span>
-						<span className="doublescale-navbar__label">{item.label}</span>
-					</div>
-				</SidebarMenuButton>
-			</SidebarMenuItem>
-		);
-	};
+	const isItemActive = useCallback(
+		(itemPath: string) => {
+			if (selectedKey === itemPath) return true;
+			const normalizedSelected = selectedKey.replace(/^\//, '');
+			const normalizedItem = itemPath.replace(/^\//, '');
+			if (normalizedSelected === normalizedItem) return true;
+			if (
+				normalizedItem &&
+				normalizedSelected.startsWith(normalizedItem + '/')
+			)
+				return true;
+			return false;
+		},
+		[selectedKey]
+	);
 
 	useEffect(() => {
 		const currentPath = getCurrentPathFromLocation();
-
-		// Try to match the current path with navigation items
-		// navigation items can have paths like '/' (dashboard) or 'contacts' (no leading slash)
-		// currentPath will be like '' (for '/') or 'contacts', 'contacts/123', etc. (no leading slash)
 		const matched = navigationItems.find((item) => {
-			// Normalize item path for comparison (remove leading slash if present)
 			const normalizedItemPath = item.path.replace(/^\//, '');
-
-			// Handle dashboard/home case (path is '/' or empty)
 			if (item.path === '/' || item.path === '') {
 				return currentPath === '' || currentPath === '/';
 			}
-
-			// Exact match
-			if (currentPath === normalizedItemPath) {
-				return true;
-			}
-
-			// Check if current path matches any submenu item
+			if (currentPath === normalizedItemPath) return true;
 			if (item.subMenu) {
-				const subMenuMatch = item.subMenu.some(
-					(subItem) => currentPath === subItem.path
-				);
-				if (subMenuMatch) {
-					return true;
-				}
+				if (item.subMenu.some((sub) => currentPath === sub.path)) return true;
 			}
-
-			// Check if current path starts with item path (for sub-routes like 'contacts/123')
-			// Make sure we match on path boundaries (e.g., 'contacts' matches 'contacts/123' but not 'contact')
 			return (
 				currentPath.startsWith(normalizedItemPath + '/') ||
 				currentPath.startsWith(normalizedItemPath + ':')
@@ -332,8 +299,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 		if (matched) {
 			setSelectedKey(matched.path);
+			if (matched.subMenu) {
+				setExpandedSubMenus((prev) => new Set([...prev, matched.path]));
+			}
 		} else if (currentPath === '') {
-			// If no path, use default
 			setSelectedKey(defaultSelectedPath);
 		}
 	}, [
@@ -343,114 +312,322 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		defaultSelectedPath,
 	]);
 
-	useEffect(() => {
-		const container = scrollContainerRef.current;
-		if (!container) {
+	const handleBackToWordPress = () => {
+		const ajaxUrl = (window as Window & { ajaxurl?: string }).ajaxurl ?? '';
+		if (ajaxUrl.includes('admin-ajax.php')) {
+			window.location.href = ajaxUrl.replace('admin-ajax.php', 'index.php');
 			return;
 		}
+		window.location.href = `${window.location.origin}/wp-admin/`;
+	};
 
-		updateScrollIndicators();
+	const [collapsedPopover, setCollapsedPopover] = useState<string | null>(null);
+	const [collapsedFlyoutPos, setCollapsedFlyoutPos] = useState<{
+		top: number;
+		left: number;
+	} | null>(null);
+	const flyoutCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-		container.addEventListener('scroll', updateScrollIndicators, {
-			passive: true,
+	const cancelFlyoutClose = useCallback(() => {
+		if (flyoutCloseTimerRef.current !== null) {
+			clearTimeout(flyoutCloseTimerRef.current);
+			flyoutCloseTimerRef.current = null;
+		}
+	}, []);
+
+	const scheduleFlyoutClose = useCallback(() => {
+		cancelFlyoutClose();
+		flyoutCloseTimerRef.current = window.setTimeout(() => {
+			setCollapsedPopover(null);
+			setCollapsedFlyoutPos(null);
+			flyoutCloseTimerRef.current = null;
+		}, 180);
+	}, [cancelFlyoutClose]);
+
+	const syncCollapsedFlyoutPosition = useCallback((anchorPath: string) => {
+		window.requestAnimationFrame(() => {
+			const escaped =
+				typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+					? CSS.escape(anchorPath)
+					: anchorPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+			const anchorEl = document.querySelector(
+				`[data-collapsed-flyout-anchor="${escaped}"]`
+			);
+			if (!anchorEl) return;
+			const r = anchorEl.getBoundingClientRect();
+			setCollapsedFlyoutPos({
+				top: r.top - 4,
+				left: r.left + r.width + 8,
+			});
 		});
-		window.addEventListener('resize', updateScrollIndicators);
+	}, []);
 
-		return () => {
-			container.removeEventListener('scroll', updateScrollIndicators);
-			window.removeEventListener('resize', updateScrollIndicators);
-		};
-	}, [updateScrollIndicators]);
+	const collapsedFlyoutItem = useMemo(() => {
+		if (!collapsedPopover) return null;
+		for (const g of sectionGroups) {
+			const found = g.items.find(
+				(i) => i.path === collapsedPopover && Boolean(i.subMenu?.length)
+			);
+			if (found) return found;
+		}
+		return null;
+	}, [collapsedPopover, sectionGroups]);
 
 	useEffect(() => {
-		updateScrollIndicators();
-	}, [navigationItems, updateScrollIndicators]);
+		if (!isCollapsed) {
+			cancelFlyoutClose();
+			setCollapsedPopover(null);
+			setCollapsedFlyoutPos(null);
+		}
+	}, [isCollapsed, cancelFlyoutClose]);
+
+	useEffect(() => {
+		if (!isCollapsed || !collapsedPopover) return;
+		const sync = () => syncCollapsedFlyoutPosition(collapsedPopover);
+		sync();
+		const scrollEl = document.querySelector('[data-sidebar="content"]');
+		scrollEl?.addEventListener('scroll', sync, { passive: true });
+		window.addEventListener('resize', sync);
+		return () => {
+			scrollEl?.removeEventListener('scroll', sync);
+			window.removeEventListener('resize', sync);
+		};
+	}, [isCollapsed, collapsedPopover, syncCollapsedFlyoutPosition]);
+
+	const renderNavItem = (item: NavigationItem) => {
+		const active = isItemActive(item.path);
+		const hasSubMenu = item.subMenu && item.subMenu.length > 0;
+		const isExpanded = expandedSubMenus.has(item.path);
+
+		if (isCollapsed) {
+			if (hasSubMenu) {
+				return (
+					<div key={item.path} className="doublescale-navbar__item-group">
+						<SidebarMenuItem className="doublescale-navbar__item">
+							<div
+								className="doublescale-navbar__collapsed-trigger"
+								data-collapsed-flyout-anchor={item.path}
+								onMouseEnter={(e) => {
+									cancelFlyoutClose();
+									const r = e.currentTarget.getBoundingClientRect();
+									setCollapsedFlyoutPos({
+										top: r.top - 4,
+										left: r.left + r.width + 8,
+									});
+									setCollapsedPopover(item.path);
+								}}
+								onMouseLeave={scheduleFlyoutClose}
+							>
+								<SidebarMenuButton
+									isActive={active}
+									className="doublescale-navbar__link"
+									onClick={() => handleNavigation(item.path)}
+								>
+									<span className="doublescale-navbar__icon">{item.icon}</span>
+								</SidebarMenuButton>
+							</div>
+						</SidebarMenuItem>
+					</div>
+				);
+			}
+
+			return (
+				<div key={item.path} className="doublescale-navbar__item-group">
+					<SidebarMenuItem className="doublescale-navbar__item">
+						<TooltipProvider delayDuration={0}>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<SidebarMenuButton
+										isActive={active}
+										className="doublescale-navbar__link"
+										onClick={() => handleNavigation(item.path)}
+									>
+										<span className="doublescale-navbar__icon">{item.icon}</span>
+									</SidebarMenuButton>
+								</TooltipTrigger>
+								<TooltipContent side="right" sideOffset={8}>
+									{item.label}
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</SidebarMenuItem>
+				</div>
+			);
+		}
+
+		return (
+			<div key={item.path} className="doublescale-navbar__item-group">
+				<SidebarMenuItem className="doublescale-navbar__item">
+					<SidebarMenuButton
+						isActive={active}
+						className="doublescale-navbar__link"
+						onClick={() => {
+							if (hasSubMenu) {
+								toggleSubMenu(item.path);
+								handleNavigation(item.path);
+							} else {
+								handleNavigation(item.path);
+							}
+						}}
+					>
+						<span className="doublescale-navbar__icon">{item.icon}</span>
+						<span className="doublescale-navbar__label">{item.label}</span>
+						{hasSubMenu && (
+							<span
+								className={`doublescale-navbar__expand-icon ${isExpanded ? 'doublescale-navbar__expand-icon--open' : ''}`}
+							>
+								<ChevronDown size={14} />
+							</span>
+						)}
+					</SidebarMenuButton>
+				</SidebarMenuItem>
+
+				{hasSubMenu && isExpanded && (
+					<div className="doublescale-navbar__submenu">
+						{item.subMenu!.map((subItem) => {
+							const subActive =
+								getCurrentPathFromLocation() === subItem.path;
+							return (
+								<button
+									key={subItem.path}
+									type="button"
+									className={`doublescale-navbar__submenu-item ${subActive ? 'doublescale-navbar__submenu-item--active' : ''}`}
+									onClick={() => handleNavigation(subItem.path)}
+								>
+									<span className="doublescale-navbar__submenu-dot" />
+									{subItem.label}
+								</button>
+							);
+						})}
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	const backToWordPressLabel = __('Back to WordPress', 'doublescale');
+
+	const wpFooterButton = (
+		<Button
+			className="doublescale-navbar__wp-link"
+			onClick={handleBackToWordPress}
+		>
+			<WordPressLogoIcon />
+			{!isCollapsed && (
+				<span className="doublescale-navbar__wp-label">
+					{backToWordPressLabel}
+				</span>
+			)}
+		</Button>
+	);
 
 	return (
 		<>
-			<Sidebar
-				collapsible="icon"
-				className={`doublescale-navbar${isMounted ? ' doublescale-navbar--mounted' : ''
-					}`}
-			>
-				<div className="doublescale-navbar__surface">
-					<SidebarHeader className="doublescale-navbar__header">
+			<Sidebar collapsible="icon" className="doublescale-navbar">
+				<SidebarHeader className="doublescale-navbar__header">
+					{applyFilters(
+						'doublescale_navbar_brand',
 						<div className="doublescale-navbar__brand">
-							<LogoIcon width={30} height={40} />
+							<span className="doublescale-navbar__logo-icon">
+								<LogoIcon width={28} height={32} />
+							</span>
 							<span className="doublescale-navbar__brand-text">
 								{__('DoubleScale', 'doublescale')}
 							</span>
 						</div>
-					</SidebarHeader>
-					<SidebarContent className="doublescale-navbar__content">
-						{!isAtTop && (
-							<button
-								type="button"
-								className="doublescale-navbar__chevron doublescale-navbar__chevron--top"
-								onClick={() => handleScrollBy('up')}
-								aria-label={__('Scroll up', 'doublescale')}
-							>
-								<ChevronUp />
-							</button>
+					) as React.ReactNode}
+					<button
+						type="button"
+						className="doublescale-navbar__collapse-btn"
+						onClick={toggleSidebar}
+						aria-label={
+							isCollapsed
+								? __('Expand sidebar', 'doublescale')
+								: __('Collapse sidebar', 'doublescale')
+						}
+					>
+						{isCollapsed ? (
+							<PanelLeftOpen size={16} />
+						) : (
+							<PanelLeftClose size={16} />
 						)}
-						<div
-							ref={scrollContainerRef}
-							className="doublescale-navbar__scroll-container"
-						>
+					</button>
+				</SidebarHeader>
+
+				<SidebarContent className="doublescale-navbar__content">
+					{sectionGroups.map((section) => (
+						<div key={section.key} className="doublescale-navbar__section">
+							{!isCollapsed && (
+								<div className="doublescale-navbar__section-label">
+									{section.label}
+								</div>
+							)}
 							<SidebarMenu className="doublescale-navbar__menu">
-								{navigationItems.map((item, index) =>
-									renderMenuItem(item, index)
-								)}
+								{section.items.map((item) => renderNavItem(item))}
 							</SidebarMenu>
 						</div>
-						{!isAtBottom && (
-							<button
-								type="button"
-								className="doublescale-navbar__chevron doublescale-navbar__chevron--bottom"
-								onClick={() => handleScrollBy('down')}
-								aria-label={__('Scroll down', 'doublescale')}
-							>
-								<ChevronDown />
-							</button>
-						)}
-					</SidebarContent>
-				</div>
+					))}
+				</SidebarContent>
+
+				<SidebarFooter className="doublescale-navbar__footer">
+					{isCollapsed ? (
+						<TooltipProvider delayDuration={0}>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span className="doublescale-navbar__wp-tooltip-trigger">
+										{wpFooterButton}
+									</span>
+								</TooltipTrigger>
+								<TooltipContent side="right" sideOffset={8}>
+									{backToWordPressLabel}
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					) : (
+						wpFooterButton
+					)}
+				</SidebarFooter>
 			</Sidebar>
-			{hoveredItem &&
+			{isCollapsed &&
+				collapsedFlyoutItem?.subMenu &&
+				collapsedFlyoutPos &&
 				createPortal(
 					<div
-						className="doublescale-navbar__submenu-portal"
+						className="doublescale-navbar__collapsed-popover doublescale-navbar__collapsed-popover--portal"
 						style={{
 							position: 'fixed',
-							top: `${hoveredItem.rect.top - getSubmenuTopOffset(hoveredItem.path)}px`,
-							left: `${hoveredItem.rect.right + 20}px`,
-							zIndex: 99999,
+							top: collapsedFlyoutPos.top,
+							left: collapsedFlyoutPos.left,
+							zIndex: 160100,
 						}}
-						onMouseEnter={() => {
-							// Clear timeout when hovering over submenu
-							if (hoverTimeoutRef.current) {
-								clearTimeout(hoverTimeoutRef.current);
-								hoverTimeoutRef.current = null;
-							}
-						}}
-						onMouseLeave={() => {
-							// Close submenu when leaving
-							setHoveredItem(null);
-						}}
+						onMouseEnter={cancelFlyoutClose}
+						onMouseLeave={scheduleFlyoutClose}
+						role="presentation"
 					>
-						<div className="doublescale-navbar__submenu">
-							{hoveredItem.subMenu.map((subItem) => (
-								<button
-									key={subItem.path}
-									onClick={() => {
-										handleNavigation(subItem.path);
-										setHoveredItem(null);
-									}}
-									className="doublescale-navbar__submenu-item"
-								>
-									{subItem.label}
-								</button>
-							))}
+						<div className="doublescale-navbar__collapsed-popover-inner">
+							<div className="doublescale-navbar__collapsed-popover-header">
+								{collapsedFlyoutItem.label}
+							</div>
+							{collapsedFlyoutItem.subMenu!.map((subItem) => {
+								const subActive =
+									getCurrentPathFromLocation() === subItem.path;
+								return (
+									<button
+										key={subItem.path}
+										type="button"
+										className={`doublescale-navbar__collapsed-popover-item ${subActive ? 'doublescale-navbar__collapsed-popover-item--active' : ''}`}
+										onClick={(e) => {
+											e.stopPropagation();
+											handleNavigation(subItem.path);
+											cancelFlyoutClose();
+											setCollapsedPopover(null);
+											setCollapsedFlyoutPos(null);
+										}}
+									>
+										{subItem.label}
+									</button>
+								);
+							})}
 						</div>
 					</div>,
 					document.body

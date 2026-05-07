@@ -12,7 +12,8 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 
 interface ProtectedRouteProps {
 	page: {
-		requiredCapability?: string;
+		/** User needs at least one of these caps (see `useCapabilities.hasRequiredCapability`). */
+		requiredCapability?: string[];
 		component?: React.ComponentType;
 	};
 	children?: React.ReactNode;
@@ -24,7 +25,6 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	const navigate = useNavigate();
 	const { hasRequiredCapability } = useCapabilities();
-
 	useEffect(() => {
 		if (
 			page.requiredCapability &&
@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 			// Redirect to dashboard if user doesn't have permission using navigation
 			navigate(getToLink('/'));
 		}
-	}, [page.requiredCapability, navigate]);
+	}, [page.requiredCapability, navigate, hasRequiredCapability]);
 
 	// If user doesn't have permission, return null or loading state
 	if (

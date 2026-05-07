@@ -410,8 +410,8 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 - Improved action hooks with appropriate comments for clarity and compliance with naming conventions.
 - Fixed minor bugs and improved overall code readability.
 
-*Update text domain from 'doublescale' to 'quill-crm' and add ABSPATH check in multiple files
-- Changed the text domain in doublescale.php and various other files to 'quill-crm' for consistency.
+*Update text domain from 'doublescale' to 'doublescale' and add ABSPATH check in multiple files
+- Changed the text domain in doublescale.php and various other files to 'doublescale' for consistency.
 - Added a check for ABSPATH in several classes and functions to enhance security by preventing direct access.
 
 

@@ -46,14 +46,14 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 	const handleOAuthMessage = useCallback((event: MessageEvent) => {
 		if (event.origin !== window.location.origin) return;
 
-		if (event.data.type === 'QUILLCRM_OAUTH_SUCCESS') {
+		if (event.data.type === 'DOUBLESCALE_OAUTH_SUCCESS') {
 			if (event.data.provider === provider) {
 				setConnecting(false);
 				setConnected(true);
 				setError(null);
 				onSuccess?.(event.data);
 			}
-		} else if (event.data.type === 'QUILLCRM_OAUTH_ERROR') {
+		} else if (event.data.type === 'DOUBLESCALE_OAUTH_ERROR') {
 			if (event.data.provider === provider) {
 				setConnecting(false);
 				setError(event.data.message || __('OAuth authorization failed', 'doublescale'));

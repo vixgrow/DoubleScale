@@ -1,5 +1,5 @@
 {
-	"name": "quill-crm",
+	"name": "doublescale",
 	"version": "0.1.0",
 	"main": "webpack.config.js",
 	"dependencies": {

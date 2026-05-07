@@ -98,7 +98,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 
 		try {
 			const response: any = await apiFetch({
-				path: addQueryArgs(`/qc/v1/activities`, {
+				path: addQueryArgs(`/doublescale/v1/activities`, {
 					contact_id,
 					activity_type: 'call_logged',
 					per_page: perPage,
@@ -139,7 +139,7 @@ const Calls: React.FC<CallsProps> = ({ contact_id }) => {
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/activities/${callToDelete.id}`,
+				path: `/doublescale/v1/activities/${callToDelete.id}`,
 				method: 'DELETE',
 			});
 

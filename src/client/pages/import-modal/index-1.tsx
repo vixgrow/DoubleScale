@@ -83,7 +83,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/import-export/import'),
+				path: addQueryArgs('/doublescale/v1/import-export/import'),
 				method: 'POST',
 				data: {
 					source,
@@ -139,7 +139,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/import-export/upload'),
+				path: addQueryArgs('/doublescale/v1/import-export/upload'),
 				method: 'POST',
 				body: formData,
 			})) as { file_name: string; header_columns: string[] };
@@ -176,7 +176,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 
 		try {
 			const response = await apiFetch({
-				path: addQueryArgs(`/qc/v1/import-export/${source}`, {
+				path: addQueryArgs(`/doublescale/v1/import-export/${source}`, {
 					credentials,
 				}),
 			}) as {

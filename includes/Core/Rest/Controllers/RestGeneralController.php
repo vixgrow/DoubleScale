@@ -17,7 +17,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
@@ -33,8 +32,6 @@ use DoubleScale\Constants\CampaignChannel;
  * @since 1.0.0
  */
 class RestGeneralController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

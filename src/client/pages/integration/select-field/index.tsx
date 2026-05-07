@@ -45,7 +45,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs(
-					`/qc/v1/integrations/${integration}/${slug}`
+					`/doublescale/v1/integrations/${integration}/${slug}`
 				),
 				method: 'GET',
 			})) as IntegrationSelectOptions;

@@ -103,7 +103,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 
 			// Get OAuth authorization URL
 			const authResponse = (await apiFetch({
-				path: '/qc/v1/import-export/oauth/authorize',
+				path: '/doublescale/v1/import-export/oauth/authorize',
 				method: 'POST',
 				data: {
 					provider,
@@ -144,7 +144,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 	const disconnect = useCallback(async () => {
 		try {
 			await apiFetch({
-				path: '/qc/v1/import-export/oauth/disconnect',
+				path: '/doublescale/v1/import-export/oauth/disconnect',
 				method: 'DELETE',
 				data: { provider },
 			});
@@ -170,7 +170,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 	const checkStatus = useCallback(async () => {
 		try {
 			const response = await apiFetch({
-				path: `/qc/v1/import-export/oauth/status?provider=${provider}`,
+				path: `/doublescale/v1/import-export/oauth/status?provider=${provider}`,
 				method: 'GET',
 			}) as { connected: boolean };
 

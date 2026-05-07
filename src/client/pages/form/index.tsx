@@ -118,7 +118,7 @@ const Form: React.FC<FormProps> = ({
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/forms/${id}`,
+				path: `/doublescale/v1/forms/${id}`,
 			})) as FormType;
 
 			setForm(prepareForm(response));
@@ -143,14 +143,14 @@ const Form: React.FC<FormProps> = ({
 			if (isNewForm && (!newForm.id || newForm.id === 0)) {
 				// Create new form
 				response = (await apiFetch({
-					path: '/qc/v1/forms',
+					path: '/doublescale/v1/forms',
 					method: 'POST',
 					data: newForm,
 				})) as FormType;
 			} else {
 				// Update existing form
 				response = (await apiFetch({
-					path: `/qc/v1/forms/${newForm.id}`,
+					path: `/doublescale/v1/forms/${newForm.id}`,
 					method: 'POST',
 					data: newForm,
 				})) as FormType;

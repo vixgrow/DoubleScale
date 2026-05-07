@@ -69,7 +69,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 			// Save Twilio configuration via existing integration API
 			// Uses the same endpoint as the Integrations settings page
 			await apiFetch({
-				path: '/qc/v1/integrations/twilio',
+				path: '/doublescale/v1/integrations/twilio',
 				method: 'POST',
 				data: {
 					settings: {
@@ -129,7 +129,7 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 
 		try {
 			const result: TestResult = await apiFetch({
-				path: '/qc/v1/integrations/twilio/test-whatsapp',
+				path: '/doublescale/v1/integrations/twilio/test-whatsapp',
 				method: 'POST',
 				data: {
 					account_sid: accountSid,

@@ -59,7 +59,7 @@ const CronJobs: React.FC = () => {
 		try {
 			setError(null);
 			const response = await apiFetch({
-				path: '/qc/v1/settings/cron-status',
+				path: '/doublescale/v1/settings/cron-status',
 			});
 			setCronStatus(response as CronStatus);
 		} catch (error) {
@@ -80,7 +80,7 @@ const CronJobs: React.FC = () => {
 		setRunError(null);
 		try {
 			await apiFetch({
-				path: '/qc/v1/settings/run-cron',
+				path: '/doublescale/v1/settings/run-cron',
 				method: 'POST',
 				data: { hook },
 			});

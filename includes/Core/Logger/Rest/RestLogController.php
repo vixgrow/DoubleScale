@@ -11,7 +11,6 @@
 namespace DoubleScale\Core\Logger\Rest;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\Core\Logger\LogHandlerDb;
 use DoubleScale\UserRoles\Permissions;
 use WP_Error;
@@ -25,8 +24,6 @@ use WP_REST_Server;
  * @since 1.6.0
  */
 class RestLogController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

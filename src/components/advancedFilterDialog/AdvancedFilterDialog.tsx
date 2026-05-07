@@ -107,7 +107,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									)
 								}
 								placeholder={__('Select All Owner', 'doublescale')}
-								apiEndpoint="/qc/v1/user-management/users/frontend"
+								apiEndpoint="/doublescale/v1/user-management/users/frontend"
 								getOptionLabel={(u) => u.display_name || u.name}
 								getOptionValue={(u) => u.id}
 								dataPath="users"

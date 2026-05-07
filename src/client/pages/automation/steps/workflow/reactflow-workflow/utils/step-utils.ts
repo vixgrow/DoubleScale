@@ -93,7 +93,7 @@ export const deleteStep = async (
     try {
         // Make API call to delete the step using the correct endpoint
         await apiFetch({
-            path: `/qc/v1/automation-steps/${stepId}`,
+            path: `/doublescale/v1/automation-steps/${stepId}`,
             method: 'DELETE',
             data: {
                 updated_steps: updatedOrdersSteps,
@@ -225,7 +225,7 @@ export const reorderStep = async (
 
         // Update the database
         await apiFetch({
-            path: `/qc/v1/automation-steps/${step.id}/reorder`,
+            path: `/doublescale/v1/automation-steps/${step.id}/reorder`,
             method: 'POST',
             data: {
                 direction,

@@ -43,7 +43,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		setIsSending(true);
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/campaigns/send-test-message',
+				path: '/doublescale/v1/campaigns/send-test-message',
 				method: 'POST',
 				data: {
 					channel: 'email',

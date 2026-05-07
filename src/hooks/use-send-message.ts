@@ -229,7 +229,7 @@ export const useSendMessage = ({
 
 			// Send message via API
 			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}/send-message`,
+				path: `/doublescale/v1/contacts/${contact.id}/send-message`,
 				method: 'POST',
 				data: payload,
 			});

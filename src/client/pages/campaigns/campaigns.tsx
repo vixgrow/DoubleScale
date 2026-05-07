@@ -156,7 +156,7 @@ const Campaigns: React.FC = () => {
 			}
 
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns', queryParams),
+				path: addQueryArgs('/doublescale/v1/campaigns', queryParams),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
 			setTotalRecords(response.total || 0);
@@ -202,7 +202,7 @@ const Campaigns: React.FC = () => {
 
 			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
-				path: '/qc/v1/campaigns',
+				path: '/doublescale/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
@@ -231,7 +231,7 @@ const Campaigns: React.FC = () => {
 		try {
 			// Use unified bulk-delete endpoint (works across all campaign types)
 			await apiFetch({
-				path: '/qc/v1/campaigns/bulk-delete',
+				path: '/doublescale/v1/campaigns/bulk-delete',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
@@ -252,7 +252,7 @@ const Campaigns: React.FC = () => {
 		try {
 			// Use unified endpoint - type is auto-detected
 			await apiFetch({
-				path: `/qc/v1/campaigns/${id}`,
+				path: `/doublescale/v1/campaigns/${id}`,
 				method: 'DELETE',
 			});
 
@@ -274,7 +274,7 @@ const Campaigns: React.FC = () => {
 		try {
 			// Use unified endpoint - type is auto-detected
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${id}/duplicate`,
+				path: `/doublescale/v1/campaigns/${id}/duplicate`,
 				method: 'POST',
 			})) as Campaign;
 

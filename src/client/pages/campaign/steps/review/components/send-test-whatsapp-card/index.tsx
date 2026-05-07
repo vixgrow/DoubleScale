@@ -91,7 +91,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 
 			// Get campaign data to retrieve the template info
 			const campaign: any = await apiFetch({
-				path: `/qc/v1/campaigns/${campaignId}`,
+				path: `/doublescale/v1/campaigns/${campaignId}`,
 				method: 'GET',
 				signal: abortControllerRef.current.signal,
 			});
@@ -112,7 +112,7 @@ const SendTestWhatsAppCard: React.FC<SendTestWhatsAppCardProps> = ({
 
 			// Send test WhatsApp using unified endpoint
 			const response: any = await apiFetch({
-				path: `/qc/v1/campaigns/send-test-message`,
+				path: `/doublescale/v1/campaigns/send-test-message`,
 				method: 'POST',
 				data: {
 					channel: 'whatsapp',

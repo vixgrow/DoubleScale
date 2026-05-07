@@ -9,7 +9,6 @@
 namespace DoubleScale\Core\UserRoles\Rest;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\UserRoles\Permissions;
 use DoubleScale\UserRoles\UserRoles;
 use WP_Error;
@@ -20,8 +19,6 @@ use WP_REST_Response;
  * User Management REST Controller
  */
 class RestUserManagementController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * Route base.

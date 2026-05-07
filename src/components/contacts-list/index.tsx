@@ -65,7 +65,7 @@ const ContactList: React.FC<ContactListProps> = ({
 		try {
 			const response = await apiFetch<{ data: Contact[]; total: number; filtered_total?: number }>(
 				{
-					path: addQueryArgs('/qc/v1/contacts', {
+					path: addQueryArgs('/doublescale/v1/contacts', {
 						per_page: 50,
 						page: pageNum,
 						filters,

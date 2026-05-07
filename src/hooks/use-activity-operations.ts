@@ -73,7 +73,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const addNote = useCallback(async (entityId: number, entityType: EntityTypeValue, note: string) => {
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/activities/notes',
+				path: '/doublescale/v1/activities/notes',
 				method: 'POST',
 				data: {
 					entity_id: entityId,
@@ -98,7 +98,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const logCall = useCallback(async (entityId: number, entityType: EntityTypeValue, callData: any) => {
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/activities/calls',
+				path: '/doublescale/v1/activities/calls',
 				method: 'POST',
 				data: {
 					entity_id: entityId,
@@ -123,7 +123,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const logEmail = useCallback(async (entityId: number, entityType: EntityTypeValue, emailData: any) => {
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/activities/emails',
+				path: '/doublescale/v1/activities/emails',
 				method: 'POST',
 				data: {
 					entity_id: entityId,
@@ -149,7 +149,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		async (entityId: number, entityType: EntityTypeValue, meetingData: any) => {
 			try {
 				const response = await apiFetch({
-					path: '/qc/v1/activities/meetings',
+					path: '/doublescale/v1/activities/meetings',
 					method: 'POST',
 					data: {
 						entity_id: entityId,
@@ -198,7 +198,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				}
 
 				const response = await apiFetch({
-					path: `/qc/v1/activities/${activityId}`,
+					path: `/doublescale/v1/activities/${activityId}`,
 					method: 'PATCH',
 					data: requestData,
 				});
@@ -221,7 +221,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const deleteActivity = useCallback(async (activityId: number) => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/activities/${activityId}`,
+				path: `/doublescale/v1/activities/${activityId}`,
 				method: 'DELETE',
 			});
 		} catch (error) {
@@ -241,7 +241,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		async (activityId: number, content: string) => {
 			try {
 				const response = await apiFetch({
-					path: `/qc/v1/activities/${activityId}/comments`,
+					path: `/doublescale/v1/activities/${activityId}/comments`,
 					method: 'POST',
 					data: {
 						content,
@@ -267,7 +267,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		async (commentId: number, content: string) => {
 			try {
 				const response = await apiFetch({
-					path: `/qc/v1/comments/${commentId}`,
+					path: `/doublescale/v1/comments/${commentId}`,
 					method: 'PATCH',
 					data: {
 						content,
@@ -292,7 +292,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const deleteComment = useCallback(async (commentId: number) => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/comments/${commentId}`,
+				path: `/doublescale/v1/comments/${commentId}`,
 				method: 'DELETE',
 			});
 		} catch (error) {
@@ -311,7 +311,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 	const getActivityComments = useCallback(async (activityId: number) => {
 		try {
 			const response = await apiFetch({
-				path: `/qc/v1/activities/${activityId}/comments`,
+				path: `/doublescale/v1/activities/${activityId}/comments`,
 				method: 'GET',
 			});
 			return response;
@@ -342,7 +342,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 			});
 
 			const response = await apiFetch({
-				path: `/qc/v1/activities/statistics?${queryParams.toString()}`,
+				path: `/doublescale/v1/activities/statistics?${queryParams.toString()}`,
 				method: 'GET',
 			});
 			return response;

@@ -31,7 +31,7 @@ export const useDashboardData = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/general/dashboard'),
+				path: addQueryArgs('/doublescale/v1/general/dashboard'),
 			})) as DashboardData;
 
 			setData(response);
@@ -65,7 +65,7 @@ export const useContactAnalytics = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts/analytics', {
+				path: addQueryArgs('/doublescale/v1/contacts/analytics', {
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),
@@ -113,7 +113,7 @@ export const useEmailAnalytics = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns/analytics', {
+				path: addQueryArgs('/doublescale/v1/campaigns/analytics', {
 					channel: 'email',
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),

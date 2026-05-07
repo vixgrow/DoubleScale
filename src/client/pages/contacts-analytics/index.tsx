@@ -38,7 +38,7 @@ const ContactAnalytics: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts/analytics', {
+				path: addQueryArgs('/doublescale/v1/contacts/analytics', {
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),

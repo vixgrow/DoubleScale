@@ -103,7 +103,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
+				path: addQueryArgs('/doublescale/v1/lists', {
 					per_page: perPage,
 					page,
 					from: formatDateForAPI(dateRange.from),
@@ -130,7 +130,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setIsSaving(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/lists',
+				path: '/doublescale/v1/lists',
 				method: 'POST',
 				data: list,
 			});
@@ -161,7 +161,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/lists/${selectedList?.id}`,
+				path: `/doublescale/v1/lists/${selectedList?.id}`,
 				method: 'PUT',
 				data: selectedList,
 			})) as ContactList;
@@ -192,7 +192,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/lists',
+				path: '/doublescale/v1/lists',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});

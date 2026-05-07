@@ -119,7 +119,7 @@ const SettingsPage: React.FC = () => {
 	const fetchSettings = async () => {
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/settings',
+				path: '/doublescale/v1/settings',
 			});
 
 			const settingsData = response as Settings;
@@ -146,7 +146,7 @@ const SettingsPage: React.FC = () => {
 		setIsUpdating(true);
 		try {
 			const response: any = await apiFetch({
-				path: '/qc/v1/settings',
+				path: '/doublescale/v1/settings',
 				method: 'POST',
 				data: settings,
 			});

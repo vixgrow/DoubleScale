@@ -61,7 +61,7 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 	): Promise<SelectOption[]> => {
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
+				path: addQueryArgs('/doublescale/v1/lists', {
 					keyword: keyword,
 					ids: ids,
 				}),

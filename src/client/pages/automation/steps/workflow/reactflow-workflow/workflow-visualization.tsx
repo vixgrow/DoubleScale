@@ -116,7 +116,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				// Make API call to delete the step using the correct endpoint
 				await apiFetch({
-					path: `/qc/v1/automation-steps/${stepId}`,
+					path: `/doublescale/v1/automation-steps/${stepId}`,
 					method: 'DELETE',
 					data: {
 						updated_steps: {},
@@ -125,7 +125,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				// Refresh the automation data after deletion
 				const updatedAutomation = (await apiFetch({
-					path: `/qc/v1/automations/${automation.id}`,
+					path: `/doublescale/v1/automations/${automation.id}`,
 					method: 'GET',
 				})) as Automation;
 
@@ -466,7 +466,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 			// Don't await the API call to avoid blocking the UI
 			apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
+				path: `/doublescale/v1/automations/${automation.id}`,
 				method: 'POST',
 				data: updatedAutomation,
 			}).catch((error) => {

@@ -255,7 +255,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
             if (selectedMeeting) {
                 // Update existing meeting
                 const response = (await apiFetch({
-                    path: `/qc/v1/activities/${selectedMeeting.id}`,
+                    path: `/doublescale/v1/activities/${selectedMeeting.id}`,
                     method: 'PATCH',
                     data: {
                         meeting_data: meetingData,
@@ -270,7 +270,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
             } else {
                 // Create new meeting
                 const response = (await apiFetch({
-                    path: `/qc/v1/activities/meetings`,
+                    path: `/doublescale/v1/activities/meetings`,
                     method: 'POST',
                     data: {
                         contact_id,

@@ -305,7 +305,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const handleMarkTaskComplete = async (taskId: number) => {
         try {
             await apiFetch({
-                path: `/qc/v1/tasks/${taskId}`,
+                path: `/doublescale/v1/tasks/${taskId}`,
                 method: 'PATCH',
                 data: {
                     status: 'completed',

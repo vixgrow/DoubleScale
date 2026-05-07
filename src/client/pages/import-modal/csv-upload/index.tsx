@@ -87,7 +87,7 @@ const CsvUpload: React.FC = () => {
 			}, 200);
 
 			const response = await apiFetch({
-				path: addQueryArgs('/qc/v1/import-export/upload'),
+				path: addQueryArgs('/doublescale/v1/import-export/upload'),
 				method: 'POST',
 				body: formData,
 			});

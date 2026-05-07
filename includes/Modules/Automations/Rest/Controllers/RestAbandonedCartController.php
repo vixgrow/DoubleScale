@@ -17,7 +17,6 @@ use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
 use DoubleScale\UserRoles\Permissions;
 
@@ -25,8 +24,6 @@ use DoubleScale\UserRoles\Permissions;
  * RestAbandonedCartController class
  */
 class RestAbandonedCartController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

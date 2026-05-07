@@ -134,7 +134,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${id}`,
+				path: `/doublescale/v1/automation-steps/${id}`,
 				method: 'POST',
 				data: {
 					...currentStep,

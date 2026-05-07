@@ -27,7 +27,7 @@ export async function checkProviderStatus(
 ): Promise<ProviderStatusResponse> {
 	try {
 		const response = await apiFetch({
-			path: `/qc/v1/integrations/provider-status?channel=${channel}`,
+			path: `/doublescale/v1/integrations/provider-status?channel=${channel}`,
 		}) as ProviderStatusResponse;
 
 		return response;

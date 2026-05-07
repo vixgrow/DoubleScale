@@ -19,7 +19,7 @@ const TagField = ({ value, onChange }: Props) => {
 		<PaginatedSelect
 			value={value}
 			onChange={onChange}
-			endpoint="/qc/v1/tags"
+			endpoint="/doublescale/v1/tags"
 			placeholder={__('Select tag', 'doublescale')}
 			noOptionsMessage={__('No tags available', 'doublescale')}
 			className="doublescale-tag-field"

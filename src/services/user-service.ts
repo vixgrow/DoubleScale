@@ -147,7 +147,7 @@ export class UserService {
 		try {
 			const params = this.buildCRMSearchParams(options);
 			const response = await apiFetch({
-				path: `/qc/v1/user-management/users/frontend?${params.toString()}`,
+				path: `/doublescale/v1/user-management/users/frontend?${params.toString()}`,
 			});
 
 			// CRM API returns paginated response with users array

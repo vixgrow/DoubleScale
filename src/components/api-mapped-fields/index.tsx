@@ -49,7 +49,7 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/integrations/${endpoint}`,
+				path: `/doublescale/v1/integrations/${endpoint}`,
 			})) as ReactSelectOptions;
 
 			setFields([...fields, ...response]);

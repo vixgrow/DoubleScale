@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\UserRoles\Permissions;
 use WP_Error;
 use Exception;
@@ -41,8 +40,6 @@ use DoubleScale\Modules\LeadScoring\LeadScoringManager;
  * @since 1.0.0
  */
 class RestContactController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

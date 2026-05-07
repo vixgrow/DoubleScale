@@ -38,7 +38,7 @@ const CartAnalytics: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/abandoned-carts/analytics', {
+				path: addQueryArgs('/doublescale/v1/abandoned-carts/analytics', {
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),

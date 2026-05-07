@@ -49,7 +49,7 @@ export const useGoHighLevelOAuth = ({
 		try {
 			console.log('GoHighLevel: Fetching source data...');
 			const response = (await apiFetch({
-				path: '/qc/v1/import-export/gohighlevel',
+				path: '/doublescale/v1/import-export/gohighlevel',
 				method: 'GET',
 			})) as { [key: string]: any };
 
@@ -137,7 +137,7 @@ export const useGoHighLevelOAuth = ({
 	const getConnectionStatus = useCallback(async () => {
 		try {
 			const response = (await apiFetch({
-				path: '/qc/v1/import-export/oauth/status?provider=gohighlevel',
+				path: '/doublescale/v1/import-export/oauth/status?provider=gohighlevel',
 				method: 'GET',
 			})) as GoHighLevelOAuthState;
 

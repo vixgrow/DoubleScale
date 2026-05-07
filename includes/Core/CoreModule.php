@@ -9,8 +9,6 @@ namespace DoubleScale\Core;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Core\Abstracts\RestController;
-
 final class CoreModule extends AbstractModule {
 
 	public function slug(): string {
@@ -76,26 +74,6 @@ final class CoreModule extends AbstractModule {
 
 	public function boot( Container $container ): void {
 		parent::boot( $container );
-
-		$legacy_controllers = $this->restControllers();
-		add_action(
-			'rest_api_init',
-			static function () use ( $legacy_controllers ) {
-				foreach ( $legacy_controllers as $class ) {
-					if ( ! is_string( $class ) || ! class_exists( $class, true ) ) {
-						continue;
-					}
-					if ( ! is_subclass_of( $class, RestController::class, true ) ) {
-						continue;
-					}
-					if ( ! method_exists( $class, 'register_routes_legacy' ) ) {
-						continue;
-					}
-					( new $class() )->register_routes_legacy();
-				}
-			},
-			11
-		);
 
 		\DoubleScale\Admin\Admin::instance();
 		\DoubleScale\Admin\AdminLoader::instance();

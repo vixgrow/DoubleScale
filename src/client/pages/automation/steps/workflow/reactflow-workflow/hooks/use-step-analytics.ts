@@ -68,7 +68,7 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 
 			try {
 				const response = (await apiFetch({
-					path: `/qc/v1/automation-steps/${stepId}/analytics`,
+					path: `/doublescale/v1/automation-steps/${stepId}/analytics`,
 					method: 'GET',
 				})) as StepAnalyticsResponse;
 

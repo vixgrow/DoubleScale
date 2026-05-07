@@ -95,7 +95,7 @@ export const useResendEmail = ({
 	): Promise<boolean> => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/campaigns/${campaignEmail.source_id}/messages/${campaignEmail.id}/resend`,
+				path: `/doublescale/v1/campaigns/${campaignEmail.source_id}/messages/${campaignEmail.id}/resend`,
 				method: 'POST',
 			});
 

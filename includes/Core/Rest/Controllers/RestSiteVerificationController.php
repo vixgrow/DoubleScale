@@ -15,12 +15,8 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Application_Passwords;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 
 class RestSiteVerificationController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
-
 	protected $rest_base = 'site';
 
 	const TEMP_TOKEN_TTL = 900; // 15 minutes

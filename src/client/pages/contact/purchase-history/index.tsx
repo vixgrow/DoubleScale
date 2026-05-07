@@ -77,7 +77,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs(
-					`/qc/v1/contacts/${contact_id}/purchase-history`,
+					`/doublescale/v1/contacts/${contact_id}/purchase-history`,
 					{
 						woo_page: wooPage,
 						woo_per_page: wooPerPage,

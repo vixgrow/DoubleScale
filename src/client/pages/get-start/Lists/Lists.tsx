@@ -51,7 +51,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 		setIsSaving,
 		refetch,
 	} = usePaginatedSegments<ContactList>({
-		endpoint: '/qc/v1/lists',
+		endpoint: '/doublescale/v1/lists',
 		parseResponse: (response) => response as ListsResponse,
 	});
 
@@ -77,7 +77,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 			};
 
 			await apiFetch({
-				path: '/qc/v1/lists',
+				path: '/doublescale/v1/lists',
 				method: 'POST',
 				data: listData,
 			});
@@ -135,7 +135,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/lists/${id}`,
+				path: `/doublescale/v1/lists/${id}`,
 				method: 'PUT',
 				data: {
 					name: editingValues.name,
@@ -177,7 +177,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 
 		try {
 			await apiFetch({
-				path: '/qc/v1/lists',
+				path: '/doublescale/v1/lists',
 				method: 'DELETE',
 				data: { ids: [id] },
 			});

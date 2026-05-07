@@ -41,7 +41,7 @@ interface ApiResponse {
 interface Props {
 	value?: number[];
 	onChange: (value: number[]) => void;
-	endpoint: string; // e.g., '/qc/v1/lists' or '/qc/v1/tags'
+	endpoint: string; // e.g., '/doublescale/v1/lists' or '/doublescale/v1/tags'
 	placeholder: string;
 	noOptionsMessage?: string;
 	perPage?: number;

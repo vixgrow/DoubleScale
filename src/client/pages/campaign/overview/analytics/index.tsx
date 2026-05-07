@@ -50,7 +50,7 @@ const Analytics: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${campaign.id}`,
+				path: `/doublescale/v1/campaigns/${campaign.id}`,
 			})) as CampaignType;
 
 			const totalMessages = (response.sent_count || 0) + (response.failed_count || 0);

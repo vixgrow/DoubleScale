@@ -123,7 +123,7 @@ const renderTemplateBody = async (
 	if (template.id) {
 		try {
 			const response: any = await apiFetch({
-				path: `/qc/v1/templates/${template.id}/render`,
+				path: `/doublescale/v1/templates/${template.id}/render`,
 				method: 'POST',
 			});
 

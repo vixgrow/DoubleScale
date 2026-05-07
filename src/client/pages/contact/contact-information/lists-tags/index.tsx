@@ -88,7 +88,7 @@ const ListsTagsCards: React.FC = () => {
 		try {
 			// Fetch the full list objects
 			const response = (await apiFetch({
-				path: `/qc/v1/lists?ids=${selectedListIds.join(',')}`,
+				path: `/doublescale/v1/lists?ids=${selectedListIds.join(',')}`,
 			})) as { data: List[] };
 
 			const newLists = response.data;
@@ -123,7 +123,7 @@ const ListsTagsCards: React.FC = () => {
 		try {
 			// Fetch the full tag objects
 			const response = (await apiFetch({
-				path: `/qc/v1/tags?ids=${selectedTagIds.join(',')}`,
+				path: `/doublescale/v1/tags?ids=${selectedTagIds.join(',')}`,
 			})) as { data: Tag[] };
 
 			const newTags = response.data;

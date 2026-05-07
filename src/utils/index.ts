@@ -297,7 +297,7 @@ export const getCampaignEndpoint = (campaignType: string): string | null => {
 	const validTypes = ['email', 'sms', 'whatsapp'];
 
 	if (validTypes.includes(campaignType)) {
-		return '/qc/v1/campaigns';
+		return '/doublescale/v1/campaigns';
 	}
 
 	return null;

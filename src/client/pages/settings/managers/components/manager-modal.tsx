@@ -242,7 +242,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 										'Select a WordPress user',
 										'doublescale'
 									)}
-									apiEndpoint="/qc/v1/user-management/users/frontend"
+									apiEndpoint="/doublescale/v1/user-management/users/frontend"
 									searchParamName="search"
 									getOptionLabel={(user: WordPressUser) =>
 										`${user.display_name} (${user.email})`

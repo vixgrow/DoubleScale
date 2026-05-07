@@ -11,7 +11,6 @@
 namespace DoubleScale\Core\Rest\Controllers;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -25,8 +24,6 @@ use WP_REST_Server;
  * @since 1.0.0
  */
 class RestPluginsController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * REST Base

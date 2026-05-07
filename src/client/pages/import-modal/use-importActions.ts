@@ -179,7 +179,7 @@ export const useImportActions = () => {
 			}
 
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/import-export/${state.source}`, {
+				path: addQueryArgs(`/doublescale/v1/import-export/${state.source}`, {
 					credentials: state.credentials,
 				}),
 			})) as { [key: string]: any };
@@ -341,7 +341,7 @@ export const useImportActions = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/import-export/import'),
+				path: addQueryArgs('/doublescale/v1/import-export/import'),
 				method: 'POST',
 				data: {
 					source: state.source,
@@ -595,7 +595,7 @@ export const useImportActions = () => {
 	const cancelImport = async () => {
 		try {
 			await apiFetch({
-				path: '/qc/v1/import-export/import/cancel',
+				path: '/doublescale/v1/import-export/import/cancel',
 				method: 'POST',
 				data: { source: state.source },
 			});

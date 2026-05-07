@@ -85,7 +85,7 @@ const DebuggingLogs: React.FC = () => {
 		const fetchLogLevel = async () => {
 			try {
 				const settings = await apiFetch({
-					path: '/qc/v1/settings',
+					path: '/doublescale/v1/settings',
 				}) as any;
 				if (settings?.debugging?.log_level) {
 					setLogLevel(settings.debugging.log_level);
@@ -104,7 +104,7 @@ const DebuggingLogs: React.FC = () => {
 		try {
 			const levels = logLevel.split(',');
 			const response = await apiFetch({
-				path: `/qc/v1/logs?levels=${levels.join(',')}&page=${page}&per_page=${perPage}`,
+				path: `/doublescale/v1/logs?levels=${levels.join(',')}&page=${page}&per_page=${perPage}`,
 			}) as LogsResponse;
 
 			setLogs(response.items || []);
@@ -125,7 +125,7 @@ const DebuggingLogs: React.FC = () => {
 	const saveLogLevel = async (newLevel: LogLevelOption) => {
 		try {
 			const settings = await apiFetch({
-				path: '/qc/v1/settings',
+				path: '/doublescale/v1/settings',
 			}) as any;
 
 			const updatedSettings = {
@@ -137,7 +137,7 @@ const DebuggingLogs: React.FC = () => {
 			};
 
 			await apiFetch({
-				path: '/qc/v1/settings',
+				path: '/doublescale/v1/settings',
 				method: 'POST',
 				data: updatedSettings,
 			});
@@ -161,14 +161,14 @@ const DebuggingLogs: React.FC = () => {
 		try {
 			if (logIds && logIds.length > 0) {
 				await apiFetch({
-					path: '/qc/v1/logs',
+					path: '/doublescale/v1/logs',
 					method: 'DELETE',
 					data: { ids: logIds.join(',') },
 				});
 			} else {
 				const levels = logLevel.split(',');
 				await apiFetch({
-					path: `/qc/v1/logs?levels=${levels.join(',')}`,
+					path: `/doublescale/v1/logs?levels=${levels.join(',')}`,
 					method: 'DELETE',
 				});
 			}
@@ -184,7 +184,7 @@ const DebuggingLogs: React.FC = () => {
 	const exportLogs = async () => {
 		try {
 			const levels = logLevel.split(',');
-			const url = `/wp-json/qc/v1/logs?levels=${levels.join(',')}&export=json`;
+			const url = `/wp-json/doublescale/v1/logs?levels=${levels.join(',')}&export=json`;
 			window.open(url, '_blank');
 		} catch (err) {
 			console.error('Failed to export logs:', err);

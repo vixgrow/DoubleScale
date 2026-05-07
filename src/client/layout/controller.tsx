@@ -77,7 +77,7 @@ const useOnboardingRedirect = () => {
 		const checkBusinessSettings = async () => {
 			try {
 				const settings: any = await apiFetch({
-					path: '/qc/v1/settings',
+					path: '/doublescale/v1/settings',
 				});
 				const business = settings?.business || {};
 

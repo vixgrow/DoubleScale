@@ -32,7 +32,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 					{ is_installed?: boolean; is_active?: boolean }
 				>;
 			} = await apiFetch({
-				path: `/qc/v1/plugins/status?plugins=${encodeURIComponent(
+				path: `/doublescale/v1/plugins/status?plugins=${encodeURIComponent(
 					pluginFile
 				)}`,
 				method: 'GET',
@@ -78,7 +78,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 			const response: {
 				plugin_file?: string;
 			} = await apiFetch({
-				path: '/qc/v1/plugins/install',
+				path: '/doublescale/v1/plugins/install',
 				method: 'POST',
 				data: {
 					download_url: plugin.downloadUrl,
@@ -114,7 +114,7 @@ export function usePluginInstaller(): UsePluginInstallerReturn {
 		setIsProcessing(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/plugins/activate',
+				path: '/doublescale/v1/plugins/activate',
 				method: 'POST',
 				data: {
 					plugin_file: pluginFile,

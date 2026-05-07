@@ -117,7 +117,7 @@ export const reorderStep = async (
 
         // Update the database
         await apiFetch({
-            path: `/qc/v1/automation-steps/${step.id}/reorder`,
+            path: `/doublescale/v1/automation-steps/${step.id}/reorder`,
             method: 'POST',
             data: {
                 direction,

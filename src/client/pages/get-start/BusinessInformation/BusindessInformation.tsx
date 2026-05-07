@@ -145,7 +145,7 @@ export default function BusindessInformation({
 		void (async () => {
 			setIsLoading(true);
 			try {
-				const response = await apiFetch({ path: '/qc/v1/settings' });
+				const response = await apiFetch({ path: '/doublescale/v1/settings' });
 
 				if (!isMounted) return;
 
@@ -253,7 +253,7 @@ export default function BusindessInformation({
 
 			// Save settings
 			await apiFetch({
-				path: '/qc/v1/settings',
+				path: '/doublescale/v1/settings',
 				method: 'POST',
 				data: settings,
 			});

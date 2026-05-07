@@ -190,7 +190,7 @@ const Workflow: React.FC = () => {
 		try {
 			// @ts-ignore
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}`,
+				path: `/doublescale/v1/automation-steps/${step.id}`,
 				method: 'DELETE',
 				data: {
 					updated_steps: updatedOrdersSteps,

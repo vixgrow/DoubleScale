@@ -38,7 +38,7 @@ const EmailAnalytics: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns/analytics', {
+				path: addQueryArgs('/doublescale/v1/campaigns/analytics', {
 					channel: 'email',
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),

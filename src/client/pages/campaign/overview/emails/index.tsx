@@ -102,7 +102,7 @@ const EmailsTab: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${id}`,
+				path: `/doublescale/v1/campaigns/${id}`,
 			})) as { type: string };
 			setCampaignType(response.type);
 			return response.type;
@@ -126,7 +126,7 @@ const EmailsTab: React.FC = () => {
 
 			// Use unified endpoint for all campaign types
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/campaigns/${id}/messages`, {
+				path: addQueryArgs(`/doublescale/v1/campaigns/${id}/messages`, {
 					per_page: perPage,
 					page,
 					status,
@@ -182,7 +182,7 @@ const EmailsTab: React.FC = () => {
 				),
 			});
 
-			const endpoint = `/qc/v1/campaigns`;
+			const endpoint = `/doublescale/v1/campaigns`;
 
 			// Fetch current campaign data first
 			const currentCampaign = (await apiFetch({
@@ -233,7 +233,7 @@ const EmailsTab: React.FC = () => {
 
 			// Resend single message via API endpoint
 			await apiFetch({
-				path: `/qc/v1/campaigns/${id}/messages/${emailToRetry.id}/resend`,
+				path: `/doublescale/v1/campaigns/${id}/messages/${emailToRetry.id}/resend`,
 				method: 'POST',
 			});
 

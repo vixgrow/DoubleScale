@@ -111,7 +111,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
+				path: addQueryArgs('/doublescale/v1/tags', {
 					per_page: perPage,
 					page,
 					from: formatDateForAPI(dateRange.from),
@@ -142,7 +142,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setIsSaving(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/tags',
+				path: '/doublescale/v1/tags',
 				method: 'POST',
 				data: tag,
 			});
@@ -176,7 +176,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/tags/${selectedTag?.id}`,
+				path: `/doublescale/v1/tags/${selectedTag?.id}`,
 				method: 'PUT',
 				data: selectedTag,
 			})) as ContactTag;
@@ -205,7 +205,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/tags',
+				path: '/doublescale/v1/tags',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});

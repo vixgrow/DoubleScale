@@ -54,7 +54,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
+				path: addQueryArgs('/doublescale/v1/contacts', {
 					page,
 					per_page: perPage,
 					filters: filters,
@@ -87,7 +87,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 
 		try {
 			const response = (await apiFetch({
-				path: '/qc/v1/contacts',
+				path: '/doublescale/v1/contacts',
 				method: 'POST',
 				data: contactPayload,
 			})) as Contact;
@@ -123,7 +123,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/contacts',
+				path: '/doublescale/v1/contacts',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});
@@ -150,7 +150,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/contacts/add-to-list',
+				path: '/doublescale/v1/contacts/add-to-list',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
@@ -183,7 +183,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/contacts/remove-from-list',
+				path: '/doublescale/v1/contacts/remove-from-list',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
@@ -213,7 +213,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/contacts/add-tag',
+				path: '/doublescale/v1/contacts/add-tag',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
@@ -240,7 +240,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/contacts/remove-tag',
+				path: '/doublescale/v1/contacts/remove-tag',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,

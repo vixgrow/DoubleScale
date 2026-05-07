@@ -93,7 +93,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 		setFetchError(null);
 		try {
 			const response: any = await apiFetch({
-				path: '/qc/v1/whatsapp/templates',
+				path: '/doublescale/v1/whatsapp/templates',
 			});
 
 			if (response.success && response.templates) {
@@ -184,7 +184,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 			// If template doesn't have a local ID, save it first
 			if (!templateId && selectedTemplate?.sid) {
 				const saveResponse: any = await apiFetch({
-					path: '/qc/v1/whatsapp/templates/save',
+					path: '/doublescale/v1/whatsapp/templates/save',
 					method: 'POST',
 					data: {
 						sid: selectedTemplate.sid,

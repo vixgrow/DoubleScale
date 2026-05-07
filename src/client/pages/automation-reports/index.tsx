@@ -32,7 +32,7 @@ const AutomationReports: React.FC = () => {
 	const fetchAutomation = async () => {
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automations/${id}`,
+				path: `/doublescale/v1/automations/${id}`,
 			})) as Automation;
 
 			setAutomation(response);

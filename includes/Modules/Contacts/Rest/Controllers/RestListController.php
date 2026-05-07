@@ -10,16 +10,13 @@
 
 namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
-use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Core\Abstracts\RestTaxonomyController;
+use DoubleScale\Modules\Contacts\Models\ListModel;
 
 /**
  * List Controller class
  */
 class RestListController extends RestTaxonomyController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * Constructor

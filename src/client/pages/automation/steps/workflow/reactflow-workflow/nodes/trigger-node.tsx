@@ -78,7 +78,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 			if (tempAutomation.trigger !== automation.trigger) {
 				// check if you have any condtions is related with this trigger
 				const response = await apiFetch({
-					path: '/qc/v1/automations/check-conditions',
+					path: '/doublescale/v1/automations/check-conditions',
 					method: 'POST',
 					data: {
 						automation_id: automation.id,
@@ -96,7 +96,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 					);
 					if (confirm) {
 						await apiFetch({
-							path: '/qc/v1/automations/check-conditions',
+							path: '/doublescale/v1/automations/check-conditions',
 							method: 'POST',
 							data: {
 								automation_id: automation.id,

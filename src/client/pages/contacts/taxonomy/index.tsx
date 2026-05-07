@@ -75,7 +75,7 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 	// Configuration based on type
 	const config = {
 		list: {
-			apiPath: '/qc/v1/lists',
+			apiPath: '/doublescale/v1/lists',
 			itemName: __('List', 'doublescale'),
 			itemNamePlural: __('Lists', 'doublescale'),
 			icon: <GradientListIcon width={120} height={120} />,
@@ -95,7 +95,7 @@ const TaxonomyManager = forwardRef<TaxonomyRef, TaxonomyProps>(({ type, activeTa
 			nameRequiredMessage: __('List name is required', 'doublescale'),
 		},
 		tag: {
-			apiPath: '/qc/v1/tags',
+			apiPath: '/doublescale/v1/tags',
 			itemName: __('Tag', 'doublescale'),
 			itemNamePlural: __('Tags', 'doublescale'),
 			icon: <GradientTagIcon width={120} height={120} />,

@@ -159,7 +159,7 @@ const Review: React.FC = () => {
 					const lists = await Promise.all(
 						includeListIds.map(async (listId) => {
 							const list = (await apiFetch({
-								path: `/qc/v1/lists/${listId}`,
+								path: `/doublescale/v1/lists/${listId}`,
 							})) as { name?: string };
 							return list?.name || '';
 						})
@@ -173,7 +173,7 @@ const Review: React.FC = () => {
 					const lists = await Promise.all(
 						excludeListIds.map(async (listId) => {
 							const list = (await apiFetch({
-								path: `/qc/v1/lists/${listId}`,
+								path: `/doublescale/v1/lists/${listId}`,
 							})) as { name?: string };
 							return list?.name || '';
 						})
@@ -186,7 +186,7 @@ const Review: React.FC = () => {
 					const tags = await Promise.all(
 						includeTagIds.map(async (tagId) => {
 							const tag = (await apiFetch({
-								path: `/qc/v1/tags/${tagId}`,
+								path: `/doublescale/v1/tags/${tagId}`,
 							})) as { name?: string };
 							return tag?.name || '';
 						})
@@ -202,7 +202,7 @@ const Review: React.FC = () => {
 					const tags = await Promise.all(
 						excludeTagIds.map(async (tagId) => {
 							const tag = (await apiFetch({
-								path: `/qc/v1/tags/${tagId}`,
+								path: `/doublescale/v1/tags/${tagId}`,
 							})) as { name?: string };
 							return tag?.name || '';
 						})

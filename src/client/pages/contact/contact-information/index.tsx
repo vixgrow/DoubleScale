@@ -179,7 +179,7 @@ const ContactInformation: React.FC = () => {
 		setIsSendingOptIn(true);
 		try {
 			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}/send-opt-in`,
+				path: `/doublescale/v1/contacts/${contact.id}/send-opt-in`,
 				method: 'POST',
 			});
 

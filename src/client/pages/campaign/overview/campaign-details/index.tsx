@@ -47,7 +47,7 @@ const CampaignDetails: React.FC = () => {
 					try {
 						// Try to render via API endpoint (no contact for preview)
 						const response: any = await apiFetch({
-							path: `/qc/v1/templates/${template.id}/render`,
+							path: `/doublescale/v1/templates/${template.id}/render`,
 							method: 'POST',
 						});
 

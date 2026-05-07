@@ -88,7 +88,7 @@ const FieldsCard: React.FC = () => {
 	const fetchLists = async (keyword = '', ids = []) => {
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
+				path: addQueryArgs('/doublescale/v1/lists', {
 					keyword: keyword,
 					ids: ids,
 				}),
@@ -112,7 +112,7 @@ const FieldsCard: React.FC = () => {
 	const fetchTags = async (keyword = '', ids = []) => {
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
+				path: addQueryArgs('/doublescale/v1/tags', {
 					keyword: keyword,
 					ids: ids,
 				}),

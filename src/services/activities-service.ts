@@ -15,11 +15,11 @@ import apiFetch from '@wordpress/api-fetch';
  */
 export const ACTIVITIES_ENDPOINTS = {
 	/** Activities endpoint - for activity type tabs (Notes, Calls, etc.) */
-	ACTIVITIES: '/qc/v1/activities',
+	ACTIVITIES: '/doublescale/v1/activities',
 	/** Timeline endpoint - for unified timeline (activities + tasks when Pro active) */
-	TIMELINE: '/qc/v1/timeline',
+	TIMELINE: '/doublescale/v1/timeline',
 	/** Upcoming activities - today onward, sorted ascending (nearest first) */
-	UPCOMING: '/qc/v1/activities/upcoming',
+	UPCOMING: '/doublescale/v1/activities/upcoming',
 } as const;
 
 /**

@@ -141,7 +141,7 @@ export const ContactFilterSection = forwardRef<
 		setError(null);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
+				path: addQueryArgs('/doublescale/v1/lists', {
 					per_page: perPage,
 					page,
 					keyword,
@@ -171,7 +171,7 @@ export const ContactFilterSection = forwardRef<
 		setError(null);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
+				path: addQueryArgs('/doublescale/v1/tags', {
 					per_page: perPage,
 					page,
 					keyword,

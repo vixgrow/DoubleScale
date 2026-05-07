@@ -118,7 +118,7 @@ const FormsList: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/forms', {
+				path: addQueryArgs('/doublescale/v1/forms', {
 					page,
 					per_page: perPage,
 					from: formatDateForAPI(dateRange.from),
@@ -149,7 +149,7 @@ const FormsList: React.FC = () => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/qc/v1/forms',
+				path: '/doublescale/v1/forms',
 				method: 'DELETE',
 				data: {
 					ids: selectedRowKeys,
@@ -170,7 +170,7 @@ const FormsList: React.FC = () => {
 	const deleteForm = async (id: number) => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/forms/${id}`,
+				path: `/doublescale/v1/forms/${id}`,
 				method: 'DELETE',
 			});
 
@@ -187,7 +187,7 @@ const FormsList: React.FC = () => {
 	) => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/forms/${id}`,
+				path: `/doublescale/v1/forms/${id}`,
 				method: 'POST',
 				data: {
 					status: currentStatus === 'active' ? 'inactive' : 'active',

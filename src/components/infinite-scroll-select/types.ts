@@ -9,7 +9,7 @@ export interface InfiniteScrollSelectProps {
   placeholder?: string;
 
   // API configuration
-  apiEndpoint: string; // e.g., '/qc/v1/contacts'
+  apiEndpoint: string; // e.g., '/doublescale/v1/contacts'
   apiParams?: Record<string, any>; // Additional query params
   searchParamName?: string; // Default: 'search'
 

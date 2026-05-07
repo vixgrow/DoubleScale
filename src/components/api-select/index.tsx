@@ -52,12 +52,12 @@ function isIntegrationResponse(response: any): response is IntegrationDataItem[]
 const API_Select = ({ endpoint, value, onChange, multiple = false }: Props) => {
 	// Normalize endpoint path
 	const normalizedEndpoint = useMemo(() => {
-		// If endpoint starts with 'qc/v1/' or '/qc/v1/', use it as-is
-		// Otherwise, prepend '/qc/v1/integrations/' for integration endpoints
-		if (endpoint.startsWith('qc/v1/') || endpoint.startsWith('/qc/v1/')) {
+		// If endpoint starts with '/doublescale/v1/', use it as-is
+		// Otherwise, prepend '/doublescale/v1/integrations/' for integration endpoints
+		if (endpoint.startsWith('/doublescale/v1/') || endpoint.startsWith('doublescale/v1/')) {
 			return endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 		}
-		return `/qc/v1/integrations/${endpoint}`;
+		return `/doublescale/v1/integrations/${endpoint}`;
 	}, [endpoint]);
 
 	// For multiple selection, use PaginatedSelect

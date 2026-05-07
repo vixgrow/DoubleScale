@@ -75,7 +75,7 @@ const AutomationsList: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/automations', {
+				path: addQueryArgs('/doublescale/v1/automations', {
 					per_page: perPage,
 					page,
 					from: formatDateForAPI(dateRange.from),
@@ -109,7 +109,7 @@ const AutomationsList: React.FC = () => {
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
-				path: '/qc/v1/automations',
+				path: '/doublescale/v1/automations',
 				method: 'POST',
 				data: automation,
 			})) as Automation;
@@ -128,7 +128,7 @@ const AutomationsList: React.FC = () => {
 	const deleteSelected = async () => {
 		try {
 			await apiFetch({
-				path: '/qc/v1/automations',
+				path: '/doublescale/v1/automations',
 				method: 'DELETE',
 				data: {
 					ids: selectedRowKeys,
@@ -180,7 +180,7 @@ const AutomationsList: React.FC = () => {
 		setUpdatingAutomationId(automation.id);
 		try {
 			await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
+				path: `/doublescale/v1/automations/${automation.id}`,
 				method: 'PUT',
 				data: {
 					status: newStatus,
@@ -216,7 +216,7 @@ const AutomationsList: React.FC = () => {
 	const deleteAutomation = async (id: number) => {
 		try {
 			await apiFetch({
-				path: `/qc/v1/automations/${id}`,
+				path: `/doublescale/v1/automations/${id}`,
 				method: 'DELETE',
 			});
 

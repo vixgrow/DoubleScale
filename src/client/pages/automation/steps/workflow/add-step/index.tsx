@@ -129,7 +129,7 @@ const AddStep: React.FC<AddStepProps> = ({
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps`,
+				path: `/doublescale/v1/automation-steps`,
 				method: 'POST',
 				data,
 			})) as AutomationStep;

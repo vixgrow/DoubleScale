@@ -271,7 +271,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps`,
+				path: `/doublescale/v1/automation-steps`,
 				method: 'POST',
 				data: requestData,
 			})) as AutomationStep;

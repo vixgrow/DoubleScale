@@ -100,7 +100,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 			if (activePostId) params.post_id = activePostId; // For Elementor forms
 
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/automations/merge-tags', params),
+				path: addQueryArgs('/doublescale/v1/automations/merge-tags', params),
 			})) as AutomationMergeTags;
 
 			setDynamicMergeTags(response);

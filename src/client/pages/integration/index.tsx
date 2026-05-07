@@ -95,7 +95,7 @@ const Integration: React.FC<IntegrationProps> = ({
 			setIsLoading(true);
 			try {
 				const response = await apiFetch<{ settings: Record<string, any> }>({
-					path: `/qc/v1/integrations/${slug}`,
+					path: `/doublescale/v1/integrations/${slug}`,
 				});
 				setFieldsValue(parseSettingsToFieldValues(response.settings, isAppBased));
 			} catch (error) {
@@ -131,7 +131,7 @@ const Integration: React.FC<IntegrationProps> = ({
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/integrations/${slug}`,
+				path: `/doublescale/v1/integrations/${slug}`,
 				method: 'POST',
 				data: {
 					settings: isAppBased ? { app: fieldsValue } : fieldsValue,
@@ -154,7 +154,7 @@ const Integration: React.FC<IntegrationProps> = ({
 	const getAuthUrl = async () => {
 		try {
 			const response = await apiFetch<{ auth_uri: string }>({
-				path: `/qc/v1/integrations/${slug}/auth`,
+				path: `/doublescale/v1/integrations/${slug}/auth`,
 			});
 			window.location.href = response.auth_uri;
 		} catch (error) {

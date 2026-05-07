@@ -79,7 +79,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/contacts/${contact_id}/notes`, {
+				path: addQueryArgs(`/doublescale/v1/contacts/${contact_id}/notes`, {
 					per_page: perPage,
 					page,
 				}),
@@ -115,7 +115,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/activities/${noteToDelete.id}`,
+				path: `/doublescale/v1/activities/${noteToDelete.id}`,
 				method: 'DELETE',
 			});
 

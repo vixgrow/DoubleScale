@@ -46,7 +46,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 	const saveStep = async (payload: Partial<OrganizedStep> = {}) => {
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}`,
+				path: `/doublescale/v1/automation-steps/${step.id}`,
 				method: 'POST',
 				data: {
 					...step,

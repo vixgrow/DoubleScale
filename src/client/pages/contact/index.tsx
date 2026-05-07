@@ -78,7 +78,7 @@ const Contact: React.FC<ContactProps> = ({
 		setLoading(true);
 		try {
 			const response = await apiFetch({
-				path: `/qc/v1/contacts/${id}`,
+				path: `/doublescale/v1/contacts/${id}`,
 				method: 'GET',
 			});
 
@@ -103,7 +103,7 @@ const Contact: React.FC<ContactProps> = ({
 
 		try {
 			const response = await apiFetch({
-				path: `/qc/v1/contacts/${id}/messages?mode=email&per_page=10&page=1`,
+				path: `/doublescale/v1/contacts/${id}/messages?mode=email&per_page=10&page=1`,
 				method: 'GET',
 			});
 
@@ -137,7 +137,7 @@ const Contact: React.FC<ContactProps> = ({
 			};
 
 			const response = await apiFetch({
-				path: `/qc/v1/contacts/${id}`,
+				path: `/doublescale/v1/contacts/${id}`,
 				method: 'POST',
 				data: contactData,
 			});

@@ -246,7 +246,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
             if (selectedCall) {
                 // Update existing call
                 const response = (await apiFetch({
-                    path: `/qc/v1/activities/${selectedCall.id}`,
+                    path: `/doublescale/v1/activities/${selectedCall.id}`,
                     method: 'PATCH',
                     data: {
                         call_data: callData,
@@ -261,7 +261,7 @@ const CallDialog: React.FC<CallDialogProps> = ({
             } else {
                 // Create new call
                 const response = (await apiFetch({
-                    path: `/qc/v1/activities/calls`,
+                    path: `/doublescale/v1/activities/calls`,
                     method: 'POST',
                     data: {
                         contact_id,

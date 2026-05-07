@@ -29,7 +29,7 @@ export interface UpdateUserRoleRequest {
  * User Management API Service
  */
 export class UserManagementAPI {
-    private static baseUrl = '/qc/v1/user-management';
+    private static baseUrl = '/doublescale/v1/user-management';
 
     /**
      * Get all CRM users

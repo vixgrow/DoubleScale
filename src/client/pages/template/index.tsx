@@ -42,7 +42,7 @@ const Template: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/templates/${id}`,
+				path: `/doublescale/v1/templates/${id}`,
 			})) as TemplateType;
 
 			const newTemplate = {
@@ -80,7 +80,7 @@ const Template: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/templates/${newTemplate.id}`,
+				path: `/doublescale/v1/templates/${newTemplate.id}`,
 				method: 'POST',
 				data: newTemplate,
 			})) as TemplateType;

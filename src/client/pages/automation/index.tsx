@@ -71,7 +71,7 @@ const Automation: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automations/${id}`,
+				path: `/doublescale/v1/automations/${id}`,
 			})) as AutomationType;
 
 			setAutomation(response);
@@ -105,7 +105,7 @@ const Automation: React.FC = () => {
 		try {
 			setAnalyticsLoading(true);
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-reports/${automationId}/get-chart-report`,
+				path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
 			})) as any;
 
 			if (response.funnel_data) {
@@ -133,7 +133,7 @@ const Automation: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automations/${newAutomation.id}`,
+				path: `/doublescale/v1/automations/${newAutomation.id}`,
 				method: 'POST',
 				data: newAutomation,
 			})) as AutomationType;

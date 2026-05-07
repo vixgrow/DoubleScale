@@ -51,7 +51,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			setError(null);
 
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-reports/${automation.id}/get-chart-report`,
+				path: `/doublescale/v1/automation-reports/${automation.id}/get-chart-report`,
 			})) as FunnelResponse;
 
 			console.log('response', response);

@@ -62,7 +62,7 @@ const Courses = ({ contact_id }: CoursesProps) => {
         try {
             const response = (await apiFetch({
                 path: addQueryArgs(
-                    `/qc/v1/contacts/${contact_id}/lms-courses`,
+                    `/doublescale/v1/contacts/${contact_id}/lms-courses`,
                     {
                         per_page: perPage,
                         page,

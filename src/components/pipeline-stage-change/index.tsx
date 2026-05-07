@@ -44,12 +44,12 @@ const PipelineStageChange = ({
 
 	const buildApiPath = () => {
 		if (endpoint === endpointForPipelines) {
-			return `/qc/v1/pipelines`;
+			return `/doublescale/v1/pipelines`;
 		}
 
 		if (endpoint === endpointForStages) {
 			if (isNumber(allValues?.pipeline)) {
-				return `/qc/v1/pipelines/${allValues?.pipeline}/stages`;
+				return `/doublescale/v1/pipelines/${allValues?.pipeline}/stages`;
 			}
 			return '';
 		}

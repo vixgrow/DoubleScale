@@ -19,7 +19,6 @@
 namespace DoubleScale\Modules\Activities\Rest\Controllers;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\Rest\Concerns\RegistersLegacyQcV1Routes;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
@@ -34,8 +33,6 @@ use WP_REST_Server;
  * Activity REST Controller class
  */
 class RestActivityController extends RestController {
-
-	use RegistersLegacyQcV1Routes;
 
 	/**
 	 * Route base.

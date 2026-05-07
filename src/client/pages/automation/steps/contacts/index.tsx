@@ -46,7 +46,7 @@ const ContactsList: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/automations/${id}/contacts`, {
+				path: addQueryArgs(`/doublescale/v1/automations/${id}/contacts`, {
 					page,
 					per_page: perPage,
 					keyword,

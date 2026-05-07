@@ -51,7 +51,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs(
-					`/qc/v1/contacts/${contact_id}/automation-contacts`,
+					`/doublescale/v1/contacts/${contact_id}/automation-contacts`,
 					{
 						per_page: perPage,
 						page,

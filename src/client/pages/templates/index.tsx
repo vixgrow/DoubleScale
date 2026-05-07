@@ -48,7 +48,7 @@ const TemplatesList: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/templates', {
+				path: addQueryArgs('/doublescale/v1/templates', {
 					page,
 					per_page: perPage,
 					keyword: clear ? '' : keyword,
@@ -84,7 +84,7 @@ const TemplatesList: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: '/qc/v1/templates',
+				path: '/doublescale/v1/templates',
 				method: 'POST',
 				data: template,
 			})) as Template;
@@ -106,7 +106,7 @@ const TemplatesList: React.FC = () => {
 
 		try {
 			await apiFetch({
-				path: '/qc/v1/campaigns',
+				path: '/doublescale/v1/campaigns',
 				method: 'DELETE',
 				data: {
 					ids: selectedRowKeys,

@@ -18,7 +18,7 @@ export const renderTemplate = async (
 ): Promise<string> => {
 	try {
 		const response = await apiFetch({
-			path: `/qc/v1/templates/${templateId}/render`,
+			path: `/doublescale/v1/templates/${templateId}/render`,
 			method: 'POST',
 			data: {
 				merge_tags: {},
@@ -41,7 +41,7 @@ export const createTemplate = async (
 ): Promise<EmailTemplate> => {
 	try {
 		const response = await apiFetch({
-			path: '/qc/v1/templates',
+			path: '/doublescale/v1/templates',
 			method: 'POST',
 			data: templateData,
 		});
@@ -63,7 +63,7 @@ export const updateTemplate = async (
 ): Promise<EmailTemplate> => {
 	try {
 		const response = await apiFetch({
-			path: `/qc/v1/templates/${templateId}`,
+			path: `/doublescale/v1/templates/${templateId}`,
 			method: 'PUT',
 			data: templateData,
 		});
@@ -89,7 +89,7 @@ export const saveTemplate = async (
 ): Promise<EmailTemplate> => {
 	try {
 		const response = await apiFetch({
-			path: '/qc/v1/templates/save',
+			path: '/doublescale/v1/templates/save',
 			method: 'POST',
 			data: templateData,
 		});
@@ -111,7 +111,7 @@ export const getTemplate = async (
 ): Promise<EmailTemplate> => {
 	try {
 		const response = await apiFetch({
-			path: `/qc/v1/templates/${templateId}`,
+			path: `/doublescale/v1/templates/${templateId}`,
 		});
 
 		return response as EmailTemplate;
@@ -129,7 +129,7 @@ export const getTemplate = async (
 export const getTemplates = async (): Promise<EmailTemplate[]> => {
 	try {
 		const response = await apiFetch({
-			path: '/qc/v1/templates',
+			path: '/doublescale/v1/templates',
 		});
 		return response as EmailTemplate[];
 	} catch (error) {
@@ -161,8 +161,8 @@ export const getUserTemplates = async (params?: {
 		}
 
 		const path = queryParams.toString()
-			? `/qc/v1/templates/user-templates?${queryParams.toString()}`
-			: '/qc/v1/templates/user-templates';
+			? `/doublescale/v1/templates/user-templates?${queryParams.toString()}`
+			: '/doublescale/v1/templates/user-templates';
 
 		const response = await apiFetch({
 			path,
@@ -182,7 +182,7 @@ export const getUserTemplates = async (params?: {
 export const deleteTemplate = async (templateId: number): Promise<void> => {
 	try {
 		await apiFetch({
-			path: `/qc/v1/templates/${templateId}`,
+			path: `/doublescale/v1/templates/${templateId}`,
 			method: 'DELETE',
 		});
 	} catch (error) {

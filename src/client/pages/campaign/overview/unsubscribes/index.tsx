@@ -48,7 +48,7 @@ const UnsubscribesTab: React.FC = () => {
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/campaigns/${id}/unsubscribes`, {
+				path: addQueryArgs(`/doublescale/v1/campaigns/${id}/unsubscribes`, {
 					per_page: perPage,
 					page,
 					keywords,

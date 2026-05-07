@@ -41,7 +41,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 		try {
 			setLoading(true);
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-reports/${automation.id}/steps-report`,
+				path: `/doublescale/v1/automation-reports/${automation.id}/steps-report`,
 				method: 'GET',
 			})) as StepsReportResponse;
 

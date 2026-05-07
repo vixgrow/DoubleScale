@@ -21,7 +21,7 @@ const ListField = ({ value, onChange }: Props) => {
 				<PaginatedSelect
 					value={value}
 					onChange={onChange}
-					endpoint="/qc/v1/lists"
+					endpoint="/doublescale/v1/lists"
 					placeholder={__('Select list', 'doublescale')}
 					noOptionsMessage={__('No lists available', 'doublescale')}
 					className="doublescale-list-field"

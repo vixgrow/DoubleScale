@@ -89,7 +89,7 @@ export const fetchCampaign =
 			try {
 				// Use unified endpoint for all campaign types
 				const response = (await apiFetch({
-					path: `/qc/v1/campaigns/${id}`,
+					path: `/doublescale/v1/campaigns/${id}`,
 				})) as ExtendedCampaign;
 
 				dispatch(setCampaign(response));
@@ -122,7 +122,7 @@ export const saveCampaign =
 			try {
 				// Use unified endpoint - type is auto-detected from campaign
 				const response = (await apiFetch({
-					path: `/qc/v1/campaigns/${campaign.id}`,
+					path: `/doublescale/v1/campaigns/${campaign.id}`,
 					method: 'PUT',
 					data: {
 						...campaign,
@@ -194,7 +194,7 @@ export const saveCampaignStep =
 
 				// Use unified endpoint - type is auto-detected from campaign
 				const response = (await apiFetch({
-					path: `/qc/v1/campaigns/${campaign.id}`,
+					path: `/doublescale/v1/campaigns/${campaign.id}`,
 					method: 'PUT',
 					data: {
 						...campaign,

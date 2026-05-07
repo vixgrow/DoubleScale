@@ -79,7 +79,7 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 						campaignEmail?.contact_id || campaignEmail?.contact?.id;
 					const trackingId = campaignEmail?.id; // Use the tracking record ID
 					const response: any = await apiFetch({
-						path: `/qc/v1/templates/${templateId}/render`,
+						path: `/doublescale/v1/templates/${templateId}/render`,
 						method: 'POST',
 						data: {
 							...(contactId ? { contact_id: contactId } : {}),

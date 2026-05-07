@@ -31,7 +31,7 @@ const Debug: React.FC = () => {
     const fetchLogs = async () => {
         try {
             const response = await apiFetch({
-                path: addQueryArgs('/qc/v1/logs', {
+                path: addQueryArgs('/doublescale/v1/logs', {
                     page,
                     per_page: perPage,
                 }),
@@ -58,7 +58,7 @@ const Debug: React.FC = () => {
         }
         try {
             await apiFetch({
-                path: '/qc/v1/logs',
+                path: '/doublescale/v1/logs',
                 method: 'DELETE',
                 data,
             });
@@ -75,7 +75,7 @@ const Debug: React.FC = () => {
     const exportLogs = async () => {
         try {
             const response = await apiFetch({
-                path: addQueryArgs('/qc/v1/logs', {
+                path: addQueryArgs('/doublescale/v1/logs', {
                     export: 'json',
                 }),
             });

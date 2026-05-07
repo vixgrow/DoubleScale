@@ -112,7 +112,7 @@ export const useContactMessages = ({
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/contacts/${contactId}/messages`, {
+				path: addQueryArgs(`/doublescale/v1/contacts/${contactId}/messages`, {
 					mode,
 					per_page: perPage,
 					page,

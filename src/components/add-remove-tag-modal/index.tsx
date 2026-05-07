@@ -57,7 +57,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 	): Promise<SelectOption[]> => {
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
+				path: addQueryArgs('/doublescale/v1/tags', {
 					keyword: keyword,
 					ids: ids,
 				}),

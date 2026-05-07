@@ -198,7 +198,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					}
 
 					const response = (await apiFetch({
-						path: addQueryArgs('/qc/v1/automations/rules', params),
+						path: addQueryArgs('/doublescale/v1/automations/rules', params),
 						method: 'GET',
 					})) as any;
 

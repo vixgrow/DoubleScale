@@ -70,7 +70,7 @@ const Integrations: React.FC = () => {
 		try {
 			// @ts-ignore
 			const response = await apiFetch({
-				path: addQueryArgs(`/qc/v1/integrations/${integrationKey}`),
+				path: addQueryArgs(`/doublescale/v1/integrations/${integrationKey}`),
 				method: 'GET',
 			});
 
@@ -123,7 +123,7 @@ const Integrations: React.FC = () => {
 		try {
 			// @ts-ignore
 			await apiFetch({
-				path: addQueryArgs(`/qc/v1/integrations/${integrationKey}`),
+				path: addQueryArgs(`/doublescale/v1/integrations/${integrationKey}`),
 				method: 'POST',
 				data: { settings: {} },
 			});

@@ -62,7 +62,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automations/${automation?.id}`,
+				path: `/doublescale/v1/automations/${automation?.id}`,
 			})) as Automation;
 
 			onChange(response.settings);
@@ -81,7 +81,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 			<div className="flex flex-col gap-2.5">
 				<p className="text-base font-normal text-[#09090B]">{__('Webhook URL')}</p>
 				<Input
-					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?doublescale_key=${webhook_key}&doublescale_id=${automation?.id}`}
+					value={`${adminUrl}/wp-json/doublescale/v1/automations/webhook?doublescale_key=${webhook_key}&doublescale_id=${automation?.id}`}
 					readOnly
 				/>
 				<p className="text-sm text-muted-foreground">

@@ -51,7 +51,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 		setIsSaving,
 		refetch,
 	} = usePaginatedSegments<ContactTag>({
-		endpoint: '/qc/v1/tags',
+		endpoint: '/doublescale/v1/tags',
 		parseResponse: (response) => response as TagsResponse,
 	});
 
@@ -77,7 +77,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 			};
 
 			await apiFetch({
-				path: '/qc/v1/tags',
+				path: '/doublescale/v1/tags',
 				method: 'POST',
 				data: tagData,
 			});
@@ -131,7 +131,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 
 		try {
 			await apiFetch({
-				path: `/qc/v1/tags/${id}`,
+				path: `/doublescale/v1/tags/${id}`,
 				method: 'PUT',
 				data: {
 					name: editingValues.name,
@@ -172,7 +172,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 
 		try {
 			await apiFetch({
-				path: '/qc/v1/tags',
+				path: '/doublescale/v1/tags',
 				method: 'DELETE',
 				data: { ids: [id] },
 			});

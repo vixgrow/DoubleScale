@@ -94,7 +94,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
 
         try {
             const response: any = await apiFetch({
-                path: addQueryArgs(`/qc/v1/activities`, {
+                path: addQueryArgs(`/doublescale/v1/activities`, {
                     contact_id,
                     activity_type: 'meeting_scheduled',
                     per_page: perPage,
@@ -135,7 +135,7 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
 
         try {
             await apiFetch({
-                path: `/qc/v1/activities/${meetingToDelete.id}`,
+                path: `/doublescale/v1/activities/${meetingToDelete.id}`,
                 method: 'DELETE',
             });
 

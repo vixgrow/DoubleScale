@@ -21,76 +21,109 @@ import type {
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
+declare global {
+	interface Window {
+		/** Injected by {@see DoubleScale\Admin\AdminConfig::set_admin_config} before the admin bundle runs. */
+		doublescaleConfig?: Partial<ConfigData> & Record<string, unknown>;
+	}
+}
+
+/**
+ * PHP prints `window.doublescaleConfig = {...}` inline before `build/client/index.js`.
+ * Without merging it here, `userCapabilities` stay at defaults (all false) and every
+ * `ProtectedRoute` shows Access Denied — including Administrators.
+ */
+const serverData: Partial<ConfigData> & Record<string, unknown> =
+	typeof window !== 'undefined' && window.doublescaleConfig
+		? window.doublescaleConfig
+		: {};
+
+const defaultUserCapabilities: UserCapabilities = {
+	doublescale_crm_manager: false,
+	doublescale_sales_manager: false,
+	doublescale_sales_rep: false,
+};
+
 const configData: ConfigData = {
-	initialPayload: {
-		business: {
-			business_name: '',
-			business_address: '',
+	initialPayload:
+		(serverData.initialPayload as InitialPayload | undefined) ?? {
+			business: {
+				business_name: '',
+				business_address: '',
+			},
+			email: {
+				from_name: '',
+				from_email: '',
+				reply_to: '',
+				email_footer: '',
+				max_in_second: 0,
+				max_in_day: 0,
+			},
+			sms: {
+				max_in_second: 0,
+				max_in_day: 0,
+			},
+			double_optin: {
+				email_subject: '',
+				email_content: '',
+				after_confirmation: '',
+				confirmation_message: '',
+				confirmation_redirect: '',
+			},
 		},
-		email: {
-			from_name: '',
-			from_email: '',
-			reply_to: '',
-			email_footer: '',
-			max_in_second: 0,
-			max_in_day: 0,
+	blogName: (serverData.blogName as string | undefined) ?? '',
+	adminUrl: (serverData.adminUrl as string | undefined) ?? '',
+	pluginDirUrl: (serverData.pluginDirUrl as string | undefined) ?? '',
+	license: (serverData.license as License | false | undefined) ?? false,
+	adminEmail: (serverData.adminEmail as string | undefined) ?? '',
+	ajaxUrl: (serverData.ajaxUrl as string | undefined) ?? '',
+	siteUrl: (serverData.siteUrl as string | undefined) ?? '',
+	nonce: (serverData.nonce as string | undefined) ?? '',
+	forms: (serverData.forms as Forms | undefined) ?? {},
+	customFieldsTypes:
+		(serverData.customFieldsTypes as CustomFieldsTypes | undefined) ?? {},
+	filtersGroups:
+		(serverData.filtersGroups as FiltersGroups | undefined) ?? {
+			contact: {
+				name: '',
+				filters: {},
+			},
 		},
-		sms: {
-			max_in_second: 0,
-			max_in_day: 0,
+	contactFieldsGroups:
+		(serverData.contactFieldsGroups as ContactFieldsGroups | undefined) ?? {},
+	integrations: (serverData.integrations as Integrations | undefined) ?? {},
+	automationTriggers:
+		(serverData.automationTriggers as AutomationTriggers | undefined) ?? {},
+	automationActions:
+		(serverData.automationActions as AutomationActions | undefined) ?? {},
+	automationGoals:
+		(serverData.automationGoals as AutomationGoals | undefined) ?? {},
+	automationRules:
+		(serverData.automationRules as AutomationRules | undefined) ?? {},
+	isWoocommerceActive: serverData.isWoocommerceActive ?? false,
+	isEddActive: serverData.isEddActive ?? false,
+	isSurecartActive: serverData.isSurecartActive ?? false,
+	isLmsActive: serverData.isLmsActive ?? false,
+	mergeTags: (serverData.mergeTags as AutomationMergeTags | undefined) ?? {},
+	importers: (serverData.importers as Importers | undefined) ?? {},
+	userCapabilities:
+		(serverData.userCapabilities as UserCapabilities | undefined) ??
+		defaultUserCapabilities,
+	defaultStages: (serverData.defaultStages as DefaultStage[] | undefined) ?? [],
+	dealPriorities:
+		(serverData.dealPriorities as DealPriority[] | undefined) ?? [],
+	quillsmtpInfo:
+		(serverData.smtpInfo as QuillSMTPInfo | undefined) ??
+		(serverData.quillsmtpInfo as QuillSMTPInfo | undefined) ?? {
+			configured: false,
 		},
-		double_optin: {
-			email_subject: '',
-			email_content: '',
-			after_confirmation: '',
-			confirmation_message: '',
-			confirmation_redirect: '',
+	currency: (serverData.currency as string | undefined) ?? 'USD',
+	urlDoubleScalePro: (serverData.urlDoubleScalePro as string | undefined) ?? '',
+	proPluginData:
+		(serverData.proPluginData as ProPluginData | undefined) ?? {
+			is_installed: false,
+			is_active: false,
 		},
-	},
-	blogName: '',
-	adminUrl: '',
-	pluginDirUrl: '',
-	license: false,
-	adminEmail: '',
-	ajaxUrl: '',
-	siteUrl: '',
-	nonce: '',
-	forms: {},
-	customFieldsTypes: {},
-	filtersGroups: {
-		contact: {
-			name: '',
-			filters: {},
-		},
-	},
-	contactFieldsGroups: {},
-	integrations: {},
-	automationTriggers: {},
-	automationActions: {},
-	automationGoals: {},
-	automationRules: {},
-	isWoocommerceActive: false,
-	isEddActive: false,
-	isSurecartActive: false,
-	isLmsActive: false,
-	mergeTags: {},
-	importers: {},
-	userCapabilities: {
-		doublescale_crm_manager: false,
-		doublescale_sales_manager: false,
-		doublescale_sales_rep: false,
-	},
-	defaultStages: [],
-	dealPriorities: [],
-	quillsmtpInfo: {
-		configured: false,
-	},
-	currency: 'USD',
-	urlDoubleScalePro: '',
-	proPluginData: {
-		is_installed: false,
-		is_active: false,
-	},
 };
 
 /**

@@ -17,10 +17,11 @@
  *     'capability'  => 'doublescale_access',
  *     'callback'    => array( AdminLoader::class, 'page_wrapper' ),
  *     'position'    => 20,
- *     'group'       => 'contacts', // dashboard|contacts|sales|marketing|automations|settings
+ *     'group'            => 'contacts', // dashboard|contacts|sales|marketing|automations|settings
+ *     'requires_module'  => 'campaigns', // optional: Pro module slug; row hidden unless Pro is active and module is enabled
  *   )
  *
- * @package DoubleScale\Pro
+ * @package DoubleScale
  */
 
 namespace DoubleScale\Admin;
@@ -67,22 +68,24 @@ class MenuRegistry {
 				'group'      => 'contacts',
 			),
 			array(
-				'page_title' => __( 'Campaigns', 'doublescale' ),
-				'menu_title' => __( 'Campaigns', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=campaigns',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 30,
-				'group'      => 'marketing',
+				'page_title'       => __( 'Campaigns', 'doublescale' ),
+				'menu_title'       => __( 'Campaigns', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=campaigns',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 30,
+				'group'            => 'marketing',
+				'requires_module' => 'campaigns',
 			),
 			array(
-				'page_title' => __( 'Pipelines', 'doublescale' ),
-				'menu_title' => __( 'Pipelines', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=sales-pipeline',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 40,
-				'group'      => 'sales',
+				'page_title'       => __( 'Pipelines', 'doublescale' ),
+				'menu_title'       => __( 'Pipelines', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=sales-pipeline',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 40,
+				'group'            => 'sales',
+				'requires_module' => 'deals',
 			),
 			array(
 				'page_title' => __( 'Automations', 'doublescale' ),
@@ -94,40 +97,44 @@ class MenuRegistry {
 				'group'      => 'automations',
 			),
 			array(
-				'page_title' => __( 'Forms', 'doublescale' ),
-				'menu_title' => __( 'Forms', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=forms',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 60,
-				'group'      => 'marketing',
+				'page_title'       => __( 'Forms', 'doublescale' ),
+				'menu_title'       => __( 'Forms', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=forms',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 60,
+				'group'            => 'marketing',
+				'requires_module' => 'forms',
 			),
 			array(
-				'page_title' => __( 'Integrations', 'doublescale' ),
-				'menu_title' => __( 'Integrations', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=integrations',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 70,
-				'group'      => 'automations',
+				'page_title'       => __( 'Integrations', 'doublescale' ),
+				'menu_title'       => __( 'Integrations', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=integrations',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 70,
+				'group'            => 'automations',
+				'requires_module' => 'integrations',
 			),
 			array(
-				'page_title' => __( 'smtp', 'doublescale' ),
-				'menu_title' => __( 'smtp', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=smtp',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 75,
-				'group'      => 'settings',
+				'page_title'       => __( 'SMTP', 'doublescale' ),
+				'menu_title'       => __( 'SMTP', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=smtp',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 75,
+				'group'            => 'settings',
+				'requires_module' => 'smtp',
 			),
 			array(
-				'page_title' => __( 'Analytics', 'doublescale' ),
-				'menu_title' => __( 'Analytics', 'doublescale' ),
-				'capability' => 'doublescale_access',
-				'slug'       => $menu_slug . '&path=analytics',
-				'callback'   => array( AdminLoader::class, 'page_wrapper' ),
-				'position'   => 80,
-				'group'      => 'settings',
+				'page_title'       => __( 'Analytics', 'doublescale' ),
+				'menu_title'       => __( 'Analytics', 'doublescale' ),
+				'capability'       => 'doublescale_access',
+				'slug'             => $menu_slug . '&path=analytics',
+				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
+				'position'         => 80,
+				'group'            => 'settings',
+				'requires_module' => 'analytics',
 			),
 			array(
 				'page_title' => __( 'Settings', 'doublescale' ),
@@ -164,6 +171,8 @@ class MenuRegistry {
 		 */
 		$entries = apply_filters( 'ds_admin_menu', $entries );
 
+		$entries = self::filter_entries_by_pro_modules( $entries );
+
 		usort(
 			$entries,
 			static function ( array $a, array $b ): int {
@@ -178,5 +187,30 @@ class MenuRegistry {
 
 	public static function reset_for_tests(): void {
 		self::$entries = array();
+	}
+
+	/**
+	 * Drops rows tied to a Pro module when Pro is inactive or that module is disabled.
+	 *
+	 * @param array<int, array<string, mixed>> $entries
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function filter_entries_by_pro_modules( array $entries ): array {
+		return array_values(
+			array_filter(
+				$entries,
+				static function ( array $item ): bool {
+					$module_slug = isset( $item['requires_module'] ) ? (string) $item['requires_module'] : '';
+					if ( '' === $module_slug ) {
+						return true;
+					}
+					if ( ! class_exists( \DoubleScale\Pro\Core\PluginKernel::class, true ) ) {
+						return false;
+					}
+					$module = \DoubleScale\Pro\Core\PluginKernel::instance()->get_module_registry()->get( $module_slug );
+					return $module && $module->is_enabled();
+				}
+			)
+		);
 	}
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Quill CRM Plugin">
-	<description>Sniffs for WordPress plugins, with minor modifications for Quill CRM</description>
+<ruleset name="WordPress Coding Standards for DoubleScale Plugin">
+	<description>Sniffs for WordPress plugins, with minor modifications for DoubleScale</description>
 
 	<exclude-pattern>./vendor/*</exclude-pattern>
 	<exclude-pattern>./dependencies/*</exclude-pattern>

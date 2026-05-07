@@ -58,7 +58,7 @@ const ImportProgress: React.FC<ImportProgressProps> = ({ onComplete }) => {
 			</p>
 			<span className="text-lg text-[#71717A]">
 				{__(
-					'the list, tags will be assigned to contacts and status of Quill CRM contacts profile.',
+					'the list, tags will be assigned to contacts and status of DoubleScale contacts profile.',
 					'doublescale'
 				)}
 			</span>

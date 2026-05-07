@@ -378,7 +378,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						<div className="doublescale-navbar__brand">
 							<LogoIcon width={30} height={40} />
 							<span className="doublescale-navbar__brand-text">
-								{__('Quill CRM', 'doublescale')}
+								{__('DoubleScale', 'doublescale')}
 							</span>
 						</div>
 					</SidebarHeader>

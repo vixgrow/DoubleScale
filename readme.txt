@@ -1,4 +1,4 @@
-=== Quill CRM - Complete Customer Relationship Management, Pipelines, Automations & More! ===
+=== DoubleScale - Complete Customer Relationship Management, Pipelines, Automations & More! ===
 Contributors: quillforms, mdmag
 Tags: crm, pipeline, whatsapp, automation
 Requires at least: 5.8
@@ -11,7 +11,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 A native WordPress CRM with pipelines, contact management, email/SMS/WhatsApp campaigns, automations, and integrations with 20+ plugins.
 == Description ==
 
-**[Quill CRM](https://doublescale.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
+**[DoubleScale](https://doublescale.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
 
 ### 🚀 KEY FEATURES
 
@@ -177,11 +177,11 @@ A native WordPress CRM with pipelines, contact management, email/SMS/WhatsApp ca
 * **WordPress Users** - Automatic user synchronization
 * **Third-Party Services** - Via webhooks and API
 
-### 🎯 WHO IS QUILL CRM FOR?
+### 🎯 WHO IS DoubleScale FOR?
 
 **Any business or organization that manages customer relationships!**
 
-Whether you're a solopreneur with **100 contacts** or an enterprise with **100,000+** contacts, Quill CRM scales to meet your needs.
+Whether you're a solopreneur with **100 contacts** or an enterprise with **100,000+** contacts, DoubleScale scales to meet your needs.
 
 **By Business Size:**
 * **Solopreneurs & Freelancers** - Track clients and projects in one place
@@ -218,7 +218,7 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 
 **No Contact Limits. No Per-Contact Pricing. Scales With Your Growth.**
 
-### 🌟 WHY CHOOSE QUILL CRM?
+### 🌟 WHY CHOOSE DoubleScale?
 
 * **Native WordPress** - Built specifically for WordPress, not a wrapper or iframe
 * **All-in-One Platform** - Email, SMS, WhatsApp campaigns in one solution
@@ -238,9 +238,9 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 * **GDPR Compliant** - Privacy-focused design with data control
 * **Great Support** - Active development and support team
 
-### 🥊 QUILL CRM VS. COMPETITORS
+### 🥊 DoubleScale VS. COMPETITORS
 
-[Compare Quill CRM with FluentCRM](https://doublescale.io/compare/vs-fluentcrm/)
+[Compare DoubleScale with FluentCRM](https://doublescale.io/compare/vs-fluentcrm/)
 
 **Perfect For Businesses That Are:**
 * Outgrowing spreadsheets and need professional CRM
@@ -250,7 +250,7 @@ Whether you're a solopreneur with **100 contacts** or an enterprise with **100,0
 * Digital agencies handling multiple client relationships
 * Looking for unlimited contacts without price jumps
 
-**No artificial contact limits!** Quill CRM's optimized architecture handles databases of any size efficiently.
+**No artificial contact limits!** DoubleScale's optimized architecture handles databases of any size efficiently.
 
 ### 📚 DOCUMENTATION
 
@@ -285,10 +285,10 @@ All third-party libraries used are documented in `package.json` and are publicly
 
 1. Log in to your WordPress dashboard
 2. Navigate to Plugins → Add New
-3. Search for "Quill CRM"
+3. Search for "DoubleScale"
 4. Click "Install Now"
 5. Activate the plugin
-6. Go to Quill CRM in your admin menu to start setup
+6. Go to DoubleScale in your admin menu to start setup
 
 ### MANUAL INSTALLATION
 
@@ -297,11 +297,11 @@ All third-party libraries used are documented in `package.json` and are publicly
 3. Navigate to Plugins → Add New → Upload Plugin
 4. Choose the zip file and click "Install Now"
 5. Activate the plugin
-6. Go to Quill CRM in your admin menu to start setup
+6. Go to DoubleScale in your admin menu to start setup
 
 ### AFTER ACTIVATION
 
-1. Navigate to Quill CRM → Settings
+1. Navigate to DoubleScale → Settings
 2. Configure your email settings
 3. Set up your first contact list
 4. Import existing contacts (optional)
@@ -310,21 +310,21 @@ All third-party libraries used are documented in `package.json` and are publicly
 
 == Frequently Asked Questions ==
 
-= What features does Quill CRM include? =
+= What features does DoubleScale include? =
 
-Quill CRM includes contact management, pipelines, email campaigns, SMS campaigns, marketing automation, analytics & reports, bounce handling, webhooks, link triggers, cart management, and integrations with 12+ popular WordPress plugins.
+DoubleScale includes contact management, pipelines, email campaigns, SMS campaigns, marketing automation, analytics & reports, bounce handling, webhooks, link triggers, cart management, and integrations with 12+ popular WordPress plugins.
 
 = Does it work with WooCommerce? =
 
-Absolutely! Quill CRM seamlessly integrates with WooCommerce to sync orders, track customer purchases, calculate revenue, and manage abandoned carts.
+Absolutely! DoubleScale seamlessly integrates with WooCommerce to sync orders, track customer purchases, calculate revenue, and manage abandoned carts.
 
 = Can I send SMS campaigns? =
 
-Yes! Quill CRM includes SMS campaign features allowing you to send bulk SMS messages and individual SMS to contacts. You can also use SMS in your automation workflows.
+Yes! DoubleScale includes SMS campaign features allowing you to send bulk SMS messages and individual SMS to contacts. You can also use SMS in your automation workflows.
 
 = Does it integrate with form plugins? =
 
-Yes! Quill CRM integrates with 10+ popular form plugins including Contact Form 7, Elementor Forms, Gravity Forms, WPForms, Fluent Forms, Formidable Forms, Forminator, MetForm, Ninja Forms, and Quill Forms.
+Yes! DoubleScale integrates with 10+ popular form plugins including Contact Form 7, Elementor Forms, Gravity Forms, WPForms, Fluent Forms, Formidable Forms, Forminator, MetForm, Ninja Forms, and Quill Forms.
 
 = Can I import my existing contacts? =
 
@@ -332,23 +332,23 @@ Yes, you can import contacts via CSV file or sync with your existing WordPress u
 
 = Is my data safe? =
 
-Yes! All data is stored in your WordPress database. We never access or store your data externally. Quill CRM is GDPR compliant.
+Yes! All data is stored in your WordPress database. We never access or store your data externally. DoubleScale is GDPR compliant.
 
 = Can I use it with page builders? =
 
-Yes! Quill CRM works with all major page builders including Elementor, Beaver Builder, Divi, and others. We have direct integration with Elementor Forms.
+Yes! DoubleScale works with all major page builders including Elementor, Beaver Builder, Divi, and others. We have direct integration with Elementor Forms.
 
 = Does it slow down my website? =
 
-No! Quill CRM is optimized for performance with efficient database queries and minimal frontend impact.
+No! DoubleScale is optimized for performance with efficient database queries and minimal frontend impact.
 
 = Can I customize contact fields? =
 
-Yes! Quill CRM allows you to create unlimited custom fields for contacts and deals.
+Yes! DoubleScale allows you to create unlimited custom fields for contacts and deals.
 
 = How many contacts can I manage? =
 
-There's no limit! Quill CRM is designed to scale and can handle thousands of contacts efficiently.
+There's no limit! DoubleScale is designed to scale and can handle thousands of contacts efficiently.
 
 = Is there email marketing included? =
 
@@ -356,7 +356,7 @@ Yes! Create and send email campaigns with our drag-and-drop email builder, track
 
 = Can I create automations? =
 
-Yes! Quill CRM includes a powerful visual automation builder with 11+ automation types. You can create trigger-based workflows with conditional logic, time delays, and multiple actions including email, SMS, tagging, and list management.
+Yes! DoubleScale includes a powerful visual automation builder with 11+ automation types. You can create trigger-based workflows with conditional logic, time delays, and multiple actions including email, SMS, tagging, and list management.
 
 = Can multiple users access the CRM? =
 
@@ -364,7 +364,7 @@ Yes! Assign WordPress user roles and permissions to control access levels.
 
 = What about WhatsApp marketing? =
 
-Yes! Quill CRM includes WhatsApp marketing features allowing you to send WhatsApp messages to your contacts directly from Quill CRM. or you can automate WhatsApp workflows with our visual automation builder.
+Yes! DoubleScale includes WhatsApp marketing features allowing you to send WhatsApp messages to your contacts directly from DoubleScale. or you can automate WhatsApp workflows with our visual automation builder.
 
 = How do I get support? =
 
@@ -372,15 +372,15 @@ You can get support through the WordPress.org forums, our comprehensive document
 
 = Does it work with LearnDash? =
 
-Yes! Quill CRM integrates with LearnDash to track course enrollments and student engagement.
+Yes! DoubleScale integrates with LearnDash to track course enrollments and student engagement.
 
-= Is Quill CRM suitable for enterprise use? =
+= Is DoubleScale suitable for enterprise use? =
 
-Yes! Quill CRM's scalable architecture efficiently handles 50,000+ contacts and includes advanced features like complex automation workflows, comprehensive analytics, API integrations, and team collaboration tools.
+Yes! DoubleScale's scalable architecture efficiently handles 50,000+ contacts and includes advanced features like complex automation workflows, comprehensive analytics, API integrations, and team collaboration tools.
 
 = Are there any monthly fees or per-contact charges? =
 
-No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-contact pricing. Manage unlimited contacts without worrying about increasing costs.
+No! DoubleScale is a one-time purchase with no recurring monthly fees and no per-contact pricing. Manage unlimited contacts without worrying about increasing costs.
 
 == Screenshots ==
 
@@ -462,11 +462,11 @@ No! Quill CRM is a one-time purchase with no recurring monthly fees and no per-c
 * Dashboard redirect improvements, Naira currency support
 
 = 1.0.0 =
-Initial release of Quill CRM. Install now to start managing your customer relationships with email & SMS campaigns, powerful automations, and 12+ plugin integrations!
+Initial release of DoubleScale. Install now to start managing your customer relationships with email & SMS campaigns, powerful automations, and 12+ plugin integrations!
 
 == Privacy Policy ==
 
-Quill CRM stores contact information in your WordPress database. We do not collect, transmit, or store any data externally. All data remains on your server. The plugin is designed to be GDPR compliant, allowing you to:
+DoubleScale stores contact information in your WordPress database. We do not collect, transmit, or store any data externally. All data remains on your server. The plugin is designed to be GDPR compliant, allowing you to:
 
 * Export contact data
 * Delete contact data
@@ -476,7 +476,7 @@ Quill CRM stores contact information in your WordPress database. We do not colle
 
 == External Services ==
 
-Quill CRM may connect to external third-party services for specific optional features. These services are only used when you explicitly configure and enable the respective integrations. No data is sent to these services unless you set them up.
+DoubleScale may connect to external third-party services for specific optional features. These services are only used when you explicitly configure and enable the respective integrations. No data is sent to these services unless you set them up.
 
 **ActiveCampaign Integration (Optional)**
 * **Purpose**: Sync contacts and manage marketing automation with ActiveCampaign
@@ -554,12 +554,12 @@ Quill CRM may connect to external third-party services for specific optional fea
 * All integrations are completely optional and disabled by default
 * You must manually configure API keys and enable each integration
 * No data is transmitted to these services unless you explicitly set up the integration
-* You can disable any integration at any time from the Quill CRM settings
+* You can disable any integration at any time from the DoubleScale settings
 * When using these integrations, you are subject to the respective service's terms and privacy policies
 
 == Credits ==
 
-Quill CRM is developed and maintained by the Quill Forms team.
+DoubleScale is developed and maintained by the Quill Forms team.
 
 * **Website**: [doublescale.io](https://doublescale.io)
 * **Documentation**: [doublescale.io/docs](https://doublescale.io/docs)
@@ -586,8 +586,8 @@ We welcome contributions! Visit our GitHub repository to:
 
 == Languages ==
 
-Quill CRM is translation-ready and includes:
+DoubleScale is translation-ready and includes:
 * English (default)
 * More translations coming soon!
 
-Help us translate Quill CRM into your language!
+Help us translate DoubleScale into your language!

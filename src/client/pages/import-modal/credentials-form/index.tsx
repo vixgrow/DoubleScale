@@ -149,7 +149,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 					</CardTitle>
 					<div className="text-[#71717A] text-lg">
 						{__(
-							'Start syncing your contacts to the Quill CRM using your API credentials.',
+							'Start syncing your contacts to the DoubleScale using your API credentials.',
 							'doublescale'
 						)}
 					</div>

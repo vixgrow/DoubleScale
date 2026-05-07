@@ -7,16 +7,16 @@ export default function WelcomePage({ onNext, onSkip}) {
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center gap-6">
         <div className="w-full flex flex-col justify-center items-center">
-          <img src={welcomepage} alt="Welcome to Quill CRM" className="max-w-md" />
+          <img src={welcomepage} alt="Welcome to DoubleScale" className="max-w-md" />
           <h1 className="text-4xl font-bold text-foreground py-4 text-center">
-            Welcome to Quill CRM!
+            Welcome to DoubleScale!
           </h1>
         </div>
         
         {/* Description */}
         <div className="flex flex-col justify-center items-center gap-4 text-muted-foreground text-lg leading-relaxed max-w-4xl">
           <p className="text-center">
-            We're so glad you're here. Quill CRM is your all-in-one solution for managing email marketing campaigns, automations, and customer relationships — all from your WordPress dashboard.
+            We're so glad you're here. DoubleScale is your all-in-one solution for managing email marketing campaigns, automations, and customer relationships — all from your WordPress dashboard.
           </p>
           <p className="text-center">
             Whether you're launching your first campaign or scaling a growing business, this setup wizard will help you configure the essentials in under two minutes. It's quick, optional, and designed to get you up and running with zero hassle.

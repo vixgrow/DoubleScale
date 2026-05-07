@@ -64,7 +64,7 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
 					{__(
-						'Configure how contacts will be organized in Quill CRM',
+						'Configure how contacts will be organized in DoubleScale',
 						'doublescale'
 					)}
 				</div>

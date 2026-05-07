@@ -110,7 +110,7 @@ const SourceHeader: React.FC = () => {
 					)}
 				</div>
 				<ChevronRight className="w-6 h-6 text-[#979797]" />
-				<div className="text-[#09090B] text-2xl">Quill CRM</div>
+				<div className="text-[#09090B] text-2xl">DoubleScale</div>
 			</div>
 		</CardHeader>
 	);

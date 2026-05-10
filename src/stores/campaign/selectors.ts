@@ -50,11 +50,6 @@ export const getCurrentStep = (state: State): string => {
     return isAutomated ? 'trigger' : 'template';
   }
 
-  // Automated campaigns skip the email-templates step (standard email flow only).
-  if (isAutomated && stored === 'email-templates') {
-    return 'builder';
-  }
-
   return stored;
 };
 

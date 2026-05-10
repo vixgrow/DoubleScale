@@ -221,9 +221,9 @@ const Contacts: React.FC = () => {
 				canProceed="true"
 				currentStep={
 					campaign?.settings?.automated
-						? 4
+						? 5
 						: campaign?.type === 'email'
-							? 3
+							? 4
 							: 2
 				}
 				onStepClick={goToStep}

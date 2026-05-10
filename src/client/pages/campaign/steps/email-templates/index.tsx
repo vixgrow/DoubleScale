@@ -9,8 +9,8 @@ import { useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { getToLink, useLocation, useNavigate } from '@doublescale/navigation';
-import { useCampaignStep } from '../shared';
-import { PanelLayout, PlayIcon } from '@doublescale/components';
+import { useCampaignStep, campaignSteps, automatedCampaignSteps } from '../shared';
+import { PanelLayout, PlayIcon, Stepper } from '@doublescale/components';
 import {
 	AiIcon,
 	MyTemplatesSidebarIcon,
@@ -156,7 +156,7 @@ const MyTemplateCard = ({
 );
 
 const EmailTemplatesStep: React.FC = () => {
-	const { campaign, saveCampaignStep, isNewCampaign } = useCampaignStep();
+	const { campaign, saveCampaignStep, isNewCampaign, goToStep } = useCampaignStep();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
@@ -335,6 +335,19 @@ const EmailTemplatesStep: React.FC = () => {
 				]}
 				type="campaign"
 			>
+				<Stepper
+					steps={
+						campaign?.settings?.automated
+							? automatedCampaignSteps
+							: campaignSteps
+					}
+					canProceed="true"
+					currentStep={
+						campaign?.settings?.automated ? 3 : 2
+					}
+					onStepClick={goToStep}
+					disableNavigation={isNewCampaign}
+				/>
 				<Card className="mt-6 overflow-hidden rounded-lg bg-muted/50 shadow-none p-6">
 					{/* Header - flex with buttons */}
 					<div className="flex items-center justify-between gap-4">

@@ -36,6 +36,10 @@ export const automatedCampaignSteps = [
     slug: 'template',
   },
   {
+    label: __('Email Builder', 'doublescale'),
+    slug: 'email-templates',
+  },
+  {
     label: __('Builder', 'doublescale'),
     slug: 'builder',
   },

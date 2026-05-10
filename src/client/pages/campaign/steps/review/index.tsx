@@ -341,9 +341,9 @@ const Review: React.FC = () => {
 		canProceed="true"
 		currentStep={
 			campaign?.settings?.automated
-				? 5
+				? 6
 				: campaign?.type === 'email'
-					? 4
+					? 5
 					: 3
 		}
 		onStepClick={goToStep}

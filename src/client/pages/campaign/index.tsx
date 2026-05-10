@@ -112,21 +112,6 @@ const Campaign: React.FC = () => {
 		}
 	}, [campaign, tab, id, navigate, currentStep]);
 
-	// Legacy: draft automated campaigns may have current_step or URL on email-templates (standard flow only)
-	useEffect(() => {
-		if (
-			!campaign ||
-			!id ||
-			!tab ||
-			campaign.status !== 'draft' ||
-			campaign.settings?.automated !== true ||
-			tab !== 'email-templates'
-		) {
-			return;
-		}
-		navigate(getToLink(`campaigns/${id}/builder`), { replace: true });
-	}, [campaign, tab, id, navigate]);
-
 	// Save current step when tab changes (only for draft campaigns)
 	useEffect(() => {
 		if (campaign && tab && tab !== normalizeTab(currentStep) && campaign.status === 'draft') {

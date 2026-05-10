@@ -3,7 +3,7 @@
  * Plugin Name:       DoubleScale
  * Plugin URI:        https://www.doublescale.io/
  * Description:       DoubleScale (free) — modular CRM core. Smoke-test this entry during migration; production uses this after cutover from DoubleScale.
- * Version:           0.1.0-alpha
+ * Version:           0.1.1-alpha
  * Author:            doublescale.io
  * Author URI:        https://www.doublescale.io
  * License:           GPL v2 or later
@@ -26,7 +26,7 @@ if ( ! defined( 'DOUBLESCALE_PLUGIN_FILE' ) ) {
 	define( 'DOUBLESCALE_PLUGIN_FILE', __FILE__ );
 }
 if ( ! defined( 'DOUBLESCALE_VERSION' ) ) {
-	define( 'DOUBLESCALE_VERSION', '0.1.0-alpha' );
+	define( 'DOUBLESCALE_VERSION', '0.1.1-alpha' );
 }
 if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 	define( 'DOUBLESCALE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

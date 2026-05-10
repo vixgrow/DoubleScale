@@ -47,7 +47,8 @@ final class CoreModule extends AbstractModule {
 			$base . 'includes/Core/CustomFields/Migrations/CustomFieldsTable.php',
 			$base . 'includes/Core/CustomFields/Migrations/CustomFieldRelationshipTable.php',
 		);
-		return array_merge( $custom_fields, $logger );
+		$task_meta = $base . 'includes/Core/Database/Migrations/TaskMetaTable.php';
+		return array_merge( $custom_fields, array( $task_meta ), $logger );
 	}
 
 	public function register( Container $container ): void {

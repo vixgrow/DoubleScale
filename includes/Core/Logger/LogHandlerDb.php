@@ -19,7 +19,7 @@ use DoubleScale\Core\Logger\Models\LogModel;
  *
  * @since        1.0.0
  */
-class LogHandlerDb extends LogHandler {
+class LogHandlerDb implements LogHandlerInterface {
 
 
 	/**

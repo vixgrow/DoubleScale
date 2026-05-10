@@ -24,12 +24,13 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import RulesBuilder from '@/components/rules-builder';
 import { getFilteredRulesGroups, getInitialRule } from '@/utils';
-import { useCampaignStep, campaignSteps } from '../shared';
+import { useCampaignStep, campaignSteps, automatedCampaignSteps } from '../shared';
 import { applyFilters } from '@wordpress/hooks';
 import { Lock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaignStep, updateSettings, goToStep, saving } =
+	const { campaign, saveCampaignStep, updateSettings, goToStep, saving, isNewCampaign } =
 		useCampaignStep();
 
 	// Check if Pro is active for conditional sections
@@ -205,17 +206,29 @@ const Contacts: React.FC = () => {
 				campaign?.status === 'processed' ||
 				campaign?.status === 'archived'
 			) && (
-				<Stepper
-					steps={
-						campaign?.type === 'email'
+			<Stepper
+				steps={
+					campaign?.settings?.automated
+						? automatedCampaignSteps
+						: campaign?.type === 'email'
 							? campaignSteps
 							: campaignSteps.filter(
-									(step) => step.slug !== 'builder'
+									(step) =>
+										step.slug !== 'builder' &&
+										step.slug !== 'email-templates'
 								)
-					}
-					canProceed="true"
-					currentStep={campaign?.type === 'email' ? 3 : 2}
-				/>
+				}
+				canProceed="true"
+				currentStep={
+					campaign?.settings?.automated
+						? 4
+						: campaign?.type === 'email'
+							? 3
+							: 2
+				}
+				onStepClick={goToStep}
+				disableNavigation={isNewCampaign}
+			/>
 			)}
 
 			<div className="flex gap-6 items-start">
@@ -261,12 +274,12 @@ const Contacts: React.FC = () => {
 					>
 						<div className="space-y-6">
 							{inlineError && (
-								<div className="border border-red-300 bg-red-50 text-red-700 rounded-lg px-4 py-2">
+								<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2.5 text-sm text-destructive">
 									{inlineError}
 								</div>
 							)}
 							<div>
-								<p className="text-base font-bold mb-2 text-black">
+								<p className="mb-2.5 text-sm font-semibold text-foreground">
 									{__('Filter By', 'doublescale')}
 								</p>
 								<RadioGroup
@@ -276,17 +289,18 @@ const Contacts: React.FC = () => {
 								>
 									<Label
 										htmlFor="list-tags"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
+										className={cn(
+											'flex items-center gap-3 w-1/2 rounded-xl border px-4 py-3 cursor-pointer transition-all duration-150',
 											filterBy === 'list-tags'
-												? 'border-blue-500 bg-blue-50 text-blue-500'
-												: 'border-gray-300 bg-white'
-										}`}
+												? 'border-primary/50 bg-primary/5 text-primary shadow-sm'
+												: 'border-border bg-card text-foreground hover:border-border/60 hover:bg-muted/30'
+										)}
 									>
 										<RadioGroupItem
 											value="list-tags"
 											id="list-tags"
 										/>
-										<span>
+										<span className="text-sm font-medium">
 											{__('Lists and Tags', 'doublescale')}
 										</span>
 									</Label>
@@ -306,15 +320,13 @@ const Contacts: React.FC = () => {
 												setShowProModal(true);
 											}
 										}}
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 relative ${
+										className={cn(
+											'flex items-center gap-3 w-1/2 rounded-xl border px-4 py-3 relative transition-all duration-150',
 											filterBy === 'advanced'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-300 bg-white'
-										} ${
-											!isProActive
-												? 'opacity-75 cursor-pointer'
-												: 'cursor-pointer'
-										}`}
+												? 'border-primary/50 bg-primary/5'
+												: 'border-border bg-card hover:border-border/60 hover:bg-muted/30',
+											!isProActive ? 'opacity-75 cursor-pointer' : 'cursor-pointer'
+										)}
 									>
 										<RadioGroupItem
 											value="advanced"

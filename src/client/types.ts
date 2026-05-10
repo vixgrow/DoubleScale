@@ -305,11 +305,53 @@ export type ReviewStepData = {
 	lastModified?: string;
 };
 
+export type AutomatedTriggerType = 'event' | 'schedule';
+
+export type ScheduleFrequency =
+	| 'daily'
+	| 'weekly'
+	| 'monthly'
+	| 'custom';
+
+export type ScheduleDay =
+	| 'monday'
+	| 'tuesday'
+	| 'wednesday'
+	| 'thursday'
+	| 'friday'
+	| 'saturday'
+	| 'sunday';
+
+export type EventTrigger = {
+	event_type: 'post_published';
+	post_type?: string;
+	post_status?: string;
+	categories?: number[];
+};
+
+export type ScheduleTrigger = {
+	frequency: ScheduleFrequency;
+	time: string;
+	timezone?: string;
+	day_of_week?: ScheduleDay;
+	day_of_month?: number;
+	custom_interval?: number;
+	custom_unit?: 'hours' | 'days' | 'weeks';
+};
+
+export type AutomatedTriggerConfig = {
+	trigger_type: AutomatedTriggerType;
+	event?: EventTrigger;
+	schedule?: ScheduleTrigger;
+};
+
 type CampaignSettings = {
 	templates: Template[];
 	contacts: number[];
 	filters: Filter[];
 	ab_test: boolean;
+	automated?: boolean;
+	trigger?: AutomatedTriggerConfig;
 	current_step?: string;
 	// Template IDs stored in array (for A/B testing support)
 	template_ids?: number[];

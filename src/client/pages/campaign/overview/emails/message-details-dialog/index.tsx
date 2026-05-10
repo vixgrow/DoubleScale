@@ -110,7 +110,7 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 		// Sent On
 		fields.push({
 			label: __('Sent On', 'doublescale'),
-			value: <TimeAgoCell value={campaignEmail.sent_at} />,
+			value: <TimeAgoCell value={campaignEmail.sent_at || campaignEmail.created_at} />,
 		});
 
 		// Email specific metrics
@@ -129,15 +129,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'doublescale')}
+								{campaignEmail.opened_at ? (
+									<TimeAgoCell value={campaignEmail.opened_at} />
+								) : (
+									__('Yes', 'doublescale')
+								)}
 							</>
 						) : (
-							<>
-								<div className="text-destructive">
-									<NotOpenedIcon />
-								</div>
-								{__('No', 'doublescale')}
-							</>
+							<span className="text-gray-400">—</span>
 						)}
 					</div>
 				),
@@ -157,15 +156,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'doublescale')}
+								{campaignEmail.clicked_at ? (
+									<TimeAgoCell value={campaignEmail.clicked_at} />
+								) : (
+									__('Yes', 'doublescale')
+								)}
 							</>
 						) : (
-							<>
-								<div className="text-destructive">
-									<NotOpenedIcon />
-								</div>
-								{__('No', 'doublescale')}
-							</>
+							<span className="text-gray-400">—</span>
 						)}
 					</div>
 				),
@@ -216,15 +214,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'doublescale')}
+								{campaignEmail.clicked_at ? (
+									<TimeAgoCell value={campaignEmail.clicked_at} />
+								) : (
+									__('Yes', 'doublescale')
+								)}
 							</>
 						) : (
-							<>
-								<div className="text-destructive">
-									<NotOpenedIcon />
-								</div>
-								{__('No', 'doublescale')}
-							</>
+							<span className="text-gray-400">—</span>
 						)}
 					</div>
 				),
@@ -247,15 +244,14 @@ const MessageDetails: React.FC<MessageDetailsProps> = ({
 								<div className="text-green-600">
 									<OpenedIcon />
 								</div>
-								{__('Yes', 'doublescale')}
+								{campaignEmail.clicked_at ? (
+									<TimeAgoCell value={campaignEmail.clicked_at} />
+								) : (
+									__('Yes', 'doublescale')
+								)}
 							</>
 						) : (
-							<>
-								<div className="text-destructive">
-									<NotOpenedIcon />
-								</div>
-								{__('No', 'doublescale')}
-							</>
+							<span className="text-gray-400">—</span>
 						)}
 					</div>
 				),

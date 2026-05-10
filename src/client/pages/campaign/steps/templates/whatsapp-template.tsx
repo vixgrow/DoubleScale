@@ -48,7 +48,7 @@ interface WhatsAppBusinessTemplate {
  * from Meta Business Suite. Free-text messages are not supported for bulk campaigns.
  */
 const WhatsAppTemplateStep: React.FC = () => {
-	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
+	const { campaign, saving, goToStep, updateCampaign, isNewCampaign } = useCampaignStep();
 
 	// Template state
 	const [templates, setTemplates] = useState<WhatsAppBusinessTemplate[]>([]);
@@ -275,11 +275,13 @@ const WhatsAppTemplateStep: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper
-				steps={campaignSteps.filter((step) => step.slug !== 'builder')}
-				canProceed="true"
-				currentStep={1}
-			/>
+		<Stepper
+			steps={campaignSteps.filter((step) => step.slug !== 'builder')}
+			canProceed="true"
+			currentStep={1}
+			onStepClick={goToStep}
+			disableNavigation={isNewCampaign}
+		/>
 
 			<div className="w-full max-w-2xl">
 				{/* Notice Banner */}

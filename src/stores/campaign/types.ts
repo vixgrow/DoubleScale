@@ -26,6 +26,8 @@ export interface ExtendedCampaignSettings {
   contacts: Campaign['settings']['contacts'];
   filters: Campaign['settings']['filters'];
   ab_test: Campaign['settings']['ab_test'];
+  automated?: Campaign['settings']['automated'];
+  trigger?: Campaign['settings']['trigger'];
   current_step?: Campaign['settings']['current_step'];
   // Template IDs stored in array (for A/B testing support)
   template_ids?: number[];

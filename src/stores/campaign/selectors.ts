@@ -43,7 +43,19 @@ export const getErrors = (state: State): Record<string, string> => {
  * Get current step
  */
 export const getCurrentStep = (state: State): string => {
-  return state.campaign?.settings?.current_step || 'template';
+  const isAutomated = state.campaign?.settings?.automated === true;
+  const stored = state.campaign?.settings?.current_step;
+
+  if (!stored) {
+    return isAutomated ? 'trigger' : 'template';
+  }
+
+  // Automated campaigns skip the email-templates step (standard email flow only).
+  if (isAutomated && stored === 'email-templates') {
+    return 'builder';
+  }
+
+  return stored;
 };
 
 /**
@@ -131,6 +143,8 @@ export const canGoToStep = (state: State, step: string): boolean => {
   switch (step) {
     case 'template':
       return !!campaign.name;
+    case 'email-templates':
+      return hasStepData(state, 'template') && !!campaign.name;
     case 'builder':
       return hasStepData(state, 'template') && !!campaign.name;
     case 'contacts':

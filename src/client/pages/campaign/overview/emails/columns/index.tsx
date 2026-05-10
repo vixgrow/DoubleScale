@@ -52,30 +52,30 @@ export function getColumns({
 
 				return (
 					<NavLink to={`/contacts/${contact.id}`}>
-						<div className="flex items-center gap-3">
-							<Avatar className="w-12 h-12 rounded-lg">
-								{avatarUrl ? (
-									<AvatarImage
-										src={avatarUrl}
-										alt={fullName || contact.email}
-										className="rounded-lg"
-									/>
-								) : null}
-								<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
-									{initials}
-								</AvatarFallback>
-							</Avatar>
-							<div className="flex flex-col">
-								{fullName && (
-									<div className="font-semibold capitalize text-base w-40 truncate text-[#09090B]">
-										{fullName}
-									</div>
-								)}
-								<div className="text-base text-gray-500">
-									{campaignType === CAMPAIGN_CHANNEL.EMAIL ? contact.email : contact.phone}
+					<div className="flex items-center gap-2.5">
+						<Avatar className="w-9 h-9 rounded-full">
+							{avatarUrl ? (
+								<AvatarImage
+									src={avatarUrl}
+									alt={fullName || contact.email}
+									className="rounded-full"
+								/>
+							) : null}
+							<AvatarFallback className="rounded-full bg-primary/10 text-primary font-semibold text-xs">
+								{initials}
+							</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-col">
+							{fullName && (
+								<div className="font-medium capitalize text-sm max-w-[180px] leading-tight truncate text-foreground">
+									{fullName}
 								</div>
+							)}
+							<div className="text-xs text-muted-foreground">
+								{campaignType === CAMPAIGN_CHANNEL.EMAIL ? contact.email : contact.phone}
 							</div>
 						</div>
+					</div>
 					</NavLink>
 				);
 			},
@@ -83,7 +83,7 @@ export function getColumns({
 		{
 			accessorKey: 'sent_at',
 			header: __('Sent On', 'doublescale'),
-			cell: ({ row }) => <TimeAgoCell value={row.getValue('sent_at')} />,
+			cell: ({ row }) => <TimeAgoCell value={row.original.sent_at || row.original.created_at} />,
 		},
 		{
 			accessorKey: 'status',
@@ -91,30 +91,30 @@ export function getColumns({
 			cell: ({ row }) => {
 				const statusSlug = row.original.status_slug || 'unknown';
 				let statusDisplay = statusSlug;
-				let statusClass = 'text-gray-600 bg-gray-100 border-gray-600';
+				let statusClass = 'text-muted-foreground bg-muted/50 border-border';
 
 				if (statusSlug === 'sent' || statusSlug === 'delivered') {
 					statusDisplay = __('Sent', 'doublescale');
-					statusClass =
-						'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
-				} else if (statusSlug === 'failed') {
-					statusDisplay = __('Failed', 'doublescale');
-					statusClass =
-						'text-destructive bg-[#EF444429] border-destructive';
-				} else if (statusSlug === 'pending') {
-					statusDisplay = __('Pending', 'doublescale');
-					statusClass =
-						'text-yellow-600 bg-yellow-50 border-yellow-600';
-				} else if (statusSlug === 'read') {
-					statusDisplay = __('Read', 'doublescale');
-					statusClass =
-						'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
+				statusClass =
+					'text-emerald-700 bg-emerald-50 border-emerald-200';
+			} else if (statusSlug === 'failed') {
+				statusDisplay = __('Failed', 'doublescale');
+				statusClass =
+					'text-destructive bg-destructive/5 border-destructive/20';
+			} else if (statusSlug === 'pending') {
+				statusDisplay = __('Pending', 'doublescale');
+				statusClass =
+					'text-amber-700 bg-amber-50 border-amber-200';
+			} else if (statusSlug === 'read') {
+				statusDisplay = __('Read', 'doublescale');
+				statusClass =
+					'text-emerald-700 bg-emerald-50 border-emerald-200';
 				}
 
 				return (
 					<div className="flex items-center gap-2">
 						<span
-							className={`border rounded-md px-2 py-1 ${statusClass}`}
+							className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 ${statusClass}`}
 						>
 							{statusDisplay}
 						</span>
@@ -134,26 +134,19 @@ export function getColumns({
 				header: __('Opened', 'doublescale'),
 				cell: ({ row }) => {
 					const isOpened = row.original.opened != '0';
+					if (!isOpened) {
+						return <span className="text-muted-foreground">—</span>;
+					}
 					return (
 						<div className="flex items-center gap-2">
-							<div
-								className={
-									isOpened
-										? 'text-green-600'
-										: 'text-destructive'
-								}
-							>
-								{isOpened ? (
-									<OpenedIcon />
-								) : (
-									<NotOpenedIcon />
-								)}
+							<div className="text-emerald-600">
+								<OpenedIcon />
 							</div>
-							<span>
-								{isOpened
-									? __('Yes', 'doublescale')
-									: __('No', 'doublescale')}
-							</span>
+							{row.original.opened_at ? (
+								<TimeAgoCell value={row.original.opened_at} />
+							) : (
+								<span>{__('Yes', 'doublescale')}</span>
+							)}
 						</div>
 					);
 				},
@@ -163,26 +156,19 @@ export function getColumns({
 				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
+					if (!isClicked) {
+						return <span className="text-muted-foreground">—</span>;
+					}
 					return (
 						<div className="flex items-center gap-2">
-							<div
-								className={
-									isClicked
-										? 'text-green-600'
-										: 'text-destructive'
-								}
-							>
-								{isClicked ? (
-									<OpenedIcon />
-								) : (
-									<NotOpenedIcon />
-								)}
+							<div className="text-emerald-600">
+								<OpenedIcon />
 							</div>
-							<span>
-								{isClicked
-									? __('Yes', 'doublescale')
-									: __('No', 'doublescale')}
-							</span>
+							{row.original.clicked_at ? (
+								<TimeAgoCell value={row.original.clicked_at} />
+							) : (
+								<span>{__('Yes', 'doublescale')}</span>
+							)}
 						</div>
 					);
 				},
@@ -201,7 +187,7 @@ export function getColumns({
 							<div
 								className={
 									isDelivered
-										? 'text-green-600'
+										? 'text-emerald-600'
 										: 'text-destructive'
 								}
 							>
@@ -225,26 +211,19 @@ export function getColumns({
 				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
+					if (!isClicked) {
+						return <span className="text-muted-foreground">—</span>;
+					}
 					return (
 						<div className="flex items-center gap-2">
-							<div
-								className={
-									isClicked
-										? 'text-green-600'
-										: 'text-destructive'
-								}
-							>
-								{isClicked ? (
-									<OpenedIcon />
-								) : (
-									<NotOpenedIcon />
-								)}
+							<div className="text-emerald-600">
+								<OpenedIcon />
 							</div>
-							<span>
-								{isClicked
-									? __('Yes', 'doublescale')
-									: __('No', 'doublescale')}
-							</span>
+							{row.original.clicked_at ? (
+								<TimeAgoCell value={row.original.clicked_at} />
+							) : (
+								<span>{__('Yes', 'doublescale')}</span>
+							)}
 						</div>
 					);
 				},
@@ -264,7 +243,7 @@ export function getColumns({
 							<div
 								className={
 									isDelivered
-										? 'text-green-600'
+										? 'text-emerald-600'
 										: 'text-destructive'
 								}
 							>
@@ -293,7 +272,7 @@ export function getColumns({
 							<div
 								className={
 									isRead
-										? 'text-green-600'
+										? 'text-emerald-600'
 										: 'text-destructive'
 								}
 							>
@@ -313,26 +292,19 @@ export function getColumns({
 				header: __('Clicked', 'doublescale'),
 				cell: ({ row }) => {
 					const isClicked = row.original.clicked != '0';
+					if (!isClicked) {
+						return <span className="text-muted-foreground">—</span>;
+					}
 					return (
 						<div className="flex items-center gap-2">
-							<div
-								className={
-									isClicked
-										? 'text-green-600'
-										: 'text-destructive'
-								}
-							>
-								{isClicked ? (
-									<OpenedIcon />
-								) : (
-									<NotOpenedIcon />
-								)}
+							<div className="text-emerald-600">
+								<OpenedIcon />
 							</div>
-							<span>
-								{isClicked
-									? __('Yes', 'doublescale')
-									: __('No', 'doublescale')}
-							</span>
+							{row.original.clicked_at ? (
+								<TimeAgoCell value={row.original.clicked_at} />
+							) : (
+								<span>{__('Yes', 'doublescale')}</span>
+							)}
 						</div>
 					);
 				},

@@ -17,6 +17,7 @@ import './style.scss';
 import Analytics from './analytics';
 import TabsSelection from './tabs-selection';
 import CampaignDetails from './campaign-details';
+import AutomatedRunsView from './emails/automated-runs';
 import {
 	Dialog,
 	DialogContent,
@@ -73,9 +74,9 @@ const Overview: React.FC = () => {
 					<div className="px-12 overflow-y-auto py-8 flex-1">
 						{campaign.status === 'draft' ? (
 							// Draft campaigns: Show only campaign details, full width
-							<Card className="bg-[#F8F8F8] shadow-none px-5 w-full">
+							<Card className="bg-muted/50 shadow-none px-5 w-full">
 								<CardHeader className="border-b pb-4 px-0">
-									<CardTitle className="text-xl font-medium text-[#09090B] flex items-center gap-2">
+									<CardTitle className="text-xl font-medium text-foreground flex items-center gap-2">
 										<CampaignsIcon width={24} height={24} />
 										{__('Campaign Details', 'doublescale')}
 									</CardTitle>
@@ -84,13 +85,16 @@ const Overview: React.FC = () => {
 									<CampaignDetails />
 								</CardContent>
 							</Card>
-						) : (
-							// Other campaigns: Show analytics + tabs
-							<div className="flex gap-5">
-								<Analytics />
-								<TabsSelection />
-							</div>
-						)}
+					) : campaign.settings?.automated ? (
+						// Automated campaigns: Show batches directly (each batch is its own campaign)
+						<AutomatedRunsView />
+					) : (
+						// Regular campaigns: Show analytics + tabs
+						<div className="flex gap-5">
+							<Analytics />
+							<TabsSelection />
+						</div>
+					)}
 					</div>
 				) : (
 					<div className="flex items-center justify-center h-64">

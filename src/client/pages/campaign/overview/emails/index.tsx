@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,6 +14,7 @@ import './style.scss';
 import type {
 	CampaignEmail,
 	CampaignEmailsResponse,
+	Campaign,
 	NoticeMessage,
 } from '@doublescale/client';
 import { useParams } from '@doublescale/navigation';
@@ -50,9 +52,18 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import AutomatedRunsView from './automated-runs';
 
 const EmailsTab: React.FC = () => {
 	const { id } = useParams<{ id: string; subtab: string }>();
+
+	const campaign = useSelect(
+		(select: any) => select('doublescale/campaign').getCampaign(),
+		[]
+	) as Campaign | null;
+	const campaignType = campaign?.type ?? null;
+	const isAutomated = campaign?.settings?.automated || false;
+
 	const [isLoading, setIsLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
@@ -62,7 +73,6 @@ const EmailsTab: React.FC = () => {
 	const [campaignEmail, setCampaignEmail] = useState<CampaignEmail | null>(
 		null
 	);
-	const [campaignType, setCampaignType] = useState<string | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [showRetryDialog, setShowRetryDialog] = useState(false);
@@ -72,12 +82,10 @@ const EmailsTab: React.FC = () => {
 		null
 	);
 
-	// Close notice function
 	const closeNotice = () => {
 		setNotice(null);
 	};
 
-	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
 			noticeBannerRef.current.scrollIntoView({
@@ -87,7 +95,6 @@ const EmailsTab: React.FC = () => {
 		}
 	}, [notice]);
 
-	// Initialize server-side table
 	const serverSideTable = useServerSideTable({
 		page,
 		perPage,
@@ -96,35 +103,10 @@ const EmailsTab: React.FC = () => {
 		setPerPage,
 	});
 
-	// Helper function to get campaign type
-	const fetchCampaignType = async () => {
-		if (campaignType) return campaignType; // Already cached
-
-		try {
-			const response = (await apiFetch({
-				path: `/doublescale/v1/campaigns/${id}`,
-			})) as { type: string };
-			setCampaignType(response.type);
-			return response.type;
-		} catch (error) {
-			console.error('Failed to fetch campaign type:', error);
-			return null;
-		}
-	};
-
 	const fetchCampaignEmails = async () => {
 		setIsLoading(true);
 
 		try {
-			// First, get the campaign type
-			const type = await fetchCampaignType();
-			if (!type) {
-				throw new Error(
-					__('Failed to determine campaign type', 'doublescale')
-				);
-			}
-
-			// Use unified endpoint for all campaign types
 			const response = (await apiFetch({
 				path: addQueryArgs(`/doublescale/v1/campaigns/${id}/messages`, {
 					per_page: perPage,
@@ -136,7 +118,6 @@ const EmailsTab: React.FC = () => {
 			setTotalRecords(response.total);
 			setData(response.data);
 
-			// Check if there are any failed emails
 			const hasFailed =
 				response.data?.some(
 					(email) => email.status_slug === 'failed'
@@ -154,8 +135,10 @@ const EmailsTab: React.FC = () => {
 	};
 
 	useEffect(() => {
-		fetchCampaignEmails();
-	}, [page, perPage, status]);
+		if (!isAutomated) {
+			fetchCampaignEmails();
+		}
+	}, [page, perPage, status, isAutomated]);
 
 	// Confirm retry sending
 	const handleConfirmRetry = async () => {
@@ -304,6 +287,10 @@ const EmailsTab: React.FC = () => {
 	};
 
 	// Get columns
+	if (isAutomated) {
+		return <AutomatedRunsView />;
+	}
+
 	const columns = getColumns({
 		onViewTemplate: setCampaignEmail,
 		onResendMessage: handleResendMessage,
@@ -313,7 +300,6 @@ const EmailsTab: React.FC = () => {
 	return (
 		<>
 			<div className="flex flex-col gap-5">
-				{/* Header with status filter */}
 				<div className="flex justify-between items-center">
 					<h3 className="text-2xl font-semibold text-[#09090B]">
 						{__('Emails', 'doublescale')}
@@ -345,7 +331,6 @@ const EmailsTab: React.FC = () => {
 					</div>
 				</div>
 
-				{/* Notice Banner */}
 				{notice && (
 					<NoticeBanner
 						ref={noticeBannerRef}
@@ -354,7 +339,6 @@ const EmailsTab: React.FC = () => {
 					/>
 				)}
 
-				{/* Warning Banner for Failed Emails */}
 				{hasFailedEmails && !isLoading && (
 					<div className="flex justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
 						<div className="flex items-center gap-2">
@@ -383,7 +367,6 @@ const EmailsTab: React.FC = () => {
 					</div>
 				)}
 
-				{/* Messages Table */}
 				<div>
 					{!isLoading && data.length === 0 ? (
 						<NoData
@@ -417,7 +400,6 @@ const EmailsTab: React.FC = () => {
 				</div>
 			</div>
 
-			{/* Message Details Dialog */}
 			<MessageDetails
 				campaignEmail={campaignEmail}
 				campaignType={campaignType}
@@ -425,7 +407,6 @@ const EmailsTab: React.FC = () => {
 				onResend={handleResendMessage}
 			/>
 
-			{/* Retry Sending Confirmation Dialog */}
 			<AlertDialog
 				open={showRetryDialog}
 				onOpenChange={setShowRetryDialog}

@@ -1,0 +1,929 @@
+{
+	"name": "Customer Survey",
+	"type": "email",
+	"body": {
+		"type": "builder",
+		"value": {
+			"sections": [
+				{
+					"id": "section-1",
+					"columns": [
+						{
+							"id": "column-1",
+							"width": 35,
+							"blocks": [
+								{
+									"id": "block-1",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/plain-text/Logo.png",
+										"alt": "Logo",
+										"width": "auto",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						},
+						{
+							"id": "column-2",
+							"width": 65,
+							"blocks": [
+								{
+									"id": "block-2",
+									"type": "menu",
+									"props": {
+										"menuItems": [
+											{
+												"id": "1",
+												"name": "Link 1",
+												"link": "#",
+												"fontSize": 16,
+												"color": "#121212",
+												"fontFamily": "Arial",
+												"bold": false,
+												"italic": false,
+												"underline": false,
+												"strikethrough": false,
+												"backgroundColor": "transparent",
+												"borderRadius": "0",
+												"letterSpacing": "0px"
+											},
+											{
+												"id": "2",
+												"name": "Link 2",
+												"link": "#",
+												"fontSize": 16,
+												"color": "#121212",
+												"fontFamily": "Arial",
+												"bold": false,
+												"italic": false,
+												"underline": false,
+												"strikethrough": false,
+												"backgroundColor": "transparent",
+												"borderRadius": "0",
+												"letterSpacing": "0px"
+											},
+											{
+												"id": "3",
+												"name": "Link 3",
+												"link": "#",
+												"fontSize": 16,
+												"color": "#121212",
+												"fontFamily": "Arial",
+												"bold": false,
+												"italic": false,
+												"underline": false,
+												"strikethrough": false,
+												"backgroundColor": "transparent",
+												"borderRadius": "0",
+												"letterSpacing": "0px"
+											},
+											{
+												"id": "4",
+												"name": "Link 4",
+												"link": "#",
+												"fontSize": 16,
+												"color": "#121212",
+												"fontFamily": "Arial",
+												"bold": false,
+												"italic": false,
+												"underline": false,
+												"strikethrough": false,
+												"backgroundColor": "transparent",
+												"borderRadius": "0",
+												"letterSpacing": "0px"
+											}
+										],
+										"padding": {
+											"top": 10,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"gap": 24,
+										"align": "right"
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#FFFFFF",
+						"padding": "40px 32px 12px 32px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-2",
+					"columns": [
+						{
+							"id": "column-3",
+							"width": 42,
+							"blocks": [
+								{
+									"id": "block-3",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img1.png",
+										"alt": "Hero",
+										"width": "100%",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						},
+						{
+							"id": "column-4",
+							"width": 58,
+							"blocks": [
+								{
+									"id": "block-4",
+									"type": "text",
+									"props": {
+										"content": "<p><strong>DO YOU HAVE A<br>MINUTE?</strong></p>",
+										"hyperlink": "",
+										"fontSize": 24,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.7",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 4,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-5",
+									"type": "text",
+									"props": {
+										"content": "<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.7",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 10,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-6",
+									"type": "button",
+									"props": {
+										"text": "Get Started With Us",
+										"url": "#",
+										"containerPadding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"containerBackgroundColor": "transparent",
+										"align": "left",
+										"buttonStyle": "secondary"
+									}
+								},
+								{
+									"id": "block-7",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img2.png",
+										"alt": "Star",
+										"width": "18",
+										"height": "auto",
+										"align": "right",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 4,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#02B53B",
+						"padding": "40px 32px",
+						"margin": "0px 0px 32px 32px",
+						"borderRadius": "24px 0px 0px 24px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-3",
+					"columns": [
+						{
+							"id": "column-5",
+							"blocks": [
+								{
+									"id": "block-8",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\"><strong>📌 Share your experience about our event 📌</strong></p>",
+										"hyperlink": "",
+										"fontSize": 27,
+										"color": "#121212",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.5",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#00BA41",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-9",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img3.png",
+										"alt": "Feedback Meter",
+										"width": "75%",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 8,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-10",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\">We use your feedback to actively improve and make sure you get the service you deserve.</p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#121212",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.7",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#00BA41",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 8,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-11",
+									"type": "button",
+									"props": {
+										"text": "Click here to share with us",
+										"url": "#",
+										"containerPadding": {
+											"top": 8,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"containerBackgroundColor": "transparent",
+										"align": "center",
+										"buttonStyle": "primary"
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#FFFFFF",
+						"padding": "24px 32px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-4",
+					"columns": [
+						{
+							"id": "column-6",
+							"blocks": [
+								{
+									"id": "block-12",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img2.png",
+										"alt": "Star",
+										"width": "26",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-13",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\"><strong>Need help?</strong></p>",
+										"hyperlink": "",
+										"fontSize": 32,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.3",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#02B53B",
+						"padding": "32px 32px 16px 32px",
+						"margin": "0px 32px 0px 0px",
+						"borderRadius": "0px 16px 0px 0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-5",
+					"columns": [
+						{
+							"id": "column-7",
+							"width": 50,
+							"styles": {
+								"backgroundColor": "#FFFFFF33",
+								"borderRadius": "24px",
+								"border": "1px solid #FFFFFF",
+								"padding": "24px",
+								"margin": "0px 24px 0px 0px"
+							},
+							"blocks": [
+								{
+									"id": "block-14",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img4.png",
+										"alt": "Support Center",
+										"width": "36",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "#FFFFFF",
+										"padding": {
+											"top": 8,
+											"right": 8,
+											"bottom": 8,
+											"left": 8
+										},
+										"link": "",
+										"borderRadius": "9999",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-15",
+									"type": "text",
+									"props": {
+										"content": "<p><strong>Support Center</strong></p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 2,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-16",
+									"type": "text",
+									"props": {
+										"content": "<p>Contact our dedicated support team for personalized assistance</p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": "column-8",
+							"width": 50,
+							"styles": {
+								"backgroundColor": "#FFFFFF33",
+								"borderRadius": "24px",
+								"border": "1px solid #FFFFFF",
+								"padding": "24px",
+								"margin": "0px"
+							},
+							"blocks": [
+								{
+									"id": "block-17",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img5.png",
+										"alt": "Knowledge Base",
+										"width": "36",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "#FFFFFF",
+										"padding": {
+											"top": 8,
+											"right": 8,
+											"bottom": 8,
+											"left": 8
+										},
+										"link": "",
+										"borderRadius": "9999",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-18",
+									"type": "text",
+									"props": {
+										"content": "<p><strong>Knowledge Base</strong></p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 2,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-19",
+									"type": "text",
+									"props": {
+										"content": "<p>Access a wealth of information, including articles, FAQs, and tutorials</p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#02B53B",
+						"padding": "0px 56px 32px 32px",
+						"margin": "0px 32px 0px 0px",
+						"borderRadius": "0px 0px 16px 0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-6",
+					"columns": [
+						{
+							"id": "column-9",
+							"blocks": [
+								{
+									"id": "block-20",
+									"type": "image",
+									"props": {
+										"src": "http://images.doublescale.io/templates-images/engagement/img6.png",
+										"alt": "Thank You",
+										"width": "auto",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-21",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\">Want To Change How You Receive These Emails?</p><br><p style=\"text-align:center;\">You Can Update Your Preferences Or <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\"><strong style=\"text-decoration: underline; color: #121212;\">Unsubscribe</strong></a> From This List.</p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#121212",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "2",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#121212",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 8,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-22",
+									"type": "divider",
+									"props": {
+										"height": "1",
+										"color": "#D9D9D9",
+										"backgroundColor": "transparent",
+										"style": "solid",
+										"padding": {
+											"top": 24,
+											"right": 0,
+											"bottom": 24,
+											"left": 0
+										},
+										"align": "center",
+										"width": "100",
+										"borderRadius": "0",
+										"opacity": 1
+									}
+								},
+								{
+									"id": "block-23",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
+										"hyperlink": "",
+										"fontSize": 24,
+										"color": "#121212",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#00BA41",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-24",
+									"type": "social_media",
+									"props": {
+										"platforms": {
+											"instagram": {
+												"enabled": true,
+												"link": "https://instagram.com"
+											},
+											"tiktok": {
+												"enabled": true,
+												"link": "https://tiktok.com"
+											},
+											"linkedin": {
+												"enabled": true,
+												"link": "https://linkedin.com"
+											},
+											"x": {
+												"enabled": true,
+												"link": "https://x.com"
+											},
+											"youtube": {
+												"enabled": true,
+												"link": "https://youtube.com"
+											},
+											"facebook": {
+												"enabled": true,
+												"link": "https://facebook.com"
+											},
+											"threads": {
+												"enabled": false,
+												"link": ""
+											},
+											"pinterest": {
+												"enabled": false,
+												"link": ""
+											},
+											"snapchat": {
+												"enabled": false,
+												"link": ""
+											},
+											"soundcloud": {
+												"enabled": false,
+												"link": ""
+											},
+											"mail": {
+												"enabled": false,
+												"link": ""
+											},
+											"website": {
+												"enabled": false,
+												"link": ""
+											},
+											"vimeo": {
+												"enabled": false,
+												"link": ""
+											},
+											"medium": {
+												"enabled": false,
+												"link": ""
+											},
+											"spotify": {
+												"enabled": false,
+												"link": ""
+											},
+											"discord": {
+												"enabled": false,
+												"link": ""
+											}
+										},
+										"iconSize": "medium",
+										"align": "center",
+										"shape": "rounded",
+										"colorMode": "colored",
+										"color": "#02B53B",
+										"padding": {
+											"top": 8,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#FFFFFF",
+						"padding": "40px 32px",
+						"hideAddBlockButton": true
+					}
+				}
+			],
+			"globalSettings": {
+				"canvasColor": "#FFFFFF",
+				"backgroundImage": null,
+				"backgroundRepeat": "no-repeat",
+				"backgroundSize": "cover",
+				"backgroundPosition": "center",
+				"canvasWidth": 700
+			},
+			"buttonSettings": {
+				"primary": {
+					"font": "Arial, sans-serif",
+					"size": 16,
+					"letterSpacing": "0px",
+					"borderRadius": 1600,
+					"textColor": "#ffffff",
+					"backgroundColor": "#02B53B",
+					"borderWidth": 0,
+					"borderColor": "#1e398a",
+					"padding": {
+						"top": 12,
+						"right": 20,
+						"bottom": 12,
+						"left": 20
+					},
+					"bold": true,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				},
+				"secondary": {
+					"font": "Arial, sans-serif",
+					"size": 16,
+					"letterSpacing": "0px",
+					"borderRadius": 1600,
+					"textColor": "#02B53B",
+					"backgroundColor": "#FFFFFF",
+					"borderWidth": 1,
+					"borderColor": "#FFFFFF",
+					"padding": {
+						"top": 12,
+						"right": 20,
+						"bottom": 12,
+						"left": 20
+					},
+					"bold": true,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				},
+				"tertiary": {
+					"font": "Arial, sans-serif",
+					"size": 16,
+					"letterSpacing": "0px",
+					"borderRadius": 0,
+					"textColor": "#1e398a",
+					"backgroundColor": "#ffffff",
+					"borderWidth": 0,
+					"borderColor": "transparent",
+					"padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+					"bold": false,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				}
+			}
+		}
+	}
+}

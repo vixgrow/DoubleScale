@@ -1,0 +1,600 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useState, useEffect } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { getToLink, useLocation, useNavigate } from '@doublescale/navigation';
+import { useCampaignStep } from '../shared';
+import { PanelLayout, PlayIcon } from '@doublescale/components';
+import {
+	AiIcon,
+	MyTemplatesSidebarIcon,
+	ReadyToUseIcon,
+	ViewIcon,
+} from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+	TEMPLATE_CATEGORIES,
+	type TemplateItemConfig,
+} from './templatesConfig';
+import { getUserTemplates, renderTemplate } from '@/builder/api/templates';
+import type { EmailTemplate } from '@doublescale/client';
+import configApi from '@doublescale/config';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogOverlay,
+} from '@/components/ui/dialog';
+import { ArrowLeft, Plus } from 'lucide-react';
+import AIEmailBuilder from '../templates/ai-email-builder';
+
+const BUILDER_INITIAL_KEY = 'doublescale_campaign_builder_initial';
+
+const resolveAssetUrls = (obj: unknown): unknown => {
+	const baseUrl = configApi.getPluginDirUrl() + 'assets/images/templates/';
+	const json = JSON.stringify(obj);
+	return JSON.parse(json.replace(/\{\{ASSETS_URL\}\}/g, baseUrl));
+};
+
+interface ReadyToUseTemplateCardProps {
+	template: TemplateItemConfig;
+	onUseTemplate: (template: TemplateItemConfig) => void;
+	onPreview: (template: TemplateItemConfig) => void;
+}
+
+const ReadyToUseTemplateCard = ({
+	template,
+	onUseTemplate,
+	onPreview,
+}: ReadyToUseTemplateCardProps) => (
+	<Card className="overflow-hidden flex flex-col bg-muted/50 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
+		<div className="relative aspect-[4/3] bg-muted overflow-hidden">
+			{template.imageUrl ? (
+				<img
+					src={template.imageUrl}
+					alt={template.title}
+					className="w-full h-full object-cover"
+				/>
+			) : (
+				<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+					{template.title}
+				</div>
+			)}
+		</div>
+		<CardContent className="p-4 flex flex-col gap-3">
+			<h3 className="text-base font-semibold text-foreground text-center line-clamp-2">
+				{template.title}
+			</h3>
+			<div className="flex items-center justify-between">
+				<button
+					type="button"
+					onClick={() => onPreview(template)}
+					className="flex items-center gap-1.5 text-primary hover:text-primary/80 text-base transition-colors border-0 bg-transparent"
+				>
+					<ViewIcon />
+					{__('Preview', 'doublescale')}
+				</button>
+				<Button
+					size="sm"
+					variant="secondary"
+					onClick={() => onUseTemplate(template)}
+					className="text-base"
+				>
+					{__('Use template', 'doublescale')}
+				</Button>
+			</div>
+		</CardContent>
+	</Card>
+);
+
+interface MyTemplateCardProps {
+	template: EmailTemplate;
+	onUseTemplate: (template: EmailTemplate) => void;
+	onPreview: (template: EmailTemplate) => void;
+	onExport: (template: EmailTemplate) => void;
+}
+
+const MyTemplateCard = ({
+	template,
+	onUseTemplate,
+	onPreview,
+	onExport,
+}: MyTemplateCardProps) => (
+	<Card className="overflow-hidden flex flex-col bg-muted/50 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow group">
+		<div className="relative aspect-[4/3] bg-muted overflow-hidden">
+			{template.thumbnail ? (
+				<img
+					src={template.thumbnail}
+					alt={template.name}
+					className="w-full h-full object-cover"
+				/>
+			) : (
+				<div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/50">
+					{template.name}
+				</div>
+			)}
+			{/* Hover overlay with buttons */}
+			<div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+				<div className="flex flex-col gap-3">
+					<Button
+						onClick={() => onUseTemplate(template)}
+						className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-full font-medium text-sm shadow-lg"
+					>
+						{__('Use template', 'doublescale')}
+					</Button>
+					<Button
+						onClick={() => onPreview(template)}
+						variant="outline"
+						className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
+					>
+						{__('Preview', 'doublescale')}
+					</Button>
+					<Button
+						onClick={() => onExport(template)}
+						variant="outline"
+						className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
+					>
+						{__('Export', 'doublescale')}
+					</Button>
+				</div>
+			</div>
+		</div>
+		<CardContent className="p-4">
+			<h3 className="text-base font-semibold text-foreground text-center line-clamp-2">
+				{template.name}
+			</h3>
+		</CardContent>
+	</Card>
+);
+
+const EmailTemplatesStep: React.FC = () => {
+	const { campaign, saveCampaignStep, isNewCampaign } = useCampaignStep();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const dispatch = useDispatch();
+
+	const showBackToBuilder =
+		campaign?.id &&
+		new URLSearchParams(location.search).get('changeTemplate') === '1';
+
+	const [activeTab, setActiveTab] = useState<'my-templates' | 'ready-to-use'>(
+		'ready-to-use'
+	);
+	const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+		TEMPLATE_CATEGORIES[0]?.id || 'announcements'
+	);
+	const [myTemplates, setMyTemplates] = useState<EmailTemplate[]>([]);
+	const [myTemplatesLoading, setMyTemplatesLoading] = useState(false);
+	const [aiBuilderVisible, setAiBuilderVisible] = useState(false);
+	const [previewTemplate, setPreviewTemplate] = useState<
+		TemplateItemConfig | EmailTemplate | null
+	>(null);
+	const [previewHtml, setPreviewHtml] = useState<string>('');
+	const [previewLoading, setPreviewLoading] = useState(false);
+
+	const selectedCategory = TEMPLATE_CATEGORIES.find(
+		(c) => c.id === selectedCategoryId
+	);
+	const displayTemplates = selectedCategory?.templates || [];
+
+	useEffect(() => {
+		if (activeTab === 'my-templates' && campaign) {
+			setMyTemplatesLoading(true);
+			getUserTemplates()
+				.then((templates) =>
+					setMyTemplates(Array.isArray(templates) ? templates : [])
+				)
+				.catch(() => setMyTemplates([]))
+				.finally(() => setMyTemplatesLoading(false));
+		}
+	}, [activeTab, campaign?.id]);
+
+	const applyBuiltInTemplateAndNavigate = (template: TemplateItemConfig) => {
+		if (!campaign) return;
+		try {
+			const body = template.data?.body;
+			if (body?.type !== 'builder' || !body?.value) return;
+
+			const resolved = resolveAssetUrls(body.value) as {
+				sections: unknown[];
+				globalSettings?: Record<string, unknown>;
+				buttonSettings?: Record<string, unknown>;
+			};
+
+			sessionStorage.setItem(
+				`${BUILDER_INITIAL_KEY}_${campaign.id}`,
+				JSON.stringify(resolved)
+			);
+			saveCampaignStep('email-templates', {});
+			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
+		} catch (error) {
+			console.error('Error applying template:', error);
+		}
+	};
+
+	const applyUserTemplateAndNavigate = async (template: EmailTemplate) => {
+		if (!campaign) return;
+		try {
+			dispatch('doublescale/campaign').updateCampaign({
+				settings: {
+					...campaign.settings,
+					template_ids: template.id ? [template.id] : [],
+				},
+			});
+			saveCampaignStep('email-templates', { template_id: template.id });
+			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
+		} catch (error) {
+			console.error('Error applying template:', error);
+		}
+	};
+
+	const handleStartFromScratch = () => {
+		if (!campaign) return;
+		sessionStorage.removeItem(`${BUILDER_INITIAL_KEY}_${campaign.id}`);
+		saveCampaignStep('email-templates', {});
+		const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+		navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
+	};
+
+	const handlePreviewBuiltIn = (template: TemplateItemConfig) => {
+		setPreviewTemplate(template);
+		setPreviewHtml('');
+		setPreviewLoading(false);
+		// For built-in templates, show image as preview
+		setPreviewHtml('');
+	};
+
+	const handlePreviewUserTemplate = async (template: EmailTemplate) => {
+		setPreviewTemplate(template);
+		setPreviewLoading(true);
+		setPreviewHtml('');
+		try {
+			if (template.id) {
+				const html = await renderTemplate(template.id);
+				setPreviewHtml(html);
+			}
+		} catch {
+			setPreviewHtml(
+				'<p style="color: red; padding: 20px; text-align: center;">Failed to load preview</p>'
+			);
+		} finally {
+			setPreviewLoading(false);
+		}
+	};
+
+	const handleUseBuiltInTemplate = (template: TemplateItemConfig) => {
+		setPreviewTemplate(null);
+		applyBuiltInTemplateAndNavigate(template);
+	};
+
+	const handleUseUserTemplate = (template: EmailTemplate) => {
+		setPreviewTemplate(null);
+		applyUserTemplateAndNavigate(template);
+	};
+
+	const handleExportUserTemplate = (template: EmailTemplate) => {
+		if (!template.body) return;
+		try {
+			const bodyData =
+				typeof template.body === 'string'
+					? JSON.parse(template.body)
+					: template.body;
+			const exportData = {
+				name: template.name,
+				type: template.type,
+				body: bodyData,
+			};
+			const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+				type: 'application/json',
+			});
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${template.name || 'template'}.json`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Error exporting template:', error);
+		}
+	};
+
+	const isBuiltInPreview =
+		previewTemplate &&
+		'data' in previewTemplate &&
+		'imageUrl' in previewTemplate;
+	const isUserPreview = previewTemplate && 'body' in previewTemplate;
+
+	return (
+		<div>
+			<PanelLayout
+				items={[
+					{ label: __('Campaigns', 'doublescale'), href: 'campaigns' },
+					{
+						label: __('Create Campaign', 'doublescale'),
+						href: `campaigns/${campaign?.id}/template`,
+					},
+					{ label: __('Email Builder', 'doublescale') },
+				]}
+				panelbtns={[
+					<Button variant="secondaryDeepBlue">
+						<PlayIcon />
+						{__('Watch Tutorial', 'doublescale')}
+					</Button>,
+				]}
+				type="campaign"
+			>
+				<Card className="mt-6 overflow-hidden rounded-lg bg-muted/50 shadow-none p-6">
+					{/* Header - flex with buttons */}
+					<div className="flex items-center justify-between gap-4">
+						<div className="flex items-center gap-4">
+							{showBackToBuilder && (
+								<Button
+									variant="outline"
+									className="shrink-0 text-destructive border-destructive bg-transparent rounded-md"
+									onClick={() =>
+										navigate(
+											getToLink(
+												`campaigns/${campaign.id}/builder`
+											)
+										)
+									}
+								>
+									<ArrowLeft className="h-4 w-4" />
+									{__('Back to builder', 'doublescale')}
+								</Button>
+							)}
+							<div>
+								<h1 className="text-2xl font-bold text-foreground">
+									{__('All templates', 'doublescale')}
+								</h1>
+								<p className="text-muted-foreground mt-1">
+									{__(
+										'Create your campaign by choosing from ready-made email templates, starting from scratch, or reusing your saved designs.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</div>
+						<div className="flex gap-4 flex-shrink-0">
+							<Button
+								variant="secondary"
+								onClick={() => setAiBuilderVisible(true)}
+								className="rounded-md"
+							>
+								<AiIcon width={32} height={32} />
+								{__('Generate With AI', 'doublescale')}
+							</Button>
+							<Button
+								variant="default"
+								onClick={handleStartFromScratch}
+								className="rounded-md"
+							>
+								<Plus className="h-8 w-8" />
+								{__('Start From Scratch', 'doublescale')}
+							</Button>
+						</div>
+					</div>
+					<div className="border-b border-border py-3" />
+					{/* Tabs - in card with white bg */}
+					<Card className="mt-6 bg-white shadow-none">
+						<CardContent className="p-0">
+							<div className="flex gap-8 px-6 pt-4 pb-0">
+								<button
+									type="button"
+									onClick={() => setActiveTab('my-templates')}
+									className={`flex items-center gap-2 pb-4 -mb-px transition-colors ${
+										activeTab === 'my-templates'
+											? 'text-primary border-b-2 border-primary'
+											: 'text-muted-foreground hover:text-primary'
+									}`}
+								>
+									<MyTemplatesSidebarIcon
+										width={32}
+										height={32}
+									/>
+									<span className="text-lg">
+										{__('My Templates', 'doublescale')}
+									</span>
+								</button>
+								<button
+									type="button"
+									onClick={() => setActiveTab('ready-to-use')}
+									className={`flex items-center gap-2 pb-4 -mb-px transition-colors ${
+										activeTab === 'ready-to-use'
+											? 'text-primary border-b-2 border-primary'
+											: 'text-muted-foreground hover:text-primary'
+									}`}
+								>
+									<ReadyToUseIcon width={32} height={32} />
+									<span className="text-lg">
+										{__('Ready-to-use', 'doublescale')}
+									</span>
+								</button>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Tab content */}
+					{activeTab === 'my-templates' ? (
+						<div className="min-h-[400px] pt-6">
+							<Card className="h-full min-h-[300px] overflow-auto">
+								<CardContent className="p-6">
+									{myTemplatesLoading ? (
+										<div className="flex items-center justify-center py-16">
+											<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+										</div>
+									) : myTemplates.length === 0 ? (
+										<div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+											<MyTemplatesSidebarIcon
+												width={64}
+												height={64}
+											/>
+											<p className="text-center">
+												{__(
+													'No saved templates yet. Create one in the builder and save it as a template.',
+													'doublescale'
+												)}
+											</p>
+										</div>
+									) : (
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+											{myTemplates.map((template) => (
+												<MyTemplateCard
+													key={template.id}
+													template={template}
+													onUseTemplate={
+														handleUseUserTemplate
+													}
+													onPreview={
+														handlePreviewUserTemplate
+													}
+													onExport={
+														handleExportUserTemplate
+													}
+												/>
+											))}
+										</div>
+									)}
+								</CardContent>
+							</Card>
+						</div>
+					) : (
+						<div className="flex gap-4 min-h-[400px] pt-6">
+							<div className="w-1/4 flex-shrink-0">
+								<Card className="h-full min-h-[300px]">
+									<CardContent className="p-6">
+										<h3 className="text-base text-muted-foreground uppercase tracking-wider mb-3">
+											{__('ALL CATEGORIES', 'doublescale')}
+										</h3>
+										<nav className="flex flex-col gap-3">
+											{TEMPLATE_CATEGORIES.filter(
+												(c) => c.templates.length > 0
+											).map((category) => (
+												<button
+													key={category.id}
+													type="button"
+													onClick={() =>
+														setSelectedCategoryId(
+															category.id
+														)
+													}
+													className={`text-left p-3 rounded-lg text-lg transition-colors ${
+														selectedCategoryId ===
+														category.id
+															? 'bg-primary text-primary-foreground font-semibold'
+															: 'text-foreground hover:bg-muted font-normal'
+													}`}
+												>
+													{category.title}
+												</button>
+											))}
+										</nav>
+									</CardContent>
+								</Card>
+							</div>
+							<div className="flex-1 min-w-0">
+								<Card className="h-full min-h-[300px] overflow-auto">
+									<CardContent className="p-6">
+										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+											{displayTemplates.map(
+												(template) => (
+													<ReadyToUseTemplateCard
+														key={template.id}
+														template={template}
+														onUseTemplate={
+															handleUseBuiltInTemplate
+														}
+														onPreview={
+															handlePreviewBuiltIn
+														}
+													/>
+												)
+											)}
+										</div>
+									</CardContent>
+								</Card>
+							</div>
+						</div>
+					)}
+				</Card>
+			</PanelLayout>
+
+			{/* Preview Dialog */}
+			<Dialog
+				open={!!previewTemplate}
+				onOpenChange={() => setPreviewTemplate(null)}
+			>
+				<DialogOverlay />
+				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+					<DialogHeader>
+						<DialogTitle className="text-center">
+							{__('Preview template', 'doublescale')}
+						</DialogTitle>
+					</DialogHeader>
+					<div className="flex-1 overflow-auto mt-4">
+						{isBuiltInPreview && previewTemplate && (
+							<div className="flex justify-center">
+								<img
+									src={
+										(previewTemplate as TemplateItemConfig)
+											.imageUrl
+									}
+									alt={
+										(previewTemplate as TemplateItemConfig)
+											.title
+									}
+									className="max-w-full h-auto rounded-lg border"
+								/>
+							</div>
+						)}
+						{isUserPreview && (
+							<>
+								{previewLoading ? (
+									<div className="flex flex-col items-center justify-center min-h-[400px]">
+										<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+										<p className="text-muted-foreground mt-4">
+											{__(
+												'Loading preview...',
+												'doublescale'
+											)}
+										</p>
+									</div>
+								) : previewHtml ? (
+									<iframe
+										srcDoc={previewHtml}
+										className="w-full min-h-[600px] border-0"
+										title={__(
+											'Template Preview',
+											'doublescale'
+										)}
+										sandbox="allow-same-origin"
+									/>
+								) : null}
+							</>
+						)}
+					</div>
+				</DialogContent>
+			</Dialog>
+
+			<AIEmailBuilder
+				visible={aiBuilderVisible}
+				setVisible={setAiBuilderVisible}
+				campaign={campaign}
+			/>
+		</div>
+	);
+};
+
+export default EmailTemplatesStep;

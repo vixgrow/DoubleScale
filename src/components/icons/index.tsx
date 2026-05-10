@@ -1,4 +1,5 @@
 export { default as AllContactsIcon } from './all-contacts';
+export { default as AiIcon } from './ai';
 export { default as AnalyticsReportsIcon } from './analytics-reports';
 export { default as ArrowDownIcon } from './arrow-down';
 export { default as ArrowUpIcon } from './arrow-up';

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import type { Campaign } from '@doublescale/client';
-import { getToLink, useNavigate } from '@doublescale/navigation';
+import { getToLink, useLocation, useNavigate } from '@doublescale/navigation';
 import { getCampaignEndpoint } from '@doublescale/utils';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -14,6 +14,8 @@ import { __ } from '@wordpress/i18n';
  */
 export const useCampaignStep = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isNewCampaign = !!(location.state as any)?.isNew;
 
   // Selectors
   const campaign = useSelect(
@@ -50,11 +52,11 @@ export const useCampaignStep = () => {
     if (!campaign) return;
     const status = (campaign as CampaignWithStatus)?.status;
     if (status === 'processed' || status === 'archived') {
-      // Lock steps: show overview details only
       navigate(getToLink(`campaigns/${campaign.id}/overview`));
       return;
     }
-    navigate(getToLink(`campaigns/${campaign.id}/${step}`));
+    const navOptions = isNewCampaign ? { state: { isNew: true } } : undefined;
+    navigate(getToLink(`campaigns/${campaign.id}/${step}`), navOptions);
   };
 
   /**
@@ -95,12 +97,17 @@ export const useCampaignStep = () => {
       throw new Error(__('Invalid campaign type', 'doublescale'));
     }
 
+    const cleanSettings = { ...campaign.settings, ...(data.settings || {}) };
+    delete (cleanSettings as any).templates;
+    delete (cleanSettings as any).is_attached;
+
     const response = await apiFetch({
       path: `${endpoint}/${campaign.id}`,
       method: 'PUT',
       data: {
         ...campaign,
         ...data,
+        settings: cleanSettings,
       },
     });
 
@@ -116,6 +123,7 @@ export const useCampaignStep = () => {
     loading,
     saving,
     currentStep,
+    isNewCampaign,
 
     // Actions
     saveCampaignStep,

@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useRef, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -23,77 +22,83 @@ interface SendTestSMSCardProps {
 	buttonVariant?: 'secondary' | 'gradient';
 }
 
+type FeedbackState = {
+	type: 'success' | 'error';
+	message: string;
+} | null;
+
 const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = true, description = true, cardClassName = '', buttonClassName = '', buttonVariant = 'secondary' }) => {
-	const { createNotice } = useDispatch('doublescale/core');
 	const [testPhone, setTestPhone] = useState('');
 	const [isSendingTest, setIsSendingTest] = useState(false);
+	const [feedback, setFeedback] = useState<FeedbackState>(null);
 	const isMountedRef = useRef(true);
 	const abortControllerRef = useRef<AbortController | null>(null);
+	const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
 		return () => {
 			isMountedRef.current = false;
-			// Cancel any pending requests when component unmounts
 			if (abortControllerRef.current) {
 				abortControllerRef.current.abort();
+			}
+			if (feedbackTimerRef.current) {
+				clearTimeout(feedbackTimerRef.current);
 			}
 		};
 	}, []);
 
+	const showFeedback = (type: 'success' | 'error', message: string) => {
+		if (feedbackTimerRef.current) {
+			clearTimeout(feedbackTimerRef.current);
+		}
+		setFeedback({ type, message });
+		feedbackTimerRef.current = setTimeout(() => {
+			if (isMountedRef.current) {
+				setFeedback(null);
+			}
+		}, 8000);
+	};
+
 	const sendTestSMS = async () => {
+		setFeedback(null);
+
 		if (!testPhone.trim()) {
-			createNotice({
-				type: 'error',
-				message: __('Please enter a phone number', 'doublescale'),
-			});
+			showFeedback('error', __('Please enter a phone number', 'doublescale'));
 			return;
 		}
 
 		if (!campaignId) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign ID is missing', 'doublescale'),
-			});
+			showFeedback('error', __('Campaign ID is missing', 'doublescale'));
 			return;
 		}
 
-		// Abort any previous pending request
 		if (abortControllerRef.current) {
 			abortControllerRef.current.abort();
 		}
 
-		// Create new AbortController for this request
 		abortControllerRef.current = new AbortController();
-
 		setIsSendingTest(true);
 
 		try {
-			// Validate E.164 format (e.g., +1234567890)
 			const phone = testPhone.trim();
 			if (!phone.match(/^\+[1-9]\d{1,14}$/)) {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Please enter a valid phone number in E.164 format (e.g., +1234567890)',
-						'doublescale'
-					),
-				});
+				showFeedback(
+					'error',
+					__('Please enter a valid phone number in E.164 format (e.g., +1234567890)', 'doublescale')
+				);
 				return;
 			}
 
-			// Get campaign data to retrieve the message content
 			const campaign: any = await apiFetch({
 				path: `/doublescale/v1/campaigns/${campaignId}`,
 				method: 'GET',
 				signal: abortControllerRef.current.signal,
 			});
 
-			// Extract message from template
 			const message =
 				campaign?.settings?.templates?.[0]?.body ||
 				__('Test SMS message', 'doublescale');
 
-			// Send test SMS using unified endpoint
 			const response: any = await apiFetch({
 				path: `/doublescale/v1/campaigns/send-test-message`,
 				method: 'POST',
@@ -105,34 +110,22 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = 
 				signal: abortControllerRef.current.signal,
 			});
 
-			// Only update state if component is still mounted
 			if (!isMountedRef.current) return;
 
-			createNotice({
-				type: 'success',
-				message:
-					response.message ||
-					__('Test SMS sent successfully', 'doublescale'),
-			});
-
+			showFeedback(
+				'success',
+				response.message || __('Test SMS sent successfully', 'doublescale')
+			);
 			setTestPhone('');
 		} catch (error: any) {
-			// Ignore abort errors (expected when component unmounts)
-			if (error.name === 'AbortError') {
-				return;
-			}
-
-			// Only handle error if component is still mounted
+			if (error.name === 'AbortError') return;
 			if (!isMountedRef.current) return;
 
-			console.error('Test SMS error:', error);
-			createNotice({
-				type: 'error',
-				message:
-					error.message || __('Failed to send test SMS', 'doublescale'),
-			});
+			showFeedback(
+				'error',
+				error.message || __('Failed to send test SMS', 'doublescale')
+			);
 		} finally {
-			// Only update state if component is still mounted
 			if (isMountedRef.current) {
 				setIsSendingTest(false);
 			}
@@ -140,7 +133,7 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = 
 	};
 
 	return (
-		<div className={cn('bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4', cardClassName)}>
+		<div className={cn('bg-muted/50 rounded-lg border border-gray-200 p-6 sticky top-4', cardClassName)}>
 			{/* Header */}
 			{header && (
 			<div className="pb-4 border-b mb-6">
@@ -156,12 +149,12 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = 
 			{/* Content */}
 			<div className="space-y-4">
 				{description && (
-				<h4 className="text-base text-[#09090B]">
+				<h4 className="text-base text-foreground">
 					{__('Who do you want to test your SMS with?', 'doublescale')}
 				</h4>
 				)}
 				<div>
-					<label className="block text-base text-[#09090B] mb-2">
+					<label className="block text-base text-foreground mb-2">
 						{__('Send a test SMS to', 'doublescale')}
 					</label>
 					<Textarea
@@ -179,8 +172,22 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = 
 					</p>
 				</div>
 
+				{/* Inline feedback banner */}
+				{feedback && (
+					<div
+						className={cn(
+							'rounded-lg p-4 text-sm font-medium',
+							feedback.type === 'success'
+								? 'bg-green-50 border border-green-200 text-green-800'
+								: 'bg-red-50 border border-red-200 text-red-800'
+						)}
+					>
+						{feedback.message}
+					</div>
+				)}
+
 				{/* Warning */}
-				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
+				<div className="bg-white border border-border/60 rounded-lg p-4">
 					<div className="flex gap-3">
 						<div className="text-destructive">
 							<AlertIcon width={24} height={24} />

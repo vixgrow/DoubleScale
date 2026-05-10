@@ -1,0 +1,476 @@
+{
+  "name": "Plain Text",
+  "type": "email",
+  "body": {
+    "type": "builder",
+    "value": {
+      "sections": [
+        {
+          "id": "section-1",
+          "columns": [
+            {
+              "id": "column-1",
+              "width": 50,
+              "blocks": [
+                {
+                  "id": "block-1",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/plain-text/Logo.png",
+                    "alt": "Logo",
+                    "width": "auto",
+                    "height": "auto",
+                    "align": "left",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "column-2",
+              "width": 50,
+              "blocks": [
+                {
+                  "id": "block-2",
+                  "type": "social_media",
+                  "props": {
+                    "platforms": {
+                      "instagram": {
+                        "enabled": true,
+                        "link": "https://instagram.com"
+                      },
+                      "tiktok": {
+                        "enabled": true,
+                        "link": "https://tiktok.com"
+                      },
+                      "linkedin": {
+                        "enabled": true,
+                        "link": "https://linkedin.com"
+                      },
+                      "x": {
+                        "enabled": true,
+                        "link": "https://x.com"
+                      },
+                      "youtube": {
+                        "enabled": true,
+                        "link": "https://youtube.com"
+                      },
+                      "facebook": {
+                        "enabled": true,
+                        "link": "https://facebook.com"
+                      },
+                      "threads": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "pinterest": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "snapchat": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "soundcloud": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "mail": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "website": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "vimeo": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "medium": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "spotify": {
+                        "enabled": false,
+                        "link": ""
+                      },
+                      "discord": {
+                        "enabled": false,
+                        "link": ""
+                      }
+                    },
+                    "iconSize": "medium",
+                    "align": "right",
+                    "shape": "rounded",
+                    "colorMode": "colored",
+                    "color": "#000000",
+                    "padding": { "top": 7, "right": 0, "bottom": 8, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F4F7FF",
+            "padding": "40px 32px 0px 32px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-2",
+          "columns": [
+            {
+              "id": "column-3",
+              "width": 100,
+              "blocks": [
+                {
+                  "id": "block-3",
+                  "type": "divider",
+                  "props": {
+                    "height": "2",
+                    "color": "#E2E2E2",
+                    "backgroundColor": "transparent",
+                    "style": "solid",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                    "align": "center",
+                    "width": "100",
+                    "borderRadius": "218px",
+                    "opacity": 1
+                  }
+                },
+                {
+                  "id": "block-4",
+                  "type": "text",
+                  "props": {
+                    "content": "<h1 style=\"text-align:center; color: #386ADC; font-weight: 700;\">Hi There !</h1>",
+                    "hyperlink": "",
+                    "fontSize": 60,
+                    "color": "#386ADC",
+                    "align": "center",
+                    "fontFamily": "'Times New Roman', serif",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "h1",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-5",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/plain-text/plain-text-img-1.png",
+                    "alt": "Hero Image",
+                    "width": "75%",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 16, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-6",
+                  "type": "text",
+                  "props": {
+                    "content": "<p><span style=\"color: #333333;\">Hello </span><strong style=\"color: #407BFF; font-weight: 700;\">{{contact:first_name}},</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 24,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 5, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-7",
+                  "type": "text",
+                  "props": {
+                    "content": "<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>",
+                    "hyperlink": "",
+                    "fontSize": 17,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 5, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-8",
+                  "type": "text",
+                  "props": {
+                    "content": "<p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p><p><span style=\"color: #407BFF;\">✦</span> Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 16, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-9",
+                  "type": "video",
+                  "props": {
+                    "videoUrl": "https://www.youtube.com/watch?v=2J-ycNN-9g4",
+                    "imageUrl": "http://images.doublescale.io/templates-images/plain-text/plain-text-img-2.png",
+                    "alt": "Video",
+                    "width": "100%",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "#000000",
+                    "padding": { "top": 0, "right": 0, "bottom": 16, "left": 0 },
+                    "borderRadius": "8",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-10",
+                  "type": "button",
+                  "props": {
+                    "text": "More Info",
+                    "url": "#",
+                    "containerPadding": {
+                      "top": 16,
+                      "right": 0,
+                      "bottom": 16,
+                      "left": 0
+                    },
+                    "containerBackgroundColor": "transparent",
+                    "align": "center",
+                    "buttonStyle": "primary"
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F4F7FF",
+            "padding": "0px 32px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-3",
+          "columns": [
+            {
+              "id": "column-4",
+              "width": 100,
+              "blocks": [
+                {
+                  "id": "block-11",
+                  "type": "text",
+                  "props": {
+                    "content": "<p><strong>Lorem Ipsum is simply dummy text of the printing</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 24,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.6",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 24, "right": 32, "bottom": 24, "left": 32 }
+                  }
+                },
+                {
+                  "id": "block-12",
+                  "type": "text",
+                  "props": {
+                    "content": "<p>Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor. Fusce sollicitudin erat eu turpis fermentum, sit amet mattis mi malesuada. Vestibulum varius augue ut lacus aliquam, non bibendum libero cursus. Nulla facilisi. Sed id leo a dolor malesuada pellentesque. Curabitur feugiat, purus nec viverra sagittis, justo ex tincidunt velit, nec malesuada neque arcu vel libero.</p>",
+                    "hyperlink": "",
+                    "fontSize": 18,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.6",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 32, "bottom": 24, "left": 32 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#ffffff",
+            "padding": "0px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-4",
+          "columns": [
+            {
+              "id": "column-5",
+              "width": 100,
+              "blocks": [
+                {
+                  "id": "block-13",
+                  "type": "text",
+                  "props": {
+                    "content": "<p><strong>[Your Full Name],</strong></p><br>\n<p><strong>[Job Title],</strong></p><br>\n<p><strong>{{general:business_name}},</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 20,
+                    "color": "#333333",
+                    "align": "left",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.6",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#4F6BED",
+                    "backgroundColor": "transparent",
+                    "textAlign": "left",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 24, "right": 32, "bottom": 40, "left": 32 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F4F7FF",
+            "padding": "0px",
+            "hideAddBlockButton": true
+          }
+        }
+      ],
+      "globalSettings": {
+        "canvasColor": "#ffffff",
+        "backgroundImage": null,
+        "backgroundRepeat": "no-repeat",
+        "backgroundSize": "cover",
+        "backgroundPosition": "center",
+        "canvasWidth": 700
+      },
+      "buttonSettings": {
+        "primary": {
+          "font": "Arial, sans-serif",
+          "size": 20,
+          "letterSpacing": "0px",
+          "borderRadius": 12,
+          "textColor": "#ffffff",
+          "backgroundColor": "#407BFF",
+          "borderWidth": 0,
+          "borderColor": "#1e398a",
+          "padding": { "top": 20, "right": 96, "bottom": 20, "left": 96 },
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "secondary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 4,
+          "textColor": "#1e398a",
+          "backgroundColor": "transparent",
+          "borderWidth": 1,
+          "borderColor": "#1e398a",
+          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "tertiary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 0,
+          "textColor": "#1e398a",
+          "backgroundColor": "#ffffff",
+          "borderWidth": 0,
+          "borderColor": "transparent",
+          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        }
+      }
+    }
+  }
+}

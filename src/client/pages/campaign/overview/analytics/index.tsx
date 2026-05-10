@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { Link } from 'react-router-dom';
 
 /**
  * External dependencies
@@ -20,6 +21,7 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
+import { getToLink } from '@doublescale/navigation';
 import { RenderMetrics } from './metrics';
 import { RenderChart } from './chart';
 
@@ -123,9 +125,9 @@ const Analytics: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-5 w-1/3">
-			<Card className="bg-[#F8F8F8] shadow-none w-full px-5">
+			<Card className="bg-muted/50 shadow-none w-full px-5">
 				<CardHeader className="border-b pb-4 px-0">
-					<CardTitle className="text-xl font-medium text-[#09090B]">
+					<CardTitle className="text-xl font-medium text-foreground">
 						{__('Campaign Performance (Analytics)', 'doublescale')}
 					</CardTitle>
 				</CardHeader>
@@ -137,20 +139,44 @@ const Analytics: React.FC = () => {
 						</div>
 					)}
 
-					{/* Metrics */}
-					<RenderMetrics
-						campaign={campaign}
-						calculatePercentage={calculatePercentage}
-						totalMessages={totalMessages}
-					/>
+				{/* Metrics */}
+				<RenderMetrics
+					campaign={campaign}
+					calculatePercentage={calculatePercentage}
+					totalMessages={totalMessages}
+				/>
 
-					{/* Progress indicator - shown if processing and started */}
+				{/* Failures hint - shown when campaign has failed messages */}
+				{campaign.status !== 'processing' &&
+					campaign.status !== 'resending' &&
+					(campaign.failed_count || 0) > 0 && (
+						<div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800">
+							<p className="font-medium">
+								{sprintf(
+									__('%d message(s) failed.', 'doublescale'),
+									campaign.failed_count
+								)}
+							</p>
+							<p className="mt-1">
+								{__('Check ', 'doublescale')}
+								<Link
+									to={getToLink('settings/system')}
+									className="underline font-medium text-amber-900 hover:text-amber-700"
+								>
+									{__('Settings > Logs', 'doublescale')}
+								</Link>
+								{__(' for details on why messages failed.', 'doublescale')}
+							</p>
+						</div>
+					)}
+
+				{/* Progress indicator - shown if processing and started */}
 					{(campaign.status === 'processing' ||
 						campaign.status === 'resending') &&
 						started && (
 							<Card className="shadow-none bg-white p-4">
 								<CardHeader>
-									<CardTitle className="text-xl font-medium text-[#09090B]">
+									<CardTitle className="text-xl font-medium text-foreground">
 										{__('Process Sending', 'doublescale')}
 									</CardTitle>
 								</CardHeader>
@@ -222,9 +248,9 @@ const Analytics: React.FC = () => {
 			{/* Statistics Chart - shown if NOT processing/resending */}
 			{campaign.status !== 'processing' &&
 				campaign.status !== 'resending' && (
-					<Card className="bg-[#F8F8F8] shadow-none w-full px-5">
+					<Card className="bg-muted/50 shadow-none w-full px-5">
 						<CardHeader className="px-0">
-							<CardTitle className="text-xl font-medium text-[#09090B]">
+							<CardTitle className="text-xl font-medium text-foreground">
 								{__('Statistics', 'doublescale')}
 							</CardTitle>
 						</CardHeader>

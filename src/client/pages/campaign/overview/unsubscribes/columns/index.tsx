@@ -31,7 +31,7 @@ export function getColumns(campaignType?: string) {
 		{
 			accessorKey: 'sent_at',
 			header: __('Sent On', 'doublescale'),
-			cell: ({ row }) => <TimeAgoCell value={row.getValue('sent_at')} />,
+			cell: ({ row }) => <TimeAgoCell value={row.original.sent_at || row.original.created_at} />,
 		},
 	];
 
@@ -70,7 +70,7 @@ export function getColumns(campaignType?: string) {
 					return (
 						<div
 							className={cn(
-								'bg-[#EF444429] w-fit text-destructive border-destructive px-2 py-1 rounded-md'
+								'bg-destructive/5 w-fit text-destructive border-destructive inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full'
 							)}
 						>
 							{__('Failed', 'doublescale')}
@@ -82,7 +82,7 @@ export function getColumns(campaignType?: string) {
 					return (
 						<div
 							className={cn(
-								'bg-[#EFFFF5] w-fit text-[#16A34A] border-[#16A34A] px-2 py-1 rounded-md'
+								'bg-emerald-50 w-fit text-emerald-700 border-emerald-200 inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full'
 							)}
 						>
 							{__('Delivered', 'doublescale')}

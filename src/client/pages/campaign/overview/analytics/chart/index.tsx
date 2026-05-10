@@ -15,70 +15,67 @@ import { Chart } from 'react-chartjs-2';
 import { Campaign as CampaignType } from '@doublescale/client';
 import { CAMPAIGN_CHANNEL, isEmailChannel } from '@/constants/campaign-channel';
 
-interface ChartProps {
-	campaign: CampaignType | null;
+export interface ChartData {
+	labels: string[];
+	data: number[];
+	colors: string[];
 }
 
-export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
-	if (!campaign) return null;
+interface ChartProps {
+	campaign?: CampaignType | null;
+	chartData?: ChartData;
+}
 
-	let chartData: {
-		labels: string[];
-		data: number[];
-		colors: string[];
-	};
-
+function buildChartDataFromCampaign(campaign: CampaignType): ChartData {
 	if (isEmailChannel(campaign.type)) {
-		const sentCount = campaign.sent_count;
-		const openCount = campaign.opened_count || 0;
-		const clickCount = campaign.clicked_count;
-		const failedCount = campaign.failed_count;
-
-		chartData = {
+		return {
 			labels: [
 				__('Sent Emails', 'doublescale'),
 				__('Open Rate', 'doublescale'),
 				__('Click Rate', 'doublescale'),
 				__('Failed Emails', 'doublescale'),
 			],
-			data: [sentCount, openCount, clickCount, failedCount],
+			data: [campaign.sent_count, campaign.opened_count || 0, campaign.clicked_count, campaign.failed_count],
 			colors: ['#458DC7', '#16A34A', '#660FF1', '#E13B3B'],
 		};
-	} else if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
-		chartData = {
+	}
+
+	if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
+		return {
 			labels: [
 				__('Sent', 'doublescale'),
 				__('Failed', 'doublescale'),
 				__('Delivered', 'doublescale'),
 				__('Clicked', 'doublescale'),
 			],
-			data: [
-				campaign.sent_count,
-				campaign.failed_count,
-				campaign.delivered_count || 0,
-				campaign.clicked_count,
-			],
+			data: [campaign.sent_count, campaign.failed_count, campaign.delivered_count || 0, campaign.clicked_count],
 			colors: ['#458DC7', '#E13B3B', '#16A34A', '#660FF1'],
 		};
+	}
+
+	// WhatsApp
+	return {
+		labels: [
+			__('Sent', 'doublescale'),
+			__('Failed', 'doublescale'),
+			__('Delivered', 'doublescale'),
+			__('Read', 'doublescale'),
+			__('Clicked', 'doublescale'),
+		],
+		data: [campaign.sent_count, campaign.failed_count, campaign.delivered_count || 0, campaign.read_count || 0, campaign.clicked_count],
+		colors: ['#458DC7', '#E13B3B', '#16A34A', '#FFA500', '#660FF1'],
+	};
+}
+
+export const RenderChart: React.FC<ChartProps> = ({ campaign, chartData: externalChartData }) => {
+	let chartData: ChartData;
+
+	if (externalChartData) {
+		chartData = externalChartData;
+	} else if (campaign) {
+		chartData = buildChartDataFromCampaign(campaign);
 	} else {
-		// WhatsApp
-		chartData = {
-			labels: [
-				__('Sent', 'doublescale'),
-				__('Failed', 'doublescale'),
-				__('Delivered', 'doublescale'),
-				__('Read', 'doublescale'),
-				__('Clicked', 'doublescale'),
-			],
-			data: [
-				campaign.sent_count,
-				campaign.failed_count,
-				campaign.delivered_count || 0,
-				campaign.read_count || 0,
-				campaign.clicked_count,
-			],
-			colors: ['#458DC7', '#E13B3B', '#16A34A', '#FFA500', '#660FF1'],
-		};
+		return null;
 	}
 
 	// Calculate total for percentage calculations

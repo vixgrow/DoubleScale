@@ -24,7 +24,6 @@ const TabsSelection: React.FC = () => {
 
 	const isSMSCampaign = campaign?.type === CAMPAIGN_CHANNEL.SMS;
 	const isWhatsAppCampaign = campaign?.type === CAMPAIGN_CHANNEL.WHATSAPP;
-
 	// SMS and WhatsApp campaigns only show Campaign Details and Unsubscribes tabs
 	const tabsList = (isSMSCampaign || isWhatsAppCampaign)
 		? [
@@ -104,7 +103,7 @@ const TabsSelection: React.FC = () => {
 		];
 
 	return (
-		<Card className="bg-[#F8F8F8] shadow-none p-5 w-2/3">
+		<Card className="bg-muted/50 shadow-none p-5 w-2/3">
 			<PageTabs
 				defaultValue="details"
 				tabsList={tabsList}

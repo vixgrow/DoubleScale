@@ -21,6 +21,7 @@ module.exports = {
 		alias: {
 			'@': path.resolve(__dirname, 'src'),
 			'@/lib': path.resolve(__dirname, 'src/lib'),
+			'@/builder': path.resolve(__dirname, 'src/builder'),
 			'@doublescale/navigation': path.resolve(__dirname, 'src/navigation'),
 			'@doublescale/config': path.resolve(__dirname, 'src/config'),
 			'@doublescale/client': path.resolve(__dirname, 'src/client/index.tsx'),

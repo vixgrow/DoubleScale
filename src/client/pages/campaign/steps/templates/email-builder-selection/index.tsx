@@ -12,8 +12,6 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogOverlay,
-	DialogPortal,
 } from '@/components/ui/dialog';
 import { EnvelopeIcon, RepeatIcon } from '@/components';
 import { getToLink, useNavigate } from '@doublescale/navigation';
@@ -23,19 +21,22 @@ interface CampaignTypesProps {
 	setVisible: (visible: boolean) => void;
 	visible: boolean;
 	campaign: Campaign | null;
+	onAIBuilderClick?: () => void;
 }
 
 const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 	setVisible,
 	visible,
 	campaign,
+	onAIBuilderClick,
 }) => {
 	const navigate = useNavigate();
 	const campaignTypesRows = [
 		{
 			label: __('Start From Scratch', 'doublescale'),
 			description: __(
-				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
+				'Build your email from the ground up using our drag-and-drop builder with full creative control.',
+				'doublescale'
 			),
 			type: 'blank',
 			icon: <EnvelopeIcon />,
@@ -46,35 +47,35 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 		{
 			label: __('Choose A Pre-built Template', 'doublescale'),
 			description: __(
-				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
+				'Start with a professionally designed template and customize it to match your brand.',
+				'doublescale'
 			),
 			type: 'pre-built',
 			icon: <RepeatIcon />,
 			onClick: () => {
-				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				navigate(getToLink(`campaigns/${campaign?.id}/builder`) + '&openTemplates=1');
 			},
 		},
 		{
 			label: __('Generate With AI', 'doublescale'),
 			beta: true,
 			description: __(
-				'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering.'
+				'Describe the email you want and let AI create a professional template for you to customize.',
+				'doublescale'
 			),
 			type: 'ai',
 			icon: <RepeatIcon />,
 			onClick: () => {
-				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				setVisible(false);
+				onAIBuilderClick?.();
 			},
 		},
 	];
 	return (
 		<Dialog open={visible} onOpenChange={() => setVisible(!visible)}>
-			<DialogPortal>
-				<DialogOverlay style={{ zIndex: 9999999 }} />
-				<DialogContent
-					className="max-w-[840px] w-full mx-auto"
-					style={{ zIndex: 9999999 }}
-				>
+			<DialogContent
+				className="max-w-[840px] w-full mx-auto"
+			>
 					<DialogHeader className="text-center sm:text-center">
 						<DialogTitle className="text-3xl font-bold mb-1">
 							{__(
@@ -118,7 +119,6 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 						))}
 					</div>
 				</DialogContent>
-			</DialogPortal>
 		</Dialog>
 	);
 };

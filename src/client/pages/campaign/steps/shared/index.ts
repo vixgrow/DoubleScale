@@ -2,6 +2,6 @@
  * Shared step utilities
  */
 
-export { campaignSteps } from './stepsConfig';
+export { campaignSteps, automatedCampaignSteps } from './stepsConfig';
 export { useCampaignStep } from './useCampaignStep';
 

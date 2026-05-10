@@ -105,6 +105,26 @@ export const fetchCampaign =
 		};
 
 /**
+ * Refresh campaign from API without showing loading state.
+ * Use when navigating back to builder to ensure latest template_id.
+ * Returns the campaign or null on error.
+ */
+export const refreshCampaign =
+	(id: string) =>
+		async ({ dispatch }: any): Promise<ExtendedCampaign | null> => {
+			try {
+				const response = (await apiFetch({
+					path: `/doublescale/v1/campaigns/${id}`,
+				})) as ExtendedCampaign;
+
+				dispatch(setCampaign(response));
+				return response;
+			} catch {
+				return null;
+			}
+		};
+
+/**
  * Save campaign to API
  */
 export const saveCampaign =
@@ -158,9 +178,13 @@ export const saveCampaignStep =
 			try {
 				let updatedSettings = { ...campaign.settings, current_step: step };
 				delete updatedSettings.templates;
+				delete (updatedSettings as { is_attached?: unknown }).is_attached;
 
 				// Handle template step - add template_id to template_ids array
-				if (step === 'template' && stepData?.template_id) {
+				if (
+					(step === 'template' || step === 'email-templates') &&
+					stepData?.template_id
+				) {
 					const templateIds = campaign.settings.template_ids || [];
 					const newTemplateIds =
 						templateIds.length > 0

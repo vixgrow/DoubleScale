@@ -61,9 +61,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 					icon={<ContactTotalEmailsIcon width={40} height={40} />}
 					value={totalMessages}
 					label={__('Total Emails', 'doublescale')}
-					iconBgClass="bg-[#E4EEFD]"
-					borderColorClass="border-l-[#458DC7]"
-					iconColor="text-[#458DC7]"
+					iconBgClass="bg-primary/10"
+					iconColor="text-primary"
 				/>
 
 				{isProcessing ? (
@@ -78,9 +77,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.contacts_count - totalMessages}
 							label={__('Scheduled Emails', 'doublescale')}
-							iconBgClass="bg-[#FAF3DF]"
-							borderColorClass="border-l-[#A67D0A]"
-							iconColor="text-[#A67D0A]"
+							iconBgClass="bg-amber-50"
+							iconColor="text-amber-600"
 						/>
 
 						{/* Processing: Processing emails */}
@@ -93,9 +91,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.sent_count}
 							label={__('Processing Emails', 'doublescale')}
-							iconBgClass="bg-[#FAEADF]"
-							borderColorClass="border-l-[#CB5301]"
-							iconColor="text-[#CB5301]"
+							iconBgClass="bg-orange-50"
+							iconColor="text-orange-600"
 						/>
 					</>
 				) : (
@@ -107,8 +104,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.failed_count}
 							label={__('Failed Emails', 'doublescale')}
-							iconBgClass="bg-[#FBE8E8]"
-							borderColorClass="border-l-destructive"
+							iconBgClass="bg-red-50"
 							iconColor="text-destructive"
 						/>
 
@@ -117,9 +113,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							icon={<OpenRateIcon width={40} height={40} />}
 							value={`${campaign.open_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Open Rate', 'doublescale')}
-							iconBgClass="bg-[#E4FAEC]"
-							borderColorClass="border-l-[#16A34A]"
-							iconColor="text-[#16A34A]"
+							iconBgClass="bg-emerald-50"
+							iconColor="text-emerald-600"
 						/>
 
 						{/* Not Processing: Click rate */}
@@ -127,9 +122,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							icon={<ClickRateIcon width={40} height={40} />}
 							value={`${campaign.click_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Click Rate', 'doublescale')}
-							iconBgClass="bg-[#EEE4FF]"
-							borderColorClass="border-l-[#660FF1]"
-							iconColor="text-[#660FF1]"
+							iconBgClass="bg-violet-50"
+							iconColor="text-violet-600"
 						/>
 
 						{/* Not Processing: Click to open rate */}
@@ -142,9 +136,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={`${clickToOpenRate}%`}
 							label={__('Click to Open Rate', 'doublescale')}
-							iconBgClass="bg-[#FAEADF]"
-							borderColorClass="border-l-[#CB5301]"
-							iconColor="text-[#CB5301]"
+							iconBgClass="bg-orange-50"
+							iconColor="text-orange-600"
 						/>
 
 						{/* Not Processing: Unsubscribed */}
@@ -156,9 +149,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								(campaign as any).unsubscribed_count || 0
 							}
 							label={__('Unsubscribed', 'doublescale')}
-							iconBgClass="bg-[#FBE8E8]"
-							borderColorClass="border-l-[#A61919]"
-							iconColor="text-[#A61919]"
+							iconBgClass="bg-red-50"
+							iconColor="text-red-700"
 						/>
 					</>
 				)}
@@ -175,9 +167,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 					icon={<ContactSMSIcon width={40} height={40} />}
 					value={totalMessages}
 					label={__('Total SMS', 'doublescale')}
-					iconBgClass="bg-[#E4EEFD]"
-					borderColorClass="border-l-[#458DC7]"
-					iconColor="text-[#458DC7]"
+					iconBgClass="bg-primary/10"
+					iconColor="text-primary"
 				/>
 
 				{isProcessing ? (
@@ -192,9 +183,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.contacts_count - totalMessages}
 							label={__('Scheduled SMS', 'doublescale')}
-							iconBgClass="bg-[#FAF3DF]"
-							borderColorClass="border-l-[#A67D0A]"
-							iconColor="text-[#A67D0A]"
+							iconBgClass="bg-amber-50"
+							iconColor="text-amber-600"
 						/>
 
 						{/* Processing: Processing SMS */}
@@ -207,9 +197,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.sent_count}
 							label={__('Processing SMS', 'doublescale')}
-							iconBgClass="bg-[#FAEADF]"
-							borderColorClass="border-l-[#CB5301]"
-							iconColor="text-[#CB5301]"
+							iconBgClass="bg-orange-50"
+							iconColor="text-orange-600"
 						/>
 					</>
 				) : (
@@ -221,8 +210,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={campaign.failed_count}
 							label={__('Failed SMS', 'doublescale')}
-							iconBgClass="bg-[#FBE8E8]"
-							borderColorClass="border-l-destructive"
+							iconBgClass="bg-red-50"
 							iconColor="text-destructive"
 						/>
 
@@ -233,9 +221,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							}
 							value={`${campaign.delivery_rate || 0}%`}
 							label={__('Delivery Rate', 'doublescale')}
-							iconBgClass="bg-[#E4FAEC]"
-							borderColorClass="border-l-[#16A34A]"
-							iconColor="text-[#16A34A]"
+							iconBgClass="bg-emerald-50"
+							iconColor="text-emerald-600"
 						/>
 
 						{/* Not Processing: Click rate */}
@@ -243,9 +230,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							icon={<ClickRateIcon width={40} height={40} />}
 							value={`${campaign.click_rate || 0}%`}
 							label={__('Click Rate', 'doublescale')}
-							iconBgClass="bg-[#EEE4FF]"
-							borderColorClass="border-l-[#660FF1]"
-							iconColor="text-[#660FF1]"
+							iconBgClass="bg-violet-50"
+							iconColor="text-violet-600"
 						/>
 
 						{/* Not Processing: Unsubscribed */}
@@ -257,9 +243,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 								(campaign as any).unsubscribed_count || 0
 							}
 							label={__('Unsubscribed', 'doublescale')}
-							iconBgClass="bg-[#FBE8E8]"
-							borderColorClass="border-l-[#A61919]"
-							iconColor="text-[#A61919]"
+							iconBgClass="bg-red-50"
+							iconColor="text-red-700"
 						/>
 					</>
 				)}
@@ -291,9 +276,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// // 				icon={<ContactWhatsAppIcon width={40} height={40} />}
 	// // 				value={totalMessages}
 	// // 				label={__('Total WhatsApp', 'doublescale')}
-	// // 				iconBgClass="bg-[#E4EEFD]"
+	// // 				iconBgClass="bg-primary/10"
 	// 				borderColorClass="border-l-[#458DC7]"
-	// 				iconColor="text-[#458DC7]"
+	// 				iconColor="text-primary"
 	// 			/>
 
 	// 			{isProcessing ? (
@@ -308,9 +293,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						}
 	// 						value={campaign.contacts_count - totalMessages}
 	// 						label={__('Scheduled Messages', 'doublescale')}
-	// 						iconBgClass="bg-[#FAF3DF]"
+	// 						iconBgClass="bg-amber-50"
 	// 						borderColorClass="border-l-[#A67D0A]"
-	// 						iconColor="text-[#A67D0A]"
+	// 						iconColor="text-amber-600"
 	// 					/>
 
 	// 					{/* Processing: Processing WhatsApp */}
@@ -323,9 +308,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						}
 	// 						value={campaign.sent_count}
 	// 						label={__('Processing Messages', 'doublescale')}
-	// 						iconBgClass="bg-[#FAEADF]"
+	// 						iconBgClass="bg-orange-50"
 	// 						borderColorClass="border-l-[#CB5301]"
-	// 						iconColor="text-[#CB5301]"
+	// 						iconColor="text-orange-600"
 	// 					/>
 	// 				</>
 	// 			) : (
@@ -337,7 +322,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						}
 	// 						value={campaign.failed_count}
 	// 						label={__('Failed Messages', 'doublescale')}
-	// 						iconBgClass="bg-[#FBE8E8]"
+	// 						iconBgClass="bg-red-50"
 	// 						borderColorClass="border-l-destructive"
 	// 						iconColor="text-destructive"
 	// 					/>
@@ -349,9 +334,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						}
 	// 						value={`${campaign.delivery_rate || 0}%`}
 	// 						label={__('Delivery Rate', 'doublescale')}
-	// 						iconBgClass="bg-[#E4FAEC]"
+	// 						iconBgClass="bg-emerald-50"
 	// 						borderColorClass="border-l-[#16A34A]"
-	// 						iconColor="text-[#16A34A]"
+	// 						iconColor="text-emerald-600"
 	// 					/>
 
 	// 					{/* Not Processing: Read Rate */}
@@ -359,9 +344,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						icon={<ReadRateIcon width={40} height={40} />}
 	// 						value={`${campaign.read_rate || 0}%`}
 	// 						label={__('Read Rate', 'doublescale')}
-	// 						iconBgClass="bg-[#FAEADF]"
+	// 						iconBgClass="bg-orange-50"
 	// 						borderColorClass="border-l-[#CB5301]"
-	// 						iconColor="text-[#CB5301]"
+	// 						iconColor="text-orange-600"
 	// 					/>
 
 	// 					{/* Not Processing: Click rate */}
@@ -369,9 +354,9 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	// 						icon={<ClickRateIcon width={40} height={40} />}
 	// 						value={`${campaign.click_rate || 0}%`}
 	// 						label={__('Click Rate', 'doublescale')}
-	// 						iconBgClass="bg-[#EEE4FF]"
+	// 						iconBgClass="bg-violet-50"
 	// 						borderColorClass="border-l-[#660FF1]"
-	// 						iconColor="text-[#660FF1]"
+	// 						iconColor="text-violet-600"
 	// 					/>
 	// 				</>
 	// 			)}

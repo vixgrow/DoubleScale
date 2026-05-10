@@ -8,6 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
 import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
@@ -29,9 +30,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import EmailBuilderSelection from './email-builder-selection';
 import { saveTemplate } from '@/builder/api/templates';
-import { campaignSteps } from '../shared/stepsConfig';
+import { campaignSteps, automatedCampaignSteps } from '../shared/stepsConfig';
 import { FromEmailSelector } from '@doublescale/components/from-email-selector';
 
 const templateSchema = z
@@ -63,7 +63,7 @@ const templateSchema = z
 			utm_term: z.string().optional(),
 			utm_content: z.string().optional(),
 		}),
-		body: z.string().optional(), // Body will be filled by builder
+		body: z.any().optional(),
 	})
 	.refine(
 		(data) => {
@@ -87,14 +87,13 @@ const templateSchema = z
 	);
 
 const Templates: React.FC = () => {
-	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
-		useState(false);
 	const [validationErrors, setValidationErrors] = useState<{
 		[key: string]: string;
 	}>({});
 	const [isSaving, setIsSaving] = useState(false);
-	const { campaign, goToStep } = useCampaignStep();
+	const { campaign, goToStep, isNewCampaign } = useCampaignStep();
 	const { updateCampaign } = useDispatch('doublescale/campaign');
+	const navigate = useNavigate();
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -186,18 +185,20 @@ const Templates: React.FC = () => {
 		return true;
 	};
 
-	const handleOpenEmailBuilder = () => {
-		if (!template) {
-			return;
-		}
 
-		// Validate the current template before opening the modal
-		if (!validate(template)) {
-			return;
+	const hasBuilderBody = (() => {
+		const body = template.body;
+		if (!body) return false;
+		try {
+			const parsed = typeof body === 'string' ? JSON.parse(body) : body;
+			return (
+				parsed?.type === 'builder' &&
+				parsed?.value?.sections?.length > 0
+			);
+		} catch {
+			return false;
 		}
-
-		setEmailBuilderSelectionVisible(true);
-	};
+	})();
 
 	const saveTemplateStepAndNavigate = async () => {
 		if (!template || !campaign) {
@@ -211,7 +212,6 @@ const Templates: React.FC = () => {
 			return;
 		}
 
-		// Validate current template
 		if (!validate(template)) {
 			showNotice({
 				type: 'error',
@@ -226,20 +226,24 @@ const Templates: React.FC = () => {
 		setIsSaving(true);
 
 		try {
-			// Prepare template with empty body shell (builder will fill it)
+			const rawBody = template.body;
+			const bodyStr =
+				typeof rawBody === 'string'
+					? rawBody
+					: rawBody
+						? JSON.stringify(rawBody)
+						: '{"type":"rich-text","value":""}';
+
 			const templateData: Partial<EmailTemplate> & {
 				campaign_id?: number;
 			} = {
 				...template,
-				body: template.body || '{"type":"rich-text","value":""}',
-				campaign_id: campaign?.id, // Backend will update campaign's template_ids
+				body: bodyStr,
+				campaign_id: campaign?.id,
 			};
 
-			// saveTemplate decides create vs update based on ID presence
-			// Backend handles updating campaign.settings.template_ids
 			const savedTemplate = await saveTemplate(templateData);
 
-			// Update campaign state with new template ID
 			if (savedTemplate.id && campaign?.settings) {
 				updateCampaign({
 					id: campaign.id,
@@ -250,12 +254,12 @@ const Templates: React.FC = () => {
 				});
 			}
 
-			showNotice({
-				type: 'success',
-				message: __('Template saved successfully', 'doublescale'),
-			});
-
-			goToStep('builder');
+			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
+			if (hasBuilderBody) {
+				navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
+			} else {
+				navigate(getToLink(`campaigns/${campaign.id}/email-templates`), navState);
+			}
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
@@ -282,9 +286,11 @@ const Templates: React.FC = () => {
 						href: 'campaigns',
 					},
 					{
-						label: campaign?.settings.ab_test
-							? __('A/B Test Campaign', 'doublescale')
-							: __('Standard Campaign', 'doublescale'),
+						label: campaign?.settings?.automated
+							? __('Automated Campaign', 'doublescale')
+							: campaign?.settings.ab_test
+								? __('A/B Test Campaign', 'doublescale')
+								: __('Standard Campaign', 'doublescale'),
 					},
 				]}
 				panelbtns={[
@@ -295,11 +301,13 @@ const Templates: React.FC = () => {
 				]}
 				type="campaign"
 			>
-				<Stepper
-					steps={campaignSteps}
-					canProceed="true"
-					currentStep={1}
-				/>
+			<Stepper
+				steps={campaign?.settings?.automated ? automatedCampaignSteps : campaignSteps}
+				canProceed="true"
+				currentStep={campaign?.settings?.automated ? 2 : 1}
+				onStepClick={goToStep}
+				disableNavigation={isNewCampaign}
+			/>
 
 				<div className="flex gap-6">
 					<PanelSettings
@@ -343,19 +351,15 @@ const Templates: React.FC = () => {
 											from_name: e.target.value,
 										});
 									}}
-									style={{
-										borderRadius: '8px',
-									}}
-									className={cn(
-										'h-12 bg-white',
-										validationErrors.from_name &&
-										'!border-red-500 focus-visible:!ring-red-500'
-									)}
+								className={cn(
+									validationErrors.from_name &&
+									'!border-destructive focus-visible:!ring-destructive/20'
+								)}
 								/>
 								{validationErrors.from_name && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.from_name}
-									</p>
+							<p className="text-destructive text-sm mt-1">
+									{validationErrors.from_name}
+								</p>
 								)}
 							</FormField>
 
@@ -380,9 +384,9 @@ const Templates: React.FC = () => {
 									error={validationErrors.from_email}
 								/>
 								{validationErrors.from_email && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.from_email}
-									</p>
+							<p className="text-destructive text-sm mt-1">
+									{validationErrors.from_email}
+								</p>
 								)}
 							</FormField>
 						</div>
@@ -406,19 +410,15 @@ const Templates: React.FC = () => {
 											reply_to: e.target.value,
 										});
 									}}
-									style={{
-										borderRadius: '8px',
-									}}
-									className={cn(
-										'h-12 bg-white',
-										validationErrors.reply_to &&
-										'!border-red-500 focus-visible:!ring-red-500'
-									)}
+								className={cn(
+									validationErrors.reply_to &&
+									'!border-destructive focus-visible:!ring-destructive/20'
+								)}
 								/>
 								{validationErrors.reply_to && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.reply_to}
-									</p>
+							<p className="text-destructive text-sm mt-1">
+									{validationErrors.reply_to}
+								</p>
 								)}
 							</FormField>
 
@@ -436,19 +436,15 @@ const Templates: React.FC = () => {
 											subject: e.target.value,
 										});
 									}}
-									style={{
-										borderRadius: '8px',
-									}}
-									className={cn(
-										'h-12 bg-white',
-										validationErrors.subject &&
-										'!border-red-500 focus-visible:!ring-red-500'
-									)}
+								className={cn(
+									validationErrors.subject &&
+									'!border-destructive focus-visible:!ring-destructive/20'
+								)}
 								/>
 								{validationErrors.subject && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.subject}
-									</p>
+							<p className="text-destructive text-sm mt-1">
+									{validationErrors.subject}
+								</p>
 								)}
 							</FormField>
 						</div>
@@ -469,19 +465,15 @@ const Templates: React.FC = () => {
 										preview_text: e.target.value,
 									});
 								}}
-								style={{
-									borderRadius: '8px',
-								}}
-								className={cn(
-									'bg-white',
-									validationErrors.preview_text &&
-									'!border-red-500 focus-visible:!ring-red-500'
-								)}
+							className={cn(
+								validationErrors.preview_text &&
+								'!border-destructive focus-visible:!ring-destructive/20'
+							)}
 							/>
 							{validationErrors.preview_text && (
-								<p className="text-red-500 text-sm mt-1">
-									{validationErrors.preview_text}
-								</p>
+						<p className="text-destructive text-sm mt-1">
+								{validationErrors.preview_text}
+							</p>
 							)}
 						</FormField>
 
@@ -535,21 +527,17 @@ const Templates: React.FC = () => {
 															e.target.value,
 													});
 												}}
-												style={{
-													borderRadius: '8px',
-												}}
-												className={cn(
-													'h-12 bg-white',
-													validationErrors.utm_source &&
-													'!border-red-500 focus-visible:!ring-red-500'
-												)}
+											className={cn(
+												validationErrors.utm_source &&
+												'!border-destructive focus-visible:!ring-destructive/20'
+											)}
 											/>
 											{validationErrors.utm_source && (
-												<p className="text-red-500 text-sm mt-1">
-													{
-														validationErrors.utm_source
-													}
-												</p>
+											<p className="text-destructive text-sm mt-1">
+												{
+													validationErrors.utm_source
+												}
+											</p>
 											)}
 										</FormField>
 
@@ -573,21 +561,17 @@ const Templates: React.FC = () => {
 															e.target.value,
 													});
 												}}
-												style={{
-													borderRadius: '8px',
-												}}
-												className={cn(
-													'h-12 bg-white',
-													validationErrors.utm_medium &&
-													'!border-red-500 focus-visible:!ring-red-500'
-												)}
+											className={cn(
+												validationErrors.utm_medium &&
+												'!border-destructive focus-visible:!ring-destructive/20'
+											)}
 											/>
 											{validationErrors.utm_medium && (
-												<p className="text-red-500 text-sm mt-1">
-													{
-														validationErrors.utm_medium
-													}
-												</p>
+											<p className="text-destructive text-sm mt-1">
+												{
+													validationErrors.utm_medium
+												}
+											</p>
 											)}
 										</FormField>
 									</div>
@@ -613,19 +597,15 @@ const Templates: React.FC = () => {
 															e.target.value,
 													});
 												}}
-												style={{
-													borderRadius: '8px',
-												}}
-												className={cn(
-													'h-12 bg-white',
-													validationErrors.utm_name &&
-													'!border-red-500 focus-visible:!ring-red-500'
-												)}
+											className={cn(
+												validationErrors.utm_name &&
+												'!border-destructive focus-visible:!ring-destructive/20'
+											)}
 											/>
 											{validationErrors.utm_name && (
-												<p className="text-red-500 text-sm mt-1">
-													{validationErrors.utm_name}
-												</p>
+											<p className="text-destructive text-sm mt-1">
+												{validationErrors.utm_name}
+											</p>
 											)}
 										</FormField>
 
@@ -641,14 +621,10 @@ const Templates: React.FC = () => {
 													template.settings
 														?.utm_term || ''
 												}
-												style={{
-													borderRadius: '8px',
-												}}
-												className={cn(
-													'h-12 bg-white',
-													validationErrors.utm_term &&
-													'!border-red-500 focus-visible:!ring-red-500'
-												)}
+											className={cn(
+												validationErrors.utm_term &&
+												'!border-destructive focus-visible:!ring-destructive/20'
+											)}
 												onChange={(e) =>
 													updateSettings({
 														utm_term:
@@ -671,14 +647,10 @@ const Templates: React.FC = () => {
 												template.settings
 													?.utm_content || ''
 											}
-											style={{
-												borderRadius: '8px',
-											}}
-											className={cn(
-												'h-12 bg-white',
-												validationErrors.utm_content &&
-												'!border-red-500 focus-visible:!ring-red-500'
-											)}
+										className={cn(
+											validationErrors.utm_content &&
+											'!border-destructive focus-visible:!ring-destructive/20'
+										)}
 											onChange={(e) =>
 												updateSettings({
 													utm_content: e.target.value,
@@ -698,11 +670,6 @@ const Templates: React.FC = () => {
 					/>
 				</div>
 			</PanelLayout>
-			<EmailBuilderSelection
-				setVisible={setEmailBuilderSelectionVisible}
-				visible={emailBuilderSelectionVisible}
-				campaign={campaign}
-			/>
 		</div>
 	);
 };

@@ -1,0 +1,333 @@
+{
+  "name": "Thank You For Joining",
+  "type": "email",
+  "body": {
+    "type": "builder",
+    "value": {
+      "sections": [
+        {
+          "id": "section-1",
+          "columns": [
+            {
+              "id": "column-1",
+              "width": 100,
+              "styles": {
+                "padding": "75px 50px 120px 50px"
+              },
+              "blocks": [
+                {
+                  "id": "block-1",
+                  "type": "text",
+                  "props": {
+                    "content": "<h1 style=\"text-align:center; color:#AE2253;\"><strong>Thank You for Joining</strong></h1>",
+                    "hyperlink": "",
+                    "fontSize": 30,
+                    "color": "#AE2253",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.3",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#AE3F71",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "h1",
+                    "padding": { "top": 38, "right": 32, "bottom": 6, "left": 32 }
+                  }
+                },
+                {
+                  "id": "block-2",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/greetings/img11.png",
+                    "alt": "Thank You",
+                    "width": "50%",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 8, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-3",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><strong>Hello {{contact:first_name}}</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#121212",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#2B2B2B",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 10, "right": 0, "bottom": 2, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-4",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center; color:#121212;\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s..</p>",
+                    "hyperlink": "",
+                    "fontSize": 15,
+                    "color": "#121212",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.7",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#2F2F2F",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 6, "right": 32, "bottom": 12, "left": 32 }
+                  }
+                },
+                {
+                  "id": "block-5",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center; color:#121212;\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>",
+                    "hyperlink": "",
+                    "fontSize": 15,
+                    "color": "#121212",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.7",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#2F2F2F",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 6, "right": 32, "bottom": 12, "left": 32 }
+                  }
+                },
+                {
+                  "id": "block-6",
+                  "type": "button",
+                  "props": {
+                    "text": "Let's Get Started",
+                    "url": "#",
+                    "containerPadding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                    "containerBackgroundColor": "transparent",
+                    "align": "center",
+                    "buttonStyle": "primary"
+                  }
+                },
+                {
+                  "id": "block-7",
+                  "type": "divider",
+                  "props": {
+                    "height": "1",
+                    "color": "#DFDFDF",
+                    "backgroundColor": "transparent",
+                    "style": "solid",
+                    "padding": { "top": 24, "right": 32, "bottom": 24, "left": 32 },
+                    "align": "center",
+                    "width": "100",
+                    "borderRadius": "0px",
+                    "opacity": 1
+                  }
+                },
+                {
+                  "id": "block-8",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/greetings/img12.png",
+                    "alt": "Logo",
+                    "width": "auto",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 16, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-9",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><strong>FOLLOW US ON SOCIAL MEDIA</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#121212",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#202020",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 12, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-10",
+                  "type": "social_media",
+                  "props": {
+                    "platforms": {
+                      "instagram": { "enabled": true, "link": "https://instagram.com" },
+                      "tiktok": { "enabled": true, "link": "https://tiktok.com" },
+                      "linkedin": { "enabled": true, "link": "https://linkedin.com" },
+                      "x": { "enabled": true, "link": "https://x.com" },
+                      "youtube": { "enabled": true, "link": "https://youtube.com" },
+                      "facebook": { "enabled": true, "link": "https://facebook.com" },
+                      "threads": { "enabled": false, "link": "" },
+                      "pinterest": { "enabled": false, "link": "" },
+                      "snapchat": { "enabled": false, "link": "" },
+                      "soundcloud": { "enabled": false, "link": "" },
+                      "mail": { "enabled": false, "link": "" },
+                      "website": { "enabled": false, "link": "" },
+                      "vimeo": { "enabled": false, "link": "" },
+                      "medium": { "enabled": false, "link": "" },
+                      "spotify": { "enabled": false, "link": "" },
+                      "discord": { "enabled": false, "link": "" }
+                    },
+                    "iconSize": "medium",
+                    "align": "center",
+                    "shape": "circle",
+                    "colorMode": "colored",
+                    "color": "#1EBDC0",
+                    "padding": { "top": 0, "right": 0, "bottom": 16, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-11",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center; color:#121212;\"><a href=\"#\" style=\"color:#1EBDC0;\"><strong>Edit preferences </strong></a> | <a href=\"{{contact:unsubscribe_link}}\" target=\"_blank\" style=\"color:#1EBDC0;\"><strong>Unsubscribe</strong></a></p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#121212",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#1EBDC0",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 24, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg4.png)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundSize": "100% 100%",
+            "backgroundPosition": "center",
+            "padding": "24px 34px",
+            "hideAddBlockButton": true
+          }
+        }
+      ],
+      "globalSettings": {
+        "canvasColor": "#EFE7F1",
+        "backgroundImage": null,
+        "backgroundRepeat": "no-repeat",
+        "backgroundSize": "cover",
+        "backgroundPosition": "center",
+        "canvasWidth": 700
+      },
+      "buttonSettings": {
+        "primary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 999,
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#1EBDC0",
+          "borderWidth": 1,
+          "borderColor": "#1EBDC0",
+          "padding": { "top": 16, "right": 88, "bottom": 16, "left": 88 },
+          "bold": true,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "secondary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 4,
+          "textColor": "#1e398a",
+          "backgroundColor": "transparent",
+          "borderWidth": 1,
+          "borderColor": "#1e398a",
+          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "tertiary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 0,
+          "textColor": "#1e398a",
+          "backgroundColor": "#ffffff",
+          "borderWidth": 0,
+          "borderColor": "transparent",
+          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        }
+      }
+    }
+  }
+}

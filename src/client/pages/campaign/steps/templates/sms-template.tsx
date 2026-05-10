@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useRef, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
@@ -20,14 +19,14 @@ import {
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { SMSTemplate, NoticeMessage, Campaign } from '@doublescale/client';
-import type { ExtendedCampaign } from '@/stores/campaign/types';
+import type { SMSTemplate, NoticeMessage } from '@doublescale/client';
+import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
-import { getCampaignEndpoint } from '@doublescale/utils';
+import { saveTemplate } from '@/builder/api/templates';
 import SMSDevice from './sms-device';
 
 const SMSTemplateStep: React.FC = () => {
-	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
+	const { campaign, saving, goToStep, updateCampaign, isNewCampaign } = useCampaignStep();
 	const { setMergeTagsVisible, setMergeTagCallback } =
 		useDispatch('doublescale/core');
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -57,17 +56,13 @@ const SMSTemplateStep: React.FC = () => {
 	// Sync template state with campaign data when it changes
 	useEffect(() => {
 		const existingTemplate = campaign?.settings?.templates?.[0];
-		if (
-			existingTemplate &&
-			'type' in existingTemplate &&
-			existingTemplate.type === CAMPAIGN_CHANNEL.SMS
-		) {
-			// Convert backend format to frontend format
-			const backendTemplate = existingTemplate as any;
+		if (existingTemplate) {
+			const t = existingTemplate as any;
 			setTemplate({
-				name: backendTemplate.name || defaultTemplate.name,
+				template_id: t.id || t.template_id,
+				name: t.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.SMS,
-				body: backendTemplate.body || '',
+				body: t.body || '',
 				settings: {},
 			});
 		}
@@ -121,33 +116,31 @@ const SMSTemplateStep: React.FC = () => {
 
 		try {
 			setIsSavingTemplate(true);
-			// Use consistent structure across all campaign types
-			const backendTemplate = {
+
+			const templateData: Record<string, any> = {
 				name: template.name,
-				type: template.type,
+				type: CAMPAIGN_CHANNEL.SMS,
 				body: template.body,
 				settings: {},
+				hidden: 1,
+				campaign_id: campaign.id,
 			};
 
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'doublescale'));
+			if (template.template_id) {
+				templateData.id = template.template_id;
 			}
 
-			const response = await apiFetch({
-				path: `${endpoint}/${campaign.id}`,
-				method: 'PUT',
-				data: {
-					...campaign,
+			const savedTemplate = await saveTemplate(templateData as any);
+
+			if (savedTemplate.id && campaign.settings) {
+				updateCampaign({
+					id: campaign.id,
 					settings: {
 						...campaign.settings,
-						templates: [backendTemplate],
-					},
-				},
-			}) as Campaign;
-
-			// Update campaign store with response data
-			updateCampaign(response as Partial<ExtendedCampaign>);
+						template_ids: [savedTemplate.id],
+					} as ExtendedCampaignSettings,
+				});
+			}
 
 			setNotice(null);
 			goToStep('contacts');
@@ -214,11 +207,13 @@ const SMSTemplateStep: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper
-				steps={campaignSteps.filter((step) => step.slug !== 'builder')}
-				canProceed="true"
-				currentStep={1}
-			/>
+		<Stepper
+			steps={campaignSteps.filter((step) => step.slug !== 'builder')}
+			canProceed="true"
+			currentStep={1}
+			onStepClick={goToStep}
+			disableNavigation={isNewCampaign}
+		/>
 
 			<div className="w-full flex gap-6">
 				<div className="w-2/3">

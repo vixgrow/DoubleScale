@@ -1,0 +1,665 @@
+{
+  "name": "Offers",
+  "type": "email",
+  "body": {
+    "type": "builder",
+    "value": {
+      "sections": [
+        {
+          "id": "section-1",
+          "columns": [
+            {
+              "id": "column-1",
+              "blocks": [
+                {
+                  "id": "block-1",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/announcements/img14.png",
+                    "alt": "Logo",
+                    "width": "auto",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 14, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-2",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><em>Congratulations on</em></p><p style=\"text-align:center;\"><strong>[SPECIAL DEAL] !</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 48,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "Georgia, serif",
+                    "bold": true,
+                    "italic": true,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.5",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 18, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg3.png)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundSize": "100% 100%",
+            "backgroundPosition": "center",
+            "padding": "40px 24px 80px 24px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-2",
+          "columns": [
+            {
+              "id": "column-2",
+              "blocks": [
+                {
+                  "id": "block-3",
+                  "type": "text",
+                  "props": {
+                    "content": "<p>&nbsp;</p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 235, "right": 0, "bottom": 0, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/img13.png)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundSize": "100% 100%",
+            "backgroundPosition": "center",
+            "padding": "24px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-3",
+          "columns": [
+            {
+              "id": "column-3",
+              "blocks": [
+                {
+                  "id": "block-4",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><strong>20% OFF</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 68,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "'Times New Roman', serif",
+                    "bold": true,
+                    "italic": true,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 8, "right": 0, "bottom": 10, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-5",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\">Lorem Ipsum Has Been The Industry's Standard Dummy text ever since the 1500s</p>",
+                    "hyperlink": "",
+                    "fontSize": 16,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.6",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 8, "bottom": 12, "left": 8 }
+                  }
+                },
+                {
+                  "id": "block-6",
+                  "type": "timer",
+                  "props": {
+                    "targetDate": "2099-12-31",
+                    "targetHour": 23,
+                    "targetMinute": 59,
+                    "timezone": "UTC",
+                    "width": "100",
+                    "link": "",
+                    "altText": "Countdown Timer",
+                    "backgroundColor": "#F7F7F71F",
+                    "digitsFontFamily": "'Times New Roman', serif",
+                    "digitsFontSize": 54,
+                    "digitsColor": "#FFFFFF",
+                    "separatorFontFamily": "'Times New Roman', serif",
+                    "separatorFontSize": 54,
+                    "separatorColor": "#FFFFFF",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                    "content": "",
+                    "fontSize": 16,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "borderRadius": "16px"
+                  }
+                },
+                {
+                  "id": "block-7",
+                  "type": "button",
+                  "props": {
+                    "text": "Shop Now",
+                    "url": "#",
+                    "containerPadding": { "top": 16, "right": 0, "bottom": 16, "left": 0 },
+                    "containerBackgroundColor": "transparent",
+                    "align": "center",
+                    "buttonStyle": "secondary"
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg4.png)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundSize": "100% 100%",
+            "backgroundPosition": "center",
+            "padding": "50px 32px 40px 32px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-4",
+          "columns": [
+            {
+              "id": "column-4",
+              "blocks": [
+                {
+                  "id": "block-8",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><strong>Our best selling ones:</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 30,
+                    "color": "#000000",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#121212",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F7F8FA",
+            "padding": "24px 20px 0px 20px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-5",
+          "columns": [
+            {
+              "id": "column-5",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-9",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "column-6",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-10",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "column-7",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-11",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F7F8FA",
+            "padding": "0px 20px 8px 20px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-6",
+          "columns": [
+            {
+              "id": "column-8",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-12",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "column-9",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-13",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "column-10",
+              "width": 33,
+              "blocks": [
+                {
+                  "id": "block-14",
+                  "type": "product",
+                  "props": {
+                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageAlt": "Product Name",
+                    "width": "100%",
+                    "title": "Product Name",
+                    "description": "100% Organic soy wax with a 40+ hour burn time",
+                    "price": "99.99 EGP",
+                    "buttonText": "Shop Now",
+                    "buttonLink": "#",
+                    "buttonStyle": "tertiary",
+                    "padding": { "top": 14, "right": 14, "bottom": 14, "left": 14 },
+                    "imagePadding": { "top": 46, "right": 12, "bottom": 46, "left": 12 },
+                    "borderColor": "#D9D9D9",
+                    "titleColor": "#334155",
+                    "descriptionColor": "#334155",
+                    "priceColor": "#188E5B",
+                    "imageBackgroundColor": "#F4F4F4"
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F7F8FA",
+            "padding": "0px 20px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-7",
+          "columns": [
+            {
+              "id": "column-11",
+              "blocks": [
+                {
+                  "id": "block-15",
+                  "type": "button",
+                  "props": {
+                    "text": "See All Products",
+                    "url": "#",
+                    "containerPadding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                    "containerBackgroundColor": "transparent",
+                    "align": "center",
+                    "buttonStyle": "primary"
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundColor": "#F7F8FA",
+            "padding": "0px 20px 24px 20px",
+            "hideAddBlockButton": true
+          }
+        },
+        {
+          "id": "section-8",
+          "columns": [
+            {
+              "id": "column-12",
+              "blocks": [
+                {
+                  "id": "block-16",
+                  "type": "image",
+                  "props": {
+                    "src": "http://images.doublescale.io/templates-images/announcements/img14.png",
+                    "alt": "Logo",
+                    "width": "auto",
+                    "height": "auto",
+                    "align": "center",
+                    "backgroundColor": "transparent",
+                    "padding": { "top": 4, "right": 0, "bottom": 0, "left": 0 },
+                    "link": "",
+                    "borderRadius": "0",
+                    "shape": "rectangle"
+                  }
+                },
+                {
+                  "id": "block-17",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\"><strong>Follow Us On Social Media</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 20,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": true,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "1.4",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 16, "right": 0, "bottom": 16, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-18",
+                  "type": "social_media",
+                  "props": {
+                    "platforms": {
+                      "instagram": { "enabled": true, "link": "https://instagram.com" },
+                      "tiktok": { "enabled": true, "link": "https://tiktok.com" },
+                      "linkedin": { "enabled": true, "link": "https://linkedin.com" },
+                      "x": { "enabled": true, "link": "https://x.com" },
+                      "youtube": { "enabled": true, "link": "https://youtube.com" },
+                      "facebook": { "enabled": true, "link": "https://facebook.com" },
+                      "threads": { "enabled": false, "link": "" },
+                      "pinterest": { "enabled": false, "link": "" },
+                      "snapchat": { "enabled": false, "link": "" },
+                      "soundcloud": { "enabled": false, "link": "" },
+                      "mail": { "enabled": false, "link": "" },
+                      "website": { "enabled": false, "link": "" },
+                      "vimeo": { "enabled": false, "link": "" },
+                      "medium": { "enabled": false, "link": "" },
+                      "spotify": { "enabled": false, "link": "" },
+                      "discord": { "enabled": false, "link": "" }
+                    },
+                    "iconSize": "medium",
+                    "align": "center",
+                    "shape": "circle",
+                    "colorMode": "colored",
+                    "color": "transparent",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
+                  }
+                },
+                {
+                  "id": "block-19",
+                  "type": "divider",
+                  "props": {
+                    "height": "1",
+                    "color": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "style": "solid",
+                    "padding": { "top": 24, "right": 0, "bottom": 24, "left": 0 },
+                    "align": "center",
+                    "width": "100",
+                    "borderRadius": "0",
+                    "opacity": 1
+                  }
+                },
+                {
+                  "id": "block-20",
+                  "type": "text",
+                  "props": {
+                    "content": "<p style=\"text-align:center;\">Questions or Faq? Contact us at <strong>info@otto.com.pv</strong> or call us on our Toll Free Number <br><strong>1800 4457 5032 3962.</strong></p>",
+                    "hyperlink": "",
+                    "fontSize": 15,
+                    "color": "#FFFFFF",
+                    "align": "center",
+                    "fontFamily": "Arial",
+                    "bold": false,
+                    "italic": false,
+                    "underline": false,
+                    "line-through": false,
+                    "lineHeight": "2",
+                    "letterSpacing": "0px",
+                    "borderRadius": "0px",
+                    "borderWidth": "0px",
+                    "linkColor": "#FFFFFF",
+                    "backgroundColor": "transparent",
+                    "textAlign": "center",
+                    "listType": "none",
+                    "headingStyle": "p",
+                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
+                  }
+                }
+              ]
+            }
+          ],
+          "styles": {
+            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg5.png)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundSize": "100% 100%",
+            "backgroundPosition": "center",
+            "padding": "52px 32px",
+            "hideAddBlockButton": true
+          }
+        }
+      ],
+      "globalSettings": {
+        "canvasColor": "#F7F8FA",
+        "backgroundImage": null,
+        "backgroundRepeat": "no-repeat",
+        "backgroundSize": "cover",
+        "backgroundPosition": "center",
+        "canvasWidth": 700
+      },
+      "buttonSettings": {
+        "primary": {
+          "font": "Arial, sans-serif",
+          "size": 20,
+          "letterSpacing": "0px",
+          "borderRadius": 999,
+          "textColor": "#FFFFFF",
+          "backgroundColor": "#00CA72",
+          "borderWidth": 1,
+          "borderColor": "#00CA72",
+          "padding": { "top": 16, "right": 32, "bottom": 16, "left": 32 },
+          "bold": true,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "secondary": {
+          "font": "Arial, sans-serif",
+          "size": 20,
+          "letterSpacing": "0px",
+          "borderRadius": 999,
+          "textColor": "#1F742A",
+          "backgroundColor": "#FFFFFF",
+          "borderWidth": 1,
+          "borderColor": "#FFFFFF",
+          "padding": { "top": 16, "right": 32, "bottom": 16, "left": 32 },
+          "bold": true,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        },
+        "tertiary": {
+          "font": "Arial, sans-serif",
+          "size": 16,
+          "letterSpacing": "0px",
+          "borderRadius": 999,
+          "textColor": "#00CA72",
+          "backgroundColor": "#FFFFFF",
+          "borderWidth": 1,
+          "borderColor": "#00CA72",
+          "padding": { "top": 12, "right": 16, "bottom": 12, "left": 16 },
+          "bold": true,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false
+        }
+      }
+    }
+  }
+}

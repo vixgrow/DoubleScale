@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import UserManagementAPI, { CRMUser, AddUserRequest } from '../services/user-management';
-import { ManagerRole, ManagerRoleLabels } from '../pages/settings/managers/components/types';
+import { ManagerRole, ManagerRoleLabels } from '../pages/settings/team/components/types';
 
 interface UseUserManagementReturn {
     users: CRMUser[];

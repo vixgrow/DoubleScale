@@ -4,7 +4,7 @@
  */
 
 import apiFetch from '@wordpress/api-fetch';
-import { ManagerRole } from '../pages/settings/managers/components/types';
+import { ManagerRole } from '../pages/settings/team/components/types';
 
 export interface CRMUser {
     id: number;

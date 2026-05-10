@@ -49,9 +49,9 @@ export const getManagerColumns = ({
             header: () => __('Role', 'doublescale'),
             cell: ({ row }) => (
                 <div
-                    className={`text-base py-1 px-2 rounded-md capitalize border w-fit ${row.original.crm_role === 'doublescale_crm_manager'
-                        ? 'bg-secondary/10 text-secondary border-secondary'
-                        : 'bg-[#E6F7EE] text-[#166534] border-[#166534]'
+                    className={`inline-flex items-center text-xs font-medium py-0.5 px-2.5 rounded-full capitalize border w-fit ${row.original.crm_role === 'doublescale_crm_manager' || row.original.crm_role === 'ds_crm_manager'
+                        ? 'bg-primary/10 text-primary border-primary/20'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}
                 >
                     {ManagerRoleLabels[row.original.crm_role]}
@@ -67,7 +67,8 @@ export const getManagerColumns = ({
                         size="sm"
                         onClick={() => onEdit(row.original.id)}
                         disabled={isUpdating}
-                        className="border-none bg-transparent text-[#09090B] p-0 shadow-none hover:bg-transparent"
+                        variant="ghost"
+                        className="p-0 text-muted-foreground hover:text-foreground"
                         title={__('Edit role', 'doublescale')}
                     >
                         <EditHeaderIcon/>

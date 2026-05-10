@@ -16,6 +16,7 @@ import { applyFilters } from '@wordpress/hooks';
  * DoubleScale dependencies
  */
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
+import config from '@doublescale/config';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import {
 	PageTabs,
 	BusinessIcon,
 	ContactTotalEmailsIcon,
-	DoubleOptInIcon,
 	CartIcon,
 	CurrencyIcon,
 	CustomFieldsIcon,
@@ -41,47 +41,54 @@ import {
 	WhatsAppIcon,
 	WebsiteIcon,
 } from '@doublescale/components';
-import { Bell } from 'lucide-react';
+import { Bell, Blocks, Inbox, Smartphone, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
-import DoubleOptInSettings from './double-optin';
-import Managers from './managers';
+import MailboxSettings from './mailbox';
+import Team from './team';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
+import ModulesSettings from './modules';
+import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
+import MobileAppSettings from './mobile-app';
 // import CustomFields from '../custom-fields'; // Moved to Pro
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
-const TABS_WITHOUT_SAVE_BUTTON = new Set([
+const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
 	'link_triggers',
 	'system',
-	'managers',
+	'team',
 	'license',
 	'smtp',
 	'whatsapp',
 	'debugging',
 	'notifications',
-]);
+	'mailbox',
+	'mobile_app',
+	'modules',
+];
+
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
 	'sms',
-	'double_optin',
 	'cart',
 	'currencies',
 	'website_tracking',
+	'ai',
 ]);
 
 // Tabs that Sales Reps and Sales Managers can access (limited settings)
-const SALES_REP_ALLOWED_TABS = new Set(['notifications']);
+const SALES_REP_ALLOWED_TABS = new Set(['notifications', 'mailbox']);
 
 const SettingsPage: React.FC = () => {
 	const navigate = useNavigate();
@@ -94,7 +101,12 @@ const SettingsPage: React.FC = () => {
 	const originalSettingsRef = useWordPressRef<Settings | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
-	
+
+	const TABS_WITHOUT_SAVE_BUTTON = useMemo(
+		() => new Set(applyFilters('doublescale_settings_tabs_without_save', TABS_WITHOUT_SAVE_BUTTON_LIST) as string[]),
+		[]
+	);
+
 	// Memoize the role checks to avoid recalculating on every render
 	// Sales Rep and Sales Manager have limited settings access
 	const hasLimitedSettingsAccess = useMemo(() => isSalesRep() || (isSalesManager() && !isCrmManager()), []);
@@ -255,6 +267,8 @@ const SettingsPage: React.FC = () => {
 					SMTPSettings
 				) as React.ComponentType;
 				return <SMTPComponent />;
+			case 'mailbox':
+				return <MailboxSettings />;
 			case 'sms':
 				const SMSComponent = applyFilters(
 					'doublescale_settings_sms_settings',
@@ -296,14 +310,7 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'double_optin':
-				return (
-					<DoubleOptInSettings
-						settings={settings!}
-						onChange={setSettings}
-					/>
-				);
-			case 'cart':
+		case 'cart':
 				const CartComponent = applyFilters(
 					'doublescale_settings_cart_settings',
 					() => (
@@ -325,8 +332,8 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'managers':
-				return <Managers />;
+			case 'team':
+				return <Team />;
 			case 'system':
 				return <SystemSettings />;
 			case 'currencies':
@@ -337,6 +344,13 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'website_tracking':
+				if (!config.isModuleEnabled('websitetracking')) {
+					return (
+						<ModuleDisabledNotice
+							featureName={__('Website Tracking', 'doublescale')}
+						/>
+					);
+				}
 				const WebsiteTrackingComponent = applyFilters(
 					'doublescale_settings_website_tracking_settings',
 					() => (
@@ -388,22 +402,56 @@ const SettingsPage: React.FC = () => {
 					)
 				) as React.ComponentType;
 				return <LinkTriggersComponent />;
-			case 'notifications':
-				const NotificationsComponent = applyFilters(
-					'doublescale_settings_notifications_settings',
+			case 'ai':
+				const AIComponent = applyFilters(
+					'doublescale_settings_ai_settings',
 					() => (
 						<ProFeatureNotice
-							featureName={__('Notification Preferences', 'doublescale')}
+							featureName={__('AI Email Builder', 'doublescale')}
 							description={__(
-								'Configure how you receive notifications via bell icon and email with DoubleScale Pro.',
+								'Configure AI providers to generate email templates with artificial intelligence using DoubleScale Pro.',
 								'doublescale'
 							)}
 						/>
 					)
-				) as React.ComponentType;
-				return <NotificationsComponent />;
-			default:
-				return null;
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
+				return (
+					<AIComponent
+						settings={settings!}
+						onChange={setSettings}
+					/>
+				);
+	case 'modules':
+			return <ModulesSettings />;
+	case 'mobile_app':
+			return <MobileAppSettings />;
+	case 'notifications':
+			const NotificationsComponent = applyFilters(
+				'doublescale_settings_notifications_settings',
+				() => (
+					<ProFeatureNotice
+						featureName={__('Notification Preferences', 'doublescale')}
+						description={__(
+							'Configure how you receive notifications via bell icon and email with DoubleScale Pro.',
+							'doublescale'
+						)}
+					/>
+				)
+			) as React.ComponentType;
+			return <NotificationsComponent />;
+		default: {
+			const DynamicComponent = applyFilters(
+				`doublescale_settings_${currentTab}_settings`,
+				null
+			) as React.ComponentType | null;
+			if (DynamicComponent) {
+				return <DynamicComponent />;
+			}
+			return null;
+		}
 		}
 	};
 
@@ -424,6 +472,11 @@ const SettingsPage: React.FC = () => {
 			icon: <ProcessingEmailsIcon width={24} height={24} />,
 		},
 		{
+			value: 'mailbox',
+			label: 'Mailbox',
+			icon: <Inbox size={24} />,
+		},
+		{
 			value: 'sms',
 			label: 'SMS',
 			icon: <TotalSMSIcon width={24} height={24} />,
@@ -433,13 +486,8 @@ const SettingsPage: React.FC = () => {
 			label: 'WhatsApp',
 			icon: <WhatsAppIcon width={24} height={24} />,
 		},
-		{
-			value: 'double_optin',
-			label: 'Double Opt-In',
-			icon: <DoubleOptInIcon />,
-		},
-		{
-			value: 'cart',
+	{
+		value: 'cart',
 			label: 'Cart',
 			icon: <CartIcon />,
 		},
@@ -459,13 +507,18 @@ const SettingsPage: React.FC = () => {
 			icon: <LicenseIcon />,
 		},
 		{
+			value: 'modules',
+			label: 'Modules',
+			icon: <Blocks size={24} />,
+		},
+		{
 			value: 'system',
 			label: 'System',
 			icon: <ToolsIcon width={24} height={24} />,
 		},
 		{
-			value: 'managers',
-			label: 'Managers',
+			value: 'team',
+			label: 'Team',
 			icon: <ManagerIcon width={24} height={24} />,
 		},
 		{
@@ -479,16 +532,32 @@ const SettingsPage: React.FC = () => {
 			icon: <LinkTriggersIcon width={24} height={24} />,
 		},
 		{
+			value: 'ai',
+			label: 'AI',
+			icon: <Sparkles size={24} />,
+		},
+		{
+			value: 'mobile_app',
+			label: 'Mobile App',
+			icon: <Smartphone size={24} />,
+		},
+		{
 			value: 'notifications',
 			label: 'Notifications',
 			icon: <Bell size={24} />,
 		},
 	];
 
+	const filteredTabsList = applyFilters('doublescale_settings_tabs_list', allTabsList) as typeof allTabsList;
+
 	// Filter tabs based on user role - Sales Reps and Sales Managers only see allowed tabs
-	const tabsList = hasLimitedSettingsAccess
-		? allTabsList.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value))
-		: allTabsList;
+	const tabsList = useMemo(() => {
+		let tabs = filteredTabsList;
+		if (hasLimitedSettingsAccess) {
+			tabs = tabs.filter((tab) => SALES_REP_ALLOWED_TABS.has(tab.value));
+		}
+		return tabs;
+	}, [filteredTabsList, hasLimitedSettingsAccess]);
 
 	const tabsContent = tabsList.map(({ value }) => {
 		if (activeTab !== value) {
@@ -509,10 +578,10 @@ const SettingsPage: React.FC = () => {
 				<Card
 					className={`flex shadow-none flex-col mt-4 ${
 						value === 'license'
-							? 'bg-[#F8F8F8]'
+							? 'bg-muted/50'
 							: TABS_WITHOUT_SAVE_BUTTON.has(value)
 								? 'bg-white'
-								: 'bg-[#F8F8F8]'
+								: 'bg-muted/50'
 					}`}
 				>
 					<CardContent

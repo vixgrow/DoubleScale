@@ -130,10 +130,10 @@ const Managers: React.FC = () => {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<div className="text-[#09090B] font-semibold text-2xl">
+					<h1 className="text-2xl font-bold text-foreground tracking-tight">
 						{__('CRM Managers', 'doublescale')}
-					</div>
-					<p className="text-sm text-gray-400">
+					</h1>
+					<p className="text-sm text-muted-foreground">
 						{__(
 							'All WordPress Administrators automatically get full access to DoubleScale',
 							'doublescale'

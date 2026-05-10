@@ -218,7 +218,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 					{/* User Selection Section */}
 					<div className="mb-6">
-						<label className="block text-[#09090B] font-normal text-base mb-2">
+						<label className="block text-foreground font-normal text-base mb-2">
 							{__('Select User', 'doublescale')}
 							{!isEditMode && (
 								<span className="text-red-500 ml-1">*</span>
@@ -226,7 +226,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 						</label>
 						{isEditMode ? (
 							<>
-								<div className="h-12 w-full py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] bg-gray-50 text-[#09090B] text-sm flex items-center">
+								<div className="h-12 w-full py-[5px] px-4 rounded-lg border border-border/60 bg-gray-50 text-foreground text-sm flex items-center">
 									{email}
 								</div>
 								<p className="text-xs text-gray-500 mt-1">
@@ -264,7 +264,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 					{/* Roles Section */}
 					<div className="">
-						<div className="text-[#09090B] font-normal text-base">
+						<div className="text-foreground font-normal text-base">
 							{isEditMode
 								? __('Role', 'doublescale')
 								: __('Roles', 'doublescale')}

@@ -8,26 +8,31 @@ import { __ } from '@wordpress/i18n';
  */
 import type { Settings } from '@doublescale/client';
 import { Field, Editor } from '@doublescale/components';
-import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
-import ConfigAPI from '@doublescale/config';
-import { FromEmailSelector } from '@/components/from-email-selector';
+import { RadioGroup, RadioGroupItem } from '@doublescale/components/ui/radio-group';
+import { Label } from '@doublescale/components/ui/label';
 
 interface EmailSettingsProps {
     settings: Settings;
     onChange: (settings: Settings) => void;
 }
 
-const EmailSettings: React.FC<EmailSettingsProps> = ({
+const ProEmailSettings: React.FC<EmailSettingsProps> = ({
     settings,
     onChange,
 }) => {
     const {
-        from_name,
-        from_email,
-        reply_to,
         email_footer,
         max_in_second,
+        max_in_day,
     } = settings.email;
+
+    const {
+        email_subject,
+        email_content,
+        after_confirmation,
+        confirmation_message,
+        confirmation_redirect,
+    } = settings.double_optin;
 
     const handleFieldChange = (key: string, value: string) => {
         onChange({
@@ -39,45 +44,20 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
         });
     };
 
+    const handleOptInChange = (key: string, value: string) => {
+        onChange({
+            ...settings,
+            double_optin: {
+                ...settings.double_optin,
+                [key]: value,
+            },
+        });
+    };
+
     return (
         <div className="email-settings doublescale-fields">
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Email', 'doublescale')}
-            </div>
-            <div className="flex gap-5 items-start mb-3">
-                <div className="flex-1">
-                    <Field
-                        label={__('From Name', 'doublescale')}
-                        value={from_name || ConfigAPI.getBlogName()}
-                        onChange={(value) => handleFieldChange('from_name', value)}
-                        type="text"
-                    />
-                </div>
-                <div className="flex-1">
-                    <div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
-                        {__('From Email', 'doublescale')}
-                    </div>
-                    <div className="doublescale-field-input">
-                        <FromEmailSelector
-                            value={from_email || ConfigAPI.getAdminEmail()}
-                            onChange={(email, name) => {
-                                handleFieldChange('from_email', email);
-                                // Auto-fill from name if provided and current from_name is empty
-                                if (name && !from_name) {
-                                    handleFieldChange('from_name', name);
-                                }
-                            }}
-                        />
-                    </div>
-                </div>
-                <div className="flex-1">
-                    <Field
-                        label={__('Reply To', 'doublescale')}
-                        value={reply_to || ConfigAPI.getBlogName()}
-                        onChange={(value) => handleFieldChange('reply_to', value)}
-                        type="email"
-                    />
-                </div>
             </div>
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full flex flex-col gap-5">
@@ -86,6 +66,15 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         value={max_in_second}
                         onChange={(value) =>
                             handleFieldChange('max_in_second', value)
+                        }
+                        type="number"
+                        min={1}
+                    />
+                    <Field
+                        label={__('Max Emails in Day', 'doublescale')}
+                        value={max_in_day}
+                        onChange={(value) =>
+                            handleFieldChange('max_in_day', value)
                         }
                         type="number"
                         min={1}
@@ -105,9 +94,95 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     </div>
                 </div>
             </div>
-			{/* Note: Bounce Handler section removed - only available in Pro plugin */}
+
+            {/* Double Opt-In */}
+            <div className="text-[#09090B] font-semibold text-2xl mt-8">
+                {__('Double Opt-In', 'doublescale')}
+            </div>
+            <div className="flex gap-5 items-start pb-5 border-b">
+                <div className="w-full">
+                    <Field
+                        label={__('Email Subject', 'doublescale')}
+                        value={email_subject}
+                        onChange={(value) =>
+                            handleOptInChange('email_subject', value)
+                        }
+                        type="text"
+                    />
+                </div>
+                <div className="w-full">
+                    <Label className="text-[#09090B] font-normal text-base">
+                        {__('Email Content', 'doublescale')}
+                    </Label>
+                    <div className="mt-2">
+                        <Editor
+                            message={email_content}
+                            onChange={(content) =>
+                                handleOptInChange('email_content', content)
+                            }
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className="flex gap-5 items-start w-full">
+                <div className="w-full">
+                    <div className="doublescale-field">
+                        <div className="doublescale-field-label text-[#09090B] font-normal text-base">
+                            {__('After Confirmation', 'doublescale')}
+                        </div>
+                        <RadioGroup
+                            value={after_confirmation}
+                            onValueChange={(value) =>
+                                handleOptInChange('after_confirmation', value)
+                            }
+                        >
+                            <div className="flex gap-5">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="message" id="radio-message" />
+                                    <Label htmlFor="radio-message" className="font-normal cursor-pointer">
+                                        {__('Show Message', 'doublescale')}
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="url" id="radio-url" />
+                                    <Label htmlFor="radio-url" className="font-normal cursor-pointer">
+                                        {__('Redirect to URL', 'doublescale')}
+                                    </Label>
+                                </div>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                </div>
+                <div className="w-full">
+                    {after_confirmation === 'message' ? (
+                        <>
+                            <Label className="text-[#09090B] font-normal text-base">
+                                {__('Confirmation Message', 'doublescale')}
+                            </Label>
+                            <div className="mt-2">
+                                <Editor
+                                    message={confirmation_message}
+                                    onChange={(content) =>
+                                        handleOptInChange('confirmation_message', content)
+                                    }
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <Field
+                            label={__('Confirmation Redirect', 'doublescale')}
+                            value={confirmation_redirect}
+                            onChange={(value) =>
+                                handleOptInChange('confirmation_redirect', value)
+                            }
+                            type="text"
+                        />
+                    )}
+                </div>
+            </div>
         </div>
     );
 };
 
-export default EmailSettings;
+export default ProEmailSettings;
+

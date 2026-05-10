@@ -1,0 +1,1516 @@
+/**
+ * Notification Preferences Settings Page
+ *
+ * HubSpot-style layout with two sub-tabs:
+ * - "Email & Desktop": Bell/Email/Browser channels with all categories
+ * - "Mobile app": Push preferences for mobile-relevant categories only
+ *
+ * @since 2.0.0
+ * @package DoubleScale\Pro
+ */
+
+import { useState, useEffect, useMemo } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
+import { useNotificationPreferences } from '@doublescale/hooks/use-notification-preferences';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import ConfigAPI from '@/config';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
+import {
+	Accordion,
+	AccordionItem,
+	AccordionTrigger,
+	AccordionContent,
+} from '@/components/ui/accordion';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+	Loader2,
+	Bell,
+	Mail,
+	Save,
+	Monitor,
+	Smartphone,
+	CheckCircle2,
+	AlertCircle,
+	XCircle,
+	Wifi,
+} from 'lucide-react';
+import {
+	isBrowserNotificationSupported,
+	getBrowserNotificationPermission,
+	requestBrowserNotificationPermission,
+	showTestBrowserNotification,
+	type NotificationPermission,
+} from '@doublescale/utils/browser-notifications';
+import NotificationRetentionSettings from './notification-retention-settings';
+
+interface PushConfig {
+	enabled: boolean;
+	configured: boolean;
+	credentials_available: boolean;
+	project_id: string;
+}
+
+// ──────────────────────────────────────────────────────
+// Shared Save Button
+// ──────────────────────────────────────────────────────
+function SaveButton({
+	hasChanges,
+	isSaving,
+	onSave,
+}: {
+	hasChanges: boolean;
+	isSaving: boolean;
+	onSave: () => void;
+}) {
+	if (!hasChanges) return null;
+	return (
+		<Button onClick={onSave} disabled={isSaving}>
+			{isSaving ? (
+				<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+			) : (
+				<Save className="w-4 h-4 mr-2" />
+			)}
+			{__('Save Changes', 'doublescale')}
+		</Button>
+	);
+}
+
+// ──────────────────────────────────────────────────────
+// "Email & Desktop" sub-tab content
+// ──────────────────────────────────────────────────────
+function EmailDesktopTab({
+	preferences,
+	categories,
+	subcategories,
+	updateChannel,
+	updateSubcategory,
+	hasChanges,
+	isSaving,
+	onSave,
+	canManageRetentionSettings,
+	browserPermission,
+	isRequestingPermission,
+	testNotificationShown,
+	onRequestPermission,
+	onTestNotification,
+}: {
+	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
+	categories: ReturnType<typeof useNotificationPreferences>['categories'];
+	subcategories: ReturnType<typeof useNotificationPreferences>['subcategories'];
+	updateChannel: ReturnType<typeof useNotificationPreferences>['updateChannel'];
+	updateSubcategory: ReturnType<typeof useNotificationPreferences>['updateSubcategory'];
+	hasChanges: boolean;
+	isSaving: boolean;
+	onSave: () => void;
+	canManageRetentionSettings: boolean;
+	browserPermission: NotificationPermission;
+	isRequestingPermission: boolean;
+	testNotificationShown: boolean;
+	onRequestPermission: () => void;
+	onTestNotification: () => void;
+}) {
+	const hasBrowser = isBrowserNotificationSupported();
+	const [openCategory, setOpenCategory] = useState<string>('');
+	const desktopGridCols = hasBrowser
+		? 'grid-cols-[1fr_60px_60px_60px]'
+		: 'grid-cols-[1fr_60px_60px]';
+
+	return (
+		<div className="space-y-6">
+			{/* Channel Toggles — Bell, Email, Browser (no push) */}
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						{__('Notification Channels', 'doublescale')}
+					</CardTitle>
+					<CardDescription>
+						{__(
+							'Control how you receive notifications on desktop.',
+							'doublescale'
+						)}
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					{/* Bell */}
+					<div className="flex items-center justify-between">
+						<div className="flex items-start gap-3">
+							<div className="p-2 bg-blue-50 rounded-lg">
+								<Bell className="w-5 h-5 text-blue-600" />
+							</div>
+							<div>
+								<div className="font-medium">
+									{__('In-app (Bell)', 'doublescale')}
+								</div>
+								<div className="text-sm text-muted-foreground">
+									{__(
+										'Show notifications in the bell icon dropdown.',
+										'doublescale'
+									)}
+								</div>
+							</div>
+						</div>
+						<Switch
+							checked={preferences.channels.bell}
+							onCheckedChange={(checked) =>
+								updateChannel('bell', checked)
+							}
+						/>
+					</div>
+
+					{/* Email */}
+					<div className="flex items-center justify-between">
+						<div className="flex items-start gap-3">
+							<div className="p-2 bg-green-50 rounded-lg">
+								<Mail className="w-5 h-5 text-green-600" />
+							</div>
+							<div>
+								<div className="font-medium">
+									{__('Email', 'doublescale')}
+								</div>
+								<div className="text-sm text-muted-foreground">
+									{__(
+										'Receive notifications via email (max 1,000/day site-wide).',
+										'doublescale'
+									)}
+								</div>
+							</div>
+						</div>
+						<Switch
+							checked={preferences.channels.email}
+							onCheckedChange={(checked) =>
+								updateChannel('email', checked)
+							}
+						/>
+					</div>
+
+					{/* Browser */}
+					{hasBrowser && (
+						<div className="flex items-center justify-between">
+							<div className="flex items-start gap-3">
+								<div className="p-2 bg-purple-50 rounded-lg">
+									<Monitor className="w-5 h-5 text-purple-600" />
+								</div>
+								<div>
+									<div className="font-medium flex items-center gap-2">
+										{__('Browser', 'doublescale')}
+										{browserPermission === 'granted' && (
+											<Badge
+												variant="default"
+												className="bg-green-500 text-xs px-1.5 py-0"
+											>
+												{__(
+													'Permission granted',
+													'doublescale'
+												)}
+											</Badge>
+										)}
+										{browserPermission === 'denied' && (
+											<Badge
+												variant="destructive"
+												className="text-xs px-1.5 py-0"
+											>
+												{__('Blocked', 'doublescale')}
+											</Badge>
+										)}
+										{browserPermission === 'default' && (
+											<Badge
+												variant="secondary"
+												className="text-xs px-1.5 py-0"
+											>
+												{__(
+													'Permission needed',
+													'doublescale'
+												)}
+											</Badge>
+										)}
+									</div>
+									<div className="text-sm text-muted-foreground">
+										{__(
+											'Show desktop notifications when DoubleScale tab is not focused.',
+											'doublescale'
+										)}
+									</div>
+								</div>
+							</div>
+							<Switch
+								checked={preferences.channels.browser}
+								onCheckedChange={(checked) =>
+									updateChannel('browser', checked)
+								}
+								disabled={browserPermission !== 'granted'}
+							/>
+						</div>
+					)}
+				</CardContent>
+			</Card>
+
+			{/* Browser Permission Management */}
+			{hasBrowser && browserPermission !== 'granted' && (
+				<Card>
+					<CardHeader>
+						<CardTitle>
+							{__('Browser Permission', 'doublescale')}
+						</CardTitle>
+						<CardDescription>
+							{__(
+								'Grant browser permission to receive desktop notifications.',
+								'doublescale'
+							)}
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="flex items-start justify-between gap-4">
+							<div className="flex-1">
+								<div className="text-sm text-muted-foreground">
+									{browserPermission === 'denied' &&
+										__(
+											"Browser notifications are blocked. To enable, click your browser's site settings icon in the address bar and allow notifications.",
+											'doublescale'
+										)}
+									{browserPermission === 'default' &&
+										__(
+											"Allow DoubleScale to show you notifications via your operating system's notification center.",
+											'doublescale'
+										)}
+								</div>
+							</div>
+							{browserPermission === 'default' && (
+								<Button
+									onClick={onRequestPermission}
+									disabled={isRequestingPermission}
+									size="sm"
+								>
+									{isRequestingPermission ? (
+										<>
+											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+											{__(
+												'Requesting...',
+												'doublescale'
+											)}
+										</>
+									) : (
+										<>
+											<Bell className="w-4 h-4 mr-2" />
+											{__('Enable', 'doublescale')}
+										</>
+									)}
+								</Button>
+							)}
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Browser Notification Info (granted) */}
+			{hasBrowser && browserPermission === 'granted' && (
+				<Card>
+					<CardHeader>
+						<CardTitle>
+							{__('Browser Notifications', 'doublescale')}
+						</CardTitle>
+						<CardDescription>
+							{__(
+								'Desktop notifications are enabled. Test them or learn how they work.',
+								'doublescale'
+							)}
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div className="text-sm text-muted-foreground">
+								{__(
+									'Send a test notification to verify everything is working.',
+									'doublescale'
+								)}
+							</div>
+							<Button
+								onClick={onTestNotification}
+								variant="outline"
+								size="sm"
+								disabled={testNotificationShown}
+							>
+								{testNotificationShown ? (
+									<>
+										<CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
+										{__('Sent!', 'doublescale')}
+									</>
+								) : (
+									<>
+										<Monitor className="w-4 h-4 mr-2" />
+										{__('Test', 'doublescale')}
+									</>
+								)}
+							</Button>
+						</div>
+
+						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+							<div className="flex gap-3">
+								<AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+								<div className="text-sm text-blue-900">
+									<div className="font-medium mb-1">
+										{__(
+											'How browser notifications work:',
+											'doublescale'
+										)}
+									</div>
+									<ul className="list-disc list-inside space-y-1">
+										<li>
+											{__(
+												'Notifications appear when DoubleScale tab is open but not focused',
+												'doublescale'
+											)}
+										</li>
+										<li>
+											{__(
+												'Click a notification to return to DoubleScale and see details',
+												'doublescale'
+											)}
+										</li>
+										<li>
+											{__(
+												'Notifications auto-dismiss after ~5 seconds',
+												'doublescale'
+											)}
+										</li>
+										<li>
+											{__(
+												'You can disable this anytime in your browser settings',
+												'doublescale'
+											)}
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Per-Category Toggles — Bell / Email / Browser columns (no push) */}
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						{__('What you get notified about', 'doublescale')}
+					</CardTitle>
+					<CardDescription>
+						{__(
+							'Choose which types of notifications you want to receive on desktop.',
+							'doublescale'
+						)}
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{/* Header */}
+					<div
+						className={`grid gap-4 pb-3 border-b mb-4 ${desktopGridCols}`}
+					>
+						<div className="text-sm font-medium text-muted-foreground">
+							{__('Category', 'doublescale')}
+						</div>
+						<div className="text-sm font-medium text-muted-foreground text-center">
+							<Bell className="w-4 h-4 mx-auto" />
+						</div>
+						<div className="text-sm font-medium text-muted-foreground text-center">
+							<Mail className="w-4 h-4 mx-auto" />
+						</div>
+						{hasBrowser && (
+							<div className="text-sm font-medium text-muted-foreground text-center">
+								<Monitor className="w-4 h-4 mx-auto" />
+							</div>
+						)}
+					</div>
+
+					<div className="space-y-4">
+						{Object.entries(categories).map(
+							([key, category]) => {
+								const catSubs = subcategories[key] || {};
+								const subEntries = Object.entries(catSubs);
+								if (subEntries.length === 0) return null;
+
+								if (subEntries.length === 1) {
+									const [subKey] = subEntries[0];
+									const subPrefs =
+										preferences.subcategories[subKey];
+									if (!subPrefs) return null;
+									return (
+										<div
+											key={key}
+											className={`grid ${desktopGridCols} gap-4 items-center`}
+										>
+											<div>
+												<div className="font-medium">
+													{category.label}
+												</div>
+												<div className="text-sm text-muted-foreground">
+													{category.description}
+												</div>
+											</div>
+											<div className="flex justify-center">
+												<Switch
+													checked={subPrefs.bell}
+													onCheckedChange={(c) =>
+														updateSubcategory(
+															subKey,
+															'bell',
+															c
+														)
+													}
+													disabled={
+														!preferences
+															.channels.bell
+													}
+												/>
+											</div>
+											<div className="flex justify-center">
+												<Switch
+													checked={subPrefs.email}
+													onCheckedChange={(c) =>
+														updateSubcategory(
+															subKey,
+															'email',
+															c
+														)
+													}
+													disabled={
+														!preferences
+															.channels.email
+													}
+												/>
+											</div>
+											{hasBrowser && (
+												<div className="flex justify-center">
+													<Switch
+														checked={
+															subPrefs.browser ??
+															true
+														}
+														onCheckedChange={(
+															c
+														) =>
+															updateSubcategory(
+																subKey,
+																'browser',
+																c
+															)
+														}
+														disabled={
+															!preferences
+																.channels
+																.browser ||
+															browserPermission !==
+																'granted'
+														}
+													/>
+												</div>
+											)}
+										</div>
+									);
+								}
+
+								return (
+									<Accordion
+										key={key}
+										type="single"
+										collapsible
+										value={openCategory === key ? key : ''}
+										onValueChange={(val) => setOpenCategory(val)}
+									>
+										<AccordionItem value={key}>
+											<AccordionTrigger className="hover:no-underline">
+												<div className="flex-1 text-left">
+													<div className="font-medium">
+														{category.label}
+													</div>
+													<div className="text-sm text-muted-foreground">
+														{
+															category.description
+														}
+													</div>
+												</div>
+											</AccordionTrigger>
+											<AccordionContent>
+												<div className="space-y-3 pt-2 pl-4">
+													{subEntries.map(
+														([
+															subKey,
+															subInfo,
+														]) => {
+															const subPrefs =
+																preferences
+																	.subcategories[
+																	subKey
+																];
+															if (!subPrefs)
+																return null;
+															return (
+																<div
+																	key={
+																		subKey
+																	}
+																	className={`grid ${desktopGridCols} gap-4 items-center`}
+																>
+																	<div>
+																		<div className="font-medium text-sm">
+																			{
+																				subInfo.label
+																			}
+																		</div>
+																		<div className="text-xs text-muted-foreground">
+																			{
+																				subInfo.description
+																			}
+																		</div>
+																	</div>
+																	<div className="flex justify-center">
+																		<Switch
+																			checked={
+																				subPrefs.bell
+																			}
+																			onCheckedChange={(
+																				c
+																			) =>
+																				updateSubcategory(
+																					subKey,
+																					'bell',
+																					c
+																				)
+																			}
+																			disabled={
+																				!preferences
+																					.channels
+																					.bell
+																			}
+																		/>
+																	</div>
+																	<div className="flex justify-center">
+																		<Switch
+																			checked={
+																				subPrefs.email
+																			}
+																			onCheckedChange={(
+																				c
+																			) =>
+																				updateSubcategory(
+																					subKey,
+																					'email',
+																					c
+																				)
+																			}
+																			disabled={
+																				!preferences
+																					.channels
+																					.email
+																			}
+																		/>
+																	</div>
+																	{hasBrowser && (
+																		<div className="flex justify-center">
+																			<Switch
+																				checked={
+																					subPrefs.browser ??
+																					true
+																				}
+																				onCheckedChange={(
+																					c
+																				) =>
+																					updateSubcategory(
+																						subKey,
+																						'browser',
+																						c
+																					)
+																				}
+																				disabled={
+																					!preferences
+																						.channels
+																						.browser ||
+																					browserPermission !==
+																						'granted'
+																				}
+																			/>
+																		</div>
+																	)}
+																</div>
+															);
+														}
+													)}
+												</div>
+											</AccordionContent>
+										</AccordionItem>
+									</Accordion>
+								);
+							}
+						)}
+					</div>
+				</CardContent>
+			</Card>
+
+			<div className="text-sm text-muted-foreground">
+				{__(
+					'Note: Disabling a global channel will disable all category toggles for that channel.',
+					'doublescale'
+				)}
+			</div>
+
+			{canManageRetentionSettings && <NotificationRetentionSettings />}
+
+			<SaveButton hasChanges={hasChanges} isSaving={isSaving} onSave={onSave} />
+		</div>
+	);
+}
+
+// ──────────────────────────────────────────────────────
+// "Mobile app" sub-tab content
+// ──────────────────────────────────────────────────────
+function MobileAppTab({
+	preferences,
+	categories,
+	subcategories,
+	updateChannel,
+	updateSubcategory,
+	hasChanges,
+	isSaving,
+	onSave,
+	canManagePushSetup,
+	whiteLabel,
+	pushConfig,
+	pushConfigLoading,
+	pushToggling,
+	pushTesting,
+	pushMessage,
+	pushCategories,
+	pushExcludedSubcategories,
+	onPushToggle,
+	onPushTest,
+	pushSending,
+	pushSendMessage,
+	onPushSend,
+}: {
+	preferences: ReturnType<typeof useNotificationPreferences>['preferences'];
+	categories: ReturnType<typeof useNotificationPreferences>['categories'];
+	subcategories: ReturnType<typeof useNotificationPreferences>['subcategories'];
+	updateChannel: ReturnType<typeof useNotificationPreferences>['updateChannel'];
+	updateSubcategory: ReturnType<typeof useNotificationPreferences>['updateSubcategory'];
+	hasChanges: boolean;
+	isSaving: boolean;
+	onSave: () => void;
+	canManagePushSetup: boolean;
+	whiteLabel: ReturnType<typeof ConfigAPI.getWhiteLabel>;
+	pushConfig: PushConfig | null;
+	pushConfigLoading: boolean;
+	pushToggling: boolean;
+	pushTesting: boolean;
+	pushMessage: { type: 'success' | 'error'; text: string } | null;
+	pushCategories: string[];
+	pushExcludedSubcategories: string[];
+	onPushToggle: (checked: boolean) => void;
+	onPushTest: () => void;
+	pushSending: boolean;
+	pushSendMessage: { type: 'success' | 'error'; text: string } | null;
+	onPushSend: () => void;
+}) {
+	const mobileGridCols = 'grid-cols-[1fr_60px]';
+	const pushSiteWideEnabled = pushConfig?.enabled ?? false;
+	const [openCategory, setOpenCategory] = useState<string>('');
+
+	return (
+		<div className="space-y-6">
+			{/* 1. Mobile Push Setup — admin only, first element */}
+			{canManagePushSetup && !whiteLabel?.enabled && (
+				<Card>
+					<CardHeader>
+						<CardTitle>
+							{__('Mobile Push Setup', 'doublescale')}
+						</CardTitle>
+						<CardDescription>
+							{__(
+								'Configure push notifications for the DoubleScale mobile app.',
+								'doublescale'
+							)}
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<Label
+									htmlFor="push-site-toggle"
+									className="text-sm font-medium"
+								>
+									{__(
+										'Enable Push Notifications',
+										'doublescale'
+									)}
+								</Label>
+								<p className="text-xs text-muted-foreground">
+									{__(
+										'When enabled, CRM events will trigger push notifications to mobile devices.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+							<Switch
+								id="push-site-toggle"
+								checked={pushSiteWideEnabled}
+								onCheckedChange={onPushToggle}
+								disabled={
+									pushToggling || pushConfigLoading
+								}
+							/>
+						</div>
+
+						{pushSiteWideEnabled && pushConfig && (
+							<div
+								className={`flex items-center gap-2 rounded-lg border px-4 py-3 ${
+									pushConfig.configured
+										? 'border-green-200 bg-green-50'
+										: pushConfig.credentials_available
+											? 'border-yellow-200 bg-yellow-50'
+											: 'border-red-200 bg-red-50'
+								}`}
+							>
+								{pushConfig.configured ? (
+									<>
+										<CheckCircle2 className="w-[18px] h-[18px] text-green-600 flex-shrink-0" />
+										<span className="text-sm font-medium text-green-800">
+											{__(
+												'Active — Push notifications are ready to be sent to mobile devices.',
+												'doublescale'
+											)}
+										</span>
+									</>
+								) : pushConfig.credentials_available ? (
+									<>
+										<Loader2 className="w-[18px] h-[18px] animate-spin text-yellow-600 flex-shrink-0" />
+										<span className="text-sm font-medium text-yellow-800">
+											{__(
+												'Initializing — push notification credentials are being set up.',
+												'doublescale'
+											)}
+										</span>
+									</>
+								) : (
+									<>
+										<XCircle className="w-[18px] h-[18px] text-red-600 flex-shrink-0" />
+										<span className="text-sm font-medium text-red-800">
+											{__(
+												'Push notification credentials are not yet available. Please update the plugin to the latest version.',
+												'doublescale'
+											)}
+										</span>
+									</>
+								)}
+							</div>
+						)}
+
+						{pushSiteWideEnabled && pushConfig?.configured && (
+							<>
+								<div className="flex items-center justify-between">
+									<div className="text-sm text-muted-foreground">
+										{__(
+											'Verify that your site can communicate with the push notification service.',
+											'doublescale'
+										)}
+									</div>
+									<Button
+										onClick={onPushTest}
+										disabled={pushTesting}
+										variant="outline"
+										size="sm"
+									>
+										{pushTesting ? (
+											<>
+												<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+												{__(
+													'Testing...',
+													'doublescale'
+												)}
+											</>
+										) : (
+											<>
+												<Wifi className="w-4 h-4 mr-2" />
+												{__(
+													'Test Connection',
+													'doublescale'
+												)}
+											</>
+										)}
+									</Button>
+								</div>
+
+								<div className="flex items-center justify-between">
+									<div className="text-sm text-muted-foreground">
+										{__(
+											'Send a test notification to your mobile device to verify delivery.',
+											'doublescale'
+										)}
+									</div>
+									<Button
+										onClick={onPushSend}
+										disabled={pushSending}
+										variant="outline"
+										size="sm"
+									>
+										{pushSending ? (
+											<>
+												<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+												{__(
+													'Sending...',
+													'doublescale'
+												)}
+											</>
+										) : (
+											<>
+												<Smartphone className="w-4 h-4 mr-2" />
+												{__(
+													'Send Test Push',
+													'doublescale'
+												)}
+											</>
+										)}
+									</Button>
+								</div>
+							</>
+						)}
+
+						{pushMessage && (
+							<div
+								className={`flex items-center gap-2 rounded-lg border px-4 py-3 ${
+									pushMessage.type === 'success'
+										? 'border-green-200 bg-green-50 text-green-800'
+										: 'border-red-200 bg-red-50 text-red-800'
+								}`}
+							>
+								{pushMessage.type === 'success' ? (
+									<CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+								) : (
+									<XCircle className="w-4 h-4 flex-shrink-0" />
+								)}
+								<span className="text-sm">
+									{pushMessage.text}
+								</span>
+							</div>
+						)}
+
+						{pushSendMessage && (
+							<div
+								className={`flex items-center gap-2 rounded-lg border px-4 py-3 ${
+									pushSendMessage.type === 'success'
+										? 'border-green-200 bg-green-50 text-green-800'
+										: 'border-red-200 bg-red-50 text-red-800'
+								}`}
+							>
+								{pushSendMessage.type === 'success' ? (
+									<CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+								) : (
+									<XCircle className="w-4 h-4 flex-shrink-0" />
+								)}
+								<span className="text-sm">
+									{pushSendMessage.text}
+								</span>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* 2. Info Note */}
+			<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+				<div className="flex gap-3">
+					<Smartphone className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+					<div className="text-sm text-blue-900">
+						{__(
+							'Push and in-app notifications will be sent to your mobile device if you have the DoubleScale app installed. You can also change your mobile notification settings in the DoubleScale mobile app.',
+							'doublescale'
+						)}
+					</div>
+				</div>
+			</div>
+
+			{/* 2b. Test Push — visible to all users when push is enabled */}
+			{!pushConfigLoading && pushSiteWideEnabled && !canManagePushSetup && (
+				<Card>
+					<CardContent className="pt-6">
+						<div className="flex items-center justify-between">
+							<div className="text-sm text-muted-foreground">
+								{__(
+									'Send a test notification to your mobile device to verify delivery.',
+									'doublescale'
+								)}
+							</div>
+							<Button
+								onClick={onPushSend}
+								disabled={pushSending}
+								variant="outline"
+								size="sm"
+							>
+								{pushSending ? (
+									<>
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+										{__('Sending...', 'doublescale')}
+									</>
+								) : (
+									<>
+										<Smartphone className="w-4 h-4 mr-2" />
+										{__('Send Test Push', 'doublescale')}
+									</>
+								)}
+							</Button>
+						</div>
+						{pushSendMessage && (
+							<div
+								className={`flex items-center gap-2 rounded-lg border px-4 py-3 mt-4 ${
+									pushSendMessage.type === 'success'
+										? 'border-green-200 bg-green-50 text-green-800'
+										: 'border-red-200 bg-red-50 text-red-800'
+								}`}
+							>
+								{pushSendMessage.type === 'success' ? (
+									<CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+								) : (
+									<XCircle className="w-4 h-4 flex-shrink-0" />
+								)}
+								<span className="text-sm">
+									{pushSendMessage.text}
+								</span>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* 3. Site-wide disabled warning */}
+			{!pushConfigLoading && !pushSiteWideEnabled && (
+				<div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+					<div className="flex gap-3">
+						<AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+						<div className="text-sm text-amber-900">
+							{canManagePushSetup
+								? __(
+										'Push notifications are currently disabled. Enable them above to configure per-category settings.',
+										'doublescale'
+									)
+								: __(
+										'Push notifications are not enabled by your administrator. Contact your admin to enable mobile push notifications.',
+										'doublescale'
+									)}
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* 4. Per-category push toggles — mobile-relevant only */}
+			<Card>
+				<CardHeader>
+					<CardTitle>
+						{__('Mobile notifications', 'doublescale')}
+					</CardTitle>
+					<CardDescription>
+						{__(
+							'Choose which notifications you receive on your mobile device.',
+							'doublescale'
+						)}
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{/* Global push channel toggle */}
+					<div className="flex items-center justify-between pb-4 mb-4 border-b">
+						<div className="flex items-start gap-3">
+							<div className="p-2 bg-orange-50 rounded-lg">
+								<Smartphone className="w-5 h-5 text-orange-600" />
+							</div>
+							<div>
+								<div className="font-medium">
+									{__('Mobile Push', 'doublescale')}
+								</div>
+								<div className="text-sm text-muted-foreground">
+									{__('Receive push notifications on your mobile device.', 'doublescale')}
+								</div>
+								{!pushSiteWideEnabled && !pushConfigLoading && (
+									<div className="text-xs text-amber-600 mt-1">
+										{__('Push notifications are not enabled by your administrator.', 'doublescale')}
+									</div>
+								)}
+							</div>
+						</div>
+						<Switch
+							checked={pushSiteWideEnabled && preferences.channels.push}
+							onCheckedChange={(checked) => updateChannel('push', checked)}
+							disabled={!pushSiteWideEnabled}
+						/>
+					</div>
+
+					{/* Header */}
+					<div
+						className={`grid gap-4 pb-3 border-b mb-4 ${mobileGridCols}`}
+					>
+						<div className="text-sm font-medium text-muted-foreground">
+							{__('Category', 'doublescale')}
+						</div>
+						<div className="text-sm font-medium text-muted-foreground text-center">
+							<Smartphone className="w-4 h-4 mx-auto" />
+						</div>
+					</div>
+
+					<div className="space-y-4">
+						{Object.entries(categories)
+							.filter(([key]) =>
+								pushCategories.includes(key)
+							)
+							.map(([key, category]) => {
+								const catSubs = subcategories[key] || {};
+								const subEntries = Object.entries(
+									catSubs
+								).filter(
+									([subKey]) =>
+										!pushExcludedSubcategories.includes(
+											subKey
+										)
+								);
+								if (subEntries.length === 0) return null;
+
+								const pushDisabled =
+									!pushSiteWideEnabled ||
+									!preferences.channels.push;
+
+								if (subEntries.length === 1) {
+									const [subKey] = subEntries[0];
+									const subPrefs =
+										preferences.subcategories[subKey];
+									if (!subPrefs) return null;
+									return (
+										<div
+											key={key}
+											className={`grid ${mobileGridCols} gap-4 items-center`}
+										>
+											<div>
+												<div className="font-medium">
+													{category.label}
+												</div>
+												<div className="text-sm text-muted-foreground">
+													{category.description}
+												</div>
+											</div>
+											<div className="flex justify-center">
+												<Switch
+													checked={
+														pushSiteWideEnabled &&
+														preferences.channels
+															.push &&
+														(subPrefs.push ??
+															true)
+													}
+													onCheckedChange={(c) =>
+														updateSubcategory(
+															subKey,
+															'push',
+															c
+														)
+													}
+													disabled={pushDisabled}
+												/>
+											</div>
+										</div>
+									);
+								}
+
+								return (
+									<Accordion
+										key={key}
+										type="single"
+										collapsible
+										value={openCategory === key ? key : ''}
+										onValueChange={(val) => setOpenCategory(val)}
+									>
+										<AccordionItem value={key}>
+											<AccordionTrigger className="hover:no-underline">
+												<div className="flex-1 text-left">
+													<div className="font-medium">
+														{category.label}
+													</div>
+													<div className="text-sm text-muted-foreground">
+														{
+															category.description
+														}
+													</div>
+												</div>
+											</AccordionTrigger>
+											<AccordionContent>
+												<div className="space-y-3 pt-2 pl-4">
+													{subEntries.map(
+														([
+															subKey,
+															subInfo,
+														]) => {
+															const subPrefs =
+																preferences
+																	.subcategories[
+																	subKey
+																];
+															if (!subPrefs)
+																return null;
+															return (
+																<div
+																	key={
+																		subKey
+																	}
+																	className={`grid ${mobileGridCols} gap-4 items-center`}
+																>
+																	<div>
+																		<div className="font-medium text-sm">
+																			{
+																				subInfo.label
+																			}
+																		</div>
+																		<div className="text-xs text-muted-foreground">
+																			{
+																				subInfo.description
+																			}
+																		</div>
+																	</div>
+																	<div className="flex justify-center">
+																		<Switch
+																			checked={
+																				pushSiteWideEnabled &&
+																				preferences
+																					.channels
+																					.push &&
+																				(subPrefs.push ??
+																					true)
+																			}
+																			onCheckedChange={(
+																				c
+																			) =>
+																				updateSubcategory(
+																					subKey,
+																					'push',
+																					c
+																				)
+																			}
+																			disabled={
+																				pushDisabled
+																			}
+																		/>
+																	</div>
+																</div>
+															);
+														}
+													)}
+												</div>
+											</AccordionContent>
+										</AccordionItem>
+									</Accordion>
+								);
+							})}
+					</div>
+				</CardContent>
+			</Card>
+
+			<SaveButton hasChanges={hasChanges} isSaving={isSaving} onSave={onSave} />
+		</div>
+	);
+}
+
+// ──────────────────────────────────────────────────────
+// Main Component
+// ──────────────────────────────────────────────────────
+export function NotificationPreferences() {
+	const {
+		isLoading,
+		isSaving,
+		error,
+		preferences,
+		categories,
+		subcategories,
+		updateChannel,
+		updateSubcategory,
+		savePreferences,
+		hasChanges,
+	} = useNotificationPreferences();
+
+	const { isSalesRep, isSalesManager, isCrmManager } = useCapabilities();
+
+	const canManageRetentionSettings = !isSalesRep();
+	const hasLimitedAccess = isSalesRep() || (isSalesManager() && !isCrmManager());
+	const canManagePushSetup = !hasLimitedAccess;
+	const whiteLabel = ConfigAPI.getWhiteLabel();
+
+	const [browserPermission, setBrowserPermission] =
+		useState<NotificationPermission>('default');
+	const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+	const [testNotificationShown, setTestNotificationShown] = useState(false);
+
+	const [pushConfig, setPushConfig] = useState<PushConfig | null>(null);
+	const [pushConfigLoading, setPushConfigLoading] = useState(true);
+	const [pushToggling, setPushToggling] = useState(false);
+	const [pushTesting, setPushTesting] = useState(false);
+	const [pushMessage, setPushMessage] = useState<{
+		type: 'success' | 'error';
+		text: string;
+	} | null>(null);
+	const [pushSending, setPushSending] = useState(false);
+	const [pushSendMessage, setPushSendMessage] = useState<{
+		type: 'success' | 'error';
+		text: string;
+	} | null>(null);
+
+	// Derive push-supported and desktop-only category lists from API metadata
+	const { pushCategories, pushExcludedSubcategories } = useMemo(() => {
+		const pushCats: string[] = [];
+		const excludedSubs: string[] = [];
+
+		Object.entries(categories).forEach(([key, cat]) => {
+			if (cat.push_supported) {
+				pushCats.push(key);
+				if (cat.push_excluded_subcategories) {
+					excludedSubs.push(...cat.push_excluded_subcategories);
+				}
+			}
+		});
+
+		return { pushCategories: pushCats, pushExcludedSubcategories: excludedSubs };
+	}, [categories]);
+
+	useEffect(() => {
+		const fetchPushConfig = async () => {
+			try {
+				const data = (await apiFetch({
+					path: '/doublescale/v1/settings/mobile-app',
+				})) as PushConfig;
+				setPushConfig(data);
+			} catch {
+				setPushConfig({
+					enabled: false,
+					configured: false,
+					credentials_available: false,
+					project_id: '',
+				});
+			} finally {
+				setPushConfigLoading(false);
+			}
+		};
+		fetchPushConfig();
+	}, []);
+
+	const handlePushToggle = async (checked: boolean) => {
+		setPushToggling(true);
+		setPushMessage(null);
+		try {
+			const res = (await apiFetch({
+				path: '/doublescale/v1/settings/mobile-app',
+				method: 'POST',
+				data: { enabled: checked },
+			})) as { success: boolean; enabled: boolean };
+			setPushConfig((prev) =>
+				prev ? { ...prev, enabled: res.enabled } : prev
+			);
+			if (res.enabled) {
+				const data = (await apiFetch({
+					path: '/doublescale/v1/settings/mobile-app',
+				})) as PushConfig;
+				setPushConfig(data);
+			}
+		} catch (err: any) {
+			setPushMessage({
+				type: 'error',
+				text: err?.message || __('Failed to update setting.', 'doublescale'),
+			});
+		} finally {
+			setPushToggling(false);
+		}
+	};
+
+	const handlePushTest = async () => {
+		setPushTesting(true);
+		setPushMessage(null);
+		try {
+			const res = (await apiFetch({
+				path: '/doublescale/v1/settings/mobile-app/test',
+				method: 'POST',
+			})) as { success: boolean; message: string };
+			setPushMessage({
+				type: res.success ? 'success' : 'error',
+				text: res.message,
+			});
+		} catch (err: any) {
+			setPushMessage({
+				type: 'error',
+				text:
+					err?.message || __('Connection test failed.', 'doublescale'),
+			});
+		} finally {
+			setPushTesting(false);
+		}
+	};
+
+	const handlePushSend = async () => {
+		setPushSending(true);
+		setPushSendMessage(null);
+		try {
+			const res = (await apiFetch({
+				path: '/doublescale/v1/settings/mobile-app/test-push',
+				method: 'POST',
+			})) as { success: boolean; message: string };
+			setPushSendMessage({
+				type: res.success ? 'success' : 'error',
+				text: res.message,
+			});
+		} catch (err: any) {
+			setPushSendMessage({
+				type: 'error',
+				text: err?.message || __('Failed to send test push.', 'doublescale'),
+			});
+		} finally {
+			setPushSending(false);
+		}
+	};
+
+	useEffect(() => {
+		const checkPermission = () => {
+			if (isBrowserNotificationSupported()) {
+				setBrowserPermission(getBrowserNotificationPermission());
+			}
+		};
+		checkPermission();
+		window.addEventListener('focus', checkPermission);
+		return () => window.removeEventListener('focus', checkPermission);
+	}, []);
+
+	const handleRequestPermission = async () => {
+		setIsRequestingPermission(true);
+		try {
+			const permission = await requestBrowserNotificationPermission();
+			setBrowserPermission(permission);
+			if (permission === 'granted') {
+				setTestNotificationShown(true);
+				showTestBrowserNotification();
+				setTimeout(() => setTestNotificationShown(false), 3000);
+			}
+		} catch (err) {
+			console.error('Failed to request permission:', err);
+		} finally {
+			setIsRequestingPermission(false);
+		}
+	};
+
+	const handleTestNotification = () => {
+		const result = showTestBrowserNotification();
+		if (result) {
+			setTestNotificationShown(true);
+			setTimeout(() => setTestNotificationShown(false), 3000);
+		} else {
+			const currentPermission = getBrowserNotificationPermission();
+			setBrowserPermission(currentPermission);
+		}
+	};
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center p-8">
+				<Loader2 className="w-6 h-6 animate-spin" />
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>
+		);
+	}
+
+	const handleSave = async () => {
+		try {
+			await savePreferences();
+		} catch {
+			// Error handled in hook
+		}
+	};
+
+	return (
+		<div className="space-y-6 max-w-2xl">
+			{/* Header */}
+			<div>
+				<h2 className="text-2xl font-semibold text-foreground">
+					{__('Notification Preferences', 'doublescale')}
+				</h2>
+				<p className="text-sm text-muted-foreground mt-1">
+					{__(
+						'Choose how and when you want to receive notifications.',
+						'doublescale'
+					)}
+				</p>
+			</div>
+
+			{/* Sub-tabs */}
+			<Tabs defaultValue="email-desktop">
+				<TabsList>
+					<TabsTrigger value="email-desktop">
+						<Monitor className="w-4 h-4 mr-2" />
+						{__('Email & Desktop', 'doublescale')}
+					</TabsTrigger>
+					<TabsTrigger value="mobile-app">
+						<Smartphone className="w-4 h-4 mr-2" />
+						{__('Mobile app', 'doublescale')}
+					</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="email-desktop" className="mt-6">
+					<EmailDesktopTab
+						preferences={preferences}
+						categories={categories}
+						subcategories={subcategories}
+						updateChannel={updateChannel}
+						updateSubcategory={updateSubcategory}
+						hasChanges={hasChanges}
+						isSaving={isSaving}
+						onSave={handleSave}
+						canManageRetentionSettings={canManageRetentionSettings}
+						browserPermission={browserPermission}
+						isRequestingPermission={isRequestingPermission}
+						testNotificationShown={testNotificationShown}
+						onRequestPermission={handleRequestPermission}
+						onTestNotification={handleTestNotification}
+					/>
+				</TabsContent>
+
+				<TabsContent value="mobile-app" className="mt-6">
+					<MobileAppTab
+						preferences={preferences}
+						categories={categories}
+						subcategories={subcategories}
+						updateChannel={updateChannel}
+						updateSubcategory={updateSubcategory}
+						hasChanges={hasChanges}
+						isSaving={isSaving}
+						onSave={handleSave}
+						canManagePushSetup={canManagePushSetup}
+						whiteLabel={whiteLabel}
+						pushConfig={pushConfig}
+						pushConfigLoading={pushConfigLoading}
+						pushToggling={pushToggling}
+						pushTesting={pushTesting}
+						pushMessage={pushMessage}
+						pushCategories={pushCategories}
+						pushExcludedSubcategories={pushExcludedSubcategories}
+						onPushToggle={handlePushToggle}
+						onPushTest={handlePushTest}
+						pushSending={pushSending}
+						pushSendMessage={pushSendMessage}
+						onPushSend={handlePushSend}
+					/>
+				</TabsContent>
+			</Tabs>
+		</div>
+	);
+}
+
+export default NotificationPreferences;

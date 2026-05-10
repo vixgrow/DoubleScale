@@ -768,14 +768,18 @@ export const isModuleEnabled =
 	};
 
 /**
- * True only when the slug exists in {@link ConfigData.modules} and is enabled.
- * Used for route registration and strict gating (unknown slugs are treated as off).
+ * Whether the slug appears in {@link ConfigData.modules} and is enabled.
+ * When the slug is missing from the payload (older caches, partial merges), defaults to **true**
+ * so routes and UI match {@see doublescale_is_module_enabled()} (unknown slugs stay on).
  */
 export const isModuleToggleEnabled =
 	(data: ConfigData) =>
 	(slug: string): boolean => {
 		const mod = data.modules.find((m) => m.slug === slug);
-		return Boolean(mod && mod.enabled);
+		if (!mod) {
+			return true;
+		}
+		return Boolean(mod.enabled);
 	};
 
 /**

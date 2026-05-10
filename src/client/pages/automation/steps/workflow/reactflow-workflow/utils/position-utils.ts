@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { AutomationStep } from "@doublescale/client";
-import { SPACING_CONSTANTS, LAYOUT_CONSTANTS } from "@doublescale/config";
+import { SPACING_CONSTANTS, LAYOUT_CONSTANTS } from '../config';
 import { PositionCalculationParams } from "../types";
 import { getContextSteps } from "./step-utils";
 

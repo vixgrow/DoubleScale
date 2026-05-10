@@ -37,7 +37,30 @@ import {
 	AutomationAnalyticsIcon,
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
-import { moduleFetch } from '@doublescale/services/module-fetch';
+import Config from '@doublescale/config';
+import {
+	moduleFetch,
+	getModuleFetchBlockedNotice,
+	getProRequiredForAnalyticsNotice,
+} from '@doublescale/services/module-fetch';
+
+/** Ensures `steps` is always an array (PHP may serialize keyed arrays as objects). */
+function normalizeAutomationPayload(raw: AutomationType): AutomationType | null {
+	if (!raw || typeof raw !== 'object') {
+		return null;
+	}
+	if (raw.id == null) {
+		return null;
+	}
+	let stepsUnknown = raw.steps as unknown;
+	if (!Array.isArray(stepsUnknown)) {
+		stepsUnknown =
+			stepsUnknown && typeof stepsUnknown === 'object'
+				? Object.values(stepsUnknown as Record<string, unknown>)
+				: [];
+	}
+	return { ...raw, steps: stepsUnknown as AutomationType['steps'] };
+}
 
 const Automation: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -77,20 +100,29 @@ const Automation: React.FC = () => {
 			if (!response) {
 				createNotice({
 					type: 'error',
-					message: __('The Automations module is disabled.', 'doublescale'),
+					message: getModuleFetchBlockedNotice('automations'),
 				});
 				return undefined;
 			}
 
-			setAutomation(response);
-			setSteps(response.steps);
+			const normalized = normalizeAutomationPayload(response);
+			if (!normalized) {
+				createNotice({
+					type: 'error',
+					message: __('Invalid automation response from the server.', 'doublescale'),
+				});
+				return undefined;
+			}
+
+			setAutomation(normalized);
+			setSteps(Array.isArray(normalized.steps) ? normalized.steps : []);
 
 			// Fetch analytics data once when automation loads
 			if (!skipLoading) {
-				fetchAnalyticsData(response.id);
+				fetchAnalyticsData(normalized.id);
 			}
 
-			return response;
+			return normalized;
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -117,6 +149,13 @@ const Automation: React.FC = () => {
 			})) as any | null;
 
 			if (!response) {
+				const proOff = !Config.getProPluginData()?.is_active;
+				createNotice({
+					type: proOff ? 'info' : 'error',
+					message: proOff
+						? getProRequiredForAnalyticsNotice()
+						: getModuleFetchBlockedNotice('analytics'),
+				});
 				setAnalyticsData([]);
 				return;
 			}
@@ -131,8 +170,11 @@ const Automation: React.FC = () => {
 				}));
 				setAnalyticsData(analytics);
 			}
-		} catch (error: any) {
-			console.error('Failed to fetch analytics data:', error);
+		} catch (error: unknown) {
+			const err = error as { code?: string };
+			if (err?.code !== 'rest_no_route') {
+				console.error('Failed to fetch analytics data:', error);
+			}
 			setAnalyticsData([]);
 		} finally {
 			setAnalyticsLoading(false);
@@ -154,13 +196,24 @@ const Automation: React.FC = () => {
 			if (!response) {
 				createNotice({
 					type: 'error',
-					message: __('The Automations module is disabled.', 'doublescale'),
+					message: getModuleFetchBlockedNotice('automations'),
 				});
 				return;
 			}
 
-			setAutomation(response);
-			setSteps(response.steps);
+			const normalizedSave = normalizeAutomationPayload(response);
+			if (!normalizedSave) {
+				createNotice({
+					type: 'error',
+					message: __('Invalid automation response from the server.', 'doublescale'),
+				});
+				return;
+			}
+
+			setAutomation(normalizedSave);
+			setSteps(
+				Array.isArray(normalizedSave.steps) ? normalizedSave.steps : []
+			);
 			createNotice({
 				type: 'success',
 				message: __('Automation saved successfully.', 'doublescale'),

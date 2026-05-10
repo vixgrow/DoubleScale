@@ -1,6 +1,6 @@
 import { AutomationStep } from "../../../../../../types";
 import { Edge } from "@xyflow/react";
-import { SPACING_CONSTANTS, LAYOUT_CONSTANTS } from "@doublescale/config";
+import { SPACING_CONSTANTS, LAYOUT_CONSTANTS } from '../config';
 import { PositionCalculationParams } from "../types";
 
 /**

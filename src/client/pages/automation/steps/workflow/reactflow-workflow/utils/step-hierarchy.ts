@@ -18,7 +18,7 @@ import type {
 } from '@doublescale/client';
 import { createMergeNodeData } from './merge-utils';
 import { calculateBranchWidth } from './helper';
-import { LAYOUT_CONSTANTS_VIEW_MODE } from '@doublescale/config';
+import { LAYOUT_CONSTANTS_VIEW_MODE } from '../config';
 
 const processStepHierarchy = (
 	stepList: AutomationStep[],

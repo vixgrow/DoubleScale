@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Card, CardContent } from '@/components/ui/card';
 import './style.scss';
 import { Automation } from '@doublescale/client';
-import { moduleFetch } from '@doublescale/services/module-fetch';
+import {
+	moduleFetch,
+	getModuleFetchBlockedNotice,
+	getProRequiredForAnalyticsNotice,
+} from '@doublescale/services/module-fetch';
+import Config from '@doublescale/config';
 // @ts-ignore
 import D3Funnel from 'd3-funnel';
 
@@ -57,7 +61,11 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			if (!response) {
 				setFunnelData([]);
 				setLoading(false);
-				setError(__('The Analytics module is disabled.', 'doublescale'));
+				setError(
+					!Config.getProPluginData()?.is_active
+						? getProRequiredForAnalyticsNotice()
+						: getModuleFetchBlockedNotice('analytics')
+				);
 				return;
 			}
 
@@ -68,12 +76,17 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			}
 			setLoading(false);
 			setError(null);
-		} catch (error: any) {
-			console.error('Failed to fetch funnel data:', error);
+		} catch (error: unknown) {
+			const err = error as { code?: string; message?: string };
+			if (err?.code !== 'rest_no_route') {
+				console.error('Failed to fetch funnel data:', error);
+			}
 			setFunnelData([]);
 			setLoading(false);
 			setError(
-				error.message || __('Failed to fetch funnel data', 'doublescale')
+				err?.code === 'rest_no_route'
+					? __('Analytics reporting is unavailable on this site.', 'doublescale')
+					: err.message || __('Failed to fetch funnel data', 'doublescale')
 			);
 		}
 	}, [automation?.id]);

@@ -43,6 +43,7 @@ import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
 import { UserDashboardShimmer } from './UserDashboardShimmer';
 import { useContactAnalytics } from '../use-analytics';
+import config from '@doublescale/config';
 // import { applyFilters } from '@wordpress/hooks'; // Uncomment when cart analytics is enabled
 
 interface UserDashboardProps {
@@ -50,6 +51,10 @@ interface UserDashboardProps {
 }
 
 const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
+	const contactsOn = config.isModuleToggleEnabled('contacts');
+	const automationsOn = config.isModuleToggleEnabled('automations');
+	const campaignsOn = config.isModuleToggleEnabled('campaigns');
+
 	// Use separate hooks for contact and cart analytics with their own state
 	const {
 		data: contactsData,
@@ -63,38 +68,43 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 		refetch: refetchContacts,
 	} = useContactAnalytics();
 
-	if (!contactsData) {
+	if (contactsOn && !contactsData) {
 		return <UserDashboardShimmer />;
 	}
 
 	return (
 		<div className="flex flex-col gap-5 mt-5">
 			<DashboardCards data={dashboardData} />
-			<div className="flex gap-5">
-				<RecentContactsList contacts={dashboardData.recent_contacts} />
-				<ContactAnalyticsChart
-					data={contactsData}
-					loading={contactsLoading}
-					interval={contactsInterval}
-					startDate={contactsStartDate}
-					endDate={contactsEndDate}
-					onIntervalChange={setContactsInterval}
-					onChangeFromDate={setContactsStartDate}
-					onChangeToDate={setContactsEndDate}
-					onSubmit={refetchContacts}
-				/>
-			</div>
+			{contactsOn && contactsData && (
+				<div className="flex gap-5">
+					<RecentContactsList contacts={dashboardData.recent_contacts} />
+					<ContactAnalyticsChart
+						data={contactsData}
+						loading={contactsLoading}
+						interval={contactsInterval}
+						startDate={contactsStartDate}
+						endDate={contactsEndDate}
+						onIntervalChange={setContactsInterval}
+						onChangeFromDate={setContactsStartDate}
+						onChangeToDate={setContactsEndDate}
+						onSubmit={refetchContacts}
+					/>
+				</div>
+			)}
 
 			<div className="flex gap-5">
-				<RecentAutomationsTable
-					automations={dashboardData.top_automations}
-				/>
-				<QuickLinks />
+				{automationsOn && (
+					<RecentAutomationsTable
+						automations={dashboardData.top_automations}
+					/>
+				)}
+				<QuickLinks stretch={!automationsOn} />
 			</div>
 
-			<div className="flex gap-5">
-				<RecentCampaignsTable campaigns={dashboardData.top_campaigns} />
-				{/* <CartsChart
+			{campaignsOn && (
+				<div className="flex gap-5">
+					<RecentCampaignsTable campaigns={dashboardData.top_campaigns} />
+					{/* <CartsChart
 					data={cartsData}
 					interval={cartsInterval}
 					startDate={cartsStartDate}
@@ -104,7 +114,8 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 					onChangeToDate={setCartsEndDate}
 					onSubmit={refetchCarts}
 				/> */}
-			</div>
+				</div>
+			)}
 		</div>
 	);
 };

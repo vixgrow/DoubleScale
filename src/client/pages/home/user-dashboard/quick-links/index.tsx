@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { ArrowRight, UserPlus, Mail, Upload, Workflow } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 /**
  * internal dependencies
@@ -13,18 +13,30 @@ import { useNavigate } from 'react-router-dom';
 import { AddDealsIcon, CreateFormsIcon, DashboardContentCard, GradientAddContactIcon, GradientAutomationsIcon, GradientCampaignsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { getToLink } from '@doublescale/navigation';
+import config from '@doublescale/config';
 
-export const QuickLinks: React.FC = () => {
+interface QuickLinksProps {
+	/** When the adjacent automations panel is hidden, span full row width. */
+	stretch?: boolean;
+}
+
+export const QuickLinks: React.FC<QuickLinksProps> = ({ stretch }) => {
 	const navigate = useNavigate();
+	const dealsOn = config.isModuleToggleEnabled('deals');
+	const campaignsOn = config.isModuleToggleEnabled('campaigns');
+	const automationsOn = config.isModuleToggleEnabled('automations');
+	const formsOn = config.isModuleToggleEnabled('forms');
+	const contactsOn = config.isModuleToggleEnabled('contacts');
 
 	return (
 		<DashboardContentCard
 			title={__('Quick Links', 'doublescale')}
-			cardClassName="w-2/5"
+			cardClassName={stretch ? 'w-full' : 'w-2/5'}
 			headerContent={__('(Most Used Functions)', 'doublescale')}
 		>
 			<div className='border-t'></div>
 			<div>
+				{contactsOn && (
 				<Button
 					variant="ghost"
 					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
@@ -42,7 +54,9 @@ export const QuickLinks: React.FC = () => {
 						<ArrowRight className="size-12 text-primary" />
 					</div>
 				</Button>
+				)}
 
+				{dealsOn && (
 				<Button
 					variant="ghost"
 					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
@@ -60,7 +74,9 @@ export const QuickLinks: React.FC = () => {
 						<ArrowRight className="size-12 text-primary" />
 					</div>
 				</Button>
+				)}
 
+				{campaignsOn && (
 				<Button
 					variant="ghost"
 					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
@@ -78,7 +94,9 @@ export const QuickLinks: React.FC = () => {
 						<ArrowRight className="size-12 text-primary" />
 					</div>
 				</Button>
+				)}
 
+				{automationsOn && (
 				<Button
 					variant="ghost"
 					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
@@ -96,7 +114,9 @@ export const QuickLinks: React.FC = () => {
 						<ArrowRight className="size-12 text-primary" />
 					</div>
 				</Button>
+				)}
 
+				{formsOn && (
 				<Button
 					variant="ghost"
 					className="w-full justify-start h-auto py-4 px-0 rounded-none hover:bg-transparent"
@@ -114,6 +134,7 @@ export const QuickLinks: React.FC = () => {
 						<ArrowRight className="size-12 text-primary" />
 					</div>
 				</Button>
+				)}
 			</div>
 		</DashboardContentCard>
 	);

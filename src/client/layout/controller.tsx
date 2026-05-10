@@ -69,6 +69,7 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
 import Campaigns_EmailSequences from '../pages/campaigns';
+import SequencesMail from '../pages/email-sequences/sequences-mail';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
@@ -333,13 +334,12 @@ registerAdminPage('email-sequences', {
 
 registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Email Sequence', 'doublescale')}
-			description={__(
-				'View and manage email sequences with DoubleScale Pro.',
-				'doublescale'
-			)}
+	component: (props) => (
+		<SequencesMail
+			{...(props as {
+				navigate: (path: string) => void;
+				params: Record<string, string>;
+			})}
 		/>
 	),
 	label: __('Email Sequence', 'doublescale'),

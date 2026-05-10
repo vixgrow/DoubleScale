@@ -126,6 +126,7 @@ const configData: ConfigData = {
 			is_active: false,
 		},
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
+	aiConfigured: Boolean(serverData.aiConfigured),
 };
 
 /**
@@ -881,6 +882,7 @@ export interface ConfigApi {
 	isModuleToggleEnabled: (slug: string) => boolean;
 	getModules: () => ModuleInfo[];
 	setModules: (value: ModuleInfo[]) => void;
+	isAiConfigured: () => boolean;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -951,6 +953,7 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setModules = setModules(data);
 	configApi.isModuleEnabled = isModuleEnabled(data);
 	configApi.isModuleToggleEnabled = isModuleToggleEnabled(data);
+	configApi.isAiConfigured = () => Boolean(data.aiConfigured);
 	return configApi;
 };
 

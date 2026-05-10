@@ -34,6 +34,8 @@ export type ConfigData = Record<string, unknown> & {
 	currency: string;
 	urlDoubleScalePro: string;
 	modules: ModuleInfo[];
+	/** Whether AI credentials are configured (OpenAI etc.). */
+	aiConfigured: boolean;
 };
 
 export type ModuleInfo = {

@@ -1,6 +1,7 @@
 <?php
 /**
- * Module / feature gate helpers (free DoubleScale).
+ * Module / feature gate helpers (DoubleScale free — canonical definitions).
+ * Pro extends via {@see 'doublescale_module_slug_to_class_map'} and related filters.
  *
  * @package DoubleScale
  */
@@ -8,43 +9,49 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Discovered Module class map (free modules). Pro merges via filter.
+ *
  * @return array<string, class-string<\DoubleScale\Core\ModuleInterface>>
  */
 function doublescale_module_slug_to_class_map(): array {
-	static $map = null;
-
-	if ( null !== $map ) {
-		return $map;
+	if ( isset( $GLOBALS['doublescale_module_slug_to_class_map_cache'] ) && is_array( $GLOBALS['doublescale_module_slug_to_class_map_cache'] ) ) {
+		return $GLOBALS['doublescale_module_slug_to_class_map_cache'];
 	}
 
-	$map = array();
+	$base = array();
 
-	if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
-		return $map;
-	}
-
-	$root = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/';
-	foreach ( (array) glob( $root . '*', GLOB_ONLYDIR ) as $dir ) {
-		$basename = basename( $dir );
-		$class    = 'DoubleScale\\Modules\\' . $basename . '\\Module';
-		if ( ! class_exists( $class ) ) {
-			continue;
+	if ( defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
+		$root = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/';
+		foreach ( (array) glob( $root . '*', GLOB_ONLYDIR ) as $dir ) {
+			$basename = basename( $dir );
+			$class    = 'DoubleScale\\Modules\\' . $basename . '\\Module';
+			if ( ! class_exists( $class ) ) {
+				continue;
+			}
+			$module = new $class();
+			if ( ! $module instanceof \DoubleScale\Core\ModuleInterface ) {
+				continue;
+			}
+			$base[ $module->slug() ] = $class;
 		}
-		$module = new $class();
-		if ( ! $module instanceof \DoubleScale\Core\ModuleInterface ) {
-			continue;
-		}
-		$map[ $module->slug() ] = $class;
 	}
 
-	return $map;
+	$GLOBALS['doublescale_module_slug_to_class_map_cache'] = apply_filters( 'doublescale_module_slug_to_class_map', $base );
+
+	return $GLOBALS['doublescale_module_slug_to_class_map_cache'];
 }
 
 /**
+ * Whether a discovered module is enabled ({@see ModuleInterface::is_enabled()}).
+ * Unknown slugs return true so third-party groups are not stripped by mistake.
+ *
  * @param string $slug Module slug.
  */
 function doublescale_is_module_enabled( string $slug ): bool {
-	static $cache = array();
+	if ( ! isset( $GLOBALS['doublescale_module_enabled_cache'] ) || ! is_array( $GLOBALS['doublescale_module_enabled_cache'] ) ) {
+		$GLOBALS['doublescale_module_enabled_cache'] = array();
+	}
+	$cache = &$GLOBALS['doublescale_module_enabled_cache'];
 
 	if ( array_key_exists( $slug, $cache ) ) {
 		return $cache[ $slug ];
@@ -58,6 +65,18 @@ function doublescale_is_module_enabled( string $slug ): bool {
 	$module = new $classes[ $slug ]();
 
 	return $cache[ $slug ] = $module->is_enabled();
+}
+
+if ( ! function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
+	/**
+	 * Clears the request-level cache used by {@see doublescale_is_module_enabled()}.
+	 */
+	function doublescale_flush_module_enabled_cache(): void {
+		if ( isset( $GLOBALS['doublescale_module_enabled_cache'] ) ) {
+			$GLOBALS['doublescale_module_enabled_cache'] = array();
+		}
+		unset( $GLOBALS['doublescale_module_slug_to_class_map_cache'] );
+	}
 }
 
 /**
@@ -101,7 +120,7 @@ function doublescale_filter_contact_filters_groups_for_modules( array $groups ):
 		}
 	}
 
-	return $groups;
+	return apply_filters( 'doublescale_contact_filters_groups_for_modules', $groups );
 }
 
 /**
@@ -121,7 +140,7 @@ function doublescale_filter_automation_rules_groups_for_modules( array $groups )
 		}
 	}
 
-	return $groups;
+	return apply_filters( 'doublescale_automation_rules_groups_for_modules', $groups );
 }
 
 /**
@@ -136,5 +155,7 @@ function doublescale_filter_merge_tag_groups_for_modules( array $groups ): array
 		}
 	}
 
-	return apply_filters( 'doublescale_merge_tag_groups_module_filtered', $groups );
+	$groups = apply_filters( 'doublescale_merge_tag_groups_module_filtered', $groups );
+
+	return $groups;
 }

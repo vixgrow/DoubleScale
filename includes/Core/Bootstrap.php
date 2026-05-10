@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 final class Bootstrap {
 
 	public static function init(): PluginKernel {
+		ModuleManager::register_hooks();
 		return PluginKernel::instance();
 	}
 }

@@ -18,7 +18,7 @@
  *     'callback'    => array( AdminLoader::class, 'page_wrapper' ),
  *     'position'    => 20,
  *     'group'            => 'contacts', // dashboard|contacts|sales|marketing|automations|settings
- *     'requires_module'  => 'campaigns', // optional: Pro module slug; row hidden unless Pro is active and module is enabled
+ *     'requires_module'  => 'campaigns', // optional: module slug; row hidden unless module is registered and enabled
  *   )
  *
  * @package DoubleScale
@@ -171,7 +171,7 @@ class MenuRegistry {
 		 */
 		$entries = apply_filters( 'ds_admin_menu', $entries );
 
-		$entries = self::filter_entries_by_pro_modules( $entries );
+		$entries = self::filter_entries_by_registered_modules( $entries );
 
 		usort(
 			$entries,
@@ -190,12 +190,15 @@ class MenuRegistry {
 	}
 
 	/**
-	 * Drops rows tied to a Pro module when Pro is inactive or that module is disabled.
+	 * Drops rows when {@see requires_module} is set and that slug is not installed or is disabled.
+	 *
+	 * Uses the canonical merged module map from the free plugin ({@see doublescale_module_slug_to_class_map})
+	 * and {@see doublescale_is_module_enabled()} so free-only installs (e.g. Campaigns in core) work without Pro.
 	 *
 	 * @param array<int, array<string, mixed>> $entries
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function filter_entries_by_pro_modules( array $entries ): array {
+	private static function filter_entries_by_registered_modules( array $entries ): array {
 		return array_values(
 			array_filter(
 				$entries,
@@ -204,11 +207,15 @@ class MenuRegistry {
 					if ( '' === $module_slug ) {
 						return true;
 					}
-					if ( ! class_exists( \DoubleScale\Pro\Core\PluginKernel::class, true ) ) {
+					if ( ! function_exists( 'doublescale_module_slug_to_class_map' ) || ! function_exists( 'doublescale_is_module_enabled' ) ) {
+						return true;
+					}
+					$classes = doublescale_module_slug_to_class_map();
+					if ( ! isset( $classes[ $module_slug ] ) ) {
 						return false;
 					}
-					$module = \DoubleScale\Pro\Core\PluginKernel::instance()->get_module_registry()->get( $module_slug );
-					return $module && $module->is_enabled();
+
+					return doublescale_is_module_enabled( $module_slug );
 				}
 			)
 		);

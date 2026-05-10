@@ -104,6 +104,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 const FREE_CORE_PAGE_IDS = new Set([
 	'dashboard',
 	'contacts',
+	'campaigns',
 	'automations',
 	'settings',
 ]);

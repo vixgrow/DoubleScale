@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import React from 'react';
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface AnalyticsPopupProps {
 	visible: boolean;
@@ -385,7 +386,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 		</>
 	);
 
-	return (
+	const popupContent = (
 		<div className="doublescale-analytics-popup">
 			<div className="doublescale-analytics-popup__overlay" onClick={onClose} />
 			<div
@@ -413,6 +414,12 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 			</div>
 		</div>
 	);
+
+	if (typeof document === 'undefined') {
+		return popupContent;
+	}
+
+	return createPortal(popupContent, document.body);
 };
 
 export default AnalyticsPopup;

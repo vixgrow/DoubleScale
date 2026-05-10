@@ -80,6 +80,12 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 				'doublescale'
 			);
 		}
+		if (groupLabel === 'Paid Memberships Pro') {
+			return __(
+				'Paid Memberships Pro plugin is not installed or activated. Install Paid Memberships Pro to use these goals.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'Order' || groupLabel === 'SureCart') {
 			return __(
 				'SureCart plugin is not installed or activated. Install SureCart to use these goals.',

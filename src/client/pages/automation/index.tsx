@@ -29,10 +29,10 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ChevronRight } from 'lucide-react';
+import { getTriggerLabel } from '@doublescale/utils';
 import {
-	UndoIcon,
-	RedoIcon,
 	WorkflowIcon,
 	AutomationContactsIcon,
 	AutomationAnalyticsIcon,
@@ -140,8 +140,16 @@ const Automation: React.FC = () => {
 
 			setAutomation(response);
 			setSteps(response.steps);
+			createNotice({
+				type: 'success',
+				message: __('Automation saved successfully.', 'doublescale'),
+			});
 		} catch (error) {
 			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save automation.', 'doublescale'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -151,6 +159,38 @@ const Automation: React.FC = () => {
 		'workflow' | 'contacts' | 'reports'
 	>('workflow');
 	const [open, setOpen] = useState(true);
+	const [editingAutomationName, setEditingAutomationName] =
+		useState(false);
+	const [automationNameDraft, setAutomationNameDraft] =
+		useState('');
+
+	useEffect(() => {
+		if (automation && !editingAutomationName) {
+			setAutomationNameDraft(automation.name);
+		}
+	}, [automation?.id, automation?.name, editingAutomationName]);
+
+	const commitAutomationName = async () => {
+		if (!automation) {
+			return;
+		}
+		const trimmed = automationNameDraft.trim();
+		if (!trimmed) {
+			setAutomationNameDraft(automation.name);
+			setEditingAutomationName(false);
+			createNotice({
+				type: 'error',
+				message: __('Automation name is required', 'doublescale'),
+			});
+			return;
+		}
+		if (trimmed === automation.name) {
+			setEditingAutomationName(false);
+			return;
+		}
+		await saveAutomation({ name: trimmed });
+		setEditingAutomationName(false);
+	};
 
 	const renderContent = () => {
 		switch (activeTab) {
@@ -215,7 +255,7 @@ const Automation: React.FC = () => {
 				}}
 			>
 				<DialogContent
-					className="z-[150000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
+					className="w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
 					style={{
 						paddingTop: '10px',
 						paddingLeft: '0px',
@@ -256,6 +296,18 @@ const Automation: React.FC = () => {
 				>
 					{loading ? (
 						<AutomationShimmer />
+					) : !automation ? (
+						<div className="flex flex-col items-center justify-center h-full gap-4">
+							<p className="text-lg text-[#667085]">
+								{__('Automation not found or failed to load.', 'doublescale')}
+							</p>
+							<Button
+								variant="outline"
+								onClick={() => navigate(getToLink('automations'))}
+							>
+								{__('Back to Automations', 'doublescale')}
+							</Button>
+						</div>
 					) : (
 						<>
 							<DialogHeader className="border-b border-[#E4E7EC] pr-14 pl-5 pb-4">
@@ -282,9 +334,9 @@ const Automation: React.FC = () => {
 										</div> */}
 
 										{/* Left section - Title */}
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-2 min-w-0 flex-wrap">
 											<span
-												className="text-base text-normal text-[#667085] cursor-pointer hover:text-[#1E3A8A] transition-colors"
+												className="text-base text-normal text-[#667085] cursor-pointer hover:text-[#1E3A8A] transition-colors shrink-0"
 												onClick={() =>
 													navigate(
 														getToLink('automations')
@@ -292,14 +344,77 @@ const Automation: React.FC = () => {
 												}
 											>
 												{__(
-													'Create Automation',
+													'Automations',
 													'doublescale'
 												)}
 											</span>
-											<ChevronRight className="h-4 w-4" />
-											<span className="capitalize text-normal text-[#374151]">
+											<ChevronRight className="h-4 w-4 shrink-0" />
+											{editingAutomationName ? (
+												<Input
+													className="h-8 max-w-md text-base text-[#374151]"
+													value={automationNameDraft}
+													onChange={(e) =>
+														setAutomationNameDraft(
+															e.target.value
+														)
+													}
+													onBlur={() => {
+														void commitAutomationName();
+													}}
+													onKeyDown={(e) => {
+														if (e.key === 'Enter') {
+															(
+																e.target as HTMLInputElement
+															).blur();
+														}
+														if (e.key === 'Escape') {
+															setAutomationNameDraft(
+																automation?.name ||
+																	''
+															);
+															setEditingAutomationName(
+																false
+															);
+														}
+													}}
+													autoFocus
+													disabled={isSaving}
+													aria-label={__(
+														'Automation name',
+														'doublescale'
+													)}
+												/>
+											) : (
+												<button
+													type="button"
+													className="text-left text-base font-medium text-[#374151] hover:text-[#1E3A8A] transition-colors truncate max-w-md min-w-0"
+													onClick={() => {
+														setAutomationNameDraft(
+															automation?.name ||
+																''
+														);
+														setEditingAutomationName(
+															true
+														);
+													}}
+													title={__(
+														'Click to rename',
+														'doublescale'
+													)}
+												>
+													{automation?.name ||
+														__(
+															'Untitled automation',
+															'doublescale'
+														)}
+												</button>
+											)}
+											<ChevronRight className="h-4 w-4 shrink-0" />
+											<span className="text-normal text-[#667085] truncate max-w-[12rem] sm:max-w-xs">
 												{activeTab === 'workflow'
-													? automation?.trigger
+													? getTriggerLabel(
+															automation
+														)
 													: activeTab}
 											</span>
 										</div>

@@ -21,6 +21,7 @@ import AutomationFunnel from './automation-funnels';
 const AutomationReports: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const [automation, setAutomation] = useState<Automation | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
 	const { createNotice } = useDispatch('doublescale/core');
 
 	useEffect(() => {
@@ -30,6 +31,7 @@ const AutomationReports: React.FC = () => {
 	}, [id]);
 
 	const fetchAutomation = async () => {
+		setLoading(true);
 		try {
 			const response = (await apiFetch({
 				path: `/doublescale/v1/automations/${id}`,
@@ -43,12 +45,14 @@ const AutomationReports: React.FC = () => {
 					error.message ||
 					__('Failed to fetch automation', 'doublescale'),
 			});
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	return (
 		<div className="doublescale-automation-reports">
-			<AutomationFunnel automation={automation} />
+			<AutomationFunnel automation={automation} loading={loading} />
 		</div>
 	);
 };

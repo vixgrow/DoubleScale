@@ -54,8 +54,8 @@ const ContactsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationContactsResponse;
 
-			setTotalRecords(response.total);
-			setContacts(response.data);
+			setTotalRecords(response.total ?? 0);
+			setContacts(response.data ?? []);
 		} catch (error: any) {
 			createNotice({
 				type: 'error',

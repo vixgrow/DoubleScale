@@ -1,7 +1,6 @@
 .doublescale-workflow-sidebar {
 	transform: translateX(100%);
 	transition: transform 0.3s ease-in-out;
-	background-color: #fff;
 
 	&.is-visible {
 		transform: translateX(0);

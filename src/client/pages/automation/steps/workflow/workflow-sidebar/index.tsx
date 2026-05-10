@@ -346,7 +346,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			<SidebarLayoutProvider>
 				<div
 					className={cn(
-						'doublescale-workflow-sidebar absolute top-0 right-0 bottom-0 w-96 rounded-l-lg z-[150400] flex flex-col min-h-0',
+						'doublescale-workflow-sidebar absolute top-0 right-0 bottom-0 z-[150400] flex min-h-0 w-[min(100%,26rem)] max-w-[26rem] flex-col rounded-l-2xl border-l border-border/50 bg-card/95 shadow-[-16px_0_48px_-20px_rgba(15,23,42,0.18)] backdrop-blur-md',
 						isVisible ? 'is-visible' : ''
 					)}
 				>
@@ -355,7 +355,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						onClose={handleClose}
 					/>
 
-					<div className="flex-1 min-h-0 overflow-y-auto space-y-4 p-4">
+					<div className="flex-1 min-h-0 space-y-4 overflow-y-auto px-5 py-4">
 						{notice && (
 							<NoticeBanner
 								notice={notice}

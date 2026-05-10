@@ -46,28 +46,46 @@ export function getColumns({ onViewJourney }) {
             ),
             cell: ({ row }) => {
                 const contact = row.original.contact;
+
+                if (!contact) {
+                    return (
+                        <div className="flex items-center gap-2.5">
+                            <Avatar className="w-9 h-9 rounded-full">
+                                <AvatarFallback className="rounded-full bg-muted/50 text-muted-foreground font-semibold text-xs">
+                                    ?
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <div className="text-sm text-muted-foreground italic">
+                                    {__('Deleted Contact', 'doublescale')}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
                 const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
                 const initials = getContactInitials(contact.first_name, contact.last_name);
                 const avatarUrl = (contact as any).avatar_url;
 
                 return (
                     <NavLink to={`contacts/${contact.id}`}>
-                        <div className="flex items-center gap-3">
-                            <Avatar className="w-12 h-12 rounded-lg">
+                        <div className="flex items-center gap-2.5">
+                            <Avatar className="w-9 h-9 rounded-full">
                                 {avatarUrl ? (
-                                    <AvatarImage src={avatarUrl} alt={fullName || contact.email} className="rounded-lg" />
+                                    <AvatarImage src={avatarUrl} alt={fullName || contact.email} className="rounded-full" />
                                 ) : null}
-                                <AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+                                <AvatarFallback className="rounded-full bg-primary/10 text-primary font-semibold text-xs">
                                     {initials}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
                                 {fullName && (
-                                    <div className="font-semibold capitalize text-base w-40 truncate text-[#09090B]">
+                                    <div className="font-medium capitalize text-sm max-w-[180px] truncate text-foreground leading-tight">
                                         {fullName}
                                     </div>
                                 )}
-                                <div className="text-base text-gray-500">
+                                <div className="text-xs text-muted-foreground">
                                     {contact.email}
                                 </div>
                             </div>
@@ -126,13 +144,13 @@ export function getColumns({ onViewJourney }) {
             cell: ({ row }) => {
                 const status = row.getValue('status') as string;
                 const bgColor = status === 'completed'
-                    ? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : status === 'failed'
-                        ? 'bg-[#EF444429] text-destructive border-destructive'
-                        : 'bg-gray-100 text-gray-700';
+                        ? 'bg-destructive/5 text-destructive border-destructive/20'
+                        : 'bg-muted/50 text-muted-foreground border-border';
 
                 return (
-                    <span className={`capitalize border rounded py-1 px-3 text-sm w-fit ${bgColor}`}>
+                    <span className={`inline-flex items-center text-xs font-medium capitalize border rounded-full py-0.5 px-2.5 w-fit ${bgColor}`}>
                         {status}
                     </span>
                 );

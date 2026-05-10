@@ -26,11 +26,13 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogOverlay,
-	AlertDialogPortal,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import {
+	automationAlertDialogContentClassName,
+	automationModalOverlayClassName,
+} from '../../automation-dialog-presets';
 import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
@@ -85,106 +87,108 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	};
 
 	return (
-		<div
-			className="doublescale-reactflow-node__dropdown"
-			onClick={(e) => {
-				e.stopPropagation();
-				e.preventDefault();
-			}}
-			onMouseDown={(e) => {
-				e.stopPropagation();
-			}}
-			onMouseUp={(e) => {
-				e.stopPropagation();
-			}}
-		>
-			<DropdownMenu>
-				<DropdownMenuTrigger
-					asChild
-					onClick={(e) => e.stopPropagation()}
-				>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="doublescale-reactflow-node__dropdown-btn h-8 w-8"
+		<>
+			<div
+				className="doublescale-reactflow-node__dropdown"
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+				}}
+				onMouseDown={(e) => {
+					e.stopPropagation();
+				}}
+				onMouseUp={(e) => {
+					e.stopPropagation();
+				}}
+			>
+				<DropdownMenu>
+					<DropdownMenuTrigger
+						asChild
+						onClick={(e) => e.stopPropagation()}
 					>
-						<MoreVertical className="h-4 w-4" />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent
-					align="end"
-					className="z-[150000]"
-					removePortal={true}
-					onClick={(e) => e.stopPropagation()}
+						<Button
+							variant="ghost"
+							size="icon"
+							className="doublescale-reactflow-node__dropdown-btn h-8 w-8"
+						>
+							<MoreVertical className="h-4 w-4" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						align="end"
+						className="z-[150000]"
+						removePortal={true}
+						onClick={(e) => e.stopPropagation()}
+					>
+						{showEdit && onEdit && (
+							<DropdownMenuItem
+								onClick={onEdit}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<EditHeaderIcon />
+								<span>{editLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showChangeTrigger && onChangeTrigger && (
+							<DropdownMenuItem
+								onClick={onChangeTrigger}
+								className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
+							>
+								<EditHeaderIcon />
+								<span>{changeTriggerLabel}</span>
+							</DropdownMenuItem>
+						)}
+						{showDelete && onDelete && (
+							<DropdownMenuItem
+								className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
+								onSelect={(e) => {
+									e.preventDefault();
+									setIsDialogOpen(true);
+								}}
+							>
+								<DeleteIcon />
+								<span>{deleteLabel}</span>
+							</DropdownMenuItem>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
+
+			{showDelete && onDelete && (
+				<AlertDialog
+					open={isDialogOpen}
+					onOpenChange={setIsDialogOpen}
 				>
-					{showEdit && onEdit && (
-						<DropdownMenuItem
-							onClick={onEdit}
-							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
-						>
-							<EditHeaderIcon />
-							<span>{editLabel}</span>
-						</DropdownMenuItem>
-					)}
-					{showChangeTrigger && onChangeTrigger && (
-						<DropdownMenuItem
-							onClick={onChangeTrigger}
-							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
-						>
-							<EditHeaderIcon />
-							<span>{changeTriggerLabel}</span>
-						</DropdownMenuItem>
-					)}
-					{showDelete && onDelete && (
-						<AlertDialog
-							open={isDialogOpen}
-							onOpenChange={setIsDialogOpen}
-						>
-							<AlertDialogTrigger asChild>
-								<DropdownMenuItem
-									className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
-									onSelect={(e) => e.preventDefault()}
-								>
-									<DeleteIcon />
-									<span>{deleteLabel}</span>
-								</DropdownMenuItem>
-							</AlertDialogTrigger>
-							<AlertDialogPortal>
-								<AlertDialogOverlay className="z-[150000]" />
-								<AlertDialogContent className="z-[150000]">
-									<AlertDialogHeader>
-										<AlertDialogTitle>
-											{deleteTitle}
-										</AlertDialogTitle>
-										<AlertDialogDescription>
-											{deleteDescription}
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogFooter>
-										<AlertDialogCancel
-											disabled={isDeleting}
-										>
-											{__('Cancel', 'doublescale')}
-										</AlertDialogCancel>
-										<AlertDialogAction
-											onClick={(e) => {
-												e.preventDefault();
-												handleDelete();
-											}}
-											disabled={isDeleting}
-										>
-											{isDeleting
-												? __('Deleting...', 'doublescale')
-												: __('Delete', 'doublescale')}
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialogPortal>
-						</AlertDialog>
-					)}
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</div>
+					<AlertDialogContent
+						overlayClassName={automationModalOverlayClassName}
+						className={cn(automationAlertDialogContentClassName)}
+					>
+						<AlertDialogHeader>
+							<AlertDialogTitle>{deleteTitle}</AlertDialogTitle>
+							<AlertDialogDescription>
+								{deleteDescription}
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel disabled={isDeleting}>
+								{__('Cancel', 'doublescale')}
+							</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={(e) => {
+									e.preventDefault();
+									handleDelete();
+								}}
+								disabled={isDeleting}
+							>
+								{isDeleting
+									? __('Deleting...', 'doublescale')
+									: __('Delete', 'doublescale')}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			)}
+		</>
 	);
 };
 

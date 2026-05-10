@@ -58,6 +58,9 @@ const AutomationsList: React.FC = () => {
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
 		number | null
 	>(null);
+	const [renamingAutomationId, setRenamingAutomationId] = useState<
+		number | null
+	>(null);
 	const [createError, setCreateError] = useState<NoticeMessage | null>(null);
 	const [listError, setListError] = useState<NoticeMessage | null>(null);
 	const navigate = useNavigate();
@@ -85,8 +88,8 @@ const AutomationsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationsResponse;
 
-			setData(response.data);
-			setTotalRecords(response.total);
+			setData(response.data ?? []);
+			setTotalRecords(response.total ?? 0);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			setListError({
@@ -173,6 +176,58 @@ const AutomationsList: React.FC = () => {
 		return true;
 	};
 
+	const handleRenameAutomation = async (
+		automation: Automation,
+		name: string
+	) => {
+		const trimmed = name.trim();
+		if (!trimmed) {
+			setListError({
+				type: 'error',
+				message: __('Automation name is required', 'doublescale'),
+			});
+			return;
+		}
+		if (trimmed === automation.name) {
+			return;
+		}
+		setRenamingAutomationId(automation.id);
+		try {
+			await apiFetch({
+				path: `/doublescale/v1/automations/${automation.id}`,
+				method: 'PUT',
+				data: {
+					name: trimmed,
+					status: automation.status,
+				},
+			});
+
+			setData((prev) =>
+				prev.map((item) =>
+					item.id === automation.id
+						? { ...item, name: trimmed }
+						: item
+				)
+			);
+
+			setListError({
+				type: 'success',
+				message: __(
+					'Automation updated successfully',
+					'doublescale'
+				),
+			});
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+			throw error;
+		} finally {
+			setRenamingAutomationId(null);
+		}
+	};
+
 	const handleStatusChange = async (
 		automation: Automation,
 		newStatus: string
@@ -248,6 +303,8 @@ const AutomationsList: React.FC = () => {
 	const columns = getAutomationColumns({
 		onStatusChange: handleStatusChange,
 		updatingAutomationId,
+		renamingAutomationId,
+		onRenameAutomation: handleRenameAutomation,
 		navigate,
 		onDelete: deleteAutomation,
 	});

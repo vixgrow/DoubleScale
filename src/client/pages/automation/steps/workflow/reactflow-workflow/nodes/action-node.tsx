@@ -62,8 +62,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Use custom analytics hook
 	const {
 		analyticsData,
-		isVisible: showAnalytics,
+		isVisible: isAnalyticsVisible,
 		fetchAnalytics,
+		showAnalytics: openAnalyticsPopup,
 		hideAnalytics,
 	} = useStepAnalytics();
 
@@ -130,19 +131,34 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
-	const handleViewAnalytics = async (e: React.MouseEvent) => {
-		e.stopPropagation();
-		await fetchAnalytics(step.id);
+	const openAnalytics = async () => {
+		openAnalyticsPopup();
+		await fetchAnalytics(Number(step.id));
 	};
 
 	// Custom footer for analytics
 	const customFooter =
-		!viewMode && hasAnalytics && isConfigured ? (
-			<div className="doublescale-reactflow-node__footer-row">
+		viewMode && hasAnalytics && isConfigured ? (
+			<div className="flex justify-center items-center pb-3">
 				<button
-					className="doublescale-reactflow-node__analytics-link text-primary"
-					onClick={handleViewAnalytics}
+					className="doublescale-reactflow-node__analytics-link doublescale-reactflow-node__analytics-link--interactive text-primary nodrag nopan"
+					onClickCapture={(e) => {
+						e.stopPropagation();
+						e.preventDefault();
+					}}
+					onPointerDown={(e) => {
+						e.stopPropagation();
+						e.preventDefault();
+					}}
+					onPointerUp={async (e) => {
+						e.stopPropagation();
+						e.preventDefault();
+						await openAnalytics();
+					}}
+					onMouseDown={(e) => e.stopPropagation()}
+					onMouseUp={(e) => e.stopPropagation()}
 					title={__('View Analytics', 'doublescale')}
+					type="button"
 				>
 					<ViewIcon width={16} height={16} />
 					<span>{__('View Analytics', 'doublescale')}</span>
@@ -158,7 +174,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				disabled={viewMode}
 			>
 				<div
-					className={`doublescale-reactflow-node doublescale-reactflow-node--action ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--action ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && ((hasAnalytics && isConfigured) || analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<Handle
 						type="target"
@@ -196,12 +212,17 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			</NodeContextMenu>
 
 			{/* Analytics Popup */}
-			{isConfigured && hasAnalytics && analyticsData && !hasWarning && (
+			{isConfigured && hasAnalytics && isAnalyticsVisible && !hasWarning && (
 				<AnalyticsPopup
-					visible={showAnalytics}
+					visible={isAnalyticsVisible}
 					onClose={hideAnalytics}
 					actionType={getChannelType(step.action || '')}
-					analytics={analyticsData}
+					analytics={
+						analyticsData || {
+							sent: analytics?.contacts || 0,
+							clickRate: analytics?.conversion_rate || 0,
+						}
+					}
 				/>
 			)}
 		</>

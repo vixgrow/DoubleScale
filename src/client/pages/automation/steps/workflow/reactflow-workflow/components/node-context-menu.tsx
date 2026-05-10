@@ -26,9 +26,13 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogOverlay,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import {
+	automationAlertDialogContentClassName,
+	automationModalOverlayClassName,
+} from '../../automation-dialog-presets';
 import { DeleteIcon } from '@doublescale/components';
 import EditHeaderIcon from '@/components/icons/edit-header';
 
@@ -80,8 +84,10 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 				open={showDeleteAlert}
 				onOpenChange={setShowDeleteAlert}
 			>
-				<AlertDialogOverlay className="z-[150000]" />
-				<AlertDialogContent className="z-[150000]">
+				<AlertDialogContent
+					overlayClassName={automationModalOverlayClassName}
+					className={cn(automationAlertDialogContentClassName)}
+				>
 					<AlertDialogHeader>
 						<AlertDialogTitle>
 							{__('Are you sure?', 'doublescale')}

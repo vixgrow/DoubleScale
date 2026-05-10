@@ -41,6 +41,11 @@ interface CreateAutomationModalProps {
 	onAutomationChange: (automation: { name: string; trigger: string }) => void;
 	onClearError: () => void;
 	error?: NoticeMessage | null;
+	/**
+	 * When true (default), dialog renders inline — can break inside transformed parents (e.g. React Flow).
+	 * Set false to portal to document.body for a full-screen overlay modal.
+	 */
+	removePortal?: boolean;
 }
 
 const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
@@ -53,6 +58,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	onAutomationChange,
 	onClearError,
 	error,
+	removePortal = true,
 }) => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
 	const [selectedCategory, setSelectedCategory] = useState('crm');
@@ -413,6 +419,188 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				'doublescale'
 			),
 		},
+		memberpress: {
+			image: (
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						opacity="0.4"
+						d="M17 2H7C4.24 2 2 4.24 2 7V17C2 19.76 4.24 22 7 22H17C19.76 22 22 19.76 22 17V7C22 4.24 19.76 2 17 2Z"
+						fill="url(#paint0_linear_mp_trigger)"
+					/>
+					<path
+						d="M15.5 9.75H8.5C8.09 9.75 7.75 9.41 7.75 9C7.75 8.59 8.09 8.25 8.5 8.25H15.5C15.91 8.25 16.25 8.59 16.25 9C16.25 9.41 15.91 9.75 15.5 9.75Z"
+						fill="url(#paint1_linear_mp_trigger)"
+					/>
+					<path
+						d="M12 12.75C10.9 12.75 10 11.85 10 10.75V7.25C10 6.15 10.9 5.25 12 5.25C13.1 5.25 14 6.15 14 7.25V10.75C14 11.85 13.1 12.75 12 12.75Z"
+						fill="url(#paint2_linear_mp_trigger)"
+					/>
+					<path
+						d="M17 15.75H7C6.59 15.75 6.25 15.41 6.25 15C6.25 14.59 6.59 14.25 7 14.25H17C17.41 14.25 17.75 14.59 17.75 15C17.75 15.41 17.41 15.75 17 15.75Z"
+						fill="url(#paint3_linear_mp_trigger)"
+					/>
+					<path
+						d="M14 18.75H10C9.59 18.75 9.25 18.41 9.25 18C9.25 17.59 9.59 17.25 10 17.25H14C14.41 17.25 14.75 17.59 14.75 18C14.75 18.41 14.41 18.75 14 18.75Z"
+						fill="url(#paint4_linear_mp_trigger)"
+					/>
+					<defs>
+						<linearGradient
+							id="paint0_linear_mp_trigger"
+							x1="2"
+							y1="12"
+							x2="22"
+							y2="12"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint1_linear_mp_trigger"
+							x1="7.75"
+							y1="9"
+							x2="16.25"
+							y2="9"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint2_linear_mp_trigger"
+							x1="10"
+							y1="9"
+							x2="14"
+							y2="9"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint3_linear_mp_trigger"
+							x1="6.25"
+							y1="15"
+							x2="17.75"
+							y2="15"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint4_linear_mp_trigger"
+							x1="9.25"
+							y1="18"
+							x2="14.75"
+							y2="18"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+					</defs>
+				</svg>
+			),
+			description: __(
+				'MemberPress membership automation',
+				'doublescale'
+			),
+		},
+		pmpro: {
+			image: (
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						opacity="0.4"
+						d="M12 2C9.38 2 3 4.5 3 4.5V14.5C3 18 7 21 12 22C17 21 21 18 21 14.5V4.5C21 4.5 14.62 2 12 2Z"
+						fill="url(#paint0_linear_pmpro_trigger)"
+					/>
+					<path
+						d="M12 7C10.9 7 10 7.9 10 9V10H9.5C9.22 10 9 10.22 9 10.5V14.5C9 14.78 9.22 15 9.5 15H14.5C14.78 15 15 14.78 15 14.5V10.5C15 10.22 14.78 10 14.5 10H14V9C14 7.9 13.1 7 12 7ZM13 10H11V9C11 8.45 11.45 8 12 8C12.55 8 13 8.45 13 9V10Z"
+						fill="url(#paint1_linear_pmpro_trigger)"
+					/>
+					<path
+						d="M12 17.5C11.17 17.5 10.5 16.83 10.5 16C10.5 15.17 11.17 14.5 12 14.5C12.83 14.5 13.5 15.17 13.5 16C13.5 16.83 12.83 17.5 12 17.5Z"
+						fill="url(#paint2_linear_pmpro_trigger)"
+					/>
+					<defs>
+						<linearGradient
+							id="paint0_linear_pmpro_trigger"
+							x1="3"
+							y1="12"
+							x2="21"
+							y2="12"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint1_linear_pmpro_trigger"
+							x1="9"
+							y1="11"
+							x2="15"
+							y2="11"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+						<linearGradient
+							id="paint2_linear_pmpro_trigger"
+							x1="10.5"
+							y1="16"
+							x2="13.5"
+							y2="16"
+							gradientUnits="userSpaceOnUse"
+						>
+							<stop
+								offset="0.610577"
+								stopColor="#1E3A8A"
+							/>
+							<stop offset="1" stopColor="#3B82F6" />
+						</linearGradient>
+					</defs>
+				</svg>
+			),
+			description: __(
+				'Paid Memberships Pro membership automation',
+				'doublescale'
+			),
+		},
 		surecart: {
 			image: (
 				<svg
@@ -512,7 +700,10 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
-			<DialogContent className="max-w-[1100px] z-[150000] max-h-[90vh] h-full flex flex-col overflow-hidden">
+			<DialogContent
+				className="max-w-[1100px] z-[150300] max-h-[90vh] h-full flex flex-col overflow-hidden"
+				removePortal={removePortal}
+			>
 				<DialogHeader className="shrink-0">
 					<CustomDialogHeader
 						title={
@@ -559,7 +750,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 
 						<div className="doublescale-field flex-1 flex flex-col overflow-hidden min-h-0">
-							<div className="doublescale-field-label flex items-center text-base text-[#09090B] shrink-0">
+							<div className="doublescale-field-label flex items-center text-base text-foreground shrink-0">
 								{__('Trigger', 'doublescale')}
 								<span className="text-destructive">*</span>
 							</div>
@@ -597,8 +788,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					<Button
 						onClick={onOk}
 						disabled={isSaving}
-						variant="gradient"
-						className="mt-0 px-8 py-3 rounded-lg"
+						size="lg"
 					>
 						{isSaving
 							? isEditAutomation

@@ -356,8 +356,8 @@
 	// Footer Row (Second row with recipient and analytics link)
 	&__footer-row {
 		display: flex;
-		justify-content: flex-end;
-		align-items: flex-end;
+		justify-content: space-between;
+		align-items: center;
 		padding: 12px 16px;
 		width: 100%;
 	}
@@ -398,6 +398,12 @@
 		span {
 			white-space: nowrap;
 		}
+	}
+
+	&__analytics-link--interactive {
+		pointer-events: auto;
+		position: relative;
+		z-index: 20;
 	}
 
 	&--delay {
@@ -862,21 +868,26 @@
 
 // Analytics Popup Styles
 .doublescale-analytics-popup {
-	position: absolute;
-	top: 30px;
-	left: 500px;
-	width: 100%;
-	height: 100%;
-	z-index: 9999;
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 2000000;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+
+	&__overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.45);
+	}
 
 	&__content {
 		position: relative;
 		background: #fff;
 		border-radius: 12px;
-		width: 695px;
+		width: min(695px, calc(100vw - 40px));
 		z-index: 10000;
 		animation: slideUp 0.3s ease-out;
 	}

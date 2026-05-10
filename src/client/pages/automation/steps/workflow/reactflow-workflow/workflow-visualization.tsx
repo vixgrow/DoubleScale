@@ -544,6 +544,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						panOnDrag={true}
 						zoomOnScroll={true}
 						zoomOnPinch={true}
+						zoomOnDoubleClick={!viewMode}
 						deleteKeyCode={null}
 						defaultEdgeOptions={{
 							animated: false,
@@ -556,6 +557,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						snapGrid={[15, 15]}
 						edgesFocusable={false}
 						edgesReconnectable={false}
+						noPanClassName="nopan"
+						noDragClassName="nodrag"
 					>
 						<Background />
 						<Controls />

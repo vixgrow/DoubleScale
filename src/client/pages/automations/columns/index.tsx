@@ -6,7 +6,8 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 /**
  * internal dependencies
  */
@@ -35,10 +36,130 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { getAutomationWarnings } from '@doublescale/utils';
+import { Input } from '@/components/ui/input';
+
+interface AutomationNameCellProps {
+	automation: Automation;
+	onRename: (automation: Automation, name: string) => Promise<void>;
+	isRenaming: boolean;
+}
+
+const AutomationNameCell: React.FC<AutomationNameCellProps> = ({
+	automation,
+	onRename,
+	isRenaming,
+}) => {
+	const [editing, setEditing] = useState(false);
+	const [draft, setDraft] = useState(automation.name);
+
+	useEffect(() => {
+		if (!editing) {
+			setDraft(automation.name);
+		}
+	}, [automation.name, automation.id, editing]);
+
+	const commit = async () => {
+		const trimmed = draft.trim();
+		if (!trimmed) {
+			setDraft(automation.name);
+			setEditing(false);
+			return;
+		}
+		if (trimmed === automation.name) {
+			setEditing(false);
+			return;
+		}
+		try {
+			await onRename(automation, trimmed);
+			setEditing(false);
+		} catch {
+			// Stay in edit mode; list shows the error notice.
+		}
+	};
+
+	const warnings = getAutomationWarnings(automation);
+	const triggerWarnings = warnings.filter((w) => w.type === 'trigger');
+
+	return (
+		<div className="flex items-center gap-2 min-w-0 max-w-md">
+			{editing ? (
+				<Input
+					className="h-8 text-sm"
+					value={draft}
+					onChange={(e) => setDraft(e.target.value)}
+					onBlur={() => {
+						void commit();
+					}}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							(e.target as HTMLInputElement).blur();
+						}
+						if (e.key === 'Escape') {
+							setDraft(automation.name);
+							setEditing(false);
+						}
+					}}
+					autoFocus
+					disabled={isRenaming}
+					aria-label={__('Automation name', 'doublescale')}
+					onClick={(e) => e.stopPropagation()}
+				/>
+			) : (
+				<>
+					<button
+						type="button"
+						className="text-left font-medium text-primary hover:underline truncate min-w-0"
+						onClick={(e) => {
+							e.stopPropagation();
+							setDraft(automation.name);
+							setEditing(true);
+						}}
+						title={__('Click to rename', 'doublescale')}
+					>
+						{automation.name}
+					</button>
+					<NavLink
+						to={`automations/${automation.id}`}
+						className="shrink-0 text-muted-foreground hover:text-foreground p-0.5 rounded"
+						title={__('Open automation', 'doublescale')}
+						onClick={(e) => e.stopPropagation()}
+					>
+						<ExternalLink className="h-3.5 w-3.5" />
+					</NavLink>
+				</>
+			)}
+			{triggerWarnings.length > 0 && (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />
+						</TooltipTrigger>
+						<TooltipContent side="right" className="max-w-xs">
+							<div className="space-y-2">
+								{triggerWarnings.map((warning, index) => (
+									<div key={index}>
+										{warning.plugin_label && (
+											<p className="font-semibold">
+												{warning.plugin_label}
+											</p>
+										)}
+										<p className="text-xs">{warning.message}</p>
+									</div>
+								))}
+							</div>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			)}
+		</div>
+	);
+};
 
 interface AutomationColumnsProps {
 	onStatusChange: (automation: Automation, newStatus: string) => void;
 	updatingAutomationId: number | null;
+	renamingAutomationId: number | null;
+	onRenameAutomation: (automation: Automation, name: string) => Promise<void>;
 	navigate: (to: string) => void;
 	onDelete: (id: number) => void;
 }
@@ -46,6 +167,8 @@ interface AutomationColumnsProps {
 export const getAutomationColumns = ({
 	onStatusChange,
 	updatingAutomationId,
+	renamingAutomationId,
+	onRenameAutomation,
 	navigate,
 	onDelete,
 }: AutomationColumnsProps): ColumnDef<Automation>[] => {
@@ -86,52 +209,13 @@ export const getAutomationColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => {
-				const warnings = getAutomationWarnings(row.original);
-				const triggerWarnings = warnings.filter(
-					(w) => w.type === 'trigger'
-				);
-
-				return (
-					<div className="flex items-center gap-2">
-						<NavLink to={`automations/${row.original.id}`}>
-							{row.original.name}
-						</NavLink>
-						{triggerWarnings.length > 0 && (
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<AlertTriangle className="h-4 w-4 text-orange-500" />
-									</TooltipTrigger>
-									<TooltipContent
-										side="right"
-										className="max-w-xs"
-									>
-										<div className="space-y-2">
-											{triggerWarnings.map(
-												(warning, index) => (
-													<div key={index}>
-														{warning.plugin_label && (
-															<p className="font-semibold">
-																{
-																	warning.plugin_label
-																}
-															</p>
-														)}
-														<p className="text-xs">
-															{warning.message}
-														</p>
-													</div>
-												)
-											)}
-										</div>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						)}
-					</div>
-				);
-			},
+			cell: ({ row }) => (
+				<AutomationNameCell
+					automation={row.original}
+					onRename={onRenameAutomation}
+					isRenaming={renamingAutomationId === row.original.id}
+				/>
+			),
 		},
 		{
 			accessorKey: 'trigger',
@@ -180,10 +264,10 @@ export const getAutomationColumns = ({
 			),
 			cell: ({ row }) => (
 				<span
-					className={`px-3 py-1 border rounded text-sm font-normal ${
+					className={`inline-flex items-center text-xs font-medium rounded-full border py-0.5 px-2.5 ${
 						row.original.status === 'active'
-							? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
-							: 'bg-[#F8F8F8] text-gray-500 border-gray-500'
+							? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+							: 'bg-muted/50 text-muted-foreground border-border'
 					}`}
 				>
 					{row.original.status === 'active' ? 'Published' : 'Draft'}
@@ -217,7 +301,7 @@ export const getAutomationColumns = ({
 					<div className="text-start">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button className="h-6 w-6 bg-accent text-[#1E2125] rounded-lg p-0 hover:bg-accent focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0">
+								<Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground focus-visible:ring-0">
 									<ThreeDotsIcon />
 								</Button>
 							</DropdownMenuTrigger>
@@ -236,7 +320,7 @@ export const getAutomationColumns = ({
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(automation.id)}
-									className="text-red-500 hover:text-red-500 focus:text-red-500"
+									className="text-destructive hover:text-destructive focus:text-destructive"
 								>
 									<DeleteIcon />
 									{__('Delete', 'doublescale')}

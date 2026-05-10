@@ -10,6 +10,7 @@ import { map } from 'lodash';
  * External dependencies
  */
 import { Lock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
  * Internal dependencies
@@ -19,11 +20,15 @@ import {
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+	automationDialogAccentBarClassName,
+	automationDialogBodyClassName,
+	automationDialogHeaderClassName,
+	automationDialogSurfaceMedium,
+} from '../automation-dialog-presets';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -132,59 +137,98 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 						</Button>
 					</div>
 				</DialogTrigger>
-				<DialogPortal>
-					<DialogOverlay className="z-[150200]" />
-					<DialogContent className="max-w-[800px] z-[150200] p-6">
-						<DialogHeader>
-							<DialogTitle>
-								{__('Add Step', 'doublescale')}
-							</DialogTitle>
-							<DialogDescription className="mt-1">
-								{__('Select one of the Steps', 'doublescale')}
-							</DialogDescription>
-						</DialogHeader>
-						<div className="flex flex-col gap-5">
-							{map(defaultTypesOptions, (type, key) => {
-								const isConditionLocked =
-									key === 'condition' && !isProActive;
-								return (
-									<Card
-										key={key}
-										className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${loading ? 'pointer-events-none opacity-50' : ''}`}
-										onClick={(e) => {
-											e.stopPropagation();
-											if (isConditionLocked) {
-												setShowProModal(true);
-												return;
-											}
-											onStepSelection(key);
-										}}
-									>
-										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-4">
-												<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+				<DialogContent className={cn(automationDialogSurfaceMedium)}>
+					<div
+						className={automationDialogAccentBarClassName}
+						aria-hidden
+					/>
+					<DialogHeader
+						className={cn(automationDialogHeaderClassName, 'space-y-2')}
+					>
+						<p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+							{__('Workflow', 'doublescale')}
+						</p>
+						<DialogTitle className="text-xl font-semibold tracking-tight sm:text-2xl">
+							{__('Add Step', 'doublescale')}
+						</DialogTitle>
+						<DialogDescription className="text-base text-muted-foreground">
+							{__(
+								'Pick the next block in your automation. Each type controls how contacts move forward.',
+								'doublescale'
+							)}
+						</DialogDescription>
+					</DialogHeader>
+					<div
+						className={cn(
+							automationDialogBodyClassName,
+							'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4'
+						)}
+					>
+						{map(defaultTypesOptions, (type, key) => {
+							const isConditionLocked =
+								key === 'condition' && !isProActive;
+							const isEnd = key === 'end_automation';
+							return (
+								<Card
+									key={key}
+									className={cn(
+										'group cursor-pointer overflow-hidden border-border/60 bg-card/95 p-0 shadow-sm transition-all duration-200',
+										'hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md',
+										loading && 'pointer-events-none opacity-50'
+									)}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (isConditionLocked) {
+											setShowProModal(true);
+											return;
+										}
+										onStepSelection(key);
+									}}
+								>
+									<div className="flex items-stretch">
+										<div
+											className={cn(
+												'w-1 shrink-0 bg-gradient-to-b transition-opacity group-hover:opacity-100',
+												isEnd
+													? 'from-slate-500 to-slate-400 opacity-80'
+													: 'from-indigo-600 to-sky-500 opacity-90'
+											)}
+											aria-hidden
+										/>
+										<div className="flex min-w-0 flex-1 items-center justify-between gap-3 p-4 sm:p-5">
+											<div className="flex min-w-0 items-center gap-3 sm:gap-4">
+												<div
+													className={cn(
+														'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-sm ring-1 ring-white/20',
+														isEnd
+															? 'bg-gradient-to-br from-slate-600 to-slate-500'
+															: 'bg-gradient-to-br from-indigo-700 to-sky-500'
+													)}
+												>
 													{type.icon}
 												</div>
-												<div className="">
-													<h3 className="font-semibold text-xl text-[#3F4254] flex items-center gap-2">
+												<div className="min-w-0">
+													<h3 className="flex items-center gap-2 text-base font-semibold tracking-tight text-foreground sm:text-lg">
 														{type.label}
 														{isConditionLocked && (
-															<Lock className="h-4 w-4 text-orange-500" />
+															<Lock className="h-4 w-4 shrink-0 text-amber-500" />
 														)}
 													</h3>
-													<p className="text-sm text-[#333333] mt-1">
+													<p className="mt-0.5 text-sm leading-snug text-muted-foreground">
 														{type.description}
 													</p>
 												</div>
 											</div>
-											<GradientArrowIcon />
+											<div className="shrink-0 text-muted-foreground transition-colors group-hover:text-primary">
+												<GradientArrowIcon />
+											</div>
 										</div>
-									</Card>
-								);
-							})}
-						</div>
-					</DialogContent>
-				</DialogPortal>
+									</div>
+								</Card>
+							);
+						})}
+					</div>
+				</DialogContent>
 			</Dialog>
 
 			<ProAutomationModal

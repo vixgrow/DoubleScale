@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import React from 'react';
+import { cn } from '@/lib/utils';
 /**
  * Internal dependencies
  */
@@ -16,9 +17,13 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
-} from '@doublescale/components/ui/dialog';
+} from '@/components/ui/dialog';
+import {
+	automationDialogAccentBarClassName,
+	automationDialogBodyClassName,
+	automationDialogHeaderClassName,
+	automationDialogSurfaceWide,
+} from '../automation-dialog-presets';
 import ResultContent from './content';
 
 interface ResultProps {
@@ -34,24 +39,25 @@ const Result: React.FC<ResultProps> = ({ contact, open, onOpenChange }) => {
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogPortal>
-				<DialogOverlay className="z-[150200]" />
-				<DialogContent className="max-w-[1000px] max-h-[90vh] overflow-y-auto z-[150200]">
-					<DialogHeader>
-						<CustomDialogHeader
-							title={__('View Journey', 'doublescale')}
-							subtitle={__(
-								`View journey of contact ${contact?.contact.email}`,
-								'doublescale'
-							)}
-							icon={<GradientViewIcon />}
-						/>
-					</DialogHeader>
-					<div>
-						<ResultContent contact={contact} />
-					</div>
-				</DialogContent>
-			</DialogPortal>
+			<DialogContent className={cn(automationDialogSurfaceWide)}>
+				<div
+					className={automationDialogAccentBarClassName}
+					aria-hidden
+				/>
+				<DialogHeader className={automationDialogHeaderClassName}>
+					<CustomDialogHeader
+						title={__('View Journey', 'doublescale')}
+						subtitle={__(
+							`View journey of contact ${contact?.contact?.email || __('Deleted Contact', 'doublescale')}`,
+							'doublescale'
+						)}
+						icon={<GradientViewIcon />}
+					/>
+				</DialogHeader>
+				<div className={automationDialogBodyClassName}>
+					<ResultContent contact={contact} />
+				</div>
+			</DialogContent>
 		</Dialog>
 	);
 };

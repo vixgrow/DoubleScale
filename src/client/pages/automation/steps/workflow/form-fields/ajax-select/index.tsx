@@ -4,10 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
-/**
- * External dependencies
- */
-import { Typography } from 'antd';
 import { isObject, map } from 'lodash';
 import AsyncSelect from 'react-select/async';
 
@@ -76,11 +72,11 @@ const AjaxSelect: React.FC<Props> = ({
 	};
 
 	return (
-		<div className="doublescale-field">
-			<div className="doublescale-field-label">
-				<Typography.Text>{label}</Typography.Text>
+        <div className="doublescale-field">
+            <div className="doublescale-field-label">
+				<span>{label}</span>
 			</div>
-			<div className="doublescale-field-input">
+            <div className="doublescale-field-input">
 				<AsyncSelect
 					className="react-select-container"
 					classNamePrefix="react-select"
@@ -112,8 +108,8 @@ const AjaxSelect: React.FC<Props> = ({
 					cacheOptions={false}
 				/>
 			</div>
-		</div>
-	);
+        </div>
+    );
 };
 
 export default AjaxSelect;

@@ -24,7 +24,7 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 	// Tailwind classes for yes (green) and no (red/destructive)
 	const colorClasses = isYes
 		? 'bg-green-50 border-green-500 text-green-600 hover:bg-green-100 hover:border-green-600'
-		: 'bg-red-50 border-red-500 text-red-600 hover:bg-red-100 hover:border-red-600';
+		: 'bg-destructive/5 border-destructive text-destructive hover:bg-destructive/10 hover:border-destructive';
 
 	return (
 		<div

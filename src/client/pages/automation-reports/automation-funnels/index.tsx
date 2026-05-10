@@ -38,6 +38,16 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 		);
 	}
 
+	if (!automation) {
+		return (
+			<div className="flex items-center justify-center h-full">
+				<div className="text-lg text-[#667085]">
+					{__('No automation data available.', 'doublescale')}
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<Provider value={contextValue}>
 			<div className="h-full min-h-0 overflow-hidden flex flex-col">

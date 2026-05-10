@@ -26,8 +26,15 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogFooter,
-	DialogOverlay,
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import {
+	automationDialogAccentBarClassName,
+	automationDialogBodyClassName,
+	automationDialogFooterClassName,
+	automationDialogHeaderClassName,
+	automationDialogSurfaceWide,
+} from '../automation-dialog-presets';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -253,9 +260,12 @@ const ConditionsModal: React.FC<RulesProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogOverlay className="z-[150300]" />
-			<DialogContent className="max-w-[1100px] max-h-[90vh] z-[150300] overflow-y-auto">
-				<DialogHeader>
+			<DialogContent className={cn(automationDialogSurfaceWide)}>
+				<div
+					className={automationDialogAccentBarClassName}
+					aria-hidden
+				/>
+				<DialogHeader className={automationDialogHeaderClassName}>
 					<CustomDialogHeader
 						title={__('Create a condition', 'doublescale')}
 						subtitle={__(
@@ -266,12 +276,13 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					/>
 				</DialogHeader>
 
+				<div className={automationDialogBodyClassName}>
 				{/* Show warning if condition has plugin dependency issues */}
 				{(hasConditionWarning || conditionWarning) &&
 					unavailableRulesCount > 0 && (
 						<Alert
 							variant="destructive"
-							className="border-orange-500 bg-orange-50 mx-6"
+							className="mb-5 border-orange-500/80 bg-orange-50/90"
 						>
 							<AlertTriangle className="h-4 w-4 text-orange-600" />
 							<AlertDescription className="text-sm text-orange-800">
@@ -316,19 +327,23 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						</Alert>
 					)}
 
-				<div className="py-4">
 					<RulesBuilder
 						rules={rules}
 						onChange={setRules}
 						rulesGroups={filteredRulesGroups}
 					/>
 				</div>
-				<DialogFooter>
+				<DialogFooter
+					className={cn(
+						automationDialogFooterClassName,
+						'flex-col-reverse gap-2 pt-0 sm:flex-row sm:justify-end sm:gap-3'
+					)}
+				>
 					<Button
 						onClick={() => save({ settings: rules })}
 						disabled={isSaving}
 						size="xl"
-						className="w-full"
+						className="w-full min-w-[12rem] sm:w-auto sm:min-w-[200px]"
 						variant="gradient"
 					>
 						{isSaving

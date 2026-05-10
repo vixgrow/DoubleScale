@@ -51,9 +51,9 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 
 	// Helper function to get tooltip message for disabled triggers
 	const getDisabledTooltip = (groupLabel: string) => {
-		if (groupLabel === 'QuillBooking') {
+		if (groupLabel === 'Booking') {
 			return __(
-				'QuillBooking plugin is not installed or activated. Install QuillBooking to use these triggers.',
+				'Booking module is not enabled. Enable the Booking module to use these triggers.',
 				'doublescale'
 			);
 		}
@@ -90,6 +90,12 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		if (groupLabel === 'MemberPress') {
 			return __(
 				'MemberPress plugin is not installed or activated. Install MemberPress to use these triggers.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Paid Memberships Pro') {
+			return __(
+				'Paid Memberships Pro plugin is not installed or activated. Install Paid Memberships Pro to use these triggers.',
 				'doublescale'
 			);
 		}

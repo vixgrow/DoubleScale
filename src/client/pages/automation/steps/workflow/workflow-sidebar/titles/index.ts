@@ -45,24 +45,24 @@ export const findGoalLabel = (goalKey: string): string | null => {
  * Title map for different step types
  */
 const titleMap: Record<string, (currentStep: OrganizedStep | null) => string> =
-{
-	action: (currentStep) =>
-		currentStep?.action
-			? findActionLabel(currentStep.action) ||
-			__('Action Settings', 'doublescale')
-			: __('Action Settings', 'doublescale'),
-	goal: (currentStep) =>
-		currentStep?.action
-			? findGoalLabel(currentStep.action) ||
-			__('Goal Settings', 'doublescale')
-			: __('Goal Settings', 'doublescale'),
-	condition: () => __('Condition Settings', 'doublescale'),
-	delay: (currentStep) =>
-		currentStep?.action
-			? findActionLabel(currentStep.action) ||
-			__('Delay Settings', 'doublescale')
-			: __('Select Delay Type', 'doublescale'),
-};
+	{
+		action: (currentStep) =>
+			currentStep?.action
+				? findActionLabel(currentStep.action) ||
+					__('Action Settings', 'doublescale')
+				: __('Action Settings', 'doublescale'),
+		goal: (currentStep) =>
+			currentStep?.action
+				? findGoalLabel(currentStep.action) ||
+					__('Goal Settings', 'doublescale')
+				: __('Goal Settings', 'doublescale'),
+		condition: () => __('Condition Settings', 'doublescale'),
+		delay: (currentStep) =>
+			currentStep?.action
+				? findActionLabel(currentStep.action) ||
+					__('Delay Settings', 'doublescale')
+				: __('Select Delay Type', 'doublescale'),
+	};
 
 /**
  * Get the title for the sidebar based on current state

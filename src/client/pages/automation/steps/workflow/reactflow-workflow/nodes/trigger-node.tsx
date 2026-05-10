@@ -52,8 +52,8 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [showChangeTriggerModal, setShowChangeTriggerModal] = useState(false);
 	const [tempAutomation, setTempAutomation] = useState({
-		name: automation.name || '',
-		trigger: automation.trigger || '',
+		name: automation?.name || '',
+		trigger: automation?.trigger || '',
 	});
 
 	const handleEdit = () => {
@@ -65,8 +65,8 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 	const handleChangeTrigger = () => {
 		if (!viewMode) {
 			setTempAutomation({
-				name: automation.name || '',
-				trigger: automation.trigger || '',
+				name: automation?.name || '',
+				trigger: automation?.trigger || '',
 			});
 			setShowChangeTriggerModal(true);
 		}
@@ -74,8 +74,35 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 
 	const handleChangeTriggerSave = async () => {
 		try {
-			// Only update if trigger has changed
-			if (tempAutomation.trigger !== automation.trigger) {
+			const nameTrimmed = tempAutomation.name.trim();
+			const nameChanged =
+				nameTrimmed !== (automation?.name || '').trim();
+			const triggerChanged = tempAutomation.trigger !== automation?.trigger;
+
+			if (!nameChanged && !triggerChanged) {
+				setShowChangeTriggerModal(false);
+				return;
+			}
+
+			// Rename only: skip trigger condition checks
+			if (nameChanged && !triggerChanged) {
+				if (!nameTrimmed) {
+					createNotice({
+						type: 'error',
+						message: __(
+							'Automation name is required',
+							'doublescale'
+						),
+					});
+					return;
+				}
+				await saveAutomation({ name: nameTrimmed });
+				await refetchAutomation();
+				setShowChangeTriggerModal(false);
+				return;
+			}
+
+			if (triggerChanged) {
 				// check if you have any condtions is related with this trigger
 				const response = await apiFetch({
 					path: '/doublescale/v1/automations/check-conditions',
@@ -104,15 +131,14 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 								is_delete: true,
 							},
 						});
-						handleChangeTriggerConfirm();
+						await handleChangeTriggerConfirm();
 						setShowChangeTriggerModal(false);
 					}
 				} else {
-					handleChangeTriggerConfirm();
+					await handleChangeTriggerConfirm();
 					setShowChangeTriggerModal(false);
 				}
 			}
-			// Close the modal
 		} catch (error) {
 			console.error('Failed to change trigger:', error);
 			createNotice({
@@ -123,9 +149,17 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleChangeTriggerConfirm = async () => {
+		const nameTrimmed = tempAutomation.name.trim();
+		if (!nameTrimmed) {
+			createNotice({
+				type: 'error',
+				message: __('Automation name is required', 'doublescale'),
+			});
+			return;
+		}
 		await saveAutomation({
 			trigger: tempAutomation.trigger,
-			name: tempAutomation.name,
+			name: nameTrimmed,
 		});
 
 		// Refetch the automation to get fresh data and trigger re-render
@@ -134,15 +168,9 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 
 	const handleChangeTriggerCancel = () => {
 		setShowChangeTriggerModal(false);
-		// Reset temp automation
 		setTempAutomation({
-			name: automation.name || '',
-			trigger: automation.trigger || '',
-		});
-		// Show success notification
-		createNotice({
-			type: 'success',
-			message: __('Trigger updated successfully', 'doublescale'),
+			name: automation?.name || '',
+			trigger: automation?.trigger || '',
 		});
 	};
 
@@ -232,6 +260,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				onAutomationChange={setTempAutomation}
 				onClearError={() => {}}
 				error={null}
+				removePortal={false}
 			/>
 		</>
 	);

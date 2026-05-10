@@ -27,11 +27,13 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogPortal,
-	AlertDialogOverlay,
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+	automationAlertDialogContentClassName,
+	automationModalOverlayClassName,
+} from './automation-dialog-presets';
 import './style.scss';
 import { useAutomationContext } from '../../state/context';
 import type {
@@ -274,35 +276,35 @@ const Workflow: React.FC = () => {
 										<DeleteIcon />
 									</Button>
 								</AlertDialogTrigger>
-								<AlertDialogPortal>
-									<AlertDialogOverlay className="z-[150000]" />
-									<AlertDialogContent className="z-[150000]">
-										<AlertDialogHeader>
-											<AlertDialogTitle>
-												{__(
-													'Are you sure?',
-													'doublescale'
-												)}
-											</AlertDialogTitle>
-											<AlertDialogDescription>
-												{__(
-													'This action cannot be undone.',
-													'doublescale'
-												)}
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>
-												{__('No', 'doublescale')}
-											</AlertDialogCancel>
-											<AlertDialogAction
-												onClick={() => deleteStep(step)}
-											>
-												{__('Yes', 'doublescale')}
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialogPortal>
+								<AlertDialogContent
+									overlayClassName={automationModalOverlayClassName}
+									className={cn(automationAlertDialogContentClassName)}
+								>
+									<AlertDialogHeader>
+										<AlertDialogTitle>
+											{__(
+												'Are you sure?',
+												'doublescale'
+											)}
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											{__(
+												'This action cannot be undone.',
+												'doublescale'
+											)}
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>
+											{__('No', 'doublescale')}
+										</AlertDialogCancel>
+										<AlertDialogAction
+											onClick={() => deleteStep(step)}
+										>
+											{__('Yes', 'doublescale')}
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
 							</AlertDialog>
 						</div>
 					</CardContent>

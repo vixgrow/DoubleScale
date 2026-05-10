@@ -89,6 +89,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
+		if (groupLabel === 'Paid Memberships Pro') {
+			return __(
+				'Paid Memberships Pro plugin is not installed or activated. Install Paid Memberships Pro to use these actions.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'Presto Player') {
 			return __(
 				'Presto Player plugin is not installed or activated. Install Presto Player to use these actions.',

@@ -41,9 +41,6 @@ class CommunicationTrackingModel extends Model {
 	 * @return string
 	 */
 	protected static function resolve_campaign_relation_class() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel' ) ) {
-			return \DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel::class;
-		}
 		if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\CampaignModel' ) ) {
 			return \DoubleScale\Modules\Campaigns\Models\CampaignModel::class;
 		}
@@ -56,9 +53,6 @@ class CommunicationTrackingModel extends Model {
 	 * @return string
 	 */
 	protected static function resolve_template_relation_class() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\TemplateModel' ) ) {
-			return \DoubleScale\Pro\Modules\Campaigns\Models\TemplateModel::class;
-		}
 		if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\TemplateModel' ) ) {
 			return \DoubleScale\Modules\Campaigns\Models\TemplateModel::class;
 		}
@@ -439,9 +433,6 @@ class CommunicationTrackingModel extends Model {
 	 */
 	public function get_campaign() {
 		if ( $this->source_type === MessageSourceTypes::CAMPAIGN ) {
-			if ( class_exists( '\DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel' ) ) {
-				return \DoubleScale\Pro\Modules\Campaigns\Models\CampaignModel::find( $this->source_id );
-			}
 			if ( class_exists( '\DoubleScale\Modules\Campaigns\Models\CampaignModel' ) ) {
 				return \DoubleScale\Modules\Campaigns\Models\CampaignModel::find( $this->source_id );
 			}

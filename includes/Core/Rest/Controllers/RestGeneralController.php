@@ -127,7 +127,15 @@ class RestGeneralController extends RestController {
 			$recent_emails     = CommunicationTrackingModel::emails()->with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		}
 
-		if ( $this->dashboard_aggregate_allowed( 'tracking' ) && class_exists( '\DoubleScale\Modules\Tracking\Models\TrackingTemplateModel' ) ) {
+		if (
+			$this->dashboard_aggregate_allowed( 'campaigns' )
+			&& class_exists( '\DoubleScale\Modules\Campaigns\Models\TemplateModel' )
+		) {
+			$total_email_templates = \DoubleScale\Modules\Campaigns\Models\TemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
+		} elseif (
+			$this->dashboard_aggregate_allowed( 'tracking' )
+			&& class_exists( '\DoubleScale\Modules\Tracking\Models\TrackingTemplateModel' )
+		) {
 			$total_email_templates = \DoubleScale\Modules\Tracking\Models\TrackingTemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
 		}
 
@@ -135,9 +143,9 @@ class RestGeneralController extends RestController {
 
 		if (
 			$this->dashboard_aggregate_allowed( 'campaigns' )
-			&& class_exists( '\DoubleScale\Modules\Tracking\Models\TrackingCampaignModel' )
+			&& class_exists( '\DoubleScale\Modules\Campaigns\Models\CampaignModel' )
 		) {
-			$top_campaigns = \DoubleScale\Modules\Tracking\Models\TrackingCampaignModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
+			$top_campaigns = \DoubleScale\Modules\Campaigns\Models\CampaignModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		}
 
 		$total_automations = 0;

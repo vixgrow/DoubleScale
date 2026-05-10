@@ -28,6 +28,7 @@ import {
 	FallbackCell,
 	FormattedDateCell,
 	ProcessingEmailsIcon,
+	RepeatIcon,
 	SettingsOutlinedIcon,
 	SortedHeaderCell,
 	TimeAgoCell,
@@ -35,12 +36,14 @@ import {
 } from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
 import EditHeaderIcon from '@/components/icons/edit-header';
+import { Play, Pause } from 'lucide-react';
 
 // Add interface for column props
 interface ColumnProps {
 	onDelete: (id: number) => void;
 	duplicate: (id: number) => void;
 	navigate: (path: string) => void;
+	onStatusChange?: (id: number, status: 'active' | 'draft') => void;
 }
 
 // Common columns used across all campaign types
@@ -48,6 +51,7 @@ const getCommonColumns = ({
 	onDelete,
 	duplicate,
 	navigate,
+	onStatusChange,
 }: ColumnProps) => {
 	const selectColumn: ColumnDef<Campaign> = {
 		id: 'select',
@@ -85,16 +89,16 @@ const getCommonColumns = ({
 			const campaign = row.original;
 			const name = row.getValue('name') as string;
 			const status = campaign.status;
-			const currentStep = campaign.settings?.current_step;
+			const isAutomated = campaign.settings?.automated || false;
 
-			// Determine target tab based on current step or status
-			let targetTab = currentStep || 'overview';
-			if (!currentStep) {
-				if (status === CAMPAIGN_STATUS.DRAFT) {
-					targetTab = 'template';
-				} else if (status === CAMPAIGN_STATUS.SCHEDULED) {
-					targetTab = 'view';
-				}
+			let targetTab: string;
+			if (status === CAMPAIGN_STATUS.DRAFT) {
+				const currentStep = campaign.settings?.current_step;
+				targetTab = currentStep || (isAutomated ? 'trigger' : 'template');
+			} else if (status === CAMPAIGN_STATUS.SCHEDULED) {
+				targetTab = 'view';
+			} else {
+				targetTab = 'overview';
 			}
 
 			return (
@@ -123,11 +127,11 @@ const getCommonColumns = ({
 				'bg-muted text-muted-foreground';
 
 			return (
-				<div
-					className={`${colorClasses} rounded-xl w-fit text-center px-2 py-1 border text-base`}
+				<span
+					className={`${colorClasses} inline-flex items-center text-xs font-medium rounded-full w-fit text-center px-2.5 py-0.5 border`}
 				>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
-				</div>
+				</span>
 			);
 		},
 	};
@@ -162,7 +166,10 @@ const getCommonColumns = ({
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
-			const canEdit = campaign.status === 'draft';
+			const isAutomated = campaign.settings?.automated || false;
+			const canEdit =
+				campaign.status === 'draft' ||
+				(isAutomated && campaign.status === 'active');
 
 			return (
 				<div className="text-center">
@@ -178,18 +185,9 @@ const getCommonColumns = ({
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem
 								onClick={() => {
-									const currentStep = campaign.settings?.current_step;
-									let targetTab = currentStep || 'overview';
-									if (!currentStep) {
-										targetTab =
-											campaign.status ===
-											CAMPAIGN_STATUS.SCHEDULED
-												? 'view'
-												: 'overview';
-									}
 									navigate(
 										getToLink(
-											`campaigns/${campaign.id}/${targetTab}`
+											`campaigns/${campaign.id}/overview`
 										)
 									);
 								}}
@@ -197,17 +195,12 @@ const getCommonColumns = ({
 								<ViewOutlinedIcon />
 								{__('Overview', 'doublescale')}
 							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => duplicate(campaign.id)}
-							>
-								<CopyIcon />
-								{__('Duplicate', 'doublescale')}
-							</DropdownMenuItem>
 							{canEdit && (
 								<DropdownMenuItem
 									onClick={() => {
-										const currentStep = campaign.settings?.current_step;
-										const targetTab = currentStep || 'template';
+										const targetTab = isAutomated
+											? 'trigger'
+											: (campaign.settings?.current_step || 'template');
 										navigate(
 											getToLink(`campaigns/${campaign.id}/${targetTab}`)
 										);
@@ -217,9 +210,31 @@ const getCommonColumns = ({
 									{__('Edit', 'doublescale')}
 								</DropdownMenuItem>
 							)}
+							{isAutomated && campaign.status === 'draft' && onStatusChange && (
+								<DropdownMenuItem
+									onClick={() => onStatusChange(campaign.id, 'active')}
+								>
+									<Play className="w-4 h-4" />
+									{__('Activate', 'doublescale')}
+								</DropdownMenuItem>
+							)}
+							{isAutomated && campaign.status === 'active' && onStatusChange && (
+								<DropdownMenuItem
+									onClick={() => onStatusChange(campaign.id, 'draft')}
+								>
+									<Pause className="w-4 h-4" />
+									{__('Deactivate', 'doublescale')}
+								</DropdownMenuItem>
+							)}
+							<DropdownMenuItem
+								onClick={() => duplicate(campaign.id)}
+							>
+								<CopyIcon />
+								{__('Duplicate', 'doublescale')}
+							</DropdownMenuItem>
 							<DropdownMenuItem
 								onClick={() => onDelete(campaign.id)}
-								className="text-red-500 hover:text-red-500 focus:text-red-500"
+								className="text-destructive hover:text-destructive focus:text-destructive"
 							>
 								<DeleteIcon />
 								{__('Delete', 'doublescale')}
@@ -247,6 +262,7 @@ export const emailCampaignColumns = ({
 	onDelete,
 	duplicate,
 	navigate,
+	onStatusChange,
 }: ColumnProps): ColumnDef<Campaign>[] => {
 	const {
 		selectColumn,
@@ -256,7 +272,7 @@ export const emailCampaignColumns = ({
 		createdAtColumn,
 		updatedAtColumn,
 		actionsColumn,
-	} = getCommonColumns({ onDelete, duplicate, navigate });
+	} = getCommonColumns({ onDelete, duplicate, navigate, onStatusChange });
 
 	const typeColumn: ColumnDef<Campaign> = {
 		accessorKey: 'type',
@@ -265,23 +281,38 @@ export const emailCampaignColumns = ({
 		cell: ({ row }) => {
 			const campaign = row.original;
 			const isAbTest = campaign.settings?.ab_test || false;
+			const isAutomated = campaign.settings?.automated || false;
+
+			const getTypeInfo = () => {
+				if (isAutomated) {
+					return {
+						icon: <RepeatIcon width={24} height={24} />,
+						iconClass: 'text-primary',
+						label: __('Automated Campaign', 'doublescale'),
+					};
+				}
+				if (isAbTest) {
+					return {
+						icon: <ABSplitIcon />,
+						iconClass: 'text-secondary',
+						label: __('A/B Split Campaign', 'doublescale'),
+					};
+				}
+				return {
+					icon: <ProcessingEmailsIcon width={24} height={24} />,
+					iconClass: 'text-primary',
+					label: __('Standard Campaign', 'doublescale'),
+				};
+			};
+
+			const typeInfo = getTypeInfo();
 
 			return (
 				<div className="flex items-center gap-2">
-					{isAbTest ? (
-						<div className="text-secondary">
-							<ABSplitIcon />
-						</div>
-					) : (
-						<div className="text-[#660FF1]">
-							<ProcessingEmailsIcon width={24} height={24} />
-						</div>
-					)}
-					<span>
-						{isAbTest
-							? __('A/B Split Campaign', 'doublescale')
-							: __('Standard Campaign', 'doublescale')}
-					</span>
+					<div className={typeInfo.iconClass}>
+						{typeInfo.icon}
+					</div>
+					<span>{typeInfo.label}</span>
 				</div>
 			);
 		},
@@ -320,6 +351,7 @@ export const smsCampaignColumns = ({
 	onDelete,
 	duplicate,
 	navigate,
+	onStatusChange,
 }: ColumnProps): ColumnDef<Campaign>[] => {
 	const {
 		selectColumn,
@@ -329,7 +361,7 @@ export const smsCampaignColumns = ({
 		createdAtColumn,
 		updatedAtColumn,
 		actionsColumn,
-	} = getCommonColumns({ onDelete, duplicate, navigate });
+	} = getCommonColumns({ onDelete, duplicate, navigate, onStatusChange });
 
 	const deliveryRateColumn: ColumnDef<Campaign> = {
 		accessorKey: 'delivery_rate',

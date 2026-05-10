@@ -5,13 +5,12 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { applyFilters } from '@wordpress/hooks';
-
 /**
  * Internal dependencies
  */
 import './style.scss';
 import {
+	AutomatedTriggerConfig,
 	Campaign,
 	CampaignModalStep,
 	CampaignsResponse,
@@ -24,22 +23,32 @@ import { emailCampaignColumns, smsCampaignColumns } from './columns';
 import {
 	PageHeader,
 	PlusIcon,
+	NoticeBanner,
 	ContactTotalEmailsIcon,
 	ContactSMSIcon,
-	NoticeBanner,
-	ProFeatureNotice,
 } from '@/components';
+import PageTabs from '@/components/page-tabs';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable'; // Import the hook
 import { formatDateForAPI } from '@doublescale/utils';
-import PageTabs from '@/components/page-tabs';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
 import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
 
-const Campaigns: React.FC = () => {
+export type CampaignChannel = 'email' | 'sms';
+
+interface CampaignsProps {
+	channel?: CampaignChannel;
+}
+
+const Campaigns: React.FC<CampaignsProps> = ({
+	channel: channelProp,
+}) => {
+	const [activeTab, setActiveTab] = useState<CampaignChannel>('email');
+	const channel = channelProp ?? activeTab;
+
 	const [loading, setLoading] = useState(true);
 	const [campaignType, setCampaignType] = useState<CampaignType>('standard');
 	const [keywords, setKeywords] = useState<string>('');
@@ -58,7 +67,6 @@ const Campaigns: React.FC = () => {
 		to: null,
 	});
 	const [step, setStep] = useState<CampaignModalStep>(null);
-	const [activeTab, setActiveTab] = useState<string>('email');
 	const [campaignFilters, setCampaignFilters] = useState({
 		status: 'all',
 		type: 'all',
@@ -88,13 +96,12 @@ const Campaigns: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords, activeTab, campaignFilters]);
+	}, [page, perPage, dateRange, keywords, channel, campaignFilters]);
 
-	// Reset page when changing tabs
 	useEffect(() => {
 		setPage(1);
 		setSelectedRowKeys([]);
-	}, [activeTab]);
+	}, [channel]);
 
 	const fetchCampaigns = async () => {
 		setLoading(true);
@@ -113,7 +120,7 @@ const Campaigns: React.FC = () => {
 				from: formatDateForAPI(dateRange.from),
 				to: formatDateForAPI(dateRange.to),
 				keywords,
-				channel: channelMap[activeTab],
+				channel: channelMap[channel],
 			};
 
 			// Add campaign filter parameters
@@ -123,7 +130,7 @@ const Campaigns: React.FC = () => {
 
 			// Only apply type filter for email campaigns
 			if (
-				activeTab === 'email' &&
+				channel === 'email' &&
 				campaignFilters.type &&
 				campaignFilters.type !== 'all'
 			) {
@@ -172,7 +179,9 @@ const Campaigns: React.FC = () => {
 	};
 
 	const addCampaign = async (
-		name: string
+		name: string,
+		selectedCampaignType: CampaignType,
+		triggerConfig?: AutomatedTriggerConfig
 	): Promise<{ success: boolean; error?: string }> => {
 		if (!name) {
 			return {
@@ -184,40 +193,51 @@ const Campaigns: React.FC = () => {
 		try {
 			let channelType = '';
 			let isAbTest = false;
+			const isAutomated = selectedCampaignType === 'automated';
 
 			// Determine channel type based on active tab
-			if (activeTab === 'email') {
-				// For email, campaignType determines if it's standard or ab_test
-				if (!campaignType) {
+			if (channel === 'email') {
+				if (!selectedCampaignType) {
 					return {
 						success: false,
 						error: __('Campaign type is required', 'doublescale'),
 					};
 				}
 				channelType = 'email';
-				isAbTest = campaignType === 'ab_test';
-			} else if (activeTab === 'sms') {
+				isAbTest = selectedCampaignType === 'ab_test';
+			} else if (channel === 'sms') {
 				channelType = 'sms';
 			}
 
-			// Use unified endpoint with type parameter (as string)
+			const settings: Record<string, any> = {
+				ab_test: isAbTest,
+			};
+
+			if (isAutomated && triggerConfig) {
+				settings.automated = true;
+				settings.trigger = triggerConfig;
+			}
+
 			const response = (await apiFetch({
 				path: '/doublescale/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
 					type: channelType,
-					settings: {
-						ab_test: isAbTest,
-					},
-					description: __('New campaign', 'doublescale'),
+					settings,
+					description: isAutomated
+						? __('Automated campaign', 'doublescale')
+						: __('New campaign', 'doublescale'),
 					status: 'draft',
 				},
 			})) as Campaign;
 
 			setCampaigns([...campaigns, response]);
 			setStep(null);
-			navigate(getToLink(`campaigns/${response.id}/template`));
+			const firstStep = isAutomated ? 'trigger' : 'template';
+			navigate(getToLink(`campaigns/${response.id}/${firstStep}`), {
+				state: { isNew: true },
+			});
 			return { success: true };
 		} catch (error: any) {
 			return {
@@ -278,7 +298,31 @@ const Campaigns: React.FC = () => {
 				method: 'POST',
 			})) as Campaign;
 
-			navigate(getToLink(`campaigns/${response.id}`));
+			navigate(getToLink(`campaigns/${response.id}/template`));
+		} catch (error: any) {
+			setNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
+	const changeCampaignStatus = async (id: number, status: 'active' | 'draft') => {
+		try {
+			await apiFetch({
+				path: `/doublescale/v1/campaigns/${id}`,
+				method: 'PUT',
+				data: { status },
+			});
+
+			setNotice({
+				type: 'success',
+				message: status === 'active'
+					? __('Campaign activated successfully.', 'doublescale')
+					: __('Campaign deactivated successfully.', 'doublescale'),
+			});
+
+			fetchCampaigns();
 		} catch (error: any) {
 			setNotice({
 				type: 'error',
@@ -293,9 +337,10 @@ const Campaigns: React.FC = () => {
 			onDelete: deleteCampaign,
 			duplicate: duplicateCampaign,
 			navigate: navigate,
+			onStatusChange: changeCampaignStatus,
 		};
 
-		if (activeTab === 'email') {
+		if (channel === 'email') {
 			return emailCampaignColumns(columnProps);
 		} else {
 			// Both SMS and WhatsApp use the same columns
@@ -327,7 +372,7 @@ const Campaigns: React.FC = () => {
 	 * For SMS campaigns, check provider connection before opening modal
 	 */
 	const handleCreateCampaign = () => {
-		if (activeTab === 'sms' && !isSmsProviderConnected) {
+		if (channel === 'sms' && !isSmsProviderConnected) {
 			// Show error notice if provider not configured
 			setNotice({
 				type: 'error',
@@ -343,20 +388,6 @@ const Campaigns: React.FC = () => {
 
 	const columns = getColumns();
 
-	// Define tabs list with icons
-	const tabsList = [
-		{
-			value: 'email',
-			label: 'Email Campaigns',
-			icon: <ContactTotalEmailsIcon width={24} height={24} />,
-		},
-		{
-			value: 'sms',
-			label: 'SMS Campaigns',
-			icon: <ContactSMSIcon width={24} height={24} />,
-		},
-	];
-
 	// Campaign content component
 	const CampaignContent = () => (
 		<>
@@ -369,7 +400,7 @@ const Campaigns: React.FC = () => {
 						initialPageSize={perPage}
 						setPage={setPage}
 						loading={loading}
-						activeTab={activeTab}
+						activeTab={channel}
 						config={{
 							search: {
 								placeholder: __('Search', 'doublescale'),
@@ -387,7 +418,7 @@ const Campaigns: React.FC = () => {
 								currentAction: '',
 								onActionChange: () => {},
 								onExecuteAction: handleBulkAction,
-								activeTab: activeTab,
+								activeTab: channel,
 							},
 							dateRange: {
 								enabled: true,
@@ -414,35 +445,25 @@ const Campaigns: React.FC = () => {
 			) : (
 				<EmptyCampaignList
 					setStep={setStep}
-					campaignChannel={activeTab}
+					campaignChannel={channel}
 					onCreateClick={handleCreateCampaign}
 				/>
 			)}
 		</>
 	);
 
-	// Define tabs content
-	// Apply filters to allow Pro version to override tab content
-	// If filter returns null, it means PRO wants to use the regular CampaignContent
-	const SMSTabContentOverride = applyFilters(
-		'doublescale_campaigns_tab_content',
-		'default', // Pass a signal value, not a component
-		'sms'
-	);
-
-	const SMSTabContent =
-		SMSTabContentOverride === null ? (
-			<CampaignContent /> // PRO version active - use regular campaigns
-		) : (
-			// Free version - show PRO notice
-			<ProFeatureNotice
-				featureName={__('SMS Campaigns', 'doublescale')}
-				description={__(
-					'Create and send bulk SMS campaigns to your contacts with full tracking and analytics.',
-					'doublescale'
-				)}
-			/>
-		);
+	const tabsList = [
+		{
+			value: 'email',
+			label: 'Email Campaigns',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'sms',
+			label: 'SMS Campaigns',
+			icon: <ContactSMSIcon width={24} height={24} />,
+		},
+	];
 
 	const tabsContent = [
 		{
@@ -451,20 +472,91 @@ const Campaigns: React.FC = () => {
 		},
 		{
 			value: 'sms',
-			children: SMSTabContent,
+			children: <CampaignContent />,
 		},
 	];
 
 	// Determine if "Create Campaign" button should be shown
 	// Hide for SMS campaigns when Twilio is not configured
 	const showCreateButton =
-		activeTab === 'email' ||
-		(activeTab === 'sms' && isSmsProviderConnected);
+		channel === 'email' ||
+		(channel === 'sms' && isSmsProviderConnected);
+
+	const listTitle =
+		channel === 'sms'
+			? __('SMS Campaigns', 'doublescale')
+			: __('Email Campaigns', 'doublescale');
+
+	const campaignBody = <CampaignContent />;
+
+	if (channelProp === undefined) {
+		return (
+			<div className="doublescale-campaigns">
+				<PageHeader
+					title={__('Campaigns List', 'doublescale')}
+					subtitle={__('Campaigns', 'doublescale')}
+					actions={
+						showCreateButton
+							? [
+									{
+										label: __('Create Campaign', 'doublescale'),
+										icon: <PlusIcon />,
+										onClick: handleCreateCampaign,
+									},
+								]
+							: []
+					}
+				/>
+
+				{notice && (
+					<NoticeBanner
+						notice={notice}
+						closeNotice={() => setNotice(null)}
+					/>
+				)}
+
+				{channel === 'sms' &&
+					!isSmsProviderConnected &&
+					!isSmsProviderLoading && (
+						<ProviderNotConnectedWarning
+							channel="sms"
+							onConfigureClick={() => setShowTwilioConfig(true)}
+						/>
+					)}
+
+				<PageTabs
+					defaultValue="email"
+					tabsList={tabsList}
+					tabsContent={tabsContent}
+					onValueChange={(value) =>
+						setActiveTab(value as CampaignChannel)
+					}
+					tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-4"
+					tabsListClassName="bg-transparent text-foreground gap-3"
+				/>
+
+				<AddCampaign
+					setCampaignType={setCampaignType}
+					campaignType={campaignType}
+					setStep={setStep}
+					step={step}
+					addCampaign={addCampaign}
+					activeTab={channel}
+				/>
+
+				<TwilioConfigModal
+					open={showTwilioConfig}
+					onClose={() => setShowTwilioConfig(false)}
+					onSuccess={handleTwilioConfigSuccess}
+				/>
+			</div>
+		);
+	}
 
 	return (
 		<div className="doublescale-campaigns">
 			<PageHeader
-				title={__('Campaigns List', 'doublescale')}
+				title={listTitle}
 				subtitle={__('Campaigns', 'doublescale')}
 				actions={
 					showCreateButton
@@ -488,7 +580,7 @@ const Campaigns: React.FC = () => {
 			)}
 
 			{/* SMS: Show provider warning if not configured */}
-			{activeTab === 'sms' &&
+			{channel === 'sms' &&
 				!isSmsProviderConnected &&
 				!isSmsProviderLoading && (
 					<ProviderNotConnectedWarning
@@ -497,14 +589,7 @@ const Campaigns: React.FC = () => {
 					/>
 				)}
 
-			<PageTabs
-				defaultValue="email"
-				tabsList={tabsList}
-				tabsContent={tabsContent}
-				onValueChange={(value) => setActiveTab(value)}
-				tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-4"
-				tabsListClassName="bg-transparent text-foreground gap-3"
-			/>
+			{campaignBody}
 
 			<AddCampaign
 				setCampaignType={setCampaignType}
@@ -512,7 +597,7 @@ const Campaigns: React.FC = () => {
 				setStep={setStep}
 				step={step}
 				addCampaign={addCampaign}
-				activeTab={activeTab}
+				activeTab={channel}
 			/>
 
 			{/* Twilio Configuration Modal */}

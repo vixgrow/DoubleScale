@@ -70,6 +70,14 @@ final class PluginKernel {
 		$this->module_registry = new ModuleRegistry( $container );
 		$this->module_registry->register( new CoreModule() );
 		$this->module_registry->discover( DOUBLESCALE_PLUGIN_DIR . 'includes/Modules' );
+
+		/**
+		 * Allow extensions (e.g. DoubleScale Pro) to register additional modules before boot.
+		 *
+		 * @param ModuleRegistry $module_registry
+		 */
+		do_action( 'doublescale_register_modules', $this->module_registry );
+
 		$this->module_registry->boot();
 	}
 

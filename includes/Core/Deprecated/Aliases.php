@@ -50,8 +50,15 @@ class Aliases {
 		if ( null !== self::$map ) {
 			return self::$map;
 		}
-		$map_file   = __DIR__ . '/aliases-map.php';
-		self::$map = is_file( $map_file ) ? (array) require $map_file : array();
+		$map_file = __DIR__ . '/aliases-map.php';
+		$base     = is_file( $map_file ) ? (array) require $map_file : array();
+		/**
+		 * Merge additional old FQCN → new FQCN alias entries (e.g. from DoubleScale Pro).
+		 *
+		 * @param array<string, string> $base
+		 * @return array<string, string>
+		 */
+		self::$map = apply_filters( 'doublescale_aliases_map', $base );
 		return self::$map;
 	}
 

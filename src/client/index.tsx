@@ -32,6 +32,24 @@ addFilter(
 	5
 );
 
+/**
+ * When PHP marks the install as Pro (`doublescalePro.isPro`), treat Pro as active for
+ * sidebar and feature gates even if the Pro client bundle did not register first.
+ */
+addFilter(
+	'doublescale_is_pro_active',
+	'doublescale/free-is-pro-from-php-config',
+	(active: boolean) => {
+		if (active) {
+			return active;
+		}
+		const cfg = (window as { doublescalePro?: { isPro?: boolean } })
+			.doublescalePro;
+		return Boolean(cfg?.isPro);
+	},
+	1
+);
+
 const appRoot = document.getElementById( 'doublescale-admin-root' );
 
 if (appRoot) {

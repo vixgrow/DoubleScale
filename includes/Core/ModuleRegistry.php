@@ -23,12 +23,24 @@ class ModuleRegistry {
 		$this->container = $container;
 	}
 
-	public function discover( string $modules_root ): void {
+	/**
+	 * @param string[] $exclude_dir_basenames Directory names under $modules_root to skip (e.g. modules already loaded from the free plugin).
+	 */
+	public function discover( string $modules_root, array $exclude_dir_basenames = array() ): void {
 		if ( ! is_dir( $modules_root ) ) {
 			return;
 		}
 
+		$exclude_lookup = array();
+		foreach ( $exclude_dir_basenames as $name ) {
+			$exclude_lookup[ strtolower( (string) $name ) ] = true;
+		}
+
 		foreach ( (array) glob( $modules_root . '/*', GLOB_ONLYDIR ) as $dir ) {
+			$basename = strtolower( basename( $dir ) );
+			if ( isset( $exclude_lookup[ $basename ] ) ) {
+				continue;
+			}
 			$module_file = $dir . '/Module.php';
 			if ( ! is_file( $module_file ) ) {
 				continue;

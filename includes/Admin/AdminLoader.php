@@ -208,16 +208,20 @@ class AdminLoader {
 		wp_style_add_data( 'doublescale-admin-entry', 'rtl', 'replace' );
 
 		// Attach Pro config to the main script.
+		$doublescale_pro_script_data = array(
+			'version'   => DOUBLESCALE_VERSION,
+			'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
+			'restUrl'   => rest_url( 'doublescale/v1/' ),
+			'nonce'     => wp_create_nonce( 'wp_rest' ),
+			'isPro'     => self::admin_context_is_pro_plugin(),
+		);
+		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ) {
+			$doublescale_pro_script_data['proPluginUrl'] = DOUBLESCALE_PRO_PLUGIN_URL;
+		}
 		wp_localize_script(
 			'doublescale-admin',
 			'doublescalePro',
-			array(
-				'version'   => DOUBLESCALE_VERSION,
-				'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
-				'restUrl'   => rest_url( 'doublescale/v1/' ),
-				'nonce'     => wp_create_nonce( 'wp_rest' ),
-				'isPro'     => self::admin_context_is_pro_plugin(),
-			)
+			$doublescale_pro_script_data
 		);
 
 		// Enqueue WordPress media library for admin pages that need it.

@@ -1,6 +1,9 @@
 <?php
 /**
- * Integrations facade for the free plugin (CRM vendor integrations ship in Pro).
+ * Integrations facade: delegates to Pro implementation when the Pro plugin is active.
+ *
+ * CRM vendor integrations live in DoubleScale Pro; the free plugin keeps this FQCN so
+ * automations, admin config, and legacy call sites resolve without fatals.
  *
  * @package DoubleScale\Managers
  */
@@ -10,7 +13,7 @@ namespace DoubleScale\Managers;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Singleton placeholder used by automations, admin config, and legacy call sites.
+ * Singleton entry point for integration registry access.
  */
 final class IntegrationsManager {
 
@@ -20,12 +23,17 @@ final class IntegrationsManager {
 	private static $instance;
 
 	/**
-	 * @return self
+	 * @return self|\DoubleScale\Modules\Integrations\Services\IntegrationsManager
 	 */
 	public static function instance() {
+		if ( class_exists( \DoubleScale\Modules\Integrations\Services\IntegrationsManager::class, true ) ) {
+			return \DoubleScale\Modules\Integrations\Services\IntegrationsManager::instance();
+		}
+
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
+
 		return self::$instance;
 	}
 
@@ -44,6 +52,7 @@ final class IntegrationsManager {
 	 * @return null
 	 */
 	public function get_integration( $slug ) {
+		unset( $slug );
 		return null;
 	}
 

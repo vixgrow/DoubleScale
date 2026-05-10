@@ -155,6 +155,13 @@ if ( ! function_exists( 'doublescale_get_countries' ) ) {
 		global $wp_filesystem;
 		WP_Filesystem();
 		$path = DOUBLESCALE_PLUGIN_DIR . 'assets/countries.json';
+		if ( ( ! $wp_filesystem || ! file_exists( $path ) )
+			&& defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' ) ) {
+			$pro_path = DOUBLESCALE_PRO_PLUGIN_DIR . 'assets/countries.json';
+			if ( $wp_filesystem && file_exists( $pro_path ) ) {
+				$path = $pro_path;
+			}
+		}
 		if ( ! $wp_filesystem || ! file_exists( $path ) ) {
 			return array();
 		}

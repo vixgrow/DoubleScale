@@ -13,7 +13,7 @@ import { X } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { useRegisteredBlocks } from '../../stores/blocks-registry';
+import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import {
 	GlobalEmailSettingsIcon,

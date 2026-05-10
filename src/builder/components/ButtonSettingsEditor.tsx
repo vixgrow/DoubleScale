@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useButtonSettings } from '../hooks/useButtonSettings';
+import { useButtonSettings } from '@doublescale/hooks/useButtonSettings';
 import {
 	FontControl,
 	LetterSpacingControl,

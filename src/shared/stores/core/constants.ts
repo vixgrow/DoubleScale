@@ -2,6 +2,7 @@ export const STORE_KEY = 'doublescale/core';
 export const SETUP_STORE = 'SETUP_STORE';
 export const ADD_NOTICE = 'ADD_NOTICE';
 export const DELETE_NOTICE = 'DELETE_NOTICE';
+export const SET_BREADCRUMBS = 'SET_BREADCRUMBS';
 export const SET_MERGE_TAGS_VISIBLE = 'SET_MERGE_TAGS_VISIBLE';
 export const SET_CURRENT_TRIGGER = 'SET_CURRENT_TRIGGER';
 export const SET_MERGE_TAG_CALLBACK = 'SET_MERGE_TAG_CALLBACK';

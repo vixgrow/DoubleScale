@@ -7,11 +7,11 @@ import { GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
-import { useRegisteredBlocks } from '../../stores/blocks-registry';
+import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import { DeleteIcon } from '@doublescale/components';
 import { useDispatch } from '@wordpress/data';
-import { isTemplateBlock } from '../utils/templateUtils';
+import { isTemplateBlock } from '@doublescale/utils/templateUtils';
 import { ImageResizeHandles } from './ImageResizeHandles';
 
 interface BlockRendererProps {

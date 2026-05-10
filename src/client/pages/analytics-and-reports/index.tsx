@@ -7,7 +7,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { useCapabilities } from '../../../hooks/use-capabilities';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import ContactAnalytics from '../home/contacts-analytics';
 import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';

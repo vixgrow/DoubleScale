@@ -1,4 +1,4 @@
-import type { BlockDefinition } from '../../builder/blocks/blockRegistryUtils';
+import type { BlockDefinition } from '@/builder/blocks/blockRegistryUtils';
 
 export interface BlocksRegistryState {
   blocks: Record<string, BlockDefinition>;

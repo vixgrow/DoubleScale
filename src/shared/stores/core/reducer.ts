@@ -12,6 +12,7 @@ import {
 	SETUP_STORE,
 	ADD_NOTICE,
 	DELETE_NOTICE,
+	SET_BREADCRUMBS,
 	SET_MERGE_TAGS_VISIBLE,
 	SET_CURRENT_TRIGGER,
 	SET_MERGE_TAG_CALLBACK,
@@ -23,6 +24,7 @@ import { CorePureState, CoreActionTypes } from './types';
 const initialState: CorePureState = {
 	notices: {},
 	initialAccountData: {},
+	breadcrumbs: {},
 	mergeTagsVisible: false,
 	currentTrigger: '',
 	mergeTagCallback: null,
@@ -60,6 +62,7 @@ const reducer: Reducer<CorePureState, CoreActionTypes> = (
 			return {
 				...state,
 				notices: {
+					...state.notices,
 					[id]: notice,
 				},
 			};
@@ -77,6 +80,16 @@ const reducer: Reducer<CorePureState, CoreActionTypes> = (
 			return {
 				...state,
 				notices: updatedNotices,
+			};
+		}
+		case SET_BREADCRUMBS: {
+			const { breadcrumbs } = action;
+			return {
+				...state,
+				breadcrumbs: {
+					...state.breadcrumbs,
+					...breadcrumbs,
+				},
 			};
 		}
 		case SET_MERGE_TAGS_VISIBLE: {

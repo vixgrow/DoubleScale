@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import ServerErrorIcon from '../icons/server-error';
-import NotFoundIcon from '../icons/notFound-page';
-import NotAuthorizedIcon from '../icons/not-authorizated';
-import NoInternetIcon from '../icons/no-internet';
+import ServerErrorIcon from '@/components/icons/server-error';
+import NotFoundIcon from '@/components/icons/notFound-page';
+import NotAuthorizedIcon from '@/components/icons/not-authorizated';
+import NoInternetIcon from '@/components/icons/no-internet';
 
 interface ErrorStateProps {
   type: number; // 404, 403, 0, 500 ...

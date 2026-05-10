@@ -4,7 +4,7 @@ import './style.scss';
 import Select from 'react-select';
 import { isObject } from 'lodash';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { UserService } from '../../services/user-service';
+import { UserService } from '@doublescale/services/user-service';
 
 interface DealOwnerChangeProps {
 	value: { condition: string; owner_id: string };

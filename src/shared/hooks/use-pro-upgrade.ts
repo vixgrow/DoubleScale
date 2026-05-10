@@ -4,7 +4,7 @@
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import config from '../config';
+import config from '@doublescale/config';
 
 /**
  * Hook to handle Pro upgrade/install/activate logic

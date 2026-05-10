@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { AutomationContact } from '@doublescale/client';
 import { Button } from '@doublescale/components/ui/button';
 import { TimeAgoCell, ViewIcon } from '@doublescale/components';
-import { getTriggerLabel } from '../../../../../utils';
+import { getTriggerLabel } from '@doublescale/utils';
 
 interface ColumnsProps {
 	onViewJourney: (automationContact: AutomationContact) => void;

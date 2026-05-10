@@ -1,9 +1,9 @@
 import { __ } from '@wordpress/i18n';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 import PanelSettingsHeader from '../panel-settings-header';
-import { Button } from '../ui/button';
-import ArrowLeft from '../icons/arrow-left';
-import ArrowRightWhite from '../icons/arrow-right-white';
+import { Button } from '@/components/ui/button';
+import ArrowLeft from '@/components/icons/arrow-left';
+import ArrowRightWhite from '@/components/icons/arrow-right-white';
 
 interface PanelSettingsProps {
 	title: string;

@@ -1,9 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { Breadcrumb } from '@doublescale/components';
-import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import ArrowLeft from '../icons/arrow-left';
-import ArrowRightWhite from '../icons/arrow-right-white';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import ArrowLeft from '@/components/icons/arrow-left';
+import ArrowRightWhite from '@/components/icons/arrow-right-white';
 
 interface PanelLayoutProps {
 	items: Array<{

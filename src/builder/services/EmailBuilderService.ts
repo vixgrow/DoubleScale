@@ -10,7 +10,7 @@ import {
   generateColumnId,
   generateSectionId,
 } from '@/builder/utils/idGenerator';
-import { getRegisteredBlocks } from '../../stores/blocks-registry';
+import { getRegisteredBlocks } from '@/stores/blocks-registry';
 import type {
   BlockType,
   EmailBlock,

@@ -37,7 +37,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '@doublescale/components/ui/sidebar';
-import { LogoIcon } from '../icons';
+import { LogoIcon } from '@/components/icons';
 import { ChevronDown, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import {
 	Tooltip,
@@ -45,7 +45,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import WordPressLogoIcon from '../icons/woedpress-logo';
+import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
 

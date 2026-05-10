@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * internal dependencies
  */
-import { useRegisteredBlocks } from '../../stores/blocks-registry';
+import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getDraggableBlocks } from '../blocks/blockRegistryUtils';
 import TemplateCard from './TemplateCard';
 import { EmailBlock } from '../../stores/email-builder/types';

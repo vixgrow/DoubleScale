@@ -1,4 +1,4 @@
-export * from './icons';
+export * from '../shared/icons';
 export * from './table';
 export { default as NavBar } from './navbar';
 export { default as TagField } from './tag-field';

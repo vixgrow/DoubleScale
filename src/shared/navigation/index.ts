@@ -8,7 +8,10 @@ export { NavLink, setForceReload } from './nav-link';
 export const getToLink = (routeTemplate: string) => {
 	const pathname = document.location.pathname;
 	const basename = pathname.substring(0, pathname.lastIndexOf('/'));
-	let to = `${basename}/admin.php?page=doublescale`;
+	const menuSlug =
+		(window as unknown as { doublescaleConfig?: { menuSlug?: string } })
+			.doublescaleConfig?.menuSlug || 'doublescale';
+	let to = `${basename}/admin.php?page=${menuSlug}`;
 
 	// Replace dynamic segments in the route template with the actual values from `params`.
 	const route = routeTemplate.replace(/:([^/]+)/g, (_, key) => {

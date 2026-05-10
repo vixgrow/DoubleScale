@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRegisteredBlocks } from '../../stores/blocks-registry';
+import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import TemplateCard from './TemplateCard';
 import { EmailBlock } from '../../stores/email-builder/types';

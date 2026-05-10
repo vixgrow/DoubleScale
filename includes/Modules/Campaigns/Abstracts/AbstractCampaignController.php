@@ -34,6 +34,15 @@ use DoubleScale\Constants\MessageSourceTypes;
 abstract class AbstractCampaignController extends RestController {
 
 	/**
+	 * Campaign REST requires the campaigns module (routes vanish when module is off unless shimmed).
+	 *
+	 * @return WP_Error|null
+	 */
+	protected function campaigns_module_guard(): ?WP_Error {
+		return $this->require_module( 'campaigns' );
+	}
+
+	/**
 	 * Campaign channel (email, sms, whatsapp)
 	 *
 	 * @var string
@@ -989,24 +998,52 @@ abstract class AbstractCampaignController extends RestController {
 	 * Permission checks - all return the same for campaigns
 	 */
 	public function get_items_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function get_item_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function create_item_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function update_item_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function delete_item_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function delete_items_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 	public function get_analytics_permissions_check( $request ) {
+		$mod = $this->campaigns_module_guard();
+		if ( $mod instanceof WP_Error ) {
+			return $mod;
+		}
 		return Permissions::has_crm_manager_access();
 	}
 }

@@ -18,7 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { DeleteIcon } from '../icons';
+import { DeleteIcon } from '@/components/icons';
 
 interface RuleProps {
 	ruleSettings: RuleSettings;

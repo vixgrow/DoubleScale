@@ -23,7 +23,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import TrashIcon from '../icons/trash';
+import TrashIcon from '@/components/icons/trash';
 import Select from 'react-select';
 
 interface ContactMappedFieldsFormProps {

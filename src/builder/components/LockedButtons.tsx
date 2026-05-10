@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { PremiumIcon, RocketIcon } from '../../components';
-import { Button } from '../../components/ui/button';
-import { useProUpgrade } from '../../hooks/use-pro-upgrade';
+import { Button } from '@/components/ui/button';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 /**
  * Component to display locked library placeholder for Pro features

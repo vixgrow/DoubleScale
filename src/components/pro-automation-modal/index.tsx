@@ -19,9 +19,9 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import './style.scss';
-import config from '../../config';
-import { RocketIcon } from '../icons';
-import { useProUpgrade } from '../../hooks/use-pro-upgrade';
+import config from '@doublescale/config';
+import { RocketIcon } from '@/components/icons';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
 

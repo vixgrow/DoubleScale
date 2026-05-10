@@ -1,6 +1,6 @@
 // Import and register all stores
-import './blocks-registry';
+import '../shared/stores/blocks-registry';
 import './campaign';
-import './core';
+import '../shared/stores/core';
 import './email-builder';
 

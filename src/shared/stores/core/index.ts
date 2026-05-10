@@ -1,5 +1,5 @@
 import { createReduxStore, register } from '@wordpress/data';
-import type { DispatchFromMap, SelectFromMap } from '../types';
+import type { DispatchFromMap, SelectFromMap } from '../../../stores/types';
 import * as actions from './actions';
 import { STORE_KEY } from './constants';
 import type { State } from './reducer';

@@ -1,5 +1,5 @@
 import { Column } from '@tanstack/react-table';
-import { SortIcon } from '../icons';
+import { SortIcon } from '@/components/icons';
 
 const SortedHeaderCell = <T,>({
 	column,

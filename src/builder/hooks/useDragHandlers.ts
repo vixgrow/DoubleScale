@@ -1,15 +1,15 @@
 import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from 'react';
-import { getRegisteredBlocks } from '../../stores/blocks-registry';
+import { getRegisteredBlocks } from '@/stores/blocks-registry';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { TemplateConfig, TemplateType } from '../types/common';
 import {
   handleTemplateDropOnCanvas,
   markAsTemplateBlock,
-} from '../utils/dragAndDropHelpers';
-import { generateBlockId, generateColumnId, generateSectionId } from '../utils/idGenerator';
-import { isTemplateSection } from '../utils/templateUtils';
+} from '@doublescale/utils/dragAndDropHelpers';
+import { generateBlockId, generateColumnId, generateSectionId } from '@doublescale/utils/idGenerator';
+import { isTemplateSection } from '@doublescale/utils/templateUtils';
 
 // Helper: Auto-select and scroll to a block
 const selectAndScrollToBlock = (

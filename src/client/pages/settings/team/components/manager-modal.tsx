@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CRMUser } from '../../../../services/user-management';
+import { CRMUser } from '@doublescale/services/user-management';
 import { ManagerRole, ManagerRoleOptions } from './types';
 import {
 	CustomDialogHeader,

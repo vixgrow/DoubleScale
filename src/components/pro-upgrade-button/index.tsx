@@ -2,8 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { RocketIcon } from '../icons';
-import { useProUpgrade } from '../../hooks/use-pro-upgrade';
+import { RocketIcon } from '@/components/icons';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 interface ProUpgradeButtonProps {
 	className?: string;

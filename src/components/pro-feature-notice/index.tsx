@@ -6,11 +6,11 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import config from '../../config';
+import config from '@doublescale/config';
 //@ts-ignore
 import proImage from '../../../assets/images/pro_img.png';
-import { PremiumIcon, RocketIcon } from '../icons';
-import { useProUpgrade } from '../../hooks/use-pro-upgrade';
+import { PremiumIcon, RocketIcon } from '@/components/icons';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 interface ProFeatureNoticeProps {
 	featureName: string;

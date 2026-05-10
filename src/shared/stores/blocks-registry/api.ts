@@ -6,7 +6,7 @@
  */
 
 import { dispatch, select, useSelect } from '@wordpress/data';
-import type { BlockDefinition } from '../../builder/blocks/blockRegistryUtils';
+import type { BlockDefinition } from '@/builder/blocks/blockRegistryUtils';
 import { STORE_KEY } from './constants';
 
 /**

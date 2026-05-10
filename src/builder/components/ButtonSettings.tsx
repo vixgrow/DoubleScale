@@ -12,7 +12,7 @@ import { useState } from 'react';
  */
 import { Button } from '@/components/ui/button';
 import ButtonEditor from './ButtonSettingsEditor';
-import { useButtonSettings } from '../hooks/useButtonSettings';
+import { useButtonSettings } from '@doublescale/hooks/useButtonSettings';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
 

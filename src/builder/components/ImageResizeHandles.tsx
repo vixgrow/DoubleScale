@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ResizeHandleType, useImageResize } from '../hooks/useImageResize';
+import { ResizeHandleType, useImageResize } from '@doublescale/hooks/useImageResize';
 
 interface ImageResizeHandlesProps {
 	width: string;

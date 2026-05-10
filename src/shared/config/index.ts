@@ -1,5 +1,6 @@
 /* eslint-disable jsdoc/check-line-alignment */
 import type {
+	Addons,
 	AutomationActions,
 	AutomationGoals,
 	AutomationMergeTags,
@@ -125,6 +126,8 @@ const configData: ConfigData = {
 			is_installed: false,
 			is_active: false,
 		},
+	addons: (serverData.addons as Addons | undefined) ?? {},
+	storeNonce: (serverData.storeNonce as string | undefined) ?? '',
 	modules: (serverData.modules as ModuleInfo[] | undefined) ?? [],
 	aiConfigured: Boolean(serverData.aiConfigured),
 };
@@ -750,6 +753,11 @@ export const getModules = (data: ConfigData) => (): ModuleInfo[] => {
 
 export const setModules = (data: ConfigData) => (value: ModuleInfo[]) => {
 	data.modules = value;
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(
+			new CustomEvent('doublescale:modules-updated', { detail: value })
+		);
+	}
 };
 
 export const isModuleEnabled =
@@ -812,6 +820,22 @@ export const setProPluginData = (data: ConfigData) => (value: ProPluginData) => 
  */
 export const getProPluginData = (data: ConfigData) => (): ProPluginData => {
 	return data.proPluginData as unknown as ProPluginData;
+};
+
+export const getAddons = (data: ConfigData) => (): Addons => {
+	return data.addons;
+};
+
+export const setAddons = (data: ConfigData) => (value: Addons) => {
+	data.addons = value;
+};
+
+export const getStoreNonce = (data: ConfigData) => (): string => {
+	return data.storeNonce;
+};
+
+export const setStoreNonce = (data: ConfigData) => (value: string) => {
+	data.storeNonce = value;
 };
 
 export interface ConfigApi {
@@ -878,6 +902,10 @@ export interface ConfigApi {
 	setUrlDoubleScalePro: (value: string) => void;
 	getProPluginData: () => ProPluginData;
 	setProPluginData: (value: ProPluginData) => void;
+	getAddons: () => Addons;
+	setAddons: (value: Addons) => void;
+	getStoreNonce: () => string;
+	setStoreNonce: (value: string) => void;
 	isModuleEnabled: (slug: string) => boolean;
 	isModuleToggleEnabled: (slug: string) => boolean;
 	getModules: () => ModuleInfo[];
@@ -925,6 +953,10 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setLicense = setLicense(data);
 	configApi.getProPluginData = getProPluginData(data);
 	configApi.setProPluginData = setProPluginData(data);
+	configApi.getAddons = getAddons(data);
+	configApi.setAddons = setAddons(data);
+	configApi.getStoreNonce = getStoreNonce(data);
+	configApi.setStoreNonce = setStoreNonce(data);
 	configApi.getSiteUrl = getSiteUrl(data);
 	configApi.setSiteUrl = setSiteUrl(data);
 	configApi.getMergeTags = () => getMergeTags(data);

@@ -10,7 +10,7 @@
  * internal dependencies
  */
 import { ButtonBlockProps } from '..';
-import { useButtonSettings } from '../../../../hooks/useButtonSettings';
+import { useButtonSettings } from '@doublescale/hooks/useButtonSettings';
 import { getTextAlignment } from '@/builder/utils/styleHelpers';
 
 export interface ButtonRendererProps {

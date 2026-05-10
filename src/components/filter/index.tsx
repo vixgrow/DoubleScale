@@ -24,7 +24,7 @@ import type {
 } from '@doublescale/client';
 import { DeleteIcon } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
-import { DateRangePicker } from '../ui/date-range-picker';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
 	Select,

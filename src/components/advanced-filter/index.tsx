@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useRef, useState, useEffect } from 'react';
 import Filters from '../filters';
 import type { Filter as FilterType } from '@doublescale/client';
-import { DeleteIcon } from '../icons';
+import { DeleteIcon } from '@/components/icons';
 
 interface FilterBlock {
 	id: string;

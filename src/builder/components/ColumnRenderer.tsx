@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
-import { isSectionTemplate } from '../utils/templateUtils';
+import { isSectionTemplate } from '@doublescale/utils/templateUtils';
 // @ts-ignore
 import dropIcon from '../../../assets/images/drop-icon.png';
 

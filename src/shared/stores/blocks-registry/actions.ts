@@ -1,4 +1,4 @@
-import type { BlockDefinition } from '../../builder/blocks/blockRegistryUtils';
+import type { BlockDefinition } from '@/builder/blocks/blockRegistryUtils';
 import { REGISTER_BLOCKS } from './constants';
 import type { RegisterBlocksAction } from './types';
 

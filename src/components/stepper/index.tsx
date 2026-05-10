@@ -1,4 +1,4 @@
-import TwoArrows from '../icons/two-arrows';
+import TwoArrows from '@/components/icons/two-arrows';
 
 type Step = {
 	label: string;

@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 /**
@@ -36,6 +35,7 @@ import { formatDateForAPI } from '@doublescale/utils';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
 import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
+import { moduleFetch } from '@doublescale/services/module-fetch';
 
 export type CampaignChannel = 'email' | 'sms';
 
@@ -162,9 +162,22 @@ const Campaigns: React.FC<CampaignsProps> = ({
 				);
 			}
 
-			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/campaigns', queryParams),
-			})) as CampaignsResponse;
+			const response = (await moduleFetch<CampaignsResponse>(
+				'campaigns',
+				{
+					path: addQueryArgs('/doublescale/v1/campaigns', queryParams),
+				}
+			)) as CampaignsResponse | null;
+			if (!response) {
+				setCampaigns([]);
+				setTotalRecords(0);
+				setHasRecords(false);
+				setNotice({
+					type: 'error',
+					message: __('The Campaigns module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 			setCampaigns(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
@@ -218,7 +231,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 				settings.trigger = triggerConfig;
 			}
 
-			const response = (await apiFetch({
+			const response = (await moduleFetch<Campaign>('campaigns', {
 				path: '/doublescale/v1/campaigns',
 				method: 'POST',
 				data: {
@@ -230,7 +243,14 @@ const Campaigns: React.FC<CampaignsProps> = ({
 						: __('New campaign', 'doublescale'),
 					status: 'draft',
 				},
-			})) as Campaign;
+			})) as Campaign | null;
+
+			if (!response) {
+				return {
+					success: false,
+					error: __('The Campaigns module is disabled.', 'doublescale'),
+				};
+			}
 
 			setCampaigns([...campaigns, response]);
 			setStep(null);
@@ -250,13 +270,20 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	const deleteSelected = async () => {
 		try {
 			// Use unified bulk-delete endpoint (works across all campaign types)
-			await apiFetch({
+			const deleted = await moduleFetch('campaigns', {
 				path: '/doublescale/v1/campaigns/bulk-delete',
 				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
 				},
 			});
+			if (!deleted) {
+				setNotice({
+					type: 'error',
+					message: __('The Campaigns module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 
 			setSelectedRowKeys([]);
 			fetchCampaigns();
@@ -271,10 +298,17 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	const deleteCampaign = async (id: number) => {
 		try {
 			// Use unified endpoint - type is auto-detected
-			await apiFetch({
+			const ok = await moduleFetch('campaigns', {
 				path: `/doublescale/v1/campaigns/${id}`,
 				method: 'DELETE',
 			});
+			if (!ok) {
+				setNotice({
+					type: 'error',
+					message: __('The Campaigns module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 
 			fetchCampaigns();
 		} catch (error: any) {
@@ -293,10 +327,18 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 		try {
 			// Use unified endpoint - type is auto-detected
-			const response = (await apiFetch({
+			const response = (await moduleFetch<Campaign>('campaigns', {
 				path: `/doublescale/v1/campaigns/${id}/duplicate`,
 				method: 'POST',
-			})) as Campaign;
+			})) as Campaign | null;
+
+			if (!response) {
+				setNotice({
+					type: 'error',
+					message: __('The Campaigns module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 
 			navigate(getToLink(`campaigns/${response.id}/template`));
 		} catch (error: any) {
@@ -309,11 +351,19 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 	const changeCampaignStatus = async (id: number, status: 'active' | 'draft') => {
 		try {
-			await apiFetch({
+			const ok = await moduleFetch('campaigns', {
 				path: `/doublescale/v1/campaigns/${id}`,
 				method: 'PUT',
 				data: { status },
 			});
+
+			if (!ok) {
+				setNotice({
+					type: 'error',
+					message: __('The Campaigns module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 
 			setNotice({
 				type: 'success',

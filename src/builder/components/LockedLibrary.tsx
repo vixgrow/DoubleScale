@@ -2,9 +2,9 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button } from '../../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { PremiumIcon } from '../../components';
-import { useProUpgrade } from '../../hooks/use-pro-upgrade';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 /**
  * Component to display locked library placeholder for Pro features

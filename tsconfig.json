@@ -37,14 +37,20 @@
 		"strictNullChecks": true,
 		"types": [],
 		"paths": {
+			"@doublescale/shared": [
+				"shared"
+			],
+			"@doublescale/shared/*": [
+				"shared/*"
+			],
 			"@doublescale/navigation": [
-				"navigation"
+				"shared/navigation"
 			],
 			"@doublescale/store": [
 				"store/index.ts"
 			],
 			"@doublescale/config": [
-				"config"
+				"shared/config"
 			],
 			"@doublescale/client": [
 				"client"
@@ -55,20 +61,62 @@
 			"@doublescale/components/*": [
 				"components/*"
 			],
+			"@doublescale/components/ui/*": [
+				"shared/ui/*"
+			],
+			"@doublescale/components/icons/*": [
+				"shared/icons/*"
+			],
 			"@doublescale/utils": [
-				"utils"
+				"shared/utils"
 			],
 			"@doublescale/services": [
-				"services"
+				"shared/services"
 			],
 			"@doublescale/services/*": [
-				"services/*"
+				"shared/services/*"
 			],
 			"@doublescale/hooks/*": [
-				"hooks/*"
+				"shared/hooks/*"
 			],
 			"@doublescale/assets": [
 				"assets/*"
+			],
+			"@/components/ui/*": [
+				"shared/ui/*"
+			],
+			"@/components/icons/*": [
+				"shared/icons/*"
+			],
+			"@/lib": [
+				"shared/lib"
+			],
+			"@/lib/*": [
+				"shared/lib/*"
+			],
+			"@/hooks/*": [
+				"shared/hooks/*"
+			],
+			"@/utils/*": [
+				"shared/utils/*"
+			],
+			"@/stores/blocks-registry": [
+				"shared/stores/blocks-registry"
+			],
+			"@/stores/blocks-registry/*": [
+				"shared/stores/blocks-registry/*"
+			],
+			"@/navigation/*": [
+				"shared/navigation/*"
+			],
+			"@/config/*": [
+				"shared/config/*"
+			],
+			"@/constants/*": [
+				"shared/constants/*"
+			],
+			"@/types/*": [
+				"shared/types/*"
 			],
 			"@/*": [
 				"./*"

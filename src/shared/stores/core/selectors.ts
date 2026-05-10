@@ -16,6 +16,17 @@ export const getNotices = (state: State): Notices => {
 };
 
 /**
+ * Get breadcrumbs.
+ *
+ * @param {State} state State.
+ *
+ * @return {Record<string, string>} Breadcrumbs.
+ */
+export const getBreadcrumbs = (state: State): Record<string, string> => {
+	return state.breadcrumbs;
+};
+
+/**
  * Get merge tags visibility.
  *
  * @param {State} state State.

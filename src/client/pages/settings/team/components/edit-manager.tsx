@@ -1,6 +1,6 @@
 import React from 'react';
 import ManagerModal, { ManagerFormData } from './manager-modal';
-import { CRMUser } from '../../../../services/user-management';
+import { CRMUser } from '@doublescale/services/user-management';
 import { ManagerRole } from './types';
 
 interface EditManagerProps {

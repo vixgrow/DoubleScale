@@ -34,6 +34,10 @@ export type ConfigData = Record<string, unknown> & {
 	currency: string;
 	urlDoubleScalePro: string;
 	modules: ModuleInfo[];
+	/** Add-on plugin catalog + install state from the store. */
+	addons: Addons;
+	/** Nonce for in-app store / installer requests. */
+	storeNonce: string;
 	/** Whether AI credentials are configured (OpenAI etc.). */
 	aiConfigured: boolean;
 };
@@ -62,6 +66,23 @@ export type ProPluginData = {
 	is_active: boolean;
 };
 
+/**
+ * Store add-on (Quill SMTP, etc.) — serialized from {@see \DoubleScale\Admin\AdminConfig::get_addons_status()}.
+ */
+export type Addon = {
+	slug: string;
+	label: string;
+	description: string;
+	plugin_file: string;
+	image: string;
+	plan: string;
+	is_installed: boolean;
+	is_active: boolean;
+};
+
+export type Addons = {
+	[key: string]: Addon;
+};
 
 export type UserCapabilities = {
 	doublescale_crm_manager: boolean;

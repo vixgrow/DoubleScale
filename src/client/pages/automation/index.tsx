@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
@@ -38,6 +37,7 @@ import {
 	AutomationAnalyticsIcon,
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
+import { moduleFetch } from '@doublescale/services/module-fetch';
 
 const Automation: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -70,9 +70,17 @@ const Automation: React.FC = () => {
 		}
 
 		try {
-			const response = (await apiFetch({
+			const response = (await moduleFetch<AutomationType>('automations', {
 				path: `/doublescale/v1/automations/${id}`,
-			})) as AutomationType;
+			})) as AutomationType | null;
+
+			if (!response) {
+				createNotice({
+					type: 'error',
+					message: __('The Automations module is disabled.', 'doublescale'),
+				});
+				return undefined;
+			}
 
 			setAutomation(response);
 			setSteps(response.steps);
@@ -104,9 +112,14 @@ const Automation: React.FC = () => {
 
 		try {
 			setAnalyticsLoading(true);
-			const response = (await apiFetch({
+			const response = (await moduleFetch<any>('analytics', {
 				path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
-			})) as any;
+			})) as any | null;
+
+			if (!response) {
+				setAnalyticsData([]);
+				return;
+			}
 
 			if (response.funnel_data) {
 				// Transform funnel data to analytics format
@@ -132,11 +145,19 @@ const Automation: React.FC = () => {
 		const newAutomation = { ...automation, ...data };
 
 		try {
-			const response = (await apiFetch({
+			const response = (await moduleFetch<AutomationType>('automations', {
 				path: `/doublescale/v1/automations/${newAutomation.id}`,
 				method: 'POST',
 				data: newAutomation,
-			})) as AutomationType;
+			})) as AutomationType | null;
+
+			if (!response) {
+				createNotice({
+					type: 'error',
+					message: __('The Automations module is disabled.', 'doublescale'),
+				});
+				return;
+			}
 
 			setAutomation(response);
 			setSteps(response.steps);

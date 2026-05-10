@@ -9,6 +9,7 @@ import type { InitialPayload } from '@doublescale/config';
 import {
 	ADD_NOTICE,
 	DELETE_NOTICE,
+	SET_BREADCRUMBS,
 	SET_CURRENT_TRIGGER,
 	SET_FORM_CONTEXT,
 	SET_MERGE_TAG_CALLBACK,
@@ -19,6 +20,7 @@ import {
 export type CorePureState = {
 	notices: Notices;
 	initialAccountData: InitialAccountData;
+	breadcrumbs: Record<string, string>;
 	mergeTagsVisible: boolean;
 	currentTrigger: string;
 	mergeTagCallback?: ((tagValue: string) => void) | null;
@@ -61,6 +63,11 @@ type deleteNote = {
 	id: string;
 };
 
+export type setBreadcrumbs = {
+	type: typeof SET_BREADCRUMBS;
+	breadcrumbs: Record<string, string>;
+};
+
 export type setMergeTagsVisible = {
 	type: typeof SET_MERGE_TAGS_VISIBLE;
 	visible: boolean;
@@ -85,6 +92,7 @@ export type CoreActionTypes =
 	| setupStoreAction
 	| addNote
 	| deleteNote
+	| setBreadcrumbs
 	| setMergeTagsVisible
 	| setCurrentTrigger
 	| setMergeTagCallback

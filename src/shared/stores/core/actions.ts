@@ -10,6 +10,7 @@ import {
 	SETUP_STORE,
 	ADD_NOTICE,
 	DELETE_NOTICE,
+	SET_BREADCRUMBS,
 	SET_MERGE_TAGS_VISIBLE,
 	SET_CURRENT_TRIGGER,
 	SET_MERGE_TAG_CALLBACK,
@@ -47,6 +48,18 @@ export const createNotice = (notice: Notice): CoreActionTypes => ({
 export const deleteNotice = (id: string): CoreActionTypes => ({
 	type: DELETE_NOTICE,
 	id,
+});
+
+/**
+ * Set Breadcrumbs Action.
+ * @param {Record<string, string>} breadcrumbs Breadcrumbs.
+ * @returns {CoreActionTypes} Set Breadcrumbs Action.
+ */
+export const setBreadcrumbs = (
+	breadcrumbs: Record<string, string>
+): CoreActionTypes => ({
+	type: SET_BREADCRUMBS,
+	breadcrumbs,
 });
 
 /**

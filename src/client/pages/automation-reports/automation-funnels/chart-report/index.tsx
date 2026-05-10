@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { Card, CardContent } from '@/components/ui/card';
 import './style.scss';
 import { Automation } from '@doublescale/client';
+import { moduleFetch } from '@doublescale/services/module-fetch';
 // @ts-ignore
 import D3Funnel from 'd3-funnel';
 
@@ -50,11 +50,16 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			setLoading(true);
 			setError(null);
 
-			const response = (await apiFetch({
+			const response = (await moduleFetch<FunnelResponse>('analytics', {
 				path: `/doublescale/v1/automation-reports/${automation.id}/get-chart-report`,
-			})) as FunnelResponse;
+			})) as FunnelResponse | null;
 
-			console.log('response', response);
+			if (!response) {
+				setFunnelData([]);
+				setLoading(false);
+				setError(__('The Analytics module is disabled.', 'doublescale'));
+				return;
+			}
 
 			if (response.funnel_data) {
 				setFunnelData(response.funnel_data || []);

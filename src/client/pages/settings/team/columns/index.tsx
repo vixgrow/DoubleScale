@@ -9,7 +9,7 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * internal dependencies
  */
-import type { CRMUser } from '../../../../services/user-management';
+import type { CRMUser } from '@doublescale/services/user-management';
 import { Button } from '@/components/ui/button';
 import { ManagerRoleLabels } from '../components/types';
 import { DeleteIcon } from '@doublescale/components';

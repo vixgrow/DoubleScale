@@ -11,18 +11,11 @@ import React, { useEffect, useState } from 'react';
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from '@/components/ui/dialog';
-import {
-	Field,
-	CustomDialogHeader,
-	GradientAddContactIcon,
-} from '@doublescale/components';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { GradientAddContactIcon } from '@doublescale/components';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import { useContactsContext } from '../contexts';
 import { useContactsAPI } from '../useContactsAPI';
 import ImportModal from '../../../import-modal';
@@ -60,108 +53,193 @@ export const CreateContactModal: React.FC = () => {
 		}
 	};
 
+	const closeModal = () => {
+		setCreateContactVisible(false);
+		setContactForm(emptyContact);
+	};
+
+	const inputClass =
+		'h-11 rounded-xl border-border/80 bg-background pr-11 text-base shadow-inner shadow-black/[0.02]';
+
 	return (
 		<Dialog open={createContactVisible} onOpenChange={handleClose}>
-			<DialogContent className="max-h-[90vh]">
-				<DialogHeader>
-					<DialogTitle>
-						<CustomDialogHeader
-							title={__('Create Contact', 'doublescale')}
-							subtitle={__(
-								'Add basic information below to add new Contact',
-								'doublescale'
-							)}
-							icon={<GradientAddContactIcon />}
-						/>
-					</DialogTitle>
-				</DialogHeader>
-
-				<div className="doublescale-fields space-y-5 h-[calc(90vh-13rem)] overflow-y-auto">
-					<Field
-						label={__('First Name', 'doublescale')}
-						placeholder={__('Enter First Name', 'doublescale')}
-						value={contactForm.first_name}
-						onChange={(value) =>
-							setContactForm((prev) => ({
-								...prev,
-								first_name: value,
-							}))
-						}
-						type="text"
-					/>
-					<Field
-						label={__('Last Name', 'doublescale')}
-						value={contactForm.last_name}
-						onChange={(value) =>
-							setContactForm((prev) => ({
-								...prev,
-								last_name: value,
-							}))
-						}
-						type="text"
-						placeholder={__('Enter Last Name', 'doublescale')}
-					/>
-
-					<Field
-						label={__('Email', 'doublescale')}
-						value={contactForm.email}
-						onChange={(value) =>
-							setContactForm((prev) => ({
-								...prev,
-								email: value,
-							}))
-						}
-						type="email"
-						placeholder={__('Enter Email', 'doublescale')}
-					/>
-					<Field
-						label={__('Phone', 'doublescale')}
-						value={contactForm.phone}
-						onChange={(value) => {
-							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
-							const phoneRegex = /^[0-9+\-\s()]*$/;
-							if (phoneRegex.test(value) || value === '') {
-								setContactForm((prev) => ({
-									...prev,
-									phone: value,
-								}));
-							}
-						}}
-						type="tel"
-						placeholder={__('Enter Phone Number', 'doublescale')}
-					/>
-					<Field
-						label={__('WhatsApp Phone', 'doublescale')}
-						value={contactForm.whatsapp_phone}
-						onChange={(value) => {
-							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
-							const phoneRegex = /^[0-9+\-\s()]*$/;
-							if (phoneRegex.test(value) || value === '') {
-								setContactForm((prev) => ({
-									...prev,
-									whatsapp_phone: value,
-								}));
-							}
-						}}
-						type="tel"
-						placeholder={__('Enter WhatsApp Phone Number', 'doublescale')}
-						helperText={__('Phone number for WhatsApp messaging (e.g., +1234567890)', 'doublescale')}
-					/>
+			<DialogContent
+				className={cn(
+					'max-h-[min(90vh,760px)] max-w-[520px] gap-0 overflow-hidden rounded-2xl border-border/70 p-0 shadow-2xl',
+					'sm:max-w-[520px]'
+				)}
+			>
+				<div className="border-b border-border/70 bg-gradient-to-br from-muted/30 via-background to-background px-8 pb-6 pt-8">
+					<div className="flex gap-4 pr-8">
+						<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-sm">
+							<span className="text-primary [&>svg]:h-6 [&>svg]:w-6">
+								<GradientAddContactIcon />
+							</span>
+						</div>
+						<div className="min-w-0 flex-1 space-y-1.5">
+							<h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+								{__('Create contact', 'doublescale')}
+							</h2>
+							<p className="text-sm leading-relaxed text-muted-foreground">
+								{__(
+									'Add the essentials now. You can enrich the profile with lists, tags, and custom fields on the next screen.',
+									'doublescale'
+								)}
+							</p>
+						</div>
+					</div>
 				</div>
 
-				<DialogFooter className="mt-6">
+				<div className="max-h-[min(52vh,420px)] space-y-6 overflow-y-auto px-8 py-7">
+					<div>
+						<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+							{__('Identity', 'doublescale')}
+						</p>
+						<div className="mt-4 grid gap-4 sm:grid-cols-2">
+							<div className="space-y-2">
+								<Label htmlFor="ds-create-contact-first" className="text-sm font-medium">
+									{__('First name', 'doublescale')}
+								</Label>
+								<Input
+									id="ds-create-contact-first"
+									className={inputClass}
+									autoComplete="given-name"
+									placeholder={__('Jane', 'doublescale')}
+									value={contactForm.first_name}
+									onChange={(e) =>
+										setContactForm((prev) => ({
+											...prev,
+											first_name: e.target.value,
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="ds-create-contact-last" className="text-sm font-medium">
+									{__('Last name', 'doublescale')}
+								</Label>
+								<Input
+									id="ds-create-contact-last"
+									className={inputClass}
+									autoComplete="family-name"
+									placeholder={__('Doe', 'doublescale')}
+									value={contactForm.last_name}
+									onChange={(e) =>
+										setContactForm((prev) => ({
+											...prev,
+											last_name: e.target.value,
+										}))
+									}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="ds-create-contact-email" className="text-sm font-medium">
+							{__('Email', 'doublescale')}
+						</Label>
+						<Input
+							id="ds-create-contact-email"
+							type="email"
+							className={inputClass}
+							autoComplete="email"
+							inputMode="email"
+							placeholder={__('name@company.com', 'doublescale')}
+							value={contactForm.email}
+							onChange={(e) =>
+								setContactForm((prev) => ({
+									...prev,
+									email: e.target.value,
+								}))
+							}
+						/>
+					</div>
+
+					<div>
+						<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+							{__('Phone (optional)', 'doublescale')}
+						</p>
+						<div className="mt-4 space-y-4">
+							<div className="space-y-2">
+								<Label htmlFor="ds-create-contact-phone" className="text-sm font-medium">
+									{__('Phone', 'doublescale')}
+								</Label>
+								<Input
+									id="ds-create-contact-phone"
+									type="tel"
+									className={inputClass}
+									autoComplete="tel"
+									placeholder={__('+1 555 010 2030', 'doublescale')}
+									value={contactForm.phone}
+									onChange={(e) => {
+										const v = e.target.value;
+										const phoneRegex = /^[0-9+\-\s()]*$/;
+										if (phoneRegex.test(v) || v === '') {
+											setContactForm((prev) => ({
+												...prev,
+												phone: v,
+											}));
+										}
+									}}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="ds-create-contact-whatsapp" className="text-sm font-medium">
+									{__('WhatsApp', 'doublescale')}
+								</Label>
+								<Input
+									id="ds-create-contact-whatsapp"
+									type="tel"
+									className={inputClass}
+									autoComplete="tel"
+									placeholder={__('Same or different as phone', 'doublescale')}
+									value={contactForm.whatsapp_phone}
+									onChange={(e) => {
+										const v = e.target.value;
+										const phoneRegex = /^[0-9+\-\s()]*$/;
+										if (phoneRegex.test(v) || v === '') {
+											setContactForm((prev) => ({
+												...prev,
+												whatsapp_phone: v,
+											}));
+										}
+									}}
+								/>
+								<p className="text-xs text-muted-foreground">
+									{__(
+										'Used for WhatsApp messaging. Include country code (e.g. +15550102030).',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="flex flex-col-reverse gap-3 border-t border-border/70 bg-muted/25 px-8 py-5 sm:flex-row sm:items-center sm:justify-end">
 					<Button
+						type="button"
+						variant="outline"
+						className="h-11 rounded-xl border-border/80 sm:min-w-[100px]"
+						onClick={closeModal}
+						disabled={isSaving}
+					>
+						{__('Cancel', 'doublescale')}
+					</Button>
+					<Button
+						type="button"
+						variant="default"
+						size="lg"
+						className="h-11 rounded-xl px-8 font-semibold shadow-sm sm:min-w-[160px]"
 						onClick={() => createContact(contactForm)}
 						disabled={isSaving}
-						size="xl"
-						variant="gradient"
-						className="w-full"
 					>
 						{isSaving
-							? __('Submitting...', 'doublescale')
-							: __('Submit', 'doublescale')}
+							? __('Saving…', 'doublescale')
+							: __('Create contact', 'doublescale')}
 					</Button>
-				</DialogFooter>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

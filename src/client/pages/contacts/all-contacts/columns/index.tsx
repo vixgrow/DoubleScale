@@ -54,6 +54,21 @@ export const useContactsColumns = () => {
 
 	const baseColumns: ColumnDef<Contact>[] = [
 		{
+			accessorKey: 'id',
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('ID', 'doublescale')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => <span className="text-muted-foreground font-mono text-xs">{row.original.id}</span>,
+		},
+		{
 			accessorKey: 'contact',
 			header: ({ column }) => (
 				<div
@@ -84,26 +99,26 @@ export const useContactsColumns = () => {
 						}
 						className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
 					>
-						<div className="flex items-center gap-3">
-							<Avatar className="w-12 h-12 rounded-lg">
+						<div className="flex items-center gap-2.5">
+							<Avatar className="w-9 h-9 rounded-full">
 								{avatarUrl ? (
 									<AvatarImage
 										src={avatarUrl}
 										alt={fullName || contact.email}
-										className="rounded-lg"
+										className="rounded-full"
 									/>
 								) : null}
-								<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+								<AvatarFallback className="rounded-full bg-primary/10 text-primary font-semibold text-xs">
 									{initials}
 								</AvatarFallback>
 							</Avatar>
-							<div className="flex flex-col">
+							<div className="flex flex-col gap-0.5">
 								{fullName && (
-									<div className="font-semibold capitalize text-base text-[#09090B] w-40 truncate">
+									<div className="font-medium capitalize text-sm text-foreground max-w-[180px] truncate leading-tight">
 										{fullName}
 									</div>
 								)}
-								<div className="text-base text-gray-500">
+								<div className="text-xs text-muted-foreground">
 									{contact.email}
 								</div>
 							</div>
@@ -125,7 +140,7 @@ export const useContactsColumns = () => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.phone || '-',
+			cell: ({ row }) => <span className="text-sm text-foreground">{row.original.phone || '-'}</span>,
 		},
 		{
 			accessorKey: 'whatsapp_phone',
@@ -140,7 +155,7 @@ export const useContactsColumns = () => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.whatsapp_phone || '-',
+			cell: ({ row }) => <span className="text-sm text-foreground">{row.original.whatsapp_phone || '-'}</span>,
 		},
 		{
 			accessorKey: 'country',
@@ -155,12 +170,12 @@ export const useContactsColumns = () => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => row.original.country || '-',
+			cell: ({ row }) => <span className="text-sm text-foreground">{row.original.country || '-'}</span>,
 		},
 		{
 			accessorKey: 'city',
 			header: __('City', 'doublescale'),
-			cell: ({ row }) => row.original.city || '-',
+			cell: ({ row }) => <span className="text-sm text-foreground">{row.original.city || '-'}</span>,
 		},
 		{
 			accessorKey: 'status',
@@ -178,7 +193,6 @@ export const useContactsColumns = () => {
 			cell: ({ row }) => {
 				const contact = row.original as any;
 
-				// Determine overall status: subscribed if ANY channel is subscribed
 				const emailStatus = contact.email_status || '';
 				const smsStatus = contact.sms_status || '';
 				const whatsappStatus = contact.whatsapp_status || '';
@@ -194,49 +208,77 @@ export const useContactsColumns = () => {
 				switch (status.toLowerCase()) {
 					case 'subscribed':
 						statusClasses =
-							'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
+							'text-emerald-700 bg-emerald-50 border-emerald-200';
 						break;
 					case 'unsubscribed':
 						statusClasses =
-							'text-[#1C1D22] bg-[#FFF2E2] border-[#1C1D22]';
+							'text-amber-700 bg-amber-50 border-amber-200';
 						break;
 					case 'bounced':
 						statusClasses =
-							'text-[#5570F1] bg-[#5570F129] border-[#5570F1]';
+							'text-primary bg-primary/5 border-primary/20';
 						break;
 					case 'unverified':
 						statusClasses =
-							'text-[#CC5F5F] bg-[#F57E7729] border-[#CC5F5F]';
+							'text-destructive bg-destructive/5 border-destructive/20';
 						break;
 					default:
 						statusClasses =
-							'text-gray-600 bg-gray-100 border-gray-600';
+							'text-muted-foreground bg-muted/50 border-border';
 				}
 
 				return (
-					<div
-						className={`text-base capitalize w-fit rounded-lg border py-1 px-3 ${statusClasses}`}
+					<span
+						className={`inline-flex items-center text-xs font-medium capitalize rounded-full border py-0.5 px-2.5 ${statusClasses}`}
 					>
 						{status}
-					</div>
+					</span>
 				);
 			},
 		},
 		{
 			accessorKey: 'tags',
-			header: 'Tag',
-			cell: ({ row }) =>
-				row.original.tags?.map((tag) => (
-					<div key={tag.id}>{tag.name}</div>
-				)),
+			header: __('Tag', 'doublescale'),
+			cell: ({ row }) => {
+				const tags = row.original.tags;
+				if (!tags || tags.length === 0) return <span className="text-muted-foreground">-</span>;
+				return (
+					<div className="flex flex-wrap gap-1">
+						{tags.slice(0, 2).map((tag) => (
+							<span key={tag.id} className="inline-flex items-center text-xs font-medium bg-violet-50 text-violet-700 border border-violet-200 rounded-full px-2 py-0.5">
+								{tag.name}
+							</span>
+						))}
+						{tags.length > 2 && (
+							<span className="inline-flex items-center text-xs font-medium text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
+								+{tags.length - 2}
+							</span>
+						)}
+					</div>
+				);
+			},
 		},
 		{
 			accessorKey: 'lists',
-			header: 'List',
-			cell: ({ row }) =>
-				row.original.lists?.map((list) => (
-					<div key={list.id}>{list.name}</div>
-				)),
+			header: __('List', 'doublescale'),
+			cell: ({ row }) => {
+				const lists = row.original.lists;
+				if (!lists || lists.length === 0) return <span className="text-muted-foreground">-</span>;
+				return (
+					<div className="flex flex-wrap gap-1">
+						{lists.slice(0, 2).map((list) => (
+							<span key={list.id} className="inline-flex items-center text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5">
+								{list.name}
+							</span>
+						))}
+						{lists.length > 2 && (
+							<span className="inline-flex items-center text-xs font-medium text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
+								+{lists.length - 2}
+							</span>
+						)}
+					</div>
+				);
+			},
 		},
 		{
 			accessorKey: 'address_1',

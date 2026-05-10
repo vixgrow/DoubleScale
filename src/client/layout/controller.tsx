@@ -24,6 +24,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
+import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
 // import CustomFields from '../pages/custom-fields'; // Moved to Pro
 import Campaign from '../pages/campaign';
 import LinkTriggers from '../pages/link-triggers';
@@ -285,6 +286,15 @@ registerAdminPage('tags', {
 	component: () => <Tags />,
 	label: __('Tags', 'doublescale'),
 	hidden: true,
+});
+
+registerAdminPage('lead-scoring', {
+	path: 'lead-scoring',
+	component: () => <ContactsLeadScoringRoute />,
+	label: __('Lead Scoring', 'doublescale'),
+	hidden: true,
+	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'leadscoring',
 });
 
 // Custom Fields page registration - now handled by Pro plugin

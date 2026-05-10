@@ -3,51 +3,54 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useRef } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type {
-	Tag as ContactTag,
-	TagsResponse,
-	DataTableConfig,
-	NoticeMessage,
-} from '@doublescale/client';
-import {
-	NoticeBanner,
-	NoData,
-	GradientTagIcon,
-	PageHeader,
-	PlusIcon,
-} from '@doublescale/components';
-import { useCapabilities } from '@doublescale/hooks/use-capabilities';
-import { isEmpty } from 'validator';
+import type { DataTableConfig, NoticeMessage } from '@doublescale/client';
+import { NoticeBanner, NoData, ToolsIcon } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
-import { TagsDialog } from './tags-dialog';
-import { useTagsColumns } from './columns';
+import { RuleDialog } from './rule-dialog';
+import { useRulesColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 
-export interface TagsRef {
-	openCreateTagModal: () => void;
+export interface RulesRef {
+	openCreateRuleModal: () => void;
 }
 
-interface TagsProps {
+interface RulesProps {
 	activeTab?: string;
 }
 
-const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
-	const isCrmManager = useCapabilities().isCrmManager();
-	const [tags, setTags] = useState<ContactTag[]>([]);
+export interface LeadScoringRule {
+	id: number;
+	title: string;
+	status: 'active' | 'inactive';
+	points: number;
+	is_adding: boolean;
+	settings?: Record<string, any>;
+	created_at: string;
+	updated_at: string;
+}
+
+interface RulesResponse {
+	data: LeadScoringRule[];
+	total: number;
+	total_count?: number;
+}
+
+const Rules = forwardRef<RulesRef, RulesProps>(({ activeTab }, ref) => {
+	const [rules, setRules] = useState<LeadScoringRule[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
@@ -55,12 +58,17 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [visible, setVisible] = useState<boolean>(false);
-	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
+	const [selectedRule, setSelectedRule] = useState<LeadScoringRule | null>(
+		null
+	);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const [tag, setTag] = useState({
-		name: '',
-		description: '',
+	const [rule, setRule] = useState({
+		title: '',
+		status: 'active' as 'active' | 'inactive',
+		points: 0,
+		is_adding: true,
+		settings: {},
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
@@ -90,21 +98,25 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
 		}
 	}, [notice]);
 
-	const handleOpenCreateTagModal = () => {
-		setSelectedTag(null);
-		setTag({
-			name: '',
-			description: '',
-		});
-		setVisible(true);
-	};
-
 	useImperativeHandle(ref, () => ({
-		openCreateTagModal: handleOpenCreateTagModal,
+		openCreateRuleModal: () => {
+			setSelectedRule(null);
+			setRule({
+				title: '',
+				status: 'active',
+				points: 0,
+				is_adding: true,
+				settings: {},
+			});
+			setVisible(true);
+		},
 	}));
 
 	// Use the reusable hook
@@ -116,21 +128,21 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setPerPage,
 	});
 
-	const fetchTags = async () => {
+	const fetchRules = async () => {
 		setLoading(true);
 
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/tags', {
+				path: addQueryArgs('/doublescale/v1/lead-scoring-rules', {
 					per_page: perPage,
 					page,
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
-			})) as TagsResponse;
+			})) as RulesResponse;
 
-			setTags(response.data);
+			setRules(response.data);
 			setTotalRecords(response.total);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
@@ -141,35 +153,42 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	};
 
 	useEffect(() => {
-		fetchTags();
+		fetchRules();
 	}, [page, perPage, keyword, dateRange]);
 
-	const createTag = async () => {
-		if (!validate(tag)) {
+	const validate = (rule: Partial<LeadScoringRule>) => {
+		if (!rule.title || rule.title.trim() === '') {
+			setVisible(false);
+			showNotice('error', __('Rule title is required', 'doublescale'));
+			return false;
+		}
+		if (rule.points === undefined || rule.points < 0) {
+			setVisible(false);
+			showNotice(
+				'error',
+				__('Points must be a positive number', 'doublescale')
+			);
+			return false;
+		}
+		return true;
+	};
+
+	const createRule = async () => {
+		if (!validate(rule)) {
 			return;
 		}
 
 		setIsSaving(true);
 		try {
 			await apiFetch({
-				path: '/doublescale/v1/tags',
+				path: '/doublescale/v1/lead-scoring-rules',
 				method: 'POST',
-				data: tag,
+				data: rule,
 			});
 
 			setVisible(false);
-			setTag({
-				name: '',
-				description: '',
-			});
-			showNotice(
-				'success',
-				__(
-					'Your Tag was successfully added  — check it out!',
-					'doublescale'
-				)
-			);
-			fetchTags();
+			await fetchRules();
+			showNotice('success', __('Rule created successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -179,25 +198,25 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const updateTag = async () => {
-		if (!selectedTag || !validate(selectedTag)) {
+	const updateRule = async () => {
+		if (!selectedRule || !validate(selectedRule)) {
 			return;
 		}
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
-				path: `/doublescale/v1/tags/${selectedTag?.id}`,
+				path: `/doublescale/v1/lead-scoring-rules/${selectedRule?.id}`,
 				method: 'PUT',
-				data: selectedTag,
-			})) as ContactTag;
+				data: selectedRule,
+			})) as LeadScoringRule;
 
-			setTags([
-				...tags.map((tag) => (tag.id === response.id ? response : tag)),
+			setRules([
+				...rules.map((r) => (r.id === response.id ? response : r)),
 			]);
 
 			setVisible(false);
-			setSelectedTag(null);
-			showNotice('success', __('Tag updated successfully', 'doublescale'));
+			setSelectedRule(null);
+			showNotice('success', __('Rule updated successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -207,7 +226,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const deleteSelectedTags = async () => {
+	const deleteSelectedRules = async () => {
 		if (selectedRowKeys.length === 0) {
 			return;
 		}
@@ -215,17 +234,17 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/doublescale/v1/tags',
+				path: '/doublescale/v1/lead-scoring-rules',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});
 
-			await fetchTags();
+			await fetchRules();
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Selected tags deleted successfully', 'doublescale')
+				__('Selected rules deleted successfully', 'doublescale')
 			);
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -237,39 +256,42 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const doBulkAction = async (action: string) => {
 		switch (action) {
 			case 'delete':
-				deleteSelectedTags();
+				deleteSelectedRules();
 				break;
 			default:
 				break;
 		}
 	};
 
-	const validate = (tag: Partial<ContactTag>) => {
-		if (isEmpty(tag.name || '', { ignore_whitespace: true })) {
-			setVisible(false);
-			showNotice('error', __('Tag name is required', 'doublescale'));
-			return false;
-		}
-		return true;
-	};
-
-	const handleEditTag = (tag: ContactTag) => {
-		setSelectedTag(tag);
+	const handleEditRule = (rule: LeadScoringRule) => {
+		setSelectedRule(rule);
 		setVisible(true);
 	};
 
 	const handleSubmit = () => {
-		selectedTag ? updateTag() : createTag();
+		selectedRule ? updateRule() : createRule();
 	};
 
-	const columns = useTagsColumns({ onEditTag: handleEditTag });
+	const handleCloseModal = () => {
+		setVisible(false);
+		setSelectedRule(null);
+		setRule({
+			title: '',
+			status: 'active',
+			points: 0,
+			is_adding: true,
+			settings: {},
+		});
+	};
 
-	const tableConfig: DataTableConfig<ContactTag> = {
+	const columns = useRulesColumns({ onEditRule: handleEditRule });
+
+	const tableConfig: DataTableConfig<LeadScoringRule> = {
 		manageColumns: {
 			enabled: false,
 		},
 		search: {
-			placeholder: __('Search Tags', 'doublescale'),
+			placeholder: __('Search Rules', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -294,32 +316,22 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	};
 
 	return (
-		<div className="doublescale-contacts-tags-list">
-			<PageHeader
-				title={__('Tags', 'doublescale')}
-				subtitle={__('Contacts', 'doublescale')}
-				actions={
-					isCrmManager
-						? [
-								{
-									label: __('Add Tags', 'doublescale'),
-									onClick: handleOpenCreateTagModal,
-									icon: <PlusIcon />,
-								},
-							]
-						: []
-				}
-			/>
+		<div className="doublescale-lead-scoring-rules-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner
+					ref={noticeBannerRef}
+					notice={notice}
+					closeNotice={closeNotice}
+				/>
 			)}
 
 			{loading || hasRecords ? (
 				<>
+					{/* Data Table */}
 					<DataTable
 						columns={columns}
-						data={tags}
+						data={rules}
 						activeTab={activeTab}
 						config={tableConfig}
 						showPagination={false}
@@ -331,29 +343,42 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				</>
 			) : (
 				<NoData
-					icon={<GradientTagIcon width={120} height={120} />}
-					title={__('No tags yet', 'doublescale')}
+					icon={<ToolsIcon width={40} height={40} />}
+					title={__('No Rules Found', 'doublescale')}
 					subtitle={__(
-						'Get started by creating your first tag to organize your contacts',
+						'Create your first lead scoring rule to get started',
 						'doublescale'
 					)}
-					buttonLabel={__('Create Tag', 'doublescale')}
-					onClick={handleOpenCreateTagModal}
+					buttonLabel={__('Add Rule', 'doublescale')}
+					onClick={() => {
+						setSelectedRule(null);
+						setRule({
+							title: '',
+							status: 'active',
+							points: 0,
+							is_adding: true,
+							settings: {},
+						});
+						setVisible(true);
+					}}
 				/>
 			)}
 
-			<TagsDialog
+			{/* Dialog */}
+			<RuleDialog
 				visible={visible}
-				onVisibleChange={setVisible}
-				selectedTag={selectedTag}
-				tag={tag}
-				onTagChange={setTag}
-				onSelectedTagChange={setSelectedTag}
-				onSubmit={handleSubmit}
+				selectedRule={selectedRule}
+				rule={rule}
 				isSaving={isSaving}
+				onClose={handleCloseModal}
+				onSubmit={handleSubmit}
+				onRuleChange={setRule}
+				onSelectedRuleChange={setSelectedRule}
 			/>
 		</div>
 	);
 });
 
-export default Tags;
+Rules.displayName = 'Rules';
+
+export default Rules;

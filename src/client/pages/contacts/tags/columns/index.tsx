@@ -49,6 +49,21 @@ export const useTagsColumns = ({
 	return [
 		selectionColumn,
 		{
+			accessorKey: 'id',
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('ID', 'doublescale')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => <span className="text-muted-foreground font-mono text-xs">{row.original.id}</span>,
+		},
+		{
 			accessorKey: 'name',
 			header: ({ column }) => (
 				<div

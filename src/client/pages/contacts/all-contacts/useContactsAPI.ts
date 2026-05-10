@@ -77,7 +77,12 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 	};
 
 	const createContact = async (contactPayload: ContactPayload) => {
-		if (!isEmail(contactPayload.email)) {
+		const email =
+			typeof contactPayload.email === 'string'
+				? contactPayload.email.trim()
+				: '';
+
+		if (!email || !isEmail(email)) {
 			setCreateContactVisible(false);
 			showNotice('error', __('Invalid email', 'doublescale'));
 			return;
@@ -89,7 +94,7 @@ export const useContactsAPI = (options?: UseContactsAPIOptions) => {
 			const response = (await apiFetch({
 				path: '/doublescale/v1/contacts',
 				method: 'POST',
-				data: contactPayload,
+				data: { ...contactPayload, email },
 			})) as Contact;
 
 			// Close the create contact modal

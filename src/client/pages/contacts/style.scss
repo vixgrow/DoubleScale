@@ -1,26 +1,34 @@
 .doublescale-contacts-list {
 	width: 100%;
+
 	&__avatar {
-		width: 30px;
-		height: 30px;
-		border-radius: 50%;
-		background-color: #0073aa;
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		background-color: hsl(240 100% 69% / 0.1);
+		color: hsl(240 100% 69%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		font-weight: 600;
+		font-size: 13px;
+
 		svg {
-			fill: #fff;
+			fill: hsl(240 100% 69%);
 		}
 	}
+
 	&__actions {
-		padding: 20px;
-		margin-bottom: 20px;
-		border-radius: 8px;
-		border: 1px solid #DEE1E6;
+		padding: 16px;
+		margin-bottom: 16px;
+		border-radius: 12px;
+		border: 1px solid hsl(220 13% 91% / 0.6);
+		background: hsl(0 0% 100%);
 	}
+
 	&__filters {
-		padding: 10px;
-		margin-bottom: 20px;
-		border-radius: 6px;
+		padding: 12px;
+		margin-bottom: 16px;
+		border-radius: 12px;
 	}
 }

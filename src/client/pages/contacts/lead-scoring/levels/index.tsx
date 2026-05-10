@@ -3,67 +3,77 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useRef } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+
 /**
- * external dependencies
+ * External dependencies
  */
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
+
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type {
-	List as ContactList,
-	ListsResponse,
 	DataTableConfig,
 	NoticeMessage,
 } from '@doublescale/client';
-import {
-	GradientListIcon,
-	NoticeBanner,
-	NoData,
-	PageHeader,
-	PlusIcon,
-} from '@doublescale/components';
-import { useCapabilities } from '@doublescale/hooks/use-capabilities';
-import { isEmpty } from 'validator';
+import { NoticeBanner, NoData, CategoryIcon } from '@doublescale/components';
 import { DataTable } from '@/components/ui/data-table';
-import { getListColumns } from './columns';
-import { ListDialog } from './lists-dialog';
+import { LevelDialog } from './level-dialog';
+import { useLevelsColumns } from './columns';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@doublescale/utils';
 
-export interface ListsRef {
-	openCreateListModal: () => void;
+export interface LevelsRef {
+	openCreateLevelModal: () => void;
 }
 
-interface ListsProps {
+interface LevelsProps {
 	activeTab?: string;
 }
 
-const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
-	const isCrmManager = useCapabilities().isCrmManager();
-	const [lists, setLists] = useState<ContactList[]>([]);
+export interface LeadScoringLevel {
+	id: number;
+	name: string;
+	slug: string;
+	points: number;
+	created_at: string;
+	updated_at: string;
+}
+
+interface LevelsResponse {
+	data: LeadScoringLevel[];
+	total: number;
+	total_count?: number;
+}
+
+const Levels = forwardRef<LevelsRef, LevelsProps>(({ activeTab }, ref) => {
+	const [levels, setLevels] = useState<LeadScoringLevel[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
+	const [keyword, setKeyword] = useState<string>('');
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [hasRecords, setHasRecords] = useState<boolean>(false);
-	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
-	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
+	const [selectedLevel, setSelectedLevel] = useState<LeadScoringLevel | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const [list, setList] = useState({
+	const [level, setLevel] = useState({
 		name: '',
-		description: '',
+		slug: '',
+		points: 0,
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
+
+	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -72,11 +82,12 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		to: null,
 	});
 
-	// Helper functions
+	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
 		setNotice({ type, message });
 	};
 
+	// Helper function to close notice
 	const closeNotice = () => {
 		setNotice(null);
 	};
@@ -88,14 +99,17 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	}, [notice]);
 
-	const validate = (list: Partial<ContactList>) => {
-		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
-			setVisible(false);
-			showNotice('error', __('List name is required', 'doublescale'));
-			return false;
-		}
-		return true;
-	};
+	useImperativeHandle(ref, () => ({
+		openCreateLevelModal: () => {
+			setSelectedLevel(null);
+			setLevel({
+				name: '',
+				slug: '',
+				points: 0,
+			});
+			setVisible(true);
+		},
+	}));
 
 	// Use the reusable hook
 	const serverSideTable = useServerSideTable({
@@ -106,22 +120,23 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setPerPage,
 	});
 
-	// API functions
-	const fetchLists = async () => {
+	const fetchLevels = async () => {
 		setLoading(true);
+
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/doublescale/v1/lists', {
+				path: addQueryArgs('/doublescale/v1/lead-scoring-levels', {
 					per_page: perPage,
 					page,
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keyword,
+					order: 'asc',
 				}),
-			})) as ListsResponse;
+			})) as LevelsResponse;
 
-			setLists(response.data);
-			setTotalRecords(response.total || 0);
+			setLevels(response.data);
+			setTotalRecords(response.total);
 			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -130,29 +145,40 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const createList = async () => {
-		if (!validate(list)) {
+	useEffect(() => {
+		fetchLevels();
+	}, [page, perPage, keyword, dateRange]);
+
+	const validate = (level: Partial<LeadScoringLevel>) => {
+		if (!level.name || level.name.trim() === '') {
+			setVisible(false);
+			showNotice('error', __('Level name is required', 'doublescale'));
+			return false;
+		}
+		if (level.points === undefined || level.points < 0) {
+			setVisible(false);
+			showNotice('error', __('Points must be a positive number', 'doublescale'));
+			return false;
+		}
+		return true;
+	};
+
+	const createLevel = async () => {
+		if (!validate(level)) {
 			return;
 		}
 
 		setIsSaving(true);
 		try {
 			await apiFetch({
-				path: '/doublescale/v1/lists',
+				path: '/doublescale/v1/lead-scoring-levels',
 				method: 'POST',
-				data: list,
+				data: level,
 			});
 
 			setVisible(false);
-			setList({ name: '', description: '' });
-			showNotice(
-				'success',
-				__(
-					'Your List was successfully added — check it out!',
-					'doublescale'
-				)
-			);
-			fetchLists();
+			await fetchLevels();
+			showNotice('success', __('Level created successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -162,27 +188,23 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const updateList = async () => {
-		if (!selectedList || !validate(selectedList)) {
+	const updateLevel = async () => {
+		if (!selectedLevel || !validate(selectedLevel)) {
 			return;
 		}
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
-				path: `/doublescale/v1/lists/${selectedList?.id}`,
+				path: `/doublescale/v1/lead-scoring-levels/${selectedLevel?.id}`,
 				method: 'PUT',
-				data: selectedList,
-			})) as ContactList;
+				data: selectedLevel,
+			})) as LeadScoringLevel;
 
-			setLists([
-				...lists.map((list) =>
-					list.id === response.id ? response : list
-				),
-			]);
+			setLevels([...levels.map((l) => (l.id === response.id ? response : l))]);
 
 			setVisible(false);
-			setSelectedList(null);
-			showNotice('success', __('List updated successfully', 'doublescale'));
+			setSelectedLevel(null);
+			showNotice('success', __('Level updated successfully', 'doublescale'));
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -192,7 +214,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const deleteSelectedLists = async () => {
+	const deleteSelectedLevels = async () => {
 		if (selectedRowKeys.length === 0) {
 			return;
 		}
@@ -200,17 +222,17 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setIsApplying(true);
 		try {
 			await apiFetch({
-				path: '/doublescale/v1/lists',
+				path: '/doublescale/v1/lead-scoring-levels',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});
 
-			await fetchLists();
+			await fetchLevels();
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			showNotice(
 				'success',
-				__('Selected lists deleted successfully', 'doublescale')
+				__('Selected levels deleted successfully', 'doublescale')
 			);
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -219,54 +241,43 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	// Event handlers
-	const handleOpenCreateModal = () => {
-		setSelectedList(null);
-		setList({ name: '', description: '' });
-		setVisible(true);
-	};
-
-	const handleCloseModal = () => {
-		setVisible(false);
-		setSelectedList(null);
-		setList({ name: '', description: '' });
-	};
-
-	const handleEditList = (listToEdit: ContactList) => {
-		setSelectedList(listToEdit);
-		setVisible(true);
-	};
-
-	const handleSubmit = () => {
-		selectedList ? updateList() : createList();
-	};
-
-	const handleBulkAction = async (action: string) => {
+	const doBulkAction = async (action: string) => {
 		switch (action) {
 			case 'delete':
-				deleteSelectedLists();
+				deleteSelectedLevels();
 				break;
 			default:
 				break;
 		}
 	};
 
-	useEffect(() => {
-		fetchLists();
-	}, [page, perPage, keyword, dateRange]);
+	const handleEditLevel = (level: LeadScoringLevel) => {
+		setSelectedLevel(level);
+		setVisible(true);
+	};
 
-	// Imperative handle
-	useImperativeHandle(ref, () => ({
-		openCreateListModal: handleOpenCreateModal,
-	}));
+	const handleSubmit = () => {
+		selectedLevel ? updateLevel() : createLevel();
+	};
 
-	// Table configuration
-	const columns = getListColumns({ onEditList: handleEditList });
+	const handleCloseModal = () => {
+		setVisible(false);
+		setSelectedLevel(null);
+		setLevel({
+			name: '',
+			slug: '',
+			points: 0,
+		});
+	};
 
-	const tableConfig: DataTableConfig<ContactList> = {
-		manageColumns: { enabled: false },
+	const columns = useLevelsColumns({ onEditLevel: handleEditLevel });
+
+	const tableConfig: DataTableConfig<LeadScoringLevel> = {
+		manageColumns: {
+			enabled: false,
+		},
 		search: {
-			placeholder: __('Search Lists', 'doublescale'),
+			placeholder: __('Search Levels', 'doublescale'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
@@ -279,7 +290,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			enabled: true,
 			currentAction: bulkAction,
 			onActionChange: setBulkAction,
-			onExecuteAction: handleBulkAction,
+			onExecuteAction: doBulkAction,
 			activeTab: activeTab,
 		},
 		dateRange: {
@@ -291,22 +302,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	};
 
 	return (
-		<div className="doublescale-contacts-lists-list">
-			<PageHeader
-				title={__('Lists', 'doublescale')}
-				subtitle={__('Contacts', 'doublescale')}
-				actions={
-					isCrmManager
-						? [
-								{
-									label: __('Add Lists', 'doublescale'),
-									onClick: handleOpenCreateModal,
-									icon: <PlusIcon />,
-								},
-							]
-						: []
-				}
-			/>
+		<div className="doublescale-lead-scoring-levels-list">
 			{/* Notice Banner */}
 			{notice && (
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
@@ -317,7 +313,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 					{/* Data Table */}
 					<DataTable
 						columns={columns}
-						data={lists}
+						data={levels}
 						activeTab={activeTab}
 						config={tableConfig}
 						showPagination={false}
@@ -329,30 +325,37 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				</>
 			) : (
 				<NoData
-					icon={<GradientListIcon width={120} height={120} />}
-					title={__('No lists yet', 'doublescale')}
-					subtitle={__(
-						'Get started by creating your first list to organize your contacts',
-						'doublescale'
-					)}
-					buttonLabel={__('Create List', 'doublescale')}
-					onClick={handleOpenCreateModal}
+					icon={<CategoryIcon width={40} height={40} />}
+					title={__('No Levels Found', 'doublescale')}
+					subtitle={__('Create your first lead scoring level to get started', 'doublescale')}
+					buttonLabel={__('Add Level', 'doublescale')}
+					onClick={() => {
+						setSelectedLevel(null);
+						setLevel({
+							name: '',
+							slug: '',
+							points: 0,
+						});
+						setVisible(true);
+					}}
 				/>
 			)}
 
 			{/* Dialog */}
-			<ListDialog
+			<LevelDialog
 				visible={visible}
-				selectedList={selectedList}
-				list={list}
+				selectedLevel={selectedLevel}
+				level={level}
 				isSaving={isSaving}
 				onClose={handleCloseModal}
 				onSubmit={handleSubmit}
-				onListChange={setList}
-				onSelectedListChange={setSelectedList}
+				onLevelChange={setLevel}
+				onSelectedLevelChange={setSelectedLevel}
 			/>
 		</div>
 	);
 });
 
-export default Lists;
+Levels.displayName = 'Levels';
+
+export default Levels;

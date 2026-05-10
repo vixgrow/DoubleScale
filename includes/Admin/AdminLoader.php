@@ -174,7 +174,8 @@ class AdminLoader {
 		global $submenu;
 		$user = wp_get_current_user();
 
-		$asset_file   = DOUBLESCALE_PLUGIN_DIR . 'build/client/index.asset.php';
+		list( $bundle_dir, $bundle_url ) = self::get_admin_client_bundle_base();
+		$asset_file   = $bundle_dir . 'build/client/index.asset.php';
 		$asset        = file_exists( $asset_file ) ? require $asset_file : null;
 		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : array();
 		$version      = isset( $asset['version'] ) ? $asset['version'] : DOUBLESCALE_VERSION;
@@ -182,7 +183,7 @@ class AdminLoader {
 		// Register main script.
 		wp_register_script(
 			'doublescale-admin',
-			DOUBLESCALE_PLUGIN_URL . 'build/client/index.js',
+			$bundle_url . 'build/client/index.js',
 			$dependencies,
 			$version,
 			true
@@ -191,7 +192,7 @@ class AdminLoader {
 		// Register main stylesheet (SCSS-based styles).
 		wp_register_style(
 			'doublescale-admin',
-			DOUBLESCALE_PLUGIN_URL . 'build/client/style-index.css',
+			$bundle_url . 'build/client/style-index.css',
 			array(),
 			$version
 		);
@@ -200,7 +201,7 @@ class AdminLoader {
 		// Register entry-point stylesheet (CSS imports in JS).
 		wp_register_style(
 			'doublescale-admin-entry',
-			DOUBLESCALE_PLUGIN_URL . 'build/client/index.css',
+			$bundle_url . 'build/client/index.css',
 			array(),
 			$version
 		);
@@ -215,7 +216,7 @@ class AdminLoader {
 				'pluginUrl' => DOUBLESCALE_PLUGIN_URL,
 				'restUrl'   => rest_url( 'doublescale/v1/' ),
 				'nonce'     => wp_create_nonce( 'wp_rest' ),
-				'isPro'     => is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' ) || is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' ),
+				'isPro'     => self::admin_context_is_pro_plugin(),
 			)
 		);
 
@@ -223,6 +224,65 @@ class AdminLoader {
 		if ( self::is_admin_page() ) {
 			wp_enqueue_media();
 		}
+	}
+
+	/**
+	 * Whether the Pro plugin is active in this request (admin SPA + sidebar).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private static function admin_context_is_pro_plugin(): bool {
+		if ( defined( 'DOUBLESCALE_PRO_VERSION' ) ) {
+			return true;
+		}
+		if ( function_exists( 'is_plugin_active' ) ) {
+			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH ) ) {
+				return true;
+			}
+			$candidates = array(
+				'QuillCRM-Pro/doublescale-pro.php',
+				'DoubleScale-Pro/doublescale-pro.php',
+			);
+			foreach ( $candidates as $relative ) {
+				if ( \is_plugin_active( $relative ) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if ( function_exists( 'doublescale_is_plugin_active' ) ) {
+			return doublescale_is_plugin_active( 'QuillCRM-Pro/doublescale-pro.php' )
+				|| doublescale_is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' )
+				|| (
+					defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
+					&& doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH )
+				);
+		}
+		return false;
+	}
+
+	/**
+	 * Admin client bundle directory and URL (Pro replaces free when Pro is active and its build exists).
+	 *
+	 * If Pro is active but `build/client/` was never shipped or built, fall back to the free bundle
+	 * so the SPA still loads; `doublescalePro.isPro` and JS filters still mark the install as Pro.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array{0:string,1:string} Tuple of directory path and URL base (trailing slash).
+	 */
+	private static function get_admin_client_bundle_base(): array {
+		if (
+			self::admin_context_is_pro_plugin()
+			&& defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' )
+			&& defined( 'DOUBLESCALE_PRO_PLUGIN_URL' )
+			&& is_readable( DOUBLESCALE_PRO_PLUGIN_DIR . 'build/client/index.js' )
+		) {
+			return array( DOUBLESCALE_PRO_PLUGIN_DIR, DOUBLESCALE_PRO_PLUGIN_URL );
+		}
+		return array( DOUBLESCALE_PLUGIN_DIR, DOUBLESCALE_PLUGIN_URL );
 	}
 
 	/**

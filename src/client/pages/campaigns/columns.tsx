@@ -31,6 +31,7 @@ import {
 	RepeatIcon,
 	SettingsOutlinedIcon,
 	SortedHeaderCell,
+	ThreeDotsIcon,
 	TimeAgoCell,
 	ViewOutlinedIcon,
 } from '@doublescale/components';
@@ -128,7 +129,7 @@ const getCommonColumns = ({
 
 			return (
 				<span
-					className={`${colorClasses} inline-flex items-center text-xs font-medium rounded-full w-fit text-center px-2.5 py-0.5 border`}
+					className={`${colorClasses} inline-flex items-center text-xs font-medium rounded-lg w-fit text-center px-2 py-1`}
 				>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
 				</span>
@@ -176,10 +177,10 @@ const getCommonColumns = ({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
-								variant="ghost"
-								className="h-8 w-8 p-0 focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0"
+								variant="secondary"
+								className="w-8 h-8 p-0 !rounded"
 							>
-								<SettingsOutlinedIcon />
+								<ThreeDotsIcon width={32} height={32} />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
@@ -287,7 +288,7 @@ export const emailCampaignColumns = ({
 				if (isAutomated) {
 					return {
 						icon: <RepeatIcon width={24} height={24} />,
-						iconClass: 'text-primary',
+						iconClass: 'text-[#CB5301]',
 						label: __('Automated Campaign', 'doublescale'),
 					};
 				}
@@ -300,7 +301,7 @@ export const emailCampaignColumns = ({
 				}
 				return {
 					icon: <ProcessingEmailsIcon width={24} height={24} />,
-					iconClass: 'text-primary',
+					iconClass: 'text-[#0D9DFC]',
 					label: __('Standard Campaign', 'doublescale'),
 				};
 			};

@@ -487,29 +487,27 @@ body {
 	}
 }
 
-// Dashboard home card grid
-.doublescale-dashboard {
-	.doublescale-dashboard-card {
-		flex: 1;
-	}
+// Stat cards (dashboard home + analytics pages; not nested under `.doublescale-dashboard`)
+.doublescale-dashboard-card {
+	flex: 1;
+}
 
-	.doublescale-dashboard-card-icon {
-		padding: 8px;
-		border-radius: 10px;
-		background-color: hsl(240 100% 69% / 0.08);
-		color: hsl(240 100% 69%);
-		width: 36px;
-		height: 36px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
+.doublescale-dashboard-card-icon {
+	padding: 8px;
+	border-radius: 10px;
+	background-color: hsl(240 100% 69% / 0.08);
+	color: hsl(240 100% 69%);
+	width: 36px;
+	height: 36px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 
-	.doublescale-dashboard-card-value {
-		font-size: 28px;
-		font-weight: 700;
-		color: hsl(240 6% 17%);
-	}
+.doublescale-dashboard-card-value {
+	font-size: 28px;
+	font-weight: 700;
+	color: hsl(240 6% 17%);
 }
 
 // Pro feature overlay

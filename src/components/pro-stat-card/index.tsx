@@ -16,6 +16,8 @@ interface ProStatCardProps {
 	iconBgClass?: string;
 	borderColorClass?: string;
 	iconColor?: string;
+	className?: string;
+	layout?: 'default' | 'centered';
 }
 
 /**
@@ -30,6 +32,8 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 	iconBgClass,
 	borderColorClass,
 	iconColor,
+	layout = 'default',
+	className = '',
 }) => {
 	return (
 		<div className="doublescale-pro-stat-card">
@@ -40,14 +44,14 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 				iconBgClass={iconBgClass}
 				borderColorClass={borderColorClass}
 				iconColor={iconColor}
+				layout={layout}
+				className={className}
 			/>
 			<div className="doublescale-pro-stat-card__pro-feature">
-				<span className="text-lg text-[#CB5301] font-bold">
+				<span className="text-lg text-primary font-bold">
 					{__('Pro feature', 'doublescale')}
 				</span>
 			</div>
 		</div>
 	);
 };
-
-

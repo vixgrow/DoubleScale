@@ -76,10 +76,6 @@ function doublescale_bootstrap_register() {
 				DoubleScale\Database\Install::ensure_db_ready();
 			}
 
-			if ( class_exists( DoubleScale\Core\HookShim::class ) ) {
-				DoubleScale\Core\HookShim::register();
-			}
-
 			DoubleScale\Core\Bootstrap::init();
 
 			/**

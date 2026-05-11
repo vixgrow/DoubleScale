@@ -97,10 +97,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 								}
 								type="number"
 								min="1"
-								className={cn('h-12 bg-white w-32')}
-								style={{
-									borderRadius: '8px',
-								}}
+							className={cn('w-32')}
 								placeholder="0"
 							/>
 							<span className="text-sm text-gray-600 bg-gray-100 px-3 py-3.5 rounded-lg">

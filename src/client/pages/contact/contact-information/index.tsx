@@ -26,13 +26,12 @@ import {
 	ClickRateIcon,
 	ContactTotalEmailsIcon,
 	OpenRateIcon,
-	ProcessingEmailsIcon,
 } from '@doublescale/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import LeadScoreCard from './lead-score-card';
-import { UserRound, Mail, MessageSquare } from 'lucide-react';
-import PhoneIcon from '@/components/icons/phone';
+import LeadScoreCardContent from './lead-score-card';
+import { UserRound, Mail } from 'lucide-react';
+import PhoneIcon from '@doublescale/shared/icons/phone';
 
 // Constants
 const DROPDOWN_Z_INDEX = 'z-[150000]'; // High z-index to appear above modals
@@ -110,17 +109,17 @@ const getChannelDisplayLabel = (channel: string): string => {
 const getStatusClasses = (status: string): string => {
 	switch (status?.toLowerCase()) {
 		case 'subscribed':
-			return 'border-[#16A34A] text-[#16A34A] bg-[#EFFFF5]';
+			return 'border-emerald-500/40 text-emerald-700 bg-emerald-50';
 		case 'unsubscribed':
-			return 'border-[#1C1D22] text-[#1C1D22] bg-[#FFF2E2]';
+			return 'border-amber-500/40 text-amber-700 bg-amber-50';
 		case 'bounced':
-			return 'border-[#5570F1] text-[#5570F1] bg-[#5570F129]';
+			return 'border-primary/30 text-primary bg-primary/5';
 		case 'unverified':
-			return 'border-[#CC5F5F] text-[#CC5F5F] bg-[#F57E7729]';
+			return 'border-red-400/40 text-red-600 bg-red-50';
 		case 'blocked':
-			return 'border-gray-600 text-gray-600 bg-gray-100';
+			return 'border-border text-muted-foreground bg-muted/50';
 		default:
-			return 'border-gray-600 text-gray-600 bg-gray-100';
+			return 'border-border text-muted-foreground bg-muted/50';
 	}
 };
 
@@ -140,7 +139,7 @@ const StatusSelect: React.FC<StatusSelectProps> = ({
 }) => {
 	return (
 		<Select value={value} onValueChange={onChange}>
-			<SelectTrigger className={`w-fit h-10 ${getStatusClasses(value)}`}>
+			<SelectTrigger className={`h-8 w-fit rounded-full px-3 text-xs font-medium shadow-sm ${getStatusClasses(value)}`}>
 				<div className="flex items-center gap-1">
 					{getChannelDisplayLabel(channel)}:{' '}
 					{getChannelStatusLabel(channel, value)}
@@ -241,9 +240,9 @@ const ContactInformation: React.FC = () => {
 
 	if (!contact) {
 		return (
-			<Card className="flex-1 bg-[#F8F8F8] shadow-none">
-				<CardContent>
-					<div className="doublescale-contact-information">
+			<Card className="flex-1 rounded-2xl border border-border/50 bg-card shadow-sm ring-1 ring-black/[0.03]">
+				<CardContent className="py-10">
+					<div className="doublescale-contact-information text-center text-sm text-muted-foreground">
 						{__('No contact information available', 'doublescale')}
 					</div>
 				</CardContent>
@@ -268,106 +267,124 @@ const ContactInformation: React.FC = () => {
 	const clickRate = emailAnalytics?.click_rate?.toFixed(1) || '0.0';
 
 	return (
-		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
-			<CardHeader>
-				<div className="border-b pb-4">
-					<div className="flex items-center gap-4">
-						<Avatar className="w-28 h-28 border">
+		<Card className="w-full shrink-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm ring-1 ring-black/[0.03]">
+			<CardHeader className="space-y-0 p-0">
+				<div className="relative border-b border-border/40 bg-gradient-to-b from-primary/[0.07] via-primary/[0.02] to-transparent px-5 pb-6 pt-6">
+					<div
+						className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-primary/[0.14] to-transparent"
+						aria-hidden
+					/>
+					<div className="relative flex flex-col items-center text-center">
+						<Avatar className="mb-4 h-[5.25rem] w-[5.25rem] border-[3px] border-background shadow-md ring-2 ring-border/30">
 							{avatarUrl ? (
 								<AvatarImage
 									src={avatarUrl}
 									alt={fullName}
-									className="rounded-full"
+									className="rounded-full object-cover"
 								/>
 							) : null}
-							<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
+							<AvatarFallback className="bg-primary/8 text-primary text-xl font-bold">
 								{initials || (
-									<UserRound className="w-12 h-12" />
+									<UserRound className="h-10 w-10" />
 								)}
 							</AvatarFallback>
 						</Avatar>
-						<div className="w-full min-w-0">
-							<CardTitle className="text-xl font-semibold break-words mb-2">
-								{fullName}
-							</CardTitle>
-
-							<div className="my-3">
-								{contact.email && (
-									<div className="flex gap-2 items-center min-w-0">
-										<div className="flex-shrink-0">
-											<ProcessingEmailsIcon
-												width={24}
-												height={24}
-											/>
-										</div>
-										<span
-											className="text-base font-medium break-words min-w-0"
-											style={{
-												overflowWrap: 'anywhere',
-												wordBreak: 'break-word',
-											}}
-										>
-											{contact.email}
-										</span>
-									</div>
-								)}
-							</div>
-							{contact.phone && (
-								<span className="text-base font-medium text-[#CB5301] flex gap-2 items-center">
-									<PhoneIcon />
-									{contact.phone}
-								</span>
-							)}
-							{contact.email_status === 'unverified' && (
-								<div className="mt-3">
-									<Button
-										size="sm"
-										variant="outline"
-										className="h-7 text-xs gap-1"
-										disabled={isSendingOptIn || optInSent}
-										onClick={sendOptInEmail}
+						<CardTitle className="mb-2 max-w-full break-words text-xl font-semibold tracking-tight text-foreground">
+							{fullName}
+						</CardTitle>
+						<div className="flex w-full max-w-full flex-col gap-2">
+							{contact.email && (
+								<div className="mx-auto flex max-w-full items-start gap-2 rounded-xl bg-background/80 px-3 py-2 text-left text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
+									<Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/70" />
+									<span
+										className="min-w-0 text-sm leading-snug"
+										style={{
+											overflowWrap: 'anywhere',
+											wordBreak: 'break-word',
+										}}
 									>
-										<Mail className="w-3 h-3" />
-										{isSendingOptIn
-											? __('Sending...', 'doublescale')
-											: optInSent
-												? __('Email Sent', 'doublescale')
-												: __(
-														'Send Opt-in Email',
-														'doublescale'
-													)}
-									</Button>
+										{contact.email}
+									</span>
 								</div>
 							)}
-							<div className="mt-3 flex items-center gap-3">
-								<div className="flex gap-1 items-center border-r pr-3">
-									<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
-										<ContactTotalEmailsIcon />
-									</div>
-									<span className="text-primary text-base font-semibold">
-										{totalEmails}
+							{contact.phone && (
+								<div className="mx-auto flex max-w-full items-center gap-2 rounded-xl bg-background/80 px-3 py-2 text-sm text-muted-foreground shadow-sm ring-1 ring-border/40 backdrop-blur-sm">
+									<span className="flex shrink-0 text-primary/70 [&_svg]:h-3.5 [&_svg]:w-3.5">
+										<PhoneIcon />
+									</span>
+									<span className="tabular-nums">
+										{contact.phone}
 									</span>
 								</div>
-								<div className="flex gap-1 items-center border-r pr-3">
-									<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
-										<OpenRateIcon />
-									</div>
-									<span className="text-primary text-base font-semibold">
-										{openRate}%
-									</span>
-								</div>
-								<div className="flex gap-1 items-center">
-									<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
-										<ClickRateIcon />
-									</div>
-									<span className="text-primary text-base font-semibold">
-										{clickRate}%
-									</span>
-								</div>
+							)}
+						</div>
+					</div>
+
+					{contact.email_status === 'unverified' && (
+						<div className="relative mt-4 flex justify-center">
+							<Button
+								size="sm"
+								variant="outline"
+								className="h-8 gap-1.5 rounded-full border-primary/25 bg-background/90 text-xs font-medium shadow-sm backdrop-blur-sm"
+								disabled={isSendingOptIn || optInSent}
+								onClick={sendOptInEmail}
+							>
+								<Mail className="h-3.5 w-3.5" />
+								{isSendingOptIn
+									? __('Sending...', 'doublescale')
+									: optInSent
+										? __('Email Sent', 'doublescale')
+										: __(
+												'Send Opt-in Email',
+												'doublescale'
+											)}
+							</Button>
+						</div>
+					)}
+
+					<div className="relative mt-5 grid grid-cols-3 gap-2">
+						<div className="flex flex-col items-center gap-2 rounded-xl border border-border/45 bg-background/70 px-2 py-3 shadow-sm backdrop-blur-sm">
+							<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary">
+								<ContactTotalEmailsIcon />
+							</div>
+							<div className="text-center">
+								<p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+									{__('Emails', 'doublescale')}
+								</p>
+								<p className="text-base font-semibold tabular-nums text-foreground">
+									{totalEmails}
+								</p>
+							</div>
+						</div>
+						<div className="flex flex-col items-center gap-2 rounded-xl border border-border/45 bg-background/70 px-2 py-3 shadow-sm backdrop-blur-sm">
+							<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/12 text-emerald-700">
+								<OpenRateIcon />
+							</div>
+							<div className="text-center">
+								<p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+									{__('Open', 'doublescale')}
+								</p>
+								<p className="text-base font-semibold tabular-nums text-foreground">
+									{openRate}%
+								</p>
+							</div>
+						</div>
+						<div className="flex flex-col items-center gap-2 rounded-xl border border-border/45 bg-background/70 px-2 py-3 shadow-sm backdrop-blur-sm">
+							<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/12 text-violet-700">
+								<ClickRateIcon />
+							</div>
+							<div className="text-center">
+								<p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+									{__('Click', 'doublescale')}
+								</p>
+								<p className="text-base font-semibold tabular-nums text-foreground">
+									{clickRate}%
+								</p>
 							</div>
 						</div>
 					</div>
-					<div className="flex gap-5 items-center mt-4 flex-wrap">
+
+					<div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
 						<StatusSelect
 							channel="email"
 							value={contact.email_status}
@@ -389,10 +406,12 @@ const ContactInformation: React.FC = () => {
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="flex flex-col gap-5">
+			<CardContent className="flex flex-col gap-0 px-4 pb-5 pt-1 sm:px-5">
 				<ListsTagsCards />
-				<LeadScoreCard />
-				<InfoCard />
+				<div className="mt-3 space-y-3">
+					<LeadScoreCardContent contact={contact} />
+					<InfoCard />
+				</div>
 			</CardContent>
 		</Card>
 	);

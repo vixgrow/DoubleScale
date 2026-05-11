@@ -91,7 +91,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 					value={interval}
 					onValueChange={(value) => onIntervalChange(value)}
 				>
-					<SelectTrigger className="w-full bg-[#FFFFFF80] py-0 px-2">
+					<SelectTrigger className="w-full bg-[#fff] text-[#6549CA] border border-[#6549CA] rounded-md py-0 px-2">
 						<SelectValue placeholder="Select interval" />
 					</SelectTrigger>
 					<SelectContent>

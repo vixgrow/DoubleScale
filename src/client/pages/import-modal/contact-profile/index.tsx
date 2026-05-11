@@ -17,6 +17,8 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Field } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 
@@ -28,8 +30,14 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 	showStatusField = true,
 }) => {
 	const { state, dispatch } = useImportContext();
-	const { assignedLists, assignedTags, newStatus, updateExisting, source } =
-		state;
+	const {
+		assignedLists,
+		assignedTags,
+		newStatus,
+		sendDoubleOptin,
+		updateExisting,
+		source,
+	} = state;
 
 	const statusOptions = [
 		{ label: __('Subscribed', 'doublescale'), value: 'subscribed' },
@@ -108,23 +116,59 @@ const ContactProfile: React.FC<ContactProfileProps> = ({
 
 				<div className="space-y-4">
 					{shouldShowStatus && (
-						<Field
-							label={__('Status', 'doublescale')}
-							type="select"
-							value={newStatus}
-							onChange={(value) =>
-								dispatch({
-									type: 'SET_NEW_STATUS',
-									payload: value,
-								})
-							}
-							options={statusOptions}
-							required={false}
-							tooltip={__(
-								'Set the subscription status for imported contacts. Subscribed contacts can receive emails, while unsubscribed or bounced contacts will be excluded from campaigns.',
-								'doublescale'
+						<>
+							<Field
+								label={__('Status', 'doublescale')}
+								type="select"
+								value={newStatus}
+								onChange={(value) => {
+									dispatch({
+										type: 'SET_NEW_STATUS',
+										payload: value,
+									});
+									if (value !== 'unverified') {
+										dispatch({
+											type: 'SET_SEND_DOUBLE_OPTIN',
+											payload: false,
+										});
+									}
+								}}
+								options={statusOptions}
+								required={false}
+								tooltip={__(
+									'Set the subscription status for imported contacts. Subscribed contacts can receive emails, while unsubscribed or bounced contacts will be excluded from campaigns.',
+									'doublescale'
+								)}
+							/>
+
+							{newStatus === 'unverified' && (
+								<div className="flex items-center justify-between pt-2 border-t">
+									<div className="flex flex-col gap-1">
+										<Label className="text-base text-[#09090B]">
+											{__(
+												'Send Double Opt-in Email',
+												'doublescale'
+											)}
+										</Label>
+										<p className="text-sm text-muted-foreground">
+											{__(
+												'Send a confirmation email to new contacts to verify their subscription',
+												'doublescale'
+											)}
+										</p>
+									</div>
+									<Switch
+										checked={sendDoubleOptin}
+										onCheckedChange={(value) =>
+											dispatch({
+												type: 'SET_SEND_DOUBLE_OPTIN',
+												payload: value,
+											})
+										}
+									/>
+								</div>
 							)}
-						/>
+						</>
 					)}
 
 					<div className="flex gap-3 items-center">

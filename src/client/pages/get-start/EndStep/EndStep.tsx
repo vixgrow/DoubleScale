@@ -1,24 +1,32 @@
-import { Button } from '@doublescale/components/ui/button'
-
+import { __ } from '@wordpress/i18n';
+import { Button } from '@/components/ui/button';
 import { useNavigate, getToLink } from '@doublescale/navigation';
-
+import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function EndStep() {
-  const navigate = useNavigate();
-  const handleClick=()=>{
-    navigate(getToLink('/'))
-  }
-  return (
-    <div className='flex flex-col justify-center items-center gap-3 mx-auto min-h-[60vh] text-center px-4'>
-      <h3 className="text-[#170F49] text-[32px] font-semibold">
-         You're All Set—Start Using Your CRM with Confidence
-        </h3>
-        <p className="text-[#777] text-lg font-normal leading-7 text-center">
-        Your CRM setup is complete—now it’s time to explore, connect, and grow. With contacts, deals, and plugins in place, you’re ready to manage relationships, automate tasks, and track performance all in one dashboard.
-        </p>
-        <Button className=' bg-[#1E3A8A] text-[#FFF] rounded-[8px] py-3 px-24' onClick={handleClick}>
-          Go To Dashboard
-        </Button>
-    </div>
-  )
+	const navigate = useNavigate();
+
+	return (
+		<div className="flex flex-col items-center justify-center gap-5 mx-auto min-h-[60vh] text-center max-w-lg px-4">
+			<div className="flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 mb-2">
+				<CheckCircle2 size={32} />
+			</div>
+
+			<h3 className="text-foreground text-2xl font-semibold">
+				{__("You're All Set!", 'doublescale')}
+			</h3>
+
+			<p className="text-muted-foreground text-sm leading-relaxed">
+				{__(
+					'Your CRM setup is complete. Start managing relationships, automating tasks, and tracking performance from your dashboard.',
+					'doublescale'
+				)}
+			</p>
+
+			<Button size="lg" onClick={() => navigate(getToLink('/'))}>
+				{__('Go to Dashboard', 'doublescale')}
+				<ArrowRight size={16} className="ml-1.5" />
+			</Button>
+		</div>
+	);
 }

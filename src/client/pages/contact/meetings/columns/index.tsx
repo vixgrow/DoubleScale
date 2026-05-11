@@ -13,8 +13,8 @@ import timezone from 'dayjs/plugin/timezone';
  * Internal dependencies
  */
 import { Button } from '@doublescale/components/ui/button';
-import EditHeaderIcon from '@/components/icons/edit-header';
-import TrashIcon from '@doublescale/components/icons/trash';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
+import TrashIcon from '@doublescale/shared/icons/trash';
 
 interface Meeting {
     id: number;
@@ -73,7 +73,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             cell: ({ row }) => {
                 const dateTime = row.original.data?.scheduled_at || row.original.data?.meeting_date_time || row.original.created_at;
                 return (
-                    <span className="text-[#09090B]">
+                    <span className="text-foreground">
                         {formatMeetingDateTime(dateTime)}
                     </span>
                 );
@@ -83,7 +83,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             accessorKey: 'location',
             header: __('Location', 'doublescale'),
             cell: ({ row }) => (
-                <span className="text-[#09090B]">
+                <span className="text-foreground">
                     {row.original.data?.location || '-'}
                 </span>
             ),
@@ -94,7 +94,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             cell: ({ row }) => {
                 const duration = row.original.data?.duration || 0;
                 return (
-                    <span className="text-[#09090B]">
+                    <span className="text-foreground">
                         {formatDuration(duration)}
                     </span>
                 );

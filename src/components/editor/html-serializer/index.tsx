@@ -5,6 +5,12 @@ import { useEffect, useRef } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $generateHtmlFromNodes } from '@lexical/html';
 
+const SANITIZED_MERGE_TAG_URL = /href="https?:\/\/(\{\{.*?\}\})"/g;
+
+function restoreMergeTagHrefs(html: string): string {
+  return html.replace(SANITIZED_MERGE_TAG_URL, (_match, mergeTag) => `href="${mergeTag}"`);
+}
+
 interface HtmlSerializerProps {
   onChange: (html: string) => void;
   onWordCountChange?: (count: number) => void;
@@ -17,18 +23,16 @@ export default function HtmlSerializer({ onChange, onWordCountChange }: HtmlSeri
   
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
-      // Clear any existing timeout to prevent multiple rapid updates
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       
-      // Debounce the serialization to avoid performance issues
       timeoutRef.current = setTimeout(() => {
         editorState.read(() => {
           try {
-            const htmlString = $generateHtmlFromNodes(editor);
+            let htmlString = $generateHtmlFromNodes(editor);
+            htmlString = restoreMergeTagHrefs(htmlString);
             
-            // Count words from the HTML consistently
             if (onWordCountChange) {
               const tempDiv = document.createElement('div');
               tempDiv.innerHTML = htmlString;
@@ -37,14 +41,12 @@ export default function HtmlSerializer({ onChange, onWordCountChange }: HtmlSeri
               onWordCountChange(words.length);
             }
             
-            // Only trigger onChange if the HTML actually changed
             if (htmlString !== lastHtmlRef.current) {
               lastHtmlRef.current = htmlString;
               onChange(htmlString);
             }
           } catch (error) {
             console.error('Error serializing HTML:', error);
-            // Optionally provide a fallback empty HTML if serialization fails
             onChange('<p></p>');
             if (onWordCountChange) {
               onWordCountChange(0);
@@ -55,7 +57,6 @@ export default function HtmlSerializer({ onChange, onWordCountChange }: HtmlSeri
     });
   }, [editor, onChange, onWordCountChange]);
 
-  // Clear timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {

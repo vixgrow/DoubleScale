@@ -13,7 +13,7 @@
         "phpcompatibility/php-compatibility": "^9.3",
         "wp-coding-standards/wpcs": "^2.2",
         "sirbrillig/phpcs-variable-analysis": "^2.8",
-        "phpunit/phpunit": "^6.5",
+        "phpunit/phpunit": "^9.6",
         "spatie/phpunit-watcher": "^1.23",
         "yoast/phpunit-polyfills": "^1.0"
     },
@@ -23,6 +23,11 @@
     "autoload": {
         "psr-4": {
             "DoubleScale\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DoubleScale\\Tests\\": "phpunit/tests/"
         }
     },
     "config": {

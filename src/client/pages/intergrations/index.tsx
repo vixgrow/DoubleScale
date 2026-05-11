@@ -22,21 +22,32 @@ import Integration from '../integration';
 import { PageHeader, NoticeBanner } from '@doublescale/components';
 import { Card, CardContent } from '@doublescale/components/ui/card';
 import { IntegrationCard } from './integration-card';
+import { AddonCard } from './addon-card';
 import './style.scss';
 
-// Integration images mapping
+const basePluginUrl = ConfigAPI.getPluginDirUrl();
+const proPluginUrl =
+	(typeof window !== 'undefined' &&
+		(
+			window as unknown as {
+				doublescalePro?: { proPluginUrl?: string };
+			}
+		).doublescalePro?.proPluginUrl) ||
+	basePluginUrl;
+
 const integrationImages: Record<string, string> = {
-	slack: `${ConfigAPI.getPluginDirUrl()}assets/images/slack/slack.png`,
-	twilio: `${ConfigAPI.getPluginDirUrl()}assets/images/twilio/twilio.png`,
-	'meta-whatsapp': `${ConfigAPI.getPluginDirUrl()}assets/images/meta-whatsapp/meta-whatsapp.svg`,
+	slack: `${basePluginUrl}assets/images/slack/slack.png`,
+	twilio: `${basePluginUrl}assets/images/twilio/twilio.png`,
+	stripe: `${proPluginUrl}assets/images/stripe/stripe.png`,
+	'meta-whatsapp': `${basePluginUrl}assets/images/meta-whatsapp/meta-whatsapp.svg`,
+	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
+	make: `${proPluginUrl}assets/images/make/make.svg`,
 };
 
-// Integration keys to display
-const INTEGRATIONS_TO_SHOW = ['twilio', 'slack', 'meta-whatsapp'];
+const INTEGRATIONS_TO_SHOW = ['twilio', 'stripe', 'slack', 'meta-whatsapp', 'zapier', 'make'];
 
-/**
- * Helper function to filter integrations
- */
+const ADDON_INTEGRATIONS = ['zapier', 'make'];
+
 const filterIntegrations = (allIntegrations: any) => {
 	return Object.keys(allIntegrations)
 		.filter((key) => INTEGRATIONS_TO_SHOW.includes(key))
@@ -52,6 +63,7 @@ const filterIntegrations = (allIntegrations: any) => {
 const Integrations: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
 	const allIntegrations = ConfigAPI.getIntegrations();
+	const addons = ConfigAPI.getAddons();
 	const navigate = useNavigate();
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +86,6 @@ const Integrations: React.FC = () => {
 				method: 'GET',
 			});
 
-			// Update the specific integration in state
 			setIntegrations((prev) => ({
 				...prev,
 				[integrationKey]: {
@@ -94,7 +105,6 @@ const Integrations: React.FC = () => {
 		setNotice({ type, message });
 	};
 
-	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
 			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -162,6 +172,10 @@ const Integrations: React.FC = () => {
 		}
 	}, [tab, id]);
 
+	const inactiveAddons = ADDON_INTEGRATIONS.filter(
+		(key) => !integrations[key] && addons[key]
+	);
+
 	return (
 		<div className="doublescale-integrations">
 			<PageHeader
@@ -172,23 +186,32 @@ const Integrations: React.FC = () => {
 
 			{notice && <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />}
 
-			<Card className="shadow-none bg-[#F8F8F8]">
-				<CardContent className="flex gap-4 items-center flex-wrap p-6">
-					{map(integrations, (integration, key) => (
-						<IntegrationCard
-							key={key}
-							integrationKey={key}
-							integration={integration}
-							imageUrl={integrationImages[key]}
-							isLoading={loadingIntegrations[key]}
-							onNavigate={() => navigate(getToLink(`integrations/${key}`))}
-							onDisconnect={() => handleDisconnect(key, integration.label)}
-						/>
-					))}
+			<Card className="shadow-none bg-muted/50">
+				<CardContent className="p-6">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{map(integrations, (integration, key) => (
+							<IntegrationCard
+								key={key}
+								integrationKey={key}
+								integration={integration}
+								imageUrl={integrationImages[key]}
+								isLoading={loadingIntegrations[key]}
+								onNavigate={() => navigate(getToLink(`integrations/${key}`))}
+								onDisconnect={() => handleDisconnect(key, integration.label)}
+							/>
+						))}
+						{inactiveAddons.map((key) => (
+							<AddonCard
+								key={key}
+								addon={addons[key]}
+								imageUrl={integrationImages[key]}
+							/>
+						))}
+					</div>
 				</CardContent>
 			</Card>
 
-			{id && !tab && (
+			{id && !tab && allIntegrations[id] && (
 				<Integration
 					integration={allIntegrations[id]}
 					slug={id}

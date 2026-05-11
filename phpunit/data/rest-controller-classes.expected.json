@@ -1,0 +1,23 @@
+[
+    "RestAbandonedCartController",
+    "RestActivityController",
+    "RestAiEmailBuilderController",
+    "RestAutomationContactController",
+    "RestAutomationController",
+    "RestAutomationStepController",
+    "RestCampaignController",
+    "RestContactController",
+    "RestEmailSequenceController",
+    "RestGeneralController",
+    "RestImportExportController",
+    "RestLinkTriggerController",
+    "RestListController",
+    "RestLogController",
+    "RestModulesController",
+    "RestPluginsController",
+    "RestSettingsController",
+    "RestSiteVerificationController",
+    "RestTagController",
+    "RestTemplateController",
+    "RestUserManagementController"
+]

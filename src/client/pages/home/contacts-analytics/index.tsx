@@ -97,7 +97,10 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 				{/* <ContactStatsCards data={data} /> */}
 
 				<div className="flex gap-5">
-					<RecentContactsList contacts={dashboardData.recent_contacts} />
+					<RecentContactsList
+						contacts={dashboardData.recent_contacts}
+						cardClassName="w-1/2 min-h-0 max-w-[50%] shrink-0"
+					/>
 					<ContactAnalyticsChart
 						data={data}
 						interval={interval}
@@ -107,6 +110,7 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 						onChangeFromDate={setStartDate}
 						onChangeToDate={setEndDate}
 						onSubmit={refetch}
+						cardClassName="w-1/2 min-h-0 max-w-[50%] shrink-0"
 					/>
 				</div>
 

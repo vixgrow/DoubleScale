@@ -13,12 +13,12 @@ const CustomDialogHeader: React.FC<CustomDialogHeaderProps> = ({
 	icon,
 }) => {
 	return (
-		<div className="flex items-center gap-4 p-0">
-			<span className="bg-[#4A30CF1F] p-3 rounded-xl">{icon}</span>
+		<div className="flex items-center gap-3 p-0">
+			<span className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary rounded-lg">{icon}</span>
 
 			<div>
-				<p className="text-[#09090B] font-bold text-2xl">{title}</p>
-				<p className="text-[#979797] text-sm font-normal">{subtitle}</p>
+				<p className="text-foreground font-semibold text-lg leading-tight">{title}</p>
+				<p className="text-muted-foreground text-sm font-normal mt-0.5">{subtitle}</p>
 			</div>
 		</div>
 	);

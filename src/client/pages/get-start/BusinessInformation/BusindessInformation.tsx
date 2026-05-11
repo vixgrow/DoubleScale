@@ -19,7 +19,7 @@ import {
 import { Input } from '@doublescale/components/ui/input';
 import { Textarea } from '@doublescale/components/ui/textarea';
 import ButtonComponent from '../component/button';
-import UploadImageIcon from '@doublescale/components/icons/upload-image';
+import UploadImageIcon from '@doublescale/shared/icons/upload-image';
 import { BusinessFormSkeleton } from './BusinessFormSkeleton';
 
 export const formSchema = z.object({
@@ -78,8 +78,8 @@ function LogoUpload({
 					relative border-2 border-dashed rounded-2xl 
 					flex flex-col items-center justify-center py-12 cursor-pointer 
 					transition-all text-center
-					${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-					${error ? 'border-red-500' : ''}
+				${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}
+				${error ? '!border-destructive' : ''}
 				`}
 			>
 				<input {...getInputProps()} />
@@ -91,27 +91,26 @@ function LogoUpload({
 							alt="Logo preview"
 							className="w-32 h-32 object-contain rounded-lg border"
 						/>
-						<p className="text-sm text-gray-600">
+						<p className="text-sm text-muted-foreground">
 							{__('Click or drag to replace', 'doublescale')}
 						</p>
 					</div>
 				) : (
 					<>
 						<UploadImageIcon />
-						<p className="text-xl leading-[30px] font-medium text-[#458DC7]">
-							{__('Browse images', 'doublescale')}
-							<span className="text-[#09090B]">
-								{' '}
-								{__('to upload', 'doublescale')}
-							</span>
-						</p>
-						<p className="text-base leading-[26px] text-[#979797] mt-1">
-							{__('or drag and drop it here', 'doublescale')}
-						</p>
+					<p className="text-sm font-medium text-primary mt-3">
+						{__('Browse images', 'doublescale')}
+						<span className="text-foreground font-normal">
+							{' '}{__('to upload', 'doublescale')}
+						</span>
+					</p>
+					<p className="text-xs text-muted-foreground mt-1">
+						{__('or drag and drop it here', 'doublescale')}
+					</p>
 					</>
 				)}
 			</div>
-			{error ? <p className="text-sm text-red-500">{error}</p> : null}
+			{error ? <p className="text-sm text-destructive">{error}</p> : null}
 		</div>
 	);
 }
@@ -296,15 +295,15 @@ export default function BusindessInformation({
 
 
 	return (
-		<div className="flex flex-col gap-10">
+		<div className="flex flex-col gap-8">
 			{/* Header */}
 			<div>
-				<h3 className="text-[#170F49] text-[32px] font-semibold">
-					{__('Please provide your business information', 'doublescale')}
+				<h3 className="text-foreground text-2xl font-semibold mb-1">
+					{__('Business Information', 'doublescale')}
 				</h3>
-				<p className="text-[#777] text-lg font-normal leading-7">
+				<p className="text-muted-foreground text-sm leading-relaxed">
 					{__(
-						"This will be used for your email campaign, Subscriber's front pages",
+						"This will be used for your email campaigns and subscriber-facing pages.",
 						'doublescale'
 					)}
 				</p>
@@ -318,7 +317,7 @@ export default function BusindessInformation({
 						name="name"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel className="text-base text-[#09090B] leading-[150%]">
+								<FormLabel className="text-sm font-medium text-foreground">
 									{__('Business Name', 'doublescale')}
 								</FormLabel>
 								<FormControl>
@@ -328,7 +327,6 @@ export default function BusindessInformation({
 											'doublescale'
 										)}
 										{...field}
-										className="border border-[#DEE1E6] rounded-[8px] h-12 py-[5px] px-4"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -344,18 +342,18 @@ export default function BusindessInformation({
 							name="address"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="text-base text-[#09090B] leading-[150%]">
-										{__('Business Address', 'doublescale')}
-									</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder={__(
-												'Type here business address....',
-												'doublescale'
-											)}
-											{...field}
-											className="border border-[#DEE1E6] rounded-[8px]  py-3 px-4 min-h-[190px] resize-none"
-										/>
+								<FormLabel className="text-sm font-medium text-foreground">
+									{__('Business Address', 'doublescale')}
+								</FormLabel>
+								<FormControl>
+									<Textarea
+										placeholder={__(
+											'Type your business address...',
+											'doublescale'
+										)}
+										{...field}
+										className="min-h-[160px] resize-none"
+									/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -369,9 +367,9 @@ export default function BusindessInformation({
 							render={({ field }) => {
 								return (
 									<FormItem>
-										<FormLabel className="text-base text-[#09090B] leading-[150%]">
-											{__('Logo', 'doublescale')}
-										</FormLabel>
+								<FormLabel className="text-sm font-medium text-foreground">
+										{__('Logo', 'doublescale')}
+									</FormLabel>
 										<FormControl>
 											<LogoUpload
 												value={field.value || null}
@@ -402,7 +400,7 @@ export default function BusindessInformation({
 			</Form>
             }
 			{/* Buttons */}
-			<div className="flex justify-between pt-8">
+			<div className="flex justify-between pt-6 border-t border-border/40">
 						<ButtonComponent
 							onClick={handlePrevious}
 							type=""

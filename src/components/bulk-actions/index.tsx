@@ -229,7 +229,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 					onValueChange={handleAction}
 					disabled={selectedRowKeys.length === 0}
 				>
-					<SelectTrigger className="w-[150px] h-9 rounded-xl px-3 py-[20px] bg-accent border-none text-[#A1A5B7] font-semibold">
+					<SelectTrigger className="w-[150px] h-8 rounded-lg px-3 border border-border bg-background text-sm text-muted-foreground font-medium">
 						<SelectValue placeholder="Bulk Actions" />
 					</SelectTrigger>
 					<SelectContent>

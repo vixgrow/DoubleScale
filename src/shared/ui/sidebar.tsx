@@ -25,7 +25,8 @@ import {
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '9rem';
+/** Must match admin nav shell (see `.doublescale-navbar { --sidebar-width }`) so the flex spacer and fixed rail share one width. */
+const SIDEBAR_WIDTH = '260px';
 const SIDEBAR_WIDTH_MOBILE = '11rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
@@ -240,7 +241,7 @@ const Sidebar = React.forwardRef<
 		return (
 			<div
 				ref={ref}
-				className="group peer hidden text-sidebar-foreground md:block"
+				className="group peer hidden text-sidebar-foreground md:block md:shrink-0"
 				data-state={state}
 				data-collapsible={state === 'collapsed' ? collapsible : ''}
 				data-variant={variant}
@@ -249,7 +250,7 @@ const Sidebar = React.forwardRef<
 				{/* This is what handles the sidebar gap on desktop */}
 				<div
 					className={cn(
-						'relative w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear',
+						'relative w-[--sidebar-width] shrink-0 bg-transparent transition-[width] duration-200 ease-linear',
 						'group-data-[collapsible=offcanvas]:w-0',
 						'group-data-[side=right]:rotate-180',
 						variant === 'floating' || variant === 'inset'

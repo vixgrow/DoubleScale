@@ -23,7 +23,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import TrashIcon from '@/components/icons/trash';
+import TrashIcon from '@doublescale/shared/icons/trash';
 import Select from 'react-select';
 
 interface ContactMappedFieldsFormProps {
@@ -105,8 +105,8 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 		<div className="flex-1 relative">
 			<Input
 				ref={inputRef}
-				className={`w-full bg-white h-12 pr-10 ${hasMergeTags(value || '')
-					? 'border-blue-300 bg-blue-50/30'
+				className={`w-full pr-10 ${hasMergeTags(value || '')
+					? 'border-primary/30 bg-primary/5'
 					: ''
 					}`}
 				value={value || ''}
@@ -364,17 +364,14 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 			{map(contactFields, (_, key) => {
 				return (
 					<div key={key} className="flex gap-3">
-						<Input
-							value={contactFields[key].label}
-							disabled
-							className="flex-1 bg-white h-12 disabled:opacity-100"
-							style={{
-								borderRadius: '8px',
-							}}
-						/>
+					<Input
+						value={contactFields[key].label}
+						disabled
+						className="flex-1 disabled:opacity-100"
+					/>
 						{key === 'email' ? (
 							<Select
-								className="react-select-container h-12"
+								className="react-select-container"
 								classNamePrefix="react-select "
 								onChange={(value) => {
 									if (!isObject(value)) {
@@ -466,7 +463,7 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 					<div key={field.id} className="flex gap-3 items-start">
 						<div className="flex-1">
 							<Select
-								className="react-select-container h-12"
+								className="react-select-container"
 								classNamePrefix="react-select"
 								onChange={(value) => {
 									if (!isObject(value)) {

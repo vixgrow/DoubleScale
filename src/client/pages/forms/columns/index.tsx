@@ -115,11 +115,11 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 			),
 			cell: ({ row }) => (
 				<div
-					className={`capitalize rounded-lg py-1 px-3 border text-base w-fit
+					className={`inline-flex items-center text-xs font-medium capitalize rounded-full py-0.5 px-2.5 border w-fit
 				${
 					row.original.status === 'active'
-						? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
-						: 'bg-[#EF44444A] text-destructive border-destructive'
+						? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+						: 'bg-destructive/5 text-destructive border-destructive/20'
 				}
 			`}
 				>
@@ -170,7 +170,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 					<div className="text-start">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button className="h-6 w-6 bg-accent text-[#1E2125] rounded-lg p-0 hover:bg-accent focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0">
+								<Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground focus-visible:ring-0">
 									<ThreeDotsIcon />
 								</Button>
 							</DropdownMenuTrigger>
@@ -200,7 +200,7 @@ export function getColumns({ formTypes, onDelete, onToggleStatus }) {
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => onDelete(form.id)}
-									className="text-red-500 hover:text-red-500 focus:text-red-500"
+									className="text-destructive hover:text-destructive focus:text-destructive"
 								>
 									<DeleteIcon />
 									{__('Delete', 'doublescale')}

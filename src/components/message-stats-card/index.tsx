@@ -1,100 +1,100 @@
-/**
- * Reusable Message Statistics Card Component
- *
- * Displays a statistics card with icon, value, and label.
- * Used across email, SMS, and WhatsApp message tabs for consistent UI.
- *
- * @since 1.0.0
- */
-
 import React from 'react';
-import { Card } from '@/components/ui/card';
 
-/**
- * Props interface for MessageStatsCard
- */
+import { cn } from '@/lib/utils';
+
 interface MessageStatsCardProps {
-	/** Icon element to display */
 	icon: React.ReactNode;
-	/** Main value to display (number or string) */
 	value: string | number;
-	/** Label text below the value */
 	label: string;
-	/** Optional percentage to display */
 	percentage?: number;
-	/** Background color class for icon container */
 	iconBgClass?: string;
-	/** Border color class for left border */
 	borderColorClass?: string;
-	/** Additional CSS classes for the card */
 	className?: string;
-	/** Icon color class for icon */
 	iconColor?: string;
+	/** Vertical analytics layout: icon on top, label, then value */
+	layout?: 'default' | 'centered';
 }
 
-/**
- * MessageStatsCard Component
- *
- * Renders a styled card displaying message statistics with:
- * - Large value/metric at top
- * - Descriptive label below
- * - Icon in colored background circle
- * - Optional percentage display
- * - Customizable border and icon colors
- *
- * @example
- * ```tsx
- * <MessageStatsCard
- *   icon={<ContactTotalEmailsIcon width={38} height={22} />}
- *   value={totalMessages}
- *   label={__('Total Emails', 'doublescale')}
- *   iconBgClass="bg-[#E4EEFD]"
- *   borderColorClass="border-l-secondary"
- * />
- * ```
- *
- * @example With percentage
- * ```tsx
- * <MessageStatsCard
- *   icon={<OpenRateIcon />}
- *   value={`${openRate}%`}
- *   label={__('Open Rate', 'doublescale')}
- *   percentage={75}
- *   iconBgClass="bg-[#D1F6DF]"
- *   borderColorClass="border-l-[#16A34A]"
- * />
- * ```
- */
 export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 	icon,
 	value,
 	label,
 	percentage,
-	iconBgClass = 'bg-blue-50',
-	borderColorClass = 'border-l-primary',
+	iconBgClass = 'bg-primary/10',
+	borderColorClass = '',
 	className = '',
-	iconColor = 'text-secondary',
+	iconColor = 'text-primary',
+	layout = 'default',
 }) => {
-	return (
-		<Card
-			className={`flex-1 p-3 shadow-none ${borderColorClass} border-l-[3px] border-y-0 border-r-0 ${className}`}
-		>
-			<div className="flex justify-between items-center">
-				<div className="flex flex-col">
-					<span className="text-2xl font-semibold">{value}</span>
-					<span className="text-lg text-gray-500 font-medium">
-						{label}
+	if (layout === 'centered') {
+		return (
+			<div
+				className={cn(
+					'flex flex-1 flex-col gap-3 items-center rounded-xl border border-[#D0D0D0] bg-card p-3.5 text-center transition-all',
+					borderColorClass,
+					className
+				)}
+			>
+				<div
+					className={cn(
+						iconBgClass,
+						'flex p-1.5 shrink-0 items-center justify-center rounded-full',
+						iconColor
+					)}
+				>
+					{icon}
+				</div>
+				<span className="whitespace-nowrap text-[16px] leading-5 text-[#6B6C76]">
+					{label}
+				</span>
+				<div className="flex items-baseline justify-center gap-2">
+					<span className="text-xl leading-7 font-bold tabular-nums text-[#29292E]">
+						{value}
 					</span>
 					{percentage !== undefined && (
-						<span className="text-xs text-gray-400">
+						<span className="text-xs font-medium text-muted-foreground">
 							{percentage}%
 						</span>
 					)}
 				</div>
-				<div className={`${iconBgClass} p-1.5 rounded-full ${iconColor}`}>
+			</div>
+		);
+	}
+
+	return (
+		<div
+			className={cn(
+				'flex-1 rounded-xl border border-border/60 bg-card p-5 transition-all hover:shadow-sm',
+				borderColorClass,
+				className
+			)}
+		>
+			<div className="flex items-start justify-between">
+				<div className="flex flex-col gap-1">
+					<span className="text-sm font-medium text-muted-foreground">
+						{label}
+					</span>
+					<div className="flex items-baseline gap-2">
+						<span className="text-2xl font-bold text-foreground">
+							{value}
+						</span>
+						{percentage !== undefined && (
+							<span className="text-xs font-medium text-muted-foreground">
+								{percentage}%
+							</span>
+						)}
+					</div>
+				</div>
+				<div
+					className={cn(
+						iconBgClass,
+						'flex h-10 w-10 items-center justify-center rounded-lg',
+						iconColor
+					)}
+				>
 					{icon}
 				</div>
 			</div>
-		</Card>
+		</div>
 	);
 };

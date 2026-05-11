@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  * External dependencies
  */
 import { format } from 'date-fns';
-import { User, ArrowRight, Badge } from 'lucide-react';
+import { User, ArrowRight, Eye, MousePointerClick, Globe } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -26,11 +26,12 @@ import {
 } from '@doublescale/services/activities-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import './style.scss';
-import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon } from '@doublescale/components';
+import { NoData, TaskDoneIcon, GradientActivitiesIcon, NoteAddIcon, EditHeaderIcon, DealValueIcon, MeetingActivityIcon, UserActivityIcon, StartDateIcon, DurationIcon, LocationIcon, CallActivityIcon, EmailActivityIcon, CheckCircleIcon, SMSIcon, WhatsAppIcon } from '@doublescale/components';
 import { ActivityActionsDropdown } from './activity-action-dropdown';
 import { useActivityOperations } from '@doublescale/hooks/use-activity-operations';
-import { useContactContext } from '../state/context';
 import NoteDialog from '../notes/note-dialog';
 import CallDialog from '../calls/call-dialog';
 import MeetingDialog from '../meetings/meeting-dialog';
@@ -65,14 +66,25 @@ interface Activity {
 // TimelineItem is imported from activities-service (includes activity field)
 
 const activityTypeIcons: Record<string, React.ReactNode> = {
-    created: <UserActivityIcon color="#3B82F6" />,
-    stage_changed: <ArrowRight className="w-4 h-4" />,
+    created: <UserActivityIcon color="hsl(var(--primary))" />,
+    stage_changed: <ArrowRight className="h-4 w-4 text-primary" />,
     value_changed: <DealValueIcon color="#F97316" />,
     status_changed: <EditHeaderIcon />,
     note: <NoteAddIcon />,
     email_sent: <EmailActivityIcon />,
+    email_received: <EmailActivityIcon />,
     call_logged: <CallActivityIcon width={16} height={16} />,
     meeting_scheduled: <MeetingActivityIcon color="#CB5301" />,
+    sms_sent: <SMSIcon />,
+    sms_received: <SMSIcon />,
+    whatsapp_sent: <WhatsAppIcon />,
+    whatsapp_received: <WhatsAppIcon />,
+    // Tracking types
+    email_opened: <Eye className="w-4 h-4" />,
+    email_clicked: <MousePointerClick className="w-4 h-4" />,
+    sms_clicked: <MousePointerClick className="w-4 h-4" />,
+    whatsapp_clicked: <MousePointerClick className="w-4 h-4" />,
+    page_visited: <Globe className="w-4 h-4" />,
     // Task types
     task: <TaskDoneIcon color="#CB5301" />,
     call: <CallActivityIcon width={16} height={16} />,
@@ -82,23 +94,51 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     follow_up: <TaskDoneIcon color="#CB5301" />,
 };
 
-const activityTypeColors: Record<string, string> = {
-    created: '#3B82F6',
-    stage_changed: '#8B5CF6',
-    value_changed: '#F97316',
-    status_changed: '#06B6D4',
-    note: '#458DC7',
-    email_sent: '#16A34A',
-    call_logged: '#660FF1',
-    meeting_scheduled: '#CB5301',
-    // Task types
-    task: '#CB5301',
-    call: '#660FF1',
-    email: '#16A34A',
-    meeting: '#CB5301',
-    todo: '#CB5301',
-    follow_up: '#F59E0B',
+/** Matches deal pipeline activity timeline badge tokens */
+const activityBadgeClass: Record<string, string> = {
+    created: 'border-primary/40 bg-primary/10 text-primary',
+    stage_changed: 'border-primary/40 bg-primary/10 text-primary',
+    value_changed:
+        'border-orange-500/40 bg-orange-500/10 text-orange-900 dark:text-orange-100',
+    status_changed:
+        'border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-100',
+    note: 'border-primary/40 bg-primary/10 text-primary',
+    email_sent:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    email_received:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    call_logged: 'border-primary/40 bg-primary/10 text-primary',
+    meeting_scheduled:
+        'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    sms_sent: 'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
+    sms_received:
+        'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
+    whatsapp_sent:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    whatsapp_received:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    email_opened: 'border-primary/40 bg-primary/10 text-primary',
+    email_clicked: 'border-primary/40 bg-primary/10 text-primary',
+    sms_clicked:
+        'border-violet-500/40 bg-violet-500/10 text-violet-900 dark:text-violet-100',
+    whatsapp_clicked:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    page_visited:
+        'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    task: 'border-border bg-muted/70 text-foreground',
+    call: 'border-primary/40 bg-primary/10 text-primary',
+    email:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    meeting:
+        'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    todo: 'border-border bg-muted/70 text-foreground',
+    follow_up:
+        'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
 };
+
+const getActivityBadgeClass = (activityType: string) =>
+    activityBadgeClass[activityType] ??
+    'border-border/60 bg-muted/50 text-muted-foreground';
 
 // Task Dialog Wrapper Component - uses Pro plugin components via WordPress filters
 const TaskDialogWrapper: React.FC<{
@@ -146,7 +186,6 @@ const TaskDialogWrapper: React.FC<{
 
 const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
     const { deleteActivity } = useActivityOperations();
-    const { contact } = useContactContext();
     const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -334,10 +373,6 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
         return activityTypeIcons[activityType] || <User className="w-4 h-4" />;
     };
 
-    const getActivityColor = (activityType: string) => {
-        return activityTypeColors[activityType] || '#6B7280';
-    };
-
     dayjs.extend(utc);
     dayjs.extend(timezone);
     const formatActivityTime = (createdAt: string) => {
@@ -352,7 +387,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 return (
                     activity.data?.content && (
                         <div className="activity-note-content">
-                            <p className="text-base font-normal text-[#777] leading-[26px]">
+                            <p className="text-sm leading-snug text-muted-foreground">
                                 {activity.data.content}
                             </p>
                         </div>
@@ -362,15 +397,15 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             case 'meeting_scheduled':
                 return (
                     activity.data && (
-                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px]">
+                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
                             <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
-                                <div className=" text-[#09090B] text-xl text-center font-semibold leading-[30px]">
+                                <div className=" text-foreground text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
                                         activity.data.scheduled_at ||
                                         activity.created_at
                                     ).getDate()}
                                 </div>
-                                <div className=" text-[#09090B] text-base text-center font-normal leading-[26px]">
+                                <div className=" text-foreground text-base text-center font-normal leading-[26px]">
                                     {format(
                                         new Date(
                                             activity.data.scheduled_at ||
@@ -383,7 +418,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             <div className=" flex flex-col gap-3">
                                 <div className="flex gap-6 items-center">
                                     {activity.data.scheduled_at && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
+                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <StartDateIcon />
                                             <span>
                                                 {__('Start Date', 'doublescale')}:
@@ -399,7 +434,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         </div>
                                     )}
                                     {activity.data.location && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
+                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <LocationIcon />
                                             <span>
                                                 {__('Location', 'doublescale')}:{' '}
@@ -410,7 +445,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         </div>
                                     )}
                                     {activity.data.duration && (
-                                        <div className="flex justify-center gap-2  font-medium text-[#777]">
+                                        <div className="flex justify-center gap-2  font-medium text-muted-foreground">
                                             <DurationIcon />
                                             <span>
                                                 {__('Duration', 'doublescale')}:{' '}
@@ -424,10 +459,10 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                 </div>
                                 {activity.data.description && (
                                     <div className="flex flex-col gap-2  ">
-                                        <h4 className="text-[#09090B]  text-base font-medium">
+                                        <h4 className="text-foreground  text-base font-medium">
                                             {__('Meeting Description', 'doublescale')}
                                         </h4>
-                                        <p className=" text-base font-normal text-[#777] leading-[26px]">
+                                        <p className=" text-base font-normal text-muted-foreground leading-[26px]">
                                             {activity.data.description}
                                         </p>
                                     </div>
@@ -440,30 +475,66 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             case 'email_sent':
                 return (
                     activity.data && (
-                        <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-4 py-4 px-2">
                             {activity.data.subject && (
                                 <div>
-                                    <h4 className="text-[#09090B] text-base font-medium">
+                                    <h4 className="text-foreground text-base font-medium">
                                         {__('Subject', 'doublescale')}
                                     </h4>
-                                    <p className="text-base font-normal text-[#777] leading-[26px]">
+                                    <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                         {activity.data.subject}
                                     </p>
                                 </div>
                             )}
                             {activity.data.body && (
                                 <div>
-                                    <h4 className="text-[#09090B] text-base font-medium">
+                                    <h4 className="text-foreground text-base font-medium">
                                         {__('Email Body', 'doublescale')}
                                     </h4>
                                     <div
-                                        className="text-base font-normal text-[#777] leading-[26px]"
+                                        className="text-base font-normal text-muted-foreground leading-[26px]"
                                         dangerouslySetInnerHTML={{ __html: activity.data.body }}
                                     />
                                 </div>
                             )}
                             {!activity.data.subject && !activity.data.body && (
-                                <p className="text-base font-normal text-[#777] leading-[26px]">
+                                <p className="text-base font-normal text-muted-foreground leading-[26px]">
+                                    {activity.formatted_message}
+                                </p>
+                            )}
+                        </div>
+                    )
+                );
+
+            case 'sms_sent':
+            case 'sms_received':
+            case 'whatsapp_sent':
+            case 'whatsapp_received':
+                return (
+                    activity.data && (
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-4 py-4 px-2">
+                            {activity.data.to && (
+                                <div>
+                                    <h4 className="text-foreground text-base font-medium">
+                                        {__('To', 'doublescale')}
+                                    </h4>
+                                    <p className="text-base font-normal text-muted-foreground leading-[26px]">
+                                        {activity.data.to}
+                                    </p>
+                                </div>
+                            )}
+                            {activity.data.body && (
+                                <div>
+                                    <h4 className="text-foreground text-base font-medium">
+                                        {__('Message', 'doublescale')}
+                                    </h4>
+                                    <p className="text-base font-normal text-muted-foreground leading-[26px]">
+                                        {activity.data.body}
+                                    </p>
+                                </div>
+                            )}
+                            {!activity.data.body && (
+                                <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                     {activity.formatted_message}
                                 </p>
                             )}
@@ -474,28 +545,54 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
             case 'call_logged':
                 return (
                     activity.data && (
-                        <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
-                            <h4 className="text-[#09090B] text-base font-medium">
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-4 py-4 px-2">
+                            <h4 className="text-foreground text-base font-medium">
                                 {__('Call Notes', 'doublescale')}
                             </h4>
-                            <p className="text-base font-normal text-[#777] leading-[26px]">
+                            <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                 {activity.data.notes || __('No notes available', 'doublescale')}
                             </p>
                         </div>
                     )
                 );
+            case 'email_opened':
+            case 'email_clicked':
+            case 'sms_clicked':
+            case 'whatsapp_clicked':
+                return (
+                    activity.data?.campaign_name ? (
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-2 py-3 px-3">
+                            <p className="text-sm text-muted-foreground">
+                                {__('Campaign', 'doublescale')}: <span className="font-medium text-foreground">{activity.data.campaign_name as string}</span>
+                            </p>
+                        </div>
+                    ) : null
+                );
+
+            case 'page_visited':
+                return (
+                    <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-2 py-3 px-3">
+                        <p className="text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">{activity.data?.path as string || '/'}</span>
+                            {activity.data?.query ? (
+                                <span className="text-xs text-[#999] ml-1">?{activity.data.query as string}</span>
+                            ) : null}
+                        </p>
+                    </div>
+                );
+
             case 'value_changed':
                 return (
                     activity.data && (
-                        <div className="activity-value-content flex items-center gap-2 text-base text-[#09090B]">
+                        <div className="activity-value-content flex flex-wrap items-center gap-2 text-sm text-foreground">
                             <span>
                                 {__('Value changed from', 'doublescale')}
                             </span>
-                            <span className="line-through text-[#6B7280]">
+                            <span className="line-through text-muted-foreground">
                                 {activity.data.old_value}
                             </span>
                             <span>{__('to', 'doublescale')}</span>
-                            <span className="font-semibold text-[#09090B]">
+                            <span className="font-medium text-foreground">
                                 {activity.data.new_value}
                             </span>
                         </div>
@@ -504,7 +601,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
             default:
                 return (
-                    <p className="text-base font-normal text-[#777] leading-[26px]">
+                    <p className="text-sm leading-snug text-muted-foreground">
                         {activity.formatted_message}
                     </p>
                 );
@@ -528,7 +625,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     }
                 />
             </div>
-            <div className="activities-list mt-6">
+            <div className="activities-list mt-4">
                 {loading ? (
                     <div className="space-y-6">
                         {[...Array(3)].map((_, i) => (
@@ -545,13 +642,14 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                 ) : timelineItems.length > 0 ? (
                     <div className="relative">
                         {/* Timeline line */}
-                        <div className="absolute left-[18px] top-0 bottom-0 w-[2px] bg-dashed border-l-2 border-[#E5E7EB] border-dashed"></div>
+                        <div className="absolute bottom-0 left-[18px] top-0 border-l-2 border-dashed border-border" />
 
                         <div className="space-y-0">
                             {timelineItems.map((item) => {
                                 const isTask = item.type === 'task';
+                                const isTracking = item.type === 'tracking';
                                 // Use stored activity if available, otherwise construct it
-                                const activity: Activity | null = isTask ? null : {
+                                const activity: Activity | null = (isTask || isTracking) ? null : {
                                     id: item.activity_id ?? 0,
                                     contact_id: (item.activity as Record<string, unknown>)?.contact_id as number ?? 0,
                                     activity_type: item.icon_type,
@@ -562,6 +660,17 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                     updated_at: item.timestamp,
                                     user: item.user,
                                 };
+                                // For tracking items, build a pseudo-activity for renderActivityContent
+                                const trackingActivity: Activity | null = isTracking ? {
+                                    id: item.tracking_id ?? 0,
+                                    contact_id: item.contact_id ?? 0,
+                                    activity_type: item.icon_type,
+                                    data: item.data,
+                                    user_id: 0,
+                                    formatted_message: item.title || '',
+                                    created_at: item.timestamp,
+                                    updated_at: item.timestamp,
+                                } : null;
                                 const itemId = isTask ? item.task_id : item.activity_id;
 
                                 return (
@@ -570,30 +679,50 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                         className="activity-item relative pl-12 pb-8"
                                     >
                                         {/* Activity/Task Icon */}
-                                        <div className="absolute p-1 left-0 top-0 w-9 h-9 rounded-full bg-[#FFF] flex items-center justify-center border border-[#DEE1E6]">
+                                        <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card p-1 shadow-sm">
                                             {getActivityIcon(item.icon_type)}
                                         </div>
 
                                         {/* Activity/Task Content */}
                                         <div className="activity-content">
                                             {/* Header */}
-                                            <div className="flex items-center justify-between mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex justify-center gap-2">
+                                            <div className="mb-2 flex flex-wrap items-center justify-between gap-y-2">
+                                                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                                                    <div className="flex items-center gap-1.5">
                                                         <MeetingActivityIcon />
-                                                        <p className="text-base font-normal text-[#777] border-r border-r-[#DEE1E6] pr-2">
+                                                        <p className="border-r border-border/60 pr-2 text-xs font-medium text-muted-foreground">
                                                             {formatActivityTime(item.timestamp)}
                                                         </p>
                                                     </div>
-                                                    <div className="flex justify-center gap-2">
+                                                    <div className="flex items-center gap-1.5">
                                                         <UserActivityIcon />
-                                                        <p className="text-base font-normal text-[#777]">
-                                                            {contact?.first_name} {contact?.last_name}
+                                                        <p className="text-xs font-medium text-muted-foreground">
+                                                            {item.user?.display_name ||
+                                                                __(
+                                                                    'System',
+                                                                    'doublescale'
+                                                                )}
                                                         </p>
                                                     </div>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                            'max-w-[12rem] truncate border px-2 py-0.5 text-xs font-medium capitalize shadow-none',
+                                                            getActivityBadgeClass(
+                                                                item.icon_type
+                                                            )
+                                                        )}
+                                                    >
+                                                        {isTask
+                                                            ? __('Task', 'doublescale')
+                                                            : item.icon_type.replace(
+                                                                    /_/g,
+                                                                    ' '
+                                                                )}
+                                                    </Badge>
                                                 </div>
                                                 {/* Actions */}
-                                                <div className="flex items-center gap-5">
+                                                <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                                                     {!isTask && activity && isEditableActivity(item.icon_type) && (
                                                         <ActivityActionsDropdown
                                                             onEdit={() => handleEditActivity(activity)}
@@ -611,19 +740,19 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                                                     variant="outline"
                                                                     size="sm"
                                                                     onClick={() => handleMarkTaskComplete(item.task_id!)}
-                                                                    className="flex items-center gap-2 text-[#16A34A]"
+                                                                    className="h-8 gap-1.5 border-emerald-600/35 text-xs font-medium text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                                                                 >
                                                                     <CheckCircleIcon width={16} height={16} />
                                                                     {__('Mark Complete', 'doublescale')}
                                                                 </Button>
                                                             )}
                                                             {item.status && (
-                                                                <Badge className="text-xs">
+                                                                <Badge variant="default" className="text-xs">
                                                                     {item.status}
                                                                 </Badge>
                                                             )}
                                                             {item.priority && (
-                                                                <Badge className="text-xs ml-2">
+                                                                <Badge variant="outline" className="ml-2 text-xs">
                                                                     {item.priority}
                                                                 </Badge>
                                                             )}
@@ -634,24 +763,25 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
                                             {/* Activity/Task Description */}
                                             <div className="activity-body">
-                                                <p className="text-base text-[#09090B] mb-3 font-medium">
-                                                    {isTask ? item.title : (activity?.formatted_message || item.title)}
+                                                <p className="mb-2 text-sm font-medium leading-snug text-foreground">
+                                                    {isTask ? item.title : (activity?.formatted_message || trackingActivity?.formatted_message || item.title)}
                                                 </p>
 
                                                 {isTask && item.description && (
-                                                    <p className="text-sm text-gray-700 mb-2">
+                                                    <p className="mb-2 text-sm text-muted-foreground">
                                                         {item.description}
                                                     </p>
                                                 )}
 
                                                 {isTask && item.due_date && (
-                                                    <p className="text-xs text-gray-600">
+                                                    <p className="text-xs text-muted-foreground">
                                                         {__('Due', 'doublescale')}: {item.due_date} {item.due_time}
                                                     </p>
                                                 )}
 
                                                 {/* Activity-specific content */}
                                                 {!isTask && activity && renderActivityContent(activity)}
+                                                {isTracking && trackingActivity && renderActivityContent(trackingActivity)}
                                             </div>
                                         </div>
                                     </div>

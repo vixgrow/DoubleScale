@@ -41,6 +41,12 @@ const Settings: React.FC = () => {
 			return;
 		}
 
+		if (!form.id || form.id === 0) {
+			setIsFetching(false);
+			setFormFields(null);
+			return;
+		}
+
 		try {
 			const body = new FormData();
 			body.append('action', fieldsSettings.action);
@@ -73,11 +79,33 @@ const Settings: React.FC = () => {
 	};
 
 	useEffect(() => {
+		if (!form?.id || form.id === 0) {
+			setIsFetching(false);
+			setFormFields(null);
+			return;
+		}
+		setIsFetching(true);
 		getFormFields();
-	}, [form?.form_id]);
+	}, [form?.form_id, form?.id]);
 
 	const settings = form?.data || null;
 	const mappedFields = settings ? settings.mapped_fields : {};
+
+	const pendingConnection =
+		form && (!form.id || form.id === 0);
+
+	if (pendingConnection) {
+		return (
+			<div className="rounded-xl border border-dashed border-border/80 bg-muted/20 px-6 py-12 text-center">
+				<p className="text-sm leading-relaxed text-muted-foreground">
+					{__(
+						'Complete the integration above (name, builder, and form). Field mapping will load here automatically once the connection is saved.',
+						'doublescale'
+					)}
+				</p>
+			</div>
+		);
+	}
 
 	return (
 		<div>
@@ -194,6 +222,36 @@ const Settings: React.FC = () => {
 												}
 											/>
 										</div>
+
+										{!settings?.mark_as_subscribed && (
+											<div className="flex flex-col gap-2 pt-2 border-t">
+												<div className="flex items-center justify-between">
+													<div className="flex flex-col gap-1">
+														<Label className="text-base text-[#09090B]">
+															{__(
+																'Enable email notification',
+																'doublescale'
+															)}
+														</Label>
+														<p className="text-sm text-muted-foreground">
+															{__('Note: Use {{contact:subscribe_link}} for double opt-in', 'doublescale')}
+														</p>
+													</div>
+													<Switch
+														checked={
+															settings?.enable_email_notification ||
+															false
+														}
+														onCheckedChange={(value) =>
+															updateSettings(
+																'enable_email_notification',
+																value
+															)
+														}
+													/>
+												</div>
+											</div>
+										)}
 									</CardContent>
 								</Card>
 							</div>

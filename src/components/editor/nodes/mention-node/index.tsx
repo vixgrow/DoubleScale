@@ -27,26 +27,22 @@ export class MentionNode extends TextNode {
 	}
 
 	createDOM(config) {
-		// Use the standard TextNode DOM creation without styling
 		const dom = super.createDOM(config);
-		
-		// Just add data attributes for reference but no styling
+		dom.className = 'mention-node';
 		dom.dataset.mentionCategory = this.__category;
 		dom.dataset.mentionName = this.__mention;
-		
 		return dom;
 	}
 
 	static exportDOM(node) {
-		// Use standard text export
 		const element = document.createElement('span');
 		element.textContent = node.__text;
+		element.className = 'mention-node';
 		element.dataset.mentionCategory = node.__category;
 		element.dataset.mentionName = node.__mention;
 		return { element };
 	}
 
-	// Define how to import from DOM
 	static importDOM() {
 		return {
 			span: (domNode: HTMLElement) => {
@@ -59,7 +55,7 @@ export class MentionNode extends TextNode {
 								node: new MentionNode(mention, category, domNode.textContent || '', undefined)
 							};
 						},
-						priority: 1 as 0 | 1 | 2 | 3 | 4,
+						priority: 2 as 0 | 1 | 2 | 3 | 4,
 					};
 				}
 				return null;
@@ -114,7 +110,7 @@ export function $createMentionNode(mentionName, category) {
 	const mentionNode = new MentionNode(
 		mentionName,
 		category,
-		mentionName,
+		`{{${category}:${mentionName}}}`,
 		undefined
 	);
 	return mentionNode;

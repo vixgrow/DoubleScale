@@ -127,25 +127,22 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.wc.total}
 								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-[#E4EEFD]"
-								borderColorClass="border-l-secondary"
-								iconColor="text-[#458DC7]"
+								iconBgClass="bg-primary/10"
+								iconColor="text-primary"
 							/>
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
-								value={`${purchaseHistory.wc.revenue} ${purchaseHistory.wc.currency}`}
+								value={`${Number(purchaseHistory.wc.revenue || 0).toFixed(2)} ${purchaseHistory.wc.currency}`}
 								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-[#D1F6DF]"
-								borderColorClass="border-l-[#16A34A]"
-								iconColor="text-[#16A34A]"
+								iconBgClass="bg-emerald-50"
+								iconColor="text-emerald-600"
 							/>
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
-								value={`${purchaseHistory.wc.average || '0'} ${purchaseHistory.wc.currency}`}
+								value={`${Number(purchaseHistory.wc.average || 0).toFixed(2)} ${purchaseHistory.wc.currency}`}
 								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-[#EEE4FF]"
-								borderColorClass="border-l-[#660FF1]"
-								iconColor="text-[#660FF1]"
+								iconBgClass="bg-violet-50"
+								iconColor="text-violet-600"
 							/>
 						</div>
 					)}
@@ -194,25 +191,22 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.edd.total}
 								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-[#E4EEFD]"
-								borderColorClass="border-l-secondary"
-								iconColor="text-[#458DC7]"
+								iconBgClass="bg-primary/10"
+								iconColor="text-primary"
 							/>
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
-								value={`${purchaseHistory.edd.revenue} ${purchaseHistory.edd.currency}`}
+								value={`${Number(purchaseHistory.edd.revenue || 0).toFixed(2)} ${purchaseHistory.edd.currency}`}
 								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-[#D1F6DF]"
-								borderColorClass="border-l-[#16A34A]"
-								iconColor="text-[#16A34A]"
+								iconBgClass="bg-emerald-50"
+								iconColor="text-emerald-600"
 							/>
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
-								value={`${purchaseHistory.edd.average || '0'} ${purchaseHistory.edd.currency}`}
+								value={`${Number(purchaseHistory.edd.average || 0).toFixed(2)} ${purchaseHistory.edd.currency}`}
 								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-[#EEE4FF]"
-								borderColorClass="border-l-[#660FF1]"
-								iconColor="text-[#660FF1]"
+								iconBgClass="bg-violet-50"
+								iconColor="text-violet-600"
 							/>
 						</div>
 					)}
@@ -261,25 +255,22 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 								icon={<TotalOrdersIcon />}
 								value={purchaseHistory.surecart.total}
 								label={__('Total Orders', 'doublescale')}
-								iconBgClass="bg-[#E4EEFD]"
-								borderColorClass="border-l-secondary"
-								iconColor="text-[#458DC7]"
+								iconBgClass="bg-primary/10"
+								iconColor="text-primary"
 							/>
 							<MessageStatsCard
 								icon={<TotalRevenueIcon />}
 								value={`${purchaseHistory.surecart.revenue?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
 								label={__('Total Revenue', 'doublescale')}
-								iconBgClass="bg-[#D1F6DF]"
-								borderColorClass="border-l-[#16A34A]"
-								iconColor="text-[#16A34A]"
+								iconBgClass="bg-emerald-50"
+								iconColor="text-emerald-600"
 							/>
 							<MessageStatsCard
 								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.surecart.average?.toFixed(2) || '0'} ${purchaseHistory.surecart.currency}`}
 								label={__('Average Order Value', 'doublescale')}
-								iconBgClass="bg-[#EEE4FF]"
-								borderColorClass="border-l-[#660FF1]"
-								iconColor="text-[#660FF1]"
+								iconBgClass="bg-violet-50"
+								iconColor="text-violet-600"
 							/>
 						</div>
 					)}

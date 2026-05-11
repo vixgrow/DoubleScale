@@ -199,28 +199,45 @@ const MergeTagsGroupRender: React.FC<{
 
 	return (
 		<div className="space-y-3 max-h-96 overflow-y-auto">
-			{map(filteredMergeTags, (tag, key) => (
-				<Button
-					key={key}
-					className="w-full py-8 justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none"
-					onClick={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						handleTagClick(tag.value);
-					}}
-				>
-					<div className="flex w-full items-center justify-between">
-						<span className="grid font-semibold text-base text-[#3F4254]">
-							{tag.name}
-							<span className="text-xs font-normal italic text-[#505255]">
-								{tag.value}
+			{Object.keys(filteredMergeTags).length === 0 ? (
+				<div className="text-center text-gray-500 py-8">
+					<p>
+						{__(
+							'No merge tags available for this group.',
+							'doublescale'
+						)}
+					</p>
+					<p className="text-sm mt-2">
+						{__(
+							'Please configure the required fields or plugin to see merge tags here.',
+							'doublescale'
+						)}
+					</p>
+				</div>
+			) : (
+				map(filteredMergeTags, (tag, key) => (
+					<Button
+						key={key}
+						className="w-full py-8 justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none"
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							handleTagClick(tag.value);
+						}}
+					>
+						<div className="flex w-full items-center justify-between">
+							<span className="grid font-semibold text-base text-[#3F4254]">
+								{tag.name}
+								<span className="text-xs font-normal italic text-[#505255]">
+									{tag.value}
+								</span>
 							</span>
-						</span>
 
-						<Copy className="h-4 w-4" />
-					</div>
-				</Button>
-			))}
+							<Copy className="h-4 w-4" />
+						</div>
+					</Button>
+				))
+			)}
 		</div>
 	);
 };

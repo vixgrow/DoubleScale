@@ -215,7 +215,6 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 								control: (styles) => ({
 									...styles,
 									minHeight: '40px',
-									borderRadius: '8px',
 								}),
 							}}
 						/>

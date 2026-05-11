@@ -7,17 +7,15 @@ import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { Card, Button, Flex } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
 import { CustomTemplate as TemplateType } from '@doublescale/client';
 import { useParams } from '@doublescale/navigation';
 import { Field } from '@doublescale/components';
+
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const Template: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -149,129 +147,116 @@ const Template: React.FC = () => {
 	};
 
 	return (
-		<div className="doublescale-template-trigger">
-			<Card
-				title={template?.name || __('Template', 'doublescale')}
-				extra={
-					<Button
-						type="primary"
+        <div className="doublescale-template-trigger">
+            <Card><CardHeader className='flex flex-row items-center justify-between'><CardTitle>{template?.name || __('Template', 'doublescale')}</CardTitle>{<Button
 						onClick={() => saveTemplate()}
-						loading={isSaving}
+						disabled
+						variant='default'
 					>
 						{__('Save', 'doublescale')}
-					</Button>
-				}
-				loading={loading}
-			>
-				{template && (
-					<>
-						<Card>
-							<Flex gap={40}>
-								<Flex
-									className="doublescale-fields"
-									vertical
-									style={{ flex: 1 }}
-								>
-									<Flex gap={20}>
-										<Field
-											label={__('From Name', 'doublescale')}
-											value={template.settings.from_name}
-											onChange={(value) =>
-												updateSettings({
-													from_name: value,
-												})
-											}
-											type="text"
-											status={
-												template.settings.from_name
-													? undefined
-													: 'error'
-											}
-										/>
-										<Field
-											label={__('From Email', 'doublescale')}
-											value={template.settings.from_email}
-											onChange={(value) =>
-												updateSettings({
-													from_email: value,
-												})
-											}
-											type="email"
-											status={
-												template.settings.from_email
-													? undefined
-													: 'error'
-											}
-										/>
-									</Flex>
-									<Field
-										label={__('Reply To', 'doublescale')}
-										value={template.settings.reply_to}
-										onChange={(value) =>
-											updateSettings({
-												reply_to: value,
-											})
-										}
-										type="email"
-									/>
-									<Field
-										label={__('Subject', 'doublescale')}
-										value={template.settings.subject}
-										onChange={(value) =>
-											updateSettings({
-												subject: value,
-											})
-										}
-										type="text"
-										status={
-											template.settings.subject
-												? undefined
-												: 'error'
-										}
-									/>
-									<Field
-										label={__('Preview Text', 'doublescale')}
-										value={template.settings.preview_text}
-										onChange={(value) =>
-											updateSettings({
-												preview_text: value,
-											})
-										}
-										type="text"
-									/>
-								</Flex>
-								<Flex style={{ flex: 1 }}>
-									<Card
-										style={{ width: '100%' }}
-										styles={{
-											body: {
-												height: '100%',
-												backgroundColor: '#f5f5f5',
-											},
-										}}
-									>
-										<Flex
-											className="doublescale-preview-content"
-											align="center"
-											justify="center"
-											style={{ height: '100%' }}
-										>
-											<Button type="primary" size="large">
-												{__(
-													'Create with email designer',
-													'doublescale'
-												)}
-											</Button>
-										</Flex>
-									</Card>
-								</Flex>
-							</Flex>
-						</Card>
-					</>
-				)}
-			</Card>
-		</div>
-	);
+					</Button>}</CardHeader><CardContent>
+                    {template && (
+                        <>
+                            <Card><CardContent>
+                                    <div className='flex gap-10'>
+                                        <div className='flex flex-col doublescale-fields' style={{ flex: 1 }}>
+                                            <div className='flex gap-5'>
+                                                <Field
+                                                    label={__('From Name', 'doublescale')}
+                                                    value={template.settings.from_name}
+                                                    onChange={(value) =>
+                                                        updateSettings({
+                                                            from_name: value,
+                                                        })
+                                                    }
+                                                    type="text"
+                                                    status={
+                                                        template.settings.from_name
+                                                            ? undefined
+                                                            : 'error'
+                                                    }
+                                                />
+                                                <Field
+                                                    label={__('From Email', 'doublescale')}
+                                                    value={template.settings.from_email}
+                                                    onChange={(value) =>
+                                                        updateSettings({
+                                                            from_email: value,
+                                                        })
+                                                    }
+                                                    type="email"
+                                                    status={
+                                                        template.settings.from_email
+                                                            ? undefined
+                                                            : 'error'
+                                                    }
+                                                />
+                                            </div>
+                                            <Field
+                                                label={__('Reply To', 'doublescale')}
+                                                value={template.settings.reply_to}
+                                                onChange={(value) =>
+                                                    updateSettings({
+                                                        reply_to: value,
+                                                    })
+                                                }
+                                                type="email"
+                                            />
+                                            <Field
+                                                label={__('Subject', 'doublescale')}
+                                                value={template.settings.subject}
+                                                onChange={(value) =>
+                                                    updateSettings({
+                                                        subject: value,
+                                                    })
+                                                }
+                                                type="text"
+                                                status={
+                                                    template.settings.subject
+                                                        ? undefined
+                                                        : 'error'
+                                                }
+                                            />
+                                            <Field
+                                                label={__('Preview Text', 'doublescale')}
+                                                value={template.settings.preview_text}
+                                                onChange={(value) =>
+                                                    updateSettings({
+                                                        preview_text: value,
+                                                    })
+                                                }
+                                                type="text"
+                                            />
+                                        </div>
+                                        <div style={{ flex: 1 }} className='flex'>
+                                            <Card
+                                                style={{ width: '100%' }}
+                                                styles={{
+                                                    body: {
+                                                        height: '100%',
+                                                        backgroundColor: '#f5f5f5',
+                                                    },
+                                                }}
+                                            ><CardContent>
+                                                    <div
+                                                        className='flex items-center justify-center doublescale-preview-content'
+                                                        style={{ height: '100%' }}>
+                                                        <Button variant='default' size='lg'>
+                                                            {__(
+                                                                'Create with email designer',
+                                                                'doublescale'
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </CardContent></Card>
+                                        </div>
+                                    </div>
+                                </CardContent></Card>
+                        </>
+                    )}
+                </CardContent></Card>
+        </div>
+    );
 };
 
 export default Template;

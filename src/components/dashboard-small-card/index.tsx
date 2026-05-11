@@ -1,32 +1,37 @@
 // WordPress dependencies
 import { __ } from '@wordpress/i18n';
-import { MessageStatsCard } from '../message-stats-card';
 
 interface DashboardSmallCardProps {
 	title: string;
 	subtitle: string | number;
 	icon: React.ReactNode;
-	color?:string;
+	color?: string;
 }
 
 const DashboardSmallCard: React.FC<DashboardSmallCardProps> = ({
 	subtitle,
 	title,
 	icon,
-	color
+	color,
 }) => {
 	return (
-		<div className="flex flex-1 flex-col items-start gap-[30px] border border-[#F1F1F2] rounded-xl py-8 px-6">
-			<div className="flex items-center gap-6 p-0">
-				<span className={`${color ? color : 'bg-[#ECF3FC]'}   p-2 rounded-full`}>{icon}</span>
-				<p className="text-[#7E8299] font-semibold text-lg">{title}</p>
+		<div className="flex flex-1 flex-col gap-4 rounded-xl border border-border/60 bg-card p-5 transition-all hover:shadow-sm">
+			<div className="flex items-center gap-3">
+				<span
+					className={`${color ? color : 'bg-primary/10 text-primary'} flex h-10 w-10 items-center justify-center rounded-lg`}
+				>
+					{icon}
+				</span>
+				<span className="text-sm font-medium text-muted-foreground">
+					{title}
+				</span>
 			</div>
 			<div>
-				<p className="text-4xl text-black font-bold">{subtitle}</p>
-				
+				<span className="text-3xl font-bold text-foreground">
+					{subtitle}
+				</span>
 			</div>
 		</div>
-		
 	);
 };
 

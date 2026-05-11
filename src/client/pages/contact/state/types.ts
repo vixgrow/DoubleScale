@@ -76,6 +76,7 @@ export type PurchaseHistory = {
 		average: number;
 		last_order: string;
 		currency: string;
+		revenue_by_currency?: Record<string, number>;
 	};
 	wc: {
 		orders: Order[];
@@ -84,6 +85,7 @@ export type PurchaseHistory = {
 		average: number;
 		last_order: string;
 		currency: string;
+		revenue_by_currency?: Record<string, number>;
 	};
 	surecart: {
 		orders: SurecartOrder[];
@@ -92,6 +94,7 @@ export type PurchaseHistory = {
 		average: number;
 		last_order: string;
 		currency: string;
+		revenue_by_currency?: Record<string, number>;
 	};
 } | null;
 

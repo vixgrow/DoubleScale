@@ -47,6 +47,7 @@ export const BounceHandler: React.FC = () => {
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
+	// Fetch webhooks on component mount
 	useEffect(() => {
 		fetchWebhooks();
 	}, []);
@@ -83,6 +84,7 @@ export const BounceHandler: React.FC = () => {
 
 	const selectedWebhook = selectedProvider && webhooks ? webhooks[selectedProvider] : null;
 
+	// Get sorted provider list for dropdown
 	const providersList = webhooks
 		? Object.values(webhooks).sort((a, b) => a.name.localeCompare(b.name))
 		: [];
@@ -146,6 +148,7 @@ export const BounceHandler: React.FC = () => {
 							)}
 						</CardHeader>
 						<CardContent className="space-y-4">
+							{/* Webhook URL */}
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-gray-700">
 									{__('Webhook URL', 'doublescale')}
@@ -178,6 +181,7 @@ export const BounceHandler: React.FC = () => {
 								</div>
 							</div>
 
+							{/* Setup Instructions */}
 							{selectedWebhook.setup_instructions && (
 								<Alert>
 									<AlertDescription className="text-sm">
@@ -187,6 +191,7 @@ export const BounceHandler: React.FC = () => {
 								</Alert>
 							)}
 
+							{/* Documentation Link */}
 							{selectedWebhook.doc_url && (
 								<div>
 									<a
@@ -201,6 +206,7 @@ export const BounceHandler: React.FC = () => {
 								</div>
 							)}
 
+							{/* How It Works Info */}
 							<Alert className="bg-blue-50 border-blue-200 mt-4">
 								<AlertDescription className="text-sm text-blue-900">
 									<strong>{__('How it works:', 'doublescale')}</strong>{' '}

@@ -7,11 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 //@ts-ignore
-import QuillBooking from '../../../../../assets/images/plugin-start/QuillBooking.png'
-//@ts-ignore
-import QuillForms from '../../../../../assets/images/plugin-start/QuillForms.png'
-//@ts-ignore
-import QuillSMTP from '../../../../../assets/images/plugin-start/QuillSMTP.png'
+import QuillForms from '@doublescale/assets/images/plugin-start/QuillForms.png';
 /**
  * External dependencies
  */
@@ -23,11 +19,9 @@ import {
 	AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import RecommendedPluginIcon from '@doublescale/components/icons/recommended-plugin';
-import QuillBookingIcon from '@doublescale/components/icons/quillBooking';
-import OptionalPluginIcon from '@doublescale/components/icons/optional-icon';
+import OptionalPluginIcon from '@doublescale/shared/icons/optional-icon';
 import ButtonComponent from '../component/button';
-import { Input } from '../../../../components/ui/input';
+import { Input } from '@/components/ui/input';
 import { PluginsLoadingSkeleton } from './Plugin-Skeleton';
 
 interface Plugin {
@@ -36,41 +30,13 @@ interface Plugin {
 	// icon: React.ReactNode;
 	icon: string;
 	description: string;
-	pluginFile?: string; // WordPress plugin file path (e.g., 'quill-smtp/quill-smtp.php')
+	pluginFile?: string; // WordPress plugin file path (e.g., 'doublescale/doublescale.php')
 	downloadUrl?: string; // WordPress.org zip URL
 	isInstalled?: boolean;
 	isActive?: boolean;
 }
 
-const RecommendedPlugins: Plugin[] = [
-	{
-		id: 'quill-smtp',
-		name: 'Quill SMTP',
-		icon: QuillSMTP,
-		description: __(
-			'Quill SMTP helps you send reliable, trackable emails directly from your CRM.',
-			'doublescale'
-		),
-		// Main plugin file is "quillsmtp.php" inside the "quill-smtp" folder.
-		pluginFile: 'quill-smtp/quillsmtp.php',
-		downloadUrl:
-			'https://downloads.wordpress.org/plugin/quill-smtp.1.5.3.zip',
-	},
-];
-
 const OptionalPlugins: Plugin[] = [
-	{
-		id: 'quillbooking',
-		name: 'Quill Booking',
-		icon: QuillBooking,
-		description: __(
-			'Quill Booking empowers you with seamless appointment scheduling.',
-			'doublescale'
-		),
-		pluginFile: 'quillbooking/quillbooking.php',
-		downloadUrl:
-			'https://downloads.wordpress.org/plugin/quillbooking.1.2.1.zip',
-	},
 	{
 		id: 'quillforms',
 		name: 'Quill Forms',
@@ -106,13 +72,13 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 	}
 
 	return (
-		<div className="flex items-start justify-between gap-4 p-4 border border-[#DEE1E6] bg-[#F8F8F8] rounded-2xl">
+		<div className="flex items-start justify-between gap-4 p-4 border border-border/60 bg-muted/50 rounded-2xl">
 			<div className="flex flex-col items-start gap-3 flex-1">
 				<div className="flex justify-between items-center w-full">
 					<div className="flex gap-1 flex-1">
 						{/* {plugin.icon} */}
 						<img src={plugin.icon} alt={plugin.name} />
-						<h4 className="text-xl font-medium leading-[30px] text-[#09090B]">
+						<h4 className="text-xl font-medium leading-[30px] text-foreground">
 							{plugin.name}
 						</h4>
 					</div>
@@ -123,10 +89,10 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 						</span>
 					) : (
 						<Button
-							variant="default"
+							variant="outline"
 							size="sm"
 							onClick={() => onAction(plugin)}
-							className="flex-shrink-0 justify-end text-xs h-8 px-4 bg-transparent font-medium leading-[26px] text-base border border-[#458DC7] text-[#458DC7] hover:bg-blue-100"
+							className="flex-shrink-0 border-primary text-primary hover:bg-primary/5"
 							disabled={isProcessing}
 						>
 							{isProcessing
@@ -136,7 +102,7 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 					)}
 				</div>
 
-				<p className="text-lg leading-7 text-[#777] mt-1">
+				<p className="text-lg leading-7 text-muted-foreground mt-1">
 					{plugin.description}
 				</p>
 			</div>
@@ -156,8 +122,6 @@ export default function PluginComplete({
 	onNext,
 }: PluginCompleteProps) {
 	const { createNotice } = useDispatch('doublescale/core');
-	const [recommendedPlugins, setRecommendedPlugins] =
-		useState<Plugin[]>(RecommendedPlugins);
 	const [optionalPlugins, setOptionalPlugins] =
 		useState<Plugin[]>(OptionalPlugins);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -169,7 +133,7 @@ export default function PluginComplete({
 		const checkPluginStatus = async () => {
 			setIsLoading(true);
 			try {
-				const pluginFiles = [...RecommendedPlugins, ...OptionalPlugins]
+				const pluginFiles = [...OptionalPlugins]
 					.map((plugin) => plugin.pluginFile)
 					.filter((file): file is string => Boolean(file))
 					.join(',');
@@ -193,18 +157,6 @@ export default function PluginComplete({
 
 				const statusMap = response?.data || {};
 
-				const updatedRecommended = RecommendedPlugins.map((plugin) => {
-					const status = plugin.pluginFile
-						? statusMap[plugin.pluginFile]
-						: undefined;
-
-					return {
-						...plugin,
-						isInstalled: Boolean(status?.is_installed),
-						isActive: Boolean(status?.is_active),
-					};
-				});
-
 				const updatedOptional = OptionalPlugins.map((plugin) => {
 					const status = plugin.pluginFile
 						? statusMap[plugin.pluginFile]
@@ -217,7 +169,6 @@ export default function PluginComplete({
 					};
 				});
 
-				setRecommendedPlugins(updatedRecommended);
 				setOptionalPlugins(updatedOptional);
 			} catch (error: any) {
 				// eslint-disable-next-line no-console
@@ -289,7 +240,7 @@ export default function PluginComplete({
 			});
 
 			// Refresh plugin status after action.
-			const pluginFiles = [...RecommendedPlugins, ...OptionalPlugins]
+			const pluginFiles = [...OptionalPlugins]
 				.map((p) => p.pluginFile)
 				.filter((file): file is string => Boolean(file))
 				.join(',');
@@ -308,19 +259,6 @@ export default function PluginComplete({
 				});
 
 				const statusMap = response?.data || {};
-
-				setRecommendedPlugins(
-					RecommendedPlugins.map((p) => {
-						const status = p.pluginFile
-							? statusMap[p.pluginFile]
-							: undefined;
-						return {
-							...p,
-							isInstalled: Boolean(status?.is_installed),
-							isActive: Boolean(status?.is_active),
-						};
-					})
-				);
 
 				setOptionalPlugins(
 					OptionalPlugins.map((p) => {
@@ -358,17 +296,17 @@ export default function PluginComplete({
 	};
 
 	return (
-		<div className="flex flex-col gap-10">
+		<div className="flex flex-col gap-8">
 			<div>
-				<h3 className="text-[#170F49] text-[32px] font-semibold">
+				<h3 className="text-foreground text-2xl font-semibold mb-1">
 					{__(
-						'Complete Your Setup—Install Recommended & Optional Plugins',
+						'Optional Plugins',
 						'doublescale'
 					)}
 				</h3>
-				<p className="text-[#777] text-lg font-normal leading-7">
+				<p className="text-muted-foreground text-sm leading-relaxed">
 					{__(
-						'Enhance your CRM experience by installing Quill SMTP (recommended) and optional Quill Booking / Quill Forms integrations.',
+						'Enhance your CRM experience with optional Quill Booking and Quill Forms integrations.',
 						'doublescale'
 					)}
 				</p>
@@ -376,54 +314,24 @@ export default function PluginComplete({
 
 			{isLoading ? (
 				<div className="text-center py-12">
-					<p className="text-[#777] text-lg">
+					<p className="text-muted-foreground text-lg">
 						<PluginsLoadingSkeleton />
 					</p>
 				</div>
 			) : (
 				<Accordion
 					type="multiple"
-					defaultValue={['recommended', 'optional']}
-					className="grid grid-cols-1 md:grid-cols-2 gap-12"
+					defaultValue={['optional']}
+					className="grid grid-cols-1 gap-12"
 				>
-					{/* Recommended Plugins */}
-					<AccordionItem
-						value="recommended"
-						className="border border-[#DEE1E6] rounded-lg shadow-sm flex flex-col gap-4"
-					>
-						<AccordionTrigger className="px-4 py-3 bg-[#F8F8F8] hover:no-underline border-b border-[#DEE1E6]">
-							<div className="flex items-center gap-2">
-								<RecommendedPluginIcon />
-								<span className="text-lg font-medium leading-7 text-[#09090B]">
-									{__('Recommended Plugins', 'doublescale')}
-								</span>
-							</div>
-						</AccordionTrigger>
-						<AccordionContent className="px-4 pb-3">
-							<div className="flex flex-col gap-4">
-								{recommendedPlugins.map((plugin) => (
-									<PluginCard
-										key={plugin.id}
-										plugin={plugin}
-										onAction={handlePluginAction}
-										isProcessing={
-											isProcessing === plugin.id
-										}
-									/>
-								))}
-							</div>
-						</AccordionContent>
-					</AccordionItem>
-
-					{/* Optional Plugins */}
 					<AccordionItem
 						value="optional"
-						className="border border-[#DEE1E6] rounded-lg shadow-sm flex flex-col gap-4"
+						className="border border-border/60 rounded-lg shadow-sm flex flex-col gap-4"
 					>
-						<AccordionTrigger className="px-4 py-3 bg-[#F8F8F8] hover:no-underline border-b border-[#DEE1E6]">
+						<AccordionTrigger className="px-4 py-3 bg-muted/50 hover:no-underline border-b border-border/60">
 							<div className="flex items-center gap-2">
 								<OptionalPluginIcon />
-								<span className="text-lg font-medium leading-7 text-[#09090B]">
+								<span className="text-lg font-medium leading-7 text-foreground">
 									{__('Optional Plugins', 'doublescale')}
 								</span>
 							</div>
@@ -446,12 +354,12 @@ export default function PluginComplete({
 				</Accordion>
 			)}
 
-			<div className=" bg-[#DEE1E6] w-full h-[1px]"></div>
+			<div className="border-t border-border/40" />
 
 			{/* Email Subscription */}
 
 			{/* <div className=" !p-0 !m-0">
-				<label className="text-base leading-6 text-[#09090B] block mb-[2px]">
+				<label className="text-base leading-6 text-foreground block mb-[2px]">
 					{__('Email Address', 'doublescale')}
 				</label>
 
@@ -460,7 +368,7 @@ export default function PluginComplete({
 					placeholder={__('Email Address', 'doublescale')}
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					className="w-full border !border-[#DEE1E6] rounded-lg h-12 py-[5px] px-4 !m-0"
+					className="w-full border !border-border/60 rounded-lg h-12 py-[5px] px-4 !m-0"
 				/>
 
 				<p className="text-xs text-[#CB5301] font-semibold leading-[26px] !m-0">
@@ -471,7 +379,7 @@ export default function PluginComplete({
 				</p>
 			</div> */}
 
-			<div className="flex justify-between pt-8">
+			<div className="flex justify-between pt-6">
 				<div className="flex gap-2">
 					<ButtonComponent onClick={onPrevious} type="">
 						{__('Previous', 'doublescale')}

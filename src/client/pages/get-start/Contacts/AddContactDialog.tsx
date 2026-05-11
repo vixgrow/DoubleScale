@@ -9,13 +9,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import ContactAddIcon from '@doublescale/components/icons/contact-add';
+import ContactAddIcon from '@doublescale/shared/icons/contact-add';
 import { CustomDialogHeader } from '@doublescale/components';
 import { useState } from 'react';
 import { NoticeMessage } from '@/client/types';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { Loader2 } from 'lucide-react';
+import { isEmail } from 'validator';
 
 // Mock Icons (replace with your actual icons)
 
@@ -50,8 +51,11 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
         <DialogHeader>
           <DialogTitle asChild>
             <CustomDialogHeader
-              title="Add Contact"
-              subtitle="Add basic information below to add new Contact"
+              title={__('Create contact', 'doublescale')}
+              subtitle={__(
+                'Add the essentials now. You can enrich the profile with lists, tags, and custom fields on the next screen.',
+                'doublescale'
+              )}
               icon={<span className=' text-[#1E3A8A]'><ContactAddIcon width={22} height={22} /></span>}
             />
           </DialogTitle>
@@ -96,9 +100,14 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
               placeholder="LowaroooDavig@gmail.com"
               {...register('email', {
                 required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address',
+                setValueAs: (value) =>
+                  typeof value === 'string' ? value.trim() : value,
+                validate: (value) => {
+                  const v = typeof value === 'string' ? value : '';
+                  if (!v) {
+                    return 'Email is required';
+                  }
+                  return isEmail(v) || 'Invalid email address';
                 },
               })}
              className='border-0 h-12 py-[5px] px-4 shadow-none rounded-[8px]'
@@ -121,10 +130,10 @@ export function AddContactDialog({ open, onClose, onSubmit, isLoading = false })
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {__('Creating...', 'doublescale')}
+                  {__('Saving…', 'doublescale')}
                 </>
               ) : (
-                __('Submit', 'doublescale')
+                __('Create contact', 'doublescale')
               )}
             </Button>
           </div>

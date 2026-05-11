@@ -5,10 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-/**
- * External dependencies
- */
-import { Flex } from 'antd';
 import Select from 'react-select';
 import { isObject, isArray, isNumber, isString } from 'lodash';
 
@@ -139,9 +135,9 @@ const PipelineStageChange = ({
 	}, [endpoint, allValues]);
 
 	return (
-		<Flex vertical={true} gap={10}>
-			<Flex justify="space-between" gap={10}>
-				<Flex vertical={true} gap={10} style={{ flex: 1 }}>
+        <div className='flex flex-col gap-2.5'>
+            <div className='flex justify-between gap-2.5'>
+				<div style={{ flex: 1 }} className='flex flex-col gap-2.5'>
 					<Select
 						key={`${endpoint}-${options.length}`}
 						className="react-select-container"
@@ -166,10 +162,10 @@ const PipelineStageChange = ({
 						)}
 						placeholder={placeholderForSelect}
 					/>
-				</Flex>
-			</Flex>
-		</Flex>
-	);
+				</div>
+			</div>
+        </div>
+    );
 };
 
 export default PipelineStageChange;

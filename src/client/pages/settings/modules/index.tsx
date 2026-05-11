@@ -5,9 +5,8 @@ import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
 import type { ModuleInfo } from '@doublescale/config';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface ModulesResponse {
 	success: boolean;
@@ -65,6 +64,33 @@ function collectDependenciesToEnable(
 		}
 	}
 	return result;
+}
+
+/** Matches Get Started: SMTP, Pipelines, Forms, Tasks, Campaigns, Booking. */
+const OPTIONAL_MODULE_DISPLAY_ORDER = [
+	'smtp',
+	'deals',
+	'forms',
+	'tasks',
+	'campaigns',
+	'booking',
+];
+
+function sortToggleableModules(list: ModuleInfo[]): ModuleInfo[] {
+	return [...list].sort((a, b) => {
+		const ia = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(a.slug);
+		const ib = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(b.slug);
+		if (ia === -1 && ib === -1) {
+			return a.label.localeCompare(b.label);
+		}
+		if (ia === -1) {
+			return 1;
+		}
+		if (ib === -1) {
+			return -1;
+		}
+		return ia - ib;
+	});
 }
 
 export default function ModulesSettings() {
@@ -141,8 +167,15 @@ export default function ModulesSettings() {
 		}
 	}, [hasChanges, pendingChanges, createNotice]);
 
-	const toggleable = modules.filter((m) => m.is_toggleable);
-	const required = modules.filter((m) => !m.is_toggleable);
+	const optionalShown = useMemo(
+		() =>
+			sortToggleableModules(
+				modules.filter(
+					(m) => m.is_toggleable && OPTIONAL_MODULE_DISPLAY_ORDER.includes(m.slug)
+				)
+			),
+		[modules]
+	);
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -151,82 +184,53 @@ export default function ModulesSettings() {
 					{__('Modules', 'doublescale')}
 				</h3>
 				<p className="text-sm text-muted-foreground mt-1">
-					{__('Enable or disable modules to customize your CRM. Disabled modules will not load, freeing up resources.', 'doublescale')}
+					{__(
+						'Enable or disable optional features: SMTP, Pipelines, Forms, Tasks, Campaigns, and Booking. Other CRM capabilities are always available and are not listed here.',
+						'doublescale'
+					)}
 				</p>
 			</div>
 
-			{required.length > 0 && (
-				<div className="flex flex-col gap-3">
-					<h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-						{__('Always On', 'doublescale')}
-					</h4>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-						{required.map((mod) => (
-							<div
-								key={mod.slug}
-								className="flex items-center justify-between gap-4 p-4 border border-border/60 bg-muted/30 rounded-xl opacity-75"
-							>
-								<div className="flex flex-col gap-1 flex-1 min-w-0">
-									<div className="flex items-center gap-2">
-										<span className="text-sm font-medium text-foreground">{mod.label}</span>
-										<Badge variant="secondary" className="gap-1 text-[10px]">
-											<Lock size={10} />
-											{__('Required', 'doublescale')}
-										</Badge>
-									</div>
-									<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-			)}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+				{optionalShown.map((mod) => {
+					const isEnabled = getEffectiveState(mod.slug, modules, pendingChanges);
+					const dependents = getDependentLabels(mod.slug);
 
-			<div className="flex flex-col gap-3">
-				<h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-					{__('Optional Modules', 'doublescale')}
-				</h4>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-					{toggleable.map((mod) => {
-						const isEnabled = getEffectiveState(mod.slug, modules, pendingChanges);
-						const dependents = getDependentLabels(mod.slug);
-
-						return (
-							<div
-								key={mod.slug}
-								className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
-									isEnabled
-										? 'border-border/60 bg-card'
-										: 'border-border/40 bg-muted/20'
-								}`}
-							>
-								<div className="flex flex-col gap-1 flex-1 min-w-0">
-									<span className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
-										{mod.label}
-									</span>
-									<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-									{mod.dependencies.length > 0 && (
-										<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-											{__('Requires:', 'doublescale')}{' '}
-											{mod.dependencies
-												.map((d) => modules.find((m) => m.slug === d)?.label || d)
-												.join(', ')}
-										</p>
-									)}
-									{isEnabled && dependents.length > 0 && (
-										<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-											{__('Used by:', 'doublescale')} {dependents.join(', ')}
-										</p>
-									)}
-								</div>
-								<Switch
-									checked={isEnabled}
-									onCheckedChange={(checked) => handleToggle(mod.slug, checked)}
-								/>
+					return (
+						<div
+							key={mod.slug}
+							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
+								isEnabled
+									? 'border-border/60 bg-card'
+									: 'border-border/40 bg-muted/20'
+							}`}
+						>
+							<div className="flex flex-col gap-1 flex-1 min-w-0">
+								<span className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
+									{mod.label}
+								</span>
+								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
+								{mod.dependencies.length > 0 && (
+									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
+										{__('Requires:', 'doublescale')}{' '}
+										{mod.dependencies
+											.map((d) => modules.find((m) => m.slug === d)?.label || d)
+											.join(', ')}
+									</p>
+								)}
+								{isEnabled && dependents.length > 0 && (
+									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
+										{__('Used by:', 'doublescale')} {dependents.join(', ')}
+									</p>
+								)}
 							</div>
-						);
-					})}
-				</div>
+							<Switch
+								checked={isEnabled}
+								onCheckedChange={(checked) => handleToggle(mod.slug, checked)}
+							/>
+						</div>
+					);
+				})}
 			</div>
 
 			{hasChanges && (

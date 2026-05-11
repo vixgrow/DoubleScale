@@ -153,10 +153,18 @@ const Integration: React.FC<IntegrationProps> = ({
 
 	const getAuthUrl = async () => {
 		try {
-			const response = await apiFetch<{ auth_uri: string }>({
+			const response = await apiFetch<{ auth_uri?: unknown }>({
 				path: `/doublescale/v1/integrations/${slug}/auth`,
 			});
-			window.location.href = response.auth_uri;
+			const authUri = response?.auth_uri;
+			if ( typeof authUri !== 'string' || ! authUri.trim() ) {
+				showError(
+					new Error( __( 'Invalid authorization response', 'doublescale' ) ),
+					__( 'Failed to get auth url', 'doublescale' )
+				);
+				return;
+			}
+			window.location.href = authUri;
 		} catch (error) {
 			showError(error, __('Failed to get auth url', 'doublescale'));
 		} finally {
@@ -167,7 +175,7 @@ const Integration: React.FC<IntegrationProps> = ({
 	return (
 		<Dialog open={open} onOpenChange={(value) => !value && onClose()}>
 			<DialogContent
-				className="z-[150000] w-screen h-screen max-w-none overflow-y-auto bg-white rounded-none shadow-none"
+				className="z-[150300] w-screen h-screen max-w-none overflow-y-auto bg-white rounded-none shadow-none"
 				style={{
 					paddingTop: '10px',
 					paddingLeft: '0px',
@@ -203,7 +211,7 @@ const Integration: React.FC<IntegrationProps> = ({
 					) : (
 						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 							{/* Instructions Card */}
-							<Card className="shadow-none bg-[#F8F8F8] h-screen">
+							<Card className="shadow-none bg-muted/50 h-screen">
 								<CardContent className="p-6">
 									<Instructions
 										slug={slug}
@@ -214,7 +222,7 @@ const Integration: React.FC<IntegrationProps> = ({
 							</Card>
 
 							{/* Credentials/App Card */}
-							<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
+							<Card className="flex shadow-none bg-muted/50 flex-col h-screen">
 								<CardContent className="flex-1 overflow-y-auto p-6">
 								{!isAppBased ? (
 									(() => {

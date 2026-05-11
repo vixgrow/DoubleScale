@@ -42,8 +42,8 @@ import { RecentAutomationsTable } from './recent-automations';
 import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
 import { UserDashboardShimmer } from './UserDashboardShimmer';
+import { MobileAppCard } from './mobile-app-card';
 import { useContactAnalytics } from '../use-analytics';
-import config from '@doublescale/config';
 // import { applyFilters } from '@wordpress/hooks'; // Uncomment when cart analytics is enabled
 
 interface UserDashboardProps {
@@ -51,10 +51,6 @@ interface UserDashboardProps {
 }
 
 const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
-	const contactsOn = config.isModuleToggleEnabled('contacts');
-	const automationsOn = config.isModuleToggleEnabled('automations');
-	const campaignsOn = config.isModuleToggleEnabled('campaigns');
-
 	// Use separate hooks for contact and cart analytics with their own state
 	const {
 		data: contactsData,
@@ -68,16 +64,27 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 		refetch: refetchContacts,
 	} = useContactAnalytics();
 
-	if (contactsOn && !contactsData) {
+	if (!contactsData) {
 		return <UserDashboardShimmer />;
 	}
 
 	return (
-		<div className="flex flex-col gap-5 mt-5">
-			<DashboardCards data={dashboardData} />
-			{contactsOn && contactsData && (
-				<div className="flex gap-5">
+		<div className="flex flex-col gap-6">
+			<MobileAppCard />
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
+				<div className="h-full min-h-0 lg:col-span-2">
+					<DashboardCards data={dashboardData} />
+				</div>
+				<div className="flex h-full min-h-0 flex-col lg:col-span-1">
+					<QuickLinks />
+				</div>
+			</div>
+
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch">
+				<div className="flex h-full min-h-0 flex-col">
 					<RecentContactsList contacts={dashboardData.recent_contacts} />
+				</div>
+				<div className="flex h-full min-h-0 flex-col">
 					<ContactAnalyticsChart
 						data={contactsData}
 						loading={contactsLoading}
@@ -90,32 +97,20 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 						onSubmit={refetchContacts}
 					/>
 				</div>
-			)}
+			</div>
 
-			<div className="flex gap-5">
-				{automationsOn && (
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch">
+				<div className="flex h-full min-h-0 flex-col">
 					<RecentAutomationsTable
 						automations={dashboardData.top_automations}
 					/>
-				)}
-				<QuickLinks stretch={!automationsOn} />
-			</div>
-
-			{campaignsOn && (
-				<div className="flex gap-5">
-					<RecentCampaignsTable campaigns={dashboardData.top_campaigns} />
-					{/* <CartsChart
-					data={cartsData}
-					interval={cartsInterval}
-					startDate={cartsStartDate}
-					endDate={cartsEndDate}
-					onIntervalChange={setCartsInterval}
-					onChangeFromDate={setCartsStartDate}
-					onChangeToDate={setCartsEndDate}
-					onSubmit={refetchCarts}
-				/> */}
 				</div>
-			)}
+				<div className="flex h-full min-h-0 flex-col">
+					<RecentCampaignsTable
+						campaigns={dashboardData.top_campaigns}
+					/>
+				</div>
+			</div>
 		</div>
 	);
 };

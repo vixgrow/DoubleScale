@@ -4,15 +4,12 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { Typography, Flex, Input } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
+
 import { map } from 'lodash';
+import { Input } from '@/components/ui/input';
 
 interface MappedFieldsProps {
     onChange: (value: { [key: string]: string }) => void;
@@ -30,18 +27,18 @@ const MappedFields: React.FC<MappedFieldsProps> = ({
     fields,
 }) => {
     return (
-        <Flex gap={10} vertical>
-            <Flex gap={20}>
-                <Typography.Text style={{ flex: 1 }} strong>
+        <div className='flex gap-2.5 flex-col'>
+            <div className='flex gap-5'>
+                <span style={{ flex: 1 }}>
                     {__('Field')}
-                </Typography.Text>
-                <Typography.Text style={{ flex: 1 }} strong>
+                </span>
+                <span style={{ flex: 1 }}>
                     {__('Contact Field')}
-                </Typography.Text>
-            </Flex>
+                </span>
+            </div>
             {map(fields, (_, key) => {
                 return (
-                    <Flex key={key} gap={20}>
+                    <div key={key} className='flex gap-5'>
                         <Input
                             value={fields[key].label}
                             disabled
@@ -54,10 +51,10 @@ const MappedFields: React.FC<MappedFieldsProps> = ({
                             }}
                             style={{ flex: 1 }}
                         />
-                    </Flex>
+                    </div>
                 );
             })}
-        </Flex>
+        </div>
     );
 };
 

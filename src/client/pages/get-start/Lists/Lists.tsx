@@ -205,17 +205,17 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 	};
 
 	return (
-		<div className="flex flex-col gap-10">
+		<div className="flex flex-col gap-8">
 			<div>
-				<h3 className="text-[#170F49] text-[32px] font-semibold">
+				<h3 className="text-foreground text-2xl font-semibold mb-1">
 					{__(
-						'Segment Your Contacts—Create Smart Lists for Better Targeting',
+						'Create Smart Lists',
 						'doublescale'
 					)}
 				</h3>
-				<p className="text-[#777] text-lg font-normal leading-7">
+				<p className="text-muted-foreground text-sm leading-relaxed">
 					{__(
-						'Create smart contact segments to organize leads, customers, and users by type, behavior. From VIPs to WordPress users, segmenting helps you personalize outreach and automate with precision.',
+						'Organize leads, customers, and users by type or behavior. Smart lists help you personalize outreach and automate with precision.',
 						'doublescale'
 					)}
 				</p>
@@ -267,7 +267,7 @@ export default function Lists({ onNext, onPrevious, onSkip }: ListsProps) {
 				)}
 			/>
 
-			<div className="flex justify-between pt-8">
+			<div className="flex justify-between pt-6 border-t border-border/40">
 				<div className="flex gap-2">
 					<ButtonComponent
 						onClick={onPrevious}

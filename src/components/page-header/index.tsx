@@ -16,33 +16,39 @@ interface ActionConfig {
 interface PageHeaderProps {
 	title: string;
 	subtitle?: string;
-	actions: ActionConfig[];
+	actions?: ActionConfig[];
 	className?: string;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
 	subtitle,
 	title,
-	actions,
+	actions = [],
 	className,
 }) => {
 	return (
-		<div className="flex flex-col gap-2 mb-4">
-			{subtitle && <p>{subtitle}</p>}
+		<div className="flex flex-col gap-1 mb-6">
+			{subtitle && (
+				<span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
+					{subtitle}
+				</span>
+			)}
 
 			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-				<h1 className="font-semibold text-3xl">{title}</h1>
+				<h1 className="text-2xl font-bold text-foreground tracking-tight">
+					{title}
+				</h1>
 
 				{actions.length > 0 && (
 					<div
-						className={`sales-pipeline-header-actions flex flex-col sm:flex-row items-stretch sm:items-center gap-3 ${className}`}
+						className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-2 ${className || ''}`}
 					>
 						{actions.map((action, index) => {
 							const {
 								label,
 								icon,
 								onClick,
-								className,
+								className: actionClassName,
 								disabled,
 								hidden,
 								...rest
@@ -52,12 +58,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 									<Button
 										key={index}
 										onClick={onClick}
-										className={`${className || ''} w-full sm:w-auto min-w-[120px] transition-all duration-200 hover:scale-105 hover:shadow-md`}
+										className={actionClassName || ''}
 										disabled={disabled}
 										{...rest}
 									>
 										{icon && (
-											<span className="mr-2 btn-icon">
+											<span className="btn-icon">
 												{icon}
 											</span>
 										)}

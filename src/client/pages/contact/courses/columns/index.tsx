@@ -19,11 +19,11 @@ const STATUS_STYLES: Record<
     string
 > = {
     completed:
-        'bg-[#EFFFF5] border-[#16A34A] text-[#16A34A]',
+        'bg-emerald-50 border-emerald-200 text-emerald-700',
     in_progress:
-        'bg-[#FFF2E2] border-[#CB5301] text-[#CB5301]',
+        'bg-amber-50 border-amber-200 text-amber-700',
     not_started:
-        'bg-[#F8F8F8] border-gray-500 text-gray-500',
+        'bg-muted/50 border-border text-muted-foreground',
 };
 
 const LMS_LABELS: Record<string, string> = {
@@ -46,7 +46,7 @@ const getStatusContent = (status?: string) => {
 
     const classes =
         STATUS_STYLES[normalizedStatus] ??
-        'bg-[#F4F4F5] border-[#D4D4D8] text-[#4B5563]';
+        'bg-muted/50 border-border text-muted-foreground';
 
     return {
         // Display label: replace underscores with spaces and capitalize first letter of each word
@@ -74,7 +74,7 @@ export const getColumns = (): ColumnDef<LMSCourse>[] => [
 
             return (
                 <span
-                    className={`inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium capitalize ${statusContent.classes}`}
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${statusContent.classes}`}
                 >
                     {statusContent.label}
                 </span>
@@ -102,7 +102,7 @@ export const getColumns = (): ColumnDef<LMSCourse>[] => [
             const lms = row.original.lms;
             if (!lms) return <span>-</span>;
             return (
-                <span className="inline-flex items-center rounded-full bg-[#F4F4F5] border border-[#D4D4D8] px-3 py-1 text-sm font-medium text-[#4B5563]">
+                <span className="inline-flex items-center rounded-full bg-muted/50 border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                     {LMS_LABELS[lms] || lms}
                 </span>
             );

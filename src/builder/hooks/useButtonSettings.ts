@@ -1,69 +1,63 @@
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect } from 'react';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { ButtonSettings, ButtonType } from '../../stores/email-builder/types';
 
 /**
- * Custom hook to manage button settings
- * Now loads from campaign template data instead of separate API
+ * Monotonic version counter incremented when a template is applied from the
+ * sidebar so async template fetches can detect stale responses.
+ */
+let settingsVersion = 0;
+
+export const setSkipButtonSettingsReload = (skip: boolean) => {
+	if (skip) {
+		settingsVersion++;
+	}
+};
+
+export const getButtonSettingsVersion = (): number => settingsVersion;
+
+/**
+ * Button settings in the email-builder store. Initial load is handled by
+ * `loadTemplateData` in `builder/index.tsx` only — this hook does not fetch.
  */
 export const useButtonSettings = () => {
-  const dispatch = useDispatch();
+	const dispatch = useDispatch();
 
-  // Get button settings from store
-  const buttonSettings = useSelect(
-    (select: any) => select(STORE_KEY).getAllButtonSettings(),
-    []
-  );
+	const buttonSettings = useSelect(
+		(select: any) => select(STORE_KEY).getAllButtonSettings(),
+		[]
+	);
 
-  // Get existing template data from campaign store (contains template_id)
-  const existingTemplateData = useSelect(
-    (select: any) => select('doublescale/campaign').getStepData('template'),
-    []
-  );
+	const updateButtonSettings = (
+		buttonType: ButtonType,
+		settings: Partial<ButtonSettings>
+	) => {
+		dispatch(STORE_KEY).updateButtonSettings(buttonType, settings);
+	};
 
-  // Load button settings from template table
-  useEffect(() => {
-    const loadButtonSettings = async () => {
-      if (!existingTemplateData?.template_id) {
-        return;
-      }
+	const defaultButtonSettings: ButtonSettings = {
+		font: 'Arial, sans-serif',
+		size: 16,
+		letterSpacing: '0px',
+		borderRadius: 4,
+		textColor: '#ffffff',
+		backgroundColor: '#1e398a',
+		borderWidth: 0,
+		borderColor: '#1e398a',
+		padding: { top: 6, right: 8, bottom: 6, left: 8 },
+		bold: false,
+		italic: false,
+		underline: false,
+		strikethrough: false,
+	};
 
-      try {
-        const { getTemplate } = await import('../api/templates');
-        const template = await getTemplate(existingTemplateData.template_id);
+	const getButtonSettings = (buttonType: ButtonType): ButtonSettings => {
+		return buttonSettings?.[buttonType] ?? defaultButtonSettings;
+	};
 
-        const body = typeof template.body === 'string'
-          ? JSON.parse(template.body)
-          : template.body;
-
-        if (body?.type === 'builder' && body.value?.buttonSettings) {
-          dispatch(STORE_KEY).setButtonSettings(body.value.buttonSettings);
-        }
-      } catch (error) {
-        console.error('Failed to load button settings:', error);
-      }
-    };
-
-    loadButtonSettings();
-  }, [existingTemplateData?.template_id, dispatch]);
-
-  // Helper function to update button settings
-  const updateButtonSettings = (
-    buttonType: ButtonType,
-    settings: Partial<ButtonSettings>
-  ) => {
-    dispatch(STORE_KEY).updateButtonSettings(buttonType, settings);
-  };
-
-  // Helper function to get settings for a specific button type
-  const getButtonSettings = (buttonType: ButtonType): ButtonSettings => {
-    return buttonSettings[buttonType];
-  };
-
-  return {
-    buttonSettings,
-    updateButtonSettings,
-    getButtonSettings,
-  };
+	return {
+		buttonSettings,
+		updateButtonSettings,
+		getButtonSettings,
+	};
 };

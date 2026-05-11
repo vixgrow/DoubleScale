@@ -131,7 +131,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 			setConnecting(false);
 			const errorMessage = error.message || __('Failed to initiate OAuth authorization', 'doublescale');
 			setError(errorMessage);
-
+			
 			createNotice({
 				type: 'error',
 				message: errorMessage,
@@ -151,7 +151,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 
 			setConnected(false);
 			setError(null);
-
+			
 			createNotice({
 				type: 'success',
 				message: __('Successfully disconnected', 'doublescale'),
@@ -159,7 +159,7 @@ export const useOAuth = ({ provider, onSuccess, onError, onStatusChange }: UseOA
 		} catch (error: any) {
 			const errorMessage = error.message || __('Failed to disconnect', 'doublescale');
 			setError(errorMessage);
-
+			
 			createNotice({
 				type: 'error',
 				message: errorMessage,

@@ -545,7 +545,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				'a'
 			) as HTMLAnchorElement;
 			if (existingLink) {
-				existingUrl = existingLink.href || '';
+				// Use getAttribute to get raw href (preserves merge tags like {{contact:unsubscribe_link}})
+				// .href would resolve to absolute URL and corrupt merge tags
+				existingUrl = existingLink.getAttribute('href') || '';
 			}
 		}
 

@@ -9,12 +9,11 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { useState } from 'react';
 import { Check, X, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
-import { Skeleton } from 'antd';
-
 /**
  * Internal dependencies
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@doublescale/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useContactContext } from '../../state/context';
@@ -25,7 +24,8 @@ import {
 import Field from '@doublescale/components/field';
 import { getToLink } from '@doublescale/navigation';
 import { useNavigate } from '@doublescale/navigation';
-import EditHeaderIcon from '@doublescale/components/icons/edit-header';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -317,18 +317,18 @@ const InfoCard: React.FC = () => {
 		const isEditing = editingField === fieldName;
 
 		return (
-			<div className="flex flex-col gap-1">
-				<div className="flex items-center justify-between">
-					<label className="text-base font-medium text-gray-500">
+            <div className="flex flex-col gap-0.5">
+                <div className="flex items-center justify-between gap-2">
+					<label className="text-xs font-medium text-muted-foreground">
 						{label}
 					</label>
 					{!isEditing ? (
 						<Button
 							size="sm"
 							onClick={() => handleEdit(fieldName, value)}
-							className="h-6 w-6 p-1 shadow-none rounded-full bg-[#E4EEFD] text-[#458DC7]"
+							className="h-7 w-7 shrink-0 rounded-full bg-[#E4EEFD] p-0 shadow-none text-[#458DC7]"
 						>
-							<EditHeaderIcon width={20} height={20} color="#458DC7" />
+							<EditHeaderIcon width={16} height={16} color="#458DC7" />
 						</Button>
 					) : (
 						<div className="flex gap-1">
@@ -357,7 +357,7 @@ const InfoCard: React.FC = () => {
 						</div>
 					)}
 				</div>
-				{isEditing ? (
+                {isEditing ? (
 					<Input
 						type={fieldName === 'email' ? 'email' : 'text'}
 						value={editValue}
@@ -381,24 +381,24 @@ const InfoCard: React.FC = () => {
 							}
 						}}
 						disabled={isSaving}
-						className="text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+						className="h-9 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
 						autoFocus
 						style={{ borderRadius: '0.5rem' }}
 					/>
 				) : (
-					<div className="text-lg font-semibold truncate max-w-[400px]">
+					<div className="max-w-full truncate text-sm font-medium leading-snug text-foreground">
 						{value || __('—', 'doublescale')}
 					</div>
 				)}
-			</div>
-		);
+            </div>
+        );
 	};
 
 	const renderTabContent = () => {
 		switch (activeTab) {
 			case 'basic':
 				return (
-					<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-3">
 						{renderField(
 							'first_name',
 							__('First Name', 'doublescale'),
@@ -428,7 +428,7 @@ const InfoCard: React.FC = () => {
 				);
 			case 'address':
 				return (
-					<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-3">
 						{renderField(
 							'address_1',
 							__('Address 1', 'doublescale'),
@@ -477,12 +477,12 @@ const InfoCard: React.FC = () => {
 
 				if (isLoading) {
 					return (
-						<div className="flex flex-col gap-4">
-							<Skeleton active paragraph={{ rows: 2 }} />
-							<Skeleton active paragraph={{ rows: 2 }} />
-							<Skeleton active paragraph={{ rows: 2 }} />
-						</div>
-					);
+                        <div className="flex flex-col gap-4">
+                            <Skeleton className='h-4 w-full' />
+                            <Skeleton className='h-4 w-full' />
+                            <Skeleton className='h-4 w-full' />
+                        </div>
+                    );
 				}
 
 				const hasCustomFields =
@@ -496,9 +496,9 @@ const InfoCard: React.FC = () => {
 
 				if (!hasCustomFields) {
 					return (
-						<div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-500">
+						<div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
 							<OutlinedCustomFieldsIcon />
-							<p className="text-lg font-medium">
+							<p className="text-sm font-medium">
 								{__('No custom fields', 'doublescale')}
 							</p>
 							<Button
@@ -507,7 +507,7 @@ const InfoCard: React.FC = () => {
 								}}
 								className="shadow-none"
 								variant="secondary"
-								size="lg"
+								size="default"
 							>
 								{__('Manage Custom Fields', 'doublescale')}
 							</Button>
@@ -516,7 +516,7 @@ const InfoCard: React.FC = () => {
 				}
 
 				return (
-					<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-3">
 						{groups.map((group) => {
 							if (
 								!group.custom_fields ||
@@ -532,11 +532,11 @@ const InfoCard: React.FC = () => {
 									<CardHeader
 										className={`px-4 py-2 ${!isCollapsed ? 'border-b rounded-t-xl' : 'rounded-xl'} bg-[#F8F8F8]`}
 									>
-										<CardTitle className="flex items-center justify-between font-medium text-lg">
+										<CardTitle className="flex items-center justify-between text-sm font-semibold">
 											<div className="flex items-center gap-2">
 												<OutlinedCustomFieldsIcon
-													width={20}
-													height={20}
+													width={18}
+													height={18}
 												/>
 												{group.name}
 											</div>
@@ -599,7 +599,7 @@ const InfoCard: React.FC = () => {
 																key={
 																	customField.id
 																}
-																className={`flex flex-col gap-1 py-4 ${
+																className={`flex flex-col gap-0.5 py-3 ${
 																	index !==
 																	group
 																		.custom_fields
@@ -609,8 +609,8 @@ const InfoCard: React.FC = () => {
 																		: ''
 																}`}
 															>
-																<div className="flex items-center justify-between">
-																	<label className="text-base font-medium text-gray-500">
+																<div className="flex items-center justify-between gap-2">
+																	<label className="text-xs font-medium text-muted-foreground">
 																		{
 																			customField.name
 																		}
@@ -624,9 +624,9 @@ const InfoCard: React.FC = () => {
 																					formattedValue
 																				)
 																			}
-																			className="h-6 w-6 p-1 shadow-none rounded-full bg-[#E4EEFD] text-secondary"
+																			className="h-7 w-7 shrink-0 rounded-full bg-primary/10 p-0 text-primary shadow-none"
 																		>
-																			<EditHeaderIcon width={20} height={20} color="#458DC7" />
+																			<EditHeaderIcon width={16} height={16} color="#458DC7" />
 																		</Button>
 																	) : (
 																		<div className="flex gap-1">
@@ -665,7 +665,7 @@ const InfoCard: React.FC = () => {
 																</div>
 																{isEditing ? (
 																	<div
-																		className="text-lg font-semibold"
+																		className="text-sm font-medium"
 																		style={{
 																			pointerEvents:
 																				isSavingCustomField
@@ -697,7 +697,7 @@ const InfoCard: React.FC = () => {
 																		/>
 																	</div>
 																) : (
-																	<div className="text-lg font-semibold">
+																	<div className="text-sm font-medium leading-snug text-foreground">
 																		{formatCustomFieldDisplay(
 																			formattedValue,
 																			customField.type,
@@ -723,29 +723,30 @@ const InfoCard: React.FC = () => {
 	};
 
 	return (
-		<Card className="shadow-none">
-			<CardHeader className="px-4 pt-4 pb-0 border-b">
-				<div className="flex items-center justify-center gap-6 relative">
-					{tabs.map((tab) => (
-						<Button
-							key={tab.id}
-							onClick={() => setActiveTab(tab.id)}
-							className={`relative p-0 bg-transparent shadow-none hover:bg-transparent pb-4 transition-colors ${
-								activeTab === tab.id
-									? 'text-secondary font-semibold'
-									: 'text-[#1E2125] font-medium'
-							}`}
-						>
-							{tab.label}
-							{activeTab === tab.id && (
-								<span className="absolute -bottom-px left-0 right-0 h-0.5 bg-secondary z-10"></span>
-							)}
-						</Button>
-					))}
-				</div>
-			</CardHeader>
-			<CardContent className="p-4">{renderTabContent()}</CardContent>
-		</Card>
+		<div className="rounded-xl border border-border/50 bg-muted/15 p-1 shadow-sm">
+			<div
+				className="flex flex-wrap gap-1 rounded-lg bg-background/80 p-1 ring-1 ring-border/35"
+				role="tablist"
+			>
+				{tabs.map((tab) => (
+					<button
+						type="button"
+						key={tab.id}
+						role="tab"
+						aria-selected={activeTab === tab.id}
+						onClick={() => setActiveTab(tab.id)}
+						className={`relative min-h-9 flex-1 cursor-pointer rounded-md border-0 px-3 py-1.5 text-center text-xs font-medium transition-all sm:flex-none sm:px-3 sm:text-sm ${
+							activeTab === tab.id
+								? 'bg-background font-semibold text-primary shadow-sm ring-1 ring-border/50'
+								: 'bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+						}`}
+					>
+						{tab.label}
+					</button>
+				))}
+			</div>
+			<div className="px-2 py-3 sm:px-3">{renderTabContent()}</div>
+		</div>
 	);
 };
 

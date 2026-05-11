@@ -145,7 +145,7 @@ export const useGoHighLevelOAuth = ({
 		} catch (error: any) {
 			oauth.setError(
 				error.message ||
-				__('Failed to get connection status', 'doublescale')
+					__('Failed to get connection status', 'doublescale')
 			);
 			return null;
 		}

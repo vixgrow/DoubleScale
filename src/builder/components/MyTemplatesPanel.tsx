@@ -8,6 +8,7 @@ import {
 	AlertIcon,
 } from '@/components/icons';
 import { getUserTemplates, renderTemplate } from '../api/templates';
+import { setSkipButtonSettingsReload } from '../hooks/useButtonSettings';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import type { EmailTemplate } from '@doublescale/client';
@@ -157,6 +158,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 						buttonSettings,
 					});
 
+					setSkipButtonSettingsReload(true);
 					// Clear existing content first
 					dispatch(STORE_KEY).resetBuilder();
 

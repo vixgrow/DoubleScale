@@ -5,40 +5,20 @@
 
 	&__pro-feature {
 		position: absolute;
-		top: 0.75rem;
-		left: 3.5rem;
+		inset: 0;
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		background: hsla(0, 0%, 100%, 0.7);
+		backdrop-filter: blur(4px);
+		border-radius: 0.75rem;
 		pointer-events: none;
 	}
 }
 
-// Global style to blur value in pro stat cards
-.doublescale-pro-stat-card .text-2xl {
+.doublescale-pro-stat-card .text-2xl,
+.doublescale-pro-stat-card .text-3xl {
 	filter: blur(4px) !important;
 	-webkit-user-select: none;
 	user-select: none;
-}
-
-// Responsive adjustments
-@media (max-width: 768px) {
-	.doublescale-pro-stat-card {
-		&__content {
-			padding: 0.75rem;
-		}
-
-		&__icon {
-			width: 20px;
-			height: 20px;
-		}
-
-		&__text {
-			font-size: 0.75rem;
-		}
-
-		&__link {
-			font-size: 0.6875rem;
-			padding: 0.25rem 0.625rem;
-		}
-	}
 }

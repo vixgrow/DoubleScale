@@ -8,11 +8,6 @@ import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { Table, Input, Button, Modal, Flex, Select } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
@@ -24,12 +19,36 @@ import { NavLink, getToLink, useNavigate } from '@doublescale/navigation';
 import { Field } from '@doublescale/components';
 import { convertDate } from '@doublescale/utils';
 
-const { Column } = Table;
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const TemplatesList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(10);
+	const [perPage] = useState(10);
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<Template[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -125,129 +144,181 @@ const TemplatesList: React.FC = () => {
 		}
 	};
 
+	const totalPages = Math.max(1, Math.ceil(total / perPage));
+	const allSelected =
+		data.length > 0 && selectedRowKeys.length === data.length;
+	const toggleAll = () =>
+		setSelectedRowKeys(allSelected ? [] : data.map((d) => d.id));
+	const toggleRow = (id: React.Key) =>
+		setSelectedRowKeys((prev) =>
+			prev.includes(id) ? prev.filter((k) => k !== id) : [...prev, id]
+		);
+
 	return (
 		<div className="doublescale-templates-list">
-			<Flex
-				className="doublescale-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
+			<div className="flex justify-between doublescale-contacts-list__actions">
+				<div className="flex gap-2.5">
+					<div className="flex gap-2.5">
 						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'doublescale'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'doublescale'),
-									value: 'delete',
-								},
-							]}
 							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
+							onValueChange={(value) => setBulkAction(value)}
 							disabled={selectedRowKeys.length === 0}
-						/>
+						>
+							<SelectTrigger className="w-40">
+								<SelectValue
+									placeholder={__('Bulk action', 'doublescale')}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="delete">
+									{__('Delete', 'doublescale')}
+								</SelectItem>
+							</SelectContent>
+						</Select>
 						<Button
-							type="primary"
 							onClick={() => {
 								if (bulkAction === 'delete') {
 									deleteSelected();
 								}
 							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
+							disabled={selectedRowKeys.length === 0 || isApplying}
+							variant="default"
 						>
 							{__('Apply', 'doublescale')}
 						</Button>
-					</Flex>
-					<Input.Search
+					</div>
+					<Input
 						placeholder={__('Search', 'doublescale')}
-						allowClear
-						onSearch={(_value, _e, source) => {
-							if (source?.source === 'clear') {
-								fetchTemplates(true);
-								return;
-							}
-							fetchTemplates();
-						}}
+						value={keyword}
 						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') fetchTemplates();
 						}}
-					/>
-				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Template', 'doublescale')}
-				</Button>
-			</Flex>
-			<Table
-				dataSource={data}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total: total,
-					onChange: (page, perPage) => {
-						setPage(page);
-						setPerPage(perPage);
-					},
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name', 'doublescale')}
-					dataIndex="name"
-					key="name"
-					render={(_, record: Template) => (
-						<NavLink to={`templates/${record.id}`}>
-							{record.name}
-						</NavLink>
-					)}
-				/>
-				<Column
-					title={__('Subject', 'doublescale')}
-					dataIndex="subject"
-					key="subject"
-				/>
-				<Column
-					title={__('Created At', 'doublescale')}
-					dataIndex="created_at"
-					key="created_at"
-					render={(date: string) => convertDate(date)}
-				/>
-			</Table>
-			<Modal
-				title={__('Create Template', 'doublescale')}
-				open={visible}
-				onOk={createTemplate}
-				onCancel={() => setVisible(false)}
-				confirmLoading={isSaving}
-			>
-				<div className="doublescale-fields">
-					<Field
-						label={__('Name', 'doublescale')}
-						value={template.name}
-						onChange={(value) =>
-							setTemplate({
-								...template,
-								name: value,
-							})
-						}
-						type="text"
+						type="search"
 					/>
 				</div>
-			</Modal>
+				<Button onClick={() => setVisible(true)} variant="default">
+					{__('Create Template', 'doublescale')}
+				</Button>
+			</div>
+			<Table>
+				<TableHeader>
+					<TableRow>
+						<TableHead className="w-10">
+							<Checkbox
+								checked={allSelected}
+								onCheckedChange={toggleAll}
+							/>
+						</TableHead>
+						<TableHead>{__('Name', 'doublescale')}</TableHead>
+						<TableHead>{__('Subject', 'doublescale')}</TableHead>
+						<TableHead>{__('Created At', 'doublescale')}</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{loading ? (
+						Array.from({ length: 5 }).map((_, i) => (
+							<TableRow key={`s-${i}`}>
+								<TableCell colSpan={4}>
+									<Skeleton className="h-6 w-full" />
+								</TableCell>
+							</TableRow>
+						))
+					) : data.length === 0 ? (
+						<TableRow>
+							<TableCell
+								colSpan={4}
+								className="text-center text-muted-foreground"
+							>
+								{__('No results found.', 'doublescale')}
+							</TableCell>
+						</TableRow>
+					) : (
+						data.map((record) => (
+							<TableRow key={record.id}>
+								<TableCell>
+									<Checkbox
+										checked={selectedRowKeys.includes(record.id)}
+										onCheckedChange={() => toggleRow(record.id)}
+									/>
+								</TableCell>
+								<TableCell>
+									<NavLink to={`templates/${record.id}`}>
+										{record.name}
+									</NavLink>
+								</TableCell>
+								<TableCell>{record.subject}</TableCell>
+								<TableCell>
+									{convertDate(record.created_at as any)}
+								</TableCell>
+							</TableRow>
+						))
+					)}
+				</TableBody>
+			</Table>
+
+			{total > 0 && (
+				<div className="flex items-center justify-between mt-4">
+					<span className="text-sm text-muted-foreground">
+						{__('Page', 'doublescale')} {page} / {totalPages}
+					</span>
+					<div className="flex gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={page <= 1}
+							onClick={() => setPage(page - 1)}
+						>
+							{__('Previous', 'doublescale')}
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={page >= totalPages}
+							onClick={() => setPage(page + 1)}
+						>
+							{__('Next', 'doublescale')}
+						</Button>
+					</div>
+				</div>
+			)}
+
+			<Dialog
+				open={visible}
+				onOpenChange={(open) => {
+					if (!open) setVisible(false);
+				}}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							{__('Create Template', 'doublescale')}
+						</DialogTitle>
+					</DialogHeader>
+					<div className="doublescale-fields">
+						<Field
+							label={__('Name', 'doublescale')}
+							value={template.name}
+							onChange={(value) =>
+								setTemplate({
+									...template,
+									name: value,
+								})
+							}
+							type="text"
+						/>
+					</div>
+					<div className="flex justify-end mt-4">
+						<Button
+							variant="default"
+							onClick={createTemplate}
+							disabled={isSaving}
+						>
+							{__('Create', 'doublescale')}
+						</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 };

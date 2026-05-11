@@ -6,18 +6,17 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Link as LinkIcon, Image } from 'lucide-react';
-import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import {
 	$getSelection,
 	$createTextNode,
 	$isRangeSelection,
-	$isElementNode,
-	$createParagraphNode,
 	$getRoot,
-	$isTextNode,
+	$createRangeSelection,
+	$setSelection,
+	$findMatchingParent,
 } from 'lexical';
-import { $wrapNodes } from '@lexical/selection';
-import { $createLinkNode, $isLinkNode } from '@lexical/link';
+import { $createLinkNode, $isLinkNode, $toggleLink, LinkNode } from '@lexical/link';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -35,85 +34,112 @@ import { Input } from '@/components/ui/input';
  */
 import { INSERT_IMAGE_COMMAND } from '../../../plugins/image-plugin';
 import { MergeTagsModal, MergeTagsIcon } from '@doublescale/components';
-import { Link } from 'lucide-react';
 
 interface AttachmentsProps {
 	activeEditor: any;
 }
 
 export default function Attachments({ activeEditor }: AttachmentsProps) {
-	// State for managing modals
 	const [linkModalOpen, setLinkModalOpen] = useState(false);
 	const [mergeTagModalVisible, setMergeTagModalVisible] = useState(false);
 	const [linkUrl, setLinkUrl] = useState('');
 	const [linkText, setLinkText] = useState('');
 	const [selectedText, setSelectedText] = useState('');
 	const [isEditingExistingLink, setIsEditingExistingLink] = useState(false);
+	const [isLinkActive, setIsLinkActive] = useState(false);
+	const storedSelectionRef = useRef<{
+		anchor: { key: string; offset: number; type: 'text' | 'element' };
+		focus: { key: string; offset: number; type: 'text' | 'element' };
+	} | null>(null);
+	const editorRef = useRef<HTMLElement | null>(null);
 
-	// Add click handler for links in the editor
 	useEffect(() => {
-		const handleLinkClick = (event: Event) => {
+		const rootElement = activeEditor.getRootElement();
+		if (!rootElement) return;
+
+		editorRef.current = rootElement;
+
+		const handleLinkClick = (event: MouseEvent) => {
 			const target = event.target as HTMLElement;
 			const linkElement = target.closest('a');
 
-			if (linkElement) {
-				event.preventDefault();
-				event.stopPropagation();
+			if (!linkElement) return;
 
-				const href = linkElement.getAttribute('href');
-				const text = linkElement.textContent || '';
+			event.preventDefault();
+			event.stopPropagation();
 
-				if (href) {
-					// Set the selection to the clicked link
-					activeEditor.update(() => {
+			const text = linkElement.textContent || '';
+
+			let foundUrl = '';
+			activeEditor.update(() => {
+				const root = $getRoot();
+				const allNodes = root.getAllTextNodes();
+				for (const textNode of allNodes) {
+					const parent = textNode.getParent();
+					if (
+						$isLinkNode(parent) &&
+						textNode.getTextContent() === text
+					) {
+						foundUrl = parent.getURL();
+						textNode.select(0, textNode.getTextContentSize());
 						const selection = $getSelection();
 						if ($isRangeSelection(selection)) {
-							// Find the link node and select it
-							const linkNode = selection.anchor.getNode();
-							if (linkNode) {
-								selection.focus.set(
-									linkNode.getKey(),
-									0,
-									'text'
-								);
-								selection.anchor.set(
-									linkNode.getKey(),
-									linkNode.getTextContentSize(),
-									'text'
-								);
-							}
+							storedSelectionRef.current = {
+								anchor: {
+									key: selection.anchor.key,
+									offset: selection.anchor.offset,
+									type: selection.anchor.type,
+								},
+								focus: {
+									key: selection.focus.key,
+									offset: selection.focus.offset,
+									type: selection.focus.type,
+								},
+							};
 						}
-					});
-
-					setLinkUrl(href);
-					setLinkText(text);
-					setSelectedText(text);
-					setIsEditingExistingLink(true);
-					setLinkModalOpen(true);
+						break;
+					}
 				}
-			}
+			});
+
+			if (!foundUrl) return;
+
+			setLinkUrl(foundUrl);
+			setLinkText(text);
+			setSelectedText(text);
+			setIsEditingExistingLink(true);
+			setLinkModalOpen(true);
 		};
 
-		// Add click listener to the editor container
-		const editorElement = document.querySelector('.editor-input');
-		if (editorElement) {
-			editorElement.addEventListener(
-				'click',
-				handleLinkClick as EventListener
-			);
-		}
+		rootElement.addEventListener('click', handleLinkClick);
 
 		return () => {
-			if (editorElement) {
-				editorElement.removeEventListener(
-					'click',
-					handleLinkClick as EventListener
-				);
-			}
+			rootElement.removeEventListener('click', handleLinkClick);
 		};
 	}, [activeEditor]);
 
-	// Function to open WordPress media library
+	// Update link button active state when selection changes (cursor/selection inside a link)
+	const updateLinkState = useCallback(() => {
+		activeEditor.getEditorState().read(() => {
+			const selection = $getSelection();
+			if ($isRangeSelection(selection)) {
+				const anchorNode = selection.anchor.getNode();
+				const linkParent = $findMatchingParent(anchorNode, $isLinkNode);
+				setIsLinkActive(linkParent !== null);
+			} else {
+				setIsLinkActive(false);
+			}
+		});
+	}, [activeEditor]);
+
+	useEffect(() => {
+		return activeEditor.registerUpdateListener(({ editorState }) => {
+			editorState.read(() => {
+				updateLinkState();
+			});
+		});
+	}, [activeEditor, updateLinkState]);
+
 	const openMediaLibrary = useCallback(() => {
 		if (window.wp && window.wp.media) {
 			activeEditor.focus();
@@ -180,186 +206,157 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 		}
 	}, [activeEditor]);
 
-	// Function to handle merge tag selection for URLs
 	const handleMergeTagClick = useCallback((tagValue: string) => {
 		setLinkUrl((prev) => prev + tagValue);
 		setMergeTagModalVisible(false);
 	}, []);
 
-	// Function to open the link modal and capture selected text
-	const openLinkModal = useCallback(() => {
+	const openLinkModal = useCallback((e?: React.MouseEvent) => {
+		// Prevent editor from losing focus (and thus selection) when clicking the button
+		e?.preventDefault();
 		activeEditor.focus();
 		activeEditor.update(() => {
 			const selection = $getSelection();
-			if ($isRangeSelection(selection)) {
+			// Only open modal when text is selected (not collapsed)
+			if ($isRangeSelection(selection) && !selection.isCollapsed()) {
 				const text = selection.getTextContent();
 				setSelectedText(text);
 				setLinkText(text || '');
 				setIsEditingExistingLink(false);
+				// Store selection to restore when inserting (selection is lost when modal input gets focus)
+				storedSelectionRef.current = {
+					anchor: {
+						key: selection.anchor.key,
+						offset: selection.anchor.offset,
+						type: selection.anchor.type,
+					},
+					focus: {
+						key: selection.focus.key,
+						offset: selection.focus.offset,
+						type: selection.focus.type,
+					},
+				};
+				setLinkUrl('');
+				setLinkModalOpen(true);
+			} else {
+				storedSelectionRef.current = null;
 			}
 		});
-		setLinkModalOpen(true);
 	}, [activeEditor]);
 
-	// Function to insert the link into the editor
 	const insertLink = useCallback(() => {
-		if (linkUrl) {
-			activeEditor.focus();
-			activeEditor.update(() => {
-				const selection = $getSelection();
-				if ($isRangeSelection(selection)) {
-					let linkNode;
+		if (!linkUrl) return;
 
-					if (isEditingExistingLink) {
-						// If editing existing link, remove the old link first
-						const nodes = selection.getNodes();
-						nodes.forEach((node) => {
-							if ($isLinkNode(node)) {
-								// Create a new text node with the same content
-								const textNode = $createTextNode(
-									node.getTextContent()
-								);
-								// Replace the link node with the text node
-								node.replace(textNode);
-							}
-						});
-					}
+		const normalizedUrl = linkUrl.startsWith('http') || linkUrl.startsWith('mailto:') || linkUrl.startsWith('tel:') || /\{\{.*?\}\}/.test(linkUrl)
+			? linkUrl
+			: `https://${linkUrl}`;
 
-					// Get the current paragraph node or create a new one
-					let paragraphNode = selection.anchor.getNode().getParent();
-					if (!paragraphNode || !$isElementNode(paragraphNode)) {
-						paragraphNode = $createParagraphNode();
-						const root = $getRoot();
-						root.append(paragraphNode);
-					}
+		activeEditor.focus();
+		activeEditor.update(() => {
+			let selection = $getSelection();
+			if (!$isRangeSelection(selection)) return;
 
-					if (selection.isCollapsed() || !selectedText) {
-						const textToUse = linkText || linkUrl;
-						const linkTextNode = $createTextNode(textToUse);
-						linkNode = $createLinkNode(linkUrl, {
-							rel: 'noopener noreferrer',
-							target: '_blank',
-						});
-						linkNode.append(linkTextNode);
-
-						// Insert the link node at the current selection
-						if (selection.isCollapsed()) {
-							// If we're at the end of a paragraph, append to current paragraph
-							if (
-								selection.anchor.offset ===
-								paragraphNode.getTextContentSize()
-							) {
-								paragraphNode.append(linkNode);
-							} else {
-								// Get the current text node
-								const currentNode = selection.anchor.getNode();
-								if ($isTextNode(currentNode)) {
-									// Split the text node at the cursor position
-									const splitPoint = selection.anchor.offset;
-									const textContent =
-										currentNode.getTextContent();
-									const beforeText = textContent.slice(
-										0,
-										splitPoint
-									);
-									const afterText =
-										textContent.slice(splitPoint);
-
-									// Create new text nodes for before and after
-									const beforeNode =
-										$createTextNode(beforeText);
-									const afterNode =
-										$createTextNode(afterText);
-
-									// Replace the current node with the new structure
-									currentNode.replace(beforeNode);
-									beforeNode.insertAfter(linkNode);
-									linkNode.insertAfter(afterNode);
-								} else {
-									// If we're not in a text node, ensure we're in a paragraph
-									const parentNode = currentNode.getParent();
-									if (parentNode) {
-										// Create a new text node for the link
-										const newTextNode =
-											$createTextNode(textToUse);
-										linkNode.append(newTextNode);
-
-										// Insert the link node after the current node
-										currentNode.insertAfter(linkNode);
-									} else {
-										// If no parent node, create a new paragraph
-										const newParagraph =
-											$createParagraphNode();
-										newParagraph.append(linkNode);
-										const root = $getRoot();
-										root.append(newParagraph);
-									}
-								}
-							}
-						} else {
-							// If text is selected, wrap it in a link
-							linkNode = $createLinkNode(linkUrl, {
-								rel: 'noopener noreferrer',
-								target: '_blank',
-							});
-							$wrapNodes(selection, () => linkNode);
-						}
-					} else {
-						linkNode = $createLinkNode(linkUrl, {
-							rel: 'noopener noreferrer',
-							target: '_blank',
-						});
-						$wrapNodes(selection, () => linkNode);
-					}
-
-					// Ensure the link is in a paragraph node
-					if (linkNode) {
-						const linkParent = linkNode.getParent();
-						if (!linkParent || !$isElementNode(linkParent)) {
-							const newParagraph = $createParagraphNode();
-							newParagraph.append(linkNode);
-							const root = $getRoot();
-							root.append(newParagraph);
-						}
-					}
-
-					// Clean up empty paragraphs
-					const root = $getRoot();
-					const children = root.getChildren();
-					children.forEach((child) => {
-						if (child.getTextContentSize() === 0) {
-							child.remove();
-						}
-					});
+			// Restore selection if it was lost when modal input took focus
+			const stored = storedSelectionRef.current;
+			if (stored) {
+				try {
+					const newSelection = $createRangeSelection();
+					newSelection.anchor.set(stored.anchor.key, stored.anchor.offset, stored.anchor.type);
+					newSelection.focus.set(stored.focus.key, stored.focus.offset, stored.focus.type);
+					$setSelection(newSelection);
+					selection = newSelection;
+				} catch {
+					// Nodes may have changed, fall through with current selection
 				}
-			});
+				storedSelectionRef.current = null;
+			}
 
-			setLinkUrl('');
-			setLinkText('');
-			setIsEditingExistingLink(false);
-			setLinkModalOpen(false);
-		}
+			if (isEditingExistingLink) {
+				const nodes = selection.getNodes();
+				let existingLinkNode: LinkNode | null = null;
+
+				for (const node of nodes) {
+					const parent = node.getParent();
+					if ($isLinkNode(parent)) {
+						existingLinkNode = parent;
+						break;
+					}
+					if ($isLinkNode(node)) {
+						existingLinkNode = node as LinkNode;
+						break;
+					}
+				}
+
+				if (existingLinkNode) {
+					const newLinkNode = $createLinkNode(normalizedUrl, {
+						rel: 'noopener noreferrer',
+						target: '_blank',
+					});
+					const textContent = linkText || existingLinkNode.getTextContent();
+					const newTextNode = $createTextNode(textContent);
+					newLinkNode.append(newTextNode);
+					existingLinkNode.replace(newLinkNode);
+					newTextNode.select();
+				}
+			} else if (!selection.isCollapsed()) {
+				// Text selected: use $toggleLink to wrap selection in a link (proper Lexical API)
+				$toggleLink(normalizedUrl, {
+					rel: 'noopener noreferrer',
+					target: '_blank',
+				});
+			}
+		});
+
+		setLinkUrl('');
+		setLinkText('');
+		setSelectedText('');
+		setIsEditingExistingLink(false);
+		setLinkModalOpen(false);
 	}, [activeEditor, linkUrl, linkText, selectedText, isEditingExistingLink]);
 
-	// Memoized Link Modal component
-	const LinkModal = useMemo(
-		() => (
-			<Dialog
-				open={linkModalOpen}
-				onOpenChange={(open) => {
-					if (!open) {
-						setLinkModalOpen(false);
-						setLinkUrl('');
-						setLinkText('');
-					}
-				}}
-			>
+	const closeLinkModal = useCallback(() => {
+		setLinkModalOpen(false);
+		setLinkUrl('');
+		setLinkText('');
+		setSelectedText('');
+		setIsEditingExistingLink(false);
+		storedSelectionRef.current = null;
+	}, []);
+
+	return (
+		<>
+			<div className="flex gap-2.5 border-r pr-5">
+				<Button
+					onMouseDown={(e) => openLinkModal(e)}
+					title="Insert Link"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<LinkIcon
+						className={`w-5 h-5 hover:text-color-primary ${isLinkActive ? 'text-color-primary' : 'text-[#52525B]'}`}
+					/>
+				</Button>
+				<Button
+					onClick={openMediaLibrary}
+					title="Insert Image from Media Library"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<Image className="w-5 h-5 text-[#52525B] hover:text-color-primary" />
+				</Button>
+			</div>
+
+			<Dialog open={linkModalOpen} onOpenChange={(open) => { if (!open) closeLinkModal(); }}>
 				<DialogPortal>
 					<DialogOverlay className="z-[150200]" />
 					<DialogContent className="sm:max-w-[500px] z-[150500]">
 						<DialogHeader>
 							<DialogTitle>
-								{__('Add Link', 'doublescale')}
+								{isEditingExistingLink
+									? __('Edit Link', 'doublescale')
+									: __('Add Link', 'doublescale')}
 							</DialogTitle>
 							<DialogDescription>
 								{__(
@@ -405,54 +402,20 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 								variant="gradient"
 								size="xl"
 							>
-								{__('Insert', 'doublescale')}
+								{isEditingExistingLink
+									? __('Update', 'doublescale')
+									: __('Insert', 'doublescale')}
 							</Button>
 						</DialogFooter>
 					</DialogContent>
 				</DialogPortal>
 			</Dialog>
-		),
-		[linkModalOpen, linkUrl, linkText, selectedText, insertLink]
-	);
 
-	const MergeTagsModalComponent = useMemo(
-		() => (
 			<MergeTagsModal
 				visible={mergeTagModalVisible}
 				onClose={() => setMergeTagModalVisible(false)}
 				onInsertTag={handleMergeTagClick}
 			/>
-		),
-		[mergeTagModalVisible, handleMergeTagClick]
-	);
-
-	return (
-		<>
-			{/* Link and Image buttons */}
-			<div className="flex gap-2.5 border-r pr-5">
-				<Button
-					onClick={openLinkModal}
-					title="Insert Link"
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 p-0"
-				>
-					<LinkIcon className="w-5 h-5 text-[#52525B] hover:text-color-primary" />
-				</Button>
-				<Button
-					onClick={openMediaLibrary}
-					title="Insert Image from Media Library"
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 p-0"
-				>
-					<Image className="w-5 h-5 text-[#52525B] hover:text-color-primary" />
-				</Button>
-			</div>
-
-			{/* Render modals */}
-			{LinkModal}
-			{MergeTagsModalComponent}
 		</>
 	);
 }

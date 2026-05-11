@@ -10,14 +10,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import {
-	Card,
-	List as AntList,
-	Typography,
-	Flex,
-	Button,
-	Tag as AntTag,
-} from 'antd';
 import { map, isEmpty } from 'lodash';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 /**
@@ -33,7 +25,10 @@ import type {
 	ListsResponse,
 	TagsResponse,
 } from '@doublescale/client';
-import EditHeaderIcon from '@doublescale/components/icons/edit-header';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 const FieldsCard: React.FC = () => {
 	const { form, isLoading } = useFormContext();
 	const { getForms } = ConfigAPI;
@@ -157,140 +152,92 @@ const FieldsCard: React.FC = () => {
 	};
 
 	return (
-		<Card
-			loading={isLoading}
-			title={
-				<Flex justify="space-between">
-					<Typography.Text strong>
-						{__('Fields', 'doublescale')}
-					</Typography.Text>
-					<Button
-						type="link"
-						onClick={() => {
-							navigate(getToLink(`forms/${form?.id}/settings`));
-						}}
-					>
-						<EditHeaderIcon />
-						{__('Edit', 'doublescale')}
-					</Button>
-				</Flex>
-			}
-			style={{ marginTop: 20 }}
-		>
-			{formFields && (
-				<AntList
-					header={
-						<Typography.Text strong>
-							{__('Mapped Fields', 'doublescale')}
-						</Typography.Text>
-					}
-					size="small"
-					className="doublescale-overview-fields-list"
-					loading={isFetching}
-				>
-					<AntList.Item>
-						<Flex>
-							<Typography.Text strong>
-								{__('Form Fields', 'doublescale')}
-							</Typography.Text>
-							<Typography.Text strong>
-								{__('Contact Fields', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-					</AntList.Item>
-					{map(form?.data.mapped_fields, (value, key) => (
-						<AntList.Item>
-							<Flex>
-								<Typography.Text>
-									{formFields[key]}
-								</Typography.Text>
-								<Typography.Text>
-									{getValueLabel(value)}
-								</Typography.Text>
-							</Flex>
-						</AntList.Item>
-					))}
-				</AntList>
-			)}
-			<AntList
-				header={
-					<Typography.Text strong>
-						{__('Contact', 'doublescale')}
-					</Typography.Text>
-				}
-				size="small"
-				className="doublescale-overview-fields-list"
-				loading={isFetching}
-			>
-				<AntList.Item>
-					<Flex>
-						<Typography.Text strong>
-							{__('Lists', 'doublescale')}
-						</Typography.Text>
-						<Typography.Text>
-							{isEmpty(savedLists)
-								? __('No lists', 'doublescale')
-								: // @ts-ignore
-									savedLists.map((list) => (
-										<AntTag>{list.name}</AntTag>
-									))}
-						</Typography.Text>
-					</Flex>
-				</AntList.Item>
-				<AntList.Item>
-					<Flex>
-						<Typography.Text strong>
-							{__('Tags', 'doublescale')}
-						</Typography.Text>
-						<Typography.Text>
-							{isEmpty(savedTags)
-								? __('No tags', 'doublescale')
-								: // @ts-ignore
-									savedTags.map((tag) => (
-										<AntTag>{tag.name}</AntTag>
-									))}
-						</Typography.Text>
-					</Flex>
-				</AntList.Item>
-				<AntList.Item>
-					<Flex>
-						<Typography.Text strong>
-							{__('Update existing contact', 'doublescale')}
-						</Typography.Text>
-						<Typography.Text>
-							{form?.data.update_existing_contact
-								? __('Yes', 'doublescale')
-								: __('No', 'doublescale')}
-						</Typography.Text>
-					</Flex>
-				</AntList.Item>
-				<AntList.Item>
-					<Flex>
-						<Typography.Text strong>
-							{__('Update blank fields', 'doublescale')}
-						</Typography.Text>
-						<Typography.Text>
-							{form?.data.update_blank_fields
-								? __('Yes', 'doublescale')
-								: __('No', 'doublescale')}
-						</Typography.Text>
-					</Flex>
-				</AntList.Item>
-				<AntList.Item>
-					<Flex>
-						<Typography.Text strong>
-							{__('Mark as subscribed', 'doublescale')}
-						</Typography.Text>
-						<Typography.Text>
-							{form?.data.mark_as_subscribed
-								? __('Yes', 'doublescale')
-								: __('No', 'doublescale')}
-						</Typography.Text>
-					</Flex>
-				</AntList.Item>
-			</AntList>
-		</Card>
-	);
+        <Card style={{ marginTop: 20 }}><CardHeader><CardTitle>{<div className='flex justify-between'>
+                        <span>
+                            {__('Fields', 'doublescale')}
+                        </span>
+                        <Button
+                            onClick={() => {
+                                navigate(getToLink(`forms/${form?.id}/settings`));
+                            }}
+                            variant='link'
+                        >
+                            <EditHeaderIcon />
+                            {__('Edit', 'doublescale')}
+                        </Button>
+                    </div>}</CardTitle></CardHeader><CardContent>
+                {formFields && (
+                    <div className="doublescale-overview-fields-list border border-border rounded-md mb-4">
+                        <div className="px-3 py-2 border-b border-border font-medium">
+                            {__('Mapped Fields', 'doublescale')}
+                        </div>
+                        <ul className="divide-y divide-border">
+                            <li className="flex justify-between px-3 py-2">
+                                <span>{__('Form Fields', 'doublescale')}</span>
+                                <span>{__('Contact Fields', 'doublescale')}</span>
+                            </li>
+                            {map(form?.data.mapped_fields, (value, key) => (
+                                <li key={String(key)} className="flex justify-between px-3 py-2">
+                                    <span>{formFields[key]}</span>
+                                    <span>{getValueLabel(value)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+                <div className="doublescale-overview-fields-list border border-border rounded-md">
+                    <div className="px-3 py-2 border-b border-border font-medium">
+                        {__('Contact', 'doublescale')}
+                    </div>
+                    <ul className="divide-y divide-border">
+                        <li className="flex justify-between px-3 py-2">
+                            <span>{__('Lists', 'doublescale')}</span>
+                            <span className="flex flex-wrap gap-1 justify-end">
+                                {isEmpty(savedLists)
+                                    ? __('No lists', 'doublescale')
+                                    : savedLists.map((list) => (
+                                          <Badge key={list.id} variant="secondary">{list.name}</Badge>
+                                      ))}
+                            </span>
+                        </li>
+                        <li className="flex justify-between px-3 py-2">
+                            <span>{__('Tags', 'doublescale')}</span>
+                            <span className="flex flex-wrap gap-1 justify-end">
+                                {isEmpty(savedTags)
+                                    ? __('No tags', 'doublescale')
+                                    : savedTags.map((tag) => (
+                                          <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+                                      ))}
+                            </span>
+                        </li>
+                        <li className="flex justify-between px-3 py-2">
+                            <span>{__('Update existing contact', 'doublescale')}</span>
+                            <span>
+                                {form?.data.update_existing_contact
+                                    ? __('Yes', 'doublescale')
+                                    : __('No', 'doublescale')}
+                            </span>
+                        </li>
+                        <li className="flex justify-between px-3 py-2">
+                            <span>{__('Update blank fields', 'doublescale')}</span>
+                            <span>
+                                {form?.data.update_blank_fields
+                                    ? __('Yes', 'doublescale')
+                                    : __('No', 'doublescale')}
+                            </span>
+                        </li>
+                        <li className="flex justify-between px-3 py-2">
+                            <span>{__('Mark as subscribed', 'doublescale')}</span>
+                            <span>
+                                {form?.data.mark_as_subscribed
+                                    ? __('Yes', 'doublescale')
+                                    : __('No', 'doublescale')}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </CardContent></Card>
+    );
 };
 
 export default FieldsCard;

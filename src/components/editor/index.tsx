@@ -24,7 +24,61 @@ import AutoLinkMatchers from './plugins/autolink-plugin';
 import HtmlSerializer from './html-serializer';
 import InitialContentPlugin from './plugins/initial-content-plugin';
 import WordCountPlugin from './word-count';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getRoot, $createParagraphNode } from 'lexical';
+import { $generateNodesFromDOM } from '@lexical/html';
 import './style.scss';
+
+function ExternalContentPlugin({
+	content,
+	onApplied,
+}: {
+	content: string;
+	onApplied: () => void;
+}) {
+	const [editor] = useLexicalComposerContext();
+
+	useEffect(() => {
+		editor.update(() => {
+			try {
+				const root = $getRoot();
+				root.clear();
+
+				if (!content) {
+					root.append($createParagraphNode());
+					onApplied();
+					return;
+				}
+
+				const parser = new DOMParser();
+				const dom = parser.parseFromString(content, 'text/html');
+				const newNodes = $generateNodesFromDOM(editor, dom);
+
+				newNodes.forEach((node) => {
+					if (node.getType() === 'text') {
+						const paragraph = $createParagraphNode();
+						paragraph.append(node);
+						root.append(paragraph);
+					} else {
+						root.append(node);
+					}
+				});
+
+				if (root.getChildrenSize() === 0) {
+					root.append($createParagraphNode());
+				}
+			} catch (error) {
+				console.error('Error setting external content:', error);
+				const root = $getRoot();
+				root.clear();
+				root.append($createParagraphNode());
+			}
+		});
+		onApplied();
+	}, [editor, content, onApplied]);
+
+	return null;
+}
 
 const theme = {
 	paragraph: 'editor-paragraph',
@@ -48,10 +102,10 @@ interface EditorProps {
 function Editor({ message, onChange }: EditorProps) {
 	const [editorActive, setEditorActive] = useState(false);
 	const [wordCount, setWordCount] = useState(0);
-	// Keep track of the initial load to prevent resetting content during editing
 	const initialLoadRef = useRef(true);
-	// Store initial message to compare if it changes from parent
+	const lastMessageRef = useRef(message);
 	const initialMessageRef = useRef(message);
+	const [externalContent, setExternalContent] = useState<string | null>(null);
 
 	const initialConfig = {
 		namespace: 'EmailBodyEditor',
@@ -74,6 +128,7 @@ function Editor({ message, onChange }: EditorProps) {
 	};
 
 	const handleHtmlChange = (html: string) => {
+		lastMessageRef.current = html;
 		if (onChange) onChange(html);
 	};
 
@@ -92,27 +147,24 @@ function Editor({ message, onChange }: EditorProps) {
 		}
 	}, [message]);
 
-	// Check if message was changed externally (not from this editor's onChange)
+	// Detect external message changes and push them to the editor
 	useEffect(() => {
-		// Skip the first render and during active editing
 		if (initialLoadRef.current) {
 			initialLoadRef.current = false;
 			return;
 		}
 
-		// Only update the editor if the message prop changes from an external source
-		// and the editor is not currently focused/active
-		if (!editorActive && message !== initialMessageRef.current) {
-			initialMessageRef.current = message;
+		if (message !== lastMessageRef.current) {
+			lastMessageRef.current = message;
+			setExternalContent(message);
 
-			// Update word count for the new external message
 			const tempDiv = document.createElement('div');
 			tempDiv.innerHTML = message || '';
 			const text = tempDiv.textContent || tempDiv.innerText || '';
 			const words = text.split(/\s+/).filter((word) => word.length > 0);
 			setWordCount(words.length);
 		}
-	}, [message, editorActive]);
+	}, [message]);
 
 	return (
 		<div className="email-body-editor">
@@ -143,12 +195,20 @@ function Editor({ message, onChange }: EditorProps) {
 						/>
 						<HistoryPlugin />
 						<ListPlugin />
-						<LinkPlugin />
+						<LinkPlugin
+							validateUrl={(url: string) => {
+								if (/\{\{.*?\}\}/.test(url)) return true;
+								return /^https?:\/\//.test(url) || /^mailto:/.test(url) || /^tel:/.test(url);
+							}}
+						/>
 						<AutoLinkMatchers />
-						{/* Only load initial content once when the component mounts */}
-						{initialLoadRef.current && (
-							<InitialContentPlugin
-								initialContent={initialMessageRef.current}
+						<InitialContentPlugin
+							initialContent={initialMessageRef.current}
+						/>
+						{externalContent !== null && (
+							<ExternalContentPlugin
+								content={externalContent}
+								onApplied={() => setExternalContent(null)}
 							/>
 						)}
 					</div>

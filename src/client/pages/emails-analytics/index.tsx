@@ -7,12 +7,8 @@ import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
-/**
- * External dependencies
- */
-import { Card, Flex, Skeleton, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { MailOutlined, EyeOutlined, LinkOutlined } from '@ant-design/icons';
+import { Mail as MailOutlined, Eye as EyeOutlined, Link as LinkOutlined } from 'lucide-react';
 import { map } from 'lodash';
 import '../../lib/chart-setup';
 import { Line } from 'react-chartjs-2';
@@ -25,6 +21,9 @@ import type { EmailsAnalytics as EmailAnalyticsData } from '@doublescale/client'
 import { NavLink } from '@doublescale/navigation';
 import { convertDate, formatDate } from '@doublescale/utils';
 import { DateFilter } from '@doublescale/components';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const EmailAnalytics: React.FC = () => {
 	const [data, setData] = useState<EmailAnalyticsData | null>(null);
@@ -62,59 +61,59 @@ const EmailAnalytics: React.FC = () => {
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton active />;
+		return <Skeleton className='h-4 w-full' />;
 	}
 
 	return (
-		<Flex gap={20} vertical>
-			<Flex gap={20}>
-				<Card className="doublescale-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="doublescale-dashboard-card-icon">
-								<MailOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Sent', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="doublescale-dashboard-card-value">
-							{data.total}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="doublescale-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="doublescale-dashboard-card-icon">
-								<EyeOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Opened', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="doublescale-dashboard-card-value">
-							{data.total_opened || 0}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="doublescale-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="doublescale-dashboard-card-icon">
-								<LinkOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Clicked', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="doublescale-dashboard-card-value">
-							{data.total_clicked || 0}
-						</Typography.Text>
-					</Flex>
-				</Card>
-			</Flex>
-			<DateFilter
+        <div className='flex gap-5 flex-col'>
+            <div className='flex gap-5'>
+				<Card className="doublescale-dashboard-card"><CardContent>
+                        <div className='flex gap-2.5 flex-col'>
+                            <div className='flex gap-2.5'>
+                                <div className="doublescale-dashboard-card-icon">
+                                    <MailOutlined style={{ fontSize: 16 }} />
+                                </div>
+                                <span>
+                                    {__('Total Sent', 'doublescale')}
+                                </span>
+                            </div>
+                            <span className="doublescale-dashboard-card-value">
+                                {data.total}
+                            </span>
+                        </div>
+                    </CardContent></Card>
+				<Card className="doublescale-dashboard-card"><CardContent>
+                        <div className='flex gap-2.5 flex-col'>
+                            <div className='flex gap-2.5'>
+                                <div className="doublescale-dashboard-card-icon">
+                                    <EyeOutlined style={{ fontSize: 16 }} />
+                                </div>
+                                <span>
+                                    {__('Total Opened', 'doublescale')}
+                                </span>
+                            </div>
+                            <span className="doublescale-dashboard-card-value">
+                                {data.total_opened || 0}
+                            </span>
+                        </div>
+                    </CardContent></Card>
+				<Card className="doublescale-dashboard-card"><CardContent>
+                        <div className='flex gap-2.5 flex-col'>
+                            <div className='flex gap-2.5'>
+                                <div className="doublescale-dashboard-card-icon">
+                                    <LinkOutlined style={{ fontSize: 16 }} />
+                                </div>
+                                <span>
+                                    {__('Total Clicked', 'doublescale')}
+                                </span>
+                            </div>
+                            <span className="doublescale-dashboard-card-value">
+                                {data.total_clicked || 0}
+                            </span>
+                        </div>
+                    </CardContent></Card>
+			</div>
+            <DateFilter
 				interval={interval}
 				startDate={startDate}
 				endDate={endDate}
@@ -123,65 +122,59 @@ const EmailAnalytics: React.FC = () => {
 				onChangeToDate={(date) => setEndDate(date)}
 				onSubmit={fetchEmailAnalytics}
 			/>
-			<Flex gap={20}>
-				<Card
-					title={__('Email Analytics', 'doublescale')}
-					extra={
-						<NavLink to="campaigns">
+            <div className='flex gap-5'>
+				<Card style={{ flex: 1 }}><CardHeader className='flex flex-row items-center justify-between'><CardTitle>{__('Email Analytics', 'doublescale')}</CardTitle>{<NavLink to="campaigns">
 							{__('View All', 'doublescale')}
-						</NavLink>
-					}
-					style={{ flex: 1 }}
-				>
-					<Line
-						data={{
-							labels: map(data.data.dates, (date) => {
-								return formatDate(date, data.data.type);
-							}),
-							datasets: [
-								{
-									label: __('Emails', 'doublescale'),
-									data: map(data.data.dates, (date) => {
-										return data.email[date]
-											? data.email[date]
-											: 0;
-									}),
-									borderColor: '#6d78d8',
-									backgroundColor: '#6d78d8',
-								},
-							],
-						}}
-						options={{
-							scales: {
-								x: {
-									grid: {
-										display: false,
-									},
-								},
-								y: {
-									beginAtZero: true,
-									max: parseInt(data.total) + 10,
-								},
-							},
-							plugins: {
-								tooltip: {
-									callbacks: {
-										label: function (context) {
-											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
-										},
-										title: function (context) {
-											return `Emails: ${data.email[data.data.dates[context[0].dataIndex]]}`;
-										},
-									},
-								},
-							},
-						}}
-						height={70}
-					/>
-				</Card>
-			</Flex>
-		</Flex>
-	);
+						</NavLink>}</CardHeader><CardContent>
+                        <Line
+                            data={{
+                                labels: map(data.data.dates, (date) => {
+                                    return formatDate(date, data.data.type);
+                                }),
+                                datasets: [
+                                    {
+                                        label: __('Emails', 'doublescale'),
+                                        data: map(data.data.dates, (date) => {
+                                            return data.email[date]
+                                                ? data.email[date]
+                                                : 0;
+                                        }),
+                                        borderColor: '#6d78d8',
+                                        backgroundColor: '#6d78d8',
+                                    },
+                                ],
+                            }}
+                            options={{
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        max: parseInt(data.total) + 10,
+                                    },
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+                                            },
+                                            title: function (context) {
+                                                return `Emails: ${data.email[data.data.dates[context[0].dataIndex]]}`;
+                                            },
+                                        },
+                                    },
+                                },
+                            }}
+                            height={70}
+                        />
+                    </CardContent></Card>
+			</div>
+        </div>
+    );
 };
 
 export default EmailAnalytics;

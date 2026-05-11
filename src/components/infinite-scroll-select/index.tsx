@@ -278,9 +278,9 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 					placeholder={placeholder}
 					disabled={disabled || externalLoading}
 					autoComplete="off"
-					className={`h-12 w-full py-[5px] px-4 pr-10 !rounded-[8px] border !border-[#DEE1E6] text-[#09090B] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-						displayError ? 'border-red-500' : ''
-					} ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+				className={`h-12 w-full py-[5px] px-4 pr-10 !rounded-[8px] border !border-border/60 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+					displayError ? 'border-destructive' : ''
+				} ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
 				/>
 				<div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
 					<svg
@@ -313,9 +313,9 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 					)}
 
 					{!loading && displayError && (
-						<div className="px-3 py-2 text-sm text-red-500">
-							{displayError}
-						</div>
+					<div className="px-3 py-2 text-sm text-destructive">
+						{displayError}
+					</div>
 					)}
 
 					{!loading && !displayError && items.length === 0 && (
@@ -368,12 +368,14 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 			)}
 
 			{displayError && (
-				<span className="text-sm text-red-500 mt-1 block">
-					{displayError}
-				</span>
+			<span className="text-sm text-destructive mt-1 block">
+				{displayError}
+			</span>
 			)}
 		</div>
 	);
 };
+
+export { InfiniteScrollMultiSelect } from './infinite-scroll-multi-select';
 
 export default InfiniteScrollSelect;

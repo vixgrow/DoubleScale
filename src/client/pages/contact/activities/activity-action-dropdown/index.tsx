@@ -9,9 +9,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import MoreHorizantail from '@doublescale/components/icons/moreHorizantal-header';
-import EditHeaderIcon from '@doublescale/components/icons/edit-header';
-import TrashIcon from '@doublescale/components/icons/trash';
+import MoreHorizantail from '@doublescale/shared/icons/moreHorizantal-header';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
+import TrashIcon from '@doublescale/shared/icons/trash';
 
 interface Props {
 	onEdit: () => void;

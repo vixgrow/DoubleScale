@@ -3,7 +3,7 @@ export interface Plugin {
 	name: string;
 	icon?: string;
 	description: string;
-	pluginFile?: string; // WordPress plugin file path (e.g., 'quill-smtp/quillsmtp.php')
+	pluginFile?: string; // WordPress plugin file path (e.g., 'doublescale/doublescale.php')
 	downloadUrl?: string; // WordPress.org zip URL
 	isInstalled?: boolean;
 	isActive?: boolean;

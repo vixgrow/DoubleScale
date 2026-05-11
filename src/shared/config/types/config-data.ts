@@ -7,6 +7,8 @@ export type ConfigData = Record<string, unknown> & {
 	adminUrl: string;
 	siteUrl: string;
 	pluginDirUrl: string;
+	/** Pro plugin base URL when Pro is active; used for assets bundled only in Pro (e.g. SMTP mailer logos). */
+	proPluginDirUrl: string;
 	adminEmail: string;
 	ajaxUrl: string;
 	nonce: string;

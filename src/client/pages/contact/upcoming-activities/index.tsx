@@ -262,7 +262,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                 return (
                     activity.data?.content && (
                         <div className="activity-note-content">
-                            <p className="text-base font-normal text-[#777] leading-[26px]">
+                            <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                 {activity.data.content}
                             </p>
                         </div>
@@ -272,15 +272,15 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
             case 'meeting_scheduled':
                 return (
                     activity.data && (
-                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px]">
+                        <div className="activity-meeting-content flex gap-4 py-4 px-2 border border-border/60 bg-[#DEE1E666] rounded-lg">
                             <div className="meeting-date-card h-full flex flex-col items-center justify-center text-center border-r border-r-[#DEE1E6] pr-3 py-3 px-4 gap-2">
-                                <div className=" text-[#09090B] text-xl text-center font-semibold leading-[30px]">
+                                <div className=" text-foreground text-xl text-center font-semibold leading-[30px]">
                                     {new Date(
                                         activity.data.scheduled_at ||
                                         activity.created_at
                                     ).getDate()}
                                 </div>
-                                <div className=" text-[#09090B] text-base text-center font-normal leading-[26px]">
+                                <div className=" text-foreground text-base text-center font-normal leading-[26px]">
                                     {format(
                                         new Date(
                                             activity.data.scheduled_at ||
@@ -293,7 +293,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                             <div className=" flex flex-col gap-3">
                                 <div className="flex gap-6 items-center">
                                     {activity.data.scheduled_at && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
+                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <StartDateIcon />
                                             <span>
                                                 {__('Start Date', 'doublescale')}:
@@ -309,7 +309,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         </div>
                                     )}
                                     {activity.data.location && (
-                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-[#777] pr-4">
+                                        <div className="flex justify-center gap-2 border-r border-r-[#DEE1E6] font-medium text-muted-foreground pr-4">
                                             <LocationIcon />
                                             <span>
                                                 {__('Location', 'doublescale')}:{' '}
@@ -320,7 +320,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         </div>
                                     )}
                                     {activity.data.duration && (
-                                        <div className="flex justify-center gap-2  font-medium text-[#777]">
+                                        <div className="flex justify-center gap-2  font-medium text-muted-foreground">
                                             <DurationIcon />
                                             <span>
                                                 {__('Duration', 'doublescale')}:{' '}
@@ -334,10 +334,10 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                 </div>
                                 {activity.data.description && (
                                     <div className="flex flex-col gap-2  ">
-                                        <h4 className="text-[#09090B]  text-base font-medium">
+                                        <h4 className="text-foreground  text-base font-medium">
                                             {__('Meeting Description', 'doublescale')}
                                         </h4>
-                                        <p className=" text-base font-normal text-[#777] leading-[26px]">
+                                        <p className=" text-base font-normal text-muted-foreground leading-[26px]">
                                             {activity.data.description}
                                         </p>
                                     </div>
@@ -350,30 +350,30 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
             case 'email_sent':
                 return (
                     activity.data && (
-                        <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-4 py-4 px-2">
                             {activity.data.subject && (
                                 <div>
-                                    <h4 className="text-[#09090B] text-base font-medium">
+                                    <h4 className="text-foreground text-base font-medium">
                                         {__('Subject', 'doublescale')}
                                     </h4>
-                                    <p className="text-base font-normal text-[#777] leading-[26px]">
+                                    <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                         {activity.data.subject}
                                     </p>
                                 </div>
                             )}
                             {activity.data.body && (
                                 <div>
-                                    <h4 className="text-[#09090B] text-base font-medium">
+                                    <h4 className="text-foreground text-base font-medium">
                                         {__('Email Body', 'doublescale')}
                                     </h4>
                                     <div
-                                        className="text-base font-normal text-[#777] leading-[26px]"
+                                        className="text-base font-normal text-muted-foreground leading-[26px]"
                                         dangerouslySetInnerHTML={{ __html: activity.data.body }}
                                     />
                                 </div>
                             )}
                             {!activity.data.subject && !activity.data.body && (
-                                <p className="text-base font-normal text-[#777] leading-[26px]">
+                                <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                     {activity.formatted_message}
                                 </p>
                             )}
@@ -384,11 +384,11 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
             case 'call_logged':
                 return (
                     activity.data && (
-                        <div className="border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
-                            <h4 className="text-[#09090B] text-base font-medium">
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-4 py-4 px-2">
+                            <h4 className="text-foreground text-base font-medium">
                                 {__('Call Notes', 'doublescale')}
                             </h4>
-                            <p className="text-base font-normal text-[#777] leading-[26px]">
+                            <p className="text-base font-normal text-muted-foreground leading-[26px]">
                                 {activity.data.notes || __('No notes available', 'doublescale')}
                             </p>
                         </div>
@@ -397,7 +397,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
 
             default:
                 return (
-                    <p className="text-base font-normal text-[#777] leading-[26px]">
+                    <p className="text-base font-normal text-muted-foreground leading-[26px]">
                         {activity.formatted_message}
                     </p>
                 );
@@ -467,7 +467,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                         className="activity-item relative pl-12 pb-8"
                                     >
                                         {/* Activity/Task Icon */}
-                                        <div className="absolute p-1 left-0 top-0 w-9 h-9 rounded-full bg-[#FFF] flex items-center justify-center border border-[#DEE1E6]">
+                                        <div className="absolute p-1 left-0 top-0 w-9 h-9 rounded-full bg-card flex items-center justify-center border border-border/60">
                                             {getActivityIcon(item.icon_type)}
                                         </div>
 
@@ -478,13 +478,13 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
                                                 <div className="flex items-center gap-2">
                                                     <div className="flex justify-center gap-2">
                                                         {isTask ? <TaskDoneIcon color="#CB5301" /> : <MeetingActivityIcon />}
-                                                        <p className="text-base font-normal text-[#777] border-r border-r-[#DEE1E6] pr-2">
+                                                        <p className="text-base font-normal text-muted-foreground border-r border-r-[#DEE1E6] pr-2">
                                                             {formatActivityTime(displayDate)}
                                                         </p>
                                                     </div>
                                                     <div className="flex justify-center gap-2">
                                                         <UserActivityIcon />
-                                                        <p className="text-base font-normal text-[#777]">
+                                                        <p className="text-base font-normal text-muted-foreground">
                                                             {contact?.first_name} {contact?.last_name}
                                                         </p>
                                                     </div>
@@ -548,7 +548,7 @@ const UpcomingActivities: React.FC<UpcomingActivitiesProps> = ({ contact_id, ent
 
                                             {/* Activity/Task Description */}
                                             <div className="activity-body">
-                                                <p className="text-base text-[#09090B] mb-3 font-medium">
+                                                <p className="text-base text-foreground mb-3 font-medium">
                                                     {isTask ? item.title : (activity?.formatted_message || item.title)}
                                                 </p>
 

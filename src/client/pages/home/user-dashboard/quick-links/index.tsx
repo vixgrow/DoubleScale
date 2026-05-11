@@ -2,139 +2,95 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+
 /**
  * external dependencies
  */
-import { ArrowRight } from 'lucide-react';
+import type { FC, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 /**
  * internal dependencies
  */
-import { AddDealsIcon, CreateFormsIcon, DashboardContentCard, GradientAddContactIcon, GradientAutomationsIcon, GradientCampaignsIcon } from '@doublescale/components';
-import { Button } from '@/components/ui/button';
+import {
+	AddContactIcon,
+	DashboardContentCard,
+	ExternalLinkIcon,
+	NewAutomationIcon,
+	NewCampaignIcon,
+	NewDealIcon,
+	NewFormIcon,
+} from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
-import config from '@doublescale/config';
+import { cn } from '@/lib/utils';
 
-interface QuickLinksProps {
-	/** When the adjacent automations panel is hidden, span full row width. */
-	stretch?: boolean;
-}
 
-export const QuickLinks: React.FC<QuickLinksProps> = ({ stretch }) => {
+type QuickLinkItem = {
+	label: string;
+	to: string;
+	icon: ReactNode;
+};
+
+export const QuickLinks: FC = () => {
 	const navigate = useNavigate();
-	const dealsOn = config.isModuleToggleEnabled('deals');
-	const campaignsOn = config.isModuleToggleEnabled('campaigns');
-	const automationsOn = config.isModuleToggleEnabled('automations');
-	const formsOn = config.isModuleToggleEnabled('forms');
-	const contactsOn = config.isModuleToggleEnabled('contacts');
+
+	const links: QuickLinkItem[] = [
+		{
+			label: __('Create Contact', 'doublescale'),
+			to: getToLink('contacts'),
+			icon: <AddContactIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
+			label: __('Create Deal', 'doublescale'),
+			to: getToLink('sales-pipeline'),
+			icon: <NewDealIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
+			label: __('Create Campaign', 'doublescale'),
+			to: getToLink('campaigns'),
+			icon: <NewCampaignIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
+			label: __('Create Automation', 'doublescale'),
+			to: getToLink('automations'),
+			icon: <NewAutomationIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
+			label: __('Create Forms', 'doublescale'),
+			to: getToLink('forms'),
+			icon: <NewFormIcon color='#0D9DFC' width={27} height={27} />,
+		},
+	];
 
 	return (
 		<DashboardContentCard
 			title={__('Quick Links', 'doublescale')}
-			cardClassName={stretch ? 'w-full' : 'w-2/5'}
+			cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+			contentClassName="flex min-h-0 flex-1 flex-col"
 			headerContent={__('(Most Used Functions)', 'doublescale')}
 		>
-			<div className='border-t'></div>
-			<div>
-				{contactsOn && (
-				<Button
-					variant="ghost"
-					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
-					onClick={() => navigate(getToLink('contacts'))}
-				>
-					<div className="flex items-center justify-between w-full">
-						<div className="flex items-center gap-3">
-							<div className="bg-[#4A30CF1F] p-2 rounded-xl">
-								<GradientAddContactIcon width={24} height={24} />
+			<div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
+				{links.map(({ label, to, icon }) => (
+					<button
+						key={to}
+						type="button"
+						onClick={() => navigate(to)}
+						className={cn(
+							'group flex w-full flex-col gap-3 rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] p-3.5 text-left',
+							'transition-shadow hover:border-border hover:shadow-sm',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
+						)}
+					>
+						<div className="flex w-full items-start justify-between gap-2">
+							<div className="flex text-[#0D9DFC] h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D0D0D0] bg-white">
+								{icon}
 							</div>
-							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Contact', 'doublescale')}
-							</span>
+							<ExternalLinkIcon/>
 						</div>
-						<ArrowRight className="size-12 text-primary" />
-					</div>
-				</Button>
-				)}
-
-				{dealsOn && (
-				<Button
-					variant="ghost"
-					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
-					onClick={() => navigate(getToLink('sales-pipeline'))}
-				>
-					<div className="flex items-center justify-between w-full">
-						<div className="flex items-center gap-3">
-							<div className="bg-[#4A30CF1F] p-2 rounded-xl">
-								<AddDealsIcon width={24} height={24} />
-							</div>
-							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Deals', 'doublescale')}
-							</span>
-						</div>
-						<ArrowRight className="size-12 text-primary" />
-					</div>
-				</Button>
-				)}
-
-				{campaignsOn && (
-				<Button
-					variant="ghost"
-					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
-					onClick={() => navigate(getToLink('campaigns'))}
-				>
-					<div className="flex items-center justify-between w-full">
-						<div className="flex items-center gap-3">
-							<div className="bg-[#4A30CF1F] p-2 rounded-xl">
-								<GradientCampaignsIcon width={24} height={24} />
-							</div>
-							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Campaign', 'doublescale')}
-							</span>
-						</div>
-						<ArrowRight className="size-12 text-primary" />
-					</div>
-				</Button>
-				)}
-
-				{automationsOn && (
-				<Button
-					variant="ghost"
-					className="w-full justify-start h-auto py-4 px-0 border-b-[1.25px] border-dashed border-[#E1E3EA] rounded-none hover:bg-transparent"
-					onClick={() => navigate(getToLink('automations'))}
-				>
-					<div className="flex items-center justify-between w-full">
-						<div className="flex items-center gap-3">
-							<div className="bg-[#4A30CF1F] p-2 rounded-xl">
-								<GradientAutomationsIcon width={24} height={24} />
-							</div>
-							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Automation', 'doublescale')}
-							</span>
-						</div>
-						<ArrowRight className="size-12 text-primary" />
-					</div>
-				</Button>
-				)}
-
-				{formsOn && (
-				<Button
-					variant="ghost"
-					className="w-full justify-start h-auto py-4 px-0 rounded-none hover:bg-transparent"
-					onClick={() => navigate(getToLink('forms'))}
-				>
-					<div className="flex items-center justify-between w-full">
-						<div className="flex items-center gap-3">
-							<div className="bg-[#4A30CF1F] p-2 rounded-xl">
-								<CreateFormsIcon width={24} height={24} />
-							</div>
-							<span className="text-[#09090B] text-lg font-medium">
-								{__('Add New Forms', 'doublescale')}
-							</span>
-						</div>
-						<ArrowRight className="size-12 text-primary" />
-					</div>
-				</Button>
-				)}
+						<span className="whitespace-nowrap text-sm font-medium text-foreground">
+							{label}
+						</span>
+					</button>
+				))}
 			</div>
 		</DashboardContentCard>
 	);

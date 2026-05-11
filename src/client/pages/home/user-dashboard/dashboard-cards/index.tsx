@@ -2,6 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * internal dependencies
@@ -9,6 +10,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	DashboardContentCard,
 	MessageStatsCard,
+	ProStatCard,
 	DealsWonValueIcon,
 	DealsClosedWonIcon,
 	ContactsIcon,
@@ -17,111 +19,146 @@ import {
 	AutomationsIcon,
 	DealsIcon,
 	ListsIcon,
+	PremiumIcon,
 } from '@doublescale/components';
 import type { DashboardData } from '@doublescale/client';
-import config from '@doublescale/config';
 
 interface DashboardCardsProps {
 	data: DashboardData;
 }
 
+const formatStatCount = (n: number) => n.toLocaleString();
+
+const formatDealsWonValue = (n: number) =>
+	new Intl.NumberFormat(undefined, {
+		style: 'currency',
+		currency: 'USD',
+		notation: 'compact',
+		maximumFractionDigits: 1,
+	}).format(n);
+
 export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
-	const contactsOn = config.isModuleToggleEnabled('contacts');
-	const trackingOn = config.isModuleToggleEnabled('tracking');
-	const automationsOn = config.isModuleToggleEnabled('automations');
-	const dealsOn = config.isModuleToggleEnabled('deals');
+	const isProActive = applyFilters('doublescale_is_pro_active', false) as boolean;
 
 	return (
 		<DashboardContentCard
 			title={__('Analytics Overview', 'doublescale')}
-			cardClassName="w-full"
+			cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+			contentClassName="flex min-h-0 flex-1 flex-col"
 		>
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-				{contactsOn && (
-					<MessageStatsCard
-						label={__('Total Contacts', 'doublescale')}
-						value={data.total_contacts || 0}
-						icon={<ContactsIcon width={40} height={40} />}
-						iconBgClass="bg-[#E3EEFF99]"
-						borderColorClass="border-l-primary"
-						iconColor="text-primary"
-					/>
-				)}
+			<div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4 lg:gap-6">
+				<MessageStatsCard
+					layout="centered"
+					className="bg-[#F7F8FA]"
+					label={__('Total Contacts', 'doublescale')}
+					value={formatStatCount(data.total_contacts || 0)}
+					icon={<ContactsIcon width={29} height={29} />}
+					iconBgClass="bg-[#CB5301]"
+					iconColor="text-white"
+				/>
 
-				{trackingOn && (
-					<MessageStatsCard
-						label={__('Total Sent Emails', 'doublescale')}
-						value={data.total_sent_emails || 0}
-						icon={<ContactTotalEmailsIcon width={40} height={40} />}
-						iconBgClass="bg-[#E3EEFF99]"
-						borderColorClass="border-l-secondary"
-						iconColor="text-secondary"
-					/>
-				)}
+				<MessageStatsCard
+					layout="centered"
+					className="bg-[#F7F8FA]"
+					label={__('Total Sent Emails', 'doublescale')}
+					value={formatStatCount(data.total_sent_emails || 0)}
+					icon={<ContactTotalEmailsIcon width={29} height={29} />}
+					iconBgClass="bg-[#0D9DFC]"
+					iconColor="text-white"
+				/>
 
-				{contactsOn && (
-					<MessageStatsCard
-						label={__('Total Tags', 'doublescale')}
-						value={data.total_tags || 0}
-						icon={<TagsIcon width={40} height={40} />}
-						iconBgClass="bg-[#F5EFFF]"
-						borderColorClass="border-l-[#660FF1]"
-						iconColor="text-[#660FF1]"
-					/>
-				)}
+				<MessageStatsCard
+					layout="centered"
+					className="bg-[#F7F8FA]"
+					label={__('Total Tags', 'doublescale')}
+					value={formatStatCount(data.total_tags || 0)}
+					icon={<TagsIcon width={29} height={29} />}
+					iconBgClass="bg-[#FFD242]"
+					iconColor="text-[#29292E]"
+				/>
 
-				{contactsOn && (
-					<MessageStatsCard
-						label={__('Total Lists', 'doublescale')}
-						value={data.total_lists || 0}
-						icon={<ListsIcon width={40} height={40} />}
-						iconBgClass="bg-[#E8F5E9]"
-						borderColorClass="border-l-[#4CAF50]"
-						iconColor="text-[#4CAF50]"
-					/>
-				)}
+				<MessageStatsCard
+					layout="centered"
+					className="bg-[#F7F8FA]"
+					label={__('Total Lists', 'doublescale')}
+					value={formatStatCount(data.total_lists || 0)}
+					icon={<ListsIcon width={29} height={29} />}
+					iconBgClass="bg-[#262666]"
+					iconColor="text-white"
+				/>
 
-				{automationsOn && (
-					<MessageStatsCard
-						label={__('Active Automation', 'doublescale')}
-						value={data.total_automations || 0}
-						icon={<AutomationsIcon width={40} height={40} />}
-						iconBgClass="bg-[#FAEADF]"
-						borderColorClass="border-l-[#CB5301]"
-						iconColor="text-[#CB5301]"
-					/>
-				)}
+				<MessageStatsCard
+					layout="centered"
+					className="bg-[#F7F8FA]"
+					label={__('Active Automation', 'doublescale')}
+					value={formatStatCount(data.total_automations || 0)}
+					icon={<AutomationsIcon width={29} height={29} />}
+					iconBgClass="bg-[#6549CA]"
+					iconColor="text-white"
+				/>
 
-				{dealsOn && (
+				{isProActive ? (
 					<MessageStatsCard
+						layout="centered"
+						className="bg-[#F7F8FA]"
 						label={__('Total Deals', 'doublescale')}
-						value={data.deals || 0}
-						icon={<DealsIcon width={40} height={40} />}
-						iconBgClass="bg-[#FAF3DF]"
-						borderColorClass="border-l-[#A67D0A]"
-						iconColor="text-[#A67D0A]"
+						value={formatStatCount(data.deals || 0)}
+						icon={<DealsIcon width={29} height={29} />}
+						iconBgClass="bg-[#0D9DFC]"
+						iconColor="text-white"
+					/>
+				) : (
+					<ProStatCard
+						layout="centered"
+						className="bg-[#F7F8FA]"
+						label={__('Total Deals', 'doublescale')}
+						value={formatStatCount(data.deals || 0)}
+						icon={<PremiumIcon width={29} height={29} />}
+						iconBgClass="bg-[#0D9DFC]"
+						iconColor="text-white"
 					/>
 				)}
 
-				{dealsOn && (
+				{isProActive ? (
 					<MessageStatsCard
-						label={__('Deals Closed Won ', 'doublescale')}
-						value={data.deals_closed_won || 0}
-						icon={<DealsClosedWonIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4FAEC]"
-						borderColorClass="border-l-[#16A34A]"
-						iconColor="text-[#16A34A]"
+						layout="centered"
+						className="bg-[#F7F8FA]"
+						label={__('Deals Closed Won', 'doublescale')}
+						value={formatStatCount(data.deals_closed_won || 0)}
+						icon={<DealsClosedWonIcon width={29} height={29} />}
+						iconBgClass="bg-[#16A34A]"
+						iconColor="text-white"
+					/>
+				) : (
+					<ProStatCard
+						layout="centered"
+
+						label={__('Deals Closed Won', 'doublescale')}
+						value={formatStatCount(data.deals_closed_won || 0)}
+						icon={<PremiumIcon width={29} height={29} />}
+						iconBgClass="bg-[#16A34A]"
+						iconColor="text-white"
 					/>
 				)}
 
-				{dealsOn && (
+				{isProActive ? (
 					<MessageStatsCard
+						layout="centered"
+						className="bg-[#F7F8FA]"
 						label={__('Deals Won Value', 'doublescale')}
-						value={data.deals_won_value || 0}
-						icon={<DealsWonValueIcon width={40} height={40} />}
-						iconBgClass="bg-[#E4FAEC]"
-						borderColorClass="border-l-[#16A34A]"
-						iconColor="text-[#16A34A]"
+						value={formatDealsWonValue(data.deals_won_value || 0)}
+						icon={<DealsWonValueIcon width={29} height={29} />}
+						iconBgClass="bg-[#16A34A]"
+						iconColor="text-white"
+					/>
+				) : (
+					<ProStatCard
+						layout="centered"
+						label={__('Deals Won Value', 'doublescale')}
+						value={formatDealsWonValue(data.deals_won_value || 0)}
+						icon={<PremiumIcon width={29} height={29} />}
+						iconBgClass="bg-[#16A34A]"
+						iconColor="text-white"
 					/>
 				)}
 			</div>

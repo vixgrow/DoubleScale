@@ -44,7 +44,7 @@ interface MessageDetailsDialogProps {
 	zIndex?: number;
 }
 
-const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
+const MessageDetailsDialog: React.FC< MessageDetailsDialogProps > = ( {
 	campaignEmail,
 	open,
 	onClose,
@@ -55,130 +55,161 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 	messageContent,
 	footerButton,
 	zIndex = 150200,
-}) => {
-	const [renderedContent, setRenderedContent] = useState<string>('');
-	const [isLoading, setIsLoading] = useState<boolean>(true);
+} ) => {
+	const [ renderedContent, setRenderedContent ] = useState< string >( '' );
+	const [ isLoading, setIsLoading ] = useState< boolean >( true );
+	const [ isFullHtml, setIsFullHtml ] = useState< boolean >( false );
 
-	// Render template body from JSON to HTML
-	useEffect(() => {
-		if (!campaignEmail) {
-			setIsLoading(false);
+	useEffect( () => {
+		if ( ! campaignEmail ) {
+			setIsLoading( false );
 			return;
 		}
 
 		const renderTemplate = async () => {
-			setIsLoading(true);
+			setIsLoading( true );
 
 			const templateId = campaignEmail.template?.id;
 
-			if (templateId) {
+			if ( templateId ) {
 				try {
-					// Try to render via API endpoint with stored merge tag values for historical accuracy
-					// Pass preview=true to strip tracking elements (prevents admin views from counting as opens)
 					const contactId =
 						campaignEmail?.contact_id || campaignEmail?.contact?.id;
-					const trackingId = campaignEmail?.id; // Use the tracking record ID
-					const response: any = await apiFetch({
-						path: `/doublescale/v1/templates/${templateId}/render`,
+					const trackingId = campaignEmail?.id;
+					const response: any = await apiFetch( {
+						path: `/doublescale/v1/templates/${ templateId }/render`,
 						method: 'POST',
 						data: {
-							...(contactId ? { contact_id: contactId } : {}),
-							...(trackingId ? { tracking_id: trackingId } : {}),
+							...( contactId ? { contact_id: contactId } : {} ),
+							...( trackingId
+								? { tracking_id: trackingId }
+								: {} ),
 							preview: true,
 						},
-					});
+					} );
 
-					if (response?.html) {
-						setRenderedContent(response.html);
+					if ( response?.html ) {
+						setRenderedContent( response.html );
+						setIsFullHtml( /<html[\s>]/i.test( response.html ) );
 					} else {
-						// Fallback to displaying body as-is
-						setRenderedContent(messageContent);
+						setRenderedContent( messageContent );
+						setIsFullHtml( false );
 					}
-				} catch (error) {
-					console.error('Failed to render template:', error);
-					// Fallback to displaying body as-is
-					setRenderedContent(messageContent);
+				} catch ( error ) {
+					console.error( 'Failed to render template:', error );
+					setRenderedContent( messageContent );
+					setIsFullHtml( false );
 				}
 			} else {
-				// No template ID, use the content as-is
-				setRenderedContent(messageContent);
+				setRenderedContent( messageContent );
+				setIsFullHtml( false );
 			}
 
-			setIsLoading(false);
+			setIsLoading( false );
 		};
 
 		renderTemplate();
-	}, [campaignEmail, messageContent]);
+	}, [ campaignEmail, messageContent ] );
 
 	return (
-		<Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+		<Dialog open={ open } onOpenChange={ ( open ) => ! open && onClose() }>
 			<DialogPortal>
-				<DialogOverlay style={{ zIndex }} />
+				<DialogOverlay style={ { zIndex } } />
 				<DialogContent
-					className="max-w-[800px] max-h-[90vh] overflow-y-auto"
-					style={{ zIndex }}
+					className="max-w-[800px] max-h-[90vh] overflow-y-auto p-0"
+					style={ { zIndex } }
 				>
-					<DialogHeader>
+					<DialogHeader className="px-6 pt-6 pb-0">
 						<DialogTitle>
 							<CustomDialogHeader
-								title={title}
-								subtitle={subtitle}
-								icon={<NoEmailsIcon width={24} height={24} />}
+								title={ title }
+								subtitle={ subtitle }
+								icon={
+									<NoEmailsIcon width={ 24 } height={ 24 } />
+								}
 							/>
 						</DialogTitle>
 					</DialogHeader>
-					{campaignEmail && (
-						<div className="flex flex-col gap-5 w-full">
-							<div className="flex flex-col gap-4 w-full">
-								{detailFields
-									.filter((field) => !field.hidden)
-									.map((field, index) => (
+					{ campaignEmail && (
+						<div className="flex flex-col w-full">
+							{ /* Detail fields */ }
+							<div className="px-6 py-4 border-b bg-gray-50/60 flex flex-col gap-3">
+								{ detailFields
+									.filter( ( field ) => ! field.hidden )
+									.map( ( field, index ) => (
 										<div
-											key={index}
+											key={ index }
 											className="flex justify-between items-center"
 										>
-											<span className="text-base font-medium text-gray-500 flex items-center gap-2">
-												{field.icon}
-												{field.label}
+											<span className="text-sm font-medium text-gray-500 flex items-center gap-2">
+												{ field.icon }
+												{ field.label }
 											</span>
-											<span className="text-xl font-semibold text-[#09090B]">
-												{field.value}
+											<span className="text-base font-semibold text-[#09090B]">
+												{ field.value }
 											</span>
 										</div>
-									))}
+									) ) }
 							</div>
-							<div className="flex flex-col gap-2 w-full">
-								<div className="text-base font-medium text-gray-500">
-									{messageLabel}
+
+							{ /* Email body */ }
+							<div className="px-6 py-4">
+								<div className="text-sm font-medium text-gray-500 mb-2">
+									{ messageLabel }
 								</div>
-								{isLoading ? (
-									<div className="flex items-center justify-center py-8 text-gray-500">
-										{__('Loading template...', 'doublescale')}
+								{ isLoading ? (
+									<div className="flex items-center justify-center py-10 text-gray-400 text-sm">
+										{ __(
+											'Loading content...',
+											'doublescale'
+										) }
 									</div>
+								) : isFullHtml ? (
+									<iframe
+										srcDoc={ renderedContent || '' }
+										sandbox="allow-same-origin"
+										title={ __(
+											'Email content',
+											'doublescale'
+										) }
+										className="w-full rounded-lg border border-gray-200 bg-white"
+										style={ { minHeight: '100px' } }
+										onLoad={ ( e ) => {
+											const iframe =
+												e.target as HTMLIFrameElement;
+											if ( iframe.contentDocument ) {
+												const h =
+													iframe.contentDocument.body
+														.scrollHeight;
+												iframe.style.height =
+													Math.max( h, 100 ) + 'px';
+											}
+										} }
+									/>
 								) : (
 									<div
-										className="template-body-preview rounded border"
-										dangerouslySetInnerHTML={{
+										className="doublescale-email-body"
+										dangerouslySetInnerHTML={ {
 											__html: renderedContent || '',
-										}}
+										} }
 									/>
-								)}
+								) }
 							</div>
 						</div>
-					)}
-					{footerButton && (
-						<DialogFooter className="mt-4">
+					) }
+					{ footerButton && (
+						<DialogFooter className="px-6 pb-6 pt-0">
 							<Button
 								size="xl"
 								variant="gradient"
-								onClick={footerButton.onClick}
-								disabled={footerButton.disabled}
+								onClick={ footerButton.onClick }
+								disabled={ footerButton.disabled }
 								className="w-full"
 							>
-								{footerButton.text}
+								{ footerButton.text }
 							</Button>
 						</DialogFooter>
-					)}
+					) }
 				</DialogContent>
 			</DialogPortal>
 		</Dialog>

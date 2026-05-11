@@ -46,7 +46,7 @@ const Contact: React.FC<ContactProps> = ({
 	onClose,
 	onContactUpdate,
 }) => {
-	const { id: urlId } = useParams<{ id: string; tab: string }>();
+	const { id: urlId, tab: urlTab } = useParams<{ id: string; tab: string }>();
 	const navigate = useNavigate();
 	const id = contactId || urlId;
 	const [loading, setLoading] = useState(true);
@@ -212,30 +212,42 @@ const Contact: React.FC<ContactProps> = ({
 			modal={false}
 		>
 			<DialogContent
-				className="z-[140000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
+				className="doublescale-contact-page z-[140000] flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none"
 				style={{
-					paddingTop: '10px',
+					paddingTop: '0px',
 					paddingLeft: '0px',
 					paddingRight: '0px',
 					paddingBottom: '0px',
 				}}
 			>
-				<DialogHeader className="pb-0 border-b border-[#E4E7EC]">
-					<DialogTitle className="px-12 pb-4 pt-2">
-						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
+				<DialogHeader className="shrink-0 border-b border-border/50 bg-white/90 pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
+					<DialogTitle className="sr-only">
+						{__('Contact Details', 'doublescale')}
+					</DialogTitle>
+					<div className="mx-auto flex w-full max-w-[1680px] items-center px-6 py-3.5 sm:px-10">
+						<nav
+							className="text-sm font-medium text-muted-foreground flex flex-wrap items-center gap-2"
+							aria-label={__('Breadcrumb', 'doublescale')}
+						>
 							<button
+								type="button"
 								onClick={() => navigate(getToLink('contacts'))}
-								className="hover:text-[#344054] cursor-pointer transition-colors"
+								className="rounded-md px-2 py-1 -mx-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
 							>
 								{__('Contacts List', 'doublescale')}
 							</button>
-							<ChevronRight className="w-4 h-4 text-[#667085]" />
-							{__('Contact Details', 'doublescale')}
-						</h1>
-					</DialogTitle>
+							<ChevronRight
+								className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+								aria-hidden
+							/>
+							<span className="rounded-md bg-muted/50 px-2.5 py-1 text-foreground font-semibold tracking-tight">
+								{__('Contact Details', 'doublescale')}
+							</span>
+						</nav>
+					</div>
 				</DialogHeader>
 				{loading ? (
-					<div className="px-12 py-8">
+					<div className="doublescale-contact-page-column-scroll mx-auto min-h-0 w-full max-w-[1680px] flex-1 overflow-y-scroll px-6 py-8 sm:px-10">
 						<ContactShimmer />
 					</div>
 				) : contact ? (
@@ -249,26 +261,37 @@ const Contact: React.FC<ContactProps> = ({
 							showNotice: setNotice,
 						}}
 					>
-						<div className="px-12 overflow-y-auto py-8">
+						<div className="mx-auto flex min-h-0 w-full max-w-[1680px] flex-1 flex-col px-6 py-8 sm:px-10">
 							{notice && (
-								<NoticeBanner
-									ref={noticeBannerRef}
-									notice={notice}
-									closeNotice={closeNotice}
-								/>
+								<div className="mb-4 shrink-0">
+									<NoticeBanner
+										ref={noticeBannerRef}
+										notice={notice}
+										closeNotice={closeNotice}
+									/>
+								</div>
 							)}
-							<div className="flex gap-5">
-								<ContactInformation />
-								<DataCard navigate={navigate} />
+							<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden lg:flex-row lg:items-stretch lg:gap-6">
+								<div className="doublescale-contact-page-column-scroll min-h-0 w-full shrink-0 overflow-y-scroll lg:max-w-[400px] lg:w-[min(100%,400px)]">
+									<ContactInformation />
+								</div>
+								<div className="doublescale-contact-page-column-scroll min-h-0 flex-1 min-w-0 overflow-y-scroll">
+									<DataCard
+										navigate={navigate}
+										initialTab={urlTab}
+									/>
+								</div>
 							</div>
 						</div>
 					</Provider>
 				) : (
-					<div className="flex items-center justify-center h-64">
-						<div className="text-lg text-red-500">
-							{!id
-								? __('No contact ID provided', 'doublescale')
-								: __('Contact not found', 'doublescale')}
+					<div className="flex flex-1 items-center justify-center px-6 py-16">
+						<div className="rounded-2xl border border-border/60 bg-card px-8 py-10 text-center shadow-sm">
+							<p className="text-base font-medium text-destructive">
+								{!id
+									? __('No contact ID provided', 'doublescale')
+									: __('Contact not found', 'doublescale')}
+							</p>
 						</div>
 					</div>
 				)}

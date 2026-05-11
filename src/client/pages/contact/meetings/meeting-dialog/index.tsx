@@ -42,7 +42,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import TrashIcon from '@doublescale/components/icons/trash';
+import TrashIcon from '@doublescale/shared/icons/trash';
 
 /**
  * Pro plugin TaskService - loaded via WordPress filters at runtime.
@@ -284,7 +284,10 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                 const TaskService = getProTaskService();
                 if (formData.createTask && formData.dueDate && TaskService) {
                     try {
-                        const currentUserId = (window as any).doublescaleData?.currentUserId || 1;
+                        const currentUserId =
+							(window as any).doublescaleData?.currentUserId ||
+							(window as any).dsData?.currentUserId ||
+							1;
                         const reminderAt = formData.setReminder && formData.reminderDates.length > 0
                             ? dayjs(formData.reminderDates[0]).format('YYYY-MM-DD') + ' 09:00:00'
                             : undefined;
@@ -375,7 +378,7 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                             <div className="flex flex-col gap-2">
                                 <Label className="text-base font-normal text-[#09090B]">
                                     {__('Meeting Title', 'doublescale')}{' '}
-                                    <span className="text-red-500">*</span>
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     placeholder={__(
@@ -392,10 +395,10 @@ const MeetingDialog: React.FC<MeetingDialogProps> = ({
                                             });
                                         }
                                     }}
-                                    className={`h-12 ${errors.meetingTitle ? 'border-red-500' : ''}`}
+                                    className={`h-12 ${errors.meetingTitle ? 'border-destructive' : ''}`}
                                 />
                                 {errors.meetingTitle && (
-                                    <p className="text-sm text-red-500">
+                                    <p className="text-sm text-destructive">
                                         {errors.meetingTitle}
                                     </p>
                                 )}

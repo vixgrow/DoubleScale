@@ -13,9 +13,9 @@ import timezone from 'dayjs/plugin/timezone';
  * Internal dependencies
  */
 import { Button } from '@doublescale/components/ui/button';
-import EditHeaderIcon from '@/components/icons/edit-header';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
 import { Badge } from '@/components/ui/badge';
-import TrashIcon from '@doublescale/components/icons/trash';
+import TrashIcon from '@doublescale/shared/icons/trash';
 
 interface Call {
     id: number;
@@ -63,13 +63,13 @@ const formatPhoneNumber = (phone?: string) => {
 
 const getOutcomeBadgeColor = (outcome?: string) => {
     const colors: Record<string, string> = {
-        completed: 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]',
-        no_answer: 'bg-[#FEF2F2] text-[#DC2626] border-[#DC2626]',
-        busy: 'bg-[#FEF3C7] text-[#D97706] border-[#D97706]',
-        voicemail: 'bg-[#E0E7FF] text-[#6366F1] border-[#6366F1]',
-        callback_requested: 'bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]',
-        not_interested: 'bg-[#FEE2E2] text-[#DC2626] border-[#DC2626]',
-        follow_up: 'bg-[#FEF3C7] text-[#D97706] border-[#D97706]',
+        completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        no_answer: 'bg-destructive/5 text-destructive border-destructive/20',
+        busy: 'bg-amber-50 text-amber-700 border-amber-200',
+        voicemail: 'bg-violet-50 text-violet-700 border-violet-200',
+        callback_requested: 'bg-blue-50 text-blue-700 border-blue-200',
+        not_interested: 'bg-destructive/5 text-destructive border-destructive/20',
+        follow_up: 'bg-amber-50 text-amber-700 border-amber-200',
     };
     return colors[outcome || 'completed'] || colors.completed;
 };
@@ -80,7 +80,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             accessorKey: 'phone_number',
             header: __('Phone Number', 'doublescale'),
             cell: ({ row }) => (
-                <span className="text-[#09090B]">
+                <span className="text-foreground">
                     {formatPhoneNumber(row.original.data?.phone_number)}
                 </span>
             ),
@@ -91,7 +91,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             cell: ({ row }) => {
                 const dateTime = row.original.data?.called_at || row.original.created_at;
                 return (
-                    <span className="text-[#09090B]">
+                    <span className="text-foreground">
                         {formatCallDateTime(dateTime)}
                     </span>
                 );
@@ -105,7 +105,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
                 const colorClass = getOutcomeBadgeColor(outcome);
                 return (
                     <Badge
-                        className={`border rounded-md px-2 py-1 capitalize ${colorClass} hover:`}
+                        className={`border rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${colorClass}`}
                     >
                         {outcome.replace(/_/g, ' ')}
                     </Badge>
@@ -118,7 +118,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
             cell: ({ row }) => {
                 const duration = row.original.data?.duration || 0;
                 return (
-                    <span className="text-[#09090B]">
+                    <span className="text-foreground">
                         {duration} {__('M', 'doublescale')}
                     </span>
                 );

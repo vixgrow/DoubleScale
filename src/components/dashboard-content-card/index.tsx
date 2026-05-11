@@ -12,14 +12,18 @@ import { Link } from 'react-router-dom';
  * Internal dependencies
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+
 import { getToLink } from '@doublescale/navigation';
+import { cn } from '@/lib/utils';
+import ArrowRight from '@doublescale/shared/icons/arrow-rightt';
 
 interface DashboardContentProps {
 	title: string;
 	children: React.ReactNode;
 	headerContent?: React.ReactNode;
 	cardClassName?: string;
+	/** Merged with CardContent (below header); use for `flex-1` when card should fill grid row height */
+	contentClassName?: string;
 	viewAllLink?: boolean;
 	viewAllLinkUrl?: string;
 	dateFilter?: boolean;
@@ -31,34 +35,44 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 	children,
 	headerContent,
 	cardClassName,
+	contentClassName,
 	viewAllLink,
 	viewAllLinkUrl,
 	dateFilter,
 	dateFilterComponent,
 }) => {
 	return (
-		<Card className={`shadow-none rounded-lg bg-[#F8F8F8] ${cardClassName}`}>
-			<CardHeader className={`flex flex-row justify-between items-center px-5 pt-5 pb-0`}>
-				{/* <div className="flex items-center justify-between gap-2"> */}
-				<CardTitle className="text-[#333333] font-medium text-2xl">
+		<Card
+			className={cn(
+				'rounded-2xl border border-border/50 bg-muted/50 p-6 shadow-none',
+				cardClassName
+			)}
+		>
+			<CardHeader className="flex flex-row items-center justify-between gap-3 p-0">
+				<CardTitle className="text-xl font-semibold tracking-tight text-[#29292E]">
 					{title}
 				</CardTitle>
-				{headerContent && <div className="text-[#7E8299] text-lg font-medium">{headerContent}</div>}
-				{/* </div> */}
+				{headerContent && (
+					<div className="text-sm font-medium text-muted-foreground">
+						{headerContent}
+					</div>
+				)}
 				{viewAllLink && viewAllLinkUrl && (
 					<div className="flex justify-end">
 						<Link
 							to={getToLink(viewAllLinkUrl)}
-							className="text-primary shadow-none text-base bg-transparent hover:bg-transparent p-0 flex items-center gap-1 hover:text-primary/80 transition-colors"
+							className="text-[#6549CA] shadow-none text-base leading-7 font-medium bg-transparent hover:bg-transparent p-0 flex items-center gap-1 hover:text-primary/80 transition-colors"
 						>
 							{__('View All', 'doublescale')}
-							<ArrowRight className="size-4" />
+							<ArrowRight width={24} height={24}  />
 						</Link>
 					</div>
 				)}
 				{dateFilter && <div className="w-1/2 flex justify-end">{dateFilterComponent}</div>}
 			</CardHeader>
-			<CardContent className="p-5">{children}</CardContent>
+			<CardContent className={cn('mt-6 p-0', contentClassName)}>
+				{children}
+			</CardContent>
 		</Card>
 	);
 };

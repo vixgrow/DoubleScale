@@ -1,5 +1,6 @@
-import { select, useSelect } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { getTemplate, saveTemplate } from '../api/templates';
 import { BuilderData } from '../index';
@@ -49,6 +50,12 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		(select) => select('doublescale/campaign').getCampaign(),
 		[]
 	);
+
+	const { updateCampaign } = useDispatch('doublescale/campaign') as {
+		updateCampaign: (payload: {
+			settings?: Record<string, unknown>;
+		}) => void;
+	};
 
 	// Create a serialized version of current state for comparison
 	const currentState = JSON.stringify({
@@ -179,25 +186,54 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			// Get template ID from campaign settings
 			const templateId = campaign.settings?.template_ids?.[0];
 
+			let savedTemplate;
+
 			if (!templateId) {
-				throw new Error('No template ID found. Please complete the template step first.');
+				// Builder opened from scratch / ready-made layout without a DB template yet.
+				// POST /templates/save creates the row and links campaign (see RestTemplateController::save_template).
+				savedTemplate = await saveTemplate({
+					name:
+						(campaign.name && String(campaign.name).trim()) ||
+						__('Email Template', 'doublescale'),
+					type: 'email',
+					body: JSON.stringify({
+						type: 'builder',
+						value: builderData,
+					}),
+					campaign_id: campaign.id,
+					hidden: true,
+				});
+				const newId = savedTemplate?.id;
+				if (!newId) {
+					throw new Error(
+						__('Could not create email template for this campaign.', 'doublescale')
+					);
+				}
+				updateCampaign({
+					settings: {
+						...campaign.settings,
+						template_ids: [newId],
+					},
+				});
+			} else {
+				// Fetch current template
+				const template = await getTemplate(templateId);
+
+				// Save template with updated builder body + campaign_id
+				const templateWithCampaignId: typeof template & {
+					campaign_id: number;
+				} = {
+					...template,
+					body: JSON.stringify({
+						type: 'builder',
+						value: builderData,
+					}),
+					campaign_id: campaign.id,
+					hidden: true, // Auto-save should be hidden from user templates
+				};
+
+				savedTemplate = await saveTemplate(templateWithCampaignId);
 			}
-
-			// Fetch current template
-			const template = await getTemplate(templateId);
-
-			// Save template with updated builder body + campaign_id
-			const templateWithCampaignId: typeof template & { campaign_id: number } = {
-				...template,
-				body: JSON.stringify({
-					type: 'builder',
-					value: builderData,
-				}),
-				campaign_id: campaign.id,
-				hidden: true, // Auto-save should be hidden from user templates
-			};
-
-			const savedTemplate = await saveTemplate(templateWithCampaignId);
 
 			if (isMountedRef.current) {
 				const now = new Date();
@@ -225,7 +261,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			console.error('Save error:', error);
 			return { success: false, templateId: null };
 		}
-	}, [campaign, customSaveCallback]);
+	}, [campaign, customSaveCallback, updateCampaign]);
 
 	// Auto-save effect
 	useEffect(() => {

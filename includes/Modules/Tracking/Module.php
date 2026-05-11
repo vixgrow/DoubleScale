@@ -34,6 +34,10 @@ final class Module extends AbstractModule {
 		return '1.0.0';
 	}
 
+	public function is_toggleable(): bool {
+		return false;
+	}
+
 	public function dependencies(): array {
 		return array( 'core', 'contacts', 'automations' );
 	}

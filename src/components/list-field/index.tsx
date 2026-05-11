@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import { PaginatedSelect } from '@doublescale/components';
+import PaginatedSelect from '@doublescale/components/paginated-select';
 
 interface Props {
 	value: number[];
@@ -16,18 +16,14 @@ interface Props {
 
 const ListField = ({ value, onChange }: Props) => {
 	return (
-		<div className="doublescale-field">
-			<div className="doublescale-field-input">
-				<PaginatedSelect
-					value={value}
-					onChange={onChange}
-					endpoint="/doublescale/v1/lists"
-					placeholder={__('Select list', 'doublescale')}
-					noOptionsMessage={__('No lists available', 'doublescale')}
-					className="doublescale-list-field"
-				/>
-			</div>
-		</div>
+		<PaginatedSelect
+			value={value}
+			onChange={onChange}
+			endpoint="/doublescale/v1/lists"
+			placeholder={__('Select list', 'doublescale')}
+			noOptionsMessage={__('No lists available', 'doublescale')}
+			className="doublescale-list-field"
+		/>
 	);
 };
 

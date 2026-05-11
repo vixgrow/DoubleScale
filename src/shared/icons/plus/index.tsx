@@ -1,6 +1,6 @@
 import { IconProps } from '@doublescale/config';
 
-const PlusIcon: React.FC<IconProps> = ({ width = 14, height = 14 }) => {
+const PlusIcon: React.FC<IconProps> = ({ width = 16, height = 16 }) => {
 	return (
 		<svg
 			width={width}

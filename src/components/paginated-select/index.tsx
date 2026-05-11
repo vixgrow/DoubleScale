@@ -21,6 +21,7 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import { Tag } from '@doublescale/components';
+import { reactSelectControl } from '@doublescale/components/react-select-shared-styles';
 import './style.scss';
 
 interface SelectOption {
@@ -467,16 +468,24 @@ const PaginatedSelect = ({
 								(option as any).isDisabled || false
 							}
 							styles={{
-								control: (styles) => ({
-									...styles,
-									minWidth: 200,
+								control: (base, state) => ({
+									...reactSelectControl(
+										base as Record<string, unknown>,
+										state
+									),
+									minWidth: '100%',
+									backgroundColor: '#ffffff',
 								}),
-								menuList: (styles) => ({
-									...styles,
+								input: (base) => ({
+									...base,
+									outline: 'none',
+								}),
+								menuList: (base) => ({
+									...base,
 									maxHeight: 200,
 								}),
-								option: (styles, { isDisabled }) => ({
-									...styles,
+								option: (base, { isDisabled }) => ({
+									...base,
 									...(isDisabled && {
 										color: '#9CA3AF',
 										fontStyle: 'italic',
@@ -484,7 +493,7 @@ const PaginatedSelect = ({
 										backgroundColor: 'transparent',
 									}),
 								}),
-								menu: (base: any) => ({
+								menu: (base) => ({
 									...base,
 									color: 'black',
 								}),

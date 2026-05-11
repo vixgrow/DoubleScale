@@ -30,8 +30,8 @@ const GradientFilterIcon: React.FC<IconProps> = ({
 					y2="11.9981"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#2D1B69" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_3532_7720"
@@ -41,8 +41,8 @@ const GradientFilterIcon: React.FC<IconProps> = ({
 					y2="6.25461"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#2D1B69" />
+					<stop offset="1" stop-color="#1B1145" />
 				</linearGradient>
 			</defs>
 		</svg>

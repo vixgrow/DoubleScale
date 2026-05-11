@@ -104,7 +104,7 @@ final class AdminConfig {
 					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_options()
 					: array(),
 				'filtersGroups'       => FiltersManager::instance()->get_groups(),
-				'customFieldsTypes'   => class_exists( 'DoubleScale\Managers\CustomFieldsManager' ) ? \DoubleScale\Managers\CustomFieldsManager::instance()->get_options() : array(),
+				'customFieldsTypes'   => class_exists( \DoubleScale\Core\CustomFields\CustomFieldsManager::class ) ? \DoubleScale\Core\CustomFields\CustomFieldsManager::instance()->get_options() : array(),
 				'contactFieldsGroups' => Utils::get_contact_fields(),
 				'integrations'        => IntegrationsManager::instance()->get_options(),
 				'automationTriggers'  => TriggersManager::instance()->get_sources(),

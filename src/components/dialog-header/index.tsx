@@ -14,11 +14,11 @@ const CustomDialogHeader: React.FC<CustomDialogHeaderProps> = ({
 }) => {
 	return (
 		<div className="flex items-center gap-4 p-0">
-			<span className="bg-[#4A30CF1F] p-3 rounded-xl">{icon}</span>
+			<span className="bg-[#E8E2FB] p-3 rounded-xl">{icon}</span>
 
 			<div>
-				<p className="text-[#09090B] font-bold text-2xl">{title}</p>
-				<p className="text-[#979797] text-sm font-normal">{subtitle}</p>
+				<p className="text-[#29292E] font-bold !text-2xl">{title}</p>
+				<p className="text-[#6B6C76] !text-base font-normal">{subtitle}</p>
 			</div>
 		</div>
 	);

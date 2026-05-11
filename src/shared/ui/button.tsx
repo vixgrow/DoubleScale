@@ -5,33 +5,35 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-	'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+	'inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 	{
 		variants: {
 			variant: {
 				default:
-					'bg-primary text-primary-foreground shadow hover:bg-primary/90',
+					'bg-brandPrimary text-white shadow-sm hover:bg-brandPrimary/90 active:bg-brandPrimary/80',
 				destructive:
 					'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
 				outline:
-					'border border-input text-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
+					'border border-border bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground',
 				secondary:
-					'border border-secondary text-secondary shadow-sm hover:bg-secondary/80 hover:text-primary-foreground',
+					'bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20',
 				tertiary:
-					'bg-[#C6DFF3] text-[#274C77] shadow-sm hover:bg-secondary/80 hover:text-primary-foreground',
-				ghost: 'hover:bg-accent hover:text-accent-foreground',
-				link: 'text-primary underline-offset-4 hover:underline',
+					'bg-accent text-accent-foreground hover:bg-accent/80',
+				ghost:
+					'hover:bg-accent hover:text-accent-foreground',
+				link:
+					'text-primary underline-offset-4 hover:underline',
 				gradient:
-					'bg-gradient-to-br from-[#2D1B69] to-[#1B1145] text-primary-foreground',
+					'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
 				secondaryDeepBlue:
-					'border border-[#274C77] text-[#274C77] shadow-sm',
+					'border border-brandPrimary text-brandPrimary bg-white hover:bg-brandPrimary/10',
 			},
 			size: {
-				default: 'h-9 rounded-xl px-6 py-[20px]',
-				sm: 'h-8 rounded-md px-3 text-xs',
-				lg: 'h-10 rounded-md px-8',
-				xl: 'h-12 rounded-lg',
-				icon: 'h-9 w-9',
+				default: 'h-10 rounded-lg px-4 py-2',
+				sm: 'h-8 rounded-lg px-3 text-xs',
+				lg: 'h-11 rounded-lg px-6',
+				xl: 'h-12 rounded-lg px-8',
+				icon: 'h-9 w-9 rounded-lg',
 			},
 		},
 		defaultVariants: {

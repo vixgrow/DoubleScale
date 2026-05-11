@@ -20,10 +20,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-	Dialog,
-	DialogContent,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
 	Table,
 	TableBody,
@@ -32,16 +29,15 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import type { EmailLogRow } from './types';
+import type { EmailLogRow } from '@/client/pages/settings/smtp/types';
 import {
 	deleteSmtpEmailLog,
 	deleteSmtpEmailLogsByIds,
-} from './smtp-api';
-import { ViewIcon } from '@doublescale/components';
-import TrashIcon from '@/components/icons/trash';
-import AccordingRightIcon from '@/components/icons/according-right';
-import SearchIcon from '@/components/icons/search';
-
+} from '@/client/pages/settings/smtp/smtp-api';
+import { ViewIcon } from '@pro/components';
+import TrashIcon from '@pro/components/icons/trash';
+import AccordingRightIcon from '@pro/components/icons/according-right';
+import SearchIcon from '@pro/components/icons/search';
 
 const BODY_PREVIEW_MAX = 12000;
 
@@ -88,7 +84,7 @@ function statusBadgeClass(status: string): string {
 	if (normalized === 'failed' || normalized === 'error') {
 		return 'bg-[#FBE8E8] text-[#C30A0A] text-sm font-medium leading-6 py-1 px-2 rounded-[8px]';
 	}
-	return 'bg-[#E5E7EB] text-[#4B5563]';
+	return 'bg-[#E5E7EB] text-muted-foreground';
 }
 
 function formatLogTimestamp(value: unknown): string {
@@ -123,9 +119,13 @@ function matchesLogFilter(row: EmailLogRow, filter: LogFilter): boolean {
 		return true;
 	}
 
-	const status = String(row.status ?? '').trim().toLowerCase();
+	const status = String(row.status ?? '')
+		.trim()
+		.toLowerCase();
 	if (filter === 'succeeded') {
-		return status === 'succeeded' || status === 'sent' || status === 'success';
+		return (
+			status === 'succeeded' || status === 'sent' || status === 'success'
+		);
 	}
 	return status === 'failed' || status === 'error';
 }
@@ -166,7 +166,10 @@ function buildDetailFields(row: EmailLogRow): DetailField[] {
 		if (typeof recipients !== 'object') {
 			const str = stringifyLogValue(recipients).trim();
 			if (str) {
-				out.push({ label: __('Recipients', 'doublescale'), value: str });
+				out.push({
+					label: __('Recipients', 'doublescale'),
+					value: str,
+				});
 			}
 			return;
 		}
@@ -189,7 +192,9 @@ function buildDetailFields(row: EmailLogRow): DetailField[] {
 			if (!str) {
 				return;
 			}
-			const exists = out.some((field) => field.label === label && field.value === str);
+			const exists = out.some(
+				(field) => field.label === label && field.value === str
+			);
 			if (!exists) {
 				out.push({ label, value: str });
 			}
@@ -211,7 +216,10 @@ function buildDetailFields(row: EmailLogRow): DetailField[] {
 	return out;
 }
 
-function formatBodyForModal(body: string): { text: string; truncated: boolean } {
+function formatBodyForModal(body: string): {
+	text: string;
+	truncated: boolean;
+} {
 	if (!body) {
 		return { text: '', truncated: false };
 	}
@@ -237,10 +245,7 @@ export type SmtpEmailLogControlledFilters = {
 	searchQuery: string;
 	onSearchQueryChange: (next: string) => void;
 	dateRange: { from: Date | null; to: Date | null };
-	onDateRangeChange: (next: {
-		from: Date | null;
-		to: Date | null;
-	}) => void;
+	onDateRangeChange: (next: { from: Date | null; to: Date | null }) => void;
 };
 
 export type SmtpEmailLogTableProps = {
@@ -270,7 +275,9 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 }) => {
 	const [detailRow, setDetailRow] = useState<EmailLogRow | null>(null);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
-	const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
+	const [selectedIds, setSelectedIds] = useState<Set<number>>(
+		() => new Set()
+	);
 	const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 	const [bulkDeleting, setBulkDeleting] = useState(false);
 	const [internalActiveFilter, setInternalActiveFilter] =
@@ -288,8 +295,7 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 		controlledFilters?.activeFilter ?? internalActiveFilter;
 	const setActiveFilter =
 		controlledFilters?.onActiveFilterChange ?? setInternalActiveFilter;
-	const searchQuery =
-		controlledFilters?.searchQuery ?? internalSearchQuery;
+	const searchQuery = controlledFilters?.searchQuery ?? internalSearchQuery;
 	const setSearchQuery =
 		controlledFilters?.onSearchQueryChange ?? setInternalSearchQuery;
 	const dateRange = controlledFilters?.dateRange ?? internalDateRange;
@@ -303,53 +309,53 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 			return logs;
 		}
 		return logs.filter((row) => {
-				if (!matchesLogFilter(row, activeFilter)) {
+			if (!matchesLogFilter(row, activeFilter)) {
+				return false;
+			}
+
+			const query = searchQuery.trim().toLowerCase();
+			if (query) {
+				const haystack = [
+					row.subject,
+					row.status,
+					row.timestamp,
+					row.provider,
+					row.source_label,
+					(row as Record<string, unknown>).from,
+					(row as Record<string, unknown>).recipients,
+				]
+					.map((v) => stringifyLogValue(v).toLowerCase())
+					.join(' ');
+
+				if (!haystack.includes(query)) {
+					return false;
+				}
+			}
+
+			if (dateRange.from || dateRange.to) {
+				const logDate = parseLogDate(row.timestamp);
+				if (!logDate) {
 					return false;
 				}
 
-				const query = searchQuery.trim().toLowerCase();
-				if (query) {
-					const haystack = [
-						row.subject,
-						row.status,
-						row.timestamp,
-						row.provider,
-						row.source_label,
-						(row as Record<string, unknown>).from,
-						(row as Record<string, unknown>).recipients,
-					]
-						.map((v) => stringifyLogValue(v).toLowerCase())
-						.join(' ');
-
-					if (!haystack.includes(query)) {
+				if (dateRange.from) {
+					const from = new Date(dateRange.from);
+					from.setHours(0, 0, 0, 0);
+					if (logDate < from) {
 						return false;
 					}
 				}
 
-				if (dateRange.from || dateRange.to) {
-					const logDate = parseLogDate(row.timestamp);
-					if (!logDate) {
+				if (dateRange.to) {
+					const to = new Date(dateRange.to);
+					to.setHours(23, 59, 59, 999);
+					if (logDate > to) {
 						return false;
 					}
-
-					if (dateRange.from) {
-						const from = new Date(dateRange.from);
-						from.setHours(0, 0, 0, 0);
-						if (logDate < from) {
-							return false;
-						}
-					}
-
-					if (dateRange.to) {
-						const to = new Date(dateRange.to);
-						to.setHours(23, 59, 59, 999);
-						if (logDate > to) {
-							return false;
-						}
-					}
 				}
-				return true;
-			});
+			}
+			return true;
+		});
 	}, [
 		activeFilter,
 		controlledFilters,
@@ -451,7 +457,10 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 			onActionError?.(
 				e instanceof Error
 					? e.message
-					: __('Could not delete selected log entries.', 'doublescale')
+					: __(
+							'Could not delete selected log entries.',
+							'doublescale'
+						)
 			);
 		} finally {
 			setBulkDeleting(false);
@@ -461,7 +470,7 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 	return (
 		<>
 			{showFilterChrome && (
-				<div className="mb-6 flex items-end gap-10 border-b border-[#D0D0D0] px-4">
+				<div className="mb-6 flex items-end gap-10 border-b border-border px-4">
 					<Button
 						type="button"
 						variant="ghost"
@@ -470,7 +479,7 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 						className={`px-0 pt-3 pb-4 h-auto rounded-none text-sm font-medium ${
 							activeFilter === 'all'
 								? 'text-brandPrimary border-b-2 border-brandPrimary'
-								: 'text-[#29292E]'
+								: 'text-foreground'
 						}`}
 					>
 						{__('All Logs', 'doublescale')}
@@ -483,7 +492,7 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 						className={`px-0 pt-3 pb-4 h-auto rounded-none text-sm font-medium ${
 							activeFilter === 'succeeded'
 								? 'text-brandPrimary border-b-2 border-brandPrimary'
-								: 'text-[#29292E]'
+								: 'text-foreground'
 						}`}
 					>
 						{__('Successful', 'doublescale')}
@@ -496,7 +505,7 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 						className={`px-0 pt-3 pb-4 h-auto rounded-none text-sm font-medium ${
 							activeFilter === 'failed'
 								? 'text-brandPrimary border-b-2 border-brandPrimary'
-								: 'text-[#29292E]'
+								: 'text-foreground'
 						}`}
 					>
 						{__('Failed', 'doublescale')}
@@ -507,20 +516,22 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 				<div className="mb-6 flex flex-wrap items-center justify-between gap-3">
 					<div className="w-full max-w-[480px]">
 						<div className="relative">
-							<span
-								className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9EA2A9]"
-								
-							>
-								<SearchIcon/>
+							<span className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground">
+								<SearchIcon />
 							</span>
-							
+
 							<Input
 								type="text"
 								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.currentTarget.value)}
-								placeholder={__('Search by title...', 'doublescale')}
+								onChange={(e) =>
+									setSearchQuery(e.currentTarget.value)
+								}
+								placeholder={__(
+									'Search by title...',
+									'doublescale'
+								)}
 								disabled={logLoading}
-								className="h-10 !rounded-lg !border-[#D0D0D0] bg-[#fff] !pl-[44px] text-sm placeholder:text-[#777] focus-visible:ring-0 focus-visible:border-[#D0D0D0]"
+								className="h-10 !rounded-lg !border-border bg-background !pl-[44px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-border"
 							/>
 						</div>
 					</div>
@@ -528,210 +539,273 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 						value={dateRange}
 						onChange={setDateRange}
 						placeholder={__('Date Range', 'doublescale')}
-						className="h-10 py-1 px-2 w-fit rounded-lg border-[#D0D0D0] bg-[#F7F8FA] text-sm font-medium text-[#29292E]"
+						className="h-10 py-1 px-2 w-fit rounded-lg border border-border bg-muted text-sm font-medium text-foreground"
 					/>
 				</div>
 			)}
 
-			<div className="rounded-2xl border border-[#D0D0D0] overflow-hidden bg-white">
-				<Table className="[&_tbody_td]:px-6 [&_tbody_td]:py-4 [&_thead_th]:text-sm [&_thead_th]:font-medium [&_thead_th]:leading-6 [&_thead_th]:text-[#29292E] [&_thead_th]:normal-case [&_thead_th]:tracking-normal [&_tbody_td]:text-sm [&_tbody_td]:font-medium [&_tbody_td]:leading-6 [&_tbody_td]:text-[#29292E]">
-					<TableHeader className="bg-[#F5F5F5]">
-						<TableRow className="hover:bg-transparent  border-[#D0D0D0]">
-						<TableHead className="w-[44px] ">
-							<div className="flex justify-center">
-								<Checkbox
-									aria-label={__('Select all on this page', 'doublescale')}
-									className="border-[#D6D6DE] bg-[#F3F3F6] data-[state=checked]:bg-brandPrimary data-[state=checked]:border-0 data-[state=checked]:text-white"
-									checked={
-										allSelected
-											? true
-											: someSelected
-												? 'indeterminate'
-												: false
-									}
-									onCheckedChange={(checked) => {
-										setSelectedIds((prev) => {
-											const next = new Set(prev);
-											if (checked === true) {
-												pageIds.forEach((id) => next.add(id));
-											} else {
-												pageIds.forEach((id) => next.delete(id));
-											}
-											return next;
-										});
-									}}
-								/>
-							</div>
-						</TableHead>
-						<TableHead>{__('Subject', 'doublescale')}</TableHead>
-						<TableHead>{__('Status', 'doublescale')}</TableHead>
-						<TableHead>{__('Time', 'doublescale')}</TableHead>
-						<TableHead>{__('CRM source', 'doublescale')}</TableHead>
-						<TableHead>{__('Provider', 'doublescale')}</TableHead>
-						<TableHead>{__('Response', 'doublescale')}</TableHead>
-						<TableHead className=" text-center" >
-								{__('Actions', 'doublescale')}
-						</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{filteredLogs.length === 0 ? (
-						<TableRow className="bg-white hover:bg-white">
-							<TableCell colSpan={8} className="py-12 text-center text-sm text-[#6B6C76]">
-								{logLoading
-									? __('Loading log…', 'doublescale')
-									: searchQuery.trim() ||
-											dateRange.from ||
-											dateRange.to ||
-											activeFilter !== 'all'
-										? __('No logs match the selected filters.', 'doublescale')
-										: __('No log rows found.', 'doublescale')}
-							</TableCell>
-						</TableRow>
-					) : (
-						filteredLogs.map((row, idx) => {
-						const responseRaw = (row as Record<string, unknown>).response;
-						const responseText =
-							responseRaw == null
-								? ''
-								: typeof responseRaw === 'string'
-									? responseRaw
-									: stringifyLogValue(responseRaw);
-						const displayResponse =
-							responseText.length > 120
-								? `${responseText.slice(0, 117)}…`
-								: responseText;
-						const sourceLink =
-							typeof row.source_link === 'string'
-								? row.source_link.trim()
-								: '';
-						const sourceLabel =
-							typeof row.source_label === 'string'
-								? row.source_label.trim()
-								: '';
-						const rowId = rowLogId(row);
-						const isSelected = rowId != null && selectedIds.has(rowId);
-						return (
-							<TableRow
-								key={
-									row.log_id != null
-										? String(row.log_id)
-										: `log-row-${idx}`
-								}
-								className={`border-[#D0D0D0]  hover:bg-[#ECEEF2] ${
-									idx % 2 === 0 ? 'bg-[#fff]' : 'bg-[#F7F8FA]'
-								}`}
-							>
-								<TableCell className="w-[44px]  align-middle">
-									<div className="flex justify-center">
-										<Checkbox
-											aria-label={sprintf(
-												/* translators: %s: log id */
-												__('Select log #%s', 'doublescale'),
-												rowId != null ? String(rowId) : '—'
-											)}
-											className="border-[#D6D6DE] bg-[#F3F3F6] data-[state=checked]:bg-brandPrimary data-[state=checked]:border-0 data-[state=checked]:text-white"
-											disabled={rowId == null}
-											checked={isSelected}
-											onCheckedChange={(checked) => {
-												if (rowId == null) {
-													return;
+			<div className="rounded-2xl border border-border overflow-hidden bg-white">
+				<Table className="[&_tbody_td]:px-6 [&_tbody_td]:py-4 [&_thead_th]:text-sm [&_thead_th]:font-medium [&_thead_th]:leading-6 [&_thead_th]:text-foreground [&_thead_th]:normal-case [&_thead_th]:tracking-normal [&_tbody_td]:text-sm [&_tbody_td]:font-medium [&_tbody_td]:leading-6 [&_tbody_td]:text-foreground">
+					<TableHeader className="bg-muted">
+						<TableRow className="hover:bg-transparent  border-border">
+							<TableHead className="w-[44px] ">
+								<div className="flex justify-center">
+									<Checkbox
+										aria-label={__(
+											'Select all on this page',
+											'doublescale'
+										)}
+										className="border-[#D6D6DE] bg-[#F3F3F6] data-[state=checked]:bg-brandPrimary data-[state=checked]:border-0 data-[state=checked]:text-white"
+										checked={
+											allSelected
+												? true
+												: someSelected
+													? 'indeterminate'
+													: false
+										}
+										onCheckedChange={(checked) => {
+											setSelectedIds((prev) => {
+												const next = new Set(prev);
+												if (checked === true) {
+													pageIds.forEach((id) =>
+														next.add(id)
+													);
+												} else {
+													pageIds.forEach((id) =>
+														next.delete(id)
+													);
 												}
-												setSelectedIds((prev) => {
-													const next = new Set(prev);
-													if (checked === true) {
-														next.add(rowId);
-													} else {
-														next.delete(rowId);
-													}
-													return next;
-												});
-											}}
-										/>
-									</div>
-								</TableCell>
-								<TableCell className="max-w-[260px] truncate align-middle ">
-									{row.subject ?? '—'}
-								</TableCell>
-								<TableCell className="align-middle">
-									<span
-										className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusBadgeClass(
-											String(row.status ?? '')
-										)}`}
-									>
-										{row.status ?? '—'}
-									</span>
-								</TableCell>
-								<TableCell className="whitespace-nowrap align-middle ">
-									{formatLogTimestamp(row.timestamp)}
-								</TableCell>
-								
-								<TableCell className="max-w-[220px] align-middle  ">
-									{sourceLink && sourceLabel ? (
-										<a
-											href={sourceLink}
-											className="text-brandPrimary underline-offset-2 hover:underline"
-											target="_blank"
-											rel="noreferrer"
-										>
-											{sourceLabel}
-										</a>
-									) : sourceLabel ? (
-										<span className="text-muted-foreground">
-											{sourceLabel}
-										</span>
-									) : (
-										'—'
-									)}
-								</TableCell>
-								<TableCell className="align-middle ">
-									{row.provider ?? '—'}
-								</TableCell>
+												return next;
+											});
+										}}
+									/>
+								</div>
+							</TableHead>
+							<TableHead>
+								{__('Subject', 'doublescale')}
+							</TableHead>
+							<TableHead>{__('Status', 'doublescale')}</TableHead>
+							<TableHead>{__('Time', 'doublescale')}</TableHead>
+							<TableHead>
+								{__('CRM source', 'doublescale')}
+							</TableHead>
+							<TableHead>
+								{__('Provider', 'doublescale')}
+							</TableHead>
+							<TableHead>
+								{__('Response', 'doublescale')}
+							</TableHead>
+							<TableHead className=" text-center">
+								{__('Actions', 'doublescale')}
+							</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{filteredLogs.length === 0 ? (
+							<TableRow className="bg-white hover:bg-white">
 								<TableCell
-									className="max-w-md truncate align-middle"
-									title={responseText || undefined}
+									colSpan={8}
+									className="py-12 text-center text-sm text-muted-foreground"
 								>
-									{responseText ? displayResponse : '—'}
-								</TableCell>
-								<TableCell className="p-1 text-center">
-									<div className="flex items-center justify-center gap-0.5">
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											className=" text-[#0D9DFC] "
-											aria-label={__(
-												'View full log details',
-												'doublescale'
-											)}
-											onClick={() => setDetailRow(row)}
-										>
-											<ViewIcon width={24} height={24} />
-										</Button>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											className=" text-[#C30A0A]"
-											disabled={
-												rowId == null || deletingId === rowId
-											}
-											aria-label={__(
-												'Delete this log entry',
-												'doublescale'
-											)}
-											onClick={() => void handleDeleteRow(row)}
-										>
-											<TrashIcon width={24} height={24} />
-										</Button>
-									</div>
+									{logLoading
+										? __('Loading log…', 'doublescale')
+										: searchQuery.trim() ||
+											  dateRange.from ||
+											  dateRange.to ||
+											  activeFilter !== 'all'
+											? __(
+													'No logs match the selected filters.',
+													'doublescale'
+												)
+											: __(
+													'No log rows found.',
+													'doublescale'
+												)}
 								</TableCell>
 							</TableRow>
-						);
-						})
-					)}
-				</TableBody>
-			</Table>
+						) : (
+							filteredLogs.map((row, idx) => {
+								const responseRaw = (
+									row as Record<string, unknown>
+								).response;
+								const responseText =
+									responseRaw == null
+										? ''
+										: typeof responseRaw === 'string'
+											? responseRaw
+											: stringifyLogValue(responseRaw);
+								const displayResponse =
+									responseText.length > 120
+										? `${responseText.slice(0, 117)}…`
+										: responseText;
+								const sourceLink =
+									typeof row.source_link === 'string'
+										? row.source_link.trim()
+										: '';
+								const sourceLabel =
+									typeof row.source_label === 'string'
+										? row.source_label.trim()
+										: '';
+								const rowId = rowLogId(row);
+								const isSelected =
+									rowId != null && selectedIds.has(rowId);
+								return (
+									<TableRow
+										key={
+											row.log_id != null
+												? String(row.log_id)
+												: `log-row-${idx}`
+										}
+										className={`border-border  hover:bg-muted ${
+											idx % 2 === 0
+												? 'bg-background'
+												: 'bg-muted'
+										}`}
+									>
+										<TableCell className="w-[44px]  align-middle">
+											<div className="flex justify-center">
+												<Checkbox
+													aria-label={sprintf(
+														/* translators: %s: log id */
+														__(
+															'Select log #%s',
+															'doublescale'
+														),
+														rowId != null
+															? String(rowId)
+															: '—'
+													)}
+													className="border-[#D6D6DE] bg-[#F3F3F6] data-[state=checked]:bg-brandPrimary data-[state=checked]:border-0 data-[state=checked]:text-white"
+													disabled={rowId == null}
+													checked={isSelected}
+													onCheckedChange={(
+														checked
+													) => {
+														if (rowId == null) {
+															return;
+														}
+														setSelectedIds(
+															(prev) => {
+																const next =
+																	new Set(
+																		prev
+																	);
+																if (
+																	checked ===
+																	true
+																) {
+																	next.add(
+																		rowId
+																	);
+																} else {
+																	next.delete(
+																		rowId
+																	);
+																}
+																return next;
+															}
+														);
+													}}
+												/>
+											</div>
+										</TableCell>
+										<TableCell className="max-w-[260px] truncate align-middle ">
+											{row.subject ?? '—'}
+										</TableCell>
+										<TableCell className="align-middle">
+											<span
+												className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusBadgeClass(
+													String(row.status ?? '')
+												)}`}
+											>
+												{row.status ?? '—'}
+											</span>
+										</TableCell>
+										<TableCell className="whitespace-nowrap align-middle ">
+											{formatLogTimestamp(row.timestamp)}
+										</TableCell>
+
+										<TableCell className="max-w-[220px] align-middle  ">
+											{sourceLink && sourceLabel ? (
+												<a
+													href={sourceLink}
+													className="text-brandPrimary underline-offset-2 hover:underline"
+													target="_blank"
+													rel="noreferrer"
+												>
+													{sourceLabel}
+												</a>
+											) : sourceLabel ? (
+												<span className="text-muted-foreground">
+													{sourceLabel}
+												</span>
+											) : (
+												'—'
+											)}
+										</TableCell>
+										<TableCell className="align-middle ">
+											{row.provider ?? '—'}
+										</TableCell>
+										<TableCell
+											className="max-w-md truncate align-middle"
+											title={responseText || undefined}
+										>
+											{responseText
+												? displayResponse
+												: '—'}
+										</TableCell>
+										<TableCell className="p-1 text-center">
+											<div className="flex items-center justify-center gap-0.5">
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className=" text-[#0D9DFC] "
+													aria-label={__(
+														'View full log details',
+														'doublescale'
+													)}
+													onClick={() =>
+														setDetailRow(row)
+													}
+												>
+													<ViewIcon
+														width={24}
+														height={24}
+													/>
+												</Button>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className=" text-[#C30A0A]"
+													disabled={
+														rowId == null ||
+														deletingId === rowId
+													}
+													aria-label={__(
+														'Delete this log entry',
+														'doublescale'
+													)}
+													onClick={() =>
+														void handleDeleteRow(
+															row
+														)
+													}
+												>
+													<TrashIcon
+														width={24}
+														height={24}
+													/>
+												</Button>
+											</div>
+										</TableCell>
+									</TableRow>
+								);
+							})
+						)}
+					</TableBody>
+				</Table>
 			</div>
 
 			<AlertDialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
@@ -777,60 +851,92 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 					}
 				}}
 			>
-				<DialogContent className="!left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !max-w-none !h-screen !rounded-none !border-0 !p-0 overflow-y-auto  bg-[#F7F8FA]">
+				<DialogContent className="!left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !max-w-none !h-screen !rounded-none !border-0 !p-0 overflow-y-auto  bg-muted">
 					{detailRow && (
 						<div className="min-h-screen flex flex-col">
-							<div className=" rounded-t-lg bg-[#fff] py-2 px-6 pr-14 flex items-center gap-2.5">
-								     <p className="text-sm font-medium text-[#29292E] leading-7">
-								    {__('Logs', 'doublescale')}</p>
-									 <AccordingRightIcon />
-									<span className="text-[#6B6C76] leading-7">{__('Log Details', 'doublescale')} </span>
+							<div className=" rounded-t-lg bg-background py-2 px-6 pr-14 flex items-center gap-2.5">
+								<p className="text-sm font-medium text-foreground leading-7">
+									{__('Logs', 'doublescale')}
+								</p>
+								<AccordingRightIcon />
+								<span className="text-muted-foreground leading-7">
+									{__('Log Details', 'doublescale')}{' '}
+								</span>
 							</div>
 
-							<div className="m-6  rounded-[20px]  bg-[#fff] p-4 shadow-[0px_8px_30px_0px_rgba(59,130,246,0.12)]">
-								<div className="mx-auto space-y-6 w-full rounded-2xl border border-[#D0D0D0] bg-[#F7F8FA] p-6 ">
-									<div className="rounded-xl border border-[#D0D0D0] bg-white p-6">
-										<h3 className="mb-6 text-xl font-semibold leading-8 text-[#29292E]">
+							<div className="m-6  rounded-[20px]  bg-background p-4 shadow-[0px_8px_30px_0px_rgba(59,130,246,0.12)]">
+								<div className="mx-auto space-y-6 w-full rounded-2xl border border-border bg-muted p-6 ">
+									<div className="rounded-xl border border-border bg-white p-6">
+										<h3 className="mb-6 text-xl font-semibold leading-8 text-foreground">
 											{__('Log Details', 'doublescale')}
 										</h3>
 										<dl className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm md:grid-cols-2">
-											{buildDetailFields(detailRow).map(({ label, value }) => {
-												const isStatusField = label === __('Status', 'doublescale');
-												return (
-													<div key={label} className="flex gap-2">
-														<dt className="text-[#777] leading-7 shrink-0">{label}:</dt>
+											{buildDetailFields(detailRow).map(
+												({ label, value }) => {
+													const isStatusField =
+														label ===
+														__(
+															'Status',
+															'doublescale'
+														);
+													return (
+														<div
+															key={label}
+															className="flex gap-2"
+														>
+															<dt className="text-muted-foreground leading-7 shrink-0">
+																{label}:
+															</dt>
 
-														<dd className="break-words whitespace-pre-wrap text-[#29292E] leading-7 font-semibold">
-															{isStatusField ? (
-																<span
-																	className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusBadgeClass(
-																		String(value ?? '')
-																	)}`}
-																>
-																	{value}
-																</span>
-															) : (
-																value
-															)}
-														</dd>
-													</div>
-												);
-											})}
+															<dd className="break-words whitespace-pre-wrap text-foreground leading-7 font-semibold">
+																{isStatusField ? (
+																	<span
+																		className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusBadgeClass(
+																			String(
+																				value ??
+																					''
+																			)
+																		)}`}
+																	>
+																		{value}
+																	</span>
+																) : (
+																	value
+																)}
+															</dd>
+														</div>
+													);
+												}
+											)}
 										</dl>
 									</div>
 
 									<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 										{(() => {
-											const body = String((detailRow as Record<string, unknown>).body ?? '');
-											const { text, truncated } = formatBodyForModal(body);
+											const body = String(
+												(
+													detailRow as Record<
+														string,
+														unknown
+													>
+												).body ?? ''
+											);
+											const { text, truncated } =
+												formatBodyForModal(body);
 											return (
-												<div className="rounded-xl border border-[#D0D0D0] bg-white p-6">
-													<h4 className="mb-6 text-xl font-semibold leading-8 text-[#29292E]">
+												<div className="rounded-xl border border-border bg-white p-6">
+													<h4 className="mb-6 text-xl font-semibold leading-8 text-foreground">
 														{truncated
-															? __('Email Body (preview)', 'doublescale')
-															: __('Email Body', 'doublescale')}
+															? __(
+																	'Email Body (preview)',
+																	'doublescale'
+																)
+															: __(
+																	'Email Body',
+																	'doublescale'
+																)}
 													</h4>
-													<pre className="min-h-40 max-h-72 overflow-auto whitespace-pre-wrap break-words leading-7 text-[#777]">
+													<pre className="min-h-40 max-h-72 overflow-auto whitespace-pre-wrap break-words leading-7 text-muted-foreground">
 														{text || '—'}
 													</pre>
 												</div>
@@ -838,13 +944,23 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 										})()}
 
 										{(() => {
-											const raw = stringifyLogValue((detailRow as Record<string, unknown>).response);
+											const raw = stringifyLogValue(
+												(
+													detailRow as Record<
+														string,
+														unknown
+													>
+												).response
+											);
 											return (
-												<div className="rounded-xl border border-[#D0D0D0] bg-white p-6">
-													<h4 className="mb-6 text-xl font-semibold leading-8 text-[#29292E]">
-														{__('Server Response', 'doublescale')}
+												<div className="rounded-xl border border-border bg-white p-6">
+													<h4 className="mb-6 text-xl font-semibold leading-8 text-foreground">
+														{__(
+															'Server Response',
+															'doublescale'
+														)}
 													</h4>
-													<pre className="min-h-40 max-h-72 overflow-auto whitespace-pre-wrap break-words leading-7 text-[#777]">
+													<pre className="min-h-40 max-h-72 overflow-auto whitespace-pre-wrap break-words leading-7 text-muted-foreground">
 														{raw || '—'}
 													</pre>
 												</div>
@@ -854,13 +970,23 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 
 									<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 										{(() => {
-											const hdr = stringifyLogValue((detailRow as Record<string, unknown>).headers);
+											const hdr = stringifyLogValue(
+												(
+													detailRow as Record<
+														string,
+														unknown
+													>
+												).headers
+											);
 											return (
-												<div className="rounded-xl border border-[#D0D0D0] bg-white p-6">
-													<h4 className="mb-6 text-xl font-semibold leading-8 text-[#29292E]">
-														{__('Headers', 'doublescale')}
+												<div className="rounded-xl border border-border bg-white p-6">
+													<h4 className="mb-6 text-xl font-semibold leading-8 text-foreground">
+														{__(
+															'Headers',
+															'doublescale'
+														)}
 													</h4>
-													<pre className="min-h-32 max-h-64 overflow-auto whitespace-pre-wrap break-words leading-7 text-[#777]">
+													<pre className="min-h-32 max-h-64 overflow-auto whitespace-pre-wrap break-words leading-7 text-muted-foreground">
 														{hdr || '—'}
 													</pre>
 												</div>
@@ -868,13 +994,23 @@ const SmtpEmailLogTable: React.FC<SmtpEmailLogTableProps> = ({
 										})()}
 
 										{(() => {
-											const ctx = stringifyLogValue((detailRow as Record<string, unknown>).context);
+											const ctx = stringifyLogValue(
+												(
+													detailRow as Record<
+														string,
+														unknown
+													>
+												).context
+											);
 											return (
-												<div className="rounded-xl border border-[#D0D0D0] bg-white p-6">
-													<h4 className="mb-6 text-xl font-semibold leading-8 text-[#29292E]">
-														{__('Context', 'doublescale')}
+												<div className="rounded-xl border border-border bg-white p-6">
+													<h4 className="mb-6 text-xl font-semibold leading-8 text-foreground">
+														{__(
+															'Context',
+															'doublescale'
+														)}
 													</h4>
-													<pre className="min-h-32 max-h-64 overflow-auto whitespace-pre-wrap break-words leading-7 text-[#777]">
+													<pre className="min-h-32 max-h-64 overflow-auto whitespace-pre-wrap break-words leading-7 text-muted-foreground">
 														{ctx || '—'}
 													</pre>
 												</div>

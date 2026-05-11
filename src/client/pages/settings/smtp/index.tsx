@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import ConfigAPI from '@doublescale/config';
 import { AddonCard } from '@/client/pages/intergrations/addon-card';
-import { BounceHandler } from '@/components/bounce-handler';
+import { BounceHandler } from '@pro/components/bounce-handler';
 import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import BuiltinSmtpSettings from './builtin-smtp-settings';
 import { ConnectionsViewToggle } from './connections-view-toggle';
@@ -22,13 +22,12 @@ const ProSMTPSettings: React.FC = () => {
 		'table'
 	);
 
-	const showAddonCard =
-		!smtpModuleOn && smtpAddon && !smtpAddon.is_active;
+	const showAddonCard = !smtpModuleOn && smtpAddon && !smtpAddon.is_active;
 
 	return (
 		<div className="smtp-settings">
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-				<div className="text-[#09090B] font-semibold text-2xl">
+				<div className="text-foreground font-semibold text-2xl">
 					{__('SMTP / Email Sending Service Settings', 'doublescale')}
 				</div>
 				{smtpModuleOn ? (

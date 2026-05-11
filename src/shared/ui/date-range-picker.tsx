@@ -16,7 +16,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
-import { OutlinedCalendarIcon } from '@doublescale/components';
+import { CalendarIcon, OutlinedCalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 
 interface DateRangePickerProps {
@@ -46,7 +46,7 @@ export function DateRangePicker({
 
 	const formatDateRange = () => {
 		if (!internalRange.from)
-			return placeholder || __('Pick a date range', 'doublescale');
+			return placeholder || __('Date Range', 'doublescale');
 
 		const fromDate = internalRange.from.toLocaleDateString();
 		const toDate = internalRange.to
@@ -95,12 +95,13 @@ export function DateRangePicker({
 			<PopoverTrigger asChild>
 				<Button
 					className={cn(
-						'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
 						className
 					)}
+					variant="outline"
+					size="sm"
 				>
+					<CalendarIcon width={32} height={32} />
 					{formatDateRange()}
-					<OutlinedCalendarIcon />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent

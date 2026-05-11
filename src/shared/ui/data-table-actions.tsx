@@ -233,11 +233,11 @@ export function DataTableActions<TData>({
 					>
 						<DialogTrigger asChild>
 							<Button
-								variant="tertiary"
-								className="font-semibold px-4 text-[#3B82F6]"
+								variant="outline"
 								onClick={handleCampaignFiltersDialogOpen}
+								size="sm"
 							>
-								<FiltersIcon />
+								<FiltersIcon width={32} height={32} />
 								{__('Filters', 'doublescale')}
 							</Button>
 						</DialogTrigger>

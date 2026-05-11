@@ -75,6 +75,11 @@ div#wpcontent {
 	min-height: 100vh;
 	background: #F7F8FA;
 
+	/* Sidebar (fixed rail + spacer): default flex-shrink lets this column compress while the rail stays wide — content draws underneath. */
+	> .group.peer {
+		flex-shrink: 0;
+	}
+
 	.doublescale-layout__workspace {
 		flex: 1;
 		display: flex;

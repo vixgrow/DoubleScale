@@ -1,0 +1,67 @@
+export const NAMESPACE = '/doublescale/v1/booking';
+export const ACTIVE_PRO_URL = 'https://doublescale.com/';
+export const DEFAULT_WEEKLY_HOURS = {
+	monday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: false,
+	},
+	tuesday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: false,
+	},
+	wednesday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: false,
+	},
+	thursday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: false,
+	},
+	friday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: false,
+	},
+	saturday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: true,
+	},
+	sunday: {
+		times: [
+			{
+				start: '09:00',
+				end: '17:00',
+			},
+		],
+		off: true,
+	},
+};

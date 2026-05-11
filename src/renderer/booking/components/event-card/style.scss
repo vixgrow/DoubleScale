@@ -1,0 +1,46 @@
+.event-card-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.event-card-wrapper {
+  width: 100%;
+  max-width: 856px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.subscription-required-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 28px;
+  text-align: center;
+  gap: 16px;
+}
+
+.subscription-required-icon {
+  opacity: 0.6;
+}
+
+.subscription-required-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.subscription-required-message {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+  max-width: 360px;
+  line-height: 1.5;
+}

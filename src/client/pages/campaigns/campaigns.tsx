@@ -442,7 +442,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	const CampaignContent = () => (
 		<>
 			{loading || hasRecords ? (
-				<>
+				<div className="bg-white rounded-3xl p-6 shadow-sm">
 					<DataTable
 						columns={columns}
 						data={campaigns}
@@ -491,7 +491,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 						}}
 					/>
 					<DataTablePagination table={serverSideTable} />
-				</>
+				</div>
 			) : (
 				<EmptyCampaignList
 					setStep={setStep}
@@ -543,7 +543,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 		return (
 			<div className="doublescale-campaigns">
 				<PageHeader
-					title={__('Campaigns List', 'doublescale')}
+					title={listTitle}
 					subtitle={__('Campaigns', 'doublescale')}
 					actions={
 						showCreateButton
@@ -581,7 +581,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 					onValueChange={(value) =>
 						setActiveTab(value as CampaignChannel)
 					}
-					tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-4"
+					tabsListWrapperClassName="shadow-sm bg-white px-5 py-3 rounded-lg mb-4"
 					tabsListClassName="bg-transparent text-foreground gap-3"
 				/>
 

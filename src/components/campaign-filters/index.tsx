@@ -4,11 +4,6 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { useState } from 'react';
-
-/**
  * Internal dependencies
  */
 import {
@@ -19,7 +14,6 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 export interface CampaignFiltersState {
@@ -32,19 +26,17 @@ export interface CampaignFiltersState {
 interface CampaignFiltersProps {
 	filters: CampaignFiltersState;
 	onChange: (filters: CampaignFiltersState) => void;
-	onClear: () => void;
 	activeTab?: string;
 }
 
 export function CampaignFilters({
 	filters,
 	onChange,
-	onClear,
 	activeTab = 'email',
 }: CampaignFiltersProps) {
 	const handleFilterChange = (
 		key: keyof CampaignFiltersState,
-		value: any
+		value: unknown
 	) => {
 		onChange({
 			...filters,
@@ -53,11 +45,11 @@ export function CampaignFilters({
 	};
 
 	return (
-		<div className="bg-white rounded-lg border border-gray-200 p-6">
+		<div className="rounded-lg border border-gray-200 bg-white p-6">
 			<div className="grid grid-cols-2 gap-4">
 				{/* Status Filter */}
 				<div className="space-y-2">
-					<Label className="text-[#3F4254] font-semibold text-base">
+					<Label className="text-base font-semibold text-[#3F4254]">
 						{__('Status', 'doublescale')}
 					</Label>
 					<Select
@@ -66,7 +58,7 @@ export function CampaignFilters({
 							handleFilterChange('status', value)
 						}
 					>
-						<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
+						<SelectTrigger className="h-11 w-full rounded-lg border-gray-200 bg-white">
 							<SelectValue
 								placeholder={__('Select Status', 'doublescale')}
 							/>
@@ -100,7 +92,7 @@ export function CampaignFilters({
 				{/* Type Filter - Only show for email campaigns */}
 				{activeTab === 'email' && (
 					<div className="space-y-2">
-						<Label className="text-[#3F4254] font-semibold text-base">
+						<Label className="text-base font-semibold text-[#3F4254]">
 							{__('Type', 'doublescale')}
 						</Label>
 						<Select
@@ -109,7 +101,7 @@ export function CampaignFilters({
 								handleFilterChange('type', value)
 							}
 						>
-							<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
+							<SelectTrigger className="h-11 w-full rounded-lg border-gray-200 bg-white">
 								<SelectValue
 									placeholder={__('Select Type', 'doublescale')}
 								/>
@@ -131,7 +123,7 @@ export function CampaignFilters({
 
 				{/* Create Date Filter */}
 				<div className="flex flex-col gap-1">
-					<Label className="text-[#3F4254] font-semibold text-base">
+					<Label className="text-base font-semibold text-[#3F4254]">
 						{__('Create Date', 'doublescale')}
 					</Label>
 					<DateRangePicker
@@ -140,14 +132,13 @@ export function CampaignFilters({
 							handleFilterChange('createDate', range)
 						}
 						placeholder={__('From - To', 'doublescale')}
-						className="w-full bg-white rounded-lg shadow-none border"
-
+						className="w-full rounded-lg border bg-white shadow-none"
 					/>
 				</div>
 
 				{/* Updated At Filter */}
 				<div className="flex flex-col gap-1">
-					<Label className="text-[#3F4254] font-semibold text-base">
+					<Label className="text-base font-semibold text-[#3F4254]">
 						{__('Updated At', 'doublescale')}
 					</Label>
 					<DateRangePicker
@@ -156,22 +147,10 @@ export function CampaignFilters({
 							handleFilterChange('updatedAt', range)
 						}
 						placeholder={__('From - To', 'doublescale')}
-						className="w-full bg-white rounded-lg shadow-none border"
+						className="w-full rounded-lg border bg-white shadow-none"
 					/>
 				</div>
-			</div>
-
-			{/* Clear Filters Button */}
-			<div className="mt-4">
-				<Button
-					variant="outline"
-					onClick={onClear}
-					className="text-gray-500 shadow-none rounded-lg"
-				>
-					{__('Clear Filters', 'doublescale')}
-				</Button>
 			</div>
 		</div>
 	);
 }
-

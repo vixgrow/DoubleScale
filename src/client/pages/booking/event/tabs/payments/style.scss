@@ -1,0 +1,48 @@
+.custom-switch.ant-switch-checked {
+	background-color: #3A3A99;
+}
+
+.custom-radio {
+	display: flex;
+	align-items: center;
+}
+
+.custom-radio .ant-radio .ant-radio-inner {
+	background-color: #e1e3ea;
+	border-color: #e1e3ea;
+}
+
+.custom-radio .ant-radio-checked .ant-radio-inner {
+	background-color: #3A3A99 !important;
+	border-color: #3A3A99 !important;
+}
+
+/* Change inner dot color */
+.custom-radio .ant-radio-checked .ant-radio-inner::after {
+	background-color: white !important;
+}
+
+.paypal-img {
+	width: 5rem;
+	height: 2rem;
+	margin-top: 10px;
+	margin-left: 5px;
+}
+
+.stripe-img {
+	width: 5rem;
+	height: 2rem;
+	margin-top: 7px;
+	margin-left: 5px;
+}
+
+.custom-check .ant-checkbox .ant-checkbox-inner {
+	background-color: #e1e3ea;
+	border-color: #e1e3ea;
+	width: 16px;
+	height: 16px;
+}
+
+.custom-check .ant-checkbox-checked .ant-checkbox-inner {
+	background-color: #3A3A99;
+}

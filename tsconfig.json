@@ -94,6 +94,45 @@
 			"@/lib/*": [
 				"shared/lib/*"
 			],
+			"@/types/booking": [
+				"types/booking"
+			],
+			"@/types/booking/*": [
+				"types/booking/*"
+			],
+			"@/hooks/booking": [
+				"hooks/booking"
+			],
+			"@/hooks/booking/*": [
+				"hooks/booking/*"
+			],
+			"@/utils/booking": [
+				"utils/booking"
+			],
+			"@/utils/booking/*": [
+				"utils/booking/*"
+			],
+			"@/stores/booking/event": [
+				"stores/booking/event"
+			],
+			"@/stores/booking/event/*": [
+				"stores/booking/event/*"
+			],
+			"@/config/booking": [
+				"config/booking"
+			],
+			"@/config/booking/*": [
+				"config/booking/*"
+			],
+			"@/constants/booking": [
+				"constants/booking.ts"
+			],
+			"@/renderer/booking": [
+				"renderer/booking"
+			],
+			"@/renderer/booking/*": [
+				"renderer/booking/*"
+			],
 			"@/hooks/*": [
 				"shared/hooks/*"
 			],

@@ -1,0 +1,26 @@
+/* Ant Design Steps overrides aligned with CRM tokens */
+.custom-steps .ant-steps-item-title {
+	font-weight: 500;
+	color: #333333;
+}
+
+.custom-steps .ant-steps-item-icon {
+	background-color: #E8E2FB;
+	color: #3A3A99;
+}
+
+.custom-steps .ant-steps-item-process .ant-steps-item-icon {
+	background-color: #3A3A99;
+	border-color: #3A3A99;
+}
+
+.custom-steps .ant-steps-item-finish .ant-steps-item-icon {
+	background-color: #3A3A99;
+	border-color: #3A3A99;
+}
+
+.custom-steps .ant-steps-item-tail {
+	background-color: #3A3A99;
+	height: 2px;
+	top: 50%;
+}

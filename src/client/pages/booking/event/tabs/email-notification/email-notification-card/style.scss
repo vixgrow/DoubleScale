@@ -1,0 +1,32 @@
+/**
+ * react-multi-email ships Semantic-UI-like borders (gray + bright blue `.focused`).
+ * Align with shadcn Input: one border, theme tokens, soft ring on focus.
+ */
+.booking-react-multi-email.react-multi-email {
+	margin: 0;
+	max-width: 100%;
+	border: 1px solid hsl(var(--border));
+	border-radius: 0.5rem;
+	box-shadow: none;
+	background: hsl(var(--card));
+	color: hsl(var(--foreground));
+	padding: 0.35rem 0.5rem;
+	min-height: 3rem;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+	&.focused {
+		border-color: hsl(var(--primary));
+		box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+		background: hsl(var(--card));
+	}
+
+	> input {
+		background: transparent;
+		color: inherit;
+	}
+
+	> span[data-placeholder] {
+		color: hsl(var(--muted-foreground));
+		opacity: 0.8;
+	}
+}

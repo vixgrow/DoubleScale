@@ -1,0 +1,469 @@
+<?php
+
+/**
+ * Class Booking Ajax
+ * Handles the booking ajax actions
+ *
+ * @since 1.0.0
+ *
+ * @package DoubleScale
+ */
+
+namespace DoubleScale\Modules\Booking\Services;
+
+use DoubleScale\Modules\Booking\Services\BookingValidator;
+use DoubleScale\Modules\Booking\Services\BookingService;
+use DoubleScale\Modules\Booking\Services\BookingEvents;
+use DoubleScale\Modules\Booking\Models\CalendarModel;
+use DoubleScale\Modules\Booking\Models\AvailabilityModel;
+use DoubleScale\Modules\Booking\Models\BookedSlotModel;
+use DoubleScale\Modules\Booking\Models\BookingModel;
+use DoubleScale\Modules\Booking\Models\EventModel;
+use Illuminate\Support\Arr;
+
+
+class BookingAjax {
+
+
+
+
+	// --- Dependency Properties ---
+	private string $bookingValidatorClass;
+	private string $bookingServiceClass;
+
+
+	public function __construct(
+		string $bookingValidatorClass = BookingValidator::class,
+		string $bookingServiceClass = BookingService::class
+	) {
+		$this->bookingValidatorClass = $bookingValidatorClass;
+		$this->bookingServiceClass   = $bookingServiceClass;
+		add_action( 'wp_ajax_doublescale_booking_booking_slots', array( $this, 'booking_details' ) );
+		add_action( 'wp_ajax_nopriv_doublescale_booking_booking_slots', array( $this, 'booking_details' ) );
+		add_action( 'wp_ajax_doublescale_booking_booking', array( $this, 'booking' ) );
+		add_action( 'wp_ajax_nopriv_doublescale_booking_booking', array( $this, 'booking' ) );
+		add_action( 'wp_ajax_doublescale_booking_cancel_booking', array( $this, 'ajax_cancel_booking' ) );
+		add_action( 'wp_ajax_nopriv_doublescale_booking_cancel_booking', array( $this, 'ajax_cancel_booking' ) );
+		add_action( 'wp_ajax_doublescale_booking_reschedule_booking', array( $this, 'ajax_reschedule_booking' ) );
+		add_action( 'wp_ajax_nopriv_doublescale_booking_reschedule_booking', array( $this, 'ajax_reschedule_booking' ) );
+		add_action( 'wp_ajax_doublescale_booking_process_payment', array( $this, 'ajax_process_payment' ) );
+		add_action( 'wp_ajax_nopriv_doublescale_booking_process_payment', array( $this, 'ajax_process_payment' ) );
+	}
+
+	/**
+	 * Verify the request carries a valid booking nonce. Renderer pages ship
+	 * `doublescale_booking`; the admin SPA ships `doublescale-admin`. Accept
+	 * either so both contexts work without duplicating AJAX registrations.
+	 */
+	private function verify_booking_nonce(): void {
+		if ( wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ?? '' ), 'doublescale_booking' ) ) {
+			return;
+		}
+		if ( is_user_logged_in() && current_user_can( 'doublescale_access' ) ) {
+			return;
+		}
+		wp_send_json_error( array( 'message' => __( 'Security check failed.', 'doublescale' ) ), 403 );
+	}
+
+	/**
+	 * Ajax booking
+	 *
+	 * @return void
+	 */
+	public function booking() {
+		// $this->verify_booking_nonce();
+		try {
+			$id    = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : null;
+			$event = $this->bookingValidatorClass::validate_event( $id );
+
+			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : null;
+
+			if ( ! $payment_method && $event->requirePayment() ) {
+				throw new \Exception( __( 'Invalid payment method', 'doublescale' ) );
+			}
+
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			if ( ! $start_date ) {
+				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
+			}
+
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			if ( ! $timezone ) {
+				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
+			}
+			$start_date = $this->bookingValidatorClass::validate_start_date( $start_date, $timezone );
+
+			$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $event->duration;
+			$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
+
+			$location = isset( $_POST['location'] ) ? json_decode( stripslashes( $_POST['location'] ), true ) : null;
+			if ( ! $location ) {
+				throw new \Exception( __( 'Invalid location', 'doublescale' ) );
+			}
+
+			// Validate invitees if needed
+			$invitees = isset( $_POST['invitees'] ) ? json_decode( stripslashes( $_POST['invitees'] ), true ) : array();
+			if ( empty( $invitees ) || ! is_array( $invitees ) ) {
+				throw new \Exception( __( 'Please, add valid invitees', 'doublescale' ) );
+			}
+
+			$booking_service = new $this->bookingServiceClass();
+
+			$validate_invitee = $booking_service->validate_invitee( $event, $invitees );
+			if ( 'group' !== $event->type && count( $validate_invitee ) > 1 ) {
+				throw new \Exception( __( 'Invalid event type', 'doublescale' ) );
+			}
+
+			$available_slots = $event->get_booking_available_slots( $start_date, $duration, $timezone );
+
+			$fields = array();
+			if ( isset( $_POST['fields'] ) ) {
+				$fields = json_decode( wp_unslash( $_POST['fields'] ), true );
+			}
+
+			$host_ids = isset( $_POST['host_ids'] ) ? $_POST['host_ids'] : null;
+			$host_id  = null;
+			if ( $host_ids ) {
+				$host_ids = explode( ',', $host_ids );
+				if ( $event->type === 'round-robin' ) {
+					$host_id = $host_ids[0];
+				} else {
+					$host_id = $host_ids;
+				}
+			}
+
+			$calendar_id = $event->calendar_id;
+
+			if ( ! $available_slots || $available_slots < count( $validate_invitee ) ) {
+				$wl_settings = $event->waiting_list_settings;
+				if ( ! empty( $wl_settings['enabled'] ) ) {
+					$wl_host_ids = is_array( $host_id )
+						? $host_id
+						: array( $host_id ?? $event->user_id ?? get_current_user_id() );
+
+					$booking = $booking_service->book_waiting_list_slot(
+						$event,
+						$calendar_id,
+						$start_date,
+						$duration,
+						$timezone,
+						$validate_invitee,
+						$location,
+						$fields,
+						$wl_host_ids
+					);
+					wp_send_json_success(
+						array(
+							'booking'      => $booking,
+							'waiting_list' => true,
+							'position'     => $booking->get_meta( 'waiting_list_position' ),
+						)
+					);
+					return;
+				}
+				throw new \Exception( __( 'Sorry, This booking is not available', 'doublescale' ) );
+			}
+
+			$status = 'scheduled';
+
+			if ( isset( $_POST['status'] ) && 'pending' === sanitize_text_field( $_POST['status'] ) ) {
+				$status = 'pending';
+			}
+
+			$booking = $booking_service->book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $validate_invitee, $location, $status, $fields, $host_id );
+
+			do_action(
+				'doublescale_booking_after_booking_created',
+				$booking,
+				array(
+					'payment_method' => $payment_method,
+				)
+			);
+
+			// resolve
+			/*
+				redirect_query_string
+				:
+				"{{booking:additional_guests}}{{guest:email}}"
+				redirect_url
+				:
+				"https://www.google.com/"
+			*/
+			$advanced_settings     = $booking->getAdvancedSettings();
+			$redirect_query_string = isset( $advanced_settings['redirect_query_string'] ) ? $advanced_settings['redirect_query_string'] : null;
+			$merge_tags_manager    = \DoubleScale\Modules\Booking\Managers\MergeTagsManager::instance();
+			$result                = $merge_tags_manager->process_merge_tags( $redirect_query_string, $booking );
+			$redirect_query_string = $result;
+
+			$redirect_url = isset( $advanced_settings['redirect_url'] ) ? $advanced_settings['redirect_url'] : null;
+			// add query string to redirect url
+			$redirect_url                  = $redirect_url . '?' . $redirect_query_string;
+			$booking->booking_redirect_url = $redirect_url;
+			wp_send_json_success( array( 'booking' => $booking ) );
+		} catch ( \Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Ajax Get booking slots
+	 *
+	 * @return void
+	 */
+	public function booking_details() {
+		// $this->verify_booking_nonce();
+		try {
+			$id          = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : null;
+			$user_id     = isset( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : null;
+			$calendar_id = isset( $_POST['calendar_id'] ) ? intval( $_POST['calendar_id'] ) : null;
+
+			if ( ! $id ) {
+				throw new \Exception( __( 'Invalid event', 'doublescale' ) );
+			}
+
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			if ( ! $start_date ) {
+				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
+			}
+
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			if ( ! $timezone ) {
+				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
+			}
+
+			$event = EventModel::find( $id );
+
+			if ( $event ) {
+				$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $event->duration;
+				$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
+
+				$wl_settings  = $event->waiting_list_settings;
+				$include_full = ! empty( $wl_settings['enabled'] );
+
+				$available_slots = $event->get_available_slots( $start_date, $timezone, $duration, $user_id, $include_full );
+
+				$response = array( 'slots' => $available_slots );
+				if ( ! empty( $wl_settings['enabled'] ) ) {
+					$response['waiting_list_enabled']  = true;
+					$wl_capacity                       = isset( $wl_settings['capacity'] ) ? (int) $wl_settings['capacity'] : 10;
+					$response['waiting_list_capacity'] = $wl_capacity;
+					$utc_tz                            = new \DateTimeZone( 'UTC' );
+					$user_tz                           = new \DateTimeZone( $timezone );
+					foreach ( $response['slots'] as $date_key => &$day_slots ) {
+						foreach ( $day_slots as &$slot ) {
+							if ( isset( $slot['remaining'] ) && 0 === (int) $slot['remaining'] ) {
+								$start_utc = ( new \DateTime( $slot['start'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
+								$end_utc   = ( new \DateTime( $slot['end'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
+								$wl_count  = BookingModel::where( 'status', 'waiting' )
+									->where( 'event_id', $event->id )
+									->where( 'start_time', $start_utc )
+									->where( 'end_time', $end_utc )
+									->count();
+								$slot['waiting_list_count']    = $wl_count;
+								$slot['waiting_list_capacity'] = $wl_capacity;
+							}
+						}
+						unset( $slot );
+					}
+					unset( $day_slots );
+				}
+
+				wp_send_json_success( $response );
+				return;
+			}
+
+			throw new \Exception( __( 'Event is not available', 'doublescale' ) );
+		} catch ( \Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Ajax Cancel booking
+	 *
+	 * @return void
+	 */
+	public function ajax_cancel_booking() {
+		// $this->verify_booking_nonce();
+
+		try {
+			$id                  = isset( $_POST['id'] ) ? sanitize_text_field( $_POST['id'] ) : null;
+			$booking             = $this->bookingValidatorClass::validate_booking( $id );
+			$cancellation_reason = isset( $_POST['cancellation_reason'] ) ? sanitize_text_field( $_POST['cancellation_reason'] ) : null;
+
+			if ( $booking->isCancelled() ) {
+				throw new \Exception( __( 'Booking is already cancelled', 'doublescale' ) );
+			}
+
+			if ( $cancellation_reason ) {
+				$booking->update_meta( 'cancellation_reason', $cancellation_reason );
+			}
+
+			$booking->cancelled_by = 'attendee';
+			$booking->status       = 'cancelled';
+			$booking->save();
+
+			BookedSlotModel::release( $booking->id );
+
+			$booking->logs()->create(
+				array(
+					'type'    => 'info',
+					'message' => __( 'Booking cancelled', 'doublescale' ),
+					'details' => __( 'Booking cancelled by Attendee', 'doublescale' ),
+				)
+			);
+
+			BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'attendee' ) );
+
+			wp_send_json_success( array( 'message' => __( 'Booking cancelled', 'doublescale' ) ) );
+		} catch ( \Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Ajax Reschedule booking
+	 *
+	 * @return void
+	 */
+	public function ajax_reschedule_booking() {
+		// $this->verify_booking_nonce();
+
+		try {
+			$id                = isset( $_POST['id'] ) ? sanitize_text_field( $_POST['id'] ) : null;
+			$booking           = $this->bookingValidatorClass::validate_booking( $id );
+			$reschedule_reason = isset( $_POST['reschedule_reason'] ) ? sanitize_text_field( $_POST['reschedule_reason'] ) : null;
+
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			if ( ! $start_date ) {
+				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
+			}
+
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			if ( ! $timezone ) {
+				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
+			}
+
+			// Use the BookingValidator to validate the start date
+			$start_date = $this->bookingValidatorClass::validate_start_date( $start_date, $timezone );
+
+			$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $booking->slot_time;
+			$duration = $this->bookingValidatorClass::validate_duration( $duration, $booking->slot_time );
+
+			if ( $booking->isCancelled() ) {
+				throw new \Exception( __( 'Booking is already cancelled', 'doublescale' ) );
+			}
+
+			// Check if the booking is same as the current booking
+			$booking_start_date = new \DateTime( $booking->start_time, new \DateTimeZone( 'UTC' ) );
+			if ( $start_date->getTimestamp() === $booking_start_date->getTimestamp() && $duration === $booking->slot_time ) {
+				throw new \Exception( __( 'Booking is already scheduled for this time', 'doublescale' ) );
+			}
+
+			$bookable = $booking->getBookableEntity();
+			if ( $bookable && method_exists( $bookable, 'get_booking_available_slots' ) ) {
+				$available_slots = $bookable->get_booking_available_slots( $start_date, $duration, $timezone );
+				if ( ! $available_slots ) {
+					throw new \Exception( __( 'Sorry, This booking is not available', 'doublescale' ) );
+				}
+			} elseif ( ! $bookable ) {
+				throw new \Exception( __( 'Booking entity not found', 'doublescale' ) );
+			}
+
+			$end_date = clone $start_date;
+			$end_date->modify( "+{$duration} minutes" );
+
+			$booking->start_time = $start_date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+			$booking->end_time   = $end_date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+			if ( $reschedule_reason ) {
+				$booking->update_meta( 'reschedule_reason', $reschedule_reason );
+			}
+
+			$booking->save();
+
+			$booking->logs()->create(
+				array(
+					'type'    => 'info',
+					'message' => __( 'Booking rescheduled', 'doublescale' ),
+					'details' => __( 'Booking rescheduled by Attendee', 'doublescale' ),
+				)
+			);
+
+			BookingEvents::emit( 'rescheduled', (int) $booking->id, array( 'actor' => 'attendee' ) );
+
+			wp_send_json_success( array( 'message' => __( 'Booking rescheduled', 'doublescale' ) ) );
+		} catch ( \Exception $e ) {
+			error_log( 'error: ' . $e->getMessage() );
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+
+	/**
+	 * Ajax Process Payment
+	 *
+	 * @return void
+	 */
+	public function ajax_process_payment() {
+		try {
+			$booking_hash_id = isset( $_POST['booking_hash_id'] ) ? sanitize_text_field( $_POST['booking_hash_id'] ) : null;
+			if ( ! $booking_hash_id ) {
+				throw new \Exception( __( 'Invalid booking', 'doublescale' ) );
+			}
+
+			$booking = $this->bookingValidatorClass::validate_booking( $booking_hash_id );
+
+			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : null;
+			if ( ! $payment_method ) {
+				throw new \Exception( __( 'Invalid payment method', 'doublescale' ) );
+			}
+
+			$bookable_entity = $booking->getBookableEntity();
+			if ( ! $bookable_entity ) {
+				throw new \Exception( __( 'Booking entity not found', 'doublescale' ) );
+			}
+
+			$payments_settings = method_exists( $bookable_entity, 'get_meta' )
+				? $bookable_entity->get_meta( 'payments_settings', array() )
+				: ( $bookable_entity->payments_settings ?? array() );
+
+			if ( ! isset( $payments_settings['enable_payment'] ) || ! $payments_settings['enable_payment'] ) {
+				throw new \Exception( __( 'Payment is not enabled for this booking', 'doublescale' ) );
+			}
+
+			$method_enabled_key = 'enable_' . $payment_method;
+			if ( ! isset( $payments_settings[ $method_enabled_key ] ) || ! $payments_settings[ $method_enabled_key ] ) {
+				throw new \Exception( __( 'Selected payment method is not available', 'doublescale' ) );
+			}
+
+			// Process the payment through the payment gateway
+			do_action(
+				'doublescale_booking_process_payment',
+				$booking,
+				array(
+					'payment_method' => $payment_method,
+				)
+			);
+
+			// Log the payment attempt
+			$booking->logs()->create(
+				array(
+					'type'    => 'info',
+					'message' => __( 'Payment processing initiated', 'doublescale' ),
+					'details' => sprintf( __( 'Payment processing initiated with %s', 'doublescale' ), $payment_method ),
+				)
+			);
+
+			wp_send_json_success(
+				array(
+					'booking' => $booking,
+					'message' => __( 'Payment processing initiated', 'doublescale' ),
+				)
+			);
+		} catch ( \Exception $e ) {
+			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+}

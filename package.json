@@ -38,6 +38,8 @@
 		"@radix-ui/react-tabs": "^1.1.12",
 		"@radix-ui/react-toolbar": "^1.1.0",
 		"@radix-ui/react-tooltip": "^1.2.7",
+		"@stripe/react-stripe-js": "^3.10.0",
+		"@stripe/stripe-js": "^7.9.0",
 		"@tailwindcss/postcss": "^4.1.10",
 		"@tanstack/react-table": "^8.21.3",
 		"@tinymce/tinymce-react": "^6.3.0",
@@ -85,6 +87,7 @@
 		"cmdk": "^1.0.0",
 		"d3-funnel": "^2.1.3",
 		"date-fns": "^4.1.0",
+		"date-fns-tz": "^3.2.0",
 		"emotion": "^11.0.0",
 		"eslint-plugin-prettier": "^5.2.1",
 		"framer-motion": "^12.4.1",
@@ -108,6 +111,7 @@
 		"react-dropzone": "^14.3.8",
 		"react-hook-form": "^7.65.0",
 		"react-loader-spinner": "^6.1.6",
+		"react-phone-input-2": "^2.15.1",
 		"react-router": "^6.25.1",
 		"react-router-dom": "^6.25.1",
 		"react-select": "^5.8.0",
@@ -125,10 +129,8 @@
 		"zod": "^4.1.12"
 	},
 	"scripts": {
-		"dev": "npm run dev-client && npm run dev-config",
-		"build": "npm run build-client && npm run build-config",
-		"dev-client": "wp-scripts start src/client/index.tsx --output-path=build/client",
-		"build-client": "wp-scripts build src/client/index.tsx --output-path=build/client",
+		"dev": "wp-scripts start --config webpack.config.js",
+		"build": "rm -rf build/client build/renderer && wp-scripts build --config webpack.config.js && npm run build-config",
 		"dev-config": "wp-scripts start src/shared/config/index.ts --output-path=build/config",
 		"build-config": "wp-scripts build src/shared/config/index.ts --output-path=build/config"
 	},

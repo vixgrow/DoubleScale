@@ -1,0 +1,170 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useEffect, useState } from '@wordpress/element';
+
+import { useParams, useNavigate } from 'react-router-dom';
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
+import { useApi } from '@/hooks/booking';
+import ConfigAPI from '@/config/booking';
+import IntegrationDetailsPage from './integration';
+import {
+	AdvancedSettingsIcon,
+	CardHeader,
+	NoticeBanner,
+} from '@/components/booking';
+import { NoticeMessage } from '@/types/booking';
+import { SelectionCard } from '@/components/booking';
+import { useCalendarContext } from '../../state/context';
+import type { Integration } from '@/config/booking';
+import { Card, CardContent } from '@/components/ui/card';
+
+const IntegrationCards: React.FC<{
+	hasSelectedCalendar: boolean;
+	hasAccounts: boolean;
+	setHasSelectedCalendar: (hasSelectedCalendar: boolean) => void;
+	setHasAccounts: (hasAccounts: boolean) => void;
+}> = ({
+	hasSelectedCalendar,
+	hasAccounts,
+	setHasSelectedCalendar,
+	setHasAccounts,
+}) => {
+	const { id } = useParams<{
+		id: string;
+	}>();
+	const navigate = useNavigate();
+	const { state: calendar } = useCalendarContext();
+
+	// Prevent access to integrations page for team calendars
+	useEffect(() => {
+		if (calendar?.type === 'team') {
+			// Redirect back to general tab
+			const urlParams = new URLSearchParams(window.location.search);
+			urlParams.delete('tab');
+			urlParams.delete('subtab');
+			const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+			window.history.replaceState({}, '', newUrl);
+			// Navigate away from integrations tab
+			navigate(`booking/calendars/${id}`);
+		}
+	}, [calendar, navigate, id]);
+
+	// Don't render anything for team calendars
+	if (calendar?.type === 'team') {
+		return null;
+	}
+
+	const [activeTab, setActiveTab] = useState<string | null>(null);
+	const integrations = Object.entries(ConfigAPI.getIntegrations() || {})
+		.filter(
+			([key]) =>
+				key === 'google' ||
+				key === 'outlook' ||
+				key === 'apple' ||
+				key === 'zoom'
+		)
+		.map(([key, integration]) => ({
+			id: key,
+			...(integration as Integration),
+		}));
+	const { loading } = useApi();
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	// Handle URL parameters for tab and subtab
+	useEffect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const tabParam = urlParams.get('tab');
+		const subtabParam = urlParams.get('subtab');
+
+		// If we're in the integrations tab and have a subtab, set it as active
+		if (tabParam === 'integrations' && subtabParam) {
+			setActiveTab(subtabParam);
+		} else if (integrations.length > 0 && !activeTab) {
+			// Otherwise set first integration as default
+			setActiveTab(integrations[0].id);
+		}
+		if (activeTab == 'zoom') {
+			setHasSelectedCalendar(true);
+		}
+	}, [integrations, activeTab]);
+
+	// Handle tab change
+	const handleTabChange = (newTab: string) => {
+		// If we have accounts but no calendar selected, prevent tab change
+		if (hasAccounts && !hasSelectedCalendar) {
+			window.alert(
+				__(
+					'Please select a remote calendar before changing tabs.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
+		setActiveTab(newTab);
+		// Update only the subtab parameter while preserving other URL parameters
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set('subtab', newTab);
+		// Keep the current URL path and only update the search params
+		const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+		window.history.pushState({}, '', newUrl);
+	};
+
+	// Find the active integration
+	const activeIntegration = activeTab
+		? integrations.find((int) => int.id === activeTab)
+		: null;
+
+	return (
+        <div className="doublescale-booking-integrations">
+            <Card><CardContent>
+                    <CardHeader
+                        title={__(
+                            'Remote Calendar & Conferencing Sync Settings.',
+                            'doublescale'
+                        )}
+                        description={__(
+                            'Set the Zoom account to create meeting when a event is booked and calendars to check for conflicts to prevent double bookings and add events to your remote calendar.',
+                            'doublescale'
+                        )}
+                        icon={<AdvancedSettingsIcon />}
+                        border={false}
+                    />
+                    <div className="doublescale-booking-conferencing-calendars grid grid-cols-2 gap-5 w-full">
+                        {notice && (
+                            <div className="col-span-2">
+                                <NoticeBanner
+                                    notice={notice}
+                                    closeNotice={() => setNotice(null)}
+                                />
+                            </div>
+                        )}
+                        <SelectionCard
+                            integrations={integrations}
+                            activeTab={activeTab}
+                            setActiveTab={handleTabChange}
+                            isLoading={loading}
+                        />
+                        {activeTab && activeIntegration && id && (
+                            <IntegrationDetailsPage
+                                integration={activeIntegration}
+                                setNotice={setNotice}
+                                calendarId={id}
+                                slug={activeTab}
+                                onCalendarSelect={setHasSelectedCalendar}
+                                hasAccounts={setHasAccounts}
+                            />
+                        )}
+                    </div>
+                </CardContent></Card>
+        </div>
+    );
+};
+
+export default IntegrationCards;

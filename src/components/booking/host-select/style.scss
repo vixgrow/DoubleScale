@@ -1,0 +1,19 @@
+/* WP admin + browser default focus rings on react-select (portaled input) */
+.host-select {
+	.custom-select__control,
+	.custom-select__control--is-focused {
+		outline: none !important;
+		box-shadow: none !important;
+	}
+
+	.custom-select__control--is-focused {
+		border-color: #d0d0d0 !important;
+	}
+
+	.custom-select__input,
+	.custom-select__input:focus,
+	.custom-select__input:focus-visible {
+		outline: none !important;
+		box-shadow: none !important;
+	}
+}

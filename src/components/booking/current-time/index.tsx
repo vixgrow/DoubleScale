@@ -1,0 +1,40 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import {
+	getCurrentTimeInTimezone,
+	getCurrentTimezone,
+} from '@/utils/booking';
+
+interface CurrentTimeInTimezoneProps
+	extends React.HTMLAttributes<HTMLDivElement> {
+	currentTimezone?: string;
+	timeClassName?: string;
+	timeFormat?: string;
+}
+
+const CurrentTimeInTimezone: React.FC<CurrentTimeInTimezoneProps> = ({
+	currentTimezone,
+	timeClassName,
+	timeFormat = '12',
+	...rest
+}) => {
+	return (
+		<div {...rest}>
+			{__('Current DateTime', 'doublescale')}:{' '}
+			<span className={timeClassName}>
+				{getCurrentTimeInTimezone(
+					currentTimezone || getCurrentTimezone(),
+					timeFormat
+				)}
+			</span>
+		</div>
+	);
+};
+
+export default CurrentTimeInTimezone;

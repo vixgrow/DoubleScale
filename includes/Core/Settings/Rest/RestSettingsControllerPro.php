@@ -25,6 +25,96 @@ use WP_Error;
 class RestSettingsControllerPro {
 
 	/**
+	 * Pro add-on ships Inbox (OAuth, bounce handlers, messaging webhooks) and Tracking (IMAP client).
+	 * Free-only installs register these routes from CoreModule but must not reference missing classes.
+	 */
+	private static function has_email_oauth_layer(): bool {
+		return class_exists( 'DoubleScale\\Modules\\Inbox\\Oauth\\EmailOauth' );
+	}
+
+	private static function has_bounce_handler_manager(): bool {
+		return class_exists( 'DoubleScale\\Modules\\Inbox\\Services\\BounceHandlerManager' );
+	}
+
+	private static function has_messaging_incoming(): bool {
+		return class_exists( 'DoubleScale\\Modules\\Inbox\\Incoming\\MessagingIncoming' );
+	}
+
+	private static function has_imap_client(): bool {
+		return class_exists( 'DoubleScale\\Modules\\Tracking\\ImapClient' );
+	}
+
+	private static function has_notifications_push_layer(): bool {
+		return class_exists( 'DoubleScale\\Modules\\Notifications\\Services\\PushNotificationService' );
+	}
+
+	private static function pro_mailbox_unavailable_error(): WP_Error {
+		return new WP_Error(
+			'doublescale_pro_required',
+			__( 'This feature requires DoubleScale Pro (Inbox).', 'doublescale' ),
+			array( 'status' => 501 )
+		);
+	}
+
+	private static function pro_push_unavailable_error(): WP_Error {
+		return new WP_Error(
+			'doublescale_pro_required',
+			__( 'This feature requires DoubleScale Pro (Notifications).', 'doublescale' ),
+			array( 'status' => 501 )
+		);
+	}
+
+	/**
+	 * Full email-inbound payload for managers when OAuth layer is absent (avoids fatals on free-only).
+	 *
+	 * @param array<string, mixed> $settings Stored email_inbound.
+	 * @param array<string, mixed> $defaults Default sending identity.
+	 * @return array<string, mixed>
+	 */
+	private function email_inbound_settings_without_oauth_layer( array $settings, array $defaults ): array {
+		if ( ! empty( $settings['imap'] ) && is_array( $settings['imap'] ) && ! empty( $settings['imap']['password'] ) ) {
+			$settings['imap']['password'] = '********';
+		}
+		$settings['from_email'] = $settings['from_email'] ?? '';
+		$settings['from_name']  = $settings['from_name'] ?? '';
+		$settings['reply_to']   = $settings['reply_to'] ?? '';
+		$settings['defaults']   = $defaults;
+		$settings['oauth']    = array(
+			'gmail'   => array(
+				'connected'    => false,
+				'email'        => '',
+				'needs_reauth' => false,
+			),
+			'outlook' => array(
+				'connected'    => false,
+				'email'        => '',
+				'needs_reauth' => false,
+			),
+		);
+		$settings['oauth_apps_configured'] = array(
+			'gmail'   => false,
+			'outlook' => false,
+		);
+		$settings['oauth_redirect_uri'] = '';
+		$settings['imap_available']     = self::has_imap_client();
+		$settings['smtp_detection']    = array(
+			'has_smtp'           => false,
+			'from_emails'        => array(),
+			'gmail_detected'     => false,
+			'gmail_accounts'     => array(),
+			'gmail_app'          => array(),
+			'outlook_detected'   => false,
+			'outlook_accounts'   => array(),
+			'outlook_app'        => array(),
+			'detected_providers' => array(),
+		);
+		if ( ! isset( $settings['imap_provider'] ) ) {
+			$settings['imap_provider'] = 'custom';
+		}
+		return $settings;
+	}
+
+	/**
 	 * Register REST Api routes
 	 *
 	 * @since 1.0.0
@@ -200,6 +290,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_bounce_webhooks( $request ) {
+		if ( ! self::has_bounce_handler_manager() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$manager  = BounceHandlerManager::instance();
 		$urls     = $manager->get_webhook_urls();
 		$provider = $request->get_param( 'provider' );
@@ -243,6 +336,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_messaging_webhooks( $request ) {
+		if ( ! self::has_messaging_incoming() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$channel = $request->get_param( 'channel' );
 
 		// Build webhook URLs for all messaging channels
@@ -318,6 +414,13 @@ class RestSettingsControllerPro {
 			);
 		}
 
+		if ( ! self::has_email_oauth_layer() ) {
+			return new WP_REST_Response(
+				$this->email_inbound_settings_without_oauth_layer( $settings, $defaults ),
+				200
+			);
+		}
+
 		// Never expose passwords in responses — mask them.
 		if ( ! empty( $settings['imap'] ) && ! empty( $settings['imap']['password'] ) ) {
 			$settings['imap']['password'] = '********';
@@ -375,6 +478,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_email_inbound_settings( $request ) {
+		if ( ! self::has_email_oauth_layer() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$body = $request->get_json_params();
 
 		if ( empty( $body ) ) {
@@ -457,6 +563,14 @@ class RestSettingsControllerPro {
 	public function test_email_inbound_connection( $request ) {
 		$body     = $request->get_json_params();
 		$provider = sanitize_text_field( $body['provider'] ?? 'custom' );
+
+		if ( in_array( $provider, array( 'gmail', 'outlook', 'smtp_gmail', 'smtp_outlook' ), true ) ) {
+			if ( ! self::has_email_oauth_layer() || ! self::has_imap_client() ) {
+				return self::pro_mailbox_unavailable_error();
+			}
+		} elseif ( ! self::has_imap_client() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 
 		if ( in_array( $provider, array( 'gmail', 'outlook' ), true ) ) {
 			return $this->test_oauth_connection( $provider );
@@ -732,6 +846,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function oauth_authorize( $request ) {
+		if ( ! self::has_email_oauth_layer() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$body     = $request->get_json_params();
 		$provider = sanitize_text_field( $body['provider'] ?? '' );
 
@@ -763,6 +880,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function oauth_disconnect( $request ) {
+		if ( ! self::has_email_oauth_layer() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$body     = $request->get_json_params();
 		$provider = sanitize_text_field( $body['provider'] ?? '' );
 
@@ -795,6 +915,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response
 	 */
 	public function get_email_oauth_apps() {
+		if ( ! self::has_email_oauth_layer() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		$result = array();
 		foreach ( array( 'gmail', 'outlook' ) as $provider ) {
 			$creds = EmailOauth::get_oauth_app_credentials( $provider );
@@ -823,6 +946,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_email_oauth_apps( $request ) {
+		if ( ! self::has_email_oauth_layer() ) {
+			return self::pro_mailbox_unavailable_error();
+		}
 		if ( ! EmailOauth::smtp_oauth_storage_available() ) {
 			return new WP_Error( 'smtp_required', __( 'SMTP storage backend is unavailable; cannot save email credentials.', 'doublescale'), array( 'status' => 400 ) );
 		}
@@ -1525,6 +1651,18 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response
 	 */
 	public function get_mobile_app_settings() {
+		if ( ! self::has_notifications_push_layer() ) {
+			return new WP_REST_Response(
+				array(
+					'enabled'                 => false,
+					'configured'              => false,
+					'credentials_available'   => false,
+					'project_id'              => '',
+					'configured_at'           => '',
+				),
+				200
+			);
+		}
 		\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		$config = get_option( 'doublescale_firebase_config', array() );
 
@@ -1553,6 +1691,9 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response
 	 */
 	public function save_mobile_app_settings( $request ) {
+		if ( ! self::has_notifications_push_layer() ) {
+			return self::pro_push_unavailable_error();
+		}
 		$enabled = (bool) $request->get_param( 'enabled' );
 		update_option( 'doublescale_push_enabled', $enabled, false );
 
@@ -1579,6 +1720,15 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response
 	 */
 	public function test_mobile_app_connection() {
+		if ( ! self::has_notifications_push_layer() ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Push notifications require DoubleScale Pro.', 'doublescale' ),
+				),
+				200
+			);
+		}
 		\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		$config = get_option( 'doublescale_firebase_config', array() );
 
@@ -1685,6 +1835,15 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response
 	 */
 	public function test_mobile_app_push() {
+		if ( ! self::has_notifications_push_layer() ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Push notifications require DoubleScale Pro.', 'doublescale' ),
+				),
+				200
+			);
+		}
 		if ( ! get_option( 'doublescale_push_enabled', false ) ) {
 			return new WP_REST_Response(
 				array(

@@ -16,6 +16,7 @@
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
     "RestSettingsController": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsController",
+    "RestSettingsControllerPro": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsControllerPro",
     "RestSiteVerificationController": "DoubleScale\\Core\\Rest\\Controllers\\RestSiteVerificationController",
     "RestTagController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestTagController",
     "RestTemplateController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestTemplateController",

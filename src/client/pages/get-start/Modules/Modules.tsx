@@ -5,12 +5,44 @@ import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
 import type { ModuleInfo } from '@doublescale/config';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import ButtonComponent from '../component/button';
 
 interface ModulesResponse {
 	success: boolean;
 	modules: ModuleInfo[];
+}
+
+interface ModulesStepProps {
+	readonly onNext: () => void;
+	readonly onPrevious: () => void;
+	readonly onSkip: () => void;
+}
+
+/** Optional modules shown in this order: SMTP, Pipelines (deals), Forms, Tasks, Campaigns, Booking. */
+const OPTIONAL_MODULE_DISPLAY_ORDER = [
+	'smtp',
+	'deals',
+	'forms',
+	'tasks',
+	'campaigns',
+	'booking',
+];
+
+function sortToggleableModules(list: ModuleInfo[]): ModuleInfo[] {
+	return [...list].sort((a, b) => {
+		const ia = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(a.slug);
+		const ib = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(b.slug);
+		if (ia === -1 && ib === -1) {
+			return a.label.localeCompare(b.label);
+		}
+		if (ia === -1) {
+			return 1;
+		}
+		if (ib === -1) {
+			return -1;
+		}
+		return ia - ib;
+	});
 }
 
 function getEffectiveState(
@@ -33,7 +65,11 @@ function collectDependentsToDisable(
 	while (queue.length > 0) {
 		const s = queue.shift()!;
 		for (const m of modules) {
-			if (m.is_toggleable && m.dependencies.includes(s) && getEffectiveState(m.slug, modules, { ...current, ...result, [slug]: false }) ) {
+			if (
+				m.is_toggleable &&
+				m.dependencies.includes(s) &&
+				getEffectiveState(m.slug, modules, { ...current, ...result, [slug]: false })
+			) {
 				result[m.slug] = false;
 				queue.push(m.slug);
 			}
@@ -66,50 +102,11 @@ function collectDependenciesToEnable(
 	return result;
 }
 
-/** Matches Get Started: SMTP, Pipelines, Forms, Tasks, Campaigns, Booking. */
-const OPTIONAL_MODULE_DISPLAY_ORDER = [
-	'smtp',
-	'deals',
-	'forms',
-	'tasks',
-	'campaigns',
-	'booking',
-];
-
-function sortToggleableModules(list: ModuleInfo[]): ModuleInfo[] {
-	return [...list].sort((a, b) => {
-		const ia = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(a.slug);
-		const ib = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(b.slug);
-		if (ia === -1 && ib === -1) {
-			return a.label.localeCompare(b.label);
-		}
-		if (ia === -1) {
-			return 1;
-		}
-		if (ib === -1) {
-			return -1;
-		}
-		return ia - ib;
-	});
-}
-
-export default function ModulesSettings() {
+export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepProps) {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
-	const [isSaving, setIsSaving] = useState(false);
 	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
-
-	const hasChanges = useMemo(() => Object.keys(pendingChanges).length > 0, [pendingChanges]);
-
-	const getDependentLabels = useCallback(
-		(slug: string): string[] => {
-			return modules
-				.filter((m) => m.dependencies.includes(slug) && m.slug !== slug)
-				.filter((m) => getEffectiveState(m.slug, modules, pendingChanges))
-				.map((m) => m.label);
-		},
-		[modules, pendingChanges]
-	);
+	const [isSaving, setIsSaving] = useState(false);
 
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
@@ -137,8 +134,12 @@ export default function ModulesSettings() {
 		[modules]
 	);
 
-	const handleSave = useCallback(async () => {
-		if (!hasChanges) return;
+	const handleNext = useCallback(async () => {
+		if (Object.keys(pendingChanges).length === 0) {
+			onNext();
+			return;
+		}
+
 		setIsSaving(true);
 		try {
 			const response = await apiFetch<ModulesResponse>({
@@ -151,21 +152,20 @@ export default function ModulesSettings() {
 				setModules(response.modules);
 				config.setModules(response.modules);
 				setPendingChanges({});
-				createNotice({
-					type: 'success',
-					message: __('Module settings saved. Reload the page for changes to take full effect.', 'doublescale'),
-				});
 			}
-		} catch (error: any) {
+
+			onNext();
+		} catch (error: unknown) {
+			const err = error as { message?: string; data?: { message?: string } };
 			const msg =
-				error?.message ||
-				error?.data?.message ||
+				err?.message ||
+				err?.data?.message ||
 				__('Failed to save module settings.', 'doublescale');
 			createNotice({ type: 'error', message: msg });
 		} finally {
 			setIsSaving(false);
 		}
-	}, [hasChanges, pendingChanges, createNotice]);
+	}, [pendingChanges, onNext, createNotice]);
 
 	const optionalShown = useMemo(
 		() =>
@@ -180,12 +180,12 @@ export default function ModulesSettings() {
 	return (
 		<div className="flex flex-col gap-8">
 			<div>
-				<h3 className="text-lg font-semibold text-foreground">
-					{__('Modules', 'doublescale')}
+				<h3 className="text-foreground text-2xl font-semibold mb-1">
+					{__('Choose Your Modules', 'doublescale')}
 				</h3>
-				<p className="text-sm text-muted-foreground mt-1">
+				<p className="text-muted-foreground text-sm leading-relaxed">
 					{__(
-						'Enable or disable optional features: SMTP, Pipelines, Forms, Tasks, Campaigns, and Booking. Other CRM capabilities are always available and are not listed here.',
+						'Turn on only the add-ons you want: SMTP, Pipelines, Forms, Tasks, Campaigns, and Booking. Everything else in the CRM stays available and is not listed here. You can change this later in Settings → Modules.',
 						'doublescale'
 					)}
 				</p>
@@ -194,7 +194,6 @@ export default function ModulesSettings() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 				{optionalShown.map((mod) => {
 					const isEnabled = getEffectiveState(mod.slug, modules, pendingChanges);
-					const dependents = getDependentLabels(mod.slug);
 
 					return (
 						<div
@@ -206,23 +205,12 @@ export default function ModulesSettings() {
 							}`}
 						>
 							<div className="flex flex-col gap-1 flex-1 min-w-0">
-								<span className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
+								<span
+									className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
+								>
 									{mod.label}
 								</span>
 								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-								{mod.dependencies.length > 0 && (
-									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-										{__('Requires:', 'doublescale')}{' '}
-										{mod.dependencies
-											.map((d) => modules.find((m) => m.slug === d)?.label || d)
-											.join(', ')}
-									</p>
-								)}
-								{isEnabled && dependents.length > 0 && (
-									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-										{__('Used by:', 'doublescale')} {dependents.join(', ')}
-									</p>
-								)}
 							</div>
 							<Switch
 								checked={isEnabled}
@@ -233,24 +221,19 @@ export default function ModulesSettings() {
 				})}
 			</div>
 
-			{hasChanges && (
-				<div className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
-					<div className="flex items-center gap-2 text-amber-700">
-						<RefreshCw size={16} />
-						<span className="text-sm font-medium">
-							{__('You have unsaved changes. A page reload is recommended after saving.', 'doublescale')}
-						</span>
-					</div>
-					<Button
-						onClick={handleSave}
-						disabled={isSaving}
-						variant="gradient"
-						className="min-w-[120px]"
-					>
-						{isSaving ? __('Saving...', 'doublescale') : __('Save Changes', 'doublescale')}
-					</Button>
+			<div className="flex justify-between pt-6">
+				<div className="flex gap-2">
+					<ButtonComponent onClick={onPrevious} type="">
+						{__('Previous', 'doublescale')}
+					</ButtonComponent>
+					<ButtonComponent type="no" onClick={onSkip}>
+						{__('Skip', 'doublescale')}
+					</ButtonComponent>
 				</div>
-			)}
+				<ButtonComponent type="go" onClick={handleNext} disabled={isSaving}>
+					{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
+				</ButtonComponent>
+			</div>
 		</div>
 	);
 }

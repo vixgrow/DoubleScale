@@ -109,6 +109,29 @@ const sharedFallback = {
 	'react/jsx-dev-runtime': 'react/jsx-dev-runtime.js',
 };
 
+/**
+ * Override the default @wordpress/scripts splitChunks.cacheGroups.style `name`
+ * function. The stock implementation calls `path.dirname(chunkName)`, which
+ * throws `ERR_INVALID_ARG_TYPE` when `chunkName` is null — and it is null for
+ * every async chunk produced by `React.lazy(() => import(…))`. The booking
+ * admin pages use `React.lazy` for every sub-route, so without this override
+ * the build crashes the moment booking is imported.
+ */
+function safeSplitChunks(base) {
+	const cacheGroups = { ...(base?.cacheGroups || {}) };
+	if (cacheGroups.style) {
+		cacheGroups.style = {
+			...cacheGroups.style,
+			name(_, chunks, cacheGroupKey) {
+				const chunkName = chunks[0]?.name;
+				if (!chunkName) return cacheGroupKey;
+				return `${path.dirname(chunkName)}/${cacheGroupKey}-${path.basename(chunkName)}`;
+			},
+		};
+	}
+	return { ...base, cacheGroups };
+}
+
 const sharedDefinePlugin = new webpack.DefinePlugin({
 	'process.env.NODE_ENV': JSON.stringify(
 		process.env.NODE_ENV || 'development'
@@ -150,6 +173,10 @@ const adminClientConfig = {
 	module: {
 		...defaultConfig.module,
 	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: safeSplitChunks(defaultConfig.optimization?.splitChunks),
+	},
 	resolve: {
 		...defaultConfig.resolve,
 		extensions: ['.tsx', '.ts', '.js'],
@@ -190,6 +217,10 @@ const bookingRendererConfig = {
 	},
 	module: {
 		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: safeSplitChunks(defaultConfig.optimization?.splitChunks),
 	},
 	resolve: {
 		...defaultConfig.resolve,

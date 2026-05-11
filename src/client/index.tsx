@@ -18,6 +18,15 @@ import '../stores';
 export * from './types';
 import '../styles/react-select-global.css';
 import LinkTriggers from './pages/link-triggers';
+import config from '@doublescale/config';
+
+// Booking admin pages register themselves via `registerAdminPage()` as a side
+// effect of the import. Only load when the booking module is enabled so the
+// pages don't appear in the sidebar/router when toggled off.
+if (config.isModuleEnabled('booking')) {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+	require('./pages/booking');
+}
 
 /**
  * Link triggers REST + DB live in the free plugin; register the real settings UI here.

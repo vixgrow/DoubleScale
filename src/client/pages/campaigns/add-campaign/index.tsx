@@ -6,9 +6,10 @@ import { useState } from 'react';
 /**
  * internal dependencies
  */
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { GradientCampaignsIcon, NoticeBanner } from '@/components';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { CustomDialogHeader, GradientCampaignsIcon, InfoIcon, NoticeBanner } from '@/components';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CampaignTypes from './campaign-types';
@@ -128,29 +129,19 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogContent
 				className={cn(
-					'max-w-[560px] gap-0 overflow-hidden rounded-2xl border-border/70 p-0 shadow-2xl',
-					'sm:max-w-[560px]'
+					'flex max-h-[90vh] max-w-5xl flex-col gap-0 overflow-hidden rounded-2xl border-border/70 p-6 shadow-2xl bg-white',
+					'sm:max-w-5xl'
 				)}
 			>
-				<div className="border-b border-border/70 bg-gradient-to-br from-muted/30 via-background to-background px-8 pb-6 pt-8">
-					<div className="flex gap-4">
-						<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-card shadow-sm">
-							<span className="text-primary [&>svg]:h-6 [&>svg]:w-6">
-								<GradientCampaignsIcon />
-							</span>
-						</div>
-						<div className="min-w-0 flex-1 space-y-1.5 pr-6">
-							<h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-								{title}
-							</h2>
-							<p className="text-sm leading-relaxed text-muted-foreground">
-								{subtitle}
-							</p>
-						</div>
-					</div>
-				</div>
+				<DialogHeader>
+					<CustomDialogHeader
+						title={title}
+						subtitle={subtitle}
+						icon={<GradientCampaignsIcon />}
+					/>
+				</DialogHeader>
 
-				<div className="space-y-8 px-8 py-7">
+				<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto py-6">
 					{notice && (
 						<NoticeBanner
 							notice={notice}
@@ -158,41 +149,53 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 						/>
 					)}
 
-					<div className="space-y-2">
-						<Label
-							htmlFor="doublescale-add-campaign-name"
-							className="text-sm font-medium text-foreground"
-						>
-							{__('Internal name', 'doublescale')}
-						</Label>
-						<Input
-							id="doublescale-add-campaign-name"
-							autoComplete="off"
-							placeholder={__(
-								'e.g. Spring promo — enterprise segment',
-								'doublescale'
-							)}
-							value={campaignName}
-							onChange={(e) => setCampaignName(e.target.value)}
-							className="h-11 rounded-xl border-border/80 bg-background text-base shadow-inner shadow-black/[0.02]"
-						/>
-						<p className="text-xs text-muted-foreground">
-							{__(
-								'Use something you will recognize in lists and analytics.',
-								'doublescale'
-							)}
-						</p>
-					</div>
+					<Card className="border-border bg-background shadow-none">
+						<CardContent className="p-6">
+							<div className="space-y-2">
+								<Label
+									htmlFor="doublescale-add-campaign-name"
+									className="text-sm font-medium text-foreground flex items-center gap-1 py-0"
+								>
+									{__('Campaign name', 'doublescale')}
+									<span className="text-destructive">*</span>
+								</Label>
+								<Input
+									id="doublescale-add-campaign-name"
+									autoComplete="off"
+									placeholder={__(
+										'e.g. Spring promo — enterprise segment',
+										'doublescale'
+									)}
+									value={campaignName}
+									onChange={(e) =>
+										setCampaignName(e.target.value)
+									}
+									className="h-11 rounded-xl border-border bg-white text-base shadow-inner shadow-black/[0.02] my-1"
+								/>
+								<p className="text-sm text-muted-foreground flex items-center gap-2">
+									<InfoIcon />
+									{__(
+										'Use something you will recognize in lists and analytics.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</CardContent>
+					</Card>
 
 					{isEmail && (
-						<CampaignTypes
-							selectedType={selectedType}
-							onTypeChange={setSelectedType}
-						/>
+						<Card className="border-border bg-background shadow-none">
+							<CardContent className="p-6">
+								<CampaignTypes
+									selectedType={selectedType}
+									onTypeChange={setSelectedType}
+								/>
+							</CardContent>
+						</Card>
 					)}
 				</div>
 
-				<div className="flex flex-col-reverse gap-3 border-t border-border/70 bg-muted/25 px-8 py-5 sm:flex-row sm:items-center sm:justify-end">
+				<div className="flex shrink-0 flex-col-reverse gap-3 pt-6 sm:flex-row sm:items-center sm:justify-end">
 					<Button
 						type="button"
 						variant="outline"

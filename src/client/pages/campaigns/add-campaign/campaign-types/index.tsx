@@ -2,14 +2,17 @@
  * external dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Check } from 'lucide-react';
 
 /**
  * internal dependencies
  */
-import { AllContactsIcon, RepeatIcon } from '@doublescale/components';
+import { CheckIcon } from '@doublescale/components';
 import { CampaignType } from '@doublescale/client';
 import { cn } from '@/lib/utils';
+//@ts-ignore asset lives under plugin root (outside ts rootDir)
+import standardCampaignImg from '../../../../../../assets/images/standard-campaign.png';
+//@ts-ignore asset lives under plugin root (outside ts rootDir)
+import automatedCampaignImg from '../../../../../../assets/images/automated-campaign.png';
 
 interface CampaignTypesProps {
 	selectedType: CampaignType;
@@ -29,27 +32,32 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				'doublescale'
 			),
 			type: 'standard' as const,
-			icon: <AllContactsIcon width={22} height={22} />,
+			image: standardCampaignImg,
+			iconPanelClass:
+				'bg-[#D9E9F3]',
+			badgeClass:
+				'bg-[#D9E9F3] text-[#0D9DFC]',
 		},
 		{
 			label: __('Automated', 'doublescale'),
 			hint: __('Triggered', 'doublescale'),
 			description: __(
-				'Runs when you activate it using a WordPress content event (for example, when a post is published) or on a recurring schedule—not a manual one-time send.',
+				'Runs when triggered by a WordPress content event or recurring schedule, not manual one-time send.',
 				'doublescale'
 			),
 			type: 'automated' as const,
-			icon: <RepeatIcon width={22} height={22} />,
+			image: automatedCampaignImg,
+			iconPanelClass:
+				'bg-[#FAEADF]',
+			badgeClass:
+				'bg-[#FAEADF] text-[#CB5301]',
 		},
 	];
 
 	return (
 		<div className="space-y-4">
 			<div>
-				<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-					{__('Campaign type', 'doublescale')}
-				</p>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<p className="text-base leading-relaxed text-[#29292E]">
 					{__(
 						'Choose how this campaign should run. You can change details later in the editor.',
 						'doublescale'
@@ -57,57 +65,66 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				</p>
 			</div>
 
-			<div className="grid gap-3 sm:grid-cols-2">
+			<div className="flex flex-col gap-6">
 				{options.map((opt) => {
 					const isSelected = selectedType === opt.type;
 					return (
 						<button
 							key={opt.type}
 							type="button"
-							onClick={() => onTypeChange(opt.type)}
+							onClick={() =>
+								onTypeChange(opt.type as CampaignType)
+							}
 							className={cn(
-								'group relative flex flex-col rounded-xl border bg-card p-5 text-left transition-all duration-200',
-								'hover:border-primary/35 hover:shadow-sm',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2',
+								'group relative flex w-full items-center rounded-xl border text-left transition-all duration-200',
+								'hover:border-primary/35 hover:shadow-md',
+								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
 								isSelected
-									? 'border-primary shadow-md ring-1 ring-primary/15 bg-primary/[0.06]'
-									: 'border-border/80'
+									? 'border-primary bg-white ring-1 ring-primary'
+									: 'border-border bg-card'
 							)}
 						>
-							<span
-								className={cn(
-									'absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full border-2 transition-colors',
-									isSelected
-										? 'border-primary bg-primary text-primary-foreground'
-										: 'border-muted-foreground/25 bg-background text-transparent'
-								)}
-								aria-hidden
-							>
-								<Check className="h-3.5 w-3.5 stroke-[3]" />
-							</span>
-
-							<span
-								className={cn(
-									'mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors',
-									isSelected
-										? 'border-primary/20 bg-primary/10 text-primary'
-										: 'border-border/60 bg-muted/40 text-foreground'
-								)}
-							>
-								{opt.icon}
-							</span>
-
-							<div className="flex flex-wrap items-baseline gap-2 pr-10">
-								<span className="text-base font-semibold tracking-tight text-foreground">
-									{opt.label}
+							{isSelected && (
+								<span
+									className="pointer-events-none absolute -right-2 -top-2 z-10 bg-white rounded-full p-0"
+									aria-hidden
+								>
+									<CheckIcon width={22} height={22} />
 								</span>
-								<span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+							)}
+
+							<div
+								className={cn(
+									'flex shrink-0 items-center justify-center rounded-l-xl p-6',
+									opt.iconPanelClass
+								)}
+							>
+								<img
+									src={opt.image}
+									alt={opt.label}
+									className="h-16 w-16 object-contain"
+								/>
+							</div>
+
+							<div className="flex min-w-0 flex-1 items-start gap-4 rounded-r-xl pl-3 pr-4 py-4">
+								<div className="min-w-0 flex-1">
+									<p className="text-sm font-semibold tracking-tight text-foreground">
+										{opt.label}
+									</p>
+									<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+										{opt.description}
+									</p>
+								</div>
+
+								<span
+									className={cn(
+										'shrink-0 rounded-lg p-1 text-sm font-medium tracking-wide',
+										opt.badgeClass
+									)}
+								>
 									{opt.hint}
 								</span>
 							</div>
-							<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-								{opt.description}
-							</p>
 						</button>
 					);
 				})}

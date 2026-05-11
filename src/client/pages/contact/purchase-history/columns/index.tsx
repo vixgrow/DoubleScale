@@ -44,13 +44,13 @@ export function getWooColumns() {
 		{
 			accessorKey: 'date',
 			header: __('Date', 'doublescale'),
-			cell: ({ row }) => formatDate(row.original.date.date),
+			cell: ({ row }) => formatDate(row.original.date),
 		},
 		{
 			accessorKey: 'total',
 			header: __('Total', 'doublescale'),
 			cell: ({ row }) =>
-				`${row.original.total_amount} ${row.original.currency}`,
+				`${Number(row.original.total_amount).toFixed(2)} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'status',
@@ -58,14 +58,18 @@ export function getWooColumns() {
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
-					completed: 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]',
-					pending: 'bg-[#FFF2E2] text-[#A6600B] border-[#A6600B]',
-					refunded: 'bg-[#5570F129] text-[#5570F1] border-[#5570F1]',
+					completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+					processing: 'bg-blue-50 text-blue-700 border-blue-200',
+					'on hold': 'bg-amber-50 text-amber-700 border-amber-200',
+					pending: 'bg-amber-50 text-amber-700 border-amber-200',
+					refunded: 'bg-primary/5 text-primary border-primary/20',
+					failed: 'bg-destructive/5 text-destructive border-destructive/20',
+					cancelled: 'bg-destructive/5 text-destructive border-destructive/20',
 				};
 
 				return (
 					<span
-						className={`border rounded-md px-2 py-1 ${statusStyles[status] || ''}`}
+						className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 ${statusStyles[status] || ''}`}
 					>
 						{row.original.status}
 					</span>
@@ -113,14 +117,17 @@ export function getEddColumns() {
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
-					completed: 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]',
-					pending: 'bg-[#FFF2E2] text-[#A6600B] border-[#A6600B]',
-					refunded: 'bg-[#5570F129] text-[#5570F1] border-[#5570F1]',
+					completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+					pending: 'bg-amber-50 text-amber-700 border-amber-200',
+					refunded: 'bg-primary/5 text-primary border-primary/20',
+					revoked: 'bg-destructive/5 text-destructive border-destructive/20',
+					failed: 'bg-destructive/5 text-destructive border-destructive/20',
+					abandoned: 'bg-muted/50 text-muted-foreground border-border',
 				};
 
 				return (
 					<span
-						className={`border rounded-md px-2 py-1 ${statusStyles[status] || ''}`}
+						className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 ${statusStyles[status] || ''}`}
 					>
 						{row.original.status}
 					</span>
@@ -130,7 +137,7 @@ export function getEddColumns() {
 		{
 			accessorKey: 'total',
 			header: __('Total', 'doublescale'),
-			cell: ({ row }) => `${row.original.total} ${row.original.currency}`,
+			cell: ({ row }) => `${Number(row.original.total).toFixed(2)} ${row.original.currency}`,
 		},
 		{
 			accessorKey: 'actions',
@@ -174,15 +181,15 @@ export function getSurecartColumns() {
 			cell: ({ row }) => {
 				const status = row.original.status.toLowerCase();
 				const statusStyles: Record<string, string> = {
-					paid: 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]',
-					pending: 'bg-[#FFF2E2] text-[#A6600B] border-[#A6600B]',
-					refunded: 'bg-[#5570F129] text-[#5570F1] border-[#5570F1]',
-					canceled: 'bg-[#FEE2E2] text-[#DC2626] border-[#DC2626]',
+					paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+					pending: 'bg-amber-50 text-amber-700 border-amber-200',
+					refunded: 'bg-primary/5 text-primary border-primary/20',
+					canceled: 'bg-destructive/5 text-destructive border-destructive/20',
 				};
 
 				return (
 					<span
-						className={`border rounded-md px-2 py-1 ${statusStyles[status] || ''}`}
+						className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 ${statusStyles[status] || ''}`}
 					>
 						{row.original.status}
 					</span>

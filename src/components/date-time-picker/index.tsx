@@ -109,7 +109,7 @@ export function DateTimePicker({
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
-						className="px-3 h-12 !shadow-none bg-white hover:bg-white text-[#09090B] border border-[#DEE1E6] flex flex-row-reverse justify-between items-center"
+						className="px-3 h-12 !shadow-none bg-white hover:bg-white text-foreground border border-border/60 flex flex-row-reverse justify-between items-center"
 					>
 						<OutlinedCalendarIcon />
 						<span>{date ? formatDateTime(date) : placeholder}</span>
@@ -133,14 +133,14 @@ export function DateTimePicker({
 					/>
 
 					<div className="flex justify-center pt-3 border-t">
-						<div className="flex items-center gap-1 border h-10 border-[#DEE1E6] rounded-l-[8px]">
+						<div className="flex items-center gap-1 border h-10 border-border/60 rounded-l-[8px]">
 							<input
 								type="number"
 								value={hours.toString().padStart(2, '0')}
 								min={1}
 								max={12}
 								onChange={(e) => handleTimeChange('h', e.target.value)}
-								className="w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="w-12 text-center text-sm text-foreground font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
 							/>
 							<span className="text-sm">:</span>
 							<input
@@ -149,11 +149,11 @@ export function DateTimePicker({
 								min={0}
 								max={59}
 								onChange={(e) => handleTimeChange('m', e.target.value)}
-								className="w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="w-12 text-center text-sm text-foreground font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
 							/>
 						</div>
 
-						<div className="flex flex-col h-10 w-14 border border-[#DEE1E6] rounded-r-[8px] overflow-hidden">
+						<div className="flex flex-col h-10 w-14 border border-border/60 rounded-r-[8px] overflow-hidden">
 							<button
 								type="button"
 								onClick={() => handleAmPmClick('AM')}
@@ -161,7 +161,7 @@ export function DateTimePicker({
 									'w-full h-full text-xs font-medium',
 									ampm === 'AM'
 										? 'bg-[#458DC7] text-white'
-										: 'bg-white text-[#09090B]'
+										: 'bg-white text-foreground'
 								)}
 							>
 								AM
@@ -173,7 +173,7 @@ export function DateTimePicker({
 									'w-full h-full text-xs font-medium',
 									ampm === 'PM'
 										? 'bg-[#458DC7] text-white'
-										: 'bg-white text-[#09090B]'
+										: 'bg-white text-foreground'
 								)}
 							>
 								PM

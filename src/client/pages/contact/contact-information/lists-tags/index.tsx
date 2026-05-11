@@ -13,7 +13,6 @@ import { X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	AddRemoveListsModal,
 	AddRemoveTagsModal,
@@ -151,12 +150,14 @@ const ListsTagsCards: React.FC = () => {
 
 	return (
 		<>
-			<div className="flex flex-col gap-4 border-b pb-5">
-				<Card className="shadow-none">
-					<CardHeader className={`px-4 py-2 ${!isListsCollapsed ? 'border-b' : ''}`}>
-						<CardTitle className="flex items-center justify-between font-medium text-lg">
-							<div className="flex items-center gap-2">
-								<ListsIcon width={26} height={26} />
+			<div className="flex flex-col gap-0">
+				<div className="border-b border-border/40">
+					<div className="px-0 py-3">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary [&_svg]:block">
+									<ListsIcon width={20} height={20} />
+								</span>
 								{__('Lists', 'doublescale')}
 							</div>
 							<Button
@@ -165,44 +166,43 @@ const ListsTagsCards: React.FC = () => {
 								onClick={() =>
 									setIsListsCollapsed(!isListsCollapsed)
 								}
-								className="h-8 w-8 p-0"
+								className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
 							>
 								{isListsCollapsed ? (
-									<ChevronDown className="h-6 w-6" />
+									<ChevronDown className="h-4 w-4" />
 								) : (
-									<ChevronUp className="h-6 w-6" />
+									<ChevronUp className="h-4 w-4" />
 								)}
 							</Button>
-						</CardTitle>
-					</CardHeader>
+						</div>
+					</div>
 					{!isListsCollapsed && (
-						<CardContent className="p-4">
+						<div className="px-0 pb-3 pt-1">
 							{isAddingLists || deletingListId !== null ? (
-								<div className="flex flex-wrap gap-2 items-center">
+								<div className="flex flex-wrap gap-1.5 items-center">
 									{contact?.lists && contact.lists.length > 0 ? (
 										contact.lists.map((list) => (
 											<Skeleton
 												key={list.id}
-												className="h-8 w-24 rounded-lg"
+												className="h-6 w-20 rounded-md"
 											/>
 										))
 									) : (
-										<Skeleton className="h-8 w-32 rounded-lg" />
+										<Skeleton className="h-6 w-28 rounded-md" />
 									)}
-									<Skeleton className="h-8 w-28 rounded-lg" />
 								</div>
 							) : (
-								<div className="flex flex-wrap gap-2 items-center">
+								<div className="flex flex-wrap gap-1.5 items-center">
 									{contact?.lists && contact.lists.length > 0 ? (
 										contact.lists.map((list) => (
 											<Badge
 												key={list.id}
 												variant="outline"
-												className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
+												className="flex items-center gap-1.5 rounded-lg border-border/50 bg-muted/25 px-2 py-0.5 text-xs font-medium shadow-sm"
 											>
 												{list.name}
 												<X
-													className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
+													className="h-3 w-3 cursor-pointer hover:text-destructive transition-colors"
 													onClick={() =>
 														deleteList(list.id)
 													}
@@ -222,29 +222,29 @@ const ListsTagsCards: React.FC = () => {
 											</Badge>
 										))
 									) : (
-										<p className="text-sm text-muted-foreground">
+										<p className="text-xs text-muted-foreground">
 											{__('No lists found', 'doublescale')}
 										</p>
 									)}
-									<Button
-										variant="ghost"
-										size="sm"
+									<button
 										onClick={() => setIsListModalOpen(true)}
-										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
+										className="text-xs text-primary font-medium hover:text-primary/80 flex items-center gap-0.5 transition-colors"
 									>
-										<Plus className="h-4 w-4 mr-1" />
+										<Plus className="h-3 w-3" />
 										{__('Add Lists', 'doublescale')}
-									</Button>
+									</button>
 								</div>
 							)}
-						</CardContent>
+						</div>
 					)}
-				</Card>
-				<Card className="shadow-none">
-					<CardHeader className={`px-4 py-2 ${!isTagsCollapsed ? 'border-b' : ''}`}>
-						<CardTitle className="flex items-center justify-between font-medium text-lg">
-							<div className="flex items-center gap-2">
-								<TagsIcon width={26} height={26} />
+				</div>
+				<div className="border-b border-border/40">
+					<div className="px-0 py-3">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
+								<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-700 [&_svg]:block">
+									<TagsIcon width={20} height={20} />
+								</span>
 								{__('Tags', 'doublescale')}
 							</div>
 							<Button
@@ -253,44 +253,43 @@ const ListsTagsCards: React.FC = () => {
 								onClick={() =>
 									setIsTagsCollapsed(!isTagsCollapsed)
 								}
-								className="h-8 w-8 p-0"
+								className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
 							>
 								{isTagsCollapsed ? (
-									<ChevronDown className="h-6 w-6" />
+									<ChevronDown className="h-4 w-4" />
 								) : (
-									<ChevronUp className="h-6 w-6" />
+									<ChevronUp className="h-4 w-4" />
 								)}
 							</Button>
-						</CardTitle>
-					</CardHeader>
+						</div>
+					</div>
 					{!isTagsCollapsed && (
-						<CardContent className="p-4">
+						<div className="px-0 pb-3 pt-1">
 							{isAddingTags || deletingTagId !== null ? (
-								<div className="flex flex-wrap gap-2 items-center">
+								<div className="flex flex-wrap gap-1.5 items-center">
 									{contact?.tags && contact.tags.length > 0 ? (
 										contact.tags.map((tag) => (
 											<Skeleton
 												key={tag.id}
-												className="h-8 w-24 rounded-lg"
+												className="h-6 w-20 rounded-md"
 											/>
 										))
 									) : (
-										<Skeleton className="h-8 w-32 rounded-lg" />
+										<Skeleton className="h-6 w-28 rounded-md" />
 									)}
-									<Skeleton className="h-8 w-28 rounded-lg" />
 								</div>
 							) : (
-								<div className="flex flex-wrap gap-2 items-center">
+								<div className="flex flex-wrap gap-1.5 items-center">
 									{contact?.tags && contact.tags.length > 0 ? (
 										contact.tags.map((tag) => (
 											<Badge
 												key={tag.id}
 												variant="outline"
-												className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
+												className="flex items-center gap-1.5 rounded-lg border-border/50 bg-muted/25 px-2 py-0.5 text-xs font-medium shadow-sm"
 											>
 												{tag.name}
 												<X
-													className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
+													className="h-3 w-3 cursor-pointer hover:text-destructive transition-colors"
 													onClick={() =>
 														deleteTag(tag.id)
 													}
@@ -308,24 +307,22 @@ const ListsTagsCards: React.FC = () => {
 											</Badge>
 										))
 									) : (
-										<p className="text-sm text-muted-foreground">
+										<p className="text-xs text-muted-foreground">
 											{__('No tags found', 'doublescale')}
 										</p>
 									)}
-									<Button
-										variant="ghost"
-										size="sm"
+									<button
 										onClick={() => setIsTagModalOpen(true)}
-										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
+										className="text-xs text-primary font-medium hover:text-primary/80 flex items-center gap-0.5 transition-colors"
 									>
-										<Plus className="h-4 w-4 mr-1" />
+										<Plus className="h-3 w-3" />
 										{__('Add Tags', 'doublescale')}
-									</Button>
+									</button>
 								</div>
 							)}
-						</CardContent>
+						</div>
 					)}
-				</Card>
+				</div>
 			</div>
 
 			{/* Add Lists Modal */}

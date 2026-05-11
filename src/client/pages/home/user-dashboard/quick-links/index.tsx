@@ -22,7 +22,7 @@ import {
 } from '@doublescale/components';
 import { getToLink } from '@doublescale/navigation';
 import { cn } from '@/lib/utils';
-import config from '@doublescale/config';
+
 
 type QuickLinkItem = {
 	label: string;
@@ -32,52 +32,34 @@ type QuickLinkItem = {
 
 export const QuickLinks: FC = () => {
 	const navigate = useNavigate();
-	const dealsOn = config.isModuleToggleEnabled('deals');
-	const campaignsOn = config.isModuleToggleEnabled('campaigns');
-	const automationsOn = config.isModuleToggleEnabled('automations');
-	const formsOn = config.isModuleToggleEnabled('forms');
-	const contactsOn = config.isModuleToggleEnabled('contacts');
 
-	const links: QuickLinkItem[] = [];
-	if (contactsOn) {
-		links.push({
+	const links: QuickLinkItem[] = [
+		{
 			label: __('Create Contact', 'doublescale'),
 			to: getToLink('contacts'),
-			icon: <AddContactIcon color="#0D9DFC" width={27} height={27} />,
-		});
-	}
-	if (dealsOn) {
-		links.push({
+			icon: <AddContactIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
 			label: __('Create Deal', 'doublescale'),
 			to: getToLink('sales-pipeline'),
-			icon: <NewDealIcon color="#0D9DFC" width={27} height={27} />,
-		});
-	}
-	if (campaignsOn) {
-		links.push({
+			icon: <NewDealIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
 			label: __('Create Campaign', 'doublescale'),
 			to: getToLink('campaigns'),
-			icon: <NewCampaignIcon color="#0D9DFC" width={27} height={27} />,
-		});
-	}
-	if (automationsOn) {
-		links.push({
+			icon: <NewCampaignIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
 			label: __('Create Automation', 'doublescale'),
 			to: getToLink('automations'),
-			icon: <NewAutomationIcon color="#0D9DFC" width={27} height={27} />,
-		});
-	}
-	if (formsOn) {
-		links.push({
+			icon: <NewAutomationIcon color='#0D9DFC' width={27} height={27} />,
+		},
+		{
 			label: __('Create Forms', 'doublescale'),
 			to: getToLink('forms'),
-			icon: <NewFormIcon color="#0D9DFC" width={27} height={27} />,
-		});
-	}
-
-	if (links.length === 0) {
-		return null;
-	}
+			icon: <NewFormIcon color='#0D9DFC' width={27} height={27} />,
+		},
+	];
 
 	return (
 		<DashboardContentCard
@@ -102,7 +84,7 @@ export const QuickLinks: FC = () => {
 							<div className="flex text-[#0D9DFC] h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D0D0D0] bg-white">
 								{icon}
 							</div>
-							<ExternalLinkIcon />
+							<ExternalLinkIcon/>
 						</div>
 						<span className="whitespace-nowrap text-sm font-medium text-foreground">
 							{label}

@@ -53,9 +53,10 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 			return;
 		}
 
-		// Ensure URL has protocol
 		let finalUrl = url.trim();
-		if (!finalUrl.match(/^https?:\/\//)) {
+		// Don't add protocol for merge tags (e.g. {{contact:unsubscribe_link}})
+		const isMergeTag = finalUrl.startsWith('{{') && finalUrl.endsWith('}}');
+		if (!isMergeTag && !finalUrl.match(/^https?:\/\//)) {
 			finalUrl = `https://${finalUrl}`;
 		}
 
@@ -92,8 +93,8 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
 						</Label>
 						<Input
 							id="link-url"
-							type="url"
-							placeholder="https://example.com"
+							type="text"
+							placeholder="https://example.com or {{contact:unsubscribe_link}}"
 							value={url}
 							onChange={(e) => setUrl(e.target.value)}
 							autoFocus

@@ -35,8 +35,8 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	return (
 		<div className="doublescale-pro-feature-notice">
 			<div className="doublescale-pro-feature-notice__container">
-				<div className="bg-[#FAEADF] text-[#CB5301] rounded-full p-2">
-					<PremiumIcon width={54} height={54} />
+				<div className="bg-primary/10 text-primary rounded-2xl p-3">
+					<PremiumIcon width={40} height={40} />
 				</div>
 				<div className="doublescale-pro-feature-notice__content">
 					<h2 className="doublescale-pro-feature-notice__title">
@@ -48,7 +48,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						</p>
 					)}
 					{isLicenseExpired && (
-						<div className="mt-3 text-sm text-[#b91c1c] bg-[#FEF2F2] border border-[#FECACA] rounded-md px-3 py-2">
+						<div className="mt-3 text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2">
 							{__(
 								'Your license has expired. Renew to continue using Pro features.',
 								'doublescale'

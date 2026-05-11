@@ -17,6 +17,12 @@ module.exports = {
 			},
 		},
 		extend: {
+			zIndex: {
+				popover: '160000',
+			},
+			fontFamily: {
+				sans: ['"Inter"', 'sans-serif'],
+			},
 			backgroundImage: {
 				'sidebar-accent':
 					'linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%)',
@@ -76,6 +82,12 @@ module.exports = {
 					ring: 'hsl(var(--sidebar-ring))',
 					header: 'hsl(var(--sidebar-header))',
 				},
+				brandPrimary: '#3A3A99',
+				'color-primary': '#953AE4',
+				'color-secondary': '#F1E0FF',
+				'color-tertiary': '#FBF9FC',
+				'color-primary-text': '#292D32',
+				'color-lime-green': '#B7F005',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -9,6 +9,8 @@ export interface ImportStats {
 }
 
 export interface ImportState {
+	/** 1 = source grid; 2–3 = configure (CSV: 2 upload, 3 map; API importers: 2 credentials, 3 map) */
+	wizardStep: number;
 	currentStep: number;
 	importing: boolean;
 	showingCompletion: boolean; // Add this new state
@@ -28,6 +30,7 @@ export interface ImportState {
 	assignedLists: number[];
 	assignedTags: number[];
 	newStatus: string;
+	sendDoubleOptin: boolean;
 	updateExisting: boolean;
 	uploadProgress: number;
 	isUploading: boolean;
@@ -36,6 +39,7 @@ export interface ImportState {
 }
 
 type ImportAction =
+	| { type: 'SET_WIZARD_STEP'; payload: number }
 	| { type: 'SET_CURRENT_STEP'; payload: number }
 	| { type: 'SET_IMPORTING'; payload: boolean }
 	| { type: 'SET_SHOWING_COMPLETION'; payload: boolean } // Add this action
@@ -50,6 +54,7 @@ type ImportAction =
 	| { type: 'SET_ASSIGNED_LISTS'; payload: number[] }
 	| { type: 'SET_ASSIGNED_TAGS'; payload: number[] }
 	| { type: 'SET_NEW_STATUS'; payload: string }
+	| { type: 'SET_SEND_DOUBLE_OPTIN'; payload: boolean }
 	| { type: 'SET_UPDATE_EXISTING'; payload: boolean }
 	| { type: 'SET_UPLOAD_PROGRESS'; payload: number }
 	| { type: 'SET_IS_UPLOADING'; payload: boolean }
@@ -59,11 +64,12 @@ type ImportAction =
 	| { type: 'RESET_STATE' };
 
 const initialState: ImportState = {
+	wizardStep: 1,
 	currentStep: 1,
 	importing: false,
 	showingCompletion: false, // Add this to initial state
 	count: 0,
-	source: 'csv',
+	source: '',
 	offset: 0,
 	cursor: null, // Add cursor to initial state
 	fileData: null,
@@ -73,6 +79,7 @@ const initialState: ImportState = {
 	assignedLists: [],
 	assignedTags: [],
 	newStatus: 'subscribed',
+	sendDoubleOptin: false,
 	updateExisting: false,
 	uploadProgress: 0,
 	isUploading: false,
@@ -82,6 +89,8 @@ const initialState: ImportState = {
 
 function importReducer(state: ImportState, action: ImportAction): ImportState {
 	switch (action.type) {
+		case 'SET_WIZARD_STEP':
+			return { ...state, wizardStep: action.payload };
 		case 'SET_CURRENT_STEP':
 			return { ...state, currentStep: action.payload };
 		case 'SET_IMPORTING':
@@ -110,6 +119,8 @@ function importReducer(state: ImportState, action: ImportAction): ImportState {
 			return { ...state, assignedTags: action.payload };
 		case 'SET_NEW_STATUS':
 			return { ...state, newStatus: action.payload };
+		case 'SET_SEND_DOUBLE_OPTIN':
+			return { ...state, sendDoubleOptin: action.payload };
 		case 'SET_UPDATE_EXISTING':
 			return { ...state, updateExisting: action.payload };
 		case 'SET_UPLOAD_PROGRESS':
@@ -144,6 +155,8 @@ interface ImportContextType {
 	updateValues: (key: string, value: any) => void;
 	updateCredentials: (key: string, value: any) => void;
 	resetState: () => void;
+	/** Wizard step 1: source grid; clears file/credentials/source */
+	returnToSourceStep: () => void;
 }
 
 const ImportContext = createContext<ImportContextType | undefined>(undefined);
@@ -183,12 +196,27 @@ export const ImportProvider: React.FC<ImportProviderProps> = ({ children }) => {
 		dispatch({ type: 'RESET_STATE' });
 	};
 
+	const returnToSourceStep = () => {
+		if (state.importing) {
+			return;
+		}
+		dispatch({ type: 'SET_WIZARD_STEP', payload: 1 });
+		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+		dispatch({ type: 'SET_SOURCE', payload: '' });
+		dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+		dispatch({ type: 'SET_FILE_DATA', payload: null });
+		dispatch({ type: 'SET_CREDENTIALS', payload: {} });
+		dispatch({ type: 'SET_VALUES', payload: {} });
+		dispatch({ type: 'SET_IS_FETCHING', payload: false });
+	};
+
 	const value = {
 		state,
 		dispatch,
 		updateValues,
 		updateCredentials,
 		resetState,
+		returnToSourceStep,
 	};
 
 	return (

@@ -59,25 +59,27 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 	const upgradeUrl = config.getUrlDoubleScalePro();
 
 	return (
-		<Card className="shadow-none max-w-md relative overflow-hidden">
+		<Card className="shadow-none relative overflow-hidden h-full">
 			{isLoading && (
 				<div className="absolute inset-0 z-10 pointer-events-none">
 					<Skeleton className="w-full h-full rounded-lg" />
 				</div>
 			)}
 
-			<CardContent className={`p-4 ${isLoading ? 'opacity-50' : ''}`}>
+			<CardContent className={`p-4 h-full flex flex-col ${isLoading ? 'opacity-50' : ''}`}>
 				{/* Header with logo and connection status */}
-				<div className="flex items-center justify-between mb-3">
-					<div className="flex items-center gap-4">
+				<div className="flex items-center justify-between mb-3 w-full">
+					<div className="flex items-center gap-4 w-full">
 						{imageUrl && (
-							<img
-								src={imageUrl}
-								alt={integration.label}
-								className="max-w-[100px] h-auto"
-							/>
+							<div className="w-12 h-12 flex items-center justify-center shrink-0">
+								<img
+									src={imageUrl}
+									alt={integration.label}
+									className="max-w-full max-h-full object-contain"
+								/>
+							</div>
 						)}
-						<div className="font-semibold text-xl">
+						<div className="font-semibold text-lg w-full">
 							{integration.label}
 						</div>
 					</div>
@@ -89,7 +91,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 				</div>
 
 				{/* Description */}
-				<div className="text-base text-gray-500 border-b pb-3">
+				<div className="text-base text-gray-500 border-b pb-3 flex-1">
 					{integration.description}
 				</div>
 

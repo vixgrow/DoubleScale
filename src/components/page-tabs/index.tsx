@@ -34,10 +34,10 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	tabsContent,
 	className,
 	onValueChange,
-	tabsListWrapperClassName = 'border px-5 py-3 rounded-lg',
-	tabsListClassName = 'bg-transparent text-foreground gap-3',
+	tabsListWrapperClassName = 'border border-border/60 px-2 py-2 rounded-xl bg-card',
+	tabsListClassName = 'bg-transparent text-muted-foreground gap-1',
 	scrollThreshold = 10,
-	scrollArrowBg = 'bg-white',
+	scrollArrowBg = 'bg-card',
 }) => {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [showLeftChevron, setShowLeftChevron] = useState(false);
@@ -90,16 +90,15 @@ const PageTabs: React.FC<PageTabsProps> = ({
 			onValueChange={onValueChange}
 		>
 			<div
-				className={`${tabsListWrapperClassName} ${hasManyTabs ? 'relative' : ''
-					}`}
+				className={`${tabsListWrapperClassName} ${hasManyTabs ? 'relative' : ''}`}
 			>
 				{hasManyTabs && showLeftChevron && (
 					<button
 						onClick={() => scroll('left')}
-						className={`absolute left-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-r-md shadow-sm transition-colors flex items-center justify-center px-1`}
+						className={`absolute left-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-r-lg transition-colors flex items-center justify-center px-1`}
 						aria-label="Scroll left"
 					>
-						<ChevronLeft className="w-5 h-5" />
+						<ChevronLeft className="w-4 h-4 text-muted-foreground" />
 					</button>
 				)}
 				<div
@@ -111,10 +110,10 @@ const PageTabs: React.FC<PageTabsProps> = ({
 							<TabsTrigger
 								key={tab.value}
 								value={tab.value}
-								className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
+								className="gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:hover:text-foreground sm:px-4"
 							>
 								{tab?.icon}
-								{__(tab.label, '@doublescale')}
+								{__(tab.label, 'doublescale')}
 							</TabsTrigger>
 						))}
 					</TabsList>
@@ -122,10 +121,10 @@ const PageTabs: React.FC<PageTabsProps> = ({
 				{hasManyTabs && showRightChevron && (
 					<button
 						onClick={() => scroll('right')}
-						className={`absolute right-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-l-md shadow-sm transition-colors flex items-center justify-center px-1`}
+						className={`absolute right-0 top-0 bottom-0 h-full z-10 ${scrollArrowBg} rounded-l-lg transition-colors flex items-center justify-center px-1`}
 						aria-label="Scroll right"
 					>
-						<ChevronRight className="w-5 h-5" />
+						<ChevronRight className="w-4 h-4 text-muted-foreground" />
 					</button>
 				)}
 			</div>

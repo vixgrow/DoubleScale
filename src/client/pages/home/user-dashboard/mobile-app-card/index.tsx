@@ -12,6 +12,8 @@ import { Smartphone, X, Apple } from 'lucide-react';
 /**
  * Internal dependencies
  */
+import { Button } from '@/components/ui/button';
+
 const ANDROID_URL = 'https://play.google.com/store/apps/details?id=com.doublescale.app';
 const IOS_URL = 'https://apps.apple.com/app/doublescale/id0000000000';
 
@@ -36,15 +38,12 @@ export const MobileAppCard: React.FC = () => {
 		setDismissed(true);
 		try {
 			localStorage.setItem('doublescale_mobile_app_dismissed', '1');
-		} catch {
-			/* ignore */
-		}
+		} catch { }
 	};
 
 	return (
 		<div className="relative overflow-hidden rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] bg-[#fff] p-6">
 			<button
-				type="button"
 				onClick={handleDismiss}
 				className="absolute top-3 right-3 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
 				aria-label={__('Dismiss', 'doublescale')}

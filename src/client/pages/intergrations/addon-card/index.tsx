@@ -11,8 +11,8 @@ import { AlertTriangle, ArrowRight } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@doublescale/components/ui/card';
+import { Button } from '@doublescale/components/ui/button';
 import type { Addon } from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 

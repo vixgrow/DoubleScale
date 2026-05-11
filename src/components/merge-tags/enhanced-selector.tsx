@@ -300,12 +300,20 @@ const MergeTagsGroupRender: React.FC<{
 							</p>
 						</>
 					) : (
-						<p>
-							{__(
-								'No merge tags available for this trigger.',
-								'doublescale'
-							)}
-						</p>
+						<>
+							<p>
+								{__(
+									'No merge tags available for this group.',
+									'doublescale'
+								)}
+							</p>
+							<p className="text-sm mt-2">
+								{__(
+									'Please configure the required fields or plugin to see merge tags here.',
+									'doublescale'
+								)}
+							</p>
+						</>
 					)}
 				</div>
 			) : (

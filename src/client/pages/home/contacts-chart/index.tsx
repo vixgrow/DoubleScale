@@ -41,7 +41,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 	onIntervalChange,
 	onChangeFromDate,
 	onChangeToDate,
-	onSubmit: _onSubmit,
+	onSubmit,
 	cardClassName,
 	contentClassName,
 }) => {
@@ -98,6 +98,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 					onIntervalChange={onIntervalChange}
 					onChangeFromDate={onChangeFromDate}
 					onChangeToDate={onChangeToDate}
+					
 				/>
 			}
 			cardClassName={cn(
@@ -128,79 +129,79 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 							}
 						}}
 						data={{
-							labels: map(data.data.dates, (date) => {
-								return formatDate(date, data.data.type);
-							}),
-							datasets: [
-								{
-									label: __('Contacts', 'doublescale'),
-									data: map(data.data.dates, (date) => {
-										return data.contacts[date]
-											? data.contacts[date]
-											: 0;
-									}),
-									borderColor: gradients.line,
-									backgroundColor: gradients.fill,
-									fill: true,
-									tension: 0.4,
-									pointRadius: 0,
-									pointHoverRadius: 6,
-									borderWidth: 3,
-								},
-							],
-						}}
-						options={{
-							responsive: true,
-							maintainAspectRatio: false,
-							scales: {
-								x: {
-									grid: {
-										display: false,
-									},
-									border: {
-										display: false,
-									},
-								},
-								y: {
-									beginAtZero: true,
-									max: parseInt(data.total) + 10,
-									grid: {
-										color: 'rgba(0, 0, 0, 0.1)',
-									},
-									border: {
-										display: false,
-									},
-								},
+						labels: map(data.data.dates, (date) => {
+							return formatDate(date, data.data.type);
+						}),
+						datasets: [
+							{
+								label: __('Contacts', 'doublescale'),
+								data: map(data.data.dates, (date) => {
+									return data.contacts[date]
+										? data.contacts[date]
+										: 0;
+								}),
+								borderColor: gradients.line,
+								backgroundColor: gradients.fill,
+								fill: true,
+								tension: 0.4,
+								pointRadius: 0,
+								pointHoverRadius: 6,
+								borderWidth: 3,
 							},
-							plugins: {
-								legend: {
+						],
+					}}
+					options={{
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: {
+							x: {
+								grid: {
 									display: false,
 								},
-								tooltip: {
-									mode: 'index',
-									intersect: false,
-									backgroundColor: 'rgba(255, 255, 255, 0.95)',
-									titleColor: '#333',
-									bodyColor: '#666',
-									borderColor: '#ddd',
-									borderWidth: 1,
-									cornerRadius: 8,
-									callbacks: {
-										label: function (context) {
-											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
-										},
-										title: function (context) {
-											return `Contacts: ${data.contacts[data.data.dates[context[0].dataIndex]]}`;
-										},
+								border: {
+									display: false,
+								},
+							},
+							y: {
+								beginAtZero: true,
+								max: parseInt(data.total) + 10,
+								grid: {
+									color: 'rgba(0, 0, 0, 0.1)',
+								},
+								border: {
+									display: false,
+								},
+							},
+						},
+						plugins: {
+							legend: {
+								display: false,
+							},
+							tooltip: {
+								mode: 'index',
+								intersect: false,
+								backgroundColor: 'rgba(255, 255, 255, 0.95)',
+								titleColor: '#333',
+								bodyColor: '#666',
+								borderColor: '#ddd',
+								borderWidth: 1,
+								cornerRadius: 8,
+								callbacks: {
+									label: function (context) {
+										return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+									},
+									title: function (context) {
+										return `Contacts: ${data.contacts[data.data.dates[context[0].dataIndex]]}`;
 									},
 								},
 							},
-							interaction: {
-								mode: 'nearest',
-								axis: 'x',
-								intersect: false,
-							},
-						}}
+						},
+						interaction: {
+							mode: 'nearest',
+							axis: 'x',
+							intersect: false,
+						},
+					}}
 					/>
 				</div>
 			)}

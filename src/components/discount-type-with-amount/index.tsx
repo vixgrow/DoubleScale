@@ -91,10 +91,7 @@ const DiscountTypeWithAmount: React.FC<DiscountTypeWithAmountProps> = ({
 					min="0"
 					max={type === 'percent' ? '100' : ''}
 					step="0.01"
-					className={cn('h-12 bg-white')}
-					style={{
-						borderRadius: '8px',
-					}}
+				className={cn('')}
 					placeholder={
 						type === 'percent' ? '%' : __('Amount', 'doublescale')
 					}

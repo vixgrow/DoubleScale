@@ -103,7 +103,7 @@ export const PluginStatusCard: React.FC<PluginStatusCardProps> = ({
 	if (isChecking) {
 		return (
 			<Card
-				className={`p-6 bg-white border border-[#DEE1E6] rounded-lg shadow-sm ${className}`}
+				className={`p-6 bg-white border border-border/60 rounded-lg shadow-sm ${className}`}
 			>
 				<div className="animate-pulse">
 					<div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>

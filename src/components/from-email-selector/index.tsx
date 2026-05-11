@@ -17,6 +17,7 @@ import {
 import { Check, ChevronsUpDown } from 'lucide-react';
 import config from '@/config';
 import { cn } from '@/lib/utils';
+import { useNavigate, getToLink } from '@doublescale/navigation';
 
 interface VerifiedSender {
 	email: string;
@@ -24,7 +25,7 @@ interface VerifiedSender {
 	connection_id: string;
 }
 
-interface QuillSMTPInfo {
+interface smtpInfo {
 	configured: boolean;
 	verified_senders?: VerifiedSender[];
 	config_url?: string;
@@ -37,6 +38,7 @@ interface FromEmailSelectorProps {
 	error?: string;
 	required?: boolean;
 	className?: string;
+	placeholder?: string;
 }
 
 export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
@@ -45,27 +47,29 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	error,
 	required = true,
 	className,
+	placeholder,
 }) => {
 	const [open, setOpen] = useState(false);
+	const navigate = useNavigate();
 
-	// Safely get QuillSMTP info with fallback
-	let quillsmtpInfo: QuillSMTPInfo | undefined;
+	// Safely get smtp info with fallback
+	let smtpInfo: smtpInfo | undefined;
 	try {
-		quillsmtpInfo = config.getQuillSMTPInfo() as QuillSMTPInfo | undefined;
+		smtpInfo = config.getsmtpInfo() as smtpInfo | undefined;
 	} catch (e) {
-		console.warn('[DoubleScale] Failed to get QuillSMTP info:', e);
-		quillsmtpInfo = undefined;
+		console.warn('[DoubleScale] Failed to get smtp info:', e);
+		smtpInfo = undefined;
 	}
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =
-		quillsmtpInfo?.configured &&
-		quillsmtpInfo?.verified_senders &&
-		quillsmtpInfo.verified_senders.length > 0;
+		smtpInfo?.configured &&
+		smtpInfo?.verified_senders &&
+		smtpInfo.verified_senders.length > 0;
 
 	// Handle selection from dropdown
 	const handleSelect = (selectedEmail: string) => {
-		const sender = quillsmtpInfo?.verified_senders?.find(
+		const sender = smtpInfo?.verified_senders?.find(
 			(s) => s.email === selectedEmail
 		);
 		onChange(selectedEmail, sender?.name || undefined);
@@ -78,29 +82,25 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 			<div className={className}>
 				<Input
 					type="email"
-					placeholder={__('name@gmail.com', 'doublescale')}
+					placeholder={placeholder || __('name@gmail.com', 'doublescale')}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className={cn('h-12 bg-white', error && '!border-red-500 focus-visible:!ring-red-500')}
-					required={required}
-					style={{
-						borderRadius: '8px',
-					}}
+				className={cn(error && '!border-destructive focus-visible:!ring-destructive/20')}
+				required={required}
 				/>
-				{!quillsmtpInfo?.configured && quillsmtpInfo?.plugin_url && (
-					<p className="text-sm text-gray-500 mt-1">
-						{__('Install', 'doublescale')}{' '}
-						<a
-							href={quillsmtpInfo.plugin_url}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-blue-600 hover:underline"
-						>
-							QuillSMTP
-						</a>{' '}
-						{__('for easier email management', 'doublescale')}
-					</p>
-				)}
+			{!smtpInfo?.configured && (
+				<p className="text-xs text-muted-foreground mt-1">
+					{__('Install', 'doublescale')}{' '}
+					<button
+						type="button"
+						onClick={() => navigate(getToLink('extensions') + '&search=smtp')}
+						className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0"
+					>
+						smtp
+					</button>{' '}
+					{__('for easier email management', 'doublescale')}
+				</p>
+			)}
 			</div>
 		);
 	}
@@ -112,16 +112,13 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				<div className="flex-1 min-w-0">
 					<Input
 						type="email"
-						placeholder={__('name@gmail.com', 'doublescale')}
+						placeholder={placeholder || __('name@gmail.com', 'doublescale')}
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
-						className={cn(
-							'w-full h-12 bg-white',
-							error && '!border-red-500 focus-visible:!ring-red-500'
-						)}
-						style={{
-							borderRadius: '8px',
-						}}
+					className={cn(
+						'w-full',
+						error && '!border-destructive focus-visible:!ring-destructive/20'
+					)}
 						required={required}
 					/>
 				</div>
@@ -131,10 +128,10 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 							variant="outline"
 							role="combobox"
 							aria-expanded={open}
-							className="h-12 w-12 shrink-0 justify-center p-0"
+							className="h-10 w-10 shrink-0 justify-center p-0"
 							type="button"
 						>
-							<ChevronsUpDown className="h-6 w-6 opacity-50" />
+							<ChevronsUpDown className="h-4 w-4 opacity-50" />
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-[400px] p-0" align="end">
@@ -143,8 +140,8 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 								<CommandEmpty>
 									{__('No verified senders found.', 'doublescale')}
 								</CommandEmpty>
-								<CommandGroup heading={__('QuillSMTP Connections', 'doublescale')}>
-									{quillsmtpInfo?.verified_senders?.map((sender) => (
+								<CommandGroup heading={__('smtp Connections', 'doublescale')}>
+									{smtpInfo?.verified_senders?.map((sender) => (
 										<CommandItem
 											key={sender.connection_id}
 											value={sender.email}
@@ -163,9 +160,9 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 													{sender.email}
 												</span>
 												{sender.name && (
-													<span className="text-sm text-gray-500">
-														{sender.name}
-													</span>
+												<span className="text-sm text-muted-foreground">
+													{sender.name}
+												</span>
 												)}
 											</div>
 										</CommandItem>
@@ -176,7 +173,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					</PopoverContent>
 				</Popover>
 			</div>
-			<p className="text-xs text-gray-500 mt-1">
+			<p className="text-xs text-muted-foreground mt-1">
 				{__('Type an email as per your domain/SMTP settings. Email mismatch settings may not deliver emails as expected', 'doublescale')}
 			</p>
 		</div>

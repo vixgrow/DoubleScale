@@ -5,11 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-/**
- * External dependencies
- */
-import { Typography, Flex, Select, Input, Skeleton, Button } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Trash2 as DeleteOutlined } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -17,6 +13,11 @@ import { DeleteOutlined } from '@ant-design/icons';
 import './style.scss';
 import type { ReactSelectOptions } from '@doublescale/client';
 import { map } from 'lodash';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface APIMappedFieldsProps {
 	onChange: (value: { key: string; value: string }[]) => void;
@@ -65,7 +66,7 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 	}, []);
 
 	if (loading) {
-		return <Skeleton active />;
+		return <Skeleton className='h-4 w-full' />;
 	}
 
 	const addNewField = () => {
@@ -91,43 +92,39 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 	};
 
 	return (
-		<Flex gap={10} vertical>
-			<Flex gap={20}>
-				<Typography.Text style={{ flex: 1 }} strong>
+        <div className='flex gap-2.5 flex-col'>
+            <div className='flex gap-5'>
+				<span style={{ flex: 1 }}>
 					{__('Field', 'doublescale')}
-				</Typography.Text>
-				<Typography.Text style={{ flex: 1 }} strong>
+				</span>
+				<span style={{ flex: 1 }}>
 					{__('Value', 'doublescale')}
-				</Typography.Text>
-			</Flex>
-			{fields.length > 0 && map(values, (field, index) => {
+				</span>
+			</div>
+            {fields.length > 0 && map(values, (field, index) => {
 				return (
-					<Flex key={index} gap={20}>
-						<Select
-							onChange={(value) => {
+                    <div key={index} className='flex gap-5'>
+                        <Select
+                            onValueChange={(value) => {
 								changeHandler(index, { key: value });
 							}}
-							value={field.key}
-							options={fields}
-							style={{ flex: 1 }}
-						/>
-						<Input
+                            value={field.key} />
+                        <Input
 							value={field.value}
 							onChange={(e) => {
 								changeHandler(index, { value: e.target.value });
 							}}
 							style={{ flex: 1 }}
 						/>
-						<Button icon={<DeleteOutlined />} onClick={() => removeField(index)} danger />
-					</Flex>
-				);
+                        <Button onClick={() => removeField(index)} variant='destructive' />
+                    </div>
+                );
 			})}
-
-			<Button onClick={addNewField}>
+            <Button onClick={addNewField}>
 				{__('Add New Field', 'doublescale')}
 			</Button>
-		</Flex>
-	);
+        </div>
+    );
 };
 
 export default APIMappedFields;

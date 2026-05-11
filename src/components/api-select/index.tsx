@@ -52,9 +52,9 @@ function isIntegrationResponse(response: any): response is IntegrationDataItem[]
 const API_Select = ({ endpoint, value, onChange, multiple = false }: Props) => {
 	// Normalize endpoint path
 	const normalizedEndpoint = useMemo(() => {
-		// If endpoint starts with '/doublescale/v1/', use it as-is
+		// If endpoint starts with 'doublescale/v1/' or '/doublescale/v1/', use it as-is
 		// Otherwise, prepend '/doublescale/v1/integrations/' for integration endpoints
-		if (endpoint.startsWith('/doublescale/v1/') || endpoint.startsWith('doublescale/v1/')) {
+		if (endpoint.startsWith('doublescale/v1/') || endpoint.startsWith('/doublescale/v1/')) {
 			return endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 		}
 		return `/doublescale/v1/integrations/${endpoint}`;

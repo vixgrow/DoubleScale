@@ -200,17 +200,17 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 	};
 
 	return (
-		<div className="flex flex-col gap-10">
+		<div className="flex flex-col gap-8">
 			<div>
-				<h3 className="text-[#170F49] text-[32px] font-semibold">
+				<h3 className="text-foreground text-2xl font-semibold mb-1">
 					{__(
-						'Tag Your Contacts—Organize CRM Segments with Ease',
+						'Organize with Tags',
 						'doublescale'
 					)}
 				</h3>
-				<p className="text-[#777] text-lg font-normal leading-7">
+				<p className="text-muted-foreground text-sm leading-relaxed">
 					{__(
-						'Add tags to your contacts to label VIPs, product users, and more—making it easier to filter, track, and personalize your CRM outreach. Smart tagging helps you stay organized and automate actions with precision.',
+						'Add tags to label VIPs, product users, and more — making it easier to filter, track, and personalize your CRM outreach.',
 						'doublescale'
 					)}
 				</p>
@@ -262,7 +262,7 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				)}
 			/>
 
-			<div className="flex justify-between pt-8">
+			<div className="flex justify-between pt-6 border-t border-border/40">
 				<div className="flex gap-2">
 					<ButtonComponent onClick={onPrevious} type="" disabled={isSaving}>
 						{__('Previous', 'doublescale')}

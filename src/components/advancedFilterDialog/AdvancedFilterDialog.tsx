@@ -91,10 +91,10 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						/>
 					</DialogTitle>
 				</DialogHeader>
-				<div className=" flex border flex-col border-[#1E3A8A] rounded-[8px] p-6  gap-6">
+				<div className=" flex border flex-col border-[#1E3A8A] rounded-lg p-6  gap-6">
 					<div className=" w-full grid grid-cols-1 md:grid-cols-2 gap-6 ">
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1  font-normal text-[#09090B] text-base">
+							<label className="block mb-1  font-normal text-foreground text-base">
 								{__('Deal Owner', 'doublescale')}
 							</label>
 
@@ -119,7 +119,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						</div>
 						{/* Pipeline Filter */}
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1 font-normal text-[#09090B] text-base">
+							<label className="block mb-1 font-normal text-foreground text-base">
 								{__('Pipeline', 'doublescale')}
 							</label>
 
@@ -133,7 +133,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									onPipelineChange(Number(value))
 								}
 							>
-								<SelectTrigger className=" h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] font-sm text-base tracking-[-.5px]">
+								<SelectTrigger className=" h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-foreground font-sm text-base tracking-[-.5px]">
 									<SelectValue
 										placeholder={__(
 											'Select Stage',
@@ -165,7 +165,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						</div>
 						{/* Expected Close Date */}
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1 font-normal text-[#09090B] text-base">
+							<label className="block mb-1 font-normal text-foreground text-base">
 								{__('Expected Close Date', 'doublescale')}
 							</label>
 							<DateRangePicker
@@ -182,12 +182,12 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									)
 								}
 								placeholder="From - To"
-								className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
+								className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-foreground bg-white !font-normal !text-base tracking-[-.5px]"
 							/>
 						</div>
 						{/* Created Date */}
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1 font-normal text-[#09090B] text-base">
+							<label className="block mb-1 font-normal text-foreground text-base">
 								{__('Created Date', 'doublescale')}
 							</label>
 							<DateRangePicker
@@ -204,12 +204,12 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									)
 								}
 								placeholder="From - To"
-								className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
+								className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-foreground bg-white !font-normal !text-base tracking-[-.5px]"
 							/>
 						</div>
 						{/* Priority */}
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1 font-normal text-[#09090B] text-base">
+							<label className="block mb-1 font-normal text-foreground text-base">
 								{__('Priority', 'doublescale')}
 							</label>
 
@@ -222,7 +222,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 									)
 								}
 							>
-								<SelectTrigger className=" h-10 rounded-md border border-[#E1E3EA] !text-[#09090B] font-sm text-base tracking-[-.5px]">
+								<SelectTrigger className=" h-10 rounded-md border border-[#E1E3EA] !text-foreground font-sm text-base tracking-[-.5px]">
 									<SelectValue
 										placeholder={__(
 											'All priorities',
@@ -245,7 +245,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 						</div>
 						{/* Deal Value Range */}
 						<div className="flex flex-col gap-2">
-							<label className="block mb-1 font-normal text-[#09090B] text-base">
+							<label className="block mb-1 font-normal text-foreground text-base">
 								{__('Deal Value Range', 'doublescale')}
 							</label>
 							<div className=" flex gap-2">
@@ -264,7 +264,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 												: null,
 										})
 									}
-									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
+									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
 									placeholder={__('Min', 'doublescale')}
 								/>
 								<Input
@@ -282,7 +282,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 												: null,
 										})
 									}
-									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
+									className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-foreground font-sm text-base tracking-[-.5px]"
 									placeholder={__('Max', 'doublescale')}
 								/>
 							</div>
@@ -294,7 +294,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 							className={`py-2 px-4 rounded-md border hover:bg-white !shadow-none font-sm text-base tracking-[-.5px] ${
 								hasActiveFilters
 									? '!text-[#E13B3B] !border-[#E13B3B] bg-white' 
-									: '!text-[#777] !border-[#777] bg-white'
+									: '!text-muted-foreground !border-[#777] bg-white'
 							}`}
 							onClick={clearFilters}
 							title={__('Clear all filters', 'doublescale')}

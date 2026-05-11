@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 //@ts-ignore
-import device from '../../../assets/images/email-device.png';
+import device from '@doublescale/assets/images/email-device.png';
 import { Star } from 'lucide-react';
 
 const FeedBuilder: React.FC<{
@@ -17,7 +17,7 @@ const FeedBuilder: React.FC<{
 	const avatarLetter = displayFromName.charAt(0).toUpperCase();
 
 	return (
-		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-full lg:w-1/3 py-8 sm:py-10">
+		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-muted/50 w-full lg:w-1/3 py-8 sm:py-10">
 			<div className="relative w-full flex items-center justify-center">
 				<img
 					src={device}
@@ -33,14 +33,14 @@ const FeedBuilder: React.FC<{
 					<div className="flex-1 space-y-1">
 						<div className="flex flex-col gap-1">
 							<div className="flex items-center justify-between gap-2">
-								<span className="font-medium text-[#09090B] text-xs sm:text-sm max-w-[75px] truncate">
+								<span className="font-medium text-foreground text-xs sm:text-sm max-w-[75px] truncate">
 									{displayFromName}
 								</span>
 								<span className="text-[9px] sm:text-[10px] text-[#9c9595] shrink-0">
 									{__('9:01 AM', 'doublescale')}
 								</span>
 							</div>
-							<span className="text-[10px] sm:text-xs text-[#09090B] max-w-[180px] font-medium truncate">
+							<span className="text-[10px] sm:text-xs text-foreground max-w-[180px] font-medium truncate">
 								{displaySubject}
 							</span>
 						</div>

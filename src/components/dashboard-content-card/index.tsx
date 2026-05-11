@@ -64,7 +64,7 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 							className="text-[#6549CA] shadow-none text-base leading-7 font-medium bg-transparent hover:bg-transparent p-0 flex items-center gap-1 hover:text-primary/80 transition-colors"
 						>
 							{__('View All', 'doublescale')}
-							<ArrowRight width={24} height={24} />
+							<ArrowRight width={24} height={24}  />
 						</Link>
 					</div>
 				)}

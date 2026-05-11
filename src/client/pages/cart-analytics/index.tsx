@@ -7,11 +7,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
-/**
- * External dependencies
- */
-import { Card, Flex, Skeleton, Typography } from 'antd';
-import { UserOutlined, MailOutlined } from '@ant-design/icons';
+import { User as UserOutlined, Mail as MailOutlined } from 'lucide-react';
 import dayjs from 'dayjs';
 import { map } from 'lodash';
 import '../../lib/chart-setup';
@@ -25,6 +21,9 @@ import type { CartAnalytics as CartAnalyticsData } from '@doublescale/client';
 import { NavLink } from '@doublescale/navigation';
 import { convertDate, formatDate } from '@doublescale/utils';
 import { DateFilter } from '@doublescale/components';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CartAnalytics: React.FC = () => {
 	const [data, setData] = useState<CartAnalyticsData | null>(null);
@@ -61,44 +60,44 @@ const CartAnalytics: React.FC = () => {
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton active />;
+		return <Skeleton className='h-4 w-full' />;
 	}
 
 	return (
-		<Flex gap={20} vertical>
-			<Flex gap={20}>
-				<Card className="doublescale-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="doublescale-dashboard-card-icon">
-								<UserOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Carts', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="doublescale-dashboard-card-value">
-							{data.total.carts}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="doublescale-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="doublescale-dashboard-card-icon">
-								<MailOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Revenue', 'doublescale')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="doublescale-dashboard-card-value">
-							{data.total.revenue}
-						</Typography.Text>
-					</Flex>
-				</Card>
-			</Flex>
-			<DateFilter
+        <div className='flex gap-5 flex-col'>
+            <div className='flex gap-5'>
+				<Card className="doublescale-dashboard-card"><CardContent>
+                        <div className='flex gap-2.5 flex-col'>
+                            <div className='flex gap-2.5'>
+                                <div className="doublescale-dashboard-card-icon">
+                                    <UserOutlined style={{ fontSize: 16 }} />
+                                </div>
+                                <span>
+                                    {__('Total Carts', 'doublescale')}
+                                </span>
+                            </div>
+                            <span className="doublescale-dashboard-card-value">
+                                {data.total.carts}
+                            </span>
+                        </div>
+                    </CardContent></Card>
+				<Card className="doublescale-dashboard-card"><CardContent>
+                        <div className='flex gap-2.5 flex-col'>
+                            <div className='flex gap-2.5'>
+                                <div className="doublescale-dashboard-card-icon">
+                                    <MailOutlined style={{ fontSize: 16 }} />
+                                </div>
+                                <span>
+                                    {__('Total Revenue', 'doublescale')}
+                                </span>
+                            </div>
+                            <span className="doublescale-dashboard-card-value">
+                                {data.total.revenue}
+                            </span>
+                        </div>
+                    </CardContent></Card>
+			</div>
+            <DateFilter
 				interval={interval}
 				startDate={startDate}
 				endDate={endDate}
@@ -107,124 +106,112 @@ const CartAnalytics: React.FC = () => {
 				onChangeToDate={(date) => setEndDate(date)}
 				onSubmit={fetchCartAnalytics}
 			/>
-			<Flex gap={20}>
-				<Card
-					title={__('Cart Analytics', 'doublescale')}
-					extra={
-						<NavLink to="abandoned-carts">
+            <div className='flex gap-5'>
+				<Card style={{ flex: 1 }}><CardHeader className='flex flex-row items-center justify-between'><CardTitle>{__('Cart Analytics', 'doublescale')}</CardTitle>{<NavLink to="abandoned-carts">
 							{__('View All', 'doublescale')}
-						</NavLink>
-					}
-					style={{ flex: 1 }}
-				>
-					<Line
-						data={{
-							labels: map(data.data.dates, (date) => {
-								return formatDate(date, data.data.type);
-							}),
-							datasets: [
-								{
-									label: __('Carts', 'doublescale'),
-									data: map(data.data.dates, (date) => {
-										return data.carts[date]
-											? data.carts[date]
-											: 0;
-									}),
-									borderColor: '#6d78d8',
-									backgroundColor: '#6d78d8',
-								},
-							],
-						}}
-						options={{
-							scales: {
-								x: {
-									grid: {
-										display: false,
-									},
-								},
-								y: {
-									beginAtZero: true,
-									max: data.total.carts + 10,
-								},
-							},
-							plugins: {
-								tooltip: {
-									callbacks: {
-										label: function (context) {
-											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
-										},
-										title: function (context) {
-											return `Carts: ${data.carts[data.data.dates[context[0].dataIndex]]}`;
-										},
-									},
-								},
-							},
-						}}
-						height={100}
-					/>
-				</Card>
-				<Card
-					title={__('Revenue', 'doublescale')}
-					extra={
-						<NavLink to="abandoned-carts">
+						</NavLink>}</CardHeader><CardContent>
+                        <Line
+                            data={{
+                                labels: map(data.data.dates, (date) => {
+                                    return formatDate(date, data.data.type);
+                                }),
+                                datasets: [
+                                    {
+                                        label: __('Carts', 'doublescale'),
+                                        data: map(data.data.dates, (date) => {
+                                            return data.carts[date]
+                                                ? data.carts[date]
+                                                : 0;
+                                        }),
+                                        borderColor: '#6d78d8',
+                                        backgroundColor: '#6d78d8',
+                                    },
+                                ],
+                            }}
+                            options={{
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        max: data.total.carts + 10,
+                                    },
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+                                            },
+                                            title: function (context) {
+                                                return `Carts: ${data.carts[data.data.dates[context[0].dataIndex]]}`;
+                                            },
+                                        },
+                                    },
+                                },
+                            }}
+                            height={100}
+                        />
+                    </CardContent></Card>
+				<Card style={{ flex: 1 }}><CardHeader className='flex flex-row items-center justify-between'><CardTitle>{__('Revenue', 'doublescale')}</CardTitle>{<NavLink to="abandoned-carts">
 							{__('View All', 'doublescale')}
-						</NavLink>
-					}
-					style={{ flex: 1 }}
-				>
-					<Line
-						data={{
-							labels: map(data.data.dates, (date) => {
-								return formatDate(date, data.data.type);
-							}),
-							datasets: [
-								{
-									label: __('Revenue', 'doublescale'),
-									data: map(data.data.dates, (date) => {
-										return data.revenue[date]
-											? data.revenue[date]
-											: 0;
-									}),
-									borderColor: '#6d78d8',
-									backgroundColor: '#6d78d8',
-									fill: false,
-								},
-							],
-						}}
-						options={{
-							scales: {
-								x: {
-									grid: {
-										display: false,
-									},
-								},
-								y: {
-									beginAtZero: true,
-									max:
-										parseInt(
-											data.total.revenue.toString()
-										) + 10,
-								},
-							},
-							plugins: {
-								tooltip: {
-									callbacks: {
-										label: function (context) {
-											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
-										},
-										title: function (context) {
-											return `Revenue: ${data.revenue[data.data.dates[context[0].dataIndex]]}`;
-										},
-									},
-								},
-							},
-						}}
-						height={100}
-					/>
-				</Card>
-			</Flex>
-		</Flex>
-	);
+						</NavLink>}</CardHeader><CardContent>
+                        <Line
+                            data={{
+                                labels: map(data.data.dates, (date) => {
+                                    return formatDate(date, data.data.type);
+                                }),
+                                datasets: [
+                                    {
+                                        label: __('Revenue', 'doublescale'),
+                                        data: map(data.data.dates, (date) => {
+                                            return data.revenue[date]
+                                                ? data.revenue[date]
+                                                : 0;
+                                        }),
+                                        borderColor: '#6d78d8',
+                                        backgroundColor: '#6d78d8',
+                                        fill: false,
+                                    },
+                                ],
+                            }}
+                            options={{
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        max:
+                                            parseInt(
+                                                data.total.revenue.toString()
+                                            ) + 10,
+                                    },
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+                                            },
+                                            title: function (context) {
+                                                return `Revenue: ${data.revenue[data.data.dates[context[0].dataIndex]]}`;
+                                            },
+                                        },
+                                    },
+                                },
+                            }}
+                            height={100}
+                        />
+                    </CardContent></Card>
+			</div>
+        </div>
+    );
 };
 
 export default CartAnalytics;

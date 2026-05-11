@@ -18,13 +18,13 @@ import { ImportProgressIcon, LoadingSpinner } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 //@ts-ignore
-import csvIcon from '../../../../../assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/csv.png';
 //@ts-ignore
-import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
+import hubspotIcon from '@doublescale/assets/images/hubspot/hubspot-icon.png';
 //@ts-ignore
-import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
+import pipedriveIcon from '@doublescale/assets/images/pipedrive/pipedrive-icon.png';
 //@ts-ignore
-import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
+import gohighlevelIcon from '@doublescale/assets/images/gohighlevel/gohighlevel-icon.png';
 import { getToLink } from '@doublescale/navigation';
 
 interface ImportProgressProps {

@@ -198,13 +198,12 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 								setSelectedTags(newTags);
 							}}
 							placeholder={content.selectPlaceholder}
-							styles={{
-								control: (styles) => ({
-									...styles,
-									minHeight: '40px',
-									borderRadius: '8px',
-								}),
-							}}
+						styles={{
+							control: (styles) => ({
+								...styles,
+								minHeight: '40px',
+							}),
+						}}
 						/>
 					</div>
 

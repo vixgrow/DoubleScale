@@ -49,11 +49,7 @@ const Dashboard: React.FC = () => {
 	const hero = (
 		<div
 			className="doublescale-dashboard-hero"
-			style={{
-				backgroundImage: `url(${frameDashboardBg})`,
-				backgroundSize: 'cover',
-				backgroundPosition: 'center',
-			}}
+			style={{ backgroundImage: `url(${frameDashboardBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
 		>
 			<div className="doublescale-dashboard-hero__header">
 				<PageHeader
@@ -62,11 +58,11 @@ const Dashboard: React.FC = () => {
 					actions={[]}
 				/>
 			</div>
-			{showUpgradeHeroBanner && (
+            {showUpgradeHeroBanner && (
 				<div className="doublescale-dashboard-hero__promo">
 					<UpgradeHeroBanner />
 				</div>
-			)}
+			)} 
 		</div>
 	);
 

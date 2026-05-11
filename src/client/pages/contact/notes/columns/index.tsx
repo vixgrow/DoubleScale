@@ -12,7 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { Note } from '@doublescale/client';
 import { Button } from '@doublescale/components/ui/button';
 import { DeleteIcon } from '@doublescale/components';
-import EditHeaderIcon from '@/components/icons/edit-header';
+import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
 
 interface ColumnsProps {
 	onEdit: (note: Note) => void;
@@ -41,8 +41,8 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 			cell: ({ row }) => {
 				const isDealNote = row.original.deal_id !== null && row.original.deal_id !== undefined;
 				const sourceColors: Record<string, string> = {
-					deal: 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]',
-					contact: 'text-[#5570F1] bg-[#5570F129] border-[#5570F1]',
+					deal: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+					contact: 'text-primary bg-primary/5 border-primary/20',
 				};
 
 				const sourceType = isDealNote ? 'deal' : 'contact';
@@ -50,7 +50,7 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 
 				return (
 					<span
-						className={`border rounded-md px-2 py-1 ${colorClass}`}
+						className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 ${colorClass}`}
 					>
 						{isDealNote ? __('Deal', 'doublescale') : __('Contact', 'doublescale')}
 					</span>
@@ -63,15 +63,15 @@ export function getColumns({ onEdit, onDelete }: ColumnsProps) {
 			cell: ({ row }) => {
 				const type = row.original.type;
 				const typeColors: Record<string, string> = {
-					reminder: 'text-[#A6600B] bg-[#FFF2E2] border-[#A6600B]',
-					note: 'text-[#5570F1] bg-[#5570F129] border-[#5570F1]',
+					reminder: 'text-amber-700 bg-amber-50 border-amber-200',
+					note: 'text-primary bg-primary/5 border-primary/20',
 				};
 
 				const colorClass = typeColors[type] || typeColors.note;
 
 				return (
 					<span
-						className={`border rounded-md px-2 py-1 capitalize ${colorClass}`}
+						className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 capitalize ${colorClass}`}
 					>
 						{type}
 					</span>

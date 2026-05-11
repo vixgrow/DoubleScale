@@ -24,7 +24,6 @@ import Overview from './overview';
 import {
 	CreateFormsIcon,
 	PanelLayout,
-	PanelSettings,
 	PlayIcon,
 	NoticeBanner,
 } from '@doublescale/components';
@@ -43,7 +42,6 @@ const Form: React.FC<FormProps> = ({
 	onSuccess,
 }) => {
 	const id = useParams().id;
-	const tab = useParams().tab;
 	const navigate = useNavigate();
 	const [state, dispatch] = useReducer(reducer, {
 		form: null,
@@ -55,13 +53,11 @@ const Form: React.FC<FormProps> = ({
 	const { form } = state;
 	const [loading, setLoading] = useState(!isNewForm);
 	const [isSaving, setIsSaving] = useState(false);
-	const [currentStep, setCurrentStep] = useState(0);
+	const isSavingRef = useRef(false);
 	const [formFields, setFormFields] = useState<
 		FormType['fields_settings']['fields'] | null
 	>(null);
 	const [formWasSaved, setFormWasSaved] = useState(false);
-	const isEditMode = !isNewForm;
-
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
@@ -103,6 +99,7 @@ const Form: React.FC<FormProps> = ({
 					update_existing_contact: false,
 					update_blank_fields: false,
 					mark_as_subscribed: false,
+					enable_email_notification: false,
 				},
 				post_id: undefined,
 			} as FormType);
@@ -130,8 +127,14 @@ const Form: React.FC<FormProps> = ({
 	};
 
 	const saveForm = async (data: Partial<FormType> = {}) => {
+		const baseForm = stateRef.current.form as FormType | null;
+		if (!baseForm) {
+			return;
+		}
+
+		isSavingRef.current = true;
 		setIsSaving(true);
-		const newForm = { ...form, ...data };
+		const newForm = { ...baseForm, ...data };
 
 		if (newForm.post_id) {
 			newForm.form_id = `${newForm.post_id}:${newForm.form_id}`;
@@ -141,14 +144,12 @@ const Form: React.FC<FormProps> = ({
 			let response: FormType;
 
 			if (isNewForm && (!newForm.id || newForm.id === 0)) {
-				// Create new form
 				response = (await apiFetch({
 					path: '/doublescale/v1/forms',
 					method: 'POST',
 					data: newForm,
 				})) as FormType;
 			} else {
-				// Update existing form
 				response = (await apiFetch({
 					path: `/doublescale/v1/forms/${newForm.id}`,
 					method: 'POST',
@@ -163,6 +164,7 @@ const Form: React.FC<FormProps> = ({
 			throw error;
 		} finally {
 			setIsSaving(false);
+			isSavingRef.current = false;
 		}
 	};
 
@@ -182,38 +184,72 @@ const Form: React.FC<FormProps> = ({
 				update_existing_contact: false,
 				update_blank_fields: false,
 				mark_as_subscribed: false,
+				enable_email_notification: false,
 			};
 		}
 
 		return form;
 	};
 
-	// Modify the handleNext function in the Form component
-	const handleNext = async () => {
-		if (currentStep === 0) {
-			if (!form?.name || !form?.form_type || !form?.form_id) {
-				showNotice(
-					'error',
-					__('Please fill all required fields', 'doublescale')
-				);
+	const connectionIsComplete = (f: FormType | null) =>
+		!!(
+			f?.name?.trim() &&
+			f.form_type &&
+			f.form_id
+		);
+
+	// Persist connection (name + builder + form) shortly after edits so mapping can load.
+	useEffect(() => {
+		if (loading) {
+			return;
+		}
+		const snap = stateRef.current.form as FormType | null;
+		if (!snap || !connectionIsComplete(snap)) {
+			return;
+		}
+		if (isSavingRef.current) {
+			return;
+		}
+
+		const timer = window.setTimeout(async () => {
+			if (isSavingRef.current) {
+				return;
+			}
+			const latest = stateRef.current.form as FormType | null;
+			if (!latest || !connectionIsComplete(latest)) {
 				return;
 			}
 			try {
 				await saveForm();
-				setFormWasSaved(true); // Mark that form was saved
-				closeNotice(); // Clear any existing notices when moving to step 2
-				setCurrentStep(1);
-			} catch (error: any) {
-				showNotice('error', error.message);
+				setFormWasSaved(true);
+			} catch {
+				// saveForm surfaces notice
 			}
-		} else if (currentStep === 1) {
-			// Validate that required contact fields are mapped
-			const mappedFields = (form?.data as any)?.mapped_fields || {};
+		}, 900);
 
-			// Required contact fields that must be mapped
+		return () => window.clearTimeout(timer);
+	}, [form?.name, form?.form_type, form?.form_id, form?.post_id, loading]);
+
+	const handleActivate = async () => {
+		const snap = stateRef.current.form as FormType | null;
+		if (!connectionIsComplete(snap)) {
+			showNotice(
+				'error',
+				__('Please fill all required fields', 'doublescale')
+			);
+			return;
+		}
+
+		try {
+			if (isNewForm && snap && (!snap.id || snap.id === 0)) {
+				await saveForm();
+				setFormWasSaved(true);
+			}
+
+			const mappedFields =
+				(stateRef.current.form?.data as { mapped_fields?: Record<string, string> })
+					?.mapped_fields || {};
 			const requiredContactFields = ['email'];
-
-			// Check if all required contact fields have valid mappings
 			const allRequiredFieldsMapped = requiredContactFields.every(
 				(key) => mappedFields[key] && mappedFields[key] !== ''
 			);
@@ -229,77 +265,65 @@ const Form: React.FC<FormProps> = ({
 				return;
 			}
 
-			try {
-				await saveForm({ status: 'active' });
-				setFormWasSaved(true); // Mark that form was saved
+			await saveForm({ status: 'active' });
+			setFormWasSaved(true);
 
-				// Show appropriate notice based on whether it's a new form or edit
-				const successMessage = isNewForm
-					? __('Form created successfully', 'doublescale')
-					: __('Form updated successfully', 'doublescale');
+			const successMessage = isNewForm
+				? __('Form created successfully', 'doublescale')
+				: __('Form updated successfully', 'doublescale');
 
-				showNotice('success', successMessage);
+			showNotice('success', successMessage);
 
-				// Call onSuccess first to refresh the forms list before closing
-				if (onSuccess) {
-					const onSuccessMessage = isNewForm
-						? __('Form created successfully', 'doublescale')
-						: __('Form updated successfully', 'doublescale');
-					onSuccess(onSuccessMessage);
-				}
-
-				// Close the form after activation
-				if (onClose) {
-					onClose();
-				} else {
-					// In edit mode, navigate with success message in URL
-					const successType = isNewForm ? 'created' : 'updated';
-					const formsLink = getToLink('forms');
-					const separator = formsLink.includes('?') ? '&' : '?';
-					navigate(`${formsLink}${separator}success=${successType}`);
-				}
-			} catch (error: any) {
-				showNotice('error', error.message);
+			if (onSuccess) {
+				onSuccess(successMessage);
 			}
+
+			if (onClose) {
+				onClose();
+			} else {
+				const successType = isNewForm ? 'created' : 'updated';
+				const formsLink = getToLink('forms');
+				const separator = formsLink.includes('?') ? '&' : '?';
+				navigate(`${formsLink}${separator}success=${successType}`);
+			}
+		} catch (error: any) {
+			showNotice('error', error.message);
 		}
 	};
 
-	// Modify the handleBack function to handle cancellation properly
 	const handleBack = () => {
-		if (currentStep > 0) {
-			// Just go back to previous step
-			setCurrentStep(currentStep - 1);
-		} else {
-			// When closing from step 0, only show success if form was actually saved
-			if (formWasSaved) {
-				// Form was saved during this session, show success message and refresh
-				if (onSuccess) {
-					const onSuccessMessage = isNewForm
-						? __('Form created successfully', 'doublescale')
-						: __('Form updated successfully', 'doublescale');
-					onSuccess(onSuccessMessage);
-				}
+		if (formWasSaved) {
+			if (onSuccess) {
+				const onSuccessMessage = isNewForm
+					? __('Form created successfully', 'doublescale')
+					: __('Form updated successfully', 'doublescale');
+				onSuccess(onSuccessMessage);
 			}
+		}
 
-			// For existing forms, navigate back to forms list
-			if (!isNewForm) {
-				// If form was saved during this session, add success parameter to URL
-				if (formWasSaved) {
-					const formsLink = getToLink('forms');
-					const separator = formsLink.includes('?') ? '&' : '?';
-					navigate(`${formsLink}${separator}success=updated`);
-				} else {
-					navigate(getToLink('forms'));
-				}
+		if (!isNewForm) {
+			if (formWasSaved) {
+				const formsLink = getToLink('forms');
+				const separator = formsLink.includes('?') ? '&' : '?';
+				navigate(`${formsLink}${separator}success=updated`);
+			} else {
+				navigate(getToLink('forms'));
 			}
-			// For new forms in modal, just close
-			if (isNewForm && onClose) {
-				onClose();
-			}
+		}
+		if (isNewForm && onClose) {
+			onClose();
 		}
 	};
 
 	const handleSaveDraft = async () => {
+		const snap = stateRef.current.form as FormType | null;
+		if (!connectionIsComplete(snap)) {
+			showNotice(
+				'error',
+				__('Please fill all required fields', 'doublescale')
+			);
+			return;
+		}
 		try {
 			await saveForm({ status: 'inactive' });
 			setFormWasSaved(true); // Mark that form was saved
@@ -329,28 +353,25 @@ const Form: React.FC<FormProps> = ({
 		}
 	};
 
-	const stepTitles = [
-		__('Form Information', 'doublescale'),
-		__('Mappping Fields', 'doublescale'),
-	];
-
 	const breadcrumbItems = isNewForm
 		? [
 				{
-					label: __('Create Forms', 'doublescale'),
+					label: __('Forms', 'doublescale'),
 					href: 'forms',
 				},
 				{
-					label: stepTitles[currentStep],
+					label: __('New integration', 'doublescale'),
 				},
 			]
 		: [
 				{
-					label: __('Edit Form', 'doublescale'),
+					label: __('Forms', 'doublescale'),
 					href: 'forms',
 				},
 				{
-					label: stepTitles[currentStep],
+					label:
+						form?.name?.trim() ||
+						__('Edit integration', 'doublescale'),
 				},
 			];
 
@@ -401,29 +422,21 @@ const Form: React.FC<FormProps> = ({
 		>
 			<PanelLayout
 				items={breadcrumbItems}
+				type="form"
+				showProgressBar={false}
 				panelbtns={[
 					<Button key="tutorial" variant="secondaryDeepBlue">
 						<PlayIcon />
 						{__('Watch Tutorial', 'doublescale')}
 					</Button>,
 				]}
-				totalSteps={2}
-				currentStep={currentStep}
-				onNext={handleNext}
+				totalSteps={1}
+				currentStep={0}
+				onNext={handleActivate}
 				onBack={handleBack}
 				onSaveDraft={handleSaveDraft}
-				nextLabel={
-					currentStep === 1
-						? __('Activate', 'doublescale')
-						: isEditMode
-							? __('Update Form', 'doublescale')
-							: __('Create Form', 'doublescale')
-				}
-				backLabel={
-					currentStep === 0
-						? __('Cancel', 'doublescale')
-						: __('Back', 'doublescale')
-				}
+				nextLabel={__('Activate', 'doublescale')}
+				backLabel={__('Cancel', 'doublescale')}
 				showSaveDraft={true}
 				isLoading={isSaving}
 				handleNavigate={(href) => {
@@ -468,20 +481,61 @@ const Form: React.FC<FormProps> = ({
 						closeNotice={closeNotice}
 					/>
 				)}
-				<div className="flex gap-6">
-					<PanelSettings
-						title={stepTitles[currentStep]}
-						description={__(
-							'Add The Following data below to continue creating new form.',
-							'doublescale'
-						)}
-						icon={<CreateFormsIcon />}
-						iconVariant={'white'}
-						className="w-full"
-					>
-						{currentStep === 0 && <InitialStep />}
-						{currentStep === 1 && <SettingsStep />}
-					</PanelSettings>
+				<div className="mx-auto w-full max-w-4xl space-y-8 pb-6">
+					<div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card px-6 py-8 shadow-lg shadow-primary/[0.04] ring-1 ring-border/30 sm:px-10 sm:py-9">
+						<div
+							className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_0%_-20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(ellipse_80%_60%_at_100%_0%,rgba(139,92,246,0.06),transparent_45%)]"
+							aria-hidden
+						/>
+						<div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+							<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 to-primary/[0.02] shadow-inner">
+								<span className="text-primary [&>svg]:h-8 [&>svg]:w-8">
+									<CreateFormsIcon />
+								</span>
+							</div>
+							<div className="min-w-0 flex-1 space-y-2">
+								<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+									{__('Form sync', 'doublescale')}
+								</p>
+								<h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.65rem]">
+									{isNewForm
+										? __('New form integration', 'doublescale')
+										: __('Edit form integration', 'doublescale')}
+								</h1>
+								<p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+									{__(
+										'Link your WordPress form, map fields to contacts, then activate or save a draft. Your connection saves automatically so field lists stay in sync.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-md ring-1 ring-border/25">
+						<div className="space-y-0">
+							<div className="px-6 py-8 sm:px-9 sm:py-9">
+								<InitialStep />
+							</div>
+							<div className="border-t border-border/50 bg-muted/[0.35] px-6 py-8 sm:px-9 sm:py-10">
+								<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+									{__('Mapping', 'doublescale')}
+								</p>
+								<h2 className="mt-1.5 text-lg font-semibold text-foreground">
+									{__('Fields & contact options', 'doublescale')}
+								</h2>
+								<p className="mt-1 max-w-xl text-sm text-muted-foreground">
+									{__(
+										'Match each CRM field to a form question. Email is required before activation.',
+										'doublescale'
+									)}
+								</p>
+								<div className="mt-7">
+									<SettingsStep />
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</PanelLayout>
 		</Provider>

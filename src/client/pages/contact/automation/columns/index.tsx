@@ -50,23 +50,23 @@ export function getColumns({ onViewJourney, onViewAutomation }: ColumnsProps) {
 			header: __('Status', 'doublescale'),
 			cell: ({ row }) => {
 				const status = row.original.status;
-				let statusColor = 'text-gray-600 bg-gray-100 border-gray-600';
+				let statusColor = 'text-muted-foreground bg-muted/50 border-border';
 
 				if (status === 'active' || status === 'completed') {
 					statusColor =
-						'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
+						'text-emerald-700 bg-emerald-50 border-emerald-200';
 				} else if (status === 'paused' || status === 'pending') {
 					statusColor =
-						'text-yellow-600 bg-yellow-50 border-yellow-600';
+						'text-amber-700 bg-amber-50 border-amber-200';
 				} else if (status === 'failed' || status === 'cancelled') {
 					statusColor =
-						'text-destructive bg-[#EF444429] border-destructive';
+						'text-destructive bg-destructive/5 border-destructive/20';
 				}
 
 				return (
 					<div className="flex items-center gap-2">
 						<span
-							className={`border rounded-md px-2 py-1 capitalize ${statusColor}`}
+							className={`inline-flex items-center text-xs font-medium border rounded-full px-2.5 py-0.5 capitalize ${statusColor}`}
 						>
 							{status || __('N/A', 'doublescale')}
 						</span>

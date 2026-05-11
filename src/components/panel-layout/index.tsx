@@ -23,6 +23,8 @@ interface PanelLayoutProps {
 	children: React.ReactNode;
 	type?: string;
 	handleNavigate?: (href: string) => void;
+	/** When false, footer actions stay but the step progress bar is hidden (e.g. form setup). */
+	showProgressBar?: boolean;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -40,12 +42,14 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	children,
 	type,
 	handleNavigate,
+	showProgressBar = true,
 }) => {
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
+	const showBar = showProgressBar && !!totalSteps;
 
 	return (
-		<div className="fixed inset-0 w-full h-full bg-white z-[150000] flex flex-col overflow-y-auto">
+		<div className="fixed inset-0 z-[150000] flex h-full w-full flex-col overflow-y-auto bg-white">
 			{/* Header Section - Fixed */}
 			<div
 				className={`flex-none p-4 bg-white px-12 ${type === 'campaign' ? 'z-10' : ''}`}
@@ -68,19 +72,25 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 
 			{/* Scrollable Content Section */}
 			<div
-				className={`flex-1 bg-white px-12 ${type === 'campaign' ? 'pt-4' : ''}`}
+				className={`flex-1 px-12 ${type === 'campaign' ? 'pt-4' : ''} ${type === 'form' ? 'bg-muted/25' : 'bg-white'}`}
 			>
-				<div className="pb-8 h-full">{children}</div>
+				<div className="h-full pb-8">{children}</div>
 			</div>
 
 			{/* Footer Section - Fixed */}
 			{totalSteps && (
-				<div className="flex-none pb-6 bg-white mt-10">
-					<Progress
-						value={progressValue}
-						className="rounded-none h-4 bg-muted [&>div]:bg-primary/15 [&>div]:from-primary/15 [&>div]:to-primary/15"
-					/>
-					<div className="py-6 flex justify-between items-center px-8">
+				<div
+					className={`mt-10 flex-none bg-white pb-6 ${showBar ? '' : 'border-t border-border/70'}`}
+				>
+					{showBar && (
+						<Progress
+							value={progressValue}
+							className="h-4 rounded-none bg-muted [&>div]:bg-primary/15 [&>div]:from-primary/15 [&>div]:to-primary/15"
+						/>
+					)}
+					<div
+						className={`flex items-center justify-between px-8 ${showBar ? 'py-6' : 'py-5'}`}
+					>
 						{onBack && (
 							<Button
 								variant="secondaryDeepBlue"

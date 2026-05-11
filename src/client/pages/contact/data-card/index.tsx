@@ -13,7 +13,7 @@ import { applyFilters } from '@wordpress/hooks';
  */
 import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
-import Emails from '../emails';
+import EmailsBase from '../emails';
 import SMSBase from '../sms';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
@@ -38,19 +38,21 @@ import {
 	WebsiteIcon,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
+import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import Courses from '../courses';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Meetings from '../meetings';
 import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
-import WhatsAppIcon from '@doublescale/components/icons/whatsapp-icon';
+import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
+	initialTab?: string;
 }
 
-const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
+const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const { contact } = useContactContext();
 	const isEddActive = ConfigAPI.isEddActive();
 	const isWooActive = ConfigAPI.isWoocommerceActive();
@@ -62,6 +64,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 	}
 
 	// Apply filters to allow Pro version to override components
+	const Emails = applyFilters(
+		'doublescale_contact_tab_component',
+		EmailsBase,
+		'emails'
+	) as React.FC<{ contact_id: number }>;
 	const SMS = applyFilters(
 		'doublescale_contact_tab_component',
 		SMSBase,
@@ -243,10 +250,16 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 			value: 'website_tracking',
 			children: (
 				<CardContent className="pt-6">
-					<WebsiteTracking
-						contact_id={contact.id}
-						navigate={navigate}
-					/>
+					{ConfigAPI.isModuleEnabled('websitetracking') ? (
+						<WebsiteTracking
+							contact_id={contact.id}
+							navigate={navigate}
+						/>
+					) : (
+						<ModuleDisabledNotice
+							featureName={__('Website Tracking', 'doublescale')}
+						/>
+					)}
 				</CardContent>
 			),
 		},
@@ -300,17 +313,23 @@ const DataCard: React.FC<DataCardProps> = ({ navigate }) => {
 		});
 	}
 
+	// Use URL tab param if it matches a valid tab, otherwise fall back to "activities".
+	const resolvedTab =
+		initialTab && tabsList.some((t) => t.value === initialTab)
+			? initialTab
+			: 'activities';
+
 	return (
-		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
+		<Card className="flex min-h-full w-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card p-0 shadow-sm ring-1 ring-black/[0.03] lg:min-h-[min(70vh,560px)]">
 			<PageTabs
-				defaultValue="activities"
+				defaultValue={resolvedTab}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
-				className="w-full"
-				tabsListWrapperClassName="border-b pb-7 pt-5"
-				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
+				className="w-full min-w-0"
+				tabsListWrapperClassName="border-b border-border/50 bg-muted/20 px-3 py-3 sm:px-5"
+				tabsListClassName="w-full justify-start gap-1 rounded-xl bg-background/85 p-1 text-foreground shadow-sm ring-1 ring-border/40"
 				scrollThreshold={6}
-				scrollArrowBg="bg-[#F8F8F8]"
+				scrollArrowBg="bg-background/95 backdrop-blur-sm"
 			/>
 		</Card>
 	);

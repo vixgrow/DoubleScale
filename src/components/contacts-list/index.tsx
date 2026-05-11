@@ -155,7 +155,7 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	return (
 		<div
-			className="w-[45%] bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 flex flex-col"
+			className="w-[45%] bg-muted/50 rounded-lg border border-gray-200 p-6 flex flex-col"
 			style={{
 				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
 				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',
@@ -256,7 +256,7 @@ const ContactList: React.FC<ContactListProps> = ({
 										{/* Contact Info */}
 										<div className="flex-1 min-w-0">
 											{fullName && (
-												<div className="font-semibold capitalize text-base text-[#09090B] w-72 truncate">
+												<div className="font-semibold capitalize text-base text-foreground w-72 truncate">
 													{fullName}
 												</div>
 											)}

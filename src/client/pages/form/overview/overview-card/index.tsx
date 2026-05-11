@@ -7,8 +7,7 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Card, List as AntList, Typography, Flex, Popover, Button } from 'antd';
-import { MoreOutlined } from '@ant-design/icons';
+import { MoreHorizontal as MoreOutlined } from 'lucide-react';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 /**
  * Internal dependencies
@@ -16,6 +15,20 @@ import { useNavigate, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@doublescale/config';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
+
+const OverviewRow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+	<li className="doublescale-overview-list__item flex border-b border-border last:border-b-0 px-3 py-2">
+		{children}
+	</li>
+);
+
 const Overview: React.FC = () => {
 	const { form, isLoading, saveForm } = useFormContext();
 	const [deactivating, setDeactivating] = useState(false);
@@ -38,74 +51,71 @@ const Overview: React.FC = () => {
 	};
 
 	return (
-		<Card
-			title={
-				<Flex justify="space-between">
-					<Typography.Text strong>
-						{__('Overview', 'doublescale')}
-					</Typography.Text>
-					<Popover
-						content={
-							<Button
-								type="link"
-								loading={deactivating}
-								onClick={deactivateForm}
-							>
-								{__('Deactivate', 'doublescale')}
-							</Button>
-						}
-						trigger="click"
-					>
-						<MoreOutlined />
-					</Popover>
-				</Flex>
-			}
-			loading={isLoading}
-		>
-			<AntList size="small" className="doublescale-overview-list">
-				{form && (
-					<>
-						<AntList.Item>
-							<Flex>
-								<Typography.Text strong>
-									{__('Name', 'doublescale')}
-								</Typography.Text>
-								<Typography.Text>{form.name}</Typography.Text>
-							</Flex>
-						</AntList.Item>
-						<AntList.Item>
-							<Flex>
-								<Typography.Text strong>
-									{__('Form Type', 'doublescale')}
-								</Typography.Text>
-								<Typography.Text>
-									{formsData[form.form_type]?.label}
-								</Typography.Text>
-							</Flex>
-						</AntList.Item>
-						<AntList.Item>
-							<Flex>
-								<Typography.Text strong>
-									{__('Form ID', 'doublescale')}
-								</Typography.Text>
-								<Typography.Text>
-									{form.form_id}
-								</Typography.Text>
-							</Flex>
-						</AntList.Item>
-						<AntList.Item>
-							<Flex>
-								<Typography.Text strong>
-									{__('Status', 'doublescale')}
-								</Typography.Text>
-								<Typography.Text>{form.status}</Typography.Text>
-							</Flex>
-						</AntList.Item>
-					</>
-				)}
-			</AntList>
-		</Card>
-	);
+        <Card><CardHeader><CardTitle>{<div className='flex justify-between'>
+                        <span>
+                            {__('Overview', 'doublescale')}
+                        </span>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <button className="p-1" type="button">
+                                    <MoreOutlined />
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-2">
+                                <Button
+                                    disabled
+                                    onClick={deactivateForm}
+                                    variant='link'
+                                >
+                                    {__('Deactivate', 'doublescale')}
+                                </Button>
+                            </PopoverContent>
+                        </Popover>
+                    </div>}</CardTitle></CardHeader><CardContent>
+                <ul className="doublescale-overview-list border border-border rounded-md divide-y divide-border">
+                    {form && (
+                        <>
+                            <OverviewRow>
+                                <div className='flex w-full justify-between'>
+                                    <span>
+                                        {__('Name', 'doublescale')}
+                                    </span>
+                                    <span>{form.name}</span>
+                                </div>
+                            </OverviewRow>
+                            <OverviewRow>
+                                <div className='flex w-full justify-between'>
+                                    <span>
+                                        {__('Form Type', 'doublescale')}
+                                    </span>
+                                    <span>
+                                        {formsData[form.form_type]?.label}
+                                    </span>
+                                </div>
+                            </OverviewRow>
+                            <OverviewRow>
+                                <div className='flex w-full justify-between'>
+                                    <span>
+                                        {__('Form ID', 'doublescale')}
+                                    </span>
+                                    <span>
+                                        {form.form_id}
+                                    </span>
+                                </div>
+                            </OverviewRow>
+                            <OverviewRow>
+                                <div className='flex w-full justify-between'>
+                                    <span>
+                                        {__('Status', 'doublescale')}
+                                    </span>
+                                    <span>{form.status}</span>
+                                </div>
+                            </OverviewRow>
+                        </>
+                    )}
+                </ul>
+            </CardContent></Card>
+    );
 };
 
 export default Overview;

@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
+import {  Mail } from 'lucide-react';
 import { isEmpty } from 'lodash';
 /**
  * internal dependencies
@@ -85,20 +86,20 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 									<NavLink to={`contacts/${record.id}`}>
 										<span className="inline-flex shrink-0 items-center gap-1 text-sm leading-6 font-medium text-[#6549CA] hover:opacity-80">
 											{__('View Profile', 'doublescale')}
-											<ArrowRight width={24} height={24} />
+											<ArrowRight width={24} height={24} color="#6549CA" />
 										</span>
 									</NavLink>
 								</div>
 								<div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-									<div className="flex min-w-0 max-w-[65%] items-center gap-2 text-sm leading-6 font-medium text-[#16A34A]">
-										<ContactTotalEmailsIcon width={24} height={24} />
+									<div className="flex min-w-0 max-w-[65%] items-center text-[#16A34A] gap-2 text-sm leading-6 font-medium">
+										<ContactTotalEmailsIcon width={24} height={24} color="#16A34A" />
 										<span className="truncate font-medium text-[#16A34A]">
 											{record.email || '-'}
 										</span>
 									</div>
 									{record.created_at ? (
 										<div className="flex shrink-0 items-center gap-2 text-sm leading-6 font-medium text-[#CB5301]">
-											<CalendarIcon width={24} height={24} />
+											<CalendarIcon width={24} height={24} color="#CB5301" />
 											<span className="whitespace-nowrap [&_*]:text-[#CB5301]">
 												<FormattedDateCell value={record.created_at} />
 											</span>

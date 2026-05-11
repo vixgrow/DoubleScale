@@ -30,10 +30,10 @@ import {
 } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
+import { cn } from '@/lib/utils';
 //@ts-ignore
-import csvIcon from '../../../../../assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/csv.png';
 
-// Utility function to format file size
 const formatFileSize = (bytes: number): string => {
 	if (bytes === 0) return '0 Bytes';
 	const k = 1024;
@@ -47,7 +47,6 @@ const CsvUpload: React.FC = () => {
 	const { fileData, isFetching, isUploading, uploadProgress } = state;
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
-	// Store file information locally
 	const [fileInfo, setFileInfo] = useState<{
 		file: File | null;
 		uploadedSize: number;
@@ -62,11 +61,9 @@ const CsvUpload: React.FC = () => {
 		dispatch({ type: 'SET_IS_UPLOADING', payload: true });
 		dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 0 });
 
-		// Store file info for size display
 		setFileInfo({ file, uploadedSize: 0 });
 
 		try {
-			// Simulate progress for fetch (since fetch doesn't support upload progress natively)
 			let currentProgress = 0;
 			const progressSimulation = setInterval(() => {
 				if (currentProgress >= 90) {
@@ -74,7 +71,6 @@ const CsvUpload: React.FC = () => {
 					return;
 				}
 				currentProgress += 10;
-				// Update uploaded size based on progress
 				const uploadedBytes = (currentProgress / 100) * file.size;
 				setFileInfo((prev) => ({
 					...prev,
@@ -96,7 +92,6 @@ const CsvUpload: React.FC = () => {
 			dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 100 });
 			setFileInfo((prev) => ({ ...prev, uploadedSize: file.size }));
 
-			// Small delay to show 100% completion
 			setTimeout(() => {
 				const typedResponse = response as {
 					file_name: string;
@@ -105,7 +100,6 @@ const CsvUpload: React.FC = () => {
 				dispatch({ type: 'SET_FILE_DATA', payload: typedResponse });
 				updateValues('file_name', typedResponse.file_name);
 
-				// Set sourceData from importer fields for CSV
 				const importers = ConfigAPI.getImporters();
 				const csvImporter = importers['csv'];
 				if (csvImporter && csvImporter.fields) {
@@ -167,7 +161,10 @@ const CsvUpload: React.FC = () => {
 
 	const renderUploadArea = () => (
 		<div
-			className="border-2 border-dashed border-[#9CA6AF80] rounded-2xl p-20 text-center hover:border-gray-400 transition-colors cursor-pointer"
+			className={cn(
+				'cursor-pointer rounded-xl border-2 border-dashed border-border/80 bg-muted/5 p-10 text-center transition-colors',
+				'hover:border-primary/40 hover:bg-muted/10 sm:p-14'
+			)}
 			onClick={handleUploadClick}
 			onDragOver={handleDragOver}
 			onDrop={handleDrop}
@@ -180,15 +177,15 @@ const CsvUpload: React.FC = () => {
 				className="hidden"
 				disabled={isUploading}
 			/>
-			<div className="flex flex-col items-center space-y-4">
+			<div className="flex flex-col items-center gap-4">
 				<div className="flex items-center justify-center">
-					<img src={csvIcon} alt="Default" className="w-16 h-16" />
+					<img src={csvIcon} alt="" className="h-14 w-14 object-contain" />
 				</div>
-				<div>
-					<h3 className="text-2xl font-normal text-[#09090B]">
+				<div className="space-y-1">
+					<h3 className="text-base font-semibold text-foreground">
 						{__('Select CSV file to import', 'doublescale')}
 					</h3>
-					<p className="text-base text-[#979797]">
+					<p className="text-sm text-muted-foreground">
 						{__('or drag and drop it here', 'doublescale')}
 					</p>
 				</div>
@@ -203,50 +200,49 @@ const CsvUpload: React.FC = () => {
 		const uploadedSize = formatFileSize(fileInfo.uploadedSize);
 
 		return (
-			<div className="flex flex-col items-center">
-				<Card className="w-full p-8 rounded-xl shadow-none">
-					<CardHeader className="p-0 mb-2 flex flex-row items-center justify-between">
-						<span className="text-3xl text-[#292D32] truncate">
+			<div className="flex flex-col items-stretch">
+				<Card className="w-full rounded-xl border border-border/70 shadow-none">
+					<CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 p-5 sm:p-6">
+						<span className="min-w-0 flex-1 break-all text-sm font-medium leading-snug text-foreground sm:text-base">
 							{fileData?.file_name}
 						</span>
-						<div
+						<button
+							type="button"
 							onClick={removeFile}
-							className="cursor-pointer text-[#292D32]"
+							className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+							aria-label={__('Remove file', 'doublescale')}
 						>
 							{isUploading ? (
-								<CircleX className="w-[30px] h-[30px]" />
+								<CircleX className="h-6 w-6" aria-hidden />
 							) : (
-								<DeleteIcon width={30} height={30} />
+								<DeleteIcon width={24} height={24} />
 							)}
-						</div>
+						</button>
 					</CardHeader>
 
-					<CardContent className="p-0">
+					<CardContent className="px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
 						{isUploading ? (
-							<>
-								<div className="flex items-center gap-2 text-2xl text-[#3EBF8F] mt-2">
-									<div className="text-[#A9ACB4]">
-										{uploadedSize} of {totalSize} •
-									</div>
-									<LoadingSpinner size={24} />
-									<div className="text-[#292D32]">
+							<div className="space-y-3">
+								<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+									<span>
+										{uploadedSize} {__('of', 'doublescale')} {totalSize}
+									</span>
+									<span className="text-muted-foreground/60">·</span>
+									<LoadingSpinner size={18} />
+									<span className="font-medium text-foreground">
 										{__('Uploading...', 'doublescale')}
-									</div>
+									</span>
 								</div>
-								<Progress
-									value={uploadProgress}
-									className="w-full h-2"
-								/>
-							</>
+								<Progress value={uploadProgress} className="h-2 w-full" />
+							</div>
 						) : (
-							<div className="flex items-center gap-2 text-2xl text-[#3EBF8F] mt-2">
-								<div className="text-[#A9ACB4]">
-									{totalSize} •
-								</div>
+							<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+								<span className="text-muted-foreground">{totalSize}</span>
+								<span className="text-muted-foreground/60">·</span>
 								<CheckCircleIcon />
-								<div className="text-[#292D32]">
+								<span className="font-medium text-emerald-600 dark:text-emerald-500">
 									{__('Completed', 'doublescale')}
-								</div>
+								</span>
 							</div>
 						)}
 					</CardContent>
@@ -256,36 +252,22 @@ const CsvUpload: React.FC = () => {
 	};
 
 	return (
-		<div>
-			<div className="mb-6">
-				<CardTitle className="text-2xl font-normal text-[#09090B]">
+		<div className="space-y-6">
+			<div className="space-y-2">
+				<CardTitle className="text-lg font-semibold leading-snug text-foreground">
 					{__('Upload CSV file', 'doublescale')}
 				</CardTitle>
-				<CardDescription className="text-[#71717A] text-base mb-4">
+				<CardDescription className="text-sm leading-relaxed text-muted-foreground">
 					{__(
-						'Your file must include a column with either first name, last name and email addresses for each contact. (Maximum file size 12 MB.)',
+						'Your file must include columns for contact data (for example first name, last name, and email). Maximum file size 12 MB.',
 						'doublescale'
 					)}
 				</CardDescription>
 			</div>
 
-			{isFetching && <Skeleton className="h-40 w-full" />}
+			{isFetching && <Skeleton className="h-40 w-full rounded-lg" />}
 
-			{!isFetching && (
-				<>{!fileData ? renderUploadArea() : renderFileCard()}</>
-			)}
-
-			{/* <div className="mt-6 text-center">
-				<p className="text-lg text-[#71717A] mb-2">
-					{__('Learn more or', 'doublescale')}
-					<a
-						href="#"
-						className="text-[#3B82F6] hover:text-blue-700 ml-1"
-					>
-						{__('Download example file', 'doublescale')}
-					</a>
-				</p>
-			</div> */}
+			{!isFetching && <>{!fileData ? renderUploadArea() : renderFileCard()}</>}
 		</div>
 	);
 };

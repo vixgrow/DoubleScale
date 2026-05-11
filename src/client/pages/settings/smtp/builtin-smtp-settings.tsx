@@ -13,10 +13,50 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { Button } from '@/components/ui/button';
+
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { CheckCheck, ExternalLink, Info } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
 	defaultCredentialsForMailer,
+	getMailerCredentialFields,
+	getOAuthAppFields,
+	getSmtpMailerLogoUrl,
+	getSmtpMailerOptionLabel,
+	getSmtpMailerUiMeta,
 	isSmtpOAuthMailer,
+	type MailerField,
+	SMTP_MAILER_CATEGORY_LABEL,
+	SMTP_MAILER_OPTIONS,
 } from './mailer-options';
 import {
 	deleteMailerAccount,
@@ -31,34 +71,487 @@ import {
 } from './smtp-api';
 import { getConnectionDisplayLabel } from './builtin-smtp/settings-utils';
 import { SmtpConnectionsPanel } from './builtin-smtp/smtp-connections-panel';
-import { SmtpGeneralSettingsPanel } from './builtin-smtp/general-settings-panel';
-import { ConnectionWizardDialog } from './builtin-smtp/connection-wizard-dialog';
-import {
-	DeleteConnectionDialog,
-	DeleteProviderAccountDialog,
-} from './builtin-smtp/smtp-delete-dialogs';
-import {
-	applyStoredAccountRowToForm,
-	buildSmtpCredentialsForRest,
-	emptyConnection,
-	mergeVaultAccountIntoForm,
-	migrateConnectionForm,
-	normalizeApiCredentials,
-	parseMailerAccountsResponse,
-	restErrorToDetailLines,
-	validateConnectionForm,
-	validateConnectionFormWithVaultLinkFallback,
-	vaultBackedDisplayNameFromForm,
-	type ApplyStoredRowOpts,
-	type MailerAccountRowMeta,
-} from './builtin-smtp/form-utils';
-import type { SmtpConnection, SmtpSettingsPayload } from './types';
+import type {
+	SmtpConnection,
+	SmtpOAuthApp,
+	SmtpSettingsPayload,
+} from './types';
 import config from '@doublescale/config';
 import { cn } from '@/lib/utils';
+import AwsIdentitiesPanel from './aws-identities-panel';
+import TrashIcon from '@/components/icons/trash';
+import {
+	EditIcon,
+	PlusIcon,
+	SettingsIcon,
+} from '@doublescale/components';
+import AccordingRightIcon from '@/components/icons/according-right';
+import NoSearchIcon from '@/components/icons/no-search';
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+/** Match routing selects + account name (rounded-lg, light border) for API key, From email, etc. */
+const SMTP_CONNECTION_INPUT_CLASS =
+	'h-10 w-full rounded-lg border border-[#D0D0D0] bg-white text-sm text-[#29292E] shadow-sm placeholder:text-[#6B6C76] focus-visible:border-[#6549CA] focus-visible:ring-2 focus-visible:ring-[#6549CA]/20';
+
+const SMTP_CONNECTION_SELECT_TRIGGER_CLASS =
+	'h-10 w-full rounded-lg border border-[#D0D0D0] bg-white text-[#29292E] focus:ring-[#6549CA]/20 focus:border-[#6549CA]';
+
+/**
+ * Expand REST / api-fetch errors into lines for the connection-save feedback modal.
+ */
+function restErrorToDetailLines(err: unknown): string[] {
+	const lines: string[] = [];
+	if (typeof err === 'string' && err.trim()) {
+		return [err.trim()];
+	}
+	if (err instanceof Error && err.message.trim()) {
+		lines.push(err.message.trim());
+	}
+	if (err && typeof err === 'object') {
+		const o = err as Record<string, unknown>;
+		const msg = typeof o.message === 'string' ? o.message.trim() : '';
+		if (msg && !lines.includes(msg)) {
+			lines.unshift(msg);
+		}
+		const code = typeof o.code === 'string' ? o.code.trim() : '';
+		if (code) {
+			lines.push(sprintf(__('REST error code: %s', 'doublescale'), code));
+		}
+		const data = o.data as Record<string, unknown> | undefined;
+		if (data && typeof data === 'object') {
+			if (typeof data.status === 'number') {
+				lines.push(
+					sprintf(__('HTTP status: %s', 'doublescale'), String(data.status))
+				);
+			}
+			const dm =
+				typeof data.message === 'string' ? data.message.trim() : '';
+			if (dm && !lines.includes(dm)) {
+				lines.push(dm);
+			}
+			if (data.details !== undefined && data.details !== null) {
+				const d = data.details;
+				if (typeof d === 'string' && d.trim()) {
+					lines.push(d.trim());
+				} else {
+					try {
+						lines.push(JSON.stringify(d, null, 2));
+					} catch {
+						lines.push(String(d));
+					}
+				}
+			}
+			if (data.params && typeof data.params === 'object') {
+				try {
+					lines.push(
+						`${__('Validation parameters:', 'doublescale')}\n${JSON.stringify(
+							data.params,
+							null,
+							2
+						)}`
+					);
+				} catch {
+					/* noop */
+				}
+			}
+			if (data.errors && typeof data.errors === 'object') {
+				try {
+					lines.push(
+						`${__('REST field errors:', 'doublescale')}\n${JSON.stringify(
+							data.errors,
+							null,
+							2
+						)}`
+					);
+				} catch {
+					lines.push(String(data.errors));
+				}
+			}
+		}
+	}
+	if (lines.length === 0) {
+		lines.push(__('An unknown error occurred.', 'doublescale'));
+	}
+	return lines;
+}
+
+/** Aligns with PHP App::maybe_authorize() admin.php query args (SMTP-compatible). */
+function oauthAdminAuthorizeUrl(mailerSlug: string): string | null {
+	if (
+		mailerSlug !== 'gmail' &&
+		mailerSlug !== 'outlook' &&
+		mailerSlug !== 'zoho'
+	) {
+		return null;
+	}
+	const param =
+		mailerSlug === 'gmail'
+			? 'smtp-gmail=authorize'
+			: mailerSlug === 'outlook'
+				? 'smtp-outlook=authorize'
+				: 'smtp-zoho=authorize';
+	const candidates: string[] = [];
+	const cfgAdmin = String(config.adminUrl ?? '').trim();
+	if (cfgAdmin) {
+		candidates.push(cfgAdmin);
+	}
+	if (typeof window !== 'undefined' && window.location?.href) {
+		candidates.push(window.location.href);
+	}
+	for (const baseCandidate of candidates) {
+		try {
+			const baseStr = baseCandidate.endsWith('/')
+				? baseCandidate
+				: baseCandidate.replace(/[^/]*$/, '');
+			const url = new URL(`admin.php?${param}`, baseStr);
+			if (url.protocol.startsWith('http')) {
+				return url.toString();
+			}
+		} catch {
+			continue;
+		}
+	}
+	return null;
+}
+
+function resolveFromEmailForSelect(
+	current: string | undefined,
+	options: MailerFromEmailOption[]
+): string {
+	if (!options.length) {
+		return '';
+	}
+	const trimmed = String(current ?? '').trim();
+	if (trimmed && options.some((o) => o.value === trimmed)) {
+		return trimmed;
+	}
+	return options[0].value;
+}
+
+const emptyConnection = (): SmtpConnection => ({
+	mailer: 'smtp',
+	connection_name: '',
+	account_id: '',
+	account_name: '',
+	from_email: '',
+	from_name: '',
+	force_from_email: false,
+	force_from_name: false,
+	host: '',
+	port: '587',
+	encryption: 'tls',
+	auth: true,
+	user: '',
+	pass: '',
+	api_key: '',
+	credentials: {},
+	oauth_app: {
+		client_id: '',
+		client_secret: '',
+		region: 'com',
+	},
+});
+
+function migrateConnectionForm(c: SmtpConnection): SmtpConnection {
+	const mailer = c.mailer || 'smtp';
+	const merged: SmtpConnection = { ...emptyConnection(), ...c, mailer };
+	const fields = getMailerCredentialFields(mailer);
+	let creds: Record<string, unknown> =
+		merged.credentials && typeof merged.credentials === 'object'
+			? { ...merged.credentials }
+			: {};
+	if (fields?.length) {
+		creds = { ...defaultCredentialsForMailer(mailer), ...creds };
+		if (typeof merged.api_key === 'string' && merged.api_key) {
+			if (mailer === 'mailersend') {
+				creds.api_token = creds.api_token || merged.api_key;
+			} else if (!creds.api_key) {
+				creds.api_key = merged.api_key;
+			}
+		}
+	}
+	const oauth_app: SmtpOAuthApp = {
+		client_id: merged.oauth_app?.client_id || '',
+		client_secret: merged.oauth_app?.client_secret || '',
+		region: merged.oauth_app?.region || 'com',
+	};
+	const legacyName =
+		typeof (merged as { name?: unknown }).name === 'string'
+			? String((merged as { name?: string }).name || '').trim()
+			: '';
+	return {
+		...merged,
+		credentials: creds,
+		oauth_app,
+		account_name: merged.account_name || '',
+		connection_name:
+			String(merged.connection_name || '').trim() || legacyName || '',
+	};
+}
+
+/**
+ * Merge mailer account list row (may include credentials) into the wizard form for Edit.
+ */
+function mergeVaultAccountIntoForm(
+	form: SmtpConnection,
+	account: { name?: string; credentials?: Record<string, unknown> },
+	mailerSlug: string
+): SmtpConnection {
+	const name = String(account.name || '').trim();
+	const raw = account.credentials;
+	const creds =
+		raw && typeof raw === 'object' && !Array.isArray(raw)
+			? { ...(raw as Record<string, unknown>) }
+			: {};
+	const mergedCredentials: Record<string, unknown> = {
+		...defaultCredentialsForMailer(mailerSlug),
+		...((form.credentials || {}) as Record<string, unknown>),
+		...creds,
+	};
+	const next: SmtpConnection = {
+		...form,
+		account_name: name || form.account_name || '',
+		credentials: mergedCredentials,
+	};
+	if (mailerSlug === 'smtp') {
+		const c = mergedCredentials;
+		return {
+			...next,
+			host: String(c.smtp_host ?? next.host ?? ''),
+			port:
+				c.smtp_port !== undefined && c.smtp_port !== null
+					? String(c.smtp_port)
+					: String(next.port ?? ''),
+			encryption: String(c.encryption ?? next.encryption ?? 'tls'),
+			auth: Boolean(c.authentication ?? next.auth),
+			user: String(c.username ?? next.user ?? ''),
+			pass: String(c.password ?? next.pass ?? ''),
+		};
+	}
+	if (mailerSlug === 'mailersend') {
+		const tok = mergedCredentials.api_token;
+		if (tok !== undefined && tok !== null && String(tok).trim()) {
+			return { ...next, api_key: String(tok) };
+		}
+	}
+	const ak = mergedCredentials.api_key;
+	if (ak !== undefined && ak !== null && String(ak).trim()) {
+		return { ...next, api_key: String(ak) };
+	}
+	return next;
+}
+
+type ApplyStoredRowOpts = { allowToggleOff?: boolean };
+
+/** Clear linked vault account so the right column returns to “add new” credentials. */
+function clearVaultAccountSelection(
+	form: SmtpConnection,
+	mailerSlug: string
+): SmtpConnection {
+	const cleared: SmtpConnection = {
+		...form,
+		account_id: '',
+		account_name: '',
+		credentials: defaultCredentialsForMailer(mailerSlug),
+	};
+	if (mailerSlug === 'smtp') {
+		return {
+			...cleared,
+			host: '',
+			port: '587',
+			encryption: 'tls',
+			auth: true,
+			user: '',
+			pass: '',
+		};
+	}
+	return { ...cleared, api_key: '' };
+}
+
+/** Select / deselect a vault row and merge credentials into the wizard form. */
+function applyStoredAccountRowToForm(
+	form: SmtpConnection,
+	accId: string,
+	meta: MailerAccountRowMeta | undefined,
+	mailerSlug: string,
+	opts?: ApplyStoredRowOpts
+): SmtpConnection {
+	const allowToggle = opts?.allowToggleOff !== false;
+	const cur = String(form.account_id || '').trim();
+	if (allowToggle && cur === accId) {
+		return clearVaultAccountSelection(form, mailerSlug);
+	}
+	return mergeVaultAccountIntoForm(
+		{ ...form, account_id: accId },
+		meta || {},
+		mailerSlug
+	);
+}
+
+/** Select value: create new provider account with the credentials in this form. */
+const NEW_MAILER_ACCOUNT = '__new_mailer_account__';
+
+type MailerAccountRowMeta = {
+	name?: string;
+	credentials?: Record<string, unknown>;
+};
+
+function parseMailerAccountsResponse(
+	raw: unknown
+): Record<string, MailerAccountRowMeta> {
+	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+		return {};
+	}
+	const out: Record<string, MailerAccountRowMeta> = {};
+	for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
+		if (val && typeof val === 'object' && !Array.isArray(val)) {
+			const v = val as { name?: unknown; credentials?: unknown };
+			const name = v.name;
+			const row: MailerAccountRowMeta = {
+				name: typeof name === 'string' ? name : undefined,
+			};
+			const creds = v.credentials;
+			if (creds && typeof creds === 'object' && !Array.isArray(creds)) {
+				row.credentials = creds as Record<string, unknown>;
+			}
+			out[id] = row;
+		}
+	}
+	return out;
+}
+
+function getProviderAccountBinding(
+	slug: string,
+	accountId: string,
+	bucket: Record<string, MailerAccountRowMeta> | undefined
+): string {
+	if (slug === 'phpmailer' || !bucket || Object.keys(bucket).length === 0) {
+		return NEW_MAILER_ACCOUNT;
+	}
+	const aid = String(accountId || '').trim();
+	if (aid && bucket[aid]) {
+		return aid;
+	}
+	return NEW_MAILER_ACCOUNT;
+}
+
+function mailerAccountSelectLabel(
+	id: string,
+	meta?: MailerAccountRowMeta
+): string {
+	const n = String(meta?.name || '').trim();
+	return n || id;
+}
+
+/** Two-letter badge for provider cards in the mailer picker. */
+function mailerInitialsFromLabel(label: string): string {
+	const cleaned = label.replace(/\s+/g, ' ').trim();
+	const words = cleaned.split(' ').filter(Boolean);
+	if (words.length >= 2) {
+		const a = words[0][0] || '';
+		const b = words[1][0] || '';
+		return (a + b).toUpperCase();
+	}
+	return cleaned.slice(0, 2).toUpperCase();
+}
+
+function buildSmtpCredentialsForRest(
+	form: SmtpConnection
+): Record<string, unknown> {
+	const portRaw = form.port === '' ? '587' : String(form.port ?? '587');
+	const portNum = Number(portRaw);
+	return {
+		smtp_host: String(form.host || '').trim(),
+		smtp_port: Number.isFinite(portNum) ? portNum : portRaw,
+		encryption: String(form.encryption || 'tls'),
+		auto_tls:
+			typeof form.credentials?.auto_tls === 'boolean'
+				? form.credentials.auto_tls
+				: true,
+		authentication: Boolean(form.auth),
+		username: String(form.user || ''),
+		password: String(form.pass || ''),
+	};
+}
+
+function normalizeApiCredentials(
+	slug: string,
+	raw: Record<string, unknown>
+): Record<string, unknown> {
+	const out = { ...raw };
+	if (slug === 'mailgun' && !String(out.region || '').trim()) {
+		out.region = 'us';
+	}
+	if (slug === 'sparkpost' && !String(out.region || '').trim()) {
+		out.region = 'us';
+	}
+	return out;
+}
+
+function validateConnectionForm(form: SmtpConnection): string | null {
+	const mailer = form.mailer || 'smtp';
+	if (mailer === 'phpmailer') {
+		return null;
+	}
+	if (isSmtpOAuthMailer(mailer)) {
+		const fields = getOAuthAppFields(mailer);
+		const app = form.oauth_app || {};
+		for (const f of fields || []) {
+			const v = String((app as Record<string, unknown>)[f.key] ?? '').trim();
+			if (f.required && !v) {
+				return __(
+					'Please complete all required OAuth app fields.',
+					'doublescale'
+				);
+			}
+		}
+		return null;
+	}
+	if (mailer === 'smtp') {
+		if (!String(form.host || '').trim()) {
+			return __('SMTP host is required.', 'doublescale');
+		}
+		if (!String(form.port ?? '').trim()) {
+			return __('SMTP port is required.', 'doublescale');
+		}
+		if (form.auth) {
+			if (!String(form.user || '').trim()) {
+				return __(
+					'SMTP username is required when authentication is enabled.',
+					'doublescale'
+				);
+			}
+			if (!String(form.pass || '').trim()) {
+				return __(
+					'SMTP password is required when authentication is enabled.',
+					'doublescale'
+				);
+			}
+		}
+		return null;
+	}
+	const fields = getMailerCredentialFields(mailer);
+	for (const f of fields || []) {
+		if (f.required) {
+			const v = String((form.credentials || {})[f.key] ?? '').trim();
+			if (!v) {
+				return __(
+					'Please fill all required provider credentials.',
+					'doublescale'
+				);
+			}
+		}
+	}
+	if (mailer === 'aws') {
+		const name = String(form.account_name || form.from_name || '').trim();
+		if (!name) {
+			return __(
+				'Account name or From name is required for Amazon SES.',
+				'doublescale'
+			);
+		}
+	}
+	return null;
+}
 
 type BuiltinSmtpSettingsProps = {
 	addConnectionRef?: { current: (() => void) | null };
@@ -69,56 +562,47 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	addConnectionRef,
 	connectionsView,
 }) => {
-	// -------------------------------------------------------------------------
-	// Settings state
-	// -------------------------------------------------------------------------
 	const [settings, setSettings] = useState<SmtpSettingsPayload | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
-
-	// -------------------------------------------------------------------------
-	// Wizard state
-	// -------------------------------------------------------------------------
 	/** Detailed messages when saving a connection (validation, REST, or success summary). */
 	const [connectionSaveFeedback, setConnectionSaveFeedback] = useState<{
 		variant: 'error' | 'success';
 		title: string;
 		lines: string[];
+		/** When false, dismissing success does not close the connection wizard. */
 		closeWizardOnDismiss?: boolean;
 	} | null>(null);
 
+	/** OAuth: confirm save + open sign-in popup without leaving this screen (keeps client secret in form). */
+	const [oauthAuthorizeDialogOpen, setOauthAuthorizeDialogOpen] =
+		useState(false);
+	const oauthAuthorizeDialogHrefRef = useRef<string | null>(null);
+
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [accountEditModalOpen, setAccountEditModalOpen] = useState(false);
-	const [rightAccountPanelMode, setRightAccountPanelMode] = useState<
-		'add' | 'edit'
-	>('add');
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [form, setForm] = useState<SmtpConnection>(emptyConnection());
 	/** 1 = name, 2 = provider, 3 = vault/credentials, 4 = from + save connection */
 	const [wizardStep, setWizardStep] = useState(1);
+	const WIZARD_LAST_STEP = 4;
+
 
 	const [mailerAccountsBySlug, setMailerAccountsBySlug] = useState<
 		Record<string, Record<string, MailerAccountRowMeta>>
 	>({});
 	const [mailerAccountsLoading, setMailerAccountsLoading] = useState(false);
 	const mailerAccountsRequestId = useRef(0);
-
-	/** Stable vault/connection id for new connections until "Save connection". */
+	/** Stable vault/connection id for new connections until “Save connection”. */
 	const pendingNewVaultAccountIdRef = useRef<string | null>(null);
 	/**
-	 * User clicked "Add new account". Next non-OAuth vault POST must use a new account id.
-	 * (Do not derive from `reuseStoredProviderAccount`: an empty account list forces "new"
+	 * User clicked “Add new account”. Next non-OAuth vault POST must use a new account id.
+	 * (Do not derive this from `reuseStoredProviderAccount`: an empty account list forces “new”
 	 * there even when a row is selected, and breaks add vs update.)
 	 */
 	const forceNewMailerVaultAccountOnNextSaveRef = useRef(false);
-	/** Wizard form before opening Edit-account modal from pencil icon (restore on modal close). */
-	const accountEditWizardSnapshotRef = useRef<SmtpConnection | null>(null);
-
-	// -------------------------------------------------------------------------
-	// Delete: provider vault account
-	// -------------------------------------------------------------------------
+	/** Confirm before DELETE on a stored provider vault account. */
 	const [providerAccountToDelete, setProviderAccountToDelete] = useState<{
 		mailerSlug: string;
 		accountId: string;
@@ -127,17 +611,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	const [deletingProviderAccount, setDeletingProviderAccount] =
 		useState(false);
 
-	// -------------------------------------------------------------------------
-	// Delete: SMTP connection
-	// -------------------------------------------------------------------------
-	const [smtpConnectionToDeleteId, setSmtpConnectionToDeleteId] = useState<
-		string | null
-	>(null);
-	const [deletingSmtpConnection, setDeletingSmtpConnection] = useState(false);
-
-	// -------------------------------------------------------------------------
-	// Step-4 from-email options
-	// -------------------------------------------------------------------------
 	const [wizardFromEmailOptions, setWizardFromEmailOptions] = useState<
 		MailerFromEmailOption[]
 	>([]);
@@ -146,15 +619,8 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	const [wizardFromEmailsFetchFailed, setWizardFromEmailsFetchFailed] =
 		useState(false);
 
-	// =========================================================================
-	// Data loading
-	// =========================================================================
-
-	const reload = useCallback(async (options?: { showLoading?: boolean }) => {
-		const showLoading = options?.showLoading !== false;
-		if (showLoading) {
-			setLoading(true);
-		}
+	const reload = useCallback(async () => {
+		setLoading(true);
 		setError(null);
 		try {
 			const data = (await fetchSmtpSettings()) as SmtpSettingsPayload;
@@ -168,8 +634,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			) {
 				default_connection = ids[0];
 			}
-			let fallback_connection =
-				(data.fallback_connection as string) || '';
+			let fallback_connection = (data.fallback_connection as string) || '';
 			if (fallback_connection && !ids.includes(fallback_connection)) {
 				fallback_connection = '';
 			}
@@ -186,9 +651,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 					: __('Could not load SMTP settings.', 'doublescale')
 			);
 		} finally {
-			if (showLoading) {
-				setLoading(false);
-			}
+			setLoading(false);
 		}
 	}, []);
 
@@ -226,9 +689,36 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}
 	}, []);
 
-	// =========================================================================
-	// Effects
-	// =========================================================================
+	const executeDeleteProviderAccount = useCallback(async () => {
+		if (!providerAccountToDelete) {
+			return;
+		}
+		const { mailerSlug, accountId } = providerAccountToDelete;
+		setDeletingProviderAccount(true);
+		setError(null);
+		try {
+			await deleteMailerAccount(mailerSlug, accountId);
+			setProviderAccountToDelete(null);
+			setForm((f) => {
+				if ((f.mailer || '') !== mailerSlug) {
+					return f;
+				}
+				if (String(f.account_id || '').trim() !== accountId) {
+					return f;
+				}
+				return { ...f, account_id: '' };
+			});
+			void loadMailerAccounts(mailerSlug);
+		} catch (e: unknown) {
+			const lines = restErrorToDetailLines(e);
+			setError(
+				lines[0] ||
+				__('Could not delete this provider account.', 'doublescale')
+			);
+		} finally {
+			setDeletingProviderAccount(false);
+		}
+	}, [providerAccountToDelete, loadMailerAccounts]);
 
 	useEffect(() => {
 		if (!dialogOpen) {
@@ -237,7 +727,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		void loadMailerAccounts(form.mailer || 'smtp');
 	}, [dialogOpen, form.mailer, loadMailerAccounts]);
 
-	/** Fetch from-email options when entering step 4. */
 	useEffect(() => {
 		if (wizardStep !== 4 || !dialogOpen) {
 			setWizardFromEmailOptions([]);
@@ -310,10 +799,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 				add_new_zoho_account: (id: string, name: string) => void;
 			}>;
 		const w = window as OAuthPopupWin;
-		const adopt = (
-			slug: 'gmail' | 'outlook' | 'zoho',
-			accountId: string
-		) => {
+		const adopt = (slug: 'gmail' | 'outlook' | 'zoho', accountId: string) => {
 			void loadMailerAccounts(slug);
 			const aid = String(accountId || '').trim();
 			if (!aid) {
@@ -346,7 +832,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		};
 	}, [loadMailerAccounts]);
 
-	/** Clear stale OAuth account ids missing from the mailer store. */
+	/** SMTP: OAuth account ids come from the provider after authorization, not the connection id—clear stale ids missing from the mailer store. */
 	useEffect(() => {
 		if (!dialogOpen || !isSmtpOAuthMailer(form.mailer || '')) {
 			return;
@@ -362,26 +848,24 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}
 	}, [dialogOpen, form.mailer, form.account_id, mailerAccountsBySlug]);
 
-	// =========================================================================
-	// Derived state (step-3)
-	// =========================================================================
-
 	const providerBucket = mailerAccountsBySlug[form.mailer || 'smtp'];
 	const storedAccountCount = Object.keys(providerBucket || {}).length;
 
-	/** When editing, list only the connection's linked vault account (add flow shows all). */
+	/** When editing, list only the connection’s linked vault account (add flow shows all). */
 	const providerAccountEntriesForList = useMemo(() => {
 		const bucket = providerBucket || {};
 		const sortEntries = (
 			entries: [string, MailerAccountRowMeta][]
 		): [string, MailerAccountRowMeta][] =>
-			entries.slice().sort((a, b) => {
-				const aLabel = a[1]?.name || a[0];
-				const bLabel = b[1]?.name || b[0];
-				return aLabel.localeCompare(bLabel, undefined, {
-					sensitivity: 'base',
-				});
-			});
+			entries
+				.slice()
+				.sort((a, b) =>
+					mailerAccountSelectLabel(a[0], a[1]).localeCompare(
+						mailerAccountSelectLabel(b[0], b[1]),
+						undefined,
+						{ sensitivity: 'base' }
+					)
+				);
 		const all = sortEntries(Object.entries(bucket));
 		if (editingId === '__new__' || !editingId) {
 			return all;
@@ -403,50 +887,27 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		!providerBucket?.[String(form.account_id || '').trim()] &&
 		storedAccountCount > 0;
 
+	const providerBinding = useMemo(
+		() =>
+			getProviderAccountBinding(
+				form.mailer || 'smtp',
+				String(form.account_id || ''),
+				providerBucket
+			),
+		[form.mailer, form.account_id, providerBucket]
+	);
 	const reuseStoredProviderAccount =
 		(form.mailer || 'smtp') !== 'phpmailer' &&
-		Boolean(String(form.account_id || '').trim()) &&
-		Boolean(providerBucket?.[String(form.account_id || '').trim()]);
+		providerBinding !== NEW_MAILER_ACCOUNT;
 
-	const oauthAuthorizeHref = useMemo(() => {
-		const slug = form.mailer || '';
-		if (slug !== 'gmail' && slug !== 'outlook' && slug !== 'zoho') {
-			return null;
-		}
-		const param =
-			slug === 'gmail'
-				? 'smtp-gmail=authorize'
-				: slug === 'outlook'
-					? 'smtp-outlook=authorize'
-					: 'smtp-zoho=authorize';
-		const candidates: string[] = [];
-		const cfgAdmin = String(config.adminUrl ?? '').trim();
-		if (cfgAdmin) {
-			candidates.push(cfgAdmin);
-		}
-		if (typeof window !== 'undefined' && window.location?.href) {
-			candidates.push(window.location.href);
-		}
-		for (const baseCandidate of candidates) {
-			try {
-				const baseStr = baseCandidate.endsWith('/')
-					? baseCandidate
-					: baseCandidate.replace(/[^/]*$/, '');
-				const url = new URL(`admin.php?${param}`, baseStr);
-				if (url.protocol.startsWith('http')) {
-					return url.toString();
-				}
-			} catch {
-				continue;
-			}
-		}
-		return null;
-	}, [form.mailer]);
+	const oauthAuthorizeHref = useMemo(
+		() => oauthAdminAuthorizeUrl(form.mailer || ''),
+		[form.mailer]
+	);
 
-	// =========================================================================
-	// Wizard handlers
-	// =========================================================================
+	const step3MailerMeta = getSmtpMailerUiMeta(form.mailer || 'smtp');
 
+	/** Add flow runs steps 1→4; edit starts at step 1 so the mail provider can be changed. */
 	const applyMailerSelection = useCallback((mailerSlug: string) => {
 		forceNewMailerVaultAccountOnNextSaveRef.current = false;
 		setForm((f) => ({
@@ -463,23 +924,11 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}));
 	}, []);
 
-	const restoreWizardAfterClosingEditAccountModal = () => {
-		const snap = accountEditWizardSnapshotRef.current;
-		if (!snap) {
-			return;
-		}
-		accountEditWizardSnapshotRef.current = null;
-		setForm(snap);
-	};
-
 	const handleDialogOpenChange = (open: boolean) => {
 		if (!open) {
-			restoreWizardAfterClosingEditAccountModal();
 			setWizardStep(1);
 			setConnectionSaveFeedback(null);
 			setProviderAccountToDelete(null);
-			setAccountEditModalOpen(false);
-			setRightAccountPanelMode('add');
 			pendingNewVaultAccountIdRef.current = null;
 			forceNewMailerVaultAccountOnNextSaveRef.current = false;
 		}
@@ -488,10 +937,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 
 	const dismissConnectionSaveFeedback = () => {
 		setConnectionSaveFeedback((prev) => {
-			if (
-				prev?.variant === 'success' &&
-				prev?.closeWizardOnDismiss !== false
-			) {
+			if (prev?.variant === 'success' && prev?.closeWizardOnDismiss !== false) {
 				setTimeout(() => {
 					handleDialogOpenChange(false);
 					setEditingId(null);
@@ -503,7 +949,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 
 	const openAdd = () => {
 		setEditingId('__new__');
-		setRightAccountPanelMode('add');
 		forceNewMailerVaultAccountOnNextSaveRef.current = false;
 		pendingNewVaultAccountIdRef.current = `conn_${Math.random()
 			.toString(36)
@@ -514,9 +959,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	};
 
 	useEffect(() => {
-		if (!addConnectionRef) {
-			return;
-		}
+		if (!addConnectionRef) return;
 		addConnectionRef.current = openAdd;
 		return () => {
 			addConnectionRef.current = null;
@@ -529,7 +972,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			return;
 		}
 		setEditingId(id);
-		setRightAccountPanelMode('edit');
 		const migrated = migrateConnectionForm({
 			...c,
 			mailer: c.mailer || 'smtp',
@@ -540,6 +982,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}
 		const baseForm = { ...migrated, connection_name: connName };
 		setForm(baseForm);
+		/** Start from step 1 so the user can change connection name, provider, and account flow. */
 		pendingNewVaultAccountIdRef.current = null;
 		forceNewMailerVaultAccountOnNextSaveRef.current = false;
 		setWizardStep(1);
@@ -554,15 +997,10 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			try {
 				const raw = await fetchMailerAccounts(slug);
 				const parsed = parseMailerAccountsResponse(raw);
-				setMailerAccountsBySlug((prev) => ({
-					...prev,
-					[slug]: parsed,
-				}));
+				setMailerAccountsBySlug((prev) => ({ ...prev, [slug]: parsed }));
 				const row = parsed[accountId];
 				if (row) {
-					setForm((prev) =>
-						mergeVaultAccountIntoForm(prev, row, slug)
-					);
+					setForm((prev) => mergeVaultAccountIntoForm(prev, row, slug));
 				}
 			} catch {
 				// keep connection row only
@@ -574,10 +1012,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		if (wizardStep === 1) {
 			const n = String(form.connection_name || '').trim();
 			if (!n) {
-				const msg = __(
-					'Please enter a connection name.',
-					'doublescale'
-				);
+				const msg = __('Please enter a connection name.', 'doublescale');
 				setError(msg);
 				setConnectionSaveFeedback({
 					variant: 'error',
@@ -598,11 +1033,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			return;
 		}
 		if (wizardStep === 3) {
-			const v = validateConnectionFormWithVaultLinkFallback(
-				form,
-				mailerAccountsBySlug,
-				forceNewMailerVaultAccountOnNextSaveRef.current
-			);
+			const v = validateConnectionForm(form);
 			if (v) {
 				setError(v);
 				setConnectionSaveFeedback({
@@ -612,10 +1043,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 				});
 				return;
 			}
-			if (
-				isSmtpOAuthMailer(form.mailer || '') &&
-				!String(form.account_id || '').trim()
-			) {
+			if (isSmtpOAuthMailer(form.mailer || '') && !String(form.account_id || '').trim()) {
 				const msg = __(
 					'Select or authorize a provider account before continuing.',
 					'doublescale'
@@ -631,8 +1059,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			if (
 				(form.mailer || 'smtp') !== 'phpmailer' &&
 				!isSmtpOAuthMailer(form.mailer || '') &&
-				!String(form.account_name || '').trim() &&
-				!vaultBackedDisplayNameFromForm(form, mailerAccountsBySlug)
+				!String(form.account_name || '').trim()
 			) {
 				const msg = __('Please enter an account name.', 'doublescale');
 				setError(msg);
@@ -653,6 +1080,24 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		setWizardStep((s) => Math.max(1, s - 1));
 	};
 
+	const chooseAddNewVaultAccount = useCallback(() => {
+		if (saving || deletingProviderAccount || mailerAccountsLoading) {
+			return;
+		}
+		forceNewMailerVaultAccountOnNextSaveRef.current = true;
+		const slug = form.mailer || 'smtp';
+		if (isSmtpOAuthMailer(slug)) {
+			setForm((f) => ({ ...f, account_id: '' }));
+			return;
+		}
+		setForm((f) => clearVaultAccountSelection(f, slug));
+	}, [
+		deletingProviderAccount,
+		form.mailer,
+		mailerAccountsLoading,
+		saving,
+	]);
+
 	const selectVaultAccountRow = useCallback(
 		(
 			accId: string,
@@ -661,28 +1106,17 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			opts?: ApplyStoredRowOpts
 		) => {
 			forceNewMailerVaultAccountOnNextSaveRef.current = false;
-			setForm((f) =>
-				applyStoredAccountRowToForm(f, accId, meta, slug, opts)
-			);
+			setForm((f) => applyStoredAccountRowToForm(f, accId, meta, slug, opts));
 		},
 		[]
 	);
 
-	const selectLinkedAccountOnly = useCallback((accId: string) => {
-		forceNewMailerVaultAccountOnNextSaveRef.current = false;
-		setForm((f) => ({ ...f, account_id: accId }));
-	}, []);
-
-	// =========================================================================
-	// Save handlers
-	// =========================================================================
-
-	const handleOpenOAuthAuthorize = async () => {
+	const openOAuthAuthorizeDialog = () => {
 		const slug = form.mailer || '';
 		if (!isSmtpOAuthMailer(slug)) {
 			return;
 		}
-		const href = oauthAuthorizeHref;
+		const href = oauthAdminAuthorizeUrl(slug);
 		if (!href) {
 			const lines = [
 				__(
@@ -724,16 +1158,69 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			});
 			return;
 		}
+		setError(null);
+		oauthAuthorizeDialogHrefRef.current = href;
+		setOauthAuthorizeDialogOpen(true);
+	};
+
+	const confirmOAuthAuthorizeFromDialog = async () => {
+		const slug = form.mailer || '';
+		const href = oauthAuthorizeDialogHrefRef.current;
+		if (!isSmtpOAuthMailer(slug) || !href) {
+			setOauthAuthorizeDialogOpen(false);
+			oauthAuthorizeDialogHrefRef.current = null;
+			return;
+		}
+		const app = form.oauth_app || {};
+		const clientId = String(app.client_id || '').trim();
+		const clientSecret = String(app.client_secret || '').trim();
+		if (!clientId || !clientSecret) {
+			setOauthAuthorizeDialogOpen(false);
+			oauthAuthorizeDialogHrefRef.current = null;
+			const msg = __(
+				'Please enter the OAuth client ID and client secret before authorizing.',
+				'doublescale'
+			);
+			setError(msg);
+			setConnectionSaveFeedback({
+				variant: 'error',
+				title: __('OAuth app credentials', 'doublescale'),
+				lines: [msg],
+			});
+			return;
+		}
 		setSaving(true);
 		setError(null);
 		try {
 			await saveMailerAppSettings(slug, {
 				client_id: clientId,
 				client_secret: clientSecret,
-				region:
-					slug === 'zoho' ? String(app.region || 'com') : undefined,
+				region: slug === 'zoho' ? String(app.region || 'com') : undefined,
 			});
-			window.open(href, '_blank', 'noopener,noreferrer');
+			// Named popup without noopener/noreferrer so PHP callback can call
+			// window.opener.add_new_*_account (see SMTP provider App classes).
+			const popup = window.open(
+				href,
+				'doublescale_smtp_oauth',
+				'scrollbars=yes,resizable=yes,status=yes,width=640,height=720'
+			);
+			if (!popup) {
+				const lines = [
+					__(
+						'Your browser blocked the sign-in window. Allow popups for this site, then try again.',
+						'doublescale'
+					),
+				];
+				setError(lines[0]);
+				setConnectionSaveFeedback({
+					variant: 'error',
+					title: __('OAuth authorization', 'doublescale'),
+					lines,
+				});
+				return;
+			}
+			setOauthAuthorizeDialogOpen(false);
+			oauthAuthorizeDialogHrefRef.current = null;
 		} catch (e: unknown) {
 			const lines = restErrorToDetailLines(e);
 			setError(lines[0] ?? __('Save failed.', 'doublescale'));
@@ -790,16 +1277,16 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			return;
 		}
 		const slug = form.mailer || 'smtp';
-		const vbDisplay =
-			vaultBackedDisplayNameFromForm(form, mailerAccountsBySlug) ||
-			undefined;
-		const trimmedAidEarly = String(form.account_id || '').trim();
-		const vaultBucketEarly = mailerAccountsBySlug[slug] || {};
-		const linkedExistingVaultAccount =
-			trimmedAidEarly &&
-			vaultBucketEarly[trimmedAidEarly] &&
-			!forceNewMailerVaultAccountOnNextSaveRef.current;
-
+		const validation = validateConnectionForm(form);
+		if (validation) {
+			setError(validation);
+			setConnectionSaveFeedback({
+				variant: 'error',
+				title: __('Cannot save provider account', 'doublescale'),
+				lines: [validation],
+			});
+			return;
+		}
 		if (slug === 'phpmailer') {
 			setConnectionSaveFeedback({
 				variant: 'success',
@@ -811,65 +1298,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 					),
 				],
 				closeWizardOnDismiss: false,
-			});
-			return;
-		}
-
-		/** Vault row already stored server-side; UI may omit secrets from the account list. */
-		if (linkedExistingVaultAccount && !isSmtpOAuthMailer(slug)) {
-			const strictVal = validateConnectionForm(form, {
-				vaultBackedDisplayName: vbDisplay,
-			});
-			if (strictVal !== null) {
-				const relaxedVal = validateConnectionForm(form, {
-					skipApiMailerCredentialKeys: true,
-					vaultBackedDisplayName: vbDisplay,
-					skipSmtpRelayFieldsWhenVaultLinked: true,
-				});
-				if (relaxedVal === null) {
-					const rowMeta = vaultBucketEarly[trimmedAidEarly];
-					const resolvedAccountName =
-						String(form.account_name || '').trim() ||
-						String(rowMeta?.name || '').trim() ||
-						trimmedAidEarly;
-
-					setForm((f) => ({
-						...f,
-						account_id: trimmedAidEarly,
-						account_name: resolvedAccountName,
-					}));
-					setConnectionSaveFeedback({
-						variant: 'success',
-						title: __('Using saved account', 'doublescale'),
-						lines: [
-							__(
-								'The selected provider account is linked. Continue the wizard and save the connection when you are ready.',
-								'doublescale'
-							),
-						],
-						closeWizardOnDismiss: false,
-					});
-					return;
-				}
-				setError(relaxedVal);
-				setConnectionSaveFeedback({
-					variant: 'error',
-					title: __('Cannot save provider account', 'doublescale'),
-					lines: [relaxedVal],
-				});
-				return;
-			}
-		}
-
-		const validation = validateConnectionForm(form, {
-			vaultBackedDisplayName: vbDisplay,
-		});
-		if (validation) {
-			setError(validation);
-			setConnectionSaveFeedback({
-				variant: 'error',
-				title: __('Cannot save provider account', 'doublescale'),
-				lines: [validation],
 			});
 			return;
 		}
@@ -904,10 +1332,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			});
 			return;
 		}
-		if (
-			!isSmtpOAuthMailer(slug) &&
-			!String(form.account_name || '').trim()
-		) {
+		if (!isSmtpOAuthMailer(slug) && !String(form.account_name || '').trim()) {
 			const msg = __('Please enter an account name.', 'doublescale');
 			setError(msg);
 			setConnectionSaveFeedback({
@@ -932,6 +1357,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		} else if (trimmedAid && vaultBucket[trimmedAid]) {
 			accountId = trimmedAid;
 		} else if (trimmedAid) {
+			// Upsert by id when the list has not refreshed yet or row is not in the parsed map.
 			accountId = trimmedAid;
 		} else {
 			accountId = `acc_${Math.random().toString(36).slice(2, 11)}`;
@@ -949,10 +1375,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 				await saveMailerAppSettings(slug, {
 					client_id: String(app.client_id || ''),
 					client_secret: String(app.client_secret || ''),
-					region:
-						slug === 'zoho'
-							? String(app.region || 'com')
-							: undefined,
+					region: slug === 'zoho' ? String(app.region || 'com') : undefined,
 				});
 			} else if (slug === 'smtp') {
 				await saveMailerAccount(
@@ -981,13 +1404,10 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 				title: __('Provider account saved', 'doublescale'),
 				lines: [
 					__(
-						'Credentials were stored in the vault. Go to the last step and press "Save connection" to store this SMTP connection.',
+						'Credentials were stored in the vault. Go to the last step and press “Save connection” to store this SMTP connection.',
 						'doublescale'
 					),
-					sprintf(
-						__('Provider account ID: %s', 'doublescale'),
-						accountId
-					),
+					sprintf(__('Provider account ID: %s', 'doublescale'), accountId),
 				],
 				closeWizardOnDismiss: false,
 			});
@@ -995,7 +1415,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			const lines = restErrorToDetailLines(e);
 			setError(
 				lines[0] ||
-					__('Could not save provider account.', 'doublescale')
+				__('Could not save provider account.', 'doublescale')
 			);
 			setConnectionSaveFeedback({
 				variant: 'error',
@@ -1013,11 +1433,7 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}
 		const slug = form.mailer || 'smtp';
 
-		const validation = validateConnectionFormWithVaultLinkFallback(
-			form,
-			mailerAccountsBySlug,
-			forceNewMailerVaultAccountOnNextSaveRef.current
-		);
+		const validation = validateConnectionForm(form);
 		if (validation) {
 			setError(validation);
 			setConnectionSaveFeedback({
@@ -1043,28 +1459,18 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		const id =
 			editingId === '__new__'
 				? String(pendingNewVaultAccountIdRef.current || '').trim() ||
-					`conn_${Math.random().toString(36).slice(2, 10)}`
+				`conn_${Math.random().toString(36).slice(2, 10)}`
 				: editingId;
 		if (editingId === '__new__' && !pendingNewVaultAccountIdRef.current) {
 			pendingNewVaultAccountIdRef.current = id;
 		}
+		// Gmail/Outlook/Zoho: provider account ids are assigned by OAuth (never default to connection id — see SMTP AccountSelector).
 		const accountId = isSmtpOAuthMailer(slug)
 			? String(form.account_id || '').trim()
 			: String(form.account_id || id).trim() || id;
 		const accountName =
-			String(
-				form.account_name || form.from_name || accountId || id
-			).trim() || id;
-
-		const trimmedAidForVault = String(form.account_id || '').trim();
-		const vaultBucketForSave = mailerAccountsBySlug[slug] || {};
-		const linkedExistingVaultRow =
-			trimmedAidForVault &&
-			vaultBucketForSave[trimmedAidForVault] &&
-			!forceNewMailerVaultAccountOnNextSaveRef.current;
-
-		const vaultFormCredentialComplete =
-			validateConnectionForm(form) === null;
+			String(form.account_name || form.from_name || accountId || id).trim() ||
+			id;
 
 		setSaving(true);
 		setError(null);
@@ -1077,32 +1483,22 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 				await saveMailerAppSettings(slug, {
 					client_id: String(app.client_id || ''),
 					client_secret: String(app.client_secret || ''),
-					region:
-						slug === 'zoho'
-							? String(app.region || 'com')
-							: undefined,
+					region: slug === 'zoho' ? String(app.region || 'com') : undefined,
 				});
-			} else if (
-				!(linkedExistingVaultRow && !vaultFormCredentialComplete)
-			) {
-				if (slug === 'smtp') {
-					await saveMailerAccount(
-						'smtp',
-						accountId,
-						accountName,
-						buildSmtpCredentialsForRest(form)
-					);
-				} else {
-					await saveMailerAccount(
-						slug,
-						accountId,
-						accountName,
-						normalizeApiCredentials(
-							slug,
-							(form.credentials || {}) as Record<string, unknown>
-						)
-					);
-				}
+			} else if (slug === 'smtp') {
+				await saveMailerAccount(
+					'smtp',
+					accountId,
+					accountName,
+					buildSmtpCredentialsForRest(form)
+				);
+			} else {
+				await saveMailerAccount(
+					slug,
+					accountId,
+					accountName,
+					normalizeApiCredentials(slug, (form.credentials || {}) as Record<string, unknown>)
+				);
 			}
 
 			const connections = { ...(settings.connections || {}) };
@@ -1117,10 +1513,10 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			if (slug !== 'phpmailer') {
 				void loadMailerAccounts(slug);
 			}
-			await reload({ showLoading: false });
 			setSuccess(__('Saved.', 'doublescale'));
 			setTimeout(() => setSuccess(null), 2500);
-			const connLabel = String(form.connection_name || '').trim() || id;
+			const connLabel =
+				String(form.connection_name || '').trim() || id;
 			setConnectionSaveFeedback({
 				variant: 'success',
 				title: __('Connection saved', 'doublescale'),
@@ -1130,21 +1526,15 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 						'Your connection and provider settings were stored successfully.',
 						'doublescale'
 					),
-					sprintf(
-						__('Connection name: %s', 'doublescale'),
-						connLabel
-					),
+					sprintf(__('Connection name: %s', 'doublescale'), connLabel),
 					sprintf(__('Mail provider: %s', 'doublescale'), slug),
 					...(slug !== 'phpmailer'
 						? [
-								sprintf(
-									__(
-										'Provider account ID: %s',
-										'doublescale'
-									),
-									accountId
-								),
-							]
+							sprintf(
+								__('Provider account ID: %s', 'doublescale'),
+								accountId
+							),
+						]
 						: []),
 				],
 			});
@@ -1152,10 +1542,10 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 			const lines = restErrorToDetailLines(e);
 			setError(
 				lines[0] ||
-					__(
-						'Could not save provider account or settings.',
-						'doublescale'
-					)
+				__(
+					'Could not save provider account or settings.',
+					'doublescale'
+				)
 			);
 			setConnectionSaveFeedback({
 				variant: 'error',
@@ -1167,80 +1557,207 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		}
 	};
 
-	const executeDeleteProviderAccount = useCallback(async () => {
-		if (!providerAccountToDelete) {
+	const deleteConnection = async (id: string) => {
+		if (!settings) {
 			return;
 		}
-		const { mailerSlug, accountId } = providerAccountToDelete;
-		setDeletingProviderAccount(true);
-		setError(null);
-		try {
-			await deleteMailerAccount(mailerSlug, accountId);
-			setProviderAccountToDelete(null);
-			setForm((f) => {
-				if ((f.mailer || '') !== mailerSlug) {
-					return f;
-				}
-				if (String(f.account_id || '').trim() !== accountId) {
-					return f;
-				}
-				return { ...f, account_id: '' };
-			});
-			void loadMailerAccounts(mailerSlug);
-		} catch (e: unknown) {
-			const lines = restErrorToDetailLines(e);
-			setError(
-				lines[0] ||
-					__('Could not delete this provider account.', 'doublescale')
-			);
-		} finally {
-			setDeletingProviderAccount(false);
-		}
-	}, [providerAccountToDelete, loadMailerAccounts]);
-
-	const executeDeleteSmtpConnection = async () => {
-		const id = smtpConnectionToDeleteId;
-		if (!settings || !id) {
+		// eslint-disable-next-line no-alert
+		if (!window.confirm(__('Remove this connection?', 'doublescale'))) {
 			return;
 		}
-		setDeletingSmtpConnection(true);
-		setError(null);
-		try {
-			const connections = { ...(settings.connections || {}) };
-			delete connections[id];
-			let default_connection = settings.default_connection;
-			let fallback_connection = settings.fallback_connection;
-			if (default_connection === id) {
-				default_connection = '';
-			}
-			if (fallback_connection === id) {
-				fallback_connection = '';
-			}
-			await saveSmtpSettings({
-				...settings,
-				connections,
-				default_connection,
-				fallback_connection,
-			} as Record<string, unknown>);
-			setSettings({
-				...settings,
-				connections,
-				default_connection,
-				fallback_connection,
-			});
-			setSuccess(__('Saved.', 'doublescale'));
-			setTimeout(() => setSuccess(null), 2500);
-			setSmtpConnectionToDeleteId(null);
-		} catch (e: unknown) {
-			setError(
-				e instanceof Error
-					? e.message
-					: __('Save failed.', 'doublescale')
-			);
-		} finally {
-			setDeletingSmtpConnection(false);
+		const connections = { ...(settings.connections || {}) };
+		delete connections[id];
+		let default_connection = settings.default_connection;
+		let fallback_connection = settings.fallback_connection;
+		if (default_connection === id) {
+			default_connection = '';
 		}
+		if (fallback_connection === id) {
+			fallback_connection = '';
+		}
+		await persist({
+			...settings,
+			connections,
+			default_connection,
+			fallback_connection,
+		});
 	};
+
+	/** SMTP relay only — PHPMailer/default mail has no connection credentials here. */
+	const isSmtpRelay = form.mailer === 'smtp';
+	const showSmtpRelayFields = isSmtpRelay;
+
+	const oauthWizardFields =
+		form.mailer !== 'phpmailer' && isSmtpOAuthMailer(form.mailer) ? (
+			<>
+				<Alert>
+					<AlertTitle>
+						{__('OAuth app credentials', 'doublescale')}
+					</AlertTitle>
+					<AlertDescription>
+						{__(
+							'Enter the client ID and client secret from your provider developer console. Save, then open provider authorization (left column); after OAuth completes, choose the mailbox from Provider account.',
+							'doublescale'
+						)}
+					</AlertDescription>
+				</Alert>
+				{getOAuthAppFields(form.mailer)?.map((field: MailerField) => {
+					const app = form.oauth_app || {};
+					const val = String(
+						(app as Record<string, unknown>)[field.key] ?? ''
+					);
+					const fid = `smtp-oauth-${field.key}`;
+					if (field.type === 'select' && field.options?.length) {
+						return (
+							<div key={field.key} className="space-y-2">
+								<Label htmlFor={fid}>{field.label}</Label>
+								<Select
+									value={val || field.options[0].value}
+									onValueChange={(v) =>
+										setForm((f) => ({
+											...f,
+											oauth_app: {
+												...(f.oauth_app || {}),
+												[field.key]: v,
+											},
+										}))
+									}
+								>
+									<SelectTrigger id={fid}>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{field.options.map((opt) => (
+											<SelectItem key={opt.value} value={opt.value}>
+												{opt.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						);
+					}
+					return (
+						<div key={field.key} className="space-y-2">
+							<Label htmlFor={fid}>{field.label}</Label>
+							<Input
+								id={fid}
+								type={field.type === 'password' ? 'password' : 'text'}
+								autoComplete={
+									field.type === 'password' ? 'new-password' : 'off'
+								}
+								value={val}
+								onChange={(e) =>
+									setForm((f) => ({
+										...f,
+										oauth_app: {
+											...(f.oauth_app || {}),
+											[field.key]: e.target.value,
+										},
+									}))
+								}
+							/>
+						</div>
+					);
+				})}
+			</>
+		) : null;
+
+	const apiWizardCredentialFields =
+		form.mailer !== 'phpmailer' &&
+			!isSmtpRelay &&
+			!isSmtpOAuthMailer(form.mailer)
+			? getMailerCredentialFields(form.mailer)?.map((field: MailerField) => {
+				const creds = (form.credentials || {}) as Record<string, unknown>;
+				const val = String(creds[field.key] ?? '');
+				const fid = `smtp-cred-${field.key}`;
+				const labelHasRequired =
+					field.required !== false &&
+					String(field.label).trim().length > 0;
+				if (field.type === 'select' && field.options?.length) {
+					return (
+						<div key={field.key} className="space-y-2">
+							<Label htmlFor={fid}>
+								{field.label}
+								{labelHasRequired ? (
+									<span className="text-destructive"> *</span>
+								) : null}
+							</Label>
+							<Select
+								value={val || field.options[0].value}
+								onValueChange={(v) =>
+									setForm((f) => ({
+										...f,
+										credentials: {
+											...(f.credentials || {}),
+											[field.key]: v,
+										},
+									}))
+								}
+							>
+								<SelectTrigger id={fid} className={SMTP_CONNECTION_SELECT_TRIGGER_CLASS}>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{field.options.map((opt) => (
+										<SelectItem key={opt.value} value={opt.value}>
+											{opt.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							{field.help ? (
+								<div className="flex gap-2 text-xs text-muted-foreground">
+									<Info
+										className="mt-0.5 h-4 w-4 shrink-0 text-brandPrimary	"
+										aria-hidden
+									/>
+									<span>{field.help}</span>
+								</div>
+							) : null}
+						</div>
+					);
+				}
+				return (
+					<div key={field.key} className="space-y-2">
+						<Label htmlFor={fid}>
+							{field.label}
+							{labelHasRequired ? (
+								<span className="text-destructive"> *</span>
+							) : null}
+						</Label>
+						<Input
+							id={fid}
+							className={SMTP_CONNECTION_INPUT_CLASS}
+							type={field.type === 'password' ? 'password' : 'text'}
+							autoComplete={
+								field.type === 'password' ? 'new-password' : 'off'
+							}
+							value={val}
+							placeholder={field.label}
+							onChange={(e) =>
+								setForm((f) => ({
+									...f,
+									credentials: {
+										...(f.credentials || {}),
+										[field.key]: e.target.value,
+									},
+								}))
+							}
+						/>
+						{field.help ? (
+							<div className="flex gap-2 text-xs text-muted-foreground">
+								<Info
+									className="mt-0.5 h-4 w-4 shrink-0 text-brandPrimary	"
+									aria-hidden
+								/>
+								<span>{field.help}</span>
+							</div>
+						) : null}
+					</div>
+				);
+			})
+			: null;
 
 	if (loading) {
 		return (
@@ -1253,6 +1770,15 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	if (!settings) {
 		return null;
 	}
+
+	const fromEmailsApiActive =
+		mailerUsesFetchedFromEmails(form.mailer || '') &&
+		String(form.account_id || '').trim() !== '' &&
+		!wizardFromEmailsFetchFailed;
+
+	const showWizardFromEmailSelect =
+		fromEmailsApiActive &&
+		(wizardFromEmailsLoading || wizardFromEmailOptions.length > 0);
 
 	return (
 		<div className="space-y-6 builtin-smtp-settings">
@@ -1271,98 +1797,1363 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 
 			<div
 				className={cn(
-					'grid gap-6 p-6 min-h-screen lg:grid-cols-[minmax(0,1fr)_380px] rounded-2xl border border-border bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
+					'grid gap-6 p-6 min-h-screen lg:grid-cols-[minmax(0,1fr)_380px] rounded-2xl border-[#D0D0D0] bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
 					connectionsView === 'card' && connectionIds.length > 0
 						? 'lg:items-stretch'
 						: 'lg:items-start'
 				)}
 			>
-				<SmtpGeneralSettingsPanel
-					settings={settings}
-					connectionIds={connectionIds}
-					saving={saving}
-					setSettings={setSettings}
-					saveGeneral={saveGeneral}
-				/>
+				<div className="flex min-h-0 w-full flex-col gap-6 overflow-hidden rounded-2xl border border-[#D0D0D0] bg-[#F7F8FA] p-6 text-[#29292E] shadow-sm lg:order-2 lg:self-start">
+					<div className="flex items-center gap-2">
+						<div
+							className=" text-[#CB5301]"
+							aria-hidden
+						>
+							<SettingsIcon width={24} height={24} />
+						</div>
+						<h3 className="text-lg font-semibold leading-[30px] text-[#29292E]">
+							{__('General Settings', 'doublescale')}
+						</h3>
+					</div>
+
+					<div className="space-y-2">
+						<Label className="text-sm font-medium text-[#29292E]">
+							{__('Default connection', 'doublescale')}
+						</Label>
+						{connectionIds.length === 0 ? (
+							<p className="text-xs text-[#6B6C76]">
+								{__(
+									'Add a connection below before choosing a default.',
+									'doublescale'
+								)}
+							</p>
+						) : (
+							<Select
+								value={
+									settings.default_connection &&
+										connectionIds.includes(settings.default_connection)
+										? settings.default_connection
+										: connectionIds[0]
+								}
+								onValueChange={(v) =>
+									setSettings((s) => (s ? { ...s, default_connection: v } : s))
+								}
+							>
+								<SelectTrigger className={SMTP_CONNECTION_SELECT_TRIGGER_CLASS}>
+									<SelectValue placeholder={__('Select…', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									{connectionIds.map((id) => (
+										<SelectItem key={id} value={id}>
+											{getConnectionDisplayLabel(
+												settings.connections?.[id],
+												id
+											)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					</div>
+					<div className="space-y-2">
+						<Label className="text-sm font-medium text-[#29292E]">
+							{__('Fallback connection', 'doublescale')}
+						</Label>
+						{connectionIds.length === 0 ? (
+							<p className="text-xs text-[#6B6C76]">—</p>
+						) : (
+							<Select
+								value={
+									settings.fallback_connection
+										? settings.fallback_connection
+										: '__none__'
+								}
+								onValueChange={(v) =>
+									setSettings((s) =>
+										s
+											? {
+												...s,
+												fallback_connection:
+													v === '__none__' ? '' : v,
+											}
+											: s
+									)
+								}
+							>
+								<SelectTrigger className={SMTP_CONNECTION_SELECT_TRIGGER_CLASS}>
+									<SelectValue placeholder={__('None', 'doublescale')} />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="__none__">
+										{__('None', 'doublescale')}
+									</SelectItem>
+									{connectionIds.map((id) => (
+										<SelectItem key={id} value={id}>
+											{getConnectionDisplayLabel(
+												settings.connections?.[id],
+												id
+											)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					</div>
+					<div className="flex justify-end ">
+						<Button
+							type="button"
+							variant="outline"
+							disabled={saving}
+							className=" border-brandPrimary text-brandPrimary hover:bg-[#fff]"
+							onClick={() => void saveGeneral()}
+						>
+							{saving
+								? __('Saving…', 'doublescale')
+								: __('Save routing', 'doublescale')}
+						</Button>
+					</div>
+					<div className="flex items-start justify-between gap-4 ">
+						<div className="min-w-0 flex-1">
+							<Label
+								className="text-sm font-medium text-[#29292E]"
+								htmlFor="smtp-disable-summary"
+							>
+								{__('Disable summary email', 'doublescale')}
+							</Label>
+						</div>
+						<Switch
+							id="smtp-disable-summary"
+							className="mt-0.5 data-[state=checked]:bg-brandPrimary"
+							checked={Boolean(settings.disable_summary_email)}
+							onCheckedChange={(v) =>
+								setSettings((s) =>
+									s ? { ...s, disable_summary_email: v } : s
+								)
+							}
+						/>
+					</div>
+				</div>
 
 				<div
 					className={cn(
 						'flex w-full min-w-0 flex-col gap-4 lg:order-1',
 						connectionsView === 'card' &&
-							connectionIds.length > 0 &&
-							'lg:min-h-0'
+						connectionIds.length > 0 &&
+						' lg:min-h-0'
 					)}
 				>
+
 					<SmtpConnectionsPanel
 						connectionsView={connectionsView}
 						connections={settings.connections}
 						onEdit={openEdit}
-						onRequestDelete={(id) =>
-							setSmtpConnectionToDeleteId(id)
-						}
+						onRequestDelete={(id) => void deleteConnection(id)}
 					/>
 				</div>
+
 			</div>
 
-			{/* ---------------------------------------------------------------- */}
-			{/* Wizard Dialog (+ Edit Account Modal + Save Feedback Dialog)       */}
-			{/* ---------------------------------------------------------------- */}
-			<ConnectionWizardDialog
-				open={dialogOpen}
-				onOpenChange={handleDialogOpenChange}
-				editingId={editingId}
-				wizardStep={wizardStep}
-				form={form}
-				setForm={setForm}
-				saving={saving}
-				goWizardNext={goWizardNext}
-				goWizardPrev={goWizardPrev}
-				saveConnection={saveConnection}
-				saveProviderAccountOnly={saveProviderAccountOnly}
-				applyMailerSelection={applyMailerSelection}
-				mailerAccountsLoading={mailerAccountsLoading}
-				staleLinkedVaultAccount={staleLinkedVaultAccount}
-				providerAccountEntriesForList={providerAccountEntriesForList}
-				reuseStoredProviderAccount={reuseStoredProviderAccount}
-				oauthAuthorizeHref={oauthAuthorizeHref}
-				handleOpenOAuthAuthorize={handleOpenOAuthAuthorize}
-				deletingProviderAccount={deletingProviderAccount}
-				providerAccountToDelete={providerAccountToDelete}
-				setProviderAccountToDelete={setProviderAccountToDelete}
-				selectLinkedAccountOnly={selectLinkedAccountOnly}
-				selectVaultAccountRow={selectVaultAccountRow}
-				accountEditWizardSnapshotRef={accountEditWizardSnapshotRef}
-				rightAccountPanelMode={rightAccountPanelMode}
-				setRightAccountPanelMode={setRightAccountPanelMode}
-				accountEditModalOpen={accountEditModalOpen}
-				setAccountEditModalOpen={setAccountEditModalOpen}
-				restoreWizardAfterClosingEditAccountModal={
-					restoreWizardAfterClosingEditAccountModal
-				}
-				connectionSaveFeedback={connectionSaveFeedback}
-				dismissConnectionSaveFeedback={dismissConnectionSaveFeedback}
-				wizardFromEmailOptions={wizardFromEmailOptions}
-				wizardFromEmailsLoading={wizardFromEmailsLoading}
-				wizardFromEmailsFetchFailed={wizardFromEmailsFetchFailed}
-			/>
+			{/* Email log is intentionally hidden for now.
+			<Card>
+				<CardHeader className="flex flex-row items-center justify-between space-y-0">
+					<div>
+						<CardTitle>{__('Email log', 'doublescale')}</CardTitle>
+						<CardDescription>
+							{__('Recent sends recorded by the SMTP module.', 'doublescale')}
+						</CardDescription>
+					</div>
+					<div className="flex flex-wrap items-center gap-2">
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									className="text-destructive border-destructive/30 hover:bg-destructive/10"
+									disabled={
+										logLoading ||
+										deletingAllLogs ||
+										(logMeta?.total_items ?? 0) === 0
+									}
+								>
+									{deletingAllLogs
+										? __('Clearing…', 'doublescale')
+										: __('Delete all logs', 'doublescale')}
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>
+										{__('Delete all email log entries?', 'doublescale')}
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										{__(
+											'This removes every row in the SMTP email log for this site. It cannot be undone.',
+											'doublescale'
+										)}
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogFooter>
+									<AlertDialogCancel>
+										{__('Cancel', 'doublescale')}
+									</AlertDialogCancel>
+									<AlertDialogAction
+										className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										onClick={() => void handleFlushAllLogs()}
+									>
+										{__('Delete all', 'doublescale')}
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							disabled={logLoading}
+							onClick={() => void loadLogs()}
+						>
+							{logLoading
+								? __('Loading…', 'doublescale')
+								: __('Refresh log', 'doublescale')}
+						</Button>
+					</div>
+				</CardHeader>
+				<CardContent>
+					{logMeta && (
+						<p className="text-xs text-muted-foreground mb-2">
+							{__('Total entries:', 'doublescale')} {logMeta.total_items}
+						</p>
+					)}
+					{logs.length === 0 ? (
+						<p className="text-sm text-muted-foreground">
+							{__(
+								'No rows loaded yet. Send a test email, then press Refresh log.',
+								'doublescale'
+							)}
+						</p>
+					) : (
+						<SmtpEmailLogTable
+							logs={logs}
+							onLogsMutated={() => void loadLogs()}
+							onActionError={(msg) => setError(msg)}
+						/>
+					)}
+				</CardContent>
+			</Card>
+			*/}
 
-			{/* ---------------------------------------------------------------- */}
-			{/* Delete Dialogs                                                    */}
-			{/* ---------------------------------------------------------------- */}
-			<DeleteProviderAccountDialog
-				providerAccountToDelete={providerAccountToDelete}
-				deletingProviderAccount={deletingProviderAccount}
-				setProviderAccountToDelete={setProviderAccountToDelete}
-				executeDeleteProviderAccount={executeDeleteProviderAccount}
-			/>
+			<Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+				<DialogContent
+					className={cn(
+						'!left-0 !top-0 flex !h-screen !max-h-none !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 bg-[#F7F8FA]'
+					)}
+				>
+					<DialogHeader className="shrink-0 space-y-0 border-b border-[#ECEEF2] bg-white px-0 py-0">
+						<DialogTitle className="sr-only">
+							{editingId === '__new__'
+								? __('Add connection', 'doublescale')
+								: __('Edit connection', 'doublescale')}
+						</DialogTitle>
+						<div className="flex items-center gap-2.5 px-6 py-3 pr-14">
+							<p className="text-sm font-medium leading-7 text-[#29292E]">
+								{__('Connections', 'doublescale')}
+							</p>
+							<AccordingRightIcon />
+							<span className="leading-7 text-[#6B6C76]">
+								{editingId === '__new__'
+									? __('Add connection', 'doublescale')
+									: __('Edit connection', 'doublescale')}
+							</span>
+						</div>
+					</DialogHeader>
 
-			<DeleteConnectionDialog
-				smtpConnectionToDeleteId={smtpConnectionToDeleteId}
-				deletingSmtpConnection={deletingSmtpConnection}
-				connections={settings.connections}
-				setSmtpConnectionToDeleteId={setSmtpConnectionToDeleteId}
-				executeDeleteSmtpConnection={executeDeleteSmtpConnection}
-			/>
+					<div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#F7F8FA]">
+						<div
+							className={cn(
+								'mx-6 mb-6 mt-6 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl',
+								'border border-[#ECEEF2] bg-[#fff]',
+								'shadow-[0px_8px_30px_0px_rgba(59,130,246,0.12)]'
+							)}
+						>
+							<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:items-stretch sm:gap-5 sm:p-6">
+								<aside className="flex w-full shrink-0 flex-col self-start rounded-2xl border border-[#D0D0D0] bg-[#F7F8FA] p-6 sm:w-[240px] sm:max-w-[280px]">
+									<div className="flex flex-col gap-0">
+										{[
+											{
+												step: 1,
+												num: 1,
+												label: __('Basic Info', 'doublescale'),
+											},
+											{
+												step: 2,
+												num: 2,
+												label: __('Mail provider', 'doublescale'),
+											},
+											{
+												step: 3,
+												num: 3,
+												label: __('Provider account', 'doublescale'),
+											},
+											{
+												step: 4,
+												num: 4,
+												label: __('Sender identity', 'doublescale'),
+											},
+										].map((item, idx, arr) => {
+											const isActive = wizardStep === item.step;
+											const isDone = wizardStep > item.step;
+											const showConnector = idx < arr.length - 1;
+											return (
+												<div key={item.step} className="flex gap-3">
+													<div className="flex flex-col items-center">
+														<div
+															className={cn(
+																'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors',
+																isDone &&
+																'border-transparent bg-[#16A34A] text-white',
+																isActive &&
+																!isDone &&
+																'border-brandPrimary bg-brandPrimary text-white',
+																!isActive &&
+																!isDone &&
+																'border-[#D0D0D0] bg-background text-[#29292E]'
+															)}
+															aria-current={isActive ? 'step' : undefined}
+														>
+															{isDone ? (
+																<CheckCheck
+																	className="h-4 w-4"
+																	strokeWidth={2.5}
+																	aria-hidden
+																/>
+															) : (
+																item.num
+															)}
+														</div>
+														{showConnector ? (
+															<div
+																className={cn(
+																	'my-1 h-7 w-0.5 shrink-0 rounded-full',
+																	isActive &&
+																	'bg-brandPrimary',
+																	!isActive &&
+																	'bg-[#D0D0D0]',
+																	isDone
+																		? 'bg-[#16A34A]'
+																		: 'bg-[#D0D0D0]'
+																)}
+																aria-hidden
+															/>
+														) : null}
+													</div>
+													<div
+														className={cn(
+															'min-w-0 pt-1.5 text-sm font-semibold leading-snug',
+															idx < arr.length - 1 && 'pb-6',
+															isDone && 'text-[#16A34A]',
+															isActive &&
+															!isDone &&
+															'text-brandPrimary',
+															!isDone &&
+															!isActive &&
+															'text-[#6B7280]'
+														)}
+													>
+														{item.label}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+								</aside>
+								<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[#D0D0D0] bg-[#F7F8FA] shadow-sm sm:min-h-0 sm:self-stretch">
+									<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+										<p className="mb-4 text-xs text-muted-foreground sm:hidden">
+											{sprintf(
+												__('Step %1$d of %2$d', 'doublescale'),
+												wizardStep,
+												WIZARD_LAST_STEP
+											)}
+										</p>
+										<div className="space-y-5">
+											{wizardStep === 1 && (
+												<div className="space-y-6">
+													<section className="rounded-xl border border-[#D0D0D0] bg-white p-6">
+														<h3 className="text-base font-semibold text-foreground">
+															{__(
+																"Let's start with the connection name",
+																'doublescale'
+															)}
+														</h3>
+														<p className="mt-3 text-sm text-muted-foreground">
+															{__(
+																'The connection name is used to identify the connection in the connection list.',
+																'doublescale'
+															)}
+														</p>
+														<div className="mt-5 space-y-2">
+															<Label htmlFor="smtp-conn-name">
+																{__('Connection name', 'doublescale')}
+																<span className="text-destructive"> *</span>
+															</Label>
+															<Input
+																id="smtp-conn-name"
+																value={form.connection_name || ''}
+																onChange={(e) =>
+																	setForm((f) => ({
+																		...f,
+																		connection_name: e.target.value,
+																	}))
+																}
+																placeholder={__('Connection name', 'doublescale')}
+																autoComplete="off"
+															/>
+														</div>
+													</section>
+												</div>
+											)}
+											{wizardStep === 2 && (
+												<div className="space-y-6">
+													<section className="rounded-xl border border-[#D0D0D0] bg-white p-6">
+														<div>
+															<h3 className="text-base font-semibold text-foreground">
+																{__('Select your mail provider', 'doublescale')}
+															</h3>
+															<p className="mt-3 text-sm text-muted-foreground">
+																{__(
+																	'Pick how this connection sends mail. If you do not see your provider, choose Other SMTP.',
+																	'doublescale'
+																)}
+															</p>
+														</div>
+
+														<div className="mt-5 pr-1">
+															<div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+																{SMTP_MAILER_OPTIONS.map((o) => {
+																	const selected = form.mailer === o.value;
+																	const logoSrc = getSmtpMailerLogoUrl(o.value);
+																	return (
+																		<button
+																			key={o.value}
+																			type="button"
+																			title={o.label}
+																			onClick={() =>
+																				applyMailerSelection(o.value)
+																			}
+																			className={cn(
+																				'flex flex-col items-center gap-2 rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] p-4 text-center transition-shadow hover:border-[#6549CA]/50 hover:shadow-sm',
+																				selected &&
+																				'border-brandPrimary bg-[rgba(101,73,202,0.06)] ring-1 ring-brandPrimary shadow-sm'
+																			)}
+																		>
+																			<div className="flex h-14 w-full items-center justify-center px-1">
+																				{logoSrc ? (
+																					<img
+																						src={logoSrc}
+																						alt=""
+																						className="max-h-14 w-auto max-w-[120px] object-contain"
+																						loading="lazy"
+																						decoding="async"
+																					/>
+																				) : (
+																					<span
+																						className={cn(
+																							'flex p-4 items-center justify-center rounded-lg text-[11px] font-bold',
+																							selected
+																								? 'bg-brandPrimary text-white'
+																								: 'bg-[#F7F8FA] text-muted-foreground'
+																						)}
+																						aria-hidden
+																					>
+																						{mailerInitialsFromLabel(
+																							o.label
+																						)}
+																					</span>
+																				)}
+																			</div>
+																		</button>
+																	);
+																})}
+															</div>
+														</div>
+													</section>
+												</div>
+											)}
+											{wizardStep === 3 && (
+												<div className="flex flex-col gap-6 bg-[#fff] border border-[#D0D0D0] rounded-xl p-6">
+													<div>
+														<h3 className="text-lg font-semibold tracking-tight">
+															{__('Configure provider account', 'doublescale')}
+														</h3>
+														<p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+															{step3MailerMeta.accountSetupDescription}
+														</p>
+														<div className="mt-3 flex flex-wrap items-center gap-2">
+															<Badge variant="secondary" className="shrink-0 font-normal">
+																{getSmtpMailerOptionLabel(form.mailer || 'smtp')}
+															</Badge>
+															<Badge variant="outline" className="shrink-0 font-normal capitalize">
+																{
+																	SMTP_MAILER_CATEGORY_LABEL[
+																	step3MailerMeta.category
+																	]
+																}
+															</Badge>
+															{step3MailerMeta.docUrl ? (
+																<a
+																	href={step3MailerMeta.docUrl}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+																>
+																	<ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+																	{step3MailerMeta.docLabel ||
+																		__('View documentation', 'doublescale')}
+																</a>
+															) : null}
+														</div>
+													</div>
+													<div className="rounded-lg border border-[#D0D0D0] bg-[#F7F8FA] px-3 py-2 text-sm">
+														<span className="text-muted-foreground">
+															{__('Connection', 'doublescale')}
+														</span>{' '}
+														<span className="font-medium">
+															{String(form.connection_name || '').trim() ||
+																__('(unnamed)', 'doublescale')}
+														</span>
+													</div>
+													{form.mailer === 'phpmailer' ? (
+														<div className="space-y-2">
+															<Label htmlFor="smtp-acc-name">
+																{__('Account name', 'doublescale')}
+															</Label>
+															<Input
+																id="smtp-acc-name"
+																className={SMTP_CONNECTION_INPUT_CLASS}
+																value={form.account_name || ''}
+																onChange={(e) =>
+																	setForm((f) => ({ ...f, account_name: e.target.value }))
+																}
+																placeholder={__(
+																	'Friendly name stored with the provider (defaults to From name)',
+																	'doublescale'
+																)}
+															/>
+															<p className="text-xs text-muted-foreground">
+																{step3MailerMeta.accountNameHint ||
+																	__(
+																		'Required for some providers (for example Amazon SES).',
+																		'doublescale'
+																	)}
+															</p>
+														</div>
+													) : (
+														<div className="overflow-hidden rounded-lg border border-[#D0D0D0] bg-[#F7F8FA] p-4">
+															<div className="grid gap-4 lg:grid-cols-2 lg:gap-5 lg:items-stretch">
+																<div className="flex min-h-0 flex-col gap-3 ">
+																	<p className="m-0 text-sm font-semibold text-[#29292E]">
+																		{editingId !== '__new__'
+																			? __('Linked account', 'doublescale')
+																			: __('All Accounts', 'doublescale')}
+																	</p>
+																	<div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[#D0D0D0] bg-white p-4">
+																		{mailerAccountsLoading ? (
+																			<p className="text-xs text-muted-foreground">
+																				{__('Loading accounts…', 'doublescale')}
+																			</p>
+																		) : null}
+																		{!mailerAccountsLoading && staleLinkedVaultAccount ? (
+																			<div className="flex min-h-[120px] flex-1 flex-col items-center justify-center gap-2 px-2 py-3 text-center">
+																				<NoSearchIcon />
+																				<p className="max-w-[410px] text-sm leading-relaxed text-[#6B7280]">
+																					{__(
+																						'The linked stored account was not found. Try authorizing again with your provider.',
+																						'doublescale'
+																					)}
+																				</p>
+																			</div>
+																		) : null}
+																		{!mailerAccountsLoading &&
+																			!staleLinkedVaultAccount &&
+																			providerAccountEntriesForList.length === 0 ? (
+																			<div className="flex min-h-[120px] flex-1 flex-col items-center justify-center gap-2 px-2 py-3 text-center">
+																				<NoSearchIcon />
+																				<p className="max-w-[410px] text-sm leading-relaxed text-[#6B7280]">
+																					{sprintf(
+																						__(
+																							'Looks like you don\'t have any %s accounts configured. Please add an account to continue.',
+																							'doublescale'
+																						),
+																						getSmtpMailerOptionLabel(form.mailer || 'smtp')
+																					)}
+																				</p>
+																			</div>
+																		) : null}
+																		{!mailerAccountsLoading &&
+																			!staleLinkedVaultAccount &&
+																			providerAccountEntriesForList.length > 0 ? (
+																			<div className="flex min-h-0 flex-1 flex-col">
+																				<div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-0.5">
+																					{providerAccountEntriesForList.map(([accId, meta]) => {
+																						const rowLabel = mailerAccountSelectLabel(
+																							accId,
+																							meta
+																						);
+																						const busy =
+																							deletingProviderAccount &&
+																							providerAccountToDelete?.accountId === accId;
+																						const selected =
+																							String(form.account_id || '').trim() ===
+																							accId;
+																						return (
+																							<div
+																								key={accId}
+																								role="radio"
+																								tabIndex={0}
+																								onClick={() => {
+																									const slug =
+																										form.mailer || 'smtp';
+																									const allowToggleOff =
+																										editingId === '__new__';
+																									selectVaultAccountRow(
+																										accId,
+																										meta,
+																										slug,
+																										{ allowToggleOff }
+																									);
+																								}}
+																								onKeyDown={(e) => {
+																									if (
+																										e.key === 'Enter' ||
+																										e.key === ' '
+																									) {
+																										e.preventDefault();
+																										const slug =
+																											form.mailer || 'smtp';
+																										const allowToggleOff =
+																											editingId === '__new__';
+																										selectVaultAccountRow(
+																											accId,
+																											meta,
+																											slug,
+																											{ allowToggleOff }
+																										);
+																									}
+																								}}
+																								className={cn(
+																									'flex cursor-pointer items-center gap-3 rounded-md border border-[#D0D0D0] bg-[#F7F8FA] p-3 transition-colors outline-none hover:bg-[#F9FAFB] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
+																								)}
+																								aria-checked={selected}
+																								aria-label={sprintf(
+																									/* translators: %s: account label */
+																									__(
+																										'Select stored account %s',
+																										'doublescale'
+																									),
+																									rowLabel
+																								)}
+																							>
+																								<span
+																									aria-hidden
+																									className={cn(
+																										'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+																										selected
+																											? 'border-brandPrimary'
+																											: 'border-[#B7BBC5]'
+																									)}
+																								>
+																									<span
+																										className={cn(
+																											'h-2 w-2 rounded-full transition-colors',
+																											selected
+																												? 'bg-brandPrimary'
+																												: 'bg-transparent'
+																										)}
+																									/>
+																								</span>
+																								<div className="min-w-0 flex-1 py-0 text-left text-sm font-medium leading-tight text-[#29292E] sm:text-[13px]">
+																									<span className="block truncate">
+																										{rowLabel}
+																									</span>
+
+																								</div>
+																								<div className="flex shrink-0 items-center gap-0">
+																									<Button
+																										type="button"
+																										variant="ghost"
+																										size="icon"
+																										className=" text-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+																										disabled={
+																											saving ||
+																											deletingProviderAccount ||
+																											mailerAccountsLoading
+																										}
+																										aria-label={sprintf(
+																											/* translators: %s: account label */
+																											__(
+																												'Edit stored account %s',
+																												'doublescale'
+																											),
+																											rowLabel
+																										)}
+																										onClick={(e) => {
+																											e.stopPropagation();
+																											const slug =
+																												form.mailer || 'smtp';
+																											selectVaultAccountRow(
+																												accId,
+																												meta,
+																												slug,
+																												{
+																													allowToggleOff: false,
+																												}
+																											);
+																										}}
+																									>
+																										<EditIcon width={24} height={24} />
+																									</Button>
+																									<Button
+																										type="button"
+																										variant="ghost"
+																										size="icon"
+																										className=" shrink-0 rounded-full text-destructive hover:bg-destructive/[0.12] hover:text-destructive"
+																										disabled={
+																											saving ||
+																											deletingProviderAccount ||
+																											mailerAccountsLoading
+																										}
+																										aria-label={sprintf(
+																											/* translators: %s: account label */
+																											__(
+																												'Delete stored account %s',
+																												'doublescale'
+																											),
+																											rowLabel
+																										)}
+																										onClick={(e) => {
+																											e.stopPropagation();
+																											setProviderAccountToDelete({
+																												mailerSlug:
+																													form.mailer || 'smtp',
+																												accountId: accId,
+																												label: rowLabel,
+																											});
+																										}}
+																									>
+																										{busy ? (
+																											<span className="text-xs" aria-hidden>
+																												…
+																											</span>
+																										) : (
+
+																											<TrashIcon width={24} height={24} />
+
+																										)}
+																									</Button>
+																								</div>
+																							</div>
+																						);
+																					})}
+																					<div
+																						role="radio"
+																						tabIndex={0}
+																						onClick={chooseAddNewVaultAccount}
+																						onKeyDown={(e) => {
+																							if (
+																								e.key !== 'Enter' &&
+																								e.key !== ' '
+																							) {
+																								return;
+																							}
+																							e.preventDefault();
+																							chooseAddNewVaultAccount();
+																						}}
+																						className={cn(
+																							'flex cursor-pointer items-center gap-3 rounded-md border border-[#D0D0D0] bg-[#F7F8FA] p-3 transition-colors outline-none hover:bg-[#F9FAFB] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+																							(saving ||
+																								deletingProviderAccount ||
+																								mailerAccountsLoading) &&
+																							'pointer-events-none opacity-60'
+																						)}
+																						aria-checked={!reuseStoredProviderAccount}
+																						aria-label={__(
+																							'Add new provider account',
+																							'doublescale'
+																						)}
+																					>
+																						<span
+																							aria-hidden
+																							className={cn(
+																								'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+																								!reuseStoredProviderAccount
+																									? 'border-brandPrimary'
+																									: 'border-[#B7BBC5]'
+																							)}
+																						>
+																							<span
+																								className={cn(
+																									'h-2 w-2 rounded-full transition-colors',
+																									!reuseStoredProviderAccount
+																										? 'bg-brandPrimary'
+																										: 'bg-transparent'
+																								)}
+																							/>
+																						</span>
+																						<div className="flex min-w-0 flex-1 items-center gap-2 py-0 text-left text-sm font-medium leading-tight text-[#29292E] sm:text-[13px]">
+
+																							<span className="block truncate">
+																								{__(
+																									'Add new account',
+																									'doublescale'
+																								)}
+																							</span>
+																						</div>
+																						<div
+																							className="flex h-9 w-[88px] shrink-0 items-center justify-end"
+																							aria-hidden
+																						/>
+																					</div>
+																				</div>
+																			</div>
+																		) : null}
+
+																		{isSmtpOAuthMailer(form.mailer) && oauthAuthorizeHref && (
+																			<div className="pt-1">
+																				<Button
+																					type="button"
+																					variant="secondary"
+																					size="sm"
+																					className="w-full sm:w-auto"
+																					onClick={() => {
+																						openOAuthAuthorizeDialog();
+																					}}
+																					disabled={saving}
+																				>
+																					{__(
+																						'Save OAuth app & authorize…',
+																						'doublescale'
+																					)}
+																				</Button>
+																			</div>
+																		)}
+																		{reuseStoredProviderAccount && (
+																			<Alert>
+																				<AlertDescription className="text-xs">
+																					{__(
+																						'This connection uses the stored provider account on the left. Identity fields below still apply to outbound mail.',
+																						'doublescale'
+																					)}
+																				</AlertDescription>
+																			</Alert>
+																		)}
+																	</div>
+																</div>
+																<div className="flex min-h-0 flex-col gap-3 lg:min-h-[260px]">
+																	<p className="text-sm font-semibold text-[#29292E]">
+																		{reuseStoredProviderAccount
+																			? __('Edit account', 'doublescale')
+																			: __('Adding new account', 'doublescale')}
+																	</p>
+																	<div className="flex min-h-[180px] flex-1 flex-col rounded-xl border border-[#D0D0D0] bg-white p-4 lg:min-h-[240px]">
+																		<div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
+																			<div className="space-y-2">
+																				<Label htmlFor="smtp-acc-name">
+																					{__('Account name', 'doublescale')}
+																					<span className="text-destructive"> *</span>
+																				</Label>
+																				<Input
+																					id="smtp-acc-name"
+																					className={SMTP_CONNECTION_INPUT_CLASS}
+																					value={form.account_name || ''}
+																					onChange={(e) =>
+																						setForm((f) => ({
+																							...f,
+																							account_name: e.target.value,
+																						}))
+																					}
+																					placeholder={__('Account name', 'doublescale')}
+																					autoComplete="off"
+																				/>
+																				<p className="text-xs text-muted-foreground">
+																					{step3MailerMeta.accountNameHint ||
+																						__(
+																							'Required for some providers (for example Amazon SES).',
+																							'doublescale'
+																						)}
+																				</p>
+																			</div>
+																			{oauthWizardFields}
+																			{apiWizardCredentialFields}
+																		</div>
+																		<div className="mt-4 flex justify-end">
+																			<Button
+																				type="button"
+																				variant="outline"
+																				size="sm"
+																				className="border-[#6549CA] text-sm font-medium leading-6  bg-white text-[#6549CA] hover:bg-[rgba(101,73,202,0.08)]"
+																				disabled={saving}
+																				onClick={() => void saveProviderAccountOnly()}
+																			>
+																				{reuseStoredProviderAccount ? (
+																					__('Save provider account', 'doublescale')
+																				) : (
+																					<>
+																						<PlusIcon width={24} height={24} />{' '}
+																						{__('Save provider account', 'doublescale')}
+																					</>
+																				)}
+																			</Button>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+													)}
+													{form.mailer === 'aws' && String(form.account_id || '').trim() && (
+														<AwsIdentitiesPanel
+															accountId={String(form.account_id).trim()}
+														/>
+													)}
+													{showSmtpRelayFields && (
+														<>
+															<div className="space-y-2">
+																<Label htmlFor="smtp-host">{__('SMTP host', 'doublescale')}</Label>
+																<Input
+																	id="smtp-host"
+																	value={(form.host as string) || ''}
+																	onChange={(e) =>
+																		setForm((f) => ({ ...f, host: e.target.value }))
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<Label htmlFor="smtp-port">{__('SMTP port', 'doublescale')}</Label>
+																<Input
+																	id="smtp-port"
+																	value={String(form.port ?? '')}
+																	onChange={(e) =>
+																		setForm((f) => ({ ...f, port: e.target.value }))
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<Label>{__('Encryption', 'doublescale')}</Label>
+																<Select
+																	value={(form.encryption as string) || 'tls'}
+																	onValueChange={(v) =>
+																		setForm((f) => ({ ...f, encryption: v }))
+																	}
+																>
+																	<SelectTrigger>
+																		<SelectValue />
+																	</SelectTrigger>
+																	<SelectContent>
+																		<SelectItem value="none">None</SelectItem>
+																		<SelectItem value="ssl">SSL</SelectItem>
+																		<SelectItem value="tls">TLS</SelectItem>
+																	</SelectContent>
+																</Select>
+															</div>
+															<div className="flex items-center justify-between gap-4">
+																<Label htmlFor="smtp-auth">{__('Authentication', 'doublescale')}</Label>
+																<Switch
+																	id="smtp-auth"
+																	checked={Boolean(form.auth)}
+																	onCheckedChange={(v) =>
+																		setForm((f) => ({ ...f, auth: v }))
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<Label htmlFor="smtp-user">{__('SMTP username', 'doublescale')}</Label>
+																<Input
+																	id="smtp-user"
+																	value={(form.user as string) || ''}
+																	onChange={(e) =>
+																		setForm((f) => ({ ...f, user: e.target.value }))
+																	}
+																/>
+															</div>
+															<div className="space-y-2">
+																<Label htmlFor="smtp-pass">{__('SMTP password', 'doublescale')}</Label>
+																<Input
+																	id="smtp-pass"
+																	type="password"
+																	autoComplete="new-password"
+																	value={(form.pass as string) || ''}
+																	onChange={(e) =>
+																		setForm((f) => ({ ...f, pass: e.target.value }))
+																	}
+																/>
+															</div>
+														</>
+													)}
+												</div>
+											)}
+											{wizardStep === 4 && (
+												<div className="flex flex-col gap-6 bg-[#fff] border border-[#D0D0D0] rounded-xl p-6">
+													<div>
+														<h3 className="text-lg font-semibold tracking-tight">
+															{__('Sender identity', 'doublescale')}
+														</h3>
+														<p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+															{__(
+																'Set the default From address for this connection, then save. You can store provider credentials on the previous step without saving the connection yet.',
+																'doublescale'
+															)}
+														</p>
+													</div>
+													<div className="rounded-lg border border-[#D0D0D0] bg-[#F7F8FA] px-3 py-2 text-sm">
+														<span className="text-muted-foreground">
+															{__('Connection', 'doublescale')}
+														</span>{' '}
+														<span className="font-medium">
+															{String(form.connection_name || '').trim() ||
+																__('(unnamed)', 'doublescale')}
+														</span>
+														{' · '}
+														<span className="font-medium">
+															{getSmtpMailerOptionLabel(form.mailer || 'smtp')}
+														</span>
+													</div>
+													<div className="space-y-2">
+														<Label htmlFor="smtp-from-email">
+															{__('From email', 'doublescale')}
+														</Label>
+														{showWizardFromEmailSelect ? (
+															<>
+																<Select
+																	value={resolveFromEmailForSelect(
+																		form.from_email,
+																		wizardFromEmailOptions
+																	)}
+																	onValueChange={(v) =>
+																		setForm((f) => ({
+																			...f,
+																			from_email: v,
+																		}))
+																	}
+																	disabled={wizardFromEmailsLoading}
+																>
+																	<SelectTrigger
+																		id="smtp-from-email"
+																		className={SMTP_CONNECTION_SELECT_TRIGGER_CLASS}
+																	>
+																		<SelectValue
+																			placeholder={__(
+																				'Select…',
+																				'doublescale'
+																			)}
+																		/>
+																	</SelectTrigger>
+																	<SelectContent>
+																		{wizardFromEmailOptions.map((opt, idx) => (
+																			<SelectItem
+																				key={`${opt.value}-${idx}`}
+																				value={opt.value}
+																			>
+																				{opt.label || opt.value}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+																{wizardFromEmailsLoading ? (
+																	<p className="text-xs text-muted-foreground">
+																		{__(
+																			'Loading sender addresses from the provider…',
+																			'doublescale'
+																		)}
+																	</p>
+																) : (
+																	<p className="text-xs text-muted-foreground">
+																		{__(
+																			'If left blank, the default WordPress from email will be used.',
+																			'doublescale'
+																		)}
+																	</p>
+																)}
+															</>
+														) : (
+															<>
+																<Input
+																	id="smtp-from-email"
+																	className={SMTP_CONNECTION_INPUT_CLASS}
+																	type="email"
+																	value={form.from_email || ''}
+																	onChange={(e) =>
+																		setForm((f) => ({
+																			...f,
+																			from_email: e.target.value,
+																		}))
+																	}
+																/>
+																{wizardFromEmailsFetchFailed &&
+																	mailerUsesFetchedFromEmails(
+																		form.mailer || ''
+																	) &&
+																	String(form.account_id || '').trim() !==
+																	'' ? (
+																	<p className="text-xs text-muted-foreground">
+																		{__(
+																			'Could not load sender addresses from the provider. Enter the From email manually.',
+																			'doublescale'
+																		)}
+																	</p>
+																) : (
+																	<p className="text-xs text-muted-foreground">
+																		{__(
+																			'If left blank, the default WordPress from email will be used.',
+																			'doublescale'
+																		)}
+																	</p>
+																)}
+															</>
+														)}
+													</div>
+													<div className="space-y-2">
+														<Label htmlFor="smtp-from-name">{__('From name', 'doublescale')}</Label>
+														<Input
+															id="smtp-from-name"
+															className={SMTP_CONNECTION_INPUT_CLASS}
+															value={form.from_name || ''}
+															onChange={(e) =>
+																setForm((f) => ({ ...f, from_name: e.target.value }))
+															}
+														/>
+													</div>
+													<div className="flex items-center justify-between gap-4">
+														<Label htmlFor="smtp-force-email">{__('Force from email', 'doublescale')}</Label>
+														<Switch
+															id="smtp-force-email"
+															checked={Boolean(form.force_from_email)}
+															onCheckedChange={(v) =>
+																setForm((f) => ({ ...f, force_from_email: v }))
+															}
+														/>
+													</div>
+													<div className="flex items-center justify-between gap-4">
+														<Label htmlFor="smtp-force-name">{__('Force from name', 'doublescale')}</Label>
+														<Switch
+															id="smtp-force-name"
+															checked={Boolean(form.force_from_name)}
+															onCheckedChange={(v) =>
+																setForm((f) => ({ ...f, force_from_name: v }))
+															}
+														/>
+													</div>
+												</div>
+											)}
+										</div>
+									</div>
+								</div>
+							</div>
+							<DialogFooter className="mt-0 shrink-0 gap-3  px-4 py-3 pt-4 sm:flex-row sm:justify-between sm:space-x-0 sm:px-6">
+								<Button
+									type="button"
+									variant="outline"
+									className="sm:mr-auto bg-[#fff] border-[#D0D0D0] "
+									onClick={() => handleDialogOpenChange(false)}
+								>
+									{__('Cancel', 'doublescale')}
+								</Button>
+								<div className="flex flex-wrap justify-end gap-6">
+									{wizardStep > 1 && (
+										<Button
+											type="button"
+											variant="outline"
+											className="border-brandPrimary text-brandPrimary "
+											onClick={goWizardPrev}
+										>
+											{__('Back', 'doublescale')}
+										</Button>
+									)}
+									{wizardStep < WIZARD_LAST_STEP ? (
+										<Button onClick={goWizardNext} className='bg-brandPrimary hover:bg-brandPrimary focus:hover:bg-brandPrimary'>
+											{__('Next', 'doublescale')}
+										</Button>
+									) : (
+										<Button
+
+											disabled={saving}
+											className='bg-brandPrimary hover:bg-brandPrimary focus:hover:bg-brandPrimary'
+											onClick={() => void saveConnection()}
+										>
+											{saving
+												? __('Saving…', 'doublescale')
+												: __('Save connection', 'doublescale')}
+										</Button>
+									)}
+								</div>
+							</DialogFooter>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={oauthAuthorizeDialogOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						setOauthAuthorizeDialogOpen(false);
+						oauthAuthorizeDialogHrefRef.current = null;
+					}
+				}}
+			>
+				<DialogContent className="max-w-lg">
+					<DialogHeader>
+						<DialogTitle>
+							{__('Save OAuth app and sign in', 'doublescale')}
+						</DialogTitle>
+						<DialogDescription asChild>
+							<div className="space-y-3 text-sm text-muted-foreground">
+								<p>
+									{__(
+										'Your client ID and client secret stay on this page. Only a separate sign-in window opens for Google, Microsoft, or Zoho.',
+										'doublescale'
+									)}
+								</p>
+								<p>
+									{__(
+										'When you continue, we save the app credentials to the server, then open that window. After you finish, the account list here can refresh automatically.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter className="gap-2 sm:gap-0">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => {
+								setOauthAuthorizeDialogOpen(false);
+								oauthAuthorizeDialogHrefRef.current = null;
+							}}
+							disabled={saving}
+						>
+							{__('Cancel', 'doublescale')}
+						</Button>
+						<Button
+							type="button"
+							className="bg-brandPrimary hover:bg-brandPrimary focus:hover:bg-brandPrimary"
+							disabled={saving}
+							onClick={() => void confirmOAuthAuthorizeFromDialog()}
+						>
+							{saving
+								? __('Saving…', 'doublescale')
+								: __(
+										'Save app & open sign-in window',
+										'doublescale'
+								  )}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={!!connectionSaveFeedback}
+				onOpenChange={(open) => {
+					if (!open) {
+						dismissConnectionSaveFeedback();
+					}
+				}}
+			>
+				<DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-3">
+					<DialogHeader>
+						<DialogTitle
+							className={
+								connectionSaveFeedback?.variant === 'error'
+									? 'text-destructive'
+									: ''
+							}
+						>
+							{connectionSaveFeedback?.title}
+						</DialogTitle>
+					</DialogHeader>
+					<div
+						className={cn(
+							'min-h-0 flex-1 overflow-y-auto rounded-md border bg-muted/40 p-3 text-sm',
+							connectionSaveFeedback?.variant === 'error' &&
+							'border-destructive/40 bg-destructive/5'
+						)}
+					>
+						<ul className="space-y-3 list-none m-0 p-0">
+							{(connectionSaveFeedback?.lines || []).map((line, idx) => (
+								<li key={idx}>
+									<pre className="whitespace-pre-wrap break-words font-sans text-xs leading-relaxed m-0">
+										{line}
+									</pre>
+								</li>
+							))}
+						</ul>
+					</div>
+					<DialogFooter>
+						<Button type="button" onClick={() => dismissConnectionSaveFeedback()}>
+							{connectionSaveFeedback?.variant === 'success'
+								? __('Close', 'doublescale')
+								: __('OK', 'doublescale')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<AlertDialog
+				open={!!providerAccountToDelete}
+				onOpenChange={(open) => {
+					if (!open && !deletingProviderAccount) {
+						setProviderAccountToDelete(null);
+					}
+				}}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>
+							{__('Delete stored provider account?', 'doublescale')}
+						</AlertDialogTitle>
+						<AlertDialogDescription asChild>
+							<div className="space-y-2 text-sm text-muted-foreground">
+								<p>
+									{sprintf(
+										/* translators: 1: account label, 2: mailer name */
+										__(
+											'This removes the saved vault entry for “%1$s” under %2$s.',
+											'doublescale'
+										),
+										providerAccountToDelete?.label ?? '',
+										getSmtpMailerOptionLabel(
+											providerAccountToDelete?.mailerSlug ?? ''
+										)
+									)}
+								</p>
+								<p>
+									{__(
+										'Any SMTP connection that still references this account may fail until you edit it and pick another account or create a new one.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={deletingProviderAccount}>
+							{__('Cancel', 'doublescale')}
+						</AlertDialogCancel>
+						<AlertDialogAction
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+							disabled={deletingProviderAccount}
+							onClick={(e) => {
+								e.preventDefault();
+								void executeDeleteProviderAccount();
+							}}
+						>
+							{deletingProviderAccount
+								? __('Deleting…', 'doublescale')
+								: __('Delete account', 'doublescale')}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 };

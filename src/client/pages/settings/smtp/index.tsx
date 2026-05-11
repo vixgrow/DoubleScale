@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import ConfigAPI from '@doublescale/config';
 import { AddonCard } from '@/client/pages/intergrations/addon-card';
-import { BounceHandler } from '@pro/components/bounce-handler';
+import { BounceHandler } from '@/components/bounce-handler';
 import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import BuiltinSmtpSettings from './builtin-smtp-settings';
 import { ConnectionsViewToggle } from './connections-view-toggle';

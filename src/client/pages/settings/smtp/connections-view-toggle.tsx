@@ -7,8 +7,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { cn } from '@/lib/utils';
-import GridIcon from '@pro/components/icons/grid';
-import ListIcon from '@pro/components/icons/list';
+import GridIcon from '@doublescale/shared/icons/grid';
+import ListIcon from '@doublescale/shared/icons/list';
 
 export type ConnectionsViewMode = 'table' | 'card';
 

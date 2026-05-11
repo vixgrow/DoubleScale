@@ -35,10 +35,10 @@ ChartJS.register(
 import './style.scss';
 import type { DashboardData } from '@doublescale/client';
 import { EmailStatsCards } from './email-stats-cards';
-import { Skeleton } from '@/components/ui/skeleton';
 import { RecentEmailsTable } from './recent-emails-list';
 import { useEmailAnalytics } from '../use-analytics';
 import { DashboardContentCard, PageHeader } from '@doublescale/components';
+import { Button } from '@/components/ui/button';
 import EmailAnalyticsSkeleton from './EmailAnalyticsSkeleton';
 
 interface EmailAnalyticsProps {
@@ -58,8 +58,31 @@ const EmailAnalytics: React.FC<EmailAnalyticsProps> = ({ dashboardData }) => {
 		refetch,
 	} = useEmailAnalytics();
 
-	if (!data || loading) {
-		return(<EmailAnalyticsSkeleton />);
+	if (loading && !data) {
+		return <EmailAnalyticsSkeleton />;
+	}
+
+	if (!data) {
+		return (
+			<>
+				<PageHeader
+					title={__('Emails Analytics', 'doublescale')}
+					subtitle={__('Emails Analytics', 'doublescale')}
+					actions={[]}
+				/>
+				<div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
+					<p className="text-center text-muted-foreground">
+						{__(
+							'Could not load analytics. Check your connection or try again.',
+							'doublescale'
+						)}
+					</p>
+					<Button type="button" onClick={() => void refetch()}>
+						{__('Try again', 'doublescale')}
+					</Button>
+				</div>
+			</>
+		);
 	}
 
 	return (

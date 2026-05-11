@@ -13,8 +13,8 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { EditIcon } from '@pro/components';
-import TrashIcon from '@pro/components/icons/trash';
+import { EditIcon } from '@doublescale/components';
+import TrashIcon from '@doublescale/shared/icons/trash';
 import { Calendar } from 'lucide-react';
 import {
 	getSmtpMailerLogoUrl,
@@ -25,7 +25,7 @@ import {
 	formatConnectionDate,
 	getConnectionDisplayLabel,
 } from './settings-utils';
-import DealCalenderIcon from '@pro/components/icons/deal-calender';
+import DealCalenderIcon from '@doublescale/shared/icons/deal-calender';
 
 function mailerLogoFallbackInitials(label: string): string {
 	const cleaned = label.replace(/\s+/g, ' ').trim();

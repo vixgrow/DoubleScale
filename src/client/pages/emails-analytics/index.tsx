@@ -23,6 +23,7 @@ import { convertDate, formatDate } from '@doublescale/utils';
 import { DateFilter } from '@doublescale/components';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const EmailAnalytics: React.FC = () => {
@@ -60,8 +61,24 @@ const EmailAnalytics: React.FC = () => {
 		fetchEmailAnalytics();
 	}, []);
 
-	if (!data || loading) {
-		return <Skeleton className='h-4 w-full' />;
+	if (loading) {
+		return <Skeleton className="h-4 w-full" />;
+	}
+
+	if (!data) {
+		return (
+			<div className="flex flex-col items-center gap-4 py-8">
+				<p className="text-center text-muted-foreground">
+					{__(
+						'Could not load analytics. Check your connection or try again.',
+						'doublescale'
+					)}
+				</p>
+				<Button type="button" onClick={() => void fetchEmailAnalytics()}>
+					{__('Try again', 'doublescale')}
+				</Button>
+			</div>
+		);
 	}
 
 	return (

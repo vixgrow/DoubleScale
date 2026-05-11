@@ -36,13 +36,13 @@ ChartJS.register(
  */
 import './style.scss';
 import type { DashboardData } from '@doublescale/client';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ContactStatsCards } from './contacts-stats-card';
 import { RecentContactsList } from '../recent-contacts-list';
 import { ContactAnalyticsChart } from '../contacts-chart';
 import { UnsubscribedContactsTable } from './unsubscribed-contacts-list';
 import { useContactAnalytics } from '../use-analytics';
 import { DashboardContentCard, PageHeader } from '@doublescale/components';
+import { Button } from '@/components/ui/button';
 import ContactAnalyticsSkeleton from './ContactAnalyticsSkeleton';
 
 interface ContactAnalyticsProps {
@@ -64,8 +64,31 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 		refetch,
 	} = useContactAnalytics();
 
-	if (!data || loading) {
-		return (<ContactAnalyticsSkeleton />);
+	if (loading && !data) {
+		return <ContactAnalyticsSkeleton />;
+	}
+
+	if (!data) {
+		return (
+			<>
+				<PageHeader
+					title={__('Contacts Analytics', 'doublescale')}
+					subtitle={__('Contacts Analytics', 'doublescale')}
+					actions={[]}
+				/>
+				<div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
+					<p className="text-center text-muted-foreground">
+						{__(
+							'Could not load analytics. Check your connection or try again.',
+							'doublescale'
+						)}
+					</p>
+					<Button type="button" onClick={() => void refetch()}>
+						{__('Try again', 'doublescale')}
+					</Button>
+				</div>
+			</>
+		);
 	}
 
 	return (

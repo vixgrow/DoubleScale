@@ -11,6 +11,7 @@ import ConfigAPI from '@doublescale/config';
 import frameDashboardBg from '@doublescale/assets/images/Frame-dashboard.png';
 import './style.scss';
 import { PageHeader } from '@doublescale/components';
+import { Button } from '@/components/ui/button';
 import UpgradeHeroBanner from './upgrade-hero-banner';
 import UserDashboard from './user-dashboard';
 import { UserDashboardShimmer } from './user-dashboard/UserDashboardShimmer';
@@ -36,7 +37,7 @@ function shouldShowDashboardUpgradeHero(): boolean {
 
 const Dashboard: React.FC = () => {
 	const activeTab = 'user';
-	const { data, loading } = useDashboardData();
+	const { data, loading, refetch } = useDashboardData();
 	const showUpgradeHeroBanner = shouldShowDashboardUpgradeHero();
 
 	const tabTitles: Record<string, string | undefined> = {
@@ -66,12 +67,31 @@ const Dashboard: React.FC = () => {
 		</div>
 	);
 
-	if (!data || loading) {
+	if (loading && !data) {
 		return (
 			<div className="doublescale-dashboard">
 				{hero}
 				<div className="doublescale-dashboard-main">
 					<UserDashboardShimmer />
+				</div>
+			</div>
+		);
+	}
+
+	if (!data) {
+		return (
+			<div className="doublescale-dashboard">
+				{hero}
+				<div className="doublescale-dashboard-main flex flex-col items-center justify-center gap-4 px-6 py-16">
+					<p className="text-center text-muted-foreground">
+						{__(
+							'Could not load dashboard data. Check your connection or try again.',
+							'doublescale'
+						)}
+					</p>
+					<Button type="button" onClick={() => void refetch()}>
+						{__('Try again', 'doublescale')}
+					</Button>
 				</div>
 			</div>
 		);

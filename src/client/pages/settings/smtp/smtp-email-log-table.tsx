@@ -29,15 +29,15 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import type { EmailLogRow } from '@/client/pages/settings/smtp/types';
+import type { EmailLogRow } from './types';
 import {
 	deleteSmtpEmailLog,
 	deleteSmtpEmailLogsByIds,
-} from '@/client/pages/settings/smtp/smtp-api';
-import { ViewIcon } from '@pro/components';
-import TrashIcon from '@pro/components/icons/trash';
-import AccordingRightIcon from '@pro/components/icons/according-right';
-import SearchIcon from '@pro/components/icons/search';
+} from './smtp-api';
+import { ViewIcon } from '@doublescale/shared/icons';
+import TrashIcon from '@doublescale/shared/icons/trash';
+import AccordingRightIcon from '@doublescale/shared/icons/according-right';
+import SearchIcon from '@doublescale/shared/icons/search';
 
 const BODY_PREVIEW_MAX = 12000;
 

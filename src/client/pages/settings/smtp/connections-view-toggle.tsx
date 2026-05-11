@@ -7,8 +7,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { cn } from '@/lib/utils';
-import GridIcon from '@/components/icons/grid';
-import ListIcon from '@/components/icons/list';
+import GridIcon from '@pro/components/icons/grid';
+import ListIcon from '@pro/components/icons/list';
 
 export type ConnectionsViewMode = 'table' | 'card';
 
@@ -38,7 +38,7 @@ export function ConnectionsViewToggle({
 					'relative flex h-9 w-10 shrink-0 items-center justify-center bg-white transition-colors focus-visible:z-[11] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/35 focus-visible:ring-offset-2',
 					value === 'card'
 						? 'z-10 rounded-l-[10px] border border-brandPrimary text-brandPrimary'
-						: 'z-0 rounded-l-[10px] border-t border-b border-l border-[#D0D0D0] border-r-0 text-[#A8A8B3]'
+						: 'z-0 rounded-l-[10px] border-t border-b border-l border-border border-r-0 text-muted-foreground'
 				)}
 				aria-pressed={value === 'card'}
 				aria-label={__('Card view', 'doublescale')}
@@ -52,7 +52,7 @@ export function ConnectionsViewToggle({
 					'-ml-px relative flex h-9 w-10 shrink-0 items-center justify-center bg-white transition-colors focus-visible:z-[11] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/35 focus-visible:ring-offset-2',
 					value === 'table'
 						? 'z-10 rounded-r-[10px] border border-brandPrimary text-brandPrimary'
-						: 'z-0 rounded-r-[10px] border-t border-b border-r border-[#D0D0D0] border-l-0 text-[#A8A8B3]'
+						: 'z-0 rounded-r-[10px] border-t border-b border-r border-border border-l-0 text-muted-foreground'
 				)}
 				aria-pressed={value === 'table'}
 				aria-label={__('Table view', 'doublescale')}

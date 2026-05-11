@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -39,7 +38,12 @@ import AIEmailBuilder from '../templates/ai-email-builder';
 const BUILDER_INITIAL_KEY = 'doublescale_campaign_builder_initial';
 
 const resolveAssetUrls = (obj: unknown): unknown => {
-	const baseUrl = configApi.getPluginDirUrl() + 'assets/images/templates/';
+	const proBase = configApi.getProPluginDirUrl();
+	const base =
+		typeof proBase === 'string' && proBase.length > 0
+			? proBase
+			: configApi.getPluginDirUrl();
+	const baseUrl = base.replace(/\/?$/, '/') + 'assets/images/templates/';
 	const json = JSON.stringify(obj);
 	return JSON.parse(json.replace(/\{\{ASSETS_URL\}\}/g, baseUrl));
 };
@@ -159,7 +163,6 @@ const EmailTemplatesStep: React.FC = () => {
 	const { campaign, saveCampaignStep, isNewCampaign, goToStep } = useCampaignStep();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const dispatch = useDispatch();
 
 	const showBackToBuilder =
 		campaign?.id &&
@@ -197,7 +200,9 @@ const EmailTemplatesStep: React.FC = () => {
 		}
 	}, [activeTab, campaign?.id]);
 
-	const applyBuiltInTemplateAndNavigate = (template: TemplateItemConfig) => {
+	const applyBuiltInTemplateAndNavigate = async (
+		template: TemplateItemConfig
+	) => {
 		if (!campaign) return;
 		try {
 			const body = template.data?.body;
@@ -213,7 +218,11 @@ const EmailTemplatesStep: React.FC = () => {
 				`${BUILDER_INITIAL_KEY}_${campaign.id}`,
 				JSON.stringify(resolved)
 			);
-			saveCampaignStep('email-templates', {});
+			const ok = await saveCampaignStep('email-templates', {});
+			if (!ok) {
+				sessionStorage.removeItem(`${BUILDER_INITIAL_KEY}_${campaign.id}`);
+				return;
+			}
 			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
 			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
 		} catch (error) {
@@ -222,15 +231,12 @@ const EmailTemplatesStep: React.FC = () => {
 	};
 
 	const applyUserTemplateAndNavigate = async (template: EmailTemplate) => {
-		if (!campaign) return;
+		if (!campaign || !template.id) return;
 		try {
-			dispatch('doublescale/campaign').updateCampaign({
-				settings: {
-					...campaign.settings,
-					template_ids: template.id ? [template.id] : [],
-				},
+			const ok = await saveCampaignStep('email-templates', {
+				template_id: template.id,
 			});
-			saveCampaignStep('email-templates', { template_id: template.id });
+			if (!ok) return;
 			const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
 			navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
 		} catch (error) {
@@ -238,10 +244,11 @@ const EmailTemplatesStep: React.FC = () => {
 		}
 	};
 
-	const handleStartFromScratch = () => {
+	const handleStartFromScratch = async () => {
 		if (!campaign) return;
 		sessionStorage.removeItem(`${BUILDER_INITIAL_KEY}_${campaign.id}`);
-		saveCampaignStep('email-templates', {});
+		const ok = await saveCampaignStep('email-templates', {});
+		if (!ok) return;
 		const navState = isNewCampaign ? { state: { isNew: true } } : undefined;
 		navigate(getToLink(`campaigns/${campaign.id}/builder`), navState);
 	};

@@ -30,6 +30,11 @@ class MessageSourceTypes {
 	const INDIVIDUAL = 3;
 
 	/**
+	 * Booking source - Outgoing booking confirmation/cancellation/etc emails
+	 */
+	const BOOKING = 4;
+
+	/**
 	 * Get all source types
 	 *
 	 * @return array
@@ -39,6 +44,7 @@ class MessageSourceTypes {
 			self::CAMPAIGN   => __( 'Campaign', 'doublescale'),
 			self::AUTOMATION => __( 'Automation', 'doublescale'),
 			self::INDIVIDUAL => __( 'Individual', 'doublescale'),
+			self::BOOKING    => __( 'Booking', 'doublescale'),
 		);
 	}
 
@@ -70,7 +76,7 @@ class MessageSourceTypes {
 	 * @return bool
 	 */
 	public static function supports_analytics( $type ) {
-		return in_array( $type, array( self::CAMPAIGN, self::AUTOMATION, self::INDIVIDUAL ) );
+		return in_array( $type, array( self::CAMPAIGN, self::AUTOMATION, self::INDIVIDUAL, self::BOOKING ) );
 	}
 
 	/**

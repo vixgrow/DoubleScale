@@ -47,6 +47,19 @@ class ActivityTypes {
 	const LOGGED_OUT = 'logged_out';
 
 	/**
+	 * Booking lifecycle types — virtual rows projected from `doublescale_bookings`
+	 * via `ActivityManager::build_bookings_union_sql()`. Read-only; the source of
+	 * truth is the booking row itself, edits go through booking endpoints.
+	 */
+	const BOOKING_SCHEDULED   = 'booking_scheduled';
+	const BOOKING_CONFIRMED   = 'booking_confirmed';
+	const BOOKING_PENDING     = 'booking_pending';
+	const BOOKING_RESCHEDULED = 'booking_rescheduled';
+	const BOOKING_CANCELLED   = 'booking_cancelled';
+	const BOOKING_COMPLETED   = 'booking_completed';
+	const BOOKING_REJECTED    = 'booking_rejected';
+
+	/**
 	 * Get all valid activity types
 	 *
 	 * @since 1.2.0
@@ -71,6 +84,13 @@ class ActivityTypes {
 			self::STATUS_CHANGED,
 			self::LOGGED_IN,
 			self::LOGGED_OUT,
+			self::BOOKING_SCHEDULED,
+			self::BOOKING_CONFIRMED,
+			self::BOOKING_PENDING,
+			self::BOOKING_RESCHEDULED,
+			self::BOOKING_CANCELLED,
+			self::BOOKING_COMPLETED,
+			self::BOOKING_REJECTED,
 		);
 	}
 
@@ -231,6 +251,13 @@ class ActivityTypes {
 			self::STATUS_CHANGED    => __( 'Status Changed', 'doublescale'),
 			self::LOGGED_IN         => __( 'Logged In', 'doublescale'),
 			self::LOGGED_OUT        => __( 'Logged Out', 'doublescale'),
+			self::BOOKING_SCHEDULED   => __( 'Booking Scheduled', 'doublescale' ),
+			self::BOOKING_CONFIRMED   => __( 'Booking Confirmed', 'doublescale' ),
+			self::BOOKING_PENDING     => __( 'Booking Pending', 'doublescale' ),
+			self::BOOKING_RESCHEDULED => __( 'Booking Rescheduled', 'doublescale' ),
+			self::BOOKING_CANCELLED   => __( 'Booking Cancelled', 'doublescale' ),
+			self::BOOKING_COMPLETED   => __( 'Booking Completed', 'doublescale' ),
+			self::BOOKING_REJECTED    => __( 'Booking Rejected', 'doublescale' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucfirst( str_replace( '_', ' ', $type ) );

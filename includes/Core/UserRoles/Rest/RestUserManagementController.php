@@ -305,15 +305,24 @@ class RestUserManagementController extends RestController {
 			UserRoles::SALES_REP,
 		);
 
-		foreach ( $crm_roles as $crm_role ) {
-			$user->remove_role( $crm_role );
-			do_action( 'doublescale_user_role_revoked', $user->ID, $crm_role );
-		}
-
+		// Add new CRM roles FIRST so listeners on doublescale_user_role_revoked
+		// don't observe a transient zero-roles state if any of the existing roles
+		// need to be removed afterward. (Same race as assign_crm_role.)
 		foreach ( $roles as $role ) {
-			if ( in_array( $role, $crm_roles, true ) ) {
+			if ( in_array( $role, $crm_roles, true ) && ! in_array( $role, (array) $user->roles, true ) ) {
 				$user->add_role( $role );
 				do_action( 'doublescale_user_role_assigned', $user->ID, $role );
+			}
+		}
+
+		// Remove any CRM roles the user had that aren't in the new $roles set.
+		foreach ( $crm_roles as $crm_role ) {
+			if ( in_array( $crm_role, (array) $roles, true ) ) {
+				continue;
+			}
+			if ( in_array( $crm_role, (array) $user->roles, true ) ) {
+				$user->remove_role( $crm_role );
+				do_action( 'doublescale_user_role_revoked', $user->ID, $crm_role );
 			}
 		}
 
@@ -356,14 +365,25 @@ class RestUserManagementController extends RestController {
 			UserRoles::SALES_REP,
 		);
 
-		foreach ( $crm_roles as $crm_role ) {
-			$user->remove_role( $crm_role );
-			do_action( 'doublescale_user_role_revoked', $user->ID, $crm_role );
-		}
-
-		if ( in_array( $role, $crm_roles, true ) ) {
+		// Add the new CRM role FIRST so listeners on `doublescale_user_role_revoked`
+		// observing "user still has a booking-eligible role" don't see a transient
+		// zero-roles state during the revoke loop. Otherwise the booking module's
+		// purge_host_data() listener triggers mid-swap and deletes the host's
+		// calendar+availability before the new role is added.
+		if ( in_array( $role, $crm_roles, true ) && ! in_array( $role, (array) $user->roles, true ) ) {
 			$user->add_role( $role );
 			do_action( 'doublescale_user_role_assigned', $user->ID, $role );
+		}
+
+		// Remove the OTHER CRM roles (skip the just-added one).
+		foreach ( $crm_roles as $crm_role ) {
+			if ( $crm_role === $role ) {
+				continue;
+			}
+			if ( in_array( $crm_role, (array) $user->roles, true ) ) {
+				$user->remove_role( $crm_role );
+				do_action( 'doublescale_user_role_revoked', $user->ID, $crm_role );
+			}
 		}
 
 		$assigned_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );

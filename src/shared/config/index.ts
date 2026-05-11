@@ -76,6 +76,7 @@ const configData: ConfigData = {
 	blogName: (serverData.blogName as string | undefined) ?? '',
 	adminUrl: (serverData.adminUrl as string | undefined) ?? '',
 	pluginDirUrl: (serverData.pluginDirUrl as string | undefined) ?? '',
+	proPluginDirUrl: (serverData.proPluginDirUrl as string | undefined) ?? '',
 	license: (serverData.license as License | false | undefined) ?? false,
 	adminEmail: (serverData.adminEmail as string | undefined) ?? '',
 	ajaxUrl: (serverData.ajaxUrl as string | undefined) ?? '',
@@ -276,6 +277,14 @@ const getPluginDirUrl = (data: ConfigData) => (): string => {
  */
 const setPluginDirUrl = (data: ConfigData) => (value: string) => {
 	data.pluginDirUrl = value;
+};
+
+const getProPluginDirUrl = (data: ConfigData) => (): string => {
+	return data.proPluginDirUrl;
+};
+
+const setProPluginDirUrl = (data: ConfigData) => (value: string) => {
+	data.proPluginDirUrl = value;
 };
 
 /**
@@ -860,6 +869,8 @@ export interface ConfigApi {
 	setLicense: (value: License | false) => void;
 	setPluginDirUrl: (value: string) => void;
 	getPluginDirUrl: () => string;
+	setProPluginDirUrl: (value: string) => void;
+	getProPluginDirUrl: () => string;
 	getForms: () => Forms;
 	setForms: (value: Forms) => void;
 	getCustomFieldsTypes: () => CustomFieldsTypes;
@@ -933,6 +944,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setNonce = setNonce(data);
 	configApi.getPluginDirUrl = getPluginDirUrl(data);
 	configApi.setPluginDirUrl = setPluginDirUrl(data);
+	configApi.getProPluginDirUrl = getProPluginDirUrl(data);
+	configApi.setProPluginDirUrl = setProPluginDirUrl(data);
 	configApi.getForms = () => getForms(data);
 	configApi.setForms = setForms(data);
 	configApi.getCustomFieldsTypes = () => getCustomFieldsTypes(data);

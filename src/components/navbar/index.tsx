@@ -390,9 +390,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 		if (matched) {
 			setSelectedKey(matched.path);
-			if (matched.subMenu) {
-				setExpandedSubMenus((prev) => new Set([...prev, matched.path]));
-			}
 		} else if (currentPath === '') {
 			setSelectedKey(defaultSelectedPath);
 		}
@@ -512,7 +509,12 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								<SidebarMenuButton
 									isActive={active}
 									className="doublescale-navbar__link"
-									onClick={() => handleNavigation(item.path)}
+									onClick={() => {
+										handleNavigation(item.path);
+										cancelFlyoutClose();
+										setCollapsedPopover(null);
+										setCollapsedFlyoutPos(null);
+									}}
 								>
 									<span className="doublescale-navbar__icon">{item.icon}</span>
 								</SidebarMenuButton>
@@ -583,7 +585,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 									key={subItem.path}
 									type="button"
 									className={`doublescale-navbar__submenu-item ${subActive ? 'doublescale-navbar__submenu-item--active' : ''}`}
-									onClick={() => handleNavigation(subItem.path)}
+									onClick={() => {
+										handleNavigation(subItem.path);
+										setExpandedSubMenus((prev) => {
+											const next = new Set(prev);
+											next.delete(item.path);
+											return next;
+										});
+									}}
 								>
 									<span className="doublescale-navbar__submenu-dot" />
 									{subItem.label}
@@ -710,6 +719,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 										onClick={(e) => {
 											e.stopPropagation();
 											handleNavigation(subItem.path);
+											setExpandedSubMenus((prev) => {
+												const next = new Set(prev);
+												next.delete(collapsedFlyoutItem.path);
+												return next;
+											});
 											cancelFlyoutClose();
 											setCollapsedPopover(null);
 											setCollapsedFlyoutPos(null);

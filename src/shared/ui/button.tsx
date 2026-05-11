@@ -22,7 +22,7 @@ const buttonVariants = cva(
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
 				gradient:
-					'bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground',
+					'bg-gradient-to-br from-[#2D1B69] to-[#1B1145] text-primary-foreground',
 				secondaryDeepBlue:
 					'border border-[#274C77] text-[#274C77] shadow-sm',
 			},

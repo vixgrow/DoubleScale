@@ -1,4 +1,13 @@
 .doublescale-campaigns {
+	// Zebra striping for the campaigns data table (white / #F7F8FA)
+	table tbody tr:nth-child(even):not([data-state='selected']) {
+		background-color: #f7f8fa;
+	}
+
+	table tbody tr:nth-child(odd):not([data-state='selected']) {
+		background-color: #ffffff;
+	}
+
 	.doublescale-campaigns-header {
 		display: flex;
 		justify-content: space-between;

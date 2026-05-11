@@ -57,13 +57,13 @@ export const SMTP_MAILER_LOGO_FILES: Record<string, string> = {
 	gmail: 'gmail.svg',
 	postmark: 'postmark.svg',
 	sendinblue: 'sendinblue.svg',
-	loops: 'loops.png',
+	loops: 'loops.svg',
 	mailersend: 'mailersend.svg',
-	mailjet: 'mailjet.png',
-	mandrill: 'mandrill.png',
+	mailjet: 'mailjet.svg',
+	mandrill: 'mandrill.svg',
 	sparkpost: 'sparkpost.svg',
-	sendlayer: 'sendlayer.png',
-	smtp2go: 'smtp2go.png',
+	sendlayer: 'sendlayer.svg',
+	smtp2go: 'smtp2go.svg',
 	smtpcom: 'smtpcom.svg',
 	elasticemail: 'elasticemail.svg',
 	outlook: 'outlook.svg',
@@ -79,7 +79,11 @@ export function getSmtpMailerLogoUrl(mailerSlug: string): string | undefined {
 	if (!file) {
 		return undefined;
 	}
-	const base = ConfigAPI.getPluginDirUrl();
+	const proBase = ConfigAPI.getProPluginDirUrl();
+	const base =
+		typeof proBase === 'string' && proBase.length > 0
+			? proBase
+			: ConfigAPI.getPluginDirUrl();
 	const sep = base.endsWith('/') ? '' : '/';
 	return `${base}${sep}assets/images/mailers/${file}`;
 }

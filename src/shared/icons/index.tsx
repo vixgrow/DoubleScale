@@ -250,6 +250,7 @@ export { default as SearchIcon } from './search';
 export { default as AccordingRightIcon } from './according-right';
 export { default as NoSearchIcon } from './no-search';
 export { default as DealCalenderIcon } from './deal-calender';
+export { default as CheckIcon } from './check';
 export { default as AddContactIcon } from './add-contact';
 export { default as ExternalLinkIcon } from './external-link';
 export { default as NewAutomationIcon } from './new-automation';

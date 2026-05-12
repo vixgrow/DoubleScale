@@ -79,11 +79,11 @@ class FormSubmission extends Filter {
 	public function get_options() {
 		$options = array();
 
-		if ( ! class_exists( '\DoubleScale\Modules\Forms\Models\FormModel' ) ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Models\FormModel' ) ) {
 			return $options;
 		}
 
-		$forms = \DoubleScale\Modules\Forms\Models\FormModel::all();
+		$forms = \DoubleScale\Pro\Modules\Forms\Models\FormModel::all();
 
 		foreach ( $forms as $form ) {
 			$options[ $form->id ] = $form->name;
@@ -158,6 +158,6 @@ class FormSubmission extends Filter {
 	}
 }
 
-if ( class_exists( '\DoubleScale\Modules\Forms\Models\FormModel' ) ) {
+if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Models\FormModel' ) ) {
 	FiltersManager::instance()->register( new FormSubmission() );
 }

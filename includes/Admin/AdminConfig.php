@@ -102,8 +102,8 @@ final class AdminConfig {
 				/** Base URL for static assets shipped with DoubleScale Pro (e.g. SMTP mailer logos under `assets/images/mailers/`). */
 				'proPluginDirUrl'     => defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ? DOUBLESCALE_PRO_PLUGIN_URL : '',
 				'siteUrl'             => site_url(),
-				'forms'               => class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
-					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_options()
+				'forms'               => class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
+					? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_options()
 					: array(),
 				'filtersGroups'       => FiltersManager::instance()->get_groups(),
 				'customFieldsTypes'   => class_exists( \DoubleScale\Core\CustomFields\CustomFieldsManager::class ) ? \DoubleScale\Core\CustomFields\CustomFieldsManager::instance()->get_options() : array(),

@@ -84,73 +84,74 @@ export const Layout = (props) => {
 		setMergeTagCallback(null);
 	};
 
+	// Modal + per-page shell are rendered inside each route. The global
+	// providers (SlotFillProvider, SidebarProvider) live ABOVE the router in
+	// `_PageLayout` so they survive route changes — that's what keeps the
+	// sidebar collapsed/expanded state stable when navigating between e.g.
+	// Booking → Calendar and Booking → Bookings.
+	const modal = (
+		<MergeTagsModal
+			visible={mergeTagsVisible}
+			onClose={handleCloseMergeTags}
+			onInsertTag={mergeTagCallback || undefined}
+			triggerId={formContext?.triggerId}
+			formId={formContext?.formId}
+			automationId={formContext?.automationId}
+		/>
+	);
+
 	// Check if this is the get started page - render full page without layout
 	if (props.page.path === 'start') {
 		return (
-			<SlotFillProvider>
-				<Notices />
-				<MergeTagsModal
-					visible={mergeTagsVisible}
-					onClose={handleCloseMergeTags}
-					onInsertTag={mergeTagCallback || undefined}
-					triggerId={formContext?.triggerId}
-					formId={formContext?.formId}
-					automationId={formContext?.automationId}
-				/>
+			<>
+				{modal}
 				<div className="w-full min-h-screen bg-background p-6 box-border">
 					<ProtectedRoute page={props.page}>
 						<props.page.component />
 					</ProtectedRoute>
 				</div>
-			</SlotFillProvider>
+			</>
 		);
 	}
 
 	return (
-		<SlotFillProvider>
-			<SidebarProvider>
-				<Notices />
-				<MergeTagsModal
-					visible={mergeTagsVisible}
-					onClose={handleCloseMergeTags}
-					onInsertTag={mergeTagCallback || undefined}
-					triggerId={formContext?.triggerId}
-					formId={formContext?.formId}
-					automationId={formContext?.automationId}
-				/>
-				<div className="doublescale-layout__main">
-					<NavBar />
-					<div className="doublescale-layout__workspace">
-						<HeaderBar page={props.page} />
-						<ProtectedRoute page={props.page}>
-							<Controller {...props} />
-						</ProtectedRoute>
-					</div>
+		<>
+			{modal}
+			<div className="doublescale-layout__main">
+				<NavBar />
+				<div className="doublescale-layout__workspace">
+					<HeaderBar page={props.page} />
+					<ProtectedRoute page={props.page}>
+						<Controller {...props} />
+					</ProtectedRoute>
 				</div>
-			</SidebarProvider>
-		</SlotFillProvider>
+			</div>
+		</>
 	);
 };
 
 const _PageLayout = () => {
 	return (
-		<>
-			{/* @ts-ignore */}
-			<HistoryRouter history={getHistory()}>
-				<Routes>
-					{Object.values(getAdminPages()).map((page) => {
-						return (
-							<Route
-								key={page.path}
-								path={page.path}
-								element={<Layout page={page} />}
-							/>
-						);
-					})}
-					<Route path="*" element={<Navigate to="/" replace />} />
-				</Routes>
-			</HistoryRouter>
-		</>
+		<SlotFillProvider>
+			<SidebarProvider>
+				<Notices />
+				{/* @ts-ignore */}
+				<HistoryRouter history={getHistory()}>
+					<Routes>
+						{Object.values(getAdminPages()).map((page) => {
+							return (
+								<Route
+									key={page.path}
+									path={page.path}
+									element={<Layout page={page} />}
+								/>
+							);
+						})}
+						<Route path="*" element={<Navigate to="/" replace />} />
+					</Routes>
+				</HistoryRouter>
+			</SidebarProvider>
+		</SlotFillProvider>
 	);
 };
 

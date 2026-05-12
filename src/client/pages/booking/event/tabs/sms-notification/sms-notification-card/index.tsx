@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
+import './style.scss';
+
 type SmsNotificationCardProps = {
 	notifications: Record<string, NotificationType>;
 	notificationKey: string;

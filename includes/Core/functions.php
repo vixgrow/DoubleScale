@@ -146,6 +146,35 @@ if ( ! function_exists( 'doublescale_is_plugin_active' ) ) {
 	}
 }
 
+if ( ! function_exists( 'doublescale_pro_task_model_available' ) ) {
+	/**
+	 * Whether the Pro tasks Eloquent model is loaded (unified timelines include tasks).
+	 *
+	 * Pro ships tasks under {@see \DoubleScale\Pro\Modules\Tasks\Models\TaskModel}.
+	 */
+	function doublescale_pro_task_model_available(): bool {
+		return class_exists( '\DoubleScale\Pro\Modules\Tasks\Models\TaskModel' )
+			|| class_exists( '\DoubleScale\Modules\Tasks\Models\TaskModel' );
+	}
+}
+
+if ( ! function_exists( 'doublescale_resolve_deal_model_class' ) ) {
+	/**
+	 * Resolves the Deal Eloquent model when Pipelines & Deals (Pro) is active.
+	 *
+	 * @return string|null Fully-qualified class name.
+	 */
+	function doublescale_resolve_deal_model_class(): ?string {
+		if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\DealModel' ) ) {
+			return '\DoubleScale\Pro\Modules\Deals\Models\DealModel';
+		}
+		if ( class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
+			return '\DoubleScale\Modules\Deals\Models\DealModel';
+		}
+		return null;
+	}
+}
+
 if ( ! function_exists( 'doublescale_get_countries' ) ) {
 	function doublescale_get_countries() {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
@@ -308,5 +337,24 @@ if ( ! function_exists( 'doublescale_objects_find' ) ) {
 			}
 		}
 		return null;
+	}
+}
+
+if ( ! function_exists( 'doublescale_get_smtp_email_log' ) ) {
+	/**
+	 * Email log handler for the SMTP module (outbound mail audit trail).
+	 *
+	 * @return \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler|null
+	 */
+	function doublescale_get_smtp_email_log() {
+		if ( ! class_exists( \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler::class ) ) {
+			return null;
+		}
+		return \DoubleScale\Core\ModuleManager::whenEnabled(
+			'smtp',
+			static function () {
+				return \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler::get_instance();
+			}
+		);
 	}
 }

@@ -11,7 +11,7 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Curlmulti;
 
-use DoubleScale\Pro\Modules\Smtp\Providers\SMTP2GO\Account_API;
+use DoubleScale\Modules\Smtp\Providers\SMTP2GO\Account_API;
 use WP_Error;
 
 /**

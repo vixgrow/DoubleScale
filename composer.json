@@ -23,7 +23,10 @@
     "autoload": {
         "psr-4": {
             "DoubleScale\\": "includes/"
-        }
+        },
+        "classmap": [
+            "includes/Modules/Smtp/"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

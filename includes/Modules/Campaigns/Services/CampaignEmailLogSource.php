@@ -17,7 +17,7 @@ use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 class CampaignEmailLogSource {
 
 	/**
-	 * Context fragment for {@see \DoubleScale\Pro\Modules\Smtp\EmailLog\EmailLogContext::push()}.
+	 * Context fragment for {@see \DoubleScale\Modules\Smtp\EmailLog\EmailLogContext::push()}.
 	 *
 	 * @param CampaignModel $campaign Campaign being processed (broadcast, sequence parent, or sequence step).
 	 * @return array<string, mixed>

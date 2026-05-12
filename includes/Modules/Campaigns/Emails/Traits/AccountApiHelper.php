@@ -45,13 +45,13 @@ trait AccountApiHelper {
 	 *
 	 * Override this method if the class name differs from the standard format.
 	 *
-	 * @return string Fully qualified class name (e.g. DoubleScale\Pro\Modules\Smtp\Providers\Mailgun\Accounts).
+	 * @return string Fully qualified class name (e.g. DoubleScale\Modules\Smtp\Providers\Mailgun\Accounts).
 	 */
 	protected function get_mailer_accounts_class() {
 		$slug = $this->get_slug();
 		// Convert slug to class name (e.g., 'mailgun' -> 'Mailgun', 'smtp2go' -> 'SMTP2GO')
 		$class_name = $this->slug_to_class_name( $slug );
-		return '\\DoubleScale\\Pro\\Modules\\Smtp\\Providers\\' . $class_name . '\\Accounts';
+		return '\\DoubleScale\\Modules\\Smtp\\Providers\\' . $class_name . '\\Accounts';
 	}
 
 	/**
@@ -85,8 +85,8 @@ trait AccountApiHelper {
 	 * @return object|null Mailer with public $accounts or null.
 	 */
 	protected function get_registered_mailer_instance() {
-		if ( class_exists( '\\DoubleScale\\Pro\\Modules\\Smtp\\Providers\\Mailers' ) ) {
-			$mailer = \DoubleScale\Pro\Modules\Smtp\Providers\Mailers::get_mailer( $this->get_slug() );
+		if ( class_exists( '\\DoubleScale\\Modules\\Smtp\\Providers\\Mailers' ) ) {
+			$mailer = \DoubleScale\Modules\Smtp\Providers\Mailers::get_mailer( $this->get_slug() );
 			return $mailer ?: null;
 		}
 		if ( class_exists( '\\smtp\\Mailers\\Mailers' ) ) {
@@ -109,8 +109,8 @@ trait AccountApiHelper {
 	protected function find_account_id( $from_email = null ) {
 		// Resolve the active SMTP backend's Settings class (bundled module first, then standalone).
 		$settings_class = null;
-		if ( class_exists( '\\DoubleScale\\Pro\\Modules\\Smtp\\Settings' ) ) {
-			$settings_class = '\\DoubleScale\\Pro\\Modules\\Smtp\\Settings';
+		if ( class_exists( '\\DoubleScale\\Modules\\Smtp\\Settings' ) ) {
+			$settings_class = '\\DoubleScale\\Modules\\Smtp\\Settings';
 		} elseif ( class_exists( '\\smtp\\Settings' ) ) {
 			$settings_class = '\\smtp\\Settings';
 		}

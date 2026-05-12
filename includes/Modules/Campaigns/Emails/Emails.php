@@ -159,10 +159,10 @@ class Emails {
 
 		$parts = array();
 
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings', false ) ) {
-			$smtp_attempt = \DoubleScale\Pro\Modules\Smtp\Settings::consume_smtp_send_attempt();
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings', false ) ) {
+			$smtp_attempt = \DoubleScale\Modules\Smtp\Settings::consume_smtp_send_attempt();
 			if ( is_array( $smtp_attempt ) && ! empty( $smtp_attempt ) ) {
-				$parts[] = \DoubleScale\Pro\Modules\Smtp\Settings::format_smtp_send_attempt_for_detail( $smtp_attempt );
+				$parts[] = \DoubleScale\Modules\Smtp\Settings::format_smtp_send_attempt_for_detail( $smtp_attempt );
 			}
 		}
 
@@ -464,9 +464,9 @@ class Emails {
 
 		if ( ! $result ) {
 			self::$last_send_failure_detail = self::compose_send_failure_detail( $wp_mail_failed_message );
-		} elseif ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings', false ) ) {
+		} elseif ( class_exists( '\DoubleScale\Modules\Smtp\Settings', false ) ) {
 			// Discard routing snapshot so a later failed send is not attributed to this successful attempt.
-			\DoubleScale\Pro\Modules\Smtp\Settings::consume_smtp_send_attempt();
+			\DoubleScale\Modules\Smtp\Settings::consume_smtp_send_attempt();
 		}
 
 		// Hooks after the email is sent.

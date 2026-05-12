@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ScheduleIcon } from '@doublescale/components';
 import { DateTimePicker } from '@/components/date-time-picker';
+import CardLayout from '../card-layout';
 
 interface ScheduleCardProps {
 	sendNow: boolean;
@@ -29,18 +30,13 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 	setTimezoneMode,
 }) => {
 	return (
-		<div className="border border-gray-200 bg-white rounded-lg p-6">
-			{/* Title with icon */}
-			<div className="flex items-center gap-2 mb-6 text-[#660FF1]">
-				<ScheduleIcon />
-				<h3 className="text-lg font-semibold text-[#660FF1]">
-					{__(
-						'When would you like to send the campaign?',
-						'doublescale'
-					)}
-				</h3>
-			</div>
-
+		<CardLayout
+			icon={<ScheduleIcon />}
+			header={__(
+				'When would you like to send the campaign?',
+				'doublescale'
+			)}
+		>
 			<div className="space-y-6">
 				{/* Send Now / Schedule for later */}
 				<RadioGroup
@@ -50,9 +46,9 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 				>
 					<Label
 						htmlFor="send-now"
-						className={`flex items-center space-x-3 flex-1 border rounded-lg p-3 cursor-pointer ${sendNow
-							? 'border-secondary bg-[#E3EEFF99] text-secondary'
-							: 'border-[#DEE1E6] text-[#09090B]'
+						className={`flex items-center space-x-3 text-foreground flex-1 bg-white border rounded-lg p-3 cursor-pointer ${sendNow
+							? 'border-primary'
+							: 'border-border'
 							}`}
 					>
 						<RadioGroupItem value="now" id="send-now" />
@@ -63,9 +59,9 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 
 					<Label
 						htmlFor="schedule-later"
-						className={`flex items-center space-x-3 flex-1 border rounded-lg p-3 cursor-pointer ${!sendNow
-							? 'border-secondary bg-[#E3EEFF99] text-secondary'
-							: 'border-[#DEE1E6] text-[#09090B]'
+						className={`flex items-center space-x-3 text-foreground flex-1 bg-white border rounded-lg p-3 cursor-pointer ${!sendNow
+							? 'border-primary'
+							: 'border-border'
 							}`}
 					>
 						<RadioGroupItem value="later" id="schedule-later" />
@@ -104,9 +100,9 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 							>
 								<Label
 									htmlFor="subscriber-timezone"
-									className={`flex items-center space-x-3 flex-1 border rounded-lg p-4 cursor-pointer ${timezoneMode === 'subscriber'
-										? 'border-secondary bg-[#E3EEFF99] text-secondary'
-										: 'border-gray-300'
+									className={`flex items-center space-x-3 text-foreground flex-1 bg-white border rounded-lg p-4 cursor-pointer ${timezoneMode === 'subscriber'
+										? 'border-primary'
+										: 'border-border'
 										}`}
 								>
 									<RadioGroupItem
@@ -122,9 +118,9 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 								</Label>
 								<Label
 									htmlFor="user-timezone"
-									className={`flex items-center space-x-3 flex-1 border rounded-lg p-4 cursor-pointer ${timezoneMode === 'user'
-										? 'border-secondary bg-[#E3EEFF99] text-secondary'
-										: 'border-gray-300'
+									className={`flex items-center space-x-3 text-foreground flex-1 bg-white border rounded-lg p-4 cursor-pointer ${timezoneMode === 'user'
+										? 'border-primary'
+										: 'border-border'
 										}`}
 								>
 									<RadioGroupItem
@@ -148,7 +144,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 					</>
 				)}
 			</div>
-		</div>
+		</CardLayout>
 	);
 };
 

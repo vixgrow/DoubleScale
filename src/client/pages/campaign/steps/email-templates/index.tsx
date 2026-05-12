@@ -8,16 +8,23 @@ import { useState, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { getToLink, useLocation, useNavigate } from '@doublescale/navigation';
-import { useCampaignStep, campaignSteps, automatedCampaignSteps } from '../shared';
-import { PanelLayout, PlayIcon, Stepper } from '@doublescale/components';
+import { useCampaignStep } from '../shared';
 import {
 	AiIcon,
 	MyTemplatesSidebarIcon,
 	ReadyToUseIcon,
-	ViewIcon,
-} from '@/components/icons';
+	PanelLayout, 
+	PlayIcon, 
+	ThreeDotsIcon
+} from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
 	TEMPLATE_CATEGORIES,
 	type TemplateItemConfig,
@@ -30,10 +37,14 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogOverlay,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus } from 'lucide-react';
+import {
+	ArrowLeft,
+	ArrowUpFromLine,
+	Plus,
+} from 'lucide-react'; 
 import AIEmailBuilder from '../templates/ai-email-builder';
+import PreviewEyeIcon from '@doublescale/shared/icons/preview-eye';
 
 const BUILDER_INITIAL_KEY = 'doublescale_campaign_builder_initial';
 
@@ -59,44 +70,46 @@ const ReadyToUseTemplateCard = ({
 	onUseTemplate,
 	onPreview,
 }: ReadyToUseTemplateCardProps) => (
-	<Card className="overflow-hidden flex flex-col bg-muted/50 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-		<div className="relative aspect-[4/3] bg-muted overflow-hidden">
+	<div className="flex flex-col gap-3 rounded-lg border border-border bg-[#F7F8FA] p-4">
+		<div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted">
 			{template.imageUrl ? (
 				<img
 					src={template.imageUrl}
 					alt={template.title}
-					className="w-full h-full object-cover"
+					className="h-full w-full object-cover"
 				/>
 			) : (
-				<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+				<div className="flex h-full w-full items-center justify-center text-muted-foreground">
 					{template.title}
 				</div>
 			)}
-		</div>
-		<CardContent className="p-4 flex flex-col gap-3">
-			<h3 className="text-base font-semibold text-foreground text-center line-clamp-2">
-				{template.title}
-			</h3>
-			<div className="flex items-center justify-between">
-				<button
-					type="button"
-					onClick={() => onPreview(template)}
-					className="flex items-center gap-1.5 text-primary hover:text-primary/80 text-base transition-colors border-0 bg-transparent"
-				>
-					<ViewIcon />
-					{__('Preview', 'doublescale')}
-				</button>
+			<div className="absolute right-2 top-2 z-10">
 				<Button
-					size="sm"
+					type="button"
 					variant="secondary"
-					onClick={() => onUseTemplate(template)}
-					className="text-base"
+					size="icon"
+					onClick={() => onPreview(template)}
+					className="h-9 w-9 rounded-lg bg-white shadow-sm hover:bg-secondary"
+					aria-label={__('preview', 'doublescale')}
 				>
-					{__('Use template', 'doublescale')}
+					<PreviewEyeIcon width={24} height={24} color="#3A3A98"/>
 				</Button>
 			</div>
-		</CardContent>
-	</Card>
+		</div>
+		<div className="flex items-center justify-between gap-3">
+			<h3 className="min-w-0 flex-1 text-left font-medium leading-snug text-foreground line-clamp-2">
+				{template.title}
+			</h3>
+			<Button
+				size="sm"
+				variant="secondary"
+				onClick={() => onUseTemplate(template)}
+				className="shrink-0 rounded-md bg-white text-sm font-medium"
+			>
+				{__('Use template', 'doublescale')}
+			</Button>
+		</div>
+	</div>
 );
 
 interface MyTemplateCardProps {
@@ -112,55 +125,70 @@ const MyTemplateCard = ({
 	onPreview,
 	onExport,
 }: MyTemplateCardProps) => (
-	<Card className="overflow-hidden flex flex-col bg-muted/50 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow group">
-		<div className="relative aspect-[4/3] bg-muted overflow-hidden">
+	<div className="flex flex-col gap-3 rounded-lg border border-border bg-[#F7F8FA] p-4">
+		<div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted border border-border">
 			{template.thumbnail ? (
 				<img
 					src={template.thumbnail}
 					alt={template.name}
-					className="w-full h-full object-cover"
+					className="h-full w-full object-cover"
 				/>
 			) : (
-				<div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/50">
+				<div className="flex h-full w-full items-center justify-center bg-muted/50 text-muted-foreground">
 					{template.name}
 				</div>
 			)}
-			{/* Hover overlay with buttons */}
-			<div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-				<div className="flex flex-col gap-3">
-					<Button
-						onClick={() => onUseTemplate(template)}
-						className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-full font-medium text-sm shadow-lg"
-					>
-						{__('Use template', 'doublescale')}
-					</Button>
-					<Button
-						onClick={() => onPreview(template)}
-						variant="outline"
-						className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
-					>
-						{__('Preview', 'doublescale')}
-					</Button>
-					<Button
-						onClick={() => onExport(template)}
-						variant="outline"
-						className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
-					>
-						{__('Export', 'doublescale')}
-					</Button>
-				</div>
+			<div className="absolute right-2 top-2 z-10">
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							type="button"
+							variant="secondary"
+							size="icon"
+							className="h-9 w-9 rounded-lg bg-white shadow-sm hover:bg-secondary"
+							aria-label={__('More options', 'doublescale')}
+						>
+							<ThreeDotsIcon width={24} height={24} />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="min-w-[10rem]">
+						<DropdownMenuItem
+							onSelect={() => onPreview(template)}
+							className="cursor-pointer gap-2"
+						>
+							<PreviewEyeIcon width={16} height={16} color="#3A3A98"/>
+							{__('Preview', 'doublescale')}
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onSelect={() => onExport(template)}
+							className="cursor-pointer gap-2"
+						>
+							<ArrowUpFromLine className="h-4 w-4" />
+							{__('Export', 'doublescale')}
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		</div>
-		<CardContent className="p-4">
-			<h3 className="text-base font-semibold text-foreground text-center line-clamp-2">
+		<div className="flex items-center justify-between gap-3">
+			<h3 className="min-w-0 flex-1 text-left font-medium leading-snug text-foreground line-clamp-2">
 				{template.name}
 			</h3>
-		</CardContent>
-	</Card>
+			<Button
+				size="sm"
+				variant="secondary"
+				onClick={() => onUseTemplate(template)}
+				className="shrink-0 rounded-md bg-white text-sm font-medium"
+			>
+				{__('Use template', 'doublescale')}
+			</Button>
+		</div>
+	</div>
 );
 
 const EmailTemplatesStep: React.FC = () => {
-	const { campaign, saveCampaignStep, isNewCampaign, goToStep } = useCampaignStep();
+	const { campaign, saveCampaignStep, isNewCampaign, goToStep } =
+		useCampaignStep();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -342,23 +370,25 @@ const EmailTemplatesStep: React.FC = () => {
 				]}
 				type="campaign"
 			>
-				<Stepper
-					steps={
-						campaign?.settings?.automated
-							? automatedCampaignSteps
-							: campaignSteps
-					}
-					canProceed="true"
-					currentStep={
-						campaign?.settings?.automated ? 3 : 2
-					}
-					onStepClick={goToStep}
-					disableNavigation={isNewCampaign}
-				/>
-				<Card className="mt-6 overflow-hidden rounded-lg bg-muted/50 shadow-none p-6">
+				<Card className="overflow-hidden rounded-lg bg-[#F7F8FA] shadow-none p-6">
 					{/* Header - flex with buttons */}
 					<div className="flex items-center justify-between gap-4">
 						<div className="flex items-center gap-4">
+							{!showBackToBuilder && campaign?.id && (
+								<Button
+									type="button"
+									variant="secondary"
+									size="icon"
+									className="shrink-0 rounded-md bg-white"
+									onClick={() => goToStep('template')}
+									aria-label={__(
+										'Back to set-up info',
+										'doublescale'
+									)}
+								>
+									<ArrowLeft className="h-4 w-4" />
+								</Button>
+							)}
 							{showBackToBuilder && (
 								<Button
 									variant="outline"
@@ -376,10 +406,10 @@ const EmailTemplatesStep: React.FC = () => {
 								</Button>
 							)}
 							<div>
-								<h1 className="text-2xl font-bold text-foreground">
+								<h1 className="text-xl font-semibold text-foreground">
 									{__('All templates', 'doublescale')}
 								</h1>
-								<p className="text-muted-foreground mt-1">
+								<p className="text-muted-foreground mt-3">
 									{__(
 										'Create your campaign by choosing from ready-made email templates, starting from scratch, or reusing your saved designs.',
 										'doublescale'
@@ -408,21 +438,20 @@ const EmailTemplatesStep: React.FC = () => {
 					</div>
 					<div className="border-b border-border py-3" />
 					{/* Tabs - in card with white bg */}
-					<Card className="mt-6 bg-white shadow-none">
+					<Card className="mt-6 bg-white border border-border shadow-none">
 						<CardContent className="p-0">
-							<div className="flex gap-8 px-6 pt-4 pb-0">
+							<div className="flex gap-8 px-4 pt-2 pb-0">
 								<button
 									type="button"
 									onClick={() => setActiveTab('my-templates')}
-									className={`flex items-center gap-2 pb-4 -mb-px transition-colors ${
-										activeTab === 'my-templates'
-											? 'text-primary border-b-2 border-primary'
-											: 'text-muted-foreground hover:text-primary'
-									}`}
+									className={`flex items-center gap-2 pb-2 -mb-px transition-colors ${activeTab === 'my-templates'
+										? 'text-primary border-b-2 border-primary'
+										: 'text-muted-foreground hover:text-primary'
+										}`}
 								>
 									<MyTemplatesSidebarIcon
-										width={32}
-										height={32}
+										width={24}
+										height={24}
 									/>
 									<span className="text-lg">
 										{__('My Templates', 'doublescale')}
@@ -431,13 +460,12 @@ const EmailTemplatesStep: React.FC = () => {
 								<button
 									type="button"
 									onClick={() => setActiveTab('ready-to-use')}
-									className={`flex items-center gap-2 pb-4 -mb-px transition-colors ${
-										activeTab === 'ready-to-use'
-											? 'text-primary border-b-2 border-primary'
-											: 'text-muted-foreground hover:text-primary'
-									}`}
+									className={`flex items-center gap-2 pb-2 -mb-px transition-colors ${activeTab === 'ready-to-use'
+										? 'text-primary border-b-2 border-primary'
+										: 'text-muted-foreground hover:text-primary'
+										}`}
 								>
-									<ReadyToUseIcon width={32} height={32} />
+									<ReadyToUseIcon width={24} height={24} />
 									<span className="text-lg">
 										{__('Ready-to-use', 'doublescale')}
 									</span>
@@ -449,7 +477,7 @@ const EmailTemplatesStep: React.FC = () => {
 					{/* Tab content */}
 					{activeTab === 'my-templates' ? (
 						<div className="min-h-[400px] pt-6">
-							<Card className="h-full min-h-[300px] overflow-auto">
+							<Card className="h-full min-h-[300px] overflow-auto border border-border shadow-none bg-white">
 								<CardContent className="p-6">
 									{myTemplatesLoading ? (
 										<div className="flex items-center justify-center py-16">
@@ -493,12 +521,12 @@ const EmailTemplatesStep: React.FC = () => {
 					) : (
 						<div className="flex gap-4 min-h-[400px] pt-6">
 							<div className="w-1/4 flex-shrink-0">
-								<Card className="h-full min-h-[300px]">
+								<Card className="h-full min-h-[300px] border border-border shadow-none bg-white">
 									<CardContent className="p-6">
-										<h3 className="text-base text-muted-foreground uppercase tracking-wider mb-3">
+										<h3 className="text-sm text-muted-foreground uppercase tracking-wider mb-2">
 											{__('ALL CATEGORIES', 'doublescale')}
 										</h3>
-										<nav className="flex flex-col gap-3">
+										<nav className="flex flex-col gap-2">
 											{TEMPLATE_CATEGORIES.filter(
 												(c) => c.templates.length > 0
 											).map((category) => (
@@ -510,12 +538,11 @@ const EmailTemplatesStep: React.FC = () => {
 															category.id
 														)
 													}
-													className={`text-left p-3 rounded-lg text-lg transition-colors ${
-														selectedCategoryId ===
+													className={`text-left p-2 rounded-lg text-sm transition-colors ${selectedCategoryId ===
 														category.id
-															? 'bg-primary text-primary-foreground font-semibold'
-															: 'text-foreground hover:bg-muted font-normal'
-													}`}
+														? 'bg-secondary text-primary font-medium'
+														: 'text-foreground hover:bg-muted font-normal'
+														}`}
 												>
 													{category.title}
 												</button>
@@ -525,7 +552,7 @@ const EmailTemplatesStep: React.FC = () => {
 								</Card>
 							</div>
 							<div className="flex-1 min-w-0">
-								<Card className="h-full min-h-[300px] overflow-auto">
+								<Card className="h-full min-h-[300px] overflow-auto border border-border shadow-none bg-white">
 									<CardContent className="p-6">
 										<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 											{displayTemplates.map(
@@ -554,10 +581,13 @@ const EmailTemplatesStep: React.FC = () => {
 			{/* Preview Dialog */}
 			<Dialog
 				open={!!previewTemplate}
-				onOpenChange={() => setPreviewTemplate(null)}
+				onOpenChange={(open) => {
+					if (!open) {
+						setPreviewTemplate(null);
+					}
+				}}
 			>
-				<DialogOverlay />
-				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+				<DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden z-[100000]">
 					<DialogHeader>
 						<DialogTitle className="text-center">
 							{__('Preview template', 'doublescale')}

@@ -25,6 +25,32 @@ const RecipientsCard: React.FC<RecipientsCardProps> = ({
 	excludedTags,
 	onEdit,
 }) => {
+	const renderChips = (
+		items: string[],
+		emptyText: string
+	) => {
+		if (!items.length) {
+			return (
+				<p className="text-sm font-medium text-muted-foreground">
+					{emptyText}
+				</p>
+			);
+		}
+
+		return (
+			<div className="flex flex-wrap gap-2">
+				{items.map((item, index) => (
+					<Badge
+						key={`${item}-${index}`}
+						className="rounded-md font-normal shadow-none border border-border bg-[#F7F8FA] px-2 py-1 text-sm text-muted-foreground hover:bg-[#F2F4F7]"
+					>
+						{item}
+					</Badge>
+				))}
+			</div>
+		);
+	};
+
 	return (
 		<CardLayout
 			icon={<ContactsIcon />}
@@ -33,116 +59,54 @@ const RecipientsCard: React.FC<RecipientsCardProps> = ({
 			buttonText={__('Edit Recipients', 'doublescale')}
 			onButtonClick={onEdit}
 		>
-			<div className="space-y-6">
-				{/* Included Contacts */}
-				<div>
-					<h4 className="text-lg font-medium text-[#09090B] mb-3">
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+				<div className="space-y-3 rounded-lg border border-border bg-[#F7F8FA] p-6">
+					<h4 className="text-sm font-semibold text-foreground">
 						{__('Included Contacts', 'doublescale')}
 					</h4>
-					<div className="flex gap-4">
-						{/* Selected List */}
-						<div className="flex-1 border border-dashed border-gray-300 rounded-lg p-4">
-							<p className="text-base text-gray-500 mb-2">
-								{__('Selected List', 'doublescale')}
+					<div className="space-y-3">
+						<div className="rounded-md border border-border bg-white p-4">
+							<p className="mb-2 text-sm font-medium text-foreground">
+								{__('Lists', 'doublescale')}
 							</p>
-							{includedLists.length > 0 ? (
-								<div className="flex flex-wrap gap-2">
-									{includedLists.map((list, index) => (
-										<Badge
-											key={index}
-											className="bg-[#F8F8F8] border border-[#DEE1E6] rounded-lg text-[#09090B] text-base font-medium hover:bg-gray-100"
-										>
-											{list}
-										</Badge>
-									))}
-								</div>
-							) : (
-								<p className="text-base font-semibold text-[#09090B]">
-									{__('All Lists', 'doublescale')}
-								</p>
-							)}
+							{renderChips(includedLists, __('All Lists', 'doublescale'))}
 						</div>
-
-						{/* Selected Tag */}
-						<div className="flex-1 border border-dashed border-gray-300 rounded-lg p-4">
-							<p className="text-base text-gray-500 mb-2">
-								{__('Selected Tag', 'doublescale')}
+						<div className="rounded-md border border-border bg-white p-4">
+							<p className="mb-2 text-sm font-medim text-foreground">
+								{__('Tags', 'doublescale')}
 							</p>
-							{includedTags.length > 0 ? (
-								<div className="flex flex-wrap gap-2">
-									{includedTags.map((tag, index) => (
-										<Badge
-											key={index}
-											className="bg-[#F8F8F8] border border-[#DEE1E6] rounded-lg text-[#09090B] text-base font-medium hover:bg-gray-100"
-										>
-											{tag}
-										</Badge>
-									))}
-								</div>
-							) : (
-								<p className="text-base font-semibold text-[#09090B]">
-									{__(
-										'All Contact on Selected list Segment',
-										'doublescale'
-									)}
-								</p>
+							{renderChips(
+								includedTags,
+								__(
+									'All Contact on Selected list Segment',
+									'doublescale'
+								)
 							)}
 						</div>
 					</div>
 				</div>
 
-				{/* Separator Line */}
-				<div className="border-t border-gray-200"></div>
-
-				{/* Exclude Contacts */}
-				<div>
-					<h4 className="text-lg font-medium text-[#09090B] mb-3">
+				<div className="space-y-3 rounded-lg border border-border bg-[#F7F8FA] p-6">
+					<h4 className="text-sm font-semibold text-foreground">
 						{__('Exclude Contacts', 'doublescale')}
 					</h4>
-					<div className="flex gap-4">
-						{/* Selected List */}
-						<div className="flex-1 border border-dashed border-gray-300 rounded-lg p-4">
-							<p className="text-base text-gray-500 mb-2">
-								{__('Selected List', 'doublescale')}
+					<div className="space-y-3">
+						<div className="rounded-md border border-border bg-white p-4">
+							<p className="mb-2 text-sm font-medium text-foreground">
+								{__('Lists', 'doublescale')}
 							</p>
-							{excludedLists.length > 0 ? (
-								<div className="flex flex-wrap gap-2">
-									{excludedLists.map((list, index) => (
-										<Badge
-											key={index}
-											className="bg-[#F8F8F8] border border-[#DEE1E6] rounded-lg text-[#09090B] text-base font-medium hover:bg-gray-100"
-										>
-											{list}
-										</Badge>
-									))}
-								</div>
-							) : (
-								<p className="text-base font-semibold text-[#09090B]">
-									{__('No lists excluded', 'doublescale')}
-								</p>
+							{renderChips(
+								excludedLists,
+								__('No lists excluded', 'doublescale')
 							)}
 						</div>
-
-						{/* Selected Tag */}
-						<div className="flex-1 border border-dashed border-gray-300 rounded-lg p-4">
-							<p className="text-base text-gray-500 mb-2">
-								{__('Selected Tag', 'doublescale')}
+						<div className="rounded-md border border-border bg-white p-4">
+							<p className="mb-2 text-sm font-medium text-foreground">
+								{__('Tags', 'doublescale')}
 							</p>
-							{excludedTags.length > 0 ? (
-								<div className="flex flex-wrap gap-2">
-									{excludedTags.map((tag, index) => (
-										<Badge
-											key={index}
-											className="bg-[#F8F8F8] border border-[#DEE1E6] rounded-lg text-[#09090B] text-base font-medium hover:bg-gray-100"
-										>
-											{tag}
-										</Badge>
-									))}
-								</div>
-							) : (
-								<p className="text-base font-semibold text-[#09090B]">
-									{__('No tags excluded', 'doublescale')}
-								</p>
+							{renderChips(
+								excludedTags,
+								__('No tags excluded', 'doublescale')
 							)}
 						</div>
 					</div>

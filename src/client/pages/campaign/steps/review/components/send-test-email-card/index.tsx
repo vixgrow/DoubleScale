@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertIcon, SendTestEmailIcon } from '@doublescale/components/icons';
 import { cn } from '@/lib/utils';
+import { InfoIcon } from '@doublescale/components';
 
 interface SendTestEmailCardProps {
 	campaignId?: number;
@@ -20,7 +21,7 @@ interface SendTestEmailCardProps {
 	description?: boolean;
 	cardClassName?: string;
 	buttonClassName?: string;
-	buttonVariant?: 'secondary' | 'gradient';
+	buttonVariant?: 'default' | 'gradient';
 }
 
 const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
@@ -29,7 +30,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 	description = true,
 	cardClassName = '',
 	buttonClassName = '',
-	buttonVariant = 'secondary',
+	buttonVariant = 'default',
 }) => {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [testEmails, setTestEmails] = useState('');
@@ -158,7 +159,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 			{/* Content */}
 			<div className="space-y-4">
 				{description && (
-					<h4 className="text-base text-[#09090B]">
+					<h4 className="text-base font-medium border-b border-border pb-4 text-foreground">
 						{__(
 							'Who do you want to test your email with?',
 							'doublescale'
@@ -167,8 +168,9 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				)}
 
 				<div>
-					<label className="block text-base text-[#09090B] mb-2">
+					<label className="text-base text-foreground mb-4 flex items-center gap-2">
 						{__('Send a test email to', 'doublescale')}
+						<span className="text-sm text-destructive">*</span>
 					</label>
 					<Textarea
 						value={testEmails}
@@ -177,7 +179,8 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 						className="w-full resize-none bg-white"
 						rows={2}
 					/>
-					<p className="text-base font-medium text-secondary mt-2">
+					<p className="text-sm flex items-center gap-2 font-medium text-muted-foreground mt-2">
+						<InfoIcon />
 						{__(
 							'If you enter multiple emails, separate them with a comma',
 							'doublescale'
@@ -186,12 +189,12 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				</div>
 
 				{/* Warning */}
-				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
+				<div className="bg-white border border-border rounded-lg p-4">
 					<div className="flex gap-3">
 						<div className="text-destructive">
-							<AlertIcon width={24} height={24} />
+							<InfoIcon width={24} height={24} />
 						</div>
-						<p className="text-base text-destructive">
+						<p className="text-sm text-destructive">
 							{__(
 								"Your test email could land in a spam folder. But don't worry, once you send the actual campaign, the emails will successfully reach your recipients.",
 								'doublescale'

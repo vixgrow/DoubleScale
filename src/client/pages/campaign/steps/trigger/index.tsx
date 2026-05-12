@@ -10,14 +10,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { useCampaignStep, automatedCampaignSteps } from '../shared';
 import {
 	PanelLayout,
-	PanelSettings,
 	PlayIcon,
 	Stepper,
-	SetUpInfoIcon,
 	NoticeBanner,
 	CalendarIcon,
 	ScheduleIcon,
 } from '@doublescale/components';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import type { NoticeMessage } from '@doublescale/client';
 import type {
 	AutomatedTriggerConfig,
@@ -42,7 +41,6 @@ const triggerTypeOptions: {
 	label: string;
 	description: string;
 	type: AutomatedTriggerType;
-	icon: React.ReactNode;
 }[] = [
 	{
 		label: __('Event-Based', 'doublescale'),
@@ -51,7 +49,6 @@ const triggerTypeOptions: {
 			'doublescale'
 		),
 		type: 'event',
-		icon: <CalendarIcon width={24} height={24} />,
 	},
 	{
 		label: __('Schedule-Based', 'doublescale'),
@@ -60,7 +57,6 @@ const triggerTypeOptions: {
 			'doublescale'
 		),
 		type: 'schedule',
-		icon: <ScheduleIcon width={24} height={24} />,
 	},
 ];
 
@@ -93,6 +89,7 @@ const dayOptions: { value: ScheduleDay; label: string }[] = [
 
 const TriggerStep: React.FC = () => {
 	const { campaign, goToStep, saveCampaignSettings, isNewCampaign } = useCampaignStep();
+	const navigate = useNavigate();
 
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
@@ -254,32 +251,28 @@ const TriggerStep: React.FC = () => {
 				]}
 				type="campaign"
 			>
-			<Stepper
-				steps={automatedCampaignSteps}
-				canProceed="true"
-				currentStep={1}
-				onStepClick={goToStep}
-				disableNavigation={isNewCampaign}
-			/>
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+						<Stepper
+							steps={automatedCampaignSteps}
+							canProceed="true"
+							currentStep={1}
+							onStepClick={goToStep}
+							disableNavigation={isNewCampaign}
+						/>
 
-				<div className="flex gap-6">
-					<PanelSettings
-						title={__('Configure Trigger', 'doublescale')}
-						description={__(
-							'Set up how and when your automated campaign will be triggered.',
-							'doublescale'
-						)}
-						icon={<SetUpInfoIcon />}
-						className="w-full h-full"
-						showButtons={true}
-						onNext={handleSaveAndNext}
-						nextLabel={
-							isSaving
-								? __('Saving...', 'doublescale')
-								: __('Next', 'doublescale')
-						}
-						isLoading={isSaving}
-					>
+						<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
+							<div className="pb-6">
+								<h2 className="text-xl font-semibold tracking-tight text-foreground">
+									{__('Choose Trigger Type', 'doublescale')}
+								</h2>
+								<p className="mt-3 text-sm leading-snug text-muted-foreground">
+									{__(
+										'Set up how and when your automated campaign will be triggered.',
+										'doublescale'
+									)}
+								</p>
+							</div>
 						{notice && (
 							<NoticeBanner
 								ref={noticeBannerRef}
@@ -289,54 +282,51 @@ const TriggerStep: React.FC = () => {
 						)}
 
 						{/* Trigger Type Selection */}
-						<div className="grid gap-3">
-							<Label className="text-[#09090B] font-normal text-base">
-								{__('Choose trigger type', 'doublescale')}
-							</Label>
-							<div className="flex flex-col gap-3">
+						<div className="grid gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								{triggerTypeOptions.map((option) => (
 									<div
 										key={option.type}
-										className={`flex items-center justify-between px-4 py-5 border rounded-xl cursor-pointer transition-colors relative overflow-hidden ${
+										className={`flex cursor-pointer items-start justify-between rounded-xl border px-4 py-3 transition-colors ${
 											triggerConfig.trigger_type === option.type
-												? 'border-primary bg-blue-50'
-												: 'border-gray-200 hover:border-gray-300'
+												? 'border-primary bg-white'
+												: 'border-border bg-white hover:border-border/70'
 										}`}
 										onClick={() =>
 											handleTriggerTypeChange(option.type)
 										}
 									>
-										<div className="flex items-center gap-3 flex-1">
+										<div className="flex flex-1 items-center gap-3">
 											<div
-												className="text-primary-foreground p-2.5 rounded-xl"
-												style={{
-													background:
-														'var(--Linear, linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%))',
-												}}
+												className='flex h-8 w-8 items-center justify-center rounded-full bg-[#D9E9F3] text-[#0D9DFC]'
 											>
-												{option.icon}
+												{option.type === 'event' ? (
+													<CalendarIcon width={16} height={16} />
+												) : (
+													<ScheduleIcon width={16} height={16} />
+												)}
 											</div>
 											<div className="flex-1">
-												<p className="font-semibold text-secondary-foreground text-base mb-1">
+												<p className="mb-1 text-sm font-semibold text-foreground">
 													{option.label}
 												</p>
-												<p className="text-muted-foreground text-sm">
+												<p className="text-xs text-muted-foreground">
 													{option.description}
 												</p>
 											</div>
 										</div>
 										<div>
 											<div
-												className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+												className={`flex h-4 w-4 items-center justify-center rounded-full border ${
 													triggerConfig.trigger_type ===
 													option.type
-														? 'border-primary bg-primary'
-														: 'border-gray-300'
+														? 'border-primary'
+														: 'border-muted-foreground/40'
 												}`}
 											>
 												{triggerConfig.trigger_type ===
 													option.type && (
-													<div className="w-2 h-2 bg-white rounded-full" />
+													<div className="h-2 w-2 rounded-full bg-primary" />
 												)}
 											</div>
 										</div>
@@ -347,15 +337,10 @@ const TriggerStep: React.FC = () => {
 
 						{/* Event-Based Configuration */}
 						{triggerConfig.trigger_type === 'event' && (
-							<div className="grid gap-4 p-4 border rounded-xl bg-gray-50/50 mt-4">
-								<Label className="text-[#09090B] font-semibold text-sm">
-									{__('Event Configuration', 'doublescale')}
-								</Label>
-
-								<div className="grid gap-3">
-									<div className="grid gap-1.5">
-										<Label className="text-sm text-muted-foreground">
-											{__('Trigger Event', 'doublescale')}
+							<div className="mt-4 grid gap-4 md:grid-cols-2">
+								<div className="grid gap-1.5">
+										<Label className="text-sm text-foreground">
+											{__('Trigger Event', 'doublescale')} *
 										</Label>
 										<Select
 											value={
@@ -378,13 +363,13 @@ const TriggerStep: React.FC = () => {
 												</SelectItem>
 											</SelectContent>
 										</Select>
-									</div>
+								</div>
 
-									{(triggerConfig.event?.event_type ===
+								{(triggerConfig.event?.event_type ===
 										'post_published') && (
-										<div className="grid gap-1.5">
-											<Label className="text-sm text-muted-foreground">
-												{__('Post Type', 'doublescale')}
+									<div className="grid gap-1.5">
+											<Label className="text-sm text-foreground">
+												{__('Post Type', 'doublescale')} *
 											</Label>
 											<Select
 												value={
@@ -414,15 +399,15 @@ const TriggerStep: React.FC = () => {
 													</SelectItem>
 												</SelectContent>
 											</Select>
-										</div>
-									)}
+									</div>
+								)}
 
-									{triggerConfig.event?.event_type === 'post_published' &&
+								{triggerConfig.event?.event_type === 'post_published' &&
 										triggerConfig.event?.post_type &&
 										triggerConfig.event.post_type !== 'page' && (
-										<div className="grid gap-1.5">
-											<Label className="text-sm text-muted-foreground">
-												{__('Categories', 'doublescale')}
+									<div className="grid gap-1.5 md:col-span-1">
+											<Label className="text-sm text-foreground">
+												{__('Categories', 'doublescale')} *
 											</Label>
 											<MultiSelect
 												options={categoryOptions}
@@ -436,23 +421,17 @@ const TriggerStep: React.FC = () => {
 											<p className="text-xs text-muted-foreground">
 												{__('Leave empty to trigger for all categories.', 'doublescale')}
 											</p>
-										</div>
-									)}
-								</div>
+									</div>
+								)}
 							</div>
 						)}
 
 						{/* Schedule-Based Configuration */}
 						{triggerConfig.trigger_type === 'schedule' && (
-							<div className="grid gap-4 p-4 border rounded-xl bg-gray-50/50 mt-4">
-								<Label className="text-[#09090B] font-semibold text-sm">
-									{__('Schedule Configuration', 'doublescale')}
-								</Label>
-
-								<div className="grid gap-3">
-									<div className="grid gap-1.5">
-										<Label className="text-sm text-muted-foreground">
-											{__('Frequency', 'doublescale')}
+							<div className="mt-4 grid gap-4 md:grid-cols-2">
+								<div className="grid gap-1.5">
+										<Label className="text-sm text-foreground">
+											{__('Frequency', 'doublescale')} *
 										</Label>
 										<Select
 											value={
@@ -480,11 +459,11 @@ const TriggerStep: React.FC = () => {
 												))}
 											</SelectContent>
 										</Select>
-									</div>
+								</div>
 
-									<div className="grid gap-1.5">
-										<Label className="text-sm text-muted-foreground">
-											{__('Time of Day', 'doublescale')}
+								<div className="grid gap-1.5">
+										<Label className="text-sm text-foreground">
+											{__('Time of Day', 'doublescale')} *
 										</Label>
 										<Select
 											value={
@@ -510,12 +489,12 @@ const TriggerStep: React.FC = () => {
 												))}
 											</SelectContent>
 										</Select>
-									</div>
+								</div>
 
-									{triggerConfig.schedule?.frequency ===
+								{triggerConfig.schedule?.frequency ===
 										'weekly' && (
-										<div className="grid gap-1.5">
-											<Label className="text-sm text-muted-foreground">
+									<div className="grid gap-1.5 md:col-span-1">
+											<Label className="text-sm text-foreground">
 												{__('Day of Week', 'doublescale')}
 											</Label>
 											<Select
@@ -544,13 +523,13 @@ const TriggerStep: React.FC = () => {
 													))}
 												</SelectContent>
 											</Select>
-										</div>
-									)}
+									</div>
+								)}
 
-									{triggerConfig.schedule?.frequency ===
+								{triggerConfig.schedule?.frequency ===
 										'monthly' && (
-										<div className="grid gap-1.5">
-											<Label className="text-sm text-muted-foreground">
+									<div className="grid gap-1.5 md:col-span-1">
+											<Label className="text-sm text-foreground">
 												{__('Day of Month', 'doublescale')}
 											</Label>
 											<Select
@@ -584,13 +563,30 @@ const TriggerStep: React.FC = () => {
 												))}
 											</SelectContent>
 											</Select>
-										</div>
-									)}
-
-								</div>
+									</div>
+								)}
 							</div>
 						)}
-					</PanelSettings>
+						</div>
+					</div>
+					<div className="flex justify-end gap-3">
+						<Button
+							variant="secondaryDeepBlue"
+							onClick={() => navigate(getToLink('campaigns'))}
+							disabled={isSaving}
+						>
+							{__('Cancel', 'doublescale')}
+						</Button>
+						<Button
+							variant="gradient"
+							onClick={handleSaveAndNext}
+							disabled={isSaving}
+						>
+							{isSaving
+								? __('Saving...', 'doublescale')
+								: __('Next Step', 'doublescale')}
+						</Button>
+					</div>
 				</div>
 			</PanelLayout>
 		</div>

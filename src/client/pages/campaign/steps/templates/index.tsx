@@ -13,17 +13,15 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
 import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
 import {
-	FeedBuilder,
 	FormField,
 	PanelLayout,
-	PanelSettings,
 	PlayIcon,
 	Stepper,
-	SetUpInfoIcon,
 	NoticeBanner,
 } from '@doublescale/components';
 import type { EmailTemplate, NoticeMessage } from '@doublescale/client';
 import { z } from 'zod';
+import FeedBuilder from '@/components/FeedBuilder';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -140,10 +138,6 @@ const Templates: React.FC = () => {
 			setTemplate(campaign.settings.templates[0] as EmailTemplate);
 		}
 	}, [campaign?.settings?.templates]);
-
-	const updateTemplate = (data: Partial<EmailTemplate>) => {
-		setTemplate((prev) => ({ ...prev, ...data }));
-	};
 
 	// Helper to update settings fields
 	const updateSettings = (
@@ -277,6 +271,14 @@ const Templates: React.FC = () => {
 		}
 	};
 
+	const handleBack = () => {
+		if (campaign?.settings?.automated) {
+			goToStep('trigger');
+			return;
+		}
+		navigate(getToLink('campaigns'));
+	};
+
 	return (
 		<div>
 			<PanelLayout
@@ -301,373 +303,386 @@ const Templates: React.FC = () => {
 				]}
 				type="campaign"
 			>
-			<Stepper
-				steps={campaign?.settings?.automated ? automatedCampaignSteps : campaignSteps}
-				canProceed="true"
-				currentStep={campaign?.settings?.automated ? 2 : 1}
-				onStepClick={goToStep}
-				disableNavigation={isNewCampaign}
-			/>
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+						<Stepper
+							steps={campaign?.settings?.automated ? automatedCampaignSteps : campaignSteps}
+							canProceed="true"
+							currentStep={campaign?.settings?.automated ? 2 : 1}
+							onStepClick={goToStep}
+							disableNavigation={isNewCampaign}
+						/>
 
-				<div className="flex gap-6">
-					<PanelSettings
-						title={__('Set-up info', 'doublescale')}
-						description={__(
-							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
-							'doublescale'
-						)}
-						icon={<SetUpInfoIcon />}
-						className="w-2/3 h-full"
-						showButtons={true}
-						onNext={saveTemplateStepAndNavigate}
-						nextLabel={
-							isSaving
-								? __('Saving...', 'doublescale')
-								: __('Next', 'doublescale')
-						}
-						isLoading={isSaving}
-					>
-						{/* Notice Banner */}
-						{notice && (
-							<NoticeBanner
-								ref={noticeBannerRef}
-								notice={notice}
-								closeNotice={closeNotice}
-							/>
-						)}
-
-						<div className="flex gap-4">
-							<FormField
-								label={__('From Name', 'doublescale')}
-								required={true}
-								className="flex-1"
-							>
-								<Input
-									placeholder={__('Name here', 'doublescale')}
-									value={template.settings?.from_name || ''}
-									onChange={(e) => {
-										clearError('from_name');
-										updateSettings({
-											from_name: e.target.value,
-										});
-									}}
-								className={cn(
-									validationErrors.from_name &&
-									'!border-destructive focus-visible:!ring-destructive/20'
-								)}
-								/>
-								{validationErrors.from_name && (
-							<p className="text-destructive text-sm mt-1">
-									{validationErrors.from_name}
-								</p>
-								)}
-							</FormField>
-
-							<FormField
-								label={__('From Email', 'doublescale')}
-								required={true}
-								className="flex-1"
-							>
-								<FromEmailSelector
-									value={template.settings?.from_email || ''}
-									onChange={(email, name) => {
-										clearError('from_email');
-										updateSettings({
-											from_email: email,
-											// Auto-fill from name if provided and current from_name is empty
-											...(name &&
-												!template.settings?.from_name
-												? { from_name: name }
-												: {}),
-										});
-									}}
-									error={validationErrors.from_email}
-								/>
-								{validationErrors.from_email && (
-							<p className="text-destructive text-sm mt-1">
-									{validationErrors.from_email}
-								</p>
-								)}
-							</FormField>
-						</div>
-
-						<div className="flex gap-4">
-							<FormField
-								label={__('Reply To', 'doublescale')}
-								required={true}
-								className="flex-1"
-							>
-								<Input
-									type="email"
-									placeholder={__(
-										'name@gmail.com',
+						<div className="min-w-0 flex-1 rounded-2xl border border-border bg-[#F7F8FA] p-6">
+							<div className="pb-6">
+								<h2 className="text-xl font-semibold tracking-tight text-foreground">
+									{__('Set-up info', 'doublescale')}
+								</h2>
+								<p className="mt-3 text-sm leading-snug text-muted-foreground">
+									{__(
+										'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
 										'doublescale'
 									)}
-									value={template.settings?.reply_to || ''}
-									onChange={(e) => {
-										clearError('reply_to');
-										updateSettings({
-											reply_to: e.target.value,
-										});
-									}}
-								className={cn(
-									validationErrors.reply_to &&
-									'!border-destructive focus-visible:!ring-destructive/20'
-								)}
-								/>
-								{validationErrors.reply_to && (
-							<p className="text-destructive text-sm mt-1">
-									{validationErrors.reply_to}
 								</p>
-								)}
-							</FormField>
-
-							<FormField
-								label={__('Subject', 'doublescale')}
-								required={true}
-								className="flex-1"
-							>
-								<Input
-									placeholder={__('Subject here', 'doublescale')}
-									value={template.settings?.subject || ''}
-									onChange={(e) => {
-										clearError('subject');
-										updateSettings({
-											subject: e.target.value,
-										});
-									}}
-								className={cn(
-									validationErrors.subject &&
-									'!border-destructive focus-visible:!ring-destructive/20'
-								)}
-								/>
-								{validationErrors.subject && (
-							<p className="text-destructive text-sm mt-1">
-									{validationErrors.subject}
-								</p>
-								)}
-							</FormField>
-						</div>
-
-						<FormField
-							label={__('Preview Text', 'doublescale')}
-							required={true}
-						>
-							<Textarea
-								placeholder={__(
-									'Preview text here',
-									'doublescale'
-								)}
-								value={template.settings?.preview_text || ''}
-								onChange={(e) => {
-									clearError('preview_text');
-									updateSettings({
-										preview_text: e.target.value,
-									});
-								}}
-							className={cn(
-								validationErrors.preview_text &&
-								'!border-destructive focus-visible:!ring-destructive/20'
-							)}
-							/>
-							{validationErrors.preview_text && (
-						<p className="text-destructive text-sm mt-1">
-								{validationErrors.preview_text}
-							</p>
-							)}
-						</FormField>
-
-						<Separator />
-
-						<div className="py-4">
-							<div className="flex items-center justify-between mb-4">
-								<div>
-									<p className="text-lg font-semibold text-foreground">
-										{__('Enable UTM', 'doublescale')}
-									</p>
-									<p>
-										{__(
-											'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
-											'doublescale'
+							</div>
+							<div className="flex gap-6">
+								<div className="flex-1">
+									<div className="">
+										{/* Notice Banner */}
+										{notice && (
+											<NoticeBanner
+												ref={noticeBannerRef}
+												notice={notice}
+												closeNotice={closeNotice}
+											/>
 										)}
-									</p>
+
+										<div className="flex gap-6">
+											<FormField
+												label={__('From Name', 'doublescale')}
+												required={true}
+												className="flex-1"
+											>
+												<Input
+													placeholder={__('Name here', 'doublescale')}
+													value={template.settings?.from_name || ''}
+													onChange={(e) => {
+														clearError('from_name');
+														updateSettings({
+															from_name: e.target.value,
+														});
+													}}
+													className={cn(
+														validationErrors.from_name &&
+														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+													)}
+												/>
+												{validationErrors.from_name && (
+													<p className="text-destructive text-sm mt-1">
+														{validationErrors.from_name}
+													</p>
+												)}
+											</FormField>
+
+											<FormField
+												label={__('From Email', 'doublescale')}
+												required={true}
+												className="flex-1"
+											>
+												<FromEmailSelector
+													value={template.settings?.from_email || ''}
+													onChange={(email, name) => {
+														clearError('from_email');
+														updateSettings({
+															from_email: email,
+															// Auto-fill from name if provided and current from_name is empty
+															...(name &&
+																!template.settings?.from_name
+																? { from_name: name }
+																: {}),
+														});
+													}}
+													error={validationErrors.from_email}
+												/>
+												{validationErrors.from_email && (
+													<p className="text-destructive text-sm mt-1">
+														{validationErrors.from_email}
+													</p>
+												)}
+											</FormField>
+										</div>
+
+										<div className="flex gap-6">
+											<FormField
+												label={__('Reply To', 'doublescale')}
+												required={true}
+												className="flex-1"
+											>
+												<Input
+													type="email"
+													placeholder={__(
+														'name@gmail.com',
+														'doublescale'
+													)}
+													value={template.settings?.reply_to || ''}
+													onChange={(e) => {
+														clearError('reply_to');
+														updateSettings({
+															reply_to: e.target.value,
+														});
+													}}
+													className={cn(
+														validationErrors.reply_to &&
+														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+													)}
+												/>
+												{validationErrors.reply_to && (
+													<p className="text-destructive text-sm mt-1">
+														{validationErrors.reply_to}
+													</p>
+												)}
+											</FormField>
+
+											<FormField
+												label={__('Subject', 'doublescale')}
+												required={true}
+												className="flex-1"
+											>
+												<Input
+													placeholder={__('Subject here', 'doublescale')}
+													value={template.settings?.subject || ''}
+													onChange={(e) => {
+														clearError('subject');
+														updateSettings({
+															subject: e.target.value,
+														});
+													}}
+													className={cn(
+														validationErrors.subject &&
+														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+													)}
+												/>
+												{validationErrors.subject && (
+													<p className="text-destructive text-sm mt-1">
+														{validationErrors.subject}
+													</p>
+												)}
+											</FormField>
+										</div>
+
+										<FormField
+											label={__('Preview Text', 'doublescale')}
+											required={true}
+										>
+											<Textarea
+												placeholder={__(
+													'Preview text here',
+													'doublescale'
+												)}
+												value={template.settings?.preview_text || ''}
+												onChange={(e) => {
+													clearError('preview_text');
+													updateSettings({
+														preview_text: e.target.value,
+													});
+												}}
+												className={cn(
+													validationErrors.preview_text &&
+													'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
+												)}
+											/>
+											{validationErrors.preview_text && (
+												<p className="text-destructive text-sm mt-1">
+													{validationErrors.preview_text}
+												</p>
+											)}
+										</FormField>
+
+										<div className="pt-6 border-t border-border mt-6">
+											<div className="flex items-center justify-between mb-6">
+												<div>
+													<p className="text-sm text-muted-foreground">
+														{__(
+															'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
+															'doublescale'
+														)}
+													</p>
+												</div>
+												<Switch
+													checked={
+														template.settings?.enable_utm || false
+													}
+													onCheckedChange={(checked) =>
+														updateSettings({
+															enable_utm: checked,
+														})
+													}
+												/>
+											</div>
+
+											{template.settings?.enable_utm && (
+												<div className="space-y-4">
+													<div className="grid grid-cols-2 gap-6">
+														<FormField
+															label={__('UTM Source', 'doublescale')}
+															required={true}
+														>
+															<Input
+																placeholder={__(
+																	'Source',
+																	'doublescale'
+																)}
+																value={
+																	template.settings
+																		?.utm_source || ''
+																}
+																onChange={(e) => {
+																	clearError('utm_source');
+																	updateSettings({
+																		utm_source:
+																			e.target.value,
+																	});
+																}}
+																className={cn(
+																	validationErrors.utm_source &&
+																	'!border-destructive focus-visible:!ring-destructive/20'
+																)}
+															/>
+															{validationErrors.utm_source && (
+																<p className="text-destructive text-sm mt-1">
+																	{
+																		validationErrors.utm_source
+																	}
+																</p>
+															)}
+														</FormField>
+
+														<FormField
+															label={__('UTM Medium', 'doublescale')}
+															required={true}
+														>
+															<Input
+																placeholder={__(
+																	'Medium',
+																	'doublescale'
+																)}
+																value={
+																	template.settings
+																		?.utm_medium || ''
+																}
+																onChange={(e) => {
+																	clearError('utm_medium');
+																	updateSettings({
+																		utm_medium:
+																			e.target.value,
+																	});
+																}}
+																className={cn(
+																	validationErrors.utm_medium &&
+																	'!border-destructive focus-visible:!ring-destructive/20'
+																)}
+															/>
+															{validationErrors.utm_medium && (
+																<p className="text-destructive text-sm mt-1">
+																	{
+																		validationErrors.utm_medium
+																	}
+																</p>
+															)}
+														</FormField>
+													</div>
+
+													<div className="grid grid-cols-2 gap-6">
+														<FormField
+															label={__('UTM Name', 'doublescale')}
+															required={true}
+														>
+															<Input
+																placeholder={__(
+																	'Name',
+																	'doublescale'
+																)}
+																value={
+																	template.settings
+																		?.utm_name || ''
+																}
+																onChange={(e) => {
+																	clearError('utm_name');
+																	updateSettings({
+																		utm_name:
+																			e.target.value,
+																	});
+																}}
+																className={cn(
+																	validationErrors.utm_name &&
+																	'!border-destructive focus-visible:!ring-destructive/20'
+																)}
+															/>
+															{validationErrors.utm_name && (
+																<p className="text-destructive text-sm mt-1">
+																	{validationErrors.utm_name}
+																</p>
+															)}
+														</FormField>
+
+														<FormField
+															label={__('UTM Term', 'doublescale')}
+														>
+															<Input
+																placeholder={__(
+																	'Term',
+																	'doublescale'
+																)}
+																value={
+																	template.settings
+																		?.utm_term || ''
+																}
+																className={cn(
+																	validationErrors.utm_term &&
+																	'!border-destructive focus-visible:!ring-destructive/20'
+																)}
+																onChange={(e) =>
+																	updateSettings({
+																		utm_term:
+																			e.target.value,
+																	})
+																}
+															/>
+														</FormField>
+													</div>
+
+													<FormField
+														label={__('UTM Content', 'doublescale')}
+													>
+														<Input
+															placeholder={__(
+																'Content',
+																'doublescale'
+															)}
+															value={
+																template.settings
+																	?.utm_content || ''
+															}
+															className={cn(
+																validationErrors.utm_content &&
+																'!border-destructive focus-visible:!ring-destructive/20'
+															)}
+															onChange={(e) =>
+																updateSettings({
+																	utm_content: e.target.value,
+																})
+															}
+														/>
+													</FormField>
+												</div>
+											)}
+										</div>
+									</div>
 								</div>
-								<Switch
-									checked={
-										template.settings?.enable_utm || false
-									}
-									onCheckedChange={(checked) =>
-										updateSettings({
-											enable_utm: checked,
-										})
-									}
+								<FeedBuilder
+									fromName={template.settings?.from_name}
+									subject={template.settings?.subject}
+									previewText={template.settings?.preview_text}
 								/>
 							</div>
-
-							{template.settings?.enable_utm && (
-								<div className="space-y-4">
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											label={__('UTM Source', 'doublescale')}
-											required={true}
-										>
-											<Input
-												placeholder={__(
-													'Source',
-													'doublescale'
-												)}
-												value={
-													template.settings
-														?.utm_source || ''
-												}
-												onChange={(e) => {
-													clearError('utm_source');
-													updateSettings({
-														utm_source:
-															e.target.value,
-													});
-												}}
-											className={cn(
-												validationErrors.utm_source &&
-												'!border-destructive focus-visible:!ring-destructive/20'
-											)}
-											/>
-											{validationErrors.utm_source && (
-											<p className="text-destructive text-sm mt-1">
-												{
-													validationErrors.utm_source
-												}
-											</p>
-											)}
-										</FormField>
-
-										<FormField
-											label={__('UTM Medium', 'doublescale')}
-											required={true}
-										>
-											<Input
-												placeholder={__(
-													'Medium',
-													'doublescale'
-												)}
-												value={
-													template.settings
-														?.utm_medium || ''
-												}
-												onChange={(e) => {
-													clearError('utm_medium');
-													updateSettings({
-														utm_medium:
-															e.target.value,
-													});
-												}}
-											className={cn(
-												validationErrors.utm_medium &&
-												'!border-destructive focus-visible:!ring-destructive/20'
-											)}
-											/>
-											{validationErrors.utm_medium && (
-											<p className="text-destructive text-sm mt-1">
-												{
-													validationErrors.utm_medium
-												}
-											</p>
-											)}
-										</FormField>
-									</div>
-
-									<div className="grid grid-cols-2 gap-4">
-										<FormField
-											label={__('UTM Name', 'doublescale')}
-											required={true}
-										>
-											<Input
-												placeholder={__(
-													'Name',
-													'doublescale'
-												)}
-												value={
-													template.settings
-														?.utm_name || ''
-												}
-												onChange={(e) => {
-													clearError('utm_name');
-													updateSettings({
-														utm_name:
-															e.target.value,
-													});
-												}}
-											className={cn(
-												validationErrors.utm_name &&
-												'!border-destructive focus-visible:!ring-destructive/20'
-											)}
-											/>
-											{validationErrors.utm_name && (
-											<p className="text-destructive text-sm mt-1">
-												{validationErrors.utm_name}
-											</p>
-											)}
-										</FormField>
-
-										<FormField
-											label={__('UTM Term', 'doublescale')}
-										>
-											<Input
-												placeholder={__(
-													'Term',
-													'doublescale'
-												)}
-												value={
-													template.settings
-														?.utm_term || ''
-												}
-											className={cn(
-												validationErrors.utm_term &&
-												'!border-destructive focus-visible:!ring-destructive/20'
-											)}
-												onChange={(e) =>
-													updateSettings({
-														utm_term:
-															e.target.value,
-													})
-												}
-											/>
-										</FormField>
-									</div>
-
-									<FormField
-										label={__('UTM Content', 'doublescale')}
-									>
-										<Input
-											placeholder={__(
-												'Content',
-												'doublescale'
-											)}
-											value={
-												template.settings
-													?.utm_content || ''
-											}
-										className={cn(
-											validationErrors.utm_content &&
-											'!border-destructive focus-visible:!ring-destructive/20'
-										)}
-											onChange={(e) =>
-												updateSettings({
-													utm_content: e.target.value,
-												})
-											}
-										/>
-									</FormField>
-								</div>
-							)}
 						</div>
-					</PanelSettings>
-
-					<FeedBuilder
-						fromName={template.settings?.from_name}
-						subject={template.settings?.subject}
-						previewText={template.settings?.preview_text}
-					/>
+					</div>
+					<div className="flex justify-end gap-3">
+						<Button
+							variant="secondaryDeepBlue"
+							onClick={handleBack}
+							disabled={isSaving}
+						>
+							{__('Cancel', 'doublescale')}
+						</Button>
+						<Button
+							variant="gradient"
+							onClick={saveTemplateStepAndNavigate}
+							disabled={isSaving}
+						>
+							{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
+						</Button>
+					</div>
 				</div>
 			</PanelLayout>
 		</div>

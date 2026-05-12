@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { EditIcon } from '@doublescale/components/icons';
+import { EditIcon } from '@doublescale/components';
 import { __ } from '@wordpress/i18n';
 
 interface CardLayoutProps {
@@ -21,10 +21,10 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 	button = true,
 }) => {
 	return (
-		<div className="bg-white rounded-lg border border-gray-200">
-			<div className="flex justify-between items-center border-b border-gray-200 p-4">
-				<div className="flex items-center gap-2 text-[#660FF1] font-bold text-lg">
-					{icon}
+		<div className="bg-white rounded-xl border border-border">
+			<div className="flex justify-between items-center p-6">
+				<div className="flex items-center gap-2 text-foreground font-semibold text-lg">
+					<div className="rounded-full p-1 border border-border bg-[#F7F8FA] text-[#0D9DFC]">{icon}</div>
 					{header}
 				</div>
 
@@ -35,7 +35,7 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 					</Button>
 				)}
 			</div>
-			<div className="p-4">{children}</div>
+			<div className="pb-6 px-6">{children}</div>
 		</div>
 	);
 };

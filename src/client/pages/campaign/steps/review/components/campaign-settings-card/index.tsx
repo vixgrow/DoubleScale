@@ -83,7 +83,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 		// Email Layout - All fields
 		return (
 			<>
-				<div className="grid grid-cols-2 gap-2">
+				<div className="grid grid-cols-4 gap-6">
 					<div>
 						<p className="text-base text-gray-500 mb-1">
 							{__('From Name', 'doublescale')}
@@ -100,9 +100,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 							{fromEmail}
 						</p>
 					</div>
-				</div>
 
-				<div className="grid grid-cols-2 gap-2">
 					<div>
 						<p className="text-base text-gray-500 mb-1">
 							{__('Reply to', 'doublescale')}

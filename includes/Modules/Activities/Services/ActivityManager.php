@@ -160,9 +160,12 @@ final class ActivityManager {
 
 		// Fire deal-specific hook for deal note notifications.
 		if ( $activity && $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && $entity_id ) {
-			$deal = \DoubleScale\Modules\Deals\Models\DealModel::find( $entity_id );
-			if ( $deal ) {
-				do_action( 'doublescale_deal_note_added', $deal, $activity );
+			$deal_class = doublescale_resolve_deal_model_class();
+			if ( $deal_class ) {
+				$deal = $deal_class::find( $entity_id );
+				if ( $deal ) {
+					do_action( 'doublescale_deal_note_added', $deal, $activity );
+				}
 			}
 		}
 
@@ -842,11 +845,12 @@ final class ActivityManager {
 	 * @return string 'ok' if accessible, error code otherwise.
 	 */
 	private function check_deal_access( $deal_id ): string {
-		if ( ! class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
+		$deal_class = doublescale_resolve_deal_model_class();
+		if ( ! $deal_class ) {
 			return 'no_pro';
 		}
 
-		$deal = \DoubleScale\Modules\Deals\Models\DealModel::find( $deal_id );
+		$deal = $deal_class::find( $deal_id );
 
 		if ( ! $deal ) {
 			return 'not_found';
@@ -882,11 +886,12 @@ final class ActivityManager {
 	 * @return int|null
 	 */
 	private function get_contact_id_from_deal( $deal_id ) {
-		if ( ! class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
+		$deal_class = doublescale_resolve_deal_model_class();
+		if ( ! $deal_class ) {
 			return null;
 		}
 
-		$deal = \DoubleScale\Modules\Deals\Models\DealModel::find( $deal_id );
+		$deal = $deal_class::find( $deal_id );
 		return $deal ? $deal->contact_id : null;
 	}
 
@@ -900,11 +905,12 @@ final class ActivityManager {
 	 * @return array
 	 */
 	private function get_deal_with_contact( $deal_id ) {
-		if ( ! class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
+		$deal_class = doublescale_resolve_deal_model_class();
+		if ( ! $deal_class ) {
 			return array();
 		}
 
-		$deal = \DoubleScale\Modules\Deals\Models\DealModel::with( 'contact' )->find( $deal_id );
+		$deal = $deal_class::with( 'contact' )->find( $deal_id );
 
 		if ( ! $deal ) {
 			return array();
@@ -956,7 +962,7 @@ final class ActivityManager {
 		$per_page = max( 1, $per_page );
 		$page     = max( 1, $page );
 
-		$pro_active = class_exists( '\DoubleScale\Modules\Tasks\Models\TaskModel' );
+		$pro_active = doublescale_pro_task_model_available();
 		global $wpdb;
 
 		// Permission check for deal access.

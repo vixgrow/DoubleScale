@@ -257,7 +257,7 @@ class RestActivityController extends RestController {
 	 */
 	public function get_items( $request ) {
 		// Check Pro availability.
-		$pro_active = class_exists( '\DoubleScale\Modules\Tasks\Models\TaskModel' );
+		$pro_active = doublescale_pro_task_model_available();
 
 		// Normalize entity_type to integer constant.
 		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
@@ -337,7 +337,7 @@ class RestActivityController extends RestController {
 	 */
 	public function get_timeline( $request ) {
 		// Check Pro availability.
-		$pro_active = class_exists( '\DoubleScale\Modules\Tasks\Models\TaskModel' );
+		$pro_active = doublescale_pro_task_model_available();
 
 		// Normalize entity_type to integer constant.
 		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
@@ -403,7 +403,7 @@ class RestActivityController extends RestController {
 		$entity_type = $this->normalize_entity_type( $request->get_param( 'entity_type' ) );
 
 		// Check Pro availability for deal entity type.
-		$pro_active = class_exists( '\DoubleScale\Modules\Tasks\Models\TaskModel' );
+		$pro_active = doublescale_pro_task_model_available();
 		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',

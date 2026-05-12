@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { isEmail } from 'validator';
+import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -71,8 +72,14 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
 	const [liveSmtp, setLiveSmtp] = useState<QuillSMTPInfo | null>(null);
+	const modulesTick = useModulesConfigTick();
+	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
 
 	useEffect(() => {
+		if (!smtpModuleOn) {
+			setLiveSmtp(null);
+			return;
+		}
 		let cancelled = false;
 		(async () => {
 			try {
@@ -96,12 +103,13 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [smtpModuleOn, modulesTick]);
 
 	const smtpInfo: QuillSMTPInfo = liveSmtp ?? config.getQuillSMTPInfo();
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =
+		smtpModuleOn &&
 		smtpInfo?.configured &&
 		smtpInfo?.verified_senders &&
 		smtpInfo.verified_senders.length > 0;
@@ -127,7 +135,22 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				className={cn(error && '!border-destructive focus-visible:!ring-destructive/20')}
 				required={required}
 				/>
-			{!smtpInfo.configured && (
+			{!smtpModuleOn && (
+				<p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+					{__(
+						'The SMTP module is turned off. Enable it under Settings → Modules to use saved mail connections and the sender account picker.',
+						'doublescale'
+					)}{' '}
+					<button
+						type="button"
+						onClick={() => navigate(getToLink('settings/modules'))}
+						className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0 font-medium"
+					>
+						{__('Open Modules', 'doublescale')}
+					</button>
+				</p>
+			)}
+			{smtpModuleOn && !smtpInfo.configured && (
 				<p className="text-xs text-muted-foreground mt-1">
 					{smtpInfo.plugin_url ? (
 						<>

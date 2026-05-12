@@ -24,7 +24,7 @@ class Fluentcrm extends Importer {
 	 *
 	 * @var string
 	 */
-	public $name = 'Fluentcrm';
+	public $name = 'FluentCRM';
 
 	/**
 	 * Slug

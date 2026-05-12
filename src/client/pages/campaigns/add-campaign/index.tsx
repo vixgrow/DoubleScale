@@ -154,7 +154,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 							<div className="space-y-2">
 								<Label
 									htmlFor="doublescale-add-campaign-name"
-									className="text-sm font-medium text-foreground flex items-center gap-1 py-0"
+									className="text-base font-medium text-foreground flex items-center gap-1 py-0"
 								>
 									{__('Campaign name', 'doublescale')}
 									<span className="text-destructive">*</span>
@@ -199,7 +199,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					<Button
 						type="button"
 						variant="outline"
-						className="h-11 rounded-xl border-border/80 sm:min-w-[100px]"
+						className="h-10 rounded-lg border-border bg-white sm:min-w-[100px]"
 						onClick={() => resetModal()}
 					>
 						{__('Cancel', 'doublescale')}
@@ -210,7 +210,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 						size="lg"
 						onClick={handleSubmit}
 						disabled={!campaignName.trim() || isSubmitting}
-						className="h-11 rounded-xl px-8 font-semibold shadow-sm sm:min-w-[160px]"
+						className="h-10 rounded-lg px-8 font-semibold shadow-sm sm:min-w-[160px]"
 					>
 						{__('Create campaign', 'doublescale')}
 					</Button>

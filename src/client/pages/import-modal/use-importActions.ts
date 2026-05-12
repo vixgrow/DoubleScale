@@ -16,6 +16,7 @@ import { useEffect, useRef } from 'react';
 import ConfigAPI from '@doublescale/config';
 import { useImportContext, type ImportStats } from './contexts';
 import { useGoHighLevelOAuth } from './hooks/use-gohighlevel-oauth';
+import { isIntegrationApiImportSource } from './source-definitions';
 
 export const useImportActions = () => {
 	const { state, dispatch } = useImportContext();
@@ -39,7 +40,7 @@ export const useImportActions = () => {
 			console.log('GoHighLevel: onDataFetched called with:', data);
 			dispatch({ type: 'SET_SOURCE_DATA', payload: data });
 			dispatch({ type: 'SET_IS_FETCHING', payload: false });
-			// For integration importers, advance to step 2 when source data is fetched
+			dispatch({ type: 'SET_WIZARD_STEP', payload: 3 });
 			dispatch({ type: 'SET_CURRENT_STEP', payload: 2 });
 		},
 	});
@@ -49,16 +50,7 @@ export const useImportActions = () => {
 
 	// Reset sourceData and currentStep when source changes for integration importers
 	useEffect(() => {
-		if (
-			importer?.is_integration &&
-			[
-				'mailerlite',
-				'activecampaign',
-				'hubspot',
-				'pipedrive',
-				'gohighlevel',
-			].includes(state.source)
-		) {
+		if (importer?.is_integration && isIntegrationApiImportSource(state.source)) {
 			console.log(
 				'Resetting sourceData for integration importer:',
 				state.source
@@ -79,13 +71,8 @@ export const useImportActions = () => {
 		}
 
 		const currentSource = state.source;
-		const requiresCredentials = [
-			'mailerlite',
-			'activecampaign',
-			'hubspot',
-			'pipedrive',
-			'gohighlevel',
-		].includes(currentSource);
+		const requiresCredentials =
+			isIntegrationApiImportSource(currentSource);
 
 		if (!requiresCredentials) {
 			return true;
@@ -186,9 +173,12 @@ export const useImportActions = () => {
 
 			dispatch({ type: 'SET_SOURCE_DATA', payload: response });
 
-			// For API-based integration importers (not FluentCRM/FunnelKit), advance to step 2
-			// FluentCRM and FunnelKit stay on step 1 since they only have lists/tags mapping
-			if (importer?.is_integration && !['fluentcrm', 'wpfunnelkit'].includes(state.source)) {
+			// API importers (not FluentCRM/FunnelKit): wizard step 3 = map + import
+			if (
+				importer?.is_integration &&
+				!['fluentcrm', 'wpfunnelkit'].includes(state.source)
+			) {
+				dispatch({ type: 'SET_WIZARD_STEP', payload: 3 });
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 2 });
 			}
 		} catch (error: any) {
@@ -278,8 +268,8 @@ export const useImportActions = () => {
 						'doublescale'
 					);
 				}
-				// Always reset sourceData for Pipedrive credential errors to go back to step 1
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			} else if (state.source === 'gohighlevel') {
 				if (
@@ -307,8 +297,8 @@ export const useImportActions = () => {
 						'doublescale'
 					);
 				}
-				// Always reset sourceData for GoHighLevel OAuth errors to go back to step 1
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			}
 
@@ -320,9 +310,11 @@ export const useImportActions = () => {
 			// Reset source data and step on error (only if not already reset above)
 			if (state.source !== 'pipedrive' && state.source !== 'gohighlevel') {
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
-				// For integration importers, reset to step 1 when sourceData is cleared
 				if (importer?.is_integration) {
 					dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+					if (isIntegrationApiImportSource(state.source)) {
+						dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
+					}
 				}
 			}
 		} finally {
@@ -346,10 +338,11 @@ export const useImportActions = () => {
 				data: {
 					source: state.source,
 					offset: currentOffset,
-					cursor: state.cursor, // Add cursor support
+					cursor: state.cursor,
 					lists: state.assignedLists,
 					tags: state.assignedTags,
 					status: state.newStatus,
+					send_double_optin: state.sendDoubleOptin,
 					update_existing: state.updateExisting,
 					...state.values,
 					credentials: state.credentials,
@@ -528,8 +521,8 @@ export const useImportActions = () => {
 					'Invalid Pipedrive credentials. Please check your API Domain and Token.',
 					'doublescale'
 				);
-				// Reset sourceData to force user back to credentials step
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			} else if (
 				error.message?.includes('no persons') ||
@@ -573,8 +566,8 @@ export const useImportActions = () => {
 					'doublescale'
 				);
 			}
-			// For GoHighLevel, always reset sourceData on ANY import error to go back to step 1
 			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+			dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
 			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 		}
 
@@ -609,11 +602,13 @@ export const useImportActions = () => {
 		}
 	};
 
-	// Auto-fetch source data for FluentCRM and FunnelKit when selected
+	// Auto-fetch source data for FluentCRM, FunnelKit, and MemberPress after leaving the source grid
 	useEffect(() => {
 		const shouldAutoFetch =
-			importer?.is_integration &&
-			['fluentcrm', 'wpfunnelkit'].includes(state.source) &&
+			state.wizardStep >= 2 &&
+			(importer?.is_integration
+				? ['fluentcrm', 'wpfunnelkit'].includes(state.source)
+				: ['memberpress'].includes(state.source) && !isEmpty(importer?.fields)) &&
 			!state.sourceData &&
 			!state.isFetching &&
 			hasFetchedRef.current !== state.source;
@@ -623,7 +618,13 @@ export const useImportActions = () => {
 			hasFetchedRef.current = state.source;
 			getSourceData();
 		}
-	}, [state.source, state.sourceData, state.isFetching, importer?.is_integration]);
+	}, [
+		state.source,
+		state.sourceData,
+		state.isFetching,
+		state.wizardStep,
+		importer?.is_integration,
+	]);
 
 	// Cleanup on unmount
 	useEffect(() => {

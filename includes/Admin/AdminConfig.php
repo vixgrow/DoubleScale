@@ -275,7 +275,7 @@ final class AdminConfig {
 	 * @return array smtp connection info including verified senders
 	 */
 	private static function get_smtp_connection_info() {
-		$email_oauth_class = 'DoubleScale\\Modules\\Inbox\\Oauth\\EmailOauth';
+		$email_oauth_class = 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth';
 		if ( ! class_exists( $email_oauth_class, false ) ) {
 			return array(
 				'configured' => false,

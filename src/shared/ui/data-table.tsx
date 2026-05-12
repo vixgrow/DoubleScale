@@ -69,7 +69,7 @@ export function DataTable<TData>({
 		<div className="w-full">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
-				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
+				<div className="flex items-center justify-between mb-4 w-full">
 					<DataTableSearch
 						value={
 							config.search?.onChange

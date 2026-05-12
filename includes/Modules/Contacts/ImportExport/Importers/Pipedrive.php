@@ -12,7 +12,7 @@
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
-use DoubleScale\Modules\Integrations\Pipedrive\Api;
+use DoubleScale\Pro\Modules\Integrations\Pipedrive\Api;
 
 /**
  * Pipedrive Importer class

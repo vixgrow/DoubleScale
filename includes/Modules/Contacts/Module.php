@@ -68,6 +68,16 @@ final class Module extends AbstractModule {
 		$container->get( Filters\FiltersManager::class );
 		$container->get( ImportExport\Importers\Manager::class );
 
+		add_action(
+			'doublescale_loaded',
+			static function () {
+				if ( class_exists( \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::class ) ) {
+					\DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::init();
+				}
+			},
+			15
+		);
+
 		$this->loadModuleMergeTagFiles();
 
 		$this->loadManifestOrGlobs(

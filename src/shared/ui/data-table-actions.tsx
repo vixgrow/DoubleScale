@@ -19,6 +19,7 @@ import {
 	CustomDialogHeader,
 	GradientFilterIcon,
 	GradientColumnsIcon,
+	DeleteIcon,
 } from '@doublescale/components';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { DataTableConfig } from '@doublescale/client';
@@ -38,8 +39,8 @@ import { useState } from 'react';
 import { CampaignFilters } from '@/components/campaign-filters';
 import RulesBuilder from '@/components/rules-builder';
 import type { RuleItem } from '@/components/rules-builder';
-import { getFilteredRulesGroups, getInitialRule } from '@/utils';
-import { Lock } from 'lucide-react';
+import { Delete, getFilteredRulesGroups, getInitialRule } from '@/utils';
+import { Lock, Trash2 } from 'lucide-react';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -258,16 +259,24 @@ export function DataTableActions<TData>({
 								<CampaignFilters
 									filters={tempCampaignFilters}
 									onChange={setTempCampaignFilters}
-									onClear={handleClearTempFilters}
 									activeTab={activeTab}
 								/>
 							)}
-							<DialogFooter>
+							<DialogFooter className="mt-4 flex flex-row flex-wrap items-center justify-end gap-3 sm:space-x-0">
 								<Button
+									type="button"
+									variant="outline"
+									onClick={handleClearTempFilters}
+									className="h-10 rounded-lg border-destructive text-destructive shadow-none hover:bg-destructive/10 hover:text-destructive"
+								>
+									<DeleteIcon width={16} height={16} />
+									{__('Clear Filters', 'doublescale')}
+								</Button>
+								<Button
+									type="button"
 									onClick={handleApplyCampaignFilters}
-									className="w-full"
-									variant="gradient"
-									size="xl"
+									variant="default"
+									className="rounded-lg h-10"
 								>
 									{__('Apply Filters', 'doublescale')}
 								</Button>

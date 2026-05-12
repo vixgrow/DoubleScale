@@ -12,7 +12,7 @@
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
-use DoubleScale\Modules\Integrations\Mailerlite\Api;
+use DoubleScale\Pro\Modules\Integrations\Mailerlite\Api;
 
 /**
  * MailerLite Importer class

@@ -1,65 +1,37 @@
 /**
+ * SMTP settings UI lives in DoubleScale Pro. This file remains so the free
+ * settings router can register the tab; when Pro is active it replaces this
+ * component via `doublescale_settings_smtp_settings`.
+ *
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import ConfigAPI from '@doublescale/config';
-import { AddonCard } from '@/client/pages/intergrations/addon-card';
-import { BounceHandler } from '@/components/bounce-handler';
-import ModuleDisabledNotice from '@/components/module-disabled-notice';
-import BuiltinSmtpSettings from './builtin-smtp-settings';
-import { ConnectionsViewToggle } from './connections-view-toggle';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const ProSMTPSettings: React.FC = () => {
-	const addons = ConfigAPI.getAddons();
-	const smtpAddon = addons['smtp'];
-	const smtpModuleOn = ConfigAPI.isModuleEnabled('smtp');
-	const [connectionsView, setConnectionsView] = useState<'table' | 'card'>(
-		'table'
-	);
-
-	const showAddonCard = !smtpModuleOn && smtpAddon && !smtpAddon.is_active;
-
+/**
+ * Free build: no SMTP connection wizard or mailer configuration here.
+ */
+const SmtpSettingsProOnly: React.FC = () => {
 	return (
-		<div className="smtp-settings">
-			<div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-				<div className="text-foreground font-semibold text-2xl">
-					{__('SMTP / Email Sending Service Settings', 'doublescale')}
-				</div>
-				{smtpModuleOn ? (
-					<ConnectionsViewToggle
-						value={connectionsView}
-						onChange={setConnectionsView}
-					/>
-				) : null}
+		<div className="smtp-settings max-w-2xl space-y-4">
+			<div className="text-foreground text-2xl font-semibold">
+				{__('SMTP / Email Sending', 'doublescale')}
 			</div>
-
-			{smtpModuleOn ? (
-				<BuiltinSmtpSettings connectionsView={connectionsView} />
-			) : (
-				<ModuleDisabledNotice
-					featureName={__('SMTP (built-in)', 'doublescale')}
-					className="mb-8"
-				/>
-			)}
-
-			{showAddonCard && (
-				<AddonCard
-					addon={smtpAddon}
-					imageUrl={`${ConfigAPI.getPluginDirUrl()}assets/images/smtp/smtp.svg`}
-				/>
-			)}
-
-			{/* Bounce Handler Configuration */}
-			<div className="mt-8 pt-8 border-t border-gray-200">
-				<BounceHandler />
-			</div>
+			<Alert>
+				<AlertTitle>{__('Available in DoubleScale Pro', 'doublescale')}</AlertTitle>
+				<AlertDescription className="text-sm leading-relaxed">
+					{__(
+						'Advanced SMTP setup, connection manager, email log, and bounce webhooks are provided by the Pro add-on. Install and activate DoubleScale Pro to configure outbound mail from this screen.',
+						'doublescale'
+					)}
+				</AlertDescription>
+			</Alert>
 		</div>
 	);
 };
 
-export default ProSMTPSettings;
+export default SmtpSettingsProOnly;

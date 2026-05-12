@@ -1,5 +1,5 @@
 /**
- * wordPress dependencies
+ * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
 /**
@@ -13,18 +13,18 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useImportContext } from '../contexts';
 import { useImportActions } from '../use-importActions';
+import { isIntegrationApiImportSource } from '../source-definitions';
 
 interface StepNavigationProps {
-	importer: any;
 	onImportContacts: () => void;
 }
 
 const StepNavigation: React.FC<StepNavigationProps> = ({
-	importer,
 	onImportContacts,
 }) => {
-	const { state, dispatch } = useImportContext();
+	const { state, dispatch, returnToSourceStep } = useImportContext();
 	const {
+		wizardStep,
 		currentStep,
 		source,
 		fileData,
@@ -36,134 +36,142 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 
 	const { validateCredentials, getSourceData } = useImportActions();
 
-	const canProceedToStep2 = () => {
-		if (!importer) return false;
-		if (source !== 'csv') return false;
-		if (source === 'csv' && !fileData) return false;
+	const canProceedCsvUploadToMapping = () => {
+		if (source !== 'csv' || wizardStep !== 2) return false;
+		if (!fileData) return false;
 		return true;
 	};
 
 	const handleNext = () => {
-		if (canProceedToStep2()) {
+		if (canProceedCsvUploadToMapping()) {
 			dispatch({ type: 'SET_CURRENT_STEP', payload: 2 });
-		} else if (source !== 'csv') {
+			dispatch({ type: 'SET_WIZARD_STEP', payload: 3 });
+			return;
+		}
+		if (source !== 'csv' && !isIntegrationApiImportSource(source)) {
 			onImportContacts();
 		}
 	};
 
 	const handleBack = () => {
+		if (source === 'csv' && wizardStep === 3) {
+			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+			dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
+			return;
+		}
+		if (isIntegrationApiImportSource(source) && wizardStep === 3) {
+			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+			dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
+			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+			dispatch({ type: 'SET_IS_FETCHING', payload: false });
+			return;
+		}
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 	};
 
-	// Step 1 navigation
-	if (currentStep === 1) {
+	const chooseAnotherBtn = (
+		<Button
+			type="button"
+			variant="outline"
+			size="default"
+			onClick={returnToSourceStep}
+			disabled={importing}
+			className="gap-2 border-border/80 text-sm font-medium"
+		>
+			<ArrowLeft className="h-4 w-4" aria-hidden />
+			{__('Choose another source', 'doublescale')}
+		</Button>
+	);
+
+	// API integrations — wizard step 2: credentials only
+	if (
+		currentStep === 1 &&
+		isIntegrationApiImportSource(source) &&
+		wizardStep === 2
+	) {
 		return (
-			<div className="mt-10 flex justify-end">
-				{['mailerlite', 'activecampaign', 'hubspot', 'pipedrive', 'gohighlevel'].includes(
-					source
-				) ? (
-					<>
-						{!sourceData ? (
-							/* Credentials validation step */
-							<Button
-								onClick={() => {
-									getSourceData();
-								}}
-								disabled={
-									!validateCredentials() ||
-									isFetching ||
-									isUploading ||
-									importing
-								}
-								className="flex items-center space-x-2"
-							>
-								<span>
-									{isFetching
-										? __('Validating...', 'doublescale')
-										: __(
-												'Connect & Fetch Data',
-												'doublescale'
-											)}
-								</span>
-								<ArrowRight className="w-4 h-4" />
-							</Button>
-						) : (
-							/* Field mapping step for integrations */
-							<div className="flex justify-between w-full">
-								<Button
-									variant="outline"
-									onClick={() => {
-										// Reset sourceData to go back to credentials step
-										dispatch({ type: 'SET_SOURCE_DATA', payload: null });
-										// Reset currentStep to 1 to ensure UI consistency
-										dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
-										// Also reset any fetching state
-										dispatch({ type: 'SET_IS_FETCHING', payload: false });
-									}}
-									disabled={importing}
-									className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
-								>
-									<ArrowLeft className="w-4 h-4" />
-									<span>{__('Back', 'doublescale')}</span>
-								</Button>
-								<Button
-									onClick={onImportContacts}
-									disabled={
-										isFetching || isUploading || importing
-									}
-									className="flex items-center space-x-2"
-								>
-									<span>{__('Import Contacts', 'doublescale')}</span>
-									<ArrowRight className="w-4 h-4" />
-								</Button>
-							</div>
-						)}
-					</>
-				) : (
+			<div className="mt-8 space-y-4 border-t border-border/60 pt-6">
+				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+					{chooseAnotherBtn}
 					<Button
-						onClick={handleNext}
+						onClick={() => {
+							getSourceData();
+						}}
 						disabled={
-							(source === 'csv' && !canProceedToStep2()) ||
-							(['wpfunnelkit', 'fluentcrm'].includes(source) &&
-								!sourceData) ||
+							!validateCredentials() ||
 							isFetching ||
 							isUploading ||
 							importing
 						}
-						className="flex items-center space-x-2"
+						className="gap-2 sm:ml-auto"
 					>
 						<span>
 							{isFetching
-								? __('Loading...', 'doublescale')
-								: source === 'csv'
-									? __('Next', 'doublescale')
-									: __('Import Contacts', 'doublescale')}
+								? __('Validating...', 'doublescale')
+								: __('Connect & fetch data', 'doublescale')}
 						</span>
-						<ArrowRight className="w-4 h-4" />
+						<ArrowRight className="h-4 w-4" aria-hidden />
 					</Button>
-				)}
+				</div>
 			</div>
 		);
 	}
 
-	// Step 2 navigation
+	// Step 1 navigation (CSV upload, or two-step importers on wizard 2)
+	if (currentStep === 1) {
+		return (
+			<div className="mt-8 flex flex-col gap-3 border-t border-border/60 pt-6 sm:flex-row sm:items-center sm:justify-between">
+				{chooseAnotherBtn}
+				<Button
+					onClick={handleNext}
+					disabled={
+						(source === 'csv' &&
+							wizardStep === 2 &&
+							!canProceedCsvUploadToMapping()) ||
+						(['wpfunnelkit', 'fluentcrm', 'memberpress'].includes(source) &&
+							!sourceData) ||
+						isFetching ||
+						isUploading ||
+						importing
+					}
+					className="gap-2 sm:ml-auto"
+				>
+					<span>
+						{isFetching
+							? __('Loading...', 'doublescale')
+							: source === 'csv' && wizardStep === 2
+								? __('Next: map columns', 'doublescale')
+								: __('Import contacts', 'doublescale')}
+					</span>
+					<ArrowRight className="h-4 w-4" aria-hidden />
+				</Button>
+			</div>
+		);
+	}
+
+	// CSV mapping (wizard 3) or API integration mapping (wizard 3)
 	return (
-		<div className="mt-8 flex justify-between">
-			<Button
-				variant="outline"
-				onClick={handleBack}
-				disabled={importing}
-				className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
-			>
-				<ArrowLeft className="w-4 h-4" />
-				<span>{__('Back', 'doublescale')}</span>
-			</Button>
-			<Button onClick={onImportContacts} disabled={importing}>
-				{importing
-					? __('Importing...', 'doublescale')
-					: __('Import Contacts', 'doublescale')}
-				<ArrowRight className="w-4 h-4" />
-			</Button>
+		<div className="mt-8 flex flex-col gap-3 border-t border-border/60 pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+			{chooseAnotherBtn}
+			<div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:justify-end">
+				<Button
+					variant="outline"
+					onClick={handleBack}
+					disabled={importing}
+					className="gap-2"
+				>
+					<ArrowLeft className="h-4 w-4" aria-hidden />
+					{isIntegrationApiImportSource(source) && wizardStep === 3
+						? __('Back to connection', 'doublescale')
+						: __('Back', 'doublescale')}
+				</Button>
+				<Button onClick={onImportContacts} disabled={importing} className="gap-2">
+					{importing
+						? __('Importing...', 'doublescale')
+						: __('Import contacts', 'doublescale')}
+					<ArrowRight className="h-4 w-4" aria-hidden />
+				</Button>
+			</div>
 		</div>
 	);
 };

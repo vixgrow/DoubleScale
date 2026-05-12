@@ -25,8 +25,9 @@ class ModuleRegistry {
 
 	/**
 	 * @param string[] $exclude_dir_basenames Directory names under $modules_root to skip (e.g. modules already loaded from the free plugin).
+	 * @param string     $module_class_fqcn_prefix PSR-4 prefix for Module classes (free: DoubleScale\Modules\, Pro add-on: DoubleScale\Pro\Modules\).
 	 */
-	public function discover( string $modules_root, array $exclude_dir_basenames = array() ): void {
+	public function discover( string $modules_root, array $exclude_dir_basenames = array(), string $module_class_fqcn_prefix = 'DoubleScale\\Modules\\' ): void {
 		if ( ! is_dir( $modules_root ) ) {
 			return;
 		}
@@ -48,7 +49,7 @@ class ModuleRegistry {
 			require_once $module_file;
 
 			$slug       = basename( $dir );
-			$class_name = 'DoubleScale\\Modules\\' . $slug . '\\Module';
+			$class_name = $module_class_fqcn_prefix . $slug . '\\Module';
 			if ( ! class_exists( $class_name ) ) {
 				continue;
 			}

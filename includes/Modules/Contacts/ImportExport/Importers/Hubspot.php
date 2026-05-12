@@ -12,7 +12,7 @@
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
-use DoubleScale\Modules\Integrations\Hubspot\Api;
+use DoubleScale\Pro\Modules\Integrations\Hubspot\Api;
 
 /**
  * Hubspot Importer class

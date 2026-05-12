@@ -22,6 +22,32 @@ import {
 } from '@doublescale/components';
 import SMSDevice from '../../steps/templates/sms-device';
 
+const previewUnavailableHtml = () =>
+	`<div class="p-4 text-center text-muted-foreground text-sm" style="font-family:system-ui,sans-serif">${__(
+		'Preview could not be loaded. Edit the template in the campaign builder and save again.',
+		'doublescale'
+	)}</div>`;
+
+const resolveTemplateRenderId = (
+	template: { id?: number | string },
+	index: number,
+	templateIds?: number[]
+): number => {
+	const a = Number(template?.id);
+	if (!Number.isNaN(a) && a > 0) {
+		return a;
+	}
+	const b = Number(templateIds?.[index]);
+	if (!Number.isNaN(b) && b > 0) {
+		return b;
+	}
+	const c = Number(templateIds?.[0]);
+	if (!Number.isNaN(c) && c > 0) {
+		return c;
+	}
+	return 0;
+};
+
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
 		(select: any) => select('doublescale/campaign').getCampaign(),
@@ -41,35 +67,39 @@ const CampaignDetails: React.FC = () => {
 
 		const renderTemplates = async () => {
 			const rendered: Record<number, string> = {};
+			const templateIds = campaign.settings.template_ids;
 
-			for (const template of campaign.settings.templates) {
-				if (template.id) {
-					try {
-						// Try to render via API endpoint (no contact for preview)
-						const response: any = await apiFetch({
-							path: `/doublescale/v1/templates/${template.id}/render`,
-							method: 'POST',
-						});
+			for (let i = 0; i < campaign.settings.templates.length; i++) {
+				const template = campaign.settings.templates[i];
+				const renderId = resolveTemplateRenderId(template, i, templateIds);
+				if (!renderId) {
+					continue;
+				}
 
-						if (response?.html) {
-							rendered[template.id] = response.html;
-						} else {
-							// Fallback to displaying body as-is
-							const body =
-								typeof template.body === 'string'
-									? template.body
-									: JSON.stringify(template.body);
-							rendered[template.id] = body || '';
-						}
-					} catch (error) {
-						console.error('Failed to render template:', error);
-						// Fallback to displaying body as-is
+				try {
+					const response = (await apiFetch({
+						path: `/doublescale/v1/templates/${renderId}/render`,
+						method: 'POST',
+						data: { merge_tags: {} },
+					})) as { html?: string };
+
+					if (response?.html?.trim()) {
+						rendered[renderId] = response.html;
+					} else {
 						const body =
-							typeof template.body === 'string'
+							typeof template.body === 'string' && template.body.trim()
 								? template.body
-								: JSON.stringify(template.body);
-						rendered[template.id] = body || '';
+								: previewUnavailableHtml();
+						rendered[renderId] = body;
 					}
+				} catch (error) {
+					// eslint-disable-next-line no-console
+					console.error('Failed to render template:', error);
+					const body =
+						typeof template.body === 'string' && template.body.trim()
+							? template.body
+							: previewUnavailableHtml();
+					rendered[renderId] = body;
 				}
 			}
 
@@ -77,7 +107,7 @@ const CampaignDetails: React.FC = () => {
 		};
 
 		renderTemplates();
-	}, [campaign?.settings?.templates]);
+	}, [campaign?.settings?.templates, campaign?.settings?.template_ids]);
 
 	if (!campaign) {
 		return (
@@ -177,11 +207,16 @@ const CampaignDetails: React.FC = () => {
 
 				{hasTemplates ? (
 					campaign.settings.templates.map((template, index) => {
-						const renderedHtml = template.id
-							? renderedTemplates[template.id]
+						const renderKey = resolveTemplateRenderId(
+							template,
+							index,
+							campaign.settings.template_ids
+						);
+						const renderedHtml = renderKey
+							? renderedTemplates[renderKey]
 							: typeof template.body === 'string'
 								? template.body
-								: JSON.stringify(template.body);
+								: previewUnavailableHtml();
 
 						return (
 							<div

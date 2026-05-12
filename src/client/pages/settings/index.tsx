@@ -58,7 +58,7 @@ import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
 import MobileAppSettings from './mobile-app';
-// import CustomFields from '../custom-fields'; // Moved to Pro
+import CustomFields from '../custom-fields';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -371,19 +371,7 @@ const SettingsPage: React.FC = () => {
 			case 'license':
 				return <License />;
 			case 'custom_fields':
-				const CustomFieldsComponent = applyFilters(
-					'doublescale_settings_custom_fields_settings',
-					() => (
-						<ProFeatureNotice
-							featureName={__('Custom Fields', 'doublescale')}
-							description={__(
-								'Create and manage custom fields to capture additional contact information tailored to your business needs.',
-								'doublescale'
-							)}
-						/>
-					)
-				) as React.ComponentType;
-				return <CustomFieldsComponent />;
+				return <CustomFields />;
 			case 'link_triggers':
 				const LinkTriggersComponent = applyFilters(
 					'doublescale_settings_link_triggers_settings',

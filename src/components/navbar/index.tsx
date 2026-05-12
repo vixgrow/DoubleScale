@@ -277,7 +277,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				if (item.path === 'campaigns') {
 					navItem.subMenu = [
-						{ path: 'campaigns', label: __('Campaigns', 'doublescale') },
+						{
+							path: 'campaigns',
+							label: __('Email Campaigns', 'doublescale'),
+						},
+						{
+							path: 'sms-campaigns',
+							label: __('SMS Campaigns', 'doublescale'),
+						},
 					];
 				}
 

@@ -608,3 +608,9 @@ export const generateSlug = (name: string): string => {
 		.replace(/[\s_-]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 };
+
+export {
+	getSubject,
+	groupMessagesIntoThreads,
+	type EmailRow,
+} from './contact-email-utils';

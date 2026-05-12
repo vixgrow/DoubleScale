@@ -25,7 +25,7 @@ import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
-// import CustomFields from '../pages/custom-fields'; // Moved to Pro
+import CustomFields from '../pages/custom-fields';
 import Campaign from '../pages/campaign';
 import LinkTriggers from '../pages/link-triggers';
 import LinkTrigger from '../pages/link-trigger';
@@ -72,6 +72,7 @@ import Forms from '../pages/forms';
 import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
 import Campaigns_EmailSequences from '../pages/campaigns';
+import Campaigns from '../pages/campaigns/campaigns';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
 
 const useOnboardingRedirect = () => {
@@ -299,18 +300,9 @@ registerAdminPage('lead-scoring', {
 	requiresModule: 'leadscoring',
 });
 
-// Custom Fields page registration - now handled by Pro plugin
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
-	component: () => (
-		<ProFeatureNotice
-			featureName={__('Custom Fields', 'doublescale')}
-			description={__(
-				'Custom Fields is a Pro feature. Please upgrade to the Pro plan to access this feature.',
-				'doublescale'
-			)}
-		/>
-	),
+	component: () => <CustomFields />,
 	label: __('Custom Fields', 'doublescale'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
@@ -323,6 +315,15 @@ registerAdminPage('campaigns', {
 	label: __('Campaigns', 'doublescale'),
 	icon: <CampaignsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'campaigns',
+});
+
+registerAdminPage('sms-campaigns', {
+	path: 'sms-campaigns',
+	component: () => <Campaigns channel="sms" />,
+	label: __('SMS Campaigns', 'doublescale'),
+	requiredCapability: ['doublescale_crm_manager'],
+	hidden: true,
 	requiresModule: 'campaigns',
 });
 

@@ -54,3 +54,19 @@ export function useModulesEnabled(slugs: string[]): Record<string, boolean> {
 
 	return flags;
 }
+
+/**
+ * Increments whenever module flags are updated in config (e.g. Settings → Modules save).
+ * Use in `useMemo` deps or as a `key` on `<Routes>` so sidebars and route tables re-sync.
+ */
+export function useModulesConfigTick(): number {
+	const [tick, setTick] = useState(0);
+
+	useEffect(() => {
+		const bump = () => setTick((t) => t + 1);
+		window.addEventListener(MODULES_UPDATED, bump);
+		return () => window.removeEventListener(MODULES_UPDATED, bump);
+	}, []);
+
+	return tick;
+}

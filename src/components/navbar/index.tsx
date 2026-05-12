@@ -48,6 +48,7 @@ import {
 import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
+import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 
 interface SubMenuItem {
 	path: string;
@@ -109,13 +110,15 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'settings',
 	'booking-dashboard',
 	'smtp',
+	'sales-pipeline',
+	'tasks',
+	'forms',
 ]);
 
 /**
- * Maps `registerAdminPage` path (PageSettings.path) to a Pro module slug for
- * sidebar visibility when Pro is active. Paths with no entry are not module-gated.
- * SMTP (`smtp/:tab?`) is intentionally omitted — it ships in the free plugin and
- * the SMTP page handles a disabled module in-app.
+ * Maps `registerAdminPage` path to a module slug for sidebar visibility when the
+ * page does not set {@link PageSettings.requiresModule}. Paths with no entry
+ * are not module-gated via this map (the page's `requiresModule` wins first).
  */
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
@@ -164,6 +167,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	);
 	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } =
 		useCapabilities();
+	const modulesTick = useModulesConfigTick();
 
 	const filterSubMenuByModules = useCallback(
 		(items: SubMenuItem[] | undefined, isPro: boolean): SubMenuItem[] | undefined => {
@@ -207,9 +211,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				) as boolean;
 				if (!show) {
 					return false;
-				}
-				if (!isProActive) {
-					return true;
 				}
 				const moduleSlug =
 					item.requiresModule ?? PATH_TO_MODULE[item.path];
@@ -364,6 +365,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		canManageAllDeals,
 		isCrmManager,
 		filterSubMenuByModules,
+		modulesTick,
 	]);
 
 	const sectionGroups = useMemo<SectionGroup[]>(() => {

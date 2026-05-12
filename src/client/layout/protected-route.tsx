@@ -1,7 +1,7 @@
 /**
  * WordPress Dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -27,6 +27,13 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	const navigate = useNavigate();
 	const { hasRequiredCapability } = useCapabilities();
+	const [moduleGateEpoch, setModuleGateEpoch] = useState(0);
+
+	useEffect(() => {
+		const bump = () => setModuleGateEpoch((n) => n + 1);
+		window.addEventListener('doublescale:modules-updated', bump);
+		return () => window.removeEventListener('doublescale:modules-updated', bump);
+	}, []);
 
 	useEffect(() => {
 		if (
@@ -44,7 +51,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 		) {
 			navigate(getToLink('/'), { replace: true });
 		}
-	}, [page.requiresModule, navigate]);
+	}, [page.requiresModule, navigate, moduleGateEpoch]);
 
 	if (
 		page.requiresModule &&

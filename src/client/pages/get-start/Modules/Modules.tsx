@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from '@wordpress/element';
+import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -55,71 +55,29 @@ function getEffectiveState(
 	return mod ? mod.enabled : true;
 }
 
-function collectDependentsToDisable(
-	slug: string,
-	modules: ModuleInfo[],
-	current: Record<string, boolean>
-): Record<string, boolean> {
-	const result: Record<string, boolean> = {};
-	const queue = [slug];
-	while (queue.length > 0) {
-		const s = queue.shift()!;
-		for (const m of modules) {
-			if (
-				m.is_toggleable &&
-				m.dependencies.includes(s) &&
-				getEffectiveState(m.slug, modules, { ...current, ...result, [slug]: false })
-			) {
-				result[m.slug] = false;
-				queue.push(m.slug);
-			}
-		}
-	}
-	return result;
-}
-
-function collectDependenciesToEnable(
-	slug: string,
-	modules: ModuleInfo[],
-	current: Record<string, boolean>
-): Record<string, boolean> {
-	const result: Record<string, boolean> = {};
-	const mod = modules.find((m) => m.slug === slug);
-	if (!mod) return result;
-	const queue = [...mod.dependencies];
-	const visited = new Set<string>();
-	while (queue.length > 0) {
-		const dep = queue.shift()!;
-		if (visited.has(dep)) continue;
-		visited.add(dep);
-		const depMod = modules.find((m) => m.slug === dep);
-		if (!depMod || !depMod.is_toggleable) continue;
-		if (!getEffectiveState(dep, modules, current)) {
-			result[dep] = true;
-			for (const d of depMod.dependencies) queue.push(d);
-		}
-	}
-	return result;
-}
-
 export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepProps) {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
 	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
 	const [isSaving, setIsSaving] = useState(false);
 
+	useEffect(() => {
+		const TARGETS = ['smtp', 'deals', 'forms', 'tasks', 'campaigns', 'booking'];
+		const pending: Record<string, boolean> = {};
+		for (const slug of TARGETS) {
+			const m = modules.find((x) => x.slug === slug);
+			if (m && m.is_toggleable && !m.enabled) pending[slug] = true;
+		}
+		if (Object.keys(pending).length > 0) {
+			setPendingChanges((prev) => ({ ...pending, ...prev }));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
 			setPendingChanges((prev) => {
-				let next = { ...prev, [slug]: enabled };
-
-				if (!enabled) {
-					const cascade = collectDependentsToDisable(slug, modules, next);
-					next = { ...next, ...cascade };
-				} else {
-					const cascade = collectDependenciesToEnable(slug, modules, next);
-					next = { ...next, ...cascade };
-				}
+				const next = { ...prev, [slug]: enabled };
 
 				const cleaned: Record<string, boolean> = {};
 				for (const [s, v] of Object.entries(next)) {
@@ -211,6 +169,14 @@ export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepP
 									{mod.label}
 								</span>
 								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
+								{mod.slug === 'smtp' && !isEnabled && (
+									<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+										{__(
+											'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+											'doublescale'
+										)}
+									</p>
+								)}
 							</div>
 							<Switch
 								checked={isEnabled}

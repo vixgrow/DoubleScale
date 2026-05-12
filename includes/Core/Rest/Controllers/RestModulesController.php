@@ -102,37 +102,6 @@ class RestModulesController extends RestController {
 			$proposed[ $slug ] = (bool) $enabled;
 		}
 
-		// Dependency validation: cannot disable a module that an enabled module depends on.
-		$errors = array();
-		foreach ( $proposed as $slug => $enabled ) {
-			if ( $enabled ) {
-				continue;
-			}
-			$dependents = $this->get_enabled_dependents( $slug, $all, $proposed );
-			if ( ! empty( $dependents ) ) {
-				$labels = array_map(
-					static function ( $dep_slug ) use ( $all ) {
-						return $all[ $dep_slug ]->label();
-					},
-					$dependents
-				);
-				$errors[] = sprintf(
-					/* translators: 1: module label, 2: comma-separated dependent labels */
-					__( 'Cannot disable "%1$s" because it is required by: %2$s.', 'doublescale' ),
-					$all[ $slug ]->label(),
-					implode( ', ', $labels )
-				);
-			}
-		}
-
-		if ( ! empty( $errors ) ) {
-			return new WP_Error(
-				'dependency_conflict',
-				implode( ' ', $errors ),
-				array( 'status' => 400 )
-			);
-		}
-
 		$prev_stored = is_array( $stored ) ? $stored : array();
 		update_option( 'doublescale_enabled_modules', $proposed );
 
@@ -193,29 +162,5 @@ class RestModulesController extends RestController {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Find enabled modules that depend on $slug.
-	 *
-	 * @param string                                     $slug
-	 * @param array<string, \DoubleScale\Core\ModuleInterface> $all
-	 * @param array<string, bool>                        $proposed
-	 * @return string[]
-	 */
-	private function get_enabled_dependents( string $slug, array $all, array $proposed ): array {
-		$dependents = array();
-		foreach ( $all as $other_slug => $module ) {
-			if ( $other_slug === $slug ) {
-				continue;
-			}
-			$is_enabled = ! $module->is_toggleable()
-				|| ( ! isset( $proposed[ $other_slug ] ) || (bool) $proposed[ $other_slug ] );
-
-			if ( $is_enabled && in_array( $slug, $module->dependencies(), true ) ) {
-				$dependents[] = $other_slug;
-			}
-		}
-		return $dependents;
 	}
 }

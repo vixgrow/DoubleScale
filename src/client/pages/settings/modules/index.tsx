@@ -23,49 +23,6 @@ function getEffectiveState(
 	return mod ? mod.enabled : true;
 }
 
-function collectDependentsToDisable(
-	slug: string,
-	modules: ModuleInfo[],
-	current: Record<string, boolean>
-): Record<string, boolean> {
-	const result: Record<string, boolean> = {};
-	const queue = [slug];
-	while (queue.length > 0) {
-		const s = queue.shift()!;
-		for (const m of modules) {
-			if (m.is_toggleable && m.dependencies.includes(s) && getEffectiveState(m.slug, modules, { ...current, ...result, [slug]: false }) ) {
-				result[m.slug] = false;
-				queue.push(m.slug);
-			}
-		}
-	}
-	return result;
-}
-
-function collectDependenciesToEnable(
-	slug: string,
-	modules: ModuleInfo[],
-	current: Record<string, boolean>
-): Record<string, boolean> {
-	const result: Record<string, boolean> = {};
-	const mod = modules.find((m) => m.slug === slug);
-	if (!mod) return result;
-	const queue = [...mod.dependencies];
-	const visited = new Set<string>();
-	while (queue.length > 0) {
-		const dep = queue.shift()!;
-		if (visited.has(dep)) continue;
-		visited.add(dep);
-		const depMod = modules.find((m) => m.slug === dep);
-		if (!depMod || !depMod.is_toggleable) continue;
-		if (!getEffectiveState(dep, modules, current)) {
-			result[dep] = true;
-			for (const d of depMod.dependencies) queue.push(d);
-		}
-	}
-	return result;
-}
-
 /** Matches Get Started: SMTP, Pipelines, Forms, Tasks, Campaigns, Booking. */
 const OPTIONAL_MODULE_DISPLAY_ORDER = [
 	'smtp',
@@ -101,28 +58,10 @@ export default function ModulesSettings() {
 
 	const hasChanges = useMemo(() => Object.keys(pendingChanges).length > 0, [pendingChanges]);
 
-	const getDependentLabels = useCallback(
-		(slug: string): string[] => {
-			return modules
-				.filter((m) => m.dependencies.includes(slug) && m.slug !== slug)
-				.filter((m) => getEffectiveState(m.slug, modules, pendingChanges))
-				.map((m) => m.label);
-		},
-		[modules, pendingChanges]
-	);
-
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
 			setPendingChanges((prev) => {
-				let next = { ...prev, [slug]: enabled };
-
-				if (!enabled) {
-					const cascade = collectDependentsToDisable(slug, modules, next);
-					next = { ...next, ...cascade };
-				} else {
-					const cascade = collectDependenciesToEnable(slug, modules, next);
-					next = { ...next, ...cascade };
-				}
+				const next = { ...prev, [slug]: enabled };
 
 				const cleaned: Record<string, boolean> = {};
 				for (const [s, v] of Object.entries(next)) {
@@ -194,7 +133,6 @@ export default function ModulesSettings() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 				{optionalShown.map((mod) => {
 					const isEnabled = getEffectiveState(mod.slug, modules, pendingChanges);
-					const dependents = getDependentLabels(mod.slug);
 
 					return (
 						<div
@@ -210,17 +148,12 @@ export default function ModulesSettings() {
 									{mod.label}
 								</span>
 								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-								{mod.dependencies.length > 0 && (
-									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-										{__('Requires:', 'doublescale')}{' '}
-										{mod.dependencies
-											.map((d) => modules.find((m) => m.slug === d)?.label || d)
-											.join(', ')}
-									</p>
-								)}
-								{isEnabled && dependents.length > 0 && (
-									<p className="text-[10px] text-muted-foreground/70 mt-0.5">
-										{__('Used by:', 'doublescale')} {dependents.join(', ')}
+								{mod.slug === 'smtp' && !isEnabled && (
+									<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+										{__(
+											'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+											'doublescale'
+										)}
 									</p>
 								)}
 							</div>

@@ -16,12 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Activecampaign;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Csv;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Fluentcrm;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Funnelkit;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Csv;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\Wpusers;
-use DoubleScale\Modules\Contacts\ImportExport\Importers\WcCustomers;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Gohighlevel;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Hubspot;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Mailerlite;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Memberpress;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Pipedrive;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\WcCustomers;
+use DoubleScale\Modules\Contacts\ImportExport\Importers\Wpusers;
 use Exception;
 
 /**
@@ -88,12 +93,17 @@ class Manager {
 	 */
 	public function register_importers() {
 		$importers = array(
+			new Csv(),
+			new Mailerlite(),
+			new Activecampaign(),
+			new Hubspot(),
+			new Pipedrive(),
+			new Gohighlevel(),
 			new Fluentcrm(),
 			new Funnelkit(),
-			new Csv(),
+			new Memberpress(),
 			new Wpusers(),
 			new WcCustomers(),
-			new Memberpress(),
 		);
 
 		foreach ( $importers as $importer ) {

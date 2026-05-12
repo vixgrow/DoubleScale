@@ -13,7 +13,6 @@
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
 use DoubleScale\Core\Utils\Utils;
-use DoubleScale\Fields\ContactFields;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Modules\Contacts\ImportExport\Security;
@@ -254,12 +253,42 @@ class Export {
 	}
 
 	/**
+	 * Build flat field map (slug => [ 'name' => string, 'is_custom' => bool ]) from core Utils groups.
+	 *
+	 * @return array<string, array{name: string, is_custom?: bool}>
+	 */
+	private function get_contact_fields_flat_from_utils(): array {
+		$flat = array();
+		foreach ( Utils::get_contact_fields() as $group_id => $group ) {
+			if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+			$is_custom_group = ( $group_id !== 0 );
+			foreach ( $group['fields'] as $slug => $def ) {
+				if ( ! is_string( $slug ) && ! is_int( $slug ) ) {
+					continue;
+				}
+				$key = is_int( $slug ) ? (string) $slug : $slug;
+				$flat[ $key ] = array(
+					'name'      => $def['label'] ?? $def['name'] ?? $key,
+					'is_custom' => $is_custom_group,
+				);
+			}
+		}
+		return $flat;
+	}
+
+	/**
 	 * Get contact fields
 	 *
 	 * @return array
 	 */
 	public function get_contact_fields() {
-		$contact_fields                 = ContactFields::instance()->get_fields();
+		if ( class_exists( \DoubleScale\Fields\ContactFields::class ) ) {
+			$contact_fields = \DoubleScale\Fields\ContactFields::instance()->get_fields();
+		} else {
+			$contact_fields = $this->get_contact_fields_flat_from_utils();
+		}
 		$contact_fields['lists']        = array(
 			'name' => __( 'Lists', 'doublescale'),
 		);

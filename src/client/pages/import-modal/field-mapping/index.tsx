@@ -13,12 +13,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
 	ContactMappedFields,
 	Field,
-	ProFeatureNotice,
 } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ListsMapping from '../lists-mapping';
 import TagsMapping from '../tags-mapping';
-import CustomFieldsMapping from '../custom-fields ';
+import CustomFieldsMapping from '../custom-fields';
+import MembershipFilter from '../membership-filter';
 import type { ImporterField } from '@doublescale/config';
 import {
 	TooltipProvider,
@@ -27,7 +27,6 @@ import {
 	TooltipContent,
 } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
-import { applyFilters } from '@wordpress/hooks';
 
 interface FieldMappingProps {
 	importer: any;
@@ -36,8 +35,6 @@ interface FieldMappingProps {
 const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 	const { state, updateValues } = useImportContext();
 	const { sourceData, values, source, fileData } = state;
-
-	const isProActive = applyFilters('doublescale_is_pro_active', false);
 
 	const renderLabelWithTooltip = (label: string, tooltip: string) => {
 		return (
@@ -121,6 +118,15 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 		let fieldContent;
 
 		switch (field.type) {
+			case 'membership_filter':
+				fieldContent = (
+					<MembershipFilter
+						options={field.options}
+						value={values[key] || []}
+						onChange={(value) => updateValues(key, value)}
+					/>
+				);
+				break;
 			case 'lists_mapping':
 				fieldContent = (
 					<ListsMapping
@@ -141,27 +147,13 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 				break;
 
 			case 'custom_fields_mapping':
-				if (isProActive) {
-					fieldContent = applyFilters(
-						'doublescale_field_mapping_custom_fields',
-						field.options,
-						values[key] || [],
-						(value) => updateValues(key, value)
-					);
-				} else {
-					fieldContent = (
-						<ProFeatureNotice
-							featureName={__(
-								'Custom Fields Mapping',
-								'doublescale'
-							)}
-							description={__(
-								'Custom fields mapping is only available in DoubleScale Pro.',
-								'doublescale'
-							)}
-						/>
-					);
-				}
+				fieldContent = (
+					<CustomFieldsMapping
+						customFields={field.options}
+						mapping={values[key] || []}
+						onChange={(value) => updateValues(key, value)}
+					/>
+				);
 				break;
 			case 'select':
 				fieldContent = (
@@ -249,7 +241,7 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 	return (
 		<Card className="shadow-none rounded-2xl">
 			<CardHeader>
-				<CardTitle className="text-2xl font-normal text-[#09090B]">
+				<CardTitle className="text-2xl font-normal text-foreground">
 					{__(`${importer.name} Data Import Tool`, 'doublescale')}
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">

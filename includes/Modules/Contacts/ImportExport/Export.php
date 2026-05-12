@@ -284,8 +284,8 @@ class Export {
 	 * @return array
 	 */
 	public function get_contact_fields() {
-		if ( class_exists( \DoubleScale\Fields\ContactFields::class ) ) {
-			$contact_fields = \DoubleScale\Fields\ContactFields::instance()->get_fields();
+		if ( class_exists( \DoubleScale\Pro\Fields\ContactFields::class ) ) {
+			$contact_fields = \DoubleScale\Pro\Fields\ContactFields::instance()->get_fields();
 		} else {
 			$contact_fields = $this->get_contact_fields_flat_from_utils();
 		}

@@ -80,7 +80,7 @@ class TaskEntityType {
 	public static function get_available() {
 		$types = self::get_all();
 
-		if ( ! class_exists( 'DoubleScale\\Modules\\Deals\\Models\\DealModel', false ) ) {
+		if ( ! class_exists( 'DoubleScale\\Pro\\Modules\\Deals\\Models\\DealModel', false ) ) {
 			unset( $types[ self::DEAL ] );
 		}
 

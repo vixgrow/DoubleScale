@@ -11,9 +11,9 @@
 
 namespace DoubleScale\Core\Settings\Rest;
 
-use DoubleScale\Modules\Inbox\Services\BounceHandlerManager;
-use DoubleScale\Modules\Inbox\Incoming\MessagingIncoming;
-use DoubleScale\Modules\Inbox\Oauth\EmailOauth;
+use DoubleScale\Pro\Modules\Inbox\Services\BounceHandlerManager;
+use DoubleScale\Pro\Modules\Inbox\Incoming\MessagingIncoming;
+use DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth;
 use DoubleScale\Modules\Tracking\ImapClient;
 use DoubleScale\Core\Settings\Settings;
 use WP_REST_Response;
@@ -29,15 +29,15 @@ class RestSettingsControllerPro {
 	 * Free-only installs register these routes from CoreModule but must not reference missing classes.
 	 */
 	private static function has_email_oauth_layer(): bool {
-		return class_exists( 'DoubleScale\\Modules\\Inbox\\Oauth\\EmailOauth' );
+		return class_exists( 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth' );
 	}
 
 	private static function has_bounce_handler_manager(): bool {
-		return class_exists( 'DoubleScale\\Modules\\Inbox\\Services\\BounceHandlerManager' );
+		return class_exists( 'DoubleScale\\Pro\\Modules\\Inbox\\Services\\BounceHandlerManager' );
 	}
 
 	private static function has_messaging_incoming(): bool {
-		return class_exists( 'DoubleScale\\Modules\\Inbox\\Incoming\\MessagingIncoming' );
+		return class_exists( 'DoubleScale\\Pro\\Modules\\Inbox\\Incoming\\MessagingIncoming' );
 	}
 
 	private static function has_imap_client(): bool {
@@ -45,7 +45,7 @@ class RestSettingsControllerPro {
 	}
 
 	private static function has_notifications_push_layer(): bool {
-		return class_exists( 'DoubleScale\\Modules\\Notifications\\Services\\PushNotificationService' );
+		return class_exists( 'DoubleScale\\Pro\\Modules\\Notifications\\Services\\PushNotificationService' );
 	}
 
 	private static function pro_mailbox_unavailable_error(): WP_Error {
@@ -1663,7 +1663,7 @@ class RestSettingsControllerPro {
 				200
 			);
 		}
-		\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
+		\DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		$config = get_option( 'doublescale_firebase_config', array() );
 
 		// Check whether the bundled credential files exist on disk.
@@ -1698,7 +1698,7 @@ class RestSettingsControllerPro {
 		update_option( 'doublescale_push_enabled', $enabled, false );
 
 		if ( $enabled ) {
-			\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
+			\DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		}
 
 		return new WP_REST_Response(
@@ -1729,7 +1729,7 @@ class RestSettingsControllerPro {
 				200
 			);
 		}
-		\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
+		\DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		$config = get_option( 'doublescale_firebase_config', array() );
 
 		if ( empty( $config['service_account'] ) ) {
@@ -1765,7 +1765,7 @@ class RestSettingsControllerPro {
 		}
 
 		// Try generating a JWT and exchanging it for an access token.
-		$jwt = \DoubleScale\Modules\Notifications\Services\PushNotificationService::generate_jwt( $sa );
+		$jwt = \DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::generate_jwt( $sa );
 		if ( is_wp_error( $jwt ) ) {
 			return new WP_REST_Response(
 				array(
@@ -1855,7 +1855,7 @@ class RestSettingsControllerPro {
 		}
 
 		$user_id = get_current_user_id();
-		$tokens  = \DoubleScale\Modules\Notifications\Services\DeviceTokenService::get_tokens( $user_id );
+		$tokens  = \DoubleScale\Pro\Modules\Notifications\Services\DeviceTokenService::get_tokens( $user_id );
 
 		if ( empty( $tokens ) ) {
 			return new WP_REST_Response(
@@ -1867,7 +1867,7 @@ class RestSettingsControllerPro {
 			);
 		}
 
-		\DoubleScale\Modules\Notifications\Services\PushNotificationService::ensure_config();
+		\DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::ensure_config();
 		$config = get_option( 'doublescale_firebase_config', array() );
 
 		if ( empty( $config['service_account'] ) || empty( $config['project_id'] ) ) {
@@ -1880,7 +1880,7 @@ class RestSettingsControllerPro {
 			);
 		}
 
-		$access_token = \DoubleScale\Modules\Notifications\Services\PushNotificationService::get_access_token( $config );
+		$access_token = \DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::get_access_token( $config );
 		if ( ! $access_token ) {
 			return new WP_REST_Response(
 				array(
@@ -1899,7 +1899,7 @@ class RestSettingsControllerPro {
 			'subcategory' => '',
 		);
 
-		$endpoint = sprintf( \DoubleScale\Modules\Notifications\Services\PushNotificationService::FCM_ENDPOINT, $config['project_id'] );
+		$endpoint = sprintf( \DoubleScale\Pro\Modules\Notifications\Services\PushNotificationService::FCM_ENDPOINT, $config['project_id'] );
 		$sent     = 0;
 		$failed   = 0;
 

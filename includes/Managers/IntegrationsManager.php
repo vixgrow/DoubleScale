@@ -23,11 +23,11 @@ final class IntegrationsManager {
 	private static $instance;
 
 	/**
-	 * @return self|\DoubleScale\Modules\Integrations\Services\IntegrationsManager
+	 * @return self|\DoubleScale\Pro\Modules\Integrations\Services\IntegrationsManager
 	 */
 	public static function instance() {
-		if ( class_exists( \DoubleScale\Modules\Integrations\Services\IntegrationsManager::class, true ) ) {
-			return \DoubleScale\Modules\Integrations\Services\IntegrationsManager::instance();
+		if ( class_exists( \DoubleScale\Pro\Modules\Integrations\Services\IntegrationsManager::class, true ) ) {
+			return \DoubleScale\Pro\Modules\Integrations\Services\IntegrationsManager::instance();
 		}
 
 		if ( null === self::$instance ) {

@@ -693,7 +693,7 @@ class RestSettingsController extends RestController {
 	 * @return string|null Warning message if there's an issue, null otherwise.
 	 */
 	private function check_smtp_connection( $email ) {
-		$email_oauth = 'DoubleScale\\Modules\\Inbox\\Oauth\\EmailOauth';
+		$email_oauth = 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth';
 		if ( ! class_exists( $email_oauth, false ) || ! call_user_func( array( $email_oauth, 'smtp_settings_class' ) ) ) {
 			return __( 'Warning: No SMTP backend is loaded. Enable the DoubleScale SMTP module or activate SMTP for reliable email delivery.', 'doublescale' );
 		}

@@ -1,5 +1,5 @@
 <?php
-$icons_url           = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PRO_PLUGIN_FILE );
+$icons_url           = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 $cancellation_reason = $fields['cancellation_reason'];
 $status              = $booking_array['status'] ?? '';
 ?>

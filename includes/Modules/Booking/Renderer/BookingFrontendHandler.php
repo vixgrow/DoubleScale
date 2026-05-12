@@ -54,8 +54,8 @@ class BookingFrontendHandler {
 		$wp_scripts->queue = array();
 		$wp_styles->queue  = array();
 
-		$plugin_dir = defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' ) ? DOUBLESCALE_PRO_PLUGIN_DIR : '';
-		$plugin_url = defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ? DOUBLESCALE_PRO_PLUGIN_URL : '';
+		$plugin_dir = defined( 'DOUBLESCALE_PLUGIN_DIR' ) ? DOUBLESCALE_PLUGIN_DIR : '';
+		$plugin_url = defined( 'DOUBLESCALE_PLUGIN_URL' ) ? DOUBLESCALE_PLUGIN_URL : '';
 		$version    = defined( 'DOUBLESCALE_VERSION' ) ? DOUBLESCALE_VERSION : '1.0.0';
 
 		$asset_file  = $plugin_dir . 'build/renderer/index.asset.php';

@@ -536,6 +536,12 @@ abstract class Integration {
 	 * @return string
 	 */
 	public function get_icon() {
+		// Booking integration icons (Apple/Google/Outlook/Zoom) are Pro-tier assets.
+		// Free-only installs don't have the Pro plugin URL constant — return empty so
+		// the JS bootstrap falls back gracefully rather than fataling on an undefined constant.
+		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ) {
+			return '';
+		}
 		return DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/' . $this->slug . '/icon.svg';
 	}
 

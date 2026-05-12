@@ -319,6 +319,27 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					];
 				}
 
+				if (item.path === 'booking') {
+					navItem.subMenu = [
+						{
+							path: 'booking/calendars',
+							label: __('Calendars', 'doublescale'),
+						},
+						{
+							path: 'booking/bookings',
+							label: __('Bookings', 'doublescale'),
+						},
+						{
+							path: 'booking/availability',
+							label: __('Availability', 'doublescale'),
+						},
+						{
+							path: 'booking/settings',
+							label: __('Settings', 'doublescale'),
+						},
+					];
+				}
+
 				if (navItem.subMenu) {
 					const filtered = filterSubMenuByModules(
 						navItem.subMenu,

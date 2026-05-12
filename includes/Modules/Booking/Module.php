@@ -193,14 +193,23 @@ final class Module extends AbstractModule {
 				} else {
 					new $class();
 				}
-			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// One broken integration must not block the rest from booting.
+			} catch ( \Throwable $e ) {
+				// One broken integration must not block the rest from booting,
+				// but log so silent class-not-found regressions are visible.
+				doublescale_get_logger()->error(
+					'Booking integration boot failed',
+					array(
+						'source' => 'booking-module',
+						'class'  => $class,
+						'error'  => $e->getMessage(),
+					)
+				);
 			}
 		}
 
-		if ( ! get_option( 'doublescale_booking_caps_assigned_v2' ) ) {
+		if ( ! get_option( 'doublescale_booking_caps_assigned' ) ) {
 			Capabilities::assign_capabilities_for_user_roles();
-			update_option( 'doublescale_booking_caps_assigned_v2', true );
+			update_option( 'doublescale_booking_caps_assigned', true );
 		}
 
 		$this->register_provisioner_hooks( $container );
@@ -236,7 +245,7 @@ final class Module extends AbstractModule {
 	 */
 	private function register_provisioner_hooks( Container $container ): void {
 		// One-shot bulk provisioning for existing users.
-		if ( ! get_option( 'doublescale_booking_provisioned_v1' ) ) {
+		if ( ! get_option( 'doublescale_booking_provisioned' ) ) {
 			$provisioner = $container->get( Services\BookingProvisioner::class );
 
 			$users = get_users(
@@ -255,7 +264,7 @@ final class Module extends AbstractModule {
 				$provisioner->ensure_host_calendar( (int) $user->ID );
 			}
 
-			update_option( 'doublescale_booking_provisioned_v1', true );
+			update_option( 'doublescale_booking_provisioned', true );
 		}
 
 		$resolve = static function () use ( $container ): Services\BookingProvisioner {

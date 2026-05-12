@@ -1052,12 +1052,12 @@ class EventModel extends Model {
 	/**
 	 * Fetch available slots based on provided parameters.
 	 *
-	 * @param int    $start_date Start date (Unix timestamp).
-	 * @param string $timezone   Timezone.
-	 * @param int    $duration   Duration of each slot in minutes.
-	 * @param int    $calendar_id Calendar ID to check availability for.
-	 * @param int    $time_slot  Optional. Time slot interval in minutes. Default 0.
-	 * @return array List of available slots.
+	 * @param string $start_date         Date string accepted by DateTime (e.g. `Y-m-d` or `Y-m-d H:i:s`). Numeric timestamps are NOT accepted.
+	 * @param string $timezone           Timezone identifier.
+	 * @param int    $duration           Duration of each slot in minutes.
+	 * @param int|null $user_id          Optional host user ID; defaults to the event's own user(s).
+	 * @param bool   $include_full_slots Optional. Include fully-booked slots (e.g. for waiting-list rendering). Default false.
+	 * @return array<string,array<int,array>> Slots grouped by date key (Y-m-d).
 	 */
 	public function get_available_slots( $start_date, $timezone, $duration, $user_id = null, $include_full_slots = false ) {
 		$this->validate_availability( $user_id );
@@ -1201,7 +1201,7 @@ class EventModel extends Model {
 
 	private function getTeamAvailability( $availability, $user_id = null ) {
 		$type          = $this->availability_type;
-		$is_common     = $this->availability_meta['is_common'];
+		$is_common     = $this->availability_meta['is_common'] ?? false;
 		$calendar_type = $this->calendar->type;
 
 		// Convert Eloquent model to plain array so we can freely set keys
@@ -1857,7 +1857,7 @@ class EventModel extends Model {
 	/**
 	 * Adjust start date based on event and current date.
 	 *
-	 * @param int    $start_date Start date timestamp.
+	 * @param string $start_date Date string accepted by DateTime (e.g. `Y-m-d` or `Y-m-d H:i:s`). Numeric timestamps are NOT accepted by the underlying `new \DateTime( $start_date )` call.
 	 * @param string $timezone   Timezone.
 	 * @param int    $duration   Slot duration in minutes.
 	 * @return int Adjusted start date timestamp.

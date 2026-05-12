@@ -107,6 +107,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'campaigns',
 	'automations',
 	'settings',
+	'booking-dashboard',
 	'smtp',
 ]);
 

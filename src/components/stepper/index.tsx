@@ -12,6 +12,7 @@ type StepperProps = {
 	currentStep: number;
 	onStepClick?: (slug: string) => void;
 	disableNavigation?: boolean;
+	className?: string;
 };
 
 const StepperComponent: React.FC<StepperProps> = ({
@@ -19,38 +20,40 @@ const StepperComponent: React.FC<StepperProps> = ({
 	currentStep,
 	onStepClick,
 	disableNavigation = false,
+	className,
 }) => {
 	const isClickable = (index: number): boolean =>
 		!disableNavigation && !!onStepClick && currentStep !== index + 1;
 
 	return (
-		<div className="flex items-center justify-center w-full py-5 px-6">
+		<aside
+			className={cn(
+				'w-full shrink-0 rounded-2xl border border-border bg-[#F7F8FA] p-6 lg:w-[min(100%,260px)] lg:self-start',
+				className
+			)}
+		>
 			{steps.map((step, index) => {
 				const stepNumber = index + 1;
 				const isCompleted = currentStep > stepNumber;
 				const isActive = currentStep === stepNumber;
 				const clickable = isClickable(index);
+				const isLast = index === steps.length - 1;
 
 				return (
-					<div key={step.slug} className="flex items-center">
-						<button
-							type="button"
-							disabled={!clickable}
-							onClick={() => clickable && onStepClick?.(step.slug)}
-							className={cn(
-								'group flex items-center gap-2.5 focus:outline-none',
-								clickable ? 'cursor-pointer' : 'cursor-default'
-							)}
-						>
-							{/* Circle indicator */}
-							<div
+					<div key={step.slug} className="flex gap-2.5">
+						<div className="flex flex-col items-center">
+							<button
+								type="button"
+								disabled={!clickable}
+								onClick={() => clickable && onStepClick?.(step.slug)}
 								className={cn(
-									'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-all duration-200',
-									isCompleted
-										? 'border-emerald-500 bg-emerald-500 text-white'
-										: isActive
-											? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30'
-											: 'border-border bg-background text-muted-foreground'
+									'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors',
+									isActive
+										? 'bg-brandPrimary text-white'
+										: isCompleted
+											? 'bg-[#16A34A] text-white'
+											: 'border-2 border-[#D0D5DC] bg-white text-primaryText',
+									clickable ? 'cursor-pointer' : 'cursor-default'
 								)}
 							>
 								{isCompleted ? (
@@ -58,39 +61,37 @@ const StepperComponent: React.FC<StepperProps> = ({
 								) : (
 									<span>{stepNumber}</span>
 								)}
-							</div>
-
-							{/* Label */}
-							<span
-								className={cn(
-									'text-sm font-medium tracking-tight transition-colors duration-200',
-									isCompleted
-										? 'text-emerald-600'
-										: isActive
-											? 'font-semibold text-primary'
-											: 'text-muted-foreground',
-									clickable && 'group-hover:text-foreground'
-								)}
-							>
-								{step.label}
-							</span>
-						</button>
-
-						{/* Connector line */}
-						{index < steps.length - 1 && (
-							<div className="mx-4 flex items-center">
-								<div
+							</button>
+							{!isLast ? (
+								<span
 									className={cn(
-										'h-px w-10 shrink-0 rounded-full transition-colors duration-200',
-										isCompleted ? 'bg-emerald-400' : 'bg-border'
+										'my-1 h-8 w-px shrink-0 rounded-full',
+										isCompleted ? 'bg-[#16A34A]' : 'bg-border'
 									)}
+									aria-hidden
 								/>
-							</div>
-						)}
+							) : null}
+						</div>
+						<button
+							type="button"
+							disabled={!clickable}
+							onClick={() => clickable && onStepClick?.(step.slug)}
+							className={cn(
+								'pb-3 pt-0.5 text-left font-semibold leading-7 transition-colors',
+								isActive
+									? 'text-[#3A3A99]'
+									: isCompleted
+										? 'text-[#16A34A]'
+										: 'text-primaryText',
+								clickable ? 'cursor-pointer' : 'cursor-default'
+							)}
+						>
+							{step.label}
+						</button>
 					</div>
 				);
 			})}
-		</div>
+		</aside>
 	);
 };
 

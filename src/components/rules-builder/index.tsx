@@ -108,14 +108,14 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 			<div ref={containerRef} className="flex flex-col gap-4 relative">
 				{rules.length > 1 && orBracketStyle.height > 0 && (
 					<div
-						className="absolute left-4"
+						className="absolute left-[10px]"
 						style={{
 							top: `${orBracketStyle.top}px`,
 							height: `${orBracketStyle.height}px`,
 						}}
 					>
-						<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
-						<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
+						<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl"></div>
+						<span className="absolute -left-5 top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full">
 							{__('OR', 'doublescale')}
 						</span>
 					</div>
@@ -137,7 +137,8 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 				<div className="flex justify-start items-start">
 					<Button
 						onClick={addOrGroup}
-						className="text-[#414141] bg-[#CECECE] border border-[#D3D3D3] rounded-md p-0 px-2 shadow-none hover:bg-transparent font-semibold"
+						variant="secondary"
+						className=""
 					>
 						<PlusIcon />
 						{__('Add another condition (Or)', 'doublescale')}

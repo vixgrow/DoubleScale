@@ -17,7 +17,7 @@ const FeedBuilder: React.FC<{
 	const avatarLetter = displayFromName.charAt(0).toUpperCase();
 
 	return (
-		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-muted/50 w-full lg:w-1/3 py-8 sm:py-10">
+		<div className="flex flex-col items-center justify-center border border-border rounded-2xl bg-muted/50 w-full lg:w-1/3 py-8 sm:py-10">
 			<div className="relative w-full flex items-center justify-center">
 				<img
 					src={device}
@@ -25,7 +25,7 @@ const FeedBuilder: React.FC<{
 					className="w-full max-w-[260px] sm:max-w-[300px] select-none pointer-events-none"
 				/>
 
-				<div className="absolute top-[21%] left-1/2 -translate-x-1/2 w-[68%] sm:w-[55%] max-w-[240px] flex gap-2 sm:gap-3 items-start">
+				<div className="absolute top-[21%] left-1/2 -translate-x-1/2 w-[68%] max-w-[240px] flex gap-2 sm:gap-3 items-start">
 					<div className="flex shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white font-semibold w-8 h-8 sm:w-9 sm:h-9">
 						{avatarLetter}
 					</div>

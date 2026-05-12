@@ -2,8 +2,8 @@ import { __ } from '@wordpress/i18n';
 import { Breadcrumb } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import ArrowLeft from '@/components/icons/arrow-left';
-import ArrowRightWhite from '@/components/icons/arrow-right-white';
+import ArrowLeft from '@doublescale/shared/icons/arrow-left';
+import ArrowRightWhite from '@doublescale/shared/icons/arrow-right-white';
 
 interface PanelLayoutProps {
 	items: Array<{
@@ -25,6 +25,8 @@ interface PanelLayoutProps {
 	handleNavigate?: (href: string) => void;
 	/** When false, footer actions stay but the step progress bar is hidden (e.g. form setup). */
 	showProgressBar?: boolean;
+	/** When true, the bottom nav is not rendered here (caller places it inside page content, e.g. form wizard). */
+	hideFooter?: boolean;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -43,21 +45,19 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	type,
 	handleNavigate,
 	showProgressBar = true,
+	hideFooter = false,
 }) => {
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
 	const showBar = showProgressBar && !!totalSteps;
+	const footerInnerPad =
+		type === 'form' ? 'px-6 md:px-8' : 'px-8';
 
 	return (
 		<div className="fixed inset-0 z-[150000] flex h-full w-full flex-col overflow-y-auto bg-white">
 			{/* Header Section - Fixed */}
 			<div
-				className={`flex-none p-4 bg-white px-12 ${type === 'campaign' ? 'z-10' : ''}`}
-				style={
-					type === 'campaign'
-						? { boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)' }
-						: undefined
-				}
+				className={`flex-none bg-white p-4 px-6 md:px-8 ${type === 'campaign' ? 'z-10' : ''}`}
 			>
 				<div className="flex justify-between items-center">
 					<Breadcrumb items={items} handleNavigate={handleNavigate} />
@@ -72,15 +72,19 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 
 			{/* Scrollable Content Section */}
 			<div
-				className={`flex-1 px-12 ${type === 'campaign' ? 'pt-4' : ''} ${type === 'form' ? 'bg-muted/25' : 'bg-white'}`}
+				className='w-full max-w-none bg-[#F7F8FA] py-6'
 			>
-				<div className="h-full pb-8">{children}</div>
+				<div
+					className='h-full pb-4 rounded-2xl bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] overflow-hidden'
+				>
+					{children}
+				</div>
 			</div>
 
-			{/* Footer Section - Fixed */}
-			{totalSteps && (
+			{/* Footer Section - Fixed (optional; form wizard embeds actions in the white panel) */}
+			{totalSteps && !hideFooter && (
 				<div
-					className={`mt-10 flex-none bg-white pb-6 ${showBar ? '' : 'border-t border-border/70'}`}
+					className={`${type === 'form' ? 'mt-4' : 'mt-10'} flex-none bg-white pb-6 ${showBar ? '' : 'border-t border-border/70'}`}
 				>
 					{showBar && (
 						<Progress
@@ -89,7 +93,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 						/>
 					)}
 					<div
-						className={`flex items-center justify-between px-8 ${showBar ? 'py-6' : 'py-5'}`}
+						className={`flex items-center justify-between ${footerInnerPad} ${showBar ? 'py-6' : 'py-5'}`}
 					>
 						{onBack && (
 							<Button

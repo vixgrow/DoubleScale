@@ -85,6 +85,9 @@ export default function ListTagFilter({
 			setFilters([[], []]);
 		}
 
+		// Let parent settings state flush before requesting contacts.
+		await Promise.resolve();
+
 		// Fetch contacts after clearing
 		if (fetchContacts) {
 			await fetchContacts();
@@ -99,6 +102,14 @@ export default function ListTagFilter({
 		if (onApplyingChange) onApplyingChange(true);
 		setIsApplying(true);
 
+		// Ensure parent/store gets the latest local selections before fetching.
+		if (setFilters) {
+			setFilters([includeData, excludeData]);
+		}
+
+		// Let parent settings state flush before requesting contacts.
+		await Promise.resolve();
+
 		if (fetchContacts) {
 			await fetchContacts();
 		}
@@ -108,7 +119,7 @@ export default function ListTagFilter({
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 border border-border bg-white rounded-xl p-6">
 			<ContactFilterSection
 				title="Included Contacts"
 				description="Select List and Tags that you want to send emails for this campaign. You can create multiple row to send to all of them."
@@ -116,7 +127,7 @@ export default function ListTagFilter({
 				onChange={setIncludeData}
 				initialRows={includeData.length ? includeData : undefined}
 			/>
-			<div className="border-t border-gray-200"></div>
+			<div className="border-t border-border"></div>
 			<ContactFilterSection
 				title="Exclude Contacts"
 				description="Select List and Tags that you want to Exclude from this campaign. Exclude contacts will be subtracted from your included selection."
@@ -125,23 +136,23 @@ export default function ListTagFilter({
 				initialRows={excludeData.length > 0 ? excludeData : []}
 			/>
 
-			<div className="border-t border-gray-200"></div>
-
 			{showBtns && (
-				<div className="flex gap-2">
-					<Button
-						variant="secondaryDeepBlue"
-						onClick={handleApplyFilters}
-						disabled={loading}
-					>
-						{__('Apply Filters', 'doublescale')}
-					</Button>
+				<div className="flex gap-6 justify-end">	
 					<Button
 						variant="destructive"
 						onClick={handleClearFilters}
 						disabled={loading || isApplying}
+						className="bg-white text-destructive border border-destructive hover:text-white"
 					>
 						{__('Clear Filters', 'doublescale')}
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={handleApplyFilters}
+						disabled={loading}
+						className="bg-white"
+					>
+						{__('Apply Filters', 'doublescale')}
 					</Button>
 				</div>
 			)}

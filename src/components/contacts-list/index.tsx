@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -12,6 +12,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Filter as FilterType, Contact } from '@doublescale/client';
+import {ContactsIcon} from '@doublescale/components';
 import { SearchIcon } from 'lucide-react';
 
 interface ContactListProps {
@@ -24,6 +25,8 @@ interface ContactListProps {
 	onTotalChange?: (total: number) => void;
 	onLoadingChange?: (loading: boolean) => void;
 	campaignType?: string;
+	/** Summary card only (campaign recipients step). Default: full list. */
+	variant?: 'full' | 'summary';
 }
 
 // Helper function to generate contact initials
@@ -43,7 +46,10 @@ const ContactList: React.FC<ContactListProps> = ({
 	onTotalChange,
 	onLoadingChange,
 	campaignType,
+	variant = 'full',
 }) => {
+	const isSummary = variant === 'summary';
+
 	// Simple local state
 	const [searchTerm, setSearchTerm] = useState('');
 	const [contacts, setContacts] = useState<Contact[]>([]);
@@ -62,15 +68,17 @@ const ContactList: React.FC<ContactListProps> = ({
 		setIsLoading(true);
 		setError(null);
 
+		const perPage = isSummary ? 1 : 50;
+
 		try {
 			const response = await apiFetch<{ data: Contact[]; total: number; filtered_total?: number }>(
 				{
 					path: addQueryArgs('/doublescale/v1/contacts', {
-						per_page: 50,
+						per_page: perPage,
 						page: pageNum,
 						filters,
 						subscribed: true,
-						keywords: search,
+						keywords: isSummary ? '' : search,
 						campaign_type: campaignType,
 					}),
 					method: 'GET',
@@ -81,7 +89,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				? response.data
 				: ([] as Contact[]);
 
-			if (append) {
+			if (append && !isSummary) {
 				setContacts((prev) => [...prev, ...newContacts]);
 			} else {
 				setContacts(newContacts);
@@ -89,10 +97,14 @@ const ContactList: React.FC<ContactListProps> = ({
 
 			setTotal(response.filtered_total ?? response.total);
 			setPage(pageNum);
-			setHasMore(newContacts.length === 50);
+			setHasMore(!isSummary && newContacts.length === perPage);
 		} catch (err: unknown) {
 			const message =
-				err instanceof Error ? err.message : 'Failed to fetch contacts';
+				err instanceof Error
+					? err.message
+					: (err as any)?.message ||
+						(err as any)?.data?.message ||
+						'Failed to fetch contacts';
 			setError(message);
 			console.error('Failed to fetch contacts:', err);
 		} finally {
@@ -117,16 +129,19 @@ const ContactList: React.FC<ContactListProps> = ({
 		isInitialMount.current = false;
 	}, []);
 
-	// Refetch when filters change (from apply button)
+	const filtersSignature = JSON.stringify(filters ?? []);
+
+	// Refetch when apply is requested (and when pending filters update)
 	useEffect(() => {
 		if (shouldFetch) {
 			fetchContacts(1, false, searchTerm);
 			onFetchComplete?.();
 		}
-	}, [shouldFetch]);
+	}, [shouldFetch, filtersSignature, campaignType]);
 
 	// Debounced search - refetch from API with search term
 	useEffect(() => {
+		if (isSummary) return;
 		if (isInitialMount.current) return;
 
 		const timer = setTimeout(() => {
@@ -134,11 +149,12 @@ const ContactList: React.FC<ContactListProps> = ({
 		}, 500);
 
 		return () => clearTimeout(timer);
-	}, [searchTerm]);
+	}, [searchTerm, isSummary]);
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
 		(e: React.UIEvent<HTMLDivElement>) => {
+			if (isSummary) return;
 			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
 			// Load more when near bottom
@@ -150,8 +166,66 @@ const ContactList: React.FC<ContactListProps> = ({
 				fetchContacts(page + 1, true, searchTerm);
 			}
 		},
-		[hasMore, isLoading, page, searchTerm]
+		[hasMore, isLoading, page, searchTerm, isSummary]
 	);
+
+	if (isSummary) {
+		const busy = isLoading || loading;
+		return (
+			<div className="relative w-full shrink-0 self-start rounded-xl bg-[#FAEADF] px-4 py-4 lg:max-w-sm">
+				<svg
+					className="pointer-events-none absolute inset-0 h-full w-full overflow-visible rounded-xl"
+					xmlns="http://www.w3.org/2000/svg"
+					aria-hidden
+				>
+					<rect
+						x="1"
+						y="1"
+						width="calc(100% - 1px)"
+						height="calc(100% - 1px)"
+						rx="11"
+						ry="11"
+						fill="none"
+						stroke="#CB5301"
+						strokeWidth="1"
+						strokeDasharray="44 32"
+						vectorEffect="non-scaling-stroke"
+					/>
+				</svg>
+				<div className="relative z-[1] flex gap-3">
+					<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
+						<ContactsIcon width={22} height={22} color="#CB5301" />
+					</div>
+					<div className="min-w-0 flex-1">
+						{error ? (
+							<p className="text-sm text-destructive">{error}</p>
+						) : (
+							<>
+								<p className="text-base font-medium text-foreground">
+									{busy
+										? __('Loading…', 'doublescale')
+										: sprintf(
+												/* translators: %s: number of recipients */
+												__(
+													'Total Recipients: %s',
+													'doublescale'
+												),
+												total.toLocaleString()
+											)}
+								</p>
+								<p className="mt-2 text-sm font-normal leading-snug text-muted-foreground">
+									{__(
+										'Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign.',
+										'doublescale'
+									)}
+								</p>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div

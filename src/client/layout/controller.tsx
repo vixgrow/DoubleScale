@@ -72,6 +72,7 @@ import Forms from '../pages/forms';
 import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
 import Campaigns_EmailSequences from '../pages/campaigns';
+import Campaigns from '../pages/campaigns/campaigns';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
 
 const useOnboardingRedirect = () => {
@@ -314,6 +315,15 @@ registerAdminPage('campaigns', {
 	label: __('Campaigns', 'doublescale'),
 	icon: <CampaignsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'campaigns',
+});
+
+registerAdminPage('sms-campaigns', {
+	path: 'sms-campaigns',
+	component: () => <Campaigns channel="sms" />,
+	label: __('SMS Campaigns', 'doublescale'),
+	requiredCapability: ['doublescale_crm_manager'],
+	hidden: true,
 	requiresModule: 'campaigns',
 });
 

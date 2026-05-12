@@ -106,7 +106,7 @@ class Tags extends Filter {
 		$operator = isset( $filter['operator'] ) ? $filter['operator'] : 'is';
 		$value    = isset( $filter['value'] ) ? $filter['value'] : array();
 
-		if ( empty( $value ) ) {
+		if ( empty( $value ) && ! in_array( $operator, array( 'is_empty', 'is_not_empty' ), true ) ) {
 			return $query;
 		}
 
@@ -120,7 +120,7 @@ class Tags extends Filter {
 				$query->whereHas(
 					'tags',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( 'tag_id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
 					}
 				);
 				break;
@@ -128,7 +128,7 @@ class Tags extends Filter {
 				$query->whereDoesntHave(
 					'tags',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( 'tag_id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
 					}
 				);
 				break;
@@ -136,7 +136,7 @@ class Tags extends Filter {
 				$query->whereHas(
 					'tags',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( 'tag_id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
 					}
 				);
 				break;
@@ -144,7 +144,7 @@ class Tags extends Filter {
 				$query->whereDoesntHave(
 					'tags',
 					function ( $query ) use ( $value ) {
-						$query->whereIn( 'tag_id', $value );
+						$query->whereIn( $query->getModel()->getTable() . '.id', $value );
 					}
 				);
 				break;

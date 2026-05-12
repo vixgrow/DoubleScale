@@ -193,8 +193,17 @@ final class Module extends AbstractModule {
 				} else {
 					new $class();
 				}
-			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// One broken integration must not block the rest from booting.
+			} catch ( \Throwable $e ) {
+				// One broken integration must not block the rest from booting,
+				// but log so silent class-not-found regressions are visible.
+				doublescale_get_logger()->error(
+					'Booking integration boot failed',
+					array(
+						'source' => 'booking-module',
+						'class'  => $class,
+						'error'  => $e->getMessage(),
+					)
+				);
 			}
 		}
 

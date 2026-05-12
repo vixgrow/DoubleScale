@@ -16,10 +16,6 @@ use DoubleScale\Modules\Booking\Managers\LocationsManager;
 use DoubleScale\Modules\Booking\Managers\MergeTagsManager;
 use DoubleScale\Modules\Booking\Managers\IntegrationsManager;
 use DoubleScale\Modules\Booking\Helpers\IntegrationsHelper;
-use DoubleScale\Modules\Booking\Integrations\Google\Integration as GoogleIntegration;
-use DoubleScale\Modules\Booking\Integrations\Outlook\Integration as OutlookIntegration;
-use DoubleScale\Modules\Booking\Integrations\Apple\Integration as AppleIntegration;
-use DoubleScale\Modules\Booking\Integrations\Zoom\Integration as ZoomIntegration;
 use DoubleScale\UserRoles\Permissions;
 
 final class BookingAdminConfig {
@@ -43,15 +39,14 @@ final class BookingAdminConfig {
 		$manager = IntegrationsManager::instance();
 		$options = $manager->get_options();
 
-		$calendar_primer = array(
-			GoogleIntegration::class,
-			OutlookIntegration::class,
-			AppleIntegration::class,
-			ZoomIntegration::class,
-		);
-
-		$calendar_slugs = array( 'google', 'outlook', 'apple', 'zoom' );
-		$needs_primer   = empty( $options );
+		// Pro tier exposes the full set of calendar integrations via the
+		// `doublescale_booking_integrations` filter (Apple/Google/Outlook/Zoom).
+		// Free returns an empty list. Prime any class the manager hasn't seen
+		// yet so the admin config payload includes its `fields` definition for
+		// the host-calendar popups and global settings tabs.
+		$calendar_primer = (array) apply_filters( 'doublescale_booking_integrations', array() );
+		$calendar_slugs  = array( 'google', 'outlook', 'apple', 'zoom' );
+		$needs_primer    = empty( $options );
 		if ( ! $needs_primer ) {
 			foreach ( $calendar_slugs as $slug ) {
 				$fields = $options[ $slug ]['fields'] ?? null;
@@ -64,12 +59,20 @@ final class BookingAdminConfig {
 
 		if ( $needs_primer ) {
 			foreach ( $calendar_primer as $class ) {
-				if ( class_exists( $class ) && method_exists( $class, 'instance' ) ) {
-					try {
-						$class::instance();
-					} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-						// One broken integration must not block the rest of the admin config payload.
-					}
+				if ( ! is_string( $class ) || ! class_exists( $class ) || ! method_exists( $class, 'instance' ) ) {
+					continue;
+				}
+				try {
+					$class::instance();
+				} catch ( \Throwable $e ) {
+					doublescale_get_logger()->error(
+						'Booking integration admin primer failed',
+						array(
+							'source' => 'booking-admin-config',
+							'class'  => $class,
+							'error'  => $e->getMessage(),
+						)
+					);
 				}
 			}
 			$options = $manager->get_options();

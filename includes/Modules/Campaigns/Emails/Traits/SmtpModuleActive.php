@@ -21,8 +21,8 @@ trait SmtpModuleActive {
 	 * @return string|null Fully qualified class name.
 	 */
 	public static function get_smtp_settings_class() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings' ) ) {
-			return '\DoubleScale\Pro\Modules\Smtp\Settings';
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return '\DoubleScale\Modules\Smtp\Settings';
 		}
 		if ( class_exists( '\smtp\Settings' ) ) {
 			return '\smtp\Settings';
@@ -71,8 +71,8 @@ trait SmtpModuleActive {
 	 * @return bool
 	 */
 	public static function is_smtp_module_active() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Pro\Modules\Smtp\Module' ) ) {
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
+			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
 			return true;
 		}
 
@@ -85,9 +85,9 @@ trait SmtpModuleActive {
 	 * @return bool
 	 */
 	public static function is_smtp_pro_mailers_active() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Pro\Modules\Smtp\Module' ) ) {
-			return class_exists( '\DoubleScale\Pro\Modules\Smtp\Providers\Aws\Accounts' );
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
+			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
+			return class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' );
 		}
 
 		return defined( 'smtp_PRO_PLUGIN_VERSION' );
@@ -99,8 +99,8 @@ trait SmtpModuleActive {
 	 * @return bool
 	 */
 	public static function is_smtp_module_version_supported() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Pro\Modules\Smtp\Module' ) ) {
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
+			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
 			return true;
 		}
 
@@ -117,7 +117,7 @@ trait SmtpModuleActive {
 	 * @return bool
 	 */
 	public static function is_smtp_pro_mailers_version_supported() {
-		if ( class_exists( '\DoubleScale\Pro\Modules\Smtp\Providers\Aws\Accounts' ) ) {
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' ) ) {
 			return true;
 		}
 

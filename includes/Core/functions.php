@@ -310,3 +310,22 @@ if ( ! function_exists( 'doublescale_objects_find' ) ) {
 		return null;
 	}
 }
+
+if ( ! function_exists( 'doublescale_get_smtp_email_log' ) ) {
+	/**
+	 * Email log handler for the SMTP module (outbound mail audit trail).
+	 *
+	 * @return \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler|null
+	 */
+	function doublescale_get_smtp_email_log() {
+		if ( ! class_exists( \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler::class ) ) {
+			return null;
+		}
+		return \DoubleScale\Core\ModuleManager::whenEnabled(
+			'smtp',
+			static function () {
+				return \DoubleScale\Modules\Smtp\EmailLog\EmailLogHandler::get_instance();
+			}
+		);
+	}
+}

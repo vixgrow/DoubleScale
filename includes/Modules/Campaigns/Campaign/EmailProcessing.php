@@ -32,7 +32,7 @@ use DoubleScale\Modules\Campaigns\Pipeline\Steps\InitialiseStep;
 use DoubleScale\Modules\Campaigns\Pipeline\Steps\CheckCompletionStep;
 use DoubleScale\Modules\Campaigns\Pipeline\Steps\ProcessBatchesStep;
 use DoubleScale\Modules\Campaigns\Services\CampaignEmailLogSource;
-use DoubleScale\Pro\Modules\Smtp\EmailLog\EmailLogContext;
+use DoubleScale\Modules\Smtp\EmailLog\EmailLogContext;
 use DoubleScale\Modules\Campaigns\Pipeline\Steps\ScheduleContinuationStep;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Tracking\Email;
@@ -276,7 +276,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			'campaign_status'     => $campaign->status ?? '',
 			'strategy'            => $strategy_name,
 			'template_from_email' => $from,
-			'smtp_module_present' => class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings' ),
+			'smtp_module_present' => class_exists( '\DoubleScale\Modules\Smtp\Settings' ),
 		);
 
 		if ( class_exists( BulkEmailSender::class ) ) {
@@ -2018,8 +2018,8 @@ class EmailProcessing extends AbstractCampaignProcessing {
 				'from_address'        => $emails->from_address ?? 'not set',
 				'from_name'           => $emails->from_name ?? 'not set',
 				'admin_email'         => get_option( 'admin_email' ),
-				'smtp_active'         => class_exists( '\DoubleScale\Pro\Modules\Smtp\Settings', false )
-					|| class_exists( '\DoubleScale\Pro\Modules\Smtp\Module', false ),
+				'smtp_active'         => class_exists( '\DoubleScale\Modules\Smtp\Settings', false )
+					|| class_exists( '\DoubleScale\Modules\Smtp\Module', false ),
 				'wp_mail_available'   => function_exists( 'wp_mail' ),
 				'template_settings'   => $template ? json_encode( $template->settings ) : 'no template',
 			);

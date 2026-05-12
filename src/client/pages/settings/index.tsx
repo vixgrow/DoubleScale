@@ -262,11 +262,7 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'smtp':
-				const SMTPComponent = applyFilters(
-					'doublescale_settings_smtp_settings',
-					SMTPSettings
-				) as React.ComponentType;
-				return <SMTPComponent />;
+				return <SMTPSettings />;
 			case 'mailbox':
 				return <MailboxSettings />;
 			case 'sms':

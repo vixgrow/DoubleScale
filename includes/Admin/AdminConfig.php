@@ -99,7 +99,7 @@ final class AdminConfig {
 				'ajaxUrl'             => $ajax_url,
 				'nonce'               => $nonce,
 				'pluginDirUrl'        => DOUBLESCALE_PLUGIN_URL,
-				/** Base URL for static assets shipped with DoubleScale Pro (e.g. SMTP mailer logos under `assets/images/mailers/`). */
+				/** Base URL for DoubleScale Pro plugin assets (optional; empty when Pro is not active). */
 				'proPluginDirUrl'     => defined( 'DOUBLESCALE_PRO_PLUGIN_URL' ) ? DOUBLESCALE_PRO_PLUGIN_URL : '',
 				'siteUrl'             => site_url(),
 				'forms'               => class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )

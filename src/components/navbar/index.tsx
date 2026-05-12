@@ -107,6 +107,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'campaigns',
 	'automations',
 	'settings',
+	'smtp',
 ]);
 
 /**
@@ -299,6 +300,21 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						);
 					}
 					navItem.subMenu = subMenu;
+				}
+
+				if (item.path === 'smtp/:tab?') {
+					navItem.subMenu = [
+						{
+							path: 'smtp/settings',
+							label: __('Connections', 'doublescale'),
+						},
+						{
+							path: 'smtp/email-test',
+							label: __('Email Test', 'doublescale'),
+						},
+						{ path: 'smtp/logs', label: __('Logs', 'doublescale') },
+						{ path: 'smtp/alerts', label: __('Alerts', 'doublescale') },
+					];
 				}
 
 				if (navItem.subMenu) {

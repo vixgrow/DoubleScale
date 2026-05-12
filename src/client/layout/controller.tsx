@@ -69,8 +69,10 @@ import GetStart from '../pages/get-start';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
+import SmtpPage from '../pages/smtp';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
+import { Mail } from 'lucide-react';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
@@ -467,6 +469,14 @@ registerAdminPage('integrations', {
 	icon: <IntegrationsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'integrations',
+});
+
+registerAdminPage('smtp', {
+	path: 'smtp/:tab?',
+	component: () => <SmtpPage />,
+	label: __('SMTP', 'doublescale'),
+	icon: <Mail size={24} />,
+	requiredCapability: ['doublescale_crm_manager'],
 });
 
 registerAdminPage('templates', {

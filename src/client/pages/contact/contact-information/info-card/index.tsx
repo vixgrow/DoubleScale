@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External dependencies
@@ -19,13 +18,14 @@ import { Input } from '@/components/ui/input';
 import { useContactContext } from '../../state/context';
 import {
 	OutlinedCustomFieldsIcon,
-	ProFeatureNotice,
 } from '@doublescale/components';
 import Field from '@doublescale/components/field';
 import { getToLink } from '@doublescale/navigation';
 import { useNavigate } from '@doublescale/navigation';
 import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
 import { Skeleton } from '@/components/ui/skeleton';
+
+import { useCustomFields } from '../../../custom-fields/use-customFields';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -45,19 +45,8 @@ type EditingField =
 const InfoCard: React.FC = () => {
 	const { contact, updateContact } = useContactContext();
 
-	// Get useCustomFields hook from Pro plugin via filter
-	// If Pro plugin is not active, this will return null
-	const useCustomFieldsHook = applyFilters(
-		'doublescale_use_custom_fields_hook',
-		null
-	) as any;
-
-	// Use the hook if available, otherwise provide empty defaults
-	const customFieldsData = useCustomFieldsHook
-		? useCustomFieldsHook('contact')
-		: { groups: [], loading: false };
-
-	const { groups = [], loading: isLoading = false } = customFieldsData || {};
+	const { groups = [], loading: isLoading = false } =
+		useCustomFields('contact');
 	const [activeTab, setActiveTab] = useState<TabType>('basic');
 	const [editingField, setEditingField] = useState<EditingField>(null);
 	const [editValue, setEditValue] = useState<string>('');
@@ -462,19 +451,6 @@ const InfoCard: React.FC = () => {
 					</div>
 				);
 			case 'custom':
-				// Show Pro feature notice if hook is not available (Pro plugin not installed)
-				if (!useCustomFieldsHook) {
-					return (
-						<ProFeatureNotice
-							featureName={__('Custom Fields', 'doublescale')}
-							description={__(
-								'Create unlimited custom fields to capture any information you need about your contacts. Organize fields into groups, use various field types (text, number, date, select, checkbox, etc.), and leverage custom fields in automations and campaigns.',
-								'doublescale'
-							)}
-						/>
-					);
-				}
-
 				if (isLoading) {
 					return (
                         <div className="flex flex-col gap-4">

@@ -73,7 +73,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'w-full justify-between text-left font-normal h-12',
+							'w-full justify-between text-left font-normal h-12 bg-white',
 							!selected.length && 'text-muted-foreground',
 							className
 						)}

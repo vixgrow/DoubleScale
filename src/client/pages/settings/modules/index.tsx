@@ -4,6 +4,12 @@ import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
 import type { ModuleInfo } from '@doublescale/config';
+import {
+	buildMarketingModuleDisplayRows,
+	getEffectiveMarketingModuleState,
+	pickToggleableModulePayload,
+	reduceMarketingModulePending,
+} from '@doublescale/shared/lib/optional-marketing-modules';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -13,48 +19,13 @@ interface ModulesResponse {
 	modules: ModuleInfo[];
 }
 
-function getEffectiveState(
-	slug: string,
-	modules: ModuleInfo[],
-	pending: Record<string, boolean>
-): boolean {
-	if (pending[slug] !== undefined) return pending[slug];
-	const mod = modules.find((m) => m.slug === slug);
-	return mod ? mod.enabled : true;
-}
-
-/** Matches Get Started: SMTP, Pipelines, Forms, Tasks, Campaigns, Booking. */
-const OPTIONAL_MODULE_DISPLAY_ORDER = [
-	'smtp',
-	'deals',
-	'forms',
-	'tasks',
-	'campaigns',
-	'booking',
-];
-
-function sortToggleableModules(list: ModuleInfo[]): ModuleInfo[] {
-	return [...list].sort((a, b) => {
-		const ia = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(a.slug);
-		const ib = OPTIONAL_MODULE_DISPLAY_ORDER.indexOf(b.slug);
-		if (ia === -1 && ib === -1) {
-			return a.label.localeCompare(b.label);
-		}
-		if (ia === -1) {
-			return 1;
-		}
-		if (ib === -1) {
-			return -1;
-		}
-		return ia - ib;
-	});
-}
-
 export default function ModulesSettings() {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
 	const [isSaving, setIsSaving] = useState(false);
 	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
+
+	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
 
 	const hasChanges = useMemo(() => Object.keys(pendingChanges).length > 0, [pendingChanges]);
 
@@ -62,15 +33,7 @@ export default function ModulesSettings() {
 		(slug: string, enabled: boolean) => {
 			setPendingChanges((prev) => {
 				const next = { ...prev, [slug]: enabled };
-
-				const cleaned: Record<string, boolean> = {};
-				for (const [s, v] of Object.entries(next)) {
-					const original = modules.find((m) => m.slug === s);
-					if (original && original.enabled !== v) {
-						cleaned[s] = v;
-					}
-				}
-				return cleaned;
+				return reduceMarketingModulePending(next, modules);
 			});
 		},
 		[modules]
@@ -78,12 +41,24 @@ export default function ModulesSettings() {
 
 	const handleSave = useCallback(async () => {
 		if (!hasChanges) return;
+		const payload = pickToggleableModulePayload(pendingChanges, modules);
+		if (Object.keys(payload).length === 0) {
+			setPendingChanges({});
+			createNotice({
+				type: 'info',
+				message: __(
+					'Only modules available in your install can be saved. Install DoubleScale Pro to enable the remaining add-ons.',
+					'doublescale'
+				),
+			});
+			return;
+		}
 		setIsSaving(true);
 		try {
 			const response = await apiFetch<ModulesResponse>({
 				path: '/doublescale/v1/modules',
 				method: 'POST',
-				data: { modules: pendingChanges },
+				data: { modules: payload },
 			});
 
 			if (response.success) {
@@ -92,7 +67,10 @@ export default function ModulesSettings() {
 				setPendingChanges({});
 				createNotice({
 					type: 'success',
-					message: __('Module settings saved. Reload the page for changes to take full effect.', 'doublescale'),
+					message: __(
+						'Module settings saved. Reload the page for changes to take full effect.',
+						'doublescale'
+					),
 				});
 			}
 		} catch (error: any) {
@@ -104,17 +82,7 @@ export default function ModulesSettings() {
 		} finally {
 			setIsSaving(false);
 		}
-	}, [hasChanges, pendingChanges, createNotice]);
-
-	const optionalShown = useMemo(
-		() =>
-			sortToggleableModules(
-				modules.filter(
-					(m) => m.is_toggleable && OPTIONAL_MODULE_DISPLAY_ORDER.includes(m.slug)
-				)
-			),
-		[modules]
-	);
+	}, [hasChanges, pendingChanges, modules, createNotice]);
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -131,24 +99,44 @@ export default function ModulesSettings() {
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-				{optionalShown.map((mod) => {
-					const isEnabled = getEffectiveState(mod.slug, modules, pendingChanges);
+				{displayRows.map((mod) => {
+					const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingChanges);
 
 					return (
 						<div
 							key={mod.slug}
 							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
-								isEnabled
-									? 'border-border/60 bg-card'
-									: 'border-border/40 bg-muted/20'
+								mod.unavailableUntilPro
+									? 'border-border/40 bg-muted/15'
+									: isEnabled
+										? 'border-border/60 bg-card'
+										: 'border-border/40 bg-muted/20'
 							}`}
 						>
 							<div className="flex flex-col gap-1 flex-1 min-w-0">
-								<span className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}>
+								<span
+									className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
+								>
 									{mod.label}
 								</span>
 								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-								{mod.slug === 'smtp' && !isEnabled && (
+								{mod.unavailableUntilPro && (
+									<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+										{__(
+											'Install and activate DoubleScale Pro to enable and use this module.',
+											'doublescale'
+										)}{' '}
+										<a
+											className="text-primary underline font-medium"
+											href={config.getUrlDoubleScalePro()}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											{__('View Pro plans', 'doublescale')}
+										</a>
+									</p>
+								)}
+								{mod.slug === 'smtp' && !isEnabled && !mod.unavailableUntilPro && (
 									<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
 										{__(
 											'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
@@ -171,7 +159,10 @@ export default function ModulesSettings() {
 					<div className="flex items-center gap-2 text-amber-700">
 						<RefreshCw size={16} />
 						<span className="text-sm font-medium">
-							{__('You have unsaved changes. A page reload is recommended after saving.', 'doublescale')}
+							{__(
+								'You have unsaved changes. A page reload is recommended after saving.',
+								'doublescale'
+							)}
 						</span>
 					</div>
 					<Button

@@ -9,18 +9,38 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Modules registered on the free application kernel (includes Pro modules discovered onto it).
+ *
+ * @return array<string, \DoubleScale\Core\ModuleInterface>
+ */
+function doublescale_kernel_registry_modules(): array {
+	if ( ! class_exists( \DoubleScale\Core\PluginKernel::class, false ) ) {
+		return array();
+	}
+	try {
+		return \DoubleScale\Core\PluginKernel::instance()->get_module_registry()->all();
+	} catch ( \Throwable $e ) {
+		return array();
+	}
+}
+
+/**
  * Discovered Module class map (free modules). Pro merges via filter.
  *
  * @return array<string, class-string<\DoubleScale\Core\ModuleInterface>>
  */
 function doublescale_module_slug_to_class_map(): array {
-	if ( isset( $GLOBALS['doublescale_module_slug_to_class_map_cache'] ) && is_array( $GLOBALS['doublescale_module_slug_to_class_map_cache'] ) ) {
-		return $GLOBALS['doublescale_module_slug_to_class_map_cache'];
+	$cached = \DoubleScale\Core\ModuleRequestCache::get_slug_class_map();
+	if ( is_array( $cached ) ) {
+		return $cached;
 	}
 
 	$base = array();
+	foreach ( doublescale_kernel_registry_modules() as $slug => $module ) {
+		$base[ $slug ] = get_class( $module );
+	}
 
-	if ( defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
+	if ( array() === $base && defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 		$root = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/';
 		foreach ( (array) glob( $root . '*', GLOB_ONLYDIR ) as $dir ) {
 			$basename = basename( $dir );
@@ -36,46 +56,61 @@ function doublescale_module_slug_to_class_map(): array {
 		}
 	}
 
-	$GLOBALS['doublescale_module_slug_to_class_map_cache'] = apply_filters( 'doublescale_module_slug_to_class_map', $base );
+	$filtered = apply_filters( 'doublescale_module_slug_to_class_map', $base );
+	\DoubleScale\Core\ModuleRequestCache::set_slug_class_map( $filtered );
 
-	return $GLOBALS['doublescale_module_slug_to_class_map_cache'];
+	return $filtered;
 }
 
 /**
- * Whether a discovered module is enabled ({@see ModuleInterface::is_enabled()}).
+ * Whether a discovered module is active (same storage as {@see ModuleInterface::is_enabled()}).
  * Unknown slugs return true so third-party groups are not stripped by mistake.
  *
  * @param string $slug Module slug.
  */
-function doublescale_is_module_enabled( string $slug ): bool {
-	if ( ! isset( $GLOBALS['doublescale_module_enabled_cache'] ) || ! is_array( $GLOBALS['doublescale_module_enabled_cache'] ) ) {
-		$GLOBALS['doublescale_module_enabled_cache'] = array();
+function doublescale_is_module_active( string $slug ): bool {
+	$cached = \DoubleScale\Core\ModuleRequestCache::get_enabled( $slug );
+	if ( null !== $cached ) {
+		return $cached;
 	}
-	$cache = &$GLOBALS['doublescale_module_enabled_cache'];
 
-	if ( array_key_exists( $slug, $cache ) ) {
-		return $cache[ $slug ];
+	$live = doublescale_kernel_registry_modules()[ $slug ] ?? null;
+	if ( $live instanceof \DoubleScale\Core\ModuleInterface ) {
+		$v = $live->is_enabled();
+		\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, $v );
+
+		return $v;
 	}
 
 	$classes = doublescale_module_slug_to_class_map();
 	if ( ! isset( $classes[ $slug ] ) ) {
-		return $cache[ $slug ] = true;
+		\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, true );
+
+		return true;
 	}
 
 	$module = new $classes[ $slug ]();
+	$v      = $module->is_enabled();
+	\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, $v );
 
-	return $cache[ $slug ] = $module->is_enabled();
+	return $v;
+}
+
+/**
+ * @deprecated 1.13.x Use {@see doublescale_is_module_active()}; retained for third-party callers.
+ *
+ * @param string $slug Module slug.
+ */
+function doublescale_is_module_enabled( string $slug ): bool {
+	return doublescale_is_module_active( $slug );
 }
 
 if ( ! function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
 	/**
-	 * Clears the request-level cache used by {@see doublescale_is_module_enabled()}.
+	 * Clears request-level module caches (slug map + enabled flags).
 	 */
 	function doublescale_flush_module_enabled_cache(): void {
-		if ( isset( $GLOBALS['doublescale_module_enabled_cache'] ) ) {
-			$GLOBALS['doublescale_module_enabled_cache'] = array();
-		}
-		unset( $GLOBALS['doublescale_module_slug_to_class_map_cache'] );
+		\DoubleScale\Core\ModuleRequestCache::flush();
 	}
 }
 
@@ -110,7 +145,7 @@ function doublescale_feature_group_owned_module( string $group_key, string $cont
 function doublescale_filter_contact_filters_groups_for_modules( array $groups ): array {
 	foreach ( array_keys( $groups ) as $key ) {
 		$owner = doublescale_feature_group_owned_module( $key, 'contact_filters' );
-		if ( null !== $owner && ! doublescale_is_module_enabled( $owner ) ) {
+		if ( null !== $owner && ! doublescale_is_module_active( $owner ) ) {
 			unset( $groups[ $key ] );
 			continue;
 		}
@@ -130,7 +165,7 @@ function doublescale_filter_contact_filters_groups_for_modules( array $groups ):
 function doublescale_filter_automation_rules_groups_for_modules( array $groups ): array {
 	foreach ( array_keys( $groups ) as $key ) {
 		$owner = doublescale_feature_group_owned_module( $key, 'automation_rules' );
-		if ( null !== $owner && ! doublescale_is_module_enabled( $owner ) ) {
+		if ( null !== $owner && ! doublescale_is_module_active( $owner ) ) {
 			unset( $groups[ $key ] );
 			continue;
 		}
@@ -150,7 +185,7 @@ function doublescale_filter_automation_rules_groups_for_modules( array $groups )
 function doublescale_filter_merge_tag_groups_for_modules( array $groups ): array {
 	foreach ( array_keys( $groups ) as $key ) {
 		$owner = doublescale_feature_group_owned_module( $key, 'merge_tags' );
-		if ( null !== $owner && ! doublescale_is_module_enabled( $owner ) ) {
+		if ( null !== $owner && ! doublescale_is_module_active( $owner ) ) {
 			unset( $groups[ $key ] );
 		}
 	}

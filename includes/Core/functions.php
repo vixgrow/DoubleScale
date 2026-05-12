@@ -15,6 +15,7 @@ use DoubleScale\Core\Logger\LoggerInterface;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\PluginKernel;
 
+require_once __DIR__ . '/ModuleRequestCache.php';
 require_once __DIR__ . '/ModuleFeatureGate.php';
 
 if ( ! function_exists( 'doublescale_resolve' ) ) {

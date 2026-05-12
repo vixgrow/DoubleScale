@@ -13,6 +13,7 @@ namespace DoubleScale\Core\Database;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\ModuleInterface;
 use DoubleScale\Core\ModuleRegistry;
 
 class MigrationRunner {
@@ -54,6 +55,21 @@ class MigrationRunner {
 			foreach ( $module->migrations() as $file ) {
 				self::run_one( $module->slug(), $file );
 			}
+		}
+	}
+
+	/**
+	 * Run pending migrations for a single module (e.g. user toggled the module on).
+	 */
+	public static function run_for_module( ModuleInterface $module ): void {
+		self::ensure_tracking_table();
+
+		if ( ! $module->is_enabled() ) {
+			return;
+		}
+
+		foreach ( $module->migrations() as $file ) {
+			self::run_one( $module->slug(), $file );
 		}
 	}
 

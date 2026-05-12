@@ -127,7 +127,27 @@ final class Module extends AbstractModule {
 			'automations'
 		);
 
+		$this->load_pro_automation_rule_files_if_available();
+
 		$this->loadMergeTags();
+	}
+
+	/**
+	 * Pro-only rule classes (Activity, Submission, …) live under the Pro plugin; load them only when this module boots.
+	 */
+	private function load_pro_automation_rule_files_if_available(): void {
+		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' ) ) {
+			return;
+		}
+		foreach ( array( 'Activity', 'Submission' ) as $subdir ) {
+			$dir = DOUBLESCALE_PRO_PLUGIN_DIR . 'includes/Modules/Automations/Rules/' . $subdir;
+			if ( ! is_dir( $dir ) ) {
+				continue;
+			}
+			foreach ( glob( $dir . '/*.php' ) ?: array() as $file ) {
+				require_once $file;
+			}
+		}
 	}
 
 	/**

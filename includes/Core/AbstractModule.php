@@ -42,6 +42,23 @@ abstract class AbstractModule implements ModuleInterface {
 		return (bool) apply_filters( 'doublescale_module_enabled_' . $this->slug(), $default );
 	}
 
+	public function isActive(): bool {
+		return $this->is_enabled();
+	}
+
+	public function onActivate(): void {
+	}
+
+	public function onDeactivate(): void {
+	}
+
+	/**
+	 * @return array<int, array{0: string, 1: string}>
+	 */
+	public function scheduledHooks(): array {
+		return array();
+	}
+
 	public function register( Container $container ): void {
 	}
 

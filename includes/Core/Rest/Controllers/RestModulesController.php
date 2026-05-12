@@ -11,8 +11,7 @@
 namespace DoubleScale\Core\Rest\Controllers;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\PluginKernel;
-use DoubleScale\Database\Install;
+use DoubleScale\Core\ModuleManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -82,8 +81,7 @@ class RestModulesController extends RestController {
 			);
 		}
 
-		$registry = PluginKernel::instance()->get_module_registry();
-		$all      = $registry->all();
+		$all = ModuleManager::all();
 		$stored   = get_option( 'doublescale_enabled_modules', array() );
 
 		// Merge incoming with stored values.
@@ -105,22 +103,6 @@ class RestModulesController extends RestController {
 		$prev_stored = is_array( $stored ) ? $stored : array();
 		update_option( 'doublescale_enabled_modules', $proposed );
 
-		$run_install = false;
-		foreach ( $all as $slug => $module ) {
-			if ( ! $module->is_toggleable() ) {
-				continue;
-			}
-			$before = isset( $prev_stored[ $slug ] ) ? (bool) $prev_stored[ $slug ] : true;
-			$after  = isset( $proposed[ $slug ] ) ? (bool) $proposed[ $slug ] : true;
-			if ( false === $before && true === $after ) {
-				$run_install = true;
-				break;
-			}
-		}
-		if ( $run_install && class_exists( Install::class ) ) {
-			Install::install();
-		}
-
 		return new WP_REST_Response(
 			array(
 				'success' => true,
@@ -134,8 +116,7 @@ class RestModulesController extends RestController {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function build_modules_payload(): array {
-		$registry = PluginKernel::instance()->get_module_registry();
-		$all      = $registry->all();
+		$all = ModuleManager::all();
 		$stored   = get_option( 'doublescale_enabled_modules', array() );
 		$result   = array();
 
@@ -152,12 +133,13 @@ class RestModulesController extends RestController {
 				: true;
 
 			$result[] = array(
-				'slug'         => $slug,
-				'label'        => $module->label(),
-				'description'  => $module->description(),
-				'enabled'      => $enabled,
-				'is_toggleable' => $module->is_toggleable(),
-				'dependencies' => array_values( $deps ),
+				'slug'            => $slug,
+				'label'           => $module->label(),
+				'description'     => $module->description(),
+				'enabled'         => $enabled,
+				'active'          => $enabled,
+				'is_toggleable'   => $module->is_toggleable(),
+				'dependencies'    => array_values( $deps ),
 			);
 		}
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * Unified module facade (merged free + Pro registries when Pro is active).
- * Delegates enabled checks to {@see doublescale_is_module_enabled()}.
+ * Delegates active checks to {@see doublescale_is_module_active()}.
  *
  * Lives in the free plugin so the base CRM owns the API; Pro layers registries and tasks.
  *
@@ -10,12 +10,14 @@
 
 namespace DoubleScale\Core;
 
+use DoubleScale\Core\Database\MigrationRunner;
+
 defined( 'ABSPATH' ) || exit;
 
 final class ModuleManager {
 
 	/**
-	 * Action Scheduler short hooks cleared when a module turns off (Pro Tasks helper).
+	 * Legacy Action Scheduler pairs (fallback when {@see ModuleInterface::scheduledHooks()} is empty).
 	 *
 	 * @var array<string, array<int, array{0: string, 1: string}>>
 	 */
@@ -43,11 +45,30 @@ final class ModuleManager {
 		}
 		self::$hooks_registered = true;
 
+		$sync = static function ( array $old, array $new ): void {
+			self::sync_lifecycle_from_option_delta( $old, $new );
+			self::flushCache();
+		};
+
 		add_action(
 			'update_option_doublescale_enabled_modules',
-			static function ( $old, $value ): void {
-				self::clear_tasks_for_newly_disabled_modules( $old, $value );
-				self::flushCache();
+			static function ( $old, $value ) use ( $sync ): void {
+				$sync(
+					is_array( $old ) ? $old : array(),
+					is_array( $value ) ? $value : array()
+				);
+			},
+			10,
+			2
+		);
+
+		add_action(
+			'add_option_doublescale_enabled_modules',
+			static function ( $_option, $value ) use ( $sync ): void {
+				$sync(
+					array(),
+					is_array( $value ) ? $value : array()
+				);
 			},
 			10,
 			2
@@ -55,25 +76,50 @@ final class ModuleManager {
 	}
 
 	/**
-	 * @param mixed $old_value Previous option value.
-	 * @param mixed $new_value New option value.
+	 * @param array<string, bool|string|int> $old_value Previous option value.
+	 * @param array<string, bool|string|int> $new_value New option value.
 	 */
-	private static function clear_tasks_for_newly_disabled_modules( $old_value, $new_value ): void {
-		$old = is_array( $old_value ) ? $old_value : array();
-		$new = is_array( $new_value ) ? $new_value : array();
-
-		$slugs = array_unique( array_merge( array_keys( $old ), array_keys( $new ) ) );
+	public static function sync_lifecycle_from_option_delta( array $old_value, array $new_value ): void {
+		$slugs = array_unique( array_merge( array_keys( $old_value ), array_keys( $new_value ) ) );
 		foreach ( $slugs as $slug ) {
-			$was_on = ! isset( $old[ $slug ] ) || (bool) $old[ $slug ];
-			$now_on = ! isset( $new[ $slug ] ) || (bool) $new[ $slug ];
+			$slug = (string) $slug;
+			$was_on = ! isset( $old_value[ $slug ] ) || (bool) $old_value[ $slug ];
+			$now_on = ! isset( $new_value[ $slug ] ) || (bool) $new_value[ $slug ];
 			if ( $was_on && ! $now_on ) {
-				self::clearScheduledTasksForModule( $slug );
+				self::deactivateModule( $slug );
+			} elseif ( ! $was_on && $now_on ) {
+				self::activateModule( $slug );
 			}
 		}
 	}
 
+	public static function activateModule( string $slug ): void {
+		$module = self::getModule( $slug );
+		if ( ! $module instanceof ModuleInterface ) {
+			return;
+		}
+		MigrationRunner::run_for_module( $module );
+		$module->onActivate();
+	}
+
+	public static function deactivateModule( string $slug ): void {
+		$module = self::getModule( $slug );
+		if ( ! $module instanceof ModuleInterface ) {
+			return;
+		}
+		$module->onDeactivate();
+		self::clearScheduledTasksForModule( $slug );
+	}
+
 	public static function isEnabled( string $slug ): bool {
 		return doublescale_is_module_enabled( $slug );
+	}
+
+	/**
+	 * @since 1.13.x
+	 */
+	public static function isActive( string $slug ): bool {
+		return doublescale_is_module_active( $slug );
 	}
 
 	public static function isToggleable( string $slug ): bool {
@@ -94,37 +140,28 @@ final class ModuleManager {
 	}
 
 	/**
-	 * @return \DoubleScale\Core\ModuleInterface|\DoubleScale\Pro\Core\ModuleInterface|null
+	 * @return ModuleInterface|null
 	 */
-	public static function getModule( string $slug ): ?object {
-		$pro = self::pro_registry_get( $slug );
-		if ( $pro ) {
-			return $pro;
+	public static function getModule( string $slug ): ?ModuleInterface {
+		if ( ! class_exists( \DoubleScale\Core\PluginKernel::class, false ) ) {
+			return null;
 		}
-		return self::free_registry_get( $slug );
+		$m = \DoubleScale\Core\PluginKernel::instance()->get_module_registry()->get( $slug );
+
+		return $m instanceof ModuleInterface ? $m : null;
 	}
 
 	/**
-	 * Merged module map; Pro wins on slug collision when Pro is loaded.
+	 * Merged module map; Pro modules share the free kernel registry after discovery.
 	 *
-	 * @return array<string, \DoubleScale\Core\ModuleInterface|\DoubleScale\Pro\Core\ModuleInterface>
+	 * @return array<string, ModuleInterface>
 	 */
 	public static function all(): array {
-		$merged = array();
-		if ( class_exists( \DoubleScale\Core\PluginKernel::class, false ) ) {
-			foreach ( \DoubleScale\Core\PluginKernel::instance()->get_module_registry()->all() as $slug => $module ) {
-				if ( 'automations' === $slug ) {
-					continue;
-				}
-				$merged[ $slug ] = $module;
-			}
+		if ( ! class_exists( \DoubleScale\Core\PluginKernel::class, false ) ) {
+			return array();
 		}
-		if ( class_exists( \DoubleScale\Pro\Core\PluginKernel::class, false ) ) {
-			foreach ( \DoubleScale\Pro\Core\PluginKernel::instance()->get_module_registry()->all() as $slug => $module ) {
-				$merged[ $slug ] = $module;
-			}
-		}
-		return $merged;
+
+		return \DoubleScale\Core\PluginKernel::instance()->get_module_registry()->all();
 	}
 
 	public static function flushCache(): void {
@@ -137,25 +174,26 @@ final class ModuleManager {
 	 * Clears Action Scheduler hooks owned by a module when it is disabled (Pro Tasks).
 	 */
 	public static function clearScheduledTasksForModule( string $slug ): void {
-		if ( empty( self::TASK_HOOKS_BY_MODULE[ $slug ] ) || ! class_exists( \DoubleScale\Pro\Modules\Tasks\Tasks::class ) ) {
+		if ( ! class_exists( \DoubleScale\Pro\Modules\Tasks\Tasks::class ) ) {
 			return;
 		}
-		foreach ( self::TASK_HOOKS_BY_MODULE[ $slug ] as $pair ) {
-			( new \DoubleScale\Pro\Modules\Tasks\Tasks( $pair[0] ) )->unschedule_all( $pair[1] );
-		}
-	}
 
-	private static function pro_registry_get( string $slug ): ?object {
-		if ( ! class_exists( \DoubleScale\Pro\Core\PluginKernel::class, false ) ) {
-			return null;
+		$pairs = array();
+		$mod   = self::getModule( $slug );
+		if ( $mod instanceof ModuleInterface ) {
+			$pairs = $mod->scheduledHooks();
 		}
-		return \DoubleScale\Pro\Core\PluginKernel::instance()->get_module_registry()->get( $slug );
-	}
-
-	private static function free_registry_get( string $slug ): ?object {
-		if ( ! class_exists( \DoubleScale\Core\PluginKernel::class, false ) ) {
-			return null;
+		if ( array() === $pairs && isset( self::TASK_HOOKS_BY_MODULE[ $slug ] ) ) {
+			$pairs = self::TASK_HOOKS_BY_MODULE[ $slug ];
 		}
-		return \DoubleScale\Core\PluginKernel::instance()->get_module_registry()->get( $slug );
+		if ( array() === $pairs ) {
+			return;
+		}
+		foreach ( $pairs as $pair ) {
+			if ( ! isset( $pair[0], $pair[1] ) ) {
+				continue;
+			}
+			( new \DoubleScale\Pro\Modules\Tasks\Tasks( (string) $pair[0] ) )->unschedule_all( (string) $pair[1] );
+		}
 	}
 }

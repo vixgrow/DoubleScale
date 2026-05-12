@@ -791,6 +791,9 @@ export const isModuleToggleEnabled =
 		return Boolean(mod.enabled);
 	};
 
+/** @since 1.13 — alias of {@link isModuleToggleEnabled}; prefer for new code. */
+export const isModuleActive = isModuleToggleEnabled;
+
 /**
  * Set license
  *
@@ -923,6 +926,7 @@ export interface ConfigApi {
 	setStoreNonce: (value: string) => void;
 	isModuleEnabled: (slug: string) => boolean;
 	isModuleToggleEnabled: (slug: string) => boolean;
+	isModuleActive: (slug: string) => boolean;
 	getModules: () => ModuleInfo[];
 	setModules: (value: ModuleInfo[]) => void;
 	isAiConfigured: () => boolean;
@@ -1002,6 +1006,7 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setModules = setModules(data);
 	configApi.isModuleEnabled = isModuleEnabled(data);
 	configApi.isModuleToggleEnabled = isModuleToggleEnabled(data);
+	configApi.isModuleActive = isModuleActive(data);
 	configApi.isAiConfigured = () => Boolean(data.aiConfigured);
 	return configApi;
 };

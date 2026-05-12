@@ -31,6 +31,11 @@ interface ModuleInterface {
 
 	public function is_enabled(): bool;
 
+	/**
+	 * Canonical "on" check; same as {@see is_enabled()} since 1.13.x.
+	 */
+	public function isActive(): bool;
+
 	public function register( Container $container ): void;
 
 	public function boot( Container $container ): void;
@@ -44,4 +49,26 @@ interface ModuleInterface {
 	 * @return class-string[]
 	 */
 	public function restControllers(): array;
+
+	/**
+	 * Runs once when the module transitions from inactive to active (user toggle or option add).
+	 *
+	 * @since 1.13.x
+	 */
+	public function onActivate(): void;
+
+	/**
+	 * Runs once when the module transitions from active to inactive.
+	 *
+	 * @since 1.13.x
+	 */
+	public function onDeactivate(): void;
+
+	/**
+	 * Action Scheduler group + hook pairs to unschedule when the module turns off.
+	 *
+	 * @since 1.13.x
+	 * @return array<int, array{0: string, 1: string}>
+	 */
+	public function scheduledHooks(): array;
 }

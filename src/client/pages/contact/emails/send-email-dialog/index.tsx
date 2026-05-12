@@ -29,17 +29,21 @@ import {
 import { Button } from '@doublescale/components/ui/button';
 import { Label } from '@doublescale/components/ui/label';
 import { useSendMessage } from '@doublescale/hooks/use-send-message';
+import type { EmailRow } from '@doublescale/utils';
 
 interface SendEmailDialogProps {
 	open: boolean;
 	onClose: () => void;
 	contact: Contact | null;
+	/** Passed from parent when replying to a thread (optional UI hook-up). */
+	replyTo?: EmailRow | null;
 }
 
 const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 	open,
 	onClose,
 	contact,
+	replyTo: _replyTo,
 }) => {
 	const [toEmail, setToEmail] = useState(contact?.email || '');
 	const [subject, setSubject] = useState('');

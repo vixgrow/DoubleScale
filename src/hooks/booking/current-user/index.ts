@@ -68,17 +68,17 @@ const useCurrentUser = (): UserHook => {
      */
     const hasCapability = (capability: string): boolean => {
         const user = getCurrentUser();
-        return !!user.capabilities[capability];
+        return !!user?.capabilities?.[capability];
     };
 
     /**
      * Check if current user is admin
-     * 
+     *
      * @returns boolean Whether user is admin
      */
     const isAdmin = (): boolean => {
         const user = getCurrentUser();
-        return !!user.is_admin;
+        return !!user?.is_admin;
     };
 
     /**
@@ -107,25 +107,25 @@ const useCurrentUser = (): UserHook => {
      * @returns string User's display name
      */
     const getDisplayName = (): string => {
-        return getCurrentUser().display_name;
+        return getCurrentUser()?.display_name ?? '';
     };
 
     /**
      * Get user's email
-     * 
+     *
      * @returns string User's email
      */
     const getEmail = (): string => {
-        return getCurrentUser().email;
+        return getCurrentUser()?.email ?? '';
     };
 
     /**
      * Get user's ID
-     * 
+     *
      * @returns number User's ID
      */
     const getId = (): number => {
-        return getCurrentUser().id;
+        return getCurrentUser()?.id ?? 0;
     };
 
     return {

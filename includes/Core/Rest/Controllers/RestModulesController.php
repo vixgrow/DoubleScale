@@ -11,8 +11,7 @@
 namespace DoubleScale\Core\Rest\Controllers;
 
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Core\PluginKernel;
-use DoubleScale\Database\Install;
+use DoubleScale\Core\ModuleManager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -82,8 +81,7 @@ class RestModulesController extends RestController {
 			);
 		}
 
-		$registry = PluginKernel::instance()->get_module_registry();
-		$all      = $registry->all();
+		$all = ModuleManager::all();
 		$stored   = get_option( 'doublescale_enabled_modules', array() );
 
 		// Merge incoming with stored values.
@@ -102,55 +100,8 @@ class RestModulesController extends RestController {
 			$proposed[ $slug ] = (bool) $enabled;
 		}
 
-		// Dependency validation: cannot disable a module that an enabled module depends on.
-		$errors = array();
-		foreach ( $proposed as $slug => $enabled ) {
-			if ( $enabled ) {
-				continue;
-			}
-			$dependents = $this->get_enabled_dependents( $slug, $all, $proposed );
-			if ( ! empty( $dependents ) ) {
-				$labels = array_map(
-					static function ( $dep_slug ) use ( $all ) {
-						return $all[ $dep_slug ]->label();
-					},
-					$dependents
-				);
-				$errors[] = sprintf(
-					/* translators: 1: module label, 2: comma-separated dependent labels */
-					__( 'Cannot disable "%1$s" because it is required by: %2$s.', 'doublescale' ),
-					$all[ $slug ]->label(),
-					implode( ', ', $labels )
-				);
-			}
-		}
-
-		if ( ! empty( $errors ) ) {
-			return new WP_Error(
-				'dependency_conflict',
-				implode( ' ', $errors ),
-				array( 'status' => 400 )
-			);
-		}
-
 		$prev_stored = is_array( $stored ) ? $stored : array();
 		update_option( 'doublescale_enabled_modules', $proposed );
-
-		$run_install = false;
-		foreach ( $all as $slug => $module ) {
-			if ( ! $module->is_toggleable() ) {
-				continue;
-			}
-			$before = isset( $prev_stored[ $slug ] ) ? (bool) $prev_stored[ $slug ] : true;
-			$after  = isset( $proposed[ $slug ] ) ? (bool) $proposed[ $slug ] : true;
-			if ( false === $before && true === $after ) {
-				$run_install = true;
-				break;
-			}
-		}
-		if ( $run_install && class_exists( Install::class ) ) {
-			Install::install();
-		}
 
 		return new WP_REST_Response(
 			array(
@@ -165,8 +116,7 @@ class RestModulesController extends RestController {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function build_modules_payload(): array {
-		$registry = PluginKernel::instance()->get_module_registry();
-		$all      = $registry->all();
+		$all = ModuleManager::all();
 		$stored   = get_option( 'doublescale_enabled_modules', array() );
 		$result   = array();
 
@@ -183,39 +133,16 @@ class RestModulesController extends RestController {
 				: true;
 
 			$result[] = array(
-				'slug'         => $slug,
-				'label'        => $module->label(),
-				'description'  => $module->description(),
-				'enabled'      => $enabled,
-				'is_toggleable' => $module->is_toggleable(),
-				'dependencies' => array_values( $deps ),
+				'slug'            => $slug,
+				'label'           => $module->label(),
+				'description'     => $module->description(),
+				'enabled'         => $enabled,
+				'active'          => $enabled,
+				'is_toggleable'   => $module->is_toggleable(),
+				'dependencies'    => array_values( $deps ),
 			);
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Find enabled modules that depend on $slug.
-	 *
-	 * @param string                                     $slug
-	 * @param array<string, \DoubleScale\Core\ModuleInterface> $all
-	 * @param array<string, bool>                        $proposed
-	 * @return string[]
-	 */
-	private function get_enabled_dependents( string $slug, array $all, array $proposed ): array {
-		$dependents = array();
-		foreach ( $all as $other_slug => $module ) {
-			if ( $other_slug === $slug ) {
-				continue;
-			}
-			$is_enabled = ! $module->is_toggleable()
-				|| ( ! isset( $proposed[ $other_slug ] ) || (bool) $proposed[ $other_slug ] );
-
-			if ( $is_enabled && in_array( $slug, $module->dependencies(), true ) ) {
-				$dependents[] = $other_slug;
-			}
-		}
-		return $dependents;
 	}
 }

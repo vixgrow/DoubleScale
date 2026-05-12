@@ -16,6 +16,8 @@ import {
 	SearchInput,
 } from '@/components/booking';
 
+import './style.scss';
+
 /**
  * Main Search Filter Component
  */

@@ -14,7 +14,6 @@ namespace DoubleScale\Modules\Automations\Rules\LeadScoring;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\LeadScoring\Models\LeadScoringRuleLevelModel;
 
 /**
@@ -157,10 +156,3 @@ class LeadScoreLevel extends Rule
     }
 }
 
-if (
-	function_exists( 'doublescale_is_module_enabled' )
-	&& doublescale_is_module_enabled( 'leadscoring' )
-	&& class_exists( 'DoubleScale\Modules\LeadScoring\Models\LeadScoringRuleLevelModel' )
-) {
-	RulesManager::instance()->register( new LeadScoreLevel() );
-}

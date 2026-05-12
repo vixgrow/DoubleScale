@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
+import { isEmail } from 'validator';
+import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,20 +18,38 @@ import {
 } from '@/components/ui/popover';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import config from '@/config';
+import type { QuillSMTPInfo, VerifiedSender } from '@/shared/config/types/config-data';
 import { cn } from '@/lib/utils';
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
 
-interface VerifiedSender {
-	email: string;
-	name: string;
-	connection_id: string;
-}
-
-interface smtpInfo {
-	configured: boolean;
-	verified_senders?: VerifiedSender[];
-	config_url?: string;
-	plugin_url?: string;
+/**
+ * Build SMTP picker state from live REST payload (stays fresh after saving SMTP without full reload).
+ */
+function smtpSettingsResponseToInfo(
+	data: Record<string, unknown>
+): QuillSMTPInfo {
+	const connections =
+		(data.connections as Record<
+			string,
+			{ from_email?: string; from_name?: string }
+		>) || {};
+	const verified: VerifiedSender[] = [];
+	for (const [connection_id, c] of Object.entries(connections)) {
+		const email =
+			typeof c?.from_email === 'string' ? c.from_email.trim() : '';
+		if (email && isEmail(email)) {
+			verified.push({
+				connection_id,
+				email,
+				name: typeof c?.from_name === 'string' ? c.from_name : '',
+			});
+		}
+	}
+	if (verified.length > 0) {
+		return { configured: true, verified_senders: verified };
+	}
+	return { configured: false };
 }
 
 interface FromEmailSelectorProps {
@@ -51,18 +71,45 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 }) => {
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
+	const [liveSmtp, setLiveSmtp] = useState<QuillSMTPInfo | null>(null);
+	const modulesTick = useModulesConfigTick();
+	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
 
-	// Safely get smtp info with fallback
-	let smtpInfo: smtpInfo | undefined;
-	try {
-		smtpInfo = config.getsmtpInfo() as smtpInfo | undefined;
-	} catch (e) {
-		console.warn('[DoubleScale] Failed to get smtp info:', e);
-		smtpInfo = undefined;
-	}
+	useEffect(() => {
+		if (!smtpModuleOn) {
+			setLiveSmtp(null);
+			return;
+		}
+		let cancelled = false;
+		(async () => {
+			try {
+				const data = await fetchSmtpSettings();
+				if (cancelled) {
+					return;
+				}
+				const mapped = smtpSettingsResponseToInfo(data);
+				const base = config.getQuillSMTPInfo();
+				// Successful GET means the bundled SMTP REST is available — never keep a stale "install plugin" hint.
+				setLiveSmtp({
+					configured: mapped.configured,
+					verified_senders: mapped.verified_senders,
+					config_url: base.config_url,
+					plugin_url: undefined,
+				});
+			} catch {
+				// SMTP REST unavailable (module off or no cap) — keep window.doublescaleConfig.
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [smtpModuleOn, modulesTick]);
+
+	const smtpInfo: QuillSMTPInfo = liveSmtp ?? config.getQuillSMTPInfo();
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =
+		smtpModuleOn &&
 		smtpInfo?.configured &&
 		smtpInfo?.verified_senders &&
 		smtpInfo.verified_senders.length > 0;
@@ -88,17 +135,54 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 				className={cn(error && '!border-destructive focus-visible:!ring-destructive/20')}
 				required={required}
 				/>
-			{!smtpInfo?.configured && (
-				<p className="text-xs text-muted-foreground mt-1">
-					{__('Install', 'doublescale')}{' '}
+			{!smtpModuleOn && (
+				<p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
+					{__(
+						'The SMTP module is turned off. Enable it under Settings → Modules to use saved mail connections and the sender account picker.',
+						'doublescale'
+					)}{' '}
 					<button
 						type="button"
-						onClick={() => navigate(getToLink('extensions') + '&search=smtp')}
-						className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0"
+						onClick={() => navigate(getToLink('settings/modules'))}
+						className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0 font-medium"
 					>
-						smtp
-					</button>{' '}
-					{__('for easier email management', 'doublescale')}
+						{__('Open Modules', 'doublescale')}
+					</button>
+				</p>
+			)}
+			{smtpModuleOn && !smtpInfo.configured && (
+				<p className="text-xs text-muted-foreground mt-1">
+					{smtpInfo.plugin_url ? (
+						<>
+							{__('Install an SMTP plugin', 'doublescale')}{' '}
+							<button
+								type="button"
+								onClick={() => {
+									window.location.assign(smtpInfo.plugin_url as string);
+								}}
+								className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0"
+							>
+								{__('from WordPress.org', 'doublescale')}
+							</button>
+							{' '}
+							{__('for easier email management.', 'doublescale')}
+						</>
+					) : (
+						<>
+							<button
+								type="button"
+								onClick={() => navigate(getToLink('smtp/settings'))}
+								className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0"
+							>
+								{__('Open SMTP settings', 'doublescale')}
+							</button>
+							{' '}
+							{__(
+								'to add a mail connection and From addresses.',
+								'doublescale'
+							)}
+						</>
+					)}
 				</p>
 			)}
 			</div>
@@ -134,8 +218,12 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 							<ChevronsUpDown className="h-4 w-4 opacity-50" />
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className="w-[400px] p-0" align="end">
-						<Command>
+					<PopoverContent
+						className="z-[151000] w-[400px] p-0"
+						align="end"
+					>
+						{/* PanelLayout uses z-[150000]; cmdk default filter can hide items without an input */}
+						<Command shouldFilter={false}>
 							<CommandList>
 								<CommandEmpty>
 									{__('No verified senders found.', 'doublescale')}

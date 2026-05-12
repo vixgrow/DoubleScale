@@ -48,6 +48,7 @@ import {
 import WordPressLogoIcon from '@/components/icons/woedpress-logo';
 import { createPortal } from 'react-dom';
 import config from '@doublescale/config';
+import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 
 interface SubMenuItem {
 	path: string;
@@ -109,13 +110,15 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'settings',
 	'booking-dashboard',
 	'smtp',
+	'sales-pipeline',
+	'tasks',
+	'forms',
 ]);
 
 /**
- * Maps `registerAdminPage` path (PageSettings.path) to a Pro module slug for
- * sidebar visibility when Pro is active. Paths with no entry are not module-gated.
- * SMTP (`smtp/:tab?`) is intentionally omitted — it ships in the free plugin and
- * the SMTP page handles a disabled module in-app.
+ * Maps `registerAdminPage` path to a module slug for sidebar visibility when the
+ * page does not set {@link PageSettings.requiresModule}. Paths with no entry
+ * are not module-gated via this map (the page's `requiresModule` wins first).
  */
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
@@ -164,6 +167,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	);
 	const { hasRequiredCapability, isSalesRep, canManageAllDeals, isCrmManager } =
 		useCapabilities();
+	const modulesTick = useModulesConfigTick();
 
 	const filterSubMenuByModules = useCallback(
 		(items: SubMenuItem[] | undefined, isPro: boolean): SubMenuItem[] | undefined => {
@@ -207,9 +211,6 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				) as boolean;
 				if (!show) {
 					return false;
-				}
-				if (!isProActive) {
-					return true;
 				}
 				const moduleSlug =
 					item.requiresModule ?? PATH_TO_MODULE[item.path];
@@ -326,6 +327,27 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					];
 				}
 
+				if (item.path === 'booking') {
+					navItem.subMenu = [
+						{
+							path: 'booking/calendars',
+							label: __('Calendars', 'doublescale'),
+						},
+						{
+							path: 'booking/bookings',
+							label: __('Bookings', 'doublescale'),
+						},
+						{
+							path: 'booking/availability',
+							label: __('Availability', 'doublescale'),
+						},
+						{
+							path: 'booking/settings',
+							label: __('Settings', 'doublescale'),
+						},
+					];
+				}
+
 				if (navItem.subMenu) {
 					const filtered = filterSubMenuByModules(
 						navItem.subMenu,
@@ -343,6 +365,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		canManageAllDeals,
 		isCrmManager,
 		filterSubMenuByModules,
+		modulesTick,
 	]);
 
 	const sectionGroups = useMemo<SectionGroup[]>(() => {
@@ -415,6 +438,26 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 		if (matched) {
 			setSelectedKey(matched.path);
+			// Auto-expand the parent submenu whenever a child route is
+			// active. This keeps the sibling items visible after a hard
+			// refresh on e.g. /booking/calendars and prevents the submenu
+			// from "disappearing" when the user navigates directly to a
+			// child URL from outside the SPA.
+			if (matched.subMenu?.length) {
+				const matchesChild =
+					matched.subMenu.some((sub) => currentPath === sub.path) ||
+					currentPath.startsWith(
+						matched.path.replace(/^\//, '') + '/'
+					);
+				if (matchesChild) {
+					setExpandedSubMenus((prev) => {
+						if (prev.has(matched.path)) return prev;
+						const next = new Set(prev);
+						next.add(matched.path);
+						return next;
+					});
+				}
+			}
 		} else if (currentPath === '') {
 			setSelectedKey(defaultSelectedPath);
 		}
@@ -611,12 +654,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 									type="button"
 									className={`doublescale-navbar__submenu-item ${subActive ? 'doublescale-navbar__submenu-item--active' : ''}`}
 									onClick={() => {
+										// Navigate only — keep the parent
+										// submenu expanded so the sibling
+										// items (Calendar, Bookings,
+										// Availability, Settings under
+										// Booking) remain visible. Users
+										// close the submenu via the parent
+										// chevron, not as a side effect of
+										// navigation.
 										handleNavigation(subItem.path);
-										setExpandedSubMenus((prev) => {
-											const next = new Set(prev);
-											next.delete(item.path);
-											return next;
-										});
 									}}
 								>
 									<span className="doublescale-navbar__submenu-dot" />
@@ -743,12 +789,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 										className={`doublescale-navbar__collapsed-popover-item ${subActive ? 'doublescale-navbar__collapsed-popover-item--active' : ''}`}
 										onClick={(e) => {
 											e.stopPropagation();
+											// In icon-rail mode the popover
+											// itself closes (below) — there's
+											// no expanded submenu to delete.
 											handleNavigation(subItem.path);
-											setExpandedSubMenus((prev) => {
-												const next = new Set(prev);
-												next.delete(collapsedFlyoutItem.path);
-												return next;
-											});
 											cancelFlyoutClose();
 											setCollapsedPopover(null);
 											setCollapsedFlyoutPos(null);

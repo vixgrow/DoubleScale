@@ -268,6 +268,57 @@ final class AdminConfig {
 	}
 
 	/**
+	 * Option key for global SMTP routing (connections, default route, etc.).
+	 * Mirrors {@see \DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth::smtp_routing_option_name()}
+	 * so this works when Pro is not active.
+	 *
+	 * @return string
+	 */
+	private static function get_smtp_routing_option_name() {
+		$email_oauth_class = 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth';
+		if ( class_exists( $email_oauth_class, false ) ) {
+			return call_user_func( array( $email_oauth_class, 'smtp_routing_option_name' ) );
+		}
+		return defined( 'smtp_PLUGIN_FILE' ) ? 'smtp_settings' : 'doublescale_smtp_settings';
+	}
+
+	/**
+	 * Whether an SMTP storage backend exists (standalone SMTP plugin or bundled module).
+	 *
+	 * @return bool
+	 */
+	private static function is_smtp_storage_available() {
+		$email_oauth_class = 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth';
+		if ( class_exists( $email_oauth_class, false ) ) {
+			return (bool) call_user_func( array( $email_oauth_class, 'smtp_oauth_storage_available' ) );
+		}
+		if ( defined( 'smtp_PLUGIN_FILE' ) ) {
+			return true;
+		}
+		// Allow autoload: at admin bootstrap the SMTP module classes may not be loaded yet.
+		if ( class_exists( '\\DoubleScale\\Modules\\Smtp\\Module', true )
+			|| class_exists( '\\DoubleScale\\Modules\\Smtp\\Settings', true ) ) {
+			return true;
+		}
+		// Settings may exist on disk even if classes are not loaded this request.
+		$stored = get_option( 'doublescale_smtp_settings', null );
+		return is_array( $stored );
+	}
+
+	/**
+	 * Admin URL to configure SMTP (DoubleScale in-app or legacy standalone menu).
+	 *
+	 * @return string
+	 */
+	private static function get_smtp_config_admin_url() {
+		if ( defined( 'smtp_PLUGIN_FILE' ) ) {
+			return admin_url( 'admin.php?page=smtp' );
+		}
+		$slug = apply_filters( 'doublescale_admin_menu_slug', 'doublescale' );
+		return admin_url( 'admin.php?page=' . rawurlencode( $slug ) . '&path=smtp%2Fsettings' );
+	}
+
+	/**
 	 * Get smtp connection information
 	 *
 	 * @since 1.8.0
@@ -275,29 +326,23 @@ final class AdminConfig {
 	 * @return array smtp connection info including verified senders
 	 */
 	private static function get_smtp_connection_info() {
-		$email_oauth_class = 'DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth';
-		if ( ! class_exists( $email_oauth_class, false ) ) {
+		if ( ! self::is_smtp_storage_available() ) {
 			return array(
 				'configured' => false,
 				'plugin_url' => admin_url( 'plugin-install.php?s=smtp&tab=search' ),
 			);
 		}
 
-		if ( ! call_user_func( array( $email_oauth_class, 'smtp_oauth_storage_available' ) ) ) {
-			return array(
-				'configured' => false,
-				'plugin_url' => admin_url( 'plugin-install.php?s=smtp&tab=search' ),
-			);
-		}
-
-		$settings    = get_option( call_user_func( array( $email_oauth_class, 'smtp_routing_option_name' ) ), array() );
+		$settings    = get_option( self::get_smtp_routing_option_name(), array() );
 		$connections = isset( $settings['connections'] ) && is_array( $settings['connections'] ) ? $settings['connections'] : array();
+
+		$config_url = self::get_smtp_config_admin_url();
 
 		// If no connections configured
 		if ( empty( $connections ) ) {
 			return array(
 				'configured' => false,
-				'config_url' => admin_url( 'admin.php?page=smtp' ),
+				'config_url' => $config_url,
 			);
 		}
 
@@ -313,10 +358,18 @@ final class AdminConfig {
 			}
 		}
 
+		// Connections exist but no valid From address yet — treat as not configured for the picker.
+		if ( empty( $verified_senders ) ) {
+			return array(
+				'configured' => false,
+				'config_url' => $config_url,
+			);
+		}
+
 		return array(
 			'configured'       => true,
 			'verified_senders' => $verified_senders,
-			'config_url'       => admin_url( 'admin.php?page=smtp' ),
+			'config_url'       => $config_url,
 		);
 	}
 }

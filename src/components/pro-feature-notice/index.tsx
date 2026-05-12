@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
  */
 import './style.scss';
 import config from '@doublescale/config';
-//@ts-ignore
-import proImage from '../../../assets/images/pro_img.png';
+import { AlertCircle } from 'lucide-react';
 import { PremiumIcon, RocketIcon } from '@/components/icons';
 import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
@@ -23,6 +22,7 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
 	upgradeUrl = config.getUrlDoubleScalePro(),
+	features,
 }) => {
 	const {
 		isInstalling,
@@ -55,19 +55,19 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							)}
 						</div>
 					)}
-					{/* {features.length > 0 && (
+					{features && features.length > 0 && (
 						<div className="doublescale-pro-feature-notice__features">
-							<h3>{__('Pro Features Include:', 'doublescale')}</h3>
+							<h3>{__('Pro features include:', 'doublescale')}</h3>
 							<ul>
 								{features.map((feature) => (
 									<li key={feature}>
-										<AlertCircle size={16} className='text-[#458DC7]'/>
+										<AlertCircle size={16} className="text-[#458DC7]" />
 										{feature}
 									</li>
 								))}
 							</ul>
 						</div>
-					)} */}
+					)}
 					<div className="doublescale-pro-feature-notice__actions mt-5">
 						<a
 							href={`${upgradeUrl}#features`}

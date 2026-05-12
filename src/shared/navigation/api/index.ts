@@ -76,9 +76,9 @@ export const registerAdminPage = (id: string, settings: PageSettings) => {
     return;
   }
 
-  if (!adminPagePassesModuleGate(settings)) {
-    return;
-  }
+	if (!settings.alwaysRegister && !adminPagePassesModuleGate(settings)) {
+		return;
+	}
 
   adminPages[id] = settings;
 };

@@ -113,21 +113,38 @@ const getScheduledOnLabel = (date?: string | null) => {
 	return `${localizedDate.format('MMM D, YYYY')} - ${localizedDate.format('h:mm A')}`;
 };
 
-const renderTemplateBody = async (
-	template: CampaignTemplate
+const fetchRenderedTemplateHtml = async (
+	template: CampaignTemplate,
+	fallbackTemplateId?: number
 ): Promise<string> => {
-	if (!template) {
+	if (!template || template.type !== CAMPAIGN_CHANNEL.EMAIL) {
 		return '';
 	}
 
-	if (template.id) {
-		try {
-			const response: any = await apiFetch({
-				path: `/doublescale/v1/templates/${template.id}/render`,
-				method: 'POST',
-			});
+	const emailTemplate = template as EmailTemplate;
+	const fromTemplateId =
+		emailTemplate.id != null &&
+		!Number.isNaN(Number(emailTemplate.id)) &&
+		Number(emailTemplate.id) > 0
+			? Number(emailTemplate.id)
+			: undefined;
+	const fromCampaignId =
+		fallbackTemplateId != null &&
+		!Number.isNaN(Number(fallbackTemplateId)) &&
+		Number(fallbackTemplateId) > 0
+			? Number(fallbackTemplateId)
+			: undefined;
+	const resolvedId = fromTemplateId ?? fromCampaignId;
 
-			if (response?.html) {
+	if (resolvedId) {
+		try {
+			const response = (await apiFetch({
+				path: `/doublescale/v1/templates/${resolvedId}/render`,
+				method: 'POST',
+				data: { merge_tags: {} },
+			})) as { html?: string };
+
+			if (response?.html?.trim()) {
 				return response.html;
 			}
 		} catch (error) {
@@ -136,17 +153,15 @@ const renderTemplateBody = async (
 		}
 	}
 
-	const body = (template as EmailTemplate)?.body ?? '';
-
-	if (typeof body === 'string') {
+	const body = emailTemplate.body;
+	if (typeof body === 'string' && body.trim()) {
 		return body;
 	}
 
-	try {
-		return JSON.stringify(body);
-	} catch {
-		return '';
-	}
+	return `<div class="p-6 text-center text-muted-foreground text-sm" style="font-family:system-ui,sans-serif">${__(
+		'Preview could not be loaded. Use Edit template to open the builder, then save again.',
+		'doublescale'
+	)}</div>`;
 };
 
 const View: React.FC = () => {
@@ -175,7 +190,8 @@ const View: React.FC = () => {
 			}
 
 			setIsRenderingTemplate(true);
-			const html = await renderTemplateBody(template);
+			const fallbackId = campaign?.settings?.template_ids?.[0];
+			const html = await fetchRenderedTemplateHtml(template, fallbackId);
 			if (isMounted) {
 				setRenderedTemplate(html);
 				setIsRenderingTemplate(false);
@@ -187,7 +203,7 @@ const View: React.FC = () => {
 		return () => {
 			isMounted = false;
 		};
-	}, [template, campaign?.id]);
+	}, [template, campaign?.id, campaign?.settings?.template_ids]);
 
 	const handleClose = useCallback(() => {
 		navigate(getToLink('campaigns'));

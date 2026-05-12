@@ -49,6 +49,8 @@ export type ModuleInfo = {
 	label: string;
 	description: string;
 	enabled: boolean;
+	/** Same as `enabled` when present (REST 1.13+). */
+	active?: boolean;
 	is_toggleable: boolean;
 	dependencies: string[];
 };

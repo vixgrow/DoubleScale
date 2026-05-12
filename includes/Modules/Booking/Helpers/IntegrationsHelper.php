@@ -114,13 +114,19 @@ class IntegrationsHelper {
 	 * @return array
 	 */
 	public static function get_default_integrations( $context = 'event' ) {
+		// Apple/Google/Outlook/Zoom integrations are Pro-tier — their icons live in Pro.
+		// On Free-only installs the constant is undefined and the icon URL silently empties.
+		$pro_icons_base = defined( 'DOUBLESCALE_PRO_PLUGIN_URL' )
+			? DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/'
+			: '';
+
 		if ( $context === 'manager' ) {
 			return array(
 
 				'google'             => array(
 					'name'         => 'Google Calendar/Meet',
 					'description'  => 'Google Calendar Integration',
-					'icon'         => DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/' . 'google' . '/icon.svg',
+					'icon'         => $pro_icons_base ? $pro_icons_base . 'google/icon.svg' : '',
 					'is_calendar'  => true,
 					'auth_type'    => 'oauth2',
 					'has_accounts' => true,
@@ -130,7 +136,7 @@ class IntegrationsHelper {
 				'outlook'            => array(
 					'name'         => 'Outlook Calendar/MS Teams Conferencing',
 					'description'  => 'Outlook Calendar Integration',
-					'icon'         => DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/' . 'outlook' . '/icon.svg',
+					'icon'         => $pro_icons_base ? $pro_icons_base . 'outlook/icon.svg' : '',
 					'is_calendar'  => true,
 					'auth_type'    => 'oauth2',
 					'has_accounts' => true,
@@ -139,7 +145,7 @@ class IntegrationsHelper {
 				'zoom'               => array(
 					'name'         => 'Zoom Integration',
 					'description'  => 'Zoom Meeting Integration',
-					'icon'         => DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/' . 'zoom' . '/icon.svg',
+					'icon'         => $pro_icons_base ? $pro_icons_base . 'zoom/icon.svg' : '',
 					'is_calendar'  => false,
 					'auth_type'    => 'basic',
 					'has_accounts' => false,
@@ -148,7 +154,7 @@ class IntegrationsHelper {
 				'apple'              => array(
 					'name'         => 'Apple Calendar',
 					'description'  => 'Apple Calendar Integration',
-					'icon'         => DOUBLESCALE_PRO_PLUGIN_URL . 'assets/booking-icons/' . 'apple' . '/icon.svg',
+					'icon'         => $pro_icons_base ? $pro_icons_base . 'apple/icon.svg' : '',
 					'is_calendar'  => true,
 					'auth_type'    => 'basic',
 					'has_accounts' => true,

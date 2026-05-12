@@ -101,7 +101,22 @@ class BlockRegistry {
 			return '';
 		}
 
-		return $block->render( $props, $contact );
+		try {
+			return (string) $block->render( $props, $contact );
+		} catch ( \Throwable $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log(
+					sprintf(
+						'DoubleScale: skipped email block render (type: %s): %s',
+						is_scalar( $type ) ? (string) $type : '',
+						$e->getMessage()
+					)
+				);
+			}
+
+			return '';
+		}
 	}
 
 	/**

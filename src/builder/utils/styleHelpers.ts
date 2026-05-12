@@ -44,6 +44,22 @@ export const HEADING_CONFIG: Record<string, HeadingConfig> = {
 };
 
 /**
+ * Default font size (px) when the user picks a text style in the email builder.
+ * Matches Pro block editors that reset Font Size on style change.
+ */
+export const TEXT_STYLE_DEFAULT_FONT_SIZES: Record<string, number> = {
+  h1: 36,
+  h2: 30,
+  h3: 24,
+  p: 16,
+  small: 14,
+};
+
+export const getDefaultFontSizeForStyle = (style: string): number => {
+  return TEXT_STYLE_DEFAULT_FONT_SIZES[style] ?? TEXT_STYLE_DEFAULT_FONT_SIZES.p;
+};
+
+/**
  * Get alignment styles for a given alignment value
  */
 export const getAlignmentStyle = (align: string): CSSProperties => {

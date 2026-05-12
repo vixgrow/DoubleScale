@@ -8,6 +8,7 @@ import {
 	getHistory,
 	Routes,
 	Navigate,
+	adminPagePassesModuleGate,
 } from '@doublescale/navigation';
 
 /**
@@ -15,6 +16,7 @@ import {
  */
 import { SlotFillProvider, SnackbarList } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 
 /**
  * External dependencies
@@ -133,12 +135,17 @@ export const Layout = (props) => {
 };
 
 const _PageLayout = () => {
+	const modulesTick = useModulesConfigTick();
+	const visiblePages = Object.values(getAdminPages()).filter(
+		adminPagePassesModuleGate
+	);
+
 	return (
 		<>
 			{/* @ts-ignore */}
 			<HistoryRouter history={getHistory()}>
-				<Routes>
-					{Object.values(getAdminPages()).map((page) => {
+				<Routes key={modulesTick}>
+					{visiblePages.map((page) => {
 						return (
 							<Route
 								key={page.path}

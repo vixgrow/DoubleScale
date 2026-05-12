@@ -41,6 +41,18 @@ final class Module extends AbstractModule {
 		return array( 'core', 'contacts' );
 	}
 
+	/**
+	 * @return array<int, array{0: string, 1: string}>
+	 */
+	public function scheduledHooks(): array {
+		return array(
+			array( 'doublescale_campaigns', 'doublescale_email_campaigns' ),
+			array( 'doublescale_campaigns', 'doublescale_sms_campaigns' ),
+			array( 'doublescale_campaigns', 'doublescale_whatsapp_campaigns' ),
+			array( 'doublescale_campaigns', 'doublescale_email_sequences' ),
+		);
+	}
+
 	public function register( Container $container ): void {
 		$container->singleton(
 			Services\EmailSequencesManager::class,

@@ -258,3 +258,4 @@ export { default as NewCampaignIcon } from './new-campaign';
 export { default as NewDealIcon } from './new-deal';
 export { default as NewFormIcon } from './new-form';
 export { default as PreviewEyeIcon } from './preview-eye';
+export { default as SendEmailIcon } from './send-email';

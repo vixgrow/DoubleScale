@@ -75,6 +75,25 @@ import Campaigns_EmailSequences from '../pages/campaigns';
 import Campaigns from '../pages/campaigns/campaigns';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
 
+const FORMS_PRO_FEATURE_LIST = [
+	__('Drag-and-drop form builder', 'doublescale'),
+	__('Embed forms on any WordPress page or post', 'doublescale'),
+	__('Custom fields and multi-step flows', 'doublescale'),
+	__('Submission notifications and CRM sync', 'doublescale'),
+	__('Spam protection and consent options', 'doublescale'),
+];
+
+/**
+ * The Forms module only registers when Pro is active. Missing slug + default-ON
+ * toggle semantics would otherwise mount the free Forms UI and hit Pro-only REST routes.
+ */
+function isFormsModuleAvailableForEditor(): boolean {
+	return (
+		config.getModules().some((m) => m.slug === 'forms') &&
+		config.isModuleToggleEnabled('forms')
+	);
+}
+
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
 
@@ -384,7 +403,6 @@ registerAdminPage('sales-pipeline', {
 	label: __('Pipelines', 'doublescale'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
-	requiresModule: 'deals',
 });
 
 // Deal Detail - stub registration that Pro plugin will override
@@ -402,7 +420,6 @@ registerAdminPage('deal-detail', {
 	label: __('Deal Details', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
-	requiresModule: 'deals',
 });
 
 registerAdminPage('automations', {
@@ -432,19 +449,41 @@ registerAdminPage('automation-reports', {
 
 registerAdminPage('forms', {
 	path: 'forms',
-	component: () => <Forms />,
+	component: () =>
+		isFormsModuleAvailableForEditor() ? (
+			<Forms />
+		) : (
+			<ProFeatureNotice
+				featureName={__('Forms', 'doublescale')}
+				description={__(
+					'Build and embed contact-capture forms with DoubleScale Pro.',
+					'doublescale'
+				)}
+				features={FORMS_PRO_FEATURE_LIST}
+			/>
+		),
 	label: __('Forms', 'doublescale'),
 	icon: <FormsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
-	requiresModule: 'forms',
 });
 
 registerAdminPage('form', {
 	path: 'forms/:id/:tab?',
-	component: () => <Form />,
+	component: () =>
+		isFormsModuleAvailableForEditor() ? (
+			<Form />
+		) : (
+			<ProFeatureNotice
+				featureName={__('Forms', 'doublescale')}
+				description={__(
+					'Build and embed contact-capture forms with DoubleScale Pro.',
+					'doublescale'
+				)}
+				features={FORMS_PRO_FEATURE_LIST}
+			/>
+		),
 	label: __('Form', 'doublescale'),
 	hidden: true,
-	requiresModule: 'forms',
 });
 
 registerAdminPage('link-triggers', {
@@ -478,6 +517,8 @@ registerAdminPage('smtp', {
 	label: __('SMTP', 'doublescale'),
 	icon: <Mail size={24} />,
 	requiredCapability: ['doublescale_crm_manager'],
+	requiresModule: 'smtp',
+	alwaysRegister: true,
 });
 
 registerAdminPage('templates', {
@@ -535,7 +576,6 @@ registerAdminPage('tasks', {
 	label: __('Tasks', 'doublescale'),
 	icon: <TasksIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
-	requiresModule: 'tasks',
 });
 
 registerAdminPage('analytics-and-reports', {

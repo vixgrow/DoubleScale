@@ -60,6 +60,7 @@ import {
 	PiplelinesIcon,
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
+import { Mail } from 'lucide-react';
 import { RocketIcon } from '@/components/icons';
 import AvatarIcon from '@/components/icons/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -72,7 +73,6 @@ import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
-import { Mail } from 'lucide-react';
 
 const useOnboardingRedirect = () => {
 	const navigate = useNavigate();

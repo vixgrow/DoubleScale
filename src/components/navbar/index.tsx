@@ -114,6 +114,8 @@ const FREE_CORE_PAGE_IDS = new Set([
 /**
  * Maps `registerAdminPage` path (PageSettings.path) to a Pro module slug for
  * sidebar visibility when Pro is active. Paths with no entry are not module-gated.
+ * SMTP (`smtp/:tab?`) is intentionally omitted — it ships in the free plugin and
+ * the SMTP page handles a disabled module in-app.
  */
 const PATH_TO_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
@@ -125,7 +127,6 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'email-sequences': 'campaigns',
 	'analytics-and-reports': 'analytics',
 	integrations: 'integrations',
-	'smtp/:tab?': 'smtp',
 	booking: 'booking',
 	'abandoned-carts': 'campaigns',
 	'ai-hub': 'automations',

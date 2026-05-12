@@ -429,6 +429,26 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 		if (matched) {
 			setSelectedKey(matched.path);
+			// Auto-expand the parent submenu whenever a child route is
+			// active. This keeps the sibling items visible after a hard
+			// refresh on e.g. /booking/calendars and prevents the submenu
+			// from "disappearing" when the user navigates directly to a
+			// child URL from outside the SPA.
+			if (matched.subMenu?.length) {
+				const matchesChild =
+					matched.subMenu.some((sub) => currentPath === sub.path) ||
+					currentPath.startsWith(
+						matched.path.replace(/^\//, '') + '/'
+					);
+				if (matchesChild) {
+					setExpandedSubMenus((prev) => {
+						if (prev.has(matched.path)) return prev;
+						const next = new Set(prev);
+						next.add(matched.path);
+						return next;
+					});
+				}
+			}
 		} else if (currentPath === '') {
 			setSelectedKey(defaultSelectedPath);
 		}
@@ -625,12 +645,15 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 									type="button"
 									className={`doublescale-navbar__submenu-item ${subActive ? 'doublescale-navbar__submenu-item--active' : ''}`}
 									onClick={() => {
+										// Navigate only — keep the parent
+										// submenu expanded so the sibling
+										// items (Calendar, Bookings,
+										// Availability, Settings under
+										// Booking) remain visible. Users
+										// close the submenu via the parent
+										// chevron, not as a side effect of
+										// navigation.
 										handleNavigation(subItem.path);
-										setExpandedSubMenus((prev) => {
-											const next = new Set(prev);
-											next.delete(item.path);
-											return next;
-										});
 									}}
 								>
 									<span className="doublescale-navbar__submenu-dot" />
@@ -757,12 +780,10 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 										className={`doublescale-navbar__collapsed-popover-item ${subActive ? 'doublescale-navbar__collapsed-popover-item--active' : ''}`}
 										onClick={(e) => {
 											e.stopPropagation();
+											// In icon-rail mode the popover
+											// itself closes (below) — there's
+											// no expanded submenu to delete.
 											handleNavigation(subItem.path);
-											setExpandedSubMenus((prev) => {
-												const next = new Set(prev);
-												next.delete(collapsedFlyoutItem.path);
-												return next;
-											});
 											cancelFlyoutClose();
 											setCollapsedPopover(null);
 											setCollapsedFlyoutPos(null);

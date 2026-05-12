@@ -394,8 +394,8 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 
 		// If we have a specific form_id and trigger_id, register field rules for that form only
@@ -500,8 +500,8 @@ class RestAutomationController extends RestController {
 		$trigger_id = $request->get_param( 'trigger_id' );
 		$post_id    = $request->get_param( 'post_id' );
 
-		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 
 		// If we have a specific form_id and trigger_id, register merge tags for that form only
@@ -683,11 +683,11 @@ class RestAutomationController extends RestController {
 			$is_form = false;
 			$trigger = TriggersManager::instance()->get_trigger( $automation->trigger );
 			if ( empty( $trigger ) ) {
-				if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+				if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
 					$automation->delete();
 					throw new \Exception( 'Trigger not found.' );
 				}
-				$form = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger );
+				$form = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger );
 				if ( empty( $form ) ) {
 					$automation->delete();
 					throw new \Exception( 'Trigger not found.' );
@@ -834,8 +834,8 @@ class RestAutomationController extends RestController {
 			};
 
 			if ( empty( $trigger ) ) {
-				$form = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
-					? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger )
+				$form = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
+					? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $automation->trigger )
 					: null;
 
 				if ( ! empty( $form ) && ! empty( $form->is_pro ) && $form->is_pro ) {
@@ -1364,8 +1364,8 @@ class RestAutomationController extends RestController {
 		);
 
 		// set forms
-		$forms = class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' )
-			? \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
+		$forms = class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
+			? \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms()
 			: array();
 		foreach ( $forms as $form ) {
 			$plugin_dependencies[ $form->slug ] = array(

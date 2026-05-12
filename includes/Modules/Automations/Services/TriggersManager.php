@@ -329,10 +329,10 @@ final class TriggersManager {
 	 * @return void
 	 */
 	public function set_forms_sources() {
-		if ( ! class_exists( '\DoubleScale\Modules\Forms\Services\FormsManager' ) ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
 			return;
 		}
-		$forms = \DoubleScale\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 
 		foreach ( $forms as $form ) {
 			$this->sources['forms']['groups'][ $form->slug ] = array(

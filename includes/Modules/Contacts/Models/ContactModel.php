@@ -305,10 +305,10 @@ class ContactModel extends Model
 	 */
 	public function form_submissions()
 	{
-		if ( ! class_exists( '\DoubleScale\Modules\Forms\Models\FormSubmissionModel' ) ) {
+		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Models\FormSubmissionModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
-		return $this->hasMany( \DoubleScale\Modules\Forms\Models\FormSubmissionModel::class, 'contact_id', 'id' );
+		return $this->hasMany( \DoubleScale\Pro\Modules\Forms\Models\FormSubmissionModel::class, 'contact_id', 'id' );
 	}
 
 	/**

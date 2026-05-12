@@ -207,9 +207,9 @@ final class Module extends AbstractModule {
 			}
 		}
 
-		if ( ! get_option( 'doublescale_booking_caps_assigned_v2' ) ) {
+		if ( ! get_option( 'doublescale_booking_caps_assigned' ) ) {
 			Capabilities::assign_capabilities_for_user_roles();
-			update_option( 'doublescale_booking_caps_assigned_v2', true );
+			update_option( 'doublescale_booking_caps_assigned', true );
 		}
 
 		$this->register_provisioner_hooks( $container );
@@ -245,7 +245,7 @@ final class Module extends AbstractModule {
 	 */
 	private function register_provisioner_hooks( Container $container ): void {
 		// One-shot bulk provisioning for existing users.
-		if ( ! get_option( 'doublescale_booking_provisioned_v1' ) ) {
+		if ( ! get_option( 'doublescale_booking_provisioned' ) ) {
 			$provisioner = $container->get( Services\BookingProvisioner::class );
 
 			$users = get_users(
@@ -264,7 +264,7 @@ final class Module extends AbstractModule {
 				$provisioner->ensure_host_calendar( (int) $user->ID );
 			}
 
-			update_option( 'doublescale_booking_provisioned_v1', true );
+			update_option( 'doublescale_booking_provisioned', true );
 		}
 
 		$resolve = static function () use ( $container ): Services\BookingProvisioner {

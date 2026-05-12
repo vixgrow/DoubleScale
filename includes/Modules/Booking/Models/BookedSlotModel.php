@@ -6,7 +6,7 @@ use WPEloquent\Eloquent\Model;
 
 class BookedSlotModel extends Model {
 
-	protected $table = 'doublescale_booked_slots';
+	protected $table = 'doublescale_booking_booked_slots';
 
 	protected $primary_key = 'id';
 
@@ -64,7 +64,7 @@ class BookedSlotModel extends Model {
 	public static function has_overlap( $calendar_id, $start, $end ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_booked_slots';
+		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -86,7 +86,7 @@ class BookedSlotModel extends Model {
 	public static function count_overlaps( $calendar_id, $start, $end ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_booked_slots';
+		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(

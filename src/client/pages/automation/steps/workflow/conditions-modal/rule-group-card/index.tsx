@@ -95,7 +95,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 
 	return (
 		<Card
-			className={`shadow-none ${rules.length > 1 ? 'ml-16' : 'w-full'}`}
+			className={`shadow-none ${rules.length > 1 ? 'ml-[2.2rem]' : 'w-full'}`}
 		>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">
@@ -108,15 +108,15 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 								height: bracketStyle.height,
 							}}
 						>
-							<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
-							<span className="absolute -left-7 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
+							<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl"></div>
+							<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full">
 								{__('And', 'doublescale')}
 							</span>
 						</div>
 					)}
 					<div
 						ref={containerRef}
-						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'pl-14' : ''}`}
+						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'pl-8' : ''}`}
 					>
 						{map(ruleGroup, (rule, ruleIndex) => (
 							<div
@@ -300,7 +300,8 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 							});
 							onRulesChange(newRules);
 						}}
-						className="text-[#414141] bg-[#CECECE] border border-[#D3D3D3] rounded-md p-0 px-2 shadow-none hover:bg-transparent font-semibold"
+						variant="secondary"
+						className=""
 					>
 						<PlusIcon />
 						{__('Add another condition (And)', 'doublescale')}

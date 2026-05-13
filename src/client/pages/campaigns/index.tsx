@@ -1,5 +1,5 @@
 import Campaigns from './campaigns';
-import EmailSequences from '../email-sequences';
+import EmailSequences from '@doublescale/email-sequences-page';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 
 const Campaigns_EmailSequences: React.FC<{ path: string }> = ({ path }) => {

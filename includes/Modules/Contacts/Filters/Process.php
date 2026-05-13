@@ -90,11 +90,15 @@ class Process {
 			return $this->filter_list_tag_format();
 		}
 
+		// Contacts UI sends a flat list of rows: [ { filter, group, ... }, ... ].
+		// This class expects OR-of-ANDs: [ andGroup1, andGroup2, ... ] where each group is a 0..n indexed list of rows.
+		$filters_tree = $this->normalize_or_group_structure( $this->filters );
+
 		// Standard nested format: OR groups with AND conditions
 		$or_groups = array();
 
 		// Process each OR group (each inner array is an AND group)
-		foreach ( $this->filters as $and_group ) {
+		foreach ( $filters_tree as $and_group ) {
 			if ( ! is_array( $and_group ) || empty( $and_group ) ) {
 				continue;
 			}
@@ -324,13 +328,14 @@ class Process {
 			return $query;
 		}
 
-		// Handle RuleItem format (from RulesBuilder): convert to Filter format
-		// RuleItem has: rule, operator, value, selectedGroup
+		// Handle RuleItem format (from RulesBuilder / REST): convert to Filter format
+		// RuleItem has: rule, operator, value, selectedGroup (or legacy "group")
 		// Filter needs: filter, group, operator, value
-		if ( isset( $filter['rule'] ) && isset( $filter['selectedGroup'] ) ) {
+		if ( isset( $filter['rule'] ) && ( isset( $filter['selectedGroup'] ) || isset( $filter['group'] ) ) ) {
+			$group = isset( $filter['selectedGroup'] ) ? $filter['selectedGroup'] : $filter['group'];
 			$filter = array(
 				'filter'   => $filter['rule'],
-				'group'    => $filter['selectedGroup'],
+				'group'    => $group,
 				'operator' => isset( $filter['operator'] ) ? $filter['operator'] : 'is',
 				'value'    => isset( $filter['value'] ) ? $filter['value'] : '',
 			);
@@ -376,5 +381,65 @@ class Process {
 		}
 
 		return $result_query;
+	}
+
+	/**
+	 * Normalize flat filter lists from the REST/UI into OR-grouped AND arrays.
+	 *
+	 * @param array $filters Top-level filters payload.
+	 * @return array<int, array<int, array<string, mixed>>>
+	 */
+	private function normalize_or_group_structure( array $filters ): array {
+		if ( empty( $filters ) ) {
+			return $filters;
+		}
+
+		$first = reset( $filters );
+		if ( ! is_array( $first ) ) {
+			return $filters;
+		}
+
+		// Already OR-nested: each OR branch is a 0..n list of filter rows.
+		if ( $this->is_sequential_filter_rows( $first ) ) {
+			return $filters;
+		}
+
+		// Flat list of filter rows: treat as a single AND group (one OR branch).
+		if ( $this->is_sequential_filter_rows( $filters ) ) {
+			return array( $filters );
+		}
+
+		return $filters;
+	}
+
+	/**
+	 * Whether $arr is a 0..length-1 indexed list of filter / list-tag / rule rows.
+	 *
+	 * @param array $arr Candidate AND-group array.
+	 */
+	private function is_sequential_filter_rows( array $arr ): bool {
+		if ( empty( $arr ) ) {
+			return false;
+		}
+
+		$i = 0;
+		foreach ( $arr as $k => $row ) {
+			if ( $k !== $i++ ) {
+				return false;
+			}
+			if ( ! is_array( $row ) ) {
+				return false;
+			}
+			if ( isset( $row['filter'] ) || isset( $row['rule'] ) ) {
+				continue;
+			}
+			if ( isset( $row['list'] ) || isset( $row['tag'] ) ) {
+				continue;
+			}
+
+			return false;
+		}
+
+		return true;
 	}
 }

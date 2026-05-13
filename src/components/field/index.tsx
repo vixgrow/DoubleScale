@@ -338,10 +338,11 @@ const Field: React.FC<FieldProps> = ({
 					className="react-select-container bg-white"
 					classNamePrefix="react-select"
 					value={
-						value
+						value !== null && value !== undefined && value !== ''
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) =>
+										String(option.value) === String(value)
+								)
 							: null
 					}
 					onChange={(value) => {

@@ -32,11 +32,13 @@ const DialogContent = React.forwardRef<
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
 		removePortal?: boolean;
 		hideCloseButton?: boolean;
+		/** Merged into `DialogOverlay` (e.g. `z-[160010]` when opening over fullscreen shells). */
+		overlayClassName?: string;
 	}
->(({ className, children, removePortal, hideCloseButton, ...props }, ref) => {
+>(({ className, children, removePortal, hideCloseButton, overlayClassName, ...props }, ref) => {
 	const content = (
 		<>
-			<DialogOverlay />
+			<DialogOverlay className={overlayClassName} />
 			<DialogPrimitive.Content
 				ref={ref}
 				aria-describedby={undefined}

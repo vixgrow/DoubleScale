@@ -72,7 +72,7 @@ import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import Campaigns from '../pages/campaigns/campaigns';
-import SequencesMail from '../pages/email-sequences/sequences-mail';
+import EmailSequencesUpgradeNag from '../pages/email-sequences-upgrade';
 
 const FORMS_PRO_FEATURE_LIST = [
 	__('Drag-and-drop form builder', 'doublescale'),
@@ -345,7 +345,7 @@ registerAdminPage('campaign', {
 
 registerAdminPage('email-sequences', {
 	path: 'email-sequences',
-	component: () => <Campaigns_EmailSequences path="email-sequences" />,
+	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequences', 'doublescale'),
 	icon: <EmailSequenceIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
@@ -355,14 +355,7 @@ registerAdminPage('email-sequences', {
 
 registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
-	component: (props) => (
-		<SequencesMail
-			{...(props as {
-				navigate: (path: string) => void;
-				params: Record<string, string>;
-			})}
-		/>
-	),
+	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequence', 'doublescale'),
 	hidden: true,
 	requiresModule: 'campaigns',

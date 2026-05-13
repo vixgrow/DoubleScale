@@ -214,7 +214,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 							// Add data attribute to help Radix UI dialogs ignore this element
 							data-state="open"
 							data-builder-portal="true"
-							role="dialog"
+							role="application"
 							aria-modal="true"
 							aria-label="Email Template Builder"
 							// Inline styles required for portal z-index layering

@@ -101,11 +101,12 @@ class ConditionEvaluator {
 	 * @return bool True if condition matches
 	 */
 	public function evaluate_single_condition( array $condition, ContactModel $contact ) {
-		// Handle RuleItem format (from RulesBuilder)
-		if ( isset( $condition['rule'] ) && isset( $condition['selectedGroup'] ) ) {
+		// Handle RuleItem format (from RulesBuilder / REST): rule + selectedGroup or legacy "group"
+		if ( isset( $condition['rule'] ) && ( isset( $condition['selectedGroup'] ) || isset( $condition['group'] ) ) ) {
+			$group = isset( $condition['selectedGroup'] ) ? $condition['selectedGroup'] : $condition['group'];
 			$condition = array(
 				'filter'   => $condition['rule'],
-				'group'    => $condition['selectedGroup'],
+				'group'    => $group,
 				'operator' => $condition['operator'] ?? 'is',
 				'value'    => $condition['value'] ?? '',
 			);
@@ -189,9 +190,21 @@ class ConditionEvaluator {
 
 			// Lead scoring filters
 			case 'lead_score_points':
+				if ( ! class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true ) ) {
+					return false;
+				}
+				if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'leadscoring' ) ) {
+					return false;
+				}
 				return $this->evaluate_lead_score_points_condition( $contact, $operator, $value );
 
 			case 'lead_score_level':
+				if ( ! class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true ) ) {
+					return false;
+				}
+				if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'leadscoring' ) ) {
+					return false;
+				}
 				return $this->evaluate_lead_score_level_condition( $contact, $operator, $value );
 
 			// For complex filters that can't be evaluated in-memory, fall back to database query
@@ -507,9 +520,9 @@ class ConditionEvaluator {
 	 * @return bool
 	 */
 	public function evaluate_lead_score_points_condition( ContactModel $contact, $operator, $value ) {
-		// Get the lead score points from contact meta
 		$contact_points = (int) $contact->getMeta( 'lead_score_points', 0 );
-		$check_value    = (int) $value;
+		$check_value    = (int) $this->unwrap_rule_scalar_value( $value );
+		$operator       = $this->normalize_numeric_comparison_operator( (string) $operator );
 
 		switch ( $operator ) {
 			case 'is':
@@ -524,6 +537,13 @@ class ConditionEvaluator {
 			case 'lower_than':
 			case 'less_than':
 				return $contact_points < $check_value;
+
+			case 'greater_than_or_equal':
+				return $contact_points >= $check_value;
+
+			case 'lower_than_or_equal':
+			case 'less_than_or_equal':
+				return $contact_points <= $check_value;
 
 			default:
 				return false;
@@ -542,35 +562,116 @@ class ConditionEvaluator {
 	 * @return bool
 	 */
 	public function evaluate_lead_score_level_condition( ContactModel $contact, $operator, $value ) {
-		// Get the lead score level from contact meta
-		$contact_level = $contact->getMeta( 'lead_score_level_id', '' );
+		$value    = $this->unwrap_rule_scalar_value( $value );
+		$operator = (string) $operator;
+		$op_map   = array(
+			'equals'     => 'is',
+			'='          => 'is',
+			'not_equals' => 'is_not',
+			'!='         => 'is_not',
+		);
+		if ( isset( $op_map[ $operator ] ) ) {
+			$operator = $op_map[ $operator ];
+		}
+
+		$raw_level = $contact->getMeta( 'lead_score_level_id', '' );
+		// Meta may be int, string, or empty
+		$contact_level = ( null === $raw_level || false === $raw_level || '' === $raw_level )
+			? ''
+			: (string) (int) $raw_level;
 
 		// Handle is_empty/is_not_empty operators first
 		switch ( $operator ) {
 			case 'is_empty':
-				return empty( $contact_level );
+				return '' === $contact_level;
 
 			case 'is_not_empty':
-				return ! empty( $contact_level );
-		}
-
-		// For other operators, we need a value
-		if ( empty( $value ) ) {
-			return false;
+				return '' !== $contact_level;
 		}
 
 		$check_levels = is_array( $value ) ? $value : array( $value );
 
+		// Normalize to level IDs (meta stores ID; legacy saved rules may use slug)
+		$check_ids = array();
+		foreach ( $check_levels as $v ) {
+			$v = $this->unwrap_rule_scalar_value( $v );
+			if ( null === $v || '' === $v ) {
+				continue;
+			}
+			if ( is_numeric( $v ) ) {
+				$check_ids[] = (string) (int) $v;
+				continue;
+			}
+			if ( class_exists( '\DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel' ) ) {
+				$by_slug = \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::get_by_slug( (string) $v );
+				if ( $by_slug ) {
+					$check_ids[] = (string) (int) $by_slug->id;
+				}
+			}
+		}
+
+		if ( empty( $check_ids ) ) {
+			return false;
+		}
+
 		switch ( $operator ) {
 			case 'is':
-				return in_array( $contact_level, $check_levels, false );
+			case 'equals':
+			case '=':
+				return in_array( $contact_level, $check_ids, true );
 
 			case 'is_not':
-				return ! in_array( $contact_level, $check_levels, false );
+			case 'not_equals':
+			case '!=':
+				return ! in_array( $contact_level, $check_ids, true );
 
 			default:
 				return false;
 		}
+	}
+
+	/**
+	 * Unwrap values produced by some UIs / JSON (e.g. { "value": 13 }).
+	 *
+	 * @param mixed $value Raw condition value.
+	 * @return mixed
+	 */
+	private function unwrap_rule_scalar_value( $value ) {
+		if ( is_array( $value ) ) {
+			if ( array_key_exists( 'value', $value ) ) {
+				return $this->unwrap_rule_scalar_value( $value['value'] );
+			}
+		}
+		if ( is_object( $value ) && isset( $value->value ) ) {
+			return $this->unwrap_rule_scalar_value( $value->value );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Map common operator aliases to lead-score numeric operators.
+	 *
+	 * @param string $operator Raw operator slug.
+	 * @return string
+	 */
+	private function normalize_numeric_comparison_operator( string $operator ): string {
+		static $map = array(
+			'equals'     => 'is',
+			'='          => 'is',
+			'not_equals' => 'is_not',
+			'!='         => 'is_not',
+			'gt'         => 'greater_than',
+			'lt'         => 'lower_than',
+			'gte'        => 'greater_than_or_equal',
+			'ge'         => 'greater_than_or_equal',
+			'>='         => 'greater_than_or_equal',
+			'lte'        => 'lower_than_or_equal',
+			'le'         => 'lower_than_or_equal',
+			'<='         => 'lower_than_or_equal',
+		);
+
+		return $map[ $operator ] ?? $operator;
 	}
 
 	/**

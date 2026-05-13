@@ -84,5 +84,35 @@ final class Module extends AbstractModule {
 			array( 'includes/Modules/Contacts/Filters/*/*.php' ),
 			'contacts-filters'
 		);
+
+		/**
+		 * Register the form-submission contact filter after the full kernel boot.
+		 *
+		 * The filter class file loads with the glob above, but registration must depend on the
+		 * Pro `forms` module being active. Doing this on {@see 'doublescale_loaded'} guarantees
+		 * module registry + enabled flags are final before {@see \DoubleScale\Admin\AdminConfig}
+		 * reads {@see FiltersManager::get_groups()} on admin pages.
+		 */
+		add_action(
+			'doublescale_loaded',
+			static function (): void {
+				if ( ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'forms' ) ) {
+					return;
+				}
+				if ( ! class_exists( Filters\Submission\FormSubmission::class, true ) ) {
+					return;
+				}
+				$mgr = Filters\FiltersManager::instance();
+				if ( array_key_exists( 'form_submission', $mgr->get_filters() ) ) {
+					return;
+				}
+				try {
+					$mgr->register( new Filters\Submission\FormSubmission() );
+				} catch ( \Throwable $e ) {
+					// Duplicate registration or invalid state — do not break bootstrap.
+				}
+			},
+			20
+		);
 	}
 }

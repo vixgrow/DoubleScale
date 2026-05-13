@@ -25,7 +25,6 @@ final class ModuleManager {
 		'campaigns'       => array(
 			array( 'doublescale_campaigns', 'doublescale_email_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_whatsapp_campaigns' ),
-			array( 'doublescale_campaigns', 'doublescale_email_sequences' ),
 		),
 		'websitetracking' => array(
 			array( 'doublescale_daily', 'doublescale_cleanup_page_visits' ),

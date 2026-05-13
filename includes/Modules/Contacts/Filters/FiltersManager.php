@@ -104,6 +104,10 @@ final class FiltersManager {
 				'name'    => __( 'Activity', 'doublescale'),
 				'filters' => array(),
 			),
+			'submission'     => array(
+				'name'    => __( 'Submission', 'doublescale'),
+				'filters' => array(),
+			),
 		);
 	}
 

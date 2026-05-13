@@ -7,7 +7,6 @@
     "RestAutomationStepController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationStepController",
     "RestCampaignController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestCampaignController",
     "RestContactController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestContactController",
-    "RestEmailSequenceController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestEmailSequenceController",
     "RestGeneralController": "DoubleScale\\Core\\Rest\\Controllers\\RestGeneralController",
     "RestImportExportController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestImportExportController",
     "RestLinkTriggerController": "DoubleScale\\Modules\\Tracking\\Rest\\Controllers\\RestLinkTriggerController",

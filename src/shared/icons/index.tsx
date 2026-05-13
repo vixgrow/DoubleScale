@@ -263,3 +263,5 @@ export { default as CampaignIcon } from './campaigns';
 export { default as BookingIcon } from './booking';
 export { default as PipelineIcon } from './pipeline';
 export { default as TaskIcon } from './task';
+export { default as ImportIcon } from './import';
+export { default as CheckTrueIcon } from './check-true';

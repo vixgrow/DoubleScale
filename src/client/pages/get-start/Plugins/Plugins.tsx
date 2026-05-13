@@ -1,37 +1,30 @@
 /**
  * WordPress dependencies
  */
-
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
 //@ts-ignore
 import QuillForms from '@doublescale/assets/images/plugin-start/QuillForms.png';
-/**
- * External dependencies
- */
-
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion';
+//@ts-ignore
+import pluginMarketingIllustration from '@doublescale/assets/images/plugin-ass.png';
 import { Button } from '@/components/ui/button';
-import OptionalPluginIcon from '@doublescale/shared/icons/optional-icon';
-import ButtonComponent from '../component/button';
 import { Input } from '@/components/ui/input';
-import { PluginsLoadingSkeleton } from './Plugin-Skeleton';
+import { Label } from '@/components/ui/label';
+import { PluginGridSkeleton } from './Plugin-Skeleton';
 
 interface Plugin {
 	id: string;
 	name: string;
-	// icon: React.ReactNode;
 	icon: string;
 	description: string;
-	pluginFile?: string; // WordPress plugin file path (e.g., 'doublescale/doublescale.php')
-	downloadUrl?: string; // WordPress.org zip URL
+	pluginFile?: string;
+	downloadUrl?: string;
 	isInstalled?: boolean;
 	isActive?: boolean;
 }
@@ -72,39 +65,41 @@ function PluginCard({ plugin, onAction, isProcessing }: PluginCardProps) {
 	}
 
 	return (
-		<div className="flex items-start justify-between gap-4 p-4 border border-border/60 bg-muted/50 rounded-2xl">
-			<div className="flex flex-col items-start gap-3 flex-1">
-				<div className="flex justify-between items-center w-full">
-					<div className="flex gap-1 flex-1">
-						{/* {plugin.icon} */}
-						<img src={plugin.icon} alt={plugin.name} />
-						<h4 className="text-xl font-medium leading-[30px] text-foreground">
-							{plugin.name}
-						</h4>
-					</div>
-
-					{actionType === 'active' ? (
-						<span className="text-xs font-medium leading-[26px] text-[#10B981]">
-							{__('Activated', 'doublescale')}
-						</span>
-					) : (
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => onAction(plugin)}
-							className="flex-shrink-0 border-primary text-primary hover:bg-primary/5"
-							disabled={isProcessing}
-						>
-							{isProcessing
-								? __('Processing...', 'doublescale')
-								: actionText}
-						</Button>
-					)}
-				</div>
-
-				<p className="text-lg leading-7 text-muted-foreground mt-1">
-					{plugin.description}
-				</p>
+		<div
+			className="group flex w-full flex-col gap-2 items-center rounded-xl border border-border bg-white p-6 text-center shadow-sm transition-all hover:border-brandPrimary hover:text-brandPrimary"
+		>
+			
+			<img
+				src={plugin.icon}
+				alt=""
+				className="h-12 w-12 object-contain"
+				width={48}
+				height={48}
+			/>
+			<h4 className="text-lg font-semibold leading-[30px] text-foreground">
+				{plugin.name}
+			</h4>
+			<p className=" text-base font-medium leading-7 text-muted-foreground">
+				{plugin.description}
+			</p>
+			<div className="mt-2 w-full pt-2">
+				{actionType === 'active' ? (
+					<span className="text-sm font-medium text-[#16A34A]">
+						{__('Activated', 'doublescale')}
+					</span>
+				) : (
+					<Button
+						type="button"
+						variant="outline"
+						className="w-full border-brandPrimary text-brandPrimary hover:bg-brandPrimary/5"
+						onClick={() => onAction(plugin)}
+						disabled={isProcessing}
+					>
+						{isProcessing
+							? __('Processing...', 'doublescale')
+							: actionText}
+					</Button>
+				)}
 			</div>
 		</div>
 	);
@@ -117,7 +112,7 @@ interface PluginCompleteProps {
 }
 
 export default function PluginComplete({
-	onSkip,
+	onSkip: _onSkip,
 	onPrevious,
 	onNext,
 }: PluginCompleteProps) {
@@ -128,7 +123,6 @@ export default function PluginComplete({
 	const [isProcessing, setIsProcessing] = useState<string | null>(null);
 	const [email, setEmail] = useState('');
 
-	// Check plugin status on mount
 	useEffect(() => {
 		const checkPluginStatus = async () => {
 			setIsLoading(true);
@@ -191,6 +185,7 @@ export default function PluginComplete({
 
 	const handlePluginAction = async (plugin: Plugin) => {
 		if (!plugin.pluginFile) {
+			// eslint-disable-next-line no-console
 			console.warn(`Plugin file not defined for ${plugin.name}`);
 			createNotice({
 				type: 'error',
@@ -229,17 +224,21 @@ export default function PluginComplete({
 					},
 				});
 			} else {
-				// Already active; nothing to do.
 				setIsProcessing(null);
 				return;
 			}
 
 			createNotice({
 				type: 'success',
-				message: __(`Plugin ${action}d successfully`, 'doublescale'),
+				message: sprintf(
+					/* translators: %s: "installed" or "activated" */
+					__('Plugin %s successfully', 'doublescale'),
+					action === 'install'
+						? __('installed', 'doublescale')
+						: __('activated', 'doublescale')
+				),
 			});
 
-			// Refresh plugin status after action.
 			const pluginFiles = [...OptionalPlugins]
 				.map((p) => p.pluginFile)
 				.filter((file): file is string => Boolean(file))
@@ -295,103 +294,106 @@ export default function PluginComplete({
 		}
 	};
 
+	const isBusy = Boolean(isProcessing) || isLoading;
+
 	return (
-		<div className="flex flex-col gap-8">
-			<div>
-				<h3 className="text-foreground text-2xl font-semibold mb-1">
+		<div className="flex min-h-0 flex-1 flex-col ">
+			<div className="shrink-0 pb-6">
+				<h3 className="mb-2.5 text-2xl font-bold leading-9 text-foreground">
 					{__(
-						'Optional Plugins',
+						'Install CRM Plugins—Power Up Your Workflow with Smart Tools',
 						'doublescale'
 					)}
 				</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
+				<p className="text-base font-medium leading-7 text-muted-foreground">
 					{__(
-						'Enhance your CRM experience with optional Quill Booking and Quill Forms integrations.',
+						'Add complementary plugins to extend forms, bookings, and automation—so your CRM works seamlessly with the rest of your marketing stack.',
 						'doublescale'
 					)}
 				</p>
 			</div>
 
-			{isLoading ? (
-				<div className="text-center py-12">
-					<p className="text-muted-foreground text-lg">
-						<PluginsLoadingSkeleton />
-					</p>
+			<div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+				{isLoading ? (
+					<PluginGridSkeleton />
+				) : (
+					<div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3 mb-6">
+						{optionalPlugins.map((plugin) => (
+							<PluginCard
+								key={plugin.id}
+								plugin={plugin}
+								onAction={handlePluginAction}
+								isProcessing={isProcessing === plugin.id}
+							/>
+						))}
+					</div>
+				)}
+
+				<div className="flex w-full flex-col gap-4 rounded-xl border-2 border-dashed border-[#0D9DFC] bg-[rgba(217,233,243,0.7)] p-6">
+					<div className="flex flex-wrap items-center justify-center gap-2">
+						<img
+							src={pluginMarketingIllustration}
+							alt=""
+							
+							className=" shrink-0 object-contain"
+							decoding="async"
+						/>
+						<p className=" text-center text-lg font-semibold leading-[30px] text-foreground">
+							{__(
+								'We will send marketing tips and advanced usage of Quill CRM',
+								'doublescale'
+							)}
+						</p>
+						<img
+							src={pluginMarketingIllustration}
+							alt=""
+							
+							className=" shrink-0 object-contain"
+							decoding="async"
+						/>
+					</div>
+					<div className="w-full">
+						<Label
+							htmlFor="plugin-opt-in-email"
+							className="mb-2  block py-0 text-left text-sm font-medium leading-6"
+						>
+							{__('Email', 'doublescale')}
+							<span className="text-destructive">*</span>
+						</Label>
+						<Input
+							id="plugin-opt-in-email"
+							type="email"
+							autoComplete="email"
+							placeholder={__('Email', 'doublescale')}
+							value={email}
+							onChange={(event) => setEmail(event.target.value)}
+							className="w-full !rounded-lg border !border-border bg-white p-3 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-brandPrimary focus-visible:ring-brandPrimary"
+						/>
+					</div>
 				</div>
-			) : (
-				<Accordion
-					type="multiple"
-					defaultValue={['optional']}
-					className="grid grid-cols-1 gap-12"
-				>
-					<AccordionItem
-						value="optional"
-						className="border border-border/60 rounded-lg shadow-sm flex flex-col gap-4"
+			</div>
+
+			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
+				<div className="flex flex-wrap items-center justify-end gap-6">
+					<Button
+						type="button"
+						size="lg"
+						variant="secondaryDeepBlue"
+						onClick={onPrevious}
+						disabled={isBusy}
 					>
-						<AccordionTrigger className="px-4 py-3 bg-muted/50 hover:no-underline border-b border-border/60">
-							<div className="flex items-center gap-2">
-								<OptionalPluginIcon />
-								<span className="text-lg font-medium leading-7 text-foreground">
-									{__('Optional Plugins', 'doublescale')}
-								</span>
-							</div>
-						</AccordionTrigger>
-						<AccordionContent className="px-4 pb-3">
-							<div className="flex flex-col gap-4">
-								{optionalPlugins.map((plugin) => (
-									<PluginCard
-										key={plugin.id}
-										plugin={plugin}
-										onAction={handlePluginAction}
-										isProcessing={
-											isProcessing === plugin.id
-										}
-									/>
-								))}
-							</div>
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>
-			)}
-
-			<div className="border-t border-border/40" />
-
-			{/* Email Subscription */}
-
-			{/* <div className=" !p-0 !m-0">
-				<label className="text-base leading-6 text-foreground block mb-[2px]">
-					{__('Email Address', 'doublescale')}
-				</label>
-
-				<Input
-					type="email"
-					placeholder={__('Email Address', 'doublescale')}
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
-					className="w-full border !border-border/60 rounded-lg h-12 py-[5px] px-4 !m-0"
-				/>
-
-				<p className="text-xs text-[#CB5301] font-semibold leading-[26px] !m-0">
-					{__(
-						'We will send marketing tips and advanced usage of DoubleScale',
-						'doublescale'
-					)}
-				</p>
-			</div> */}
-
-			<div className="flex justify-between pt-6">
-				<div className="flex gap-2">
-					<ButtonComponent onClick={onPrevious} type="">
-						{__('Previous', 'doublescale')}
-					</ButtonComponent>
-
-					<ButtonComponent type="no" onClick={onSkip}>
-						{__('Skip →', 'doublescale')}
-					</ButtonComponent>
+						{__('Back', 'doublescale')}
+					</Button>
+					<Button
+						type="button"
+						size="lg"
+						variant="default"
+						onClick={onNext}
+						disabled={isBusy}
+					>
+						{__('Complete installation', 'doublescale')}
+					</Button>
 				</div>
-				<ButtonComponent type="go" onClick={onNext}>
-					{__('Next Step', 'doublescale')}
-				</ButtonComponent>
 			</div>
 		</div>
 	);

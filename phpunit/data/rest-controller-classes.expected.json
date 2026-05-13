@@ -7,7 +7,6 @@
     "RestAutomationStepController",
     "RestCampaignController",
     "RestContactController",
-    "RestEmailSequenceController",
     "RestGeneralController",
     "RestImportExportController",
     "RestLinkTriggerController",

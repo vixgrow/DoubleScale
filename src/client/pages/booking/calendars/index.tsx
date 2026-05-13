@@ -596,7 +596,7 @@ const Calendars: React.FC = () => {
 												className="bg-[#FDFDFD] mb-4"
 											><CardContent>
 													<div className='flex flex-col gap-5'>
-														<Card className="bg-white"><CardContent>
+														<Card className="bg-white"><CardContent className="py-5">
 															<div className='flex justify-between items-center'>
 																<div className='flex flex-col'>
 																	<div className="text-[#313131] text-base font-semibold">

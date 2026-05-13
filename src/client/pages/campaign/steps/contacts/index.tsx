@@ -212,7 +212,7 @@ const Contacts: React.FC = () => {
 		>
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-					<div className="">
+					<div className="lg:w-1/6">
 						{!(
 							campaign?.status === 'processed' ||
 							campaign?.status === 'archived'

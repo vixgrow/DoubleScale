@@ -499,24 +499,29 @@ class RestContactController extends RestController {
 			)
 		);
 
-		// Get lead score
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/lead-score',
-			array(
+		// Get lead score (Pro feature; omit route when unavailable or module disabled).
+		// Must autoload (true): Pro registers the legacy FQCN via Aliases spl autoload, not at parse time.
+		if ( class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true )
+			&& function_exists( 'doublescale_is_module_active' )
+			&& doublescale_is_module_active( 'leadscoring' ) ) {
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . '/(?P<id>\d+)/lead-score',
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_lead_score'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
-					'args'                => array(
-						'id' => array(
-							'description' => __('Contact ID.', 'doublescale'),
-							'type'        => 'integer',
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array($this, 'get_lead_score'),
+						'permission_callback' => array($this, 'get_item_permissions_check'),
+						'args'                => array(
+							'id' => array(
+								'description' => __('Contact ID.', 'doublescale'),
+								'type'        => 'integer',
+							),
 						),
 					),
-				),
-			)
-		);
+				)
+			);
+		}
 	}
 
 	/**
@@ -1035,8 +1040,11 @@ class RestContactController extends RestController {
 	 */
 	public function get_lead_score($request)
 	{
-		if ( ! class_exists( 'DoubleScale\Modules\LeadScoring\LeadScoringManager' ) ) {
-			return new WP_Error('not_found', 'Lead scoring is not available', array('status' => 404));
+		if ( ! class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true ) ) {
+			return new WP_Error( 'not_available', __( 'Lead scoring is not available', 'doublescale' ), array( 'status' => 404 ) );
+		}
+		if ( ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'leadscoring' ) ) {
+			return new WP_Error( 'not_available', __( 'Lead scoring is not available', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		try {
@@ -1663,7 +1671,7 @@ class RestContactController extends RestController {
 			$per_page           = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$page               = $request->get_param('page') ? $request->get_param('page') : 1;
 			$keywords           = $request->get_param('keywords') ?? '';
-			$filters            = $request->get_param('filters');
+			$filters            = $this->normalize_contact_filters_param( $request->get_param( 'filters' ) );
 			$subscribed         = $request->get_param('subscribed') ?? false;
 			$campaign_type      = $request->get_param('campaign_type') ?? null;
 			$has_whatsapp_phone = $request->get_param('has_whatsapp_phone') ?? null;
@@ -2790,5 +2798,45 @@ class RestContactController extends RestController {
 	public function get_purchase_history_permissions_check($request)
 	{
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Normalize the contacts list "filters" query/body param for Contact_Filters_Process.
+	 *
+	 * Some clients send JSON as a string, or nested stdClass from decode paths; Process expects arrays.
+	 *
+	 * @param mixed $filters Raw filters param.
+	 *
+	 * @return array|null
+	 */
+	private function normalize_contact_filters_param( $filters ) {
+		if ( null === $filters || false === $filters || '' === $filters ) {
+			return null;
+		}
+		if ( is_string( $filters ) ) {
+			$decoded = json_decode( $filters, true );
+			if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $decoded ) ) {
+				return null;
+			}
+			$filters = $decoded;
+		} elseif ( is_object( $filters ) ) {
+			$decoded = json_decode( wp_json_encode( $filters ), true );
+			if ( ! is_array( $decoded ) ) {
+				return null;
+			}
+			$filters = $decoded;
+		}
+		if ( ! is_array( $filters ) ) {
+			return null;
+		}
+		if ( empty( $filters ) ) {
+			return $filters;
+		}
+		return map_deep(
+			$filters,
+			static function ( $value ) {
+				return $value;
+			}
+		);
 	}
 }

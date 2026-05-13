@@ -100,31 +100,61 @@ class LeadScorePoints extends Rule
             return 0;
         }
 
-        // Get lead score points
+        if (class_exists('\DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager')) {
+            return (int) \DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager::get_lead_score_points($contact);
+        }
+
         $points = \doublescale_get_contact_meta($contact->id, 'lead_score_points', true);
 
-        if (! $points) {
+        if ($points === '' || $points === null || false === $points) {
             return 0;
         }
 
-        return $points;
+        return (int) $points;
     }
 
     public function is_met(AutomationContactModel $automation_contact, $rule = array())
     {
-        $value = $this->get_value($automation_contact);
-        $operator = $rule['operator'];
-        $rule_value = $rule['value'];
+        $value = (int) $this->get_value($automation_contact);
+        $operator = $rule['operator'] ?? 'is';
+        $rule_value = $rule['value'] ?? '';
+
+        if (is_array($rule_value) && isset($rule_value['value'])) {
+            $rule_value = $rule_value['value'];
+        }
+        if (is_object($rule_value) && isset($rule_value->value)) {
+            $rule_value = $rule_value->value;
+        }
+
+        $rule_value = (int) $rule_value;
 
         switch ($operator) {
             case 'is':
-                return $value == $rule_value;
+            case 'equals':
+            case '=':
+                return $value === $rule_value;
             case 'is_not':
-                return $value != $rule_value;
+            case 'not_equals':
+            case '!=':
+                return $value !== $rule_value;
             case 'greater_than':
+            case 'gt':
                 return $value > $rule_value;
             case 'lower_than':
+            case 'less_than':
+            case 'lt':
                 return $value < $rule_value;
+            case 'greater_than_or_equal':
+            case 'gte':
+            case 'ge':
+            case '>=':
+                return $value >= $rule_value;
+            case 'lower_than_or_equal':
+            case 'less_than_or_equal':
+            case 'lte':
+            case 'le':
+            case '<=':
+                return $value <= $rule_value;
             default:
                 return false;
         }

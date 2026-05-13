@@ -30,9 +30,9 @@ import {
 	RecipientsCard,
 	ScheduleCard,
 	SendTestEmailCard,
-	SendTestSMSCard,
 	SendTestWhatsAppCard,
 } from './components';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 import type {
 	NoticeMessage,
 	EmailTemplate,
@@ -49,6 +49,8 @@ const Review: React.FC = () => {
 		saving,
 		isNewCampaign,
 	} = useCampaignStep();
+
+	const SendTestSMSCard = getProSmsCampaignBridge()?.SendTestSMSCard;
 
 	const [sendNow, setSendNow] = useState(true);
 	const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
@@ -572,11 +574,20 @@ const Review: React.FC = () => {
 						/>
 					</DialogHeader>
 					{campaign?.type === 'sms' ? (
-						<SendTestSMSCard
-							campaignId={campaign?.id}
-							header={false}
-							cardClassName="border border-border bg-[#F7F8FA] p-6 static top-auto"
-						/>
+						SendTestSMSCard ? (
+							<SendTestSMSCard
+								campaignId={campaign?.id}
+								header={false}
+								cardClassName="border border-border bg-[#F7F8FA] p-6 static top-auto"
+							/>
+						) : (
+							<p className="text-sm text-muted-foreground">
+								{__(
+									'SMS test sending requires DoubleScale Pro.',
+									'doublescale'
+								)}
+							</p>
+						)
 					) : campaign?.type === 'whatsapp' ? (
 						<SendTestWhatsAppCard
 							campaignId={campaign?.id}

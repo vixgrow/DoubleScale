@@ -380,7 +380,10 @@ class RestCampaignController extends AbstractCampaignController {
 		}
 
 		// Validate it's a valid channel string (email or sms only for campaigns).
-		$valid_campaign_channels = array( CampaignChannel::STR_EMAIL, CampaignChannel::STR_SMS );
+		$valid_campaign_channels = array( CampaignChannel::STR_EMAIL );
+		if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
+			$valid_campaign_channels[] = CampaignChannel::STR_SMS;
+		}
 		if ( ! in_array( $type, $valid_campaign_channels, true ) ) {
 			return new WP_Error(
 				'invalid_type',
@@ -517,9 +520,17 @@ class RestCampaignController extends AbstractCampaignController {
 
 		if ( $channel === CampaignChannel::STR_EMAIL ) {
 			return $this->send_test_email( $request );
-		} else {
-			return $this->send_test_provider_message( $request, $channel );
 		}
+
+		if ( $channel === CampaignChannel::STR_SMS && ! class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
+			return new WP_Error(
+				'pro_feature_required',
+				__( 'Sms campaigns require Plugin Pro', 'doublescale'),
+				array( 'status' => 403 )
+			);
+		}
+
+		return $this->send_test_provider_message( $request, $channel );
 	}
 
 	/**
@@ -989,9 +1000,8 @@ class RestCampaignController extends AbstractCampaignController {
 					$processor = EmailProcessing::instance();
 					break;
 				case CampaignChannel::CHANNEL_SMS:
-					// Sms processing is only available in Pro version
-					if ( class_exists( '\DoubleScale\Modules\Campaigns\Campaign\SmsProcessing' ) ) {
-						$processor = \DoubleScale\Modules\Campaigns\Campaign\SmsProcessing::instance();
+					if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
+						$processor = \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::instance();
 					} else {
 						return new WP_Error(
 							'pro_feature_required',

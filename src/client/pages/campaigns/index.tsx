@@ -13,7 +13,7 @@ const Campaigns_EmailSequences: React.FC<{ path: string }> = ({ path }) => {
 		<div className="h-screen flex flex-col overflow-hidden">
 			{/* Main Content Area */}
 			<div className="flex-1 overflow-y-auto">
-				{path === 'campaigns' && <Campaigns channel="email" />}
+				{path === 'campaigns' && <Campaigns />}
 				{path === 'email-sequences' && (
 					<EmailSequences navigate={handleNavigate} />
 				)}

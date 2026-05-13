@@ -116,13 +116,12 @@ export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepP
 					return (
 						<div
 							key={mod.slug}
-							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
-								mod.unavailableUntilPro
+							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${mod.unavailableUntilPro
 									? 'border-border/40 bg-muted/15'
 									: isEnabled
 										? 'border-border/60 bg-card'
 										: 'border-border/40 bg-muted/20'
-							}`}
+								}`}
 						>
 							<div className="flex flex-col gap-1 flex-1 min-w-0">
 								<span

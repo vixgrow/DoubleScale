@@ -341,7 +341,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 
 	useEffect(() => {
 		setIsProVersion(
-			Boolean(applyFilters('doublescale_booking_integration', true))
+			Boolean(applyFilters('doublescale_is_pro_active', false))
 		);
 	}, []);
 

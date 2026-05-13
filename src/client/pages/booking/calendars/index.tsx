@@ -50,8 +50,7 @@ import { applyFilters } from '@wordpress/hooks';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TabsTrigger } from '@radix-ui/react-tabs';
-import { Tabs, TabsList } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 /**
  * Main Calendars Component.
@@ -378,8 +377,8 @@ const Calendars: React.FC = () => {
 					)}
 				</div>
 			</div>
-			<Card className="doublescale-booking-calendars-action"><CardContent>
-				<div className='flex justify-between'>
+			<Card className="doublescale-booking-calendars-action"><CardContent className="py-5">
+				<div className='flex justify-between items-center'>
 					<div>
 						<Tabs
 							value={

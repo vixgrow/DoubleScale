@@ -52,6 +52,7 @@ import {
 	DashboardIcon,
 	FormsIcon,
 	IntegrationsIcon,
+	ManagerIcon,
 	SettingsIcon,
 	ToolsIcon,
 	CustomFieldsIcon,
@@ -70,6 +71,7 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
+import TeamManagersPage from '../pages/team-managers';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import Campaigns from '../pages/campaigns/campaigns';
 import EmailSequencesUpgradeNag from '../pages/email-sequences-upgrade';
@@ -500,6 +502,15 @@ registerAdminPage('smtp', {
 	icon: <Mail size={24} />,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'smtp',
+	alwaysRegister: true,
+});
+
+registerAdminPage('team-managers', {
+	path: 'team-managers',
+	component: () => <TeamManagersPage />,
+	label: __('Team / Managers', 'doublescale'),
+	icon: <ManagerIcon width={24} height={24} />,
+	requiredCapability: ['doublescale_crm_manager'],
 	alwaysRegister: true,
 });
 

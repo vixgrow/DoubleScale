@@ -34,7 +34,6 @@ import {
 	CustomFieldsIcon,
 	ToolsIcon,
 	TotalSMSIcon,
-	ManagerIcon,
 	LicenseIcon,
 	ProcessingEmailsIcon,
 	LinkTriggersIcon,
@@ -48,7 +47,6 @@ import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
 import MailboxSettings from './mailbox';
-import Team from './team';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,7 +79,6 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
 	'link_triggers',
 	'system',
-	'team',
 	'license',
 	'smtp',
 	'whatsapp',
@@ -131,6 +128,10 @@ const SettingsPage: React.FC = () => {
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
+			if (urlTab === 'team') {
+				navigate(getToLink('team-managers'), { replace: true });
+				return;
+			}
 			// If user with limited access tries to access a restricted tab, redirect to notifications
 			if (hasLimitedSettingsAccess && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
 				navigate(getToLink('settings/notifications'), { replace: true });
@@ -343,8 +344,6 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'team':
-				return <Team />;
 			case 'system':
 				return <SystemSettings />;
 			case 'currencies':
@@ -526,11 +525,6 @@ const SettingsPage: React.FC = () => {
 			value: 'system',
 			label: 'System',
 			icon: <ToolsIcon width={24} height={24} />,
-		},
-		{
-			value: 'team',
-			label: 'Team',
-			icon: <ManagerIcon width={24} height={24} />,
 		},
 		{
 			value: 'custom_fields',

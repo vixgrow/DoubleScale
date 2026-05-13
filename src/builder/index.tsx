@@ -52,6 +52,8 @@ export interface BuilderProps {
 				interval?: number;
 		  };
 	handleNavigate?: (href: string) => void;
+	/** When true (e.g. Pro OpenBuilder “pre-built templates” path), open My Templates in the sidebar on mount. */
+	openTemplates?: boolean;
 }
 
 const BuilderContent: React.FC<BuilderProps> = ({
@@ -60,6 +62,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	onClose,
 	autoSave = true,
 	handleNavigate,
+	openTemplates = false,
 }) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
@@ -345,6 +348,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 							sidebarCloseTrigger={sidebarCloseTrigger}
 							templatesRefreshKey={templatesRefreshTrigger}
 							openGlobalSettings={handleOpenGlobalSettings}
+							openTemplatesOnMount={openTemplates}
 						/>
 						<Canvas />
 

@@ -48,16 +48,10 @@ final class Module extends AbstractModule {
 		return array(
 			array( 'doublescale_campaigns', 'doublescale_email_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_whatsapp_campaigns' ),
-			array( 'doublescale_campaigns', 'doublescale_email_sequences' ),
 		);
 	}
 
 	public function register( Container $container ): void {
-		$container->singleton(
-			Services\EmailSequencesManager::class,
-			static fn() => Services\EmailSequencesManager::instance()
-		);
-
 		$container->singleton(
 			Services\CampaignStatusManager::class,
 			static fn() => Services\CampaignStatusManager::instance()
@@ -69,7 +63,6 @@ final class Module extends AbstractModule {
 		return array(
 			Rest\Controllers\RestCampaignController::class,
 			Rest\Controllers\RestTemplateController::class,
-			Rest\Controllers\RestEmailSequenceController::class,
 			Rest\Controllers\RestAiEmailBuilderController::class,
 		);
 	}
@@ -81,7 +74,6 @@ final class Module extends AbstractModule {
 		Campaign\EmailProcessing::instance();
 		Campaign\WhatsappProcessing::instance();
 		Campaign\AutomatedCampaignHandler::instance();
-		$container->get( Services\EmailSequencesManager::class );
 
 		add_action( 'doublescale_register_email_blocks', array( $this, 'register_email_blocks' ) );
 		add_action( 'init', array( $this, 'register_cron_schedules' ) );
@@ -96,9 +88,6 @@ final class Module extends AbstractModule {
 
 		if ( $tasks->get_next_timestamp( 'doublescale_email_campaigns' ) === false ) {
 			$tasks->schedule_recurring( time(), 60, 'doublescale_email_campaigns' );
-		}
-		if ( $tasks->get_next_timestamp( 'doublescale_email_sequences' ) === false ) {
-			$tasks->schedule_recurring( time(), 60, 'doublescale_email_sequences' );
 		}
 	}
 

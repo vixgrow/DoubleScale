@@ -52,6 +52,9 @@
 			"@doublescale/config": [
 				"shared/config"
 			],
+			"@doublescale/email-sequences-page": [
+				"client/pages/email-sequences-upgrade/index.tsx"
+			],
 			"@doublescale/client": [
 				"client"
 			],

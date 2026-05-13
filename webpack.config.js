@@ -35,6 +35,10 @@ const sharedAlias = {
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
 
+	'@doublescale/email-sequences-page': path.resolve(
+		__dirname,
+		'src/client/pages/email-sequences-upgrade/index.tsx'
+	),
 	'@doublescale-pro/pages/custom-fields': path.resolve(
 		__dirname,
 		'../QuillCRM-Pro/src/client/pages/custom-fields'

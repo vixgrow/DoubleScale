@@ -34,6 +34,8 @@ interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
 	templatesRefreshKey?: number;
 	openGlobalSettings?: () => void;
+	/** Open “My templates” drawer when the builder first mounts (used by Pro sequence mail / open-builder flow). */
+	openTemplatesOnMount?: boolean;
 }
 
 type SidebarView =
@@ -46,6 +48,7 @@ const BlockSidebar = ({
 	sidebarCloseTrigger,
 	templatesRefreshKey,
 	openGlobalSettings = () => {},
+	openTemplatesOnMount = false,
 }: BlockSidebarProps = {}) => {
 	const [view, setView] = useState<SidebarView>({ type: 'none' });
 	const [suggestionActiveItem, setSuggestionActiveItem] =
@@ -68,6 +71,13 @@ const BlockSidebar = ({
 			setSuggestionActiveItem(null);
 		}
 	}, [sidebarCloseTrigger]);
+
+	useEffect(() => {
+		if (openTemplatesOnMount) {
+			setSuggestionActiveItem(null);
+			setView({ type: 'myTemplates' });
+		}
+	}, [openTemplatesOnMount]);
 
 	const HandleMyTemplates = () => {
 		setSuggestionActiveItem(null);

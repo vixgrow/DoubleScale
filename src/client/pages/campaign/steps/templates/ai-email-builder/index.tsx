@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import { saveTemplate } from '@/builder/api/templates';
 import { STORE_KEY } from '@/stores/email-builder/constants';
@@ -67,6 +68,8 @@ interface AIEmailBuilderProps {
 	campaign?: Campaign | null;
 	insideBuilder?: boolean;
 	onApplyTemplate?: (template: GeneratedTemplate) => void;
+	/** Use when this dialog must sit above high z-index fullscreen shells (e.g. email sequence editor). */
+	stackAboveFullscreenShell?: boolean;
 }
 
 interface GeneratedTemplate {
@@ -86,6 +89,7 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 	campaign,
 	insideBuilder = false,
 	onApplyTemplate,
+	stackAboveFullscreenShell = false,
 }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -250,11 +254,15 @@ const AIEmailBuilder: React.FC<AIEmailBuilderProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={handleClose}>
 			<DialogContent
-				className={
+				overlayClassName={
+					stackAboveFullscreenShell ? 'z-[160010]' : undefined
+				}
+				className={cn(
 					view === 'preview'
 						? 'max-w-[900px] w-full mx-auto h-[85vh] flex flex-col'
-						: 'max-w-[640px] w-full mx-auto'
-				}
+						: 'max-w-[640px] w-full mx-auto',
+					stackAboveFullscreenShell && 'z-[160011]'
+				)}
 			>
 				{view === 'form' ? (
 					<>

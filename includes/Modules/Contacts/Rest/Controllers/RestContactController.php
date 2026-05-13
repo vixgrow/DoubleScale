@@ -1675,7 +1675,7 @@ class RestContactController extends RestController {
 			// Start with base query and load relationships
 			// Load custom_fields when the CustomField model is available.
 			$relationships = array('lists', 'tags', 'notes');
-			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
+			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
 				$relationships[] = 'custom_fields';
 			}
 			if (
@@ -1915,7 +1915,7 @@ class RestContactController extends RestController {
 
 			// Load relationships — include custom_fields when the model is available.
 			$contact->load(array('lists', 'tags'));
-			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
+			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
 				$contact->load('custom_fields');
 			}
 
@@ -1969,7 +1969,7 @@ class RestContactController extends RestController {
 
 			// Load relationships — include custom_fields when the model is available.
 			$contact->load(array('lists', 'tags'));
-			if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
+			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
 				$contact->load('custom_fields');
 			}
 
@@ -2189,7 +2189,7 @@ class RestContactController extends RestController {
 	{
 		try {
 			// Custom fields are PRO-only feature
-			if (! class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
+			if (! class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
 				return;
 			}
 
@@ -2199,7 +2199,7 @@ class RestContactController extends RestController {
 
 				foreach ($custom_fields as $custom_field) {
 					// Check if custom field exists
-					$custom_field_model = \DoubleScale\Core\CustomFields\Models\CustomFieldModel::find($custom_field['id']);
+					$custom_field_model = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find($custom_field['id']);
 					if (! $custom_field_model) {
 						return new WP_Error('error', __('Custom field not found', 'doublescale'), array('status' => 400));
 					}

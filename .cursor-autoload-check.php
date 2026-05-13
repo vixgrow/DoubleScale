@@ -4,9 +4,6 @@ require __DIR__ . '/vendor/autoload.php';
 fwrite( STDERR, "step2\n" );
 
 $classes = array(
-	'DoubleScale\\Modules\\CustomFields\\Module',
-	'DoubleScale\\Core\\CustomFields\\CustomFieldsManager',
-	'DoubleScale\\Core\\CustomFields\\Rest\\RestCustomFieldController',
 	'DoubleScale\\Fields\\ContactFields',
 	'DoubleScale\\Fields\\Types\\TextField',
 );

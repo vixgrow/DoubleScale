@@ -9,7 +9,7 @@
 
 namespace DoubleScale\Modules\Contacts\MergeTags\Contact;
 
-use DoubleScale\Core\CustomFields\Models\CustomFieldModel;
+use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Managers\MergeTagsManager;
@@ -90,22 +90,24 @@ class ContactCustomField extends MergeTag {
 	}
 }
 
-try {
-	foreach ( CustomFieldModel::all() as $custom_field ) {
-		MergeTagsManager::instance()->register( new ContactCustomField( $custom_field ) );
-	}
-} catch ( \Throwable $e ) {
-	// Custom field tables may not exist yet on first load before migrations run.
-	if ( function_exists( 'doublescale_get_logger' ) ) {
-		$log = doublescale_get_logger();
-		if ( is_object( $log ) && method_exists( $log, 'debug' ) ) {
-			$log->debug(
-				'Contact custom field merge tags skipped',
-				array(
-					'code'    => 'contact_custom_field_merge_tags_init',
-					'message' => $e->getMessage(),
-				)
-			);
+if ( class_exists( CustomFieldModel::class ) ) {
+	try {
+		foreach ( CustomFieldModel::all() as $custom_field ) {
+			MergeTagsManager::instance()->register( new ContactCustomField( $custom_field ) );
+		}
+	} catch ( \Throwable $e ) {
+		// Custom field tables may not exist yet on first load before migrations run.
+		if ( function_exists( 'doublescale_get_logger' ) ) {
+			$log = doublescale_get_logger();
+			if ( is_object( $log ) && method_exists( $log, 'debug' ) ) {
+				$log->debug(
+					'Contact custom field merge tags skipped',
+					array(
+						'code'    => 'contact_custom_field_merge_tags_init',
+						'message' => $e->getMessage(),
+					)
+				);
+			}
 		}
 	}
 }

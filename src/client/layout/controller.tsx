@@ -25,7 +25,6 @@ import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
-import CustomFields from '../pages/custom-fields';
 import Campaign from '../pages/campaign';
 import LinkTriggers from '../pages/link-triggers';
 import LinkTrigger from '../pages/link-trigger';
@@ -317,15 +316,6 @@ registerAdminPage('lead-scoring', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'leadscoring',
-});
-
-registerAdminPage('custom-fields', {
-	path: 'custom-fields',
-	component: () => <CustomFields />,
-	label: __('Custom Fields', 'doublescale'),
-	icon: <CustomFieldsIcon />,
-	requiredCapability: ['doublescale_crm_manager'],
-	hidden: true,
 });
 
 registerAdminPage('campaigns', {

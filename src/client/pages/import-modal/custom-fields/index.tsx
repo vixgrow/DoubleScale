@@ -8,7 +8,9 @@ import { __ } from '@wordpress/i18n';
  */
 import { Switch } from '@/components/ui/switch';
 import { Field } from '@doublescale/components';
-import { useCustomFields } from '../../custom-fields/use-customFields';
+import config from '@doublescale/config';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
+import { useCustomFields } from '../../../hooks/use-customFields';
 
 import {
 	Table,
@@ -63,6 +65,18 @@ const CustomFieldsMapping: React.FC<CustomFieldsMapping> = ({
 
 	// Use the hook if available, otherwise provide empty defaults
 	const customFieldsData = useCustomFieldsHook;
+
+	if (!config.getProPluginData()?.is_active) {
+		return (
+			<ProFeatureNotice
+				featureName={__('Custom Fields Import Mapping', 'doublescale')}
+				description={__(
+					'Map source custom fields to DoubleScale fields when DoubleScale Pro is active. Activate Pro to unlock this step.',
+					'doublescale'
+				)}
+			/>
+		);
+	}
 
 	// Filter DoubleScale custom fields by type to match the source field type
 	const getFilteredCustomFields = (sourceFieldType: string) => {

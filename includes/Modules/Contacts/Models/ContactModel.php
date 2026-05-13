@@ -20,7 +20,7 @@ use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 // use DoubleScale\Modules\Deals\Models\DealModel; // Moved to Pro
-// use DoubleScale\Core\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads from Core.
+// use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
 
 /**
@@ -169,8 +169,8 @@ class ContactModel extends Model
 	 */
 	public function custom_fields()
 	{
-		if (class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
-			return $this->belongsToMany(\DoubleScale\Core\CustomFields\Models\CustomFieldModel::class, 'doublescale_custom_field_relationship', 'entity_id', 'custom_field_id')
+		if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
+			return $this->belongsToMany(\DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::class, 'doublescale_custom_field_relationship', 'entity_id', 'custom_field_id')
 				->withPivot('value')
 				->wherePivot('entity_type', 'contact');
 		}
@@ -245,7 +245,7 @@ class ContactModel extends Model
 	 */
 	public function get_custom_field($custom_field_id)
 	{
-		if (! class_exists('DoubleScale\Core\CustomFields\Models\CustomFieldModel')) {
+		if (! class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
 			return null;
 		}
 

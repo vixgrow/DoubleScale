@@ -22,7 +22,7 @@ use DoubleScale\Fields\Types\TextareaField;
 use DoubleScale\Fields\Types\SelectField;
 use DoubleScale\Fields\Types\MultiselectField;
 use DoubleScale\Fields\Types\CheckboxField;
-use DoubleScale\Core\CustomFields\Models\CustomFieldModel;
+use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 
 /**
  * ContactFields class

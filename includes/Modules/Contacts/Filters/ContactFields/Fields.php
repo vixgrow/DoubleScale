@@ -13,7 +13,7 @@
 namespace DoubleScale\Modules\Contacts\Filters\ContactFields;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
-use DoubleScale\Core\CustomFields\Models\CustomFieldModel;
+use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -154,14 +154,16 @@ class Fields extends Filter
 	}
 }
 
-try {
-	$custom_fields = CustomFieldModel::all();
-	if ( ! empty( $custom_fields ) ) {
-		foreach ( $custom_fields as $custom_field ) {
-			$filter = new Fields( $custom_field );
-			FiltersManager::instance()->register( $filter );
+if ( class_exists( CustomFieldModel::class ) ) {
+	try {
+		$custom_fields = CustomFieldModel::all();
+		if ( ! empty( $custom_fields ) ) {
+			foreach ( $custom_fields as $custom_field ) {
+				$filter = new Fields( $custom_field );
+				FiltersManager::instance()->register( $filter );
+			}
 		}
+	} catch ( \Throwable $e ) {
+		// Tables may not exist yet before migrations.
 	}
-} catch ( \Throwable $e ) {
-	// Tables may not exist yet before migrations.
 }

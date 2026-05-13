@@ -1,5 +1,4 @@
 import { CheckTrueIcon } from '@doublescale/components';
-import { Check } from 'lucide-react';
 
 type StepIndicatorProps = {
 	step: number;
@@ -19,13 +18,12 @@ export const StepIndicator = ({
 
 	return (
 		<div
-			className={`relative flex items-center gap-3 p-4 rounded-xl transition-colors ${
+			className={`relative flex max-lg:snap-start shrink-0 items-center gap-3 rounded-xl p-4 transition-colors lg:min-w-0 ${
 				isActive
-					? 'border-2 border-primary bg-background shadow-sm after:content-[""] after:absolute after:top-1/2 after:-translate-y-1/2 after:-right-[11px] after:w-5 after:h-5 after:rotate-45 after:bg-background after:border-r-2 after:border-t-2 after:border-primary'
+					? 'border-2 border-primary bg-background shadow-sm lg:after:absolute lg:after:top-1/2 lg:after:h-5 lg:after:w-5 lg:after:-translate-y-1/2 lg:after:-right-[11px] lg:after:rotate-45 lg:after:border-r-2 lg:after:border-t-2 lg:after:border-primary lg:after:bg-background lg:after:content-[""]'
 					: 'border-2 border-transparent'
 			}`}
-		>
-			<div
+		>			<div
 				className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
 					isCompleted
 						? 'bg-[#16A34A] text-white'

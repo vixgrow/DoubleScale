@@ -52,8 +52,8 @@ export default function GetStart() {
 
 	return (
 		<div className="doublescale-get-start flex flex-col lg:flex-row -mx-4 -my-4 lg:-mx-8 lg:-my-6 min-h-[calc(100vh-80px)] bg-white">
-			<aside className="w-full lg:w-72  shrink-0 bg-[#EEF] border-b lg:border-b-0 border-primary/20 lg:sticky lg:top-0 lg:self-start lg:h-screen lg:overflow-y-auto">
-				<div className="flex flex-row lg:flex-col gap-4 p-6 ">
+			<aside className="w-full shrink-0 overflow-x-auto overscroll-x-contain border-b border-primary/20 bg-[#EEF] max-lg:snap-x max-lg:snap-mandatory lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:self-start lg:snap-none lg:overflow-x-visible lg:overflow-y-auto lg:border-b-0">
+				<div className="flex w-max min-w-full flex-row flex-nowrap gap-3 p-4 lg:w-full lg:min-w-0 lg:flex-col lg:flex-nowrap lg:gap-4 lg:p-6">
 					{steps.map((step, index) => (
 						<StepIndicator
 							key={step.number}

@@ -164,8 +164,10 @@ const SourceGrid: React.FC = () => {
 								)}
 					</p>
 					<Button
+						type="button"
+						variant="default"
 						size="lg"
-						className="min-w-[200px] shrink-0 gap-2 bg-violet-400 text-white hover:bg-violet-500 sm:min-w-[220px]"
+						className="min-w-[200px] shrink-0 gap-2 sm:min-w-[220px]"
 						disabled={!source || importing}
 						onClick={handleContinue}
 					>

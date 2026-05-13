@@ -68,7 +68,23 @@ class AvailabilityModel extends Model {
 		}
 
 		$unserialized = maybe_unserialize( $raw_value );
-		return is_array( $unserialized ) ? $unserialized : array();
+
+		// Legacy rows persisted `override` as `(object) array()` (and could
+		// contain other stdClass leaves from older code paths). Every consumer
+		// reads with array-bracket access — coerce to nested arrays once here
+		// at the data boundary so no downstream caller has to defend itself.
+		if ( is_object( $unserialized ) ) {
+			$unserialized = (array) $unserialized;
+		}
+		if ( ! is_array( $unserialized ) ) {
+			return array();
+		}
+		foreach ( array( 'weekly_hours', 'override' ) as $key ) {
+			if ( isset( $unserialized[ $key ] ) && is_object( $unserialized[ $key ] ) ) {
+				$unserialized[ $key ] = json_decode( wp_json_encode( $unserialized[ $key ] ), true );
+			}
+		}
+		return $unserialized;
 	}
 
 	public function getWeeklyHoursAttribute() {
@@ -127,7 +143,7 @@ class AvailabilityModel extends Model {
 						'off'   => true,
 					),
 				),
-				'override'     => (object) array(),
+				'override'     => array(),
 			),
 		);
 	}

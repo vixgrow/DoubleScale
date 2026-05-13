@@ -282,6 +282,56 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 		}
 	};
 
+	const validateRequiredFields = (
+		values: Record<string, any>,
+		selectedLocationType: string,
+		locationData: string
+	): string | null => {
+		if (!values.name) {
+			return __('Please enter the attendee name.', 'doublescale');
+		}
+		if (!values.email) {
+			return __('Please enter the attendee email.', 'doublescale');
+		}
+
+		// Custom fields (rendered by QuestionsComponents) are stored under
+		// `fields-{id}` to match QuillBooking's antd Form.Item naming — the
+		// `fields-` prefix is stripped by getFields() before POSTing.
+		const customFields = fields?.custom || {};
+		for (const [key, def] of Object.entries(customFields)) {
+			if (!def?.required || def?.enabled === false) {
+				continue;
+			}
+			const stored = values[`fields-${key}`];
+			if (stored === undefined || stored === '' || stored === null) {
+				return __(`${def.label} is required.`, 'doublescale');
+			}
+		}
+
+		// Location-data is required when the selected location type has
+		// required:true sub-fields (e.g. attendee_address, attendee_phone).
+		// `options` lives on the runtime field payload but isn't on FieldType.
+		const locationSelect = (fields?.location?.['location-select'] as
+			| { options?: Array<{ value: string; fields?: Record<string, any> }> }
+			| undefined) || undefined;
+		const locationOptions = locationSelect?.options || [];
+		const matchedOption = locationOptions.find(
+			(opt) => opt?.value === selectedLocationType
+		);
+		const subFields = matchedOption?.fields || {};
+		const requiresLocationData = Object.values(subFields).some(
+			(f: any) => f?.required
+		);
+		if (requiresLocationData && !locationData) {
+			return __(
+				'Please fill in the required location details.',
+				'doublescale'
+			);
+		}
+
+		return null;
+	};
+
 	const handleSubmit = async (values: any) => {
 		const {
 			selectDate,
@@ -312,6 +362,16 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 			location,
 			location_data
 		);
+
+		const validationError = validateRequiredFields(
+			values,
+			location,
+			location_data
+		);
+		if (validationError) {
+			reportError(validationError);
+			return;
+		}
 
 		const hostsToSend = hosts ? [hosts] : selectedTimeSlotHostsIds;
 

@@ -24,7 +24,7 @@ const FIELD_COMPONENTS = {
 	textarea: ({ size, ...props }) => <Textarea {...props} />,
 	password: ({ size, ...props }) => <Input type="password" {...props} />,
 	number: (props) => <Input type='number' {...props} />,
-	phone: (props) => <Input type='number' {...props} />,
+	phone: (props) => <Input type='tel' {...props} />,
 	date: (props) => <Input type="date" {...props} />,
 	time: (props) => <Input type="time" {...props} />,
 	datetime: (props) => <Input type="datetime-local" {...props} />,
@@ -72,19 +72,23 @@ const FIELD_COMPONENTS = {
 			})}
 		</RadioGroup>
 	),
-	checkbox: ({ label, required, ...props }) => (
+	checkbox: ({ label, required, value, onChange, ...props }) => (
 		<div className="flex items-center gap-2">
-			<Checkbox {...props} />
+			<Checkbox
+				checked={Boolean(value)}
+				onCheckedChange={(checked) => onChange?.(Boolean(checked))}
+				{...props}
+			/>
 			<span>{label}{required && <span className="text-red-500">*</span>}</span>
 		</div>
 	),
 };
 
-const FormField = ({ field, id, form: _form }) => {
+const FormField = ({ field, id, form }) => {
 	const {
 		type,
 		label,
-		value,
+		value: defaultValue,
 		options = [],
 		helpText = null,
 		required,
@@ -98,8 +102,44 @@ const FormField = ({ field, id, form: _form }) => {
 		updatedOptions = field.settings.options;
 	}
 
+	if (id === 'name' || id === 'email') return null;
+
+	if (id === 'location-select') {
+		return (
+			<Locations
+				locationFields={field}
+				value={form?.getFieldValue('location') ?? ''}
+				onChange={(val) => form?.setFieldsValue({ location: val })}
+				locationDataValue={form?.getFieldValue('location-data') ?? ''}
+				onLocationDataChange={(val) =>
+					form?.setFieldsValue({ 'location-data': val })
+				}
+			/>
+		);
+	}
+
+	// Match QuillBooking's Form.Item naming so getFields() can strip the prefix
+	// and submit the field map under the `fields` key — `id` here is the raw
+	// schema id like `phone_number`, stored as `fields-phone_number`.
+	const storageKey = `fields-${id}`;
+	const currentValue = form?.getFieldValue(storageKey);
+	const inputValue = currentValue !== undefined ? currentValue : defaultValue;
+
+	const handleChange = (next) => {
+		// Some FIELD_COMPONENTS (Input, Textarea, native range) pass an event;
+		// others (Select, RadioGroup, Checkbox, file) pass the value directly.
+		const value =
+			next && typeof next === 'object' && 'target' in next
+				? next.target.type === 'checkbox'
+					? next.target.checked
+					: next.target.value
+				: next;
+		form?.setFieldsValue({ [storageKey]: value });
+	};
+
 	const fieldProps = {
-		value,
+		value: inputValue ?? '',
+		onChange: handleChange,
 		options: updatedOptions,
 		label,
 		required,
@@ -107,26 +147,18 @@ const FormField = ({ field, id, form: _form }) => {
 		...otherProps,
 	};
 
-	if (id === 'name' || id === 'email') return null;
-
 	return (
-		<>
-			{id === 'location-select' ? (
-				<Locations locationFields={field} />
-			) : (
-				<div style={{ marginBottom: '24px' }}>
-					<div style={{ marginBottom: 0 }}>
-						{type !== 'checkbox' && (
-							<div className="form-label mb-1">
-								<p>{label}</p>
-							</div>
-						)}
-						{FieldComponent(fieldProps)}
+		<div style={{ marginBottom: '24px' }}>
+			<div style={{ marginBottom: 0 }}>
+				{type !== 'checkbox' && (
+					<div className="form-label mb-1">
+						<p>{label}{required && <span className="text-red-500"> *</span>}</p>
 					</div>
-					{helpText && <div className="help-text">{helpText}</div>}
-				</div>
-			)}
-		</>
+				)}
+				{FieldComponent(fieldProps)}
+			</div>
+			{helpText && <div className="help-text">{helpText}</div>}
+		</div>
 	);
 };
 

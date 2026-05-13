@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useMemo, useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import type { FC } from 'react';
 
 /**
@@ -23,6 +24,7 @@ import type { Integration } from '@/config/booking';
 import type { NoticeMessage } from '@/types/booking';
 import IntegrationDetailsPage from '@/client/pages/booking/calendar/tabs/integrations/integration';
 import { NoticeBanner } from '@/components/booking';
+import { ProFeatureNotice } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
@@ -82,6 +84,10 @@ const HostCalendarIntegrationIcons: FC<
 		useState< NoticeMessage | null >( null );
 	const [ integrationDialogCanClose, setIntegrationDialogCanClose ] =
 		useState( true );
+
+	const isProActive = Boolean(
+		applyFilters( 'doublescale_is_pro_active', false )
+	);
 
 	useEffect( () => {
 		if ( panelSlug === null ) {
@@ -247,27 +253,34 @@ const HostCalendarIntegrationIcons: FC<
 			>
 				<DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto p-6">
 					{ panelSlug && panelIntegration && activeRow && (
-						<div className="space-y-4">
-							{ integrationNotice && (
-								<NoticeBanner
-									notice={ integrationNotice }
-									closeNotice={ () =>
-										setIntegrationNotice( null )
+						isProActive ? (
+							<div className="space-y-4">
+								{ integrationNotice && (
+									<NoticeBanner
+										notice={ integrationNotice }
+										closeNotice={ () =>
+											setIntegrationNotice( null )
+										}
+									/>
+								) }
+								<IntegrationDetailsPage
+									integration={ panelIntegration }
+									calendarId={ String( calendarId ) }
+									slug={ panelSlug }
+									setNotice={ setIntegrationNotice }
+									onCalendarSelect={ () => {} }
+									hasAccounts={ () => {} }
+									onCloseReadinessChange={
+										setIntegrationDialogCanClose
 									}
 								/>
-							) }
-							<IntegrationDetailsPage
-								integration={ panelIntegration }
-								calendarId={ String( calendarId ) }
-								slug={ panelSlug }
-								setNotice={ setIntegrationNotice }
-								onCalendarSelect={ () => {} }
-								hasAccounts={ () => {} }
-								onCloseReadinessChange={
-									setIntegrationDialogCanClose
-								}
+							</div>
+						) : (
+							<ProFeatureNotice
+								featureName={ activeRow.name }
+								description={ activeRow.description }
 							/>
-						</div>
+						)
 					) }
 				</DialogContent>
 			</Dialog>

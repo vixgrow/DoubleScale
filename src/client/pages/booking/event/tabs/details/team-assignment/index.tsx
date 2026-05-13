@@ -1,8 +1,8 @@
 import { __ } from '@wordpress/i18n';
 import React from 'react';
-import { EventInfoIcon, ProTab } from '@/components/booking';
 import { Host } from '@/types/booking';
 import { applyFilters } from '@wordpress/hooks';
+import { ProFeatureNotice } from '@doublescale/components';
 
 interface TeamAssignmentProps {
 	team: Host[];
@@ -17,10 +17,12 @@ const TeamAssignment: React.FC<TeamAssignmentProps> = ({
 }) => {
 	return applyFilters(
 		'doublescale_booking_event_team_assignment',
-		<ProTab
-			title={__('Assignment', 'doublescale')}
-			description={__('Set your Members and Event Host.', 'doublescale')}
-			icon={<EventInfoIcon />}
+		<ProFeatureNotice
+			featureName={__('Team Assignment', 'doublescale')}
+			description={__(
+				'Assign multiple hosts to a single event and choose how attendees are matched. Pick between round-robin rotation, collective availability, or specific host preference.',
+				'doublescale'
+			)}
 		/>,
 		{ team, calendarId, onChange }
 	) as React.ReactNode;

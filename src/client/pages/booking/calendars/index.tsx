@@ -39,9 +39,9 @@ import {
 	NoticeBanner,
 	ShareIcon,
 	UpcomingCalendarIcon,
-	ProVersion,
 	SettingsIcon,
 } from '@/components/booking';
+import { ProFeatureNotice } from '@doublescale/components';
 import CalendarActions from './calendar-actions';
 import HostCalendarIntegrationIcons from './host-calendar-integration-icons';
 import CreateEvent from '../create-event';
@@ -737,7 +737,30 @@ const Calendars: React.FC = () => {
 							) : (
 								applyFilters(
 									'doublescale_booking_calendars_team_events',
-									<ProVersion />,
+									<ProFeatureNotice
+										featureName={__(
+											'Team Events',
+											'doublescale'
+										)}
+										description={__(
+											'Coordinate group bookings with round-robin and collective scheduling. Assign multiple hosts to a single event and let attendees book time that works for the whole team.',
+											'doublescale'
+										)}
+										features={[
+											__(
+												'Round-robin host assignment',
+												'doublescale'
+											),
+											__(
+												'Collective team availability',
+												'doublescale'
+											),
+											__(
+												'Shared team calendars',
+												'doublescale'
+											),
+										]}
+									/>,
 									{
 										getFilteredCalendars,
 										siteUrl,

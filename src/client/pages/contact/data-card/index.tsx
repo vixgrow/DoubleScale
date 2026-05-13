@@ -15,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
 import EmailsBase from '../emails';
 import SMSBase from '../sms';
+import LeadScoreBase from '../lead-score';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
@@ -46,6 +47,7 @@ import Calls from '../calls';
 import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
+import { Trophy } from 'lucide-react';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -73,6 +75,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 		'doublescale_contact_tab_component',
 		SMSBase,
 		'sms'
+	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
+	const LeadScore = applyFilters(
+		'doublescale_contact_tab_component',
+		LeadScoreBase,
+		'lead-score'
 	) as React.FC<{ contact_id: number; navigate?: (path: string) => void }>;
 	const Deals = applyFilters(
 		'doublescale_contact_tab_component',
@@ -133,6 +140,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				]
 			: []),
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		{
+			value: 'lead-score',
+			label: 'Lead Score',
+			icon: <Trophy width={24} height={24} />,
+		},
 		{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> },
 		{
 			value: 'meetings',
@@ -243,6 +255,14 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			children: (
 				<CardContent className="pt-6">
 					<Deals contact_id={contact.id} navigate={navigate} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'lead-score',
+			children: (
+				<CardContent className="pt-6">
+					<LeadScore contact_id={contact.id} navigate={navigate} />
 				</CardContent>
 			),
 		},

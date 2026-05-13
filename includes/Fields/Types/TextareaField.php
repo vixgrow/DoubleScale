@@ -11,7 +11,7 @@
 namespace DoubleScale\Fields\Types;
 
 use DoubleScale\Core\Abstracts\FieldType;
-use DoubleScale\Core\CustomFields\CustomFieldsManager;
+use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
  * TextareaField class

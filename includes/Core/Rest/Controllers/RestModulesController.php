@@ -117,7 +117,6 @@ class RestModulesController extends RestController {
 	 */
 	private function build_modules_payload(): array {
 		$all = ModuleManager::all();
-		$stored   = get_option( 'doublescale_enabled_modules', array() );
 		$result   = array();
 
 		foreach ( $all as $slug => $module ) {
@@ -128,9 +127,7 @@ class RestModulesController extends RestController {
 				}
 			);
 
-			$enabled = $module->is_toggleable()
-				? ( ! isset( $stored[ $slug ] ) || (bool) $stored[ $slug ] )
-				: true;
+			$enabled = $module->is_enabled();
 
 			$result[] = array(
 				'slug'            => $slug,

@@ -3,11 +3,13 @@
  */
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { PageHeader, PlusIcon } from '@doublescale/components';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import LeadScoring, { type LeadScoringRef } from './lead-scoring';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import config from '@doublescale/config';
@@ -17,9 +19,13 @@ const ContactsLeadScoringRoute: React.FC = () => {
 	const leadScoringRef = useRef<LeadScoringRef>(null);
 	const isCrmManager = useCapabilities().isCrmManager();
 	const moduleOn = config.isModuleEnabled('leadscoring');
+	const isProActive = applyFilters(
+		'doublescale_is_pro_active',
+		false
+	) as boolean;
 
 	const headerActions =
-		isCrmManager && moduleOn
+		isCrmManager && moduleOn && isProActive
 			? [
 					{
 						label: __('Add', 'doublescale'),
@@ -34,13 +40,23 @@ const ContactsLeadScoringRoute: React.FC = () => {
 	return (
 		<div className="doublescale-contacts-list w-full">
 			<PageHeader
-				title={__('Lead Scoring', 'doublescale')}
+				title={__('Lead Score', 'doublescale')}
 				subtitle={__('Contacts', 'doublescale')}
 				actions={headerActions}
 			/>
-			{!moduleOn ? (
+			{!isProActive ? (
+				<div className="bg-white rounded-3xl p-8 shadow-sm">
+					<ProFeatureNotice
+						featureName={__('Lead Score', 'doublescale')}
+						description={__(
+							'Define score levels, award points from automations and engagement, and prioritize follow-ups. Upgrade to DoubleScale Pro to unlock lead scoring.',
+							'doublescale'
+						)}
+					/>
+				</div>
+			) : !moduleOn ? (
 				<ModuleDisabledNotice
-					featureName={__('Lead Scoring', 'doublescale')}
+					featureName={__('Lead Score', 'doublescale')}
 				/>
 			) : (
 				<LeadScoring ref={leadScoringRef} activeTab="lead_scoring" />

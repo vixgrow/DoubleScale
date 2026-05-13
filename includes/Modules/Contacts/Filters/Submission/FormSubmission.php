@@ -13,7 +13,6 @@
 namespace DoubleScale\Modules\Contacts\Filters\Submission;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
-use DoubleScale\Modules\Contacts\Filters\FiltersManager;
 use DoubleScale\Modules\Contacts\Filters\Traits\TimeframeContactFilter;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -156,8 +155,4 @@ class FormSubmission extends Filter {
 
 		return $query;
 	}
-}
-
-if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Models\FormModel' ) ) {
-	FiltersManager::instance()->register( new FormSubmission() );
 }

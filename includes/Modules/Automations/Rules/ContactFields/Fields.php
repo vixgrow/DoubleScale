@@ -16,7 +16,7 @@ namespace DoubleScale\Modules\Automations\Rules\ContactFields;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Core\CustomFields\Models\CustomFieldModel;
+use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 
 /**
@@ -240,11 +240,13 @@ class Fields extends Rule {
 	}
 }
 
-$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
+if ( class_exists( CustomFieldModel::class ) ) {
+	$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
 
-if ( ! empty( $custom_fields ) ) {
-	foreach ( $custom_fields as $custom_field ) {
-		$rule = new Fields( $custom_field );
-		RulesManager::instance()->register( $rule );
+	if ( ! empty( $custom_fields ) ) {
+		foreach ( $custom_fields as $custom_field ) {
+			$rule = new Fields( $custom_field );
+			RulesManager::instance()->register( $rule );
+		}
 	}
 }

@@ -25,7 +25,9 @@ import { useNavigate } from '@doublescale/navigation';
 import EditHeaderIcon from '@doublescale/shared/icons/edit-header';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { useCustomFields } from '../../../custom-fields/use-customFields';
+import { useCustomFields } from '../../../../hooks/use-customFields';
+import config from '@doublescale/config';
+import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -451,6 +453,19 @@ const InfoCard: React.FC = () => {
 					</div>
 				);
 			case 'custom':
+				if (!config.getProPluginData()?.is_active) {
+					return (
+						<div className="px-1 py-2">
+							<ProFeatureNotice
+								featureName={__('Custom Fields', 'doublescale')}
+								description={__(
+									'View and edit custom field values on contacts when DoubleScale Pro is active. Upgrade to create fields, groups, and automations.',
+									'doublescale'
+								)}
+							/>
+						</div>
+					);
+				}
 				if (isLoading) {
 					return (
                         <div className="flex flex-col gap-4">

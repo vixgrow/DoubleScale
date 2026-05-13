@@ -29,7 +29,6 @@ import {
 } from '@doublescale/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import LeadScoreCardContent from './lead-score-card';
 import { UserRound, Mail } from 'lucide-react';
 import PhoneIcon from '@doublescale/shared/icons/phone';
 
@@ -409,7 +408,6 @@ const ContactInformation: React.FC = () => {
 			<CardContent className="flex flex-col gap-0 px-4 pb-5 pt-1 sm:px-5">
 				<ListsTagsCards />
 				<div className="mt-3 space-y-3">
-					<LeadScoreCardContent contact={contact} />
 					<InfoCard />
 				</div>
 			</CardContent>

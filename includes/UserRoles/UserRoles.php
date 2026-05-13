@@ -75,6 +75,12 @@ final class UserRoles {
 	 * @since 1.0.0
 	 */
 	public static function add_roles_and_capabilities() {
+		// CRM roles/caps are provisioned only when DoubleScale Pro is loaded.
+		// Prevents accidental registration if this method is called without Pro.
+		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_FILE' ) ) {
+			return;
+		}
+
 		$roles = self::get_roles();
 
 		foreach ( $roles as $role => $label ) {

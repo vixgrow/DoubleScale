@@ -42,13 +42,8 @@ final class CoreModule extends AbstractModule {
 		$base = DOUBLESCALE_PLUGIN_DIR;
 		$logger = (array) glob( $base . 'includes/Core/Logger/Migrations/*.php' );
 		sort( $logger );
-		$custom_fields = array(
-			$base . 'includes/Core/CustomFields/Migrations/CustomFieldsGroupsTable.php',
-			$base . 'includes/Core/CustomFields/Migrations/CustomFieldsTable.php',
-			$base . 'includes/Core/CustomFields/Migrations/CustomFieldRelationshipTable.php',
-		);
 		$task_meta = $base . 'includes/Core/Database/Migrations/TaskMetaTable.php';
-		return array_merge( $custom_fields, array( $task_meta ), $logger );
+		return array_merge( array( $task_meta ), $logger );
 	}
 
 	public function register( Container $container ): void {
@@ -101,6 +96,10 @@ final class CoreModule extends AbstractModule {
 		);
 
 		add_action( 'doublescale_daily_doublescale_daily3', array( \DoubleScale\Core\Tasks::class, 'cleanup_old_tasks' ) );
+
+		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Fields/Types/*.php' ) ?: array() as $f ) {
+			require_once $f;
+		}
 	}
 
 	/**

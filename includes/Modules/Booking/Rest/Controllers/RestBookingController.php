@@ -568,10 +568,7 @@ class RestBookingController extends RestController {
 	public function update_item( $request ) {
 		try {
 			$id                  = $request->get_param( 'id' );
-			$status              = $request->get_param( 'status' );
 			$cancellation_reason = $request->get_param( 'cancellation_reason' );
-			$start_time          = $request->get_param( 'start_time' );
-			$end_time            = $request->get_param( 'end_time' );
 
 			$booking = BookingModel::find( $id );
 
@@ -582,7 +579,15 @@ class RestBookingController extends RestController {
 			$old_status     = $booking->status;
 			$old_start_time = $booking->start_time;
 
-			if ( $status && $status !== $old_status ) {
+			$has_status     = $request->has_param( 'status' );
+			$has_start_time = $request->has_param( 'start_time' );
+			$has_end_time   = $request->has_param( 'end_time' );
+
+			$status     = $has_status ? $request->get_param( 'status' ) : null;
+			$start_time = $has_start_time ? $request->get_param( 'start_time' ) : null;
+			$end_time   = $has_end_time ? $request->get_param( 'end_time' ) : null;
+
+			if ( $has_status && $status !== $old_status ) {
 				$valid_transitions = array(
 					'waiting'   => array( 'scheduled', 'cancelled' ),
 					'pending'   => array( 'scheduled', 'cancelled' ),
@@ -604,33 +609,42 @@ class RestBookingController extends RestController {
 						array( 'status' => 400 )
 					);
 				}
-
-			}
-
-			if ( $start_time ) {
-				$start_time = new \DateTime( $start_time, new \DateTimeZone( $booking->timezone ) );
-				$start_time->setTimezone( new \DateTimeZone( 'UTC' ) );
-				$start_time = $start_time->format( 'Y-m-d H:i:s' );
-			}
-
-			if ( $end_time ) {
-				$end_time = new \DateTime( $end_time, new \DateTimeZone( $booking->timezone ) );
-				$end_time->setTimezone( new \DateTimeZone( 'UTC' ) );
-				$end_time = $end_time->format( 'Y-m-d H:i:s' );
 			}
 
 			if ( 'waiting' === $old_status && 'scheduled' === $status ) {
 				return $this->promote_waiting_booking( $booking );
 			}
 
-			$booking_data = array(
-				'status'     => $status,
-				'start_time' => $start_time,
-				'end_time'   => $end_time,
-			);
+			$start_dt = null;
+			$end_dt   = null;
+			if ( $has_start_time && $start_time ) {
+				$start_dt = new \DateTime( $start_time, new \DateTimeZone( $booking->timezone ) );
+			}
+			if ( $has_end_time && $end_time ) {
+				$end_dt = new \DateTime( $end_time, new \DateTimeZone( $booking->timezone ) );
+			}
 
-			$booking_data = array_filter( $booking_data );
+			$time_changed = false;
+			if ( $start_dt && 'cancelled' !== $status ) {
+				if ( ! $end_dt ) {
+					$end_dt = ( clone $start_dt )->modify( "+{$booking->slot_time} minutes" );
+				}
+				$duration = (int) ( ( $end_dt->getTimestamp() - $start_dt->getTimestamp() ) / 60 );
+				if ( $duration <= 0 ) {
+					$duration = (int) $booking->slot_time;
+				}
 
+				$service = new BookingService();
+				$service->reschedule_booking( $booking, $start_dt, $end_dt, $duration );
+				$booking->refresh();
+
+				$time_changed = $booking->start_time !== $old_start_time;
+			}
+
+			$booking_data = array();
+			if ( $has_status ) {
+				$booking_data['status'] = $status;
+			}
 			if ( 'cancelled' === $status ) {
 				$booking_data['cancelled_by'] = array(
 					'type' => 'host',
@@ -639,10 +653,10 @@ class RestBookingController extends RestController {
 				$booking->update_meta( 'cancellation_reason', $cancellation_reason );
 			}
 
-			$booking->update( $booking_data );
-			$booking->refresh();
-
-			$time_changed = $start_time && $start_time !== $old_start_time;
+			if ( ! empty( $booking_data ) ) {
+				$booking->update( $booking_data );
+				$booking->refresh();
+			}
 
 			if ( 'cancelled' === $status && 'cancelled' !== $old_status ) {
 				BookedSlotModel::release( $booking->id );

@@ -300,7 +300,7 @@ abstract class Importer {
 
 				$contact->save();
 
-				if ( ! empty( $custom_field_values ) && class_exists( 'DoubleScale\Core\CustomFields\Models\CustomFieldModel' ) ) {
+				if ( ! empty( $custom_field_values ) && class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 					foreach ( $custom_field_values as $custom_field_id => $cf_value ) {
 						if ( empty( $cf_value ) && $cf_value !== '0' ) {
 							continue;
@@ -362,7 +362,7 @@ abstract class Importer {
 				}
 
 				// Handle custom fields mapping (Pro feature)
-				if ( class_exists( 'DoubleScale\Core\CustomFields\Models\CustomFieldModel' ) && ! empty( $this->custom_fields_mapping ) ) {
+				if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) && ! empty( $this->custom_fields_mapping ) ) {
 					$this->import_custom_fields( $contact, $subscriber );
 				}
 
@@ -403,7 +403,7 @@ abstract class Importer {
 	 * @return void
 	 */
 	protected function import_custom_fields( $contact, $subscriber ) {
-		if ( ! class_exists( 'DoubleScale\Core\CustomFields\Models\CustomFieldModel' ) ) {
+		if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 			return;
 		}
 
@@ -449,7 +449,7 @@ abstract class Importer {
 				$group_id = $this->get_or_create_custom_fields_group( $field_group, $source_field );
 
 				// Check if custom field already exists
-				$custom_field = \DoubleScale\Core\CustomFields\Models\CustomFieldModel::where( 'slug', sanitize_title( $source_field ) )
+				$custom_field = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::where( 'slug', sanitize_title( $source_field ) )
 					->where( 'scope', 'contact' )
 					->first();
 
@@ -462,7 +462,7 @@ abstract class Importer {
 					$custom_field->save();
 				} else {
 					// Create new field
-					$custom_field             = new \DoubleScale\Core\CustomFields\Models\CustomFieldModel();
+					$custom_field             = new \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel();
 					$custom_field->name       = ! empty( $field_label ) ? $field_label : $source_field;
 					$custom_field->slug       = sanitize_title( $source_field );
 					$custom_field->type       = $field_type;
@@ -477,7 +477,7 @@ abstract class Importer {
 				// Map to existing custom fields
 				if ( ! empty( $target_fields ) ) {
 					foreach ( $target_fields as $custom_field_id ) {
-						$custom_field = \DoubleScale\Core\CustomFields\Models\CustomFieldModel::find( $custom_field_id );
+						$custom_field = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find( $custom_field_id );
 						if ( ! $custom_field ) {
 							continue;
 						}
@@ -569,7 +569,7 @@ abstract class Importer {
 	 * @return int Group ID
 	 */
 	protected function get_or_create_custom_fields_group( $group_name, $field_slug ) {
-		if ( ! class_exists( 'DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel' ) ) {
+		if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel' ) ) {
 			return 0;
 		}
 
@@ -581,7 +581,7 @@ abstract class Importer {
 			$group_slug = sanitize_title( $group_name );
 		}
 
-		$group = \DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel::firstOrCreate(
+		$group = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel::firstOrCreate(
 			array(
 				'slug'  => $group_slug,
 				'scope' => 'contact',

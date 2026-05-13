@@ -16,17 +16,18 @@ import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
 import './style.scss';
 import TemplatesStep from './steps/templates';
 import EmailTemplatesStep from './steps/email-templates';
-import SMSTemplateStep from './steps/templates/sms-template';
 import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import TriggerStep from './steps/trigger';
 import Builder from '../../../builder';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 import Overview from './overview';
 import StepsShimmer from './steps-shimmer';
 import OverviewDialogShimmer from './overview-dialog-shimmer';
 import ViewStep from './steps/view';
+import { ProFeatureNotice } from '@doublescale/components';
 
 const STEP_ALIASES: Record<string, string> = {
 	templates: 'template',
@@ -170,8 +171,20 @@ const Campaign: React.FC = () => {
 		if (!campaign) return null;
 
 		switch (campaign.type) {
-			case CAMPAIGN_CHANNEL.SMS:
-				return <SMSTemplateStep />;
+			case CAMPAIGN_CHANNEL.SMS: {
+				const SmsStep = getProSmsCampaignBridge()?.SMSTemplateStep;
+				return SmsStep ? (
+					<SmsStep />
+				) : (
+					<ProFeatureNotice
+						featureName={__('SMS campaigns', 'doublescale')}
+						description={__(
+							'Install and activate DoubleScale Pro to edit SMS campaign templates.',
+							'doublescale'
+						)}
+					/>
+				);
+			}
 			case CAMPAIGN_CHANNEL.WHATSAPP:
 				return <WhatsAppTemplateStep />;
 			case CAMPAIGN_CHANNEL.EMAIL:

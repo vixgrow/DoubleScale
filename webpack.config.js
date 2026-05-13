@@ -35,6 +35,20 @@ const sharedAlias = {
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
 
+	'@doublescale/email-sequences-page': path.resolve(
+		__dirname,
+		'src/client/pages/email-sequences-upgrade/index.tsx'
+	),
+	'@doublescale-pro/pages/custom-fields': path.resolve(
+		__dirname,
+		'../QuillCRM-Pro/src/client/pages/custom-fields'
+	),
+	// Pro custom-fields page imports this; free webpack must resolve it when aliasing the page in.
+	'@doublescale-free/hooks/use-custom-fields': path.resolve(
+		__dirname,
+		'src/client/hooks/use-customFields.ts'
+	),
+
 	// Generic foundation-layer fallbacks.
 	'@/hooks': path.resolve(__dirname, 'src/shared/hooks'),
 	'@/utils': path.resolve(__dirname, 'src/shared/utils'),

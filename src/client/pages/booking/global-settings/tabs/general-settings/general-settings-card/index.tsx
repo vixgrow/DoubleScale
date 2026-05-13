@@ -9,7 +9,6 @@ import { __ } from '@wordpress/i18n';
 import { CardHeader, AdvancedSettingsIcon } from '@/components/booking';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -92,22 +91,6 @@ const GeneralSettingsCard = ({ settings, updateSettings }) => {
                     icon={<AdvancedSettingsIcon />}
                 />
                 <div className='flex flex-col gap-[25px] mt-4'>
-                    <div className='flex flex-col gap-1'>
-                        <div className="text-[#3F4254] font-semibold text-[16px]">
-                            {__('Admin Email', 'doublescale')}
-                        </div>
-                        <Input
-                            id="admin_email"
-                            type="email"
-                            className="w-full rounded-lg h-[48px]"
-                            placeholder={__('{{wp.admin_email}}', 'doublescale')}
-                            value={settings.admin_email || ''}
-                            onChange={(e) =>
-                                updateSettings('admin_email', e.target.value)
-                            }
-                        />
-                    </div>
-
                     <div className='flex flex-col gap-1'>
                         <div className="text-[#3F4254] font-semibold text-[16px]">
                             {__('Calendar Start From', 'doublescale')}

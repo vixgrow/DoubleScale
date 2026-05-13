@@ -39,9 +39,9 @@ import {
 	NoticeBanner,
 	ShareIcon,
 	UpcomingCalendarIcon,
-	ProVersion,
 	SettingsIcon,
 } from '@/components/booking';
+import { ProFeatureNotice } from '@doublescale/components';
 import CalendarActions from './calendar-actions';
 import HostCalendarIntegrationIcons from './host-calendar-integration-icons';
 import CreateEvent from '../create-event';
@@ -50,8 +50,7 @@ import { applyFilters } from '@wordpress/hooks';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TabsTrigger } from '@radix-ui/react-tabs';
-import { Tabs, TabsList } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 /**
  * Main Calendars Component.
@@ -131,7 +130,7 @@ const Calendars: React.FC = () => {
 			path: addQueryArgs(`calendars`, {
 				per_page: 20,
 				keyword: '',
-				filters: {
+				filter: {
 					type: 'host',
 					user_id: String( currentUserId ),
 				},
@@ -379,7 +378,7 @@ const Calendars: React.FC = () => {
 				</div>
 			</div>
 			<Card className="doublescale-booking-calendars-action"><CardContent>
-				<div className='flex justify-between'>
+				<div className='flex justify-between items-center'>
 					<div>
 						<Tabs
 							value={
@@ -738,7 +737,30 @@ const Calendars: React.FC = () => {
 							) : (
 								applyFilters(
 									'doublescale_booking_calendars_team_events',
-									<ProVersion />,
+									<ProFeatureNotice
+										featureName={__(
+											'Team Events',
+											'doublescale'
+										)}
+										description={__(
+											'Coordinate group bookings with round-robin and collective scheduling. Assign multiple hosts to a single event and let attendees book time that works for the whole team.',
+											'doublescale'
+										)}
+										features={[
+											__(
+												'Round-robin host assignment',
+												'doublescale'
+											),
+											__(
+												'Collective team availability',
+												'doublescale'
+											),
+											__(
+												'Shared team calendars',
+												'doublescale'
+											),
+										]}
+									/>,
 									{
 										getFilteredCalendars,
 										siteUrl,

@@ -133,7 +133,7 @@
 	},
 	"scripts": {
 		"dev": "wp-scripts start --config webpack.config.js",
-		"build": "rm -rf build/client build/renderer build/config && wp-scripts build --config webpack.config.js"
+		"build": "rm -rf build/client build/renderer && wp-scripts build --config webpack.config.js"
 	},
 	"eslintConfig": {
 		"extends": [

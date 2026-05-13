@@ -560,9 +560,10 @@ class RestEventController extends RestController {
 			if ( 'host' === $calendar->type ) {
 				$default_availability = AvailabilityModel::where( 'user_id', $calendar->user_id )->where( 'is_default', 1 )->first();
 				if ( ! $default_availability ) {
-					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Default availability not found for user ID: ' . $calendar->user_id );
-					return new WP_Error( 'rest_event_error', __( 'Default availability not found', 'doublescale' ), array( 'status' => 500 ) );
+					// Lazy-seed a Mon-Fri 9-5 default so the user isn't blocked
+					// from creating their first event. They can edit the
+					// schedule afterwards from Booking → Availability.
+					$default_availability = AvailabilityModel::createDefaultForUser( $calendar->user_id );
 				}
 				$event_data['availability_id']   = $default_availability->id;
 				$event_data['availability_type'] = 'existing';
@@ -894,7 +895,13 @@ class RestEventController extends RestController {
 				}
 			}
 
-			$updated = array(
+			// Build the update set from parameters the client actually sent. Using
+			// has_param() lets clients clear fields by sending '' / null / [] —
+			// the previous array_filter() stripped every falsy value, so things
+			// like description, payments_settings, and availability_id could
+			// never be reset once set.
+			$updated     = array();
+			$param_map   = array(
 				'name'                => $name,
 				'description'         => $description,
 				'status'              => $status,
@@ -912,12 +919,23 @@ class RestEventController extends RestController {
 				'sms_notifications'   => $sms_notifications,
 				'payments_settings'   => $payments_settings,
 				'dynamic_duration'    => $dynamic_duration,
-				'availability_meta'   => maybe_serialize( $availability_meta ),
 				'availability_type'   => $availability_type,
-				'availability_id'     => is_array( $event_availability ) && isset( $event_availability['id'] )
-					? $event_availability['id']
-					: null,
 			);
+			foreach ( $param_map as $column => $value ) {
+				if ( $request->has_param( $column ) ) {
+					$updated[ $column ] = $value;
+				}
+			}
+
+			if ( $request->has_param( 'event_availability_meta' ) ) {
+				$updated['availability_meta'] = maybe_serialize( $availability_meta );
+			}
+
+			if ( $request->has_param( 'event_availability' ) ) {
+				$updated['availability_id'] = is_array( $event_availability ) && isset( $event_availability['id'] )
+					? $event_availability['id']
+					: null;
+			}
 
 			$event->setReserveTimesAttribute( $reserve_times );
 
@@ -930,7 +948,6 @@ class RestEventController extends RestController {
 				$exists = EventModel::where( 'slug', $slug )->where( 'id', '!=', $id )->first();
 				if ( $exists ) {
 					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Event slug already exists: ' . $slug );
 					return new WP_Error( 'rest_event_error', __( 'Event slug already exists', 'doublescale' ), array( 'status' => 400 ) );
 				}
 
@@ -948,7 +965,6 @@ class RestEventController extends RestController {
 			if ( $user_id ) {
 				$updated['user_id'] = $user_id;
 			}
-			$updated = array_filter( $updated );
 
 			foreach ( $updated as $key => $value ) {
 				$event->{$key} = $value;

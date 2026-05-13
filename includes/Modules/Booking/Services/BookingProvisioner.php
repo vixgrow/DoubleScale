@@ -49,6 +49,7 @@ final class BookingProvisioner {
 			if ( ! $calendar->timezone ) {
 				$calendar->timezone = self::resolve_default_timezone( $user_id );
 			}
+			self::ensure_default_availability( $user_id );
 			return $calendar;
 		}
 
@@ -65,7 +66,24 @@ final class BookingProvisioner {
 
 		$calendar->timezone = self::resolve_default_timezone( $user_id );
 
+		self::ensure_default_availability( $user_id );
+
 		return $calendar;
+	}
+
+	/**
+	 * Ensure the user has at least one availability row flagged as default.
+	 * Required by RestEventController, which refuses to create events when no
+	 * default exists for the calendar owner.
+	 */
+	private static function ensure_default_availability( int $user_id ): void {
+		$existing = AvailabilityModel::where( 'user_id', $user_id )
+			->where( 'is_default', 1 )
+			->first();
+		if ( $existing ) {
+			return;
+		}
+		AvailabilityModel::createDefaultForUser( $user_id );
 	}
 
 	/**

@@ -1133,7 +1133,24 @@ class EventModel extends Model {
 	 * @return array The availability array to use
 	 */
 	private function get_effective_availability() {
-		 return $this->processed_availability !== null ? $this->processed_availability : $this->availability;
+		$availability = $this->processed_availability !== null ? $this->processed_availability : $this->availability;
+
+		// Legacy rows can come back from maybe_unserialize / json_decode as stdClass
+		// trees (e.g. `override` keyed by date string was stored as a JSON object).
+		// Downstream code at line ~1913 uses array-bracket access, so coerce the
+		// whole structure to nested arrays here once and cache.
+		if ( is_object( $availability ) ) {
+			$availability = (array) $availability;
+		}
+		if ( is_array( $availability ) ) {
+			foreach ( array( 'weekly_hours', 'override' ) as $key ) {
+				if ( isset( $availability[ $key ] ) && is_object( $availability[ $key ] ) ) {
+					$availability[ $key ] = json_decode( wp_json_encode( $availability[ $key ] ), true );
+				}
+			}
+		}
+
+		return $availability;
 	}
 
 	/**
@@ -2736,8 +2753,24 @@ class EventModel extends Model {
 
 		static::deleted(
 			function ( $event ) {
+				// Iterate bookings as individual model deletes so the
+				// BookingModel::deleted listener fires for each row — that's
+				// what releases the BookedSlotModel slot, clears booking meta
+				// and logs, and removes host attachments. Mass deletes
+				// (->bookings()->delete()) skip model events entirely.
+				// chunk() bounds memory for events with many historical
+				// bookings; cursor() was tried first but returned models
+				// whose ->delete() silently no-ops when called inside this
+				// listener, so we use chunk() instead.
+				$event->bookings()->chunk(
+					500,
+					function ( $bookings ) {
+						foreach ( $bookings as $booking ) {
+							$booking->delete();
+						}
+					}
+				);
 				$event->meta()->delete();
-				$event->bookings()->delete();
 			}
 		);
 

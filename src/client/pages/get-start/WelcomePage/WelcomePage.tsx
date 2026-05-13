@@ -9,40 +9,31 @@ export default function WelcomePage({
 	onSkip,
 }: Readonly<{ onNext: () => void; onSkip: () => void }>) {
 	return (
-		<div className="flex flex-col items-center max-w-2xl mx-auto text-center">
+		<div className="flex flex-col items-center justify-center gap-6  mx-auto text-center">
+			<h1 className="text-2xl  leading-9 font-bold text-foreground ">
+				{__("Let's Set up Your", 'doublescale')}{' '}
+				<span className="text-[#CB5301]">
+					{__('New Project.', 'doublescale')}
+				</span>
+			</h1>
+
 			<img
 				src={welcomepage}
 				alt="Welcome to DoubleScale"
-				className="w-64 mb-6"
+				className="w-full max-w-lg"
 			/>
 
-			<h1 className="text-3xl font-bold text-foreground mb-3">
-				{__('Welcome to DoubleScale!', 'doublescale')}
-			</h1>
-
-			<p className="text-muted-foreground text-base leading-relaxed mb-2">
+			<p className="text-muted-foreground text-sm lg:text-base leading-7 font-medium max-w-4xl">
 				{__(
-					"Your all-in-one solution for managing email marketing campaigns, automations, and customer relationships — all from your WordPress dashboard.",
-					'doublescale'
+					'Your all-in-one solution for managing email marketing campaigns, automations, and customer relationships — all from your WordPress dashboard. This quick setup wizard will help you configure the essentials in under two minutes'
+				    ,'doublescale'
 				)}
 			</p>
 
-			<p className="text-muted-foreground text-base leading-relaxed mb-8">
-				{__(
-					"This quick setup wizard will help you configure the essentials in under two minutes. You can skip it and come back anytime.",
-					'doublescale'
-				)}
-			</p>
-
-			<div className="flex items-center gap-3">
-				<Button variant="outline" size="lg" onClick={onSkip}>
-					{__('Skip for now', 'doublescale')}
+				
+				<Button  onClick={onNext}>
+					{__("Let’s Get Started!", 'doublescale')}
 				</Button>
-				<Button size="lg" onClick={onNext}>
-					{__("Let's Get Started", 'doublescale')}
-					<ArrowRight size={16} className="ml-1.5" />
-				</Button>
-			</div>
 		</div>
 	);
 }

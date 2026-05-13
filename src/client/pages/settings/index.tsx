@@ -34,7 +34,6 @@ import {
 	CustomFieldsIcon,
 	ToolsIcon,
 	TotalSMSIcon,
-	ManagerIcon,
 	LicenseIcon,
 	ProcessingEmailsIcon,
 	LinkTriggersIcon,
@@ -48,7 +47,6 @@ import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
 import MailboxSettings from './mailbox';
-import Team from './team';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,15 +56,29 @@ import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
 import MobileAppSettings from './mobile-app';
-import CustomFields from '../custom-fields';
+import CustomFields from '@doublescale-pro/pages/custom-fields';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
+
+const CUSTOM_FIELDS_PRO_FEATURES = [
+	__(
+		'Create field groups and custom fields for contacts and deals',
+		'doublescale'
+	),
+	__(
+		'Use custom fields in contact records, automations, and merge tags',
+		'doublescale'
+	),
+	__(
+		'Drag-and-drop ordering and full REST API management',
+		'doublescale'
+	),
+];
 
 const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
 	'link_triggers',
 	'system',
-	'team',
 	'license',
 	'smtp',
 	'whatsapp',
@@ -116,6 +128,10 @@ const SettingsPage: React.FC = () => {
 	// Sync activeTab with URL param
 	useEffect(() => {
 		if (urlTab && urlTab !== 'tab?') {
+			if (urlTab === 'team') {
+				navigate(getToLink('team-managers'), { replace: true });
+				return;
+			}
 			// If user with limited access tries to access a restricted tab, redirect to notifications
 			if (hasLimitedSettingsAccess && !SALES_REP_ALLOWED_TABS.has(urlTab)) {
 				navigate(getToLink('settings/notifications'), { replace: true });
@@ -328,8 +344,6 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'team':
-				return <Team />;
 			case 'system':
 				return <SystemSettings />;
 			case 'currencies':
@@ -371,6 +385,18 @@ const SettingsPage: React.FC = () => {
 			case 'license':
 				return <License />;
 			case 'custom_fields':
+				if (!config.getProPluginData()?.is_active) {
+					return (
+						<ProFeatureNotice
+							featureName={__('Custom Fields', 'doublescale')}
+							description={__(
+								'Define groups and custom fields for contacts and deals, manage values on records, and use them in automations with DoubleScale Pro.',
+								'doublescale'
+							)}
+							features={CUSTOM_FIELDS_PRO_FEATURES}
+						/>
+					);
+				}
 				return <CustomFields />;
 			case 'link_triggers':
 				const LinkTriggersComponent = applyFilters(
@@ -499,11 +525,6 @@ const SettingsPage: React.FC = () => {
 			value: 'system',
 			label: 'System',
 			icon: <ToolsIcon width={24} height={24} />,
-		},
-		{
-			value: 'team',
-			label: 'Team',
-			icon: <ManagerIcon width={24} height={24} />,
 		},
 		{
 			value: 'custom_fields',

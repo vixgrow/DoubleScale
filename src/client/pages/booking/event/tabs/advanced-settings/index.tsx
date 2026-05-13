@@ -1,7 +1,7 @@
-import { AdvancedSettingsIcon, ProTab } from '@/components/booking';
 import { forwardRef } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+import { ProFeatureNotice } from '@doublescale/components';
 
 interface EventAdvancedSettingsProps {
 	disabled: boolean;
@@ -18,13 +18,12 @@ const AdvancedSettings = forwardRef<
 >(({ disabled, setDisabled }, ref) => {
 	return applyFilters(
 		'doublescale_booking_event_advanced_settings_tab',
-		<ProTab
-			title={__('Advanced Settings', 'doublescale')}
+		<ProFeatureNotice
+			featureName={__('Advanced Event Settings', 'doublescale')}
 			description={__(
-				'Customize the question asked on the booking page',
+				'Fine-tune your event with custom questions, redirect URLs, attendee limits, and conditional logic to match every booking workflow.',
 				'doublescale'
 			)}
-			icon={<AdvancedSettingsIcon />}
 		/>,
 		{ disabled, setDisabled, ref }
 	) as React.ReactNode;

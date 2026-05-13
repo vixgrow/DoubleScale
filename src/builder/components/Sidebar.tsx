@@ -35,6 +35,8 @@ interface SidebarItem {
 interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
 	openGlobalSettings?: () => void;
+	/** Open “My templates” drawer when the builder first mounts (used by Pro sequence mail / open-builder flow). */
+	openTemplatesOnMount?: boolean;
 }
 
 type SidebarTab = 'library' | 'blocks' | 'layouts' | 'settings';

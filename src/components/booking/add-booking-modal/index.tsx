@@ -39,6 +39,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { InfiniteScrollSelect } from '@/components/infinite-scroll-select';
 
 interface AddBookingModalProps {
 	open: boolean;
@@ -94,6 +95,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 	const [selectedTimeSlotHostsIds, setSelectedTimeSlotHostsIds] = useState<
 		number[]
 	>([]);
+	const [selectedContact, setSelectedContact] = useState<any | null>(null);
+	const [contactMode, setContactMode] = useState<'existing' | 'new'>('existing');
 
 	const { callApi, loading } = useApi();
 	const [inlineError, setInlineError] = useState<string | null>(null);
@@ -282,17 +285,86 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 		}
 	};
 
+	const validateRequiredFields = (
+		values: Record<string, any>,
+		selectedLocationType: string,
+		locationData: string
+	): string | null => {
+		if (contactMode === 'existing') {
+			if (!values.contact_id || !selectedContact?.email) {
+				return __('Please select an attendee.', 'doublescale');
+			}
+		} else {
+			if (!values.name) {
+				return __('Please enter the attendee name.', 'doublescale');
+			}
+			if (!values.email) {
+				return __('Please enter the attendee email.', 'doublescale');
+			}
+		}
+
+		// Custom fields (rendered by QuestionsComponents) are stored under
+		// `fields-{id}` to match QuillBooking's antd Form.Item naming — the
+		// `fields-` prefix is stripped by getFields() before POSTing.
+		const customFields = fields?.custom || {};
+		for (const [key, def] of Object.entries(customFields)) {
+			if (!def?.required || def?.enabled === false) {
+				continue;
+			}
+			const stored = values[`fields-${key}`];
+			if (stored === undefined || stored === '' || stored === null) {
+				return __(`${def.label} is required.`, 'doublescale');
+			}
+		}
+
+		// Location-data is required when the selected location type has
+		// required:true sub-fields (e.g. attendee_address, attendee_phone).
+		// `options` lives on the runtime field payload but isn't on FieldType.
+		const locationSelect = (fields?.location?.['location-select'] as
+			| { options?: Array<{ value: string; fields?: Record<string, any> }> }
+			| undefined) || undefined;
+		const locationOptions = locationSelect?.options || [];
+		const matchedOption = locationOptions.find(
+			(opt) => opt?.value === selectedLocationType
+		);
+		const subFields = matchedOption?.fields || {};
+		const requiresLocationData = Object.values(subFields).some(
+			(f: any) => f?.required
+		);
+		if (requiresLocationData && !locationData) {
+			return __(
+				'Please fill in the required location details.',
+				'doublescale'
+			);
+		}
+
+		return null;
+	};
+
 	const handleSubmit = async (values: any) => {
 		const {
 			selectDate,
 			selectTime,
 			event,
 			duration,
-			name,
-			email,
 			status,
 			hosts,
 		} = values;
+		let name = '';
+		let email = '';
+		if (contactMode === 'existing') {
+			const contactName = selectedContact
+				? [selectedContact.first_name, selectedContact.last_name]
+						.filter(Boolean)
+						.join(' ')
+						.trim()
+				: '';
+			name = contactName || selectedContact?.email || '';
+			email = selectedContact?.email || '';
+		} else {
+			name = (values.name || '').trim();
+			email = (values.email || '').trim();
+		}
 
 		if (!selectDate || !selectTime) {
 			reportError(
@@ -312,6 +384,16 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 			location,
 			location_data
 		);
+
+		const validationError = validateRequiredFields(
+			values,
+			location,
+			location_data
+		);
+		if (validationError) {
+			reportError(validationError);
+			return;
+		}
 
 		const hostsToSend = hosts ? [hosts] : selectedTimeSlotHostsIds;
 
@@ -366,6 +448,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 			setSelectedAvailability(undefined);
 			setTimeOptions([]);
 			setSelectedTimeSlotHostsIds([]);
+			setSelectedContact(null);
+			setContactMode('existing');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open]);
@@ -380,13 +464,12 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 				setCurrentTimezone(booking.timezone);
 			}
 			const contact = booking.contact;
-			const contactName = contact
-				? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
-				: '';
+			if (contact?.id) {
+				setSelectedContact(contact);
+			}
 			form.setFieldsValue({
 				event: booking.event?.id,
-				name: contactName || contact?.email || '',
-				email: contact?.email || '',
+				contact_id: contact?.id || '',
 				status: booking.status || 'scheduled',
 				timezone: booking.timezone,
 			});
@@ -657,30 +740,84 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
                             </SelectContent></Select>
                     </div>
 
-                    <div className='flex gap-5'>
-                        <div className="flex-1 space-y-1">
-                            <label className="text-sm font-medium">{__("Attendee's Name", 'doublescale')}</label>
-                            <Input
-                                value={formValues.name || ''}
-                                onChange={(e) =>
-                                    form.setFieldsValue({ name: e.target.value })
-                                }
-                                placeholder={__("Type the attendee's name", 'doublescale')}
-                                required
-                            />
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">{__('Attendee', 'doublescale')}</label>
+                        <div className="inline-flex rounded-md border border-border/60 p-1 bg-muted/40 text-sm">
+                            <button
+                                type="button"
+                                className={`px-3 py-1 rounded ${contactMode === 'existing' ? 'bg-white shadow text-foreground' : 'text-muted-foreground'}`}
+                                onClick={() => setContactMode('existing')}
+                            >
+                                {__('Existing contact', 'doublescale')}
+                            </button>
+                            <button
+                                type="button"
+                                className={`px-3 py-1 rounded ${contactMode === 'new' ? 'bg-white shadow text-foreground' : 'text-muted-foreground'}`}
+                                onClick={() => {
+                                    setContactMode('new');
+                                    setSelectedContact(null);
+                                    form.setFieldsValue({ contact_id: '' });
+                                }}
+                            >
+                                {__('New contact', 'doublescale')}
+                            </button>
                         </div>
-                        <div className="flex-1 space-y-1">
-                            <label className="text-sm font-medium">{__("Attendee's Email", 'doublescale')}</label>
-                            <Input
-                                type="email"
-                                value={formValues.email || ''}
-                                onChange={(e) =>
-                                    form.setFieldsValue({ email: e.target.value })
-                                }
-                                placeholder={__("Type the attendee's email", 'doublescale')}
-                                required
+
+                        {contactMode === 'existing' ? (
+                            <InfiniteScrollSelect
+                                value={formValues.contact_id || ''}
+                                onValueChange={(value, item) => {
+                                    form.setFieldsValue({ contact_id: value });
+                                    setSelectedContact(item || null);
+                                }}
+                                placeholder={__('Search contacts by name or email…', 'doublescale')}
+                                apiEndpoint="/doublescale/v1/contacts"
+                                searchParamName="keyword"
+                                getOptionLabel={(c: any) => {
+                                    const name = [c?.first_name, c?.last_name]
+                                        .filter(Boolean)
+                                        .join(' ')
+                                        .trim();
+                                    return name ? `${name} (${c?.email})` : (c?.email || '');
+                                }}
+                                getOptionValue={(c: any) => c?.id}
+                                dataPath="data"
+                                totalPath="total"
+                                perPage={20}
+                                selectedItem={selectedContact}
                             />
-                        </div>
+                        ) : (
+                            <div className="flex gap-5">
+                                <div className="flex-1 space-y-1">
+                                    <label className="text-xs font-medium text-muted-foreground">{__("Attendee's Name", 'doublescale')}</label>
+                                    <Input
+                                        value={formValues.name || ''}
+                                        onChange={(e) =>
+                                            form.setFieldsValue({ name: e.target.value })
+                                        }
+                                        placeholder={__("Type the attendee's name", 'doublescale')}
+                                        required
+                                    />
+                                </div>
+                                <div className="flex-1 space-y-1">
+                                    <label className="text-xs font-medium text-muted-foreground">{__("Attendee's Email", 'doublescale')}</label>
+                                    <Input
+                                        type="email"
+                                        value={formValues.email || ''}
+                                        onChange={(e) =>
+                                            form.setFieldsValue({ email: e.target.value })
+                                        }
+                                        placeholder={__("Type the attendee's email", 'doublescale')}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        {contactMode === 'new' && (
+                            <p className="text-xs text-muted-foreground">
+                                {__('A new contact will be created (or matched by email) when the booking is saved.', 'doublescale')}
+                            </p>
+                        )}
                     </div>
                     {fields && <QuestionsComponents fields={fields} form={form} />}
 

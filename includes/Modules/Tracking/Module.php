@@ -54,11 +54,6 @@ final class Module extends AbstractModule {
 		);
 
 		$container->singleton(
-			Sms::class,
-			static fn() => Sms::instance()
-		);
-
-		$container->singleton(
 			Whatsapp::class,
 			static fn() => Whatsapp::instance()
 		);
@@ -76,7 +71,6 @@ final class Module extends AbstractModule {
 		parent::boot( $container );
 
 		$container->get( Email::class );
-		$container->get( Sms::class );
 		$container->get( Whatsapp::class );
 		$container->get( LinkTriggers::class );
 	}

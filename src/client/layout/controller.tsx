@@ -25,7 +25,6 @@ import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
-import CustomFields from '../pages/custom-fields';
 import Campaign from '../pages/campaign';
 import LinkTriggers from '../pages/link-triggers';
 import LinkTrigger from '../pages/link-trigger';
@@ -53,6 +52,7 @@ import {
 	DashboardIcon,
 	FormsIcon,
 	IntegrationsIcon,
+	ManagerIcon,
 	SettingsIcon,
 	ToolsIcon,
 	CustomFieldsIcon,
@@ -71,9 +71,10 @@ import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
 import SmtpPage from '../pages/smtp';
+import TeamManagersPage from '../pages/team-managers';
 import Campaigns_EmailSequences from '../pages/campaigns';
 import Campaigns from '../pages/campaigns/campaigns';
-import SequencesMail from '../pages/email-sequences/sequences-mail';
+import EmailSequencesUpgradeNag from '../pages/email-sequences-upgrade';
 
 const FORMS_PRO_FEATURE_LIST = [
 	__('Drag-and-drop form builder', 'doublescale'),
@@ -313,19 +314,9 @@ registerAdminPage('tags', {
 registerAdminPage('lead-scoring', {
 	path: 'lead-scoring',
 	component: () => <ContactsLeadScoringRoute />,
-	label: __('Lead Scoring', 'doublescale'),
+	label: __('Lead Score', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
-	requiresModule: 'leadscoring',
-});
-
-registerAdminPage('custom-fields', {
-	path: 'custom-fields',
-	component: () => <CustomFields />,
-	label: __('Custom Fields', 'doublescale'),
-	icon: <CustomFieldsIcon />,
-	requiredCapability: ['doublescale_crm_manager'],
-	hidden: true,
 });
 
 registerAdminPage('campaigns', {
@@ -356,7 +347,7 @@ registerAdminPage('campaign', {
 
 registerAdminPage('email-sequences', {
 	path: 'email-sequences',
-	component: () => <Campaigns_EmailSequences path="email-sequences" />,
+	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequences', 'doublescale'),
 	icon: <EmailSequenceIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
@@ -366,14 +357,7 @@ registerAdminPage('email-sequences', {
 
 registerAdminPage('email-sequence', {
 	path: 'email-sequences/:id',
-	component: (props) => (
-		<SequencesMail
-			{...(props as {
-				navigate: (path: string) => void;
-				params: Record<string, string>;
-			})}
-		/>
-	),
+	component: () => <EmailSequencesUpgradeNag />,
 	label: __('Email Sequence', 'doublescale'),
 	hidden: true,
 	requiresModule: 'campaigns',
@@ -518,6 +502,15 @@ registerAdminPage('smtp', {
 	icon: <Mail size={24} />,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'smtp',
+	alwaysRegister: true,
+});
+
+registerAdminPage('team-managers', {
+	path: 'team-managers',
+	component: () => <TeamManagersPage />,
+	label: __('Team / Managers', 'doublescale'),
+	icon: <ManagerIcon width={24} height={24} />,
+	requiredCapability: ['doublescale_crm_manager'],
 	alwaysRegister: true,
 });
 

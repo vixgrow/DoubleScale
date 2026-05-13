@@ -391,6 +391,7 @@ class RestAvailabilityController extends RestController {
 		$user_id      = $request->get_param( 'user_id' ) ? $request->get_param( 'user_id' ) : get_current_user_id();
 		$name         = $request->get_param( 'name' );
 		$timezone     = $request->get_param( 'timezone' );
+		$is_default   = (bool) $request->get_param( 'is_default' );
 
 		if ( ! $name ) {
 			return new WP_Error( 'rest_availability_invalid_name', __( 'Invalid availability name.', 'doublescale' ), array( 'status' => 400 ) );
@@ -404,6 +405,14 @@ class RestAvailabilityController extends RestController {
 			return new WP_Error( 'rest_availability_invalid_timezone', __( 'Invalid timezone.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
+		// Force the first availability for a user to be the default — events
+		// can't be created without one, so we have to establish the invariant
+		// on first row regardless of what the caller asked for.
+		$has_existing = AvailabilityModel::where( 'user_id', $user_id )->exists();
+		if ( ! $has_existing ) {
+			$is_default = true;
+		}
+
 		// Prepare value data
 		$value_data = array(
 			'weekly_hours' => $weekly_hours,
@@ -415,10 +424,15 @@ class RestAvailabilityController extends RestController {
 			'name'       => $name,
 			'value'      => $value_data,
 			'timezone'   => $timezone,
-			'is_default' => false,
+			'is_default' => $is_default,
 		);
 
 		try {
+			if ( $is_default && $has_existing ) {
+				AvailabilityModel::where( 'user_id', $user_id )
+					->where( 'is_default', true )
+					->update( array( 'is_default' => false ) );
+			}
 			$availability  = AvailabilityModel::create( $availability_data );
 			$response_data = $this->prepare_availability_for_response( $availability );
 			return new WP_REST_Response( $response_data, 201 );

@@ -1,7 +1,7 @@
-import { OutlinedClockIcon, ProTab } from '@/components/booking';
 import { forwardRef } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+import { ProFeatureNotice } from '@doublescale/components';
 
 interface WaitingListSettingsProps {
 	disabled: boolean;
@@ -18,13 +18,12 @@ const WaitingListSettings = forwardRef<
 >(({ disabled, setDisabled }, ref) => {
 	return applyFilters(
 		'doublescale_booking_event_waiting_list_tab',
-		<ProTab
-			title={__('Waiting List', 'doublescale')}
+		<ProFeatureNotice
+			featureName={__('Waiting List', 'doublescale')}
 			description={__(
-				'Configure waiting list settings for this event',
+				'Keep accepting bookings even when an event is full. Attendees join a waiting list and get promoted automatically when a slot opens up.',
 				'doublescale'
 			)}
-			icon={<OutlinedClockIcon />}
 		/>,
 		{ disabled, setDisabled, ref }
 	) as React.ReactNode;

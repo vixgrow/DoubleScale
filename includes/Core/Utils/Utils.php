@@ -11,8 +11,8 @@
 
 namespace DoubleScale\Core\Utils;
 
-// use DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel; // Moved to Pro
-// use DoubleScale\Core\CustomFields\Models\CustomFieldModel; // Moved to Pro
+// use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel; // Pro
+// use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Pro
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -199,11 +199,11 @@ class Utils {
 	 */
 	public static function get_custom_fields() {
 		// Custom fields are PRO-only feature
-		if ( ! class_exists( 'DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel' ) ) {
+		if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel' ) ) {
 			return array();
 		}
 
-		$groups = \DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel::with( 'custom_fields' )->get();
+		$groups = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel::with( 'custom_fields' )->get();
 
 		$fields = array();
 
@@ -212,14 +212,14 @@ class Utils {
 				continue;
 			}
 
-			/** @var \DoubleScale\Core\CustomFields\Models\CustomFieldsGroupModel $group */
+			/** @var \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel $group */
 			$fields[ $group->id ] = array(
 				'label'  => $group->name,
 				'fields' => array(),
 			);
 
 			foreach ( $group->custom_fields as $field ) {
-				/** @var \DoubleScale\Core\CustomFields\Models\CustomFieldModel $field */
+				/** @var \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel $field */
 				$fields[ $group->id ]['fields'][ $field->id ] = array(
 					'label' => $field->name,
 					'type'  => $field->type,

@@ -195,11 +195,14 @@ class Capabilities {
 
 		$calendar = CalendarModel::find( $calendar_id );
 
+		// Deny-by-default for missing resources. Prior behavior granted access
+		// when the calendar didn't exist, which let stale UI mutate
+		// freshly-deleted IDs and returned a 404 (info leak) instead of 403.
 		if ( ! $calendar ) {
-			return true;
+			return false;
 		}
 
-		if ( $calendar->user_id === get_current_user_id() ) {
+		if ( (int) $calendar->user_id === get_current_user_id() ) {
 			return true;
 		}
 
@@ -214,10 +217,10 @@ class Capabilities {
 		$calendar = CalendarModel::find( $calendar_id );
 
 		if ( ! $calendar ) {
-			return true;
+			return false;
 		}
 
-		if ( $calendar->user_id === get_current_user_id() ) {
+		if ( (int) $calendar->user_id === get_current_user_id() ) {
 			return true;
 		}
 
@@ -232,10 +235,15 @@ class Capabilities {
 		$event = EventModel::find( $event_id );
 
 		if ( ! $event ) {
-			return true;
+			return false;
 		}
 
-		if ( $event->calendar->user_id === get_current_user_id() ) {
+		// Null-safe calendar access: if the event's calendar was deleted via
+		// a non-cascading path, optional()->user_id yields null instead of a
+		// PHP 8 warning. We then fall through to the manage_all_calendars
+		// check, which is the correct deny-by-default for orphaned events.
+		$calendar_owner = optional( $event->calendar )->user_id;
+		if ( null !== $calendar_owner && (int) $calendar_owner === get_current_user_id() ) {
 			return true;
 		}
 
@@ -253,7 +261,8 @@ class Capabilities {
 			return false;
 		}
 
-		if ( $event->calendar->user_id === get_current_user_id() ) {
+		$calendar_owner = optional( $event->calendar )->user_id;
+		if ( null !== $calendar_owner && (int) $calendar_owner === get_current_user_id() ) {
 			return true;
 		}
 

@@ -35,7 +35,7 @@ final class Module extends AbstractModule {
 	}
 
 	public function is_toggleable(): bool {
-		return false;
+		return true;
 	}
 
 	public function dependencies(): array {

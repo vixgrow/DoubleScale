@@ -478,9 +478,6 @@ class RestSettingsControllerPro {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function save_email_inbound_settings( $request ) {
-		if ( ! self::has_email_oauth_layer() ) {
-			return self::pro_mailbox_unavailable_error();
-		}
 		$body = $request->get_json_params();
 
 		if ( empty( $body ) ) {
@@ -491,6 +488,30 @@ class RestSettingsControllerPro {
 		$existing = Settings::get( 'email_inbound', array() );
 
 		$from_email = sanitize_email( $body['from_email'] ?? '' );
+		$has_pro    = self::has_email_oauth_layer();
+
+		// Free: persist sending identity only; leave all IMAP / OAuth / polling fields untouched.
+		// Pro: full payload — IMAP credentials, OAuth wiring, polling toggle, etc.
+		if ( ! $has_pro ) {
+			$settings = array_merge(
+				$existing,
+				array(
+					'from_email' => $from_email,
+					'from_name'  => sanitize_text_field( $body['from_name'] ?? '' ),
+					'reply_to'   => sanitize_email( $body['reply_to'] ?? '' ),
+				)
+			);
+
+			Settings::update( 'email_inbound', $settings );
+
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'message' => __( 'Sending identity saved.', 'doublescale'),
+				),
+				200
+			);
+		}
 
 		// Auto-resolve the IMAP provider and account from from_email.
 		// This way the admin never has to manually pick an IMAP account —

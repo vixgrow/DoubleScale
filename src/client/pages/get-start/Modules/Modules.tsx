@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
+import { useState, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -7,11 +7,21 @@ import type { ModuleInfo } from '@doublescale/config';
 import {
 	buildMarketingModuleDisplayRows,
 	getEffectiveMarketingModuleState,
+	OPTIONAL_MARKETING_MODULE_SLUGS,
 	pickToggleableModulePayload,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Switch } from '@/components/ui/switch';
-import ButtonComponent from '../component/button';
+import { Button } from '@/components/ui/button';
+import {
+	AutomationsIcon,
+	BookingIcon,
+	CampaignIcon,
+	FormsIcon,
+	IntegrationsIcon,
+	PipelineIcon,
+	TaskIcon,
+} from '@doublescale/components';
 
 interface ModulesResponse {
 	success: boolean;
@@ -24,26 +34,45 @@ interface ModulesStepProps {
 	readonly onSkip: () => void;
 }
 
-export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepProps) {
+function getModuleIcon(slug: string) {
+	switch (slug) {
+		case 'smtp':
+		case 'email':
+			return <IntegrationsIcon width={32} height={32} color="#0D9DFC" />;
+		case 'deals':
+		case 'pipelines':
+			return <PipelineIcon width={32} height={32} color="#0D9DFC" />;
+		case 'forms':
+			return <FormsIcon width={32} height={32} color="#0D9DFC" />;
+		case 'automations':
+			return <AutomationsIcon width={32} height={32} color="#0D9DFC" />;
+		case 'tasks':
+			return <TaskIcon width={32} height={32} color="#0D9DFC" />;
+		case 'campaigns':
+			return <CampaignIcon width={32} height={32} color="#0D9DFC" />;
+		case 'booking':
+			return <BookingIcon width={32} height={32} color="#0D9DFC" />;
+
+
+		default:
+			return <IntegrationsIcon width={32} height={32} color="#0D9DFC" />;
+	}
+}
+
+export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: ModulesStepProps) {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
-	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
+	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>(() => {
+		const apiModules = config.getModules();
+		const allOn: Record<string, boolean> = {};
+		for (const slug of OPTIONAL_MARKETING_MODULE_SLUGS) {
+			allOn[slug] = true;
+		}
+		return reduceMarketingModulePending(allOn, apiModules);
+	});
 	const [isSaving, setIsSaving] = useState(false);
 
 	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
-
-	useEffect(() => {
-		const TARGETS = ['smtp', 'deals', 'forms', 'tasks', 'campaigns', 'booking'];
-		const pending: Record<string, boolean> = {};
-		for (const slug of TARGETS) {
-			const m = modules.find((x) => x.slug === slug);
-			if (m && m.is_toggleable && !m.enabled) pending[slug] = true;
-		}
-		if (Object.keys(pending).length > 0) {
-			setPendingChanges((prev) => ({ ...pending, ...prev }));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
@@ -96,87 +125,90 @@ export default function ModulesStep({ onNext, onPrevious, onSkip }: ModulesStepP
 	}, [pendingChanges, onNext, createNotice]);
 
 	return (
-		<div className="flex flex-col gap-8">
-			<div>
-				<h3 className="text-foreground text-2xl font-semibold mb-1">
-					{__('Choose Your Modules', 'doublescale')}
+		<div className="flex min-h-0 flex-1 flex-col">
+			<div className="shrink-0 pb-6">
+				<h3 className="text-foreground text-2xl font-bold leading-9 mb-2.5">
+					{__('Select Modules', 'doublescale')}
 				</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
+				<p className="text-muted-foreground text-base leading-7 font-medium">
 					{__(
-						'Turn on only the add-ons you want: SMTP, Pipelines, Forms, Tasks, Campaigns, and Booking. Everything else in the CRM stays available and is not listed here. You can change this later in Settings → Modules.',
+						'Enable or disable modules to customize your project. Disabled modules will not load, freeing up resources.',
 						'doublescale'
 					)}
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-				{displayRows.map((mod) => {
-					const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingChanges);
+			<div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6">
+					{displayRows.map((mod) => {
+						const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingChanges);
+						const requires = mod.dependencies?.length ? mod.dependencies.join(', ') : null;
 
-					return (
-						<div
-							key={mod.slug}
-							className={`flex items-center justify-between gap-4 p-4 border rounded-xl transition-colors ${
-								mod.unavailableUntilPro
-									? 'border-border/40 bg-muted/15'
-									: isEnabled
-										? 'border-border/60 bg-card'
-										: 'border-border/40 bg-muted/20'
-							}`}
-						>
-							<div className="flex flex-col gap-1 flex-1 min-w-0">
-								<span
-									className={`text-sm font-medium ${isEnabled ? 'text-foreground' : 'text-muted-foreground'}`}
-								>
-									{mod.label}
-								</span>
-								<p className="text-xs text-muted-foreground leading-relaxed">{mod.description}</p>
-								{mod.unavailableUntilPro && (
-									<p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-										{__(
-											'Install and activate DoubleScale Pro to enable and use this module.',
-											'doublescale'
-										)}{' '}
-										<a
-											className="text-primary underline font-medium"
-											href={config.getUrlDoubleScalePro()}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											{__('View Pro plans', 'doublescale')}
-										</a>
-									</p>
-								)}
-								{mod.slug === 'smtp' && !isEnabled && !mod.unavailableUntilPro && (
-									<p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5 mt-2">
-										{__(
-											'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
-											'doublescale'
-										)}
-									</p>
-								)}
+						return (
+							<div
+								key={mod.slug}
+								className="flex flex-col gap-2 rounded-xl border border-border bg-white p-6 transition-colors"
+							>
+								<div className="flex items-center justify-between gap-3">
+									<div className="flex min-w-0 items-center gap-2.5">
+										<span className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#D9E9F3] p-1 text-[#0D9DFC]">
+											{getModuleIcon(mod.slug)}
+										</span>
+										<span className="truncate text-lg font-semibold leading-[30px] text-foreground">
+											{mod.label}
+										</span>
+									</div>
+									<Switch
+										checked={isEnabled}
+										onCheckedChange={(checked) => handleToggle(mod.slug, checked)}
+									/>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<p className="text-base leading-7 text-muted-foreground">{mod.description}</p>
+									{requires && (
+										<p className="text-sm font-medium leading-4 text-[#CB5301]">
+											{__('Requires:', 'doublescale')} {requires}
+										</p>
+									)}
+									{mod.unavailableUntilPro && (
+										<p className="text-sm leading-4 text-muted-foreground">
+											{__(
+												'Install and activate DoubleScale Pro to enable and use this module.',
+												'doublescale'
+											)}{' '}
+											<a
+												className="font-medium text-primary underline"
+												href={config.getUrlDoubleScalePro()}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												{__('View Pro plans', 'doublescale')}
+											</a>
+										</p>
+									)}
+									{mod.slug === 'smtp' && !isEnabled && !mod.unavailableUntilPro && (
+										<p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-700">
+											{__(
+												'SMTP is important for sending emails and campaigns. Disabling it may prevent emails from being delivered.',
+												'doublescale'
+											)}
+										</p>
+									)}
+								</div>
 							</div>
-							<Switch
-								checked={isEnabled}
-								onCheckedChange={(checked) => handleToggle(mod.slug, checked)}
-							/>
-						</div>
-					);
-				})}
-			</div>
-
-			<div className="flex justify-between pt-6">
-				<div className="flex gap-2">
-					<ButtonComponent onClick={onPrevious} type="">
-						{__('Previous', 'doublescale')}
-					</ButtonComponent>
-					<ButtonComponent type="no" onClick={onSkip}>
-						{__('Skip', 'doublescale')}
-					</ButtonComponent>
+						);
+					})}
 				</div>
-				<ButtonComponent type="go" onClick={handleNext} disabled={isSaving}>
-					{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
-				</ButtonComponent>
+			</div>
+			<div className="z-20 -mx-6 -mb-6  shrink-0  bg-white px-6 py-4 mt-6 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
+				<div className="flex items-center justify-end gap-6">
+					<Button type="button" size="lg" variant="secondaryDeepBlue" onClick={onPrevious}>
+						{__('Back', 'doublescale')}
+					</Button>
+					<Button type="button" size="lg" variant="default" onClick={handleNext} disabled={isSaving}>
+						{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

@@ -1,7 +1,7 @@
-import { ProTab, SmsNotificationIcon } from '@/components/booking';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { forwardRef } from 'react';
+import { ProFeatureNotice } from '@doublescale/components';
 
 export interface SmsNotificationsTabHandle {
 	saveSettings: () => Promise<void>;
@@ -19,13 +19,12 @@ const SmsNotificationTab = forwardRef<
 >(({ disabled, setDisabled, handleNavigation }, ref) => {
 	return applyFilters(
 		'doublescale_booking_event_sms_notification_tab',
-		<ProTab
-			title={__('SMS Notification', 'doublescale')}
+		<ProFeatureNotice
+			featureName={__('SMS Notifications', 'doublescale')}
 			description={__(
-				'Customize the SMS notifications sent to attendees and organizers',
+				'Send SMS reminders and confirmations to attendees and organizers. Reduce no-shows with timely text-message updates tied to each booking.',
 				'doublescale'
 			)}
-			icon={<SmsNotificationIcon />}
 		/>,
 		{
 			disabled,

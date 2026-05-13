@@ -142,14 +142,32 @@ class LeadScoreLevel extends Rule
     public function is_met(AutomationContactModel $automation_contact, $rule = array())
     {
         $value = $this->get_value($automation_contact);
-        $operator = $rule['operator'];
-        $rule_value = $rule['value'];
+        $operator = $rule['operator'] ?? 'is';
+        $rule_value = $rule['value'] ?? '';
+
+        if (is_array($rule_value) && isset($rule_value['value'])) {
+            $rule_value = $rule_value['value'];
+        }
+        if (is_object($rule_value) && isset($rule_value->value)) {
+            $rule_value = $rule_value->value;
+        }
+
+        $operator = (string) $operator;
+        $map = array(
+            'equals' => 'is',
+            '=' => 'is',
+            'not_equals' => 'is_not',
+            '!=' => 'is_not',
+        );
+        if (isset($map[ $operator ])) {
+            $operator = $map[ $operator ];
+        }
 
         switch ($operator) {
             case 'is':
-                return $value == $rule_value;
+                return (int) $value === (int) $rule_value;
             case 'is_not':
-                return $value != $rule_value;
+                return (int) $value !== (int) $rule_value;
             default:
                 return false;
         }

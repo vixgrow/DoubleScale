@@ -19,8 +19,9 @@ import {
 	EditIcon,
 	FormattedDateCell,
 	ContactSMSIcon,
+	ProFeatureNotice,
 } from '@doublescale/components';
-import SMSDevice from '../../steps/templates/sms-device';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 
 const previewUnavailableHtml = () =>
 	`<div class="p-4 text-center text-muted-foreground text-sm" style="font-family:system-ui,sans-serif">${__(
@@ -55,6 +56,7 @@ const CampaignDetails: React.FC = () => {
 	) as CampaignType | null;
 
 	const navigate = useNavigate();
+	const SMSDevice = getProSmsCampaignBridge()?.SMSDevice;
 	const [renderedTemplates, setRenderedTemplates] = useState<
 		Record<number, string>
 	>({});
@@ -225,19 +227,32 @@ const CampaignDetails: React.FC = () => {
 							>
 								{/* Template Body */}
 								{template.type === CAMPAIGN_CHANNEL.SMS ? (
-									<div className="flex items-center justify-center">
-										<SMSDevice
-											body={
-												typeof template.body ===
-												'string'
-													? template.body
-													: JSON.stringify(
-															template.body
-														)
-											}
-											className="bg-transparent border-none py-0 sm:p-0"
+									SMSDevice ? (
+										<div className="flex items-center justify-center">
+											<SMSDevice
+												body={
+													typeof template.body ===
+													'string'
+														? template.body
+														: JSON.stringify(
+																template.body
+															)
+												}
+												className="bg-transparent border-none py-0 sm:p-0"
+											/>
+										</div>
+									) : (
+										<ProFeatureNotice
+											featureName={__(
+												'SMS preview',
+												'doublescale'
+											)}
+											description={__(
+												'Activate DoubleScale Pro to preview SMS campaign templates.',
+												'doublescale'
+											)}
 										/>
-									</div>
+									)
 								) : renderedHtml ? (
 									<div
 										className="template-body-preview"

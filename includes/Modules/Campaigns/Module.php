@@ -47,7 +47,6 @@ final class Module extends AbstractModule {
 	public function scheduledHooks(): array {
 		return array(
 			array( 'doublescale_campaigns', 'doublescale_email_campaigns' ),
-			array( 'doublescale_campaigns', 'doublescale_sms_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_whatsapp_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_email_sequences' ),
 		);
@@ -80,7 +79,6 @@ final class Module extends AbstractModule {
 
 		Emails\EmailBuilder::instance();
 		Campaign\EmailProcessing::instance();
-		Campaign\SmsProcessing::instance();
 		Campaign\WhatsappProcessing::instance();
 		Campaign\AutomatedCampaignHandler::instance();
 		$container->get( Services\EmailSequencesManager::class );
@@ -98,9 +96,6 @@ final class Module extends AbstractModule {
 
 		if ( $tasks->get_next_timestamp( 'doublescale_email_campaigns' ) === false ) {
 			$tasks->schedule_recurring( time(), 60, 'doublescale_email_campaigns' );
-		}
-		if ( $tasks->get_next_timestamp( 'doublescale_sms_campaigns' ) === false ) {
-			$tasks->schedule_recurring( time(), 60, 'doublescale_sms_campaigns' );
 		}
 		if ( $tasks->get_next_timestamp( 'doublescale_email_sequences' ) === false ) {
 			$tasks->schedule_recurring( time(), 60, 'doublescale_email_sequences' );

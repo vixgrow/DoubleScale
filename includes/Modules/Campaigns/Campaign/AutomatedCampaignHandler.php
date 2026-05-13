@@ -840,9 +840,11 @@ class AutomatedCampaignHandler {
 
 		$processors = array(
 			CampaignChannel::STR_EMAIL    => EmailProcessing::class,
-			CampaignChannel::STR_SMS      => SmsProcessing::class,
 			CampaignChannel::STR_WHATSAPP => WhatsappProcessing::class,
 		);
+		if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
+			$processors[ CampaignChannel::STR_SMS ] = \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class;
+		}
 
 		if ( isset( $processors[ $channel_string ] ) ) {
 			$processor = $processors[ $channel_string ]::instance();

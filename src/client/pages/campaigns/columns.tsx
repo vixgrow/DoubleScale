@@ -39,8 +39,8 @@ import { getToLink } from '@doublescale/navigation';
 import EditHeaderIcon from '@/components/icons/edit-header';
 import { Play, Pause } from 'lucide-react';
 
-// Add interface for column props
-interface ColumnProps {
+// Add interface for column props (exported for Pro SMS columns).
+export interface CampaignColumnProps {
 	onDelete: (id: number) => void;
 	duplicate: (id: number) => void;
 	navigate: (path: string) => void;
@@ -48,12 +48,12 @@ interface ColumnProps {
 }
 
 // Common columns used across all campaign types
-const getCommonColumns = ({
+export const getCommonColumns = ({
 	onDelete,
 	duplicate,
 	navigate,
 	onStatusChange,
-}: ColumnProps) => {
+}: CampaignColumnProps) => {
 	const selectColumn: ColumnDef<Campaign> = {
 		id: 'select',
 		header: ({ table }) => (
@@ -264,7 +264,7 @@ export const emailCampaignColumns = ({
 	duplicate,
 	navigate,
 	onStatusChange,
-}: ColumnProps): ColumnDef<Campaign>[] => {
+}: CampaignColumnProps): ColumnDef<Campaign>[] => {
 	const {
 		selectColumn,
 		nameColumn,
@@ -341,47 +341,6 @@ export const emailCampaignColumns = ({
 		typeColumn,
 		openRateColumn,
 		recipientsColumn,
-		createdAtColumn,
-		updatedAtColumn,
-		actionsColumn,
-	];
-};
-
-// SMS/WhatsApp campaign columns: name, status, broadcast, delivered rate, created_at, updated_at, actions
-export const smsCampaignColumns = ({
-	onDelete,
-	duplicate,
-	navigate,
-	onStatusChange,
-}: ColumnProps): ColumnDef<Campaign>[] => {
-	const {
-		selectColumn,
-		nameColumn,
-		statusColumn,
-		broadcastColumn,
-		createdAtColumn,
-		updatedAtColumn,
-		actionsColumn,
-	} = getCommonColumns({ onDelete, duplicate, navigate, onStatusChange });
-
-	const deliveryRateColumn: ColumnDef<Campaign> = {
-		accessorKey: 'delivery_rate',
-		header: ({ column }) =>
-			SortedHeaderCell({
-				column,
-				header: __('Delivery Rate', 'doublescale'),
-			}),
-		cell: ({ row }) => (
-			<FallbackCell value={row.getValue('delivery_rate')} />
-		),
-	};
-
-	return [
-		selectColumn,
-		nameColumn,
-		statusColumn,
-		broadcastColumn,
-		deliveryRateColumn,
 		createdAtColumn,
 		updatedAtColumn,
 		actionsColumn,

@@ -24,7 +24,6 @@ final class ModuleManager {
 	private const TASK_HOOKS_BY_MODULE = array(
 		'campaigns'       => array(
 			array( 'doublescale_campaigns', 'doublescale_email_campaigns' ),
-			array( 'doublescale_campaigns', 'doublescale_sms_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_whatsapp_campaigns' ),
 			array( 'doublescale_campaigns', 'doublescale_email_sequences' ),
 		),

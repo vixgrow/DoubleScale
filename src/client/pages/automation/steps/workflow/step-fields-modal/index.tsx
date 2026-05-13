@@ -25,7 +25,7 @@ import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 import { useProviderStatus } from '@/hooks/use-provider-status';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
-import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 import AnalyticsPopup from '../reactflow-workflow/components/analytics-popup';
 import { useStepAnalytics } from '../reactflow-workflow/hooks/use-step-analytics';
 import {
@@ -53,6 +53,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [settings, setSettings] = useState(step.settings);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
 	const [showMergeTagNotice, setShowMergeTagNotice] = useState(false);
+	const ProTwilioModal =
+		getProSmsCampaignBridge()?.TwilioConfigModal ?? (() => null);
 	const navigate = useNavigate();
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('doublescale/core');
@@ -316,7 +318,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 			{/* Twilio Configuration Modal */}
 			{requiresProvider && channel && (
-				<TwilioConfigModal
+				<ProTwilioModal
 					open={showTwilioConfig}
 					onClose={() => setShowTwilioConfig(false)}
 					onSuccess={() => {

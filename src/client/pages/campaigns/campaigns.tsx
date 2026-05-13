@@ -18,22 +18,20 @@ import {
 } from '@doublescale/client';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { emailCampaignColumns, smsCampaignColumns } from './columns';
+import { emailCampaignColumns } from './columns';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 import {
 	PageHeader,
 	PlusIcon,
 	NoticeBanner,
-	ContactTotalEmailsIcon,
-	ContactSMSIcon,
+	ProFeatureNotice,
 } from '@/components';
-import PageTabs from '@/components/page-tabs';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable'; // Import the hook
 import { formatDateForAPI } from '@doublescale/utils';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
-import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
 import { useProviderStatus } from '@doublescale/hooks/use-provider-status';
 import { moduleFetch } from '@doublescale/services/module-fetch';
 
@@ -46,8 +44,8 @@ interface CampaignsProps {
 const Campaigns: React.FC<CampaignsProps> = ({
 	channel: channelProp,
 }) => {
-	const [activeTab, setActiveTab] = useState<CampaignChannel>('email');
-	const channel = channelProp ?? activeTab;
+	// Main "campaigns" route is email-only (SMS lives on navbar "sms-campaigns").
+	const channel: CampaignChannel = channelProp ?? 'email';
 
 	const [loading, setLoading] = useState(true);
 	const [campaignType, setCampaignType] = useState<CampaignType>('standard');
@@ -75,6 +73,11 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	});
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
+
+	const proSmsBridge = getProSmsCampaignBridge();
+	const smsUiAvailable = Boolean(proSmsBridge?.smsCampaignColumns);
+	const ProTwilioModal =
+		proSmsBridge?.TwilioConfigModal ?? (() => null);
 
 	const navigate = useNavigate();
 
@@ -104,6 +107,14 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	}, [channel]);
 
 	const fetchCampaigns = async () => {
+		if (channel === 'sms' && !smsUiAvailable) {
+			setCampaigns([]);
+			setTotalRecords(0);
+			setHasRecords(false);
+			setLoading(false);
+			return;
+		}
+
 		setLoading(true);
 
 		try {
@@ -392,10 +403,11 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 		if (channel === 'email') {
 			return emailCampaignColumns(columnProps);
-		} else {
-			// Both SMS and WhatsApp use the same columns
-			return smsCampaignColumns(columnProps);
 		}
+		if (proSmsBridge?.smsCampaignColumns) {
+			return proSmsBridge.smsCampaignColumns(columnProps);
+		}
+		return emailCampaignColumns(columnProps);
 	};
 
 	const handleBulkAction = async (action: string) => {
@@ -422,6 +434,9 @@ const Campaigns: React.FC<CampaignsProps> = ({
 	 * For SMS campaigns, check provider connection before opening modal
 	 */
 	const handleCreateCampaign = () => {
+		if (channel === 'sms' && !smsUiAvailable) {
+			return;
+		}
 		if (channel === 'sms' && !isSmsProviderConnected) {
 			// Show error notice if provider not configured
 			setNotice({
@@ -502,35 +517,24 @@ const Campaigns: React.FC<CampaignsProps> = ({
 		</>
 	);
 
-	const tabsList = [
-		{
-			value: 'email',
-			label: 'Email Campaigns',
-			icon: <ContactTotalEmailsIcon width={24} height={24} />,
-		},
-		{
-			value: 'sms',
-			label: 'SMS Campaigns',
-			icon: <ContactSMSIcon width={24} height={24} />,
-		},
-	];
-
-	const tabsContent = [
-		{
-			value: 'email',
-			children: <CampaignContent />,
-		},
-		{
-			value: 'sms',
-			children: <CampaignContent />,
-		},
-	];
+	const smsProUpgrade = (
+		<div className="bg-white rounded-3xl p-8 shadow-sm">
+			<ProFeatureNotice
+				featureName={__('SMS Campaigns', 'doublescale')}
+				description={__(
+					'Create, send, and track SMS campaigns with Twilio integration, delivery analytics, and the same automation tools you use for email. Upgrade to DoubleScale Pro to unlock SMS campaigns.',
+					'doublescale'
+				)}
+			/>
+		</div>
+	);
 
 	// Determine if "Create Campaign" button should be shown
-	// Hide for SMS campaigns when Twilio is not configured
+	// Hide for SMS without Pro, and for SMS when Twilio is not configured (Pro only)
 	const showCreateButton =
-		channel === 'email' ||
-		(channel === 'sms' && isSmsProviderConnected);
+		!(channel === 'sms' && !smsUiAvailable) &&
+		(channel === 'email' ||
+			(channel === 'sms' && isSmsProviderConnected));
 
 	const listTitle =
 		channel === 'sms'
@@ -539,66 +543,21 @@ const Campaigns: React.FC<CampaignsProps> = ({
 
 	const campaignBody = <CampaignContent />;
 
-	if (channelProp === undefined) {
+	if (channelProp === 'sms' && !smsUiAvailable) {
 		return (
 			<div className="doublescale-campaigns">
 				<PageHeader
-					title={listTitle}
+					title={__('SMS Campaigns', 'doublescale')}
 					subtitle={__('Campaigns', 'doublescale')}
-					actions={
-						showCreateButton
-							? [
-									{
-										label: __('Create Campaign', 'doublescale'),
-										icon: <PlusIcon />,
-										onClick: handleCreateCampaign,
-									},
-								]
-							: []
-					}
+					actions={[]}
 				/>
-
 				{notice && (
 					<NoticeBanner
 						notice={notice}
 						closeNotice={() => setNotice(null)}
 					/>
 				)}
-
-				{channel === 'sms' &&
-					!isSmsProviderConnected &&
-					!isSmsProviderLoading && (
-						<ProviderNotConnectedWarning
-							channel="sms"
-							onConfigureClick={() => setShowTwilioConfig(true)}
-						/>
-					)}
-
-				<PageTabs
-					defaultValue="email"
-					tabsList={tabsList}
-					tabsContent={tabsContent}
-					onValueChange={(value) =>
-						setActiveTab(value as CampaignChannel)
-					}
-					tabsListWrapperClassName="shadow-sm bg-white px-5 py-3 rounded-lg mb-4"
-					tabsListClassName="bg-transparent text-foreground gap-3"
-				/>
-
-				<AddCampaign
-					setCampaignType={setCampaignType}
-					campaignType={campaignType}
-					setStep={setStep}
-					step={step}
-					addCampaign={addCampaign}
-					activeTab={channel}
-				/>
-
-				<TwilioConfigModal
-					open={showTwilioConfig}
-					onClose={() => setShowTwilioConfig(false)}
-					onSuccess={handleTwilioConfigSuccess}
-				/>
+				{smsProUpgrade}
 			</div>
 		);
 	}
@@ -629,8 +588,9 @@ const Campaigns: React.FC<CampaignsProps> = ({
 				/>
 			)}
 
-			{/* SMS: Show provider warning if not configured */}
-			{channel === 'sms' &&
+			{/* SMS: Show provider warning if not configured (Pro only) */}
+			{smsUiAvailable &&
+				channel === 'sms' &&
 				!isSmsProviderConnected &&
 				!isSmsProviderLoading && (
 					<ProviderNotConnectedWarning
@@ -651,7 +611,7 @@ const Campaigns: React.FC<CampaignsProps> = ({
 			/>
 
 			{/* Twilio Configuration Modal */}
-			<TwilioConfigModal
+			<ProTwilioModal
 				open={showTwilioConfig}
 				onClose={() => setShowTwilioConfig(false)}
 				onSuccess={handleTwilioConfigSuccess}

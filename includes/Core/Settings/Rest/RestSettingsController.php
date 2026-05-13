@@ -952,7 +952,7 @@ class RestSettingsController extends RestController {
 		);
 
 		// Sms campaigns (every 60 seconds) - Pro only.
-		if ( class_exists( 'DoubleScale\Core\PluginKernel' ) ) {
+		if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
 			$sms_heartbeat = $campaigns_tasks->get_heartbeat_status( 'doublescale_sms_campaigns' );
 			$last_run      = $sms_heartbeat['last_run'] ?? null;
 
@@ -1126,8 +1126,8 @@ class RestSettingsController extends RestController {
 			'doublescale_daily_doublescale_daily4' => __( 'Daily Cleanup Tasks', 'doublescale' ),
 		);
 
-		// Add Pro hooks if Pro plugin is active.
-		if ( class_exists( 'DoubleScale\Core\PluginKernel' ) ) {
+		// Add Pro hooks if SMS campaign processing is available.
+		if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
 			$valid_hooks['doublescale_campaigns_doublescale_sms_campaigns'] = __( 'Scheduled Sms Sending Tasks', 'doublescale' );
 			// WhatsApp not shipping in this version.
 			// $valid_hooks['doublescale_campaigns_doublescale_whatsapp_campaigns'] = __( 'Scheduled WhatsApp Sending Tasks', 'doublescale');

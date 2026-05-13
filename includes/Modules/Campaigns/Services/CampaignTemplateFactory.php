@@ -80,6 +80,16 @@ class CampaignTemplateFactory {
 			);
 
 			$template_processor = $this->get_template_processor( $campaign_type );
+			if ( ! $template_processor ) {
+				doublescale_get_logger()->error(
+					'Template processing failed: No processor for campaign type',
+					array(
+						'campaign_type' => $campaign_type,
+						'code'          => 'template_processing_no_processor',
+					)
+				);
+				continue;
+			}
 			$template           = $template_processor->process( $template_data, $campaign_status );
 
 			if ( $template ) {
@@ -110,7 +120,7 @@ class CampaignTemplateFactory {
 	 * Get template processor for campaign type
 	 *
 	 * @param string $campaign_type Campaign type
-	 * @return Template_Processor_Interface
+	 * @return Template_Processor_Interface|null
 	 * @throws \InvalidArgumentException
 	 */
 	private function get_template_processor( $campaign_type ) {
@@ -120,7 +130,10 @@ class CampaignTemplateFactory {
 			case CampaignChannel::STR_SEQUENCE_MAIL:
 				return new Email_Template_Processor();
 			case CampaignChannel::STR_SMS:
-				return new SMS_Template_Processor();
+				if ( class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsTemplateProcessor::class ) ) {
+					return new \DoubleScale\Pro\Modules\Campaigns\Sms\SmsTemplateProcessor();
+				}
+				return null;
 			case CampaignChannel::STR_WHATSAPP:
 				return new WhatsApp_Template_Processor();
 			default:
@@ -393,37 +406,6 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 		}
 
 		return true;
-	}
-}
-
-/**
- * Sms Template Processor
- */
-class SMS_Template_Processor extends Abstract_Template_Processor {
-
-	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		parent::__construct( CampaignChannel::STR_SMS );
-	}
-
-	/**
-	 * Get default template name
-	 *
-	 * @return string
-	 */
-	public function get_default_name() {
-		return __( 'Sms Campaign Template', 'doublescale');
-	}
-
-	/**
-	 * Get default Sms template body
-	 *
-	 * @return string
-	 */
-	protected function get_default_body() {
-		return 'Hi {{contact:first_name}}, thank you for subscribing! Reply STOP to unsubscribe.';
 	}
 }
 

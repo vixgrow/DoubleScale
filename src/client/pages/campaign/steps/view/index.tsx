@@ -39,9 +39,8 @@ import {
 	CardLayout,
 	CampaignSettingsCard,
 	SendTestEmailCard,
-	SendTestSMSCard,
 } from '../review/components';
-import SMSDevice from '../templates/sms-device';
+import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
 import type {
 	EmailTemplate,
 	SMSTemplate,
@@ -167,6 +166,9 @@ const fetchRenderedTemplateHtml = async (
 const View: React.FC = () => {
 	const { campaign } = useCampaignStep();
 	const navigate = useNavigate();
+	const proSmsBridge = getProSmsCampaignBridge();
+	const SMSDevice = proSmsBridge?.SMSDevice;
+	const SendTestSMSCard = proSmsBridge?.SendTestSMSCard;
 	const [dialogChannel, setDialogChannel] = useState<
 		typeof CAMPAIGN_CHANNEL.EMAIL | typeof CAMPAIGN_CHANNEL.SMS | null
 	>(null);
@@ -362,11 +364,18 @@ const View: React.FC = () => {
 											)}
 										</div>
 									)
-								) : (
+								) : SMSDevice ? (
 									<SMSDevice
 										body={smsBody}
 										className="bg-transparent border-none py-0 sm:p-0 lg:w-full mt-4"
 									/>
+								) : (
+									<div className="text-center text-gray-500 text-base px-4">
+										{__(
+											'SMS preview requires DoubleScale Pro.',
+											'doublescale'
+										)}
+									</div>
 								)}
 							</div>
 						</div>
@@ -410,14 +419,23 @@ const View: React.FC = () => {
 						/>
 					</DialogHeader>
 					{dialogChannel === CAMPAIGN_CHANNEL.SMS ? (
-						<SendTestSMSCard
-							campaignId={campaign?.id}
-							header={false}
-							description={false}
-							cardClassName="bg-white border-none shadow-none p-0"
-							buttonClassName="w-full"
-							buttonVariant="gradient"
-						/>
+						SendTestSMSCard ? (
+							<SendTestSMSCard
+								campaignId={campaign?.id}
+								header={false}
+								description={false}
+								cardClassName="bg-white border-none shadow-none p-0"
+								buttonClassName="w-full"
+								buttonVariant="gradient"
+							/>
+						) : (
+							<p className="text-sm text-muted-foreground px-1">
+								{__(
+									'SMS test sending requires DoubleScale Pro.',
+									'doublescale'
+								)}
+							</p>
+						)
 					) : (
 						<SendTestEmailCard
 							campaignId={campaign?.id}

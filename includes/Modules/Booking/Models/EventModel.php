@@ -1133,7 +1133,24 @@ class EventModel extends Model {
 	 * @return array The availability array to use
 	 */
 	private function get_effective_availability() {
-		 return $this->processed_availability !== null ? $this->processed_availability : $this->availability;
+		$availability = $this->processed_availability !== null ? $this->processed_availability : $this->availability;
+
+		// Legacy rows can come back from maybe_unserialize / json_decode as stdClass
+		// trees (e.g. `override` keyed by date string was stored as a JSON object).
+		// Downstream code at line ~1913 uses array-bracket access, so coerce the
+		// whole structure to nested arrays here once and cache.
+		if ( is_object( $availability ) ) {
+			$availability = (array) $availability;
+		}
+		if ( is_array( $availability ) ) {
+			foreach ( array( 'weekly_hours', 'override' ) as $key ) {
+				if ( isset( $availability[ $key ] ) && is_object( $availability[ $key ] ) ) {
+					$availability[ $key ] = json_decode( wp_json_encode( $availability[ $key ] ), true );
+				}
+			}
+		}
+
+		return $availability;
 	}
 
 	/**

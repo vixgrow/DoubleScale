@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from '@wordpress/element';
+import { useState, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
@@ -7,6 +7,7 @@ import type { ModuleInfo } from '@doublescale/config';
 import {
 	buildMarketingModuleDisplayRows,
 	getEffectiveMarketingModuleState,
+	OPTIONAL_MARKETING_MODULE_SLUGS,
 	pickToggleableModulePayload,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
@@ -51,23 +52,17 @@ function getModuleIcon(slug: string) {
 export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: ModulesStepProps) {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
-	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
+	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>(() => {
+		const apiModules = config.getModules();
+		const allOn: Record<string, boolean> = {};
+		for (const slug of OPTIONAL_MARKETING_MODULE_SLUGS) {
+			allOn[slug] = true;
+		}
+		return reduceMarketingModulePending(allOn, apiModules);
+	});
 	const [isSaving, setIsSaving] = useState(false);
 
 	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
-
-	useEffect(() => {
-		const TARGETS = ['smtp', 'deals', 'forms', 'tasks', 'campaigns', 'booking'];
-		const pending: Record<string, boolean> = {};
-		for (const slug of TARGETS) {
-			const m = modules.find((x) => x.slug === slug);
-			if (m && m.is_toggleable && !m.enabled) pending[slug] = true;
-		}
-		if (Object.keys(pending).length > 0) {
-			setPendingChanges((prev) => ({ ...pending, ...prev }));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
@@ -198,7 +193,7 @@ export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: Mod
 			<div className="z-20 -mx-6 -mb-6  shrink-0  bg-white px-6 py-4 mt-6 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
 				<div className="flex items-center justify-end gap-6">
 					<Button type="button" size="lg" variant="secondaryDeepBlue" onClick={onPrevious}>
-						{__('Previous', 'doublescale')}
+						{__('Back', 'doublescale')}
 					</Button>
 					<Button type="button" size="lg" variant="default" onClick={handleNext} disabled={isSaving}>
 						{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}

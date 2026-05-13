@@ -342,7 +342,7 @@ class RestCalendarController extends RestController
 			$page     = $request->get_param('page') ? $request->get_param('page') : 1;
 			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$keyword  = $request->get_param('keyword') ? $request->get_param('keyword') : '';
-			$filter   = $request->get_param('filters') ? $request->get_param('filters') : array();
+			$filter   = $request->get_param('filter') ? $request->get_param('filter') : array();
 			$type     = Arr::get($filter, 'type', 'all');
 			$user     = $request->get_param('user') ?? (current_user_can('doublescale_booking_read_all_calendars') ? 'all' : 'own');
 			$ids      = $request->get_param('ids') ? $request->get_param('ids') : array();

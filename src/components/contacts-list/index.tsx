@@ -172,7 +172,7 @@ const ContactList: React.FC<ContactListProps> = ({
 	if (isSummary) {
 		const busy = isLoading || loading;
 		return (
-			<div className="relative w-full shrink-0 self-start rounded-xl bg-[#FAEADF] px-4 py-4 lg:max-w-sm">
+			<div className="relative w-full self-start rounded-xl bg-[#FAEADF] px-4 py-4">
 				<svg
 					className="pointer-events-none absolute inset-0 h-full w-full overflow-visible rounded-xl"
 					xmlns="http://www.w3.org/2000/svg"

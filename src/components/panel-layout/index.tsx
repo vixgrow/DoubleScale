@@ -72,10 +72,11 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 
 			{/* Scrollable Content Section */}
 			<div
-				className='w-full max-w-none bg-[#F7F8FA] py-6'
+				className='w-full max-w-none bg-[#F7F8FA] p-6'
 			>
 				<div
-					className='h-full pb-4 rounded-2xl bg-white shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] overflow-hidden'
+					className='overflow-hidden rounded-[20px] bg-white p-6
+							shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]'
 				>
 					{children}
 				</div>

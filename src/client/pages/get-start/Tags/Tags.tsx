@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useState } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import type { Tag as ContactTag, TagsResponse } from '@doublescale/client';
 import { isEmpty } from 'validator';
@@ -11,10 +11,10 @@ import { isEmpty } from 'validator';
 /**
  * Internal dependencies
  */
-import ButtonComponent from '../component/button';
+import { Button } from '@/components/ui/button';
 import { usePaginatedSegments } from '../hooks/usePaginatedSegments';
 import { SegmentTable } from '../components/SegmentTable';
-import { generateSlug, getApiErrorMessage } from '@/utils';
+import { generateSlug, getApiErrorMessage } from '@doublescale/utils';
 
 type NewSegment = {
 	name: string;
@@ -27,7 +27,7 @@ type TagsProps = Readonly<{
 	onSkip: () => void;
 }>;
 
-export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
+export default function Tags({ onNext, onPrevious, onSkip: _onSkip }: TagsProps) {
 	const { createNotice } = useDispatch('doublescale/core');
 	const [newSegment, setNewSegment] = useState<NewSegment>({
 		name: '',
@@ -62,17 +62,29 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 		});
 	};
 
+	const canAddNewSegment = useMemo(
+		() =>
+			!isEmpty(newSegment.name || '', { ignore_whitespace: true }) ||
+			!isEmpty(newSegment.slug || '', { ignore_whitespace: true }),
+		[newSegment.name, newSegment.slug]
+	);
+
 	const handleAdd = async () => {
-		if (isEmpty(newSegment.name || '', { ignore_whitespace: true })) {
+		const nameTrim = (newSegment.name || '').trim();
+		const slugTrim = (newSegment.slug || '').trim();
+		if (!nameTrim && !slugTrim) {
 			return;
 		}
+
+		const name = nameTrim || slugTrim;
+		const slug = slugTrim || generateSlug(name);
 
 		setIsSaving(true);
 
 		try {
 			const tagData = {
-				name: newSegment.name,
-				slug: newSegment.slug || generateSlug(newSegment.name),
+				name,
+				slug,
 				description: '',
 			};
 
@@ -135,7 +147,8 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				method: 'PUT',
 				data: {
 					name: editingValues.name,
-					slug: editingValues.slug || generateSlug(editingValues.name),
+					slug:
+						editingValues.slug || generateSlug(editingValues.name),
 				},
 			});
 
@@ -200,15 +213,15 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 	};
 
 	return (
-		<div className="flex flex-col gap-8">
-			<div>
-				<h3 className="text-foreground text-2xl font-semibold mb-1">
+		<div className="flex min-h-0 flex-1 flex-col">
+			<div className="shrink-0 pb-6">
+				<h3 className="mb-2.5 text-2xl font-bold leading-9 text-foreground">
 					{__(
-						'Organize with Tags',
+						'Tag Your Contacts — Organize CRM Segments with Ease',
 						'doublescale'
 					)}
 				</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
+				<p className="text-base font-medium leading-7 text-muted-foreground">
 					{__(
 						'Add tags to label VIPs, product users, and more — making it easier to filter, track, and personalize your CRM outreach.',
 						'doublescale'
@@ -216,64 +229,77 @@ export default function Tags({ onNext, onPrevious, onSkip }: TagsProps) {
 				</p>
 			</div>
 
-			<SegmentTable
-				items={tags}
-				loading={loading}
-				isSaving={isSaving}
-				newSegment={newSegment}
-				editingId={editingId}
-				editingValues={editingValues}
-				perPage={perPage}
-				page={page}
-				totalRecords={totalRecords}
-				onChangeNewName={handleNameChange}
-				onChangeNewSlug={(value) =>
-					setNewSegment((previous) => ({
-						...previous,
-						slug: value,
-					}))
-				}
-				onAdd={handleAdd}
-				onStartEdit={handleStartEdit}
-				onCancelEdit={handleCancelEdit}
-				onChangeEditingName={(value) =>
-					setEditingValues((previous) => ({
-						...previous,
-						name: value,
-					}))
-				}
-				onChangeEditingSlug={(value) =>
-					setEditingValues((previous) => ({
-						...previous,
-						slug: value,
-					}))
-				}
-				onUpdate={handleUpdate}
-				onDelete={handleDelete}
-				onChangePerPage={setPerPage}
-				onChangePage={setPage}
-				emptyMessage={__(
-					'No tags yet. Create your first tag above.',
-					'doublescale'
-				)}
-				deleteConfirmationMessage={__(
-					'Are you sure you want to delete this tag?',
-					'doublescale'
-				)}
-			/>
+			<div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+				<SegmentTable
+					variant="tags"
+					items={tags}
+					loading={loading}
+					isSaving={isSaving}
+					canAddNewSegment={canAddNewSegment}
+					newSegment={newSegment}
+					editingId={editingId}
+					editingValues={editingValues}
+					perPage={perPage}
+					page={page}
+					totalRecords={totalRecords}
+					onChangeNewName={handleNameChange}
+					onChangeNewSlug={(value) =>
+						setNewSegment((previous) => ({
+							...previous,
+							slug: value,
+						}))
+					}
+					onAdd={handleAdd}
+					onStartEdit={handleStartEdit}
+					onCancelEdit={handleCancelEdit}
+					onChangeEditingName={(value) =>
+						setEditingValues((previous) => ({
+							...previous,
+							name: value,
+						}))
+					}
+					onChangeEditingSlug={(value) =>
+						setEditingValues((previous) => ({
+							...previous,
+							slug: value,
+						}))
+					}
+					onUpdate={handleUpdate}
+					onDelete={handleDelete}
+					onChangePerPage={setPerPage}
+					onChangePage={setPage}
+					emptyMessage={__(
+						'No tags yet. Create your first tag above.',
+						'doublescale'
+					)}
+					deleteConfirmationMessage={__(
+						'Are you sure you want to delete this tag?',
+						'doublescale'
+					)}
+				/>
+			</div>
 
-			<div className="flex justify-between pt-6 border-t border-border/40">
-				<div className="flex gap-2">
-					<ButtonComponent onClick={onPrevious} type="" disabled={isSaving}>
-						{__('Previous', 'doublescale')}
-					</ButtonComponent>
-					<ButtonComponent type="no" onClick={onSkip} disabled={isSaving}>
-						{__('Skip →', 'doublescale')}
-					</ButtonComponent>
+			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
+				<div className="flex flex-wrap items-center justify-end gap-6">
+					<Button
+						type="button"
+						size="lg"
+						variant="secondaryDeepBlue"
+						onClick={onPrevious}
+						disabled={isSaving}
+					>
+						{__('Back', 'doublescale')}
+					</Button>
+					<Button
+						type="button"
+						size="lg"
+						variant="default"
+						onClick={onNext}
+						disabled={isSaving}
+					>
+						{__('Next Step', 'doublescale')}
+					</Button>
 				</div>
-				<ButtonComponent type="go" onClick={onNext} disabled={isSaving}>
-					{__('Next Step', 'doublescale')}
-				</ButtonComponent>
 			</div>
 		</div>
 	);

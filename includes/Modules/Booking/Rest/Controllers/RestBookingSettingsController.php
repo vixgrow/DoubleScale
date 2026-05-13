@@ -165,11 +165,6 @@ class RestBookingSettingsController extends RestController {
 					'type'        => 'object',
 					'description' => __( 'General settings', 'doublescale' ),
 					'properties'  => array(
-						'admin_email'             => array(
-							'type'        => 'string',
-							'description' => __( 'Admin email', 'doublescale' ),
-							'default'     => '',
-						),
 						'start_from'              => array(
 							'type'        => 'string',
 							'description' => __( 'Start from', 'doublescale' ),

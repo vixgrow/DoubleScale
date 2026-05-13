@@ -342,7 +342,7 @@ class RestCalendarController extends RestController
 			$page     = $request->get_param('page') ? $request->get_param('page') : 1;
 			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$keyword  = $request->get_param('keyword') ? $request->get_param('keyword') : '';
-			$filter   = $request->get_param('filters') ? $request->get_param('filters') : array();
+			$filter   = $request->get_param('filter') ? $request->get_param('filter') : array();
 			$type     = Arr::get($filter, 'type', 'all');
 			$user     = $request->get_param('user') ?? (current_user_can('doublescale_booking_read_all_calendars') ? 'all' : 'own');
 			$ids      = $request->get_param('ids') ? $request->get_param('ids') : array();
@@ -664,24 +664,29 @@ class RestCalendarController extends RestController
 				}
 			}
 
-			$updated = array(
-				'name'        => $name,
-				'description' => $description,
-			);
+			// Only include fields the client actually sent. The previous
+			// array_filter() stripped empty strings, so a client could never
+			// clear a calendar's description once set.
+			$updated = array();
+			if ($request->has_param('name')) {
+				$updated['name'] = $name;
+			}
+			if ($request->has_param('description')) {
+				$updated['description'] = $description;
+			}
 
 			if (! empty($slug)) {
 				$exists = CalendarModel::where('slug', $slug)->where('id', '!=', $id)->first();
 				if ($exists) {
-					error_log('Booking Calendar Controller: Calendar slug already exists: ' . $slug);
 					return new WP_Error('rest_calendar_error', __('Calendar slug already exists', 'doublescale'), array('status' => 400));
 				}
 
 				$updated['slug'] = $slug;
 			}
 
-			$updated = array_filter($updated);
-
-			$calendar->update($updated);
+			if (! empty($updated)) {
+				$calendar->update($updated);
+			}
 
 			if (! empty($timezone)) {
 				$calendar->timezone = $timezone;

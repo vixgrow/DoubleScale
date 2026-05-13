@@ -2753,8 +2753,24 @@ class EventModel extends Model {
 
 		static::deleted(
 			function ( $event ) {
+				// Iterate bookings as individual model deletes so the
+				// BookingModel::deleted listener fires for each row — that's
+				// what releases the BookedSlotModel slot, clears booking meta
+				// and logs, and removes host attachments. Mass deletes
+				// (->bookings()->delete()) skip model events entirely.
+				// chunk() bounds memory for events with many historical
+				// bookings; cursor() was tried first but returned models
+				// whose ->delete() silently no-ops when called inside this
+				// listener, so we use chunk() instead.
+				$event->bookings()->chunk(
+					500,
+					function ( $bookings ) {
+						foreach ( $bookings as $booking ) {
+							$booking->delete();
+						}
+					}
+				);
 				$event->meta()->delete();
-				$event->bookings()->delete();
 			}
 		);
 

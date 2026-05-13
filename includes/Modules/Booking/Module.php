@@ -41,7 +41,11 @@ final class Module extends AbstractModule {
 	}
 
 	public function dependencies(): array {
-		return array( 'core', 'contacts' );
+		// Campaigns supplies the Emails class used by EmailNotifications to
+		// send booking confirmations/reschedule notices. Without this in the
+		// dependency list, disabling Campaigns + leaving Booking on produces
+		// a "Class not found" fatal when a booking is created.
+		return array( 'core', 'contacts', 'campaigns' );
 	}
 
 	public function register( Container $container ): void {

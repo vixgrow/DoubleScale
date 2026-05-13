@@ -130,7 +130,7 @@ const Calendars: React.FC = () => {
 			path: addQueryArgs(`calendars`, {
 				per_page: 20,
 				keyword: '',
-				filters: {
+				filter: {
 					type: 'host',
 					user_id: String( currentUserId ),
 				},

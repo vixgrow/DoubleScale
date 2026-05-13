@@ -7,7 +7,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,13 +16,14 @@ import ContactAddIcon from '@doublescale/components/icons/contact-add';
 import CheckTrue from '@doublescale/components/icons/checkTrue';
 import ImportContact from '@doublescale/components/icons/import-contact';
 import { AddContactDialog } from './AddContactDialog';
-import ButtonComponent from '../component/button';
+import { Button } from '@/components/ui/button';
 import ImportModal from '../../import-modal';
 import {
 	ContactsProvider,
 	useContactsContext,
 } from '../../contacts/all-contacts/contexts';
 import { useContactsAPI } from '../../contacts/all-contacts/useContactsAPI';
+import { ImportIcon } from '@doublescale/components';
 
 interface ContactsContentProps {
 	readonly onSkip: () => void;
@@ -37,7 +38,7 @@ interface ContactFormData {
 }
 
 // Component داخلي يستخدم الـ Context
-function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
+function ContactsContent({ onSkip: _onSkip, onPrevious, onNext }: ContactsContentProps) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
 	const { importModalVisible, setImportModalVisible } = useContactsContext();
@@ -101,65 +102,74 @@ function ContactsContent({ onSkip, onPrevious, onNext }: ContactsContentProps) {
 	};
 
 	return (
-		<div className="flex flex-col gap-10">
-			<div>
-				<h3 className="text-[#170F49] text-[32px] font-semibold">
-					{__(
-						'Add Your Contacts—Start Building Meaningful CRM Connections',
-						'doublescale'
-					)}
+		<div className="flex min-h-0 flex-1 flex-col">
+			<div className="shrink-0 pb-6">
+			   <h3 className="mb-2.5 text-2xl font-bold leading-9 text-foreground">
+					{__('Add Your Contacts—Start Building Meaningful CRM Connections', 'doublescale')}
 				</h3>
-				<p className="text-[#777] text-lg font-normal leading-7">
+				<p className="text-base font-medium leading-7 text-muted-foreground">
 					{__(
-						"Add or import your contacts to start building your CRM database—whether it's leads, customers, or team members. Organizing contacts now helps you track interactions, personalize outreach, and automate smarter.",
+						"Add or import your contacts to start building your CRM database—whether it’s leads, customers, or team members. Organizing contacts now helps you track interactions, personalize outreach, and automate smarter.",
 						'doublescale'
 					)}
 				</p>
 			</div>
-			<div className="grid grid-cols-2 gap-4 justify-center items-center mx-auto max-w-7xl !pb-12">
+			<div className="min-h-0 flex-1 ">
+			<div className="grid grid-cols-2 gap-6 justify-center items-center max-w-2xl mx-auto ">
 				<button
 					onClick={() => setDialogOpen(true)}
-					className="group relative flex flex-col items-center justify-center gap-4 p-8 text-[#374151] border-2 border-[#DEE1E6] bg-[#F8F8F8] rounded-2xl transition-all hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+					className="group relative flex flex-col items-center justify-center gap-4 p-8 text-foreground border border-border bg-[#fff] 
+					rounded-2xl transition-all hover:border-brandPrimary hover:text-brandPrimary"
 				>
-					<div className="pointer-events-none absolute -top-2 -left-2 flex h-6 w-6 items-center justify-center rounded-full opacity-0 shadow-md transition-all group-hover:-top-3 group-hover:-left-3 group-hover:opacity-100">
+					<div className="pointer-events-none absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full opacity-0 shadow-md transition-all group-hover:-top-3 group-hover:-right-3 group-hover:opacity-100">
 						<CheckTrue />
 					</div>
 
-					<ContactAddIcon />
+					<ContactAddIcon color="currentColor" width={48} height={48} />
 
-					<span className="text-xl font-semibold leading-[30px]">
+					<span className="text-base font-medium leading-7">
 						{__('Add Contact Individual', 'doublescale')}
 					</span>
 				</button>
 
 				<button
-					className="group relative flex flex-col items-center justify-center gap-4 p-8 text-[#374151] border-2 border-[#DEE1E6] bg-[#F8F8F8] rounded-2xl transition-all hover:border-[#1E3A8A] hover:text-[#1E3A8A]"
+					className="group relative flex flex-col items-center justify-center gap-4 p-8 text-foreground border border-border bg-[#fff] 
+					rounded-2xl transition-all hover:border-brandPrimary hover:text-brandPrimary"
 					onClick={handleImportContact}
 				>
-					<div className="pointer-events-none absolute -top-2 -left-2 flex h-6 w-6 items-center justify-center rounded-full opacity-0 shadow-md transition-all group-hover:-top-3 group-hover:-left-3 group-hover:opacity-100">
+					<div className="pointer-events-none absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full opacity-0 shadow-md transition-all group-hover:-top-3 group-hover:-right-3 group-hover:opacity-100">
 						<CheckTrue />
 					</div>
-					<ImportContact />
+					<ImportIcon color="currentColor" width={48} height={48} />
 
-					<span className="text-xl font-semibold leading-[30px]">
+					<span className="text-base font-medium leading-7">
 						{__('Import Contacts', 'doublescale')}
 					</span>
 				</button>
 			</div>
+			</div>
 
-			<div className="flex justify-between pt-8">
-				<div className="flex gap-2">
-					<ButtonComponent onClick={onPrevious} type="">
-						{__('Previous', 'doublescale')}
-					</ButtonComponent>
-
-					<ButtonComponent type="no" onClick={onSkip}>
-						{__('Skip →', 'doublescale')}
-					</ButtonComponent>
+			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
+				<div className="flex flex-wrap items-center justify-end gap-6">
+					<Button
+						type="button"
+						size="lg"
+						variant="secondaryDeepBlue"
+						onClick={onPrevious}
+						disabled={isCreating}
+					>
+						{__('Back', 'doublescale')}
+					</Button>
+					<Button
+						type="button"
+						size="lg"
+						variant="default"
+						onClick={onNext}
+						disabled={isCreating}
+					>
+						{__('Next Step', 'doublescale')}
+					</Button>
 				</div>
-				<ButtonComponent type="go" onClick={onNext}>
-					{__('Next Step', 'doublescale')}
-				</ButtonComponent>
 			</div>
 
 			<AddContactDialog

@@ -83,6 +83,30 @@ class BookedSlotModel extends Model {
 		return $count > 0;
 	}
 
+	public static function has_overlap_excluding( $calendar_id, $start, $end, $exclude_booking_id ) {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
+
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table}
+				WHERE calendar_id = %d
+				  AND status = 'booked'
+				  AND booking_id <> %d
+				  AND slot_start < %s
+				  AND slot_end > %s
+				FOR UPDATE",
+				$calendar_id,
+				$exclude_booking_id,
+				$end,
+				$start
+			)
+		);
+
+		return $count > 0;
+	}
+
 	public static function count_overlaps( $calendar_id, $start, $end ) {
 		global $wpdb;
 

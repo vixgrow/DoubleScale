@@ -223,8 +223,13 @@ export default function BusindessInformation({
 
 	/**
 	 * Save business information to settings
+	 * @param options.silent When true (e.g. Back), omit success notice — only "Next" should toast.
+	 * @returns whether settings were saved successfully
 	 */
-	const saveBusinessInformation = async (data: FormType) => {
+	const saveBusinessInformation = async (
+		data: FormType,
+		options?: { silent?: boolean }
+	): Promise<boolean> => {
 		try {
 			let logoUrl = existingLogoUrl; // Keep existing logo by default
 
@@ -234,8 +239,7 @@ export default function BusindessInformation({
 				if (uploadedUrl) {
 					logoUrl = uploadedUrl;
 				} else {
-					// If image upload fails, stop the process
-					return;
+					return false;
 				}
 			}
 
@@ -255,16 +259,17 @@ export default function BusindessInformation({
 				data: settings,
 			});
 
-			// Show success message
-			createNotice({
-				type: 'success',
-				message: __(
-					'Business information saved successfully',
-					'doublescale'
-				),
-			});
+			if (!options?.silent) {
+				createNotice({
+					type: 'success',
+					message: __(
+						'Business information saved successfully',
+						'doublescale'
+					),
+				});
+			}
 
-			// Proceed to next step is handled by the caller (avoid double navigation).
+			return true;
 		} catch (error: any) {
 			console.error('Error saving business information:', error);
 			const errorMessage =
@@ -275,17 +280,22 @@ export default function BusindessInformation({
 				type: 'error',
 				message: errorMessage,
 			});
+			return false;
 		}
 	};
 
 	const handleNext = form.handleSubmit(async (data) => {
-		await saveBusinessInformation(data);
-		onNext();
+		const ok = await saveBusinessInformation(data);
+		if (ok) {
+			onNext();
+		}
 	});
 
 	const handlePrevious = form.handleSubmit(async (data) => {
-		await saveBusinessInformation(data);
-		onPrevious();
+		const ok = await saveBusinessInformation(data, { silent: true });
+		if (ok) {
+			onPrevious();
+		}
 	});
 
 	const isSubmitting = form.formState.isSubmitting;

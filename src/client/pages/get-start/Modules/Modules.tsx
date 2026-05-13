@@ -13,7 +13,15 @@ import {
 } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { BookingIcon, CampaignIcon, FormsIcon, IntegrationsIcon, PipelineIcon, TaskIcon } from '@doublescale/components';
+import {
+	AutomationsIcon,
+	BookingIcon,
+	CampaignIcon,
+	FormsIcon,
+	IntegrationsIcon,
+	PipelineIcon,
+	TaskIcon,
+} from '@doublescale/components';
 
 interface ModulesResponse {
 	success: boolean;
@@ -36,6 +44,8 @@ function getModuleIcon(slug: string) {
 			return <PipelineIcon width={32} height={32} color="#0D9DFC" />;
 		case 'forms':
 			return <FormsIcon width={32} height={32} color="#0D9DFC" />;
+		case 'automations':
+			return <AutomationsIcon width={32} height={32} color="#0D9DFC" />;
 		case 'tasks':
 			return <TaskIcon width={32} height={32} color="#0D9DFC" />;
 		case 'campaigns':

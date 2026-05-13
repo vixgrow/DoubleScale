@@ -92,7 +92,7 @@ export default function ModulesSettings() {
 				</h3>
 				<p className="text-sm text-muted-foreground mt-1">
 					{__(
-						'Enable or disable optional features: SMTP, Pipelines, Forms, Tasks, Campaigns, and Booking. Other CRM capabilities are always available and are not listed here.',
+						'Enable or disable optional features: SMTP, Pipelines, Forms, Automations, Tasks, Campaigns, and Booking. Other CRM capabilities are always available and are not listed here.',
 						'doublescale'
 					)}
 				</p>

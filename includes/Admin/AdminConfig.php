@@ -202,7 +202,6 @@ final class AdminConfig {
 	private static function get_modules_config() {
 		$registry = \DoubleScale\Core\PluginKernel::instance()->get_module_registry();
 		$all      = $registry->all();
-		$stored   = get_option( 'doublescale_enabled_modules', array() );
 		$result   = array();
 
 		foreach ( $all as $slug => $module ) {
@@ -213,9 +212,7 @@ final class AdminConfig {
 				}
 			);
 
-			$enabled = $module->is_toggleable()
-				? ( ! isset( $stored[ $slug ] ) || (bool) $stored[ $slug ] )
-				: true;
+			$enabled = $module->is_enabled();
 
 			$result[] = array(
 				'slug'          => $slug,

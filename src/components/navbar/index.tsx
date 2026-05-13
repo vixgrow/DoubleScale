@@ -97,6 +97,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	'analytics-and-reports': 'insights',
 	integrations: 'system',
 	'smtp/:tab?': 'system',
+	'team-managers': 'system',
 	'settings/:tab?': 'system',
 	extensions: 'system',
 };
@@ -110,6 +111,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'settings',
 	'booking-dashboard',
 	'smtp',
+	'team-managers',
 	'sales-pipeline',
 	'tasks',
 	'forms',

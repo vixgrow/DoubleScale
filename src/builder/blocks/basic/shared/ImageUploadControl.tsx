@@ -13,7 +13,8 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
-import { DeleteIcon, FileUploadIcon } from '@doublescale/components';
+import { DeleteIcon, ImageUploadDropzoneIcon } from '@doublescale/components';
+import { cn } from '@/lib/utils';
 import { generateRandomString } from '@/builder/utils/idGenerator';
 import { LinkInput } from './LinkInput';
 
@@ -49,6 +50,62 @@ export interface ImageUploadControlProps {
 	simpleMode?: boolean; // For URL-only mode without alt text requirement
 	disabled?: boolean;
 	enableUrl?: boolean; // Enable URL input via popover
+}
+
+function ImageUploadDropzoneFrame({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	return (
+		<div className="relative min-h-[120px] w-full min-w-0 max-w-full overflow-hidden rounded-xl bg-white/[0.04]">
+			<svg
+				className="pointer-events-none absolute inset-0 h-full w-full text-white/[0.38]"
+				xmlns="http://www.w3.org/2000/svg"
+				preserveAspectRatio="none"
+				aria-hidden
+			>
+				<rect
+					x="0.75"
+					y="0.75"
+					width="calc(100% - 1.5px)"
+					height="calc(100% - 1.5px)"
+					rx="12"
+					ry="12"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeDasharray="18 12"
+					vectorEffect="nonScalingStroke"
+				/>
+			</svg>
+			<div className="relative flex flex-col items-center justify-center px-3 py-5 text-center">
+				{children}
+			</div>
+		</div>
+	);
+}
+
+function ImageUploadDropzoneCopy() {
+	return (
+		<>
+			<div className="mb-2 flex justify-center text-white">
+				<ImageUploadDropzoneIcon width={40} height={40} />
+			</div>
+			<p className="max-w-full text-sm leading-snug text-white break-words">
+				<span className="underline decoration-white/80 underline-offset-2">
+					{__('Click to Upload', 'doublescale')}
+				</span>
+				<span className="text-white/90">
+					{' '}
+					{__('or drag and drop', 'doublescale')}
+				</span>
+			</p>
+			<p className="mt-2 text-xs text-white/55">
+				{__('(Max. File size: 25 MB)', 'doublescale')}
+			</p>
+		</>
+	);
 }
 
 export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
@@ -100,15 +157,6 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 		}
 	}, [mergeTagsVisible, mode]);
 
-	// Check if WordPress media library is available when component mounts
-	useEffect(() => {
-		console.log(
-			`${uniqueUploadId} mounted. Checking wp.media availability...`
-		);
-		console.log('window.wp:', typeof window.wp);
-		console.log('window.wp?.media:', typeof window.wp?.media);
-	}, [uniqueUploadId]);
-
 	const openMediaLibrary = (closePopover = false) => {
 		if (disabled) return;
 
@@ -119,10 +167,6 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 		// Check if wp.media is available
 		if (typeof window.wp !== 'undefined' && window.wp.media) {
-			console.log(
-				'WordPress media library is available, opening media frame...'
-			);
-			// Create the media frame
 			const frame = window.wp.media({
 				title: __('Select Image', 'doublescale'),
 				button: {
@@ -189,13 +233,6 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 			// Open the modal
 			frame.open();
 		} else {
-			console.error(
-				'WordPress media library is not available. wp object:',
-				typeof window.wp,
-				'wp.media:',
-				typeof window.wp?.media
-			);
-			// Fallback to native file input if wp.media is not available
 			document.getElementById(`${uniqueUploadId}-upload`)?.click();
 		}
 	};
@@ -275,7 +312,6 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 			frame.open();
 		} else {
-			console.error('WordPress media library is not available');
 			document.getElementById(`${uniqueUploadId}-replace`)?.click();
 		}
 	};
@@ -438,37 +474,47 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 		</PopoverContent>
 	);
 
+	const filledCardClass =
+		'mt-2 flex w-full min-w-0 max-w-full flex-col gap-3 rounded-lg border border-white/15 bg-white/[0.05] p-3';
+	const filledTitleClass = 'truncate text-sm text-white';
+	const filledMetaClass = 'truncate text-xs text-white/55';
+	const outlineActionClass =
+		'text-sm shadow-none text-white border-white/25 bg-transparent hover:bg-white/10 hover:text-white';
+	const outlineDeleteClass =
+		'shadow-none text-red-300 border-white/25 bg-transparent hover:bg-white/10 hover:text-red-200';
+
 	return (
-		<div>
-			<label className="text-[#333333] mb-2 text-base">{label}</label>
+		<div className="w-full min-w-0 max-w-full">
+			<label className="mb-2 block text-sm text-white">{label}</label>
 			{description && (
-				<p className="text-xs text-[#616161] mb-4">{description}</p>
+				<p className="mb-3 max-w-full text-xs text-white/55 break-words">
+					{description}
+				</p>
 			)}
 
 			{imageData || (value && value.trim() !== '') ? (
-				<div className="border rounded-lg p-4 bg-white flex items-center justify-between mt-2">
-					<div className="flex items-center gap-3">
+				<div className={filledCardClass}>
+					<div className="flex min-w-0 items-center gap-2">
 						<img
 							src={value}
 							alt={alt}
-							className="w-8 h-8 object-cover"
+							className="h-8 w-8 shrink-0 rounded object-cover"
 							{...(showRotation && {
 								style: { transform: `rotate(${rotation}deg)` },
 							})}
 						/>
-						<div>
-							<h4 className="text-sm text-[#333333] w-16 truncate">
+						<div className="min-w-0 flex-1">
+							<h4 className={filledTitleClass}>
 								{imageData?.name || alt}
 							</h4>
 							{imageData && (
-								<p className="text-xs text-[#6D6D6D]">
+								<p className={filledMetaClass}>
 									{formatFileSize(imageData.size)}
 								</p>
 							)}
 						</div>
 					</div>
-					<div className="flex gap-2 mt-2">
-						{/* Hidden fallback input */}
+					<div className="flex w-full min-w-0 gap-2">
 						<Input
 							type="file"
 							accept="image/*"
@@ -482,11 +528,16 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 									<Button
 										variant="outline"
 										size="sm"
-										className="text-sm text-primary shadow-none"
+										className={cn(
+											outlineActionClass,
+											'min-w-0 flex-1'
+										)}
 										disabled={disabled}
 										onClick={handleTriggerClick}
 									>
-										{__('Replace', 'doublescale')}
+										<span className="truncate">
+											{__('Replace', 'doublescale')}
+										</span>
 									</Button>
 								</PopoverAnchor>
 								{renderPopoverContent()}
@@ -495,17 +546,19 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 							<Button
 								variant="outline"
 								size="sm"
-								className="text-sm text-primary shadow-none"
+								className={cn(outlineActionClass, 'min-w-0 flex-1')}
 								onClick={handleReplaceImage}
 								disabled={disabled}
 							>
-								{__('Replace', 'doublescale')}
+								<span className="truncate">
+									{__('Replace', 'doublescale')}
+								</span>
 							</Button>
 						)}
 						<Button
 							variant="outline"
 							size="sm"
-							className="text-destructive shadow-none"
+							className={cn(outlineDeleteClass, 'shrink-0')}
 							onClick={handleDeleteImage}
 							disabled={disabled}
 						>
@@ -520,13 +573,18 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 							<button
 								type="button"
 								disabled={disabled}
+								aria-label={__(
+									'Choose upload or image URL',
+									'doublescale'
+								)}
 								onClick={handleTriggerClick}
-								className={`w-full border-2 border-dashed mt-2 bg-white rounded-lg p-4 text-center transition-colors ${disabled
-									? 'cursor-not-allowed opacity-50'
-									: 'cursor-pointer hover:border-gray-400'
-									}`}
+								className={cn(
+									'mt-2 w-full border-0 bg-transparent p-0 text-left transition-opacity',
+									disabled
+										? 'cursor-not-allowed opacity-50'
+										: 'cursor-pointer'
+								)}
 							>
-								{/* Hidden fallback input */}
 								<Input
 									type="file"
 									onChange={handleFileUpload}
@@ -535,22 +593,9 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 									id={`${uniqueUploadId}-upload`}
 									disabled={disabled}
 								/>
-								<div className="flex flex-col items-center justify-center">
-									<div className="text-primary bg-accent rounded-full p-2 mb-2">
-										<FileUploadIcon />
-									</div>
-									<div className="flex items-center gap-1">
-										<div className="text-primary">
-											{__('Click to Upload', 'doublescale')}
-										</div>
-										<div className="text-sm text-[#353535]">
-											{__('or drag and drop', 'doublescale')}
-										</div>
-									</div>
-									<div className="text-xs text-[#353535]">
-										{__('(Max. File size: 25 MB)', 'doublescale')}
-									</div>
-								</div>
+								<ImageUploadDropzoneFrame>
+									<ImageUploadDropzoneCopy />
+								</ImageUploadDropzoneFrame>
 							</button>
 						</PopoverAnchor>
 						{renderPopoverContent()}
@@ -558,12 +603,23 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 				</div>
 			) : (
 				<div
-					className={`border-2 border-dashed mt-2 bg-white rounded-lg p-4 text-center transition-colors ${disabled
-						? 'cursor-not-allowed opacity-50'
-						: 'cursor-pointer hover:border-gray-400'
-						}`}
+					className={cn(
+						'mt-2',
+						disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+					)}
+					role="button"
+					tabIndex={disabled ? -1 : 0}
+					aria-label={__('Upload image', 'doublescale')}
+					{...(disabled ? { 'aria-disabled': true } : {})}
+					onClick={() => !disabled && handleUploadAreaClick()}
+					onKeyDown={(e) => {
+						if (disabled) return;
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							handleUploadAreaClick();
+						}
+					}}
 				>
-					{/* Hidden fallback input */}
 					<Input
 						type="file"
 						onChange={handleFileUpload}
@@ -572,29 +628,9 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 						id={`${uniqueUploadId}-upload`}
 						disabled={disabled}
 					/>
-					<div
-						className={
-							disabled ? 'cursor-not-allowed' : 'cursor-pointer'
-						}
-						onClick={handleUploadAreaClick}
-					>
-						<div className="flex flex-col items-center justify-center">
-							<div className="text-primary bg-accent rounded-full p-2 mb-2">
-								<FileUploadIcon />
-							</div>
-							<div className="flex items-center gap-1">
-								<div className="text-primary">
-									{__('Click to Upload', 'doublescale')}
-								</div>
-								<div className="text-sm text-[#353535]">
-									{__('or drag and drop', 'doublescale')}
-								</div>
-							</div>
-							<div className="text-xs text-[#353535]">
-								{__('(Max. File size: 25 MB)', 'doublescale')}
-							</div>
-						</div>
-					</div>
+					<ImageUploadDropzoneFrame>
+						<ImageUploadDropzoneCopy />
+					</ImageUploadDropzoneFrame>
 				</div>
 			)}
 		</div>

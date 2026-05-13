@@ -55,7 +55,7 @@ class EmailRenderer {
 	 *
 	 * @var int
 	 */
-	private $canvas_width = 600;
+	private $canvas_width = 900;
 
 	/**
 	 * Current content width in pixels (canvas width minus section padding).
@@ -203,7 +203,7 @@ class EmailRenderer {
 
 		// Extract global settings (with defaults)
 		$canvas_color        = isset( $global_settings['canvasColor'] ) ? $global_settings['canvasColor'] : '#ffffff';
-		$canvas_width        = isset( $global_settings['canvasWidth'] ) ? $global_settings['canvasWidth'] : 600;
+		$canvas_width        = isset( $global_settings['canvasWidth'] ) ? $global_settings['canvasWidth'] : 900;
 		$background_image    = isset( $global_settings['backgroundImage']['url'] ) ? $global_settings['backgroundImage']['url'] : '';
 		$background_repeat   = isset( $global_settings['backgroundRepeat'] ) ? $global_settings['backgroundRepeat'] : 'no-repeat';
 		$background_size     = isset( $global_settings['backgroundSize'] ) ? $global_settings['backgroundSize'] : 'cover';
@@ -512,7 +512,7 @@ class EmailRenderer {
 		$section_style_string = $this->build_style_string( $section_styles );
 
 		// Get canvas width; content width is reduced by horizontal padding
-		$canvas_width = isset( $this->canvas_width ) ? $this->canvas_width : 600;
+		$canvas_width = isset( $this->canvas_width ) ? $this->canvas_width : 900;
 		$content_width = max( 200, $canvas_width - $padding_px['left'] - $padding_px['right'] );
 		$this->content_width = $content_width;
 

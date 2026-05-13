@@ -72,7 +72,7 @@ const Canvas = () => {
 				}
 			`}</style>
 			<div
-				className="mx-auto relative py-4"
+				className="mx-auto relative py-10"
 				style={{ width: `${globalSettings.canvasWidth}px` }}
 			>
 				{(sections.length > 0 || isLoading) && (
@@ -129,23 +129,17 @@ const Canvas = () => {
 											alt="email-builder.png"
 										/>
 									</div>
-									<p className="text-2xl text-secondary-foreground font-medium leading-10 text-center">
+									<p className="text-base text-foreground font-semibold text-center">
 										{__(
-											'There are no sections at the moment. Start adding',
-											'doublescale'
-										)}
-										<br />
-										{__(
-											'Or drag blocks from the library',
+											'There are no sections at the moment. Start adding sections and controlling elements.',
 											'doublescale'
 										)}
 									</p>
 								</div>
 								<Button
 									onClick={handleOpenModal}
-									variant="gradient"
-									size="lg"
-									className="px-5"
+									variant="secondary"
+									className='p-4'
 								>
 									<ColumnsLayout />
 									{__('Add New Section', 'doublescale')}

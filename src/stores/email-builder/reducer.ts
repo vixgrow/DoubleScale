@@ -42,7 +42,7 @@ const initialState: EmailBuilderState = {
 		backgroundRepeat: 'no-repeat',
 		backgroundSize: 'cover',
 		backgroundPosition: 'center',
-		canvasWidth: 700,
+		canvasWidth: 900,
 	},
 	buttonSettings: {
 		primary: {

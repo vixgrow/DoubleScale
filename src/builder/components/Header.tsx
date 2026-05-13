@@ -136,7 +136,7 @@ const Header: React.FC<HeaderProps> = ({
 				/>
 				<div className="h-6 w-px bg-border" />
 				<Button
-					variant="outline"
+					variant="ghost"
 					className="px-3"
 					onClick={() => dispatch(STORE_KEY).undo()}
 					disabled={!canUndo}
@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({
 					<UndoIcon />
 				</Button>
 				<Button
-					variant="outline"
+					variant="ghost"
 					className="px-3"
 					onClick={() => dispatch(STORE_KEY).redo()}
 					disabled={!canRedo}

@@ -18,7 +18,6 @@ import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
-import BlockEditor from './components/BlockEditor';
 import DragOverlayRenderer from './components/DragOverlayRenderer';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
@@ -343,7 +342,6 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					>
 						<Sidebar
 							sidebarCloseTrigger={sidebarCloseTrigger}
-							templatesRefreshKey={templatesRefreshTrigger}
 							openGlobalSettings={handleOpenGlobalSettings}
 						/>
 						<Canvas />
@@ -352,7 +350,6 @@ const BuilderContent: React.FC<BuilderProps> = ({
 							<DragOverlayRenderer activeItem={activeItem} />
 						</DragOverlay>
 					</DndContext>
-					<BlockEditor />
 				</div>
 			</div>
 		</>

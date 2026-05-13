@@ -2,14 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const TeamCalendarSkeleton = () => {
   return (
-    <Card
-      className="bg-[#FDFDFD] w-[377px]"
-      headStyle={{
-        backgroundColor: '#FFFFFF',
-        paddingTop: '20px',
-        paddingBottom: '20px',
-      }}
-    ><CardContent>
+    <Card className="bg-[#FDFDFD] w-[377px]"><CardContent>
         <div className='flex flex-col gap-5'>
           {/* Header */}
           <div className='flex justify-between items-center'>

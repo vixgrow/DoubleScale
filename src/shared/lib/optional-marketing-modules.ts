@@ -1,5 +1,5 @@
 /**
- * Optional add-ons shown on Get Started and Settings → Modules (fixed list of six).
+ * Optional add-ons shown on Get Started and Settings → Modules (fixed product list).
  * When Pro is not active, some slugs are missing from the REST payload — we still
  * render a card with copy that the feature requires DoubleScale Pro.
  */
@@ -11,6 +11,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'smtp',
 	'deals',
 	'forms',
+	'automations',
 	'tasks',
 	'campaigns',
 	'booking',
@@ -52,6 +53,14 @@ function placeholderFor(
 					'doublescale'
 				),
 			};
+		case 'automations':
+			return {
+				label: __('Automations', 'doublescale'),
+				description: __(
+					'Visual workflows with triggers, actions, goals, and conditional rules.',
+					'doublescale'
+				),
+			};
 		case 'tasks':
 			return {
 				label: __('Tasks', 'doublescale'),
@@ -80,7 +89,7 @@ function placeholderFor(
 }
 
 /**
- * Always returns six rows in product order: merge API {@link ModuleInfo} when the
+ * Always returns one row per slug in product order: merge API {@link ModuleInfo} when the
  * module is toggleable; otherwise a placeholder marked {@link DisplayMarketingModule.unavailableUntilPro}.
  */
 export function buildMarketingModuleDisplayRows(

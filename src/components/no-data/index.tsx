@@ -9,6 +9,7 @@ interface NoDataProps {
 	onClick?: () => void;
 	buttonLabel?: string;
 	buttonIcon?: React.ReactNode;
+	className?: string;
 }
 
 export const NoData: React.FC<NoDataProps> = ({
@@ -18,6 +19,7 @@ export const NoData: React.FC<NoDataProps> = ({
 	onClick,
 	buttonLabel,
 	buttonIcon,
+	className,
 }) => {
 	return (
 		<div className="flex flex-col items-center justify-center py-20 px-4">
@@ -32,7 +34,7 @@ export const NoData: React.FC<NoDataProps> = ({
 					{subtitle}
 				</p>
 				{onClick && buttonLabel && (
-					<Button onClick={onClick} size="default">
+					<Button onClick={onClick} size="default" className={className}>
 						{buttonIcon || <PlusIcon />}
 						{buttonLabel}
 					</Button>

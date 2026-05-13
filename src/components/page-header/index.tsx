@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 // Internal dependencies
 import { Button } from '@doublescale/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ActionConfig {
 	label: string;
@@ -18,6 +19,8 @@ interface PageHeaderProps {
 	subtitle?: string;
 	actions?: ActionConfig[];
 	className?: string;
+	/** Merged onto the outer wrapper (e.g. `mb-0` when the title sits in a toolbar row). */
+	wrapperClassName?: string;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -25,9 +28,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 	title,
 	actions = [],
 	className,
+	wrapperClassName,
 }) => {
 	return (
-		<div className="flex flex-col gap-1 mb-6">
+		<div
+			className={cn('flex flex-col gap-1 mb-6', wrapperClassName)}
+		>
 			{subtitle && (
 				<span className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
 					{subtitle}
@@ -67,7 +73,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 												{icon}
 											</span>
 										)}
-										{__(label, '@doublescale')}
+										{__(label, 'doublescale')}
 									</Button>
 								)
 							);

@@ -312,10 +312,9 @@ registerAdminPage('tags', {
 registerAdminPage('lead-scoring', {
 	path: 'lead-scoring',
 	component: () => <ContactsLeadScoringRoute />,
-	label: __('Lead Scoring', 'doublescale'),
+	label: __('Lead Score', 'doublescale'),
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
-	requiresModule: 'leadscoring',
 });
 
 registerAdminPage('campaigns', {

@@ -306,7 +306,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					if (isCrmManager()) {
 						subMenu.push(
 							{ path: 'lists', label: __('Lists', 'doublescale') },
-							{ path: 'tags', label: __('Tags', 'doublescale') }
+							{ path: 'tags', label: __('Tags', 'doublescale') },
+							{
+								path: 'lead-scoring',
+								label: __('Lead Score', 'doublescale'),
+							}
 						);
 					}
 					navItem.subMenu = subMenu;

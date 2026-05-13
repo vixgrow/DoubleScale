@@ -67,7 +67,7 @@ export default function GetStart() {
 				</div>
 			</aside>
              {/* right side */}
-			<div className="relative flex-1 min-w-0 p-6 m-6 rounded-[20px] bg-[#F7F8FA] shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)] overflow-hidden">
+			<div className="relative flex min-h-0 flex-1 min-w-0 flex-col p-6 m-6 rounded-[20px] bg-[#F7F8FA] shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)] overflow-hidden">
 				{/* decorative corner images — sit behind content on every step */}
 				<img
 					src={decorativeLeft}
@@ -85,7 +85,7 @@ export default function GetStart() {
 				/>
 
 				{/* step content sits above the decorative images */}
-				<div className="relative z-10">
+				<div className="relative z-10 flex min-h-0 flex-1 flex-col">
 					{currentStep === 1 && (
 						<WelcomePage onNext={handleNext} onSkip={handleSkip} />
 					)}

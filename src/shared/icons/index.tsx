@@ -259,3 +259,7 @@ export { default as NewDealIcon } from './new-deal';
 export { default as NewFormIcon } from './new-form';
 export { default as PreviewEyeIcon } from './preview-eye';
 export { default as SendEmailIcon } from './send-email';
+export { default as CampaignIcon } from './campaigns';
+export { default as BookingIcon } from './booking';
+export { default as PipelineIcon } from './pipeline';
+export { default as TaskIcon } from './task';

@@ -18,7 +18,7 @@ import {
 } from '@doublescale/components/ui/form';
 import { Input } from '@doublescale/components/ui/input';
 import { Textarea } from '@doublescale/components/ui/textarea';
-import ButtonComponent from '../component/button';
+import { Button } from '@/components/ui/button';
 import UploadImageIcon from '@doublescale/shared/icons/upload-image';
 import { BusinessFormSkeleton } from './BusinessFormSkeleton';
 
@@ -71,13 +71,11 @@ function LogoUpload({
 	});
 
 	return (
-		<div className="space-y-2">
+		<div className="flex h-full min-h-0 flex-1 flex-col space-y-2">
 			<div
 				{...getRootProps()}
 				className={`
-					relative border-2 border-dashed rounded-2xl 
-					flex flex-col items-center justify-center py-12 cursor-pointer 
-					transition-all text-center
+					relative flex h-full min-h-[200px] w-full flex-1 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed py-3 text-center transition-all
 				${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}
 				${error ? '!border-destructive' : ''}
 				`}
@@ -88,8 +86,8 @@ function LogoUpload({
 					<div className="space-y-4">
 						<img
 							src={displayImage}
-							alt="Logo preview"
-							className="w-32 h-32 object-contain rounded-lg border"
+							alt={__('Logo preview', 'doublescale')}
+							className="h-32 w-32 rounded-lg border object-contain"
 						/>
 						<p className="text-sm text-muted-foreground">
 							{__('Click or drag to replace', 'doublescale')}
@@ -97,20 +95,20 @@ function LogoUpload({
 					</div>
 				) : (
 					<>
-						<UploadImageIcon />
-						<p className="text-sm font-medium text-primary mt-3">
+						<UploadImageIcon color="hsl(var(--primary))" width={48} height={48} />
+						<p className="text-sm font-semibold text-primary mt-2">
 							{__('Browse images', 'doublescale')}
-							<span className="text-foreground font-normal">
+							<span className="text-foreground font-semibold">
 								{' '}{__('to upload', 'doublescale')}
 							</span>
 						</p>
-						<p className="text-xs text-muted-foreground mt-1">
+						<p className="text-sm leading-6 text-muted-foreground mt-2">
 							{__('or drag and drop it here', 'doublescale')}
 						</p>
 					</>
 				)}
 			</div>
-			{error ? <p className="text-sm text-destructive">{error}</p> : null}
+			{error ? <p className="shrink-0 text-sm text-destructive">{error}</p> : null}
 		</div>
 	);
 }
@@ -266,8 +264,7 @@ export default function BusindessInformation({
 				),
 			});
 
-			// Proceed to next step
-			onNext();
+			// Proceed to next step is handled by the caller (avoid double navigation).
 		} catch (error: any) {
 			console.error('Error saving business information:', error);
 			const errorMessage =
@@ -295,64 +292,47 @@ export default function BusindessInformation({
 
 
 	return (
-		<div className="flex flex-col gap-8">
+		<div className="flex min-h-0 flex-1 flex-col">
 			{/* Header */}
-			<div>
-				<h3 className="text-foreground text-2xl font-semibold mb-1">
-					{__('Business Information', 'doublescale')}
+			<div className="shrink-0 pb-6">
+				<h3 className="mb-2.5 text-2xl font-bold leading-9 text-foreground">
+					{__('Please provide your business information', 'doublescale')}
 				</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
+				<p className="text-base font-medium leading-7 text-muted-foreground">
 					{__(
-						"This will be used for your email campaigns and subscriber-facing pages.",
+						"This will be used for your email campaign, Subscriber's front pages, and more.",
 						'doublescale'
 					)}
 				</p>
 			</div>
-			{isLoading ? <BusinessFormSkeleton /> :
-				<Form {...form}>
-					<form onSubmit={handleNext} className="space-y-6">
-						{/* Business Name */}
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="text-sm font-medium text-foreground">
-										{__('Business Name', 'doublescale')}
-									</FormLabel>
-									<FormControl>
-										<Input
-											placeholder={__(
-												'Enter your business name',
-												'doublescale'
-											)}
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
 
-						{/* Grid: Address + Logo */}
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							{/* Address */}
+			<div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
+				{isLoading ? (
+					<BusinessFormSkeleton />
+				) : (
+					<Form {...form}>
+						<form
+							id="doublescale-get-start-business-form"
+							onSubmit={handleNext}
+							className="space-y-6 pb-4"
+						>
+							{/* Business Name */}
 							<FormField
 								control={form.control}
-								name="address"
+								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className="text-sm font-medium text-foreground">
-											{__('Business Address', 'doublescale')}
+										<FormLabel className="text-sm font-medium leading-6 text-foreground">
+											{__('Business Name', 'doublescale')}
+											<span className="text-xs text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
-											<Textarea
+											<Input
 												placeholder={__(
-													'Type your business address...',
+													'Enter your business name',
 													'doublescale'
 												)}
 												{...field}
-												className="min-h-[160px] resize-none"
 											/>
 										</FormControl>
 										<FormMessage />
@@ -360,14 +340,39 @@ export default function BusindessInformation({
 								)}
 							/>
 
-							{/* Logo Upload  */}
-							<FormField
-								control={form.control}
-								name="image"
-								render={({ field }) => {
-									return (
-										<FormItem>
-											<FormLabel className="text-sm font-medium text-foreground">
+							{/* Grid: Address + Logo — equal height on md+ */}
+							<div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch md:gap-6">
+								{/* Address */}
+								<FormField
+									control={form.control}
+									name="address"
+									render={({ field }) => (
+										<FormItem className="flex h-full flex-col">
+											<FormLabel className="py-0 text-sm font-medium leading-6 text-foreground">
+												{__('Business Address', 'doublescale')}
+											</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder={__(
+														'Type your business address...',
+														'doublescale'
+													)}
+													{...field}
+													className="min-h-[200px] flex-1 resize-none"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								{/* Logo Upload  */}
+								<FormField
+									control={form.control}
+									name="image"
+									render={({ field }) => (
+										<FormItem className="flex h-full flex-col">
+											<FormLabel className="py-0 text-sm font-medium leading-6 text-foreground">
 												{__('Logo', 'doublescale')}
 											</FormLabel>
 											<FormControl>
@@ -379,44 +384,46 @@ export default function BusindessInformation({
 															setExistingLogoUrl('');
 														}
 													}}
-													existingLogoUrl={
-														existingLogoUrl
-													}
+													existingLogoUrl={existingLogoUrl}
 													error={
-														form.formState.errors.image
-															?.message
+														form.formState.errors.image?.message
 													}
 												/>
 											</FormControl>
-											{/* Error is rendered inside LogoUpload */}
 										</FormItem>
-									);
-								}}
-							/>
-						</div>
+									)}
+								/>
+							</div>
+						</form>
+					</Form>
+				)}
+			</div>
 
-
-					</form>
-				</Form>
-			}
-			{/* Buttons */}
-			<div className="flex justify-between pt-6 border-t border-border/40">
-				<ButtonComponent
-					onClick={handlePrevious}
-					type=""
-					disabled={isSubmitting}
-				>
-					{__('Previous', 'doublescale')}
-				</ButtonComponent>
-				<ButtonComponent
-					type="go"
-					onClick={handleNext}
-					disabled={isSubmitting}
-				>
-					{isSubmitting
-						? __('Saving...', 'doublescale')
-						: __('Next Step', 'doublescale')}
-				</ButtonComponent>
+			<div className="z-20 -mx-6 -mb-6 mt-6 shrink-0 bg-white px-6 py-4 shadow-[0_-8px_28px_rgba(15,23,42,0.07)] rounded-b-[20px]">
+				<div className="flex items-center justify-end gap-6">
+					<Button
+						type="button"
+						size="lg"
+						variant="secondaryDeepBlue"
+						disabled={isSubmitting || isLoading}
+						onClick={() => {
+							void handlePrevious();
+						}}
+					>
+						{__('Back', 'doublescale')}
+					</Button>
+					<Button
+						type="submit"
+						size="lg"
+						variant="default"
+						form="doublescale-get-start-business-form"
+						disabled={isSubmitting || isLoading}
+					>
+						{isSubmitting
+							? __('Saving...', 'doublescale')
+							: __('Next Step', 'doublescale')}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

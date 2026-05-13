@@ -560,9 +560,10 @@ class RestEventController extends RestController {
 			if ( 'host' === $calendar->type ) {
 				$default_availability = AvailabilityModel::where( 'user_id', $calendar->user_id )->where( 'is_default', 1 )->first();
 				if ( ! $default_availability ) {
-					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Default availability not found for user ID: ' . $calendar->user_id );
-					return new WP_Error( 'rest_event_error', __( 'Default availability not found', 'doublescale' ), array( 'status' => 500 ) );
+					// Lazy-seed a Mon-Fri 9-5 default so the user isn't blocked
+					// from creating their first event. They can edit the
+					// schedule afterwards from Booking → Availability.
+					$default_availability = AvailabilityModel::createDefaultForUser( $calendar->user_id );
 				}
 				$event_data['availability_id']   = $default_availability->id;
 				$event_data['availability_type'] = 'existing';

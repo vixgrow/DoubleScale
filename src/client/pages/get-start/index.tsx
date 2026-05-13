@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { __ } from '@wordpress/i18n';
+//@ts-ignore
+import decorativeLeft from '@doublescale/assets/images/decorative-elements-left.png';
+//@ts-ignore
+import decorativeRight from '@doublescale/assets/images/decorative-elements-right.png';
 import { StepIndicator } from './StepIndicator/StepIndicator';
 import WelcomeStart from '@doublescale/components/icons/start-welcome';
 import SettingsIcon from '@doublescale/components/icons/settings';
@@ -21,7 +25,7 @@ export default function GetStart() {
 	const [currentStep, setCurrentStep] = useState(1);
 
 	const steps = [
-		{ number: 1, label: __('Welcome', 'doublescale'), icon: <WelcomeStart /> },
+		{ number: 1, label: __('Welcome to our system', 'doublescale'), icon: <WelcomeStart /> },
 		{ number: 2, label: __('Modules', 'doublescale'), icon: <SettingsIcon /> },
 		{ number: 3, label: __('Business Info', 'doublescale'), icon: <BusinessInfo /> },
 		{ number: 4, label: __('Lists', 'doublescale'), icon: <StartList /> },
@@ -47,9 +51,9 @@ export default function GetStart() {
 	}
 
 	return (
-		<div className="min-h-screen flex flex-col gap-8">
-			<div className="sticky top-0 z-50 bg-background">
-				<div className="border border-primary/30 flex items-center justify-between p-6 rounded-xl bg-primary/5 backdrop-blur-sm">
+		<div className="doublescale-get-start flex flex-col lg:flex-row -mx-4 -my-4 lg:-mx-8 lg:-my-6 min-h-[calc(100vh-80px)] bg-white">
+			<aside className="w-full lg:w-72  shrink-0 bg-[#EEF] border-b lg:border-b-0 border-primary/20 lg:sticky lg:top-0 lg:self-start lg:h-screen lg:overflow-y-auto">
+				<div className="flex flex-row lg:flex-col gap-4 p-6 ">
 					{steps.map((step, index) => (
 						<StepIndicator
 							key={step.number}
@@ -61,50 +65,69 @@ export default function GetStart() {
 						/>
 					))}
 				</div>
-			</div>
+			</aside>
+             {/* right side */}
+			<div className="relative flex-1 min-w-0 p-6 m-6 rounded-[20px] bg-[#F7F8FA] shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)] overflow-hidden">
+				{/* decorative corner images — sit behind content on every step */}
+				<img
+					src={decorativeLeft}
+					alt=""
+					aria-hidden="true"
+					decoding="async"
+					className="pointer-events-none absolute top-0 left-0 w-56 xl:w-72 select-none"
+				/>
+				<img
+					src={decorativeRight}
+					alt=""
+					aria-hidden="true"
+					decoding="async"
+					className="pointer-events-none absolute top-0 right-0 w-56 xl:w-72 select-none"
+				/>
 
-			<div className="flex-1 p-12 rounded-2xl border border-border bg-card shadow-lg">
-				{currentStep === 1 && (
-					<WelcomePage onNext={handleNext} onSkip={handleSkip} />
-				)}
-				{currentStep === 2 && (
-					<ModulesStep
-						onNext={handleNext}
-						onPrevious={handlePrevious}
-						onSkip={handleSkip}
-					/>
-				)}
-				{currentStep === 3 && (
-					<BusindessInformation onNext={handleNext} onPrevious={handlePrevious} />
-				)}
-				{currentStep === 4 && (
-					<Lists
-						onNext={handleNext}
-						onPrevious={handlePrevious}
-						onSkip={handleSkip}
-					/>
-				)}
-				{currentStep === 5 && (
-					<Tags
-						onNext={handleNext}
-						onPrevious={handlePrevious}
-						onSkip={handleSkip}
-					/>
-				)}
-				{currentStep === 6 && (
-					<Contacts
-						onNext={handleNext}
-						onPrevious={handlePrevious}
-						onSkip={handleSkip}
-					/>
-				)}
-				{currentStep === 7 && (
-					<PluginComplete
-						onNext={handleNext}
-						onPrevious={handlePrevious}
-						onSkip={handleSkip}
-					/>
-				)}
+				{/* step content sits above the decorative images */}
+				<div className="relative z-10">
+					{currentStep === 1 && (
+						<WelcomePage onNext={handleNext} onSkip={handleSkip} />
+					)}
+					{currentStep === 2 && (
+						<ModulesStep
+							onNext={handleNext}
+							onPrevious={handlePrevious}
+							onSkip={handleSkip}
+						/>
+					)}
+					{currentStep === 3 && (
+						<BusindessInformation onNext={handleNext} onPrevious={handlePrevious} />
+					)}
+					{currentStep === 4 && (
+						<Lists
+							onNext={handleNext}
+							onPrevious={handlePrevious}
+							onSkip={handleSkip}
+						/>
+					)}
+					{currentStep === 5 && (
+						<Tags
+							onNext={handleNext}
+							onPrevious={handlePrevious}
+							onSkip={handleSkip}
+						/>
+					)}
+					{currentStep === 6 && (
+						<Contacts
+							onNext={handleNext}
+							onPrevious={handlePrevious}
+							onSkip={handleSkip}
+						/>
+					)}
+					{currentStep === 7 && (
+						<PluginComplete
+							onNext={handleNext}
+							onPrevious={handlePrevious}
+							onSkip={handleSkip}
+						/>
+					)}
+				</div>
 			</div>
 		</div>
 	);

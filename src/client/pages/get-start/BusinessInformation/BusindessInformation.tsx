@@ -98,15 +98,15 @@ function LogoUpload({
 				) : (
 					<>
 						<UploadImageIcon />
-					<p className="text-sm font-medium text-primary mt-3">
-						{__('Browse images', 'doublescale')}
-						<span className="text-foreground font-normal">
-							{' '}{__('to upload', 'doublescale')}
-						</span>
-					</p>
-					<p className="text-xs text-muted-foreground mt-1">
-						{__('or drag and drop it here', 'doublescale')}
-					</p>
+						<p className="text-sm font-medium text-primary mt-3">
+							{__('Browse images', 'doublescale')}
+							<span className="text-foreground font-normal">
+								{' '}{__('to upload', 'doublescale')}
+							</span>
+						</p>
+						<p className="text-xs text-muted-foreground mt-1">
+							{__('or drag and drop it here', 'doublescale')}
+						</p>
 					</>
 				)}
 			</div>
@@ -308,116 +308,116 @@ export default function BusindessInformation({
 					)}
 				</p>
 			</div>
-            {isLoading ? <BusinessFormSkeleton/> :
-			<Form {...form}>
-				<form onSubmit={handleNext} className="space-y-6">
-					{/* Business Name */}
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-sm font-medium text-foreground">
-									{__('Business Name', 'doublescale')}
-								</FormLabel>
-								<FormControl>
-									<Input
-										placeholder={__(
-											'Enter your business name',
-											'doublescale'
-										)}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					{/* Grid: Address + Logo */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						{/* Address */}
+			{isLoading ? <BusinessFormSkeleton /> :
+				<Form {...form}>
+					<form onSubmit={handleNext} className="space-y-6">
+						{/* Business Name */}
 						<FormField
 							control={form.control}
-							name="address"
+							name="name"
 							render={({ field }) => (
 								<FormItem>
-								<FormLabel className="text-sm font-medium text-foreground">
-									{__('Business Address', 'doublescale')}
-								</FormLabel>
-								<FormControl>
-									<Textarea
-										placeholder={__(
-											'Type your business address...',
-											'doublescale'
-										)}
-										{...field}
-										className="min-h-[160px] resize-none"
-									/>
+									<FormLabel className="text-sm font-medium text-foreground">
+										{__('Business Name', 'doublescale')}
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder={__(
+												'Enter your business name',
+												'doublescale'
+											)}
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 
-						{/* Logo Upload  */}
-						<FormField
-							control={form.control}
-							name="image"
-							render={({ field }) => {
-								return (
+						{/* Grid: Address + Logo */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{/* Address */}
+							<FormField
+								control={form.control}
+								name="address"
+								render={({ field }) => (
 									<FormItem>
-								<FormLabel className="text-sm font-medium text-foreground">
-										{__('Logo', 'doublescale')}
-									</FormLabel>
+										<FormLabel className="text-sm font-medium text-foreground">
+											{__('Business Address', 'doublescale')}
+										</FormLabel>
 										<FormControl>
-											<LogoUpload
-												value={field.value || null}
-												onChange={(file) => {
-													field.onChange(file);
-													if (file) {
-														setExistingLogoUrl('');
-													}
-												}}
-												existingLogoUrl={
-													existingLogoUrl
-												}
-												error={
-													form.formState.errors.image
-														?.message
-												}
+											<Textarea
+												placeholder={__(
+													'Type your business address...',
+													'doublescale'
+												)}
+												{...field}
+												className="min-h-[160px] resize-none"
 											/>
 										</FormControl>
-										{/* Error is rendered inside LogoUpload */}
+										<FormMessage />
 									</FormItem>
-								);
-							}}
-						/>
-					</div>
+								)}
+							/>
 
-					
-				</form>
-			</Form>
-            }
+							{/* Logo Upload  */}
+							<FormField
+								control={form.control}
+								name="image"
+								render={({ field }) => {
+									return (
+										<FormItem>
+											<FormLabel className="text-sm font-medium text-foreground">
+												{__('Logo', 'doublescale')}
+											</FormLabel>
+											<FormControl>
+												<LogoUpload
+													value={field.value || null}
+													onChange={(file) => {
+														field.onChange(file);
+														if (file) {
+															setExistingLogoUrl('');
+														}
+													}}
+													existingLogoUrl={
+														existingLogoUrl
+													}
+													error={
+														form.formState.errors.image
+															?.message
+													}
+												/>
+											</FormControl>
+											{/* Error is rendered inside LogoUpload */}
+										</FormItem>
+									);
+								}}
+							/>
+						</div>
+
+
+					</form>
+				</Form>
+			}
 			{/* Buttons */}
 			<div className="flex justify-between pt-6 border-t border-border/40">
-						<ButtonComponent
-							onClick={handlePrevious}
-							type=""
-							disabled={isSubmitting}
-						>
-							{__('Previous', 'doublescale')}
-						</ButtonComponent>
-						<ButtonComponent
-							type="go"
-							onClick={handleNext}
-							disabled={isSubmitting}
-						>
-							{isSubmitting
-								? __('Saving...', 'doublescale')
-								: __('Next Step', 'doublescale')}
-						</ButtonComponent>
-					</div>
+				<ButtonComponent
+					onClick={handlePrevious}
+					type=""
+					disabled={isSubmitting}
+				>
+					{__('Previous', 'doublescale')}
+				</ButtonComponent>
+				<ButtonComponent
+					type="go"
+					onClick={handleNext}
+					disabled={isSubmitting}
+				>
+					{isSubmitting
+						? __('Saving...', 'doublescale')
+						: __('Next Step', 'doublescale')}
+				</ButtonComponent>
+			</div>
 		</div>
 	);
 }

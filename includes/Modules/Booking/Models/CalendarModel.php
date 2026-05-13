@@ -214,14 +214,20 @@ class CalendarModel extends Model {
 		);
 	}
 
+	private static bool $events_registered = false;
+
 	public static function boot() {
-		global $doublescale_booking_calendar_events_registered;
 		parent::boot();
 
-		if ( $doublescale_booking_calendar_events_registered ) {
+		// Idempotent registration. Eloquent re-runs boot() per process; a
+		// static flag (vs. a global) keeps this scoped to the class so tests
+		// can reset it via reflection and long-running runtimes (Roadrunner,
+		// Octane, FrankenPHP) don't cross-contaminate the dispatcher between
+		// requests.
+		if ( self::$events_registered ) {
 			return;
 		}
-		$doublescale_booking_calendar_events_registered = true;
+		self::$events_registered = true;
 
 		$dispatcher = static::getEventDispatcher();
 		if ( ! $dispatcher ) {

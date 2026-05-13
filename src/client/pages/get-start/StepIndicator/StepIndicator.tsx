@@ -1,3 +1,4 @@
+import { CheckTrueIcon } from '@doublescale/components';
 import { Check } from 'lucide-react';
 
 type StepIndicatorProps = {
@@ -33,7 +34,7 @@ export const StepIndicator = ({
 						: 'bg-background border border-muted-foreground/30 text-muted-foreground'
 				}`}
 			>
-				{isCompleted ? <Check size={14} /> : step}
+				{isCompleted ? <CheckTrueIcon /> : step}
 			</div>
 
 			<span

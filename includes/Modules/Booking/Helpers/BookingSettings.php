@@ -29,7 +29,6 @@ final class BookingSettings {
 	public static function defaults(): array {
 		return array(
 			'general'  => array(
-				'admin_email'             => '',
 				'start_from'              => 'Monday',
 				'time_format'             => '12',
 				'auto_cancel_after'       => 30,

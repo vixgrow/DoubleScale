@@ -125,7 +125,6 @@ export interface RendererBooking {
 
 export type GlobalSettings = {
   general: {
-    admin_email: string;
     start_from: string;
     time_format: string;
     auto_cancel_after: number;

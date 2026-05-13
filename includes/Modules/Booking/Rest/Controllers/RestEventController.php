@@ -895,7 +895,13 @@ class RestEventController extends RestController {
 				}
 			}
 
-			$updated = array(
+			// Build the update set from parameters the client actually sent. Using
+			// has_param() lets clients clear fields by sending '' / null / [] —
+			// the previous array_filter() stripped every falsy value, so things
+			// like description, payments_settings, and availability_id could
+			// never be reset once set.
+			$updated     = array();
+			$param_map   = array(
 				'name'                => $name,
 				'description'         => $description,
 				'status'              => $status,
@@ -913,12 +919,23 @@ class RestEventController extends RestController {
 				'sms_notifications'   => $sms_notifications,
 				'payments_settings'   => $payments_settings,
 				'dynamic_duration'    => $dynamic_duration,
-				'availability_meta'   => maybe_serialize( $availability_meta ),
 				'availability_type'   => $availability_type,
-				'availability_id'     => is_array( $event_availability ) && isset( $event_availability['id'] )
-					? $event_availability['id']
-					: null,
 			);
+			foreach ( $param_map as $column => $value ) {
+				if ( $request->has_param( $column ) ) {
+					$updated[ $column ] = $value;
+				}
+			}
+
+			if ( $request->has_param( 'event_availability_meta' ) ) {
+				$updated['availability_meta'] = maybe_serialize( $availability_meta );
+			}
+
+			if ( $request->has_param( 'event_availability' ) ) {
+				$updated['availability_id'] = is_array( $event_availability ) && isset( $event_availability['id'] )
+					? $event_availability['id']
+					: null;
+			}
 
 			$event->setReserveTimesAttribute( $reserve_times );
 
@@ -931,7 +948,6 @@ class RestEventController extends RestController {
 				$exists = EventModel::where( 'slug', $slug )->where( 'id', '!=', $id )->first();
 				if ( $exists ) {
 					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Event slug already exists: ' . $slug );
 					return new WP_Error( 'rest_event_error', __( 'Event slug already exists', 'doublescale' ), array( 'status' => 400 ) );
 				}
 
@@ -949,7 +965,6 @@ class RestEventController extends RestController {
 			if ( $user_id ) {
 				$updated['user_id'] = $user_id;
 			}
-			$updated = array_filter( $updated );
 
 			foreach ( $updated as $key => $value ) {
 				$event->{$key} = $value;

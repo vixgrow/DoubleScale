@@ -16,7 +16,6 @@ const useGlobalSettings = () => {
 	const [loading, setLoading] = useState(true);
 	const [settings, setSettings] = useState({
 		general: {
-			admin_email: '',
 			start_from: 'monday',
 			time_format: '',
 			auto_cancel_after: 60,

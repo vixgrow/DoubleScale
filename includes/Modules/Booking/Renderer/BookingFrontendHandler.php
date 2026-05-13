@@ -107,12 +107,18 @@ class BookingFrontendHandler {
 			)
 		);
 
-		// Mirror the admin's pro-feature gating into the renderer. Until the free/pro
-		// split lands, the renderer treats every install as "pro" so payment + waiting
-		// list UI render. Replace the literal `true` with a license check at split time.
+		// Mirror the admin's pro-feature gating into the renderer. When Pro
+		// isn't installed, hide the payment / waiting-list UI on public
+		// booking pages. The constant is defined by the Pro plugin itself,
+		// so the `defined()` guard prevents a notice on free-only installs.
+		$is_pro_active = defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
+			&& doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
 		wp_add_inline_script(
 			'doublescale-booking-renderer',
-			'window.doublescale = window.doublescale || {}; window.doublescale.booking_pro_active = true;',
+			sprintf(
+				'window.doublescale = window.doublescale || {}; window.doublescale.booking_pro_active = %s;',
+				wp_json_encode( $is_pro_active )
+			),
 			'before'
 		);
 

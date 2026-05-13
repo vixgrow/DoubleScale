@@ -176,8 +176,31 @@ class CalendarModel extends Model {
 		$dispatcher->listen(
 			"eloquent.deleting: {$model_name}",
 			function ( $calendar ) {
+				// Cascade in three steps. Events first, because deleting an
+				// event fires EventModel::deleted, which cleans its own
+				// bookings + slots/meta/logs. We then sweep any bookings that
+				// were attached to the calendar directly (no event_id) before
+				// finally clearing the calendar's own meta. chunk() bounds
+				// memory for calendars with large histories; per-model
+				// deletes (not mass delete) so each BookingModel::deleted
+				// listener runs and BookedSlotModel rows are released.
+				$calendar->events()->chunk(
+					500,
+					function ( $events ) {
+						foreach ( $events as $event ) {
+							$event->delete();
+						}
+					}
+				);
+				$calendar->bookings()->chunk(
+					500,
+					function ( $bookings ) {
+						foreach ( $bookings as $booking ) {
+							$booking->delete();
+						}
+					}
+				);
 				$calendar->meta()->delete();
-				$calendar->bookings()->delete();
 			}
 		);
 

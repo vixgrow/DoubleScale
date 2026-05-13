@@ -155,6 +155,7 @@ class BookingService {
 		$end_utc_string   = ( clone $end_date )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
 
 		$wpdb->query( 'START TRANSACTION' );
+		$created_bookings = array();
 		try {
 			$overlap_check();
 
@@ -229,27 +230,38 @@ class BookingService {
 					do_action( 'doublescale_booking_payment_status', $booking );
 				}
 
-				$wpdb->query( 'COMMIT' );
-
-				if ( 'pending' === $status && 'confirmation' === $pending_type ) {
-					BookingEvents::emit(
-						'pending',
-						(int) $booking->id,
-						array(
-							'actor'  => 'attendee',
-							'reason' => 'confirmation',
-						)
-					);
-				} elseif ( 'pending' !== $status ) {
-					BookingEvents::emit( 'created', (int) $booking->id, array( 'actor' => 'attendee' ) );
-				}
-
-				return $booking;
+				$created_bookings[] = $booking;
 			}
-		} catch ( \Exception $e ) {
+
+			$wpdb->query( 'COMMIT' );
+		} catch ( \Throwable $e ) {
 			$wpdb->query( 'ROLLBACK' );
 			throw $e;
 		}
+
+		// Fire lifecycle events post-commit, once per created booking, so a
+		// group booking with N invitees emits N events. Previously the COMMIT
+		// + return were inside the loop, so only invitee #1 ever materialized.
+		foreach ( $created_bookings as $created ) {
+			if ( 'pending' === $status && 'confirmation' === $pending_type ) {
+				BookingEvents::emit(
+					'pending',
+					(int) $created->id,
+					array(
+						'actor'  => 'attendee',
+						'reason' => 'confirmation',
+					)
+				);
+			} elseif ( 'pending' !== $status ) {
+				BookingEvents::emit( 'created', (int) $created->id, array( 'actor' => 'attendee' ) );
+			}
+		}
+
+		// Preserve the existing single-booking return contract for non-group
+		// flows (which always pass exactly one invitee). Group bookings now
+		// correctly persist all N invitees in the DB; callers that need the
+		// full set can read them via the slot/event relationship.
+		return end( $created_bookings );
 	}
 
 	/**
@@ -455,6 +467,98 @@ class BookingService {
 	 */
 	public static function host_has_overlap( $host_user_id, $start, $end ) {
 		$count = BookingModel::query()
+			->whereHas(
+				'hosts',
+				function ( $q ) use ( $host_user_id ) {
+					$q->where( 'user_id', $host_user_id );
+				}
+			)
+			->whereNotIn( 'status', BookingModel::NON_ACTIVE_STATUSES )
+			->where( 'start_time', '<', $end )
+			->where( 'end_time', '>', $start )
+			->count();
+
+		return $count > 0;
+	}
+
+	/**
+	 * Reschedule an existing booking: release the old slot, acquire the new
+	 * one, and update the booking row — all inside one DB transaction so a
+	 * crash mid-way can't leave the booked_slots table inconsistent.
+	 *
+	 * Host-based overlap (round-robin / collective) is checked against the
+	 * existing host_ids on the booking; group events keep their per-calendar
+	 * capacity check; one-to-one events use the calendar overlap with the
+	 * current booking excluded.
+	 *
+	 * @param BookingModel $booking  The booking to reschedule.
+	 * @param \DateTime    $start    New start datetime (any timezone — converted to UTC).
+	 * @param \DateTime    $end      New end datetime (any timezone — converted to UTC).
+	 * @param int          $duration New duration in minutes.
+	 *
+	 * @throws \Exception If the new slot is no longer available.
+	 */
+	public function reschedule_booking( BookingModel $booking, \DateTime $start, \DateTime $end, $duration ): void {
+		global $wpdb;
+
+		$utc       = new \DateTimeZone( 'UTC' );
+		$start_utc = ( clone $start )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+		$end_utc   = ( clone $end )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+
+		$wpdb->query( 'START TRANSACTION' );
+		try {
+			$entity = $booking->getBookableEntity();
+			$type   = $entity ? $entity->type : null;
+
+			if ( in_array( $type, array( 'round-robin', 'collective' ), true ) ) {
+				$host_ids = $booking->hosts->pluck( 'user_id' )->toArray();
+				foreach ( $host_ids as $host_id ) {
+					if ( $this->host_has_overlap_excluding( (int) $host_id, $start_utc, $end_utc, (int) $booking->id ) ) {
+						throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+					}
+				}
+			} elseif ( 'group' === $type ) {
+				$max_invites = (int) Arr::get( $entity->group_settings, 'max_invites', 2 );
+				if ( $max_invites < 1 ) {
+					$max_invites = 1;
+				}
+				$current = BookedSlotModel::count_overlaps( $booking->calendar_id, $start_utc, $end_utc );
+				if ( $current >= $max_invites ) {
+					throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+				}
+			} elseif ( BookedSlotModel::has_overlap_excluding( $booking->calendar_id, $start_utc, $end_utc, (int) $booking->id ) ) {
+				throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+			}
+
+			BookedSlotModel::release( $booking->id );
+
+			$booking->start_time = $start_utc;
+			$booking->end_time   = $end_utc;
+			$booking->slot_time  = $duration;
+			$booking->save();
+
+			BookedSlotModel::acquire(
+				$booking->calendar_id,
+				$start_utc,
+				$end_utc,
+				$booking->id,
+				$booking->event_id
+			);
+
+			$wpdb->query( 'COMMIT' );
+		} catch ( \Throwable $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+	}
+
+	/**
+	 * Same as host_has_overlap() but excludes a specific booking. Used during
+	 * reschedule so the booking's own slot doesn't block its new time.
+	 */
+	public static function host_has_overlap_excluding( $host_user_id, $start, $end, $exclude_booking_id ) {
+		$count = BookingModel::query()
+			->where( 'id', '!=', $exclude_booking_id )
 			->whereHas(
 				'hosts',
 				function ( $q ) use ( $host_user_id ) {

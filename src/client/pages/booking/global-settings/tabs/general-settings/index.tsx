@@ -60,7 +60,6 @@ const GeneralSettings = () => {
 	// Unified state for all settings
 	const [settings, setSettings] = useState({
 		general: {
-			admin_email: '',
 			start_from: 'monday',
 			time_format: '',
 			auto_cancel_after: 60, // 1 hour default

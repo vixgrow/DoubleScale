@@ -373,14 +373,12 @@ class BookingAjax {
 			$end_date = clone $start_date;
 			$end_date->modify( "+{$duration} minutes" );
 
-			$booking->start_time = $start_date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
-			$booking->end_time   = $end_date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+			$service = new $this->bookingServiceClass();
+			$service->reschedule_booking( $booking, $start_date, $end_date, $duration );
 
 			if ( $reschedule_reason ) {
 				$booking->update_meta( 'reschedule_reason', $reschedule_reason );
 			}
-
-			$booking->save();
 
 			$booking->logs()->create(
 				array(
@@ -394,7 +392,6 @@ class BookingAjax {
 
 			wp_send_json_success( array( 'message' => __( 'Booking rescheduled', 'doublescale' ) ) );
 		} catch ( \Exception $e ) {
-			error_log( 'error: ' . $e->getMessage() );
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 	}

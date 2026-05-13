@@ -58,9 +58,24 @@ import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
 import MobileAppSettings from './mobile-app';
-import CustomFields from '../custom-fields';
+import CustomFields from '@doublescale-pro/pages/custom-fields';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
+
+const CUSTOM_FIELDS_PRO_FEATURES = [
+	__(
+		'Create field groups and custom fields for contacts and deals',
+		'doublescale'
+	),
+	__(
+		'Use custom fields in contact records, automations, and merge tags',
+		'doublescale'
+	),
+	__(
+		'Drag-and-drop ordering and full REST API management',
+		'doublescale'
+	),
+];
 
 const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'custom_fields',
@@ -371,6 +386,18 @@ const SettingsPage: React.FC = () => {
 			case 'license':
 				return <License />;
 			case 'custom_fields':
+				if (!config.getProPluginData()?.is_active) {
+					return (
+						<ProFeatureNotice
+							featureName={__('Custom Fields', 'doublescale')}
+							description={__(
+								'Define groups and custom fields for contacts and deals, manage values on records, and use them in automations with DoubleScale Pro.',
+								'doublescale'
+							)}
+							features={CUSTOM_FIELDS_PRO_FEATURES}
+						/>
+					);
+				}
 				return <CustomFields />;
 			case 'link_triggers':
 				const LinkTriggersComponent = applyFilters(

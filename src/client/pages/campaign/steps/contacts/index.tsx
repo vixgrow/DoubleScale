@@ -212,7 +212,7 @@ const Contacts: React.FC = () => {
 		>
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-					<div className="">
+					<div className="lg:w-1/6">
 						{!(
 							campaign?.status === 'processed' ||
 							campaign?.status === 'archived'
@@ -256,8 +256,8 @@ const Contacts: React.FC = () => {
 								)}
 							</p>
 						</div>
-						<div className="flex gap-6">
-							<div className="flex-1">
+						<div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+							<div className="min-w-0">
 								<div className="space-y-6">
 									{inlineError && (
 										<div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2.5 text-sm text-destructive">

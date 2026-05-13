@@ -8,12 +8,12 @@ return array(
 	// Legacy DoubleScale manager — modular Contacts module owns the canonical implementation.
 	'DoubleScale\\Managers\\Filters_Manager' => 'DoubleScale\\Modules\\Contacts\\Filters\\FiltersManager',
 
-	// Custom fields (canonical classes live in free `includes/Core/CustomFields/`).
-	'DoubleScale\\Database\\Migrations\\CustomFieldRelationshipTable' => 'DoubleScale\\Core\\CustomFields\\Migrations\\CustomFieldRelationshipTable',
-	'DoubleScale\\Database\\Migrations\\CustomFieldsGroupsTable' => 'DoubleScale\\Core\\CustomFields\\Migrations\\CustomFieldsGroupsTable',
-	'DoubleScale\\Database\\Migrations\\CustomFieldsTable' => 'DoubleScale\\Core\\CustomFields\\Migrations\\CustomFieldsTable',
-	'DoubleScale\\Models\\CustomFieldModel' => 'DoubleScale\\Core\\CustomFields\\Models\\CustomFieldModel',
-	'DoubleScale\\Models\\CustomFieldsGroupModel' => 'DoubleScale\\Core\\CustomFields\\Models\\CustomFieldsGroupModel',
-	'DoubleScale\\RestApi\\Controllers\\V1\\RestCustomFieldController' => 'DoubleScale\\Core\\CustomFields\\Rest\\RestCustomFieldController',
-	'DoubleScale\\RestApi\\Controllers\\V1\\RestCustomFieldsGroupController' => 'DoubleScale\\Core\\CustomFields\\Rest\\RestCustomFieldsGroupController',
+	// Legacy DoubleScale — canonical custom fields classes live in Pro.
+	'DoubleScale\\Database\\Migrations\\CustomFieldRelationshipTable' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Migrations\\CustomFieldRelationshipTable',
+	'DoubleScale\\Database\\Migrations\\CustomFieldsGroupsTable' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Migrations\\CustomFieldsGroupsTable',
+	'DoubleScale\\Database\\Migrations\\CustomFieldsTable' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Migrations\\CustomFieldsTable',
+	'DoubleScale\\Models\\CustomFieldModel' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Models\\CustomFieldModel',
+	'DoubleScale\\Models\\CustomFieldsGroupModel' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Models\\CustomFieldsGroupModel',
+	'DoubleScale\\RestApi\\Controllers\\V1\\RestCustomFieldController' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Rest\\RestCustomFieldController',
+	'DoubleScale\\RestApi\\Controllers\\V1\\RestCustomFieldsGroupController' => 'DoubleScale\\Pro\\Modules\\CustomFields\\Rest\\RestCustomFieldsGroupController',
 );

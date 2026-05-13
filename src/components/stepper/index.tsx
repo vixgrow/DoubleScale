@@ -40,7 +40,7 @@ const StepperComponent: React.FC<StepperProps> = ({
 				const isLast = index === steps.length - 1;
 
 				return (
-					<div key={step.slug} className="flex gap-2.5">
+					<div key={step.slug} className="flex gap-2.5 items-start">
 						<div className="flex flex-col items-center">
 							<button
 								type="button"

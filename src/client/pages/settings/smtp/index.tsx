@@ -22,6 +22,7 @@ const ProSMTPSettings: React.FC = () => {
 	const addons = ConfigAPI.getAddons();
 	const smtpAddon = addons['smtp'];
 	const smtpModuleOn = ConfigAPI.isModuleEnabled('smtp');
+	const isProActive = !!ConfigAPI.getProPluginData()?.is_active;
 	const [connectionsView, setConnectionsView] = useState<'table' | 'card'>(
 		'table'
 	);
@@ -58,9 +59,11 @@ const ProSMTPSettings: React.FC = () => {
 				/>
 			)}
 
-			<div className="mt-8 pt-8 border-t border-gray-200">
-				<BounceHandler />
-			</div>
+			{isProActive && (
+				<div className="mt-8 pt-8 border-t border-gray-200">
+					<BounceHandler />
+				</div>
+			)}
 		</div>
 	);
 };

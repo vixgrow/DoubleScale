@@ -998,16 +998,36 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 
 						{/* Add Block Button - Only show for non-template sections */}
 						{!isThisTemplateSection && (
-							<div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-								<Button
-									variant="ghost"
-									size="sm"
-									className="w-full text-muted-foreground"
-									onClick={addTextBlock}
-								>
-									<Plus className="w-4 h-4 mr-2" />
-									{__('Add Text Block', 'doublescale')}
-								</Button>
+							<div className="px-10 py-2">
+								<div className="relative w-full rounded-lg">
+									<svg
+										className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg text-primary"
+										xmlns="http://www.w3.org/2000/svg"
+										aria-hidden
+									>
+										<rect
+											x="0.5"
+											y="0.5"
+											width="calc(100% - 1px)"
+											height="calc(100% - 1px)"
+											rx="7"
+											ry="7"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="1"
+											strokeDasharray="10 8"
+											vectorEffect="nonScalingStroke"
+										/>
+									</svg>
+									<Button
+										variant="ghost"
+										className="relative z-10 w-full border-0 bg-transparent p-6 text-primary shadow-none hover:bg-primary/10"
+										onClick={addTextBlock}
+									>
+										<Plus className="w-4 h-4 mr-2" />
+										{__('Add Text Block', 'doublescale')}
+									</Button>
+								</div>
 							</div>
 						)}
 					</>

@@ -37,6 +37,7 @@ export { default as GradientGroupIcon } from './gradient-goup';
 export { default as CopyIcon } from './copy';
 export { default as EditIcon } from './edit';
 export { default as MoveIcon } from './move';
+export { default as MoveBlockIcon } from './move-block-icon';
 export { default as ImportProgressIcon } from './import-progress';
 export { default as InstallIcon } from './install';
 export { default as OutlinedCalendarIcon } from './outlined-calendar';

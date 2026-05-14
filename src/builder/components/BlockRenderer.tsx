@@ -3,13 +3,12 @@ import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
-import { GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
-import { DeleteIcon } from '@doublescale/components';
+import { DeleteIcon, MoveBlockIcon } from '@doublescale/components';
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '@doublescale/utils/templateUtils';
 import { ImageResizeHandles } from './ImageResizeHandles';
@@ -110,31 +109,33 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			data-block-id={block.id}
 			data-block-type={block.type}
 			className={`
-				relative mb-4 group cursor-pointer border-2
-				hover:border-blue-300 transition-colors
-				${isSelected ? 'border-blue-500' : 'border-transparent'}
+				relative mb-4 group cursor-pointer border
+				hover:border-primary transition-colors
+				${isSelected ? 'border-primary' : 'border-transparent'}
 			`}
 			onClick={handleBlockClick}
 		>
 			{/* Block Controls */}
 			{isSelected && (
-				<div className="absolute -top-8 -left-[1.5px] flex items-center gap-2 bg-white shadow-md rounded-t-xl px-2 py-1 text-sm z-10 border-2 border-blue-500">
+				<div className="absolute -top-[34px] -left-[1.5px] flex items-center gap-2 bg-white shadow-md rounded-t-xl px-2 py-1 text-sm z-10"
+				style={{boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)'}}
+				>
 					{/* Only show drag handle for non-template blocks */}
 					{!isThisTemplateBlock && (
 						<div
 							{...listeners}
-							className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground"
+							className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground border-r border-border pr-2"
 						>
-							<GripVertical className="w-4 h-4" />
+							<MoveBlockIcon width={16} height={16} />
 						</div>
 					)}
-					<span className="text-secondary-foreground">
+					<span className="text-primary border-r border-border pr-2">
 						{blockDefinition.name || block.type}
 					</span>
 					{/* Only show delete button for non-template blocks */}
 					{!isThisTemplateBlock && (
 						<span
-							className="text-secondary-foreground cursor-pointer"
+							className="text-destructive cursor-pointer"
 							onClick={handleDeleteBlock}
 						>
 							<DeleteIcon />

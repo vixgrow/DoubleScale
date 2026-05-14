@@ -72,9 +72,9 @@ const TemplateOverlay: React.FC<{ title: string; label: string }> = ({
 	title,
 	label,
 }) => (
-	<div className="opacity-90 transform rotate-3 shadow-lg bg-white rounded-md border border-blue-300 p-4">
-		<div className="text-sm font-medium text-gray-700">{title}</div>
-		<div className="text-xs text-gray-500 mt-1">{label}</div>
+	<div className="opacity-90 transform rotate-3 shadow-lg rounded-md border border-blue-300 bg-white p-4">
+		<div className="text-sm font-medium text-foreground">{title}</div>
+		<div className="mt-1 text-xs text-muted-foreground">{label}</div>
 	</div>
 );
 

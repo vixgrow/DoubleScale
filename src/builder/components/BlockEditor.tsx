@@ -6,7 +6,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 /**
  * internal dependencies
@@ -21,11 +21,7 @@ import {
 	LayoutSettingsIcon,
 } from '@doublescale/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
-import BackgroundSettings from './BackgroudSettings';
-import ButtonSettings from './ButtonSettings';
 import LayoutSettings from '../blocks/layout/LayoutSettings';
-
-type ViewState = 'main' | 'background' | 'button' | 'layout';
 
 interface BlockEditorProps {
 	/**
@@ -54,7 +50,6 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 	panel,
 }) => {
 	const dispatch = useDispatch();
-	const [currentView, setCurrentView] = useState<ViewState>('main');
 	const blocksRegistry = useRegisteredBlocks();
 
 	const selectedBlock = useSelect(
@@ -71,12 +66,6 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 		(select) => select(STORE_KEY).getSelectedSectionId(),
 		[]
 	);
-
-	useEffect(() => {
-		if (selectedBlockId || selectedSectionId) {
-			setCurrentView('main');
-		}
-	}, [selectedBlockId, selectedSectionId]);
 
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
@@ -107,10 +96,6 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 			}
 			: selectedBlock?.props;
 
-	const handleBackFromSettings = () => {
-		setCurrentView('main');
-	};
-
 	const usePanelHeader = Boolean(inline && panel && onClose);
 
 	/** Settings tab global email view: no title row — content sits under tabs like Figma. */
@@ -129,20 +114,13 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 
 	return (
 		<div className={containerClass}>
-			{currentView === 'background' ? (
-				<BackgroundSettings onBack={handleBackFromSettings} />
-			) : currentView === 'button' ? (
-				<ButtonSettings onBack={handleBackFromSettings} />
-			) : currentView === 'layout' ? (
-				<LayoutSettings />
-			) : (
-				<>
+			<>
 					{!isGlobalSettingsInlineMain && (
 						<div
 							className={cn(
 								'flex flex-shrink-0 items-center justify-between',
 								usePanelHeader
-									? 'border-b border-white/10 px-0 pb-4 pt-0'
+									? 'border-b border-white/10 px-6 pb-4 pt-0'
 									: inline
 										? 'px-1 pb-3 pt-2'
 										: 'border-b-2 px-4 pb-4 pt-5'
@@ -225,100 +203,178 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 						</div>
 					)}
 
-					<div className="min-h-0 flex-1 overflow-auto">
-						<div
-							className={cn(
-								'space-y-4',
-								usePanelHeader
-									? 'px-0 py-4'
-									: isGlobalSettingsInlineMain
+					{usePanelHeader ? (
+						<div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pb-6">
+							<div className="px-6">
+								<div className="space-y-4 py-4">
+									{isBlockSelected ? (
+										selectedBlock &&
+										blockDefinition?.Editor ? (
+											<blockDefinition.Editor
+												props={editorProps as any}
+												onChange={handlePropsChange}
+											/>
+										) : (
+											<p className="text-muted-foreground">
+												{__(
+													'No editor available for this block type.',
+													'doublescale'
+												)}
+											</p>
+										)
+									) : isSectionSelected ? (
+										<LayoutSettings
+											sectionId={selectedSectionId}
+											onSettingsChange={(settings) => {
+												const sectionStyles = {
+													backgroundColor:
+														settings.backgroundColor,
+													backgroundImage:
+														settings.backgroundImage
+															? `url(${settings.backgroundImage.url})`
+															: undefined,
+													backgroundRepeat:
+														settings.backgroundRepeat,
+													backgroundSize:
+														settings.backgroundSize,
+													backgroundPosition:
+														settings.backgroundPosition,
+													padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+												};
+												dispatch(
+													STORE_KEY
+												).updateSection(
+													selectedSectionId,
+													{ styles: sectionStyles }
+												);
+											}}
+										/>
+									) : (
+										<GlobalEmailSettings />
+									)}
+								</div>
+
+								{isBlockSelected &&
+									selectedBlock &&
+									!isUnknown && (
+										<div className="my-6 border-t border-white/10 pt-4">
+											<Button
+												variant="destructive"
+												size="sm"
+												className="w-full"
+												onClick={() => {
+													dispatch(
+														STORE_KEY
+													).deleteBlock(
+														selectedBlock.id
+													);
+													dispatch(
+														STORE_KEY
+													).clearSelection();
+												}}
+											>
+												{__(
+													'Delete Block',
+													'doublescale'
+												)}
+											</Button>
+										</div>
+									)}
+							</div>
+						</div>
+					) : (
+						<div className="min-h-0 flex-1 overflow-auto">
+							<div
+								className={cn(
+									'space-y-4',
+									isGlobalSettingsInlineMain
 										? 'px-0 py-0'
 										: inline
 											? 'px-1 py-3'
 											: 'p-4'
-							)}
-						>
-							{isBlockSelected ? (
-								selectedBlock && blockDefinition?.Editor ? (
-									<blockDefinition.Editor
-										props={editorProps as any}
-										onChange={handlePropsChange}
-									/>
-								) : (
-									<p className="text-muted-foreground">
-										{__(
-											'No editor available for this block type.',
-											'doublescale'
-										)}
-									</p>
-								)
-							) : isSectionSelected ? (
-								<LayoutSettings
-									sectionId={selectedSectionId}
-									onSettingsChange={(settings) => {
-										const sectionStyles = {
-											backgroundColor:
-												settings.backgroundColor,
-											backgroundImage:
-												settings.backgroundImage
-													? `url(${settings.backgroundImage.url})`
-													: undefined,
-											backgroundRepeat:
-												settings.backgroundRepeat,
-											backgroundSize:
-												settings.backgroundSize,
-											backgroundPosition:
-												settings.backgroundPosition,
-											padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
-										};
-										dispatch(STORE_KEY).updateSection(
-											selectedSectionId,
-											{ styles: sectionStyles }
-										);
-									}}
-								/>
-							) : (
-								<GlobalEmailSettings
-									inline={inline}
-									onShowBackgroundSettings={() =>
-										setCurrentView('background')
-									}
-									onShowButtonSettings={() =>
-										setCurrentView('button')
-									}
-								/>
-							)}
-						</div>
-
-						{isBlockSelected && selectedBlock && !isUnknown && (
-							<div
-								className={cn(
-									'my-6 pt-4 border-t',
-									usePanelHeader
-										? 'border-white/10 px-0'
-										: inline
-											? 'border-white/10 px-1'
-											: 'border-border px-4'
 								)}
 							>
-								<Button
-									variant="destructive"
-									size="sm"
-									className="w-full"
-									onClick={() => {
-										dispatch(STORE_KEY).deleteBlock(
-											selectedBlock.id
-										);
-										dispatch(STORE_KEY).clearSelection();
-									}}
-								>
-									{__('Delete Block', 'doublescale')}
-								</Button>
+								{isBlockSelected ? (
+									selectedBlock &&
+									blockDefinition?.Editor ? (
+										<blockDefinition.Editor
+											props={editorProps as any}
+											onChange={handlePropsChange}
+										/>
+									) : (
+										<p className="text-muted-foreground">
+											{__(
+												'No editor available for this block type.',
+												'doublescale'
+											)}
+										</p>
+									)
+								) : isSectionSelected ? (
+									<LayoutSettings
+										sectionId={selectedSectionId}
+										onSettingsChange={(settings) => {
+											const sectionStyles = {
+												backgroundColor:
+													settings.backgroundColor,
+												backgroundImage:
+													settings.backgroundImage
+														? `url(${settings.backgroundImage.url})`
+														: undefined,
+												backgroundRepeat:
+													settings.backgroundRepeat,
+												backgroundSize:
+													settings.backgroundSize,
+												backgroundPosition:
+													settings.backgroundPosition,
+												padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+											};
+											dispatch(STORE_KEY).updateSection(
+												selectedSectionId,
+												{ styles: sectionStyles }
+											);
+										}}
+									/>
+								) : (
+									<GlobalEmailSettings />
+								)}
 							</div>
-						)}
-					</div>
+
+							{isBlockSelected &&
+								selectedBlock &&
+								!isUnknown && (
+									<div
+										className={cn(
+											'my-6 border-t pt-4',
+											inline
+												? 'border-white/10 px-1'
+												: 'border-border px-4'
+										)}
+									>
+										<Button
+											variant="destructive"
+											size="sm"
+											className="w-full"
+											onClick={() => {
+												dispatch(
+													STORE_KEY
+												).deleteBlock(
+													selectedBlock.id
+												);
+												dispatch(
+													STORE_KEY
+												).clearSelection();
+											}}
+										>
+											{__(
+												'Delete Block',
+												'doublescale'
+											)}
+										</Button>
+									</div>
+								)}
+						</div>
+					)}
 				</>
-			)}
 		</div>
 	);
 };

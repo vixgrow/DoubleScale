@@ -1,6 +1,11 @@
 // Linear gradient background for builder sidebar (matches navbar)
 .doublescale-builder-sidebar {
 	background: linear-gradient(90deg, #3A3A99 0%, #1B1145 100%);
+
+	// Scrollbar flush to the panel edge (no pr on scrollport + no stable gutter gap)
+	.custom-scrollbar {
+		scrollbar-gutter: auto;
+	}
 }
 
 .doublescale-builder-sidebar__tabs {

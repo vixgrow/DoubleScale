@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
-import { DragDropIcon, PremiumIcon } from '@/components/icons';
+import { DragDropIcon, PremiumIcon } from '@doublescale/components';
+import { cn } from '@/lib/utils';
 
 const TemplateCard = ({
 	item,
@@ -26,10 +27,9 @@ const TemplateCard = ({
 	const style = {
 		opacity: isDragging && !isDragOverlay ? 0.5 : 1,
 		zIndex: isDragging ? 1000 : 1,
+		backgroundColor: 'rgba(255,255,255,0.05)',
 	};
 
-	const baseClasses =
-		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-3 transition-colors text-center';
 	const interactiveClasses =
 		item.isPro && !item.isProActivated
 			? 'cursor-not-allowed opacity-70'
@@ -43,7 +43,11 @@ const TemplateCard = ({
 			style={style}
 			{...(!item.isPro || item.isProActivated ? listeners : {})}
 			{...(!item.isPro || item.isProActivated ? attributes : {})}
-			className={`${baseClasses} ${interactiveClasses}`}
+			className={cn(
+				'relative flex h-full w-full flex-col items-center justify-center gap-3 rounded-lg p-4 text-center text-sm transition-colors',
+				isDragOverlay ? 'text-foreground' : 'text-white',
+				interactiveClasses
+			)}
 			key={item.value || blockType}
 		>
 			{item.isPro && !item.isProActivated && (
@@ -51,19 +55,31 @@ const TemplateCard = ({
 					<PremiumIcon />
 				</div>
 			)}
-			<DragDropIcon />
+			{type === 'layout' && (
+				<DragDropIcon width={20} height={20} />
+			)}
 			<div className="flex flex-row gap-2 items-center justify-center w-full">
 				{type === 'layout' &&
 					item.width?.map((width, index) => (
 						<div
 							key={index}
-							className="w-full h-full bg-border rounded-sm py-4"
+							className={cn(
+								'h-full w-full rounded-sm py-4',
+								isDragOverlay
+									? 'bg-muted-foreground/35'
+									: 'bg-white/60'
+							)}
 							style={{ width: `${width}%` }}
 						></div>
 					))}
 
 				{type === 'element' && item.icon && (
-					<div>
+					<div
+						className={cn(
+							'shrink-0',
+							isDragOverlay ? 'text-foreground' : 'text-white'
+						)}
+					>
 						<item.icon />
 					</div>
 				)}

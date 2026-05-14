@@ -26,7 +26,7 @@ const Sections = () => {
 		<div
 			className="py-4 grid gap-4"
 			style={{
-				gridTemplateColumns: '1fr 1fr',
+				gridTemplateColumns: '1fr 1fr 1fr',
 				gridAutoRows: '115px', // Fixed height for all rows
 			}}
 		>

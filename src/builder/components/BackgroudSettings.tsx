@@ -7,12 +7,9 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * external dependencies
  */
 import React from 'react';
-import { ChevronLeft } from 'lucide-react';
 /**
  * internal dependencies
  */
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import {
 	Select,
 	SelectContent,
@@ -23,28 +20,14 @@ import {
 import { ImageUploadControl, ColorPickerControl } from '../blocks/basic/shared';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 
-interface BackgroundSettingsProps {
-	onBack?: () => void;
-	inline?: boolean;
-	/**
-	 * When true, render only the form body (no back header). Used inside
-	 * Theme settings accordions in Global Email Settings.
-	 */
-	embedded?: boolean;
-}
-
-const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
-	onBack,
-	inline = true,
-	embedded = false,
-}) => {
+const BackgroundSettings: React.FC = () => {
 	const dispatch = useDispatch();
 	const settings = useSelect(
 		(select) => select(STORE_KEY).getGlobalSettings(),
 		[]
 	);
 
-	const handleInputChange = (field: string, value: any) => {
+	const handleInputChange = (field: string, value: unknown) => {
 		dispatch(STORE_KEY).updateGlobalSettings({ [field]: value });
 	};
 
@@ -63,8 +46,8 @@ const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
 		}
 	};
 
-	const body = (
-		<>
+	return (
+		<div className="space-y-4 [&_label]:text-white">
 			<ImageUploadControl
 				label={__('Background Image', 'doublescale')}
 				description={__(
@@ -80,30 +63,17 @@ const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
 			{settings.backgroundImage && (
 				<div className="space-y-4">
 					<div className="space-y-2">
-						<label
-							className={cn(
-								'text-sm',
-								inline ? 'text-white' : 'text-[#333333]'
-							)}
-						>
+						<label className="text-sm text-white">
 							{__('Background Repeat', 'doublescale')}
 						</label>
 						<Select
 							value={settings.backgroundRepeat}
 							onValueChange={(value) =>
-								handleInputChange(
-									'backgroundRepeat',
-									value
-								)
+								handleInputChange('backgroundRepeat', value)
 							}
 						>
-							<SelectTrigger
-								className={cn(
-									'w-full rounded-lg h-11',
-									inline
-										? 'bg-white/10 border-white/15 text-white'
-										: 'bg-white'
-								)}
+							<SelectTrigger className="h-11 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white"
+							style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
 							>
 								<SelectValue
 									placeholder={__(
@@ -124,12 +94,7 @@ const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
 					</div>
 
 					<div className="space-y-2">
-						<label
-							className={cn(
-								'text-sm',
-								inline ? 'text-white' : 'text-[#333333]'
-							)}
-						>
+						<label className="text-sm text-white">
 							{__('Background Size', 'doublescale')}
 						</label>
 						<Select
@@ -138,13 +103,8 @@ const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
 								handleInputChange('backgroundSize', value)
 							}
 						>
-							<SelectTrigger
-								className={cn(
-									'w-full rounded-lg h-11',
-									inline
-										? 'bg-white/10 border-white/15 text-white'
-										: 'bg-white'
-								)}
+							<SelectTrigger className="h-11 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white"
+							style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
 							>
 								<SelectValue
 									placeholder={__(
@@ -175,70 +135,7 @@ const BackgroundSettings: React.FC<BackgroundSettingsProps> = ({
 				onChange={(value) => handleInputChange('canvasColor', value)}
 				id="canvas-color"
 				placeholder="#ffffff"
-				className={
-					inline
-						? 'border-white/15 bg-white/10 [&_input]:bg-transparent [&_input]:text-white'
-						: undefined
-				}
 			/>
-		</>
-	);
-
-	if (embedded) {
-		return (
-			<div
-				className={cn(
-					'space-y-4',
-					inline && '[&_label]:text-white [&_.flex.flex-col]:text-white'
-				)}
-			>
-				{body}
-			</div>
-		);
-	}
-
-	return (
-		<div className="h-full flex flex-col">
-			<div
-				className={cn(
-					'flex items-center justify-between flex-shrink-0',
-					inline
-						? 'px-1 pt-2 pb-3 border-b border-white/10'
-						: 'border-b-2 px-4 pt-5 pb-4'
-				)}
-			>
-				<div className="flex items-center gap-2">
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => onBack?.()}
-						className={cn(
-							'p-1 h-auto',
-							inline &&
-							'text-white hover:bg-white/10 hover:text-white'
-						)}
-					>
-						<ChevronLeft className="h-4 w-4" />
-					</Button>
-					<h3
-						className={cn(
-							'text-base font-medium',
-							inline ? 'text-white' : 'text-[#333333]'
-						)}
-					>
-						{__('Background', 'doublescale')}
-					</h3>
-				</div>
-			</div>
-
-			<div
-				className={cn(
-					'space-y-4 flex-1 overflow-auto',
-					inline ? 'px-1 py-3' : 'p-4'
-				)}
-			>
-				{body}
-			</div>
 		</div>
 	);
 };

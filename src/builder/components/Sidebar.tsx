@@ -6,12 +6,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * external dependencies
  */
-import { useState, useEffect } from 'react';
-import { X, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
 /**
  * internal dependencies
  */
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SettingsIcon } from '@doublescale/components';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -26,16 +24,10 @@ import {
 } from './SidebarTabIcons';
 import './style.scss';
 
-interface SidebarItem {
-	id: string;
-	title: string;
-	component: React.ComponentType<any>;
-}
-
 interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
 	openGlobalSettings?: () => void;
-	/** Open “My templates” drawer when the builder first mounts (used by Pro sequence mail / open-builder flow). */
+	/** Open "My templates" drawer when the builder first mounts (used by Pro sequence mail / open-builder flow). */
 	openTemplatesOnMount?: boolean;
 }
 
@@ -76,10 +68,7 @@ const TAB_ITEMS: {
 
 const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	const dispatch = useDispatch();
-	const [activeTab, setActiveTab] = useState<SidebarTab>('settings');
-	const [librarySubItem, setLibrarySubItem] = useState<SidebarItem | null>(
-		null
-	);
+	const [activeTab, setActiveTab] = useState<SidebarTab>('blocks');
 
 	const selection = useSelect((select) => {
 		return {
@@ -95,31 +84,17 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 		selection.columnId
 	);
 
-	useEffect(() => {
-		if (sidebarCloseTrigger && sidebarCloseTrigger > 0) {
-			setLibrarySubItem(null);
-		}
-	}, [sidebarCloseTrigger]);
-
-	useEffect(() => {
-		if (hasSelection) {
-			setLibrarySubItem(null);
-		}
-	}, [hasSelection]);
-
 	const handleCloseEditor = () => {
-		setActiveTab('settings');
+		setActiveTab('blocks');
 		dispatch(STORE_KEY).clearSelection();
 	};
 
 	const handleTabClick = (tab: SidebarTab) => {
-		setLibrarySubItem(null);
 		setActiveTab(tab);
 		dispatch(STORE_KEY).clearSelection();
 	};
 
 	const renderTabContent = () => {
-		// Only one BlockEditor: the panel below. Avoid duplicate toolbars/headers.
 		if (hasSelection) {
 			return null;
 		}
@@ -128,10 +103,8 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 			case 'library':
 				return (
 					<LayoutItems
-						activeSidebar={librarySubItem}
-						setActiveSidebar={(item) =>
-							setLibrarySubItem(item ?? null)
-						}
+						inline
+						collapseSignal={sidebarCloseTrigger}
 					/>
 				);
 			case 'blocks':
@@ -147,7 +120,7 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	return (
 		<div className="doublescale-builder-sidebar flex h-full w-[400px] flex-shrink-0 flex-col text-white">
 			{hasSelection ? (
-				<div className="doublescale-builder-sidebar__editor-layer flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-6">
+				<div className="doublescale-builder-sidebar__editor-layer flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pl-6 pt-6 pb-6 pr-0">
 					<BlockEditor inline panel onClose={handleCloseEditor} />
 				</div>
 			) : (
@@ -186,42 +159,9 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 					</div>
 
 					<div className="relative min-h-0 flex-1 overflow-hidden">
-						<div className="absolute inset-0 overflow-y-auto custom-scrollbar px-6 pb-6">
-							{renderTabContent()}
+						<div className="absolute inset-0 overflow-y-auto custom-scrollbar pb-6">
+							<div className="px-6">{renderTabContent()}</div>
 						</div>
-
-						{librarySubItem && (
-							<div className="absolute inset-0 z-30 flex flex-col bg-white">
-								<div className="flex flex-shrink-0 items-center gap-2 border-b border-border/60 px-4 py-3">
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={() => setLibrarySubItem(null)}
-										className="h-7 w-7 p-0"
-									>
-										<ChevronLeft className="h-4 w-4" />
-									</Button>
-									<h2 className="flex-1 text-sm font-semibold text-foreground">
-										{librarySubItem.title}
-									</h2>
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={() => setLibrarySubItem(null)}
-										className="h-7 w-7 p-0"
-									>
-										<X className="h-4 w-4" />
-									</Button>
-								</div>
-								<div className="min-h-0 flex-1 overflow-y-auto p-4 active-sidebar-scrollbar">
-									<librarySubItem.component
-										onSidebarClose={() =>
-											setLibrarySubItem(null)
-										}
-									/>
-								</div>
-							</div>
-						)}
 					</div>
 				</>
 			)}

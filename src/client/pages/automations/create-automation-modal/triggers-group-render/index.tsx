@@ -6,13 +6,27 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { useState } from 'react';
-import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import {
+	AccordingRightIcon,
+	BookingIcon,
+	CartIcon,
+	ContactsIcon,
+	CoursesIcon,
+	CurrencyIcon,
+	DealsIcon,
+	FormsIcon,
+	IntegrationsIcon,
+	LinkTriggersIcon,
+	OrdersIcon,
+	PremiumIcon,
+	VideoBlockIcon,
+} from '@doublescale/components/icons/index';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +37,57 @@ import {
 } from '@/components/ui/tooltip';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import type { TriggersGroup } from '@doublescale/config';
+import type { IconProps } from '@doublescale/config';
 import config from '@doublescale/config';
+import { cn } from '@/lib/utils';
+
+type GroupIconComponent = React.FC<IconProps>;
+
+function getGroupIcon(label: string): GroupIconComponent {
+	const l = label.toLowerCase();
+	if (
+		l.includes('contact') ||
+		l.includes('subscriber') ||
+		l.includes('list') ||
+		l.includes('tag')
+	) {
+		return ContactsIcon;
+	}
+	if (l.includes('link')) {
+		return LinkTriggersIcon;
+	}
+	if (l.includes('deal')) {
+		return DealsIcon;
+	}
+	if (l.includes('woo') || l.includes('commerce') || l.includes('cart')) {
+		return CartIcon;
+	}
+	if (l.includes('booking')) {
+		return BookingIcon;
+	}
+	if (l.includes('form')) {
+		return FormsIcon;
+	}
+	if (
+		l.includes('learn') ||
+		l.includes('tutor') ||
+		l.includes('lifter') ||
+		l.includes('member') ||
+		l.includes('course')
+	) {
+		return CoursesIcon;
+	}
+	if (l.includes('order') || l.includes('surecart')) {
+		return OrdersIcon;
+	}
+	if (l.includes('presto')) {
+		return VideoBlockIcon;
+	}
+	if (l.includes('paid')) {
+		return CurrencyIcon;
+	}
+	return IntegrationsIcon;
+}
 
 interface TriggersGroupRenderProps {
 	groups: TriggersGroup[];
@@ -34,11 +98,41 @@ interface TriggersGroupRenderProps {
 const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	groups,
 	onChange,
-	value,
+	value: _value,
 }) => {
 	const [collapsedGroups, setCollapsedGroups] = useState<
 		Record<string, boolean>
 	>({});
+
+	// `groups` may arrive as an object (PHP-encoded assoc array) — normalise to an array.
+	const groupsList = useMemo<TriggersGroup[]>(
+		() =>
+			Array.isArray(groups)
+				? groups
+				: groups && typeof groups === 'object'
+					? (Object.values(groups) as TriggersGroup[])
+					: [],
+		[groups]
+	);
+
+	const groupsSignature = useMemo(
+		() => groupsList.map((g) => g?.label ?? '').join('|'),
+		[groupsList]
+	);
+
+	useEffect(() => {
+		const initial: Record<string, boolean> = {};
+		groupsList.forEach((_, idx) => {
+			if (idx !== 0) {
+				initial[String(idx)] = true;
+			}
+		});
+		setCollapsedGroups(initial);
+		// We only want to reset when the category (signature) changes — the
+		// groupsList reference itself may be stable inside one category.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [groupsSignature]);
+
 	const [showProModal, setShowProModal] = useState(false);
 	const [selectedProTrigger, setSelectedProTrigger] = useState<{
 		name: string;
@@ -117,10 +211,11 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		);
 	};
 
-	const toggleGroup = (key: number) => {
+	const toggleGroup = (key: string | number) => {
+		const k = String(key);
 		setCollapsedGroups((prev) => ({
 			...prev,
-			[key]: !prev[key],
+			[k]: !prev[k],
 		}));
 	};
 
@@ -143,18 +238,47 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 
 	return (
 		<>
-			<div className="flex flex-col gap-4">
-				{map(groups, (group, key) => (
-					<Card key={key} className="shadow-none">
-						<CardHeader className="px-4 py-2 border-b-2">
-							<CardTitle className="flex items-center justify-between font-bold text-base">
-								<div className="flex items-center gap-2">
-									{group.label}
+			<div className="columns-1 gap-4 sm:columns-2 sm:gap-x-5 [column-fill:_balance]">
+				{map(groupsList, (group, key) => {
+					const isCollapsed = !!collapsedGroups[String(key)];
+					const GroupIcon = getGroupIcon(group.label);
+
+					return (
+					<Card
+						key={key}
+						className="mb-4 break-inside-avoid shadow-none overflow-hidden rounded-[10px] border border-neutral-200 bg-white"
+					>
+						<CardHeader
+							className={cn(
+								'cursor-pointer select-none space-y-0 p-0 transition-colors hover:bg-neutral-50/80',
+								!isCollapsed && 'border-b border-neutral-200'
+							)}
+						>
+							<button
+								type="button"
+								className="flex w-full items-center gap-3 px-4 py-4 text-left"
+								onClick={() => toggleGroup(key)}
+							>
+								<span
+									className={cn(
+										'flex  shrink-0 items-center justify-center text-sky-500',
+										group.is_disabled &&
+											'bg-neutral-100 text-neutral-400'
+									)}
+								>
+									<GroupIcon
+										width={24}
+										height={24}
+										color="currentColor"
+									/>
+								</span>
+								<CardTitle className="flex flex-1 flex-wrap items-center gap-2 text-base font-bold text-neutral-800">
+									<span>{group.label}</span>
 									{group.is_disabled && (
 										<TooltipProvider>
 											<Tooltip>
 												<TooltipTrigger asChild>
-													<span className="text-sm text-muted-foreground">
+													<span className="text-sm font-normal text-muted-foreground">
 														(
 														{__(
 															'Not Available',
@@ -171,56 +295,57 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 											</Tooltip>
 										</TooltipProvider>
 									)}
-								</div>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => toggleGroup(key)}
-									className="h-8 w-8 p-0"
-								>
-									{collapsedGroups[key] ? (
-										<ChevronDown className="h-6 w-6" />
-									) : (
-										<ChevronUp className="h-6 w-6" />
+								</CardTitle>
+								<span
+									className={cn(
+										'shrink-0 transition-transform duration-200',
+										!isCollapsed && 'rotate-90'
 									)}
-								</Button>
-							</CardTitle>
+								>
+									<AccordingRightIcon width={24} height={24} />
+								</span>
+							</button>
 						</CardHeader>
-						{!collapsedGroups[key] && (
+						{!isCollapsed && (
 							<CardContent className="p-0">
-								<div className="flex flex-col divide-y">
+								<div className="flex flex-col divide-y divide-neutral-200">
 									{map(
 										group.triggers,
 										(trigger, triggerKey) => {
 											const triggerButton = (
 												<div
 													key={triggerKey}
-													className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
+													className="flex items-center justify-between gap-4 px-4 py-3.5 transition-colors hover:bg-neutral-50/60"
 												>
-													<div className="flex items-center gap-2">
-														<span className="text-sm">
+													<div className="flex min-w-0 flex-1 items-center gap-2">
+														<span className="text-sm leading-6 text-foreground">
 															{trigger.label}
 														</span>
-														{trigger.is_pro && !isProActive && (
-															<Lock className="h-4 w-4 text-orange-500" />
-														)}
+														{trigger.is_pro &&
+															!isProActive && (
+																<span className="inline-flex shrink-0">
+																	<PremiumIcon
+																		width={16}
+																		height={16}
+																	/>
+																</span>
+															)}
 													</div>
 													<Button
-														onClick={() =>
+														onClick={(e) => {
+															e.stopPropagation();
 															handleTriggerClick(
 																triggerKey,
 																trigger
-															)
-														}
+															);
+														}}
+														variant="secondaryDeepBlue"
+														size="sm"
 														disabled={
 															!trigger.is_pro &&
 															group.is_disabled
 														}
-														className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${
-															value === triggerKey
-																? 'border-2 border-primary'
-																: 'border'
-														}`}
+														className="h-8 shrink-0 rounded-md border px-4 text-xs font-semibold uppercase tracking-wide shadow-none"
 													>
 														{__(
 															'Select',
@@ -261,7 +386,8 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 							</CardContent>
 						)}
 					</Card>
-				))}
+					);
+				})}
 			</div>
 
 			{/* PRO Modal */}

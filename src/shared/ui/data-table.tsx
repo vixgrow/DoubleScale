@@ -66,10 +66,10 @@ export function DataTable<TData>({
 	};
 
 	return (
-		<div className="w-full">
+		<div className="w-full ">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
-				<div className="flex items-center justify-between mb-4 w-full">
+				<div className="flex items-center justify-between  w-full mb-6">
 					<DataTableSearch
 						value={
 							config.search?.onChange

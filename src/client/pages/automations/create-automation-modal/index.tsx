@@ -19,6 +19,7 @@ import {
 	Field,
 	NoticeBanner,
 	GradientAutomationsIcon,
+	AutomationsIcon,
 } from '@doublescale/components';
 import {
 	Dialog,
@@ -29,6 +30,8 @@ import {
 import { Button } from '@/components/ui/button';
 import TriggerCategorySelector from './trigger-category-selector';
 import TriggersGroupRender from './triggers-group-render';
+import { Input } from '@doublescale/shared/ui/input';
+import { Label } from '@doublescale/shared/ui/label';
 interface CreateAutomationModalProps {
 	visible: boolean;
 	isEditAutomation?: boolean;
@@ -43,8 +46,9 @@ interface CreateAutomationModalProps {
 	onClearError: () => void;
 	error?: NoticeMessage | null;
 	/**
-	 * When true (default), dialog renders inline — can break inside transformed parents (e.g. React Flow).
-	 * Set false to portal to document.body for a full-screen overlay modal.
+	 * When true (default), dialog renders inline — works in normal pages.
+	 * Set false to portal to document.body when the parent uses transform/overflow
+	 * (e.g. React Flow workflow canvas).
 	 */
 	removePortal?: boolean;
 }
@@ -714,10 +718,11 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
 			<DialogContent
-				className="max-w-[1100px] z-[150300] max-h-[90vh] h-full flex flex-col overflow-hidden"
+				className="max-w-[1100px] z-[150300] max-h-[90vh] h-full flex flex-col overflow-hidden bg-[#fff] gap-0 p-0"
 				removePortal={removePortal}
 			>
-				<DialogHeader className="shrink-0">
+				{/* Sticky header */}
+				<DialogHeader className="shrink-0  bg-white px-6 pb-4 pt-6">
 					<CustomDialogHeader
 						title={
 							isEditAutomation
@@ -730,14 +735,15 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 								: __('Add New Automation', 'doublescale')
 						}
 						icon={
-							<GradientAutomationsIcon width={32} height={32} />
+							<AutomationsIcon width={24} height={24} color='#3A3A99' />
 						}
 					/>
 				</DialogHeader>
 
-				<div className="flex-1 flex flex-col overflow-hidden">
+				{/* Scrollable body — light gray surface, 24px gutter around the inner card */}
+				<div className="min-h-0 flex-1 overflow-y-auto  p-6">
 					{error && (
-						<div className="mb-4 shrink-0 pr-1">
+						<div className="mb-4">
 							<NoticeBanner
 								ref={noticeBannerRef}
 								notice={error}
@@ -746,30 +752,28 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 						</div>
 					)}
 
-					<div className="doublescale-fields doublescale-automation-modal-fields flex-1 flex flex-col overflow-hidden">
-						<div className="shrink-0">
-							<Field
-								label={__('Automation Name', 'doublescale')}
-								value={automation.name}
-								onChange={(value) =>
-									onAutomationChange({
-										...automation,
-										name: value,
-									})
-								}
-								type="text"
-								required
-							/>
-						</div>
-
-						<div className="doublescale-field flex-1 flex flex-col overflow-hidden min-h-0">
-							<div className="doublescale-field-label flex items-center text-base text-foreground shrink-0">
-								{__('Trigger', 'doublescale')}
-								<span className="text-destructive">*</span>
+					<div className="rounded-2xl border border-border bg-[#f7f8fa] p-6">
+						<div className="doublescale-fields doublescale-automation-modal-fields grid grid-cols-2 gap-6">
+							{/* Row 1, col 1 — Automation name */}
+							<div className="min-w-0 flex flex-col gap-2 ">
+                               <Label className="text-base font-normal text-foreground !p-0 ">{__('Automation Name', 'doublescale')}<span className="text-destructive">*</span></Label>
+								<Input
+									value={automation.name}
+									onChange={(e) =>
+										onAutomationChange({
+											...automation,
+											name: e.target.value,
+										})
+									}
+								/>
 							</div>
-
-							<div className="flex flex-1 gap-5 overflow-hidden min-h-0">
-								<div className="w-1/2 overflow-y-auto pr-1">
+							{/* Row 1, col 2 — Trigger category select */}
+							<div className="doublescale-field min-w-0 flex flex-col gap-2 ">
+								<div className="doublescale-field-label flex items-center gap-1 text-base font-normal text-[#09090B]">
+									{__('Trigger', 'doublescale')}
+									<span className="text-destructive">*</span>
+								</div>
+								<div className="doublescale-field-input">
 									<TriggerCategorySelector
 										triggers={automationTriggers}
 										selectedCategory={selectedCategory}
@@ -777,6 +781,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 										data={categoryData}
 									/>
 								</div>
+<<<<<<< Updated upstream
 
 								<div className="w-1/2 overflow-y-auto pr-1">
 									<TriggersGroupRender
@@ -790,16 +795,46 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 										}
 									/>
 								</div>
+=======
+							</div>
+							{/* Row 2 — full-width divider */}
+							<div
+								className="col-span-full border-t border-neutral-200"
+								role="separator"
+							/>
+							{/* Row 3 — trigger groups accordion */}
+							<div className="col-span-full ">
+								<TriggersGroupRender
+									groups={currentCategoryData?.groups || []}
+									value={automation.trigger}
+									onChange={(value) =>
+										onAutomationChange({
+											...automation,
+											trigger: value,
+										})
+									}
+								/>
+>>>>>>> Stashed changes
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<DialogFooter className="pt-4 border-t border-border flex justify-end shrink-0 bg-white">
+				{/* Sticky footer */}
+				<DialogFooter className="shrink-0  bg-white px-6 py-4 sm:justify-end gap-6">
+					<Button
+						type="button"
+						variant="secondaryDeepBlue"
+						
+						onClick={onCancel}
+						disabled={isSaving}
+					>
+						{__('Cancel', 'doublescale')}
+					</Button>
 					<Button
 						onClick={onOk}
 						disabled={isSaving}
-						size="lg"
+						
 					>
 						{isSaving
 							? isEditAutomation

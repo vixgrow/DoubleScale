@@ -336,60 +336,64 @@ const AutomationsList: React.FC = () => {
 	};
 
 	return (
-		<div className="doublescale-automations-list">
-			<PageHeader
-				title={__('Automations List', 'doublescale')}
-				subtitle={__('Automations', 'doublescale')}
-				actions={[
-					{
-						label: __('Create Automation', 'doublescale'),
-						onClick: () => {
-							setVisible(true);
-							setCreateError(null);
+		<div className="doublescale-automations-list flex min-h-0 flex-1 flex-col">
+			<div className="shrink-0">
+				<PageHeader
+					title={__('AutomationsList', 'doublescale')}
+					actions={[
+						{
+							label: __('Create Automation', 'doublescale'),
+							onClick: () => {
+								setVisible(true);
+								setCreateError(null);
+							},
+							variant: 'default' as const,
+							icon: <PlusIcon />,
 						},
-						icon: <PlusIcon />,
-					},
-				]}
-			/>
-
-		{listError && (
-			<div className="mb-4">
-				<NoticeBanner
-					notice={listError}
-					closeNotice={() => setListError(null)}
+					]}
 				/>
 			</div>
-		)}
 
-		{loading || hasRecords ? (
-			<>
-				{/* Data Table */}
-				<DataTable
-					columns={columns}
-					data={data}
-					config={tableConfig}
-					showPagination={false}
-					initialPageSize={perPage}
-					setPage={setPage}
-					loading={loading}
-				/>
-				<DataTablePagination table={serverSideTable} />
-			</>
-		) : (
-			<NoData
-				icon={<GradientAutomationsIcon />}
-				title={__('No automations yet', 'doublescale')}
-				subtitle={__(
-					'Create Automation to build your first workflow and start streamlining your process',
-					'doublescale'
+			{listError && (
+				<div className="shrink-0">
+					<NoticeBanner
+						notice={listError}
+						closeNotice={() => setListError(null)}
+					/>
+				</div>
+			)}
+			<div className="flex min-h-0 flex-1 flex-col rounded-[20px] bg-[#fff] p-6 shadow-[0px_4px_24px_0px_rgba(59,130,246,0.2)] ">
+				{loading || hasRecords ? (
+					<div className="flex min-h-0 flex-1 flex-col">
+						<DataTable
+							columns={columns}
+							data={data}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<div className="mt-auto shrink-0">
+							<DataTablePagination table={serverSideTable} />
+						</div>
+					</div>
+				) : (
+					<NoData
+						icon={<GradientAutomationsIcon />}
+						title={__('No automations yet', 'doublescale')}
+						subtitle={__(
+							'Create Automation to build your first workflow and start streamlining your process',
+							'doublescale'
+						)}
+						buttonLabel={__('Create Automation', 'doublescale')}
+						onClick={() => {
+							setVisible(true);
+							setCreateError(null);
+						}}
+					/>
 				)}
-				buttonLabel={__('Create Automation', 'doublescale')}
-				onClick={() => {
-					setVisible(true);
-					setCreateError(null);
-				}}
-			/>
-		)}
+			</div>
 
 			<CreateAutomationModal
 				visible={visible}

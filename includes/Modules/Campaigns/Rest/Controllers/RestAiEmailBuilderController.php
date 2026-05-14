@@ -883,6 +883,7 @@ class RestAiEmailBuilderController extends RestController
 		if (is_wp_error($response)) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf(__('AI request failed: %s', 'doublescale'), $response->get_error_message()),
 				array('status' => 502)
 			);
@@ -895,6 +896,7 @@ class RestAiEmailBuilderController extends RestController
 			$error_msg = $body['error']['message'] ?? __('Unknown error from OpenAI', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf(__('OpenAI Api error: %s', 'doublescale'), $error_msg),
 				array('status' => $code)
 			);
@@ -967,6 +969,7 @@ class RestAiEmailBuilderController extends RestController
 		if (is_wp_error($response)) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf(__('AI request failed: %s', 'doublescale'), $response->get_error_message()),
 				array('status' => 502)
 			);
@@ -979,6 +982,7 @@ class RestAiEmailBuilderController extends RestController
 			$error_msg = $parsed['error']['message'] ?? __('Unknown error from AI provider', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf(__('AI provider error: %s', 'doublescale'), $error_msg),
 				array('status' => $code)
 			);
@@ -1026,6 +1030,7 @@ class RestAiEmailBuilderController extends RestController
 		if (is_wp_error($response)) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf(__('AI request failed: %s', 'doublescale'), $response->get_error_message()),
 				array('status' => 502)
 			);
@@ -1038,6 +1043,7 @@ class RestAiEmailBuilderController extends RestController
 			$error_msg = $body['error']['message'] ?? __('Unknown error from Anthropic', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf(__('Anthropic Api error: %s', 'doublescale'), $error_msg),
 				array('status' => $code)
 			);
@@ -1091,6 +1097,7 @@ class RestAiEmailBuilderController extends RestController
 		if (is_wp_error($response)) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf(__('AI request failed: %s', 'doublescale'), $response->get_error_message()),
 				array('status' => 502)
 			);
@@ -1103,6 +1110,7 @@ class RestAiEmailBuilderController extends RestController
 			$error_msg = $body['error']['message'] ?? __('Unknown error from Gemini', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf(__('Gemini Api error: %s', 'doublescale'), $error_msg),
 				array('status' => $code)
 			);
@@ -1863,6 +1871,7 @@ PROMPT;
 		$emails   = array();
 
 		foreach ($data as $index => $email_data) {
+			/* translators: %d: sequence index of the email */
 			$subject    = sanitize_text_field($email_data['subject'] ?? sprintf(__('Email %d', 'doublescale'), $index + 1));
 			$delay_days = max(0, (int) ($email_data['delay_days'] ?? $index));
 

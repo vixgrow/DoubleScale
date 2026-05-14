@@ -245,20 +245,10 @@ class AdminLoader {
 			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) ) {
 				return true;
 			}
-			$candidates = array(
-				'QuillCRM-Pro/doublescale-pro.php',
-				'DoubleScale-Pro/doublescale-pro.php',
-			);
-			foreach ( $candidates as $relative ) {
-				if ( \is_plugin_active( $relative ) ) {
-					return true;
-				}
-			}
-			return false;
+			return \is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' );
 		}
 		if ( function_exists( 'doublescale_is_plugin_active' ) ) {
-			return doublescale_is_plugin_active( 'QuillCRM-Pro/doublescale-pro.php' )
-				|| doublescale_is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' )
+			return doublescale_is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' )
 				|| (
 					defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
 					&& doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH )

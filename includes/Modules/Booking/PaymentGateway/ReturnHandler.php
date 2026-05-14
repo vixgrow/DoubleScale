@@ -33,7 +33,9 @@ function doublescale_booking_payment_return_handler() {
             // Log the payment return
             $booking->logs()->create([
                 'type'    => 'info',
-                'message' => sprintf(__('Payment %s return from %s', 'doublescale'), $action, $method),
+                /* translators: 1: payment action (e.g. return, cancel), 2: gateway name */
+                'message' => sprintf(__('Payment %1$s return from %2$s', 'doublescale'), $action, $method),
+                /* translators: %s: payment gateway name */
                 'details' => sprintf(__('User returned from payment gateway: %s', 'doublescale'), $method),
             ]);
             

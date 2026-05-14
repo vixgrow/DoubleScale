@@ -16,7 +16,7 @@ if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 }
 
 if ( ! defined( 'DOUBLESCALE_PLUGIN_URL' ) ) {
-	define( 'DOUBLESCALE_PLUGIN_URL', 'http://example.test/wp-content/plugins/QuillCRM/' );
+	define( 'DOUBLESCALE_PLUGIN_URL', 'http://example.test/wp-content/plugins/doublescale/' );
 }
 
 if ( ! defined( 'DOUBLESCALE_VERSION' ) ) {

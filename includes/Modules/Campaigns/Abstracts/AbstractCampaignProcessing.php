@@ -1285,6 +1285,7 @@ abstract class AbstractCampaignProcessing {
 		$campaign_duration = $this->calculate_campaign_duration( $campaign );
 
 		doublescale_get_logger()->info(
+			/* translators: %s: dynamic value */
 			sprintf( __( '%s Campaign completed.', 'doublescale'), ucfirst( $this->channel ) ),
 			array(
 				'code'       => "{$this->channel}_campaign_completed",

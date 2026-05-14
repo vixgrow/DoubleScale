@@ -196,6 +196,7 @@ class BookingJobs {
 			array(
 				'type'    => 'info',
 				'message' => __( 'Booking automatically completed', 'doublescale' ),
+				/* translators: %s: number of hours after end time */
 				'details' => sprintf( __( 'Booking was marked as completed automatically %s hour(s) after the end time', 'doublescale' ), $time_in_hours ),
 			)
 		);

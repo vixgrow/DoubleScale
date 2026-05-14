@@ -11,7 +11,7 @@
 declare( strict_types = 1 );
 
 $free_base = dirname( __DIR__ ) . '/includes/Modules/Automations';
-$pro_base = dirname( __DIR__, 2 ) . '/QuillCRM-Pro/includes/Modules/Automations';
+$pro_base = dirname( __DIR__, 2 ) . '/DoubleScale-Pro/includes/Modules/Automations';
 
 if ( ! is_dir( $free_base ) || ! is_dir( dirname( $pro_base ) ) ) {
 	fwrite( STDERR, "Paths not found. free_base=$free_base pro_parent=" . dirname( $pro_base ) . "\n" );

@@ -41,7 +41,7 @@ const sharedAlias = {
 	),
 	'@doublescale-pro/pages/custom-fields': path.resolve(
 		__dirname,
-		'../QuillCRM-Pro/src/client/pages/custom-fields'
+		'../DoubleScale-Pro/src/client/pages/custom-fields'
 	),
 	// Pro custom-fields page imports this; free webpack must resolve it when aliasing the page in.
 	'@doublescale-free/hooks/use-custom-fields': path.resolve(

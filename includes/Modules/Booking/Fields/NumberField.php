@@ -58,12 +58,14 @@ class NumberField extends FieldType {
 	public function validate_value( $value ) {
 		if ( empty( $value ) && $this->is_required ) {
 			$this->is_valid       = false;
+			/* translators: %s: field label */
 			$this->validation_err = sprintf( __( '%s is required', 'doublescale' ), $this->label );
 			return;
 		}
 
 		if ( ! is_numeric( $value ) ) {
 			$this->is_valid       = false;
+			/* translators: %s: field label */
 			$this->validation_err = sprintf( __( '%s is not a valid number', 'doublescale' ), $this->label );
 		}
 	}

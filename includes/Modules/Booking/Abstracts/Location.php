@@ -124,6 +124,7 @@ abstract class Location {
 		$location_fields = $data['fields'] ?? array();
 		foreach ( $this->get_admin_fields() as $slug => $field ) {
 			if ( $field['required'] && ! isset( $location_fields[ $slug ] ) ) {
+				/* translators: %s: field label */
 				return new \WP_Error( 'field_required', sprintf( __( '%s is required', 'doublescale' ), $field['label'] ) );
 			}
 
@@ -133,6 +134,7 @@ abstract class Location {
 				$field_type_obj = FieldsManager::instance()->get_item( $field['type'] );
 
 				if ( null === $field_type_obj ) {
+					/* translators: %s: field type slug */
 					return new \WP_Error( 'invalid_field_type', sprintf( __( 'Field type "%s" does not exist', 'doublescale' ), $field['type'] ) );
 				}
 

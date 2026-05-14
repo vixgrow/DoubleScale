@@ -602,6 +602,7 @@ class RestBookingController extends RestController {
 					return new WP_Error(
 						'invalid_transition',
 						sprintf(
+							/* translators: 1: previous booking status, 2: target booking status */
 							__( 'Cannot transition from %1$s to %2$s', 'doublescale' ),
 							$old_status,
 							$status

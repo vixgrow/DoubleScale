@@ -525,6 +525,7 @@ abstract class Integration {
 			return true;
 		}
 
+		/* translators: %s: integration name */
 		return new \WP_Error( 'integration_not_connected', sprintf( __( 'Integration %s is not connected.', 'doublescale' ), $this->name ) );
 	}
 

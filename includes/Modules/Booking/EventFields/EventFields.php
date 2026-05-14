@@ -144,6 +144,7 @@ class EventFields {
 		$options = array();
 
 		foreach ( $minutes as $minute ) {
+			/* translators: %d: number of minutes */
 			$options[ $minute ] = sprintf( _n( '%d minute', '%d minutes', $minute, 'doublescale' ), $minute );
 		}
 
@@ -856,6 +857,7 @@ class EventFields {
 		$options = array();
 
 		foreach ( $minutes as $minute ) {
+			/* translators: %d: number of minutes */
 			$options[ $minute ] = sprintf( _n( '%d minute', '%d minutes', $minute, 'doublescale' ), $minute );
 		}
 

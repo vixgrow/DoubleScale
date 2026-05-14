@@ -448,6 +448,7 @@ class BookingAjax {
 				array(
 					'type'    => 'info',
 					'message' => __( 'Payment processing initiated', 'doublescale' ),
+					/* translators: %s: payment method name */
 					'details' => sprintf( __( 'Payment processing initiated with %s', 'doublescale' ), $payment_method ),
 				)
 			);

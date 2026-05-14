@@ -148,6 +148,7 @@ abstract class AbstractBulkMailer {
 			return new WP_Error(
 				'batch_too_large',
 				sprintf(
+					/* translators: %s: dynamic value */
 					__( 'Batch size exceeds maximum of %d recipients.', 'doublescale'),
 					$max_batch_size
 				)

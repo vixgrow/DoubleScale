@@ -43,7 +43,8 @@ abstract class Manager {
 	 */
 	public function register( $item, $type, $slug_property, $option_fields = array() ) {
 		if ( ! is_a( $item, $type ) ) {
-			throw new \Exception( __( "Invalid $type", 'doublescale' ) );
+			/* translators: %s: manager item type name */
+			throw new \Exception( esc_html( sprintf( __( 'Invalid %s', 'doublescale' ), $type ) ) );
 		}
 
 		$slug = $item->{$slug_property};

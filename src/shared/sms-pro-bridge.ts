@@ -1,5 +1,5 @@
 /**
- * Pro-injected SMS campaign UI (set by QuillCRM-Pro before the SPA renders).
+ * Pro-injected SMS campaign UI (set by DoubleScale-Pro before the SPA renders).
  *
  * @package DoubleScale
  */

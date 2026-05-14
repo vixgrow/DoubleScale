@@ -59,7 +59,8 @@ class BookingActions {
 			$booking = $this->bookingValidatorClass::validate_booking( $id );
 
 			if ( $booking->status === $new_status ) {
-				throw new \Exception( sprintf( __( 'Booking is already %s', 'doublescale' ), $new_status ) );
+				/* translators: %s: booking status */
+				throw new \Exception( esc_html( sprintf( __( 'Booking is already %s', 'doublescale' ), $new_status ) ) );
 			}
 
 			$booking->status = $new_status;
@@ -100,7 +101,9 @@ class BookingActions {
 	public function generate_success_message( $action, $status ) {
 		return array(
 			'status'  => 'success',
+			/* translators: %s: action verb such as Confirm or Reschedule */
 			'title'   => sprintf( __( '%s Successful', 'doublescale' ), ucfirst( $action ) ),
+			/* translators: %s: booking status verb such as confirmed or rescheduled */
 			'message' => sprintf( __( 'The booking has been successfully %s.', 'doublescale' ), $status ),
 		);
 	}
@@ -108,6 +111,7 @@ class BookingActions {
 	public function generate_error_message( $action, $message ) {
 		return array(
 			'status'  => 'error',
+			/* translators: %s: action verb such as Confirm or Reschedule */
 			'title'   => sprintf( __( '%s Failed', 'doublescale' ), ucfirst( $action ) ),
 			'message' => $message,
 		);

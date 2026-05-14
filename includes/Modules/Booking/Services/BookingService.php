@@ -88,6 +88,7 @@ class BookingService {
 				'host_ids'        => $host_ids,
 				'overlap_check'   => $overlap_check,
 				'log_message'     => __( 'Booking created', 'doublescale' ),
+				/* translators: 2: actor or contact display name */
 				'log_details_fmt' => __( 'Booking created by %2$s', 'doublescale' ),
 			)
 		);
@@ -365,7 +366,8 @@ class BookingService {
 					array(
 						'type'    => 'info',
 						'message' => __( 'Joined waiting list', 'doublescale' ),
-						'details' => sprintf( __( '%s joined the waiting list at position #%d', 'doublescale' ), $contact_display_name, $current_waiting + $idx + 1 ),
+						/* translators: 1: contact display name, 2: queue position */
+						'details' => sprintf( __( '%1$s joined the waiting list at position #%2$d', 'doublescale' ), $contact_display_name, $current_waiting + $idx + 1 ),
 					)
 				);
 

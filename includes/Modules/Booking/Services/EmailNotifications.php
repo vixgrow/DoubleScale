@@ -195,7 +195,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Reject email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -204,7 +206,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send reject email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -228,7 +232,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Confirmation email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -237,7 +243,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send confirmation email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -262,7 +270,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'info',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Approval email sent to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -271,7 +281,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'error',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Failed to send approval email to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -288,7 +300,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Submitted email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -297,7 +311,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send submitted email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -327,7 +343,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'info',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Reminder email sent to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -336,7 +354,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'error',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Failed to send reminder email to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -365,7 +385,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Reminder email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -374,7 +396,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send reminder email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -398,7 +422,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Rescheduled email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -407,7 +433,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send rescheduled email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -431,7 +459,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'info',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Rescheduled email sent to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -440,7 +470,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'error',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Failed to send rescheduled email to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -465,7 +497,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Cancellation email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -474,7 +508,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send cancellation email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 					)
 				);
@@ -498,7 +534,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'info',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Cancellation email sent to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -507,7 +545,9 @@ final class EmailNotifications {
 						$booking,
 						array(
 							'type'    => 'error',
+							/* translators: %s: email address */
 							'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+							/* translators: %s: email address */
 							'details' => sprintf( __( 'Failed to send cancellation email to %s', 'doublescale' ), $email ),
 						)
 					);
@@ -532,6 +572,7 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
 						'details' => __( 'Waiting list confirmation email sent', 'doublescale' ),
 					)
@@ -541,6 +582,7 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
 						'details' => __( 'Failed to send waiting list confirmation email', 'doublescale' ),
 					)
@@ -565,6 +607,7 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
 						'details' => __( 'Waiting list availability email sent', 'doublescale' ),
 					)
@@ -574,6 +617,7 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
 						'details' => __( 'Failed to send waiting list availability email', 'doublescale' ),
 					)
@@ -614,7 +658,9 @@ final class EmailNotifications {
 				$booking,
 				array(
 					'type'    => 'info',
+					/* translators: %s: email address */
 					'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+					/* translators: %s: email address */
 					'details' => sprintf( __( 'Confirmation email sent to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 				)
 			);
@@ -623,7 +669,9 @@ final class EmailNotifications {
 				$booking,
 				array(
 					'type'    => 'error',
+					/* translators: %s: email address */
 					'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+					/* translators: %s: email address */
 					'details' => sprintf( __( 'Failed to send confirmation email to %s', 'doublescale' ), $booking->calendar->user->user_email ),
 				)
 			);
@@ -642,7 +690,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'info',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Notification email sent to %s', 'doublescale' ), $email ),
 					)
 				);
@@ -651,7 +701,9 @@ final class EmailNotifications {
 					$booking,
 					array(
 						'type'    => 'error',
+						/* translators: %s: email address */
 						'message' => sprintf( __( 'Email not sent to %s', 'doublescale' ), $email ),
+						/* translators: %s: email address */
 						'details' => sprintf( __( 'Failed to send notification email to %s', 'doublescale' ), $email ),
 					)
 				);

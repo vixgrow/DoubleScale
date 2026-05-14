@@ -858,7 +858,8 @@ class EventModel extends Model {
 					$field_type = new $field_type();
 
 					if ( $field_type->has_options && ! isset( $field['settings']['options'] ) ) {
-						throw new \Exception( sprintf( __( 'Options are required for %s field', 'doublescale' ), $field['label'] ) );
+						/* translators: %s: field label */
+						throw new \Exception( esc_html( sprintf( __( 'Options are required for %s field', 'doublescale' ), $field['label'] ) ) );
 					}
 
 					$current_fields[ $group ][ $field_key ] = $field;
@@ -1675,7 +1676,7 @@ class EventModel extends Model {
 				throw new \Exception( __( 'Frequency limit or unit is not set', 'doublescale' ) );
 			}
 
-			$this->validate_frequency_limits( $frequency['limit'], $frequency['unit'], $start_date, 'Event reached the frequency limit' );
+			$this->validate_frequency_limits( $frequency['limit'], $frequency['unit'], $start_date, __( 'Event reached the frequency limit', 'doublescale' ) );
 		}
 	}
 
@@ -1758,7 +1759,7 @@ class EventModel extends Model {
 		$result = $query->count();
 
 		if ( $result >= $limit ) {
-			throw new \Exception( __( $message, 'doublescale' ) );
+			throw new \Exception( esc_html( $message ) );
 		}
 	}
 
@@ -1778,7 +1779,7 @@ class EventModel extends Model {
 				throw new \Exception( __( 'Duration limit or unit is not set', 'doublescale' ) );
 			}
 
-			$this->validate_duration_limit( $duration['limit'], $duration['unit'], $start_date, 'Event reached the duration limit', true );
+			$this->validate_duration_limit( $duration['limit'], $duration['unit'], $start_date, __( 'Event reached the duration limit', 'doublescale' ), true );
 		}
 	}
 
@@ -1867,7 +1868,7 @@ class EventModel extends Model {
 		}
 
 		if ( $duration >= $limit ) {
-			throw new \Exception( __( $message, 'doublescale' ) );
+			throw new \Exception( esc_html( $message ) );
 		}
 	}
 

@@ -262,7 +262,6 @@ final class AdminConfig {
 		$plugins_dir = trailingslashit( dirname( dirname( \DOUBLESCALE_PLUGIN_FILE ) ) );
 		$candidates  = array(
 			'DoubleScale-Pro/doublescale-pro.php',
-			'QuillCRM-Pro/doublescale-pro.php',
 		);
 		$exists      = false;
 		foreach ( $candidates as $rel ) {
@@ -274,10 +273,7 @@ final class AdminConfig {
 
 		$is_active = function_exists( 'doublescale_is_pro_addon_active' )
 			? doublescale_is_pro_addon_active()
-			: (
-				( function_exists( 'is_plugin_active' ) && is_plugin_active( $candidates[0] ) )
-				|| ( function_exists( 'is_plugin_active' ) && is_plugin_active( $candidates[1] ) )
-			);
+			: ( function_exists( 'is_plugin_active' ) && is_plugin_active( $candidates[0] ) );
 
 		return array(
 			'is_installed' => $exists,

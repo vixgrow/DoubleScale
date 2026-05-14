@@ -161,7 +161,6 @@ if ( ! function_exists( 'doublescale_is_pro_addon_active' ) ) {
 
 		$candidates = array(
 			'DoubleScale-Pro/doublescale-pro.php',
-			'QuillCRM-Pro/doublescale-pro.php',
 		);
 		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \DOUBLESCALE_PRO_PLUGIN_PATH ) {
 			array_unshift( $candidates, (string) \DOUBLESCALE_PRO_PLUGIN_PATH );
@@ -291,6 +290,7 @@ if ( ! function_exists( 'doublescale_get_logger' ) ) {
 			_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
+					/* translators: 1: provided class name, 2: filter name, 3: required interface */
 					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'doublescale' ),
 					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
 					'<code>doublescale_logging_class</code>',

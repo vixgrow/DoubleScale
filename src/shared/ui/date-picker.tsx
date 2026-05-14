@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { OutlinedCalendarIcon } from '@doublescale/components';
+import { CalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -23,6 +23,7 @@ interface DatePickerProps {
 	outputFormat?: 'iso' | 'display'; // 'iso' for YYYY-MM-DD, 'display' for formatted text
 	minDate?: Date; // Minimum selectable date (dates before this are disabled)
 	maxDate?: Date; // Maximum selectable date (dates after this are disabled)
+	style?: React.CSSProperties;
 }
 
 function formatDate(date: Date | undefined) {
@@ -69,6 +70,7 @@ export function DatePicker({
 	buttonClassName,
 	minDate,
 	maxDate,
+	style,
 }: DatePickerProps) {
 	const [open, setOpen] = React.useState(false);
 
@@ -106,19 +108,17 @@ export function DatePicker({
 
 	return (
 		<div className={cn('relative flex gap-2', className)}>
-			<Popover open={open} onOpenChange={(val) => {
-				if (!val) return;
-				setOpen(val);
-			}}>
+			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
 						className={cn(
 							'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
 							buttonClassName
 						)}
+						style={style}
 					>
 						{inputValue ? inputValue : placeholder}
-						<OutlinedCalendarIcon />
+						<CalendarIcon />
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent

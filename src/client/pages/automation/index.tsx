@@ -41,7 +41,6 @@ import Config from '@doublescale/config';
 import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
-	getProRequiredForAnalyticsNotice,
 } from '@doublescale/services/module-fetch';
 
 /** Ensures `steps` is always an array (PHP may serialize keyed arrays as objects). */
@@ -144,18 +143,24 @@ const Automation: React.FC = () => {
 
 		try {
 			setAnalyticsLoading(true);
-			const response = (await moduleFetch<any>('analytics', {
-				path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
-			})) as any | null;
+			const response = (await moduleFetch<any>(
+				'automations',
+				{
+					path: `/doublescale/v1/automation-reports/${automationId}/get-chart-report`,
+				},
+				{ requirePro: true }
+			)) as any | null;
 
 			if (!response) {
-				const proOff = !Config.getProPluginData()?.is_active;
-				createNotice({
-					type: proOff ? 'info' : 'error',
-					message: proOff
-						? getProRequiredForAnalyticsNotice()
-						: getModuleFetchBlockedNotice('analytics'),
-				});
+				// Pro is inactive: funnel data is simply unavailable — no toast,
+				// the Reports tab already renders an upgrade prompt.
+				// If automations module itself is off (different issue), show a notice.
+				if (Config.getProPluginData()?.is_active) {
+					createNotice({
+						type: 'error',
+						message: getModuleFetchBlockedNotice('automations'),
+					});
+				}
 				setAnalyticsData([]);
 				return;
 			}

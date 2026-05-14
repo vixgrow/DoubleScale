@@ -351,6 +351,12 @@ final class TriggersManager {
 
 		foreach ( $forms as $form ) {
 			if ( in_array( $form->slug, $skip_slugs, true ) ) {
+				// These slugs are handled by catalog-registered Pro triggers.
+				// Re-populate from the already-registered trigger so sources survive
+				// any later call to this method (e.g. from sync_form_trigger_sources()).
+				if ( isset( $this->triggers[ $form->slug ] ) ) {
+					$this->store_trigger_in_sources( $this->triggers[ $form->slug ] );
+				}
 				continue;
 			}
 			$this->sources['forms']['groups'][ $form->slug ] = array(

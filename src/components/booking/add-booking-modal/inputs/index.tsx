@@ -118,9 +118,9 @@ const FormField = ({ field, id, form }) => {
 		);
 	}
 
-	// Match QuillBooking's Form.Item naming so getFields() can strip the prefix
-	// and submit the field map under the `fields` key — `id` here is the raw
-	// schema id like `phone_number`, stored as `fields-phone_number`.
+	// Antd Form.Item key uses the `fields-` prefix so getFields() can strip
+	// it and submit the field map under the `fields` key — `id` here is the
+	// raw schema id like `phone_number`, stored as `fields-phone_number`.
 	const storageKey = `fields-${id}`;
 	const currentValue = form?.getFieldValue(storageKey);
 	const inputValue = currentValue !== undefined ? currentValue : defaultValue;

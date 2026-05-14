@@ -566,7 +566,6 @@ DoubleScale is developed and maintained by the Quill Forms team.
 
 **Our Other Products:**
 * **Quill Forms**: [quillforms.com](https://quillforms.com) - Advanced WordPress form builder
-* **Quill Booking**: [quillbooking.com](https://quillbooking.com) - WordPress booking system
 
 == Support ==
 

@@ -304,8 +304,8 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 		}
 
 		// Custom fields (rendered by QuestionsComponents) are stored under
-		// `fields-{id}` to match QuillBooking's antd Form.Item naming — the
-		// `fields-` prefix is stripped by getFields() before POSTing.
+		// `fields-{id}` in the antd Form.Item naming — the `fields-` prefix
+		// is stripped by getFields() before POSTing.
 		const customFields = fields?.custom || {};
 		for (const [key, def] of Object.entries(customFields)) {
 			if (!def?.required || def?.enabled === false) {

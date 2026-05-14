@@ -22,8 +22,6 @@
  * exists. The `booking.` namespace is stripped from the event name first.
  * Example: `'booking.created'` → `'doublescale_booking_created'`.
  *
- * Ported from the legacy QuillBooking `Booking_Event_Bus`.
- *
  * @package DoubleScale
  */
 
@@ -105,11 +103,11 @@ class EventBus {
 
 		// Bare-hook compatibility tail. Integrations and notifiers subscribe
 		// to `doublescale_booking_{event}` rather than registering as
-		// structured bus handlers, mirroring the legacy QuillBooking pattern
-		// where most subscribers used WP actions directly and never knew the
-		// bus existed. We strip the `booking.` namespace from the event name
-		// so the public hook name is `doublescale_booking_{event}` —
-		// matching every subscriber across the integrations and services.
+		// structured bus handlers, so most subscribers use WP actions
+		// directly and never need to know the bus exists. We strip the
+		// `booking.` namespace from the event name so the public hook name
+		// is `doublescale_booking_{event}` — matching every subscriber
+		// across the integrations and services.
 		$short_event = preg_replace( '/^booking\./', '', $event_name );
 		do_action( "doublescale_booking_{$short_event}", $booking, $context );
 
@@ -207,8 +205,6 @@ class EventBus {
 	 * trampoline-hook level (and gain idempotency through `workflow_runs`).
 	 * The bare-hook tail in {@see dispatch()} covers subscribers that
 	 * prefer to listen at the event level instead.
-	 *
-	 * Mirrors the legacy QuillBooking default-handler set verbatim.
 	 */
 	private static function get_default_handlers( $event_name ) {
 		$map = array(

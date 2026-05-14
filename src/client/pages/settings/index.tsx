@@ -56,7 +56,6 @@ import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
 import MobileAppSettings from './mobile-app';
-import CustomFields from '@doublescale-pro/pages/custom-fields';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -384,9 +383,10 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'license':
 				return <License />;
-			case 'custom_fields':
-				if (!config.getProPluginData()?.is_active) {
-					return (
+			case 'custom_fields': {
+				const CustomFieldsSettingsComponent = applyFilters(
+					'doublescale_settings_custom_fields_settings',
+					() => (
 						<ProFeatureNotice
 							featureName={__('Custom Fields', 'doublescale')}
 							description={__(
@@ -395,9 +395,10 @@ const SettingsPage: React.FC = () => {
 							)}
 							features={CUSTOM_FIELDS_PRO_FEATURES}
 						/>
-					);
-				}
-				return <CustomFields />;
+					)
+				) as React.ComponentType;
+				return <CustomFieldsSettingsComponent />;
+			}
 			case 'link_triggers':
 				const LinkTriggersComponent = applyFilters(
 					'doublescale_settings_link_triggers_settings',

@@ -781,44 +781,28 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 										data={categoryData}
 									/>
 								</div>
-<<<<<<< Updated upstream
-
-								<div className="w-1/2 overflow-y-auto pr-1">
-									<TriggersGroupRender
-										groups={ triggerGroupsForCategory }
-										value={automation.trigger}
-										onChange={(value) =>
-											onAutomationChange({
-												...automation,
-												trigger: value,
-											})
-										}
-									/>
-								</div>
-=======
-							</div>
-							{/* Row 2 — full-width divider */}
-							<div
-								className="col-span-full border-t border-neutral-200"
-								role="separator"
+						</div>
+						{/* Row 2 — full-width divider */}
+						<div
+							className="col-span-full border-t border-neutral-200"
+							role="separator"
+						/>
+						{/* Row 3 — trigger groups accordion */}
+						<div className="col-span-full ">
+							<TriggersGroupRender
+								groups={currentCategoryData?.groups || []}
+								value={automation.trigger}
+								onChange={(value) =>
+									onAutomationChange({
+										...automation,
+										trigger: value,
+									})
+								}
 							/>
-							{/* Row 3 — trigger groups accordion */}
-							<div className="col-span-full ">
-								<TriggersGroupRender
-									groups={currentCategoryData?.groups || []}
-									value={automation.trigger}
-									onChange={(value) =>
-										onAutomationChange({
-											...automation,
-											trigger: value,
-										})
-									}
-								/>
->>>>>>> Stashed changes
-							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
 				{/* Sticky footer */}
 				<DialogFooter className="shrink-0  bg-white px-6 py-4 sm:justify-end gap-6">

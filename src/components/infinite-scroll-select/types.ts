@@ -30,8 +30,6 @@ export interface InfiniteScrollSelectProps {
   loading?: boolean;
   error?: string;
   className?: string;
-  /** Extra classes for the search/input trigger (defaults match `@/components/ui/input`) */
-  inputClassName?: string;
 }
 
 export interface InfiniteScrollSelectState {

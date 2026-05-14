@@ -39,32 +39,32 @@ const TAB_ITEMS: {
 	iconOnly?: boolean;
 	Icon: React.ComponentType<{ className?: string }>;
 }[] = [
-	{
-		id: 'blocks',
-		label: __('Blocks', 'doublescale'),
-		Icon: BuilderBlocksTabIcon,
-	},
-	{
-		id: 'layouts',
-		label: __('Layouts', 'doublescale'),
-		Icon: BuilderLayoutTabIcon,
-	},
-	{
-		id: 'library',
-		label: __('Library', 'doublescale'),
-		Icon: BuilderLibraryTabIcon,
-	},
-	{
-		id: 'settings',
-		label: __('Settings', 'doublescale'),
-		iconOnly: true,
-		Icon: ({ className }) => (
-			<span className={cn('inline-flex', className)}>
-				<SettingsIcon width={24} height={24} />
-			</span>
-		),
-	},
-];
+		{
+			id: 'blocks',
+			label: __('Blocks', 'doublescale'),
+			Icon: BuilderBlocksTabIcon,
+		},
+		{
+			id: 'layouts',
+			label: __('Layouts', 'doublescale'),
+			Icon: BuilderLayoutTabIcon,
+		},
+		{
+			id: 'library',
+			label: __('Library', 'doublescale'),
+			Icon: BuilderLibraryTabIcon,
+		},
+		{
+			id: 'settings',
+			label: __('Settings', 'doublescale'),
+			iconOnly: true,
+			Icon: ({ className }) => (
+				<span className={cn('inline-flex', className)}>
+					<SettingsIcon width={24} height={24} />
+				</span>
+			),
+		},
+	];
 
 const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	const dispatch = useDispatch();
@@ -120,7 +120,8 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	return (
 		<div className="doublescale-builder-sidebar flex h-full w-[400px] flex-shrink-0 flex-col text-white">
 			{hasSelection ? (
-				<div className="doublescale-builder-sidebar__editor-layer flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden pl-6 pt-6 pb-6 pr-0">
+				<div className="doublescale-builder-sidebar__editor-layer flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden mt-6 mb-6 rpunded-lg p-4"
+				>
 					<BlockEditor inline panel onClose={handleCloseEditor} />
 				</div>
 			) : (

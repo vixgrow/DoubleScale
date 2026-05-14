@@ -106,28 +106,47 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 		!isSectionSelected;
 
 	const containerClass = cn(
-		'h-full flex flex-col overflow-hidden',
+		'h-full flex flex-col overflow-hidden rounded-lg',
 		inline
 			? 'bg-transparent'
 			: 'w-full bg-background'
 	);
 
 	return (
-		<div className={containerClass}>
+		<div
+			className={containerClass}
+			style={
+				!isGlobalSettingsInlineMain
+					? { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
+					: undefined
+			}
+		>
 			<>
-					{!isGlobalSettingsInlineMain && (
-						<div
-							className={cn(
-								'flex flex-shrink-0 items-center justify-between',
-								usePanelHeader
-									? 'border-b border-white/10 px-6 pb-4 pt-0'
-									: inline
-										? 'px-1 pb-3 pt-2'
-										: 'border-b-2 px-4 pb-4 pt-5'
-							)}
-						>
-							{usePanelHeader ? (
-								<h3 className="text-base font-semibold text-white">
+				{!isGlobalSettingsInlineMain && (
+					<div
+						className={cn(
+							'flex flex-shrink-0 items-center justify-between',
+							usePanelHeader
+								? 'border-b border-white p-4'
+								: inline
+									? 'px-1 pb-3 pt-2'
+									: 'border-b-2 px-4 pb-4 pt-5'
+						)}
+					>
+						{usePanelHeader ? (
+							isBlockSelected && blockDefinition?.icon ? (
+								<div className="flex min-w-0 flex-1 items-center gap-2">
+									<div className="flex shrink-0 items-center justify-center text-white">
+										<blockDefinition.icon width={32} height={32} />
+									</div>
+									<h3 className="min-w-0 text-base font-semibold text-white">
+										{blockDefinition?.name
+											? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
+											: __('Settings', 'doublescale')}
+									</h3>
+								</div>
+							) : (
+								<h3 className="min-w-0 flex-1 text-base font-semibold text-white">
 									{isBlockSelected && blockDefinition?.name
 										? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
 										: isSectionSelected
@@ -140,136 +159,77 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 												'doublescale'
 											)}
 								</h3>
-							) : (
-								<div className="flex items-center gap-2">
-									<div
-										className={cn(
-											'rounded-lg p-2',
-											inline
-												? 'bg-white/10 text-white'
-												: 'bg-gradient-to-r from-primary to-secondary text-white'
-										)}
-									>
-										{isBlockSelected &&
-											blockDefinition?.icon ? (
-											<blockDefinition.icon />
-										) : isSectionSelected ? (
-											<LayoutSettingsIcon />
-										) : (
-											<GlobalEmailSettingsIcon />
-										)}
-									</div>
-									<h3
-										className={cn(
-											'text-base font-semibold',
-											inline
-												? 'text-white'
-												: 'text-primary'
-										)}
-									>
-										{isBlockSelected &&
-											blockDefinition?.name
-											? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
-											: isSectionSelected
-												? __(
-													'Layout Settings',
-													'doublescale'
-												)
-												: __(
-													'Global Email Settings',
-													'doublescale'
-												)}
-									</h3>
-								</div>
-							)}
-							{onClose && (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={onClose}
+							)
+						) : (
+							<div className="flex items-center gap-2">
+								<div
 									className={cn(
+										'rounded-lg p-2',
 										inline
-											? 'text-white hover:bg-white/10 hover:text-white'
-											: ''
-									)}
-									aria-label={__(
-										'Close editor',
-										'doublescale'
+											? 'bg-white/10 text-white'
+											: 'bg-gradient-to-r from-primary to-secondary text-white'
 									)}
 								>
-									<X className="h-4 w-4" />
-								</Button>
-							)}
-						</div>
-					)}
-
-					{usePanelHeader ? (
-						<div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pb-6">
-							<div className="px-6">
-								<div className="space-y-4 py-4">
-									{isBlockSelected ? (
-										selectedBlock &&
-										blockDefinition?.Editor ? (
-											<blockDefinition.Editor
-												props={editorProps as any}
-												onChange={handlePropsChange}
-											/>
-										) : (
-											<p className="text-muted-foreground">
-												{__(
-													'No editor available for this block type.',
-													'doublescale'
-												)}
-											</p>
-										)
+									{isBlockSelected &&
+										blockDefinition?.icon ? (
+										<blockDefinition.icon />
 									) : isSectionSelected ? (
-										<LayoutSettings
-											sectionId={selectedSectionId}
-											onSettingsChange={(settings) => {
-												const sectionStyles = {
-													backgroundColor:
-														settings.backgroundColor,
-													backgroundImage:
-														settings.backgroundImage
-															? `url(${settings.backgroundImage.url})`
-															: undefined,
-													backgroundRepeat:
-														settings.backgroundRepeat,
-													backgroundSize:
-														settings.backgroundSize,
-													backgroundPosition:
-														settings.backgroundPosition,
-													padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
-												};
-												dispatch(
-													STORE_KEY
-												).updateSection(
-													selectedSectionId,
-													{ styles: sectionStyles }
-												);
-											}}
-										/>
+										<LayoutSettingsIcon />
 									) : (
-										<GlobalEmailSettings />
+										<GlobalEmailSettingsIcon />
 									)}
 								</div>
+								<h3
+									className={cn(
+										'text-base font-semibold',
+										inline
+											? 'text-white'
+											: 'text-primary'
+									)}
+								>
+									{isBlockSelected &&
+										blockDefinition?.name
+										? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
+										: isSectionSelected
+											? __(
+												'Layout Settings',
+												'doublescale'
+											)
+											: __(
+												'Global Email Settings',
+												'doublescale'
+											)}
+								</h3>
 							</div>
-						</div>
-					) : (
-						<div className="min-h-0 flex-1 overflow-auto">
-							<div
+						)}
+						{onClose && (
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={onClose}
 								className={cn(
-									'space-y-4',
-									isGlobalSettingsInlineMain
-										? 'px-0 py-0'
-										: inline
-											? 'px-1 py-3'
-											: 'p-4'
+									inline
+										? 'text-white hover:bg-white/10 hover:text-white'
+										: ''
+								)}
+								aria-label={__(
+									'Close editor',
+									'doublescale'
 								)}
 							>
+								<X className="h-4 w-4" />
+							</Button>
+						)}
+					</div>
+				)}
+
+				{usePanelHeader ? (
+					<div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pb-6">
+						<div className="px-4">
+							<div className="space-y-4 py-4">
 								{isBlockSelected ? (
 									selectedBlock &&
-									blockDefinition?.Editor ? (
+										blockDefinition?.Editor ? (
 										<blockDefinition.Editor
 											props={editorProps as any}
 											onChange={handlePropsChange}
@@ -301,7 +261,9 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 													settings.backgroundPosition,
 												padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
 											};
-											dispatch(STORE_KEY).updateSection(
+											dispatch(
+												STORE_KEY
+											).updateSection(
 												selectedSectionId,
 												{ styles: sectionStyles }
 											);
@@ -312,8 +274,66 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 								)}
 							</div>
 						</div>
-					)}
-				</>
+					</div>
+				) : (
+					<div className="min-h-0 flex-1 overflow-auto">
+						<div
+							className={cn(
+								'space-y-4',
+								isGlobalSettingsInlineMain
+									? 'px-0 py-0'
+									: inline
+										? 'px-1 py-3'
+										: 'p-4'
+							)}
+						>
+							{isBlockSelected ? (
+								selectedBlock &&
+									blockDefinition?.Editor ? (
+									<blockDefinition.Editor
+										props={editorProps as any}
+										onChange={handlePropsChange}
+									/>
+								) : (
+									<p className="text-muted-foreground">
+										{__(
+											'No editor available for this block type.',
+											'doublescale'
+										)}
+									</p>
+								)
+							) : isSectionSelected ? (
+								<LayoutSettings
+									sectionId={selectedSectionId}
+									onSettingsChange={(settings) => {
+										const sectionStyles = {
+											backgroundColor:
+												settings.backgroundColor,
+											backgroundImage:
+												settings.backgroundImage
+													? `url(${settings.backgroundImage.url})`
+													: undefined,
+											backgroundRepeat:
+												settings.backgroundRepeat,
+											backgroundSize:
+												settings.backgroundSize,
+											backgroundPosition:
+												settings.backgroundPosition,
+											padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+										};
+										dispatch(STORE_KEY).updateSection(
+											selectedSectionId,
+											{ styles: sectionStyles }
+										);
+									}}
+								/>
+							) : (
+								<GlobalEmailSettings />
+							)}
+						</div>
+					</div>
+				)}
+			</>
 		</div>
 	);
 };

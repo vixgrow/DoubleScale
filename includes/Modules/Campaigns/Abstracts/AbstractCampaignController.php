@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;

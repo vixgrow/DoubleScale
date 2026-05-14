@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Klaviyo;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**

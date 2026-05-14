@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Managers\LocationsManager;
 use DoubleScale\Modules\Booking\Managers\FieldsManager;
 use DoubleScale\Modules\Booking\Traits\EntityProperties;

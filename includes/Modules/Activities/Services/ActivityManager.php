@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Activities\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

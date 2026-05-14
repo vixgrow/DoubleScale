@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Migrations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Database\Migration;
 
 class AvailabilityTable extends Migration {

@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Booking\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use WP_Error;
 use Exception;

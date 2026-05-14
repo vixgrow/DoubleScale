@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

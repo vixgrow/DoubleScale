@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 
 /**

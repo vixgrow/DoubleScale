@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Traits;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * TimeframeContactFilter trait
  */

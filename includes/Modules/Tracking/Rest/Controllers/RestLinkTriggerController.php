@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Tracking\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\UserRoles\Permissions;
 use WP_Error;
 use Exception;

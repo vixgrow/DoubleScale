@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
 
 /**

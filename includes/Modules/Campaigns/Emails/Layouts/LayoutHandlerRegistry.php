@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Layouts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Registry for layout handlers
  */

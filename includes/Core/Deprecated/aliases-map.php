@@ -4,6 +4,9 @@
  *
  * @return array<string, string>
  */
+
+defined( 'ABSPATH' ) || exit;
+
 return array(
 	// Legacy DoubleScale manager — modular Contacts module owns the canonical implementation.
 	'DoubleScale\\Managers\\Filters_Manager' => 'DoubleScale\\Modules\\Contacts\\Filters\\FiltersManager',

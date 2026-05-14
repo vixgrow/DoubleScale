@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Constants;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Subscription Status class
  */

@@ -1,9 +1,15 @@
 # Directories
 /.git
 /.github
+/.claude
+/.playwright-mcp
+/.vscode
 /node_modules
 /tests
 /src
+/docs
+/phpunit
+/tools
 
 # Files
 .distignore
@@ -15,6 +21,11 @@
 .eslintignore
 .stylelintrc.json
 .nvmrc
+.phpunit.result.cache
+CLAUDE.md
+moduleenabled_active.md
+DoubleScale.postman_collection.json
+components.json
 composer.json
 composer.lock
 package.json
@@ -23,6 +34,7 @@ phpcs.xml
 phpcs.xml.dist
 phpunit.xml
 phpunit.xml.dist
+postcss.config.js
 webpack.config.js
 Gruntfile.js
 gulpfile.js

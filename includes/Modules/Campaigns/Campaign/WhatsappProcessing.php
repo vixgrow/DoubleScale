@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Campaign;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
@@ -91,9 +94,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 
 		// For templates without ContentSid, require approved business template
 		if ( empty( $content_sid ) && ! $template->is_whatsapp_business_template() ) {
-			throw new \Exception(
-				__( 'Whatsapp messages require an approved business template. Please create and approve a WhatsApp template in Meta Business Suite, then import it via Settings > WhatsApp Templates.', 'doublescale')
-			);
+			throw new \Exception( esc_html__( 'Whatsapp messages require an approved business template. Please create and approve a WhatsApp template in Meta Business Suite, then import it via Settings > WhatsApp Templates.', 'doublescale') );
 		}
 
 		// Prepare template message with ContentSid and variables
@@ -125,9 +126,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		$content_sid = $template->get_whatsapp_content_sid();
 
 		if ( empty( $content_sid ) ) {
-			throw new \Exception(
-				__( 'Whatsapp Business template missing ContentSid', 'doublescale')
-			);
+			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale') );
 		}
 
 		// Get variable mappings from template settings
@@ -199,25 +198,19 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 			// Get message provider
 			$provider = $this->get_message_provider();
 			if ( ! $provider ) {
-				throw new \Exception(
-					__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale')
-				);
+				throw new \Exception( esc_html__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale') );
 			}
 
 			// Validate provider is configured
 			if ( ! $provider->is_configured() ) {
-				throw new \Exception(
-					__( 'Meta WhatsApp is not configured. Please configure it in Settings > Integrations.', 'doublescale')
-				);
+				throw new \Exception( esc_html__( 'Meta WhatsApp is not configured. Please configure it in Settings > Integrations.', 'doublescale') );
 			}
 
 			$content_sid = $message_data['ContentSid'] ?? null;
 
 			// Validate ContentSid is present
 			if ( empty( $content_sid ) ) {
-				throw new \Exception(
-					__( 'Whatsapp message missing template ID. All WhatsApp messages must use approved Meta business templates.', 'doublescale')
-				);
+				throw new \Exception( esc_html__( 'Whatsapp message missing template ID. All WhatsApp messages must use approved Meta business templates.', 'doublescale') );
 			}
 
 			// Build Api data for Meta WhatsApp
@@ -345,9 +338,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		$content_sid = $template->get_whatsapp_content_sid();
 
 		if ( empty( $content_sid ) ) {
-			throw new \Exception(
-				__( 'Whatsapp Business template missing ContentSid', 'doublescale')
-			);
+			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale') );
 		}
 
 		$content_variables = $this->process_template_variables( $template_variables, $contact );

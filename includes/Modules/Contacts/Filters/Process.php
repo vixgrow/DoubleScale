@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\Filters;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

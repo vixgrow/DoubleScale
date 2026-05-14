@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;

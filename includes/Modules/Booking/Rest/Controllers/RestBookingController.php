@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DateTime;
 use WP_Error;
 use Exception;

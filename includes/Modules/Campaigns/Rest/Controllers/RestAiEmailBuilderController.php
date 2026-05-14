@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\UserRoles\Permissions;
 use WP_Error;

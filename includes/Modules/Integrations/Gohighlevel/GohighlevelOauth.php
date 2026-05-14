@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Integrations\Gohighlevel;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

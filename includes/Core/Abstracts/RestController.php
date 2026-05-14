@@ -16,6 +16,9 @@
 
 namespace DoubleScale\Core\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\ModuleManager;
 use WP_Error;
 use WP_REST_Controller;

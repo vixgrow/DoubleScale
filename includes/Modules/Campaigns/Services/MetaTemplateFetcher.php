@@ -34,16 +34,14 @@ class MetaTemplateFetcher {
 		$integration = IntegrationsManager::instance()->get_integration( 'meta-whatsapp' );
 
 		if ( ! $integration || ! $integration->is_connected() ) {
-			throw new \Exception(
-				__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale')
-			);
+			throw new \Exception( esc_html__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale') );
 		}
 
 		$api    = $integration->connect();
 		$result = $api->get_message_templates( 'APPROVED' );
 
 		if ( ! $result['success'] ) {
-			throw new \Exception( $result['error'] ?? __( 'Failed to fetch templates from Meta', 'doublescale') );
+			throw new \Exception( esc_html( $result['error'] ?? __( 'Failed to fetch templates from Meta', 'doublescale') ) );
 		}
 
 		$templates = array();

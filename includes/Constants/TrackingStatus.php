@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Constants;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * TrackingStatus class
  */

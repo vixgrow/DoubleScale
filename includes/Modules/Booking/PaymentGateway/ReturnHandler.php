@@ -6,6 +6,9 @@
  * @package DoubleScale
  */
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\BookingModel;
 
 /**

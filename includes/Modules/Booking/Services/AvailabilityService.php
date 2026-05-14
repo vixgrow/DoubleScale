@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WP_Error;
 use WP_REST_Response;
 use Exception;

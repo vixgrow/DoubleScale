@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WP_Error;
 use Exception;
 use Illuminate\Support\Arr;
@@ -458,7 +461,7 @@ class RestCalendarController extends RestController
 					'Only team calendars are creatable via REST',
 					array('source' => 'booking-calendar-rest', 'received_type' => $type)
 				);
-				throw new Exception(__('Only team calendars can be created. Host calendars are auto-provisioned for CRM team members.', 'doublescale'), 400);
+				throw new Exception( esc_html__('Only team calendars can be created. Host calendars are auto-provisioned for CRM team members.', 'doublescale'), 400 );
 			}
 
 			$this->validate_team_calendar($members);
@@ -986,7 +989,7 @@ class RestCalendarController extends RestController
 				'Team members are required for team calendar',
 				array('source' => 'booking-calendar-rest')
 			);
-			throw new Exception(__('Team members are required', 'doublescale'), 400);
+			throw new Exception( esc_html__('Team members are required', 'doublescale'), 400 );
 		}
 
 		$valid_members = CalendarModel::whereIn('user_id', $members)
@@ -1002,7 +1005,7 @@ class RestCalendarController extends RestController
 					'found'    => count($valid_members),
 				)
 			);
-			throw new Exception(__('Invalid team member selection', 'doublescale'), 400);
+			throw new Exception( esc_html__('Invalid team member selection', 'doublescale'), 400 );
 		}
 	}
 

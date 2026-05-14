@@ -13,6 +13,9 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * GoalPro class
  *

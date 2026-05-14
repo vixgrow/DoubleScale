@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Services\BookingValidator;
 use DoubleScale\Modules\Booking\Services\BookingService;
 use DoubleScale\Modules\Booking\Services\BookingEvents;

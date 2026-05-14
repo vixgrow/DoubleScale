@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;

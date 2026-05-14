@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SparkPost;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
 

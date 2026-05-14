@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Automations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Automations\Engine\ContactEnrollment;
 use DoubleScale\Modules\Automations\Engine\StepNavigator;

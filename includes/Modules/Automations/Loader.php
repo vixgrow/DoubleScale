@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\REST\Settings_Controller as Abstract_Settings_Controller;
 use WP_Error;
 use WP_REST_Response;

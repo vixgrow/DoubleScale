@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Marks actions that require the Pro add-on. Concrete classes implement {@see Action::process_action};
  * catalog-only stubs may extend {@see ProAutomationStubAction}.

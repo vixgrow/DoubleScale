@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\BookingHostsModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
@@ -45,7 +48,7 @@ class BookingService {
 				$host_ids_to_check = is_array( $user_id ) ? $user_id : array( $user_id );
 				foreach ( $host_ids_to_check as $host_to_check ) {
 					if ( self::host_has_overlap( (int) $host_to_check, $start_utc_string, $end_utc_string ) ) {
-						throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+						throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 					}
 				}
 			} elseif ( 'group' === $event->type ) {
@@ -59,10 +62,10 @@ class BookingService {
 				}
 				$current = BookedSlotModel::count_overlaps( $calendar_id, $start_utc_string, $end_utc_string );
 				if ( $current >= $max_invites ) {
-					throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 				}
 			} elseif ( BookedSlotModel::has_overlap( $calendar_id, $start_utc_string, $end_utc_string ) ) {
-				throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 			}
 		};
 
@@ -163,7 +166,7 @@ class BookingService {
 			foreach ( $invitees as $invitee ) {
 				$contact = $this->resolve_or_create_contact_for_invitee( $invitee );
 				if ( ! $contact ) {
-					throw new \Exception( __( 'Failed to book', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Failed to book', 'doublescale' ) );
 				}
 
 				$booking              = new BookingModel();
@@ -180,7 +183,7 @@ class BookingService {
 				$booking->slot_time   = $duration;
 
 				if ( ! $booking->save() ) {
-					throw new \Exception( __( 'Failed to book', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Failed to book', 'doublescale' ) );
 				}
 
 				$booking->location = $location;
@@ -223,7 +226,7 @@ class BookingService {
 					$booking_hosts->status     = $status;
 					if ( ! $booking_hosts->save() ) {
 						$booking->delete();
-						throw new \Exception( __( 'Failed to book', 'doublescale' ) );
+						throw new \Exception( esc_html__( 'Failed to book', 'doublescale' ) );
 					}
 				}
 
@@ -301,13 +304,11 @@ class BookingService {
 			$max_people    = (int) ( $wl_settings['additional_people_limit'] ?? 0 );
 			$total_allowed = $max_people + 1;
 			if ( count( $invitees ) > $total_allowed ) {
-				throw new \Exception(
-					sprintf(
+				throw new \Exception( esc_html( sprintf(
 						/* translators: %d: maximum allowed additional people */
 						__( 'You can bring at most %d additional people when joining the waiting list', 'doublescale' ),
 						$max_people
-					)
-				);
+					) ) );
 			}
 		}
 
@@ -322,14 +323,14 @@ class BookingService {
 
 			if ( $current_waiting >= $wl_capacity ) {
 				$wpdb->query( 'ROLLBACK' );
-				throw new \Exception( __( 'The waiting list for this time slot is full', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'The waiting list for this time slot is full', 'doublescale' ) );
 			}
 
 			$last_booking = null;
 			foreach ( $invitees as $idx => $invitee ) {
 				$contact = $this->resolve_or_create_contact_for_invitee( $invitee );
 				if ( ! $contact ) {
-					throw new \Exception( __( 'Failed to join waiting list', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Failed to join waiting list', 'doublescale' ) );
 				}
 
 				$booking              = new BookingModel();
@@ -344,7 +345,7 @@ class BookingService {
 				$booking->slot_time   = $duration;
 
 				if ( ! $booking->save() ) {
-					throw new \Exception( __( 'Failed to join waiting list', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Failed to join waiting list', 'doublescale' ) );
 				}
 
 				$booking->location = $location;
@@ -378,7 +379,7 @@ class BookingService {
 					$booking_hosts->status     = 'waiting';
 					if ( ! $booking_hosts->save() ) {
 						$booking->delete();
-						throw new \Exception( __( 'Failed to join waiting list', 'doublescale' ) );
+						throw new \Exception( esc_html__( 'Failed to join waiting list', 'doublescale' ) );
 					}
 				}
 
@@ -415,7 +416,7 @@ class BookingService {
 				$email = sanitize_email( Arr::get( $item, 'email', null ) );
 
 				if ( ! $name || ! $email ) {
-					throw new \Exception( __( 'Invalid invitee', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Invalid invitee', 'doublescale' ) );
 				}
 
 				$guest = array(
@@ -433,7 +434,7 @@ class BookingService {
 		);
 
 		if ( ! $allow_many && count( $invitee ) > 1 ) {
-			throw new \Exception( $multi_error ?: __( 'Multiple invitees are not allowed', 'doublescale' ) );
+			throw new \Exception( esc_html( $multi_error ?: __( 'Multiple invitees are not allowed', 'doublescale' ) ) );
 		}
 
 		return $invitee;
@@ -516,7 +517,7 @@ class BookingService {
 				$host_ids = $booking->hosts->pluck( 'user_id' )->toArray();
 				foreach ( $host_ids as $host_id ) {
 					if ( $this->host_has_overlap_excluding( (int) $host_id, $start_utc, $end_utc, (int) $booking->id ) ) {
-						throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+						throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 					}
 				}
 			} elseif ( 'group' === $type ) {
@@ -526,10 +527,10 @@ class BookingService {
 				}
 				$current = BookedSlotModel::count_overlaps( $booking->calendar_id, $start_utc, $end_utc );
 				if ( $current >= $max_invites ) {
-					throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 				}
 			} elseif ( BookedSlotModel::has_overlap_excluding( $booking->calendar_id, $start_utc, $end_utc, (int) $booking->id ) ) {
-				throw new \Exception( __( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 			}
 
 			BookedSlotModel::release( $booking->id );

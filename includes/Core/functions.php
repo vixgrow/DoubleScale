@@ -5,6 +5,9 @@
  * @package DoubleScale
  */
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

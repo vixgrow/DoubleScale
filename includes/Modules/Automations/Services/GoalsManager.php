@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -119,13 +122,13 @@ final class GoalsManager {
 	public function register( Goal $goal ) {
 		if ( ! $goal instanceof Goal ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new Exception( __( 'Invalid goal', 'doublescale') );
+			throw new Exception( esc_html__( 'Invalid goal', 'doublescale') );
 		}
 
 		if ( isset( $this->goals[ $goal->slug ] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			/* translators: %s: goal name */
-			throw new Exception( sprintf( __( 'Goal %s already registered', 'doublescale'), $goal->name ) );
+			throw new Exception( sprintf( esc_html__( 'Goal %s already registered', 'doublescale'), esc_html( $goal->name )) );
 		}
 
 		$this->goals[ $goal->slug ] = $goal;
@@ -164,7 +167,7 @@ final class GoalsManager {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: goal slug */
-		throw new Exception( sprintf( __( 'Goal %s not found', 'doublescale'), $slug ) );
+		throw new Exception( sprintf( esc_html__( 'Goal %s not found', 'doublescale'), esc_html( $slug )) );
 	}
 
 	/**

@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Renderer\CalendarPageRenderer;
 use DoubleScale\Modules\Booking\Renderer\BookingPageRenderer;
 use DoubleScale\Modules\Booking\Renderer\CancelPageRenderer;
@@ -55,7 +58,7 @@ class TemplateRendererFactory {
 			case 'claim_waitlist':
 				return new ClaimWaitlistPageRenderer( $eventModelClass );
 			default:
-				throw new \InvalidArgumentException( "Unknown page type: {$type}" );
+				throw new \InvalidArgumentException( esc_html( "Unknown page type: {$type}" ) );
 		}
 	}
 }

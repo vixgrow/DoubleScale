@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Automations\AbandonedCart;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

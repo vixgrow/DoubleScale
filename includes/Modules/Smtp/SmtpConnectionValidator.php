@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Smtp;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Providers\Mailers;
 use WP_Error;
 

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Plugin;

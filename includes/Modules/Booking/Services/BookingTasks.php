@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\BookingModel;
 
 use Illuminate\Support\Arr;

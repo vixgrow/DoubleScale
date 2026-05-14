@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
 use WP_Error;
 

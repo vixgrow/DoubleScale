@@ -14,6 +14,9 @@ namespace DoubleScale\Constants;
 
 
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Order Status class
  */

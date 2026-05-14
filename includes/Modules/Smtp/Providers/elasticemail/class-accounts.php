@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\Accounts as Abstract_Accounts;
 
 /**

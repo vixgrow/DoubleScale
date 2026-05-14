@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Logger;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Logger\Models\LogModel;
 
 /**

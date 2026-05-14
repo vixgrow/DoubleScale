@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 

@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Tracking\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;

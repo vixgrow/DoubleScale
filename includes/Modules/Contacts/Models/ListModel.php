@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\TaxonomyModel;
 
 /**

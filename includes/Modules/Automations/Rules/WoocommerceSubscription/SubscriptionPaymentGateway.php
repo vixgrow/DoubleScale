@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceSubscription;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\RulesManager;
@@ -95,7 +98,7 @@ class SubscriptionPaymentGateway extends Rule {
 	 */
 	public function get_options() {
 		 $result          = array();
-		$result['manual'] = __( 'Manual Renewal', 'woocommerce-subscriptions' );
+		$result['manual'] = __( 'Manual Renewal', 'doublescale' );
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			if ( 'yes' === $gateway->enabled && in_array( 'subscriptions', $gateway->supports, true ) ) {
 				$result[ $gateway->id ] = $gateway->get_title();

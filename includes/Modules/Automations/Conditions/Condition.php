@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Conditions;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 

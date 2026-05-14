@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Emails\Bulkmailers\AbstractBulkMailer;
 use DoubleScale\Modules\Campaigns\Emails\Bulkmailers\MailgunBulkMailer;
 use DoubleScale\Modules\Campaigns\Emails\Bulkmailers\MailersendBulkMailer;

@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Booking;
 
+
+defined( 'ABSPATH' ) || exit;
+
 class BookingUtils {
 
 	/**

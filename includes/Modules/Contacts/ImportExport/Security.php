@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Security static class
  */

@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Bulkmailers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Emails\Traits\SmtpModuleActive;
 use WP_Error;
 

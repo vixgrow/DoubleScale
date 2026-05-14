@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Core\Logger;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Log levels class.
  */

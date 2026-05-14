@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceReview;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\RulesManager;

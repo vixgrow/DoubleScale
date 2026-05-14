@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;

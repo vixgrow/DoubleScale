@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Core\Settings\Rest;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Pro\Modules\Inbox\Services\BounceHandlerManager;
 use DoubleScale\Pro\Modules\Inbox\Incoming\MessagingIncoming;
 use DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth;

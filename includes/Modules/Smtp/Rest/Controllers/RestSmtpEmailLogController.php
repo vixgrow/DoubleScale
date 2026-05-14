@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Smtp\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

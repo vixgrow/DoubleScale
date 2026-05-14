@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Core\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Core\Models\UsermetaModel;
 

@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Activities\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Constants\ActivityTypes;
 use DoubleScale\Core\Models\UserModel;

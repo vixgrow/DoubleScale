@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 
 use WPEloquent\Eloquent\Model;
@@ -261,18 +264,18 @@ class EventModel extends Model {
 		}
 
 		if ( ! is_array( $event_location ) ) {
-			throw new \Exception( __( 'Invalid location', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid location', 'doublescale' ) );
 		}
 
 		foreach ( $event_location as $index => $location ) {
 			$location_type = LocationsManager::instance()->get_location( $location['type'] );
 			if ( ! $location_type ) {
-				throw new \Exception( __( 'Location does not exist', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Location does not exist', 'doublescale' ) );
 			}
 
 			$validation = $location_type->validate_fields( $location );
 			if ( \is_wp_error( $validation ) ) {
-				throw new \Exception( $validation->get_error_message() );
+				throw new \Exception( esc_html( $validation->get_error_message() ) );
 			}
 
 			$event_location[ $index ] = $validation;
@@ -769,12 +772,12 @@ class EventModel extends Model {
 			$location_type    = $location_manager->get_location( $location['type'] );
 
 			if ( ! $location_type ) {
-				throw new \Exception( __( 'Location does not exist', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Location does not exist', 'doublescale' ) );
 			}
 
 			$validation = $location_type->validate_fields( $location );
 			if ( \is_wp_error( $validation ) ) {
-				throw new \Exception( $validation->get_error_message() );
+				throw new \Exception( esc_html( $validation->get_error_message() ) );
 			}
 
 			$fields['location-select']['options'][] = array(
@@ -796,7 +799,7 @@ class EventModel extends Model {
 		 $event_location = $this->location ?? null;
 
 		if ( ! $event_location || ! is_array( $event_location ) ) {
-			throw new \Exception( __( 'Invalid location', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid location', 'doublescale' ) );
 		}
 
 		$system_fields   = EventFields::instance()->get_system_fields();
@@ -820,7 +823,7 @@ class EventModel extends Model {
 		$event_location = $this->location ?? null;
 
 		if ( ! $event_location || ! is_array( $event_location ) ) {
-			throw new \Exception( __( 'Invalid location', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid location', 'doublescale' ) );
 		}
 
 		$fields             = $this->fields ?? array();
@@ -1110,7 +1113,7 @@ class EventModel extends Model {
 				$this->processed_availability = $default_availability;
 				$availability                 = $default_availability;
 			} else {
-				throw new \Exception( __( 'Availability not set', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Availability not set', 'doublescale' ) );
 			}
 		}
 
@@ -1123,7 +1126,7 @@ class EventModel extends Model {
 				// For now, we'll just use it without saving to avoid unintended database updates
 				$this->processed_availability = $default_availability;
 			} else {
-				throw new \Exception( __( 'Weekly hours are not set', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Weekly hours are not set', 'doublescale' ) );
 			}
 		}
 	}
@@ -1673,7 +1676,7 @@ class EventModel extends Model {
 		$frequency_limits = Arr::get( $this->limits, 'frequency.limits', array() );
 		foreach ( $frequency_limits as $frequency ) {
 			if ( ! $frequency['limit'] || ! $frequency['unit'] ) {
-				throw new \Exception( __( 'Frequency limit or unit is not set', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Frequency limit or unit is not set', 'doublescale' ) );
 			}
 
 			$this->validate_frequency_limits( $frequency['limit'], $frequency['unit'], $start_date, __( 'Event reached the frequency limit', 'doublescale' ) );
@@ -1685,7 +1688,7 @@ class EventModel extends Model {
 	 */
 	private function validate_frequency_limits( $limit, $unit, $start_date, $message ) {
 		if ( ! in_array( $unit, array( 'days', 'weeks', 'months' ), true ) ) {
-			throw new \Exception( __( 'Invalid frequency unit', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid frequency unit', 'doublescale' ) );
 		}
 
 		switch ( $unit ) {
@@ -1776,7 +1779,7 @@ class EventModel extends Model {
 		$duration_limits = Arr::get( $this->limits, 'duration.limits', array() );
 		foreach ( $duration_limits as $duration ) {
 			if ( ! $duration['limit'] || ! $duration['unit'] ) {
-				throw new \Exception( __( 'Duration limit or unit is not set', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Duration limit or unit is not set', 'doublescale' ) );
 			}
 
 			$this->validate_duration_limit( $duration['limit'], $duration['unit'], $start_date, __( 'Event reached the duration limit', 'doublescale' ), true );
@@ -1901,7 +1904,7 @@ class EventModel extends Model {
 		$event_end_date = $this->get_end_date( $timezone );
 
 		if ( $start_date > $event_end_date ) {
-			throw new \Exception( __( 'Event is not available', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Event is not available', 'doublescale' ) );
 		}
 
 		return $event_end_date;
@@ -2186,7 +2189,7 @@ class EventModel extends Model {
 	public function get_end_date( $timezone ) {
 		// Validate required data
 		if ( empty( $this->created_at ) || empty( $this->get_effective_availability()['timezone'] ) ) {
-			throw new \Exception( __( 'Invalid event data: missing created_at or timezone', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid event data: missing created_at or timezone', 'doublescale' ) );
 		}
 
 		// Validate timezone strings
@@ -2194,7 +2197,7 @@ class EventModel extends Model {
 			$original_tz = new \DateTimeZone( $this->get_effective_availability()['timezone'] );
 			$target_tz   = new \DateTimeZone( $timezone );
 		} catch ( \Exception $e ) {
-			throw new \Exception( __( 'Invalid timezone provided', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid timezone provided', 'doublescale' ) );
 		}
 
 		// Create the base date from creation time
@@ -2202,7 +2205,7 @@ class EventModel extends Model {
 			$created_date = new \DateTime( $this->created_at, $original_tz );
 			$created_date->setTimezone( $target_tz );
 		} catch ( \Exception $e ) {
-			throw new \Exception( __( 'Invalid created_at date format', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid created_at date format', 'doublescale' ) );
 		}
 
 		$event_date_type = Arr::get( $this->event_range, 'type', 'days' );
@@ -2214,7 +2217,7 @@ class EventModel extends Model {
 
 				// Validate days value
 				if ( ! is_numeric( $end_event_value ) || $end_event_value < 0 || $end_event_value > 3650 ) {
-					throw new \Exception( __( 'Invalid days value. Must be between 0 and 3650', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Invalid days value. Must be between 0 and 3650', 'doublescale' ) );
 				}
 
 				// Clone to avoid modifying original date
@@ -2235,7 +2238,7 @@ class EventModel extends Model {
 			case 'date_range':
 				$end_event_value = Arr::get( $this->event_range, 'end_date', null );
 				if ( empty( $end_event_value ) ) {
-					throw new \Exception( __( 'End date is required for date_range type', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'End date is required for date_range type', 'doublescale' ) );
 				}
 
 				try {
@@ -2245,7 +2248,7 @@ class EventModel extends Model {
 					// Convert to the target timezone
 					$end_date->setTimezone( $target_tz );
 				} catch ( \Exception $e ) {
-					throw new \Exception( __( 'Invalid end_date format', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'Invalid end_date format', 'doublescale' ) );
 				}
 
 				// Validate that end date is after creation date
@@ -2254,12 +2257,12 @@ class EventModel extends Model {
 				$created_date_start->setTime( 0, 0, 0 );
 
 				if ( $end_date <= $created_date_start ) {
-					throw new \Exception( __( 'End date must be after the created date', 'doublescale' ) );
+					throw new \Exception( esc_html__( 'End date must be after the created date', 'doublescale' ) );
 				}
 				break;
 
 			default:
-				throw new \Exception( __( 'Invalid event date type', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Invalid event date type', 'doublescale' ) );
 		}
 
 		return $end_date->getTimestamp();
@@ -2276,7 +2279,7 @@ class EventModel extends Model {
 	public function get_start_date( $timezone ) {
 		// Validate required data
 		if ( empty( $this->created_at ) || empty( $this->get_effective_availability()['timezone'] ) ) {
-			throw new \Exception( __( 'Invalid event data: missing created_at or timezone', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid event data: missing created_at or timezone', 'doublescale' ) );
 		}
 
 		// Validate timezone strings
@@ -2284,7 +2287,7 @@ class EventModel extends Model {
 			$original_tz = new \DateTimeZone( $this->get_effective_availability()['timezone'] );
 			$target_tz   = new \DateTimeZone( $timezone );
 		} catch ( \Exception $e ) {
-			throw new \Exception( __( 'Invalid timezone provided', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid timezone provided', 'doublescale' ) );
 		}
 
 		$event_date_type = Arr::get( $this->event_range, 'type', 'days' );
@@ -2300,14 +2303,14 @@ class EventModel extends Model {
 				$start_date->setTime( 0, 0, 0 );
 			}
 		} catch ( \Exception $e ) {
-			throw new \Exception( __( 'Invalid created_at date format', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Invalid created_at date format', 'doublescale' ) );
 		}
 
 		// Handle date_range type with custom start date
 		if ( 'date_range' === $event_date_type ) {
 			$start_date_value = Arr::get( $this->event_range, 'start_date', null );
 			if ( empty( $start_date_value ) ) {
-				throw new \Exception( __( 'Start date is required for date_range type', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Start date is required for date_range type', 'doublescale' ) );
 			}
 
 			try {
@@ -2317,7 +2320,7 @@ class EventModel extends Model {
 				// Convert to the target timezone
 				$start_date->setTimezone( $target_tz );
 			} catch ( \Exception $e ) {
-				throw new \Exception( __( 'Invalid start_date format', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Invalid start_date format', 'doublescale' ) );
 			}
 
 			// Validate that start date is not in the past relative to creation date
@@ -2326,7 +2329,7 @@ class EventModel extends Model {
 			$created_date_check->setTime( 0, 0, 0 );
 
 			if ( $start_date < $created_date_check ) {
-				throw new \Exception( __( 'Start date cannot be before the created date', 'doublescale' ) );
+				throw new \Exception( esc_html__( 'Start date cannot be before the created date', 'doublescale' ) );
 			}
 		}
 
@@ -2697,7 +2700,7 @@ class EventModel extends Model {
 		// Calendar must exist.
 		$calendar = CalendarModel::find( $this->calendar_id );
 		if ( ! $calendar ) {
-			throw new \Exception( __( 'Calendar does not exist', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Calendar does not exist', 'doublescale' ) );
 		}
 
 		// Calendar owner must still exist as a WP user. Booking-eligibility is

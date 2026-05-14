@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Automations\Goals\Woocommerce;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

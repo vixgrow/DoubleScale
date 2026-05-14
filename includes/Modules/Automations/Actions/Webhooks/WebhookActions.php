@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Webhooks;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * WebhookActions trait
  */

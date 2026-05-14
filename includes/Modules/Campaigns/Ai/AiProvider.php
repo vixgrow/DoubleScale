@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Ai;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Managers\MergeTagsManager;
 use WP_Error;

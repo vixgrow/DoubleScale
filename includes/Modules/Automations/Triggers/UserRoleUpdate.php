@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Automations\Triggers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

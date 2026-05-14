@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
 use WP_Error;
 
@@ -111,7 +114,7 @@ class Process extends Abstract_Process {
 		} catch ( \Exception $e ) {
 			$this->phpmailer->ErrorInfo = $e->getMessage();
 			doublescale_get_logger()->error(
-				esc_html__( 'Outlook Send Error', 'smtp' ),
+				esc_html__( 'Outlook Send Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_outlook_send_error',
 					'error' => [

@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Contacts\Models\ListModel;
 use DoubleScale\Modules\Contacts\Models\TagModel;
@@ -869,10 +872,10 @@ class ContactModel extends Model
 			$this->trim();
 			$email = $this->attributes['email'] ?? '';
 			if (! is_string($email) || '' === $email) {
-				throw new \Exception($this->messages['email.required']);
+				throw new \Exception( esc_html( $this->messages['email.required'] ) );
 			}
 			if (! is_email($email)) {
-				throw new \Exception($this->messages['email.email']);
+				throw new \Exception( esc_html( $this->messages['email.email'] ) );
 			}
 		}
 

@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Automations\Goals\Surecart;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

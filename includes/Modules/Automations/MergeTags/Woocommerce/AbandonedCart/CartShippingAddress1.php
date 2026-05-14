@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\AbandonedCart;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;

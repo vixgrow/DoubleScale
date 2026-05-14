@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Booking\Services\BookingEvents;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -385,12 +388,12 @@ class BookingModel extends Model {
 
 	public function save( array $options = array() ) {
 		if ( ! $this->event_id ) {
-			throw new \Exception( __( 'Booking must reference an event', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Booking must reference an event', 'doublescale' ) );
 		}
 
 		$event = EventModel::find( $this->event_id );
 		if ( ! $event ) {
-			throw new \Exception( __( 'Event does not exist', 'doublescale' ) );
+			throw new \Exception( esc_html__( 'Event does not exist', 'doublescale' ) );
 		}
 
 		return parent::save( $options );

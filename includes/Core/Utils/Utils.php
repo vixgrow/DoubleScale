@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Core\Utils;
 
+
+defined( 'ABSPATH' ) || exit;
+
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel; // Pro
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Pro
 use DateInterval;

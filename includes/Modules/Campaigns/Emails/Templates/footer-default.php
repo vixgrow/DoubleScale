@@ -9,6 +9,9 @@
  * @subpackage Emails
  */
 
+
+defined( 'ABSPATH' ) || exit;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

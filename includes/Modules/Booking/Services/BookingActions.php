@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DateTime;
 use DateTimeZone;
 use Exception;

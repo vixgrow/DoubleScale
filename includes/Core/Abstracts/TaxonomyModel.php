@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Core\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use Illuminate\Support\Str;

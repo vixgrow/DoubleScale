@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Fields;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Fields\Types\RadioField;
 use DoubleScale\Fields\Types\TextField;
 use DoubleScale\Fields\Types\Boolean_Field;

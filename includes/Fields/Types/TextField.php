@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Fields\Types;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 

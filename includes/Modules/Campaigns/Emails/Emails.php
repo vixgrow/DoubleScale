@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

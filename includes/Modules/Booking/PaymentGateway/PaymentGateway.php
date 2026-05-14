@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Booking\PaymentGateway;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Managers\PaymentGatewaysManager;
 

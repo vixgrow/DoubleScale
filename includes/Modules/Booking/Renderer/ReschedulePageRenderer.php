@@ -6,6 +6,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 
 class ReschedulePageRenderer extends BaseTemplateRenderer {

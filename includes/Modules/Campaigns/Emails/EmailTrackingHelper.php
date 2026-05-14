@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;

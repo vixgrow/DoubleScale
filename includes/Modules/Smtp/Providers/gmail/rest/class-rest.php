@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\REST as Abstract_REST;
 
 /**

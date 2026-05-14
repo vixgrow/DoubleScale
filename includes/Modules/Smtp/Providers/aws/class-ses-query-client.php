@@ -235,13 +235,13 @@ class Ses_Query_Client {
 	private function parse_response( $xml_body, $action ) {
 		$xml_body = trim( (string) $xml_body );
 		if ( $xml_body === '' ) {
-			throw new Ses_Exception( 'Empty SES response body.' );
+			throw new Ses_Exception( esc_html( 'Empty SES response body.' ) );
 		}
 
 		libxml_use_internal_errors( true );
 		$xml = simplexml_load_string( $xml_body );
 		if ( false === $xml ) {
-			throw new Ses_Exception( 'Invalid SES XML response.' );
+			throw new Ses_Exception( esc_html( 'Invalid SES XML response.' ) );
 		}
 
 		$root_name = $xml->getName();
@@ -251,9 +251,9 @@ class Ses_Query_Client {
 				$ens = $xml->children();
 			}
 			if ( isset( $ens->Error->Code, $ens->Error->Message ) ) {
-				throw new Ses_Exception( (string) $ens->Error->Message, (string) $ens->Error->Code );
+				throw new Ses_Exception( esc_html( (string) $ens->Error->Message, (string) $ens->Error->Code ) );
 			}
-			throw new Ses_Exception( 'SES ErrorResponse without detail.' );
+			throw new Ses_Exception( esc_html( 'SES ErrorResponse without detail.' ) );
 		}
 
 		$ns = $xml->children( self::SES_NS );
@@ -533,7 +533,7 @@ class Ses_Client {
 	 */
 	private function throw_if_wp_error( $res ) {
 		if ( is_wp_error( $res ) ) {
-			throw new Ses_Exception( $res->get_error_message() );
+			throw new Ses_Exception( esc_html( $res->get_error_message() ) );
 		}
 	}
 }

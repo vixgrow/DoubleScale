@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Booking\EventLocations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

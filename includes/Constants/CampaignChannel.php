@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Constants;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * CampaignChannel class
  *

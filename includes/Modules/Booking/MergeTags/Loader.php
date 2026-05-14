@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

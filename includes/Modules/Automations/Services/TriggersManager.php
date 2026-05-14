@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -115,18 +118,14 @@ final class TriggersManager {
 	 */
 	public function register( $trigger ) {
 		if ( ! $trigger instanceof Trigger ) {
-			throw new Exception(
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-				__( 'Invalid trigger', 'doublescale')
-			);
+			throw new Exception( esc_html( // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
+				__( 'Invalid trigger', 'doublescale') ) );
 		}
 
 		if ( isset( $this->triggers[ $trigger->slug ] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new Exception(
-				/* translators: %s: trigger name */
-				sprintf( __( 'Trigger %s already registered', 'doublescale'), $trigger->name )
-			);
+			throw new Exception( esc_html( /* translators: %s: trigger name */
+				sprintf( __( 'Trigger %s already registered', 'doublescale'), $trigger->name ) ) );
 		}
 
 		$this->triggers[ $trigger->slug ] = $trigger;

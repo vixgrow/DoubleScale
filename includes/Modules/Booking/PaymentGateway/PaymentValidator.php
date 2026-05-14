@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\PaymentGateway;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use WP_Error;
 

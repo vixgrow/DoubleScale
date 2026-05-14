@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Tracking;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Constants\MessageDirection;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;

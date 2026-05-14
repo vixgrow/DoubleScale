@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 use Illuminate\Support\Str;
 

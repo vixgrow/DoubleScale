@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\Provider;
 use DoubleScale\Modules\Smtp\Settings;
 use WP_Error;

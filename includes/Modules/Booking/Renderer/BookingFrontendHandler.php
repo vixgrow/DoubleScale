@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Models\EventModel;

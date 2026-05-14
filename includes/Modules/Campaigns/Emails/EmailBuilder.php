@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Main Email Builder class
  */

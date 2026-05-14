@@ -131,7 +131,7 @@ class Process extends Abstract_Process {
 			}
 		} catch ( Ses_Exception $e ) {
 			doublescale_get_logger()->error(
-				esc_html__( 'Aws Send Email Error', 'smtp' ),
+				esc_html__( 'Aws Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_aws_send_error',
 					'error' => [

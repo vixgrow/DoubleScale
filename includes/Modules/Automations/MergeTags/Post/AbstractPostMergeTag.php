@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Post;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Managers\MergeTagsManager;
 

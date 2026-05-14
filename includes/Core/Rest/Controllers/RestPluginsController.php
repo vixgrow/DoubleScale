@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use WP_Error;
 use WP_REST_Request;

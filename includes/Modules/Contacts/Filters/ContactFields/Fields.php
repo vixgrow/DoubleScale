@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\ContactFields;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
 use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;

@@ -99,6 +99,17 @@ const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		// EndStep of the wizard POSTs to `/doublescale/v1/modules`, which makes
+		// at least one module slug explicit in `doublescale_enabled_modules`.
+		// Treat that as proof the user has been through onboarding, so we don't
+		// keep dragging them back to /start if they later clear business info.
+		const hasExplicitModules = config
+			.getModules()
+			.some((m) => Boolean(m.is_explicit));
+		if (hasExplicitModules) {
+			return;
+		}
+
 		const checkBusinessSettings = async () => {
 			try {
 				const settings: any = await apiFetch({

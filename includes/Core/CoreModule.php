@@ -82,6 +82,13 @@ final class CoreModule extends AbstractModule {
 		\DoubleScale\Database\Install::init();
 		\DoubleScale\Site\Site::instance();
 
+		// The DoubleScale top-level admin menu and every CRM REST route check the
+		// `doublescale_access` capability. Historically this cap was granted as a
+		// side-effect of Booking module boot. Booking now installs on explicit
+		// opt-in only, so grant the base access cap here (Core) to keep the admin
+		// usable on fresh installs.
+		$this->ensure_base_access_capability();
+
 		if ( is_multisite() ) {
 			add_filter( 'user_has_cap', array( $this, 'grant_super_admin_caps' ), 10, 4 );
 		}
@@ -100,6 +107,31 @@ final class CoreModule extends AbstractModule {
 		foreach ( glob( DOUBLESCALE_PLUGIN_DIR . 'includes/Fields/Types/*.php' ) ?: array() as $f ) {
 			require_once $f;
 		}
+	}
+
+	private function ensure_base_access_capability(): void {
+		if ( get_option( 'doublescale_base_access_assigned' ) ) {
+			return;
+		}
+		if ( ! function_exists( 'get_role' ) ) {
+			return;
+		}
+
+		$roles = array(
+			'administrator',
+			\DoubleScale\UserRoles\UserRoles::CRM_MANAGER,
+			\DoubleScale\UserRoles\UserRoles::SALES_MANAGER,
+			\DoubleScale\UserRoles\UserRoles::SALES_REP,
+		);
+
+		foreach ( $roles as $role_slug ) {
+			$role = get_role( $role_slug );
+			if ( $role && ! $role->has_cap( 'doublescale_access' ) ) {
+				$role->add_cap( 'doublescale_access' );
+			}
+		}
+
+		update_option( 'doublescale_base_access_assigned', 1, false );
 	}
 
 	/**

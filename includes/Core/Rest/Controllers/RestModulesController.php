@@ -100,7 +100,6 @@ class RestModulesController extends RestController {
 			$proposed[ $slug ] = (bool) $enabled;
 		}
 
-		$prev_stored = is_array( $stored ) ? $stored : array();
 		update_option( 'doublescale_enabled_modules', $proposed );
 
 		return new WP_REST_Response(

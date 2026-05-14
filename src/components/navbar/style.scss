@@ -19,18 +19,20 @@
 	flex-direction: row !important;
 	align-items: center !important;
 	justify-content: space-between !important;
-	padding: 20px 16px 12px !important;
-	gap: 8px !important;
-	min-height: 56px;
+	padding: 12px 14px 12px 14px !important;
+	gap: 10px !important;
+	min-height: 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .doublescale-navbar__brand {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
 	color: #ffffff;
 	text-decoration: none;
 	min-width: 0;
+	flex: 1;
 }
 
 .doublescale-navbar__logo-icon {
@@ -39,14 +41,25 @@
 	justify-content: center;
 	color: #ffffff;
 	flex-shrink: 0;
+	height: 28px;
+}
+
+.doublescale-navbar__logo-icon svg {
+	display: block;
+	width: auto !important;
+	height: 100% !important;
+	max-height: 28px;
+	max-width: 44px;
 }
 
 .doublescale-navbar__brand-text {
-	font-size: 17px;
+	font-size: 16px;
 	font-weight: 700;
-	letter-spacing: -0.2px;
+	letter-spacing: -0.02em;
+	line-height: 1.05;
 	white-space: nowrap;
-	color: #ffffff;
+	color: rgba(255, 255, 255, 0.96);
+	font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
 .doublescale-navbar__collapse-btn {
@@ -445,16 +458,27 @@
 // ── Collapsed state overrides ──
 .group[data-collapsible='icon'] {
 	.doublescale-navbar__header {
-		padding: 12px 6px !important;
+		padding: 12px 6px 10px !important;
 		justify-content: center !important;
 		flex-direction: column !important;
 		gap: 8px !important;
 		align-items: center !important;
 		min-height: auto;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	}
 
 	.doublescale-navbar__brand {
 		justify-content: center;
+		flex: 0;
+	}
+
+	.doublescale-navbar__logo-icon {
+		height: 30px;
+	}
+
+	.doublescale-navbar__logo-icon svg {
+		max-height: 30px;
+		max-width: 38px;
 	}
 
 	.doublescale-navbar__brand-text {

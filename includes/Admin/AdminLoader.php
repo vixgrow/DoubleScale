@@ -327,8 +327,6 @@ class AdminLoader {
 
 		?>
 <style>
-
-
     .doublescale-wrap {
       width: 100%;
       height: 100%;
@@ -336,216 +334,100 @@ class AdminLoader {
 
     #doublescale-admin-root__loader-container {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 28px;
       width: 100%;
       height: 100vh;
-      background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+      background: linear-gradient(160deg, #1B1145 0%, #2D1B69 55%, #1B1145 100%);
       position: relative;
       overflow: hidden;
     }
 
-    /* Main logo container */
-    .logo-wrapper {
-      position: relative;
-      z-index: 10;
-      animation: pulse-glow 2.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% {
-        filter: drop-shadow(0 0 8px rgba(79, 158, 249, 0.3));
-        transform: scale(1);
-      }
-      50% {
-        filter: drop-shadow(0 0 25px rgba(79, 158, 249, 0.6));
-        transform: scale(1.05);
-      }
-    }
-
-    /* Sparkle stars */
-    .sparkle {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      animation: sparkle 2s ease-in-out infinite;
-    }
-
-    .sparkle::before,
-    .sparkle::after {
+    /* Subtle radial ambient behind the mark */
+    #doublescale-admin-root__loader-container::before {
       content: '';
       position: absolute;
-      background: linear-gradient(135deg, #4F9EF9, #274C77);
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 111, 240, 0.22) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -58%);
+      animation: ds-ambient 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ds-ambient {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -58%) scale(1);   }
+      50%       { opacity: 1;   transform: translate(-50%, -58%) scale(1.18); }
+    }
+
+    /* Logo mark */
+    .ds-logo-mark {
+      position: relative;
+      z-index: 2;
+      animation: ds-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both,
+                 ds-glow  3.5s ease-in-out 0.7s infinite;
+    }
+
+    @keyframes ds-enter {
+      from { opacity: 0; transform: scale(0.82) translateY(10px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0);    }
+    }
+
+    @keyframes ds-glow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(124, 111, 240, 0.28)); }
+      50%       { filter: drop-shadow(0 0 28px rgba(124, 111, 240, 0.62)); }
+    }
+
+    /* Wordmark */
+    .ds-wordmark {
+      position: relative;
+      z-index: 2;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.92);
+      animation: ds-text-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+    }
+
+    @keyframes ds-text-enter {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
+    /* Shimmer bar */
+    .ds-bar {
+      position: relative;
+      z-index: 2;
+      width: 120px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
+      overflow: hidden;
+      animation: ds-bar-enter 0.4s ease 0.6s both;
     }
 
-    .sparkle::before {
-      width: 100%;
-      height: 3px;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
+    @keyframes ds-bar-enter {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
 
-    .sparkle::after {
-      width: 3px;
-      height: 100%;
-      left: 50%;
-      top: 0;
-      transform: translateX(-50%);
-    }
-
-    @keyframes sparkle {
-      0%, 100% {
-        transform: scale(0) rotate(0deg);
-        opacity: 0;
-      }
-      50% {
-        transform: scale(1) rotate(45deg);
-        opacity: 1;
-      }
-    }
-
-    .sparkle:nth-child(1) { top: calc(50% - 80px); left: calc(50% - 10px); animation-delay: 0s; }
-    .sparkle:nth-child(2) { top: calc(50% - 60px); left: calc(50% + 80px); animation-delay: 0.25s; }
-    .sparkle:nth-child(3) { top: calc(50% + 10px); left: calc(50% + 100px); animation-delay: 0.5s; }
-    .sparkle:nth-child(4) { top: calc(50% + 60px); left: calc(50% + 70px); animation-delay: 0.75s; }
-    .sparkle:nth-child(5) { top: calc(50% + 70px); left: calc(50% - 20px); animation-delay: 1s; }
-    .sparkle:nth-child(6) { top: calc(50% + 50px); left: calc(50% - 100px); animation-delay: 1.25s; }
-    .sparkle:nth-child(7) { top: calc(50% - 10px); left: calc(50% - 120px); animation-delay: 1.5s; }
-    .sparkle:nth-child(8) { top: calc(50% - 70px); left: calc(50% - 80px); animation-delay: 1.75s; }
-
-    /* Orbiting dots */
-    .orbit-container {
+    .ds-bar::after {
+      content: '';
       position: absolute;
-      width: 0;
-      height: 0;
-      top: 50%;
-      left: 50%;
-      animation: orbit 3.5s linear infinite;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(196, 181, 253, 0.9) 50%, transparent 100%);
+      animation: ds-shimmer 1.8s ease-in-out 1s infinite;
     }
 
-    .orbit-container-2 {
-      animation: orbit 4.5s linear infinite reverse;
-    }
-
-    .orbit-dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: linear-gradient(135deg, #4F9EF9, #274C77);
-      border-radius: 50%;
-      top: -90px;
-      left: -4px;
-      box-shadow: 0 0 12px rgba(79, 158, 249, 0.8);
-    }
-
-    .orbit-dot-2 {
-      width: 5px;
-      height: 5px;
-      top: -70px;
-      left: -2.5px;
-      box-shadow: 0 0 8px rgba(39, 76, 119, 0.8);
-    }
-
-    @keyframes orbit {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Floating particles */
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(79, 158, 249, 0.7);
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0) scale(1);
-        opacity: 0;
-      }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% {
-        transform: translateY(-100px) scale(0.5);
-        opacity: 0;
-      }
-    }
-
-    .particle:nth-child(1) { width: 4px; height: 4px; left: calc(50% - 60px); top: calc(50% + 30px); animation-delay: 0s; }
-    .particle:nth-child(2) { width: 6px; height: 6px; left: calc(50% - 30px); top: calc(50% + 40px); animation-delay: 0.4s; }
-    .particle:nth-child(3) { width: 3px; height: 3px; left: calc(50% + 10px); top: calc(50% + 35px); animation-delay: 0.8s; }
-    .particle:nth-child(4) { width: 5px; height: 5px; left: calc(50% + 50px); top: calc(50% + 25px); animation-delay: 1.2s; }
-    .particle:nth-child(5) { width: 4px; height: 4px; left: calc(50% + 80px); top: calc(50% + 45px); animation-delay: 1.6s; }
-    .particle:nth-child(6) { width: 5px; height: 5px; left: calc(50% - 80px); top: calc(50% + 20px); animation-delay: 2s; }
-
-    /* Magic dust sweeping */
-    .dust {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #4F9EF9;
-      border-radius: 50%;
-      top: 50%;
-      left: calc(50% - 100px);
-      box-shadow: 0 0 8px rgba(79, 158, 249, 0.9);
-      animation: sweep 2.5s ease-in-out infinite;
-    }
-
-    @keyframes sweep {
-      0% {
-        transform: translateX(0) translateY(0);
-        opacity: 0;
-      }
-      20% { opacity: 1; }
-      80% { opacity: 1; }
-      100% {
-        transform: translateX(200px) translateY(-30px);
-        opacity: 0;
-      }
-    }
-
-    .dust:nth-child(1) { animation-delay: 0s; }
-    .dust:nth-child(2) { animation-delay: 0.5s; top: calc(50% + 15px); }
-    .dust:nth-child(3) { animation-delay: 1s; top: calc(50% - 15px); }
-
-    /* Ambient glow */
-    .ambient-glow {
-      position: absolute;
-      width: 250px;
-      height: 250px;
-      background: radial-gradient(circle, rgba(79, 158, 249, 0.15) 0%, transparent 70%);
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      animation: ambient 3s ease-in-out infinite;
-    }
-
-    @keyframes ambient {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-    }
-
-    /* Loading text */
-    .loading-text {
-      position: absolute;
-      bottom: calc(50% - 60px);
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 13px;
-      color: #274C77;
-      letter-spacing: 3px;
-      opacity: 0.7;
-      animation: text-pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes text-pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
+    @keyframes ds-shimmer {
+      0%   { transform: translateX(-120px); }
+      100% { transform: translateX(240px);  }
     }
   </style>
 </head>
@@ -553,74 +435,21 @@ class AdminLoader {
   <div class="doublescale-wrap">
     <div id="doublescale-admin-root">
       <div id="doublescale-admin-root__loader-container">
-        
-        <!-- Ambient background glow -->
-        <div class="ambient-glow"></div>
-        
-        <!-- Sparkle stars around the logo -->
-        <?php foreach ( range( 1, 7 ) as $i ) : ?>
-        <div class="sparkle"></div>
-        <?php endforeach; ?>
-        
-        <!-- Floating particles -->
-        <?php foreach ( range( 1, 6 ) as $i ) : ?>
-        <div class="particle"></div>
-        <?php endforeach; ?>
-        
-        <!-- Magic dust trail -->
-        <?php foreach ( range( 1, 3 ) as $i ) : ?>
-        <div class="dust"></div>
-        <?php endforeach; ?>
-        
-        <!-- Orbiting dots -->
-        <div class="orbit-container">
-          <div class="orbit-dot"></div>
-        </div>
-        <div class="orbit-container orbit-container-2">
-          <div class="orbit-dot orbit-dot-2"></div>
-        </div>
-        
-        <!-- Logo with glow -->
-        <div class="logo-wrapper">
+
+        <div class="ds-logo-mark">
           <?php
-          $default_logo = '<svg xmlns="http://www.w3.org/2000/svg" width="169" height="40" viewBox="0 0 129 40" fill="none">
-            <path d="M30.6934 12.3059L34.7387 12.3058C34.7708 16.058 34.6274 19.8262 34.8017 23.5733C34.9112 25.9261 36.8279 26.3488 38.8246 25.9844C40.0547 25.76 40.737 25.0356 41.3624 24.0322C41.6027 20.7343 41.4621 15.7272 41.4636 12.3052L45.4554 12.3084C45.4542 14.2314 45.4643 16.1546 45.4855 18.0775C45.5703 21.7184 45.4858 25.4425 45.5306 29.1093C44.3543 29.0825 43.1777 29.0723 42.0012 29.08C41.9999 28.2711 41.9405 27.5182 41.8835 26.7121C41.6789 26.9587 41.4702 27.202 41.2572 27.4415C40.1207 28.7182 38.5151 29.48 36.8068 29.5526C35.9033 29.5857 34.6835 29.3106 33.82 29.0418C30.0916 27.8762 30.6473 22.5966 30.6585 19.5184L30.6934 12.3059Z" fill="#274C77"/>
-            <path d="M95.8933 11.6901C99.0971 11.678 106.446 10.8021 107.664 14.8449C108.608 17.9789 107.228 20.5393 104.078 21.5255C105.577 23.6374 107.19 26.1171 108.568 28.3015L108.869 28.7627C108.526 29.2913 107.12 29.0174 106.532 28.9588L106.318 28.7334C104.849 26.663 103.375 24.031 101.933 21.8433C100.656 21.8244 99.3086 21.8243 98.0386 21.7796C98.0768 24.0125 98.1545 26.712 98.0487 28.9168C97.343 29.0404 96.5965 29.0111 95.8755 29.0149C95.9672 23.339 95.8729 17.3955 95.8933 11.6901Z" fill="#274C77"/>
-            <path d="M98.0322 13.5769C100.369 13.5774 105.183 12.9421 105.607 16.019C105.785 17.3146 105.609 18.1396 104.799 19.1495C103.134 20.4044 100.189 20.0192 98.0972 19.965C98.0564 17.8359 98.0348 15.7064 98.0322 13.5769Z" fill="#E4E6F1"/>
-            <path d="M125.392 11.5659C126.374 11.5826 127.376 11.6122 128.356 11.581L128.355 22.7173C128.357 24.4834 128.434 26.9174 128.343 28.6083L128.304 28.8415C127.78 29.1714 126.811 29.1765 126.314 28.7497L126.281 28.2504C126.309 24.1142 126.51 17.9924 126.272 13.9648C125.175 17.0909 123.96 19.7874 122.611 22.8137C122.145 23.8613 121.264 25.5902 120.92 26.5648C120.255 26.5681 119.57 26.5806 118.908 26.5732C118.427 24.8978 117.095 22.2388 116.326 20.5959C115.303 18.4125 114.43 16.2308 113.461 14.0511C113.606 19.0306 113.671 24.0122 113.654 28.9943L111.576 28.9867L111.546 11.671L114.505 11.6546C115.58 14.4562 116.776 17.0583 117.992 19.7896C118.568 21.085 119.58 23.1976 119.979 24.5055C121.841 20.3669 123.691 15.7742 125.392 11.5659Z" fill="url(#paint0_linear_33594_25778)"/>
-            <path d="M57.5337 5.4126L61.4695 5.42317L61.4922 29.057L57.5401 29.071L57.5337 5.4126Z" fill="#274C77"/>
-            <path d="M65.5419 5.42627L69.4655 5.42958L69.4999 29.0707C68.2387 29.1089 66.8069 29.0757 65.5317 29.0732C65.6655 21.3042 65.547 13.2279 65.5419 5.42627Z" fill="#274C77"/>
-            <path d="M87.1714 11.3388C88.7688 11.111 91.0924 11.5701 92.6096 12.0715L92.4032 14.0103C89.3293 13.0371 84.9765 12.5619 83.1064 15.8415C81.4249 18.79 81.6249 24.8859 85.0172 26.6329C86.9688 27.6378 89.579 27.3466 91.593 26.7399L92.5548 26.4067L93.0975 28.3945C91.9485 28.7346 90.8949 29.0836 89.7293 29.2314C84.5039 29.8938 80.4835 27.5499 79.9153 22.0727C79.616 19.1942 79.7599 16.5649 81.5969 14.1532C83.0096 12.2985 84.9561 11.6201 87.1714 11.3388Z" fill="url(#paint1_linear_33594_25778)"/>
-            <path d="M49.4487 12.3237L53.4645 12.3314L53.477 29.1001L49.4966 29.0543C49.3947 23.5254 49.5165 17.8827 49.4487 12.3237Z" fill="#274C77"/>
-            <path d="M20.0712 6.96015C20.3818 5.2492 20.649 3.84346 22.1758 2.78639C23.5446 1.83888 28.8932 -0.520354 30.4288 0.103593C30.843 0.893149 30.1149 3.30436 29.8723 4.15913C28.8002 7.93748 27.8094 7.48079 25.2604 9.46894C26.3529 9.16181 27.3478 8.67034 28.3794 8.19952C27.9322 9.3799 27.3182 11.0463 26.6293 12.0705C25.5832 15.3795 22.2915 17.7543 19.7036 19.6619C21.4093 19.2432 21.9191 19.0244 23.486 18.1972C21.8062 22.6683 20.1795 24.2845 16.521 27.0469C17.5615 26.8718 18.0588 26.7503 19.069 26.4357C17.519 28.7447 14.5016 30.8084 12.1526 32.2364C11.7178 33.5702 10.433 39.1778 9.98406 39.8925L9.79973 39.8161C9.66432 39.346 10.0214 37.3116 10.1381 36.7383C12.4702 25.2723 16.8309 15.4661 23.9489 6.26028L23.6861 5.98589C22.721 6.97162 22.0093 7.77187 21.1684 8.86882C20.9737 9.1227 19.754 10.6854 19.6472 10.7763C19.5176 10.2236 20.4465 9.47417 20.8658 8.76678L20.7476 8.48996C20.393 8.3799 20.1856 8.29569 19.8513 8.15276C19.412 7.41697 19.7911 6.00869 19.3991 4.94907L19.6006 4.81888C19.7858 5.16053 19.8053 6.42232 19.8797 6.95557L20.0712 6.96015Z" fill="#458DC7"/>
-            <path d="M20.0713 6.96015C20.3819 5.2492 20.6491 3.84346 22.1759 2.78639C23.5447 1.83888 28.8934 -0.520354 30.4289 0.103593C30.8432 0.893149 30.115 3.30436 29.8725 4.15913C28.8004 7.93748 27.8096 7.48079 25.2605 9.46894C26.353 9.16181 27.3479 8.67034 28.3795 8.19952C27.9324 9.3799 27.3183 11.0463 26.6294 12.0705C26.5955 11.0626 27.6893 9.96614 27.8121 8.87238C27.4908 8.58678 26.2875 9.82117 25.3835 9.62257L25.2614 9.42104C25.3543 8.99582 25.3959 9.00168 25.6975 8.6999C26.6164 8.49811 28.0949 7.2134 28.7115 6.51225L28.831 6.37442C26.8661 3.95952 26.7319 4.52831 25.2494 1.46691C22.7886 2.51315 21.1419 3.18971 20.5335 5.95506C20.4318 6.41735 20.3826 6.66627 20.0713 6.96015Z" fill="#458DC7"/>
-            <path d="M25.9153 3.73535C25.4065 4.65892 24.6733 5.49306 23.9488 6.26007L23.686 5.98567C24.4138 5.22057 25.1571 4.47038 25.9153 3.73535Z" fill="white"/>
-            <path d="M11.609 4.21103C13.1768 3.96352 16.0576 4.30087 17.6276 4.51679C16.1495 5.9252 15.5263 6.53766 14.3241 8.23588C6.07539 8.18097 4.32991 12.6278 5.14316 20.4084C5.33029 22.1984 6.15794 23.5259 7.23921 24.9352C7.26533 26.8033 7.488 27.8211 8.08354 29.5638C8.22048 29.8479 8.20953 29.8593 8.29373 30.1689L8.10966 30.3026C6.97029 30.2733 4.9038 28.9842 4.05029 28.2593C1.62431 26.1398 0.426352 23.0289 0.119345 19.8992C-0.702438 11.522 2.67615 4.99295 11.609 4.21103Z" fill="url(#paint2_linear_33594_25778)"/>
-            <path d="M19.399 4.94922C19.791 6.00884 19.4119 7.41712 19.8512 8.15291C20.1855 8.29584 20.3929 8.38005 20.7475 8.49011L20.8657 8.76693C20.4464 9.47431 19.5175 10.2237 19.6472 10.7765C18.6254 12.4358 17.358 14.0669 16.3916 15.8031C13.7619 20.5274 11.696 25.742 10.347 30.9639C8.67813 27.0663 8.61186 25.9751 8.7632 21.8687C9.25276 22.9947 9.68537 23.8574 10.2501 24.9351C9.0953 20.4023 10.1612 17.2355 12.5154 13.1958C12.8026 14.4279 12.8977 15.416 13.2516 16.7538C13.3408 16.0742 13.4428 14.7376 13.4536 14.0179C13.5087 10.3653 16.7024 7.2296 19.399 4.94922Z" fill="#274C77"/>
-            <path d="M27.4144 13.5435C27.7239 13.8519 27.8093 14.5947 27.8796 15.0265C28.886 21.2045 26.4398 27.946 20.3942 30.5128C18.8866 31.1523 17.71 31.3561 16.1101 31.6096L15.8521 31.4861C16.0151 31.1676 17.6481 30.1332 18.1849 29.5944C19.1123 28.6619 19.5151 28.3319 20.2634 27.2828C20.9451 26.8007 20.589 25.5809 20.7857 25.3818C23.2694 22.8684 24.5262 20.3274 25.3705 16.9097C25.419 16.7135 27.089 14.1533 27.4144 13.5435Z" fill="#274C77"/>
-            <path d="M50.3661 5.45176C51.839 5.27966 53.1926 5.34743 53.8535 6.90271C54.3335 8.03214 53.6235 9.08832 52.5794 9.52717C49.0227 10.1667 47.7552 7.03813 50.3661 5.45176Z" fill="#274C77"/>
-            <defs>
-              <linearGradient id="paint0_linear_33594_25778" x1="110.198" y1="25.2559" x2="129.604" y2="14.8369" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#274C77"/>
-                <stop offset="1" stop-color="#4F9EF9"/>
-              </linearGradient>
-              <linearGradient id="paint1_linear_33594_25778" x1="79.9918" y1="21.5917" x2="93.4656" y2="19.3871" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#274C77"/>
-                <stop offset="1" stop-color="#4F9EF9"/>
-              </linearGradient>
-              <linearGradient id="paint2_linear_33594_25778" x1="-1.41068" y1="24.5863" x2="21.5158" y2="15.9668" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#274C77"/>
-                <stop offset="1" stop-color="#4F9EF9"/>
-              </linearGradient>
-            </defs>
+          $default_logo = '<svg xmlns="http://www.w3.org/2000/svg" width="95" height="90" viewBox="189 -10 355 336" fill="none" preserveAspectRatio="xMidYMid meet">
+            <path fill="white" d="M377.82 260.726C386.76 242.346 380.59 228.176 366.58 216.136C364.06 213.966 361.39 211.956 358.68 210.026C345.67 200.746 332.64 191.496 319.58 182.286C290.85 162.046 277.82 133.756 278.12 99.256C278.53 50.466 313.2 10.616 361.52 1.99603C395.59 -4.07397 426.56 4.02604 455.43 21.866C465.6 28.156 475.28 35.236 485.61 42.236C490.33 32.616 495.19 22.716 500.56 11.776C513.04 42.636 525.16 72.616 537.54 103.236C505.48 98.466 474.13 93.806 441.96 89.026C450.51 81.866 458.49 75.186 466.57 68.426C466.33 67.906 466.26 67.356 465.95 67.116C446.09 51.786 425.43 38.116 400.36 32.516C365.3 24.686 328.12 42.246 314.45 73.486C301.65 102.756 309.94 136.256 335.36 155.506C348.89 165.746 363.16 174.996 376.96 184.896C388.4 193.106 395.73 203.976 397.84 218.186C400 232.746 391.04 252.496 377.84 260.726H377.82Z"/>
+            <path fill="rgba(196,181,253,0.85)" d="M247.9 272.236C242.92 282.256 238.18 291.776 233.43 301.276C233.3 301.546 232.94 301.696 232.23 302.276C219.81 272.606 207.45 243.096 194.76 212.776C226.83 217.416 258.05 221.936 290.51 226.636C281.92 233.576 273.93 240.036 265.34 246.976C268.83 249.616 272.04 252.156 275.35 254.536C293.41 267.516 312.23 278.946 334.39 283.686C366.67 290.596 396.6 279.506 414.38 251.876C433.56 222.076 427.52 182.816 398.23 160.806C384.81 150.716 370.62 141.646 356.96 131.856C345.89 123.916 338.3 113.636 336.07 99.736C333.17 81.646 340.56 68.206 354.38 57.316C350.24 66.656 349.66 75.876 354.41 85.156C358.63 93.406 365.19 99.506 372.55 104.756C387.05 115.096 401.71 125.226 416.31 135.426C439.66 151.756 451.28 174.956 455.1 202.486C461.42 247.946 434.57 294.336 386.57 310.536C359.69 319.606 332.85 317.666 306.51 307.406C286.64 299.666 268.82 288.516 252.15 275.386C250.86 274.366 249.51 273.416 247.92 272.236H247.9Z"/>
           </svg>';
           echo apply_filters( 'doublescale_loading_screen_logo', $default_logo ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
           ?>
         </div>
-        
-        <!-- Loading text -->
-        <div class="loading-text">LOADING</div>
-        
+
+        <div class="ds-wordmark">DoubleScale</div>
+
+        <div class="ds-bar"></div>
+
       </div>
     </div>
   </div>

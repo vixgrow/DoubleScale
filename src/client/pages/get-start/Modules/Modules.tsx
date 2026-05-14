@@ -1,14 +1,9 @@
-import { useState, useCallback, useMemo } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useDispatch } from '@wordpress/data';
 import config from '@doublescale/config';
-import type { ModuleInfo } from '@doublescale/config';
 import {
 	buildMarketingModuleDisplayRows,
 	getEffectiveMarketingModuleState,
-	OPTIONAL_MARKETING_MODULE_SLUGS,
-	pickToggleableModulePayload,
 	reduceMarketingModulePending,
 } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Switch } from '@/components/ui/switch';
@@ -23,15 +18,12 @@ import {
 	TaskIcon,
 } from '@doublescale/components';
 
-interface ModulesResponse {
-	success: boolean;
-	modules: ModuleInfo[];
-}
-
 interface ModulesStepProps {
 	readonly onNext: () => void;
 	readonly onPrevious: () => void;
 	readonly onSkip: () => void;
+	readonly pendingModuleChanges: Record<string, boolean>;
+	readonly onPendingModuleChange: (next: Record<string, boolean>) => void;
 }
 
 function getModuleIcon(slug: string) {
@@ -59,70 +51,30 @@ function getModuleIcon(slug: string) {
 	}
 }
 
-export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: ModulesStepProps) {
-	const { createNotice } = useDispatch('doublescale/core');
-	const [modules, setModules] = useState<ModuleInfo[]>(() => config.getModules());
-	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>(() => {
-		const apiModules = config.getModules();
-		const allOn: Record<string, boolean> = {};
-		for (const slug of OPTIONAL_MARKETING_MODULE_SLUGS) {
-			allOn[slug] = true;
-		}
-		return reduceMarketingModulePending(allOn, apiModules);
-	});
-	const [isSaving, setIsSaving] = useState(false);
-
+export default function ModulesStep({
+	onNext,
+	onPrevious,
+	onSkip: _onSkip,
+	pendingModuleChanges,
+	onPendingModuleChange,
+}: ModulesStepProps) {
+	const modules = useMemo(() => config.getModules(), []);
 	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
 
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {
-			setPendingChanges((prev) => {
-				const next = { ...prev, [slug]: enabled };
-				return reduceMarketingModulePending(next, modules);
-			});
+			const next = { ...pendingModuleChanges, [slug]: enabled };
+			onPendingModuleChange(reduceMarketingModulePending(next, modules));
 		},
-		[modules]
+		[pendingModuleChanges, onPendingModuleChange, modules]
 	);
 
-	const handleNext = useCallback(async () => {
-		if (Object.keys(pendingChanges).length === 0) {
-			onNext();
-			return;
-		}
-
-		const payload = pickToggleableModulePayload(pendingChanges, modules);
-		if (Object.keys(payload).length === 0) {
-			setPendingChanges({});
-			onNext();
-			return;
-		}
-
-		setIsSaving(true);
-		try {
-			const response = await apiFetch<ModulesResponse>({
-				path: '/doublescale/v1/modules',
-				method: 'POST',
-				data: { modules: payload },
-			});
-
-			if (response.success) {
-				setModules(response.modules);
-				config.setModules(response.modules);
-				setPendingChanges({});
-			}
-
-			onNext();
-		} catch (error: unknown) {
-			const err = error as { message?: string; data?: { message?: string } };
-			const msg =
-				err?.message ||
-				err?.data?.message ||
-				__('Failed to save module settings.', 'doublescale');
-			createNotice({ type: 'error', message: msg });
-		} finally {
-			setIsSaving(false);
-		}
-	}, [pendingChanges, onNext, createNotice]);
+	const handleNext = useCallback(() => {
+		// Selections are staged in the parent wizard's state. Migrations and
+		// the REST commit happen once at EndStep so the user can revisit this
+		// step and revise choices without thrashing the DB.
+		onNext();
+	}, [onNext]);
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
@@ -141,7 +93,7 @@ export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: Mod
 			<div className="min-h-0 flex-1 overflow-y-auto pr-0.5">
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6">
 					{displayRows.map((mod) => {
-						const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingChanges);
+						const isEnabled = getEffectiveMarketingModuleState(mod, modules, pendingModuleChanges);
 						const requires = mod.dependencies?.length ? mod.dependencies.join(', ') : null;
 
 						return (
@@ -205,8 +157,8 @@ export default function ModulesStep({ onNext, onPrevious, onSkip: _onSkip }: Mod
 					<Button type="button" size="lg" variant="secondaryDeepBlue" onClick={onPrevious}>
 						{__('Back', 'doublescale')}
 					</Button>
-					<Button type="button" size="lg" variant="default" onClick={handleNext} disabled={isSaving}>
-						{isSaving ? __('Saving...', 'doublescale') : __('Next Step', 'doublescale')}
+					<Button type="button" size="lg" variant="default" onClick={handleNext}>
+						{__('Next Step', 'doublescale')}
 					</Button>
 				</div>
 			</div>

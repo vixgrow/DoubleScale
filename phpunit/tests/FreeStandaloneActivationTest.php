@@ -135,9 +135,10 @@ final class FreeStandaloneActivationTest extends TestCase {
 		parent::tearDown();
 	}
 
-	public function test_install_creates_expected_tables_and_is_idempotent_for_migrations(): void {
-		Install::install();
-
+	/**
+	 * @return array<string, true>
+	 */
+	private function captured_tables(): array {
 		$tables = array();
 		foreach ( (array) $GLOBALS['__doublescale_phpunit_install_dbdelta'] as $chunk ) {
 			$sql = is_array( $chunk ) ? implode( "\n", $chunk ) : (string) $chunk;
@@ -147,18 +148,67 @@ final class FreeStandaloneActivationTest extends TestCase {
 				}
 			}
 		}
+		return $tables;
+	}
 
+	public function test_install_installs_non_toggleable_modules_and_skips_toggleable_ones(): void {
+		Install::install();
+
+		$tables = $this->captured_tables();
+
+		// Non-toggleable modules: core + contacts + activities + tracking must install.
 		$this->assertArrayHasKey( 'wp_doublescale_migrations', $tables, 'Migration tracking table must be created' );
-		$this->assertGreaterThanOrEqual( 19, count( $tables ), 'Expected at least 19 DoubleScale tables (free schema)' );
+		$this->assertArrayHasKey( 'wp_doublescale_contacts', $tables, 'Contacts is non-toggleable and must install at activation' );
+		$this->assertArrayHasKey( 'wp_doublescale_activities', $tables, 'Activities is non-toggleable and must install at activation' );
+		$this->assertArrayHasKey( 'wp_doublescale_logs', $tables, 'Core logger table must install at activation' );
 
+		// Toggleable modules: none of their tables should appear when the user
+		// has not yet opted in via doublescale_enabled_modules.
+		foreach ( array_keys( $tables ) as $name ) {
+			$this->assertStringStartsNotWith( 'wp_doublescale_booking_', $name, 'Booking tables must not install before opt-in' );
+		}
+		$this->assertArrayNotHasKey( 'wp_doublescale_bookings', $tables, 'wp_doublescale_bookings must not install before opt-in' );
+		$this->assertArrayNotHasKey( 'wp_doublescale_campaigns', $tables, 'Campaigns tables must not install before opt-in' );
+		$this->assertArrayNotHasKey( 'wp_doublescale_smtp_email_log', $tables, 'SMTP tables must not install before opt-in' );
+		$this->assertArrayNotHasKey( 'wp_doublescale_automations', $tables, 'Automations tables must not install before opt-in' );
+	}
+
+	public function test_install_is_idempotent_for_migrations(): void {
+		Install::install();
 		$first_migration_count = count( $GLOBALS['wpdb']->migration_keys );
 
 		Install::install();
-
 		$this->assertSame(
 			$first_migration_count,
 			count( $GLOBALS['wpdb']->migration_keys ),
 			'Second install() must not insert duplicate migration rows'
 		);
+	}
+
+	public function test_opting_in_a_toggleable_module_installs_its_tables(): void {
+		Install::install();
+		$tables_before = $this->captured_tables();
+		$this->assertArrayNotHasKey( 'wp_doublescale_bookings', $tables_before );
+
+		// Simulate the wizard / Settings → Modules write. The phpunit
+		// `update_option` stub does not fire `update_option_*` hooks, so
+		// invoke `MigrationRunner::run_for_module()` directly against the
+		// Booking module — that's what `ModuleManager::activateModule()`
+		// does internally, minus the kernel/Illuminate boot that the
+		// in-memory harness can't satisfy.
+		update_option( 'doublescale_enabled_modules', array( 'booking' => true ) );
+
+		$booking_module_path = DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Booking/Module.php';
+		if ( file_exists( $booking_module_path ) ) {
+			require_once $booking_module_path;
+		}
+		$booking = new \DoubleScale\Modules\Booking\Module();
+		\DoubleScale\Core\Database\MigrationRunner::run_for_module( $booking );
+
+		$tables_after = $this->captured_tables();
+		$new_tables   = array_diff_key( $tables_after, $tables_before );
+
+		$this->assertArrayHasKey( 'wp_doublescale_booking_calendars', $new_tables, 'Booking calendar table must install on explicit opt-in' );
+		$this->assertArrayHasKey( 'wp_doublescale_bookings', $new_tables, 'Booking core table must install on explicit opt-in' );
 	}
 }

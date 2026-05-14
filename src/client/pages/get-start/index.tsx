@@ -20,9 +20,22 @@ import Lists from './Lists/Lists';
 import Contacts from './Contacts/Contacts';
 import PluginComplete from './Plugins/Plugins';
 import EndStep from './EndStep/EndStep';
+import config from '@doublescale/config';
+import {
+	OPTIONAL_MARKETING_MODULE_SLUGS,
+	reduceMarketingModulePending,
+} from '@doublescale/shared/lib/optional-marketing-modules';
 
 export default function GetStart() {
 	const [currentStep, setCurrentStep] = useState(1);
+	const [pendingModuleChanges, setPendingModuleChanges] = useState<Record<string, boolean>>(() => {
+		const apiModules = config.getModules();
+		const allOn: Record<string, boolean> = {};
+		for (const slug of OPTIONAL_MARKETING_MODULE_SLUGS) {
+			allOn[slug] = true;
+		}
+		return reduceMarketingModulePending(allOn, apiModules);
+	});
 
 	const steps = [
 		{ number: 1, label: __('Welcome to our system', 'doublescale'), icon: <WelcomeStart /> },
@@ -47,7 +60,7 @@ export default function GetStart() {
 	};
 
 	if (currentStep === steps.length + 1) {
-		return <EndStep />;
+		return <EndStep pendingModuleChanges={pendingModuleChanges} />;
 	}
 
 	return (
@@ -94,6 +107,8 @@ export default function GetStart() {
 							onNext={handleNext}
 							onPrevious={handlePrevious}
 							onSkip={handleSkip}
+							pendingModuleChanges={pendingModuleChanges}
+							onPendingModuleChange={setPendingModuleChanges}
 						/>
 					)}
 					{currentStep === 3 && (

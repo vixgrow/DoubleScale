@@ -706,7 +706,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						'doublescale_navbar_brand',
 						<div className="doublescale-navbar__brand">
 							<span className="doublescale-navbar__logo-icon">
-								<LogoIcon width={28} height={32} />
+								<LogoIcon />
 							</span>
 							<span className="doublescale-navbar__brand-text">
 								{__('DoubleScale', 'doublescale')}

@@ -16,13 +16,12 @@ import React from 'react';
 import { PaddingControl, ColorPickerControl } from '../basic/shared';
 import { BackgroundImageSection } from './components/BackgroundImageSection';
 import ConditionalSectionGate from '@/builder/components/ConditionalSectionGate';
-import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
 import { STORE_KEY } from '@/stores/email-builder/constants';
 import {
 	useSectionSettings,
 	LayoutSettingsData,
 } from './hooks/useSectionSettings';
+import { FiltersIcon } from '@doublescale/components';
 
 interface LayoutSettingsProps {
 	onSettingsChange?: (settings: LayoutSettingsData) => void;
@@ -101,23 +100,44 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 			{/* Conditional Section Button - Pro Feature */}
 			{sectionId && (
 				<div className="border-t pt-4">
-					<Button
-						variant={hasConditions ? 'default' : 'outline'}
-						className="w-full"
+					<button
+						type="button"
 						onClick={() => setShowConditionsModal(true)}
+						className="relative mt-1 flex h-11 w-full items-center justify-center rounded-lg border-0 bg-transparent text-sm font-medium text-white/90 shadow-none transition-colors hover:bg-white/[0.06]"
 					>
-						<Filter className="w-4 h-4 mr-2" />
-						{hasConditions
-							? __('Edit Conditions', 'doublescale')
-							: __('Add Conditions', 'doublescale')}
-						{!isProActive && (
-							<span className="ml-2 text-xs text-blue-600">
-								({__('Pro', 'doublescale')})
-							</span>
-						)}
-					</Button>
+						<svg
+							className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg text-white/45"
+							xmlns="http://www.w3.org/2000/svg"
+							aria-hidden
+						>
+							<rect
+								x="0.5"
+								y="0.5"
+								width="calc(100% - 1px)"
+								height="calc(100% - 1px)"
+								rx="7"
+								ry="7"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1"
+								strokeDasharray="10 8"
+								vectorEffect="nonScalingStroke"
+							/>
+						</svg>
+						<span className="relative z-10 flex items-center justify-center gap-2">
+							<FiltersIcon />
+							{hasConditions
+								? __('Edit Conditions', 'doublescale')
+								: __('Add Conditions', 'doublescale')}
+							{!isProActive && (
+								<span className="text-xs text-white/55">
+									({__('Pro', 'doublescale')})
+								</span>
+							)}
+						</span>
+					</button>
 					{hasConditions && (
-						<p className="text-xs text-gray-600 mt-2 text-center">
+						<p className="mt-2 text-center text-xs text-white">
 							{__(
 								'This section has conditional rendering',
 								'doublescale'

@@ -253,33 +253,6 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 										<GlobalEmailSettings />
 									)}
 								</div>
-
-								{isBlockSelected &&
-									selectedBlock &&
-									!isUnknown && (
-										<div className="my-6 border-t border-white/10 pt-4">
-											<Button
-												variant="destructive"
-												size="sm"
-												className="w-full"
-												onClick={() => {
-													dispatch(
-														STORE_KEY
-													).deleteBlock(
-														selectedBlock.id
-													);
-													dispatch(
-														STORE_KEY
-													).clearSelection();
-												}}
-											>
-												{__(
-													'Delete Block',
-													'doublescale'
-												)}
-											</Button>
-										</div>
-									)}
 							</div>
 						</div>
 					) : (
@@ -338,40 +311,6 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 									<GlobalEmailSettings />
 								)}
 							</div>
-
-							{isBlockSelected &&
-								selectedBlock &&
-								!isUnknown && (
-									<div
-										className={cn(
-											'my-6 border-t pt-4',
-											inline
-												? 'border-white/10 px-1'
-												: 'border-border px-4'
-										)}
-									>
-										<Button
-											variant="destructive"
-											size="sm"
-											className="w-full"
-											onClick={() => {
-												dispatch(
-													STORE_KEY
-												).deleteBlock(
-													selectedBlock.id
-												);
-												dispatch(
-													STORE_KEY
-												).clearSelection();
-											}}
-										>
-											{__(
-												'Delete Block',
-												'doublescale'
-											)}
-										</Button>
-									</div>
-								)}
 						</div>
 					)}
 				</>

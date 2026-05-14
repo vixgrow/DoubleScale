@@ -707,10 +707,26 @@ final class EmailNotifications {
 		}
 
 		if ( $result ) {
-			error_log( sprintf( '[DoubleScale Booking] Email sent successfully to %s. Subject: %s', $email, $subject ) );
+			doublescale_get_logger()->info(
+				'Booking email sent',
+				array(
+					'source'     => 'booking-email-notifications',
+					'recipient'  => $email,
+					'subject'    => $subject,
+					'booking_id' => (int) $booking->id,
+				)
+			);
 			$this->record_tracking_row( $booking, $email, $host_user_id );
 		} else {
-			error_log( sprintf( '[DoubleScale Booking] Failed to send email to %s. Subject: %s', $email, $subject ) );
+			doublescale_get_logger()->warning(
+				'Failed to send booking email',
+				array(
+					'source'     => 'booking-email-notifications',
+					'recipient'  => $email,
+					'subject'    => $subject,
+					'booking_id' => (int) $booking->id,
+				)
+			);
 		}
 
 		return $result;
@@ -750,7 +766,14 @@ final class EmailNotifications {
 				)
 			);
 		} catch ( \Throwable $e ) {
-			error_log( '[DoubleScale Booking] Failed to record tracking row: ' . $e->getMessage() );
+			doublescale_get_logger()->error(
+				'Failed to record booking email tracking row',
+				array(
+					'source'     => 'booking-email-notifications',
+					'booking_id' => (int) $booking->id,
+					'exception'  => $e->getMessage(),
+				)
+			);
 		}
 	}
 

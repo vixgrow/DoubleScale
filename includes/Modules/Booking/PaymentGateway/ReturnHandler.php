@@ -47,10 +47,15 @@ function doublescale_booking_payment_return_handler() {
                 $redirect_url = home_url("/?doublescale_booking=booking&id={$booking_id}&type=confirm");
             }
             
-            // Log the redirection URL (helpful for debugging)
-            error_log('[DoubleScale Booking] Redirecting payment return to: ' . $redirect_url);
-            
-            // Redirect the user
+            doublescale_get_logger()->info(
+                'Redirecting payment return',
+                array(
+                    'source'       => 'booking-payment-return',
+                    'booking_id'   => (int) $booking_id,
+                    'redirect_url' => $redirect_url,
+                )
+            );
+
             wp_redirect($redirect_url);
             exit;
             

@@ -1160,6 +1160,21 @@ class RestAutomationController extends RestController {
 			}
 		}
 
+		// Form integration triggers use `source` = "forms" and are not listed in
+		// `$plugin_dependencies` above. Without this branch, Pro-only form stubs still register
+		// in {@see TriggersManager} but list/detail dependency checks never surface the Pro warning
+		// (unlike CRM triggers such as Contact Subscribed).
+		if ( 'forms' === ( $trigger->source ?? '' ) ) {
+			if ( ! empty( $trigger->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
+				return array(
+					'is_active'    => false,
+					'is_pro'       => true,
+					'message'      => __( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
+					'plugin_label' => __( 'Double Scale Pro', 'doublescale' ),
+				);
+			}
+		}
+
 		// No dependency or plugin is active
 		return array(
 			'is_active'    => true,

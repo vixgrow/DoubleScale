@@ -122,29 +122,28 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		const setFooter = setFooterRef.current;
 		if (!setFooter) return;
 		setFooter(
-			<div className="flex items-center justify-between gap-2">
-				<Button
-					onClick={handleSave}
-					disabled={isSaving || isDeleting}
-					variant="gradient"
-					className="w-full"
-					size="lg"
-				>
-					{isSaving
-						? __('Saving...', 'doublescale')
-						: __('Save Changes', 'doublescale')}
-				</Button>
+			<div className="flex items-center justify-end gap-6">
 				<Button
 					onClick={handleDelete}
 					disabled={isSaving || isDeleting}
-					variant="outline"
-					className="w-full text-destructive border-destructive hover:text-destructive"
-					size="lg"
+					variant="destructive"
+
 				>
 					{isDeleting
 						? __('Deleting...', 'doublescale')
 						: __('Delete', 'doublescale')}
 				</Button>
+				<Button
+					onClick={handleSave}
+					disabled={isSaving || isDeleting}
+					variant="default"
+
+				>
+					{isSaving
+						? __('Saving...', 'doublescale')
+						: __('Save Changes', 'doublescale')}
+				</Button>
+
 			</div>
 		);
 		return () => setFooter(null);
@@ -244,8 +243,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					<Button
 						onClick={handleDelete}
 						disabled={isDeleting}
-						variant="outline"
-						className="w-full text-destructive border-destructive hover:text-destructive"
+						variant="destructive"
+						className="w-full"
 						size="lg"
 					>
 						{isDeleting

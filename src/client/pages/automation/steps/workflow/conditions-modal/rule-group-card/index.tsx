@@ -95,7 +95,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 
 	return (
 		<Card
-			className={`shadow-none ${rules.length > 1 ? 'ml-[2.2rem]' : 'w-full'}`}
+			className={`shadow-none bg-[#F7F8FA] border-border overflow-visible ${rules.length > 1 ? 'ml-[2.2rem]' : 'w-full'}`}
 		>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">
@@ -128,7 +128,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											? lastRowRef
 											: undefined
 								}
-								className="flex items-center gap-3 w-full border rounded-xl p-3"
+								className="flex w-full min-w-0 items-center gap-3"
 							>
 								<Select
 									value={rule.selectedGroup}

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useLayoutEffect, useEffect } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
@@ -17,23 +17,19 @@ import { useSelect } from '@wordpress/data';
 import './style.scss';
 import type { AutomationStep } from '@doublescale/client';
 import ConfigAPI from '@doublescale/config';
-import {
-	CustomDialogHeader,
-	GradientConditionIcon,
-} from '@doublescale/components';
+import { ConditionAutomationIcon, CustomDialogHeader } from '@doublescale/components';
 import {
 	Dialog,
 	DialogContent,
-	DialogHeader,
 	DialogFooter,
+	DialogHeader,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import {
-	automationDialogAccentBarClassName,
 	automationDialogBodyClassName,
-	automationDialogFooterClassName,
-	automationDialogHeaderClassName,
-	automationDialogSurfaceWide,
+	automationDialogConditionsInlineSize,
+	automationDialogSurfaceConditions,
+	automationModalOverlayClassName,
 } from '../automation-dialog-presets';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -224,27 +220,52 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		}
 	}, [formContext, visible]);
 
-	// Reset rules when rulesGroups changes (after fetching dynamic rules)
+	// Repair rows whose saved entity/rule disappeared after filters reload or trigger change (e.g. Deal ↔ Contact).
 	useEffect(() => {
-		if (visible && Object.keys(rulesGroups).length > 0) {
-			// If current rules are invalid (e.g., group/rule doesn't exist in new groups), reset them
-			const currentRule = rules[0]?.[0];
-			if (
-				currentRule &&
-				(!filteredRulesGroups[currentRule.selectedGroup] ||
-					!filteredRulesGroups[currentRule.selectedGroup]?.rules[
-					currentRule.rule
-					])
-			) {
-				// Current rule is invalid, reset to initial
-				setRules([[getInitialRule()]]);
-			}
+		if (!visible || Object.keys(rulesGroups).length === 0) {
+			return;
 		}
-	}, [rulesGroups, visible]);
+		const filtered = filterRulesByTrigger(rulesGroups);
+		const keys = Object.keys(filtered);
+		if (keys.length === 0) {
+			return;
+		}
+		const firstGroupKey = keys[0];
+		const firstRuleKey = firstGroupKey
+			? Object.keys(filtered[firstGroupKey].rules)[0] || ''
+			: '';
 
-	useLayoutEffect(() => {
-		// placeholder
-	}, [rules, visible]);
+		setRules((prev) => {
+			let changed = false;
+			const next = prev.map((group) =>
+				group.map((r) => {
+					if (!filtered[r.selectedGroup]) {
+						changed = true;
+						return {
+							...r,
+							selectedGroup: firstGroupKey,
+							rule: firstRuleKey,
+							operator: 'is',
+							value: '',
+						};
+					}
+					const gRules = filtered[r.selectedGroup].rules;
+					if (!gRules[r.rule]) {
+						changed = true;
+						const nk = Object.keys(gRules)[0] || '';
+						return {
+							...r,
+							rule: nk,
+							operator: 'is',
+							value: '',
+						};
+					}
+					return r;
+				})
+			);
+			return changed ? next : prev;
+		});
+	}, [visible, rulesGroups, currentTrigger]);
 
 	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);
@@ -260,72 +281,85 @@ const ConditionsModal: React.FC<RulesProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className={cn(automationDialogSurfaceWide)}>
-				<div
-					className={automationDialogAccentBarClassName}
-					aria-hidden
-				/>
-				<DialogHeader className={automationDialogHeaderClassName}>
-					<CustomDialogHeader
-						title={__('Create a condition', 'doublescale')}
-						subtitle={__(
-							'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
-							'doublescale'
-						)}
-						icon={<GradientConditionIcon />}
-					/>
+			<DialogContent
+				style={automationDialogConditionsInlineSize}
+				className={cn(
+					automationDialogSurfaceConditions,
+					'z-[150460]'
+				)}
+				overlayClassName={cn(
+					automationModalOverlayClassName,
+					'z-[150459]'
+				)}
+			>
+				<DialogHeader className="shrink-0 space-y-0  bg-white p-6 text-left">
+					<div className="flex items-start gap-1">
+						<CustomDialogHeader
+							title={__('Create a Condition', 'doublescale')}
+							subtitle={__(
+								'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
+								'doublescale'
+							)}
+							icon={<ConditionAutomationIcon />}
+						/>
+					</div>
 				</DialogHeader>
 
-				<div className={automationDialogBodyClassName}>
-				{/* Show warning if condition has plugin dependency issues */}
-				{(hasConditionWarning || conditionWarning) &&
-					unavailableRulesCount > 0 && (
-						<Alert
-							variant="destructive"
-							className="mb-5 border-orange-500/80 bg-orange-50/90"
-						>
-							<AlertTriangle className="h-4 w-4 text-orange-600" />
-							<AlertDescription className="text-sm text-orange-800">
-								{conditionWarning?.message}
-								{conditionWarning?.plugin_labels &&
-									conditionWarning.plugin_labels.length >
-									0 && (
-										<span className="block mt-1 font-medium">
-											{__(
-												'Required plugins:',
-												'doublescale'
-											)}{' '}
-											{conditionWarning.plugin_labels.join(
-												', '
-											)}
-										</span>
-									)}
-								{unavailableRules.length > 0 && (
-									<div className="mt-2">
-										<p className="font-medium mb-1">
-											{__(
-												'Unavailable rules:',
-												'doublescale'
-											)}
-										</p>
-										<ul className="list-disc list-inside space-y-1">
-											{unavailableRules.map(
-												(rule: any, index: number) => (
-													<li
-														key={index}
-														className="text-xs"
-													>
-														{rule.rule_slug} (
-														{rule.plugin_label})
-													</li>
-												)
-											)}
-										</ul>
-									</div>
-								)}
-							</AlertDescription>
-						</Alert>
+				<div
+					className={cn(
+						automationDialogBodyClassName,
+						'bg-white'
 					)}
+				>
+					{/* Show warning if condition has plugin dependency issues */}
+					{(hasConditionWarning || conditionWarning) &&
+						unavailableRulesCount > 0 && (
+							<Alert
+								variant="destructive"
+								className="mb-5 border-orange-500/80 bg-orange-50/90"
+							>
+								<AlertTriangle className="h-4 w-4 text-orange-600" />
+								<AlertDescription className="text-sm text-orange-800">
+									{conditionWarning?.message}
+									{conditionWarning?.plugin_labels &&
+										conditionWarning.plugin_labels.length >
+										0 && (
+											<span className="block mt-1 font-medium">
+												{__(
+													'Required plugins:',
+													'doublescale'
+												)}{' '}
+												{conditionWarning.plugin_labels.join(
+													', '
+												)}
+											</span>
+										)}
+									{unavailableRules.length > 0 && (
+										<div className="mt-2">
+											<p className="font-medium mb-1">
+												{__(
+													'Unavailable rules:',
+													'doublescale'
+												)}
+											</p>
+											<ul className="list-disc list-inside space-y-1">
+												{unavailableRules.map(
+													(rule: any, index: number) => (
+														<li
+															key={index}
+															className="text-xs"
+														>
+															{rule.rule_slug} (
+															{rule.plugin_label})
+														</li>
+													)
+												)}
+											</ul>
+										</div>
+									)}
+								</AlertDescription>
+							</Alert>
+						)}
 
 					<RulesBuilder
 						rules={rules}
@@ -333,22 +367,26 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						rulesGroups={filteredRulesGroups}
 					/>
 				</div>
-				<DialogFooter
-					className={cn(
-						automationDialogFooterClassName,
-						'flex-col-reverse gap-2 pt-0 sm:flex-row sm:justify-end sm:gap-3'
-					)}
-				>
+				<DialogFooter className="shrink-0 gap-2  bg-white p-6 sm:flex-row sm:justify-end">
 					<Button
-						onClick={() => save({ settings: rules })}
+						type="button"
+						variant="outline"
+						className="rounded-lg border-brandPrimary bg-white text-brandPrimary shadow-none hover:bg-brandPrimary/10 hover:text-brandPrimary"
 						disabled={isSaving}
-						size="xl"
-						className="w-full min-w-[12rem] sm:w-auto sm:min-w-[200px]"
-						variant="gradient"
+						onClick={onClose}
+					>
+						{__('Cancel', 'doublescale')}
+					</Button>
+					<Button
+						type="button"
+						variant="default"
+						className="rounded-lg px-5 shadow-none"
+						disabled={isSaving}
+						onClick={() => save({ settings: rules })}
 					>
 						{isSaving
-							? __('Adding...', 'doublescale')
-							: __('Add condition', 'doublescale')}
+							? __('Saving...', 'doublescale')
+							: __('Create a Condition', 'doublescale')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -47,7 +47,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 
 				{actions.length > 0 && (
 					<div
-						className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-2 ${className || ''}`}
+						className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-6 ${className || ''}`}
 					>
 						{actions.map((action, index) => {
 							const {

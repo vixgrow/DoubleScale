@@ -181,7 +181,7 @@ export function DataTableActions<TData>({
 	};
 
 	return (
-		<div className="flex gap-[10px] items-center">
+		<div className="flex gap-6 items-center">
 			{config.dateRange?.enabled && (
 				<DateRangePicker
 					value={config.dateRange?.value}
@@ -236,7 +236,7 @@ export function DataTableActions<TData>({
 							<Button
 								variant="outline"
 								onClick={handleCampaignFiltersDialogOpen}
-								size="sm"
+
 							>
 								<FiltersIcon width={32} height={32} />
 								{__('Filters', 'doublescale')}
@@ -276,7 +276,7 @@ export function DataTableActions<TData>({
 									type="button"
 									onClick={handleApplyCampaignFilters}
 									variant="default"
-									className="rounded-lg h-10"
+
 								>
 									{__('Apply Filters', 'doublescale')}
 								</Button>
@@ -300,9 +300,9 @@ export function DataTableActions<TData>({
 					>
 						<DialogTrigger asChild>
 							<Button
-								variant="tertiary"
-								className={`font-semibold px-4 text-[#3B82F6] ${!isProActive ? 'relative' : ''
-									}`}
+								variant="outline"
+								// className={`font-semibold px-4 text-[#3B82F6] ${!isProActive ? 'relative' : ''
+								// 	}`}
 								onClick={handleAdvancedFiltersDialogOpen}
 							>
 								<FiltersIcon />
@@ -340,8 +340,8 @@ export function DataTableActions<TData>({
 									onClick={handleApplyAdvancedFilters}
 									disabled={config.filters?.isApplying}
 									className="w-full"
-									variant="gradient"
-									size="xl"
+									variant="outline"
+
 								>
 									{config.filters?.isApplying
 										? __('Applying...', 'doublescale')
@@ -355,6 +355,7 @@ export function DataTableActions<TData>({
 					{showProModal && (
 						<ProAutomationModal
 							visible={showProModal}
+
 							onClose={() => setShowProModal(false)}
 							featureName={__('Advanced Filters', 'doublescale')}
 						/>
@@ -370,7 +371,7 @@ export function DataTableActions<TData>({
 				>
 					<DialogTrigger asChild>
 						<Button
-							className="bg-secondary border-secondary text-white hover:bg-secondary/80 hover:text-primary-foreground"
+							variant="secondaryDeepBlue"
 							onClick={handleDialogOpen}
 						>
 							<ColumnsIcon />

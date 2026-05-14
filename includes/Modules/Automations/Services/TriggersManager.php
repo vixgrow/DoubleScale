@@ -71,14 +71,24 @@ final class TriggersManager {
 	private function __construct() {
 		$this->set_sources();
 		$this->set_forms_sources();
-		add_action( 'doublescale_loaded', array( $this, 'load_triggers' ) );
+		// After {@see FormsManager::load_forms()} (priority 5 on doublescale_loaded) so
+		// `set_forms_sources()` inside `load_triggers()` sees registered form integrations.
+		add_action( 'doublescale_loaded', array( $this, 'load_triggers' ), 10 );
 	}
 
 	/**
 	 * Load triggers
 	 */
 	public function load_triggers() {
+		// Forms (and other Pro extensions) register on module boot / doublescale_loaded.
+		// Rebuild form trigger sources here so they are not missed when this singleton
+		// was constructed before the Pro `forms` module finished booting.
+		$this->set_forms_sources();
+
 		/** @var Trigger[] $triggers */
+		// Pro add-on merges catalog triggers on `doublescale_triggers` (late priority): each catalog
+		// instance uses the same `slug` as the free stub (e.g. form integrations: contactform7,
+		// fluentforms, …), so the filtered array replaces TriggerPro definitions with real Trigger hooks.
 		$triggers = apply_filters( 'doublescale_triggers', $this->triggers );
 
 		// Re-register triggers after filter to update sources array
@@ -87,16 +97,11 @@ final class TriggersManager {
 			// Update the trigger in the internal array
 			$this->triggers[ $slug ] = $trigger;
 
-			// Update the sources array with the (potentially updated) trigger's fields
-			$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = array(
-				'label'       => $trigger->name,
-				'description' => $trigger->description,
-				'fields'      => $trigger->get_fields(),
-				'is_pro'      => $trigger->is_pro,
-			);
+			$this->store_trigger_in_sources( $trigger );
 
-			// Load the trigger's hooks
-			$trigger->load_hooks();
+			if ( ! $trigger->is_pro ) {
+				$trigger->load_hooks();
+			}
 		}
 	}
 
@@ -125,12 +130,7 @@ final class TriggersManager {
 		}
 
 		$this->triggers[ $trigger->slug ] = $trigger;
-		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = array(
-			'label'       => $trigger->name,
-			'description' => $trigger->description,
-			'fields'      => $trigger->get_fields(),
-			'is_pro'      => $trigger->is_pro,
-		);
+		$this->store_trigger_in_sources( $trigger );
 	}
 
 	/**
@@ -290,7 +290,8 @@ final class TriggersManager {
 					 'booking' => array(
 						 'label'       => __( 'Booking', 'doublescale'),
 						 'triggers'    => array(),
-						 'is_disabled' => false,
+						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							 || ! doublescale_is_module_active( 'booking' ),
 					 ),
 				 ),
 			 ),
@@ -324,6 +325,14 @@ final class TriggersManager {
 	}
 
 	/**
+	 * Rebuild automation trigger rows for every registered form integration.
+	 * Safe to call from admin config after the stack is fully booted.
+	 */
+	public function sync_form_trigger_sources(): void {
+		$this->set_forms_sources();
+	}
+
+	/**
 	 * Get forms sources
 	 *
 	 * @return void
@@ -332,9 +341,18 @@ final class TriggersManager {
 		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
 			return;
 		}
+		$this->sources['forms']['groups'] = array();
 		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 
+		$skip_slugs = array();
+		if ( class_exists( '\DoubleScale\Modules\Automations\Triggers\Forms\AbstractFormSubmittedTrigger' ) ) {
+			$skip_slugs = \DoubleScale\Modules\Automations\Triggers\Forms\AbstractFormSubmittedTrigger::integration_slugs();
+		}
+
 		foreach ( $forms as $form ) {
+			if ( in_array( $form->slug, $skip_slugs, true ) ) {
+				continue;
+			}
 			$this->sources['forms']['groups'][ $form->slug ] = array(
 				'label'       => $form->name,
 				'is_disabled' => ! $form->is_enabled(),
@@ -360,5 +378,87 @@ final class TriggersManager {
 	 */
 	public function get_sources() {
 		 return $this->sources;
+	}
+
+	/**
+	 * Merge one trigger into {@see $this->sources} (form integrations need `is_form` + group shell).
+	 *
+	 * @param Trigger $trigger Trigger instance.
+	 */
+	private function store_trigger_in_sources( Trigger $trigger ): void {
+		$row = array(
+			'label'         => $trigger->name,
+			'description'   => $trigger->description,
+			'fields'        => $trigger->get_fields(),
+			'is_pro'        => $trigger->is_pro,
+			'is_disabled'   => false,
+		);
+
+		if ( 'forms' === $trigger->source ) {
+			$row['is_form'] = true;
+			$form           = null;
+			if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
+				$form = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_form( $trigger->slug );
+			}
+			if ( $form ) {
+				$row['is_disabled'] = ! $form->is_enabled();
+			} else {
+				$row['is_disabled'] = ! $this->is_form_vendor_plugin_active( $trigger->slug );
+			}
+			if ( ! isset( $this->sources['forms']['groups'][ $trigger->group ] ) ) {
+				$this->sources['forms']['groups'][ $trigger->group ] = array(
+					'label'       => $trigger->name,
+					'is_disabled' => $row['is_disabled'],
+					'triggers'    => array(),
+				);
+			}
+			$this->sources['forms']['groups'][ $trigger->group ]['is_disabled'] = $row['is_disabled'];
+			$this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+
+			return;
+		}
+
+		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
+	}
+
+	/**
+	 * Mirrors vendor {@see \DoubleScale\Pro\Modules\Forms\* \Form::is_enabled()} when FormsManager is not ready.
+	 */
+	private function is_form_vendor_plugin_active( string $slug ): bool {
+		switch ( $slug ) {
+			case 'bitform':
+				return doublescale_is_plugin_active( 'bit-form/bitforms.php' );
+			case 'contactform7':
+				return doublescale_is_plugin_active( 'contact-form-7/wp-contact-form-7.php' );
+			case 'elementor':
+				return doublescale_is_plugin_active( 'elementor-pro/elementor-pro.php' );
+			case 'fluentforms':
+				return doublescale_is_plugin_active( 'fluentform/fluentform.php' );
+			case 'formidable':
+				return doublescale_is_plugin_active( 'formidable/formidable.php' );
+			case 'forminator':
+				return doublescale_is_plugin_active( 'forminator/forminator.php' );
+			case 'gravityforms':
+				return doublescale_is_plugin_active( 'gravityforms/gravityforms.php' );
+			case 'metform':
+				return doublescale_is_plugin_active( 'metform/metform.php' );
+			case 'ninjaforms':
+				return doublescale_is_plugin_active( 'ninja-forms/ninja-forms.php' );
+			case 'quillforms':
+				return doublescale_is_plugin_active( 'quillforms/quillforms.php' );
+			case 'sureforms':
+				return doublescale_is_plugin_active( 'sureforms/sureforms.php' );
+			case 'wpforms':
+				return doublescale_is_plugin_active( 'wpforms/wpforms.php' );
+			case 'wsform':
+				return doublescale_is_plugin_active( 'ws-form/ws-form.php' )
+					|| doublescale_is_plugin_active( 'ws-form-pro/ws-form.php' );
+			case 'eform':
+				return doublescale_is_plugin_active( 'wp-fsqm-pro/ipt_fsqm.php' );
+			case 'jetformbuilder':
+				return doublescale_is_plugin_active( 'jetformbuilder/jet-form-builder.php' );
+			default:
+				return false;
+		}
 	}
 }

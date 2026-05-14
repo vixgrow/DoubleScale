@@ -95,6 +95,9 @@ abstract class Trigger {
 	 * @return void
 	 */
 	public function process( $args ) {
+		if ( $this->is_pro ) {
+			return;
+		}
 		try {
 			$automations = AutomationModel::get_automations_by_trigger( $this->slug );
 			foreach ( $automations as $automation ) {

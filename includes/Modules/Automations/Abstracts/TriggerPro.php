@@ -22,7 +22,7 @@ abstract class TriggerPro extends Trigger {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		 $this->is_pro = ! doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
+		$this->is_pro = ! doublescale_is_pro_addon_active();
 		parent::__construct();
 	}
 

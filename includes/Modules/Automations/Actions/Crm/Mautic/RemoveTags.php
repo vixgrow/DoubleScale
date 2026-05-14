@@ -1,29 +1,20 @@
 <?php
 /**
- * Class RemoveTags
- *
- * This class is responsible for removing tags to a Mautic contact
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Mautic;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Remove Tags class
+ * RemoveTags action stub.
  */
-class RemoveTags extends Action {
+class RemoveTags extends ProAutomationStubAction {
 
-	/**
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -69,128 +60,6 @@ class RemoveTags extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
-		$tags = $step->get_setting( 'tags', array() );
-		if ( empty( $tags ) ) {
-			doublescale_get_logger()->error(
-				__( 'Mautic Remove Tags action is missing tags.', 'doublescale'),
-				array(
-					'code' => 'mautic_remove_tags',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$tags = array_map(
-			function( $tag ) {
-				return '-' . $tag;
-			},
-			$tags
-		);
-
-		$email  = $automation_contact->contact->email;
-		$data   = array(
-			'email'     => $email,
-			'firstname' => $automation_contact->contact->first_name,
-			'lastname'  => $automation_contact->contact->last_name,
-			'tags'      => $tags,
-		);
-		$mautic = IntegrationsManager::instance()->get_integration( 'mautic' );
-		$api    = $mautic->connect();
-		if ( ! $api ) {
-			doublescale_get_logger()->error(
-				__( 'Mautic Remove Tags: Could not connect to Mautic.', 'doublescale'),
-				array(
-					'code' => 'mautic_connect',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$result = $api->create_or_update_contact( $data );
-		if ( ! $result['success'] ) {
-			doublescale_get_logger()->error(
-				__( 'Mautic Remove Tags: Could not create or update contact.', 'doublescale'),
-				array(
-					'code'     => 'mautic_create_or_update_contact',
-					'data'     => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-					'response' => $result,
-				)
-			);
-			return false;
-		}
-
-		doublescale_get_logger()->info(
-			__( 'Mautic Remove Tags: Tags removed successfully.', 'doublescale'),
-			array(
-				'code'     => 'mautic_remove_tags',
-				'response' => $result,
-			)
-		);
-
-		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'tags' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => array( 'string', 'number' ),
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'tags' => array(
-				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'doublescale'),
-				'endpoint' => 'mautic/tags',
-				'multiple' => true,
-			),
-		);
-	}
 }
 
 RemoveTags::instance();

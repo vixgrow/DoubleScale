@@ -1,25 +1,21 @@
 <?php
-
 /**
- * WooCommerce Order Refunded Trigger
- * This trigger will be fired when an order is refunded.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Order;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WC_Order;
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Order Refunded Trigger
+ * OrderRefunded trigger stub.
  */
-class OrderRefunded extends Trigger
-{
-	/**
+class OrderRefunded extends TriggerPro {
+
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,37 +64,6 @@ class OrderRefunded extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('woocommerce_order_refunded', array($this, 'order_refunded'), 10, 2);
-	}
-
-	/**
-	 * Order Refunded
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 * @param int $refund_id Refund ID.
-	 * @return void
-	 */
-	public function order_refunded($order_id, $refund_id)
-	{
-		$order = \wc_get_order($order_id);
-		if (! $order instanceof WC_Order) {
-			return;
-		}
-
-		$data = array(
-			'first_name' => $order->get_billing_first_name(),
-			'last_name'  => $order->get_billing_last_name(),
-			'email'      => $order->get_billing_email(),
-			'data'       => array(
-				'order_id'  => $order->get_id(),
-				'refund_id' => $refund_id,
-			),
-		);
-
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new OrderRefunded() );

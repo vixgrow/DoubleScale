@@ -12,6 +12,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
  * Internal dependencies
  */
 import ConfigAPI from '@doublescale/config';
+import type { TriggersGroup } from '@doublescale/config';
 import type { NoticeMessage } from '@doublescale/client';
 import {
 	CustomDialogHeader,
@@ -688,6 +689,18 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		return automationTriggers[selectedCategory];
 	}, [automationTriggers, selectedCategory]);
 
+	// PHP sends `groups` as an object (associative array). TS types expect an array; normalize for the UI.
+	const triggerGroupsForCategory = useMemo((): TriggersGroup[] => {
+		const raw = currentCategoryData?.groups;
+		if ( ! raw ) {
+			return [];
+		}
+		if ( Array.isArray( raw ) ) {
+			return raw as TriggersGroup[];
+		}
+		return Object.values( raw ) as TriggersGroup[];
+	}, [ currentCategoryData ] );
+
 	// Scroll to notice banner when error appears
 	useEffect(() => {
 		if (error && noticeBannerRef.current) {
@@ -767,9 +780,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
 								<div className="w-1/2 overflow-y-auto pr-1">
 									<TriggersGroupRender
-										groups={
-											currentCategoryData?.groups || []
-										}
+										groups={ triggerGroupsForCategory }
 										value={automation.trigger}
 										onChange={(value) =>
 											onAutomationChange({

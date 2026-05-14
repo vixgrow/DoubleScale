@@ -1,26 +1,21 @@
 <?php
-
 /**
- * Contact Subscribes Trigger
- * This trigger will be fired when a contact subscribes to a list.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Contact Subscribes Trigger
+ * ContactSubscribed trigger stub.
  */
-class ContactSubscribed extends Trigger
-{
+class ContactSubscribed extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -69,26 +64,6 @@ class ContactSubscribed extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('doublescale_contact_subscribed', array($this, 'contact_subscribed'));
-	}
-
-	/**
-	 * Contact Subscribed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param ContactModel $contact_id Contact.
-	 *
-	 * @return void
-	 */
-	public function contact_subscribed($contact)
-	{
-		$data = array(
-			'contact' => $contact,
-		);
-
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new ContactSubscribed() );

@@ -1,29 +1,20 @@
 <?php
 /**
- * Class AddTags
- *
- * This class is responsible for adding tags to a contact in ActiveCampaign
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Activecampaign;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Add Tags class
+ * AddTags action stub.
  */
-class AddTags extends Action {
+class AddTags extends ProAutomationStubAction {
 
-	/**
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -76,182 +67,6 @@ class AddTags extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
-		$tags = $step->get_setting( 'tags', array() );
-		if ( empty( $tags ) ) {
-			doublescale_get_logger()->error(
-				__( 'ActiveCampaign Add Tags: Tags is empty.', 'doublescale'),
-				array(
-					'code' => 'activecampaign_add_tags',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$activecampaign = IntegrationsManager::instance()->get_integration( 'activecampaign' );
-		$api            = $activecampaign->connect();
-		if ( ! $api ) {
-			doublescale_get_logger()->error(
-				__( 'Failed to connect to ActiveCampaign.', 'doublescale'),
-				array(
-					'code' => 'activecampaign_connect',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$result = $api->get_contact( $automation_contact->contact->email );
-		if ( ! $result['success'] ) {
-			doublescale_get_logger()->error(
-				__( 'Failed to get contact from ActiveCampaign.', 'doublescale'),
-				array(
-					'code'     => 'activecampaign_get_contact',
-					'data'     => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-					'response' => $result,
-				)
-			);
-			return false;
-		}
-
-		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
-		if ( ! $contact_id ) {
-			doublescale_get_logger()->error(
-				__( 'Failed to get contact ID from ActiveCampaign.', 'doublescale'),
-				array(
-					'code'     => 'activecampaign_get_contact_id',
-					'data'     => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-					'response' => $result,
-				)
-			);
-			return false;
-		}
-
-		foreach ( $tags as $tag ) {
-			$data = array(
-				'contactTag' => array(
-					'contact' => $contact_id,
-					'tag'     => $tag,
-				),
-			);
-
-			$result = $api->add_contact_tag( $data );
-			if ( ! $result['success'] ) {
-				doublescale_get_logger()->error(
-					__( 'Failed to add tag to contact in ActiveCampaign.', 'doublescale'),
-					array(
-						'code'     => 'activecampaign_add_tag',
-						'data'     => array(
-							'automation' => array(
-								'id'   => $automation->id,
-								'name' => $automation->name,
-							),
-							'step'       => array(
-								'id'   => $step->id,
-								'type' => $step->type,
-							),
-							'tag'        => $tag,
-						),
-						'response' => $result,
-					)
-				);
-				continue;
-			} else {
-				doublescale_get_logger()->info(
-					__( 'Tag added to contact in ActiveCampaign.', 'doublescale'),
-					array(
-						'code'     => 'activecampaign_add_tag',
-						'data'     => array(
-							'automation' => array(
-								'id'   => $automation->id,
-								'name' => $automation->name,
-							),
-							'step'       => array(
-								'id'   => $step->id,
-								'type' => $step->type,
-							),
-							'tag'        => $tag,
-						),
-						'response' => $result,
-					)
-				);
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'tags' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'tag' => array(
-				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'doublescale'),
-				'endpoint' => 'activecampaign/tags',
-				'multiple' => true,
-			),
-		);
-	}
 }
 
 AddTags::instance();

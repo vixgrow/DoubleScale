@@ -466,6 +466,7 @@ class RestAutomationController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function get_triggers( $request ) {
+		TriggersManager::instance()->sync_form_trigger_sources();
 		$triggers = TriggersManager::instance()->get_sources();
 
 		return new WP_REST_Response( $triggers, 200 );
@@ -1125,7 +1126,10 @@ class RestAutomationController extends RestController {
 		if ( ! empty( $trigger->source ) && ! empty( $trigger->group ) ) {
 			if ( isset( $plugin_dependencies[ $trigger->source ][ $trigger->group ] ) ) {
 				$dependency = $plugin_dependencies[ $trigger->source ][ $trigger->group ];
-				if ( empty( $dependency['plugin'] ) ) {
+				if ( ! empty( $dependency['module'] ) ) {
+					$is_active = function_exists( 'doublescale_is_module_active' )
+						&& doublescale_is_module_active( (string) $dependency['module'] );
+				} elseif ( empty( $dependency['plugin'] ) ) {
 					$is_active = true;
 				} else {
 					$is_active = doublescale_is_plugin_active( $dependency['plugin'] );

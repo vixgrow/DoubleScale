@@ -1,24 +1,21 @@
 <?php
-
 /**
- * WooCommerce Review Received Trigger
- * This trigger will be fired when a review is received.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Review;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Review Received Trigger
+ * ReviewReceived trigger stub.
  */
-class ReviewReceived extends Trigger
-{
-	/**
+class ReviewReceived extends TriggerPro {
+
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -59,34 +56,6 @@ class ReviewReceived extends Trigger
 	 * @var string
 	 */
 	public $group = 'review';
-
-	public function load_hooks()
-	{
-		add_action('comment_post', array($this, 'review_received'), 10, 3);
-	}
-
-	/**
-	 * Review Received
-	 *
-	 * @param int   $comment_ID Comment ID.
-	 * @param int   $comment_approved Whether comment is approved.
-	 * @param array $commentdata Comment data.
-	 */
-	public function review_received($comment_ID, $comment_approved, $commentdata)
-	{
-		if (isset($commentdata['comment_type']) && $commentdata['comment_type'] === 'review') {
-			// Get the rating from comment meta
-			$rating = get_comment_meta($comment_ID, 'rating', true);
-
-			$this->process(
-				array(
-					'review_id'      => $comment_ID,
-					'product_id'     => $commentdata['comment_post_ID'] ?? null,
-					'author_email'   => $commentdata['comment_author_email'] ?? '',
-					'review_content' => $commentdata['comment_content'] ?? '',
-					'review_rating'  => $rating ?? '',
-				)
-			);
-		}
-	}
 }
+
+TriggersManager::instance()->register( new ReviewReceived() );

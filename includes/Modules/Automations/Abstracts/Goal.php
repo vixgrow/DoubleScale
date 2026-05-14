@@ -95,6 +95,9 @@ abstract class Goal {
 	 * @return void
 	 */
 	public function process( $contact, $data ) {
+		if ( $this->is_pro ) {
+			return;
+		}
 		try {
 			$steps = AutomationStepModel::where( 'type', 'goal' )->where( 'action', $this->slug )->get();
 			if ( ! $steps ) {

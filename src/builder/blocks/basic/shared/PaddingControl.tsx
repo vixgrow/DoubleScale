@@ -7,139 +7,110 @@ import { __ } from '@wordpress/i18n';
  * internal dependencies
  */
 import {
-    PaddingBottomIcon,
-    PaddingLeftIcon,
-    PaddingRightIcon,
-    PaddingTopIcon,
+	PaddingBottomIcon,
+	PaddingLeftIcon,
+	PaddingRightIcon,
+	PaddingTopIcon,
 } from '@doublescale/components';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export interface PaddingValue {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
+	top: number;
+	right: number;
+	bottom: number;
+	left: number;
 }
 
 export interface PaddingControlProps {
-    value: PaddingValue;
-    onChange: (value: PaddingValue) => void;
-    label?: string;
+	value: PaddingValue;
+	onChange: (value: PaddingValue) => void;
+	label?: string;
 }
 
+const PADDING_ARIA: Record<keyof PaddingValue, string> = {
+	top: __('Top padding', 'doublescale'),
+	right: __('Right padding', 'doublescale'),
+	bottom: __('Bottom padding', 'doublescale'),
+	left: __('Left padding', 'doublescale'),
+};
+
+/** One shell per side — icon, then value + “px” */
+const padShellClass =
+	'flex h-10 items-center gap-1 rounded-lg bg-[rgba(255,255,255,0.1)] px-3 shadow-none ring-0';
+
+const padInputClass =
+	'min-h-0 min-w-0 flex-1 !border-none !ring-0 !ring-offset-0 !bg-transparent p-0 text-sm !text-white shadow-none outline-none ring-0 [appearance:textfield] placeholder:text-white/45 focus-visible:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
+
 export const PaddingControl: React.FC<PaddingControlProps> = ({
-    value,
-    onChange,
-    label = __('Padding', 'doublescale'),
+	value,
+	onChange,
+	label = __('Padding', 'doublescale'),
 }) => {
-    const handlePaddingChange = (
-        direction: keyof PaddingValue,
-        newValue: number
-    ) => {
-        // Apply min/max constraints based on direction
-        let constrainedValue = newValue;
+	const handlePaddingChange = (
+		direction: keyof PaddingValue,
+		newValue: number
+	) => {
+		let constrainedValue = newValue;
 
-        if (direction === 'left' || direction === 'right') {
-            // Left and right: min 0, max 120
-            constrainedValue = Math.max(0, Math.min(120, newValue));
-        } else if (direction === 'top' || direction === 'bottom') {
-            // Top and bottom: min 0, max 240
-            constrainedValue = Math.max(0, Math.min(240, newValue));
-        }
+		if (direction === 'left' || direction === 'right') {
+			constrainedValue = Math.max(0, Math.min(120, newValue));
+		} else if (direction === 'top' || direction === 'bottom') {
+			constrainedValue = Math.max(0, Math.min(240, newValue));
+		}
 
-        onChange({
-            ...value,
-            [direction]: constrainedValue,
-        });
-    };
+		onChange({
+			...value,
+			[direction]: constrainedValue,
+		});
+	};
 
-    return (
-        <div>
-            <label className="text-sm text-[#333333] mb-2 block">
-                {label}
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-                <div className="relative flex items-center">
-                    <div className="absolute left-2 text-[#333333]">
-                        <PaddingLeftIcon />
-                    </div>
-                    <Input
-                        type="number"
-                        min="0"
-                        max="120"
-                        value={value.left || 0}
-                        onChange={(e) =>
-                            handlePaddingChange('left', parseInt(e.target.value) || 0)
-                        }
-                        className="h-10"
-                        style={{
-                            borderColor: '#e5e5e5',
-                            borderRadius: '0.5rem',
-                            paddingLeft: '32px',
-                        }}
-                    />
-                </div>
-                <div className="relative flex items-center">
-                    <div className="absolute left-2 text-[#333333]">
-                        <PaddingRightIcon />
-                    </div>
-                    <Input
-                        type="number"
-                        min="0"
-                        max="120"
-                        value={value.right || 0}
-                        onChange={(e) =>
-                            handlePaddingChange('right', parseInt(e.target.value) || 0)
-                        }
-                        className="h-10"
-                        style={{
-                            borderColor: '#e5e5e5',
-                            borderRadius: '0.5rem',
-                            paddingLeft: '32px',
-                        }}
-                    />
-                </div>
-                <div className="relative flex items-center">
-                    <div className="absolute left-2 text-[#333333]">
-                        <PaddingTopIcon />
-                    </div>
-                    <Input
-                        type="number"
-                        min="0"
-                        max="240"
-                        value={value.top || 0}
-                        onChange={(e) =>
-                            handlePaddingChange('top', parseInt(e.target.value) || 0)
-                        }
-                        className="h-10"
-                        style={{
-                            borderColor: '#e5e5e5',
-                            borderRadius: '0.5rem',
-                            paddingLeft: '32px',
-                        }}
-                    />
-                </div>
-                <div className="relative flex items-center">
-                    <div className="absolute left-2 text-[#333333]">
-                        <PaddingBottomIcon />
-                    </div>
-                    <Input
-                        type="number"
-                        min="0"
-                        max="240"
-                        value={value.bottom || 0}
-                        onChange={(e) =>
-                            handlePaddingChange('bottom', parseInt(e.target.value) || 0)
-                        }
-                        className="h-10"
-                        style={{
-                            borderColor: '#e5e5e5',
-                            borderRadius: '0.5rem',
-                            paddingLeft: '32px',
-                        }}
-                    />
-                </div>
-            </div>
-        </div>
-    );
+	const padInput = (
+		direction: keyof PaddingValue,
+		max: number,
+		Icon: typeof PaddingLeftIcon
+	) => (
+		<div className={padShellClass}>
+			<span
+				className="flex shrink-0 items-center text-white/85 [&_svg]:size-[18px]"
+				aria-hidden
+			>
+				<Icon />
+			</span>
+			<div className="flex min-w-0 flex-1 items-center gap-1">
+				<Input
+					type="number"
+					min={0}
+					max={max}
+					value={value[direction] ?? 0}
+					onChange={(e) =>
+						handlePaddingChange(
+							direction,
+							parseInt(e.target.value, 10) || 0
+						)
+					}
+					aria-label={PADDING_ARIA[direction]}
+					className={cn(padInputClass, 'text-left')}
+				/>
+				<span className="pointer-events-none shrink-0 text-xs text-white/55">
+					px
+				</span>
+			</div>
+		</div>
+	);
+
+	return (
+		<div>
+			<label className="mb-2 block text-sm font-normal text-white">
+				{label}
+			</label>
+			{/* Figma: row1 Top | Right, row2 Left | Bottom */}
+			<div className="grid grid-cols-2 gap-2">
+				{padInput('top', 240, PaddingTopIcon)}
+				{padInput('right', 120, PaddingRightIcon)}
+				{padInput('left', 120, PaddingLeftIcon)}
+				{padInput('bottom', 240, PaddingBottomIcon)}
+			</div>
+		</div>
+	);
 };

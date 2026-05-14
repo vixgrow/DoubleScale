@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -23,12 +24,21 @@ export interface FontControlProps {
 }
 
 const FONT_FAMILIES = [
-    { value: 'Arial', label: 'Arial' },
+    { value: 'Arial, sans-serif', label: 'Arial' },
     { value: "'Times New Roman', serif", label: 'Times New Roman' },
     { value: "'Courier New', monospace", label: 'Courier New' },
     { value: 'Georgia, serif', label: 'Georgia' },
-    { value: "'Helvetica Neue', Helvetica, sans-serif", label: 'Helvetica' },
+    {
+        value: "'Helvetica Neue', Helvetica, sans-serif",
+        label: 'Helvetica',
+    },
 ];
+
+const labelClass = 'text-white';
+const triggerClass =
+    'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 text-white shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
+const sizeInputClass =
+    'h-10 !rounded-lg !border-none !ring-0 !ring-offset-0 !text-white pr-8 shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
 
 export const FontControl: React.FC<FontControlProps> = ({
     fontFamily,
@@ -37,24 +47,26 @@ export const FontControl: React.FC<FontControlProps> = ({
     onFontSizeChange,
     className,
 }) => {
+    const fontList =
+        !fontFamily || FONT_FAMILIES.some((f) => f.value === fontFamily)
+            ? FONT_FAMILIES
+            : [...FONT_FAMILIES, { value: fontFamily, label: fontFamily }];
+
     return (
         <div className={className}>
-            <div className="flex gap-3 items-end w-full">
-                <div className="flex flex-col gap-2 text-[#333333] w-2/3">
+            <div className="flex flex-col gap-4">
+                <div className={cn('flex w-full flex-col gap-2', labelClass)}>
                     <label className="text-sm">
-                        {__('Font', 'doublescale')}
+                        {__('Font Family', 'doublescale')}
                     </label>
-                    <Select
-                        value={fontFamily}
-                        onValueChange={onFontFamilyChange}
-                    >
-                        <SelectTrigger className="w-full rounded-lg border-border h-10">
+                    <Select value={fontFamily} onValueChange={onFontFamilyChange}>
+                        <SelectTrigger className={triggerClass} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
                             <SelectValue
-                                placeholder={__('Select font', 'doublescale')}
+                                placeholder={__('Select', 'doublescale')}
                             />
                         </SelectTrigger>
                         <SelectContent>
-                            {FONT_FAMILIES.map((font) => (
+                            {fontList.map((font) => (
                                 <SelectItem key={font.value} value={font.value}>
                                     {font.label}
                                 </SelectItem>
@@ -62,9 +74,9 @@ export const FontControl: React.FC<FontControlProps> = ({
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="flex flex-col gap-2 text-[#333333] w-1/3">
+                <div className={cn('flex w-full flex-col gap-2', labelClass)}>
                     <label className="text-sm">
-                        {__('Size', 'doublescale')}
+                        {__('Font Size', 'doublescale')}
                     </label>
                     <Input
                         type="number"
@@ -74,11 +86,8 @@ export const FontControl: React.FC<FontControlProps> = ({
                             const clampedValue = Math.min(Math.max(value, 8), 72);
                             onFontSizeChange(clampedValue);
                         }}
-                        className="pr-8 h-10"
-                        style={{
-                            borderColor: '#e5e5e5',
-                            borderRadius: '0.5rem',
-                        }}
+                        className={sizeInputClass}
+                        style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
                         min={8}
                         max={72}
                     />

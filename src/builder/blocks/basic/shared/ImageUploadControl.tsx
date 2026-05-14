@@ -475,8 +475,8 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 	);
 
 	const filledCardClass =
-		'mt-2 flex w-full min-w-0 max-w-full flex-col gap-3 rounded-lg border border-white/15 bg-white/[0.05] p-3';
-	const filledTitleClass = 'truncate text-sm text-white';
+		'mt-2 flex w-full min-w-0 max-w-full flex-col gap-3 rounded-lg p-3';
+	const filledTitleClass = 'truncate text-sm text-white max-w-[200px]';
 	const filledMetaClass = 'truncate text-xs text-white/55';
 	const outlineActionClass =
 		'text-sm shadow-none text-white border-white/25 bg-transparent hover:bg-white/10 hover:text-white';
@@ -493,7 +493,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 			)}
 
 			{imageData || (value && value.trim() !== '') ? (
-				<div className={filledCardClass}>
+				<div className={filledCardClass} style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
 					<div className="flex min-w-0 items-center gap-2">
 						<img
 							src={value}

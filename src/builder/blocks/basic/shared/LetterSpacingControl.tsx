@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
+import { cn } from '@/lib/utils';
 import {
     Select,
     SelectContent,
@@ -77,18 +78,16 @@ export const LetterSpacingControl: React.FC<LetterSpacingControlProps> = ({
 }) => {
     return (
         <div className={className}>
-            <div className="flex flex-col gap-2 text-[#333333]">
-                <label className="text-sm">
-                    {__('Letter Spacing', 'doublescale')}
-                </label>
-                <Select
-                    value={value}
-                    onValueChange={onChange}
-                >
-                    <SelectTrigger className="w-full border-border h-10">
-                        <SelectValue
-                            placeholder={__('Select spacing', 'doublescale')}
-                        />
+            <div className="flex flex-col gap-2 text-white">
+                <label className="text-sm">{__('Letter Spacing', 'doublescale')}</label>
+                <Select value={value} onValueChange={onChange}>
+                    <SelectTrigger
+                        className={cn(
+                            'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white',
+                            'bg-white/[0.05] shadow-none focus-visible:ring-1 focus-visible:ring-white/30'
+                        )}
+                    >
+                        <SelectValue placeholder={__('Select', 'doublescale')} />
                     </SelectTrigger>
                     <SelectContent>
                         {LETTER_SPACING_OPTIONS.map((option) => (

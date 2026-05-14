@@ -17,12 +17,11 @@ import { Plus } from 'lucide-react';
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
+import { DropIcon } from '@doublescale/components';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
 import { isSectionTemplate } from '@doublescale/utils/templateUtils';
-// @ts-ignore
-import dropIcon from '../../../assets/images/drop-icon.png';
 
 interface ColumnRendererProps {
 	column: EmailColumn;
@@ -84,15 +83,10 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 			>
 				{column.blocks.length === 0 ? (
 					!isThisTemplateSection ? (
-						<div className="bg-[#EBF4FB] rounded-md text-center p-8">
-							<div className="text-muted-foreground flex flex-col items-center gap-2">
-								<img
-									src={dropIcon}
-									alt="Drop Icon"
-									width={24}
-									height={24}
-								/>
-								<p className="text-sm text-secondary">
+						<div className="bg-secondary rounded-lg text-center p-8">
+							<div className="text-primary flex flex-col items-center gap-2">
+								<DropIcon width={32} height={32} />
+								<p className="text-sm text-primary">
 									{__('Drop Content Here', 'doublescale')}
 								</p>
 							</div>

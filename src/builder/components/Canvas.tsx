@@ -172,15 +172,36 @@ const Canvas = () => {
 									</React.Fragment>
 								))}
 
-								{/* Add Section Button */}
-								<div className="p-4 border-t border-dashed border-border">
-									<Button
-										variant="outline"
-										className="w-full shadow-none border-dashed border-primary text-primary bg-transparent"
-										onClick={handleOpenModal}
-									>
-										{__('Add New Section', 'doublescale')}
-									</Button>
+								{/* Add Section Button — SVG stroke-dasharray for even dash/gap spacing */}
+								<div className="px-10 py-[60px]" style={{ boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)' }}>
+									<div className="relative w-full rounded-lg">
+										<svg
+											className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg text-primary"
+											xmlns="http://www.w3.org/2000/svg"
+											aria-hidden
+										>
+											<rect
+												x="0.5"
+												y="0.5"
+												width="calc(100% - 1px)"
+												height="calc(100% - 1px)"
+												rx="7"
+												ry="7"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="1"
+												strokeDasharray="10 8"
+												vectorEffect="nonScalingStroke"
+											/>
+										</svg>
+										<Button
+											variant="ghost"
+											className="relative z-10 w-full border-0 bg-transparent p-6 text-primary shadow-none hover:bg-primary/10"
+											onClick={handleOpenModal}
+										>
+											{__('Add New Section', 'doublescale')}
+										</Button>
+									</div>
 								</div>
 							</>
 						)}

@@ -79,6 +79,7 @@ export { default as UndoIcon } from './undo';
 export { default as RedoIcon } from './redo';
 export { default as PreviewIcon } from './preview';
 export { default as DragDropIcon } from './drag-drop';
+export { default as DropIcon } from './drop-icon';
 export { default as TextBlockIcon } from './text-block';
 export { default as PreheaderBlockIcon } from './preheader-block';
 export { default as ColumnsLayout } from './coulmns-layout';

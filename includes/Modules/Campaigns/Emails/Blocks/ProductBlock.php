@@ -284,6 +284,15 @@ class ProductBlock extends EmailBlock {
 	 * @return array Button styles
 	 */
 	private function get_button_style( string $button_style, array $button_settings ): array {
+		$decoration_parts = array();
+		if ( ! empty( $button_settings['underline'] ) ) {
+			$decoration_parts[] = 'underline';
+		}
+		if ( ! empty( $button_settings['strikethrough'] ) ) {
+			$decoration_parts[] = 'line-through';
+		}
+		$text_decoration = empty( $decoration_parts ) ? 'none' : implode( ' ', $decoration_parts );
+
 		$base_style = array(
 			'display'         => 'inline-block',
 			'font-family'     => $button_settings['font'],
@@ -292,7 +301,7 @@ class ProductBlock extends EmailBlock {
 			'border-radius'   => $button_settings['borderRadius'] . 'px',
 			'font-weight'     => ! empty( $button_settings['bold'] ) ? 'bold' : 'normal',
 			'font-style'      => ! empty( $button_settings['italic'] ) ? 'italic' : 'normal',
-			'text-decoration' => 'none',
+			'text-decoration' => $text_decoration,
 			'padding'         => $this->format_button_padding( $button_settings['padding'] ),
 		);
 

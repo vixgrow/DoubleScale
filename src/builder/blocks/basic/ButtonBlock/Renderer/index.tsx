@@ -44,7 +44,13 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 			borderRadius: `${buttonSettings.borderRadius}px`,
 			fontWeight: buttonSettings.bold ? 'bold' : 'normal',
 			fontStyle: buttonSettings.italic ? 'italic' : 'normal',
-			textDecoration: buttonSettings.underline ? 'underline' : 'none',
+			textDecoration:
+				[
+					buttonSettings.underline ? 'underline' : '',
+					buttonSettings.strikethrough ? 'line-through' : '',
+				]
+					.filter(Boolean)
+					.join(' ') || 'none',
 			// Text wrapping and overflow handling
 			whiteSpace: 'normal',
 			wordWrap: 'break-word',
@@ -61,7 +67,7 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		}
 
 		// Add padding from global button settings
-		const paddingString = `${buttonSettings.padding.top * 2}px ${buttonSettings.padding.right * 4}px ${buttonSettings.padding.bottom * 2}px ${buttonSettings.padding.left * 4}px`;
+		const paddingString = `${buttonSettings.padding.top}px ${buttonSettings.padding.right}px ${buttonSettings.padding.bottom}px ${buttonSettings.padding.left}px`;
 		baseStyle.padding = paddingString;
 
 		// Apply global button settings (all button types use the same styling)

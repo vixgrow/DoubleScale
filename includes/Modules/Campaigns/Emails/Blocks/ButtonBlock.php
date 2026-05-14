@@ -173,7 +173,7 @@ class ButtonBlock extends EmailBlock {
 			'border-radius'    => $global_settings['borderRadius'] . 'px',
 			'font-weight'      => $global_settings['bold'] ? 'bold' : 'normal',
 			'font-style'       => $global_settings['italic'] ? 'italic' : 'normal',
-			'text-decoration'  => $global_settings['underline'] ? 'underline' : 'none',
+			'text-decoration'  => $this->format_button_text_decoration( $global_settings ),
 			'white-space'      => 'normal',
 			'word-wrap'        => 'break-word',
 			'overflow-wrap'    => 'break-word',
@@ -195,6 +195,23 @@ class ButtonBlock extends EmailBlock {
 		return "<div style=\"{$container_style}\">
 			<a href=\"{$url}\" style=\"{$button_style}\">{$text}</a>
 		</div>";
+	}
+
+	/**
+	 * Build CSS text-decoration from global button settings.
+	 *
+	 * @param array $settings Button settings.
+	 * @return string
+	 */
+	private function format_button_text_decoration( array $settings ): string {
+		$parts = array();
+		if ( ! empty( $settings['underline'] ) ) {
+			$parts[] = 'underline';
+		}
+		if ( ! empty( $settings['strikethrough'] ) ) {
+			$parts[] = 'line-through';
+		}
+		return empty( $parts ) ? 'none' : implode( ' ', $parts );
 	}
 
 	/**

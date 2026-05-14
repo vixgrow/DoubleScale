@@ -224,20 +224,21 @@ const FooterLibrary = () => {
 
 	return (
 		<div className="grid gap-4">
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Centered Footer', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={centeredFooterTemplate}
 					id="centered-footer"
 					templateType="footer"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col items-center justify-center text-center border rounded-lg p-3 text-[10px] text-[#333333]">
+					<div className="flex flex-col items-center justify-center text-center rounded-lg p-3 text-[10px] text-white"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<div className="flex gap-2 justify-center items-center mb-2">
 							<CursorIcon />
-							<div className="text-primary text-sm">
+							<div className="text-white text-sm">
 								{__('Company', 'doublescale')}
 							</div>
 						</div>
@@ -256,27 +257,28 @@ const FooterLibrary = () => {
 								'doublescale'
 							)}
 						</div>
-						<div className="text-secondary flex gap-1">
+						<div className="text-white flex gap-1 underline">
 							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Centered Footer & Items', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={centeredFooterWithItemsTemplate}
 					id="centered-footer-items"
 					templateType="footer"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col items-center justify-center text-center border rounded-lg p-3 text-[10px] text-[#333333]">
+					<div className="flex flex-col items-center justify-center text-center rounded-lg p-3 text-[10px] text-white"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<div className="flex gap-2 justify-center items-center mb-2">
 							<CursorIcon />
-							<div className="text-primary text-sm">
+							<div className="text-white text-sm">
 								{__('Company', 'doublescale')}
 							</div>
 						</div>
@@ -302,27 +304,28 @@ const FooterLibrary = () => {
 								'doublescale'
 							)}
 						</div>
-						<div className="text-secondary flex gap-1">
+						<div className="text-white flex gap-1 underline">
 							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Basic Footer', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={basicFooterTemplate}
 					id="basic-footer"
 					templateType="footer"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col items-start justify-start border rounded-lg p-3 text-[10px] text-[#333333]">
+					<div className="flex flex-col items-start justify-start rounded-lg p-3 text-[10px] text-white"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<div className="flex gap-2 justify-start items-center mb-2">
 							<CursorIcon />
-							<div className="text-primary text-sm">
+							<div className="text-white text-sm">
 								{__('Company', 'doublescale')}
 							</div>
 						</div>
@@ -341,7 +344,7 @@ const FooterLibrary = () => {
 								'doublescale'
 							)}
 						</div>
-						<div className="text-secondary flex gap-1">
+						<div className="text-white flex gap-1 underline">
 							{__('Unsubscribe', 'doublescale')}
 						</div>
 					</div>

@@ -665,19 +665,22 @@ const EmailBodyLibrary = () => {
 
 	return (
 		<div className="grid gap-4">
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 1', 'doublescale')}</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={title1Template}
 					id="email-body-title-1"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
-						<div className="text-[#141B34] text-sm">
+					<div className="flex flex-col gap-2 items-start rounded-lg p-3 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4]">
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview .',
 								'doublescale'
@@ -687,57 +690,66 @@ const EmailBodyLibrary = () => {
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 2', 'doublescale')}</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={title2Template}
 					id="email-body-title-2"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
-						<div className="text-[#9197A4]">
+					<div className="flex flex-col gap-2 items-start rounded-lg p-3 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use,',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-[#141B34] text-sm font-bold">
+						<div className="text-white text-sm font-bold">
 							{__('title 1', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 3', 'doublescale')}</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={title3Template}
 					id="email-body-title-3"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex items-center justify-center border rounded-lg p-2 text-[10px]">
-						<div className="text-[#141B34] text-sm font-bold">
+					<div className="flex items-center justify-center rounded-lg p-2 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white text-sm font-bold">
 							{__('Title 1', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Title 4', 'doublescale')}</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={title4Template}
 					id="email-body-title-4"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-3 text-sm text-[#141B34]">
-						<div className="font-bold">
+					<div className="flex flex-col gap-2 items-center justify-center rounded-lg p-3 text-sm text-[#141B34]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white font-bold">
 							{__('title 1', 'doublescale')}
 						</div>
-						<div className="text-center">
+						<div className="text-white text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use,',
 								'doublescale'
@@ -747,117 +759,121 @@ const EmailBodyLibrary = () => {
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Title & Button 1', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={titleButton1Template}
 					id="email-body-title-button-1"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
-						<div className="text-[#141B34] font-bold text-sm">
+					<div className="flex flex-col gap-2 items-start rounded-lg p-2 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white font-bold text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4]">
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
+						<div className="text-primary w-fit bg-white py-2 px-3 rounded-lg">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Title & Button 2', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={titleButton2Template}
 					id="email-body-title-button-2"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
-						<div className="text-[#9197A4]">
+					<div className="flex flex-col gap-2 items-start rounded-lg p-2 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-[#141B34] font-bold text-sm">
+						<div className="text-white font-bold text-sm">
 							{__('title 1', 'doublescale')}
 						</div>
-						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
+						<div className="text-primary w-fit bg-white py-2 px-3 rounded-lg">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Title & 2 Buttons', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={titleButton5Template}
 					id="email-body-title-2-buttons"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
-						<div className="text-[#9197A4]">
+					<div className="flex flex-col gap-2 items-center justify-center rounded-lg p-2 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white">
 							{__('title 1', 'doublescale')}
 						</div>
-						<div className="text-[#141B34] font-bold text-sm">
+						<div className="text-white font-bold text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4]">
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-white w-fit bg-primary py-2 px-8 rounded-lg">
+						<div className="text-primary w-fit border border-white bg-white py-2 px-8 rounded-lg">
 							{__('Click here', 'doublescale')}
 						</div>
-						<div className="text-white w-fit bg-secondary py-2 px-8 rounded-lg">
+						<div className="text-white w-fit bg-transparent border border-white py-2 px-8 rounded-lg">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Title, Paragraph & Button', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={titleParagraphButtonTemplate}
 					id="email-body-title-paragraph-button"
 					templateType="email-body"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
-						<div className="text-[#9197A4]">
+					<div className="flex flex-col gap-2 items-start rounded-lg p-2 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white">
 							{__('title 1', 'doublescale')}
 						</div>
-						<div className="text-[#141B34] font-bold text-sm">
+						<div className="text-white font-bold text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4]">
+						<div className="text-white">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg">
+						<div className="text-primary w-fit bg-white py-2 px-3 rounded-lg">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>

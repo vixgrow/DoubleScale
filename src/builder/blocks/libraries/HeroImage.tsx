@@ -572,135 +572,155 @@ const HeroImageLibrary = () => {
 
 	return (
 		<div className="grid gap-4">
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Standard Hero', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={standardHeroTemplate}
 					id="hero-standard"
 					templateType="hero-image"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
-						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
+					<div className="flex flex-col gap-2 justify-center items-center rounded-lg p-2"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white rounded-lg w-full py-6 flex items-center justify-center"
+						style={{
+							backgroundColor: 'rgba(255, 255, 255, 0.1)',
+						}}
+						>
 							<ImageBlockIcon />
 						</div>
-						<div className="text-[#141B34] text-sm">
+						<div className="text-white text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4] text-center">
+						<div className="text-white text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
+						<div className="text-primary bg-white py-2 px-3 rounded-lg text-xs">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Extended Hero', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={extendedHeroTemplate}
 					id="hero-extended"
 					templateType="hero-image"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
-						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
+					<div className="flex flex-col gap-2 justify-center items-center rounded-lg p-2"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white rounded-lg w-full py-6 flex items-center justify-center"
+						style={{
+							backgroundColor: 'rgba(255, 255, 255, 0.1)',
+						}}
+						>
 							<ImageBlockIcon />
 						</div>
-						<div className="text-[#141B34] text-sm">
+						<div className="text-white text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4] text-center">
+						<div className="text-white text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
 								'doublescale'
 							)}
 						</div>
 						<div className="flex gap-3 items-center justify-center text-[10px]">
-							<div className="font-bold text-primary">
+							<div className="font-bold text-white">
 								{__('$30', 'doublescale')}
 							</div>
-							<div className="text-[#9197A4]">
+							<div className="text-white">
 								{__('$48', 'doublescale')}
 							</div>
 						</div>
-						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
+						<div className="text-primary bg-white py-2 px-3 rounded-lg text-xs">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Title + Image', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={titleImageTemplate}
 					id="hero-title-image"
 					templateType="hero-image"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
-						<div className="text-[#141B34] text-sm font-bold">
+					<div className="flex flex-col gap-2 justify-center items-center rounded-lg p-2"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white text-sm font-bold">
 							{__('Title 1', 'doublescale')}
 						</div>
-						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
+						<div className="text-white rounded-lg w-full py-6 flex items-center justify-center"
+						style={{
+							backgroundColor: 'rgba(255, 255, 255, 0.1)',
+						}}
+						>
 							<ImageBlockIcon />
 						</div>
-						<div className="text-[#141B34] text-sm">
+						<div className="text-white text-sm">
 							{__('heading 1', 'doublescale')}
 						</div>
-						<div className="text-[#9197A4] text-center">
+						<div className="text-white text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.',
 								'doublescale'
 							)}
 						</div>
-						<div className="text-white bg-primary py-2 px-3 rounded-lg text-[10px]">
+						<div className="text-primary bg-white py-2 px-3 rounded-lg text-xs">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Side by Side Image + Text', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={sideBySideTemplate}
 					id="hero-side-by-side"
 					templateType="hero-image"
 					disabled={!isProActive}
 				>
-					<div className="flex gap-5 items-center border rounded-lg p-2 w-full">
-						<div className="text-[#616161] bg-muted w-1/2 h-full py-20 flex items-center justify-center">
+					<div className="flex gap-5 items-center rounded-lg p-2 w-full"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white rounded-lg w-1/2 h-full py-20 flex items-center justify-center"
+						style={{
+							backgroundColor: 'rgba(255, 255, 255, 0.1)',
+						}}
+						>
 							<ImageBlockIcon />
 						</div>
 						<div className="grid gap-2 w-1/2">
-							<div className="text-[#141B34] text-sm font-bold">
+							<div className="text-white text-sm font-bold">
 								{__('Title 1', 'doublescale')}
 							</div>
-							<div className="text-[#141B34] text-sm">
+							<div className="text-white text-sm">
 								{__('heading 1', 'doublescale')}
 							</div>
-							<div className="text-[#9197A4]">
+							<div className="text-white">
 								{__(
 									'Lorem ipsum contains the typefaces more in use, an aspect that.',
 									'doublescale'
 								)}
 							</div>
-							<div className="text-white w-fit bg-primary py-2 px-3 rounded-lg text-[10px]">
+							<div className="text-primary w-fit bg-white py-2 px-3 rounded-lg text-xs">
 								{__('Click here', 'doublescale')}
 							</div>
 						</div>

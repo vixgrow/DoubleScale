@@ -36,21 +36,22 @@ const PreheaderLibrary = () => {
 
 	return (
 		<div className="grid gap-4">
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Text & Link', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={textAndLinkTemplate}
 					id="preheader"
 					templateType="preheader"
 					disabled={!isProActive}
 				>
-					<div className="flex gap-1 items-center border rounded-lg p-3 text-[10px]">
-						<div className="text-[#9197A4]">
+					<div className="flex gap-1 items-center rounded-lg p-3 text-[10px]"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
+						<div className="text-white">
 							{__('If you cannot see images, Please', 'doublescale')}
 						</div>
-						<div className="text-secondary underline font-extrabold">
+						<div className="text-white underline font-extrabold">
 							{__('Click here', 'doublescale')}
 						</div>
 					</div>

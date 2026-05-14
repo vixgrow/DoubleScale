@@ -196,41 +196,45 @@ const HeaderLibrary = () => {
 
 	return (
 		<div className="grid gap-4">
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">{__('Logo', 'doublescale')}</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={logoTemplate}
 					id="header-logo"
 					templateType="header"
 					disabled={!isProActive}
 				>
-					<div className="flex gap-2 justify-center items-center border rounded-lg py-3 px-4">
+					<div className="flex gap-2 justify-center items-center rounded-lg py-3 px-4"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<CursorIcon />
-						<div className="text-primary text-sm text-center">
+						<div className="text-white text-sm text-center">
 							{__('Company', 'doublescale')}
 						</div>
 					</div>
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Logo + Navigation', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={logoNavigationTemplate}
 					id="header-navigation"
 					templateType="header"
 					disabled={!isProActive}
 				>
-					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg py-3 px-4">
+					<div className="flex flex-col gap-2 justify-center items-center rounded-lg py-3 px-4"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<div className="flex gap-2 justify-center items-center">
 							<CursorIcon />
-							<div className="text-primary text-sm text-center">
+							<div className="text-white text-sm text-center">
 								{__('Company', 'doublescale')}
 							</div>
 						</div>
-						<div className="flex gap-2 items-center justify-center text-[10px] text-[#9197A4]">
+						<div className="flex gap-2 items-center justify-center text-xs text-white">
 							<div className="">{__('Item 1', 'doublescale')}</div>
 							<div className="">{__('Item 2', 'doublescale')}</div>
 							<div className="">{__('Item 3', 'doublescale')}</div>
@@ -240,25 +244,26 @@ const HeaderLibrary = () => {
 				</DraggableTemplate>
 			</div>
 
-			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className="text-sm">
-					{__('Logo + Button', 'doublescale')}
-				</label>
+			<div className="flex flex-col gap-1 text-white">
 				<DraggableTemplate
 					template={logoButtonTemplate}
 					id="header-button"
 					templateType="header"
 					disabled={!isProActive}
 				>
-					<div className="flex gap-2 items-center justify-between border rounded-lg py-3 px-4 w-full">
+					<div className="flex gap-2 items-center justify-between rounded-lg py-3 px-4 w-full"
+					style={{
+						backgroundColor: 'rgba(255, 255, 255, 0.1)',
+					}}
+					>
 						<div className="flex gap-2 justify-center items-center w-1/2">
 							<CursorIcon />
-							<div className="text-primary text-sm">
+							<div className="text-white text-sm">
 								{__('Company', 'doublescale')}
 							</div>
 						</div>
 						<div className="flex gap-2 justify-center items-center w-1/2">
-							<div className="text-white bg-primary py-1 text-xs px-3 rounded-lg text-[10px]">
+							<div className="text-primary bg-white py-1 text-xs px-3 rounded-lg">
 								{__('Click here', 'doublescale')}
 							</div>
 						</div>

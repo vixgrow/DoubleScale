@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * internal dependencies
  */
-import { TextBlockIcon } from '@doublescale/components';
+import { PreheaderBlockIcon } from '@doublescale/components';
 import { PreheaderRenderer } from './Renderer';
 import { PreheaderEditor } from './Editor';
 
@@ -46,7 +46,7 @@ const PreheaderBlock: {
 } = {
 	type: 'preheader',
 	name: __('Preheader', 'doublescale'),
-	icon: TextBlockIcon,
+	icon: PreheaderBlockIcon,
 	isProActivated: false,
 	isPro: false,
 	defaultProps: {

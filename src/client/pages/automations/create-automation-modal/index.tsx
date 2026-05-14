@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
@@ -21,6 +22,7 @@ import {
 	GradientAutomationsIcon,
 	AutomationsIcon,
 } from '@doublescale/components';
+import { IntegrationsIcon } from '@doublescale/components/icons/index';
 import {
 	Dialog,
 	DialogContent,
@@ -28,7 +30,7 @@ import {
 	DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import TriggerCategorySelector from './trigger-category-selector';
+import { cn } from '@/lib/utils';
 import TriggersGroupRender from './triggers-group-render';
 import { Input } from '@doublescale/shared/ui/input';
 import { Label } from '@doublescale/shared/ui/label';
@@ -722,7 +724,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				removePortal={removePortal}
 			>
 				{/* Sticky header */}
-				<DialogHeader className="shrink-0  bg-white px-6 pb-4 pt-6">
+				<DialogHeader className="shrink-0  bg-white p-6">
 					<CustomDialogHeader
 						title={
 							isEditAutomation
@@ -741,7 +743,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 				</DialogHeader>
 
 				{/* Scrollable body — light gray surface, 24px gutter around the inner card */}
-				<div className="min-h-0 flex-1 overflow-y-auto  p-6">
+				<div className="min-h-0 flex-1 overflow-y-auto  p-6 pt-0">
 					{error && (
 						<div className="mb-4">
 							<NoticeBanner
@@ -753,10 +755,13 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 					)}
 
 					<div className="rounded-2xl border border-border bg-[#f7f8fa] p-6">
-						<div className="doublescale-fields doublescale-automation-modal-fields grid grid-cols-2 gap-6">
-							{/* Row 1, col 1 — Automation name */}
-							<div className="min-w-0 flex flex-col gap-2 ">
-                               <Label className="text-base font-normal text-foreground !p-0 ">{__('Automation Name', 'doublescale')}<span className="text-destructive">*</span></Label>
+						<div className="doublescale-fields doublescale-automation-modal-fields flex flex-col gap-6">
+							{/* Row 1 — Automation Name (full width) */}
+							<div className="min-w-0 flex flex-col gap-2">
+								<Label className="text-base font-normal text-foreground !p-0">
+									{__('Automation Name', 'doublescale')}
+									<span className="text-destructive">*</span>
+								</Label>
 								<Input
 									value={automation.name}
 									onChange={(e) =>
@@ -767,42 +772,111 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 									}
 								/>
 							</div>
-							{/* Row 1, col 2 — Trigger category select */}
-							<div className="doublescale-field min-w-0 flex flex-col gap-2 ">
-								<div className="doublescale-field-label flex items-center gap-1 text-base font-normal text-[#09090B]">
+
+							{/* Row 2 — full-width divider */}
+							<div
+								className="border-t border-neutral-200"
+								role="separator"
+							/>
+
+							{/* Row 3 — Trigger tabs (left) + Groups list (right) */}
+							<div className="doublescale-field min-w-0 flex flex-col gap-3">
+								<div className="doublescale-field-label flex items-center gap-1 text-base font-normal text-foreground">
 									{__('Trigger', 'doublescale')}
 									<span className="text-destructive">*</span>
 								</div>
-								<div className="doublescale-field-input">
-									<TriggerCategorySelector
-										triggers={automationTriggers}
-										selectedCategory={selectedCategory}
-										onCategoryChange={setSelectedCategory}
-										data={categoryData}
-									/>
+
+								<div className="grid grid-cols-2 gap-6">
+									{/* Left: vertical list of horizontal trigger tabs */}
+									<div
+										role="tablist"
+										aria-orientation="vertical"
+										aria-label={__(
+											'Trigger category',
+											'doublescale'
+										)}
+										className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 max-h-[480px] overflow-y-auto"
+									>
+										{map(
+											automationTriggers,
+											(trigger, key) => {
+												const categoryKey = String(key);
+												const isActive =
+													selectedCategory ===
+													categoryKey;
+												const meta =
+													categoryData[categoryKey];
+												return (
+													<button
+														key={categoryKey}
+														type="button"
+														role="tab"
+														aria-selected={isActive}
+														onClick={() =>
+															setSelectedCategory(
+																categoryKey
+															)
+														}
+														className={cn(
+															'flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors',
+															'focus:outline-none focus:ring-2 focus:ring-brandPrimary/20',
+															isActive
+																? 'border-brandPrimary/40 bg-brandPrimary/5'
+																: 'border-transparent hover:bg-neutral-50'
+														)}
+													>
+														<span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white [&_svg]:max-h-[28px] [&_svg]:max-w-[28px]">
+															{meta?.image ?? (
+																<IntegrationsIcon
+																	width={22}
+																	height={22}
+																/>
+															)}
+														</span>
+														<span
+															className={cn(
+																'min-w-0 flex-1 truncate text-sm font-medium',
+																isActive
+																	? 'text-brandPrimary'
+																	: 'text-neutral-800'
+															)}
+														>
+															{trigger.label}
+														</span>
+													</button>
+												);
+											}
+										)}
+									</div>
+
+									{/* Right: trigger groups for selected category */}
+									<div
+										role="tabpanel"
+										aria-label={__(
+											'Triggers',
+											'doublescale'
+										)}
+										className="min-w-0 rounded-xl border border-neutral-200 bg-white p-4 max-h-[480px] overflow-y-auto"
+									>
+										<TriggersGroupRender
+											groups={
+												currentCategoryData?.groups ||
+												[]
+											}
+											value={automation.trigger}
+											onChange={(value) =>
+												onAutomationChange({
+													...automation,
+													trigger: value,
+												})
+											}
+										/>
+									</div>
 								</div>
-						</div>
-						{/* Row 2 — full-width divider */}
-						<div
-							className="col-span-full border-t border-neutral-200"
-							role="separator"
-						/>
-						{/* Row 3 — trigger groups accordion */}
-						<div className="col-span-full ">
-							<TriggersGroupRender
-								groups={currentCategoryData?.groups || []}
-								value={automation.trigger}
-								onChange={(value) =>
-									onAutomationChange({
-										...automation,
-										trigger: value,
-									})
-								}
-							/>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
 				{/* Sticky footer */}
 				<DialogFooter className="shrink-0  bg-white px-6 py-4 sm:justify-end gap-6">

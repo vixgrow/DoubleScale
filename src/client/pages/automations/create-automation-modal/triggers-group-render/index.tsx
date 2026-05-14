@@ -238,7 +238,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 
 	return (
 		<>
-			<div className="columns-1 gap-4 sm:columns-2 sm:gap-x-5 [column-fill:_balance]">
+			<div className="flex flex-col gap-4">
 				{map(groupsList, (group, key) => {
 					const isCollapsed = !!collapsedGroups[String(key)];
 					const GroupIcon = getGroupIcon(group.label);
@@ -246,7 +246,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 					return (
 					<Card
 						key={key}
-						className="mb-4 break-inside-avoid shadow-none overflow-hidden rounded-[10px] border border-neutral-200 bg-white"
+						className="shadow-none overflow-hidden rounded-[10px] border border-neutral-200 bg-white"
 					>
 						<CardHeader
 							className={cn(

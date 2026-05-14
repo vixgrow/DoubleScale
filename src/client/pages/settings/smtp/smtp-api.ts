@@ -324,7 +324,7 @@ export async function testSmtpAlert(data: {
 }
 
 /* ----------------------------------------------------------------------------
- * Amazon SES identity management (mirrors SMTP /qsmtp/v1 behavior).
+ * Amazon SES identity management (mirrors SMTP /doublescale/v1 behavior).
  * Backend routes: /smtp/v1/mailers/aws/settings/{accountId}/identities
  * -------------------------------------------------------------------------- */
 

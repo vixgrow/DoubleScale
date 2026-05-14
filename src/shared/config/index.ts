@@ -18,7 +18,7 @@ import type {
 	License,
 	ModuleInfo,
 	ProPluginData,
-	QuillSMTPInfo,
+	DoubleScaleInfo,
 	UserCapabilities,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
@@ -115,9 +115,9 @@ const configData: ConfigData = {
 	defaultStages: (serverData.defaultStages as DefaultStage[] | undefined) ?? [],
 	dealPriorities:
 		(serverData.dealPriorities as DealPriority[] | undefined) ?? [],
-	quillsmtpInfo:
-		(serverData.smtpInfo as QuillSMTPInfo | undefined) ??
-		(serverData.quillsmtpInfo as QuillSMTPInfo | undefined) ?? {
+	doublescaleInfo:
+		(serverData.smtpInfo as DoubleScaleInfo | undefined) ??
+		(serverData.doublescaleInfo as DoubleScaleInfo | undefined) ?? {
 			configured: false,
 		},
 	currency: (serverData.currency as string | undefined) ?? 'USD',
@@ -695,24 +695,24 @@ export const setDealPriorities = (data: ConfigData) => (value: DealPriority[]) =
 };
 
 /**
- * Get QuillSMTP connection info
+ * Get DoubleScale connection info
  *
  * @param data the json environment configuration to use for getting config values
  *
- * @returns QuillSMTPInfo
+ * @returns DoubleScaleInfo
  */
-export const getQuillSMTPInfo = (data: ConfigData): QuillSMTPInfo => {
-	return data.quillsmtpInfo;
+export const getDoubleScaleInfo = (data: ConfigData): DoubleScaleInfo => {
+	return data.doublescaleInfo;
 };
 
 /**
- * Set QuillSMTP connection info
+ * Set DoubleScale connection info
  *
  * @param data the json environment configuration to use for getting config values
  * @param value the value to set
  */
-export const setQuillSMTPInfo = (data: ConfigData) => (value: QuillSMTPInfo) => {
-	data.quillsmtpInfo = value;
+export const setDoubleScaleInfo = (data: ConfigData) => (value: DoubleScaleInfo) => {
+	data.doublescaleInfo = value;
 };
 
 /**
@@ -771,10 +771,10 @@ export const setModules = (data: ConfigData) => (value: ModuleInfo[]) => {
 
 export const isModuleEnabled =
 	(data: ConfigData) =>
-	(slug: string): boolean => {
-		const mod = data.modules.find((m) => m.slug === slug);
-		return mod ? mod.enabled : true;
-	};
+		(slug: string): boolean => {
+			const mod = data.modules.find((m) => m.slug === slug);
+			return mod ? mod.enabled : true;
+		};
 
 /**
  * Whether the slug appears in {@link ConfigData.modules} and is enabled.
@@ -783,13 +783,13 @@ export const isModuleEnabled =
  */
 export const isModuleToggleEnabled =
 	(data: ConfigData) =>
-	(slug: string): boolean => {
-		const mod = data.modules.find((m) => m.slug === slug);
-		if (!mod) {
-			return true;
-		}
-		return Boolean(mod.enabled);
-	};
+		(slug: string): boolean => {
+			const mod = data.modules.find((m) => m.slug === slug);
+			if (!mod) {
+				return true;
+			}
+			return Boolean(mod.enabled);
+		};
 
 /** @since 1.13 — alias of {@link isModuleToggleEnabled}; prefer for new code. */
 export const isModuleActive = isModuleToggleEnabled;
@@ -912,8 +912,8 @@ export interface ConfigApi {
 	setDefaultStages: (value: DefaultStage[]) => void;
 	getDealPriorities: () => DealPriority[];
 	setDealPriorities: (value: DealPriority[]) => void;
-	getQuillSMTPInfo: () => QuillSMTPInfo;
-	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
+	getDoubleScaleInfo: () => DoubleScaleInfo;
+	setDoubleScaleInfo: (value: DoubleScaleInfo) => void;
 	getCurrency: () => string;
 	setCurrency: (value: string) => void;
 	getUrlDoubleScalePro: () => string;
@@ -996,8 +996,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setDefaultStages = setDefaultStages(data);
 	configApi.getDealPriorities = () => getDealPriorities(data);
 	configApi.setDealPriorities = setDealPriorities(data);
-	configApi.getQuillSMTPInfo = () => getQuillSMTPInfo(data);
-	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
+	configApi.getDoubleScaleInfo = () => getDoubleScaleInfo(data);
+	configApi.setDoubleScaleInfo = setDoubleScaleInfo(data);
 	configApi.getCurrency = () => getCurrency(data);
 	configApi.setCurrency = setCurrency(data);
 	configApi.getUrlDoubleScalePro = () => getUrlDoubleScalePro(data);

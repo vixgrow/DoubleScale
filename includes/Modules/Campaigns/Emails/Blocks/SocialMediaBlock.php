@@ -112,6 +112,24 @@ class SocialMediaBlock extends EmailBlock {
 					'link'    => '',
 				),
 			),
+			'platformOrder' => array(
+				'facebook',
+				'x',
+				'instagram',
+				'tiktok',
+				'threads',
+				'youtube',
+				'pinterest',
+				'spotify',
+				'snapchat',
+				'soundcloud',
+				'mail',
+				'website',
+				'vimeo',
+				'medium',
+				'discord',
+				'linkedin',
+			),
 			'iconSize'  => 'medium',
 			'align'     => 'center',
 			'shape'     => 'circle',
@@ -183,6 +201,22 @@ class SocialMediaBlock extends EmailBlock {
 			</table>';
 		}
 
+		$ordered_enabled = array();
+		if ( ! empty( $props['platformOrder'] ) && is_array( $props['platformOrder'] ) ) {
+			foreach ( $props['platformOrder'] as $platform ) {
+				if ( isset( $enabled_platforms[ $platform ] ) ) {
+					$ordered_enabled[ $platform ] = $enabled_platforms[ $platform ];
+				}
+			}
+			foreach ( $enabled_platforms as $platform => $data ) {
+				if ( ! isset( $ordered_enabled[ $platform ] ) ) {
+					$ordered_enabled[ $platform ] = $data;
+				}
+			}
+		} else {
+			$ordered_enabled = $enabled_platforms;
+		}
+
 		// Start with a table for better email compatibility (matching frontend)
 		// Frontend uses gap-4 (16px) between icons, so we use 8px padding on each side = 16px gap
 		$html = "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
@@ -193,10 +227,10 @@ class SocialMediaBlock extends EmailBlock {
 
 		// Add each platform icon (matching frontend)
 		// Frontend uses gap-4 (16px) between icons, so we use 8px padding on left/right
-		$platform_count = count( $enabled_platforms );
+		$platform_count  = count( $ordered_enabled );
 		$platform_index = 0;
 
-		foreach ( $enabled_platforms as $platform => $data ) {
+		foreach ( $ordered_enabled as $platform => $data ) {
 			// Use link if provided, otherwise use '#' as fallback (matching frontend)
 			$link = ! empty( $data['link'] ) ? $this->process_merge_tags( $data['link'], $contact ) : '#';
 

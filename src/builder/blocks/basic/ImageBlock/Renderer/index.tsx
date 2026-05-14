@@ -87,7 +87,7 @@ export const ImageBlockRenderer = forwardRef<
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: '#F5F5F580',
+		backgroundColor: '#F5F5F5',
 		color: '#6B7280',
 		fontSize: '14px',
 		fontWeight: '500',

@@ -19,14 +19,13 @@ export const AltTextInput: React.FC<AltTextInputProps> = ({
     value,
     onChange,
     placeholder = "Describe the image",
-    className = 'h-10',
+    className = 'h-10 !text-white !border-none !ring-0 !ring-offset-0 !rounded-lg',
     style = {
-        borderColor: '#e5e5e5',
-        borderRadius: '0.5rem',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
     },
 }) => {
     return (
-        <div className="flex flex-col gap-2 text-[#333333]">
+        <div className="flex flex-col gap-2 text-white">
             <label className="text-sm">{__('Alt Text', 'doublescale')}</label>
             <Input
                 type="text"

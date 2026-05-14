@@ -71,15 +71,17 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 
 						{/* Line Height & Letter Spacing */}
 						<div className="flex gap-3 items-center w-full">
-							<div className="flex flex-col gap-2 text-[#333333] w-1/2">
-								<div>{__('Line Height', 'doublescale')}</div>
+							<div className="flex flex-col gap-2 text-white w-1/2">
+								<label className="text-sm">{__('Line Height', 'doublescale')}</label>
 								<Select
 									value={props.lineHeight}
 									onValueChange={(value) =>
 										onChange({ lineHeight: value })
 									}
 								>
-									<SelectTrigger className="w-full rounded-lg border-border h-10">
+									<SelectTrigger className="w-full rounded-lg !text-white !border-none !ring-0 !ring-offset-0 h-10 "
+									style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+									>
 										<SelectValue
 											placeholder={__(
 												'Select line height',

@@ -69,8 +69,8 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 						/>
 
 						{/* Button Style */}
-						<div className="flex flex-col gap-2 text-[#333333]">
-							<div>{__('Button Style', 'doublescale')}</div>
+						<div className="flex flex-col gap-2 text-white">
+							<label className="text-sm">{__('Button Style', 'doublescale')}</label>
 							<Select
 								value={props.buttonStyle}
 								onValueChange={(value) =>
@@ -82,7 +82,9 @@ export const ButtonEditor: React.FC<ButtonEditorProps> = ({
 									})
 								}
 							>
-								<SelectTrigger className="w-full rounded-lg border-border h-10">
+								<SelectTrigger className="w-full rounded-lg !text-white !border-none !ring-0 !ring-offset-0 h-10"
+								style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+								>
 									<SelectValue
 										placeholder={__(
 											'Select button style',

@@ -12,98 +12,131 @@ import { MerageTagsIcon } from '@doublescale/components';
  * internal dependencies
  */
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
+const defaultDarkInputClassName =
+	'h-10 !text-white !border-none !ring-0 !ring-offset-0 !rounded-lg placeholder:!text-white/50';
+
+const defaultInputStyle: React.CSSProperties = {
+	backgroundColor: 'rgba(255, 255, 255, 0.05)',
+};
+
+/** Use with `rootClassName="text-foreground"` when `LinkInput` sits on a light popover/panel. */
+export const linkInputLightPanelInputClassName =
+	'h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm !text-foreground shadow-none ring-offset-background placeholder:!text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:border-brandPrimary';
 
 export interface LinkInputProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    className?: string;
-    style?: React.CSSProperties;
+	label: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	/** Merged onto the `<Input />`. Defaults to dark-panel (white) styling; override for light backgrounds. */
+	className?: string;
+	style?: React.CSSProperties;
+	/** Merged onto the outer wrapper; default is `text-white`. Pass e.g. `text-foreground` on white popovers. */
+	rootClassName?: string;
+	/** Merged onto the `<label />`. */
+	labelClassName?: string;
+	/** Merged onto the merge-tags trigger wrapper. */
+	mergeTriggerClassName?: string;
 }
 
 export const LinkInput: React.FC<LinkInputProps> = ({
-    label,
-    value,
-    onChange,
-    placeholder = "https://example.com",
-    className = 'h-10',
-    style = {
-        borderColor: '#e5e5e5',
-        borderRadius: '0.5rem',
-    },
+	label,
+	value,
+	onChange,
+	placeholder = 'https://example.com',
+	className,
+	style,
+	rootClassName,
+	labelClassName,
+	mergeTriggerClassName,
 }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const { setMergeTagsVisible, setMergeTagCallback } = useDispatch('doublescale/core');
+	const inputRef = useRef<HTMLInputElement>(null);
+	const { setMergeTagsVisible, setMergeTagCallback } = useDispatch(
+		'doublescale/core'
+	);
 
-    const handleChange = (inputValue: string) => {
-        // If the input is empty, just pass it through
-        if (!inputValue.trim()) {
-            onChange(inputValue);
-            return;
-        }
+	const inputClassName =
+		className !== undefined ? className : defaultDarkInputClassName;
+	const mergedInputStyle = { ...defaultInputStyle, ...style };
 
-        // Check if the URL already has a protocol (http:// or https://)
-        const hasProtocol = /^https?:\/\//i.test(inputValue);
+	const handleChange = (inputValue: string) => {
+		if (!inputValue.trim()) {
+			onChange(inputValue);
+			return;
+		}
 
-        // If no protocol is present and the input is not empty, add https://
-        const processedValue = hasProtocol ? inputValue : `https://${inputValue}`;
+		const hasProtocol = /^https?:\/\//i.test(inputValue);
+		const isMergeTag =
+			inputValue.startsWith('{{') && inputValue.endsWith('}}');
 
-        onChange(processedValue);
-    };
+		const processedValue =
+			hasProtocol || isMergeTag ? inputValue : `https://${inputValue}`;
 
-    const handleMergeTagClick = () => {
-        setMergeTagCallback((tagValue: string) => {
-            const inputElement = inputRef.current;
-            if (!inputElement) {
-                onChange(tagValue);
-                return;
-            }
+		onChange(processedValue);
+	};
 
-            const { value: currentValue } = inputElement;
-            const selectionStart =
-                inputElement.selectionStart ?? currentValue.length;
-            const selectionEnd =
-                inputElement.selectionEnd ?? currentValue.length;
+	const handleMergeTagClick = () => {
+		setMergeTagCallback((tagValue: string) => {
+			const inputElement = inputRef.current;
+			if (!inputElement) {
+				onChange(tagValue);
+				return;
+			}
 
-            const newValue =
-                currentValue.slice(0, selectionStart) +
-                tagValue +
-                currentValue.slice(selectionEnd);
+			const { value: currentValue } = inputElement;
+			const selectionStart =
+				inputElement.selectionStart ?? currentValue.length;
+			const selectionEnd =
+				inputElement.selectionEnd ?? currentValue.length;
 
-            onChange(newValue);
+			const newValue =
+				currentValue.slice(0, selectionStart) +
+				tagValue +
+				currentValue.slice(selectionEnd);
 
-            requestAnimationFrame(() => {
-                inputElement.focus();
-                const newPosition = selectionStart + tagValue.length;
-                inputElement.setSelectionRange(newPosition, newPosition);
-            });
-        });
+			onChange(newValue);
 
-        setMergeTagsVisible(true);
-    };
+			requestAnimationFrame(() => {
+				inputElement.focus();
+				const newPosition = selectionStart + tagValue.length;
+				inputElement.setSelectionRange(newPosition, newPosition);
+			});
+		});
 
-    return (
-        <div className="flex flex-col gap-2 text-[#333333]">
-            <div className="flex items-center justify-between">
-                <label className="text-sm">{label}</label>
-                <div
-                    className="cursor-pointer hover:opacity-80"
-                    onClick={handleMergeTagClick}
-                    title={__('Insert Merge Tag', 'doublescale')}
-                >
-                    <MerageTagsIcon />
-                </div>
-            </div>
-            <Input
-                type="url"
-                ref={inputRef}
-                value={value}
-                onChange={(e) => handleChange(e.target.value)}
-                className={className}
-                style={style}
-                placeholder={placeholder}
-            />
-        </div>
-    );
+		setMergeTagsVisible(true);
+	};
+
+	return (
+		<div
+			className={cn(
+				'flex flex-col gap-2',
+				rootClassName === undefined ? 'text-white' : rootClassName
+			)}
+		>
+			<div className="flex items-center justify-between">
+				<label className={cn('text-sm', labelClassName)}>{label}</label>
+				<div
+					className={cn(
+						'cursor-pointer hover:opacity-80',
+						mergeTriggerClassName
+					)}
+					onClick={handleMergeTagClick}
+					title={__('Insert Merge Tag', 'doublescale')}
+				>
+					<MerageTagsIcon />
+				</div>
+			</div>
+			<Input
+				type="text"
+				ref={inputRef}
+				value={value}
+				onChange={(e) => handleChange(e.target.value)}
+				className={inputClassName}
+				style={mergedInputStyle}
+				placeholder={placeholder}
+			/>
+		</div>
+	);
 };

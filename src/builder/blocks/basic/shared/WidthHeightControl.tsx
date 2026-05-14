@@ -69,12 +69,14 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 			className={`flex gap-3 items-center w-full ${!showHeight ? 'flex-col' : ''}`}
 		>
 			<div
-				className={`flex flex-col gap-1 text-[#333333] ${showHeight ? 'w-1/2' : 'w-full'}`}
+				className={`flex flex-col gap-1 text-white ${showHeight ? 'w-1/2' : 'w-full'}`}
 			>
 				<label className="text-sm">{widthLabel}</label>
 				{widthOptions ? (
 					<Select value={width} onValueChange={onWidthChange}>
-						<SelectTrigger className="rounded-lg border-border h-10">
+						<SelectTrigger className="rounded-lg !text-white !border-none !ring-0 !ring-offset-0 h-10 "
+						style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+						>
 							<SelectValue
 								placeholder={__('Select width', 'doublescale')}
 							/>
@@ -91,7 +93,9 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 						</SelectContent>
 					</Select>
 				) : (
-					<div className="relative flex items-center">
+					<div className="relative flex items-center rounded-lg"
+					style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+					>
 						<Input
 							type="text"
 							value={width}
@@ -106,15 +110,11 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 									}
 								}
 							}}
-							className="pr-8 h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-							}}
+							className="pr-8 h-10 !bg-transparent !text-white !border-none !ring-0 !ring-offset-0 placeholder:!text-white/50"
 							placeholder={widthPlaceholder}
 						/>
 						{widthUnit && (
-							<span className="absolute right-3 text-gray-400">
+							<span className="absolute right-3 text-white/50">
 								{widthUnit}
 							</span>
 						)}
@@ -122,11 +122,13 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 				)}
 			</div>
 			{showHeight && (
-				<div className="flex flex-col gap-1 text-[#333333] w-1/2">
+				<div className="flex flex-col gap-1 text-white w-1/2">
 					<label className="text-sm">{heightLabel}</label>
 					{heightOptions ? (
 						<Select value={height} onValueChange={onHeightChange}>
-							<SelectTrigger className="rounded-lg border-border h-10">
+							<SelectTrigger className="rounded-lg !text-white !border-none !ring-0 !ring-offset-0 h-10 "
+							style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+							>
 								<SelectValue
 									placeholder={__(
 										'Select height',
@@ -146,7 +148,9 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 							</SelectContent>
 						</Select>
 					) : (
-						<div className="relative flex items-center">
+						<div className="relative flex items-center rounded-lg"
+						style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+						>
 							<Input
 								type="text"
 								value={height}
@@ -161,15 +165,11 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 										}
 									}
 								}}
-								className="pr-8 h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-								}}
+								className="pr-8 h-10 !bg-transparent !text-white !border-none !ring-0 !ring-offset-0 placeholder:!text-white/50"
 								placeholder={heightPlaceholder}
 							/>
 							{heightUnit && (
-								<span className="absolute right-3 text-gray-400">
+								<span className="absolute right-3 text-white/50">
 									{heightUnit}
 								</span>
 							)}

@@ -26,11 +26,9 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
     onChange,
     placeholder,
     type = 'text',
-    className = 'pr-8 h-10',
+    className = 'pr-8 h-10 !text-white !border-none !ring-0 !ring-offset-0 !rounded-lg placeholder:!text-white/50',
     style = {
-        borderColor: '#e5e5e5',
-        borderRadius: '0.5rem',
-        maxWidth:"287.2px"
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
     },
     fieldName,
 }) => {
@@ -46,7 +44,7 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
 
     return (
         <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center text-[#333333]">
+            <div className="flex justify-between items-center text-white">
                 <label className="text-sm">{label}</label>
                 <span
                     className="cursor-pointer hover:opacity-80"

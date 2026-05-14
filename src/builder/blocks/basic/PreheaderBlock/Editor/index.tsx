@@ -57,7 +57,7 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 
 						{/* Link Content */}
 						<div className="flex flex-col gap-2">
-							<div className="flex justify-between items-center text-[#333333]">
+							<div className="flex justify-between items-center text-white">
 								<div>{__('Link Text', 'doublescale')}</div>
 								<ExternalLink className="size-5" />
 							</div>
@@ -68,11 +68,8 @@ export const PreheaderEditor: React.FC<PreheaderEditorProps> = ({
 									onChange({ linkText: e.target.value })
 								}
 								placeholder={__('Enter link text', 'doublescale')}
-								className="pr-8 h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-								}}
+								className="pr-8 h-10 !text-white !border-none !ring-0 !ring-offset-0 !rounded-lg placeholder:!text-white/50"
+								style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
 							/>
 						</div>
 

@@ -44,7 +44,7 @@ export const ColorPickerControl: React.FC<ColorPickerControlProps> = ({
 					type="color"
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className="h-10 w-10 shrink-0 cursor-pointer rounded-lg !border-none !ring-0 !ring-offset-0 !bg-transparent p-1 shadow-none"
+					className="h-8 w-8 shrink-0 cursor-pointer !rounded-lg !border-none !ring-0 !ring-offset-0 !bg-transparent p-1 shadow-none"
 				/>
 			</div>
 		</div>

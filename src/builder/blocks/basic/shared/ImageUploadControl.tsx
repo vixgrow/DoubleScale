@@ -16,7 +16,10 @@ import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover'
 import { DeleteIcon, ImageUploadDropzoneIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 import { generateRandomString } from '@/builder/utils/idGenerator';
-import { LinkInput } from './LinkInput';
+import {
+	LinkInput,
+	linkInputLightPanelInputClassName,
+} from './LinkInput';
 
 // WordPress media library types
 declare global {
@@ -449,6 +452,11 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 						value={urlValue}
 						onChange={setUrlValue}
 						placeholder="https://example.com/image.jpg"
+						rootClassName="text-foreground"
+						labelClassName="text-foreground"
+						mergeTriggerClassName="text-foreground"
+						className={linkInputLightPanelInputClassName}
+						style={{ backgroundColor: 'hsl(var(--background))' }}
 					/>
 					<div className="flex gap-2 justify-end">
 						<Button

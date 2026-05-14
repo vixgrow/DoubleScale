@@ -36,36 +36,34 @@ export const RotationControl: React.FC<RotationControlProps> = ({
     };
 
     return (
-        <div className="flex justify-between items-center text-[#333333]">
+        <div className="flex justify-between items-center text-white">
             <label className="text-sm">{__('Rotation', 'doublescale')}</label>
-            <div className="flex items-center gap-2 border rounded-lg p-1">
+            <div className="flex items-center rounded-lg p-1"
+            style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+            >
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRotationChange('left')}
-                    className="flex-1 shadow-none"
+                    className="flex-1 shadow-none !bg-transparent !text-white !border-none !ring-0 !ring-offset-0 !rounded-l-lg !rounded-r-none"
                 >
-                    <Minus className="w-4 h-4 text-[#333333]" />
+                    <Minus className="w-4 h-4 text-white" />
                 </Button>
                 <Input
                     type="text"
                     value={value}
                     onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-                    className="w-10 text-center"
+                    className="w-10 text-center !bg-transparent !text-white !border-none !ring-0 !ring-offset-0 !rounded-none placeholder:!text-white/50"
                     min="0"
                     max="360"
-                    style={{
-                        border: 'none',
-                        outline: 'none',
-                    }}
                 />
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRotationChange('right')}
-                    className="flex-1 shadow-none"
+                    className="flex-1 shadow-none !bg-transparent !text-white !border-none !ring-0 !ring-offset-0 !rounded-r-lg !rounded-l-none"
                 >
-                    <Plus className="w-4 h-4 text-[#333333] " />
+                    <Plus className="w-4 h-4 text-white" />
                 </Button>
             </div>
         </div>

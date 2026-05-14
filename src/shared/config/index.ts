@@ -18,7 +18,7 @@ import type {
 	License,
 	ModuleInfo,
 	ProPluginData,
-	QuillSMTPInfo,
+	SmtpInfo,
 	UserCapabilities,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
@@ -115,9 +115,8 @@ const configData: ConfigData = {
 	defaultStages: (serverData.defaultStages as DefaultStage[] | undefined) ?? [],
 	dealPriorities:
 		(serverData.dealPriorities as DealPriority[] | undefined) ?? [],
-	quillsmtpInfo:
-		(serverData.smtpInfo as QuillSMTPInfo | undefined) ??
-		(serverData.quillsmtpInfo as QuillSMTPInfo | undefined) ?? {
+	smtpInfo:
+		(serverData.smtpInfo as SmtpInfo | undefined) ?? {
 			configured: false,
 		},
 	currency: (serverData.currency as string | undefined) ?? 'USD',
@@ -695,24 +694,24 @@ export const setDealPriorities = (data: ConfigData) => (value: DealPriority[]) =
 };
 
 /**
- * Get QuillSMTP connection info
+ * Get SMTP connection info
  *
  * @param data the json environment configuration to use for getting config values
  *
- * @returns QuillSMTPInfo
+ * @returns SmtpInfo
  */
-export const getQuillSMTPInfo = (data: ConfigData): QuillSMTPInfo => {
-	return data.quillsmtpInfo;
+export const getSmtpInfo = (data: ConfigData): SmtpInfo => {
+	return data.smtpInfo;
 };
 
 /**
- * Set QuillSMTP connection info
+ * Set SMTP connection info
  *
  * @param data the json environment configuration to use for getting config values
  * @param value the value to set
  */
-export const setQuillSMTPInfo = (data: ConfigData) => (value: QuillSMTPInfo) => {
-	data.quillsmtpInfo = value;
+export const setSmtpInfo = (data: ConfigData) => (value: SmtpInfo) => {
+	data.smtpInfo = value;
 };
 
 /**
@@ -912,8 +911,8 @@ export interface ConfigApi {
 	setDefaultStages: (value: DefaultStage[]) => void;
 	getDealPriorities: () => DealPriority[];
 	setDealPriorities: (value: DealPriority[]) => void;
-	getQuillSMTPInfo: () => QuillSMTPInfo;
-	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
+	getSmtpInfo: () => SmtpInfo;
+	setSmtpInfo: (value: SmtpInfo) => void;
 	getCurrency: () => string;
 	setCurrency: (value: string) => void;
 	getUrlDoubleScalePro: () => string;
@@ -996,8 +995,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setDefaultStages = setDefaultStages(data);
 	configApi.getDealPriorities = () => getDealPriorities(data);
 	configApi.setDealPriorities = setDealPriorities(data);
-	configApi.getQuillSMTPInfo = () => getQuillSMTPInfo(data);
-	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
+	configApi.getSmtpInfo = () => getSmtpInfo(data);
+	configApi.setSmtpInfo = setSmtpInfo(data);
 	configApi.getCurrency = () => getCurrency(data);
 	configApi.setCurrency = setCurrency(data);
 	configApi.getUrlDoubleScalePro = () => getUrlDoubleScalePro(data);

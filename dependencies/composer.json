@@ -1,7 +1,7 @@
 {
     "name": "doublescale/doublescale-deps",
     "require": {
-        "quillforms/wpeloquent": "^1.0.2",
+        "doublescale/wpeloquent": "^1.0.0",
         "nesbot/carbon": "^2.0",
         "carbonphp/carbon-doctrine-types": "^2.1",
         "league/csv": "9.8.0"
@@ -15,7 +15,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:quillforms/wpeloquent.git"
+            "url": "https://github.com/vixgrow/WPEloquent.git"
         }
     ]
 }

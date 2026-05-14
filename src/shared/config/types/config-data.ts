@@ -30,7 +30,7 @@ export type ConfigData = Record<string, unknown> & {
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
-	quillsmtpInfo: QuillSMTPInfo;
+	smtpInfo: SmtpInfo;
 	license: License | false;
 	proPluginData: ProPluginData;
 	currency: string;
@@ -113,7 +113,7 @@ export type VerifiedSender = {
 	connection_id: string;
 };
 
-export type QuillSMTPInfo = {
+export type SmtpInfo = {
 	configured: boolean;
 	verified_senders?: VerifiedSender[];
 	config_url?: string;

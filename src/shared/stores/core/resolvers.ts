@@ -1,5 +1,5 @@
 /**
- * QuillSMTP Dependencies.
+ * External Dependencies.
  */
 import ConfigAPI from '@doublescale/config';
 

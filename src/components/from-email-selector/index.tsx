@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/popover';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import config from '@/config';
-import type { QuillSMTPInfo, VerifiedSender } from '@/shared/config/types/config-data';
+import type { SmtpInfo, VerifiedSender } from '@/shared/config/types/config-data';
 import { cn } from '@/lib/utils';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
@@ -28,7 +28,7 @@ import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
  */
 function smtpSettingsResponseToInfo(
 	data: Record<string, unknown>
-): QuillSMTPInfo {
+): SmtpInfo {
 	const connections =
 		(data.connections as Record<
 			string,
@@ -71,7 +71,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 }) => {
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
-	const [liveSmtp, setLiveSmtp] = useState<QuillSMTPInfo | null>(null);
+	const [liveSmtp, setLiveSmtp] = useState<SmtpInfo | null>(null);
 	const modulesTick = useModulesConfigTick();
 	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
 
@@ -88,7 +88,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					return;
 				}
 				const mapped = smtpSettingsResponseToInfo(data);
-				const base = config.getQuillSMTPInfo();
+				const base = config.getSmtpInfo();
 				// Successful GET means the bundled SMTP REST is available — never keep a stale "install plugin" hint.
 				setLiveSmtp({
 					configured: mapped.configured,
@@ -105,7 +105,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 		};
 	}, [smtpModuleOn, modulesTick]);
 
-	const smtpInfo: QuillSMTPInfo = liveSmtp ?? config.getQuillSMTPInfo();
+	const smtpInfo: SmtpInfo = liveSmtp ?? config.getSmtpInfo();
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =

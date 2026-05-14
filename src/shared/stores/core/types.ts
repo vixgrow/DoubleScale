@@ -1,5 +1,5 @@
 /**
- * QuillSMTP Dependencies.
+ * External Dependencies.
  */
 import type { InitialPayload } from '@doublescale/config';
 

@@ -386,59 +386,27 @@ class RestAvailabilityController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function create_item( $request ) {
-		$weekly_hours = $request->get_param( 'value' )['weekly_hours'];
-		$override     = $request->get_param( 'value' )['override'];
+		$weekly_hours = $request->get_param( 'value' )['weekly_hours'] ?? array();
+		$override     = $request->get_param( 'value' )['override'] ?? array();
 		$user_id      = $request->get_param( 'user_id' ) ? $request->get_param( 'user_id' ) : get_current_user_id();
 		$name         = $request->get_param( 'name' );
 		$timezone     = $request->get_param( 'timezone' );
 		$is_default   = (bool) $request->get_param( 'is_default' );
 
-		if ( ! $name ) {
-			return new WP_Error( 'rest_availability_invalid_name', __( 'Invalid availability name.', 'doublescale' ), array( 'status' => 400 ) );
+		// Delegate to AvailabilityService so the "force first availability to
+		// be default" invariant lives in exactly one place. Previously this
+		// rule was duplicated here and missing from the legacy
+		// Availabilities::add_availability() path.
+		$service = new \DoubleScale\Modules\Booking\Services\AvailabilityService();
+		$result  = $service->create_availability( $user_id, $name, $weekly_hours, $override, $timezone, $is_default );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
-		if ( empty( $weekly_hours ) ) {
-			return new WP_Error( 'rest_availability_invalid_weekly_hours', __( 'Invalid weekly hours.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		if ( empty( $timezone ) ) {
-			return new WP_Error( 'rest_availability_invalid_timezone', __( 'Invalid timezone.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
-		// Force the first availability for a user to be the default — events
-		// can't be created without one, so we have to establish the invariant
-		// on first row regardless of what the caller asked for.
-		$has_existing = AvailabilityModel::where( 'user_id', $user_id )->exists();
-		if ( ! $has_existing ) {
-			$is_default = true;
-		}
-
-		// Prepare value data
-		$value_data = array(
-			'weekly_hours' => $weekly_hours,
-			'override'     => $override,
-		);
-
-		$availability_data = array(
-			'user_id'    => $user_id,
-			'name'       => $name,
-			'value'      => $value_data,
-			'timezone'   => $timezone,
-			'is_default' => $is_default,
-		);
-
-		try {
-			if ( $is_default && $has_existing ) {
-				AvailabilityModel::where( 'user_id', $user_id )
-					->where( 'is_default', true )
-					->update( array( 'is_default' => false ) );
-			}
-			$availability  = AvailabilityModel::create( $availability_data );
-			$response_data = $this->prepare_availability_for_response( $availability );
-			return new WP_REST_Response( $response_data, 201 );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'rest_availability_create_failed', $e->getMessage(), array( 'status' => 400 ) );
-		}
+		$availability  = AvailabilityModel::find( $result['id'] );
+		$response_data = $this->prepare_availability_for_response( $availability );
+		return new WP_REST_Response( $response_data, 201 );
 	}
 
 	/**
@@ -808,8 +776,14 @@ class RestAvailabilityController extends RestController {
 		$default_availability = AvailabilityModel::getUserDefault( $availability->user_id );
 
 		if ( ! $default_availability ) {
-			// If no default availability exists, create one or handle error
-			error_log( "Booking: No default availability found for user {$availability->user_id} when deleting availability {$availability->id}" );
+			doublescale_get_logger()->warning(
+				'No default availability when handling deletion',
+				array(
+					'source'         => 'booking-availability-rest',
+					'user_id'        => (int) $availability->user_id,
+					'availability_id' => (int) $availability->id,
+				)
+			);
 			return;
 		}
 
@@ -855,7 +829,14 @@ class RestAvailabilityController extends RestController {
 			}
 		}
 
-		// Log the replacement for debugging
-		error_log( "Booking: Replaced availability {$availability->id} references with default availability {$default_availability->id} for user {$availability->user_id}" );
+		doublescale_get_logger()->info(
+			'Replaced availability references with default after deletion',
+			array(
+				'source'                 => 'booking-availability-rest',
+				'user_id'                => (int) $availability->user_id,
+				'deleted_availability_id' => (int) $availability->id,
+				'replacement_id'         => (int) $default_availability->id,
+			)
+		);
 	}
 }

@@ -666,8 +666,9 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 					},
 				});
 			})
-			.catch((info) => {
-				console.log('Validate Failed:', info);
+			.catch(() => {
+				// Ant Design's validateFields rejects with field-level errors
+				// it has already surfaced inline. Nothing more to do here.
 			});
 	};
 
@@ -1533,11 +1534,8 @@ const IntegrationDetailsPage: React.FC<Props> = ({
                                                         handleConnectBasic();
                                                         setVisible(false);
                                                     })
-                                                    .catch((info) => {
-                                                        console.log(
-                                                            'Validate Failed:',
-                                                            info
-                                                        );
+                                                    .catch(() => {
+                                                        // Ant Design surfaces field errors inline.
                                                     });
                                             }}
                                             disabled={connectLoading}

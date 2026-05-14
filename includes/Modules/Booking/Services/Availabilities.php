@@ -101,30 +101,25 @@ class Availabilities
 	 */
 	public static function add_availability($availability)
 	{
-		// Prepare data for model
-		$value_data = array(
-			'weekly_hours' => Arr::get($availability, 'weekly_hours', array()),
-			'override' => Arr::get($availability, 'override', array()),
+		// Delegates to AvailabilityService so the "force first as default"
+		// invariant is applied consistently. Returns the same compatible
+		// shape the legacy callers expect.
+		$service = new AvailabilityService();
+		$result  = $service->create_availability(
+			Arr::get($availability, 'user_id'),
+			Arr::get($availability, 'name'),
+			Arr::get($availability, 'weekly_hours', array()),
+			Arr::get($availability, 'override', array()),
+			Arr::get($availability, 'timezone', 'UTC'),
+			(bool) Arr::get($availability, 'is_default', false)
 		);
 
-		$model_data = array(
-			'user_id' => Arr::get($availability, 'user_id'),
-			'name' => Arr::get($availability, 'name'),
-			'value' => $value_data,
-			'timezone' => Arr::get($availability, 'timezone', 'UTC'),
-			'is_default' => Arr::get($availability, 'is_default', false),
-		);
-
-		// If setting as default, unset other defaults for this user
-		if ($model_data['is_default']) {
-			AvailabilityModel::where('user_id', $model_data['user_id'])
-				->where('is_default', true)
-				->update(array('is_default' => false));
+		if (is_wp_error($result)) {
+			return array();
 		}
 
-		$model = AvailabilityModel::create($model_data);
-
-		return $model->toCompatibleArray();
+		$model = AvailabilityModel::find($result['id']);
+		return $model ? $model->toCompatibleArray() : array();
 	}
 
 	/**

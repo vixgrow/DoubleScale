@@ -2558,7 +2558,14 @@ class EventModel extends Model {
 					'hosts_ids' => $slots_available ? $available_hosts_ids : array(),
 				);
 			default:
-				error_log( 'DEBUG: Unknown event type: ' . $this->type );
+				doublescale_get_logger()->warning(
+					'Unknown event type encountered during slot availability check',
+					array(
+						'source'   => 'booking-event-model',
+						'event_id' => (int) $this->id,
+						'type'     => $this->type,
+					)
+				);
 				return array(
 					'slots'     => 0,
 					'hosts_ids' => array(),

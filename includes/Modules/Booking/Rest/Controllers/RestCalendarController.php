@@ -352,7 +352,10 @@ class RestCalendarController extends RestController
 			}
 
 			if (('all' === $user || get_current_user_id() !== $user) && ! current_user_can('doublescale_booking_read_all_calendars')) {
-				error_log('Booking Calendar Controller: Permission denied for user ' . get_current_user_id() . ' to access calendars');
+				doublescale_get_logger()->warning(
+					'Permission denied to access calendars',
+					array('source' => 'booking-calendar-rest', 'user_id' => get_current_user_id())
+				);
 				return new WP_Error('rest_calendar_error', __('You do not have permission', 'doublescale'), array('status' => 403));
 			}
 
@@ -393,7 +396,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response($calendars, 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in get_items: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in get_items',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'get_items',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -442,7 +454,10 @@ class RestCalendarController extends RestController
 			}
 
 			if ('team' !== $type) {
-				error_log('Booking Calendar Controller: Only team calendars are creatable via REST. Got: ' . $type);
+				doublescale_get_logger()->warning(
+					'Only team calendars are creatable via REST',
+					array('source' => 'booking-calendar-rest', 'received_type' => $type)
+				);
 				throw new Exception(__('Only team calendars can be created. Host calendars are auto-provisioned for CRM team members.', 'doublescale'), 400);
 			}
 
@@ -465,7 +480,16 @@ class RestCalendarController extends RestController
 			return new WP_REST_Response($calendar, 200);
 		} catch (Exception $e) {
 			$wpdb->query('ROLLBACK');
-			error_log('Booking Calendar Controller Error in create_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in create_item',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'create_item',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			// Honor explicit HTTP status codes set on the exception (e.g. 400
 			// for client validation failures); fall back to 500 for unhandled
 			// server errors.
@@ -503,7 +527,10 @@ class RestCalendarController extends RestController
 		try {
 			$ids = $request->get_param('ids');
 			if (empty($ids)) {
-				error_log('Booking Calendar Controller: No calendar IDs provided for deletion');
+				doublescale_get_logger()->warning(
+					'No calendar IDs provided for deletion',
+					array('source' => 'booking-calendar-rest')
+				);
 				return new WP_Error('rest_calendar_error', __('IDs are required', 'doublescale'), array('status' => 400));
 			}
 
@@ -511,7 +538,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response(array('message' => __('Calendars deleted successfully', 'doublescale')), 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in delete_items: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in delete_items',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'delete_items',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -546,13 +582,25 @@ class RestCalendarController extends RestController
 			$calendar = CalendarModel::find($id);
 
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found with ID: ' . $id);
+						doublescale_get_logger()->warning(
+				'Calendar not found ',
+				array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+			);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
 			return new WP_REST_Response($calendar, 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in get_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in get_item',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'get_item',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -587,7 +635,10 @@ class RestCalendarController extends RestController
 			$calendar = CalendarModel::select('id')->find($id);
 
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found for team retrieval with ID: ' . $id);
+						doublescale_get_logger()->warning(
+				'Calendar not found for team retrieval ',
+				array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+			);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
@@ -610,7 +661,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response($users, 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in get_item_team: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in get_item_team',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'get_item_team',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_team_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -644,13 +704,19 @@ class RestCalendarController extends RestController
 			}
 
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found for update with ID: ' . $id);
+						doublescale_get_logger()->warning(
+				'Calendar not found for update ',
+				array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+			);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
 			if ($members && 'team' === $calendar->type) {
 				if (empty($members)) {
-					error_log('Booking Calendar Controller: Team members cannot be empty for calendar ID: ' . $id);
+					doublescale_get_logger()->warning(
+						'Team members cannot be empty',
+						array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+					);
 					return new WP_Error('rest_calendar_error', __("Team members can't be empty", 'doublescale'), array('status' => 400));
 				}
 
@@ -659,7 +725,10 @@ class RestCalendarController extends RestController
 					->get();
 
 				if ($calendars->count() !== count($members)) {
-					error_log('Booking Calendar Controller: Invalid host selection for team calendar ID: ' . $id);
+					doublescale_get_logger()->warning(
+						'Invalid host selection for team calendar',
+						array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+					);
 					return new WP_Error('rest_calendar_error', __('Please make sure that you selected the right hosts', 'doublescale'), array('status' => 400));
 				}
 			}
@@ -712,7 +781,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response($calendar, 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in update_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in update_item',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'update_item',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -748,7 +826,10 @@ class RestCalendarController extends RestController
 			$calendar = CalendarModel::find($id);
 
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found for deletion with ID: ' . $id);
+						doublescale_get_logger()->warning(
+				'Calendar not found for deletion ',
+				array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+			);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
@@ -756,7 +837,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response(array('message' => __('Calendar deleted successfully', 'doublescale')), 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in delete_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in delete_item',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'delete_item',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -793,18 +883,27 @@ class RestCalendarController extends RestController
 
 			$calendar = CalendarModel::find($id);
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found for event cloning with ID: ' . $id);
+						doublescale_get_logger()->warning(
+				'Calendar not found for event cloning ',
+				array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $id)
+			);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
 			if (! $event_id) {
-				error_log('Booking Calendar Controller: No event IDs provided for cloning');
+				doublescale_get_logger()->warning(
+					'No event IDs provided for cloning',
+					array('source' => 'booking-calendar-rest')
+				);
 				return new WP_Error('rest_calendar_error', __('Event are required', 'doublescale'), array('status' => 400));
 			}
 
 			$event = EventModel::find($event_id)->first();
 			if (! $event) {
-				error_log('Booking Calendar Controller: Event not found for cloning with ID: ' . $event_id);
+				doublescale_get_logger()->warning(
+					'Event not found for cloning',
+					array('source' => 'booking-calendar-rest', 'event_id' => (int) $event_id)
+				);
 				return new WP_Error('rest_calendar_error', __('Event not found', 'doublescale'), array('status' => 404));
 			}
 
@@ -843,7 +942,16 @@ class RestCalendarController extends RestController
 
 			return new WP_REST_Response(array('message' => __('Events cloned successfully', 'doublescale')), 200);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in clone_events: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in clone_events',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'clone_events',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}
@@ -874,7 +982,10 @@ class RestCalendarController extends RestController
 	private function validate_team_calendar($members)
 	{
 		if (empty($members)) {
-			error_log('Booking Calendar Controller: Team members are required for team calendar');
+			doublescale_get_logger()->warning(
+				'Team members are required for team calendar',
+				array('source' => 'booking-calendar-rest')
+			);
 			throw new Exception(__('Team members are required', 'doublescale'), 400);
 		}
 
@@ -883,7 +994,14 @@ class RestCalendarController extends RestController
 			->pluck('ID');
 
 		if (count($valid_members) !== count($members)) {
-			error_log('Booking Calendar Controller: Invalid team member selection. Expected: ' . count($members) . ', Found: ' . count($valid_members));
+			doublescale_get_logger()->warning(
+				'Invalid team member selection',
+				array(
+					'source'   => 'booking-calendar-rest',
+					'expected' => count($members),
+					'found'    => count($valid_members),
+				)
+			);
 			throw new Exception(__('Invalid team member selection', 'doublescale'), 400);
 		}
 	}
@@ -903,7 +1021,10 @@ class RestCalendarController extends RestController
 			$calendar    = CalendarModel::find($calendar_id);
 
 			if (! $calendar) {
-				error_log('Booking Calendar Controller: Calendar not found for integrations with ID: ' . $calendar_id);
+				doublescale_get_logger()->warning(
+					'Calendar not found for integrations',
+					array('source' => 'booking-calendar-rest', 'calendar_id' => (int) $calendar_id)
+				);
 				return new WP_Error('rest_calendar_error', __('Calendar not found', 'doublescale'), array('status' => 404));
 			}
 
@@ -1093,7 +1214,16 @@ class RestCalendarController extends RestController
 
 			return rest_ensure_response($connected_integrations);
 		} catch (Exception $e) {
-			error_log('Booking Calendar Controller Error in get_item_integrations: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
+			doublescale_get_logger()->error(
+				'Booking calendar controller exception in get_item_integrations',
+				array(
+					'source'    => 'booking-calendar-rest',
+					'method'    => 'get_item_integrations',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error('rest_calendar_error', $e->getMessage(), array('status' => 500));
 		}
 	}

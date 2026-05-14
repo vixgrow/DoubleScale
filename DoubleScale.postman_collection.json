@@ -2951,6 +2951,7 @@
 								{
 									"key": "action",
 									"value": "doublescale_send_summary_email",
+									"value": "doublescale_send_summary_email",
 									"type": "text"
 								}
 							]
@@ -4409,9 +4410,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{pipeline}}/wp-json/doublescale/v1/site/verify",
+							"raw": "https://pipeline.doublescale.com/wp-json/doublescale/v1/site/verify",
+							"protocol": "https",
 							"host": [
-								"{{pipeline}}"
+								"pipeline",
+								"doublescale",
+								"com"
 							],
 							"path": [
 								"wp-json",
@@ -4442,9 +4446,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{pipeline}}/wp-json/doublescale/v1/site/login",
+							"raw": "https://pipeline.doublescale.com/wp-json/doublescale/v1/site/login",
+							"protocol": "https",
 							"host": [
-								"{{pipeline}}"
+								"pipeline",
+								"doublescale",
+								"com"
 							],
 							"path": [
 								"wp-json",
@@ -4486,9 +4493,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{pipeline}}/wp-json/doublescale/v1/site/create-app-password",
+							"raw": "https://pipeline.doublescale.com/wp-json/doublescale/v1/site/create-app-password",
+							"protocol": "https",
 							"host": [
-								"{{pipeline}}"
+								"pipeline",
+								"doublescale",
+								"com"
 							],
 							"path": [
 								"wp-json",
@@ -4502,7 +4512,7 @@
 					"response": []
 				},
 				{
-					"name": "{{pipeline}}/wp-json/doublescale/v1/contacts",
+					"name": "https://pipeline.doublescale.com/wp-json/doublescale/v1/contacts",
 					"request": {
 						"auth": {
 							"type": "basic",
@@ -4522,9 +4532,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{pipeline}}/wp-json/doublescale/v1/deals",
+							"raw": "https://pipeline.doublescale.com/wp-json/doublescale/v1/deals",
+							"protocol": "https",
 							"host": [
-								"{{pipeline}}"
+								"pipeline",
+								"doublescale",
+								"com"
 							],
 							"path": [
 								"wp-json",

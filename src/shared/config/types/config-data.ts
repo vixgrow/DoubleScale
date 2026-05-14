@@ -30,7 +30,7 @@ export type ConfigData = Record<string, unknown> & {
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
-	smtpInfo: SmtpInfo;
+	doublescaleInfo: DoubleScaleInfo;
 	license: License | false;
 	proPluginData: ProPluginData;
 	currency: string;
@@ -73,7 +73,7 @@ export type ProPluginData = {
 };
 
 /**
- * Store add-on (Quill SMTP, etc.) — serialized from {@see \DoubleScale\Admin\AdminConfig::get_addons_status()}.
+ * Store add-on (DoubleScale, etc.) — serialized from {@see \DoubleScale\Admin\AdminConfig::get_addons_status()}.
  */
 export type Addon = {
 	slug: string;
@@ -113,7 +113,7 @@ export type VerifiedSender = {
 	connection_id: string;
 };
 
-export type SmtpInfo = {
+export type DoubleScaleInfo = {
 	configured: boolean;
 	verified_senders?: VerifiedSender[];
 	config_url?: string;

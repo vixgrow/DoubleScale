@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/popover';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import config from '@/config';
-import type { SmtpInfo, VerifiedSender } from '@/shared/config/types/config-data';
+import type { DoubleScaleInfo, VerifiedSender } from '@/shared/config/types/config-data';
 import { cn } from '@/lib/utils';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
@@ -28,7 +28,7 @@ import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
  */
 function smtpSettingsResponseToInfo(
 	data: Record<string, unknown>
-): SmtpInfo {
+): DoubleScaleInfo {
 	const connections =
 		(data.connections as Record<
 			string,
@@ -71,7 +71,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 }) => {
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
-	const [liveSmtp, setLiveSmtp] = useState<SmtpInfo | null>(null);
+	const [liveSmtp, setLiveSmtp] = useState<DoubleScaleInfo | null>(null);
 	const modulesTick = useModulesConfigTick();
 	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
 
@@ -88,7 +88,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					return;
 				}
 				const mapped = smtpSettingsResponseToInfo(data);
-				const base = config.getSmtpInfo();
+				const base = config.getDoubleScaleInfo();
 				// Successful GET means the bundled SMTP REST is available — never keep a stale "install plugin" hint.
 				setLiveSmtp({
 					configured: mapped.configured,
@@ -105,7 +105,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 		};
 	}, [smtpModuleOn, modulesTick]);
 
-	const smtpInfo: SmtpInfo = liveSmtp ?? config.getSmtpInfo();
+	const smtpInfo: DoubleScaleInfo = liveSmtp ?? config.getDoubleScaleInfo();
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =

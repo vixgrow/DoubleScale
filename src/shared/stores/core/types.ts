@@ -1,5 +1,5 @@
 /**
- * External Dependencies.
+ * DoubleScale Dependencies.
  */
 import type { InitialPayload } from '@doublescale/config';
 

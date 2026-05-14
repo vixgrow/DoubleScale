@@ -1,37 +1,37 @@
 import { IconProps } from '@doublescale/config';
 
-const BannerBlockIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
-    return (
-        <svg
-            width={width}
-            height={height}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path
-                d="M3 3H19"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            />
-            <path
-                d="M3 21H12"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            />
-            <path
-                d="M3 12C3 9.64298 3 8.46447 3.73223 7.73223C4.46447 7 5.64298 7 8 7H16C18.357 7 19.5355 7 20.2678 7.73223C21 8.46447 21 9.64298 21 12C21 14.357 21 15.5355 20.2678 16.2678C19.5355 17 18.357 17 16 17H8C5.64298 17 4.46447 17 3.73223 16.2678C3 15.5355 3 14.357 3 12Z"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            />
-        </svg>
-    );
+const BannerBlockIcon: React.FC<IconProps> = ({ width = 40, height = 40 }) => {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width={width}
+			height={height}
+			viewBox="0 0 40 40"
+			fill="none"
+		>
+			<path
+				d="M5.00093 9.78587C5.17556 9.22482 5.46724 8.76315 6.02365 8.50213C7.12441 7.98566 8.47411 8.7808 8.50104 9.97444C7.39007 10.3228 6.27817 10.6721 5.15048 11.026C5.09846 10.8216 5.04923 10.6265 5 10.4315C5 10.216 5 10.0014 5 9.78587H5.00093Z"
+				fill="currentColor"
+			/>
+			<path
+				opacity="0.3"
+				d="M5.44275 12.8093C15.1693 9.34908 24.8541 9.12428 34.5909 12.826C33.9146 16.693 33.2375 20.5675 32.5463 24.5162C24.1927 21.7815 15.8465 21.7518 7.49191 24.5181C6.80174 20.5768 6.12457 16.7069 5.44275 12.8083V12.8093Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M7.80627 26.204C8.94976 25.8817 10.0635 25.5668 11.2209 25.2407C11.6408 27.6262 12.0542 29.9707 12.4712 32.3338C11.2962 32.541 10.1657 32.7398 8.99806 32.9451C8.60235 30.7073 8.20942 28.4826 7.80627 26.2049V26.204Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M27.5669 32.3329C27.983 29.9707 28.3955 27.6317 28.8163 25.2407C29.97 25.5658 31.0893 25.8817 32.2309 26.2031C31.8315 28.4677 31.4386 30.6915 31.041 32.9432C29.8771 32.7388 28.7392 32.5382 27.5669 32.332V32.3329Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M31.5267 9.94364C31.7878 8.75092 32.634 8.14435 33.6762 8.38586C34.7742 8.64038 35.2284 9.61573 34.8903 11.0286C33.7747 10.6682 32.6609 10.3087 31.5267 9.94271V9.94364Z"
+				fill="currentColor"
+			/>
+		</svg>
+	);
 };
 
 export default BannerBlockIcon;

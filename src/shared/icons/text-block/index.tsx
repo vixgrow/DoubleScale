@@ -1,41 +1,22 @@
 import { IconProps } from '@doublescale/config';
 
-const TextBlockIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
+const TextBlockIcon: React.FC<IconProps> = ({ width = 40, height = 40 }) => {
 	return (
 		<svg
+			xmlns="http://www.w3.org/2000/svg"
 			width={width}
 			height={height}
-			viewBox="0 0 24 24"
+			viewBox="0 0 40 40"
 			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
-				d="M3 3H21"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				opacity="0.2"
+				d="M35.0004 13.7145V26.2845C35.0004 31.7445 31.7454 34.9995 26.2854 34.9995H13.7154C13.4154 34.9995 13.1154 34.9845 12.8304 34.9695C10.9854 34.8495 9.42537 34.3245 8.19537 33.4245C7.56537 32.9895 7.01037 32.4345 6.57537 31.8045C5.54037 30.3795 5.00037 28.5195 5.00037 26.2845L5.00037 13.7145C5.00037 8.55451 7.91037 5.35951 12.8304 5.04451C13.1154 5.01451 13.4154 4.99951 13.7154 4.99951L26.2854 4.99951C28.5204 4.99951 30.3804 5.53951 31.8054 6.57451C32.4354 7.00951 32.9904 7.56451 33.4254 8.19451C34.4604 9.61951 35.0004 11.4795 35.0004 13.7145Z"
+				fill="currentColor"
 			/>
 			<path
-				d="M3 9H11"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-			<path
-				d="M3 15H21"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-			<path
-				d="M3 21H11"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				d="M27.005 10.459L12.995 10.459C11.27 10.459 9.875 11.854 9.875 13.579V15.349C9.875 15.964 10.385 16.474 11 16.474C11.615 16.474 12.125 15.964 12.125 15.349V13.579C12.125 13.099 12.515 12.709 12.995 12.709L18.875 12.709L18.875 27.2889H16.205C15.59 27.2889 15.08 27.7989 15.08 28.4139C15.08 29.0289 15.59 29.5389 16.205 29.5389L23.81 29.5389C24.425 29.5389 24.935 29.0289 24.935 28.4139C24.935 27.7989 24.425 27.2889 23.81 27.2889H21.14L21.14 12.709L27.02 12.709C27.5 12.709 27.89 13.099 27.89 13.579V15.349C27.89 15.964 28.4 16.474 29.015 16.474C29.63 16.474 30.14 15.964 30.14 15.349V13.579C30.125 11.869 28.73 10.459 27.005 10.459Z"
+				fill="currentColor"
 			/>
 		</svg>
 	);

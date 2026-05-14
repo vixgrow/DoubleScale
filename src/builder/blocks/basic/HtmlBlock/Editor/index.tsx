@@ -1,16 +1,6 @@
 /**
- * HTML Block Editor - REFACTORED
- *
- * Improvements:
- * - Uses BaseBlockEditor wrapper
- * - Uses grouped control imports
- * - Better organization
+ * HTML Block Editor — inline HTML / CSS (Figma-style), no dialog.
  */
-
-/**
- * WordPress dependencies
- */
-import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -21,7 +11,7 @@ import React from 'react';
  * Internal dependencies
  */
 import { HtmlBlockProps } from '..';
-import { HtmlDialog } from './HtmlDialog';
+import { HtmlCodeSections } from './HtmlCodeSections';
 import {
 	BaseBlockEditor,
 	BlockEditorErrorBoundary,
@@ -37,26 +27,18 @@ export const HtmlBlockEditor: React.FC<HtmlBlockEditorProps> = ({
 	props,
 	onChange,
 }) => {
-	const handleSaveDialog = (content: string, customCss: string) => {
-		onChange({ content, customCss });
-	};
-
 	return (
 		<BlockEditorErrorBoundary>
 			<BaseBlockEditor props={props} onChange={onChange}>
 				{(props, onChange) => (
 					<>
-						{/* HTML Content Dialog */}
-						<div className="flex flex-col gap-2 text-[#333333]">
-							<div>{__('HTML Content', 'doublescale')}</div>
-							<HtmlDialog
-								content={props.content}
-								customCss={props.customCss}
-								onSave={handleSaveDialog}
-							/>
-						</div>
+						<HtmlCodeSections
+							content={props.content}
+							customCss={props.customCss}
+							onContentChange={(content) => onChange({ content })}
+							onCustomCssChange={(customCss) => onChange({ customCss })}
+						/>
 
-						{/* Width */}
 						<LayoutControls.WidthHeightControl
 							width={props.width}
 							onWidthChange={(width) => onChange({ width })}
@@ -65,7 +47,6 @@ export const HtmlBlockEditor: React.FC<HtmlBlockEditorProps> = ({
 							showHeight={false}
 						/>
 
-						{/* Padding */}
 						<LayoutControls.PaddingControl
 							value={
 								props.padding || {

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Core\Logger;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * QF Logger Interface
  *

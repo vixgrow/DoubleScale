@@ -21,29 +21,29 @@ export type { LeadScoringRef } from './lead-scoring';
 
 const ContactsList: React.FC = () => {
 	const isCrmManager = useCapabilities().isCrmManager();
-	const allContactsRef = useRef< AllContactsRef >( null );
+	const allContactsRef = useRef<AllContactsRef>(null);
 
 	const headerActions = [
-		...( isCrmManager
+		...(isCrmManager
 			? [
-					{
-						label: __( 'Export Contact', 'doublescale' ),
-						onClick: () =>
-							allContactsRef.current?.openExportModal(),
-						variant: 'outline' as const,
-						icon: <ArrowUpIcon />,
-					},
-					{
-						label: __( 'Import Contact', 'doublescale' ),
-						onClick: () =>
-							allContactsRef.current?.openImportModal(),
-						variant: 'secondary' as const,
-						icon: <ArrowDownIcon />,
-					},
-			  ]
-			: [] ),
+				{
+					label: __('Export Contact', 'doublescale'),
+					onClick: () =>
+						allContactsRef.current?.openExportModal(),
+					variant: 'outline' as const,
+					icon: <ArrowUpIcon />,
+				},
+				{
+					label: __('Import Contact', 'doublescale'),
+					onClick: () =>
+						allContactsRef.current?.openImportModal(),
+					variant: 'secondaryDeepBlue' as const,
+					icon: <ArrowDownIcon />,
+				},
+			]
+			: []),
 		{
-			label: __( 'Add Contact', 'doublescale' ),
+			label: __('Add Contact', 'doublescale'),
 			onClick: () => allContactsRef.current?.openCreateContactModal(),
 			icon: <PlusIcon />,
 		},
@@ -52,12 +52,12 @@ const ContactsList: React.FC = () => {
 	return (
 		<div className="doublescale-contacts-list w-full">
 			<PageHeader
-				title={ __( 'Contacts List', 'doublescale' ) }
-				subtitle={ __( 'Contacts', 'doublescale' ) }
-				actions={ headerActions }
+				title={__('Contacts List', 'doublescale')}
+				subtitle={__('Contacts', 'doublescale')}
+				actions={headerActions}
 			/>
 
-			<AllContacts ref={ allContactsRef } activeTab="all" />
+			<AllContacts ref={allContactsRef} activeTab="all" />
 		</div>
 	);
 };

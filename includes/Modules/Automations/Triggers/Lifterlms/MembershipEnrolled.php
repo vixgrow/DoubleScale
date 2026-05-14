@@ -1,25 +1,24 @@
 <?php
-
 /**
- * LifterLMS Trigger for Membership Enrolled
- * This trigger will be fired when a user is added to a membership level.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Lifterlms;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WP_User;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Membership Enrolled Trigger
+ * MembershipEnrolled trigger stub.
  */
-class MembershipEnrolled extends Trigger {
+class MembershipEnrolled extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,33 +67,6 @@ class MembershipEnrolled extends Trigger {
 	 *
 	 * @return void
 	 */
-	public function load_hooks() {
-		add_action( 'llms_user_added_to_membership_level', array( $this, 'membership_enrolled' ), 10, 2 );
-	}
-
-	/**
-	 * Membership Enrolled
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $user_id User ID.
-	 * @param int $membership_id Membership ID.
-	 * @return void
-	 */
-	public function membership_enrolled( $user_id, $membership_id ) {
-		$user = get_user_by( 'ID', $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'membership_id' => $membership_id,
-				'user_id'       => $user_id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
+
+TriggersManager::instance()->register( new MembershipEnrolled() );

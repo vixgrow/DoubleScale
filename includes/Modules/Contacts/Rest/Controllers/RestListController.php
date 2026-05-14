@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestTaxonomyController;
 use DoubleScale\Modules\Contacts\Models\ListModel;
 

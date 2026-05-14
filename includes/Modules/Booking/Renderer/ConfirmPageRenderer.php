@@ -5,6 +5,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 class ConfirmPageRenderer extends BaseTemplateRenderer {
 
 	private string $eventModelClass;

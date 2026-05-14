@@ -1,27 +1,23 @@
 <?php
-
 /**
- * Delay Until Datetime Action
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Delays;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Plugin;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Delay Until Datetime Action
+ * DelayUntilDatetime action stub.
  */
-class DelayUntilDatetime extends Action
-{
-	/**
+class DelayUntilDatetime extends ProAutomationStubAction {
+
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -81,52 +77,6 @@ class DelayUntilDatetime extends Action
 	 *
 	 * @return bool
 	 */
-	public function process_action(AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact)
-	{
-		$next_step = $automation->get_next_step($step);
-		if (! $next_step) {
-			return false;
-		}
-		// Schedule the next step after 2 minutes
-		$datetime = $step->get_setting('datetime');
-		// convert datetime to timestamp
-		$timestamp = (new \DateTime($datetime))->getTimestamp();
-
-		Plugin::instance()->automations_tasks->schedule_single($timestamp, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id);
-		return true;
-	}
-
-	/**
-	 * Get fields.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_fields()
-	{
-		return array(
-			'datetime' => array(
-				'type'  => 'datetime',
-				'label' => __('Datetime', 'doublescale'),
-			),
-		);
-	}
-
-	/**
-	 * Get Attributes Schema
-	 */
-	public function get_attributes_schema()
-	{
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'datetime' => array(
-					'type'    => 'string',
-					'title'   => 'Datetime (YYYY-MM-DD HH:MM:SS)',
-					'default' => 'now',
-				),
-			),
-		);
-	}
 }
+
+DelayUntilDatetime::instance();

@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\LeadScoring;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 

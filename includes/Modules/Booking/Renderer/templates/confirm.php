@@ -1,5 +1,8 @@
 <?php
 
+
+defined( 'ABSPATH' ) || exit;
+
 $icons_url = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 
 $event_name  = $booking_array['event']['name'] ?? '';
@@ -206,30 +209,6 @@ file_put_contents( $ics_path, $ics_content );
 			</div>
 			<?php endif; ?>
 
-
-			<!-- <div class="cancellation-policy">
-			<h3>
-			<?php
-			// esc_html_e('Cancellation policy:', 'doublescale');
-			?>
-			</h3> 
-			<p>
-				<?php
-				// esc_html_e('You can cancel or reschedule anytime before the appointment time.', 'doublescale');
-				?>
-				</p>
-
-			<h3>
-			<?php
-			// esc_html_e('Additional information:', 'doublescale');
-			?>
-			</h3>
-			<p>
-				<?php
-				// esc_html_e('You may receive appointment-specific communication from Quill Booking. This includes confirmations, receipts and reminders via email and SMS.', 'doublescale');
-				?>
-				</p>
-		</div> -->
 
 		</div>
 	<?php endif; ?>

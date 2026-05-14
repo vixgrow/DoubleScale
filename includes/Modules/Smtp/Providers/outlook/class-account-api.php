@@ -113,7 +113,7 @@ class Account_API {
 		if ( $response_code == 401 ) {
 			$refreshed = $this->refresh_tokens();
 			if ( ! $refreshed ) {
-				return new WP_Error( 'refresh_error', __( 'Could not refresh tokens.', 'smtp' ) );
+				return new WP_Error( 'refresh_error', __( 'Could not refresh tokens.', 'doublescale' ) );
 			}
 			return $this->send( $args );
 		}
@@ -154,19 +154,19 @@ class Account_API {
 		if ( $response_code == 401 ) {
 			$refreshed = $this->refresh_tokens();
 			if ( ! $refreshed ) {
-				return new WP_Error( 'refresh_error', __( 'Could not refresh tokens.', 'smtp' ) );
+				return new WP_Error( 'refresh_error', __( 'Could not refresh tokens.', 'doublescale' ) );
 			}
 			return $this->get_profile();
 		}
 
 		if ( empty( $body ) ) {
-			return new WP_Error( 'empty_response', __( 'Empty response.', 'smtp' ) );
+			return new WP_Error( 'empty_response', __( 'Empty response.', 'doublescale' ) );
 		}
 
 		$body = json_decode( $body );
 
 		if ( ! is_object( $body ) ) {
-			return new WP_Error( 'invalid_response', __( 'Invalid response.', 'smtp' ) );
+			return new WP_Error( 'invalid_response', __( 'Invalid response.', 'doublescale' ) );
 		}
 
 		return $body;

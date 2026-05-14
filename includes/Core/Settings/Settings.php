@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Core\Settings;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Settings Class
  *

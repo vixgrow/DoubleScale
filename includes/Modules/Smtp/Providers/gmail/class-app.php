@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

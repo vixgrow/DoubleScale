@@ -104,6 +104,11 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Triggers/Learnpress/*.php',
 				'includes/Modules/Automations/Triggers/Memberpress/*.php',
 				'includes/Modules/Automations/Triggers/Pmpro/*.php',
+				'includes/Modules/Automations/Triggers/Deal/*.php',
+				'includes/Modules/Automations/Triggers/Link/*.php',
+				'includes/Modules/Automations/Triggers/Messaging/*.php',
+				'includes/Modules/Automations/Triggers/Forms/*.php',
+				'includes/Modules/Automations/Triggers/Booking/*.php',
 				'includes/Modules/Automations/Triggers/Surecart/*/*.php',
 				'includes/Modules/Automations/Triggers/Prestoplayer/*.php',
 				'includes/Modules/Automations/Actions/*.php',
@@ -118,6 +123,9 @@ final class Module extends AbstractModule {
 				'includes/Modules/Automations/Actions/Learnpress/*.php',
 				'includes/Modules/Automations/Actions/Memberpress/*.php',
 				'includes/Modules/Automations/Actions/Pmpro/*.php',
+				'includes/Modules/Automations/Actions/Deal/*.php',
+				'includes/Modules/Automations/Actions/Messaging/*.php',
+				'includes/Modules/Automations/Actions/Email/*.php',
 				'includes/Modules/Automations/Actions/Prestoplayer/*.php',
 				'includes/Modules/Automations/Goals/*.php',
 				'includes/Modules/Automations/Goals/Surecart/*.php',
@@ -140,7 +148,7 @@ final class Module extends AbstractModule {
 			return;
 		}
 		foreach ( array( 'Activity', 'Submission' ) as $subdir ) {
-			$dir = DOUBLESCALE_PRO_PLUGIN_DIR . 'includes/Modules/Automations/Rules/' . $subdir;
+			$dir = \DOUBLESCALE_PRO_PLUGIN_DIR . 'includes/Modules/Automations/Rules/' . $subdir;
 			if ( ! is_dir( $dir ) ) {
 				continue;
 			}
@@ -159,123 +167,17 @@ final class Module extends AbstractModule {
 	}
 
 	public function register_triggers( $triggers ) {
-		$triggers['contact_subscribed']                       = new Triggers\ContactSubscribed();
-		$triggers['contact_unsubscribed']                     = new Triggers\ContactUnsubscribed();
-		$triggers['user_login']                              = new Triggers\UserLogin();
-		$triggers['user_register']                           = new Triggers\UserRegister();
-		$triggers['user_role_update']                        = new Triggers\UserRoleUpdate();
-		$triggers['lists_applied']                            = new Triggers\ListsApplied();
-		$triggers['lists_removed']                            = new Triggers\ListsRemoved();
-		$triggers['tags_applied']                             = new Triggers\TagsApplied();
-		$triggers['tags_removed']                             = new Triggers\TagsRemoved();
-		$triggers['webhook_received']                         = new Triggers\WebhookReceived();
-		$triggers['wp_customer_before_card_expiry']           = new Triggers\Woocommerce\Subscription\CustomerBeforeCardExpiry();
-		$triggers['wp_subscription_before_end']               = new Triggers\Woocommerce\Subscription\SubscriptionBeforeEnd();
-		$triggers['wp_subscription_before_renewal']           = new Triggers\Woocommerce\Subscription\SubscriptionBeforeRenewal();
-		$triggers['wp_subscription_created']                  = new Triggers\Woocommerce\Subscription\SubscriptionCreated();
-		$triggers['wp_subscription_note_added']               = new Triggers\Woocommerce\Subscription\SubscriptionNoteAdded();
-		$triggers['wp_subscription_renewal_payment_complete'] = new Triggers\Woocommerce\Subscription\SubscriptionRenewalPaymentComplete();
-		$triggers['wp_subscription_renewal_payment_failed']   = new Triggers\Woocommerce\Subscription\SubscriptionRenewalPaymentFailed();
-		$triggers['wp_subscription_status_changed']           = new Triggers\Woocommerce\Subscription\SubscriptionStatusChanged();
-		$triggers['wp_subscription_trial_end']                = new Triggers\Woocommerce\Subscription\SubscriptionTrialEnd();
-		$triggers['wp_membership_created']                    = new Triggers\Woocommerce\Membership\MembershipCreated();
-		$triggers['wp_membership_status_changed']             = new Triggers\Woocommerce\Membership\MembershipStatusChanged();
-		$triggers['wp_wishlist_item_on_sale']                 = new Triggers\Woocommerce\Wishlist\WishlistItemOnSale();
-		$triggers['wp_wishlist_reminder']                     = new Triggers\Woocommerce\Wishlist\WishlistReminder();
-		$triggers['wp_user_adds_product_to_wishlist']         = new Triggers\Woocommerce\Wishlist\UserAddsProductToWishlist();
-		$triggers['wc_abandoned_cart_created']                = new Triggers\Woocommerce\Cart\AbandonedCartCreated();
-		$triggers['wc_cart_recovered']                        = new Triggers\Woocommerce\Cart\CartRecovered();
-		$triggers['wc_order_created']                         = new Triggers\Woocommerce\Order\OrderCreated();
-		$triggers['wc_order_created_per_product']             = new Triggers\Woocommerce\Order\OrderCreatedPerProduct();
-		$triggers['wc_order_completed']                       = new Triggers\Woocommerce\Order\OrderCompleted();
-		$triggers['wc_order_status_changed']                  = new Triggers\Woocommerce\Order\OrderStatusChanged();
-		$triggers['wc_order_refunded']                        = new Triggers\Woocommerce\Order\OrderRefunded();
-		$triggers['wc_order_status_pending']                  = new Triggers\Woocommerce\Order\OrderStatusPending();
-		$triggers['wc_order_note_added']                      = new Triggers\Woocommerce\Order\OrderNoteAdded();
-		$triggers['wc_order_item_stock_reduced']              = new Triggers\Woocommerce\Order\OrderItemStockReduced();
-		$triggers['wc_review_received']                       = new Triggers\Woocommerce\Review\ReviewReceived();
-		$triggers['learndash_course_completed']               = new Triggers\Learndash\CourseCompleted();
-		$triggers['learndash_lesson_completed']               = new Triggers\Learndash\LessonCompleted();
-		$triggers['learndash_topic_completed']                = new Triggers\Learndash\TopicCompleted();
-		$triggers['learndash_user_added_to_group']            = new Triggers\Learndash\UserAddedToGroup();
-		$triggers['learndash_user_enrolled_in_course']        = new Triggers\Learndash\UserEnrolledInCourse();
-		$triggers['learndash_user_left_course']               = new Triggers\Learndash\UserLeftCourse();
-		$triggers['edd_new_order_success']                    = new Triggers\Edd\NewOrderSuccess();
-		$triggers['tutorlms_course_enrolled']                 = new Triggers\Tutorlms\CourseEnrolled();
-		$triggers['tutorlms_course_completed']                = new Triggers\Tutorlms\CourseCompleted();
-		$triggers['tutorlms_lesson_completed']                = new Triggers\Tutorlms\LessonCompleted();
-		$triggers['lifterlms_course_enrolled']                = new Triggers\Lifterlms\CourseEnrolled();
-		$triggers['lifterlms_course_completed']               = new Triggers\Lifterlms\CourseCompleted();
-		$triggers['lifterlms_lesson_completed']               = new Triggers\Lifterlms\LessonCompleted();
-		$triggers['lifterlms_membership_enrolled']            = new Triggers\Lifterlms\MembershipEnrolled();
-		$triggers['learnpress_course_enrolled']               = new Triggers\Learnpress\CourseEnrolled();
-		$triggers['learnpress_course_completed']              = new Triggers\Learnpress\CourseCompleted();
-		$triggers['learnpress_lesson_completed']              = new Triggers\Learnpress\LessonCompleted();
-		$triggers['memberpress_membership_enrolled']          = new Triggers\Memberpress\MembershipEnrolled();
-		$triggers['memberpress_membership_level_expiry']      = new Triggers\Memberpress\MembershipLevelExpiry();
-		$triggers['memberpress_subscription_created']         = new Triggers\Memberpress\SubscriptionCreated();
-		$triggers['memberpress_subscription_paused']          = new Triggers\Memberpress\SubscriptionPaused();
-		$triggers['memberpress_subscription_resumed']         = new Triggers\Memberpress\SubscriptionResumed();
-		$triggers['memberpress_subscription_cancelled']       = new Triggers\Memberpress\SubscriptionCancelled();
-		$triggers['memberpress_transaction_completed']        = new Triggers\Memberpress\TransactionCompleted();
-		$triggers['memberpress_transaction_refunded']         = new Triggers\Memberpress\TransactionRefunded();
-		$triggers['memberpress_transaction_failed']           = new Triggers\Memberpress\TransactionFailed();
-		$triggers['pmpro_checkout_completed']                 = new Triggers\Pmpro\CheckoutCompleted();
-		$triggers['pmpro_membership_level_changed']           = new Triggers\Pmpro\MembershipLevelChanged();
-		$triggers['pmpro_membership_cancelled']               = new Triggers\Pmpro\MembershipCancelled();
-		$triggers['pmpro_membership_expired']                 = new Triggers\Pmpro\MembershipExpired();
-		$triggers['pmpro_membership_expiring_soon']           = new Triggers\Pmpro\MembershipExpiringSoon();
-		$triggers['pmpro_order_added']                        = new Triggers\Pmpro\OrderAdded();
-		$triggers['pmpro_order_updated']                      = new Triggers\Pmpro\OrderUpdated();
-
-		if ( defined( 'SURECART_PLUGIN_FILE' ) ) {
-			$triggers['surecart_order_success']  = new Triggers\Surecart\Order\OrderSuccess();
-			$triggers['surecart_order_refunded'] = new Triggers\Surecart\Order\OrderRefunded();
-		}
-
-		if ( defined( 'PRESTO_PLAYER_PLUGIN_FILE' ) ) {
-			$triggers['prestoplayer_video_completed'] = new Triggers\Prestoplayer\VideoCompleted();
-			$triggers['prestoplayer_video_watched']   = new Triggers\Prestoplayer\VideoWatched();
-		}
-
+		$triggers['user_login']       = new Triggers\UserLogin();
+		$triggers['user_register']    = new Triggers\UserRegister();
+		$triggers['user_role_update'] = new Triggers\UserRoleUpdate();
 		return $triggers;
 	}
 
 	public function register_actions( $actions ) {
-		$actions['learndash_add_user_to_course']      = new Actions\Learndash\AddUserToCourse();
-		$actions['learndash_add_user_to_group']       = new Actions\Learndash\AddUserToGroup();
-		$actions['learndash_remove_user_from_course'] = new Actions\Learndash\RemoveUserFromCourse();
-		$actions['learndash_remove_user_from_group']  = new Actions\Learndash\RemoveUserFromGroup();
-		$actions['add_order_note']                    = new Actions\Woocommerce\AddOrderNote();
-		$actions['change_order_status']               = new Actions\Woocommerce\ChangeOrderStatus();
-		$actions['create_coupon']                     = new Actions\Woocommerce\CreateCoupon();
-		$actions['create_user']                       = new Actions\Wordpress\CreateUser();
-		$actions['remove_user_role']                  = new Actions\Wordpress\RemoveUserRole();
-		$actions['update_user_role']                  = new Actions\Wordpress\UpdateUserRole();
-		$actions['update_user_meta']                  = new Actions\Wordpress\UpdateUserMeta();
-		$actions['delay-until-datetime']              = new Actions\Delays\DelayUntilDatetime();
-		$actions['http_request_webhook']              = new Actions\Webhooks\HttpRequestWebhook();
-		$actions['zapier_webhook']                    = new Actions\Webhooks\ZapierWebhook();
-		$actions['slack_send_to_channel']             = new Actions\Crm\Slack\SendToChannel();
-		$actions['tutorlms_add_user_to_course']       = new Actions\Tutorlms\AddUserToCourse();
-		$actions['tutorlms_remove_user_from_course']  = new Actions\Tutorlms\RemoveUserFromCourse();
-		$actions['lifterlms_add_user_to_course']          = new Actions\Lifterlms\AddUserToCourse();
-		$actions['lifterlms_remove_user_from_course']     = new Actions\Lifterlms\RemoveUserFromCourse();
-		$actions['lifterlms_add_user_to_membership']      = new Actions\Lifterlms\AddUserToMembership();
-		$actions['lifterlms_remove_user_from_membership'] = new Actions\Lifterlms\RemoveUserFromMembership();
-		$actions['learnpress_add_user_to_course']         = new Actions\Learnpress\AddUserToCourse();
-		$actions['learnpress_remove_user_from_course']    = new Actions\Learnpress\RemoveUserFromCourse();
-		$actions['memberpress_add_user_to_membership']      = new Actions\Memberpress\AddUserToMembership();
-		$actions['memberpress_remove_user_from_membership'] = new Actions\Memberpress\RemoveUserFromMembership();
-		$actions['pmpro_add_user_to_membership_level']      = new Actions\Pmpro\AddUserToMembershipLevel();
-		$actions['pmpro_remove_user_from_membership_level'] = new Actions\Pmpro\RemoveUserFromMembershipLevel();
 		return $actions;
 	}
 
 	public function register_goals( $goals ) {
-		$goals['used_dynamic_coupon']     = new Goals\UsedDynamicCoupon();
-		$goals['wc_cart_recovered_goal']  = new Goals\Woocommerce\CartRecovered();
-		$goals['surecart_order_received'] = new Goals\Surecart\OrderReceived();
 		return $goals;
 	}
 

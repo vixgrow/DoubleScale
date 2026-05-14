@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Tracking;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Tracking\Models\LinkTriggerModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 

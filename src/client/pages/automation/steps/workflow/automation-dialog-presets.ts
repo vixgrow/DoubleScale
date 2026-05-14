@@ -23,7 +23,7 @@ export const automationDialogSurfaceWide = cn(
 /** Add step and similar pickers. */
 export const automationDialogSurfaceMedium = cn(
 	automationDialogSurfaceCore,
-	'z-[150300] max-h-[min(90vh,880px)] w-[min(96vw,800px)] max-w-[min(96vw,800px)]'
+	'z-[150300] max-h-[min(90vh,880px)] w-[min(96vw,960px)] max-w-[min(96vw,960px)]'
 );
 
 /** Upsell / compact dialogs. */
@@ -37,16 +37,16 @@ export const automationDialogAccentBarClassName = cn(
 );
 
 export const automationDialogHeaderClassName = cn(
-	'shrink-0 space-y-0 border-b border-border/50 bg-gradient-to-br from-muted/80 via-muted/40 to-transparent',
-	'px-6 py-5 text-left sm:px-8 sm:py-6 sm:text-left'
+	'shrink-0 space-y-0 bg-gradient-to-br from-muted/80 via-muted/40 to-transparent',
+	'p-6 text-left sm:p-6 sm:text-left'
 );
 
 export const automationDialogBodyClassName = cn(
-	'min-h-0 flex-1 overflow-y-auto px-6 py-5 sm:px-8 sm:py-6'
+	'min-h-0 flex-1 overflow-y-auto p-6 sm:p-6'
 );
 
 export const automationDialogFooterClassName = cn(
-	'shrink-0 border-t border-border/50 bg-muted/25 px-6 py-4 sm:px-8'
+	'shrink-0 border-t border-border/50 bg-muted/25 p-6 sm:p-6'
 );
 
 /** Confirm / delete dialogs on the canvas. */

@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Booking\Managers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Abstracts\FieldType;
 use DoubleScale\Modules\Booking\Fields\CheckboxField;
 use DoubleScale\Modules\Booking\Fields\TextField;

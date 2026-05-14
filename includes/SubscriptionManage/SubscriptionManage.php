@@ -11,6 +11,9 @@
 
 namespace DoubleScale\SubscriptionManage;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

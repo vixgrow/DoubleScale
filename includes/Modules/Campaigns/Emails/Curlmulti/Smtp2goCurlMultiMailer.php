@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Curlmulti;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Providers\SMTP2GO\Account_API;
 use WP_Error;
 

@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Segments;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;

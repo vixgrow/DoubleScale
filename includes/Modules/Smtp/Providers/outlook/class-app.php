@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * App class.
  *
@@ -50,7 +53,7 @@ class App {
 		$app_credentials = $this->get_app_credentials();
 
 		if ( empty( $app_credentials ) ) {
-			echo esc_html__( 'Cannot find app credentials!', 'smtp' );
+			echo esc_html__( 'Cannot find app credentials!', 'doublescale' );
 			exit;
 		}
 
@@ -84,14 +87,14 @@ class App {
 		// ensure authorize code.
 		$code = $_GET['code'] ?? null;
 		if ( empty( $code ) ) {
-			echo esc_html__( 'Error, There is no authorize code passed!', 'smtp' );
+			echo esc_html__( 'Error, There is no authorize code passed!', 'doublescale' );
 			exit;
 		}
 
 		$app_credentials = $this->get_app_credentials();
 
 		if ( empty( $app_credentials ) ) {
-			echo esc_html__( 'Cannot find app credentials!', 'smtp' );
+			echo esc_html__( 'Cannot find app credentials!', 'doublescale' );
 			exit;
 		}
 
@@ -107,7 +110,7 @@ class App {
 		);
 
 		if ( empty( $tokens ) ) {
-			echo esc_html__( 'Error, Cannot get account tokens!', 'smtp' );
+			echo esc_html__( 'Error, Cannot get account tokens!', 'doublescale' );
 			exit;
 		}
 
@@ -116,7 +119,7 @@ class App {
 		$accounts_response = $account_api->get_profile();
 
 		if ( is_wp_error( $accounts_response ) ) {
-			echo esc_html__( 'Error, Cannot get profile details!', 'smtp' );
+			echo esc_html__( 'Error, Cannot get profile details!', 'doublescale' );
 			exit;
 		}
 
@@ -133,13 +136,13 @@ class App {
 		if ( in_array( $account_id, array_keys( $this->provider->accounts->get_accounts() ), true ) ) {
 			$result = $this->provider->accounts->update_account( $account_id, $account_data );
 			if ( empty( $result ) || is_wp_error( $result ) ) {
-				echo esc_html__( 'Error, Cannot update the account!', 'smtp' );
+				echo esc_html__( 'Error, Cannot update the account!', 'doublescale' );
 				exit;
 			}
 		} else {
 			$result = $this->provider->accounts->add_account( $account_id, $account_data );
 			if ( empty( $result ) || is_wp_error( $result ) ) {
-				echo esc_html__( 'Error, Cannot add the new account!', 'smtp' );
+				echo esc_html__( 'Error, Cannot add the new account!', 'doublescale' );
 				exit;
 			}
 		}
@@ -155,7 +158,7 @@ class App {
 			<title>Authorization done</title>
 		</head>
 		<body>
-			<?php echo esc_html__( "The account is added/updated successfully. If this window isn't closed automatically. Please close it and refersh your accounts select menu.", 'smtp' ); ?>
+			<?php echo esc_html__( "The account is added/updated successfully. If this window isn't closed automatically. Please close it and refersh your accounts select menu.", 'doublescale' ); ?>
 			<script>
 				if ( typeof window.opener.add_new_outlook_account === 'function' ) {
 					window.opener.add_new_outlook_account( '<?php echo esc_attr( $account_id ); ?>', '<?php echo esc_attr( $account_name ); ?>' );

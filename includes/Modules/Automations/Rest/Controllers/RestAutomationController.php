@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -466,6 +469,7 @@ class RestAutomationController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function get_triggers( $request ) {
+		TriggersManager::instance()->sync_form_trigger_sources();
 		$triggers = TriggersManager::instance()->get_sources();
 
 		return new WP_REST_Response( $triggers, 200 );
@@ -1125,7 +1129,10 @@ class RestAutomationController extends RestController {
 		if ( ! empty( $trigger->source ) && ! empty( $trigger->group ) ) {
 			if ( isset( $plugin_dependencies[ $trigger->source ][ $trigger->group ] ) ) {
 				$dependency = $plugin_dependencies[ $trigger->source ][ $trigger->group ];
-				if ( empty( $dependency['plugin'] ) ) {
+				if ( ! empty( $dependency['module'] ) ) {
+					$is_active = function_exists( 'doublescale_is_module_active' )
+						&& doublescale_is_module_active( (string) $dependency['module'] );
+				} elseif ( empty( $dependency['plugin'] ) ) {
 					$is_active = true;
 				} else {
 					$is_active = doublescale_is_plugin_active( $dependency['plugin'] );
@@ -1153,6 +1160,21 @@ class RestAutomationController extends RestController {
 						'plugin_label' => $dependency['label'],
 					);
 				}
+			}
+		}
+
+		// Form integration triggers use `source` = "forms" and are not listed in
+		// `$plugin_dependencies` above. Without this branch, Pro-only form stubs still register
+		// in {@see TriggersManager} but list/detail dependency checks never surface the Pro warning
+		// (unlike CRM triggers such as Contact Subscribed).
+		if ( 'forms' === ( $trigger->source ?? '' ) ) {
+			if ( ! empty( $trigger->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
+				return array(
+					'is_active'    => false,
+					'is_pro'       => true,
+					'message'      => __( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
+					'plugin_label' => __( 'Double Scale Pro', 'doublescale' ),
+				);
 			}
 		}
 

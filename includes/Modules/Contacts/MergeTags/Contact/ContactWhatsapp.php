@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\MergeTags\Contact;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Managers\MergeTagsManager;

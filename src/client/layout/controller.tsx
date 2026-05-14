@@ -62,6 +62,7 @@ import {
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { Mail } from 'lucide-react';
 import { RocketIcon } from '@/components/icons';
+import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
@@ -99,6 +100,17 @@ const useOnboardingRedirect = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		// EndStep of the wizard POSTs to `/doublescale/v1/modules`, which makes
+		// at least one module slug explicit in `doublescale_enabled_modules`.
+		// Treat that as proof the user has been through onboarding, so we don't
+		// keep dragging them back to /start if they later clear business info.
+		const hasExplicitModules = config
+			.getModules()
+			.some((m) => Boolean(m.is_explicit));
+		if (hasExplicitModules) {
+			return;
+		}
+
 		const checkBusinessSettings = async () => {
 			try {
 				const settings: any = await apiFetch({
@@ -223,6 +235,7 @@ export const HeaderBar = ({ page }: { page: any }) => {
 					</a>
 				)}
 				{!isProActive && <ProUpgradeButton />}
+				{!isProActive && <HeaderProBells />}
 				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
 				<div className="doublescale-layout__header-divider"></div>
 				<div className="doublescale-layout__header-user-info">

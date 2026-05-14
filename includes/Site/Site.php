@@ -6,8 +6,10 @@
  */
 
 namespace DoubleScale\Site;
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Site\License;
-use DoubleScale\Site\Updater;
 
 
 /**
@@ -44,7 +46,6 @@ class Site {
 	private function __construct() {
 		License::instance();
 		Store::instance();
-		Updater::instance();
 	}
 
 	/**

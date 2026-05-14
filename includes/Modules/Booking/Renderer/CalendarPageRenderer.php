@@ -6,6 +6,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 class CalendarPageRenderer extends BaseTemplateRenderer {
 
 	private string $calendarModelClass;

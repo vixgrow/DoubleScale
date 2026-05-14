@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\Provider;
 use DoubleScale\Modules\Smtp\Settings;
 use WP_Error;
@@ -63,7 +66,7 @@ trait Account_Controller_Gettable {
 			if ( ! $account_data ) {
 				return new WP_Error(
 					'doublescale_smtp_account_not_found',
-					__( 'Account not found.', 'smtp' ),
+					__( 'Account not found.', 'doublescale' ),
 					array( 'status' => 404 )
 				);
 			}

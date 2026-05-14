@@ -14,6 +14,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Campaign;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

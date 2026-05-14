@@ -12,6 +12,22 @@ import Config from '@doublescale/config';
 type ApiFetchOptions = Parameters<typeof apiFetch>[0];
 
 /**
+ * Optional flags for {@link moduleFetch} (e.g. Pro-only REST routes used from a different module’s UI).
+ */
+export type ModuleFetchMeta = {
+	/**
+	 * When true, requires DoubleScale Pro active before calling the API (same guard as slug `analytics`).
+	 * Use for automation funnel / report calls that are shown under Automations but implemented in Pro.
+	 */
+	requirePro?: boolean;
+};
+
+/** Returns true when DoubleScale Pro is installed and active. */
+export function isProActive(): boolean {
+	return Boolean(Config.getProPluginData()?.is_active);
+}
+
+/**
  * Human-readable module title for notices (uses PHP-provided label when present).
  */
 export function getModuleDisplayName(moduleSlug: string): string {
@@ -53,20 +69,21 @@ export function getProRequiredForAnalyticsNotice(): string {
  * Calls {@link apiFetch} only when {@link Config.isModuleEnabled} is true for `moduleSlug`.
  * Returns `null` without calling the API when the module is off.
  *
- * For slug `analytics`, also requires Pro active — those endpoints live in Pro only.
+ * For slug `analytics`, or when {@link ModuleFetchMeta.requirePro} is true, also requires Pro active —
+ * those reporting endpoints live in Pro only.
  */
 export async function moduleFetch<T>(
 	moduleSlug: string,
-	options: ApiFetchOptions
+	options: ApiFetchOptions,
+	meta?: ModuleFetchMeta
 ): Promise<T | null> {
 	if (!Config.isModuleEnabled(moduleSlug)) {
 		return null;
 	}
-	if (moduleSlug === 'analytics') {
-		const pro = Config.getProPluginData();
-		if (!pro?.is_active) {
-			return null;
-		}
+	const needsPro =
+		moduleSlug === 'analytics' || Boolean(meta?.requirePro);
+	if (needsPro && !isProActive()) {
+		return null;
 	}
 	return apiFetch<T>(options);
 }

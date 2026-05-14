@@ -14,6 +14,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\ContactFields;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;

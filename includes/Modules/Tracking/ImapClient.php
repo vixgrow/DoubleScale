@@ -156,13 +156,11 @@ class ImapClient {
 				$error_message = __( 'Unknown error — check server hostname, port, and encryption settings.', 'doublescale');
 			}
 
-			throw new \RuntimeException(
-				sprintf(
+			throw new \RuntimeException( esc_html( sprintf(
 					/* translators: %s: IMAP error message */
 					__( 'Failed to connect to IMAP server: %s', 'doublescale'),
 					$error_message
-				)
-			);
+				) ) );
 		}
 	}
 

@@ -1,26 +1,24 @@
 <?php
-
 /**
- * LearnDash Trigger for Course Left
- * This trigger will be fired when a user leaves a course.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Learndash;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WP_User;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Course Left Trigger
+ * UserLeftCourse trigger stub.
  */
-class UserLeftCourse extends Trigger
-{
+class UserLeftCourse extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -69,40 +67,6 @@ class UserLeftCourse extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('learndash_update_course_access', array($this, 'course_left'), 10, 4);
-	}
-
-	/**
-	 * Course Left
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $user_id User ID.
-	 * @param int $course_id Course ID.
-	 * @param int $course_access_list Access List (comma separated).
-	 * @param int $remove Remove.
-	 * @return void
-	 */
-	public function course_left($user_id, $course_id, $course_access_list, $remove)
-	{
-		if (! $remove) {
-			return;
-		}
-
-		$user = get_user_by('ID', $user_id);
-		if (! $user instanceof WP_User) {
-			return;
-		}
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'course_id'          => $course_id,
-				'course_access_list' => $course_access_list,
-				'user_id'            => $user_id,
-			),
-		);
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new UserLeftCourse() );

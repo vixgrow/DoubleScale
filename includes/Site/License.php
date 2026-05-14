@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Site;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Layouts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Generic inline layout handler - uses flexBasis from blocks
  */

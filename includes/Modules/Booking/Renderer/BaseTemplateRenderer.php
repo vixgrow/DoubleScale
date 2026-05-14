@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Data\BookingDataFormatter;
 use DoubleScale\Modules\Booking\Models\UserModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Booking;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
 use DoubleScale\Modules\Booking\Models\BookingModel;

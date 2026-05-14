@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 
 class BookedSlotModel extends Model {
@@ -49,9 +52,7 @@ class BookedSlotModel extends Model {
 			);
 		} catch ( \Exception $e ) {
 			if ( self::is_duplicate_entry_error( $e ) ) {
-				throw new \Exception(
-					__( 'This time slot has just been booked. Please choose another.', 'doublescale' )
-				);
+				throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );
 			}
 			throw $e;
 		}

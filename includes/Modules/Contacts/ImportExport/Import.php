@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Core\Models\UserModel;
@@ -423,7 +426,7 @@ class Import {
 	public function import_from_csv( $file_name, $mapping ) {
 		$this->start_time = microtime( true );
 		if ( ! Security::prepare_upload_dir() ) {
-			throw new \Exception( __( 'Could not create the import working directory.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale') );
 		}
 
 		$mapping          = array_flip( $mapping );

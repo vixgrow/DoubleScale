@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Traits;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AccountApiHelper trait
  *

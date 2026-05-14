@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Campaign;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -977,7 +980,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$rendered_section_ids = array();
 
 		// Check Pro availability
-		$is_pro_active = doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
+		$is_pro_active = doublescale_is_pro_addon_active();
 
 		// Get condition evaluator instance
 		$evaluator = ConditionEvaluator::instance();

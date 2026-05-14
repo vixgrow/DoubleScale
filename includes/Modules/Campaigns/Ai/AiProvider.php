@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Ai;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Managers\MergeTagsManager;
 use WP_Error;
@@ -219,6 +222,7 @@ class AiProvider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf( __( 'AI request failed: %s', 'doublescale'), $response->get_error_message() ),
 				array( 'status' => 502 )
 			);
@@ -231,6 +235,7 @@ class AiProvider {
 			$error_msg = $body['error']['message'] ?? __( 'Unknown error from OpenAI', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf( __( 'OpenAI Api error: %s', 'doublescale'), $error_msg ),
 				array( 'status' => $code )
 			);
@@ -302,6 +307,7 @@ class AiProvider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf( __( 'AI request failed: %s', 'doublescale'), $response->get_error_message() ),
 				array( 'status' => 502 )
 			);
@@ -314,6 +320,7 @@ class AiProvider {
 			$error_msg = $parsed['error']['message'] ?? __( 'Unknown error from AI provider', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf( __( 'AI provider error: %s', 'doublescale'), $error_msg ),
 				array( 'status' => $code )
 			);
@@ -422,6 +429,7 @@ class AiProvider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf( __( 'AI request failed: %s', 'doublescale'), $response->get_error_message() ),
 				array( 'status' => 502 )
 			);
@@ -434,6 +442,7 @@ class AiProvider {
 			$error_msg = $body['error']['message'] ?? __( 'Unknown error from Anthropic', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf( __( 'Anthropic Api error: %s', 'doublescale'), $error_msg ),
 				array( 'status' => $code )
 			);
@@ -542,6 +551,7 @@ class AiProvider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'ai_request_failed',
+				/* translators: %s: HTTP error message */
 				sprintf( __( 'AI request failed: %s', 'doublescale'), $response->get_error_message() ),
 				array( 'status' => 502 )
 			);
@@ -554,6 +564,7 @@ class AiProvider {
 			$error_msg = $body['error']['message'] ?? __( 'Unknown error from Gemini', 'doublescale');
 			return new WP_Error(
 				'ai_api_error',
+				/* translators: %s: error message returned by the AI provider */
 				sprintf( __( 'Gemini Api error: %s', 'doublescale'), $error_msg ),
 				array( 'status' => $code )
 			);
@@ -762,6 +773,7 @@ class AiProvider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'fetch_failed',
+				/* translators: %s: base URL of the AI provider */
 				sprintf( __( 'Could not reach %s. Is the server running?', 'doublescale'), $base_url ),
 				array( 'status' => 502 )
 			);

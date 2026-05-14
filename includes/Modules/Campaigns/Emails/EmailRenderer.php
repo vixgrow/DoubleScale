@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
@@ -419,7 +422,7 @@ class EmailRenderer {
 		// No tracking context - this is a new send, evaluate conditions live
 		// Conditional sections are a Pro feature
 		// Check if Pro is active via filter (Pro plugin sets this to true)
-		$is_pro_active = doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
+		$is_pro_active = doublescale_is_pro_addon_active();
 		if ( ! $is_pro_active ) {
 			return true;
 		}

@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Submission;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
 use DoubleScale\Modules\Contacts\Filters\Traits\TimeframeContactFilter;
 use Illuminate\Database\Eloquent\Builder;

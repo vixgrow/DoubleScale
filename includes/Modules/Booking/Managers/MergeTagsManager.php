@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Managers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Abstracts\Manager;

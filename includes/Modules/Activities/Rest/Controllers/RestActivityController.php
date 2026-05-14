@@ -18,6 +18,9 @@
 
 namespace DoubleScale\Modules\Activities\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;

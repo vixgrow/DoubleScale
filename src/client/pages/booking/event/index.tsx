@@ -64,10 +64,10 @@ const Event: React.FC = () => {
 		tab,
 	} = useParams<{ id: string; eventId: string; tab: string }>();
 
-	if (!id?.match(/^\d+$/)) {
-		return <Calendar />;
-	}
-
+	// All hooks MUST be called before any conditional return, per React's
+	// Rules of Hooks. Previously the !id?.match(...) early return below was
+	// above these hooks, which changed the call order between renders and
+	// could trigger "Rendered fewer hooks than expected" errors.
 	const childRef = useRef<any>(null);
 	const siteUrl = ConfigAPI.getSiteUrl();
 	const { callApi } = useApi();
@@ -118,6 +118,13 @@ const Event: React.FC = () => {
 
 	const navigate = useNavigate();
 	const setBreadcrumbs = useBreadcrumbs();
+
+	// Guards moved AFTER all hooks. An invalid or missing eventId means
+	// the user navigated to /booking/calendars/:id/events/junk — fall back
+	// to the calendar view instead of rendering an empty event editor.
+	if (!id?.match(/^\d+$/)) {
+		return <Calendar />;
+	}
 
 	if (!id) {
 		return null;

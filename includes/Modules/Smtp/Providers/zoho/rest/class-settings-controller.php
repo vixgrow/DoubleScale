@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Zoho\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
 use DoubleScale\Modules\Smtp\Settings;
 use Exception;
@@ -132,7 +135,7 @@ class Settings_Controller extends Abstract_Settings_Controller {
 			);
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				esc_html__( 'Zoho Getting User Profile Error', 'smtp' ),
+				esc_html__( 'Zoho Getting User Profile Error', 'doublescale' ),
 				array(
 					'code'  => 'zoho_get_user_profile_error',
 					'error' => [

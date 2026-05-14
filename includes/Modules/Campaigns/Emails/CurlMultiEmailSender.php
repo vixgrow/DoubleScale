@@ -15,6 +15,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Emails\Curlmulti\AbstractCurlMultiMailer;
 use DoubleScale\Modules\Campaigns\Emails\Curlmulti\Smtp2goCurlMultiMailer;
 use DoubleScale\Modules\Campaigns\Emails\Traits\SmtpModuleActive;

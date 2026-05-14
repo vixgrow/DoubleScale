@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Database\Eloquent\Builder;
 
 /**

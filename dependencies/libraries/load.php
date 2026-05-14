@@ -2,7 +2,7 @@
 /**
  * Includes libraries
  *
- * @package QuillBooking
+ * @package DoubleScale
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

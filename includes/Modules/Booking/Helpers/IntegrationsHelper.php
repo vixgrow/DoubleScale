@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Booking\Helpers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 
 /**

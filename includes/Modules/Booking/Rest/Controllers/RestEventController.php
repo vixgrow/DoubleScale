@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Booking\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\AvailabilityModel;
 use WP_Error;
 use Exception;
@@ -431,7 +434,10 @@ class RestEventController extends RestController {
 			}
 
 			if ( ( 'all' === $user || get_current_user_id() !== $user ) && ! current_user_can( 'doublescale_booking_read_all_calendars' ) ) {
-				error_log( 'Booking Event Controller: Permission denied for user ' . get_current_user_id() . ' to access events' );
+				doublescale_get_logger()->warning(
+					'Permission denied to access events',
+					array( 'source' => 'booking-event-rest', 'user_id' => get_current_user_id() )
+				);
 				return new WP_Error( 'rest_event_error', __( 'You do not have permission', 'doublescale' ), array( 'status' => 403 ) );
 			}
 
@@ -457,7 +463,16 @@ class RestEventController extends RestController {
 
 			return new WP_REST_Response( $events_data, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in get_items: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+			doublescale_get_logger()->error(
+				'Booking event controller exception in get_items',
+				array(
+					'source'    => 'booking-event-rest',
+					'method'    => 'get_items',
+					'exception' => $e->getMessage(),
+					'file'      => $e->getFile(),
+					'line'      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -502,14 +517,20 @@ class RestEventController extends RestController {
 			$color             = $request->get_param( 'color' ) ?: '#3A3A99'; // Default color if not provided
 
 			if ( empty( $location ) ) {
-				error_log( 'Booking Event Controller: Event location is required for event creation' );
+						doublescale_get_logger()->warning(
+				'Event location is required for event creation',
+				array( 'source' => 'booking-event-rest' )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event location is required.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			$calendar = CalendarModel::find( $calendar_id );
 			if ( ! $calendar ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Calendar not found for event creation with ID: ' . $calendar_id );
+				doublescale_get_logger()->warning(
+					'Calendar not found for event creation',
+					array( 'source' => 'booking-event-rest', 'calendar_id' => (int) $calendar_id )
+				);
 				return new WP_Error( 'rest_event_error', __( 'You must add event to a calendar.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
@@ -518,7 +539,10 @@ class RestEventController extends RestController {
 
 			if ( ( 'host' === $calendar->type && ! in_array( $type, $host_events ) ) || ( 'team' === $calendar->type && ! in_array( $type, $team_events ) ) ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Invalid event type ' . $type . ' for calendar type ' . $calendar->type );
+				doublescale_get_logger()->warning(
+					'Invalid event type for calendar type',
+					array( 'source' => 'booking-event-rest', 'event_type' => $type, 'calendar_type' => $calendar->type )
+				);
 				return new WP_Error( 'rest_event_error', __( 'Invalid event type.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
@@ -526,7 +550,10 @@ class RestEventController extends RestController {
 			if ( 'team' === $calendar->type && in_array( $type, $team_events ) ) {
 				if ( empty( $hosts ) || ! is_array( $hosts ) || count( $hosts ) === 0 ) {
 					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Team events require at least one host to be selected for calendar ID: ' . $calendar_id );
+					doublescale_get_logger()->warning(
+						'Team event requires at least one host',
+						array( 'source' => 'booking-event-rest', 'calendar_id' => (int) $calendar_id )
+					);
 					return new WP_Error( 'rest_event_error', __( 'Team events require at least one host to be selected.', 'doublescale' ), array( 'status' => 400 ) );
 				}
 			}
@@ -539,7 +566,10 @@ class RestEventController extends RestController {
 				// If validation fails, block the create operation and return error
 				if ( is_wp_error( $validation_result ) ) {
 					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Payment validation failed: ' . $validation_result->get_error_message() );
+					doublescale_get_logger()->warning(
+						'Payment validation failed during create',
+						array( 'source' => 'booking-event-rest', 'reason' => $validation_result->get_error_message() )
+					);
 					return $validation_result;
 				}
 			}
@@ -575,7 +605,10 @@ class RestEventController extends RestController {
 				if ( ! $primary_host_availability ) {
 					$wpdb->query( 'ROLLBACK' );
 					$user_label = $this->describe_host_for_error( (int) $hosts[0] );
-					error_log( 'Booking Event Controller: Default availability not found for team member: ' . $user_label );
+					doublescale_get_logger()->warning(
+						'Default availability not found for team member',
+						array( 'source' => 'booking-event-rest', 'host' => $user_label )
+					);
 					return new WP_Error(
 						'rest_event_error',
 						sprintf(
@@ -593,7 +626,10 @@ class RestEventController extends RestController {
 					if ( ! $host_availability ) {
 						$wpdb->query( 'ROLLBACK' );
 						$user_label = $this->describe_host_for_error( (int) $host );
-						error_log( 'Booking Event Controller: Default availability not found for team member: ' . $user_label );
+						doublescale_get_logger()->warning(
+						'Default availability not found for team member',
+						array( 'source' => 'booking-event-rest', 'host' => $user_label )
+					);
 						return new WP_Error(
 							'rest_event_error',
 							sprintf(
@@ -620,7 +656,10 @@ class RestEventController extends RestController {
 			);
 			if ( ! $event->id ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Failed to create event in database' );
+						doublescale_get_logger()->warning(
+				'Failed to create event in database',
+				array( 'source' => 'booking-event-rest' )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not created', 'doublescale' ), array( 'status' => 500 ) );
 			}
 
@@ -649,7 +688,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in create_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in create_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "create_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -680,7 +728,10 @@ class RestEventController extends RestController {
 			$ids = $request->get_param( 'ids' );
 
 			if ( ! $ids ) {
-				error_log( 'Booking Event Controller: No event IDs provided for deletion' );
+						doublescale_get_logger()->warning(
+				'No event IDs provided for deletion',
+				array( 'source' => 'booking-event-rest' )
+			);
 				return new WP_Error( 'rest_event_error', __( 'No events to delete', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
@@ -688,7 +739,10 @@ class RestEventController extends RestController {
 				$event = EventModel::find( $id );
 
 				if ( ! $event ) {
-					error_log( 'Booking Event Controller: Event not found for deletion with ID: ' . $id );
+							doublescale_get_logger()->warning(
+				'Event not found for deletion ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 					return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 				}
 
@@ -697,7 +751,16 @@ class RestEventController extends RestController {
 
 			return new WP_REST_Response( $ids, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in delete_items: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in delete_items",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "delete_items",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -730,7 +793,10 @@ class RestEventController extends RestController {
 			$event = EventModel::with( 'calendar', 'availability' )->where( 'id', $id )->first();
 
 			if ( ! $event ) {
-				error_log( 'Booking Event Controller: Event not found with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error(
 					'rest_event_not_found',
 					__( 'Event not found', 'doublescale' ),
@@ -763,7 +829,16 @@ class RestEventController extends RestController {
 
 			return new WP_REST_Response( $event, 200 );
 		} catch ( \Throwable $e ) { // Catch Throwable
-			error_log( 'Booking Event Controller Error in get_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in get_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "get_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -782,7 +857,10 @@ class RestEventController extends RestController {
 			$event = EventModel::find( $id );
 
 			if ( ! $event ) {
-				error_log( 'Booking Event Controller: Event not found for range retrieval with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for range retrieval ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -792,7 +870,16 @@ class RestEventController extends RestController {
 
 			return new WP_REST_Response( $data, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in get_item_range: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in get_item_range",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "get_item_range",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -811,13 +898,25 @@ class RestEventController extends RestController {
 			$event = EventModel::find( $id );
 
 			if ( ! $event ) {
-				error_log( 'Booking Event Controller: Event not found for fields retrieval with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for fields retrieval ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $event->fields, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in get_fields: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in get_fields",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "get_fields",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -878,7 +977,10 @@ class RestEventController extends RestController {
 			$event = EventModel::with( 'calendar' )->find( $id );
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Event not found for update with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for update ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -890,7 +992,10 @@ class RestEventController extends RestController {
 				// If validation fails, block the update and return error
 				if ( is_wp_error( $validation_result ) ) {
 					$wpdb->query( 'ROLLBACK' );
-					error_log( 'Booking Event Controller: Payment validation failed during update: ' . $validation_result->get_error_message() );
+					doublescale_get_logger()->warning(
+						'Payment validation failed during update',
+						array( 'source' => 'booking-event-rest', 'reason' => $validation_result->get_error_message() )
+					);
 					return $validation_result;
 				}
 			}
@@ -978,7 +1083,10 @@ class RestEventController extends RestController {
 			$result = $this->handle_availability_update( $event, $availability_type, $availability_meta, $event_availability, $team_availability );
 			if ( is_wp_error( $result ) ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Availability update failed: ' . $result->get_error_message() );
+				doublescale_get_logger()->warning(
+					'Availability update failed',
+					array( 'source' => 'booking-event-rest', 'reason' => $result->get_error_message() )
+				);
 				return $result;
 			}
 
@@ -990,7 +1098,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in update_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in update_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "update_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1015,14 +1132,20 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Event not found for availability update with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for availability update ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$result = $this->update_event_host_availability( $availability );
 			if ( is_wp_error( $result ) ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Host availability update failed: ' . $result->get_error_message() );
+				doublescale_get_logger()->warning(
+					'Host availability update failed',
+					array( 'source' => 'booking-event-rest', 'reason' => $result->get_error_message() )
+				);
 				return $result;
 			}
 
@@ -1031,7 +1154,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in update_item_availability: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in update_item_availability",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "update_item_availability",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1055,7 +1187,10 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Event not found for fields update with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for fields update ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1066,7 +1201,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in update_fields: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in update_fields",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "update_fields",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1103,7 +1247,10 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Event not found for deletion with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for deletion ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1119,7 +1266,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in delete_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in delete_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "delete_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1156,7 +1312,10 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
-				error_log( 'Booking Event Controller: Event not found for duplication with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for duplication ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1167,7 +1326,16 @@ class RestEventController extends RestController {
 		} catch ( Exception $e ) {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
-			error_log( 'Booking Event Controller Error in duplicate_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in duplicate_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "duplicate_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1200,20 +1368,35 @@ class RestEventController extends RestController {
 			$event = EventModel::find( $id );
 
 			if ( ! $event ) {
-				error_log( 'Booking Event Controller: Event not found for meta retrieval with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for meta retrieval ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$meta = $event->{$key};
 
 			if ( ! isset( $event->{$key} ) ) {
-				error_log( 'Booking Event Controller: Meta key not found: ' . $key . ' for event ID: ' . $id );
+				doublescale_get_logger()->warning(
+					'Meta key not found',
+					array( 'source' => 'booking-event-rest', 'meta_key' => $key, 'event_id' => (int) $id )
+				);
 				return new WP_Error( 'rest_event_error', __( 'Meta not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $meta, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in get_meta: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in get_meta",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "get_meta",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1233,14 +1416,26 @@ class RestEventController extends RestController {
 			$status = $request->get_param( 'status' );
 			$event  = EventModel::find( $id );
 			if ( ! $event ) {
-				error_log( 'Booking Event Controller: Event not found for disable status update with ID: ' . $id );
+						doublescale_get_logger()->warning(
+				'Event not found for disable status update ',
+				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
+			);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 			$event->is_disabled = $status;
 			$event->save();
 			return new WP_REST_Response( $event, 200 );
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in disable_item: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in disable_item",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "disable_item",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1256,7 +1451,10 @@ class RestEventController extends RestController {
 			$availability = AvailabilityModel::where( 'id', $event_availability['id'] )->first();
 
 			if ( ! $availability ) {
-				error_log( 'Booking Event Controller: Availability record not found with ID: ' . $event_availability['id'] );
+				doublescale_get_logger()->warning(
+					'Availability record not found',
+					array( 'source' => 'booking-event-rest', 'availability_id' => $event_availability['id'] )
+				);
 				return new WP_Error(
 					'rest_event_error',
 					__( 'Availability record not found', 'doublescale' ),
@@ -1284,7 +1482,10 @@ class RestEventController extends RestController {
 				$updated = $availability->save();
 
 				if ( ! $updated ) {
-					error_log( 'Booking Event Controller: Failed to update availability record with ID: ' . $event_availability['id'] );
+					doublescale_get_logger()->warning(
+						'Failed to update availability record',
+						array( 'source' => 'booking-event-rest', 'availability_id' => $event_availability['id'] )
+					);
 					return new WP_Error(
 						'rest_event_error',
 						__( 'Failed to update availability', 'doublescale' ),
@@ -1294,7 +1495,14 @@ class RestEventController extends RestController {
 
 				return $availability;
 			} catch ( Exception $e ) {
-				error_log( 'Booking Event Controller Error updating availability: ' . $e->getMessage() . ' | Availability ID: ' . $event_availability['id'] );
+				doublescale_get_logger()->error(
+					'Booking event controller exception updating availability',
+					array(
+						'source'          => 'booking-event-rest',
+						'availability_id' => $event_availability['id'],
+						'exception'       => $e->getMessage(),
+					)
+				);
 				return new WP_Error(
 					'rest_event_error',
 					$e->getMessage(),
@@ -1302,7 +1510,16 @@ class RestEventController extends RestController {
 				);
 			}
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in update_event_host_availability: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in update_event_host_availability",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "update_event_host_availability",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			throw $e;
 		}
 	}
@@ -1313,7 +1530,10 @@ class RestEventController extends RestController {
 			foreach ( $team_availability as $user_id => $availabilityData ) {
 				$model = AvailabilityModel::find( $availabilityData['id'] );
 				if ( ! $model ) {
-					error_log( 'Booking Event Controller: Availability not found for team member with ID: ' . $availabilityData['id'] );
+					doublescale_get_logger()->warning(
+						'Availability not found for team member',
+						array( 'source' => 'booking-event-rest', 'availability_id' => $availabilityData['id'] )
+					);
 					return new WP_Error(
 						'rest_event_error',
 						__( 'Availability not found', 'doublescale' ),
@@ -1324,7 +1544,16 @@ class RestEventController extends RestController {
 				$model->save();
 			}
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in update_event_team_availability: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in update_event_team_availability",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "update_event_team_availability",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			throw $e;
 		}
 	}
@@ -1346,7 +1575,16 @@ class RestEventController extends RestController {
 
 			return true; // No specific availability update needed
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in handle_availability_update: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in handle_availability_update",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "handle_availability_update",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			throw $e;
 		}
 	}
@@ -1405,7 +1643,16 @@ class RestEventController extends RestController {
 				200
 			);
 		} catch ( Exception $e ) {
-			error_log( 'Booking Event Controller Error in get_latest_events: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() );
+					doublescale_get_logger()->error(
+				"Booking event controller exception in get_latest_events",
+				array(
+					"source"    => "booking-event-rest",
+					"method"    => "get_latest_events",
+					"exception" => $e->getMessage(),
+					"file"      => $e->getFile(),
+					"line"      => $e->getLine(),
+				)
+			);
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}

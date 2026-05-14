@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

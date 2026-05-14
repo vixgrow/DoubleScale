@@ -1,25 +1,24 @@
 <?php
-
 /**
- * TutorLMS Trigger for Lesson Completed
- * This trigger will be fired when a user completes a lesson.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Tutorlms;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WP_User;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Lesson Completed Trigger
+ * LessonCompleted trigger stub.
  */
-class LessonCompleted extends Trigger {
+class LessonCompleted extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,40 +67,6 @@ class LessonCompleted extends Trigger {
 	 *
 	 * @return void
 	 */
-	public function load_hooks() {
-		add_action( 'tutor_lesson_completed_after', array( $this, 'lesson_completed' ), 10, 2 );
-	}
-
-	/**
-	 * Lesson Completed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $lesson_id Lesson ID.
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public function lesson_completed( $lesson_id, $user_id ) {
-		$user = get_user_by( 'ID', $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		// Get the course ID from the lesson
-		$course_id = 0;
-		if ( function_exists( 'tutor_utils' ) ) {
-			$course_id = tutor_utils()->get_course_id_by( 'lesson', $lesson_id );
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'lesson_id' => $lesson_id,
-				'course_id' => $course_id,
-				'user_id'   => $user_id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
+
+TriggersManager::instance()->register( new LessonCompleted() );

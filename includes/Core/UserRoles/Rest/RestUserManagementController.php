@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Core\UserRoles\Rest;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\UserRoles\Permissions;
 use DoubleScale\UserRoles\UserRoles;

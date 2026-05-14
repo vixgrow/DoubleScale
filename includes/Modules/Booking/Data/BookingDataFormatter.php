@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Booking\Data;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DateTime;
 use DateTimeZone;
 use Exception;

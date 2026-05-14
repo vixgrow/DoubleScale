@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Site;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Automatic_Upgrader_Skin;
 use Plugin_Upgrader;
 

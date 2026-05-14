@@ -14,6 +14,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Curlmulti;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Emails\Traits\AccountApiHelper;
 use WP_Error;
 

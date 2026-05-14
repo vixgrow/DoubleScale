@@ -30,7 +30,7 @@ export type ConfigData = Record<string, unknown> & {
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
-	quillsmtpInfo: QuillSMTPInfo;
+	doublescaleInfo: DoubleScaleInfo;
 	license: License | false;
 	proPluginData: ProPluginData;
 	currency: string;
@@ -52,6 +52,8 @@ export type ModuleInfo = {
 	/** Same as `enabled` when present (REST 1.13+). */
 	active?: boolean;
 	is_toggleable: boolean;
+	/** True when doublescale_enabled_modules contains an explicit entry for this slug. */
+	is_explicit?: boolean;
 	dependencies: string[];
 };
 export type License = {
@@ -71,7 +73,7 @@ export type ProPluginData = {
 };
 
 /**
- * Store add-on (Quill SMTP, etc.) — serialized from {@see \DoubleScale\Admin\AdminConfig::get_addons_status()}.
+ * Store add-on (DoubleScale, etc.) — serialized from {@see \DoubleScale\Admin\AdminConfig::get_addons_status()}.
  */
 export type Addon = {
 	slug: string;
@@ -111,7 +113,7 @@ export type VerifiedSender = {
 	connection_id: string;
 };
 
-export type QuillSMTPInfo = {
+export type DoubleScaleInfo = {
 	configured: boolean;
 	verified_senders?: VerifiedSender[];
 	config_url?: string;

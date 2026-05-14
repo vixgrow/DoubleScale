@@ -1,5 +1,5 @@
 /**
- * Shown when Email Sequences is opened without QuillCRM Pro active.
+ * Shown when Email Sequences is opened without DoubleScale Pro active.
  */
 import type { FC } from 'react';
 import { __ } from '@wordpress/i18n';

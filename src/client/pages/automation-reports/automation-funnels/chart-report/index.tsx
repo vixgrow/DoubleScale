@@ -5,9 +5,8 @@ import { Automation } from '@doublescale/client';
 import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
-	getProRequiredForAnalyticsNotice,
+	isProActive,
 } from '@doublescale/services/module-fetch';
-import Config from '@doublescale/config';
 // @ts-ignore
 import D3Funnel from 'd3-funnel';
 
@@ -54,18 +53,24 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 			setLoading(true);
 			setError(null);
 
-			const response = (await moduleFetch<FunnelResponse>('analytics', {
-				path: `/doublescale/v1/automation-reports/${automation.id}/get-chart-report`,
-			})) as FunnelResponse | null;
+			const response = (await moduleFetch<FunnelResponse>(
+				'automations',
+				{
+					path: `/doublescale/v1/automation-reports/${automation.id}/get-chart-report`,
+				},
+				{ requirePro: true }
+			)) as FunnelResponse | null;
 
 			if (!response) {
 				setFunnelData([]);
 				setLoading(false);
-				setError(
-					!Config.getProPluginData()?.is_active
-						? getProRequiredForAnalyticsNotice()
-						: getModuleFetchBlockedNotice('analytics')
-				);
+				// Pro inactive → show upgrade card (not an error).
+				// Automations module disabled → show module error.
+				if (!isProActive()) {
+					setError('__pro_required__');
+				} else {
+					setError(getModuleFetchBlockedNotice('automations'));
+				}
 				return;
 			}
 
@@ -299,6 +304,21 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	}
 
 	if (error) {
+		if (error === '__pro_required__') {
+			return (
+				<div className="chart-report-container flex items-center justify-center min-h-[300px]">
+					<div className="text-center max-w-sm px-6 py-8 rounded-lg border border-gray-200 bg-gray-50">
+						<div className="text-4xl mb-3">📊</div>
+						<h3 className="text-base font-semibold text-gray-900 mb-1">
+							{__('Automation Funnel Analytics', 'doublescale')}
+						</h3>
+						<p className="text-sm text-gray-500">
+							{__('Install and activate DoubleScale Pro to view funnel analytics for this automation.', 'doublescale')}
+						</p>
+					</div>
+				</div>
+			);
+		}
 		return (
 			<div className="chart-report-container">
 				<div className="report-header">

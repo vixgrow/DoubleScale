@@ -98,7 +98,7 @@ export function DateRangePicker({
 						className
 					)}
 					variant="outline"
-					size="sm"
+					
 				>
 					<CalendarIcon width={32} height={32} />
 					{formatDateRange()}

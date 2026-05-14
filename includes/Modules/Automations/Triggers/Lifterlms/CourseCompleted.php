@@ -1,25 +1,24 @@
 <?php
-
 /**
- * LifterLMS Trigger for Course Completed
- * This trigger will be fired when a user completes a course.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Lifterlms;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WP_User;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Course Completed Trigger
+ * CourseCompleted trigger stub.
  */
-class CourseCompleted extends Trigger {
+class CourseCompleted extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,33 +67,6 @@ class CourseCompleted extends Trigger {
 	 *
 	 * @return void
 	 */
-	public function load_hooks() {
-		add_action( 'lifterlms_course_completed', array( $this, 'course_completed' ), 10, 2 );
-	}
-
-	/**
-	 * Course Completed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $user_id User ID.
-	 * @param int $course_id Course ID.
-	 * @return void
-	 */
-	public function course_completed( $user_id, $course_id ) {
-		$user = get_user_by( 'ID', $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'course_id' => $course_id,
-				'user_id'   => $user_id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
+
+TriggersManager::instance()->register( new CourseCompleted() );

@@ -11,6 +11,9 @@
 namespace DoubleScale\Modules\Activities\Migrations;
 
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Database\Migration;
 /**
  * Activity_Comments Table class

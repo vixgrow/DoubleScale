@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Utils;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * PhoneValidator class
  *

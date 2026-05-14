@@ -1,29 +1,23 @@
 <?php
 /**
- * Class AddTags
- *
- * This class is responsible for adding tags to a Drip subscriber
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Drip;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\IntegrationsManager;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Add Tags class
+ * AddTags action stub.
  */
-class AddTags extends Action {
+class AddTags extends ProAutomationStubAction {
 
-	/**
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -69,136 +63,6 @@ class AddTags extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
-		$tags = $step->get_setting( 'tags', array() );
-		if ( empty( $tags ) ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Add Tags: Tags is empty.', 'doublescale'),
-				array(
-					'code' => 'drip_add_tags',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$email = $automation_contact->contact->email;
-		$data  = array(
-			'subscribers' => array(
-				array(
-					'email' => $email,
-					'tags'  => $tags,
-				),
-			),
-		);
-
-		$drip = IntegrationsManager::instance()->get_integration( 'drip' );
-		$api  = $drip->connect();
-		if ( ! $api ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Api connection failed.', 'doublescale'),
-				array(
-					'code' => 'drip_connect',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$result = $api->add_subscriber( $data );
-		if ( ! $result['success'] ) {
-			doublescale_get_logger()->error(
-				__( 'Failed to add subscriber to Drip.', 'doublescale'),
-				array(
-					'code'     => 'drip_add_subscriber',
-					'data'     => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-					'response' => $result,
-				)
-			);
-			return false;
-		}
-
-		doublescale_get_logger()->info(
-			__( 'Tags added to Drip subscriber.', 'doublescale'),
-			array(
-				'code' => 'drip_add_tags',
-				'data' => array(
-					'automation' => array(
-						'id'   => $automation->id,
-						'name' => $automation->name,
-					),
-					'step'       => array(
-						'id'   => $step->id,
-						'type' => $step->type,
-					),
-					'tags'       => $tags,
-				),
-			)
-		);
-		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'tags' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'tags' => array(
-				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'doublescale'),
-				'endpoint' => 'drip/tags',
-				'multiple' => true,
-			),
-		);
-	}
 }
 
 AddTags::instance();

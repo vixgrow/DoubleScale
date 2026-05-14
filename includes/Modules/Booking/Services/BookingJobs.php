@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Tasks;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Services\BookingEvents;
@@ -196,6 +199,7 @@ class BookingJobs {
 			array(
 				'type'    => 'info',
 				'message' => __( 'Booking automatically completed', 'doublescale' ),
+				/* translators: %s: number of hours after end time */
 				'details' => sprintf( __( 'Booking was marked as completed automatically %s hour(s) after the end time', 'doublescale' ), $time_in_hours ),
 			)
 		);

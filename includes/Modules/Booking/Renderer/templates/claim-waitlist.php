@@ -1,5 +1,8 @@
 <?php
 
+
+defined( 'ABSPATH' ) || exit;
+
 $icons_url = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 
 $event_name  = $booking_array['event']['name'] ?? '';

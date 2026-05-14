@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -172,7 +175,7 @@ final class ActionsManager {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: action slug */
-		throw new Exception( sprintf( __( 'Action %s not found', 'doublescale'), $slug ) );
+		throw new Exception( sprintf( esc_html__( 'Action %s not found', 'doublescale'), esc_html( $slug )) );
 	}
 
 	/**

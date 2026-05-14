@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

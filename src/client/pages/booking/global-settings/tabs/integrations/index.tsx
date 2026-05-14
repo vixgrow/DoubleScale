@@ -100,7 +100,7 @@ const Integrations: React.FC = () => {
 			<Header
 				header={__('Integrations', 'doublescale')}
 				subHeader={__(
-					'Connect Quill Booking to your tools and apps to enhance your scheduling automations.',
+					'Connect DoubleScale to your tools and apps to enhance your scheduling automations.',
 					'doublescale'
 				)}
 			/>

@@ -12,6 +12,9 @@
 namespace DoubleScale\Modules\Campaigns\Migrations;
 
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Database\Migration;
 /**
  * CampaignEventsTable class

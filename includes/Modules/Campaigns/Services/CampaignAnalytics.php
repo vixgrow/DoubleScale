@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;

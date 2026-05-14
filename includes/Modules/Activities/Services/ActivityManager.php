@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Activities\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -1438,8 +1441,10 @@ final class ActivityManager {
 			$from_email = $data['from_email'] ?? '';
 			$subject    = $data['subject'] ?? '';
 			$sender     = ! empty( $from_email ) ? $from_email : __( 'a contact', 'doublescale');
+			/* translators: %s: sender name or email */
 			$message    = sprintf( __( '%s sent a reply', 'doublescale'), $sender );
 			if ( ! empty( $subject ) ) {
+				/* translators: %s: email subject line */
 				$message .= sprintf( __( ' with subject "%s"', 'doublescale'), $subject );
 			}
 			return $message;
@@ -1451,14 +1456,17 @@ final class ActivityManager {
 				$user_name  = ! empty( $from_email ) ? $from_email : __( 'Unknown User', 'doublescale');
 			}
 			$subject = $data['subject'] ?? '';
+			/* translators: %s: user name */
 			$message = sprintf( __( '%s sent an email', 'doublescale'), $user_name );
 			if ( ! empty( $subject ) ) {
+				/* translators: %s: email subject line */
 				$message .= sprintf( __( ' with subject "%s"', 'doublescale'), $subject );
 			}
 			$contact_email = $data['contact_email'] ?? '';
 			$contact_name  = $data['contact_name'] ?? '';
 			if ( ! empty( $contact_email ) ) {
 				$recipient = ! empty( $contact_name ) ? $contact_name : $contact_email;
+				/* translators: %s: recipient name or email */
 				$message  .= sprintf( __( ' to %s', 'doublescale'), $recipient );
 			}
 			return $message;

@@ -49,7 +49,7 @@ const QrCode: React.FC<{
 			</div>
             <span className="text-[#71717A] text-[14px] font-[500] leading-5">
 				{__(
-					'Simply scan the code to initiate your Quill Forms, which function seamlessly both online and offline (printer required naturally).',
+					'Simply scan the code to open your booking event and schedule a time. Works online and in print (printer required naturally).',
 					'doublescale'
 				)}
 			</span>

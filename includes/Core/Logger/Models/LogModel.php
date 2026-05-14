@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Core\Logger\Models;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WPEloquent\Eloquent\Model;
 
 /**

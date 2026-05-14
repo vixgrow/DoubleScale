@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Traits;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * TimeframeFilter trait
  */

@@ -37,7 +37,9 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 
 		$stored  = get_option( 'doublescale_enabled_modules', array() );
-		$default = ! isset( $stored[ $this->slug() ] ) || (bool) $stored[ $this->slug() ];
+		$default = is_array( $stored )
+			&& array_key_exists( $this->slug(), $stored )
+			&& (bool) $stored[ $this->slug() ];
 
 		return (bool) apply_filters( 'doublescale_module_enabled_' . $this->slug(), $default );
 	}
@@ -94,12 +96,33 @@ abstract class AbstractModule implements ModuleInterface {
 		return \dirname( $ref->getFileName() );
 	}
 
+	protected function manifest_has_all_glob_files( array $manifest_files, array $patterns ): bool {
+		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
+			return false;
+		}
+		$set = array();
+		foreach ( $manifest_files as $f ) {
+			if ( is_string( $f ) && '' !== $f ) {
+				$set[ wp_normalize_path( $f ) ] = true;
+			}
+		}
+		foreach ( $patterns as $rel ) {
+			foreach ( glob( \DOUBLESCALE_PLUGIN_DIR . $rel ) ?: array() as $file ) {
+				$norm = wp_normalize_path( $file );
+				if ( ! isset( $set[ $norm ] ) ) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	protected function loadGlobs( array $patterns ): void {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 			return;
 		}
 		foreach ( $patterns as $rel ) {
-			foreach ( glob( DOUBLESCALE_PLUGIN_DIR . $rel ) ?: array() as $file ) {
+			foreach ( glob( \DOUBLESCALE_PLUGIN_DIR . $rel ) ?: array() as $file ) {
 				require_once $file;
 			}
 		}
@@ -137,7 +160,8 @@ abstract class AbstractModule implements ModuleInterface {
 		$manifest_path = doublescale_get_manifest_path( $cache_key );
 		if ( $manifest_path && is_file( $manifest_path ) ) {
 			$manifest_files = require $manifest_path;
-			if ( is_array( $manifest_files ) && $this->manifest_paths_are_only_this_plugin( $manifest_files ) ) {
+			if ( is_array( $manifest_files ) && $this->manifest_paths_are_only_this_plugin( $manifest_files )
+				&& $this->manifest_has_all_glob_files( $manifest_files, $patterns ) ) {
 				$this->loadManifest( $manifest_path );
 				return;
 			}
@@ -182,7 +206,7 @@ abstract class AbstractModule implements ModuleInterface {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 			return false;
 		}
-		$root = rtrim( wp_normalize_path( DOUBLESCALE_PLUGIN_DIR ), '/' ) . '/';
+		$root = rtrim( wp_normalize_path( \DOUBLESCALE_PLUGIN_DIR ), '/' ) . '/';
 		$norm = wp_normalize_path( $path );
 		if ( '' === $norm ) {
 			return false;
@@ -209,7 +233,7 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 		$files = array();
 		foreach ( $patterns as $rel ) {
-			foreach ( glob( DOUBLESCALE_PLUGIN_DIR . $rel ) ?: array() as $file ) {
+			foreach ( glob( \DOUBLESCALE_PLUGIN_DIR . $rel ) ?: array() as $file ) {
 				$files[] = $file;
 			}
 		}

@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\EventFields;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Traits\Singleton;
 
@@ -144,6 +147,7 @@ class EventFields {
 		$options = array();
 
 		foreach ( $minutes as $minute ) {
+			/* translators: %d: number of minutes */
 			$options[ $minute ] = sprintf( _n( '%d minute', '%d minutes', $minute, 'doublescale' ), $minute );
 		}
 
@@ -856,6 +860,7 @@ class EventFields {
 		$options = array();
 
 		foreach ( $minutes as $minute ) {
+			/* translators: %d: number of minutes */
 			$options[ $minute ] = sprintf( _n( '%d minute', '%d minutes', $minute, 'doublescale' ), $minute );
 		}
 

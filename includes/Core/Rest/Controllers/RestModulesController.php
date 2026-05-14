@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\ModuleManager;
 use WP_Error;
@@ -100,7 +103,6 @@ class RestModulesController extends RestController {
 			$proposed[ $slug ] = (bool) $enabled;
 		}
 
-		$prev_stored = is_array( $stored ) ? $stored : array();
 		update_option( 'doublescale_enabled_modules', $proposed );
 
 		return new WP_REST_Response(
@@ -116,8 +118,10 @@ class RestModulesController extends RestController {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function build_modules_payload(): array {
-		$all = ModuleManager::all();
-		$result   = array();
+		$all    = ModuleManager::all();
+		$stored = get_option( 'doublescale_enabled_modules', array() );
+		$stored = is_array( $stored ) ? $stored : array();
+		$result = array();
 
 		foreach ( $all as $slug => $module ) {
 			$deps = array_filter(
@@ -130,13 +134,14 @@ class RestModulesController extends RestController {
 			$enabled = $module->is_enabled();
 
 			$result[] = array(
-				'slug'            => $slug,
-				'label'           => $module->label(),
-				'description'     => $module->description(),
-				'enabled'         => $enabled,
-				'active'          => $enabled,
-				'is_toggleable'   => $module->is_toggleable(),
-				'dependencies'    => array_values( $deps ),
+				'slug'          => $slug,
+				'label'         => $module->label(),
+				'description'   => $module->description(),
+				'enabled'       => $enabled,
+				'active'        => $enabled,
+				'is_toggleable' => $module->is_toggleable(),
+				'is_explicit'   => array_key_exists( $slug, $stored ),
+				'dependencies'  => array_values( $deps ),
 			);
 		}
 

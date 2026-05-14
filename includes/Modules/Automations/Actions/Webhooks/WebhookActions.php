@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Webhooks;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * WebhookActions trait
  */
@@ -69,6 +72,7 @@ trait WebhookActions
     {
         if (empty($webhook_url)) {
             doublescale_get_logger()->error(
+                /* translators: %s: webhook action name */
                 \sprintf(\__('%s action is missing webhook URL.', 'doublescale'), $action_name),
                 array(
                     'code' => \strtolower(\str_replace(' ', '_', $action_name)) . '_missing_url',
@@ -88,6 +92,7 @@ trait WebhookActions
 
         if (! \filter_var($webhook_url, \FILTER_VALIDATE_URL)) {
             doublescale_get_logger()->error(
+                /* translators: %s: webhook action name */
                 \sprintf(\__('%s action has invalid webhook URL.', 'doublescale'), $action_name),
                 array(
                     'code' => \strtolower(\str_replace(' ', '_', $action_name)) . '_invalid_url',
@@ -273,6 +278,7 @@ trait WebhookActions
                 'success' => false,
                 'data'    => array(
                     'message' => \sprintf(
+                        /* translators: %s: HTTP error message returned by wp_remote_request */
                         \__('Failed to send test data: %s', 'doublescale'),
                         $response->get_error_message()
                     ),
@@ -288,6 +294,7 @@ trait WebhookActions
                 'success' => false,
                 'data'    => array(
                     'message' => \sprintf(
+                        /* translators: 1: HTTP response code, 2: response body */
                         \__('Webhook returned error status %1$d: %2$s', 'doublescale'),
                         $response_code,
                         $response_body

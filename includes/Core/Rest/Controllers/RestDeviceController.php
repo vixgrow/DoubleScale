@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Notifications\Services\DeviceTokenService;
 use WP_Error;
 use WP_REST_Controller;

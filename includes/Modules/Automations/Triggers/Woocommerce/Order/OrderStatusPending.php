@@ -1,25 +1,24 @@
 <?php
-
 /**
- * WooCommerce Order Status Pending Trigger
- * This trigger will be fired when an order status changes to pending.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Order;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WC_Order;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Order Status Pending Trigger
+ * OrderStatusPending trigger stub.
  */
-class OrderStatusPending extends Trigger
-{
-	/**
+class OrderStatusPending extends TriggerPro {
+
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,38 +67,6 @@ class OrderStatusPending extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('woocommerce_order_status_pending', array($this, 'order_status_pending'));
-	}
-
-	/**
-	 * Order Status Pending
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 *
-	 * @return void
-	 */
-	public function order_status_pending($order_id)
-	{
-		$order = \wc_get_order($order_id);
-		if (! $order instanceof WC_Order) {
-			return;
-		}
-
-		$data = array(
-			'first_name' => $order->get_billing_first_name(),
-			'last_name'  => $order->get_billing_last_name(),
-			'email'      => $order->get_billing_email(),
-			'data'       => array(
-				'order_id'     => $order->get_id(),
-				'order_total'  => $order->get_total(),
-				'order_status' => 'wc-pending',
-			),
-		);
-
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new OrderStatusPending() );

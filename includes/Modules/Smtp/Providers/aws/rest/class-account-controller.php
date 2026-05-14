@@ -83,19 +83,19 @@ class Account_Controller extends Abstract_Account_Controller {
 		$account_id   = $request->get_param( 'id' );
 
 		if ( empty( $account_name ) ) {
-			return new WP_Error( 'doublescale_smtp_aws_account_name_missing', __( 'Account name is missing.', 'smtp' ) );
+			return new WP_Error( 'doublescale_smtp_aws_account_name_missing', __( 'Account name is missing.', 'doublescale' ) );
 		}
 
 		if ( empty( $access_key ) ) {
-			return new WP_Error( 'doublescale_smtp_aws_access_key_missing', __( 'Access key is missing.', 'smtp' ) );
+			return new WP_Error( 'doublescale_smtp_aws_access_key_missing', __( 'Access key is missing.', 'doublescale' ) );
 		}
 
 		if ( empty( $secret_key ) ) {
-			return new WP_Error( 'doublescale_smtp_aws_secret_key_missing', __( 'Secret key is missing.', 'smtp' ) );
+			return new WP_Error( 'doublescale_smtp_aws_secret_key_missing', __( 'Secret key is missing.', 'doublescale' ) );
 		}
 
 		if ( empty( $region ) ) {
-			return new WP_Error( 'doublescale_smtp_aws_region_missing', __( 'Region is missing.', 'smtp' ) );
+			return new WP_Error( 'doublescale_smtp_aws_region_missing', __( 'Region is missing.', 'doublescale' ) );
 		}
 
 		try {

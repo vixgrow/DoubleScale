@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Plugin;
@@ -95,6 +98,9 @@ abstract class Trigger {
 	 * @return void
 	 */
 	public function process( $args ) {
+		if ( $this->is_pro ) {
+			return;
+		}
 		try {
 			$automations = AutomationModel::get_automations_by_trigger( $this->slug );
 			foreach ( $automations as $automation ) {

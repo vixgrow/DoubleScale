@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Smtp\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Managers\MergeTagsManager;
 use DoubleScale\Modules\Smtp\Settings;

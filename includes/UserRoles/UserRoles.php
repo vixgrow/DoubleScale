@@ -13,6 +13,9 @@
 namespace DoubleScale\UserRoles;
 
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * UserRoles class
  *

@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;

@@ -3,6 +3,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Blocks;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 

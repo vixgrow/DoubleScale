@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
 use DoubleScale\Pro\Modules\Integrations\Activecampaign\Api;
 

@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Automations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Exception;
 use DoubleScale\Modules\Automations\Engine\ContactEnrollment;
 use DoubleScale\Modules\Automations\Engine\StepNavigator;
@@ -190,7 +193,11 @@ class ProcessAutomation {
 		try {
 			$automation_contact = AutomationContactModel::findOrFail( $automation_contact_id );
 			$action             = ActionsManager::instance()->get_action( $step->action );
-			$result             = $action->process_action( $this->automation, $step, $automation_contact );
+			if ( $action->is_pro ) {
+				$result = true;
+			} else {
+				$result = $action->process_action( $this->automation, $step, $automation_contact );
+			}
 			$next_step          = $this->get_next_step( $step );
 
 			if ( ! $result ) {

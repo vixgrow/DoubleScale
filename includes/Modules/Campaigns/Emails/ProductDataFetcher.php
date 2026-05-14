@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Fetches live WooCommerce product data for email rendering
  */

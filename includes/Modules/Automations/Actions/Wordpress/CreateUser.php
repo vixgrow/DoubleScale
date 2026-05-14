@@ -1,27 +1,23 @@
 <?php
-
 /**
- * Create User Action
- * This action will create a new user.
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Wordpress;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Create User Action
+ * CreateUser action stub.
  */
-class CreateUser extends Action
-{
-	/**
+class CreateUser extends ProAutomationStubAction {
+
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -67,26 +63,6 @@ class CreateUser extends Action
 	 *
 	 * @return bool
 	 */
-	public function process_action(AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact)
-	{
-		$contact = $automation_contact->contact;
-		$user    = get_user_by('email', $contact->email);
-		if (! $user) {
-			$user_id = wp_create_user($contact->email, wp_generate_password(8), $contact->email);
-			if (is_wp_error($user_id)) {
-				return false;
-			}
-			$first_name = $contact->first_name ? $contact->first_name : '';
-			$last_name  = $contact->last_name ? $contact->last_name : '';
-			if (! empty($first_name)) {
-				update_user_meta($user_id, 'first_name', $first_name);
-			}
-
-			if (! empty($last_name)) {
-				update_user_meta($user_id, 'last_name', $last_name);
-			}
-		}
-
-		return true;
-	}
 }
+
+CreateUser::instance();

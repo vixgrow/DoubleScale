@@ -27,16 +27,16 @@ final class FreeProDetectionTest extends TestCase {
 
 	public function test_doublescale_is_plugin_active_false_for_pro_path_when_not_active(): void {
 		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) ) {
-			define( 'DOUBLESCALE_PRO_PLUGIN_PATH', 'QuillCRM-Pro/doublescale-pro.php' );
+			define( 'DOUBLESCALE_PRO_PLUGIN_PATH', 'DoubleScale-Pro/doublescale-pro.php' );
 		}
 
-		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
+		require_once \DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
 
 		update_option( 'active_plugins', array() );
-		$this->assertFalse( doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH ) );
+		$this->assertFalse( doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
 
-		update_option( 'active_plugins', array( DOUBLESCALE_PRO_PLUGIN_PATH ) );
-		$this->assertTrue( doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH ) );
+		update_option( 'active_plugins', array( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
+		$this->assertTrue( doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) );
 	}
 
 	public function test_rest_template_collection_includes_is_pro_filter(): void {
@@ -48,9 +48,9 @@ final class FreeProDetectionTest extends TestCase {
 
 	public function test_rest_automation_dependency_marks_pro_only_trigger_when_pro_inactive(): void {
 		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) ) {
-			define( 'DOUBLESCALE_PRO_PLUGIN_PATH', 'QuillCRM-Pro/doublescale-pro.php' );
+			define( 'DOUBLESCALE_PRO_PLUGIN_PATH', 'DoubleScale-Pro/doublescale-pro.php' );
 		}
-		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
+		require_once \DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
 		update_option( 'active_plugins', array() );
 
 		$trigger        = new \stdClass();

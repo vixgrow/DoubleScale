@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Smtp\EmailLog;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

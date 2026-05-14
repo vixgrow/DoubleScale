@@ -48,10 +48,10 @@ const getIntegrationRequirements = (
 		case 'google':
 			return {
 				[__('Requirements', 'doublescale')]: [
-					__('Quill Booking Pro Account.', 'doublescale'),
+					__('DoubleScale Pro Account.', 'doublescale'),
 					__('A Google account.', 'doublescale'),
 					__(
-						'Give Quill Booking Full Access to manage Calendar and Conferencing.',
+						'Give DoubleScale Full Access to manage Calendar and Conferencing.',
 						'doublescale'
 					),
 				],
@@ -59,10 +59,10 @@ const getIntegrationRequirements = (
 		case 'outlook':
 			return {
 				[__('Requirements', 'doublescale')]: [
-					__('Quill Booking Pro Account.', 'doublescale'),
+					__('DoubleScale Pro Account.', 'doublescale'),
 					__('Microsoft account.', 'doublescale'),
 					__(
-						'Give Quill Booking Full Access to manage Calendar and Conferencing.',
+						'Give DoubleScale Full Access to manage Calendar and Conferencing.',
 						'doublescale'
 					),
 				],
@@ -70,10 +70,10 @@ const getIntegrationRequirements = (
 		case 'apple':
 			return {
 				[__('Requirements', 'doublescale')]: [
-					__('Quill Booking Pro Account.', 'doublescale'),
+					__('DoubleScale Pro Account.', 'doublescale'),
 					__('Apple account.', 'doublescale'),
 					__(
-						'Give Quill Booking Full Access to manage Calendar.',
+						'Give DoubleScale Full Access to manage Calendar.',
 						'doublescale'
 					),
 				],
@@ -91,10 +91,10 @@ const getIntegrationRequirements = (
 					),
 				],
 				[__('Requirements', 'doublescale')]: [
-					__('Quill Booking Pro Account.', 'doublescale'),
+					__('DoubleScale Pro Account.', 'doublescale'),
 					__('A Zoom account.', 'doublescale'),
 					__(
-						'Give Quill Booking Full Access to manage Zoom meetings.',
+						'Give DoubleScale Full Access to manage Zoom meetings.',
 						'doublescale'
 					),
 				],
@@ -102,10 +102,10 @@ const getIntegrationRequirements = (
 		default:
 			return {
 				[__('Requirements', 'doublescale')]: [
-					__('Quill Booking Pro Account.', 'doublescale'),
+					__('DoubleScale Pro Account.', 'doublescale'),
 					__(`A ${integrationName} account.`, 'doublescale'),
 					__(
-						`Give Quill Booking Full Access to manage ${integrationName}.`,
+						`Give DoubleScale Full Access to manage ${integrationName}.`,
 						'doublescale'
 					),
 				],
@@ -440,7 +440,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -504,7 +504,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -558,7 +558,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -601,7 +601,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -666,8 +666,9 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 					},
 				});
 			})
-			.catch((info) => {
-				console.log('Validate Failed:', info);
+			.catch(() => {
+				// Ant Design's validateFields rejects with field-level errors
+				// it has already surfaced inline. Nothing more to do here.
 			});
 	};
 
@@ -681,7 +682,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -771,7 +772,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -901,7 +902,7 @@ const IntegrationDetailsPage: React.FC<Props> = ({
 				type: 'error',
 				title: __('Pro Version Required', 'doublescale'),
 				message: __(
-					'This feature requires the Pro version of Quill Booking.',
+					'This feature requires the Pro version of DoubleScale.',
 					'doublescale'
 				),
 			});
@@ -1533,11 +1534,8 @@ const IntegrationDetailsPage: React.FC<Props> = ({
                                                         handleConnectBasic();
                                                         setVisible(false);
                                                     })
-                                                    .catch((info) => {
-                                                        console.log(
-                                                            'Validate Failed:',
-                                                            info
-                                                        );
+                                                    .catch(() => {
+                                                        // Ant Design surfaces field errors inline.
                                                     });
                                             }}
                                             disabled={connectLoading}

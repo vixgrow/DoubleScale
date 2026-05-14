@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\UserRoles\Permissions;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -132,11 +135,6 @@ class RestGeneralController extends RestController {
 			&& class_exists( '\DoubleScale\Modules\Campaigns\Models\TemplateModel' )
 		) {
 			$total_email_templates = \DoubleScale\Modules\Campaigns\Models\TemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
-		} elseif (
-			$this->dashboard_aggregate_allowed( 'tracking' )
-			&& class_exists( '\DoubleScale\Modules\Tracking\Models\TrackingTemplateModel' )
-		) {
-			$total_email_templates = \DoubleScale\Modules\Tracking\Models\TrackingTemplateModel::where( 'type', CampaignChannel::CHANNEL_EMAIL )->count();
 		}
 
 		$top_campaigns = array();

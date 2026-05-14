@@ -1,10 +1,10 @@
-=== DoubleScale - Complete Customer Relationship Management, Pipelines, Automations & More! ===
+=== DoubleScale ===
 Contributors: quillforms, mdmag
 Tags: crm, pipeline, whatsapp, automation
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.3
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -566,7 +566,6 @@ DoubleScale is developed and maintained by the Quill Forms team.
 
 **Our Other Products:**
 * **Quill Forms**: [quillforms.com](https://quillforms.com) - Advanced WordPress form builder
-* **Quill Booking**: [quillbooking.com](https://quillbooking.com) - WordPress booking system
 
 == Support ==
 

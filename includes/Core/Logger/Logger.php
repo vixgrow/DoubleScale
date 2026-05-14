@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Core\Logger;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Settings\Settings;
 
 /**

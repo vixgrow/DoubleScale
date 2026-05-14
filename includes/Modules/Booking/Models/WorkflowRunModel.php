@@ -7,10 +7,6 @@
  * exactly once), retry tracking with exponential backoff, and a queryable
  * audit trail for the {@see \DoubleScale\Modules\Booking\Services\EventBus}.
  *
- * Ported from the legacy QuillBooking `Workflow_Run_Model`. Behavior is
- * identical except for namespace and the `Booking_Model` → `BookingModel`
- * rename.
- *
  * @package DoubleScale
  */
 

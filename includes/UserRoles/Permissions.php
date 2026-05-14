@@ -12,6 +12,9 @@
 
 namespace DoubleScale\UserRoles;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Settings\Settings;
 
 /**

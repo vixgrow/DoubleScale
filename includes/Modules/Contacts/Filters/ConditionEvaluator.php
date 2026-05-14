@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\Filters;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**

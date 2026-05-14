@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Smtp\Providers\SendLayer\SendLayer;
 use DoubleScale\Modules\Smtp\Providers\Mailgun\Mailgun;
 use DoubleScale\Modules\Smtp\Providers\SMTPcom\SMTPcom;

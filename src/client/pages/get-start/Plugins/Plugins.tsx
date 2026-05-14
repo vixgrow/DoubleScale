@@ -340,7 +340,7 @@ export default function PluginComplete({
 						/>
 						<p className=" text-center text-lg font-semibold leading-[30px] text-foreground">
 							{__(
-								'We will send marketing tips and advanced usage of Quill CRM',
+								'We will send marketing tips and advanced usage of DoubleScale',
 								'doublescale'
 							)}
 						</p>

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Automations\Actions;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use phpDocumentor\Reflection\DocBlock\Tag;
 use DoubleScale\Modules\Automations\Abstracts\Action;
 use DoubleScale\Modules\Automations\Services\ActionsManager;

@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Services\TemplateFieldMapper;
 use DoubleScale\Constants\CampaignChannel;

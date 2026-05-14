@@ -12,6 +12,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;

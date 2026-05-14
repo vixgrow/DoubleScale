@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Core\Logger\Rest;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Logger\LogHandlerDb;
 use DoubleScale\UserRoles\Permissions;

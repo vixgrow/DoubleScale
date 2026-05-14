@@ -1,26 +1,24 @@
 <?php
-
 /**
- * LearnDash Trigger for Course Enrolled
- * This trigger will be fired when a user enrolls in a course.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Learndash;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WP_User;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Course Enrolled Trigger
+ * UserEnrolledInCourse trigger stub.
  */
-class UserEnrolledInCourse extends Trigger
-{
+class UserEnrolledInCourse extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -69,40 +67,6 @@ class UserEnrolledInCourse extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('learndash_update_course_access', array($this, 'course_enrolled'), 10, 4);
-	}
-
-	/**
-	 * Course Enrolled
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int    $user_id User ID.
-	 * @param int    $course_id Course ID.
-	 * @param string $course_access_list Course Access List (comma separated).
-	 * @param bool   $remove Remove.
-	 * @return void
-	 */
-	public function course_enrolled($user_id, $course_id, $course_access_list, $remove)
-	{
-		if ($remove) {
-			return;
-		}
-
-		$user = get_user_by('ID', $user_id);
-		if (! $user instanceof WP_User) {
-			return;
-		}
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'course_id'          => $course_id,
-				'course_access_list' => $course_access_list,
-				'user_id'            => $user_id,
-			),
-		);
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new UserEnrolledInCourse() );

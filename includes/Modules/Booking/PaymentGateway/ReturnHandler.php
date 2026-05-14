@@ -6,6 +6,9 @@
  * @package DoubleScale
  */
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Models\BookingModel;
 
 /**
@@ -33,7 +36,9 @@ function doublescale_booking_payment_return_handler() {
             // Log the payment return
             $booking->logs()->create([
                 'type'    => 'info',
-                'message' => sprintf(__('Payment %s return from %s', 'doublescale'), $action, $method),
+                /* translators: 1: payment action (e.g. return, cancel), 2: gateway name */
+                'message' => sprintf(__('Payment %1$s return from %2$s', 'doublescale'), $action, $method),
+                /* translators: %s: payment gateway name */
                 'details' => sprintf(__('User returned from payment gateway: %s', 'doublescale'), $method),
             ]);
             
@@ -47,10 +52,15 @@ function doublescale_booking_payment_return_handler() {
                 $redirect_url = home_url("/?doublescale_booking=booking&id={$booking_id}&type=confirm");
             }
             
-            // Log the redirection URL (helpful for debugging)
-            error_log('[DoubleScale Booking] Redirecting payment return to: ' . $redirect_url);
-            
-            // Redirect the user
+            doublescale_get_logger()->info(
+                'Redirecting payment return',
+                array(
+                    'source'       => 'booking-payment-return',
+                    'booking_id'   => (int) $booking_id,
+                    'redirect_url' => $redirect_url,
+                )
+            );
+
             wp_redirect($redirect_url);
             exit;
             

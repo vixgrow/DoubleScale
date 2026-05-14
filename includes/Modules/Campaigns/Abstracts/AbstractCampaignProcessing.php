@@ -10,6 +10,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -349,18 +352,16 @@ abstract class AbstractCampaignProcessing {
 			// Get message provider
 			$provider = $this->get_message_provider();
 			if ( ! $provider ) {
-				throw new \Exception( sprintf( 'No message provider available for %s', $this->channel ) );
+				throw new \Exception( esc_html( sprintf( 'No message provider available for %s', $this->channel ) ) );
 			}
 
 			// Validate provider is configured before attempting to send
 			if ( ! $provider->is_configured() ) {
-				throw new \Exception(
-					sprintf(
+				throw new \Exception( esc_html( sprintf(
 						'%s provider (%s) is not configured. Please configure it in Settings > Integrations before sending messages.',
 						ucfirst( $this->channel ),
 						$provider->get_provider_name()
-					)
-				);
+					) ) );
 			}
 
 			// Prepare message data for provider Api
@@ -1074,13 +1075,11 @@ abstract class AbstractCampaignProcessing {
 			// Get template data
 			$template = \DoubleScale\Modules\Campaigns\Models\TemplateModel::find( $campaign_message->template_id );
 			if ( ! $template ) {
-				throw new \Exception(
-					sprintf(
+				throw new \Exception( esc_html( sprintf(
 					/* translators: %s: channel name */
 						__( 'Template not found for %s campaign', 'doublescale'),
 						$this->channel
-					)
-				);
+					) ) );
 			}
 
 			// Validate template content
@@ -1285,6 +1284,7 @@ abstract class AbstractCampaignProcessing {
 		$campaign_duration = $this->calculate_campaign_duration( $campaign );
 
 		doublescale_get_logger()->info(
+			/* translators: %s: dynamic value */
 			sprintf( __( '%s Campaign completed.', 'doublescale'), ucfirst( $this->channel ) ),
 			array(
 				'code'       => "{$this->channel}_campaign_completed",
@@ -1627,19 +1627,17 @@ abstract class AbstractCampaignProcessing {
 	protected function validate_template( $template, $campaign_type ) {
 		if ( ! $template ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception(
-				sprintf(
+			throw new \Exception( esc_html( sprintf(
 					/* translators: %s: campaign type (email, sms, whatsapp) */
 					__( 'Template not found for %s campaign', 'doublescale'),
 					$campaign_type
-				)
-			);
+				) ) );
 		}
 
 		// Check for empty body
 		if ( empty( trim( $template->body ) ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Template body cannot be empty', 'doublescale') );
+			throw new \Exception( esc_html__( 'Template body cannot be empty', 'doublescale') );
 		}
 
 		// Check for subject in email templates

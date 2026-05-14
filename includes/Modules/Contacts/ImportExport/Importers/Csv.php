@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
 use League\Csv\Reader;
 use League\Csv\Statement;
@@ -73,13 +76,13 @@ class Csv extends Importer {
 	 */
 	public function run() {
 		if ( ! Security::prepare_upload_dir() ) {
-			throw new \Exception( __( 'Could not create the import working directory.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale') );
 		}
 
 		$mapping = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Email field is required.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Email field is required.', 'doublescale') );
 		}
 
 		$file_path = Security::get_upload_file_path( $this->file_name );

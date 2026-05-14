@@ -89,6 +89,12 @@ final class AdminConfig {
 		// Get pro plugin data
 		$pro_plugin_data = self::get_pro_plugin_data();
 
+		// FormsManager may finish resolving after the first `doublescale_loaded` pass; refresh
+		// trigger catalog so the admin SPA receives form integration rows for automations.
+		if ( class_exists( TriggersManager::class ) ) {
+			TriggersManager::instance()->sync_form_trigger_sources();
+		}
+
 		$config = apply_filters(
 			'doublescale_admin_config',
 			array(
@@ -253,14 +259,25 @@ final class AdminConfig {
 		}
 
 		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
-		$plugins_dir      = trailingslashit( dirname( dirname( DOUBLESCALE_PLUGIN_FILE ) ) );
-		$plugin_file      = 'DoubleScale-Pro/doublescale-pro.php';
-		$full_plugin_file = $plugins_dir . $plugin_file;
-		$plugin_exists    = file_exists( $full_plugin_file );
+		$plugins_dir = trailingslashit( dirname( dirname( \DOUBLESCALE_PLUGIN_FILE ) ) );
+		$candidates  = array(
+			'DoubleScale-Pro/doublescale-pro.php',
+		);
+		$exists      = false;
+		foreach ( $candidates as $rel ) {
+			if ( is_file( $plugins_dir . $rel ) ) {
+				$exists = true;
+				break;
+			}
+		}
+
+		$is_active = function_exists( 'doublescale_is_pro_addon_active' )
+			? doublescale_is_pro_addon_active()
+			: ( function_exists( 'is_plugin_active' ) && is_plugin_active( $candidates[0] ) );
 
 		return array(
-			'is_installed' => $plugin_exists,
-			'is_active'    => is_plugin_active( $plugin_file ),
+			'is_installed' => $exists,
+			'is_active'    => $is_active,
 		);
 	}
 

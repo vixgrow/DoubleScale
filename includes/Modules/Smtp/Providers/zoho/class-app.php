@@ -8,6 +8,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Zoho;
 
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * App class.
  *

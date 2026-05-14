@@ -7,6 +7,9 @@
 
 namespace DoubleScale\Modules\Booking;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WP_Roles;
 use WP_User;
 use DoubleScale\Modules\Booking\Models\CalendarModel;

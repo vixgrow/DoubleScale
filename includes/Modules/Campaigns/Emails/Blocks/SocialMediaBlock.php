@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Emails\Blocks;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Campaigns\Abstracts\EmailBlock;
 use DoubleScale\Modules\Campaigns\Emails\SocialIconGenerator;
 use DoubleScale\Modules\Contacts\Models\ContactModel;

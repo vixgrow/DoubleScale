@@ -1,25 +1,24 @@
 <?php
-
 /**
- * WooCommerce Order Completed Trigger
- * This trigger will be fired when an order is completed.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Order;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use WC_Order;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Order Completed Trigger
+ * OrderCompleted trigger stub.
  */
-class OrderCompleted extends Trigger
-{
-	/**
+class OrderCompleted extends TriggerPro {
+
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -68,36 +67,6 @@ class OrderCompleted extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('woocommerce_order_status_completed', array($this, 'order_completed'));
-	}
-
-	/**
-	 * Order Completed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 *
-	 * @return void
-	 */
-	public function order_completed($order_id)
-	{
-		$order = \wc_get_order($order_id);
-		if (! $order instanceof WC_Order) {
-			return;
-		}
-
-		$data = array(
-			'first_name' => $order->get_billing_first_name(),
-			'last_name'  => $order->get_billing_last_name(),
-			'email'      => $order->get_billing_email(),
-			'data'       => array(
-				'order_id' => $order->get_id(),
-			),
-		);
-
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new OrderCompleted() );

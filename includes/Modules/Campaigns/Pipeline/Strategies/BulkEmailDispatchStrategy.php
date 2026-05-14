@@ -13,6 +13,9 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline\Strategies;
 
+
+defined( 'ABSPATH' ) || exit;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

@@ -1,26 +1,24 @@
 <?php
-
 /**
- * EDD Trigger for New Order Success
- *
- * This trigger will be fired when a new order is successfully placed.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Edd;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * New Order Success Trigger
+ * NewOrderSuccess trigger stub.
  */
-class NewOrderSuccess extends Trigger
-{
+class NewOrderSuccess extends TriggerPro {
 
-	/**
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -69,38 +67,6 @@ class NewOrderSuccess extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('edd_complete_purchase', array($this, 'new_order_success'), 10, 3);
-	}
-
-	/**
-	 * New Order Success
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int           $payment_id Payment ID.
-	 * @param \EDD_Payment  $payment    EDD_Payment object containing all payment data.
-	 * @param \EDD_Customer $customer   EDD_Customer object containing all customer data.
-	 *
-	 * @return void
-	 */
-	public function new_order_success($payment_id, $payment, $customer)
-	{
-		$user_id = $customer->user_id;
-		$user    = get_user_by('id', $user_id);
-		if (! $user instanceof \WP_User) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'payment_id'  => $payment_id,
-				'customer_id' => $customer->id,
-			),
-		);
-
-		$this->process($data);
-	}
 }
+
+TriggersManager::instance()->register( new NewOrderSuccess() );

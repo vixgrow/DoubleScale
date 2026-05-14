@@ -1,27 +1,24 @@
 <?php
-
 /**
- * WooCommerce Order Created Per Product Trigger
- * This trigger will be fired for each product when an order is created.
- *
- * @since 1.0.0
+ * Pro automation trigger (free plugin): definition only. Runtime hooks ship in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Order;
 
-use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Constants\OrderStatus;
-use WC_Order;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
+use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
- * Order Created Per Product Trigger
+ * OrderCreatedPerProduct trigger stub.
  */
-class OrderCreatedPerProduct extends Trigger
-{
-	/**
+class OrderCreatedPerProduct extends TriggerPro {
+
+/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -70,116 +67,6 @@ class OrderCreatedPerProduct extends Trigger
 	 *
 	 * @return void
 	 */
-	public function load_hooks()
-	{
-		add_action('woocommerce_new_order', array($this, 'order_created'));
-	}
-
-	/**
-	 * Order Created
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id Order ID.
-	 * @return void
-	 */
-	public function order_created($order_id)
-	{
-		$order = \wc_get_order($order_id);
-		if (! $order instanceof WC_Order) {
-			return;
-		}
-
-		$items = $order->get_items();
-
-		// Loop through each product in the order
-		foreach ($items as $item_id => $item) {
-			$product = $item->get_product();
-			if (! $product) {
-				continue;
-			}
-
-			$data = array(
-				'first_name' => $order->get_billing_first_name(),
-				'last_name'  => $order->get_billing_last_name(),
-				'email'      => $order->get_billing_email(),
-				'data'       => array(
-					'order_id'      => $order->get_id(),
-					'product_id'    => $product->get_id(),
-					'product_name'  => $product->get_name(),
-					'product_sku'   => $product->get_sku(),
-					'quantity'      => $item->get_quantity(),
-					'line_total'    => $item->get_total(),
-					'line_subtotal' => $item->get_subtotal(),
-					'item_id'       => $item_id,
-				),
-			);
-
-			$this->process($data);
-		}
-	}
-
-	/**
-	 * Is Processable
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param AutomationModel $automation
-	 * @param array            $args
-	 *
-	 * @return bool
-	 */
-	public function is_processable(AutomationModel $automation, $args)
-	{
-		$status              = $args['data']['status'] ?? '';
-		$automation_statuses = $automation->get_setting('statuses', array());
-
-		if (! in_array($status, $automation_statuses, true)) {
-			return false;
-		}
-
-		return true;
-	}
-
-
-
-	/**
-	 * Get fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_fields()
-	{
-		return array(
-			'statuses' => array(
-				'type'    => 'multiselect',
-				'label'   => __('Order Statuses', 'doublescale'),
-				'options' => OrderStatus::get_all(),
-			),
-		);
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema()
-	{
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'statuses' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-	}
 }
+
+TriggersManager::instance()->register( new OrderCreatedPerProduct() );

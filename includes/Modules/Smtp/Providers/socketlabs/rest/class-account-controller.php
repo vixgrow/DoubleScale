@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SocketLabs\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use WP_Error;
 use WP_REST_Request;
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Account_Controller as Abstract_Account_Controller;

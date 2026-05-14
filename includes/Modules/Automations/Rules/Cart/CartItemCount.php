@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Cart;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;

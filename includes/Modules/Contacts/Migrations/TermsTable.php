@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Contacts\Migrations;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Core\Database\Migration;
 
 /**

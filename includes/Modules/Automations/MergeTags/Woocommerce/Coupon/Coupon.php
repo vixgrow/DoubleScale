@@ -2,6 +2,9 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\Coupon;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;

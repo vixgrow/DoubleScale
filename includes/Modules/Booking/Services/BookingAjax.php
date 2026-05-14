@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use DoubleScale\Modules\Booking\Services\BookingValidator;
 use DoubleScale\Modules\Booking\Services\BookingService;
 use DoubleScale\Modules\Booking\Services\BookingEvents;
@@ -448,6 +451,7 @@ class BookingAjax {
 				array(
 					'type'    => 'info',
 					'message' => __( 'Payment processing initiated', 'doublescale' ),
+					/* translators: %s: payment method name */
 					'details' => sprintf( __( 'Payment processing initiated with %s', 'doublescale' ), $payment_method ),
 				)
 			);

@@ -364,8 +364,10 @@ const CreateEvent: React.FC<CreateEventProps> = ({
 					connected_integrations: response,
 				}));
 			},
-			onError: (error) => {
-				console.log(error);
+			onError: () => {
+				// Failure here is non-fatal: the user can still create the event without
+				// loading connected integrations. The integrations panel renders its own
+				// empty state.
 			},
 		});
 	}, [calendarId, calendarType, selectedTeamMemberIdsKey, callApi]);

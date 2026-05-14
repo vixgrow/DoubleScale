@@ -11,6 +11,9 @@
 
 namespace DoubleScale\Modules\Booking\Abstracts;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Integration\Accounts;
 use DoubleScale\Modules\Booking\Managers\IntegrationsManager;
@@ -525,6 +528,7 @@ abstract class Integration {
 			return true;
 		}
 
+		/* translators: %s: integration name */
 		return new \WP_Error( 'integration_not_connected', sprintf( __( 'Integration %s is not connected.', 'doublescale' ), $this->name ) );
 	}
 

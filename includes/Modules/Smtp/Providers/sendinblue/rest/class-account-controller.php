@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SendInBlue\REST;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Brevo\Client\Configuration;
 use Brevo\Client\Api\AccountApi;
 use GuzzleHttp\Client as GuzzleClient;

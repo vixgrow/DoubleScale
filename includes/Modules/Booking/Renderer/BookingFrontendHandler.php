@@ -9,6 +9,9 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
+
+defined( 'ABSPATH' ) || exit;
+
 use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
@@ -54,9 +57,9 @@ class BookingFrontendHandler {
 		$wp_scripts->queue = array();
 		$wp_styles->queue  = array();
 
-		$plugin_dir = defined( 'DOUBLESCALE_PLUGIN_DIR' ) ? DOUBLESCALE_PLUGIN_DIR : '';
-		$plugin_url = defined( 'DOUBLESCALE_PLUGIN_URL' ) ? DOUBLESCALE_PLUGIN_URL : '';
-		$version    = defined( 'DOUBLESCALE_VERSION' ) ? DOUBLESCALE_VERSION : '1.0.0';
+		$plugin_dir = defined( 'DOUBLESCALE_PLUGIN_DIR' ) ? \DOUBLESCALE_PLUGIN_DIR : '';
+		$plugin_url = defined( 'DOUBLESCALE_PLUGIN_URL' ) ? \DOUBLESCALE_PLUGIN_URL : '';
+		$version    = defined( 'DOUBLESCALE_VERSION' ) ? \DOUBLESCALE_VERSION : '1.0.0';
 
 		$asset_file  = $plugin_dir . 'build/renderer/index.asset.php';
 		$asset       = file_exists( $asset_file ) ? require $asset_file : null;
@@ -111,8 +114,8 @@ class BookingFrontendHandler {
 		// isn't installed, hide the payment / waiting-list UI on public
 		// booking pages. The constant is defined by the Pro plugin itself,
 		// so the `defined()` guard prevents a notice on free-only installs.
-		$is_pro_active = defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
-			&& doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
+		$is_pro_active = function_exists( 'doublescale_is_pro_addon_active' )
+			&& doublescale_is_pro_addon_active();
 		wp_add_inline_script(
 			'doublescale-booking-renderer',
 			sprintf(

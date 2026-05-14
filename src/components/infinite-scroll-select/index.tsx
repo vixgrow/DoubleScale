@@ -14,6 +14,8 @@ import { debounce } from 'lodash';
 /**
  * Internal dependencies
  */
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import { InfiniteScrollSelectProps } from './types';
 
 /**
@@ -44,6 +46,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	loading: externalLoading = false,
 	error: externalError,
 	className = '',
+	inputClassName,
 }) => {
 	const [items, setItems] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -260,7 +263,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	return (
 		<div className={`infinite-scroll-select relative ${className}`}>
 			<div className="relative">
-				<input
+				<Input
 					ref={inputRef}
 					type="text"
 					value={displayValue()}
@@ -278,9 +281,12 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 					placeholder={placeholder}
 					disabled={disabled || externalLoading}
 					autoComplete="off"
-				className={`h-12 w-full py-[5px] px-4 pr-10 !rounded-[8px] border !border-border/60 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-					displayError ? 'border-destructive' : ''
-				} ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+					className={cn(
+						'pr-10 !rounded-lg !border-border',
+						displayError &&
+							'border-destructive focus-visible:border-destructive',
+						inputClassName
+					)}
 				/>
 				<div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
 					<svg

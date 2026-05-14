@@ -2951,6 +2951,7 @@
 								{
 									"key": "action",
 									"value": "doublescale_send_summary_email",
+									"value": "doublescale_send_summary_email",
 									"type": "text"
 								}
 							]

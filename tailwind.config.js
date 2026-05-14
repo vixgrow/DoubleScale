@@ -3,6 +3,7 @@ module.exports = {
 	darkMode: ['class'],
 	content: [
 		'./src/api/email-editor-blocks/built-in-blocks/text/**/*.tsx',
+		'./src/client/pages/**/*.ts',
 		'./src/client/pages/**/*.tsx',
 		'./src/components/**/*.tsx',
 		'./src/shared/**/*.tsx',

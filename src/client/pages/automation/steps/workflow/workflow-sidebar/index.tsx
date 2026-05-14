@@ -346,7 +346,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			<SidebarLayoutProvider>
 				<div
 					className={cn(
-						'doublescale-workflow-sidebar absolute top-0 right-0 bottom-0 z-[150400] flex min-h-0 w-[min(100%,26rem)] max-w-[26rem] flex-col rounded-l-2xl border-l border-border/50 bg-card/95 shadow-[-16px_0_48px_-20px_rgba(15,23,42,0.18)] backdrop-blur-md',
+						'doublescale-workflow-sidebar absolute left-0 top-0 bottom-0 z-[150400] flex min-h-0 w-[min(100%,26rem)] max-w-[26rem] flex-col rounded-r-2xl border-r border-border/50 bg-card/95 shadow-[16px_0_48px_-20px_rgba(15,23,42,0.18)] backdrop-blur-md',
 						isVisible ? 'is-visible' : ''
 					)}
 				>

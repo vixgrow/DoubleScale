@@ -6,6 +6,7 @@
 	.doublescale-rule-row {
 		display: flex;
 		align-items: center;
-		gap: 16px;
+		min-width: 0;
+		width: 100%;
 	}
 }

@@ -17,8 +17,23 @@ const automationDialogSurfaceCore = cn(
 /** Large builders (conditions, journey). */
 export const automationDialogSurfaceWide = cn(
 	automationDialogSurfaceCore,
-	'z-[150300] max-h-[min(90vh,920px)] w-[min(96vw,1140px)] max-w-[min(96vw,1140px)]'
+	'z-[150300] max-h-[min(90vh,920px)] w-[min(90vw,1140px)] max-w-[min(90vw,1140px)]'
 );
+
+/** Conditions modal — compact builder, AND/OR rails sit in a slim gutter on the left. */
+export const automationDialogSurfaceConditions = cn(
+	automationDialogSurfaceCore,
+	'z-[150300] max-h-[min(92vh,820px)] w-[min(92vw,980px)] max-w-[min(92vw,980px)]'
+);
+
+/**
+ * Inline size for the conditions dialog — guarantees width even when Tailwind merge omits
+ * `max-w-[…]` from presets or the class isn’t in the CSS bundle.
+ */
+export const automationDialogConditionsInlineSize: Record<string, string> = {
+	width: 'min(92vw, 980px)',
+	maxWidth: 'min(92vw, 980px)',
+};
 
 /** Add step and similar pickers. */
 export const automationDialogSurfaceMedium = cn(
@@ -42,7 +57,7 @@ export const automationDialogHeaderClassName = cn(
 );
 
 export const automationDialogBodyClassName = cn(
-	'min-h-0 flex-1 overflow-y-auto p-6 sm:p-6'
+	'min-h-0 flex-1 overflow-y-auto p-6 pt-0'
 );
 
 export const automationDialogFooterClassName = cn(

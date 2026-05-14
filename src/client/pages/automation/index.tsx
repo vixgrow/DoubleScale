@@ -23,18 +23,21 @@ import Contacts from './steps/contacts';
 import AutomationFunnel from '../automation-reports/automation-funnels';
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronRight } from 'lucide-react';
-import { getTriggerLabel } from '@doublescale/utils';
+import { Switch } from '@/components/ui/switch';
+import { ChevronRight, Pencil, X } from 'lucide-react';
 import {
 	WorkflowIcon,
 	AutomationContactsIcon,
 	AutomationAnalyticsIcon,
+	EditHeaderIcon,
+	AccordingRightIcon,
 } from '@doublescale/components';
 import { AutomationShimmer } from './automation-shimmer';
 import Config from '@doublescale/config';
@@ -42,6 +45,7 @@ import {
 	moduleFetch,
 	getModuleFetchBlockedNotice,
 } from '@doublescale/services/module-fetch';
+import ArrowRightIcon from '@doublescale/shared/icons/arrow-right';
 
 /** Ensures `steps` is always an array (PHP may serialize keyed arrays as objects). */
 function normalizeAutomationPayload(raw: AutomationType): AutomationType | null {
@@ -334,6 +338,7 @@ const Automation: React.FC = () => {
 				}}
 			>
 				<DialogContent
+					hideCloseButton={!loading && !!automation}
 					className="w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
 					style={{
 						paddingTop: '10px',
@@ -389,84 +394,88 @@ const Automation: React.FC = () => {
 						</div>
 					) : (
 						<>
-							<DialogHeader className="border-b border-[#E4E7EC] pr-14 pl-5 pb-4">
-								<DialogTitle>
-									<div className="flex items-center justify-between">
-										{/* Left section - Undo/Redo buttons
-										<div className="flex gap-2">
-											{activeTab === 'workflow' && (
-												<>
-													<Button
-														variant="outline"
-														size="sm"
-													>
-														<UndoIcon />
-													</Button>
-													<Button
-														variant="outline"
-														size="sm"
-													>
-														<RedoIcon />
-													</Button>
-												</>
-											)}
-										</div> */}
+							<DialogHeader className="border-b border-[#E4E7EC] gap-0 space-y-0 p-0 shrink-0">
+								<DialogTitle className="sr-only">
+									{automation?.name ||
+										__(
+											'Automation editor',
+											'doublescale'
+										)}
+								</DialogTitle>
 
-										{/* Left section - Title */}
-										<div className="flex items-center gap-2 min-w-0 flex-wrap">
-											<span
-												className="text-base text-normal text-[#667085] cursor-pointer hover:text-[#1E3A8A] transition-colors shrink-0"
-												onClick={() =>
-													navigate(
-														getToLink('automations')
+								{/* Top bar: breadcrumb | centered title | active + save */}
+								<div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 p-3">
+									<nav
+										className="flex min-w-0 items-center gap-1.5 justify-self-start text-sm"
+										aria-label={__(
+											'Breadcrumb',
+											'doublescale'
+										)}
+									>
+										<button
+											type="button"
+											className="shrink-0 cursor-pointer text-foreground text-base font-medium leading-7 transition-colors hover:text-secondary"
+											onClick={() =>
+												navigate(
+													getToLink('automations')
+												)
+											}
+										>
+											{__(
+												'Automation List',
+												'doublescale'
+											)}
+										</button>
+										<AccordingRightIcon width={20} height={20} color='hsl(var(--foreground))' />
+										<span className="truncate text-base font-medium leading-7 text-muted-foreground">
+											{__(
+												'Edit Automation',
+												'doublescale'
+											)}
+										</span>
+									</nav>
+
+									<div className="flex max-w-[min(100%,28rem)] items-center justify-center justify-self-center gap-1.5">
+										{editingAutomationName ? (
+											<Input
+												className="h-9 min-w-[12rem] max-w-md text-center text-base font-medium text-[#101828]"
+												value={automationNameDraft}
+												onChange={(e) =>
+													setAutomationNameDraft(
+														e.target.value
 													)
 												}
-											>
-												{__(
-													'Automations',
+												onBlur={() => {
+													void commitAutomationName();
+												}}
+												onKeyDown={(e) => {
+													if (e.key === 'Enter') {
+														(
+															e.target as HTMLInputElement
+														).blur();
+													}
+													if (e.key === 'Escape') {
+														setAutomationNameDraft(
+															automation?.name ||
+																''
+														);
+														setEditingAutomationName(
+															false
+														);
+													}
+												}}
+												autoFocus
+												disabled={isSaving}
+												aria-label={__(
+													'Automation name',
 													'doublescale'
 												)}
-											</span>
-											<ChevronRight className="h-4 w-4 shrink-0" />
-											{editingAutomationName ? (
-												<Input
-													className="h-8 max-w-md text-base text-[#374151]"
-													value={automationNameDraft}
-													onChange={(e) =>
-														setAutomationNameDraft(
-															e.target.value
-														)
-													}
-													onBlur={() => {
-														void commitAutomationName();
-													}}
-													onKeyDown={(e) => {
-														if (e.key === 'Enter') {
-															(
-																e.target as HTMLInputElement
-															).blur();
-														}
-														if (e.key === 'Escape') {
-															setAutomationNameDraft(
-																automation?.name ||
-																	''
-															);
-															setEditingAutomationName(
-																false
-															);
-														}
-													}}
-													autoFocus
-													disabled={isSaving}
-													aria-label={__(
-														'Automation name',
-														'doublescale'
-													)}
-												/>
-											) : (
+											/>
+										) : (
+											<>
 												<button
 													type="button"
-													className="text-left text-base font-medium text-[#374151] hover:text-[#1E3A8A] transition-colors truncate max-w-md min-w-0"
+													className="min-w-0 truncate text-center text-base font-medium text-[#101828] transition-colors hover:text-secondary"
 													onClick={() => {
 														setAutomationNameDraft(
 															automation?.name ||
@@ -487,76 +496,123 @@ const Automation: React.FC = () => {
 															'doublescale'
 														)}
 												</button>
-											)}
-											<ChevronRight className="h-4 w-4 shrink-0" />
-											<span className="text-normal text-[#667085] truncate max-w-[12rem] sm:max-w-xs">
-												{activeTab === 'workflow'
-													? getTriggerLabel(
-															automation
-														)
-													: activeTab}
-											</span>
-										</div>
-
-										{/* Right section - Save button */}
-										<div className="flex gap-2">
-											{activeTab === 'workflow' && (
-												<Button
-													variant="default"
-													className="px-4 text-base font-normal rounded-lg"
-													disabled={isSaving}
-													onClick={() =>
-														saveAutomation({
-															status: 'active',
-														})
-													}
-												>
-													{__(
-														'Save & Publish',
+												<button
+													type="button"
+													className="shrink-0 rounded-md flex items-center justify-center gap-2 text-foreground text-base font-semibold leading-6 transition-colors hover:bg-[#F9FAFB] hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+													onClick={() => {
+														setAutomationNameDraft(
+															automation?.name ||
+																''
+														);
+														setEditingAutomationName(
+															true
+														);
+													}}
+													aria-label={__(
+														'Edit automation name',
 														'doublescale'
 													)}
-												</Button>
-											)}
-										</div>
+												>
+													<EditHeaderIcon width={28} height={28} color='#3A3A99' />
+												</button>
+											</>
+										)}
 									</div>
-								</DialogTitle>
-							</DialogHeader>
-							<div className="flex flex-1 min-h-0 overflow-hidden">
-								{/* Left Sidebar */}
-								<div className="w-28 border-r border-[#E4E7EC] flex flex-col gap-5 pt-4 px-2 shrink-0">
+
+									<div className="flex flex-shrink-0 items-center justify-end justify-self-end gap-3">
+										<label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#344054]">
+											<span>{__('Active', 'doublescale')}</span>
+											<Switch
+												checked={
+													automation.status ===
+													'active'
+												}
+												disabled={isSaving}
+												onCheckedChange={(checked) => {
+													void saveAutomation({
+														status: checked
+															? 'active'
+															: 'inactive',
+													});
+												}}
+												aria-label={__(
+													'Automation active status',
+													'doublescale'
+												)}
+											/>
+										</label>
+										{/* divider */}
+										<div className="h-6 w-px bg-[#D0D0D0]"></div>
+										<Button
+											variant="default"
+											
+											disabled={isSaving}
+											onClick={() =>
+												saveAutomation({
+													status: 'active',
+												})
+											}
+										>
+											{__(
+												'Save & Publish',
+												'doublescale'
+											)}
+										</Button>
+										<DialogClose
+											type="button"
+											className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[#101828] opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
+											aria-label={__(
+												'Close',
+												'doublescale'
+											)}
+										>
+											<X className="h-6 w-6" />
+											<span className="sr-only">
+												{__('Close', 'doublescale')}
+											</span>
+										</DialogClose>
+									</div>
+								</div>
+
+								{/* Tab row */}
+								<div className="flex justify-center gap-5 border-t border-[#E4E7EC] p-3">
 									{tabs.map((tab) => {
 										const Icon = tab.icon;
-										const isActive = activeTab === tab.id;
+										const isActive =
+											activeTab === tab.id;
 										return (
 											<button
 												key={tab.id}
+												type="button"
 												onClick={() =>
 													setActiveTab(
 														tab.id as
-														| 'workflow'
-														| 'contacts'
-														| 'reports'
+															| 'workflow'
+															| 'contacts'
+															| 'reports'
 													)
 												}
-												className={`flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg transition-colors shadow-none ${isActive
-													? 'bg-[#E3EEFF99] text-secondary'
-													: 'border border-[#E4E7EC] text-[#667085] hover:bg-gray-50'
-													}`}
+												className={`inline-flex items-center gap-2 rounded-lg p-2 text-sm font-medium shadow-none transition-colors ${
+													isActive
+														? 'bg-[#EEF] text-brandPrimary'
+														: 'border border-border text-foreground hover:bg-gray-50'
+												}`}
 											>
 												<Icon width={24} height={24} />
-												<span className="text-base font-normal">
-													{tab.label}
-												</span>
+												{tab.label}
 											</button>
 										);
 									})}
 								</div>
-								{/* Main Content */}
+							</DialogHeader>
+
+							<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 								<div
-									className={`flex-1 min-h-0 flex flex-col ${activeTab === 'contacts'
+									className={`flex min-h-0 flex-1 flex-col ${
+										activeTab === 'contacts'
 											? 'overflow-y-auto overflow-x-hidden'
 											: 'overflow-hidden'
-										}`}
+									}`}
 								>
 									{renderContent()}
 								</div>

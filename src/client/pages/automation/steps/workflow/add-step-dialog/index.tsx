@@ -21,12 +21,12 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from '@/components/ui/dialog';
 import {
 	automationDialogBodyClassName,
 	automationDialogHeaderClassName,
 	automationDialogSurfaceMedium,
+	automationModalOverlayClassName,
 } from '../automation-dialog-presets';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -128,28 +128,29 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 	return (
 		<>
 			<Dialog open={visible} onOpenChange={onVisibleChange}>
-				<DialogTrigger asChild>
-					<div
-						className={`doublescale-automation-workflow__add-step  mx-auto flex items-center justify-center ${!disabled ? 'pointer-events-auto' : ''}`}
-						onClick={(e) => {
-							if (disabled) return;
-							e.stopPropagation();
-							onVisibleChange(!visible);
-						}}
-					>
-						<Button
-							variant="secondary"
-							size="icon"
-							className="h-8 w-8 rounded-full bg-white"
-							title={__('Add step here', 'doublescale')}
-						>
-							<PlusIcon />
-						</Button>
-					</div>
-				</DialogTrigger>
+				<button
+					type="button"
+					disabled={disabled}
+					className={cn(
+						'doublescale-automation-workflow__add-step nodrag nopan mx-auto flex items-center justify-center rounded-full border-0 bg-transparent p-0 shadow-none outline-none transition-opacity disabled:pointer-events-none disabled:opacity-40',
+						!disabled && 'cursor-pointer hover:opacity-90'
+					)}
+					onClick={(e) => {
+						e.stopPropagation();
+						if (!disabled) {
+							onVisibleChange(true);
+						}
+					}}
+					title={__('Add step here', 'doublescale')}
+				>
+					<span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+						<PlusIcon />
+					</span>
+				</button>
 
 				<DialogContent
 					className={cn(automationDialogSurfaceMedium, 'gap-0 p-0')}
+					overlayClassName={automationModalOverlayClassName}
 				>
 					{/* Sticky header */}
 					<DialogHeader

@@ -9,6 +9,7 @@ import { map } from 'lodash';
 import './style.scss';
 import type { Rule as RuleSettings } from '@doublescale/config';
 import { Rule as RuleType } from '@doublescale/client';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Field from '../field';
 import {
@@ -18,7 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { DeleteIcon } from '@/components/icons';
+import TrashIcon from '@doublescale/shared/icons/trash';
 
 interface RuleProps {
 	ruleSettings: RuleSettings;
@@ -38,41 +39,61 @@ const Rule: React.FC<RuleProps> = ({
 		Object.keys(ruleSettings.operators).length > 0;
 
 	return (
-		<div className="doublescale-rule">
-			<div className="doublescale-rule-row w-full">
+		<div className="doublescale-rule flex min-w-0 w-full flex-1">
+			<div className="doublescale-rule-row flex min-w-0 w-full flex-1 items-center gap-3">
 				{hasOperators && (
-					<Select
-						value={rule.operator}
-						onValueChange={(value) => onChange('operator', value)}
-					>
-						<SelectTrigger className="w-[150px] h-12 border-[#D3D4D6] rounded-lg">
-							<SelectValue placeholder="Select operator" />
-						</SelectTrigger>
-						<SelectContent className="max-h-[200px] overflow-y-auto">
-							{map(ruleSettings.operators, (operator, key) => (
-								<SelectItem key={key} value={key}>
-									{operator}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					<div className="min-w-0 flex-1 basis-0">
+						<Select
+							value={rule.operator}
+							onValueChange={(value) =>
+								onChange('operator', value)
+							}
+						>
+							<SelectTrigger className="h-12 w-full min-w-0 border-border">
+								<SelectValue placeholder="Select operator" />
+							</SelectTrigger>
+							<SelectContent className="max-h-[200px] overflow-y-auto">
+								{map(
+									ruleSettings.operators,
+									(operator, key) => (
+										<SelectItem key={key} value={key}>
+											{operator}
+										</SelectItem>
+									)
+								)}
+							</SelectContent>
+						</Select>
+					</div>
 				)}
-				<Field
-					type={ruleSettings.type}
-					value={rule.value}
-					onChange={(value) => onChange('value', value)}
-					options={map(ruleSettings.options || [], (option, key) => ({
-						label: option,
-						value: key,
-					}))}
-				/>
+				<div
+					className={cn(
+						'min-w-0 [&_.react-select-container]:w-full',
+						hasOperators ? 'flex-1 basis-0' : 'flex-1'
+					)}
+				>
+					<Field
+						compact
+						type={ruleSettings.type}
+						value={rule.value}
+						
+						onChange={(value) => onChange('value', value)}
+						options={map(
+							ruleSettings.options || [],
+							(option, key) => ({
+								label: option,
+								value: key,
+							})
+						)}
+						className="w-full min-w-0 [&_input]:w-full [&_textarea]:w-full"
+					/>
+				</div>
 				{onRemove && (
 					<Button
-						size="icon"
+						type="button"
 						onClick={onRemove}
-						className="bg-transparent hover:bg-transparent text-destructive shadow-none border-l rounded-none px-0 h-12"
+						className="h-12 w-12 shrink-0 bg-transparent px-0 shadow-none hover:bg-transparent hover:text-destructive text-destructive [&_svg]:size-6"
 					>
-						<DeleteIcon width={20} height={20} />
+						<TrashIcon width={24} height={24} />
 					</Button>
 				)}
 			</div>

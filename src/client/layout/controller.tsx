@@ -62,6 +62,7 @@ import {
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { Mail } from 'lucide-react';
 import { RocketIcon } from '@/components/icons';
+import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
@@ -234,6 +235,7 @@ export const HeaderBar = ({ page }: { page: any }) => {
 					</a>
 				)}
 				{!isProActive && <ProUpgradeButton />}
+				{!isProActive && <HeaderProBells />}
 				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
 				<div className="doublescale-layout__header-divider"></div>
 				<div className="doublescale-layout__header-user-info">

@@ -12,7 +12,6 @@ import {
 } from '@doublescale/shared/lib/optional-marketing-modules';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
 
 interface ModulesResponse {
 	success: boolean;
@@ -65,13 +64,8 @@ export default function ModulesSettings() {
 				setModules(response.modules);
 				config.setModules(response.modules);
 				setPendingChanges({});
-				createNotice({
-					type: 'success',
-					message: __(
-						'Module settings saved. Reload the page for changes to take full effect.',
-						'doublescale'
-					),
-				});
+				window.location.reload();
+				return;
 			}
 		} catch (error: any) {
 			const msg =
@@ -155,16 +149,7 @@ export default function ModulesSettings() {
 			</div>
 
 			{hasChanges && (
-				<div className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
-					<div className="flex items-center gap-2 text-amber-700">
-						<RefreshCw size={16} />
-						<span className="text-sm font-medium">
-							{__(
-								'You have unsaved changes. A page reload is recommended after saving.',
-								'doublescale'
-							)}
-						</span>
-					</div>
+				<div className="flex items-center justify-end p-4 border border-border/40 rounded-xl">
 					<Button
 						onClick={handleSave}
 						disabled={isSaving}

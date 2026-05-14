@@ -1,10 +1,12 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
-import { useNavigate, getToLink } from '@doublescale/navigation';
+import { getToLink } from '@doublescale/navigation';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function EndStep() {
-	const navigate = useNavigate();
+	const goToDashboard = () => {
+		window.location.href = getToLink('/');
+	};
 
 	return (
 		<div className="flex flex-col items-center justify-center gap-5 mx-auto min-h-[60vh] text-center max-w-lg px-4">
@@ -23,7 +25,7 @@ export default function EndStep() {
 				)}
 			</p>
 
-			<Button size="lg" onClick={() => navigate(getToLink('/'))}>
+			<Button size="lg" onClick={goToDashboard}>
 				{__('Go to Dashboard', 'doublescale')}
 				<ArrowRight size={16} className="ml-1.5" />
 			</Button>

@@ -134,8 +134,10 @@ export function getEffectiveMarketingModuleState(
 const OPTIONAL_SLUG_SET: ReadonlySet<string> = new Set(OPTIONAL_MARKETING_MODULE_SLUGS);
 
 /**
- * Normalizes pending toggles: real modules only when changed vs API; Pro placeholders
- * only when turned on (visual preference until Pro is installed).
+ * Normalizes pending toggles: real modules when the user has not yet expressed
+ * an explicit opinion (so first-run wizard always commits its defaults) or when
+ * the value differs from the API; Pro placeholders only when turned on (visual
+ * preference until Pro is installed).
  */
 export function reduceMarketingModulePending(
 	next: Record<string, boolean>,
@@ -145,7 +147,7 @@ export function reduceMarketingModulePending(
 	for (const [s, v] of Object.entries(next)) {
 		const original = apiModules.find((m) => m.slug === s);
 		if (original?.is_toggleable) {
-			if (original.enabled !== v) {
+			if (!original.is_explicit || original.enabled !== v) {
 				out[s] = v;
 			}
 		} else if (OPTIONAL_SLUG_SET.has(s) && v) {

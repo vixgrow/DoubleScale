@@ -80,9 +80,10 @@ final class ModuleManager {
 	public static function sync_lifecycle_from_option_delta( array $old_value, array $new_value ): void {
 		$slugs = array_unique( array_merge( array_keys( $old_value ), array_keys( $new_value ) ) );
 		foreach ( $slugs as $slug ) {
-			$slug = (string) $slug;
-			$was_on = ! isset( $old_value[ $slug ] ) || (bool) $old_value[ $slug ];
-			$now_on = ! isset( $new_value[ $slug ] ) || (bool) $new_value[ $slug ];
+			$slug          = (string) $slug;
+			$missing_state = ! self::isToggleable( $slug );
+			$was_on        = isset( $old_value[ $slug ] ) ? (bool) $old_value[ $slug ] : $missing_state;
+			$now_on        = isset( $new_value[ $slug ] ) ? (bool) $new_value[ $slug ] : $missing_state;
 			if ( $was_on && ! $now_on ) {
 				self::deactivateModule( $slug );
 			} elseif ( ! $was_on && $now_on ) {

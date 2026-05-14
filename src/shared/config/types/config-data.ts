@@ -52,6 +52,8 @@ export type ModuleInfo = {
 	/** Same as `enabled` when present (REST 1.13+). */
 	active?: boolean;
 	is_toggleable: boolean;
+	/** True when doublescale_enabled_modules contains an explicit entry for this slug. */
+	is_explicit?: boolean;
 	dependencies: string[];
 };
 export type License = {

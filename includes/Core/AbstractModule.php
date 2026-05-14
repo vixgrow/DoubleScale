@@ -37,7 +37,9 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 
 		$stored  = get_option( 'doublescale_enabled_modules', array() );
-		$default = ! isset( $stored[ $this->slug() ] ) || (bool) $stored[ $this->slug() ];
+		$default = is_array( $stored )
+			&& array_key_exists( $this->slug(), $stored )
+			&& (bool) $stored[ $this->slug() ];
 
 		return (bool) apply_filters( 'doublescale_module_enabled_' . $this->slug(), $default );
 	}

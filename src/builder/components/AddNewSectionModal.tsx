@@ -3,14 +3,14 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogTitle,
 	DialogOverlay,
+	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
 import { layoutsStyles } from '../data/layouts';
-import { DragDropIcon } from '@doublescale/components';
 import { LayoutTemplate } from '../types';
+import { CustomDialogHeader, GradientSectionIcon } from '@doublescale/components';
 
 interface AddNewSectionModalProps {
 	isOpen: boolean;
@@ -28,49 +28,44 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 	};
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) {
+					onClose();
+				}
+			}}
+		>
 			<DialogOverlay />
-			<DialogContent className="max-w-2xl">
-				<DialogHeader>
-					<DialogTitle>
-						<div className="text-3xl mb-1">
-							{__('Add New Section', 'doublescale')}
-						</div>
-						<div className="text-sm font-normal">
-							{__(
-								'Select one of this Sections Depending on the shape you want to work on.',
-								'doublescale'
-							)}
-						</div>
-					</DialogTitle>
+			<DialogContent className="max-w-[640px] gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:max-w-[640px]">
+				<DialogHeader className="">
+					<CustomDialogHeader
+					title={__('Add New Section', 'doublescale')}
+					subtitle={__('Select a section layout to add to your email.', 'doublescale')}
+					icon={<GradientSectionIcon width={24} height={24} />}
+					/>
 				</DialogHeader>
 
-				<div className="grid grid-cols-2 gap-4 py-4">
+				<div className="grid grid-cols-2 gap-4 sm:grid-cols-2 pt-6">
 					{layoutsStyles.map((layout, index) => (
 						<Button
-							key={`${layout.value}-${index}`}
+							key={`${layout.value}-${layout.id}-${index}`}
 							variant="outline"
-							className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-accent/50"
+							className="h-auto flex-col items-stretch gap-1.5 rounded-xl border-border bg-[#F7F8FA] px-[22px] py-[18px] text-left font-normal shadow-none transition-colors hover:border-slate-300 hover:bg-slate-100/80"
 							onClick={() => handleSectionSelect(layout)}
 						>
-							<div
-								className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4 gap-2"
-								key={layout.value}
-							>
-							<DragDropIcon />
-							<div className="flex flex-row gap-2 items-center justify-center w-full">
-								{layout.width?.map((width, index) => (
+							<div className="flex w-full flex-row gap-1.5 rounded-lg">
+								{layout.width?.map((width, blockIndex) => (
 									<div
-										key={index}
-										className="w-full h-full bg-border rounded-sm py-4"
-										style={{
-											width: `${width}%`,
-										}}
-									></div>
+										key={blockIndex}
+										className="h-8 shrink-0 rounded-md bg-[#D0D0D0]"
+										style={{ width: `${width}%` }}
+									/>
 								))}
 							</div>
-							{layout.name}
-							</div>
+							<span className="w-full text-center text-sm text-muted-foreground">
+								{layout.name}
+							</span>
 						</Button>
 					))}
 				</div>

@@ -2,33 +2,89 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PremiumIcon, RocketIcon } from '../../components';
+/**
+ * external dependencies
+ */
+import { ChevronRight } from 'lucide-react';
+/**
+ * internal dependencies
+ */
+import { ButtonsIcon, RocketIcon } from '../../components';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
-/**
- * Component to display locked library placeholder for Pro features
- */
-const LockecButtons = () => {
-	const { isInstalling, isActivating, handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
+interface LockedButtonsProps {
+	inline?: boolean;
+}
 
-	return (
-		<div className="rounded-2xl bg-white shadow-[0_2px_2px_0_rgba(0,106,98,0.10)]">
+const LockecButtons: React.FC<LockedButtonsProps> = ({ inline = false }) => {
+	const {
+		isInstalling,
+		isActivating,
+		handleUpgradeClick,
+		getUpgradeButtonText,
+	} = useProUpgrade();
+
+	const themeRowClass = (isInline: boolean) =>
+		cn(
+			'flex w-full cursor-pointer items-center justify-between px-4 py-4 text-sm transition-colors',
+			isInline
+				? 'rounded-xl text-white hover:bg-white/[0.16]'
+				: 'rounded-lg border border-border/60 text-foreground hover:bg-muted/40'
+		);
+
+	if (inline) {
+		return (
 			<button
 				type="button"
-				className="flex justify-between items-center border rounded-lg p-4 text-[#616161] text-base cursor-pointer w-full hover:bg-gray-50 transition-colors"
+				className={themeRowClass(true)}
+				style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+				onClick={() => handleUpgradeClick()}
+				disabled={isInstalling || isActivating}
 			>
-				<div className="flex items-center gap-[14px]">
-					<div className="border rounded-lg border-[#616161] p-1.5">
-						<div className="border-t border-[#616161] w-[18px]"></div>
-					</div>
-					<div>{__('Buttons', 'doublescale')}</div>
+				<div className="flex items-center gap-3">
+					<span className="inline-flex shrink-0 text-white">
+						<ButtonsIcon width={32} height={32} />
+					</span>
+					<span>{__('Buttons', 'doublescale')}</span>
 				</div>
-				<PremiumIcon />
+				<ChevronRight
+					className="h-6 w-6 shrink-0 text-white"
+					aria-hidden
+				/>
+			</button>
+		);
+	}
+
+	return (
+		<div
+			className={cn(
+				'rounded-2xl',
+				'bg-white shadow-[0_2px_2px_0_rgba(0,106,98,0.10)]'
+			)}
+		>
+			<button
+				type="button"
+				className={themeRowClass(false)}
+				style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+				onClick={() => handleUpgradeClick()}
+				disabled={isInstalling || isActivating}
+			>
+				<div className="flex items-center gap-3">
+					<span className="inline-flex shrink-0 text-[#616161]">
+						<ButtonsIcon width={32} height={32} />
+					</span>
+					<span>{__('Buttons', 'doublescale')}</span>
+				</div>
+				<ChevronRight
+					className="h-6 w-6 shrink-0 text-muted-foreground"
+					aria-hidden
+				/>
 			</button>
 
-			<div className="text-center p-6 space-y-2">
-				<h3 className="text-base text-[#333333] font-medium">
+			<div className="space-y-2 p-6 text-center">
+				<h3 className={cn('text-base font-medium text-[#333333]')}>
 					{__(
 						'Unlock advanced features with Pro upgrade',
 						'doublescale'

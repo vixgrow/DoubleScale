@@ -1133,7 +1133,7 @@ You MUST respond with ONLY valid JSON (no markdown, no code fences, no explanati
     "backgroundRepeat": "no-repeat",
     "backgroundSize": "cover",
     "backgroundPosition": "center",
-    "canvasWidth": 700
+    "canvasWidth": 900
   },
   "buttonSettings": {
     "primary": {
@@ -1559,7 +1559,7 @@ PROMPT;
 					'backgroundRepeat'   => 'no-repeat',
 					'backgroundSize'     => 'cover',
 					'backgroundPosition' => 'center',
-					'canvasWidth'        => 700,
+					'canvasWidth'        => 900,
 				),
 				'buttonSettings' => $data['buttonSettings'] ?? array(),
 			),

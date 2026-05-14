@@ -9,6 +9,7 @@ import { ChevronRight } from 'lucide-react';
 /**
  * internal dependencies
  */
+import { cn } from '@/lib/utils';
 import PreheaderLibrary from '../blocks/libraries/Preheader';
 import HeaderLibrary from '../blocks/libraries/Header';
 import HeroImageLibrary from '../blocks/libraries/HeroImage';
@@ -19,9 +20,17 @@ import FooterLibrary from '../blocks/libraries/Footer';
 interface LayoutItemsProps {
 	activeSidebar?: any;
 	setActiveSidebar?: (sidebar: any) => void;
+	/**
+	 * When true, render with dark sidebar styling.
+	 */
+	inline?: boolean;
 }
 
-const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
+const LayoutItems = ({
+	activeSidebar,
+	setActiveSidebar,
+	inline = true,
+}: LayoutItemsProps) => {
 	const layoutItems = [
 		{
 			id: 'preheader',
@@ -65,25 +74,35 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 	};
 
 	return (
-		<div className="space-y-2 p-4">
-			{layoutItems.map((item) => (
-				<div
-					key={item.id}
-					onClick={() => handleItemClick(item.id)}
-					className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${
-						activeSidebar?.id === item.id
-							? 'text-primary font-bold'
-							: 'text-muted-foreground'
-					}`}
-				>
-					<span className="text-base">{item.title}</span>
-					<ChevronRight
-						className={`transition-transform ${
-							activeSidebar?.id === item.id ? 'rotate-180' : ''
-						}`}
-					/>
-				</div>
-			))}
+		<div className="space-y-2 py-2">
+			{layoutItems.map((item) => {
+				const isActive = activeSidebar?.id === item.id;
+				return (
+					<button
+						type="button"
+						key={item.id}
+						onClick={() => handleItemClick(item.id)}
+						className={cn(
+							'flex items-center justify-between w-full px-4 py-3 rounded-lg cursor-pointer transition-colors text-left',
+							inline
+								? isActive
+									? 'bg-white/15 text-white'
+									: 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white'
+								: isActive
+									? 'text-primary font-bold'
+									: 'text-muted-foreground'
+						)}
+					>
+						<span className="text-sm">{item.title}</span>
+						<ChevronRight
+							className={cn(
+								'h-4 w-4 transition-transform',
+								isActive && 'rotate-90'
+							)}
+						/>
+					</button>
+				);
+			})}
 		</div>
 	);
 };

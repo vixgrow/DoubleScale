@@ -221,22 +221,25 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 							</div>
 
 							{/* Thumbnail Upload */}
-							<ImageUploadControl
-								label={__(
-									'Template Thumbnail (Optional)',
-									'doublescale'
-								)}
-								description={__(
-									'Upload a thumbnail image to represent your template. This will help you identify it later.',
-									'doublescale'
-								)}
-								value={thumbnailUrl}
-								onChange={({ src }) => setThumbnailUrl(src)}
-								uploadId="template-thumbnail"
-								disabled={isSaving}
-								onModalStateChange={setIsMediaModalOpen}
-								simpleMode={true}
-							/>
+							{/* Thumbnail upload — dark panel so dropzone matches builder theme */}
+							<div className="rounded-xl bg-[#1a1d29] p-4 ring-1 ring-white/10">
+								<ImageUploadControl
+									label={__(
+										'Template Thumbnail (Optional)',
+										'doublescale'
+									)}
+									description={__(
+										'Upload a thumbnail image to represent your template. This will help you identify it later.',
+										'doublescale'
+									)}
+									value={thumbnailUrl}
+									onChange={({ src }) => setThumbnailUrl(src)}
+									uploadId="template-thumbnail"
+									disabled={isSaving}
+									onModalStateChange={setIsMediaModalOpen}
+									simpleMode={true}
+								/>
+							</div>
 						</>
 					) : (
 						<>

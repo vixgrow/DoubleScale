@@ -119,7 +119,7 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 						<DialogTitle className="text-left text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
 							{__('Import contacts', 'doublescale')}
 						</DialogTitle>
-						<DialogDescription className="text-left text-sm leading-relaxed text-muted-foreground sm:max-w-[28rem]">
+						<DialogDescription className="text-left text-sm leading-relaxed text-muted-foreground ">
 							{wizardStep === 1
 								? __(
 										'Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; FluentCRM, FunnelKit, MemberPress, WordPress users, WooCommerce, and other sources use two.',

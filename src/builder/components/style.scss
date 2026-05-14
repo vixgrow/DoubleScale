@@ -1,3 +1,17 @@
+// Linear gradient background for builder sidebar (matches navbar)
+.doublescale-builder-sidebar {
+	background: linear-gradient(90deg, #3A3A99 0%, #1B1145 100%);
+}
+
+.doublescale-builder-sidebar__tabs {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+// Block / section editor: same gradient as sidebar (Figma-style dark panel)
+.doublescale-builder-sidebar__editor-layer {
+	background: linear-gradient(90deg, #3a3a99 0%, #1b1145 100%);
+}
+
 // Custom scrollbar styles for Sidebar
 .custom-scrollbar {
 	// Reserve space for scrollbar to prevent layout shift

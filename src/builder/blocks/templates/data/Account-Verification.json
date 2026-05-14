@@ -417,7 +417,7 @@
         "backgroundRepeat": "no-repeat",
         "backgroundSize": "contain",
         "backgroundPosition": "center top",
-        "canvasWidth": 700
+        "canvasWidth": 900
       },
       "buttonSettings": {
         "primary": {

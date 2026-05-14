@@ -12,6 +12,7 @@ import { X } from 'lucide-react';
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
@@ -26,7 +27,32 @@ import LayoutSettings from '../blocks/layout/LayoutSettings';
 
 type ViewState = 'main' | 'background' | 'button' | 'layout';
 
-const BlockEditor: React.FC = () => {
+interface BlockEditorProps {
+	/**
+	 * Render inline inside the sidebar (no surrounding card border, dark
+	 * theme). When set, the editor is part of the sidebar's "Settings"
+	 * tab. When omitted/false, the editor is rendered as an overlay panel
+	 * for a selected block/section.
+	 */
+	inline?: boolean;
+	/**
+	 * When provided, the editor shows a top-right X that calls this
+	 * handler. Typically used to clear the current selection so the user
+	 * is returned to the main sidebar.
+	 */
+	onClose?: () => void;
+	/**
+	 * Minimal sidebar panel header (title + X, no icon chip). Use with
+	 * `inline` + `onClose` when the editor covers the tab content area.
+	 */
+	panel?: boolean;
+}
+
+const BlockEditor: React.FC<BlockEditorProps> = ({
+	inline,
+	onClose,
+	panel,
+}) => {
 	const dispatch = useDispatch();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
 	const blocksRegistry = useRegisteredBlocks();
@@ -46,7 +72,6 @@ const BlockEditor: React.FC = () => {
 		[]
 	);
 
-	// Automatically reset view to 'main' when a block or section is selected
 	useEffect(() => {
 		if (selectedBlockId || selectedSectionId) {
 			setCurrentView('main');
@@ -59,11 +84,9 @@ const BlockEditor: React.FC = () => {
 		}
 	};
 
-	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
 	const isSectionSelected = !!selectedSectionId;
 
-	// Get block definition with fallback to UnknownBlock
 	const {
 		block: blockDefinition,
 		isUnknown,
@@ -76,7 +99,6 @@ const BlockEditor: React.FC = () => {
 			)
 			: { block: null, isUnknown: false, info: undefined };
 
-	// Prepare props for the editor
 	const editorProps =
 		isUnknown && info
 			? {
@@ -85,14 +107,28 @@ const BlockEditor: React.FC = () => {
 			}
 			: selectedBlock?.props;
 
-	// Handle back navigation from settings
 	const handleBackFromSettings = () => {
 		setCurrentView('main');
 	};
 
+	const usePanelHeader = Boolean(inline && panel && onClose);
+
+	/** Settings tab global email view: no title row — content sits under tabs like Figma. */
+	const isGlobalSettingsInlineMain =
+		inline &&
+		!usePanelHeader &&
+		!isBlockSelected &&
+		!isSectionSelected;
+
+	const containerClass = cn(
+		'h-full flex flex-col overflow-hidden',
+		inline
+			? 'bg-transparent'
+			: 'w-full bg-background'
+	);
+
 	return (
-		<div className="w-80 bg-background border-l border-border rounded-l-xl h-full flex flex-col overflow-hidden">
-			{/* Show background settings, button settings, layout settings, or regular content */}
+		<div className={containerClass}>
 			{currentView === 'background' ? (
 				<BackgroundSettings onBack={handleBackFromSettings} />
 			) : currentView === 'button' ? (
@@ -101,45 +137,108 @@ const BlockEditor: React.FC = () => {
 				<LayoutSettings />
 			) : (
 				<>
-					<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4 flex-shrink-0">
-						<div className="flex items-center gap-2">
-							<div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg text-white">
-								{isBlockSelected && blockDefinition?.icon ? (
-									<blockDefinition.icon />
-								) : isSectionSelected ? (
-									<LayoutSettingsIcon />
-								) : (
-									<GlobalEmailSettingsIcon />
-								)}
-							</div>
-							<h3 className="text-base font-semibold text-primary">
-								{isBlockSelected && blockDefinition?.name
-									? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
-									: isSectionSelected
-										? __('Layout Settings', 'doublescale')
-										: __(
-											'Global Email Settings',
-											'doublescale'
+					{!isGlobalSettingsInlineMain && (
+						<div
+							className={cn(
+								'flex flex-shrink-0 items-center justify-between',
+								usePanelHeader
+									? 'border-b border-white/10 px-0 pb-4 pt-0'
+									: inline
+										? 'px-1 pb-3 pt-2'
+										: 'border-b-2 px-4 pb-4 pt-5'
+							)}
+						>
+							{usePanelHeader ? (
+								<h3 className="text-base font-semibold text-white">
+									{isBlockSelected && blockDefinition?.name
+										? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
+										: isSectionSelected
+											? __(
+												'Layout Settings',
+												'doublescale'
+											)
+											: __(
+												'Global Email Settings',
+												'doublescale'
+											)}
+								</h3>
+							) : (
+								<div className="flex items-center gap-2">
+									<div
+										className={cn(
+											'rounded-lg p-2',
+											inline
+												? 'bg-white/10 text-white'
+												: 'bg-gradient-to-r from-primary to-secondary text-white'
 										)}
-							</h3>
+									>
+										{isBlockSelected &&
+											blockDefinition?.icon ? (
+											<blockDefinition.icon />
+										) : isSectionSelected ? (
+											<LayoutSettingsIcon />
+										) : (
+											<GlobalEmailSettingsIcon />
+										)}
+									</div>
+									<h3
+										className={cn(
+											'text-base font-semibold',
+											inline
+												? 'text-white'
+												: 'text-primary'
+										)}
+									>
+										{isBlockSelected &&
+											blockDefinition?.name
+											? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
+											: isSectionSelected
+												? __(
+													'Layout Settings',
+													'doublescale'
+												)
+												: __(
+													'Global Email Settings',
+													'doublescale'
+												)}
+									</h3>
+								</div>
+							)}
+							{onClose && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={onClose}
+									className={cn(
+										inline
+											? 'text-white hover:bg-white/10 hover:text-white'
+											: ''
+									)}
+									aria-label={__(
+										'Close editor',
+										'doublescale'
+									)}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							)}
 						</div>
-						{(isBlockSelected || isSectionSelected) && (
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() =>
-									dispatch(STORE_KEY).clearSelection()
-								}
-							>
-								<X className="h-4 w-4" />
-							</Button>
-						)}
-					</div>
+					)}
 
-					<div className="flex-1 overflow-auto">
-						<div className="space-y-4 p-4">
+					<div className="min-h-0 flex-1 overflow-auto">
+						<div
+							className={cn(
+								'space-y-4',
+								usePanelHeader
+									? 'px-0 py-4'
+									: isGlobalSettingsInlineMain
+										? 'px-0 py-0'
+										: inline
+											? 'px-1 py-3'
+											: 'p-4'
+							)}
+						>
 							{isBlockSelected ? (
-								// Show block-specific editor
 								selectedBlock && blockDefinition?.Editor ? (
 									<blockDefinition.Editor
 										props={editorProps as any}
@@ -154,11 +253,9 @@ const BlockEditor: React.FC = () => {
 									</p>
 								)
 							) : isSectionSelected ? (
-								// Show LayoutSettings for all sections
 								<LayoutSettings
 									sectionId={selectedSectionId}
 									onSettingsChange={(settings) => {
-										// Convert LayoutSettingsData to section styles
 										const sectionStyles = {
 											backgroundColor:
 												settings.backgroundColor,
@@ -182,6 +279,7 @@ const BlockEditor: React.FC = () => {
 								/>
 							) : (
 								<GlobalEmailSettings
+									inline={inline}
 									onShowBackgroundSettings={() =>
 										setCurrentView('background')
 									}
@@ -193,7 +291,16 @@ const BlockEditor: React.FC = () => {
 						</div>
 
 						{isBlockSelected && selectedBlock && !isUnknown && (
-							<div className="my-6 pt-4 px-4 border-t border-border">
+							<div
+								className={cn(
+									'my-6 pt-4 border-t',
+									usePanelHeader
+										? 'border-white/10 px-0'
+										: inline
+											? 'border-white/10 px-1'
+											: 'border-border px-4'
+								)}
+							>
 								<Button
 									variant="destructive"
 									size="sm"

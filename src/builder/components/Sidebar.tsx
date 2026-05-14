@@ -1,27 +1,29 @@
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
+/**
+ * external dependencies
+ */
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { X, ChevronLeft } from 'lucide-react';
+/**
+ * internal dependencies
+ */
 import { Button } from '@/components/ui/button';
-import ColumnBlock from '../blocks/layout/ColumnBlock';
-import ContainerBlock from '../blocks/layout/ContainerBlock';
+import { cn } from '@/lib/utils';
+import { SettingsIcon } from '@doublescale/components';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { useSelect } from '@wordpress/data';
+import LayoutItems from './LayoutItems';
+import Sections from './Sections';
+import ColumnBlock from '../blocks/layout/ColumnBlock';
+import BlockEditor from './BlockEditor';
 import {
-	DashboardIcon,
-	GlobalEmailSettingsIcon,
-	MyTemplatesSidebarIcon,
-	ReadyToUseIcon,
-} from '@/components/icons';
-import MyTemplatesPanel from './MyTemplatesPanel';
-import TemplateSuggestionsPanel from './TemplateSuggestionsPanel';
-import {
-	Tooltip,
-	TooltipTrigger,
-	TooltipContent,
-	TooltipProvider,
-} from '@/components/ui/tooltip';
+	BuilderBlocksTabIcon,
+	BuilderLayoutTabIcon,
+	BuilderLibraryTabIcon,
+} from './SidebarTabIcons';
 import './style.scss';
 
 interface SidebarItem {
@@ -32,267 +34,197 @@ interface SidebarItem {
 
 interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
-	templatesRefreshKey?: number;
 	openGlobalSettings?: () => void;
 	/** Open “My templates” drawer when the builder first mounts (used by Pro sequence mail / open-builder flow). */
 	openTemplatesOnMount?: boolean;
 }
 
-type SidebarView =
-	| { type: 'none' }
-	| { type: 'myTemplates' }
-	| { type: 'templateSuggestions' }
-	| { type: 'active'; item: SidebarItem };
+type SidebarTab = 'library' | 'blocks' | 'layouts' | 'settings';
 
-const BlockSidebar = ({
-	sidebarCloseTrigger,
-	templatesRefreshKey,
-	openGlobalSettings = () => {},
-	openTemplatesOnMount = false,
-}: BlockSidebarProps = {}) => {
-	const [view, setView] = useState<SidebarView>({ type: 'none' });
-	const [suggestionActiveItem, setSuggestionActiveItem] =
-		useState<SidebarItem | null>(null);
+const TAB_ITEMS: {
+	id: SidebarTab;
+	label: string;
+	iconOnly?: boolean;
+	Icon: React.ComponentType<{ className?: string }>;
+}[] = [
+	{
+		id: 'blocks',
+		label: __('Blocks', 'doublescale'),
+		Icon: BuilderBlocksTabIcon,
+	},
+	{
+		id: 'layouts',
+		label: __('Layouts', 'doublescale'),
+		Icon: BuilderLayoutTabIcon,
+	},
+	{
+		id: 'library',
+		label: __('Library', 'doublescale'),
+		Icon: BuilderLibraryTabIcon,
+	},
+	{
+		id: 'settings',
+		label: __('Settings', 'doublescale'),
+		iconOnly: true,
+		Icon: ({ className }) => (
+			<span className={cn('inline-flex', className)}>
+				<SettingsIcon width={24} height={24} />
+			</span>
+		),
+	},
+];
 
-	const isGlobalSettingsClosed = useSelect(
-		(select) =>
-			select(STORE_KEY).getSelectedBlockId() ||
-			select(STORE_KEY).getSelectedSectionId() ||
-			select(STORE_KEY).getSelectedColumnId()
+const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
+	const dispatch = useDispatch();
+	const [activeTab, setActiveTab] = useState<SidebarTab>('settings');
+	const [librarySubItem, setLibrarySubItem] = useState<SidebarItem | null>(
+		null
 	);
 
-	const tabStyles =
-		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
+	const selection = useSelect((select) => {
+		return {
+			blockId: select(STORE_KEY).getSelectedBlockId(),
+			sectionId: select(STORE_KEY).getSelectedSectionId(),
+			columnId: select(STORE_KEY).getSelectedColumnId(),
+		};
+	}, []);
 
-	// Close sidebar when drag starts
+	const hasSelection = !!(
+		selection.blockId ||
+		selection.sectionId ||
+		selection.columnId
+	);
+
 	useEffect(() => {
 		if (sidebarCloseTrigger && sidebarCloseTrigger > 0) {
-			setView({ type: 'none' });
-			setSuggestionActiveItem(null);
+			setLibrarySubItem(null);
 		}
 	}, [sidebarCloseTrigger]);
 
 	useEffect(() => {
-		if (openTemplatesOnMount) {
-			setSuggestionActiveItem(null);
-			setView({ type: 'myTemplates' });
+		if (hasSelection) {
+			setLibrarySubItem(null);
 		}
-	}, [openTemplatesOnMount]);
+	}, [hasSelection]);
 
-	const HandleMyTemplates = () => {
-		setSuggestionActiveItem(null);
-		setView((prev) =>
-			prev.type === 'myTemplates'
-				? { type: 'none' }
-				: { type: 'myTemplates' }
-		);
+	const handleCloseEditor = () => {
+		setActiveTab('settings');
+		dispatch(STORE_KEY).clearSelection();
 	};
 
-	const HandleTemplateSuggestions = () => {
-		setSuggestionActiveItem(null);
-		setView((prev) =>
-			prev.type === 'templateSuggestions'
-				? { type: 'none' }
-				: { type: 'templateSuggestions' }
-		);
+	const handleTabClick = (tab: SidebarTab) => {
+		setLibrarySubItem(null);
+		setActiveTab(tab);
+		dispatch(STORE_KEY).clearSelection();
+	};
+
+	const renderTabContent = () => {
+		// Only one BlockEditor: the panel below. Avoid duplicate toolbars/headers.
+		if (hasSelection) {
+			return null;
+		}
+
+		switch (activeTab) {
+			case 'library':
+				return (
+					<LayoutItems
+						activeSidebar={librarySubItem}
+						setActiveSidebar={(item) =>
+							setLibrarySubItem(item ?? null)
+						}
+					/>
+				);
+			case 'blocks':
+				return <Sections />;
+			case 'layouts':
+				return <ColumnBlock />;
+			case 'settings':
+			default:
+				return <BlockEditor inline />;
+		}
 	};
 
 	return (
-		<div className="flex flex-1 max-w-[350px]">
-			<div className="bg-white p-4 flex flex-col justify-between items-center">
-				<div className="flex flex-col gap-4 items-center">
-					<div
-						className={`cursor-pointer ${view.type === 'none' ? 'text-[#1E3A8A]' : ''}	`}
-						onClick={() => setView({ type: 'none' })}
-					>
-						<DashboardIcon width={32} height={32} />
-					</div>
-
-					<div>
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div
-										className="flex flex-col items-center cursor-pointer"
-										onClick={HandleMyTemplates}
-									>
-										<MyTemplatesSidebarIcon
-											width={32}
-											height={32}
-											active={view.type === 'myTemplates'}
-										/>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>{__('My Templates', 'doublescale')}</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
-
-					<div>
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div
-										className="flex flex-col items-center cursor-pointer"
-										onClick={HandleTemplateSuggestions}
-									>
-										<ReadyToUseIcon
-											width={32}
-											height={32}
-											active={view.type === 'templateSuggestions'}
-										/>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>{__('Ready-To-Use', 'doublescale')}</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
+		<div className="doublescale-builder-sidebar flex h-full w-[400px] flex-shrink-0 flex-col text-white">
+			{hasSelection ? (
+				<div className="doublescale-builder-sidebar__editor-layer flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-6">
+					<BlockEditor inline panel onClose={handleCloseEditor} />
 				</div>
-
-				<div>
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<div
-									className={`cursor-pointer ${isGlobalSettingsClosed ? '' : 'text-[#1E3A8A]'}`}
-									onClick={openGlobalSettings}
-								>
-									<GlobalEmailSettingsIcon
-										width={32}
-										height={32}
-									/>
-								</div>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{__('Global Email Settings', 'doublescale')}</p>
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
-				</div>
-			</div>
-			<div className="bg-white w-full align-center h-full relative flex flex-col border-l">
-				<Tabs
-					defaultValue="elements"
-					className="w-full h-full flex flex-col"
-				>
-					<div className="border-b border-border w-full flex flex-col items-center py-4 flex-shrink-0">
-						<TabsList className="px-4 h-16">
-							<TabsTrigger value="elements" className={tabStyles}>
-								{__('Elements', 'doublescale')}
-							</TabsTrigger>
-							<TabsTrigger value="layouts" className={tabStyles}>
-								{__('Layouts', 'doublescale')}
-							</TabsTrigger>
-						</TabsList>
-					</div>
-					<div className="py-6 px-6 flex-1 overflow-auto custom-scrollbar">
-						<TabsContent value="elements">
-							<ContainerBlock
-								activeSidebar={
-									view.type === 'active' ? view.item : null
-								}
-								setActiveSidebar={(item: SidebarItem | null) =>
-									setView(
-										item
-											? { type: 'active', item }
-											: { type: 'none' }
-									)
-								}
-							/>
-						</TabsContent>
-						<TabsContent value="layouts">
-							<ColumnBlock />
-						</TabsContent>
-					</div>
-				</Tabs>
-
-				{/* Active Sidebar */}
-				{view.type === 'active' && (
-					<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-20 bg-white shadow-lg active-sidebar-scrollbar">
-						<div className="flex flex-col px-8 pt-7">
-							<div className="flex items-center justify-between w-full pb-4">
-								<h2 className="text-base font-bold text-primary text-center flex-1">
-									{view.item.title}
-								</h2>
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setView({ type: 'none' })}
-									className="h-6 w-6 p-0 hover:bg-gray-100"
-								>
-									<X className="h-4 w-4" />
-								</Button>
-							</div>
-							<div className="border-b-2 border-gray-200 w-full"></div>
-						</div>
-						<div
-							className="overflow-y-auto p-4 flex-1 active-sidebar-scrollbar"
-							style={{ zIndex: 100000 }}
-						>
-							<view.item.component
-								onSidebarClose={() => setView({ type: 'none' })}
-							/>
+			) : (
+				<>
+					<div className="relative z-10 flex-shrink-0 p-6">
+						<div className="doublescale-builder-sidebar__tabs flex min-w-0 flex-wrap items-center gap-1 rounded-2xl p-2">
+							{TAB_ITEMS.map(({ id, label, iconOnly, Icon }) => {
+								const isActive = activeTab === id;
+								return (
+									<button
+										type="button"
+										key={id}
+										onClick={() => handleTabClick(id)}
+										title={label}
+										aria-label={label}
+										className={cn(
+											'flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium transition-colors',
+											iconOnly
+												? 'h-9 w-9 shrink-0 px-0'
+												: 'min-w-[4.25rem] flex-1 px-2 py-2',
+											isActive
+												? 'bg-[#EEF2FF] text-[#1E3A8A]'
+												: 'text-white/90 hover:bg-white/10 hover:text-white'
+										)}
+									>
+										<Icon className="h-6 w-6 flex-shrink-0" />
+										{!iconOnly && (
+											<span className="truncate">
+												{label}
+											</span>
+										)}
+									</button>
+								);
+							})}
 						</div>
 					</div>
-				)}
 
-				{/* MyTemplates Panel */}
-				<MyTemplatesPanel
-					isOpen={view.type === 'myTemplates'}
-					onClose={() => setView({ type: 'none' })}
-					refreshKey={templatesRefreshKey}
-				/>
+					<div className="relative min-h-0 flex-1 overflow-hidden">
+						<div className="absolute inset-0 overflow-y-auto custom-scrollbar px-6 pb-6">
+							{renderTabContent()}
+						</div>
 
-				{/* Template Suggestions Active Sidebar */}
-				{view.type === 'templateSuggestions' &&
-					suggestionActiveItem && (
-						<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-40 bg-white shadow-lg active-sidebar-scrollbar">
-							<div className="flex flex-col px-8 pt-7">
-								<div className="flex items-center justify-between w-full pb-4">
-									<h2 className="text-base font-bold text-primary text-start flex-1">
-										{suggestionActiveItem.title}
+						{librarySubItem && (
+							<div className="absolute inset-0 z-30 flex flex-col bg-white">
+								<div className="flex flex-shrink-0 items-center gap-2 border-b border-border/60 px-4 py-3">
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => setLibrarySubItem(null)}
+										className="h-7 w-7 p-0"
+									>
+										<ChevronLeft className="h-4 w-4" />
+									</Button>
+									<h2 className="flex-1 text-sm font-semibold text-foreground">
+										{librarySubItem.title}
 									</h2>
 									<Button
 										variant="ghost"
 										size="sm"
-										onClick={() =>
-											setSuggestionActiveItem(null)
-										}
-										className="h-6 w-6 p-0 hover:bg-gray-100"
+										onClick={() => setLibrarySubItem(null)}
+										className="h-7 w-7 p-0"
 									>
 										<X className="h-4 w-4" />
 									</Button>
 								</div>
-								<div className="border-b-2 border-gray-200 w-full"></div>
+								<div className="min-h-0 flex-1 overflow-y-auto p-4 active-sidebar-scrollbar">
+									<librarySubItem.component
+										onSidebarClose={() =>
+											setLibrarySubItem(null)
+										}
+									/>
+								</div>
 							</div>
-							<div
-								className="overflow-y-auto p-4 flex-1 active-sidebar-scrollbar"
-								style={{ zIndex: 100000 }}
-							>
-								<suggestionActiveItem.component
-									onSidebarClose={() =>
-										setSuggestionActiveItem(null)
-									}
-								/>
-							</div>
-						</div>
-					)}
-
-				{/* Template Suggestions Panel */}
-				<TemplateSuggestionsPanel
-					isOpen={view.type === 'templateSuggestions'}
-					onClose={() => {
-						setSuggestionActiveItem(null);
-						setView({ type: 'none' });
-					}}
-					activeSidebar={suggestionActiveItem}
-					setActiveSidebar={setSuggestionActiveItem}
-				/>
-			</div>
+						)}
+					</div>
+				</>
+			)}
 		</div>
 	);
 };

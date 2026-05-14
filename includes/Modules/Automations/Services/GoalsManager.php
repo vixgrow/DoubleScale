@@ -102,7 +102,9 @@ final class GoalsManager {
 				'is_disabled' => $is_disabled,
 				'is_pro'      => $goal->is_pro,
 			);
-			$goal->load_hooks();
+			if ( ! $goal->is_pro ) {
+				$goal->load_hooks();
+			}
 		}
 	}
 

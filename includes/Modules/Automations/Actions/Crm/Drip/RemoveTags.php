@@ -1,29 +1,20 @@
 <?php
 /**
- * Class RemoveTags
- *
- * This class is responsible for removeing tags to a Drip subscriber
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Drip;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Remove Tags class
+ * RemoveTags action stub.
  */
-class RemoveTags extends Action {
+class RemoveTags extends ProAutomationStubAction {
 
-	/**
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -69,131 +60,6 @@ class RemoveTags extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
-		$tags = $step->get_setting( 'tags', array() );
-		if ( empty( $tags ) ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Remove Tags: Tags are required.', 'doublescale'),
-				array(
-					'code' => 'drip_remove_tags',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$email = $automation_contact->contact->email;
-		$data  = array(
-			'subscribers' => array(
-				array(
-					'email' => $email,
-					'tags'  => $tags,
-				),
-			),
-		);
-
-		$drip = IntegrationsManager::instance()->get_integration( 'drip' );
-		$api  = $drip->connect();
-		if ( ! $api ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Api connection failed.', 'doublescale'),
-				array(
-					'code' => 'drip_connect',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$result = $api->remove_subscriber( $data );
-		if ( ! $result ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Remove Tags: Failed to remove tags.', 'doublescale'),
-				array(
-					'code' => 'drip_remove_tags',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id' => $step->id,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		doublescale_get_logger()->info(
-			__( 'Drip Remove Tags: Tags removed successfully.', 'doublescale'),
-			array(
-				'code' => 'drip_remove_tags',
-				'data' => array(
-					'automation' => array(
-						'id'   => $automation->id,
-						'name' => $automation->name,
-					),
-					'step'       => array(
-						'id' => $step->id,
-					),
-				),
-			)
-		);
-
-		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'tags' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'tags' => array(
-				'type'     => 'api_select',
-				'label'    => __( 'Tags', 'doublescale'),
-				'endpoint' => 'drip/tags',
-				'multiple' => true,
-			),
-		);
-	}
 }
 
 RemoveTags::instance();

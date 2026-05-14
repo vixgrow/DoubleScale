@@ -242,7 +242,7 @@ class AdminLoader {
 			return true;
 		}
 		if ( function_exists( 'is_plugin_active' ) ) {
-			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH ) ) {
+			if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH ) ) {
 				return true;
 			}
 			$candidates = array(
@@ -261,7 +261,7 @@ class AdminLoader {
 				|| doublescale_is_plugin_active( 'DoubleScale-Pro/doublescale-pro.php' )
 				|| (
 					defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' )
-					&& doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH )
+					&& doublescale_is_plugin_active( \DOUBLESCALE_PRO_PLUGIN_PATH )
 				);
 		}
 		return false;
@@ -282,11 +282,11 @@ class AdminLoader {
 			self::admin_context_is_pro_plugin()
 			&& defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' )
 			&& defined( 'DOUBLESCALE_PRO_PLUGIN_URL' )
-			&& is_readable( DOUBLESCALE_PRO_PLUGIN_DIR . 'build/client/index.js' )
+			&& is_readable( \DOUBLESCALE_PRO_PLUGIN_DIR . 'build/client/index.js' )
 		) {
-			return array( DOUBLESCALE_PRO_PLUGIN_DIR, DOUBLESCALE_PRO_PLUGIN_URL );
+			return array( \DOUBLESCALE_PRO_PLUGIN_DIR, \DOUBLESCALE_PRO_PLUGIN_URL );
 		}
-		return array( DOUBLESCALE_PLUGIN_DIR, DOUBLESCALE_PLUGIN_URL );
+		return array( \DOUBLESCALE_PLUGIN_DIR, \DOUBLESCALE_PLUGIN_URL );
 	}
 
 	/**

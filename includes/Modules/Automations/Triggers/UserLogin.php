@@ -14,7 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
  * User Login Trigger
@@ -94,5 +93,3 @@ class UserLogin extends Trigger {
 		$this->process( $data );
 	}
 }
-
-TriggersManager::instance()->register( new UserLogin() );

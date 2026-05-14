@@ -147,6 +147,37 @@ if ( ! function_exists( 'doublescale_is_plugin_active' ) ) {
 	}
 }
 
+if ( ! function_exists( 'doublescale_is_pro_addon_active' ) ) {
+	/**
+	 * Whether the DoubleScale Pro add-on is active for this site.
+	 *
+	 * Does not rely on {@see DOUBLESCALE_PRO_PLUGIN_PATH} being defined first: the free
+	 * plugin may boot before Pro, so that constant can be missing until Pro loads.
+	 */
+	function doublescale_is_pro_addon_active(): bool {
+		if ( defined( 'DOUBLESCALE_PRO_VERSION' ) ) {
+			return true;
+		}
+
+		$candidates = array(
+			'DoubleScale-Pro/doublescale-pro.php',
+			'QuillCRM-Pro/doublescale-pro.php',
+		);
+		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \DOUBLESCALE_PRO_PLUGIN_PATH ) {
+			array_unshift( $candidates, (string) \DOUBLESCALE_PRO_PLUGIN_PATH );
+		}
+		$candidates = array_values( array_unique( array_filter( $candidates ) ) );
+
+		foreach ( $candidates as $basename ) {
+			if ( doublescale_is_plugin_active( $basename ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 if ( ! function_exists( 'doublescale_pro_task_model_available' ) ) {
 	/**
 	 * Whether the Pro tasks Eloquent model is loaded (unified timelines include tasks).

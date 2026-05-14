@@ -33,7 +33,7 @@ abstract class GoalPro extends Goal {
 	public function __construct() {
 		// is_pro = true when Pro is NOT active (feature is locked/requires Pro)
 		// is_pro = false when Pro IS active (feature is available)
-		$this->is_pro = ! doublescale_is_plugin_active( DOUBLESCALE_PRO_PLUGIN_PATH );
+		$this->is_pro = ! doublescale_is_pro_addon_active();
 	}
 
 	/**

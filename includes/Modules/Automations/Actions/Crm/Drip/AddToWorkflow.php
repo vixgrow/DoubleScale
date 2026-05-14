@@ -1,29 +1,20 @@
 <?php
 /**
- * Class AddToWorkflow
- *
- * This class is responsible for adding a subscriber to a Drip workflow
- *
- * @since 1.0.0
+ * Pro automation action (free plugin): definition only. Implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Drip;
 
-use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
 
 /**
- * Add To Workflow class
+ * AddToWorkflow action stub.
  */
-class AddToWorkflow extends Action {
+class AddToWorkflow extends ProAutomationStubAction {
 
-	/**
+/**
 	 * Action Name
 	 *
 	 * @var string
@@ -69,132 +60,6 @@ class AddToWorkflow extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
-		$workflow_id = $step->get_setting( 'workflow_id', '' );
-		if ( empty( $workflow_id ) ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Workflow ID is required.', 'doublescale'),
-				array(
-					'code' => 'drip_add_to_workflow',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'name' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$email = $automation_contact->contact->email;
-		$data  = array(
-			'subscribers' => array(
-				array(
-					'email' => $email,
-				),
-			),
-		);
-
-		$drip = IntegrationsManager::instance()->get_integration( 'drip' );
-		$api  = $drip->connect();
-		if ( ! $api ) {
-			doublescale_get_logger()->error(
-				__( 'Drip Api connection failed.', 'doublescale'),
-				array(
-					'code' => 'drip_connect',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		$result = $api->add_subscriber_to_workflow( $workflow_id, $data );
-		if ( ! $result['success'] ) {
-			doublescale_get_logger()->error(
-				__( 'Failed to add subscriber to Drip Workflow.', 'doublescale'),
-				array(
-					'code' => 'drip_add_to_workflow',
-					'data' => array(
-						'automation' => array(
-							'id'   => $automation->id,
-							'name' => $automation->name,
-						),
-						'step'       => array(
-							'id'   => $step->id,
-							'type' => $step->type,
-						),
-					),
-				)
-			);
-			return false;
-		}
-
-		doublescale_get_logger()->info(
-			__( 'Subscriber added to Drip Workflow.', 'doublescale'),
-			array(
-				'code'     => 'drip_add_to_workflow',
-				'data'     => array(
-					'automation' => array(
-						'id'   => $automation->id,
-						'name' => $automation->name,
-					),
-					'step'       => array(
-						'id'   => $step->id,
-						'type' => $step->type,
-					),
-				),
-				'response' => $result,
-			)
-		);
-
-		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'workflow_id' => array(
-					'type'     => array( 'string', 'number' ),
-					'required' => true,
-				),
-			),
-		);
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'workflow_id' => array(
-				'type'     => 'api_select',
-				'label'    => __( 'Workflow', 'doublescale'),
-				'endpoint' => 'drip/workflows',
-			),
-		);
-	}
 }
 
 AddToWorkflow::instance();

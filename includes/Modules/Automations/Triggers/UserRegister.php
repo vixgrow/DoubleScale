@@ -14,7 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DoubleScale\Modules\Automations\Abstracts\Trigger;
-use DoubleScale\Modules\Automations\Services\TriggersManager;
 
 /**
  * User Register Trigger
@@ -95,5 +94,3 @@ class UserRegister extends Trigger {
 		$this->process( $data );
 	}
 }
-
-TriggersManager::instance()->register( new UserRegister() );

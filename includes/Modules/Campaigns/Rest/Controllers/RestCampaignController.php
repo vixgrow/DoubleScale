@@ -35,7 +35,7 @@ use DoubleScale\Modules\Campaigns\Campaign\AutomatedCampaignHandler;
 // use DoubleScale\Modules\Campaigns\Campaign\WhatsappProcessing; // Moved to Pro
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 
 /**

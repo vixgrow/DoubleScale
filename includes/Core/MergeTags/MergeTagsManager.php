@@ -10,7 +10,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Modules\Automations\Services;
+namespace DoubleScale\Core\MergeTags;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use DoubleScale\Modules\Automations\Abstracts\MergeTag;
+use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**

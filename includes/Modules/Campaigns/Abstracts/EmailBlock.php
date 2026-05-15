@@ -13,7 +13,7 @@ namespace DoubleScale\Modules\Campaigns\Abstracts;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Emails\Blocks\EmailBlockInterface;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 

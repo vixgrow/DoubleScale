@@ -132,8 +132,7 @@ class Logger implements LoggerInterface {
 			$level,
 			$message,
 			array(
-				'source'  => $handle,
-				'_legacy' => true,
+				'source' => $handle,
 			)
 		);
 		return true;

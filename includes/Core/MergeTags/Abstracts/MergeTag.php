@@ -10,7 +10,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Modules\Automations\Abstracts;
+namespace DoubleScale\Core\MergeTags\Abstracts;
 
 
 defined( 'ABSPATH' ) || exit;

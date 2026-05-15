@@ -130,36 +130,4 @@ trait SmtpModuleActive {
 
 		return false;
 	}
-
-	/**
-	 * @deprecated 1.2.0 Use {@see self::is_smtp_module_active()}.
-	 * @return bool
-	 */
-	public static function is_smtp_plugin_active() {
-		return self::is_smtp_module_active();
-	}
-
-	/**
-	 * @deprecated 1.2.0 Use {@see self::is_smtp_pro_mailers_active()}.
-	 * @return bool
-	 */
-	public static function is_smtp_pro_plugin_active() {
-		return self::is_smtp_pro_mailers_active();
-	}
-
-	/**
-	 * @deprecated 1.2.0 Use {@see self::is_smtp_module_version_supported()}.
-	 * @return bool
-	 */
-	public static function is_smtp_plugin_accepting_version() {
-		return self::is_smtp_module_version_supported();
-	}
-
-	/**
-	 * @deprecated 1.2.0 Use {@see self::is_smtp_pro_mailers_version_supported()}.
-	 * @return bool
-	 */
-	public static function is_smtp_pro_plugin_accepting_version() {
-		return self::is_smtp_pro_mailers_version_supported();
-	}
 }

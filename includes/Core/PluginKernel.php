@@ -63,7 +63,6 @@ final class PluginKernel {
 		$this->init_illuminate();
 
 		require_once DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
-		Deprecated\Aliases::register();
 
 		$this->register_core_services();
 

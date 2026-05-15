@@ -13,9 +13,9 @@ namespace DoubleScale\Modules\Contacts\MergeTags\Acf;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Automations\Abstracts\MergeTag;
+use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 /**
  * ACF User Field Merge Tag

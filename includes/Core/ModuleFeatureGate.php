@@ -96,15 +96,6 @@ function doublescale_is_module_active( string $slug ): bool {
 	return $v;
 }
 
-/**
- * @deprecated 1.13.x Use {@see doublescale_is_module_active()}; retained for third-party callers.
- *
- * @param string $slug Module slug.
- */
-function doublescale_is_module_enabled( string $slug ): bool {
-	return doublescale_is_module_active( $slug );
-}
-
 if ( ! function_exists( 'doublescale_flush_module_enabled_cache' ) ) {
 	/**
 	 * Clears request-level module caches (slug map + enabled flags).

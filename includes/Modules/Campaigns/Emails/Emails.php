@@ -679,7 +679,7 @@ class Emails {
 			$settings   = \DoubleScale\Core\Settings\Settings::get( 'double_optin', array() );
 			$subject    = $settings['email_subject'] ?? \DoubleScale\Core\Settings\Settings::get_default_opt_in_subject();
 			$content    = $settings['email_content'] ?? \DoubleScale\Core\Settings\Settings::get_default_opt_in_content();
-			$merge_tags = \DoubleScale\Core\Managers\MergeTagsManager::instance();
+			$merge_tags = \DoubleScale\Core\MergeTags\MergeTagsManager::instance();
 			$subject    = $merge_tags->process_merge_tags( $subject, $contact );
 			$content    = $merge_tags->process_merge_tags( $content, $contact );
 			$emails     = new self();

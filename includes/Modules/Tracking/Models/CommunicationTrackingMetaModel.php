@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 use WPEloquent\Eloquent\Model;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 class CommunicationTrackingMetaModel extends Model {
 

@@ -48,9 +48,9 @@ final class CoreModule extends AbstractModule {
 
 	public function register( Container $container ): void {
 		$container->singleton(
-			\DoubleScale\Modules\Automations\Services\MergeTagsManager::class,
+			\DoubleScale\Core\MergeTags\MergeTagsManager::class,
 			static function () {
-				return \DoubleScale\Modules\Automations\Services\MergeTagsManager::instance();
+				return \DoubleScale\Core\MergeTags\MergeTagsManager::instance();
 			}
 		);
 

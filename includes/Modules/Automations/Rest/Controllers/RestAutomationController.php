@@ -24,7 +24,7 @@ use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Core\UserRoles\Permissions;

@@ -111,7 +111,7 @@ final class ModuleManager {
 	}
 
 	public static function isEnabled( string $slug ): bool {
-		return doublescale_is_module_enabled( $slug );
+		return doublescale_is_module_active( $slug );
 	}
 
 	/**

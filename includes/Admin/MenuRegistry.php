@@ -193,7 +193,7 @@ class MenuRegistry {
 	 * Drops rows when {@see requires_module} is set and that slug is not installed or is disabled.
 	 *
 	 * Uses the canonical merged module map from the free plugin ({@see doublescale_module_slug_to_class_map})
-	 * and {@see doublescale_is_module_enabled()} so free-only installs (e.g. Campaigns in core) work without Pro.
+	 * and {@see doublescale_is_module_active()} so free-only installs (e.g. Campaigns in core) work without Pro.
 	 *
 	 * @param array<int, array<string, mixed>> $entries
 	 * @return array<int, array<string, mixed>>
@@ -207,7 +207,7 @@ class MenuRegistry {
 					if ( '' === $module_slug ) {
 						return true;
 					}
-					if ( ! function_exists( 'doublescale_module_slug_to_class_map' ) || ! function_exists( 'doublescale_is_module_enabled' ) ) {
+					if ( ! function_exists( 'doublescale_module_slug_to_class_map' ) || ! function_exists( 'doublescale_is_module_active' ) ) {
 						return true;
 					}
 					$classes = doublescale_module_slug_to_class_map();
@@ -215,7 +215,7 @@ class MenuRegistry {
 						return false;
 					}
 
-					return doublescale_is_module_enabled( $module_slug );
+					return doublescale_is_module_active( $module_slug );
 				}
 			)
 		);

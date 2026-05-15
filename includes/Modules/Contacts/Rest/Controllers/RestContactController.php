@@ -34,7 +34,7 @@ use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\LeadScoring\LeadScoringManager;
 
 /**

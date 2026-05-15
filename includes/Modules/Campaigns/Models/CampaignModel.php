@@ -565,20 +565,6 @@ class CampaignModel extends Model {
 	}
 
 	/**
-	 * Attach counts (DEPRECATED - use CampaignEnrichment service instead)
-	 * Kept for backward compatibility, delegates to enrichment service
-	 *
-	 * @deprecated Use CampaignEnrichment::instance()->enrich() instead
-	 * @param CampaignModel $campaign campaign model.
-	 *
-	 * @return void
-	 */
-	public function attach_counts( $campaign ) {
-		$enrichment = \DoubleScale\Modules\Campaigns\Services\CampaignEnrichment::instance();
-		$enrichment->enrich( $campaign );
-	}
-
-	/**
 	 * Get status manager
 	 *
 	 * @return CampaignStatusManager

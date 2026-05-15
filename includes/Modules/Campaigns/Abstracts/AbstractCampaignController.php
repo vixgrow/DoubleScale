@@ -970,7 +970,7 @@ abstract class AbstractCampaignController extends RestController {
 	 * @return string Processed message
 	 */
 	protected function process_merge_tags( $message, $contact ) {
-		return \DoubleScale\Core\Managers\MergeTagsManager::instance()->process_merge_tags( $message, $contact );
+		return \DoubleScale\Core\MergeTags\MergeTagsManager::instance()->process_merge_tags( $message, $contact );
 	}
 
 	/**

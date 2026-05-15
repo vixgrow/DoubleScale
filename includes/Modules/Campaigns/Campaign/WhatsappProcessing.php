@@ -21,7 +21,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Plugin;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Whatsapp;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Core\Validators\PhoneValidator;

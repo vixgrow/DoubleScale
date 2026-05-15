@@ -13,9 +13,9 @@ namespace DoubleScale\Modules\Automations\MergeTags\Memberpress;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Automations\Abstracts\MergeTag;
+use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 /**
  * Subscription Status Merge Tag

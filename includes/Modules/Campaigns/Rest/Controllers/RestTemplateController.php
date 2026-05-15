@@ -26,7 +26,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
 use DoubleScale\Modules\Campaigns\Emails\BlockRegistry;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Constants\CampaignChannel;
 
 /**

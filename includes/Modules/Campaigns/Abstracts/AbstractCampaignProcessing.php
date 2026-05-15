@@ -31,7 +31,7 @@ use DoubleScale\Plugin;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Campaigns\Services\CampaignRateLimiter;
 use DoubleScale\Modules\Campaigns\Services\CampaignContactFilter;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Core\Managers\IntegrationsManager;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Campaigns\Pipeline\CampaignContext;

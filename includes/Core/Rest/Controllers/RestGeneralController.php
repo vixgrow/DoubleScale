@@ -69,7 +69,7 @@ class RestGeneralController extends RestController {
 	 * @param string $slug Module slug.
 	 */
 	private function dashboard_aggregate_allowed( string $slug ): bool {
-		if ( ! function_exists( 'doublescale_module_slug_to_class_map' ) || ! function_exists( 'doublescale_is_module_enabled' ) ) {
+		if ( ! function_exists( 'doublescale_module_slug_to_class_map' ) || ! function_exists( 'doublescale_is_module_active' ) ) {
 			return true;
 		}
 
@@ -78,7 +78,7 @@ class RestGeneralController extends RestController {
 			return false;
 		}
 
-		return doublescale_is_module_enabled( $slug );
+		return doublescale_is_module_active( $slug );
 	}
 
 	/**

@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 /**
  * AutomatedCampaignHandler class

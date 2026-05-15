@@ -28,7 +28,6 @@ class Security {
 	 *
 	 * @var string
 	 */
-	private const LEGACY_UPLOAD_RELATIVE_PATH = 'DS/Import-Export';
 
 	/**
 	 * Create upload dir recursive and adding security files to it
@@ -38,20 +37,6 @@ class Security {
 	 */
 	public static function prepare_upload_dir( $dir = '' ) {
 		$dir = $dir ?: self::get_upload_dir();
-
-		$legacy_dir = trailingslashit( wp_upload_dir()['basedir'] ) . self::LEGACY_UPLOAD_RELATIVE_PATH;
-
-		// If rebranded dir is missing but the legacy DS folder exists, move it so existing CSVs still resolve.
-		if ( ! is_dir( $dir ) && is_dir( $legacy_dir ) ) {
-			$parent = dirname( $dir );
-			if ( ! wp_mkdir_p( $parent ) ) {
-				return false;
-			}
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.rename_rename -- one-time legacy folder migration on first load; WP_Filesystem isn't bootstrapped here yet, and a failure is non-fatal (we fall through to mkdir).
-			if ( ! @rename( $legacy_dir, $dir ) ) {
-				// Fall through: create fresh DoubleScale dir (user may need to re-upload if rename failed).
-			}
-		}
 
 		// no need for checks.
 		if ( is_dir( $dir ) ) {

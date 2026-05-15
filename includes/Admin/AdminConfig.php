@@ -20,7 +20,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Site\License;

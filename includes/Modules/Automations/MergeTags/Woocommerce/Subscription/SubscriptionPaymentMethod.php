@@ -15,9 +15,9 @@ namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\Subscription;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Modules\Automations\Abstracts\MergeTag;
+use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Core\Managers\MergeTagsManager;
+use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 /**
  * Subscription Payment Method Merge Tag

@@ -381,6 +381,7 @@ class AbandonedCart {
 	 * @since 1.0.0
 	 */
 	public function restore_abandoned_cart() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public abandoned-cart restore link; identity comes from the per-cart hash validated against the DB below.
 		$cart_id = sanitize_text_field( wp_unslash( $_GET['doublescale-cart-id'] ?? $_GET['ds-cart-id'] ?? '' ) );
 		if ( ! $cart_id || wp_doing_ajax() || is_admin() ) {
 			return;
@@ -599,7 +600,8 @@ class AbandonedCart {
 			wp_send_json_success();
 		}
 
-		$fields = wp_unslash( $_POST['fields'] ) ?? null;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; values are extracted and individually sanitised below (sanitize_email + per-field handling).
+		$fields = isset( $_POST['fields'] ) ? wp_unslash( $_POST['fields'] ) : null;
 		if ( empty( $fields ) ) {
 			wp_send_json_error( __( 'Fields are required.', 'doublescale') );
 		}
@@ -733,7 +735,7 @@ class AbandonedCart {
 	 * @return string
 	 */
 	public function get_session() {
-		 return sanitize_text_field( $_COOKIE['doublescale_abandoned_cart'] ?? '' );
+		return isset( $_COOKIE['doublescale_abandoned_cart'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['doublescale_abandoned_cart'] ) ) : '';
 	}
 
 	/**
@@ -790,6 +792,6 @@ class AbandonedCart {
 	 * @return string
 	 */
 	public function get_skip_session() {
-		return sanitize_text_field( $_COOKIE['doublescale_abandoned_cart_skip'] ?? '' );
+		return isset( $_COOKIE['doublescale_abandoned_cart_skip'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['doublescale_abandoned_cart_skip'] ) ) : '';
 	}
 }

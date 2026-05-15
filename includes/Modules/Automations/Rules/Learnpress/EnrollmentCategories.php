@@ -148,10 +148,12 @@ class EnrollmentCategories extends Rule
 			return array();
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the LearnPress-prefixed user_items table; user id bound via prepare().
 		$results = $wpdb->get_results($wpdb->prepare(
 			"SELECT item_id FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
 			$user->ID
 		));
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if (! empty($results)) {
 			foreach ($results as $row) {

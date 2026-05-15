@@ -123,15 +123,15 @@ abstract class AbstractTracking {
 	 *
 	 * @return void
 	 */
-	protected function handle_standard_tracking() {         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
+	protected function handle_standard_tracking() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public tracking endpoint; identity comes from the per-message hash_key, validated downstream.
 		if ( ! isset( $_GET['doublescale'] ) || ! isset( $_GET['hash_key'] ) ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
-		$action = sanitize_text_field( wp_unslash( $_GET['doublescale'] ) );
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public tracking, nonce not applicable
+		$action   = sanitize_text_field( wp_unslash( $_GET['doublescale'] ) );
 		$hash_key = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$type     = $this->channel;
 
 		switch ( $action ) {
@@ -300,12 +300,12 @@ abstract class AbstractTracking {
 	 *
 	 * @return void
 	 */
-	protected function handle_meta_verification_challenge() {       // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$mode = isset( $_GET['hub_mode'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_mode'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$token = isset( $_GET['hub_verify_token'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_verify_token'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	protected function handle_meta_verification_challenge() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Meta webhook verification endpoint; the verify_token is the shared secret validated against settings.
+		$mode      = isset( $_GET['hub_mode'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_mode'] ) ) : '';
+		$token     = isset( $_GET['hub_verify_token'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_verify_token'] ) ) : '';
 		$challenge = isset( $_GET['hub_challenge'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_challenge'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Get Meta integration
 		$integration  = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'meta-whatsapp' );

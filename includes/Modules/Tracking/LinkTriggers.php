@@ -66,6 +66,7 @@ class LinkTriggers {
 	 */
 	public function link_trigger_tracking() {
 		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public link-trigger redirect; identity comes from the per-trigger hash + per-message track-id, both validated against the DB below.
 			$hash = '';
 			if ( isset( $_GET['doublescale-link-trigger'] ) ) {
 				$hash = sanitize_text_field( wp_unslash( $_GET['doublescale-link-trigger'] ) );
@@ -86,7 +87,7 @@ class LinkTriggers {
 			$link_trigger->click_count = $link_trigger->click_count + 1;
 			$link_trigger->save();
 
-			$track_id       = isset( $_GET['track-id'] ) ? sanitize_text_field( wp_unslash( $_GET['track-id'] ) ) : '';
+			$track_id = isset( $_GET['track-id'] ) ? sanitize_text_field( wp_unslash( $_GET['track-id'] ) ) : '';
 		$campaign_email = CommunicationTrackingModel::where( 'hash_key', $track_id )
 			->where('mode', CommunicationTrackingModel::MODE_EMAIL)
 				->first();
@@ -134,6 +135,7 @@ class LinkTriggers {
 			}
 
 			\doublescale_safe_redirect( $redirect_url );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
 				__( 'Link Trigger Tracking Error', 'doublescale'),

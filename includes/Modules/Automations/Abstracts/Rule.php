@@ -145,7 +145,10 @@ abstract class Rule
 		$value      = $this->get_value($automation_contact);
 		$operator   = $rule['operator'];
 		$rule_value = $rule['value'];
-		error_log('operator: ' . $operator);
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- gated by WP_DEBUG; aids rule-engine debugging without polluting production logs.
+			error_log('operator: ' . $operator);
+		}
 		switch ($operator) {
 			case 'is':
 				if (is_array($value)) {

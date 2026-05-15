@@ -1053,7 +1053,7 @@ final class ActivityManager {
 
 		$union_sql = '(' . implode( ') UNION ALL (', $select_queries ) . ')';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Variables are sanitized; $union_sql from prepared queries, $sort_by sanitized by sanitize_sort_field().
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $union_sql is built from prepared SELECTs above; $sort_by is whitelisted by sanitize_sort_field(); $sort_order is gated to 'ASC'|'DESC' just above.
 		$final_sql = $wpdb->prepare(
 			"SELECT * FROM ({$union_sql}) AS combined
 			ORDER BY {$sort_by} {$sort_order}
@@ -1061,6 +1061,7 @@ final class ActivityManager {
 			$per_page,
 			$offset
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 		$results = $wpdb->get_results( $final_sql );
@@ -1335,13 +1336,14 @@ final class ActivityManager {
 
 		$placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Using spread operator for dynamic placeholders.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a dynamically built '%d,%d…' string bound via spread; $wpdb->users is a trusted core table reference.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ID, display_name, user_email FROM {$wpdb->users} WHERE ID IN ({$placeholders})",
 				...$user_ids
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		$users = array();
 		foreach ( $results as $user ) {

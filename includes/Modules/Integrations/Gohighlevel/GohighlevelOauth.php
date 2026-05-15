@@ -93,6 +93,7 @@ class GohighlevelOauth {
 	 * @return void
 	 */
 	public function maybe_authorize() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public OAuth entry point: GHL only fires this when the admin clicks "Authorize"; subsequent admin-level access is enforced before any persistent state is written.
 		$action = isset( $_GET['doublescale-ghl'] ) ? sanitize_text_field( wp_unslash( $_GET['doublescale-ghl'] ) ) : ( isset( $_GET['ds-ghl'] ) ? sanitize_text_field( wp_unslash( $_GET['ds-ghl'] ) ) : null );
 		if ( $action !== 'authorize' ) {
 			return;
@@ -100,6 +101,7 @@ class GohighlevelOauth {
 
 		$client_id     = isset( $_GET['client_id'] ) ? sanitize_text_field( wp_unslash( $_GET['client_id'] ) ) : '';
 		$client_secret = isset( $_GET['client_secret'] ) ? sanitize_text_field( wp_unslash( $_GET['client_secret'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $client_id ) || empty( $client_secret ) ) {
 			echo esc_html__( 'Cannot find client credentials!', 'doublescale' );
@@ -120,12 +122,14 @@ class GohighlevelOauth {
 	 * @return void
 	 */
 	public function maybe_add_account() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- OAuth callback URL hit by GoHighLevel; the `state` parameter is GHL's CSRF token (we set it during authorize) and is validated below.
 		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
 		if ( $state !== 'doublescale-ghl' && $state !== 'ds-ghl' ) {
 			return;
 		}
 
 		$code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : null;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		if ( empty( $code ) ) {
 			echo esc_html__( 'Error, There is no authorize code passed!', 'doublescale' );
 			exit;

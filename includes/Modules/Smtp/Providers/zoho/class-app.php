@@ -45,7 +45,8 @@ class App {
 	 * @return void
 	 */
 	public function maybe_authorize() {
-		$action = $_GET['smtp-zoho'] ?? null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public OAuth entry point; only fires when an admin clicks "Authorize" from the Zoho settings screen.
+		$action = isset( $_GET['smtp-zoho'] ) ? sanitize_text_field( wp_unslash( $_GET['smtp-zoho'] ) ) : null;
 		if ( $action !== 'authorize' ) {
 			return;
 		}
@@ -76,14 +77,16 @@ class App {
 	 * @return void
 	 */
 	public function maybe_add_account() {
-		$state = $_GET['state'] ?? '';
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- OAuth callback URL hit by Zoho; the `state` parameter is the OAuth CSRF token validated below.
+		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
 
 		if ( strpos( $state, 'smtp-zoho' ) !== 0 ) {
 			return;
 		}
 
 		// ensure authorize code.
-		$code = $_GET['code'] ?? null;
+		$code = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : null;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		if ( empty( $code ) ) {
 			echo esc_html__( 'Error, There is no authorize code passed!', 'doublescale' );
 			exit;

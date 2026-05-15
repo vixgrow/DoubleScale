@@ -113,11 +113,13 @@ class Email
 	public function email_opened_tracking()
 	{
 		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public open-tracking pixel; identity comes from the per-message hash_key validated below.
 			if (! isset($_GET['doublescale']) || $_GET['doublescale'] !== 'email_open') {
 				return;
 			}
 
-			$hash_key = isset($_GET['hash_key']) ? sanitize_text_field($_GET['hash_key']) : '';
+			$hash_key = isset($_GET['hash_key']) ? sanitize_text_field( wp_unslash( $_GET['hash_key'] ) ) : '';
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			$tracking_entry = CommunicationTrackingModel::where('hash_key', $hash_key)
 				->where('mode', CommunicationTrackingModel::MODE_EMAIL)
 				->first();
@@ -172,6 +174,7 @@ class Email
 	public function email_clicked_tracking()
 	{
 		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public click-tracking redirect; identity comes from the per-message hash_key validated below.
 			if (! isset($_GET['doublescale']) || $_GET['doublescale'] !== 'email_click') {
 				return;
 			}
@@ -180,7 +183,8 @@ class Email
 				return;
 			}
 
-			$hash_key = sanitize_text_field($_GET['hash_key']);
+			$hash_key = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			$tracking_entry = CommunicationTrackingModel::where('hash_key', $hash_key)
 				->where('mode', CommunicationTrackingModel::MODE_EMAIL)
 				->first();
@@ -191,8 +195,8 @@ class Email
 
 			// Skip click tracking for failed outbound emails — redirect to original URL if valid, otherwise home.
 			if ($this->is_failed_outbound($tracking_entry)) {
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$fallback = isset($_GET['original']) ? esc_url_raw(sanitize_text_field(urldecode($_GET['original']))) : '';
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- public click redirect; urldecode must run before sanitize_text_field, and the URL is validated via preg_match below.
+				$fallback = isset($_GET['original']) ? esc_url_raw(sanitize_text_field(urldecode(wp_unslash($_GET['original'])))) : '';
 				if (empty($fallback) || ! preg_match('#^https?://#i', $fallback)) {
 					$fallback = home_url();
 				}
@@ -230,8 +234,8 @@ class Email
 				}
 			}
 
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- urldecode must happen before sanitize_text_field.
-			$original_url = sanitize_text_field(urldecode($_GET['original']));
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- urldecode must happen before sanitize_text_field; public click-redirect handler.
+			$original_url = sanitize_text_field(urldecode(wp_unslash($_GET['original'])));
 
 			// Handle broken unsubscribe merge tags (e.g., "unsubscribe_link}}" from unprocessed {{contact:unsubscribe_link}})
 			if (strpos($original_url, 'unsubscribe_link') !== false || strpos($original_url, '{{contact:') !== false) {

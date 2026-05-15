@@ -281,7 +281,8 @@ class Account_API {
 				'TemplateName' => $template_name,
 			] );
 		} catch ( \Exception $e ) {
-			// Log but don't fail the operation if template deletion fails
+			// Log but don't fail the operation if template deletion fails.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional best-effort diagnostic when SES template cleanup fails; the send already succeeded.
 			error_log( 'smtp: Failed to delete temporary SES template: ' . $e->getMessage() );
 		}
 

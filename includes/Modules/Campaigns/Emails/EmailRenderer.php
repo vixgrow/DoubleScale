@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Campaigns\Emails\Layouts\LayoutHandlerRegistry;
 use DoubleScale\Modules\Contacts\Filters\ConditionEvaluator;
 

@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Models\AvailabilityModel;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
-use DoubleScale\UserRoles\UserRoles;
+use DoubleScale\Core\UserRoles\UserRoles;
 
 final class BookingProvisioner {
 

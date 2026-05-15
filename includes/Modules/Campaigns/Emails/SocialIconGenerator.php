@@ -181,7 +181,7 @@ class SocialIconGenerator {
 			wp_mkdir_p( $output_dir );
 		}
 
-		if ( ! is_writable( $output_dir ) ) {
+		if ( ! is_writable( $output_dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- writing generated PNG icons into the uploads dir; WP_Filesystem does not offer an equivalent writability probe.
 			return false;
 		}
 
@@ -285,14 +285,16 @@ class SocialIconGenerator {
 		if ( is_dir( $dir ) ) {
 			$files = glob( $dir . '*.png' );
 			if ( $files ) {
-				array_map( 'unlink', $files );
+				array_map( 'wp_delete_file', $files );
 			}
 
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.PHP.NoSilencedErrors.Discouraged -- cleanup of generated-icon dir; WP_Filesystem isn't bootstrapped on cache-clear paths and failure is non-fatal.
 			@rmdir( $dir );
 
 			$parent    = dirname( $dir );
 			$remaining = glob( $parent . '/*' );
 			if ( empty( $remaining ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir, WordPress.PHP.NoSilencedErrors.Discouraged -- cleanup of empty parent dir; non-fatal on failure.
 				@rmdir( $parent );
 			}
 		}

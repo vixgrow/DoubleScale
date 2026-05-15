@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 /**
  * Abandoned Cart Billing Address 2 Merge Tag

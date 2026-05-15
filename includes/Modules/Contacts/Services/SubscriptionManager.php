@@ -9,7 +9,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\SubscriptionManage;
+namespace DoubleScale\Modules\Contacts\Services;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -24,14 +24,14 @@ use DoubleScale\Core\Settings\Settings;
 /**
  * Subscription Manage
  */
-class SubscriptionManage {
+class SubscriptionManager {
 
 	/**
 	 * Class Instance.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @var SubscriptionManage
+	 * @var SubscriptionManager
 	 */
 	private static $instance;
 
@@ -43,13 +43,13 @@ class SubscriptionManage {
 	public $merge_tags_manager;
 
 	/**
-	 * SubscriptionManage Instance.
+	 * SubscriptionManager Instance.
 	 *
 	 * Instantiates or reuses an instance
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return SubscriptionManage
+	 * @return SubscriptionManager
 	 */
 	public static function instance() {
 		if ( is_null( self::$instance ) ) {

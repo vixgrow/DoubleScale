@@ -148,7 +148,8 @@ class Store {
 	public function ajax_install() {
 		$this->check_authorization();
 
-		$addon_slug = sanitize_text_field( $_POST['addon'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce is verified inside $this->check_authorization() above.
+		$addon_slug = isset( $_POST['addon'] ) ? sanitize_text_field( wp_unslash( $_POST['addon'] ) ) : '';
 		$addon      = $this->get_addon( $addon_slug );
 		if ( ! $addon ) {
 			wp_send_json_error( esc_html__( 'Unknown addon', 'doublescale' ), 400 );
@@ -182,7 +183,8 @@ class Store {
 			// EDD may return download_link or package
 			$download_link = $response['data']['download_link'] ?? $response['data']['package'] ?? null;
 			if ( empty( $download_link ) ) {
-				// Log the response for debugging
+				// Log the response for debugging.
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.PHP.DevelopmentFunctions.error_log_print_r -- intentional admin-side diagnostic when license API returns no download link.
 				error_log( 'DoubleScale addon install response: ' . print_r( $response, true ) );
 				wp_send_json_error( esc_html__( 'Cannot retrieve addon download link. Please check your license.', 'doublescale' ), 422 );
 				exit;
@@ -230,7 +232,8 @@ class Store {
 	public function ajax_activate() {
 		$this->check_authorization();
 
-		$addon_slug = sanitize_text_field( $_POST['addon'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce is verified inside $this->check_authorization() above.
+		$addon_slug = isset( $_POST['addon'] ) ? sanitize_text_field( wp_unslash( $_POST['addon'] ) ) : '';
 		$addon      = $this->get_addon( $addon_slug );
 		if ( ! $addon ) {
 			wp_send_json_error( esc_html__( 'Unknown addon', 'doublescale' ), 400 );

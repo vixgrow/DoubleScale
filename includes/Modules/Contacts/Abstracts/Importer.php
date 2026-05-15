@@ -521,7 +521,8 @@ abstract class Importer {
 			return;
 		}
 
-		// Check if relationship already exists
+		// Check if relationship already exists.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the prefixed contact-relationships table; values bound via prepare().
 		$existing = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT id FROM {$table_name} WHERE entity_id = %d AND entity_type = 'contact' AND custom_field_id = %d",

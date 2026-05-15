@@ -7,7 +7,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Utils;
+namespace DoubleScale\Core\Validators;
 
 
 defined( 'ABSPATH' ) || exit;

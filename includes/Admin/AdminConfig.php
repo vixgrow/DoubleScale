@@ -14,15 +14,15 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Contacts\Filters\FiltersManager;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Core\Managers\IntegrationsManager;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Automations\Services\TriggersManager;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Site\License;
 // use DoubleScale\Modules\Deals\Services\PipelineManager; // Moved to Pro
 // use DoubleScale\Modules\Deals\Services\DealManager; // Moved to Pro

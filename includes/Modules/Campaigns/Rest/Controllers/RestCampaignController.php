@@ -12,7 +12,7 @@ namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -35,7 +35,7 @@ use DoubleScale\Modules\Campaigns\Campaign\AutomatedCampaignHandler;
 // use DoubleScale\Modules\Campaigns\Campaign\WhatsappProcessing; // Moved to Pro
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 
 /**
@@ -807,7 +807,7 @@ class RestCampaignController extends AbstractCampaignController {
 			// Find contact for merge tag processing (try exact match, then sanitized E.164)
 			$contact = ContactModel::where( 'phone', $phone )->first();
 			if ( ! $contact ) {
-				$sanitized = \DoubleScale\Utils\PhoneValidator::sanitize( $phone );
+				$sanitized = \DoubleScale\Core\Validators\PhoneValidator::sanitize( $phone );
 				if ( $sanitized && $sanitized !== $phone ) {
 					$contact = ContactModel::where( 'phone', $sanitized )->first();
 				}

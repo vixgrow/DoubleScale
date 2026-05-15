@@ -239,12 +239,13 @@ abstract class AbstractModule implements ModuleInterface {
 		}
 		sort( $files );
 
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export -- intentional: serialises file paths into a PHP manifest written at build time.
 		$export = "<?php\n// Auto-generated manifest — do not edit.\nreturn " . var_export( $files, true ) . ";\n";
 		$dir    = \dirname( $manifest_path );
 		if ( $dir && ! is_dir( $dir ) && function_exists( 'wp_mkdir_p' ) ) {
 			wp_mkdir_p( $dir );
 		}
-		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) {
+		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- WP_Filesystem is unavailable in this bootstrap context; direct check is required.
 			return false;
 		}
 		$ok = (bool) @\file_put_contents( $manifest_path, $export );

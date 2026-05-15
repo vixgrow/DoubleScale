@@ -91,8 +91,7 @@ class LinkTriggers {
 			->where('mode', CommunicationTrackingModel::MODE_EMAIL)
 				->first();
 			if ( ! $campaign_email ) {
-				wp_redirect( $redirect_url );
-				exit;
+				\doublescale_safe_redirect( $redirect_url );
 			}
 
 			// Update the email status
@@ -134,8 +133,7 @@ class LinkTriggers {
 				do_action( 'doublescale_link_trigger_clicked', $link_trigger, $contact );
 			}
 
-			wp_redirect( $redirect_url );
-			exit;
+			\doublescale_safe_redirect( $redirect_url );
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
 				__( 'Link Trigger Tracking Error', 'doublescale'),

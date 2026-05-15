@@ -121,7 +121,7 @@ class FirstEnrollmentDate extends Rule
 		}
 
 		$first_enrollment = $enrollments[0];
-		return date('Y-m-d', strtotime($first_enrollment->post_date));
+		return gmdate('Y-m-d', strtotime($first_enrollment->post_date));
 	}
 
 	/**
@@ -159,7 +159,7 @@ class FirstEnrollmentDate extends Rule
 
 			case 'on':
 				$rule_timestamp = strtotime($rule_value);
-				return date('Y-m-d', $enrollment_timestamp) === date('Y-m-d', $rule_timestamp);
+				return gmdate('Y-m-d', $enrollment_timestamp) === gmdate('Y-m-d', $rule_timestamp);
 
 			case 'between':
 				if (! is_array($rule_value) || count($rule_value) < 2) {

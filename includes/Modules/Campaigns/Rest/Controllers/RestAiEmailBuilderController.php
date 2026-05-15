@@ -16,13 +16,13 @@ namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
 
 /**
@@ -1419,7 +1419,7 @@ PROMPT;
 	/**
 	 * Parse and validate the AI response into builder-compatible format.
 	 *
-	 * Like QuillForms' validate_and_enhance_form(), this merges default props
+	 * validate_and_enhance_form(), this merges default props
 	 * into every block to ensure the builder receives complete, valid data
 	 * even if the AI omits some properties.
 	 *
@@ -1699,7 +1699,7 @@ PROMPT;
 	/**
 	 * Enhance specific block types with intelligent defaults.
 	 *
-	 * Similar to QuillForms' enhance_block_by_type() — ensures critical
+	 * enhance_block_by_type() — ensures critical
 	 * properties have sensible values even if the AI returned odd ones.
 	 *
 	 * @param array $block Block data.
@@ -1935,43 +1935,44 @@ PROMPT;
 	{
 		$single_email_prompt = $this->build_system_prompt($customization);
 
-		$sequence_wrapper = <<<PROMPT
-You are an expert email sequence designer. You must generate a complete email sequence of exactly {$email_count} emails as a JSON array.
-
-Each email in the array must be a JSON object with exactly these keys:
-- "subject": A compelling, unique subject line (plain text, no HTML)
-- "delay_days": Number of days after the PREVIOUS email to send this one (0 for the first email, then realistic increasing values like 1, 2, 3, 5, 7)
-- "template": A complete email builder template object following the schema described below
-
-You MUST respond with ONLY a valid JSON array [...] containing exactly {$email_count} email objects. No markdown, no code fences, no explanation.
-
-Example structure (with 2 emails):
-[
-  {
-    "subject": "Welcome aboard!",
-    "delay_days": 0,
-    "template": { "sections": [...], "globalSettings": {...}, "buttonSettings": {...} }
-  },
-  {
-    "subject": "Here's what you can do next",
-    "delay_days": 2,
-    "template": { "sections": [...], "globalSettings": {...}, "buttonSettings": {...} }
-  }
-]
-
-SEQUENCE STRATEGY:
-- Email 1 (delay_days: 0): Introduction / welcome / first impression
-- Emails 2 through {$email_count}: Progressively build engagement — each email should have a distinct purpose
-- Vary the visual layout between emails (different header styles, content arrangements, section backgrounds)
-- Keep branding consistent (same primary color, button styles, footer) but vary the design structure
-- Suggest realistic delays: 1-3 days for urgent sequences, 2-7 days for nurture sequences
-- Each email subject should be unique and compelling
-- Make emails progressively shorter as the sequence continues
-
-TEMPLATE SCHEMA FOR EACH EMAIL'S "template" VALUE:
-The following describes the exact JSON structure for each email's template object.
-
-PROMPT;
+		$sequence_lines = array(
+			"You are an expert email sequence designer. You must generate a complete email sequence of exactly {$email_count} emails as a JSON array.",
+			'',
+			'Each email in the array must be a JSON object with exactly these keys:',
+			'- "subject": A compelling, unique subject line (plain text, no HTML)',
+			'- "delay_days": Number of days after the PREVIOUS email to send this one (0 for the first email, then realistic increasing values like 1, 2, 3, 5, 7)',
+			'- "template": A complete email builder template object following the schema described below',
+			'',
+			"You MUST respond with ONLY a valid JSON array [...] containing exactly {$email_count} email objects. No markdown, no code fences, no explanation.",
+			'',
+			'Example structure (with 2 emails):',
+			'[',
+			'  {',
+			'    "subject": "Welcome aboard!",',
+			'    "delay_days": 0,',
+			'    "template": { "sections": [...], "globalSettings": {...}, "buttonSettings": {...} }',
+			'  },',
+			'  {',
+			'    "subject": "Here\'s what you can do next",',
+			'    "delay_days": 2,',
+			'    "template": { "sections": [...], "globalSettings": {...}, "buttonSettings": {...} }',
+			'  }',
+			']',
+			'',
+			'SEQUENCE STRATEGY:',
+			'- Email 1 (delay_days: 0): Introduction / welcome / first impression',
+			"- Emails 2 through {$email_count}: Progressively build engagement — each email should have a distinct purpose",
+			'- Vary the visual layout between emails (different header styles, content arrangements, section backgrounds)',
+			'- Keep branding consistent (same primary color, button styles, footer) but vary the design structure',
+			'- Suggest realistic delays: 1-3 days for urgent sequences, 2-7 days for nurture sequences',
+			'- Each email subject should be unique and compelling',
+			'- Make emails progressively shorter as the sequence continues',
+			'',
+			'TEMPLATE SCHEMA FOR EACH EMAIL\'S "template" VALUE:',
+			"The following describes the exact JSON structure for each email's template object.",
+			'',
+		);
+		$sequence_wrapper = implode( "\n", $sequence_lines ) . "\n";
 
 		// Extract just the schema portion from the single-email prompt (after the first line about being an expert).
 		$schema_start = strpos($single_email_prompt, 'You MUST respond with ONLY valid JSON');

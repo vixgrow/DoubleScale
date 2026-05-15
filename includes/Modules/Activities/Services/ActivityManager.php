@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Constants\ActivityTypes;
 
 /**

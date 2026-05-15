@@ -14,7 +14,7 @@ namespace DoubleScale\Modules\Automations\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;

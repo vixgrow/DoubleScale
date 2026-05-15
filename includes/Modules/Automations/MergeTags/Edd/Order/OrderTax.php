@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 /**
  * Order Tax Merge Tag

@@ -80,7 +80,7 @@ function write_if_changed( string $path, string $content ): void {
 	$old = is_file( $path ) ? (string) file_get_contents( $path ) : null;
 	if ( $old !== $content ) {
 		file_put_contents( $path, $content );
-		echo "Wrote $path\n";
+		echo 'Wrote ' . esc_html( $path ) . "\n";
 	}
 }
 

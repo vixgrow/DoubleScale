@@ -11,14 +11,12 @@ import BusinessInfo from '@doublescale/components/icons/start-businessinfo';
 import StartList from '@doublescale/components/icons/start-list';
 import StartTag from '@doublescale/components/icons/start-tags';
 import StartContact from '@doublescale/components/icons/start-contact';
-import StartComplete from '@doublescale/components/icons/start-complete';
 import WelcomePage from './WelcomePage/WelcomePage';
 import ModulesStep from './Modules/Modules';
 import BusindessInformation from './BusinessInformation/BusindessInformation';
 import Tags from './Tags/Tags';
 import Lists from './Lists/Lists';
 import Contacts from './Contacts/Contacts';
-import PluginComplete from './Plugins/Plugins';
 import EndStep from './EndStep/EndStep';
 import config from '@doublescale/config';
 import {
@@ -44,7 +42,6 @@ export default function GetStart() {
 		{ number: 4, label: __('Lists', 'doublescale'), icon: <StartList /> },
 		{ number: 5, label: __('Tags', 'doublescale'), icon: <StartTag /> },
 		{ number: 6, label: __('Contacts', 'doublescale'), icon: <StartContact /> },
-		{ number: 7, label: __('Complete', 'doublescale'), icon: <StartComplete /> },
 	];
 
 	const handleNext = () => {
@@ -130,13 +127,6 @@ export default function GetStart() {
 					)}
 					{currentStep === 6 && (
 						<Contacts
-							onNext={handleNext}
-							onPrevious={handlePrevious}
-							onSkip={handleSkip}
-						/>
-					)}
-					{currentStep === 7 && (
-						<PluginComplete
 							onNext={handleNext}
 							onPrevious={handlePrevious}
 							onSkip={handleSkip}

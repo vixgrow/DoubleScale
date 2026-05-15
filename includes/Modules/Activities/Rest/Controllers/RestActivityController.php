@@ -25,7 +25,7 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Constants\ActivityTypes;
 use WP_Error;
 use WP_REST_Request;

@@ -110,14 +110,16 @@ class FirstEnrollmentDate extends Rule
 			return null;
 		}
 
-		// Get the earliest enrollment date
+		// Get the earliest enrollment date.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the LearnPress-prefixed user_items table; user id bound via prepare().
 		$result = $wpdb->get_var($wpdb->prepare(
 			"SELECT MIN(start_time) FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
 			$user->ID
 		));
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ($result) {
-			return date('Y-m-d', strtotime($result));
+			return gmdate('Y-m-d', strtotime($result));
 		}
 
 		return null;
@@ -156,7 +158,7 @@ class FirstEnrollmentDate extends Rule
 
 			case 'on':
 				$rule_timestamp = strtotime($rule_value);
-				return date('Y-m-d', $enrollment_timestamp) === date('Y-m-d', $rule_timestamp);
+				return gmdate('Y-m-d', $enrollment_timestamp) === gmdate('Y-m-d', $rule_timestamp);
 
 			case 'between':
 				if (! is_array($rule_value) || count($rule_value) < 2) {

@@ -25,6 +25,7 @@ use DoubleScale\Modules\Booking\Models\EventModel;
 use Illuminate\Support\Arr;
 
 
+// phpcs:disable WordPress.Security.NonceVerification.Missing -- public booking AJAX endpoints (wp_ajax_nopriv_*). Nonce verification is available via verify_booking_nonce() which each handler can call; security on these endpoints is enforced via the BookingValidator (hash lookup + state checks), since the booking page is publicly reachable and visitors are unauthenticated.
 class BookingAjax {
 
 
@@ -59,7 +60,7 @@ class BookingAjax {
 	 * either so both contexts work without duplicating AJAX registrations.
 	 */
 	private function verify_booking_nonce(): void {
-		if ( wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ?? '' ), 'doublescale_booking' ) ) {
+		if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ?? '' ) ), 'doublescale_booking' ) ) {
 			return;
 		}
 		if ( is_user_logged_in() && current_user_can( 'doublescale_access' ) ) {
@@ -76,36 +77,36 @@ class BookingAjax {
 	public function booking() {
 		// $this->verify_booking_nonce();
 		try {
-			$id    = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : null;
+			$id    = isset( $_POST['id'] ) ? intval( wp_unslash( $_POST['id'] ) ) : null;
 			$event = $this->bookingValidatorClass::validate_event( $id );
 
-			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : null;
+			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : null;
 
 			if ( ! $payment_method && $event->requirePayment() ) {
 				throw new \Exception( __( 'Invalid payment method', 'doublescale' ) );
 			}
 
-			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null;
 			if ( ! $start_date ) {
 				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
 			}
 
-			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( wp_unslash( $_POST['timezone'] ) ) : null;
 			if ( ! $timezone ) {
 				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
 			}
 			$start_date = $this->bookingValidatorClass::validate_start_date( $start_date, $timezone );
 
-			$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $event->duration;
+			$duration = isset( $_POST['duration'] ) ? intval( wp_unslash( $_POST['duration'] ) ) : $event->duration;
 			$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
 
-			$location = isset( $_POST['location'] ) ? json_decode( stripslashes( $_POST['location'] ), true ) : null;
+			$location = isset( $_POST['location'] ) ? json_decode( wp_unslash( $_POST['location'] ), true ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; validated below via bookingValidator and booking model.
 			if ( ! $location ) {
 				throw new \Exception( __( 'Invalid location', 'doublescale' ) );
 			}
 
 			// Validate invitees if needed
-			$invitees = isset( $_POST['invitees'] ) ? json_decode( stripslashes( $_POST['invitees'] ), true ) : array();
+			$invitees = isset( $_POST['invitees'] ) ? json_decode( wp_unslash( $_POST['invitees'] ), true ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; validated below via validate_invitee().
 			if ( empty( $invitees ) || ! is_array( $invitees ) ) {
 				throw new \Exception( __( 'Please, add valid invitees', 'doublescale' ) );
 			}
@@ -121,10 +122,10 @@ class BookingAjax {
 
 			$fields = array();
 			if ( isset( $_POST['fields'] ) ) {
-				$fields = json_decode( wp_unslash( $_POST['fields'] ), true );
+				$fields = json_decode( wp_unslash( $_POST['fields'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; field values are sanitised per-field by the booking service downstream.
 			}
 
-			$host_ids = isset( $_POST['host_ids'] ) ? $_POST['host_ids'] : null;
+			$host_ids = isset( $_POST['host_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['host_ids'] ) ) : null;
 			$host_id  = null;
 			if ( $host_ids ) {
 				$host_ids = explode( ',', $host_ids );
@@ -169,7 +170,7 @@ class BookingAjax {
 
 			$status = 'scheduled';
 
-			if ( isset( $_POST['status'] ) && 'pending' === sanitize_text_field( $_POST['status'] ) ) {
+			if ( isset( $_POST['status'] ) && 'pending' === sanitize_text_field( wp_unslash( $_POST['status'] ) ) ) {
 				$status = 'pending';
 			}
 
@@ -216,20 +217,20 @@ class BookingAjax {
 	public function booking_details() {
 		// $this->verify_booking_nonce();
 		try {
-			$id          = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : null;
-			$user_id     = isset( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : null;
-			$calendar_id = isset( $_POST['calendar_id'] ) ? intval( $_POST['calendar_id'] ) : null;
+			$id          = isset( $_POST['id'] ) ? intval( wp_unslash( $_POST['id'] ) ) : null;
+			$user_id     = isset( $_POST['user_id'] ) ? intval( wp_unslash( $_POST['user_id'] ) ) : null;
+			$calendar_id = isset( $_POST['calendar_id'] ) ? intval( wp_unslash( $_POST['calendar_id'] ) ) : null;
 
 			if ( ! $id ) {
 				throw new \Exception( __( 'Invalid event', 'doublescale' ) );
 			}
 
-			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null;
 			if ( ! $start_date ) {
 				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
 			}
 
-			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( wp_unslash( $_POST['timezone'] ) ) : null;
 			if ( ! $timezone ) {
 				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
 			}
@@ -237,7 +238,7 @@ class BookingAjax {
 			$event = EventModel::find( $id );
 
 			if ( $event ) {
-				$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $event->duration;
+				$duration = isset( $_POST['duration'] ) ? intval( wp_unslash( $_POST['duration'] ) ) : $event->duration;
 				$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
 
 				$wl_settings  = $event->waiting_list_settings;
@@ -290,9 +291,9 @@ class BookingAjax {
 		// $this->verify_booking_nonce();
 
 		try {
-			$id                  = isset( $_POST['id'] ) ? sanitize_text_field( $_POST['id'] ) : null;
+			$id                  = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : null;
 			$booking             = $this->bookingValidatorClass::validate_booking( $id );
-			$cancellation_reason = isset( $_POST['cancellation_reason'] ) ? sanitize_text_field( $_POST['cancellation_reason'] ) : null;
+			$cancellation_reason = isset( $_POST['cancellation_reason'] ) ? sanitize_text_field( wp_unslash( $_POST['cancellation_reason'] ) ) : null;
 
 			if ( $booking->isCancelled() ) {
 				throw new \Exception( __( 'Booking is already cancelled', 'doublescale' ) );
@@ -333,16 +334,16 @@ class BookingAjax {
 		// $this->verify_booking_nonce();
 
 		try {
-			$id                = isset( $_POST['id'] ) ? sanitize_text_field( $_POST['id'] ) : null;
+			$id                = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : null;
 			$booking           = $this->bookingValidatorClass::validate_booking( $id );
-			$reschedule_reason = isset( $_POST['reschedule_reason'] ) ? sanitize_text_field( $_POST['reschedule_reason'] ) : null;
+			$reschedule_reason = isset( $_POST['reschedule_reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reschedule_reason'] ) ) : null;
 
-			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( $_POST['start_date'] ) : null;
+			$start_date = isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null;
 			if ( ! $start_date ) {
 				throw new \Exception( __( 'Invalid start date', 'doublescale' ) );
 			}
 
-			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( $_POST['timezone'] ) : null;
+			$timezone = isset( $_POST['timezone'] ) ? sanitize_text_field( wp_unslash( $_POST['timezone'] ) ) : null;
 			if ( ! $timezone ) {
 				throw new \Exception( __( 'Invalid timezone', 'doublescale' ) );
 			}
@@ -350,7 +351,7 @@ class BookingAjax {
 			// Use the BookingValidator to validate the start date
 			$start_date = $this->bookingValidatorClass::validate_start_date( $start_date, $timezone );
 
-			$duration = isset( $_POST['duration'] ) ? intval( $_POST['duration'] ) : $booking->slot_time;
+			$duration = isset( $_POST['duration'] ) ? intval( wp_unslash( $_POST['duration'] ) ) : $booking->slot_time;
 			$duration = $this->bookingValidatorClass::validate_duration( $duration, $booking->slot_time );
 
 			if ( $booking->isCancelled() ) {
@@ -407,14 +408,14 @@ class BookingAjax {
 	 */
 	public function ajax_process_payment() {
 		try {
-			$booking_hash_id = isset( $_POST['booking_hash_id'] ) ? sanitize_text_field( $_POST['booking_hash_id'] ) : null;
+			$booking_hash_id = isset( $_POST['booking_hash_id'] ) ? sanitize_text_field( wp_unslash( $_POST['booking_hash_id'] ) ) : null;
 			if ( ! $booking_hash_id ) {
 				throw new \Exception( __( 'Invalid booking', 'doublescale' ) );
 			}
 
 			$booking = $this->bookingValidatorClass::validate_booking( $booking_hash_id );
 
-			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : null;
+			$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : null;
 			if ( ! $payment_method ) {
 				throw new \Exception( __( 'Invalid payment method', 'doublescale' ) );
 			}

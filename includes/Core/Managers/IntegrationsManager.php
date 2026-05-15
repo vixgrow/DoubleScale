@@ -8,7 +8,7 @@
  * @package DoubleScale\Managers
  */
 
-namespace DoubleScale\Managers;
+namespace DoubleScale\Core\Managers;
 
 defined( 'ABSPATH' ) || exit;
 

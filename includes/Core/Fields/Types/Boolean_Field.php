@@ -6,7 +6,7 @@
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;

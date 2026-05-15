@@ -63,7 +63,7 @@ if ( ! function_exists( 'doublescale_get_manifest_path' ) ) {
 		if ( ! is_dir( $dir ) && function_exists( 'wp_mkdir_p' ) ) {
 			wp_mkdir_p( $dir );
 		}
-		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) {
+		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- WP_Filesystem is unavailable this early; direct check is required for cache-manifest write path.
 			return '';
 		}
 
@@ -292,12 +292,14 @@ if ( ! function_exists( 'doublescale_get_logger' ) ) {
 		} else {
 			_doing_it_wrong(
 				__FUNCTION__,
-				sprintf(
-					/* translators: 1: provided class name, 2: filter name, 3: required interface */
-					__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'doublescale' ),
-					'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
-					'<code>doublescale_logging_class</code>',
-					'<code>LoggerInterface</code>'
+				wp_kses_post(
+					sprintf(
+						/* translators: 1: provided class name, 2: filter name, 3: required interface */
+						__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'doublescale' ),
+						'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+						'<code>doublescale_logging_class</code>',
+						'<code>LoggerInterface</code>'
+					)
 				),
 				'1.0.0'
 			);

@@ -13,7 +13,7 @@ namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -34,7 +34,7 @@ use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\LeadScoring\LeadScoringManager;
 
 /**
@@ -970,7 +970,7 @@ class RestContactController extends RestController {
 		}
 
 		// Get all course enrollments for user.
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from LearnPress plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the LearnPress-prefixed user_items table; values bound via prepare().
 		$enrollments = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$table_name} WHERE user_id = %d AND item_type = %s ORDER BY start_time DESC",
@@ -978,6 +978,7 @@ class RestContactController extends RestController {
 				'lp_course'
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if (empty($enrollments)) {
 			return $result;
@@ -1547,6 +1548,7 @@ class RestContactController extends RestController {
 
 		// Build query based on mode
 		if ($mode === CampaignChannel::STR_EMAIL) {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the prefixed tracking table name; all values bound via prepare().
 			$query = $wpdb->prepare(
 				"SELECT
 					COUNT(CASE WHEN direction = %d THEN 1 END) as total_sent,
@@ -1562,6 +1564,7 @@ class RestContactController extends RestController {
 				$contact_id,
 				$tracking_mode
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row($query);
@@ -1582,8 +1585,9 @@ class RestContactController extends RestController {
 		} else {
 			// Sms/Whatsapp statistics
 			// For Sms, "total_sent" means successfully sent (SENT + DELIVERED statuses)
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the prefixed tracking table name; all values bound via prepare().
 			$query = $wpdb->prepare(
-				"SELECT 
+				"SELECT
 					COUNT(CASE WHEN status IN (%d, %d) THEN 1 END) as total_sent,
 					COUNT(CASE WHEN status IN (%d, %d) THEN 1 END) as total_delivered,
 					COUNT(CASE WHEN status = %d THEN 1 END) as total_failed
@@ -1597,6 +1601,7 @@ class RestContactController extends RestController {
 				$contact_id,
 				$tracking_mode
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
 			$stats = $wpdb->get_row($query);

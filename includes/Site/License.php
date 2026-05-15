@@ -598,7 +598,8 @@ class License {
 		}
 
 		// posted license key.
-		$license_key = trim( sanitize_text_field( $_POST['license_key'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce is verified in the AJAX bootstrap before this handler runs.
+		$license_key = isset( $_POST['license_key'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) ) : '';
 		if ( empty( $license_key ) ) {
 			wp_send_json_error( esc_html__( 'License key is required', 'doublescale'), 400 );
 			exit;

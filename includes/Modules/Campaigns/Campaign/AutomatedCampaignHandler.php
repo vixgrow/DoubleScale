@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 /**
  * AutomatedCampaignHandler class
@@ -344,10 +344,9 @@ class AutomatedCampaignHandler {
 
 		$id_placeholders = implode( ',', array_fill( 0, count( $reset_ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $events_table is a trusted constant; $id_placeholders is a dynamically built '%d,%d,%d…' string bound via spread.
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"UPDATE {$events_table}
 				 SET status = 'pending', processed_at = NULL
 				 WHERE id IN ({$id_placeholders})",
@@ -357,12 +356,12 @@ class AutomatedCampaignHandler {
 
 		$campaign_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT DISTINCT campaign_id FROM {$events_table}
 				 WHERE id IN ({$id_placeholders})",
 				...$reset_ids
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		foreach ( $campaign_ids as $cid ) {
 			$this->maybe_schedule_drain( (int) $cid );
@@ -442,9 +441,8 @@ class AutomatedCampaignHandler {
 			$dedup_names[] = "_transient_doublescale_event_dedup_{$cid}_{$post->ID}";
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- each value is wrapped through $wpdb->prepare( '%s', $n ) inside the lambda; phpcs cannot trace through array_map.
 		$existing_dedup = $wpdb->get_col(
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			"SELECT option_name FROM {$wpdb->options} WHERE option_name IN ("
 			. implode(
 				',',
@@ -457,6 +455,7 @@ class AutomatedCampaignHandler {
 			)
 			. ')'
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 
 		$already_seen = array();
 		foreach ( $existing_dedup as $name ) {
@@ -497,14 +496,14 @@ class AutomatedCampaignHandler {
 			$value_args[] = $now;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $events_table is a trusted constant; $value_rows is an array of '(%d, %d, %s, %s)' placeholders bound via spread $value_args.
 		$insert_result = $wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"INSERT INTO {$events_table} (campaign_id, post_id, status, created_at) VALUES " . implode( ', ', $value_rows ),
 				...$value_args
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		// error_log( "[Plugin] INSERT events result: {$insert_result}, rows=" . count( $new_campaign_ids ) . ( $wpdb->last_error ? ", error={$wpdb->last_error}" : '' ) );
 
@@ -527,14 +526,14 @@ class AutomatedCampaignHandler {
 			$transient_args[] = 'no';
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $transient_rows is an array of '(%s, %s, %s)' placeholders bound via spread $transient_args.
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES " . implode( ', ', $transient_rows ),
 				...$transient_args
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		// Phase 5: Schedule drain — one call per unique campaign.
 		foreach ( array_unique( $new_campaign_ids ) as $cid ) {

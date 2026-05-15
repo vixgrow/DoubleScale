@@ -87,7 +87,7 @@ final class Module extends AbstractModule {
 		$container->get( Services\TriggersManager::class );
 		$container->get( Services\ActionsManager::class );
 		Loader::instance();
-		\DoubleScale\Managers\MergeTagsManager::instance();
+		\DoubleScale\Core\Managers\MergeTagsManager::instance();
 
 		add_filter( 'doublescale_triggers', array( $this, 'register_triggers' ) );
 		add_filter( 'doublescale_actions', array( $this, 'register_actions' ) );

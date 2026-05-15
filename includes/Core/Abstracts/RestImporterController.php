@@ -24,7 +24,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use Exception;
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 
 /**
  * Rest Importer Controller

@@ -67,8 +67,7 @@ class App {
 			],
 			"https://accounts.zoho.{$app_credentials['region']}/oauth/v2/auth"
 		);
-		wp_redirect( $auth_url );
-		exit;
+		\doublescale_safe_redirect( $auth_url );
 	}
 
 	/**
@@ -168,7 +167,7 @@ class App {
 			<?php echo esc_html__( "The account is added/updated successfully. If this window isn't closed automatically. Please close it and refersh your accounts select menu.", 'doublescale' ); ?>
 			<script>
 				if ( typeof window.opener.add_new_zoho_account === 'function' ) {
-					window.opener.add_new_zoho_account( '<?php echo $account_id; ?>', '<?php echo $account_name; ?>' );
+					window.opener.add_new_zoho_account( '<?php echo esc_js( $account_id ); ?>', '<?php echo esc_js( $account_name ); ?>' );
 					window.close();
 				}
 			</script>

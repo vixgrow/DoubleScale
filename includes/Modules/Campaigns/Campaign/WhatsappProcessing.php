@@ -21,10 +21,10 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Plugin;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Whatsapp;
 use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Utils\PhoneValidator;
+use DoubleScale\Core\Validators\PhoneValidator;
 
 /**
  * WhatsApp Campaign Processing class

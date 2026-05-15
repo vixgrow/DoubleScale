@@ -134,7 +134,7 @@ file_put_contents( $ics_path, $ics_content );
 				<?php if ( ! empty( $host_names ) ) : ?>
 				<p>
 					<span><img src="<?php echo esc_url( $icons_url . 'profile.svg' ); ?>" alt="Host" /></span>
-					<span><?php echo implode( ' - ', $host_names ); ?></span>
+					<span><?php echo implode( ' - ', $host_names ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $host_names entries are individually esc_html'd above. ?></span>
 				</p>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -178,7 +178,8 @@ file_put_contents( $ics_path, $ics_content );
 	</div>
 
 	<?php
-	if ( ! isset( $_GET['embed_type'] ) || $_GET['embed_type'] !== 'Inline' ) :
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public booking confirmation page; the `embed_type` query string only controls layout, no auth context.
+	if ( ! isset( $_GET['embed_type'] ) || sanitize_text_field( wp_unslash( $_GET['embed_type'] ) ) !== 'Inline' ) :
 		;
 		?>
 		<?php if ( ! empty( $is_waiting ) || ( ! $can_cancel && ! $can_reschedule ) ) : ?>

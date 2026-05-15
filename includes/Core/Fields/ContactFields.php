@@ -8,23 +8,23 @@
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields;
+namespace DoubleScale\Core\Fields;
 
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Fields\Types\RadioField;
-use DoubleScale\Fields\Types\TextField;
-use DoubleScale\Fields\Types\Boolean_Field;
-use DoubleScale\Fields\Types\EmailField;
-use DoubleScale\Fields\Types\NumberField;
-use DoubleScale\Fields\Types\UrlField;
-use DoubleScale\Fields\Types\PhoneField;
-use DoubleScale\Fields\Types\DateField;
-use DoubleScale\Fields\Types\TextareaField;
-use DoubleScale\Fields\Types\SelectField;
-use DoubleScale\Fields\Types\MultiselectField;
-use DoubleScale\Fields\Types\CheckboxField;
+use DoubleScale\Core\Fields\Types\RadioField;
+use DoubleScale\Core\Fields\Types\TextField;
+use DoubleScale\Core\Fields\Types\Boolean_Field;
+use DoubleScale\Core\Fields\Types\EmailField;
+use DoubleScale\Core\Fields\Types\NumberField;
+use DoubleScale\Core\Fields\Types\UrlField;
+use DoubleScale\Core\Fields\Types\PhoneField;
+use DoubleScale\Core\Fields\Types\DateField;
+use DoubleScale\Core\Fields\Types\TextareaField;
+use DoubleScale\Core\Fields\Types\SelectField;
+use DoubleScale\Core\Fields\Types\MultiselectField;
+use DoubleScale\Core\Fields\Types\CheckboxField;
 use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 
 /**

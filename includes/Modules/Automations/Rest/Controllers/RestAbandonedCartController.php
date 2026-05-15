@@ -21,7 +21,7 @@ use WP_REST_Server;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 
 /**
  * RestAbandonedCartController class

@@ -46,11 +46,13 @@ class Logger implements LoggerInterface {
 				} else {
 					_doing_it_wrong(
 						__METHOD__,
-						sprintf(
-							/* translators: 1: class name 2: LogHandlerInterface */
-							__( 'The provided handler %1$s does not implement %2$s.', 'doublescale' ),
-							'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
-							'<code>LogHandlerInterface</code>'
+						wp_kses_post(
+							sprintf(
+								/* translators: 1: class name 2: LogHandlerInterface */
+								__( 'The provided handler %1$s does not implement %2$s.', 'doublescale' ),
+								'<code>' . esc_html( is_object( $handler ) ? get_class( $handler ) : $handler ) . '</code>',
+								'<code>LogHandlerInterface</code>'
+							)
 						),
 						'1.0.0'
 					);
@@ -146,11 +148,13 @@ class Logger implements LoggerInterface {
 		if ( ! LogLevels::is_valid_level( $level ) ) {
 			_doing_it_wrong(
 				__METHOD__,
-				sprintf(
-					/* translators: 1: Logger::log 2: level */
-					__( '%1$s was called with an invalid level "%2$s".', 'doublescale' ),
-					'<code>Logger::log</code>',
-					$level
+				wp_kses_post(
+					sprintf(
+						/* translators: 1: Logger::log 2: level */
+						__( '%1$s was called with an invalid level "%2$s".', 'doublescale' ),
+						'<code>Logger::log</code>',
+						esc_html( $level )
+					)
 				),
 				'1.0.0'
 			);

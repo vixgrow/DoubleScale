@@ -43,7 +43,7 @@ use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Constants\MessageDirection;
 use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
 use DoubleScale\Modules\Contacts\Filters\ConditionEvaluator;
 

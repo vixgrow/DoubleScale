@@ -136,7 +136,7 @@ class LastEnrollmentDate extends Rule
 			}
 		}
 
-		return $latest_timestamp ? date('Y-m-d', $latest_timestamp) : null;
+		return $latest_timestamp ? gmdate('Y-m-d', $latest_timestamp) : null;
 	}
 
 
@@ -175,7 +175,7 @@ class LastEnrollmentDate extends Rule
 
 			case 'on':
 				$rule_timestamp = strtotime($rule_value);
-				return date('Y-m-d', $enrollment_timestamp) === date('Y-m-d', $rule_timestamp);
+				return gmdate('Y-m-d', $enrollment_timestamp) === gmdate('Y-m-d', $rule_timestamp);
 
 			case 'between':
 				if (! is_array($rule_value) || count($rule_value) < 2) {

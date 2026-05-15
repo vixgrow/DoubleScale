@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class EmailField
+ * Class TextField
  *
  * @since 1.0.0
  *
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -17,23 +17,23 @@ use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
- * EmailField class
+ * TextField class
  */
-class EmailField extends FieldType {
+class TextField extends FieldType {
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Email Field';
+	public $name = 'Text Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'email';
+	public $slug = 'text';
 
 	/**
 	 * Is Value Array
@@ -50,7 +50,7 @@ class EmailField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return sanitize_email( $value );
+		return sanitize_text_field( $value );
 	}
 
 	/**
@@ -67,13 +67,13 @@ class EmailField extends FieldType {
 			return;
 		}
 
-		if ( ! is_email( $value ) ) {
+		if ( ! is_string( $value ) ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'This field must be a valid email address';
+			$this->validation_err = 'This field must be a string';
 		}
 	}
 }
 
 if ( class_exists( CustomFieldsManager::class ) ) {
-	CustomFieldsManager::instance()->register( new EmailField() );
+	CustomFieldsManager::instance()->register( new TextField() );
 }

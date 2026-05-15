@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class SelectField
+ * Class UrlField
  *
  * @since 1.0.0
  *
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -17,23 +17,23 @@ use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
- * SelectField class
+ * UrlField class
  */
-class SelectField extends FieldType {
+class UrlField extends FieldType {
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Select Field';
+	public $name = 'URL Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'select';
+	public $slug = 'url';
 
 	/**
 	 * Is Value Array
@@ -50,7 +50,7 @@ class SelectField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return sanitize_text_field( $value );
+		return esc_url_raw( $value );
 	}
 
 	/**
@@ -67,11 +67,13 @@ class SelectField extends FieldType {
 			return;
 		}
 
-		// For select fields, validation of options should be done against the field's attributes
-		// This is handled in the CustomFieldModel validation
+		if ( ! empty( $value ) && ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
+			$this->is_valid       = false;
+			$this->validation_err = 'Please enter a valid URL';
+		}
 	}
 }
 
 if ( class_exists( CustomFieldsManager::class ) ) {
-	CustomFieldsManager::instance()->register( new SelectField() );
+	CustomFieldsManager::instance()->register( new UrlField() );
 }

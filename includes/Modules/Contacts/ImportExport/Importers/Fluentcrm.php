@@ -199,8 +199,8 @@ class Fluentcrm extends Importer {
 
 		$fc_meta_table = $wpdb->prefix . 'fc_meta';
 
-		// Get custom field definitions from Fluentcrm meta table
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from Fluentcrm plugin.
+		// Get custom field definitions from Fluentcrm meta table.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $fc_meta_table is the Fluentcrm-prefixed table name; values bound via prepare().
 		$custom_fields_data = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT value FROM $fc_meta_table WHERE object_type = %s AND `key` = %s",
@@ -208,6 +208,7 @@ class Fluentcrm extends Importer {
 				'contact_custom_fields'
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( $custom_fields_data ) {
 			return maybe_unserialize( $custom_fields_data );

@@ -10,7 +10,7 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Core\Managers\IntegrationsManager;
 
 defined( 'ABSPATH' ) || exit;
 

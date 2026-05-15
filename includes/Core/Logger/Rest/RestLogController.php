@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\Logger\LogHandlerDb;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -159,7 +159,7 @@ class RestLogController extends RestController {
 		$filename = esc_html__( 'Logs export', 'doublescale') . '.json';
 
 		if ( ini_get( 'display_errors' ) ) {
-			ini_set( 'display_errors', '0' );
+			ini_set( 'display_errors', '0' ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- streaming a JSON file download; PHP warnings must be suppressed so the output isn't corrupted with HTML.
 		}
 		nocache_headers();
 		header( 'X-Robots-Tag: noindex', true );

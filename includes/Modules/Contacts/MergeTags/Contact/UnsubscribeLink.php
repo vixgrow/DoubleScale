@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 /**
  * Unsubscribe Link Merge Tag

@@ -465,19 +465,20 @@ class Tasks {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $group_slugs ), '%s' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Using spread operator for dynamic placeholders.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a dynamically built '%s,%s…' string bound via spread $group_slugs; Action Scheduler table is a trusted core constant.
 		$group_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT group_id FROM {$wpdb->prefix}actionscheduler_groups WHERE slug IN ($placeholders)",
 				...$group_slugs
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( ! empty( $group_ids ) ) {
 			$group_placeholders = implode( ', ', array_fill( 0, count( $group_ids ), '%d' ) );
 
-			// Delete old completed/failed actions and their associated logs
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Using spread operator for dynamic placeholders with action scheduler tables.
+			// Delete old completed/failed actions and their associated logs.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $group_placeholders is a dynamically built '%d,%d…' string bound via spread; Action Scheduler tables are trusted core constants.
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE a, l
@@ -489,6 +490,7 @@ class Tasks {
 					...array_merge( $group_ids, array( $cutoff_date ) )
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 			$stats['actions_deleted'] = $deleted !== false ? $deleted : 0;
 		}

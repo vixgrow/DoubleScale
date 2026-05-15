@@ -6,7 +6,7 @@
  * @package    DoubleScale\Pro
  */
 
-namespace DoubleScale\Managers;
+namespace DoubleScale\Core\Managers;
 
 defined( 'ABSPATH' ) || exit;
 

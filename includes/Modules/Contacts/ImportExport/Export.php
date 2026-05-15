@@ -133,6 +133,7 @@ class Export {
 		// Check if file exists and open file handle for writing
 		try {
 			$is_new_file = ! file_exists( $file_path );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming CSV append; WP_Filesystem has no streaming append API.
 			$handle      = fopen( $file_path, $is_new_file ? 'w' : 'a' );
 
 			if ( false === $handle ) {
@@ -177,10 +178,10 @@ class Export {
 					$this->write_csv_line( $handle, $contact_array );
 					$this->offset++;
 				} catch ( Exception $e ) {
-					fclose( $handle );
+					fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the streaming CSV handle opened above.
 					// Clean up partial file on error
 					if ( file_exists( $file_path ) ) {
-						unlink( $file_path );
+						wp_delete_file( $file_path );
 					}
 					return new WP_Error(
 						'csv_write_error',
@@ -195,7 +196,7 @@ class Export {
 			}
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the streaming CSV handle opened above.
 
 		$is_completed = $this->offset >= $total_contacts;
 
@@ -287,8 +288,8 @@ class Export {
 	 * @return array
 	 */
 	public function get_contact_fields() {
-		if ( class_exists( \DoubleScale\Fields\ContactFields::class ) ) {
-			$contact_fields = \DoubleScale\Fields\ContactFields::instance()->get_fields();
+		if ( class_exists( \DoubleScale\Core\Fields\ContactFields::class ) ) {
+			$contact_fields = \DoubleScale\Core\Fields\ContactFields::instance()->get_fields();
 		} else {
 			$contact_fields = $this->get_contact_fields_flat_from_utils();
 		}
@@ -345,6 +346,6 @@ class Export {
 
 		$line = implode( ',', $quoted_fields ) . "\n";
 
-		return fwrite( $handle, $line );
+		return fwrite( $handle, $line ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- writing to the streaming CSV handle opened above.
 	}
 }

@@ -15,22 +15,24 @@ use DoubleScale\Modules\Booking\Models\BookingModel;
  * Initialize the payment return handler
  */
 function doublescale_booking_payment_return_handler() {
-    // Check if this is a payment return
-    if (isset($_GET['doublescale_booking_payment'])) {
-        $mode = sanitize_text_field($_GET['doublescale_booking_payment']);
-        $method = isset($_GET['method']) ? sanitize_text_field($_GET['method']) : '';
-        $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : '';
-        $booking_id = isset($_GET['booking_id']) ? sanitize_text_field($_GET['booking_id']) : '';
+    // Check if this is a payment return.
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public payment gateway callback URL; the booking is identified by hash and validated below.
+    if ( isset( $_GET['doublescale_booking_payment'] ) ) {
+        $mode       = sanitize_text_field( wp_unslash( $_GET['doublescale_booking_payment'] ) );
+        $method     = isset( $_GET['method'] )     ? sanitize_text_field( wp_unslash( $_GET['method'] ) )     : '';
+        $action     = isset( $_GET['action'] )     ? sanitize_text_field( wp_unslash( $_GET['action'] ) )     : '';
+        $booking_id = isset( $_GET['booking_id'] ) ? sanitize_text_field( wp_unslash( $_GET['booking_id'] ) ) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         
         if (!$booking_id) {
-            wp_die(__('Invalid booking ID.', 'doublescale'));
+            wp_die( esc_html__( 'Invalid booking ID.', 'doublescale' ) );
         }
-        
+
         try {
             $booking = BookingModel::getByHashId($booking_id);
-            
+
             if (!$booking) {
-                wp_die(__('Booking not found.', 'doublescale'));
+                wp_die( esc_html__( 'Booking not found.', 'doublescale' ) );
             }
             
             // Log the payment return
@@ -61,11 +63,10 @@ function doublescale_booking_payment_return_handler() {
                 )
             );
 
-            wp_redirect($redirect_url);
-            exit;
+            doublescale_safe_redirect( $redirect_url );
             
         } catch (Exception $e) {
-            wp_die($e->getMessage());
+            wp_die( esc_html( $e->getMessage() ) );
         }
     }
 }

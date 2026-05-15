@@ -256,9 +256,9 @@ final class Module extends AbstractModule {
 				array(
 					'role__in' => array(
 						'administrator',
-						\DoubleScale\UserRoles\UserRoles::CRM_MANAGER,
-						\DoubleScale\UserRoles\UserRoles::SALES_MANAGER,
-						\DoubleScale\UserRoles\UserRoles::SALES_REP,
+						\DoubleScale\Core\UserRoles\UserRoles::CRM_MANAGER,
+						\DoubleScale\Core\UserRoles\UserRoles::SALES_MANAGER,
+						\DoubleScale\Core\UserRoles\UserRoles::SALES_REP,
 					),
 					'fields'   => array( 'ID' ),
 				)

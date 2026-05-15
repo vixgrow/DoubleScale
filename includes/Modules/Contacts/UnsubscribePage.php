@@ -59,6 +59,7 @@ class UnsubscribePage {
 	 * Handle unsubscribe page display
 	 */
 	public function handle_unsubscribe_page() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public unsubscribe confirmation page; redirect comes from a signed unsubscribe link and the success flag is purely informational.
 		if ( ! isset( $_GET['doublescale_unsubscribe_success'] ) ) {
 			return;
 		}

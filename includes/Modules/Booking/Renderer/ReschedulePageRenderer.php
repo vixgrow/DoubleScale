@@ -38,14 +38,12 @@ class ReschedulePageRenderer extends BaseTemplateRenderer {
 
 		$bookable = $booking ? $booking->getBookableEntity() : null;
 		if ( ! $booking || ! $bookable ) {
-			wp_redirect( home_url() );
-			exit;
+			\doublescale_safe_redirect( home_url() );
 		}
 
 		$calendar = $this->calendarModelClass::where( 'id', $booking->calendar_id )->first();
 		if ( ! $calendar ) {
-			wp_redirect( home_url() );
-			exit;
+			\doublescale_safe_redirect( home_url() );
 		}
 
 		if ( 'active' !== $calendar->status ) {

@@ -137,9 +137,9 @@ abstract class BaseTemplateRenderer {
 	 */
 	protected function render_react_page( string $div_id ) {
 		$this->enqueue_react_assets();
-		echo $this->get_head();
+		echo $this->get_head(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML head markup.
 		printf( '<div id="%s"></div>', esc_attr( $div_id ) );
-		echo $this->get_footer();
+		echo $this->get_footer(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML footer markup.
 		exit( 200 );
 	}
 
@@ -154,7 +154,7 @@ abstract class BaseTemplateRenderer {
 
 		$title = __( 'Booking link unavailable', 'doublescale' );
 
-		echo $this->get_head( $title );
+		echo $this->get_head( $title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML head markup.
 		?>
 		<div class="doublescale-booking-unavailable" style="max-width:560px;margin:80px auto;padding:32px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 			<h1 style="font-size:24px;margin-bottom:16px;"><?php echo esc_html__( 'This booking link is no longer available.', 'doublescale' ); ?></h1>
@@ -169,7 +169,7 @@ abstract class BaseTemplateRenderer {
 			</p>
 		</div>
 		<?php
-		echo $this->get_footer();
+		echo $this->get_footer(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML footer markup.
 
 		exit( 200 );
 	}
@@ -185,9 +185,9 @@ abstract class BaseTemplateRenderer {
 		$this->enqueue_page_assets();
 		extract( $variables );
 
-		echo $this->get_head( $variables['title'] ?? '' );
+		echo $this->get_head( $variables['title'] ?? '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML head markup.
 		include $template_path;
-		echo $this->get_footer();
+		echo $this->get_footer(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML footer markup.
 
 		exit( 200 );
 	}

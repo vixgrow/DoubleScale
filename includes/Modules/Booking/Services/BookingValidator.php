@@ -76,7 +76,7 @@ class BookingValidator {
 			$start     = new DateTime( $start_date, $tz_object );
 			$now       = new DateTime( 'now', $tz_object );
 		} catch ( \Exception $e ) {
-			throw new Exception( esc_html__( 'Invalid date format or timezone: ', 'doublescale' ) . $e->getMessage() );
+			throw new Exception( esc_html__( 'Invalid date format or timezone: ', 'doublescale' ) . esc_html( $e->getMessage() ) );
 		}
 
 		if ( $start->getTimestamp() <= $now->getTimestamp() ) {

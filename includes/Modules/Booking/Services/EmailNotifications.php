@@ -754,7 +754,7 @@ final class EmailNotifications {
 
 		foreach ( $attachments as $path ) {
 			if ( is_string( $path ) && file_exists( $path ) ) {
-				@unlink( $path );
+				wp_delete_file( $path );
 			}
 		}
 

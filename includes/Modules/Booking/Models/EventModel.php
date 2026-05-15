@@ -1072,7 +1072,7 @@ class EventModel extends Model {
 		$event_date_type = Arr::get( $this->event_range, 'type', 'days' );
 		if ( 'infinity' === $event_date_type ) {
 			// If user is browsing future months, start from the requested month
-			$requested_date = new \DateTime( date( 'Y-m-d', $start_date ), new \DateTimeZone( $timezone ) );
+			$requested_date = new \DateTime( gmdate( 'Y-m-d', $start_date ), new \DateTimeZone( $timezone ) );
 
 			// Get first day of next month from the requested date
 			$month_end = clone $requested_date;
@@ -1599,8 +1599,8 @@ class EventModel extends Model {
 		}
 
 		return array(
-			'start' => date( 'H:i', $overlap_start ),
-			'end'   => date( 'H:i', $overlap_end ),
+			'start' => gmdate( 'H:i', $overlap_start ),
+			'end'   => gmdate( 'H:i', $overlap_end ),
 		);
 	}
 
@@ -1922,8 +1922,8 @@ class EventModel extends Model {
 	private function generate_daily_slots( $start_date, $end_date, $timezone, $duration, $user_id = null, $include_full_slots = false ) {
 		$slots = array();
 		for ( $current_date = $start_date; $current_date <= $end_date; $current_date = strtotime( '+1 day', $current_date ) ) {
-			$current_date_formatted = date( 'Y-m-d', $current_date );
-			$day_of_week            = strtolower( date( 'l', $current_date ) );
+			$current_date_formatted = gmdate( 'Y-m-d', $current_date );
+			$day_of_week            = strtolower( gmdate( 'l', $current_date ) );
 
 			// Check for date-specific override first
 			$has_override = false;
@@ -2619,12 +2619,12 @@ class EventModel extends Model {
 		} else {
 			// Fall back to regular weekly hours
 			$weekly_hours = $availability['weekly_hours'] ?? array();
-			$day_of_week  = strtolower( date( 'l', $start_time->getTimestamp() ) ); // Get the day of the week (e.g., Monday, Tuesday)
+			$day_of_week  = strtolower( gmdate( 'l', $start_time->getTimestamp() ) ); // Get the day of the week (e.g., Monday, Tuesday)
 
 			if ( ! $weekly_hours[ $day_of_week ]['off'] ) {
 				foreach ( $weekly_hours[ $day_of_week ]['times'] as $time_block ) {
-					$day_start = new \DateTime( date( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['start'], new \DateTimeZone( $availability['timezone'] ) );
-					$day_end   = new \DateTime( date( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['end'], new \DateTimeZone( $availability['timezone'] ) );
+					$day_start = new \DateTime( gmdate( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['start'], new \DateTimeZone( $availability['timezone'] ) );
+					$day_end   = new \DateTime( gmdate( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['end'], new \DateTimeZone( $availability['timezone'] ) );
 
 					if ( $start_time >= $day_start && $end_time <= $day_end ) {
 						$slots = $this->check_available_slots( $start_time, $end_time, $user_id );
@@ -2669,12 +2669,12 @@ class EventModel extends Model {
 
 		// Fall back to regular weekly hours
 		$weekly_hours = $member_availability['weekly_hours'] ?? array();
-		$day_of_week  = strtolower( date( 'l', $day_start->getTimestamp() ) );
+		$day_of_week  = strtolower( gmdate( 'l', $day_start->getTimestamp() ) );
 
 		if ( isset( $weekly_hours[ $day_of_week ] ) && ! $weekly_hours[ $day_of_week ]['off'] ) {
 			foreach ( $weekly_hours[ $day_of_week ]['times'] as $time_block ) {
-				$block_start = new \DateTime( date( 'Y-m-d', $day_start->getTimestamp() ) . ' ' . $time_block['start'], new \DateTimeZone( $member_timezone ) );
-				$block_end   = new \DateTime( date( 'Y-m-d', $day_start->getTimestamp() ) . ' ' . $time_block['end'], new \DateTimeZone( $member_timezone ) );
+				$block_start = new \DateTime( gmdate( 'Y-m-d', $day_start->getTimestamp() ) . ' ' . $time_block['start'], new \DateTimeZone( $member_timezone ) );
+				$block_end   = new \DateTime( gmdate( 'Y-m-d', $day_start->getTimestamp() ) . ' ' . $time_block['end'], new \DateTimeZone( $member_timezone ) );
 
 				// Convert to UTC for comparison
 				$block_start->setTimezone( new \DateTimeZone( 'UTC' ) );

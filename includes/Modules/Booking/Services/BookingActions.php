@@ -52,6 +52,7 @@ class BookingActions {
 
 
 	public function process_booking_action( $action_type, $new_status, $log_message, $log_details ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public booking action link (cancel/reschedule); identity comes from the hash `id`; validate_booking() below verifies the booking is real before mutating anything.
 		$action = Arr::get( $_GET, 'doublescale_booking_action', null );
 		if ( $action_type !== $action ) {
 			return;
@@ -59,6 +60,7 @@ class BookingActions {
 
 		try {
 			$id      = sanitize_text_field( Arr::get( $_GET, 'id', null ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			$booking = $this->bookingValidatorClass::validate_booking( $id );
 
 			if ( $booking->status === $new_status ) {

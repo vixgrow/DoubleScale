@@ -1,6 +1,6 @@
-=== DoubleScale ===
-Contributors: quillforms, mdmag
-Tags: crm, pipeline, whatsapp, automation
+=== DoubleScale | All-In-One Business Growth Platform ===
+Contributors: vixgrowy
+Tags: crm, marketing automation, booking, email campaigns, helpdesk
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
@@ -8,585 +8,288 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A native WordPress CRM with pipelines, contact management, email/SMS/WhatsApp campaigns, automations, and integrations with 20+ plugins.
+DoubleScale is eight tools in one WordPress plugin: a CRM, email & SMS campaigns, booking, tasks, an SMTP router, a shared helpdesk inbox, analytics, and team management — natively in wp-admin.
+
 == Description ==
 
-**[DoubleScale](https://doublescale.io)** is a comprehensive Customer Relationship Management system built natively for WordPress. Manage your contacts, track deals through customizable pipelines, automate workflows with powerful automations, send email and SMS campaigns, and gain valuable insights - all from within your WordPress dashboard.
+**DoubleScale is the operating system for a WordPress-native business.** It replaces the stack most teams cobble together — CRM + Mailchimp + Calendly + ClickUp + a transactional email provider + a helpdesk + a reporting dashboard — with **one plugin** that lives inside wp-admin and stores everything in your own database.
 
-### 🚀 KEY FEATURES
+You shouldn't need eight separate logins, eight billing relationships, and eight half-broken integrations to run a small business. DoubleScale unifies them around a single contact record, so a form submit can fire an automation, book a meeting, open a support thread, score the lead, alert the assigned rep, and send the receipt — all from the same data model.
 
-**Contact Management**
-* Centralized contact database with detailed profiles
-* Custom fields for unlimited contact data
-* Automatic contact syncing from WordPress users
-* Contact segmentation with lists and tags
-* Contact notes and activity timeline
-* Advanced contact search and filtering
-* Bulk operations and import/export
-* Contact source tracking
-* Full contact history and activity log
-* Lead Scoring 
-* Website visitor tracking
+= What's inside one plugin =
 
-**Pipeline & Deal Management**
-* Visual pipeline boards for deal tracking
-* Drag-and-drop deal stages
-* Deal value tracking and forecasting
-* Win/loss analysis
-* Multiple pipeline support
-* Customizable deal stages
-* Deal activity tracking
-* Contact association with deals
+DoubleScale is a single install that gives you **eight first-class modules**, every one designed to feel like a dedicated product:
 
-**Email Campaigns**
-* Drag-and-drop email builder
-* Beautiful, responsive email templates
-* Standard broadcast campaigns
-* Email sequence automation 
-* A/B split testing (Coming Soon)
-* Click and open tracking
-* Unsubscribe management
-* Campaign performance analytics
-* Contact engagement scoring
-* Personalization with merge tags
+**1. CRM — contacts, lists, segmentation**
+A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, full activity timeline, bulk operations, and CSV / WordPress user / WooCommerce imports. Every email, SMS, deal, booking, support ticket, and form submission stitches into one timeline per contact.
 
-**SMS Marketing** (Pro Feature)
-* Send bulk SMS campaigns
-* Individual SMS messaging to contacts
-* SMS automation support
-* Delivery tracking
-* Reply management
-* SMS templates
-* Contact segmentation for SMS
-* Cost-effective bulk messaging
-* Two way conversations
+**2. Campaigns — email & SMS broadcasts and sequences**
+A drag-and-drop email builder with responsive blocks, reusable templates, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments. Build multi-step email sequences (drip campaigns) with delays and conditional branches. SMS campaigns share the same composer and audience. Per-link tracking with automation triggers; bounce handling with soft/hard classification.
 
-**WhatsApp Marketing** (Pro Feature)
-* Template message support
-* Rich media messaging
-* Automated WhatsApp workflows
-* Two-way conversations
+**3. Booking — self-service appointment scheduling**
+Built-in calendar management with availability windows, guest forms, automated confirmations, rescheduling, time-zone handling, and embeddable booking pages. No external Calendly — bookings land directly on the contact record and can trigger automations.
 
-**Marketing Automation**
-* Visual automation builder
-* Trigger-based workflows
-* Contact tag and list automation
-* Multi-step sequences
-* Action scheduling
-* Conditional logic and branching
-* Support for nested conditions
-* Time delays and wait steps
-* Email and SMS automation actions
-* Webhook triggers
-* Link triggers for campaign engagement
+**4. Tasks — team task management**
+Create, assign, schedule, and track tasks. Link them to contacts and deals. Due dates, reminders, status workflows. Stop running a separate ClickUp or Asana when 80% of your tasks are about customers anyway.
 
-**Lists & Tags**
-* Unlimited contact lists
-* Dynamic segmentation
-* Tag-based organization
-* Automated list management
-* Bulk operations
-* Import/export capabilities
+**5. SMTP — multi-provider email routing**
+A complete `wp_mail()` replacement with **20+ provider integrations** (SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and more). Smart provider selection, automatic failover, full delivery logs, and email tests — your transactional and marketing email runs through the same hardened pipeline.
 
-**Analytics & Reporting**
-* Comprehensive dashboard with 9+ report types
-* Contact activity tracking
-* Deal pipeline reports
-* Revenue analytics
-* Email campaign performance metrics
-* SMS campaign analytics
-* Custom date ranges
-* Export reports to CSV
-* Visual charts and graphs
-* ROI tracking
+**6. Helpdesk inbox — unified support across channels**
+A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox.
 
-**Bounce Handler**
-* Automatic bounce detection
-* Soft and hard bounce classification
-* Auto-cleanup of invalid emails
-* Bounce statistics and reporting
-* Email list health monitoring
+**7. Analytics — dashboards & reports**
+A built-in reporting layer covering revenue, pipeline, campaign performance, contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting CSVs to a BI tool.
 
-**Webhooks**
-* Incoming webhook support
-* Outgoing webhook triggers
-* Custom webhook actions
-* Integration with external services
-* Real-time data sync
+**8. Team management — roles, ownership, collaboration**
+Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see their deals, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
 
-**Link Triggers**
-* Track link clicks in campaigns
-* Trigger automations from link clicks
-* Contact segmentation based on clicks
-* Engagement scoring
+= Plus: a visual automation engine that connects all eight =
 
-**Cart Management**
-* Abandoned cart tracking
-* Cart recovery campaigns
-* Cart value monitoring
-* Purchase behavior analysis
+Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened — flow into **multi-step automations** with conditional branches, time delays, and webhook calls. Actions include: send email, send SMS, tag, score, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
 
-**Forms Integration**
-* Direct integration with 10+ popular form plugins
-* Automatic contact creation from form submissions
-* Custom field mapping
-* Tag and list assignment on submission
-* Multiple forms support
+= Why teams replace 5+ SaaS subscriptions with DoubleScale =
 
-**Import Contacts**
-* Import contacts via CSV file
-* Import contacts from WordPress users
-* Import contacts from Woocommerce
-* Import contacts from Fluent CRM
-* Import contacts from ActiveCampaign
-* Import contacts from HubSpot
-* Import contacts from MailerLite
-* Import contacts from Pipedrive
-* Import contacts from GoHighLevel
-* Import contacts from Funnelkit automations
+* **One contact record, eight surfaces.** A new sign-up doesn't have to be synced across five tools — it's already everywhere.
+* **No per-contact pricing. Ever.** Other CRMs charge by contact count. We charge by team plan. Run 200 contacts or 200,000 — same price.
+* **Self-hosted, native to WordPress.** Your contact records, deals, email history, support threads, and tracking events all live in your WordPress database, on your server. No iframe, no third-party cloud, no vendor lock-in.
+* **GDPR by design.** You control retention, exports, and deletion. No sub-processors. Tracking data stays inside your install.
+* **Scalable.** Benchmarked at 100,000+ contacts on a single-server install. Background tasks keep the frontend fast.
+* **Deep WordPress integrations.** WooCommerce, Easy Digital Downloads, SureCart, and 4 LMS platforms (LearnDash, LifterLMS, LearnPress, Tutor LMS) all feed the CRM natively.
+* **16 form-builder integrations.** Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, Quill Forms, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and more.
 
-### 🔗 INTEGRATIONS
+= How DoubleScale compares to GoHighLevel and HubSpot =
 
-**E-commerce Platforms:**
-* **WooCommerce** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
-* **Easy Digital Downloads** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
-* **Sure Cart** - Full e-commerce integration with order sync, revenue tracking, and customer analytics
+Both platforms position themselves as "all-in-one." Both charge accordingly. Here's what their public pricing looks like alongside DoubleScale (as of 2026):
 
-**Form Plugins (10+ Integrations):**
-* **Quill Forms** - Conversational form builder
-* **Contact Form 7** - Popular contact form plugin
-* **Elementor Forms** - Page builder forms
-* **Fluent Forms** - Advanced form builder
-* **Formidable Forms** - Professional forms
-* **Forminator Forms** - Free form builder
-* **Gravity Forms** - Premium form solution
-* **MetForm** - Elementor form builder
-* **Ninja Forms** - Flexible form builder
-* **WPForms** - Beginner-friendly forms
-* **WS Form** - Free form builder
-* **Sure Forms** - Free form builder
-* **Bit Forms** - Free form builder
+**GoHighLevel** — cloud-hosted, agency-oriented
+* Starter: **$97 / month** — limited sub-accounts, contact caps per location, per-message SMS/email fees on top
+* Unlimited: **$297 / month** — agency-tier with sub-account creation, still charges per-segment for email and per-segment for SMS
+* SaaS Pro: **$497 / month** — adds resale features, still pays usage-based fees for every send
+* What you don't own: your data sits on GHL infrastructure. Cancel = export and rebuild elsewhere.
 
-**LMS Plugins (5+ Integrations):**
-* **LearnDash** - LMS integration for course enrollment tracking
-* **LifterLMS** - LMS integration for course enrollment tracking
-* **LearnPress** - LMS integration for course enrollment tracking
-* **Tutor LMS** - LMS integration for course enrollment tracking
+**HubSpot** — cloud SaaS, contact-tiered
+* Marketing Hub Professional: **$890 / month** for the first 2,000 marketing contacts — **price climbs as your contact list grows** (~$45 per additional 1,000 contacts at this tier)
+* Sales Hub Professional: **$90 / seat / month** — billed per user
+* Service Hub Professional: **$90 / seat / month** — billed per user
+* Operations Hub Professional: **$720 / month**
+* CMS Hub Professional: **$360 / month**
+* **Marketing + Sales + Service + Ops Pro for a 5-person team starting at 2k contacts: ~$2,500 / month** — and that's before you grow.
+* Enterprise tiers cross **$3,600 / month** before per-seat or per-contact surcharges.
 
-**Other Integrations:**
-* **WordPress Users** - Automatic user synchronization
-* **Third-Party Services** - Via webhooks and API
+**DoubleScale** — self-hosted WordPress plugin
+* Starter (free, forever): unlimited contacts, email & SMS campaigns, automations, booking, SMTP, WooCommerce/EDD/LMS integrations
+* Growth: **$99 / month, billed yearly** — adds deals & pipelines, tasks, lead scoring, forms, custom fields, Stripe for bookings
+* Scale: **$199 / month, billed yearly** — adds the unified helpdesk inbox, full analytics, website tracking, push notifications, Twilio/WhatsApp, and CRM sync (HubSpot, ActiveCampaign, Pipedrive)
+* **No per-contact pricing. No per-seat fees. Run 200 or 200,000 contacts at the same price.**
 
-### 🎯 WHO IS DoubleScale FOR?
+**Side-by-side, the same workload:**
 
-**Any business or organization that manages customer relationships!**
+A team with 5 users, 25,000 contacts, sending email & SMS campaigns, running pipelines, scheduling bookings, and managing customer support:
 
-Whether you're a solopreneur with **100 contacts** or an enterprise with **100,000+** contacts, DoubleScale scales to meet your needs.
+* GoHighLevel Unlimited: **~$297 / month** + per-send usage fees (typically $50–$200 extra)
+* HubSpot Marketing Pro + Sales Pro + Service Pro: **~$1,840 / month** at 25k contacts (Marketing Hub Pro alone bills ~$1,400/mo at that contact count, plus seats)
+* **DoubleScale Scale: $199 / month — your data, your server, unlimited contacts, every module included**
 
-**By Business Size:**
-* **Solopreneurs & Freelancers** - Track clients and projects in one place
-* **Small Businesses (1-50 employees)** - Manage customer relationships without expensive software
-* **Medium Businesses (50-500 employees)** - Scale operations with advanced automation
-* **Enterprise Organizations (500+ employees)** - Handle high-volume campaigns and complex workflows
+The trade-off is honest: HubSpot and GoHighLevel are hosted SaaS, polished, and require zero infrastructure. DoubleScale lives in your WordPress install — which means a few minutes of setup, a hosting bill you already pay, and a one-time decision to keep your customer data on your own servers.
 
-**By Industry:**
-* **E-commerce & Online Stores** - Leverage WooCommerce data for personalized marketing and cart recovery
-* **Digital Marketing Agencies** - Manage multiple clients, campaigns, and report on ROI
-* **SaaS & Software Companies** - Lead nurturing, customer onboarding, and churn reduction
-* **Professional Services & Consultants** - Track proposals, deals, and client communications
-* **Course Creators & Educators** - Manage students with LearnDash integration and engagement tracking
-* **Non-Profits & Associations** - Donor management, member databases, and automated thank-you messages
-* **Real Estate Professionals** - Property lead tracking, buyer/seller nurturing, and listing updates
-* **Healthcare & Wellness Providers** - Patient/client management, appointment reminders, and follow-ups
-* **Coaches & Trainers** - Client progress tracking and program communication automation
-* **Event Organizers** - Attendee management, registrations, and event communications
-* **Marketing Teams** - Multi-channel campaigns across any industry
+*Pricing references: hubspot.com/pricing, gohighlevel.com/pricing. Verify current rates on their respective sites; both vendors adjust pricing periodically.*
 
-**By Use Case:**
-* Lead generation and nurturing
-* Sales pipeline management
-* Multi-channel marketing automation (Email, SMS, WhatsApp)
-* Customer segmentation and targeting
-* E-commerce order tracking and abandoned cart recovery
-* Form submission management and lead capture
-* Customer lifecycle automation
-* Post-purchase follow-ups and upsells
-* Event and webinar management
-* Membership and subscription management
-* Donor and fundraising management
-* Student and course engagement tracking
+= What you can throw away after installing DoubleScale =
 
-**No Contact Limits. No Per-Contact Pricing. Scales With Your Growth.**
+* Your standalone CRM (HubSpot, Pipedrive, ActiveCampaign)
+* Your email marketing platform (Mailchimp, ConvertKit, Klaviyo)
+* Your transactional email plugin (WP Mail SMTP, FluentSMTP)
+* Your booking app (Calendly, Acuity, SimplyBook)
+* Your task tracker (for customer work — ClickUp, Asana, Trello)
+* Your reporting layer (Databox, custom BI dashboards)
+* Your automation glue (Zapier — for anything happening inside your WordPress site)
 
-### 🌟 WHY CHOOSE DoubleScale?
+= Who DoubleScale is for =
 
-* **Native WordPress** - Built specifically for WordPress, not a wrapper or iframe
-* **All-in-One Platform** - Email, SMS, WhatsApp campaigns in one solution
-* **No Monthly Fees** - One-time purchase, no recurring subscription costs
-* **Unlimited Contacts** - No artificial limits or tiered per-contact pricing
-* **12+ Integrations** - Works seamlessly with popular WordPress plugins you already use
-* **Self-Hosted** - Your data stays on your server, complete control and privacy
-* **Scalable Architecture** - Efficiently handles 100 to 100,000+ contacts
-* **Visual Automation Builder** - No coding required for complex workflows
-* **Mobile App** - iOS and Android app for mobile access (Coming Soon)
-* **Developer Friendly** - Extensive hooks, filters, and REST API
-* **Regular Updates** - Active development with continuous improvements
-* **Comprehensive Documentation** - 70+ detailed guides and tutorials
-* **Performance Optimized** - Fast database queries, minimal server impact
-* **Multi-Channel** - Email, SMS, and WhatsApp from one unified platform
-* **Cost-Effective** - Enterprise features without enterprise pricing
-* **GDPR Compliant** - Privacy-focused design with data control
-* **Great Support** - Active development and support team
+Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want **one WordPress-native operations platform** instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
 
-### 🥊 DoubleScale VS. COMPETITORS
+= Integrations =
 
-[Compare DoubleScale with FluentCRM](https://doublescale.io/compare/vs-fluentcrm/)
+**Commerce:** WooCommerce, Easy Digital Downloads, SureCart
+**Forms (16):** Contact Form 7, Elementor Forms, Fluent Forms, Formidable, Forminator, Gravity Forms, JetFormBuilder, MetForm, Ninja Forms, WPForms, WS Form, Sure Forms, Bit Forms, Quill Forms, and others
+**LMS:** LearnDash, LifterLMS, LearnPress, Tutor LMS
+**SMTP providers (20+):** SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, Pepipost, Sendinblue, SendLayer, and more
+**Messaging (Pro):** Twilio (SMS), Meta WhatsApp Business, Slack
+**CRM sync (Pro):** ActiveCampaign, HubSpot, Pipedrive, Keap, Mautic, Ontraport
+**Email platforms (Pro):** Mailchimp, MailerLite, ConvertKit, GetResponse, Drip, Klaviyo
+**Calendars (Pro):** Google Calendar, Outlook
+**Payments (Pro):** Stripe (for bookings and transactions)
+**Webhooks & API:** Zapier-compatible, native webhooks, REST endpoints
 
-**Perfect For Businesses That Are:**
-* Outgrowing spreadsheets and need professional CRM
-* Running WordPress and want native integration
-* Tired of expensive monthly CRM subscription fees
-* Managing WooCommerce stores and need better customer insights
-* Digital agencies handling multiple client relationships
-* Looking for unlimited contacts without price jumps
-
-**No artificial contact limits!** DoubleScale's optimized architecture handles databases of any size efficiently.
-
-### 📚 DOCUMENTATION
-
-Comprehensive documentation with 70+ articles is available at [doublescale.io/docs](https://doublescale.io/docs)
-
+Learn more at [doublescale.io](https://doublescale.io/).
 
 == Source Code ==
 
-This plugin includes compiled/minified JavaScript and CSS files in the `build/` directory. The complete human-readable source code is included in the `src/` directory of this plugin.
+This plugin includes compiled JavaScript and CSS in the `build/` directory. Human-readable source lives in `src/`.
 
-**GitHub Repository:**
-The full source code is also publicly available on GitHub: [https://github.com/DoubleScale/DoubleScale](https://github.com/DoubleScale/DoubleScale)
+**Public repository:** [DoubleScale on GitHub](https://github.com/DoubleScale/DoubleScale)
 
-To build from source:
-1. Install Node.js (v16 or higher recommended)
-2. Navigate to the plugin directory
-3. Run: `npm install` (installs dependencies)
-4. Run: `npm run build` (builds production files)
+**Build from source**
+1. Install Node.js (LTS recommended)
+2. From the plugin directory: `npm install`
+3. Production assets: `npm run build`
+4. Development/watch: `npm run dev`
 
-For development with watch mode:
-* Run: `npm run dev`
-
-**Build Output:**
-* `build/client/` - Compiled client application
-* `build/config/` - Compiled configuration module
-
-All third-party libraries used are documented in `package.json` and are publicly available on npm.
+Outputs include client bundles under `build/`. Third-party libraries are listed in `package.json`.
 
 == Installation ==
 
-### AUTOMATIC INSTALLATION
+= Automatic =
 
-1. Log in to your WordPress dashboard
-2. Navigate to Plugins → Add New
-3. Search for "DoubleScale"
-4. Click "Install Now"
-5. Activate the plugin
-6. Go to DoubleScale in your admin menu to start setup
+1. In wp-admin go to **Plugins → Add New**
+2. Search for **DoubleScale**
+3. Install and activate
+4. Open **DoubleScale** from the admin menu and complete onboarding
 
-### MANUAL INSTALLATION
+= Manual upload =
 
-1. Download the plugin zip file
-2. Log in to your WordPress dashboard
-3. Navigate to Plugins → Add New → Upload Plugin
-4. Choose the zip file and click "Install Now"
-5. Activate the plugin
-6. Go to DoubleScale in your admin menu to start setup
+1. Download the plugin ZIP
+2. **Plugins → Add New → Upload Plugin**
+3. Activate **DoubleScale**
 
-### AFTER ACTIVATION
+= After activation =
 
-1. Navigate to DoubleScale → Settings
-2. Configure your email settings
-3. Set up your first contact list
-4. Import existing contacts (optional)
-5. Create your first automation (optional)
-6. Start managing your contacts!
+1. Review **DoubleScale → Settings**
+2. Connect an SMTP provider (the SMTP module replaces `wp_mail()` immediately)
+3. Import or sync contacts (CSV, WordPress users, or WooCommerce customers)
+4. Create your first list, automation, booking calendar, or campaign
+
+You'll have a working CRM + email engine + booking page in under 10 minutes.
 
 == Frequently Asked Questions ==
 
-= What features does DoubleScale include? =
+= Is DoubleScale really an all-in-one replacement for CRM + email + booking + tasks + SMTP + helpdesk + analytics + team management? =
 
-DoubleScale includes contact management, pipelines, email campaigns, SMS campaigns, marketing automation, analytics & reports, bounce handling, webhooks, link triggers, cart management, and integrations with 12+ popular WordPress plugins.
+Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Mailchimp, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
 
-= Does it work with WooCommerce? =
+= How is this different from "marketing automation" plugins like FluentCRM or Groundhogg? =
 
-Absolutely! DoubleScale seamlessly integrates with WooCommerce to sync orders, track customer purchases, calculate revenue, and manage abandoned carts.
+Most WordPress CRMs cover contacts + email + automation. DoubleScale covers that **plus** booking, tasks, a multi-channel helpdesk inbox, SMTP routing, and a full analytics layer — in the same plugin, around the same contact record. You're not bolting on FluentBooking + WP Mail SMTP + a separate helpdesk; it's all built in.
 
-= Can I send SMS campaigns? =
+= Is there a contact limit? =
 
-Yes! DoubleScale includes SMS campaign features allowing you to send bulk SMS messages and individual SMS to contacts. You can also use SMS in your automation workflows.
+No. DoubleScale doesn't charge per contact. The free Starter plan handles unlimited contacts. Installs running 100,000+ contacts have been benchmarked.
 
-= Does it integrate with form plugins? =
+= Where is my data stored? =
 
-Yes! DoubleScale integrates with 10+ popular form plugins including Contact Form 7, Elementor Forms, Gravity Forms, WPForms, Fluent Forms, Formidable Forms, Forminator, MetForm, Ninja Forms, and Quill Forms.
+In your WordPress database. The CRM, deals, email content, support threads, and tracking events all live in tables on your server. Optional third-party services (SMTP providers, Twilio, etc.) are only used when you configure them yourself.
 
-= Can I import my existing contacts? =
+= Do you support WooCommerce? =
 
-Yes, you can import contacts via CSV file or sync with your existing WordPress users.
+Yes — natively. Orders, customers, abandoned carts, and product purchases flow into the CRM. Trigger campaigns or automations from cart events. Set up abandoned-cart recovery in minutes.
 
-= Is my data safe? =
+= Can I send SMS or WhatsApp? =
 
-Yes! All data is stored in your WordPress database. We never access or store your data externally. DoubleScale is GDPR compliant.
+Yes. SMS via Twilio and WhatsApp Business are available in Pro packages. Both share the same audience, composer, and merge-tag system as email.
 
-= Can I use it with page builders? =
+= How does the booking module compare to Calendly? =
 
-Yes! DoubleScale works with all major page builders including Elementor, Beaver Builder, Divi, and others. We have direct integration with Elementor Forms.
+Same core experience — availability windows, embeddable booking pages, automated confirmations, time-zone handling. The difference: bookings land on the contact record, can trigger automations, and your data never leaves your install. Stripe payments and Google Calendar sync are Pro extensions.
 
-= Does it slow down my website? =
+= Does the helpdesk inbox replace Help Scout or Front? =
 
-No! DoubleScale is optimized for performance with efficient database queries and minimal frontend impact.
+For most teams, yes. The unified inbox handles email, SMS, and WhatsApp threads with team assignment, status, and contact context. Heavy SLA / ticketing workflows may still warrant a dedicated helpdesk — but for support that lives next to sales and marketing data, this is a clean replacement.
 
-= Can I customize contact fields? =
+= How does team management work? =
 
-Yes! DoubleScale allows you to create unlimited custom fields for contacts and deals.
+WordPress roles map to access patterns inside DoubleScale: sales reps see only deals they own, CRM managers see all deals and contacts, support agents see the inbox. Notifications, activity attribution, and ownership are user-aware throughout.
 
-= How many contacts can I manage? =
+= Which form plugins work? =
 
-There's no limit! DoubleScale is designed to scale and can handle thousands of contacts efficiently.
+16 form builders out of the box — Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, Quill Forms, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and others. Form submissions create or update contacts with tags, lists, and field mapping.
 
-= Is there email marketing included? =
+= How do imports work? =
 
-Yes! Create and send email campaigns with our drag-and-drop email builder, track opens and clicks, automate follow-ups, and manage bounces.
+CSV imports, WordPress user sync, WooCommerce customer import, and connectors for popular CRMs (Pro). Field mapping with preview, error handling, and dry-run mode.
 
-= Can I create automations? =
+= Does DoubleScale slow down the public site? =
 
-Yes! DoubleScale includes a powerful visual automation builder with 11+ automation types. You can create trigger-based workflows with conditional logic, time delays, and multiple actions including email, SMS, tagging, and list management.
+No. The frontend impact is minimal — heavy work (campaign sends, automation processing, tracking ingestion) runs in the admin and in background tasks (Action Scheduler).
 
-= Can multiple users access the CRM? =
+= Can my team collaborate in DoubleScale? =
 
-Yes! Assign WordPress user roles and permissions to control access levels.
+Yes. Multiple users can work simultaneously, with role-based access, ownership-aware filtering (e.g., sales rep view), and in-app notifications.
 
-= What about WhatsApp marketing? =
+= How do I get help? =
 
-Yes! DoubleScale includes WhatsApp marketing features allowing you to send WhatsApp messages to your contacts directly from DoubleScale. or you can automate WhatsApp workflows with our visual automation builder.
-
-= How do I get support? =
-
-You can get support through the WordPress.org forums, our comprehensive documentation at doublescale.io/docs with 70+ articles, and video tutorials.
-
-= Does it work with LearnDash? =
-
-Yes! DoubleScale integrates with LearnDash to track course enrollments and student engagement.
-
-= Is DoubleScale suitable for enterprise use? =
-
-Yes! DoubleScale's scalable architecture efficiently handles 50,000+ contacts and includes advanced features like complex automation workflows, comprehensive analytics, API integrations, and team collaboration tools.
-
-= Are there any monthly fees or per-contact charges? =
-
-No! DoubleScale is a one-time purchase with no recurring monthly fees and no per-contact pricing. Manage unlimited contacts without worrying about increasing costs.
-
-== Screenshots ==
-
-1. Contact Management Dashboard - View and manage all your contacts in one place
-2. Contact Profile - Detailed contact view with activity timeline, notes, and custom fields
-3. Pipeline Board - Visual drag-and-drop deal management with customizable stages
-4. Email Campaign Builder - Drag-and-drop email builder with beautiful templates
-5. SMS Campaign - Send bulk SMS campaigns to segmented contact lists
-6. Automation Builder - Visual workflow automation editor with 11+ automation types
-7. Lists & Tags - Organize contacts with lists and tags for better segmentation
-8. Analytics Dashboard - Track performance metrics, revenue, and campaign insights
-9. Form Integrations - Connect with 10+ popular form plugins
-10. Global Settings - Easy configuration for email, SMS, and system settings
+Documentation: [doublescale.io/docs](https://doublescale.io/docs). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
 
-= 1.3.3 = 14 Feb 2026
-* Enhance code quality and maintainability with PHPCS improvements
-- Added PHPCS ignore comments for various security and escaping issues across multiple files to improve code quality and compliance.
-- Updated translation comments for better clarity and consistency in the codebase.
-- Removed unnecessary error logging statements to streamline the code and reduce clutter.
-- Improved overall readability and maintainability of the code by refining comments and structure.
-
-* Refactor email templates and improve database query safety
-- Updated email templates to use consistent variable names for header images and background colors.
-- Enhanced database query safety by adding PHPCS ignore comments for unescaped parameters in various files.
-- Improved action hooks with appropriate comments for clarity and compliance with naming conventions.
-- Fixed minor bugs and improved overall code readability.
-
-*Update text domain from 'doublescale' to 'doublescale' and add ABSPATH check in multiple files
-- Changed the text domain in doublescale.php and various other files to 'doublescale' for consistency.
-- Added a check for ABSPATH in several classes and functions to enhance security by preventing direct access.
-
-
-= 1.3.2 = 14 Feb 2026
-* Make sure the plugin is compatible with wp guidelines
-
-= 1.3.0 = 10 Feb 2026
-* Fix forms async processing
-* Enhance Importing process
-* Modify activities to depend on the activity date
-
-= 1.2.4 = 8 Feb 2026
-* Fix a bug in settings tab
-
-= 1.2.2 - 7 Feb 2026
-* Added bell notifications
-* Added web push notifications
-* Added email notifications
-* Added cart recovered goal
-* Fixed some minor bugs
-
-= 1.2.0 - 25 Jan 2026 =
-* Added integration with WS Form
-* Added integration with Sure Forms
-* Added integration with Bit Forms
-* Added lead scoring feature
-* Added website visitor tracking feature
-
-= 1.1.8 - 15 Jan 2026 =
-* Added integration with Tutor LMS
-* Added integration with LifterLMS
-* Added integration with LearnPress
-
-= 1.0.0 - 17 Dec 2025 =
-* Initial release
-
+= 1.0.0 =
+* All-in-one launch: CRM, email & SMS campaigns, booking, tasks, SMTP routing, unified helpdesk inbox, analytics, and team management — in one plugin
+* Visual automation engine with 11+ trigger types connecting every module
+* 50+ integrations across commerce, forms, LMS, SMTP, messaging, and CRM sync
 
 == Upgrade Notice ==
 
-= 1.1.2 =
-* Added tasks module to the CRM
-* Fixed some minor bugs
-
-= 1.1.0 =
-* Added WhatsApp automation and 2-way messaging (Pro)
-* Added email sequences (Pro)
-* Bug fixes for messaging and Pro installation
-* Dashboard redirect improvements, Naira currency support
-
 = 1.0.0 =
-Initial release of DoubleScale. Install now to start managing your customer relationships with email & SMS campaigns, powerful automations, and 12+ plugin integrations!
+First stable release.
 
 == Privacy Policy ==
 
-DoubleScale stores contact information in your WordPress database. We do not collect, transmit, or store any data externally. All data remains on your server. The plugin is designed to be GDPR compliant, allowing you to:
+DoubleScale stores CRM, campaign, booking, task, support, and analytics data in your WordPress database. The plugin does not transmit that core repository to DoubleScale servers by default.
 
-* Export contact data
-* Delete contact data
-* Manage consent
-* Handle unsubscribe requests
-* Process data deletion requests
+Where you enable optional third-party integrations (SMTP providers, Twilio, Stripe, WhatsApp, Slack, ActiveCampaign, HubSpot, etc.), data flows are governed by those providers' terms — and only carry the fields you explicitly map. You can disable any connector by removing credentials or turning off related automations.
+
+Privacy-minded operators have access to: per-contact GDPR exports, hard-delete workflows, consent tracking per channel, retention rules for tracking data, and unsubscribe handling for every send.
 
 == External Services ==
 
-DoubleScale may connect to external third-party services for specific optional features. These services are only used when you explicitly configure and enable the respective integrations. No data is sent to these services unless you set them up.
+DoubleScale connects to external services **only when you configure** those integrations. No data is transmitted without your API keys, webhooks, or explicit provider setup.
 
-**ActiveCampaign Integration (Optional)**
-* **Purpose**: Sync contacts and manage marketing automation with ActiveCampaign
-* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the ActiveCampaign automation actions
-* **When**: Only when ActiveCampaign integration is configured and automation actions are triggered
-* **Service Provider**: ActiveCampaign LLC
-* **API Endpoint**: https://api.infusionsoft.com/
-* **Terms of Service**: https://www.activecampaign.com/legal/terms-of-service
-* **Privacy Policy**: https://www.activecampaign.com/legal/privacy-policy
+**ActiveCampaign (optional)**
+* Purpose: Contact sync
+* Data: Contact fields you map
+* Provider: ActiveCampaign LLC — account-specific API host
+* Terms: https://www.activecampaign.com/legal/terms-of-service
+* Privacy: https://www.activecampaign.com/legal/privacy-policy
 
-**ConvertKit Integration (Optional)**
-* **Purpose**: Sync subscribers and manage email marketing with ConvertKit
-* **Data Sent**: Contact information (name, email, tags) when you use the ConvertKit automation actions
-* **When**: Only when ConvertKit integration is configured and automation actions are triggered
-* **Service Provider**: ConvertKit LLC
-* **API Endpoint**: https://api.convertkit.com/v3
-* **Terms of Service**: https://convertkit.com/terms
-* **Privacy Policy**: https://convertkit.com/privacy
+**HubSpot (optional)**
+* Purpose: Contact and deal sync
+* Provider: HubSpot, Inc. — `https://api.hubapi.com`
+* Terms: https://legal.hubspot.com/terms-of-service
+* Privacy: https://legal.hubspot.com/privacy-policy
 
-**Drip Integration (Optional)**
-* **Purpose**: Sync subscribers and manage marketing automation with Drip
-* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Drip automation actions
-* **When**: Only when Drip integration is configured and automation actions are triggered
-* **Service Provider**: Drip LLC
-* **API Endpoint**: https://api.getdrip.com/v2
-* **Terms of Service**: https://www.drip.com/terms
-* **Privacy Policy**: https://www.drip.com/privacy
+**Twilio (optional, Pro)**
+* Purpose: SMS sending and inbound conversations
+* Data: Phone numbers, message content
+* Provider: Twilio Inc. — `https://api.twilio.com`
+* Terms: https://www.twilio.com/legal/tos
+* Privacy: https://www.twilio.com/legal/privacy
 
-**GetResponse Integration (Optional)**
-* **Purpose**: Sync contacts and manage email marketing campaigns with GetResponse
-* **Data Sent**: Contact information (name, email, custom fields) when you use the GetResponse automation actions
-* **When**: Only when GetResponse integration is configured and automation actions are triggered
-* **Service Provider**: GetResponse
-* **API Endpoint**: https://api.getresponse.com/v3
-* **Terms of Service**: https://www.getresponse.com/legal/terms-and-conditions
-* **Privacy Policy**: https://www.getresponse.com/legal/privacy
+**Stripe (optional, Pro)**
+* Purpose: Booking payments
+* Provider: Stripe, Inc. — `https://api.stripe.com`
+* Terms: https://stripe.com/legal
+* Privacy: https://stripe.com/privacy
 
-**HubSpot Integration (Optional)**
-* **Purpose**: Sync contacts and manage CRM data with HubSpot
-* **Data Sent**: Contact information (name, email, custom properties) when you use the HubSpot automation actions
-* **When**: Only when HubSpot integration is configured and automation actions are triggered
-* **Service Provider**: HubSpot, Inc.
-* **API Endpoint**: https://api.hubapi.com
-* **Terms of Service**: https://legal.hubspot.com/terms-of-service
-* **Privacy Policy**: https://legal.hubspot.com/privacy-policy
+**SMTP providers (optional)**
+SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and others — each governed by their own terms and privacy policy. Configured per-connection with your own credentials.
 
-**Keap (Infusionsoft) Integration (Optional)**
-* **Purpose**: Sync contacts and manage CRM and marketing automation with Keap
-* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Keap automation actions
-* **When**: Only when Keap integration is configured and automation actions are triggered
-* **Service Provider**: Keap (Infusionsoft)
-* **API Endpoint**: https://api.infusionsoft.com/
-* **Terms of Service**: https://keap.com/legal/terms-of-service
-* **Privacy Policy**: https://keap.com/legal/privacy-policy
-
-**MailerLite Integration (Optional)**
-* **Purpose**: Sync subscribers and manage email marketing with MailerLite
-* **Data Sent**: Contact information (name, email, custom fields) when you use the MailerLite automation actions
-* **When**: Only when MailerLite integration is configured and automation actions are triggered
-* **Service Provider**: MailerLite
-* **API Endpoint**: https://api.mailerlite.com/api/v2
-* **Terms of Service**: https://www.mailerlite.com/legal/terms-of-service
-* **Privacy Policy**: https://www.mailerlite.com/legal/privacy-policy
-
-**Ontraport Integration (Optional)**
-* **Purpose**: Sync contacts and manage CRM and marketing automation with Ontraport
-* **Data Sent**: Contact information (name, email, custom fields, tags) when you use the Ontraport automation actions
-* **When**: Only when Ontraport integration is configured and automation actions are triggered
-* **Service Provider**: Ontraport
-* **API Endpoint**: https://api.ontraport.com/1
-* **Terms of Service**: https://ontraport.com/terms
-* **Privacy Policy**: https://ontraport.com/privacy
-
-**Important Notes:**
-* All integrations are completely optional and disabled by default
-* You must manually configure API keys and enable each integration
-* No data is transmitted to these services unless you explicitly set up the integration
-* You can disable any integration at any time from the DoubleScale settings
-* When using these integrations, you are subject to the respective service's terms and privacy policies
+Disable any connector by removing credentials or turning off the related automations. Using a provider means you agree to their agreements and privacy practices.
 
 == Credits ==
 
-DoubleScale is developed and maintained by the Quill Forms team.
-
-* **Website**: [doublescale.io](https://doublescale.io)
-* **Documentation**: [doublescale.io/docs](https://doublescale.io/docs)
-
-**Our Other Products:**
-* **Quill Forms**: [quillforms.com](https://quillforms.com) - Advanced WordPress form builder
+* **Website:** [doublescale.io](https://doublescale.io)
+* **Documentation:** [doublescale.io/docs](https://doublescale.io/docs)
 
 == Support ==
 
-* **Documentation**: [doublescale.io/docs](https://doublescale.io/docs) - 70+ detailed articles
-* **Support Forum**: [WordPress.org Forums](https://wordpress.org/support/plugin/doublescale/)
-* **Website**: [doublescale.io](https://doublescale.io)
-* **Video Tutorials**: Coming soon
-* **Affiliate Program**: [doublescale.io/affiliate-program](https://doublescale.io/affiliate-program)
+* **Docs:** [doublescale.io/docs](https://doublescale.io/docs)
+* **Website:** [doublescale.io](https://doublescale.io)
+* **WordPress.org support:** https://wordpress.org/support/plugin/doublescale/ (when the plugin listing is public)
 
 == Contribute ==
 
-We welcome contributions! Visit our GitHub repository to:
-* Report bugs
-* Suggest features  
-* Submit pull requests
-* Translate the plugin
+Bug reports, ideas, and pull requests are welcome on the public GitHub repository linked in the **Source Code** section.
 
 == Languages ==
 
-DoubleScale is translation-ready and includes:
-* English (default)
-* More translations coming soon!
-
-Help us translate DoubleScale into your language!
+DoubleScale is translation-ready. English ships by default; additional locales welcome via community contributions.

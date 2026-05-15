@@ -14,8 +14,8 @@ namespace DoubleScale\Core\Settings\Rest;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
-use DoubleScale\UserRoles\Permissions;
-use DoubleScale\UserRoles\UserRoles;
+use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\UserRoles;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

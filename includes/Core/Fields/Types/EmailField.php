@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class DateField
+ * Class EmailField
  *
  * @since 1.0.0
  *
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -17,23 +17,23 @@ use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
- * DateField class
+ * EmailField class
  */
-class DateField extends FieldType {
+class EmailField extends FieldType {
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Date Field';
+	public $name = 'Email Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'date';
+	public $slug = 'email';
 
 	/**
 	 * Is Value Array
@@ -50,7 +50,7 @@ class DateField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return sanitize_text_field( $value );
+		return sanitize_email( $value );
 	}
 
 	/**
@@ -67,12 +67,13 @@ class DateField extends FieldType {
 			return;
 		}
 
-		if ( ! empty( $value ) && ! strtotime( $value ) ) {
+		if ( ! is_email( $value ) ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'Please enter a valid date';
+			$this->validation_err = 'This field must be a valid email address';
 		}
 	}
 }
+
 if ( class_exists( CustomFieldsManager::class ) ) {
-	CustomFieldsManager::instance()->register( new DateField() );
+	CustomFieldsManager::instance()->register( new EmailField() );
 }

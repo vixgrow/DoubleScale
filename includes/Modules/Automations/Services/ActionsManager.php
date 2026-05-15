@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Exception;
 use DoubleScale\Modules\Automations\Abstracts\Action;
-use DoubleScale\Managers\IntegrationsManager;
+use DoubleScale\Core\Managers\IntegrationsManager;
 
 /**
  * Actions class

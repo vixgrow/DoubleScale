@@ -73,6 +73,7 @@ class Aliases {
 		if ( ! $emit ) {
 			return;
 		}
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- intentional E_USER_DEPRECATED notice for legacy class aliases; gated by the doublescale_deprecation_notices filter and WP_DEBUG above.
 		\trigger_error(
 			sprintf(
 				'DoubleScale: class %1$s is deprecated and will be removed in a future release. Use %2$s instead.',

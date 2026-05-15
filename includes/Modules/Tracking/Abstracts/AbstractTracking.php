@@ -308,7 +308,7 @@ abstract class AbstractTracking {
 		$challenge = isset( $_GET['hub_challenge'] ) ? sanitize_text_field( wp_unslash( $_GET['hub_challenge'] ) ) : '';
 
 		// Get Meta integration
-		$integration  = \DoubleScale\Managers\IntegrationsManager::instance()->get_integration( 'meta-whatsapp' );
+		$integration  = \DoubleScale\Core\Managers\IntegrationsManager::instance()->get_integration( 'meta-whatsapp' );
 		$stored_token = $integration ? $integration->get_setting( 'webhook_verify_token' ) : '';
 
 		if ( 'subscribe' === $mode && ! empty( $stored_token ) && hash_equals( $stored_token, $token ) ) {

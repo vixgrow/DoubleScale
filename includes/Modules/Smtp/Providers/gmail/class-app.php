@@ -109,8 +109,7 @@ class App {
 			],
 			'https://accounts.google.com/o/oauth2/auth'
 		);
-		wp_redirect( $auth_url );
-		exit;
+		\doublescale_safe_redirect( $auth_url );
 	}
 
 	/**

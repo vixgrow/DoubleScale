@@ -216,7 +216,7 @@ class RestBookingController extends RestController {
 						'year'    => array(
 							'description' => __( 'Year to get revenue for.', 'doublescale' ),
 							'type'        => 'integer',
-							'default'     => date( 'Y' ),
+							'default'     => gmdate( 'Y' ),
 						),
 						'month'   => array(
 							'description' => __( 'Month to get revenue for (1-12). Only applicable for monthly period.', 'doublescale' ),
@@ -989,7 +989,7 @@ class RestBookingController extends RestController {
 	 */
 	protected function validate_year( $year ) {
 		$year = absint( $year );
-		return $year >= 2000 ? $year : date( 'Y' );
+		return $year >= 2000 ? $year : gmdate( 'Y' );
 	}
 
 	/**
@@ -1171,17 +1171,17 @@ class RestBookingController extends RestController {
 				}
 
 				// Get the day of the month (1-31)
-				$booking_day = date( 'j', strtotime( $booking->start_time ) );
-				$created_day = date( 'j', strtotime( $booking->created_at ) );
+				$booking_day = gmdate( 'j', strtotime( $booking->start_time ) );
+				$created_day = gmdate( 'j', strtotime( $booking->created_at ) );
 
 				// Make sure we're only counting days within our target month
-				if ( date( 'Y-m', strtotime( $booking->created_at ) ) === "$year-$month" ) {
+				if ( gmdate( 'Y-m', strtotime( $booking->created_at ) ) === "$year-$month" ) {
 					// Increment the "booked" counter for the creation date
 					$days_with_data[ (string) $created_day ]['booked']++;
 				}
 
 				// Make sure we're only counting days within our target month
-				if ( date( 'Y-m', strtotime( $booking->start_time ) ) === "$year-$month" ) {
+				if ( gmdate( 'Y-m', strtotime( $booking->start_time ) ) === "$year-$month" ) {
 					// Increment status counters for the appointment date
 					switch ( $booking->status ) {
 						case $this->STATUS_COMPLETED:
@@ -1343,9 +1343,9 @@ class RestBookingController extends RestController {
 		// Get and sanitize parameters
 		$user    = $this->sanitize_user_param( $request->get_param( 'user' ) ?? 'own' );
 		$period  = sanitize_text_field( $request->get_param( 'period' ) ?? 'monthly' );
-		$year    = (int) ( $request->get_param( 'year' ) ?? date( 'Y' ) );
-		$month   = (int) ( $request->get_param( 'month' ) ?? date( 'n' ) );
-		$quarter = (int) ( $request->get_param( 'quarter' ) ?? ceil( date( 'n' ) / 3 ) );
+		$year    = (int) ( $request->get_param( 'year' ) ?? gmdate( 'Y' ) );
+		$month   = (int) ( $request->get_param( 'month' ) ?? gmdate( 'n' ) );
+		$quarter = (int) ( $request->get_param( 'quarter' ) ?? ceil( gmdate( 'n' ) / 3 ) );
 
 		// Check permissions
 		if ( ! $this->can_view_revenue( $user ) ) {
@@ -1489,7 +1489,7 @@ class RestBookingController extends RestController {
 		switch ( $period ) {
 			case 'monthly':
 				$results['month']      = $month;
-				$results['month_name'] = date( 'F', mktime( 0, 0, 0, $month, 1, $year ) );
+				$results['month_name'] = gmdate( 'F', mktime( 0, 0, 0, $month, 1, $year ) );
 				break;
 
 			case 'quarterly':
@@ -1497,7 +1497,7 @@ class RestBookingController extends RestController {
 				break;
 
 			case 'weekly':
-				$week_number     = date( 'W', $date_range['start']->getTimestamp() );
+				$week_number     = gmdate( 'W', $date_range['start']->getTimestamp() );
 				$results['week'] = (int) $week_number;
 				break;
 		}
@@ -1517,9 +1517,9 @@ class RestBookingController extends RestController {
 	 */
 	protected function get_date_range_for_period( $period, $year = null, $month = null, $quarter = null ) {
 		// Set defaults if not provided
-		$year    = $year ?? (int) date( 'Y' );
-		$month   = $month ?? (int) date( 'n' );
-		$quarter = $quarter ?? (int) ceil( date( 'n' ) / 3 );
+		$year    = $year ?? (int) gmdate( 'Y' );
+		$month   = $month ?? (int) gmdate( 'n' );
+		$quarter = $quarter ?? (int) ceil( gmdate( 'n' ) / 3 );
 
 		// Use UTC timezone since database stores times in UTC
 		$utc_timezone = new \DateTimeZone( 'UTC' );
@@ -1527,7 +1527,7 @@ class RestBookingController extends RestController {
 		switch ( $period ) {
 			case 'weekly':
 				// Get the date for the first day of the specified week
-				$current_week = (int) date( 'W' );
+				$current_week = (int) gmdate( 'W' );
 				$date         = new DateTime( 'now', $utc_timezone );
 				$date->setISODate( $year, $current_week );
 				$date->setTime( 0, 0, 0 );
@@ -1563,8 +1563,8 @@ class RestBookingController extends RestController {
 
 			default:
 				// Default to current month if invalid period
-				$current_year  = (int) date( 'Y' );
-				$current_month = (int) date( 'm' );
+				$current_year  = (int) gmdate( 'Y' );
+				$current_month = (int) gmdate( 'm' );
 				$start         = new DateTime( sprintf( '%d-%02d-01 00:00:00', $current_year, $current_month ), $utc_timezone );
 				$end           = clone $start;
 				$end->modify( 'last day of this month' );

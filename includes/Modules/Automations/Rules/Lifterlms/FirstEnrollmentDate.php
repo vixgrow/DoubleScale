@@ -113,7 +113,7 @@ class FirstEnrollmentDate extends Rule
 						if ($enrollment_date) {
 							$timestamp = strtotime($enrollment_date);
 							if ($timestamp && ($first_date === null || $timestamp < strtotime($first_date))) {
-								$first_date = date('Y-m-d', $timestamp);
+								$first_date = gmdate('Y-m-d', $timestamp);
 							}
 						}
 					}
@@ -157,7 +157,7 @@ class FirstEnrollmentDate extends Rule
 
 			case 'on':
 				$rule_timestamp = strtotime($rule_value);
-				return date('Y-m-d', $enrollment_timestamp) === date('Y-m-d', $rule_timestamp);
+				return gmdate('Y-m-d', $enrollment_timestamp) === gmdate('Y-m-d', $rule_timestamp);
 
 			case 'between':
 				if (! is_array($rule_value) || count($rule_value) < 2) {

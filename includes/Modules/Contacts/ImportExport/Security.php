@@ -47,7 +47,7 @@ class Security {
 			if ( ! wp_mkdir_p( $parent ) ) {
 				return false;
 			}
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- rename can fail on some FS layouts; fall through to mkdir.
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.rename_rename -- one-time legacy folder migration on first load; WP_Filesystem isn't bootstrapped here yet, and a failure is non-fatal (we fall through to mkdir).
 			if ( ! @rename( $legacy_dir, $dir ) ) {
 				// Fall through: create fresh DoubleScale dir (user may need to re-upload if rename failed).
 			}

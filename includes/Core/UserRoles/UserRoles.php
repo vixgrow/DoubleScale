@@ -10,7 +10,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\UserRoles;
+namespace DoubleScale\Core\UserRoles;
 
 
 

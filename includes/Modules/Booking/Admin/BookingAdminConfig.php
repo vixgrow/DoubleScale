@@ -16,7 +16,7 @@ use DoubleScale\Modules\Booking\Managers\LocationsManager;
 use DoubleScale\Modules\Booking\Managers\MergeTagsManager;
 use DoubleScale\Modules\Booking\Managers\IntegrationsManager;
 use DoubleScale\Modules\Booking\Helpers\IntegrationsHelper;
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 
 final class BookingAdminConfig {
 

@@ -59,7 +59,7 @@ try {
 			<?php if ( ! empty( $host_names ) ) : ?>
 			<p>
 				<span><img src="<?php echo esc_url( $icons_url . 'profile.svg' ); ?>" alt="Host" /></span>
-				<span><?php echo implode( ' - ', $host_names ); ?></span>
+				<span><?php echo implode( ' - ', $host_names ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $host_names entries are individually esc_html'd above. ?></span>
 			</p>
 			<?php endif; ?>
 			<?php endif; ?>

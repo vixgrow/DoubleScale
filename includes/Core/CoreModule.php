@@ -75,10 +75,10 @@ final class CoreModule extends AbstractModule {
 
 		\DoubleScale\Admin\Admin::instance();
 		\DoubleScale\Admin\AdminLoader::instance();
-		\DoubleScale\SubscriptionManage\SubscriptionManage::instance();
+		\DoubleScale\Modules\Contacts\Services\SubscriptionManager::instance();
 		\DoubleScale\Modules\Contacts\CustomMetabox::get_instance();
-		\DoubleScale\UserRoles\UserRoles::instance();
-		\DoubleScale\UserRoles\LoginRedirect::instance();
+		\DoubleScale\Core\UserRoles\UserRoles::instance();
+		\DoubleScale\Core\UserRoles\LoginRedirect::instance();
 		\DoubleScale\Database\Install::init();
 		\DoubleScale\Site\Site::instance();
 
@@ -119,9 +119,9 @@ final class CoreModule extends AbstractModule {
 
 		$roles = array(
 			'administrator',
-			\DoubleScale\UserRoles\UserRoles::CRM_MANAGER,
-			\DoubleScale\UserRoles\UserRoles::SALES_MANAGER,
-			\DoubleScale\UserRoles\UserRoles::SALES_REP,
+			\DoubleScale\Core\UserRoles\UserRoles::CRM_MANAGER,
+			\DoubleScale\Core\UserRoles\UserRoles::SALES_MANAGER,
+			\DoubleScale\Core\UserRoles\UserRoles::SALES_REP,
 		);
 
 		foreach ( $roles as $role_slug ) {
@@ -171,7 +171,7 @@ final class CoreModule extends AbstractModule {
 	 */
 	public function grant_super_admin_caps( $allcaps, $caps, $args, $user ) {
 		if ( is_super_admin( $user->ID ) ) {
-			$crm_caps = \DoubleScale\UserRoles\UserRoles::get_all_caps();
+			$crm_caps = \DoubleScale\Core\UserRoles\UserRoles::get_all_caps();
 			foreach ( $crm_caps as $cap => $grant ) {
 				$allcaps[ $cap ] = true;
 			}

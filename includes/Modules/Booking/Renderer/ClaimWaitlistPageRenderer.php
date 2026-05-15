@@ -39,8 +39,7 @@ class ClaimWaitlistPageRenderer extends BaseTemplateRenderer {
 		if ( 'waiting' !== $booking->status ) {
 			$denied_url = ! empty( $wl_settings['redirect_url_denied'] ) ? $wl_settings['redirect_url_denied'] : '';
 			if ( $denied_url ) {
-				wp_redirect( $denied_url );
-				exit;
+				\doublescale_safe_redirect( $denied_url );
 			}
 			return $this->render_claim_result( $booking, false, __( 'This booking is no longer on the waiting list.', 'doublescale' ) );
 		}
@@ -50,16 +49,14 @@ class ClaimWaitlistPageRenderer extends BaseTemplateRenderer {
 		if ( is_wp_error( $result ) ) {
 			$denied_url = ! empty( $wl_settings['redirect_url_denied'] ) ? $wl_settings['redirect_url_denied'] : '';
 			if ( $denied_url ) {
-				wp_redirect( $denied_url );
-				exit;
+				\doublescale_safe_redirect( $denied_url );
 			}
 			return $this->render_claim_result( $booking, false, $result->get_error_message() );
 		}
 
 		$success_url = ! empty( $wl_settings['redirect_url_success'] ) ? $wl_settings['redirect_url_success'] : '';
 		if ( $success_url ) {
-			wp_redirect( $success_url );
-			exit;
+			\doublescale_safe_redirect( $success_url );
 		}
 
 		return $this->render_claim_result( $booking, true, __( 'Your booking has been confirmed!', 'doublescale' ) );

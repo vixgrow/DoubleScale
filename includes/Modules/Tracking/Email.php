@@ -91,7 +91,7 @@ class Email
 			header('Last-Modified: Wed, 11 Jan 1984 05:00:00 GMT');
 			header('Pragma: no-cache');
 		}
-		die(base64_decode(self::TRACKING_PIXEL));
+		die( base64_decode( self::TRACKING_PIXEL ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- binary 1x1 GIF tracking pixel; escaping would corrupt the bytes.
 	}
 
 	/**
@@ -196,8 +196,7 @@ class Email
 				if (empty($fallback) || ! preg_match('#^https?://#i', $fallback)) {
 					$fallback = home_url();
 				}
-				wp_redirect($fallback);
-				exit;
+				\doublescale_safe_redirect( $fallback );
 			}
 
 			// Capture state before update to avoid duplicate notifications/lead scoring.
@@ -246,8 +245,7 @@ class Email
 						),
 						home_url()
 					);
-					wp_redirect($unsubscribe_url);
-					exit;
+					\doublescale_safe_redirect($unsubscribe_url);
 				}
 			}
 
@@ -257,8 +255,7 @@ class Email
 				$original_url = home_url();
 			}
 
-			wp_redirect($original_url);
-			exit;
+			\doublescale_safe_redirect($original_url);
 		} catch (\Exception $e) {
 			doublescale_get_logger()->error(
 				__('Email Clicked Tracking Error', 'doublescale'),

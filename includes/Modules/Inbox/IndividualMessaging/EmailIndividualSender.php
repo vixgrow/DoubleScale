@@ -25,7 +25,7 @@ use DoubleScale\Constants\MessageDirection;
 use DoubleScale\Constants\MessageSourceTypes;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Core\Utils\Utils;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 use DoubleScale\Modules\Activities\Models\ActivityAssociationModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Campaigns\Emails\Emails;

@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
 use DoubleScale\Modules\Automations\Abstracts\MergeTag;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
-use DoubleScale\Managers\MergeTagsManager;
+use DoubleScale\Core\Managers\MergeTagsManager;
 
 /**
  * Renders {{contact:contact_field:…}} merge tags from custom field definitions.

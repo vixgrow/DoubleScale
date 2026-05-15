@@ -13,7 +13,7 @@ namespace DoubleScale\Modules\Campaigns\Abstracts;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -970,7 +970,7 @@ abstract class AbstractCampaignController extends RestController {
 	 * @return string Processed message
 	 */
 	protected function process_merge_tags( $message, $contact ) {
-		return \DoubleScale\Managers\MergeTagsManager::instance()->process_merge_tags( $message, $contact );
+		return \DoubleScale\Core\Managers\MergeTagsManager::instance()->process_merge_tags( $message, $contact );
 	}
 
 	/**

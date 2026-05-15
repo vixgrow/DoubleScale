@@ -67,6 +67,7 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
@@ -89,6 +90,7 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
@@ -113,6 +115,7 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}

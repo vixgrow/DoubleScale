@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class CheckboxField
+ * Class DateField
  *
  * @since 1.0.0
  *
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -17,23 +17,23 @@ use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
- * CheckboxField class
+ * DateField class
  */
-class CheckboxField extends FieldType {
+class DateField extends FieldType {
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Checkbox Field';
+	public $name = 'Date Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'checkbox';
+	public $slug = 'date';
 
 	/**
 	 * Is Value Array
@@ -50,7 +50,7 @@ class CheckboxField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return $value === 'true' || $value === true ? 'true' : 'false';
+		return sanitize_text_field( $value );
 	}
 
 	/**
@@ -61,13 +61,18 @@ class CheckboxField extends FieldType {
 	 * @return boolean
 	 */
 	public function validate_value( $value ) {
-		if ( $value !== 'true' && $value !== 'false' && $value !== true && $value !== false ) {
+		if ( empty( $value ) && $this->is_required ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'This field must be true or false';
+			$this->validation_err = 'This field is required';
+			return;
+		}
+
+		if ( ! empty( $value ) && ! strtotime( $value ) ) {
+			$this->is_valid       = false;
+			$this->validation_err = 'Please enter a valid date';
 		}
 	}
 }
-
 if ( class_exists( CustomFieldsManager::class ) ) {
-	CustomFieldsManager::instance()->register( new CheckboxField() );
+	CustomFieldsManager::instance()->register( new DateField() );
 }

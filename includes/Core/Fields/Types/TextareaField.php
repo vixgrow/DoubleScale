@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Class NumberField
+ * Class TextareaField
  *
  * @since 1.0.0
  *
  * @package DoubleScale\Pro\Pro
  */
 
-namespace DoubleScale\Fields\Types;
+namespace DoubleScale\Core\Fields\Types;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -17,23 +17,23 @@ use DoubleScale\Core\Abstracts\FieldType;
 use DoubleScale\Pro\Modules\CustomFields\CustomFieldsManager;
 
 /**
- * NumberField class
+ * TextareaField class
  */
-class NumberField extends FieldType {
+class TextareaField extends FieldType {
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Number Field';
+	public $name = 'Textarea Field';
 
 	/**
 	 * Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'number';
+	public $slug = 'textarea';
 
 	/**
 	 * Is Value Array
@@ -50,7 +50,7 @@ class NumberField extends FieldType {
 	 * @return mixed
 	 */
 	public function sanitize_field( $value ) {
-		return absint( $value );
+		return sanitize_textarea_field( $value );
 	}
 
 	/**
@@ -67,13 +67,13 @@ class NumberField extends FieldType {
 			return;
 		}
 
-		if ( ! is_numeric( $value ) ) {
+		if ( ! is_string( $value ) ) {
 			$this->is_valid       = false;
-			$this->validation_err = 'This field must be a number';
+			$this->validation_err = 'This field must be a string';
 		}
 	}
 }
 
 if ( class_exists( CustomFieldsManager::class ) ) {
-	CustomFieldsManager::instance()->register( new NumberField() );
+	CustomFieldsManager::instance()->register( new TextareaField() );
 }

@@ -104,6 +104,7 @@ class Memberpress extends Importer {
 		if ( $has_filter ) {
 			$count_sql .= " $filter_clause";
 		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $members_table is a trusted table-name constant; $filter_clause is already prepared above via $wpdb->prepare().
 		$total = $wpdb->get_var( $count_sql );
 
 		$result = $this->import_with_offset(
@@ -126,10 +127,12 @@ class Memberpress extends Importer {
 					GROUP BY m.user_id, u.user_email, fn.meta_value, ln.meta_value
 					LIMIT %d, 20";
 
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $base_query interpolates trusted table-name vars and a pre-prepared $filter_clause; $offset is bound via prepare() on the next line.
 				return $wpdb->get_results(
 					$wpdb->prepare( $base_query, $offset ),
 					ARRAY_A
 				);
+				// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 			},
 			$mapping
 		);

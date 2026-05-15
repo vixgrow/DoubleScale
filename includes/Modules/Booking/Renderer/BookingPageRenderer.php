@@ -33,12 +33,14 @@ class BookingPageRenderer extends BaseTemplateRenderer {
 		// Prefer caller-supplied slugs (used by direct event share links) and
 		// fall back to query string for the standard `?doublescale_booking_calendar=…`
 		// flow so existing call sites stay byte-compatible.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public booking link: slugs are themselves the public identifier, no nonce applies.
 		if ( ! $calendar_slug ) {
 			$calendar_slug = Arr::get( $_GET, 'doublescale_booking_calendar', null );
 		}
 		if ( ! $event_slug ) {
 			$event_slug = Arr::get( $_GET, 'event', null );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// `globalSettingsClass` is the booking-scoped settings helper which
 		// always returns the schema-defaulted shape (`general`, `payments`,
@@ -65,8 +67,7 @@ class BookingPageRenderer extends BaseTemplateRenderer {
 			->first();
 
 		if ( ! $event ) {
-			wp_redirect( home_url() );
-			exit;
+			\doublescale_safe_redirect( home_url() );
 		}
 
 		// Prepare event data

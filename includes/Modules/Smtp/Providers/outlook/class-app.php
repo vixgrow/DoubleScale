@@ -68,8 +68,7 @@ class App {
 			],
 			'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
 		);
-		wp_redirect( $auth_url );
-		exit;
+		\doublescale_safe_redirect( $auth_url );
 	}
 
 	/**

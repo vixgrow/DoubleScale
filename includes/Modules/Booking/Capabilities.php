@@ -15,7 +15,7 @@ use WP_User;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
-use DoubleScale\UserRoles\UserRoles;
+use DoubleScale\Core\UserRoles\UserRoles;
 
 class Capabilities {
 

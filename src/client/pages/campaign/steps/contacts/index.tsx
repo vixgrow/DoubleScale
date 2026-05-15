@@ -71,6 +71,7 @@ const Contacts: React.FC = () => {
 	const [inlineError, setInlineError] = useState<string | null>(null);
 	const [showProModal, setShowProModal] = useState(false);
 	const [proFeatureName, setProFeatureName] = useState('');
+	const applyFetchDoneRef = useRef<(() => void) | null>(null);
 
 	// Rules builder state (shared with ConditionsModal component) - non-automation context
 	const filteredRulesGroups = getFilteredRulesGroups(false);
@@ -153,9 +154,18 @@ const Contacts: React.FC = () => {
 		};
 	}, [filterBy, filters, isApplying]); // Re-measure when content changes
 
-	// Handle apply filters action
-	const handleApplyFilters = async (): Promise<void> => {
-		setShouldFetchContacts(true);
+	// Handle apply filters action — resolve only after ContactList finishes its fetch
+	const handleApplyFilters = (): Promise<void> => {
+		return new Promise((resolve) => {
+			applyFetchDoneRef.current = resolve;
+			setShouldFetchContacts(true);
+		});
+	};
+
+	const handleRecipientsFetchComplete = () => {
+		setShouldFetchContacts(false);
+		applyFetchDoneRef.current?.();
+		applyFetchDoneRef.current = null;
 	};
 
 	const save = async () => {
@@ -164,11 +174,13 @@ const Contacts: React.FC = () => {
 		}
 
 		// Save just the filter type so we know which tab to open next time
-		await saveCampaignStep('contacts', {
+		const success = await saveCampaignStep('contacts', {
 			filter_type: filterBy,
 		});
 
-		goToStep('review');
+		if (success) {
+			goToStep('review');
+		}
 	};
 
 	const handleNext = async () => {
@@ -420,9 +432,7 @@ const Contacts: React.FC = () => {
 								loading={isApplying}
 								maxHeight={panelHeight}
 								shouldFetch={shouldFetchContacts}
-								onFetchComplete={() =>
-									setShouldFetchContacts(false)
-								}
+								onFetchComplete={handleRecipientsFetchComplete}
 								onTotalChange={setTotalRecipients}
 								onLoadingChange={setIsLoading}
 								campaignType={campaign?.type}
@@ -471,7 +481,12 @@ const Contacts: React.FC = () => {
 					<Button
 						variant="gradient"
 						onClick={handleNext}
-						disabled={saving || isApplying}
+						disabled={
+							saving ||
+							isApplying ||
+							isLoading ||
+							totalRecipients < 1
+						}
 					>
 						{saving || isApplying
 							? __('Saving...', 'doublescale')

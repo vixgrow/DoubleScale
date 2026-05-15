@@ -95,7 +95,10 @@ const ContactList: React.FC<ContactListProps> = ({
 				setContacts(newContacts);
 			}
 
-			setTotal(response.filtered_total ?? response.total);
+			const totalCount = response.filtered_total ?? response.total;
+			setTotal(totalCount);
+			// Parent steps (e.g. campaign contacts) gate "Next" on this; sync before async paint.
+			onTotalChange?.(totalCount);
 			setPage(pageNum);
 			setHasMore(!isSummary && newContacts.length === perPage);
 		} catch (err: unknown) {
@@ -131,12 +134,23 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	const filtersSignature = JSON.stringify(filters ?? []);
 
-	// Refetch when apply is requested (and when pending filters update)
+	// Refetch when apply is requested (and when pending filters update).
+	// Wait for the request so parents that `await fetchContacts()` see an updated total.
 	useEffect(() => {
-		if (shouldFetch) {
-			fetchContacts(1, false, searchTerm);
-			onFetchComplete?.();
+		if (!shouldFetch) {
+			return;
 		}
+		let cancelled = false;
+		void (async () => {
+			await fetchContacts(1, false, searchTerm);
+			if (!cancelled) {
+				onFetchComplete?.();
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- run when apply flag / filters / type change; fetch uses latest closure
 	}, [shouldFetch, filtersSignature, campaignType]);
 
 	// Debounced search - refetch from API with search term

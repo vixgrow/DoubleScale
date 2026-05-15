@@ -38,16 +38,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 			<BaseBlockEditor props={props} onChange={onChange}>
 				{(props, onChange) => (
 					<>
-						<div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-							<div className="flex items-center gap-2 text-white">
-								<span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/[0.08]">
-									<Type className="h-4 w-4" aria-hidden />
-								</span>
-								<span className="text-base font-medium">
-									{__('Text Settings', 'doublescale')}
-								</span>
-							</div>
-
+						<div>
 							<RichTextEditor
 								theme="builderDark"
 								formattingTarget="canvas"
@@ -60,13 +51,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 									props.linkColor?.trim() || '#458DC7'
 								}
 							/>
-
-							<p className="text-sm text-white/65">
-								{__(
-									'Use the toolbar for formatting, text color, and links. Use the sparkles icon in the block toolbar for AI-generated text.',
-									'doublescale'
-								)}
-							</p>
 						</div>
 
 						{/* Typography Controls */}

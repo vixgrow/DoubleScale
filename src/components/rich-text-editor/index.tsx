@@ -22,7 +22,6 @@ import {
 	AlignRight,
 	AlignJustify,
 	Copy,
-	ChevronDown,
 } from 'lucide-react';
 
 /**
@@ -717,8 +716,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		cn(
 			isBuilderDark
 				? cn(
-						'h-9 w-9 shrink-0 rounded-full border border-white/15 bg-white/[0.06] p-0 text-white shadow-none hover:bg-white/12 hover:text-white',
-						active && 'border-indigo-400/45 bg-indigo-500/35 text-white'
+						'h-9 w-9 shrink-0 rounded-md border p-0 text-white shadow-none bg-transparent hover:bg-transparent active:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+						active ? 'border-white' : 'border-transparent'
 				  )
 				: cn('h-8 w-8 p-2', active && 'bg-accent')
 		);
@@ -726,6 +725,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const toolbarSep = isBuilderDark
 		? 'mx-0.5 h-7 w-px shrink-0 bg-white/20'
 		: 'mx-1 h-6 w-px shrink-0 bg-border';
+
+	/** SVG dashed frame: short dash, longer gap */
+	const toolbarDashPattern = '5 14';
 
 	return (
 		<div className={cn('relative', className)}>
@@ -809,16 +811,37 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			)}
 			<div
 				className={cn(
-					'rich-text-toolbar mb-2 [&_button_svg]:stroke-[2.5]',
+					'rich-text-toolbar relative mb-2 rounded-xl [&_button_svg]:stroke-[2.5]',
 					isBuilderDark
-						? 'flex flex-col gap-2 rounded-xl border border-dashed border-white/25 bg-white/[0.04] p-2 [&_button]:text-white'
+						? 'flex flex-col gap-2 bg-transparent p-2 [&_button]:text-white'
 						: 'flex flex-wrap items-center gap-1 rounded-lg border border-border bg-white p-2 shadow-sm [&_button]:text-foreground'
 				)}
 			>
+				{isBuilderDark && (
+					<svg
+						className="pointer-events-none absolute inset-0 h-full w-full overflow-visible text-white/45"
+						aria-hidden
+					>
+						<rect
+							x="1"
+							y="1"
+							width="calc(100% - 2px)"
+							height="calc(100% - 2px)"
+							rx="11"
+							ry="11"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="1.25"
+							strokeDasharray={toolbarDashPattern}
+							strokeLinecap="round"
+							vectorEffect="non-scaling-stroke"
+						/>
+					</svg>
+				)}
 				<div
 					className={cn(
 						isBuilderDark
-							? 'flex w-full flex-wrap items-center gap-1.5'
+							? 'relative z-[1] flex w-full flex-wrap items-center gap-1.5'
 							: 'contents'
 					)}
 				>
@@ -993,7 +1016,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				</div>
 
 				{isBuilderDark && (
-					<div className="flex w-full items-stretch gap-2 pt-0.5">
+					<div className="relative z-[1] flex w-full items-stretch gap-2 pt-0.5">
 						<Button
 							variant="ghost"
 							size="sm"
@@ -1004,11 +1027,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						>
 							<Link className="h-4 w-4" />
 						</Button>
+						<div
+							className="mx-1.5 w-px shrink-0 self-stretch bg-white/40"
+							aria-hidden
+						/>
 						<Button
 							variant="ghost"
 							size="sm"
 							className={cn(
-								'h-9 min-w-0 flex-1 gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-3 text-sm font-medium text-white shadow-none hover:bg-white/12 hover:text-white [&_svg]:size-4'
+								'h-9 min-w-0 flex-1 gap-2 rounded-md border border-transparent bg-transparent px-3 text-left text-sm font-medium text-white shadow-none hover:bg-transparent hover:text-white [&_svg]:size-4'
 							)}
 							onClick={() => setIsMergeTagsModalOpen(true)}
 							onMouseDown={(e) => e.preventDefault()}
@@ -1017,7 +1044,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							<span className="min-w-0 flex-1 truncate text-left">
 								{__('Insert Merge Tags', 'doublescale')}
 							</span>
-							<ChevronDown className="ml-auto shrink-0 opacity-70" />
 						</Button>
 					</div>
 				)}

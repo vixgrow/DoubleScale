@@ -1,11 +1,11 @@
 /**
  * wordpress dependencies
  */
-
+import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 /**
  * internal dependencies
  */
@@ -15,15 +15,40 @@ import {
 	getHeadingConfig,
 	calculateFontSize,
 } from '@/builder/utils/styleHelpers';
+import { stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
+
+function escapeHtml(raw: string): string {
+	return raw
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
 
 export interface TextRendererProps {
 	props: TextBlockProps;
+	/** Email builder: edit copy on the canvas when the block is selected. */
+	canvasEditable?: boolean;
+	onCanvasContentChange?: (html: string) => void;
 }
 
-export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
+export const TextRenderer: React.FC<TextRendererProps> = ({
+	props,
+	canvasEditable,
+	onCanvasContentChange,
+}) => {
+	const editRef = useRef<HTMLDivElement>(null);
+	const editingRef = useRef(false);
+	const rendererIdRef = useRef<string | null>(null);
+	if (!rendererIdRef.current) {
+		rendererIdRef.current = `text-block-renderer-${generateRandomString()}`;
+	}
+	const rendererId = rendererIdRef.current;
 	const headingConfig = getHeadingConfig(props.headingStyle);
 	const ElementType = headingConfig.element as keyof JSX.IntrinsicElements;
 	const fontSize = calculateFontSize(props.headingStyle, props.fontSize);
+	const textColor = props.color?.trim() || '#333';
+	const linkColorResolved = props.linkColor?.trim() || '#458DC7';
 
 	// Check if content is HTML
 	const isHtmlContent =
@@ -43,7 +68,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 			cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
 			cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
 			cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
-			return cleanContent;
+			return stripRichTextChromeColors(cleanContent);
 		}
 
 		// If no HTML formatting, remove font-size and font-family to use props
@@ -71,7 +96,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
 
-		return cleanContent;
+		return stripRichTextChromeColors(cleanContent);
 	};
 
 	// Check if HTML content has formatting that should override props
@@ -92,8 +117,31 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 		);
 	};
 
-	// Generate unique class name for this renderer instance
-	const rendererId = `text-block-renderer-${generateRandomString()}`;
+	const getEditableHtml = (): string => {
+		if (isHtmlContent) {
+			return getCleanContent();
+		}
+		const raw = (props.content ?? '').trim();
+		if (!raw) {
+			return `<p style="color:${textColor}"><br></p>`;
+		}
+		return `<p style="color:${textColor}">${escapeHtml(raw)}</p>`;
+	};
+
+	useLayoutEffect(() => {
+		if (
+			!canvasEditable ||
+			!onCanvasContentChange ||
+			!editRef.current ||
+			editingRef.current
+		) {
+			return;
+		}
+		const next = getEditableHtml();
+		if (editRef.current.innerHTML !== next) {
+			editRef.current.innerHTML = next;
+		}
+	}, [canvasEditable, onCanvasContentChange, props.content]); // sync store → canvas when not actively typing
 
 	const content = (
 		<>
@@ -101,6 +149,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 				.${rendererId} {
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
+					color: ${textColor} !important;
+					color-scheme: light;
 				}
 				.${rendererId} * {
 					font-size: ${fontSize}px !important;
@@ -113,9 +163,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					font-family: ${props.fontFamily} !important;
 				}
 				/* Only apply font size/family to formatting tags if no HTML formatting exists */
-				${
-					!hasHtmlFormatting()
-						? `
+				${!hasHtmlFormatting()
+					? `
 				.${rendererId} strong,
 				.${rendererId} em,
 				.${rendererId} u,
@@ -124,7 +173,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					font-family: ${props.fontFamily} !important;
 				}
 				`
-						: ''
+					: ''
 				}
 				.${rendererId} ul {
 					list-style-type: disc !important;
@@ -146,10 +195,26 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
+				.${rendererId} a,
+				.${rendererId} a:link,
+				.${rendererId} a:visited,
+				.${rendererId} a:hover {
+					color: ${linkColorResolved};
+					text-decoration: underline !important;
+				}
+				/* Plain blocks inherit block color (WebKit otherwise paints white on new lines). */
+				.${rendererId} [data-text-canvas-editor="true"] p,
+				.${rendererId} [data-text-canvas-editor="true"] li,
+				.${rendererId} [data-text-canvas-editor="true"] div,
+				.${rendererId} .text-block-html-root p,
+				.${rendererId} .text-block-html-root li,
+				.${rendererId} .text-block-html-root div {
+					color: inherit;
+					-webkit-text-fill-color: currentColor;
+				}
 				/* Only override font-size and font-family inline styles if no HTML formatting exists */
-				${
-					!hasHtmlFormatting()
-						? `
+				${!hasHtmlFormatting()
+					? `
 				.${rendererId} [style*="font-size"] {
 					font-size: ${fontSize}px !important;
 				}
@@ -157,43 +222,43 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					font-family: ${props.fontFamily} !important;
 				}
 				`
-						: ''
+					: ''
 				}
 			`}</style>
 			<div
 				style={
 					{
 						fontSize: fontSize,
-						color: props.color,
+						color: textColor,
 						// Only apply textAlign from props if HTML doesn't have its own text-align
 						...(hasHtmlFormatting() &&
-						props.content.includes('text-align')
+							props.content.includes('text-align')
 							? {}
 							: {
-									textAlign:
-										props.textAlign as React.CSSProperties['textAlign'],
-								}),
+								textAlign:
+									props.textAlign as React.CSSProperties['textAlign'],
+							}),
 						fontFamily: props.fontFamily,
 						// Only apply formatting styles if no HTML formatting exists
 						...(hasHtmlFormatting()
 							? {}
 							: {
-									fontWeight: props.bold ? 'bold' : 'normal',
-									fontStyle: props.italic
-										? 'italic'
-										: 'normal',
-									textDecoration: (() => {
-										if (
-											props.underline &&
-											props['line-through']
-										)
-											return 'underline line-through';
-										if (props.underline) return 'underline';
-										if (props['line-through'])
-											return 'line-through';
-										return 'none';
-									})(),
-								}),
+								fontWeight: props.bold ? 'bold' : 'normal',
+								fontStyle: props.italic
+									? 'italic'
+									: 'normal',
+								textDecoration: (() => {
+									if (
+										props.underline &&
+										props['line-through']
+									)
+										return 'underline line-through';
+									if (props.underline) return 'underline';
+									if (props['line-through'])
+										return 'line-through';
+									return 'none';
+								})(),
+							}),
 						lineHeight: props.lineHeight,
 						letterSpacing: props.letterSpacing,
 						borderRadius: props.borderRadius,
@@ -209,6 +274,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 						width: '100%',
 						boxSizing: 'border-box',
 						overflow: 'hidden',
+						forcedColorAdjust: 'none',
 						// CSS custom properties for inheritance
 						'--text-font-size': `${fontSize}px`,
 						'--text-font-family': props.fontFamily,
@@ -216,13 +282,48 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 				}
 				className={rendererId}
 			>
-				{isHtmlContent ? (
+				{canvasEditable && onCanvasContentChange ? (
 					<div
+						ref={editRef}
+						contentEditable
+						suppressContentEditableWarning
+						role="textbox"
+						aria-multiline
+						aria-label={__('Edit text', 'doublescale')}
+						tabIndex={0}
+						className="min-h-[1.25em] cursor-text outline-none"
+						data-text-canvas-editor="true"
+						style={{
+							fontSize: 'inherit',
+							fontFamily: 'inherit',
+							color: textColor,
+							lineHeight: 'inherit',
+							letterSpacing: 'inherit',
+						}}
+						onFocus={() => {
+							editingRef.current = true;
+						}}
+						onBlur={() => {
+							editingRef.current = false;
+							const html = editRef.current?.innerHTML ?? '';
+							onCanvasContentChange(
+								stripRichTextChromeColors(html)
+							);
+						}}
+						onKeyDown={(e) => {
+							if (e.key === 'Escape') {
+								(e.currentTarget as HTMLElement).blur();
+							}
+						}}
+					/>
+				) : isHtmlContent ? (
+					<div
+						className="text-block-html-root"
 						dangerouslySetInnerHTML={{ __html: getCleanContent() }}
 						style={{
 							fontSize: 'inherit',
 							fontFamily: 'inherit',
-							color: 'inherit',
+							color: textColor,
 							lineHeight: 'inherit',
 							letterSpacing: 'inherit',
 						}}
@@ -233,7 +334,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 							margin: 0,
 							fontSize: 'inherit',
 							fontFamily: 'inherit',
-							color: 'inherit',
+							color: textColor,
 						}}
 					>
 						{getCleanContent()}

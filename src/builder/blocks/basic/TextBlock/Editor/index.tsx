@@ -6,9 +6,11 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
+import { Type } from 'lucide-react';
 /**
  * internal dependencies
  */
+import { RichTextEditor } from '@/components/rich-text-editor';
 import {
 	Select,
 	SelectContent,
@@ -17,7 +19,6 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { TextBlockProps } from '..';
-import { RichTextEditor } from '@/components/rich-text-editor';
 import {
 	BaseBlockEditor,
 	BlockEditorErrorBoundary,
@@ -37,17 +38,35 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 			<BaseBlockEditor props={props} onChange={onChange}>
 				{(props, onChange) => (
 					<>
-						{/* Text Content */}
-						<div className="flex flex-col gap-2">
-							<div className="text-[#333333] text-sm mb-1">
-								{__('Text Content', 'doublescale')}
+						<div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
+							<div className="flex items-center gap-2 text-white">
+								<span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/[0.08]">
+									<Type className="h-4 w-4" aria-hidden />
+								</span>
+								<span className="text-base font-medium">
+									{__('Text Settings', 'doublescale')}
+								</span>
 							</div>
+
 							<RichTextEditor
-								content={props.content}
+								theme="builderDark"
+								formattingTarget="canvas"
+								content={props.content ?? ''}
 								onChange={(content) => onChange({ content })}
 								fontSize={props.fontSize}
 								fontFamily={props.fontFamily}
+								defaultBodyColor={props.color?.trim() || '#333'}
+								defaultLinkColor={
+									props.linkColor?.trim() || '#458DC7'
+								}
 							/>
+
+							<p className="text-sm text-white/65">
+								{__(
+									'Use the toolbar for formatting, text color, and links. Use the sparkles icon in the block toolbar for AI-generated text.',
+									'doublescale'
+								)}
+							</p>
 						</div>
 
 						{/* Typography Controls */}
@@ -80,7 +99,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 									}
 								>
 									<SelectTrigger className="w-full rounded-lg !text-white !border-none !ring-0 !ring-offset-0 h-10 "
-									style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}
+										style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
 									>
 										<SelectValue
 											placeholder={__(
@@ -115,14 +134,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							/>
 						</div>
 
-						{/* Style Controls - Colors */}
-						<StyleControls.ColorPickerControl
-							value={props.color}
-							onChange={(color) => onChange({ color })}
-							label={__('Text Color', 'doublescale')}
-							id="text-color"
-						/>
-
 						<StyleControls.ColorPickerControl
 							value={props.backgroundColor}
 							onChange={(backgroundColor) =>
@@ -130,13 +141,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							}
 							label={__('Background Color', 'doublescale')}
 							id="bg-color"
-						/>
-
-						<StyleControls.ColorPickerControl
-							value={props.linkColor}
-							onChange={(linkColor) => onChange({ linkColor })}
-							label={__('Link Color', 'doublescale')}
-							id="link-color"
 						/>
 
 						{/* Layout Controls - Padding */}

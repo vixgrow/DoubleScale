@@ -22,6 +22,7 @@ import {
 	AlignRight,
 	AlignJustify,
 	Copy,
+	ChevronDown,
 } from 'lucide-react';
 
 /**
@@ -38,6 +39,7 @@ import {
 import { LinkDialog, LinkData } from './LinkDialog';
 import { MerageTagsIcon } from '@doublescale/components';
 import MergeTagsSelector from '@/components/merge-tags';
+import { stripRichTextChromeColors } from '@/builder/utils/stripRichTextChromeColors';
 
 interface RichTextEditorProps {
 	content: string;
@@ -45,6 +47,17 @@ interface RichTextEditorProps {
 	className?: string;
 	fontSize?: number;
 	fontFamily?: string;
+	/** Builder sidebar: dashed toolbar, dark editing surface (Figma Text Settings). */
+	theme?: 'default' | 'builderDark';
+	/**
+	 * `canvas` — toolbar applies to the selected text block on the canvas (no sidebar body field).
+	 * Use with the email builder canvas `contentEditable` marked `data-text-canvas-editor`.
+	 */
+	formattingTarget?: 'local' | 'canvas';
+	/** Default body text / foreColor for canvas mode (matches Text block). */
+	defaultBodyColor?: string;
+	/** Links with no inline `color` in `style` use this (block default). */
+	defaultLinkColor?: string;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -53,9 +66,35 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	className,
 	fontSize = 16,
 	fontFamily = 'Arial',
+	theme = 'default',
+	formattingTarget = 'local',
+	defaultBodyColor,
+	defaultLinkColor,
 }) => {
-	const editorRef = useRef<HTMLDivElement>(null);
-	const [selectedColor, setSelectedColor] = useState('#000000');
+	const isBuilderDark = theme === 'builderDark';
+	const isCanvasFormat = formattingTarget === 'canvas';
+	const bodyColor = (defaultBodyColor ?? '#333').trim() || '#333';
+	const defaultLinkColorResolved =
+		(defaultLinkColor ?? '#458DC7').trim() || '#458DC7';
+	const localEditorRef = useRef<HTMLDivElement>(null);
+
+	const getEditorEl = (): HTMLDivElement | null => {
+		if (isCanvasFormat) {
+			return document.querySelector<HTMLDivElement>(
+				'[data-text-canvas-editor="true"]'
+			);
+		}
+		return localEditorRef.current;
+	};
+
+	const emitContent = (html: string) => {
+		onChange(stripRichTextChromeColors(html));
+	};
+	const [selectedColor, setSelectedColor] = useState(bodyColor);
+	useEffect(() => {
+		setSelectedColor(bodyColor);
+	}, [bodyColor]);
+
 	const [isMergeTagsModalOpen, setIsMergeTagsModalOpen] = useState(false);
 	const [showCopyNotification, setShowCopyNotification] = useState(false);
 	const [editorId] = useState(
@@ -93,7 +132,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 	// Check if selection is within a link
 	const isLinkSelected = (): boolean => {
-		if (!editorRef.current) return false;
+		const root = getEditorEl();
+		if (!root) return false;
 		const selection = window.getSelection();
 		if (selection && selection.rangeCount > 0) {
 			const range = selection.getRangeAt(0);
@@ -103,7 +143,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					: (range.commonAncestorContainer as Element);
 
 			const selectedLink = parentElement?.closest('a') as HTMLAnchorElement;
-			return selectedLink !== null && editorRef.current.contains(selectedLink);
+			return selectedLink !== null && root.contains(selectedLink);
 		}
 		return false;
 	};
@@ -125,70 +165,70 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		});
 	};
 
-	// Process all links to open in new tab and apply styling
-	const processLinks = () => {
-		if (editorRef.current) {
-			const links = editorRef.current.querySelectorAll('a');
-			links.forEach((link) => {
-				if (!link.hasAttribute('target')) {
-					link.setAttribute('target', '_blank');
-					link.setAttribute('rel', 'noopener noreferrer');
-				}
-				// Apply styling to make links visible - blue color and underline
-				link.style.textDecoration = 'underline';
-				link.style.color = '#458DC7'; // text-blue-300
-			});
-		}
+	// Process all links to open in new tab; underline always, color only if unset (rich-text color can override).
+	const anchorHasTextColor = (link: HTMLAnchorElement): boolean => {
+		const attr = link.getAttribute('style') || '';
+		if (/(?:^|;)\s*color\s*:/i.test(attr)) return true;
+		if (link.style.color) return true;
+		if (link.hasAttribute('color')) return true;
+		return false;
 	};
 
-	// Apply font changes when props change
+	const processLinks = () => {
+		const root = getEditorEl();
+		if (!root) return;
+		const links = root.querySelectorAll('a');
+		links.forEach((link) => {
+			if (!link.hasAttribute('target')) {
+				link.setAttribute('target', '_blank');
+				link.setAttribute('rel', 'noopener noreferrer');
+			}
+			link.style.textDecoration = 'underline';
+			if (!anchorHasTextColor(link)) {
+				link.style.color = defaultLinkColorResolved;
+			}
+		});
+	};
+
+	// Apply font changes when props change (sidebar editor only — canvas uses block styles)
 	useEffect(() => {
-		if (editorRef.current) {
-			// Set the base font styles on the editor
-			editorRef.current.style.fontSize = `${fontSize}px`;
-			editorRef.current.style.fontFamily = fontFamily;
+		if (isCanvasFormat) return;
+		const root = localEditorRef.current;
+		if (!root) return;
+		root.style.fontSize = `${fontSize}px`;
+		root.style.fontFamily = fontFamily;
 
-			// Use CSS to ensure all content inherits the font
-			editorRef.current.style.setProperty(
-				'--editor-font-size',
-				`${fontSize}px`
-			);
-			editorRef.current.style.setProperty(
-				'--editor-font-family',
-				fontFamily
-			);
+		root.style.setProperty('--editor-font-size', `${fontSize}px`);
+		root.style.setProperty('--editor-font-family', fontFamily);
 
-			// Apply font styles to existing content
-			const allElements = editorRef.current.querySelectorAll('*');
-			allElements.forEach((element: Element) => {
-				const htmlElement = element as HTMLElement;
-				htmlElement.style.fontSize = `${fontSize}px`;
-				htmlElement.style.fontFamily = fontFamily;
-			});
-		}
-	}, [fontSize, fontFamily]);
+		const allElements = root.querySelectorAll('*');
+		allElements.forEach((element: Element) => {
+			const htmlElement = element as HTMLElement;
+			htmlElement.style.fontSize = `${fontSize}px`;
+			htmlElement.style.fontFamily = fontFamily;
+		});
+	}, [fontSize, fontFamily, isCanvasFormat]);
 
 	// Listen for selection changes to update toolbar button states
 	useEffect(() => {
 		const handleSelectionChange = () => {
-			// Only update if the selection is within our editor
+			const root = getEditorEl();
 			const selection = window.getSelection();
 			if (
-				selection &&
-				editorRef.current?.contains(selection.anchorNode)
+				root &&
+				selection?.anchorNode &&
+				root.contains(selection.anchorNode)
 			) {
 				updateActiveFormats();
 			}
 		};
 
-		// Listen for selection changes
 		document.addEventListener('selectionchange', handleSelectionChange);
+		document.addEventListener('mouseup', handleSelectionChange);
 
-		// Also update on mouseup and keyup within the editor
-		const editor = editorRef.current;
-		if (editor) {
-			editor.addEventListener('mouseup', updateActiveFormats);
-			editor.addEventListener('keyup', updateActiveFormats);
+		const local = localEditorRef.current;
+		if (local && !isCanvasFormat) {
+			local.addEventListener('keyup', updateActiveFormats);
 		}
 
 		return () => {
@@ -196,38 +236,38 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				'selectionchange',
 				handleSelectionChange
 			);
-			if (editor) {
-				editor.removeEventListener('mouseup', updateActiveFormats);
-				editor.removeEventListener('keyup', updateActiveFormats);
+			document.removeEventListener('mouseup', handleSelectionChange);
+			if (local && !isCanvasFormat) {
+				local.removeEventListener('keyup', updateActiveFormats);
 			}
 		};
-	}, []);
+	}, [isCanvasFormat]);
 
-	// Handle content initialization
+	// Handle content initialization (local editor only — canvas syncs via TextRenderer)
 	useEffect(() => {
-		if (editorRef.current && content !== editorRef.current.innerHTML) {
-			const currentSelection = window.getSelection();
-			const currentRange =
-				currentSelection && currentSelection.rangeCount > 0
-					? currentSelection.getRangeAt(0)
-					: null;
+		if (isCanvasFormat) return;
+		const root = localEditorRef.current;
+		if (!root || content === root.innerHTML) return;
 
-			editorRef.current.innerHTML = getInitialContent();
+		const currentSelection = window.getSelection();
+		const currentRange =
+			currentSelection && currentSelection.rangeCount > 0
+				? currentSelection.getRangeAt(0)
+				: null;
 
-			// Process all links to open in new tab
-			processLinks();
+		root.innerHTML = getInitialContent();
 
-			// Restore cursor position if it existed
-			if (currentRange && currentSelection) {
-				try {
-					currentSelection.removeAllRanges();
-					currentSelection.addRange(currentRange);
-				} catch (e) {
-					// Ignore cursor restoration errors
-				}
+		processLinks();
+
+		if (currentRange && currentSelection) {
+			try {
+				currentSelection.removeAllRanges();
+				currentSelection.addRange(currentRange);
+			} catch (e) {
+				// Ignore cursor restoration errors
 			}
 		}
-	}, [content]);
+	}, [content, isCanvasFormat]);
 
 	// Helper function to create properly formatted list items
 	const createListItem = () => {
@@ -236,17 +276,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		// Apply current font styles
 		listItem.style.fontSize = `${fontSize}px`;
 		listItem.style.fontFamily = fontFamily;
+		if (isCanvasFormat) {
+			listItem.style.color = bodyColor;
+		}
 		return listItem;
 	};
 
 	const executeCommand = (command: string, value?: string) => {
-		// Set default font styles before executing commands
-		if (editorRef.current) {
-			// @ts-ignore - deprecated API but no modern alternative exists
-			document.execCommand('defaultParagraphSeparator', false, 'div');
-			// @ts-ignore - deprecated API but no modern alternative exists
-			document.execCommand('styleWithCSS', false, 'true');
-		}
+		const root = getEditorEl();
+		if (!root) return;
+
+		// @ts-ignore - deprecated API but no modern alternative exists
+		document.execCommand('defaultParagraphSeparator', false, 'div');
+		// @ts-ignore - deprecated API but no modern alternative exists
+		document.execCommand('styleWithCSS', false, 'true');
 
 		// Special handling for list commands
 		if (
@@ -292,6 +335,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 								// Apply font styles to new list item
 								newListItem.style.fontSize = `${fontSize}px`;
 								newListItem.style.fontFamily = fontFamily;
+								if (isCanvasFormat) {
+									newListItem.style.color = bodyColor;
+								}
 								// Position cursor at start of list item
 								const listRange = document.createRange();
 								listRange.setStart(newListItem, 0);
@@ -308,12 +354,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			document.execCommand(command, false, value);
 		}
 
-		if (editorRef.current) {
-			onChange(editorRef.current.innerHTML);
+		emitContent(root.innerHTML);
 
-			// Apply font styles to any newly created content
-			setTimeout(() => {
-				const allElements = editorRef.current!.querySelectorAll('*');
+		setTimeout(() => {
+			if (!isCanvasFormat) {
+				const allElements = root.querySelectorAll('*');
 				allElements.forEach((element: Element) => {
 					const htmlElement = element as HTMLElement;
 					if (
@@ -329,12 +374,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						htmlElement.style.fontFamily = fontFamily;
 					}
 				});
-				// Process links to open in new tab
-				processLinks();
-				// Update active formats after command execution
-				updateActiveFormats();
-			}, 50);
-		}
+			}
+			processLinks();
+			updateActiveFormats();
+		}, 50);
 	};
 
 	const handlePaste = (e: React.ClipboardEvent) => {
@@ -348,7 +391,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		if (!html) {
 			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand('insertText', false, text);
-			if (editorRef.current) onChange(editorRef.current.innerHTML);
+			if (getEditorEl()) emitContent(getEditorEl()!.innerHTML);
 			return;
 		}
 
@@ -409,16 +452,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		// @ts-ignore - deprecated API but no modern alternative exists
 		document.execCommand('insertHTML', false, cleanedHTML);
 
-		if (editorRef.current) {
+		if (getEditorEl()) {
 			processLinks();
-			onChange(editorRef.current.innerHTML);
+			emitContent(getEditorEl()!.innerHTML);
 		}
 	};
 
 	const handleInput = () => {
-		if (editorRef.current) {
+		if (getEditorEl()) {
 			processLinks(); // Process links after any input
-			onChange(editorRef.current.innerHTML);
+			emitContent(getEditorEl()!.innerHTML);
 			// Update active formats when content changes
 			updateActiveFormats();
 		}
@@ -455,6 +498,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						// Empty list item - exit the list
 						const newParagraph = document.createElement('p');
 						newParagraph.innerHTML = '<br>';
+						if (isCanvasFormat) {
+							newParagraph.style.color = bodyColor;
+						}
 
 						// Insert after the list
 						if (list.nextSibling) {
@@ -508,8 +554,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				// Let normal Enter behavior work for paragraphs
 			}
 
-			if (editorRef.current) {
-				onChange(editorRef.current.innerHTML);
+			if (getEditorEl()) {
+				emitContent(getEditorEl()!.innerHTML);
 			}
 		}
 	};
@@ -562,7 +608,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		if (!selection || !savedSelectionRef.current) return;
 
 		// Focus the editor first
-		editorRef.current?.focus();
+		getEditorEl()?.focus();
 
 		// Restore the selection from saved details
 		const range = document.createRange();
@@ -590,18 +636,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			existingLink.href = linkData.url;
 			existingLink.target = '_blank';
 			existingLink.rel = 'noopener noreferrer';
-			// Apply styling
 			existingLink.style.textDecoration = 'underline';
-			existingLink.style.color = '#458DC7'; // text-blue-300
 		} else {
 			// Create new link
 			const linkElement = document.createElement('a');
 			linkElement.href = linkData.url;
 			linkElement.target = '_blank';
 			linkElement.rel = 'noopener noreferrer';
-			// Apply styling
 			linkElement.style.textDecoration = 'underline';
-			linkElement.style.color = '#458DC7'; // text-blue-300
+			linkElement.style.color = selectedColor;
 
 			try {
 				range.surroundContents(linkElement);
@@ -614,10 +657,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			}
 		}
 
-		if (editorRef.current) {
+		if (getEditorEl()) {
 			// Process links to ensure all styling is applied
 			processLinks();
-			onChange(editorRef.current.innerHTML);
+			emitContent(getEditorEl()!.innerHTML);
 
 			// Update active formats to show link button as selected
 			setTimeout(() => {
@@ -643,16 +686,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			console.error('Failed to copy to clipboard:', error);
 		}
 
-		if (editorRef.current) {
+		if (getEditorEl()) {
 			// Focus the editor first
-			editorRef.current.focus();
+			getEditorEl()?.focus();
 
 			// Insert the merge tag at cursor position
 			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand('insertHTML', false, tagValue);
 
 			// Update the content
-			onChange(editorRef.current.innerHTML);
+			emitContent(getEditorEl()!.innerHTML);
 		}
 
 		// Close the modal
@@ -670,10 +713,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		return `<p>${content}</p>`;
 	};
 
+	const toolbarIconBtn = (active: boolean) =>
+		cn(
+			isBuilderDark
+				? cn(
+						'h-9 w-9 shrink-0 rounded-full border border-white/15 bg-white/[0.06] p-0 text-white shadow-none hover:bg-white/12 hover:text-white',
+						active && 'border-indigo-400/45 bg-indigo-500/35 text-white'
+				  )
+				: cn('h-8 w-8 p-2', active && 'bg-accent')
+		);
+
+	const toolbarSep = isBuilderDark
+		? 'mx-0.5 h-7 w-px shrink-0 bg-white/20'
+		: 'mx-1 h-6 w-px shrink-0 bg-border';
+
 	return (
 		<div className={cn('relative', className)}>
-			{/* Inline styles for comprehensive font control - scoped to this editor instance */}
-			<style>{`
+			{!isCanvasFormat && (
+				<style>{`
 				.${editorId} {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
@@ -718,7 +775,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				.${editorId} a {
 					position: relative !important;
 					text-decoration: underline !important;
-					color: #458DC7 !important;
+					color: ${defaultLinkColorResolved};
 				}
 				.${editorId} a:hover::after {
 					content: attr(href) !important;
@@ -749,241 +806,257 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					margin-top: -5px !important;
 				}
 			`}</style>
-
-			{/* Toolbar - Always visible */}
-			<div className="rich-text-toolbar border rounded-lg p-2 mb-2 bg-white shadow-sm flex flex-wrap gap-1 items-center [&_button]:text-foreground [&_button_svg]:stroke-[2.5]">
-				{/* Text Formatting */}
-				<Button
-					variant="ghost"
-					size="sm"
+			)}
+			<div
+				className={cn(
+					'rich-text-toolbar mb-2 [&_button_svg]:stroke-[2.5]',
+					isBuilderDark
+						? 'flex flex-col gap-2 rounded-xl border border-dashed border-white/25 bg-white/[0.04] p-2 [&_button]:text-white'
+						: 'flex flex-wrap items-center gap-1 rounded-lg border border-border bg-white p-2 shadow-sm [&_button]:text-foreground'
+				)}
+			>
+				<div
 					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.bold && 'bg-accent'
+						isBuilderDark
+							? 'flex w-full flex-wrap items-center gap-1.5'
+							: 'contents'
 					)}
-					onClick={() => executeCommand('bold')}
-					onMouseDown={(e) => e.preventDefault()}
 				>
-					<Bold className="h-4 w-4" />
-				</Button>
+					{/* Text formatting — B, U, I, S (Figma order) */}
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.bold)}
+						onClick={() => executeCommand('bold')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<Bold className="h-4 w-4" />
+					</Button>
 
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.italic && 'bg-accent'
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.underline)}
+						onClick={() => executeCommand('underline')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<Underline className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.italic)}
+						onClick={() => executeCommand('italic')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<Italic className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.strikeThrough)}
+						onClick={() => executeCommand('strikeThrough')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<Strikethrough className="h-4 w-4" />
+					</Button>
+
+					<div className={toolbarSep} />
+
+					{/* Text alignment */}
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.justifyLeft)}
+						onClick={() => executeCommand('justifyLeft')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<AlignLeft className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.justifyCenter)}
+						onClick={() => executeCommand('justifyCenter')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<AlignCenter className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.justifyRight)}
+						onClick={() => executeCommand('justifyRight')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<AlignRight className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(activeFormats.justifyFull)}
+						onClick={() => executeCommand('justifyFull')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<AlignJustify className="h-4 w-4" />
+					</Button>
+
+					<div className={toolbarSep} />
+
+					{/* Lists */}
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(
+							activeFormats.insertUnorderedList
+						)}
+						onClick={() => executeCommand('insertUnorderedList')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<List className="h-4 w-4" />
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						className={toolbarIconBtn(
+							activeFormats.insertOrderedList
+						)}
+						onClick={() => executeCommand('insertOrderedList')}
+						onMouseDown={(e) => e.preventDefault()}
+					>
+						<ListOrdered className="h-4 w-4" />
+					</Button>
+
+					<div className={toolbarSep} />
+
+					{/* Color picker */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(false)}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<Palette className="h-4 w-4" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-2">
+							<div className="flex items-center gap-2">
+								<Input
+									type="color"
+									value={selectedColor}
+									onChange={(e) =>
+										handleColorChange(e.target.value)
+									}
+									className="h-8 w-10 rounded p-1"
+								/>
+							</div>
+						</PopoverContent>
+					</Popover>
+
+					{!isBuilderDark && (
+						<>
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(activeFormats.link)}
+								onClick={handleLinkClick}
+								onMouseDown={(e) => e.preventDefault()}
+							>
+								<Link className="h-4 w-4" />
+							</Button>
+
+							<div className={toolbarSep} />
+
+							<Button
+								variant="ghost"
+								size="sm"
+								className={toolbarIconBtn(false)}
+								onClick={() => setIsMergeTagsModalOpen(true)}
+								onMouseDown={(e) => e.preventDefault()}
+								title={__(
+									'Insert Merge Tags',
+									'doublescale'
+								)}
+							>
+								<MerageTagsIcon />
+							</Button>
+						</>
 					)}
-					onClick={() => executeCommand('italic')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<Italic className="h-4 w-4" />
-				</Button>
+				</div>
 
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.underline && 'bg-accent'
-					)}
-					onClick={() => executeCommand('underline')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<Underline className="h-4 w-4" />
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.strikeThrough && 'bg-accent'
-					)}
-					onClick={() => executeCommand('strikeThrough')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<Strikethrough className="h-4 w-4" />
-				</Button>
-
-				<div className="w-px h-6 bg-border mx-1" />
-
-				{/* Text Alignment */}
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.justifyLeft && 'bg-accent'
-					)}
-					onClick={() => executeCommand('justifyLeft')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<AlignLeft className="h-4 w-4" />
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.justifyCenter && 'bg-accent'
-					)}
-					onClick={() => executeCommand('justifyCenter')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<AlignCenter className="h-4 w-4" />
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.justifyRight && 'bg-accent'
-					)}
-					onClick={() => executeCommand('justifyRight')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<AlignRight className="h-4 w-4" />
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.justifyFull && 'bg-accent'
-					)}
-					onClick={() => executeCommand('justifyFull')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<AlignJustify className="h-4 w-4" />
-				</Button>
-
-				<div className="w-px h-6 bg-border mx-1" />
-
-				{/* Lists */}
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.insertUnorderedList && 'bg-accent'
-					)}
-					onClick={() => executeCommand('insertUnorderedList')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<List className="h-4 w-4" />
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.insertOrderedList && 'bg-accent'
-					)}
-					onClick={() => executeCommand('insertOrderedList')}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<ListOrdered className="h-4 w-4" />
-				</Button>
-
-				<div className="w-px h-6 bg-border mx-1" />
-
-				{/* Color Picker */}
-				<Popover>
-					<PopoverTrigger asChild>
+				{isBuilderDark && (
+					<div className="flex w-full items-stretch gap-2 pt-0.5">
 						<Button
 							variant="ghost"
 							size="sm"
-							className="p-2 h-8 w-8"
+							className={toolbarIconBtn(activeFormats.link)}
+							onClick={handleLinkClick}
+							onMouseDown={(e) => e.preventDefault()}
+							title={__('Insert link', 'doublescale')}
+						>
+							<Link className="h-4 w-4" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							className={cn(
+								'h-9 min-w-0 flex-1 gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-3 text-sm font-medium text-white shadow-none hover:bg-white/12 hover:text-white [&_svg]:size-4'
+							)}
+							onClick={() => setIsMergeTagsModalOpen(true)}
 							onMouseDown={(e) => e.preventDefault()}
 						>
-							<Palette className="h-4 w-4" />
+							<MerageTagsIcon />
+							<span className="min-w-0 flex-1 truncate text-left">
+								{__('Insert Merge Tags', 'doublescale')}
+							</span>
+							<ChevronDown className="ml-auto shrink-0 opacity-70" />
 						</Button>
-					</PopoverTrigger>
-					<PopoverContent className="w-auto p-2">
-						<div className="flex items-center gap-2">
-							<Input
-								type="color"
-								value={selectedColor}
-								onChange={(e) =>
-									handleColorChange(e.target.value)
-								}
-								className="w-10 h-8 p-1 rounded"
-							/>
-							<Input
-								type="text"
-								value={selectedColor}
-								onChange={(e) =>
-									handleColorChange(e.target.value)
-								}
-								className="w-20 h-8 text-xs"
-								placeholder="#000000"
-							/>
-						</div>
-					</PopoverContent>
-				</Popover>
-
-				{/* Link */}
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						'p-2 h-8 w-8',
-						activeFormats.link && 'bg-accent'
-					)}
-					onClick={handleLinkClick}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					<Link className="h-4 w-4" />
-				</Button>
-
-				<div className="w-px h-6 bg-border mx-1" />
-
-				{/* Merge Tags */}
-				<Button
-					variant="ghost"
-					size="sm"
-					className="p-2 h-8 w-8"
-					onClick={() => setIsMergeTagsModalOpen(true)}
-					onMouseDown={(e) => e.preventDefault()}
-					title={__('Insert Merge Tags', 'doublescale')}
-				>
-					<MerageTagsIcon />
-				</Button>
+					</div>
+				)}
 			</div>
 
-			{/* Editor */}
-			<div
-				ref={editorRef}
-				contentEditable
-				suppressContentEditableWarning
-				className={cn(
-					editorId,
-					'min-h-[100px] p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring',
-					'prose prose-sm max-w-none text-foreground',
-					className
-				)}
-				style={
-					{
-						borderColor: '#e5e5e5',
-						fontSize: `${fontSize}px`,
-						fontFamily: fontFamily,
-						lineHeight: '1.5',
-						maxWidth: '287.2px',
-						overflowX: 'scroll',
-						color: 'hsl(var(--foreground))',
-						// Force font inheritance for all child elements
-						'--font-size': `${fontSize}px`,
-						'--font-family': fontFamily,
-					} as React.CSSProperties
-				}
-				onInput={handleInput}
-				onPaste={handlePaste}
-				onKeyDown={handleKeyDown}
-			/>
+			{!isCanvasFormat && (
+				<div
+					ref={localEditorRef}
+					contentEditable
+					suppressContentEditableWarning
+					className={cn(
+						editorId,
+						'min-h-[100px] rounded-lg border p-3 focus:outline-none',
+						isBuilderDark
+							? 'prose prose-sm prose-invert max-w-none border-white/10 bg-white/[0.06] text-zinc-100 focus:ring-1 focus:ring-white/25'
+							: 'prose prose-sm max-w-none text-foreground focus:ring-1 focus:ring-ring'
+					)}
+					style={
+						{
+							borderColor: isBuilderDark
+								? 'rgba(255, 255, 255, 0.12)'
+								: '#e5e5e5',
+							fontSize: `${fontSize}px`,
+							fontFamily: fontFamily,
+							lineHeight: '1.5',
+							maxWidth: isBuilderDark ? '100%' : '287.2px',
+							overflowX: 'auto',
+							color: isBuilderDark
+								? '#f4f4f5'
+								: 'hsl(var(--foreground))',
+							'--font-size': `${fontSize}px`,
+							'--font-family': fontFamily,
+						} as React.CSSProperties
+					}
+					onInput={handleInput}
+					onPaste={handlePaste}
+					onKeyDown={handleKeyDown}
+				/>
+			)}
 
 			{/* Link Dialog */}
 			<LinkDialog

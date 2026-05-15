@@ -36,7 +36,7 @@ const FONT_FAMILIES = [
 
 const labelClass = 'text-white';
 const triggerClass =
-    'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 text-white shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
+    'h-10 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
 const sizeInputClass =
     'h-10 !rounded-lg !border-none !ring-0 !ring-offset-0 !text-white pr-8 shadow-none focus-visible:ring-1 focus-visible:ring-white/30';
 

@@ -1,14 +1,21 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { useRegisteredBlocks } from '@/stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import { DeleteIcon, MoveBlockIcon } from '@doublescale/components';
+import {
+	Popover,
+	PopoverAnchor,
+} from '@/components/ui/popover';
+import {
+	TextBlockAiPopoverPanel,
+	TextBlockAiTrigger,
+} from './TextBlockAiPopover';
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '@doublescale/utils/templateUtils';
 import { ImageResizeHandles } from './ImageResizeHandles';
@@ -86,20 +93,104 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		[block.id, dispatch]
 	);
 
+	const isTextBlock = block.type === 'text';
+	const isTextAiChrome = isTextBlock && !isThisTemplateBlock;
+	const [aiPopoverOpen, setAiPopoverOpen] = useState(false);
+
+	useEffect(() => {
+		if (!isSelected) {
+			setAiPopoverOpen(false);
+		}
+	}, [isSelected]);
+
 	// Prepare props for rendering
 	// If unknown, pass original type and props for preservation
 	const renderProps =
 		isUnknown && info
 			? {
-					originalType: info.originalType,
-					originalProps: block.props,
-				}
+				originalType: info.originalType,
+				originalProps: block.props,
+			}
 			: block.props;
 
 	// Check if this is an image block and should show resize handles
 	const isImageBlock =
 		block.type === 'image' && isSelected && !isThisTemplateBlock;
 	const imageProps = isImageBlock ? (renderProps as any) : null;
+
+	const toolbar =
+		isSelected && (
+			<div
+				className="absolute -top-[34px] -left-[1.5px] z-20 flex items-center gap-2 rounded-t-xl bg-white px-2 py-1 text-sm shadow-md"
+				style={{ boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)' }}
+			>
+				{!isThisTemplateBlock && (
+					<div
+						{...listeners}
+						className="flex cursor-grab items-center border-r border-border pr-2 text-secondary-foreground hover:cursor-grabbing"
+					>
+						<MoveBlockIcon width={16} height={16} />
+					</div>
+				)}
+				{isTextAiChrome && <TextBlockAiTrigger />}
+				<span className="border-r border-border pr-2 text-primary">
+					{blockDefinition.name || block.type}
+				</span>
+				{!isThisTemplateBlock && (
+					<span
+						className="cursor-pointer text-destructive"
+						onClick={handleDeleteBlock}
+					>
+						<DeleteIcon width={16} height={16}/>
+					</span>
+				)}
+			</div>
+		);
+
+	const canvasInner = blockDefinition.Renderer ? (
+		block.type === 'text' ? (
+			<blockDefinition.Renderer
+				props={renderProps as any}
+				canvasEditable={isSelected && !isThisTemplateBlock}
+				onCanvasContentChange={(content: string) =>
+					dispatch(STORE_KEY).updateBlock(block.id, {
+						content,
+					})
+				}
+			/>
+		) : (
+			<blockDefinition.Renderer
+				props={
+					isImageBlock && imageProps
+						? {
+							...renderProps,
+							renderResizeHandles: (
+								containerRef: React.RefObject<HTMLDivElement>
+							) =>
+								isImageBlock && imageProps ? (
+									<ImageResizeHandles
+										width={imageProps.width || '100%'}
+										height={imageProps.height || 'auto'}
+										onResize={handleImageResize}
+										containerRef={containerRef}
+									/>
+								) : null,
+						}
+						: (renderProps as any)
+				}
+			/>
+		)
+	) : (
+		<div className="text-muted-foreground">
+			{__('No renderer available', 'doublescale')}
+		</div>
+	);
+
+	const canvasWrap = (
+		<div data-block-canvas-content className="relative p-2">
+			{canvasInner}
+		</div>
+	);
 
 	return (
 		<div
@@ -115,70 +206,35 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			`}
 			onClick={handleBlockClick}
 		>
-			{/* Block Controls */}
-			{isSelected && (
-				<div className="absolute -top-[34px] -left-[1.5px] flex items-center gap-2 bg-white shadow-md rounded-t-xl px-2 py-1 text-sm z-10"
-				style={{boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)'}}
+			{isTextAiChrome ? (
+				<Popover
+					open={aiPopoverOpen}
+					onOpenChange={setAiPopoverOpen}
+					modal={false}
 				>
-					{/* Only show drag handle for non-template blocks */}
-					{!isThisTemplateBlock && (
+					<PopoverAnchor asChild>
 						<div
-							{...listeners}
-							className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground border-r border-border pr-2"
-						>
-							<MoveBlockIcon width={16} height={16} />
-						</div>
-					)}
-					<span className="text-primary border-r border-border pr-2">
-						{blockDefinition.name || block.type}
-					</span>
-					{/* Only show delete button for non-template blocks */}
-					{!isThisTemplateBlock && (
-						<span
-							className="text-destructive cursor-pointer"
-							onClick={handleDeleteBlock}
-						>
-							<DeleteIcon />
-						</span>
-					)}
-				</div>
-			)}
-
-			{/* Block Content */}
-			<div className="p-2 relative">
-				{blockDefinition.Renderer ? (
-					<blockDefinition.Renderer
-						props={
-							isImageBlock && imageProps
-								? {
-										...renderProps,
-										renderResizeHandles: (
-											containerRef: React.RefObject<HTMLDivElement>
-										) =>
-											isImageBlock && imageProps ? (
-												<ImageResizeHandles
-													width={
-														imageProps.width ||
-														'100%'
-													}
-													height={
-														imageProps.height ||
-														'auto'
-													}
-													onResize={handleImageResize}
-													containerRef={containerRef}
-												/>
-											) : null,
-									}
-								: (renderProps as any)
+							aria-hidden
+							className="pointer-events-none absolute bottom-0 left-0 right-0 h-0 w-full"
+						/>
+					</PopoverAnchor>
+					{toolbar}
+					{canvasWrap}
+					<TextBlockAiPopoverPanel
+						onApplyContent={(content) =>
+							dispatch(STORE_KEY).updateBlock(block.id, {
+								content,
+							})
 						}
+						onClose={() => setAiPopoverOpen(false)}
 					/>
-				) : (
-					<div className="text-muted-foreground">
-						{__('No renderer available', 'doublescale')}
-					</div>
-				)}
-			</div>
+				</Popover>
+			) : (
+				<>
+					{toolbar}
+					{canvasWrap}
+				</>
+			)}
 		</div>
 	);
 };

@@ -46,7 +46,7 @@ const TextBlock = {
 	isProActivated: false,
 	isPro: false,
 	defaultProps: {
-		content: '<p>Your text here</p>',
+		content: '<p style="color:#333">Your text here</p>',
 		hyperlink: 'https://',
 		fontSize: 16,
 		color: '#333',

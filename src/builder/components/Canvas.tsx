@@ -64,9 +64,9 @@ const Canvas = () => {
 	return (
 		<div className="flex-1 overflow-auto h-full">
 			<style>{`
-				/* Disable pointer events on links and buttons in canvas content only */
-				#doublescale-email-builder [data-block-id] a,
-				#doublescale-email-builder [data-block-id] button {
+				/* Disable pointer events on links and buttons inside canvas preview only (not block chrome / toolbar). */
+				#doublescale-email-builder [data-block-id] [data-block-canvas-content] a,
+				#doublescale-email-builder [data-block-id] [data-block-canvas-content] button {
 					pointer-events: none !important;
 					cursor: default !important;
 				}

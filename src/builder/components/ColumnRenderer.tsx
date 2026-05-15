@@ -22,6 +22,7 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
 import { isSectionTemplate } from '@doublescale/utils/templateUtils';
+import TextBlock from '../blocks/basic/TextBlock';
 
 interface ColumnRendererProps {
 	column: EmailColumn;
@@ -51,14 +52,15 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	});
 
 	const addTextBlock = () => {
+		const base = { ...TextBlock.defaultProps } as Record<string, unknown>;
+		delete base.isProActivated;
+		delete base.isPro;
 		const newBlock = {
 			id: `block-${Date.now()}`,
 			type: 'text' as const,
 			props: {
-				content: __('Your text here', 'doublescale'),
-				fontSize: 16,
-				color: '#333',
-				align: 'left',
+				...base,
+				content: `<p style="color:#333">${__('Your text here', 'doublescale')}</p>`,
 			},
 		};
 
@@ -192,7 +194,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 								else if (
 									block.props?.inlineLayout &&
 									block.props?.containerId ===
-										'grid2-container'
+									'grid2-container'
 								) {
 									const containerId = block.props.containerId;
 									const gridBlocks: any[] = [];
@@ -202,7 +204,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										gridBlocks.push(column.blocks[i]);
 										i++;
@@ -329,7 +331,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 								else if (
 									block.props?.inlineLayout &&
 									block.props?.containerId ===
-										'grid3-container'
+									'grid3-container'
 								) {
 									const containerId = block.props.containerId;
 									const gridBlocks: any[] = [];
@@ -339,7 +341,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										gridBlocks.push(column.blocks[i]);
 										i++;
@@ -466,7 +468,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 								else if (
 									block.props?.inlineLayout &&
 									block.props?.containerId ===
-										'grid4-container'
+									'grid4-container'
 								) {
 									const containerId = block.props.containerId;
 									const gridBlocks: any[] = [];
@@ -476,7 +478,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										gridBlocks.push(column.blocks[i]);
 										i++;
@@ -603,7 +605,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 								else if (
 									block.props?.inlineLayout &&
 									block.props?.containerId ===
-										'grid5-container'
+									'grid5-container'
 								) {
 									const containerId = block.props.containerId;
 									const gridBlocks: any[] = [];
@@ -613,7 +615,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										gridBlocks.push(column.blocks[i]);
 										i++;
@@ -741,7 +743,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 								else if (
 									block.props?.inlineLayout &&
 									block.props?.containerId ===
-										'grid6-container'
+									'grid6-container'
 								) {
 									const containerId = block.props.containerId;
 									const gridBlocks: any[] = [];
@@ -751,7 +753,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										gridBlocks.push(column.blocks[i]);
 										i++;
@@ -915,7 +917,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 										i < column.blocks.length &&
 										column.blocks[i].props?.inlineLayout &&
 										column.blocks[i].props?.containerId ===
-											containerId
+										containerId
 									) {
 										inlineBlocks.push(column.blocks[i]);
 										i++;

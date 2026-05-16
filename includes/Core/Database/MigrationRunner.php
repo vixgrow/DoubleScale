@@ -96,11 +96,13 @@ class MigrationRunner {
 		require_once $file;
 
 		$class = self::class_from_file( $file );
-		if ( $class && class_exists( $class ) ) {
-			$instance = new $class();
-			if ( method_exists( $instance, 'run' ) ) {
-				$instance->run();
-			}
+		if ( ! $class || ! class_exists( $class ) ) {
+			return;
+		}
+
+		$instance = new $class();
+		if ( method_exists( $instance, 'run' ) ) {
+			$instance->run();
 		}
 
 		$wpdb->insert(

@@ -30,7 +30,6 @@ use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Constants\MessageSourceTypes;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 use DoubleScale\Modules\Campaigns\Campaign\EmailProcessing;
-use DoubleScale\Modules\Campaigns\Campaign\AutomatedCampaignHandler;
 // use DoubleScale\Modules\Campaigns\Campaign\SmsProcessing; // Moved to Pro
 // use DoubleScale\Modules\Campaigns\Campaign\WhatsappProcessing; // Moved to Pro
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
@@ -397,14 +396,17 @@ class RestCampaignController extends AbstractCampaignController {
 
 		$this->channel = $type;
 
-		// Validate provider connection for Sms campaigns - Moved to Pro
-		// Sms campaigns are Pro-only features
-		// if ( $type === CampaignChannel::STR_SMS ) {
-		// $provider_check = $this->validate_provider_connection( $type );
-		// if ( is_wp_error( $provider_check ) ) {
-		// return $provider_check;
-		// }
-		// }
+		// Automated campaigns require Pro.
+		$request_settings = $request->get_param( 'settings' );
+		if ( is_array( $request_settings ) && ! empty( $request_settings['automated'] ) ) {
+			if ( ! class_exists( \DoubleScale\Pro\Modules\Campaigns\Automated\AutomatedCampaignsFeature::class ) ) {
+				return new WP_Error(
+					'pro_feature_required',
+					__( 'Automated campaigns require DoubleScale Pro', 'doublescale' ),
+					array( 'status' => 403 )
+				);
+			}
+		}
 
 		$response = parent::create_item( $request );
 		if ( is_wp_error( $response ) ) {
@@ -417,8 +419,10 @@ class RestCampaignController extends AbstractCampaignController {
 		$data = $response->get_data();
 		if ( $data instanceof CampaignModel ) {
 			$settings = is_array( $data->settings ) ? $data->settings : array();
-			if ( ! empty( $settings['automated'] ) && 'active' === $data->status ) {
-				AutomatedCampaignHandler::instance()->schedule_campaign_cron( $data );
+			if ( ! empty( $settings['automated'] ) && 'active' === $data->status
+				&& class_exists( \DoubleScale\Pro\Modules\Campaigns\Automated\AutomatedCampaignsFeature::class )
+			) {
+				\DoubleScale\Pro\Modules\Campaigns\Automated\AutomatedCampaignHandler::instance()->schedule_campaign_cron( $data );
 			}
 		}
 
@@ -445,9 +449,17 @@ class RestCampaignController extends AbstractCampaignController {
 		$new_status = $request->get_param( 'status' );
 		$settings   = is_array( $campaign->settings ) ? $campaign->settings : array();
 
-		// Handle automated campaign activation/deactivation
+		// Handle automated campaign activation/deactivation (Pro only).
 		if ( ! empty( $settings['automated'] ) ) {
-			$handler = \DoubleScale\Modules\Campaigns\Campaign\AutomatedCampaignHandler::instance();
+			if ( ! class_exists( \DoubleScale\Pro\Modules\Campaigns\Automated\AutomatedCampaignsFeature::class ) ) {
+				return new WP_Error(
+					'pro_feature_required',
+					__( 'Automated campaigns require DoubleScale Pro', 'doublescale' ),
+					array( 'status' => 403 )
+				);
+			}
+
+			$handler = \DoubleScale\Pro\Modules\Campaigns\Automated\AutomatedCampaignHandler::instance();
 
 			if ( $new_status && 'draft' === $new_status && 'active' === $campaign->status ) {
 				$handler->unschedule_campaign_cron( $campaign->id );

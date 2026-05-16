@@ -14,6 +14,8 @@ import standardCampaignImg from '../../../../../../assets/images/standard-campai
 //@ts-ignore asset lives under plugin root (outside ts rootDir)
 import automatedCampaignImg from '../../../../../../assets/images/automated-campaign.png';
 
+declare const doublescalePro: { isPro?: boolean } | undefined;
+
 interface CampaignTypesProps {
 	selectedType: CampaignType;
 	onTypeChange: (type: CampaignType) => void;
@@ -23,6 +25,9 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 	selectedType,
 	onTypeChange,
 }) => {
+	const isPro =
+		typeof doublescalePro !== 'undefined' && !!doublescalePro?.isPro;
+
 	const options = [
 		{
 			label: __('Standard', 'doublescale'),
@@ -33,10 +38,9 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			),
 			type: 'standard' as const,
 			image: standardCampaignImg,
-			iconPanelClass:
-				'bg-[#D9E9F3]',
-			badgeClass:
-				'bg-[#D9E9F3] text-[#0D9DFC]',
+			iconPanelClass: 'bg-[#D9E9F3]',
+			badgeClass: 'bg-[#D9E9F3] text-[#0D9DFC]',
+			requiresPro: false,
 		},
 		{
 			label: __('Automated', 'doublescale'),
@@ -47,10 +51,9 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			),
 			type: 'automated' as const,
 			image: automatedCampaignImg,
-			iconPanelClass:
-				'bg-[#FAEADF]',
-			badgeClass:
-				'bg-[#FAEADF] text-[#CB5301]',
+			iconPanelClass: 'bg-[#FAEADF]',
+			badgeClass: 'bg-[#FAEADF] text-[#CB5301]',
+			requiresPro: true,
 		},
 	];
 
@@ -67,18 +70,24 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 
 			<div className="flex flex-col gap-6">
 				{options.map((opt) => {
-					const isSelected = selectedType === opt.type;
+					const isLocked = opt.requiresPro && !isPro;
+					const isSelected = !isLocked && selectedType === opt.type;
 					return (
 						<button
 							key={opt.type}
 							type="button"
-							onClick={() =>
-								onTypeChange(opt.type as CampaignType)
-							}
+							onClick={() => {
+								if (!isLocked) {
+									onTypeChange(opt.type as CampaignType);
+								}
+							}}
+							disabled={isLocked}
 							className={cn(
 								'group relative flex w-full items-center rounded-xl border text-left transition-all duration-200',
-								'hover:border-primary/35 hover:shadow-md',
 								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+								isLocked
+									? 'cursor-not-allowed opacity-60 border-border bg-card'
+									: 'hover:border-primary/35 hover:shadow-md',
 								isSelected
 									? 'border-primary bg-white ring-1 ring-primary'
 									: 'border-border bg-card'
@@ -110,9 +119,19 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 								<div className="min-w-0 flex-1">
 									<p className="text-sm font-semibold tracking-tight text-foreground">
 										{opt.label}
+										{isLocked && (
+											<span className="ml-2 inline-flex items-center rounded-md bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 text-xs font-semibold text-white">
+												PRO
+											</span>
+										)}
 									</p>
 									<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-										{opt.description}
+										{isLocked
+											? __(
+													'Upgrade to DoubleScale Pro to unlock automated campaigns triggered by content events or recurring schedules.',
+													'doublescale'
+												)
+											: opt.description}
 									</p>
 								</div>
 

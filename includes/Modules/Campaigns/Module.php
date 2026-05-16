@@ -73,7 +73,6 @@ final class Module extends AbstractModule {
 		Emails\EmailBuilder::instance();
 		Campaign\EmailProcessing::instance();
 		Campaign\WhatsappProcessing::instance();
-		Campaign\AutomatedCampaignHandler::instance();
 
 		add_action( 'doublescale_register_email_blocks', array( $this, 'register_email_blocks' ) );
 		add_action( 'init', array( $this, 'register_cron_schedules' ) );

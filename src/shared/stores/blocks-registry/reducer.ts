@@ -1,36 +1,56 @@
 import type { Reducer } from 'redux';
-import BannerBlock from '@/builder/blocks/basic/BannerBlock';
+import { __ } from '@wordpress/i18n';
+import {
+  BannerBlockIcon,
+  DividerBlockIcon,
+  HtmlBlockIcon,
+  ImageBlockIcon,
+  MenuBlockIcon,
+  PreheaderBlockIcon,
+  ProductBlockIcon,
+  SignatureBlockIcon,
+  SocialMediaBlockIcon,
+  TableBlockIcon,
+  TimerBlockIcon,
+  VideoBlockIcon,
+} from '@doublescale/components';
 import ButtonBlock from '@/builder/blocks/basic/ButtonBlock';
-import DividerBlock from '@/builder/blocks/basic/DividerBlock';
-import HtmlBlock from '@/builder/blocks/basic/HtmlBlock';
-import ImageBlock from '@/builder/blocks/basic/ImageBlock';
-import MenuBlock from '@/builder/blocks/basic/MenuBlock';
-import PreheaderBlock from '@/builder/blocks/basic/PreheaderBlock';
-import ProductBlock from '@/builder/blocks/basic/ProductBlock';
-import SocialMediaBlock from '@/builder/blocks/basic/SocialMediaBlock';
 import TextBlock from '@/builder/blocks/basic/TextBlock';
-import TimerBlock from '@/builder/blocks/basic/TimerBlock';
 import UnknownBlock from '@/builder/blocks/basic/UnknownBlock';
-import VideoBlock from '@/builder/blocks/basic/VideoBlock';
 import { REGISTER_BLOCKS } from './constants';
 import type { BlocksRegistryActionTypes, BlocksRegistryState } from './types';
 
-// Initial state with default blocks
-// Ensure all blocks have required properties
+// Free ships text + button as the two core blocks. The rest are registered as
+// Pro stubs (name + icon + isPro: true) so they appear in the blocks sidebar
+// with a Pro badge — mirroring how the libraries panel surfaces locked items.
+// Pro extends the registry at boot via `registerBlocks({ ... })` from
+// DoubleScale-Pro/src/client/index.tsx, which merges in defaultProps/Renderer/Editor
+// and flips isProActivated to true. Unknown is the safety fallback for any
+// block type the registry doesn't know about at render time.
+const proStub = (type: string, name: string, icon: React.FC<any>) => ({
+  type,
+  name,
+  icon,
+  isPro: true,
+  isProActivated: false,
+}) as any;
+
 const initialState: BlocksRegistryState = {
   blocks: {
-    image: { ...ImageBlock, type: 'image' } as any,
     text: { ...TextBlock, type: 'text' } as any,
     button: { ...ButtonBlock, type: 'button' } as any,
-    divider: { ...DividerBlock, type: 'divider' } as any,
-    html: { ...HtmlBlock, type: 'html' } as any,
-    banner: { ...BannerBlock, type: 'banner' } as any,
-    menu: { ...MenuBlock, type: 'menu' } as any,
-    preheader: { ...PreheaderBlock, type: 'preheader' } as any,
-    social_media: { ...SocialMediaBlock, type: 'social_media' } as any,
-    timer: { ...TimerBlock, type: 'timer' } as any,
-    video: { ...VideoBlock, type: 'video' } as any,
-    product: { ...ProductBlock, type: 'product' } as any,
+    image: proStub('image', __('Image', 'doublescale'), ImageBlockIcon),
+    divider: proStub('divider', __('Divider', 'doublescale'), DividerBlockIcon),
+    html: proStub('html', __('HTML', 'doublescale'), HtmlBlockIcon),
+    banner: proStub('banner', __('Banner', 'doublescale'), BannerBlockIcon),
+    menu: proStub('menu', __('Menu', 'doublescale'), MenuBlockIcon),
+    preheader: proStub('preheader', __('Preheader', 'doublescale'), PreheaderBlockIcon),
+    signature: proStub('signature', __('Signature', 'doublescale'), SignatureBlockIcon),
+    social_media: proStub('social_media', __('Social Media', 'doublescale'), SocialMediaBlockIcon),
+    table: proStub('table', __('Table', 'doublescale'), TableBlockIcon),
+    timer: proStub('timer', __('Timer', 'doublescale'), TimerBlockIcon),
+    video: proStub('video', __('Video', 'doublescale'), VideoBlockIcon),
+    product: proStub('product', __('Product', 'doublescale'), ProductBlockIcon),
     unknown: { ...UnknownBlock, type: 'unknown', isPro: false, isProActivated: false } as any,
   },
 };
@@ -62,4 +82,3 @@ const reducer: Reducer<BlocksRegistryState, BlocksRegistryActionTypes> = (
 };
 
 export default reducer;
-

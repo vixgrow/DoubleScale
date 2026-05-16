@@ -1,4 +1,4 @@
-=== DoubleScale | All-In-One Business Growth Platform ===
+=== DoubleScale ===
 Contributors: vixgrowy
 Tags: crm, marketing automation, booking, email campaigns, helpdesk
 Requires at least: 5.8
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-DoubleScale is eight tools in one WordPress plugin: a CRM, email & SMS campaigns, booking, tasks, an SMTP router, a shared helpdesk inbox, analytics, and team management — natively in wp-admin.
+WordPress-native CRM, campaigns, booking, SMTP, helpdesk, tasks, analytics, and automations in one plugin.
 
 == Description ==
 

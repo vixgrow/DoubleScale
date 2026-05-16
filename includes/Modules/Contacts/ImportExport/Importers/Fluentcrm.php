@@ -12,6 +12,8 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transactional CRM/scheduler/campaign DB ops; persistent caching is impractical for write-heavy or per-request lookups (matches WooCommerce/FluentCRM precedent).
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -152,8 +154,9 @@ class Fluentcrm extends Importer {
 		global $wpdb;
 
 		$tags_table = $wpdb->prefix . 'fc_tags';
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from Fluentcrm plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $tags_table is a trusted prefixed table name from the Fluent CRM plugin.
 		$tags = $wpdb->get_results( "SELECT * FROM $tags_table" );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$tags_array = array();
 		foreach ( $tags ?? array() as $tag ) {
@@ -175,8 +178,9 @@ class Fluentcrm extends Importer {
 		global $wpdb;
 
 		$lists_table = $wpdb->prefix . 'fc_lists';
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from Fluentcrm plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $lists_table is a trusted prefixed table name from the Fluent CRM plugin.
 		$lists = $wpdb->get_results( "SELECT * FROM $lists_table" );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$lists_array = array();
 		foreach ( $lists ?? array() as $list ) {

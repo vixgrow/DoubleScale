@@ -2,6 +2,8 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transactional CRM/scheduler/campaign DB ops; persistent caching is impractical for write-heavy or per-request lookups (matches WooCommerce/FluentCRM precedent).
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -67,7 +69,7 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
@@ -81,6 +83,7 @@ class BookedSlotModel extends Model {
 				$start
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $count > 0;
 	}
@@ -90,7 +93,7 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
@@ -106,6 +109,7 @@ class BookedSlotModel extends Model {
 				$start
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return $count > 0;
 	}
@@ -115,8 +119,8 @@ class BookedSlotModel extends Model {
 
 		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
-		return (int) $wpdb->get_var(
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
+		$result = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
 				WHERE calendar_id = %d
@@ -129,6 +133,9 @@ class BookedSlotModel extends Model {
 				$start
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $result;
 	}
 
 	private static function is_duplicate_entry_error( $e ) {

@@ -11,6 +11,8 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transactional CRM/scheduler/campaign DB ops; persistent caching is impractical for write-heavy or per-request lookups (matches WooCommerce/FluentCRM precedent).
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -183,8 +185,9 @@ class Import {
 		global $wpdb;
 		$terms_table = $wpdb->prefix . 'bwfan_terms';
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from FunnelKit plugin.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $terms_table is a trusted prefixed table name from the FunnelKit plugin.
 		$terms = $wpdb->get_results( "SELECT * FROM $terms_table" );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$lists_array = array();
 		$tags_array  = array();

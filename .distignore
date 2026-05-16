@@ -12,6 +12,7 @@
 /tools
 
 # Files
+.DS_Store
 .distignore
 .editorconfig
 .gitattributes

@@ -11,6 +11,8 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transactional CRM/scheduler/campaign DB ops; persistent caching is impractical for write-heavy or per-request lookups (matches WooCommerce/FluentCRM precedent).
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -93,11 +95,13 @@ class Memberpress extends Importer {
 		$filter_clause = '';
 
 		if ( $has_filter ) {
-			$placeholders  = implode( ',', array_fill( 0, count( $filter_ids ), '%d' ) );
+			$placeholders = implode( ',', array_fill( 0, count( $filter_ids ), '%d' ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $transactions_table is a trusted prefixed table name; $placeholders is the dynamically built '%d,%d…' placeholder string bound via spread $filter_ids.
 			$filter_clause = $wpdb->prepare(
 				"INNER JOIN $transactions_table AS tf ON m.user_id = tf.user_id AND tf.status = 'complete' AND tf.product_id IN ($placeholders)",
 				...$filter_ids
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		}
 
 		$count_sql = "SELECT COUNT(DISTINCT m.user_id) FROM $members_table AS m";

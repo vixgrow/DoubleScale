@@ -7,6 +7,8 @@
 
 namespace DoubleScale\Database;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- transactional CRM/scheduler/campaign DB ops; persistent caching is impractical for write-heavy or per-request lookups (matches WooCommerce/FluentCRM precedent).
+
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Container;

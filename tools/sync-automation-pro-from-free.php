@@ -14,6 +14,7 @@ $free_base = dirname( __DIR__ ) . '/includes/Modules/Automations';
 $pro_base = dirname( __DIR__, 2 ) . '/DoubleScale-Pro/includes/Modules/Automations';
 
 if ( ! is_dir( $free_base ) || ! is_dir( dirname( $pro_base ) ) ) {
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI dev tool (not shipped); WP_Filesystem unavailable outside WP runtime.
 	fwrite( STDERR, "Paths not found. free_base=$free_base pro_parent=" . dirname( $pro_base ) . "\n" );
 	exit( 1 );
 }
@@ -75,6 +76,7 @@ function build_pro_action( string $free_content ): string {
 function write_if_changed( string $path, string $content ): void {
 	$dir = dirname( $path );
 	if ( ! is_dir( $dir ) ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir -- CLI dev tool (not shipped); WP_Filesystem unavailable outside WP runtime.
 		mkdir( $dir, 0775, true );
 	}
 	$old = is_file( $path ) ? (string) file_get_contents( $path ) : null;
@@ -114,6 +116,7 @@ foreach ( $rii as $file ) {
 		$class   = $cm[1];
 		$props   = extract_property_block( $src, 'Trigger' );
 		if ( null === $props || '' === $props ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI dev tool (not shipped).
 			fwrite( STDERR, "Skip stub (no props): {$file->getPathname()}\n" );
 			continue;
 		}
@@ -193,6 +196,7 @@ foreach ( $rii as $file ) {
 		$class   = $cm[1];
 		$props   = extract_property_block( $src, 'Action' );
 		if ( null === $props || '' === $props ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI dev tool (not shipped).
 			fwrite( STDERR, "Skip action stub (no props): {$file->getPathname()}\n" );
 			continue;
 		}

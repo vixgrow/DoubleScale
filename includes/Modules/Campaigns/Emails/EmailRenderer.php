@@ -104,7 +104,7 @@ class EmailRenderer {
 		// Parse the JSON content
 		$content = json_decode( $template->body, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			// Handle legacy templates or error cases
+			// Plain-HTML templates: return as-is, no builder transform.
 			return $template->body;
 		}
 

@@ -19,7 +19,7 @@ use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Whatsapp;

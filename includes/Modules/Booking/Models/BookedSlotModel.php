@@ -67,7 +67,7 @@ class BookedSlotModel extends Model {
 	public static function has_overlap( $calendar_id, $start, $end ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
+		$table = esc_sql( $wpdb->prefix . 'doublescale_booking_booked_slots' );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
@@ -91,7 +91,7 @@ class BookedSlotModel extends Model {
 	public static function has_overlap_excluding( $calendar_id, $start, $end, $exclude_booking_id ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
+		$table = esc_sql( $wpdb->prefix . 'doublescale_booking_booked_slots' );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$count = (int) $wpdb->get_var(
@@ -117,7 +117,7 @@ class BookedSlotModel extends Model {
 	public static function count_overlaps( $calendar_id, $start, $end ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'doublescale_booking_booked_slots';
+		$table = esc_sql( $wpdb->prefix . 'doublescale_booking_booked_slots' );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the trusted prefixed table name; all values are bound via prepare().
 		$result = (int) $wpdb->get_var(

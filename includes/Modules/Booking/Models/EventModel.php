@@ -1139,10 +1139,8 @@ class EventModel extends Model {
 	private function get_effective_availability() {
 		$availability = $this->processed_availability !== null ? $this->processed_availability : $this->availability;
 
-		// Legacy rows can come back from maybe_unserialize / json_decode as stdClass
-		// trees (e.g. `override` keyed by date string was stored as a JSON object).
-		// Downstream code at line ~1913 uses array-bracket access, so coerce the
-		// whole structure to nested arrays here once and cache.
+		// Coerce stdClass leaves (from json_decode) to nested arrays so
+		// downstream array-bracket access is safe.
 		if ( is_object( $availability ) ) {
 			$availability = (array) $availability;
 		}
@@ -1225,8 +1223,8 @@ class EventModel extends Model {
 		$is_common     = $this->availability_meta['is_common'] ?? false;
 		$calendar_type = $this->calendar->type;
 
-		// Convert Eloquent model to plain array so we can freely set keys
-		if ( is_object( $availability ) && method_exists( $availability, 'toCompatibleArray' ) ) {
+		// Normalise to a plain array so this method can set keys freely.
+		if ( $availability instanceof AvailabilityModel ) {
 			$availability = $availability->toCompatibleArray();
 		} elseif ( is_object( $availability ) ) {
 			$availability = (array) $availability;
@@ -2707,8 +2705,8 @@ class EventModel extends Model {
 		// enforced at role-grant time by Services\BookingProvisioner, and user
 		// deletion triggers BookingProvisioner::purge_host_data() which
 		// deactivates orphan calendars. If we still hit a missing owner here
-		// (legacy data or a race with delete_user), warn and skip rather than
-		// throwing, so historical event editing doesn't hard-fail.
+		// (e.g. a race with delete_user), warn and skip rather than throwing
+		// so historical event editing doesn't hard-fail.
 		$user = get_userdata( (int) $this->calendar->user_id );
 		if ( ! $user || ! $user->exists() ) {
 			doublescale_get_logger()->warning(

@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Exception;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 
@@ -170,7 +170,7 @@ abstract class Goal {
 	 * @return void
 	 */
 	public function enqueue_goal( $automation_contact, $step ) {
-		Plugin::instance()->automations_tasks->enqueue_sync( 'process_automation_goal', $step, $automation_contact->id );
+		PluginKernel::instance()->automations_tasks->enqueue_sync( 'process_automation_goal', $step, $automation_contact->id );
 	}
 
 	/**

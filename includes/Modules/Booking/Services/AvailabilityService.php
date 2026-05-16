@@ -42,10 +42,9 @@ class AvailabilityService
 
 		// Invariant: a user's first availability row MUST be the default,
 		// because events require an availability and the system needs a
-		// fallback. Previously this rule lived only in the REST controller,
-		// so the legacy Availabilities::add_availability path could create
-		// a non-default first row and leave the user with no default. The
-		// rule now lives here as the single source of truth.
+		// fallback when no explicit choice is made. Enforced here as the
+		// single source of truth, so every entry point (REST, facade, tests)
+		// gets the same behaviour.
 		$has_existing = AvailabilityModel::where('user_id', $user_id)->exists();
 		if (!$has_existing) {
 			$default = true;

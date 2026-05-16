@@ -331,9 +331,9 @@ class Process {
 			return $query;
 		}
 
-		// Handle RuleItem format (from RulesBuilder / REST): convert to Filter format
-		// RuleItem has: rule, operator, value, selectedGroup (or legacy "group")
-		// Filter needs: filter, group, operator, value
+		// Handle RuleItem format (from RulesBuilder / REST): convert to Filter format.
+		// RuleItem has: rule, operator, value, selectedGroup (or "group" alias).
+		// Filter needs: filter, group, operator, value.
 		if ( isset( $filter['rule'] ) && ( isset( $filter['selectedGroup'] ) || isset( $filter['group'] ) ) ) {
 			$group = isset( $filter['selectedGroup'] ) ? $filter['selectedGroup'] : $filter['group'];
 			$filter = array(

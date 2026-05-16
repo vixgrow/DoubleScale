@@ -82,7 +82,10 @@ class RestGeneralController extends RestController {
 	}
 
 	/**
-	 * Resolves DealModel class when Deals is available (Pro or legacy namespace).
+	 * Resolves DealModel FQCN when the Deals module is installed.
+	 *
+	 * Tries the canonical Pro namespace first, then the unprefixed alias that
+	 * Pro's autoloader exposes.
 	 *
 	 * @return class-string|null
 	 */

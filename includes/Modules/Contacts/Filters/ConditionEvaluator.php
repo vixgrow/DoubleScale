@@ -104,7 +104,7 @@ class ConditionEvaluator {
 	 * @return bool True if condition matches
 	 */
 	public function evaluate_single_condition( array $condition, ContactModel $contact ) {
-		// Handle RuleItem format (from RulesBuilder / REST): rule + selectedGroup or legacy "group"
+		// Handle RuleItem format (from RulesBuilder / REST): rule + selectedGroup or "group" alias.
 		if ( isset( $condition['rule'] ) && ( isset( $condition['selectedGroup'] ) || isset( $condition['group'] ) ) ) {
 			$group = isset( $condition['selectedGroup'] ) ? $condition['selectedGroup'] : $condition['group'];
 			$condition = array(
@@ -594,7 +594,7 @@ class ConditionEvaluator {
 
 		$check_levels = is_array( $value ) ? $value : array( $value );
 
-		// Normalize to level IDs (meta stores ID; legacy saved rules may use slug)
+		// Normalise to level IDs — meta stores numeric IDs but rules may carry slugs.
 		$check_ids = array();
 		foreach ( $check_levels as $v ) {
 			$v = $this->unwrap_rule_scalar_value( $v );

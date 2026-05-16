@@ -93,14 +93,13 @@ class EmailTrackingHelper {
 		}
 
 		foreach ( $matches['href'] as $key => $href ) {
-			// Check if link trigger (doublescale-link-trigger or legacy ds-link-trigger).
-			if ( false !== strpos( $href, 'doublescale-link-trigger' ) || false !== strpos( $href, 'ds-link-trigger' ) ) {
+			if ( false !== strpos( $href, 'doublescale-link-trigger' ) ) {
 				// Get query string
 				$query_string = wp_parse_url( $href, PHP_URL_QUERY );
 				parse_str( $query_string, $query_args );
 
 				// Get link trigger hash
-				$hash = $query_args['doublescale-link-trigger'] ?? $query_args['ds-link-trigger'] ?? '';
+				$hash = $query_args['doublescale-link-trigger'] ?? '';
 
 				$link_trigger_class = '\DoubleScale\Modules\Tracking\Models\LinkTriggerModel';
 				$link_trigger       = null;

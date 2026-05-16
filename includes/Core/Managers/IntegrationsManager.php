@@ -1,9 +1,9 @@
 <?php
 /**
- * Integrations facade: delegates to Pro implementation when the Pro plugin is active.
+ * Integrations facade: delegates to the Pro implementation when the Pro plugin is active.
  *
  * CRM vendor integrations live in DoubleScale Pro; the free plugin keeps this FQCN so
- * automations, admin config, and legacy call sites resolve without fatals.
+ * automations and admin config can reference it without fatals when Pro is not installed.
  *
  * @package DoubleScale\Managers
  */

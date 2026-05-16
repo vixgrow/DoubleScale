@@ -72,10 +72,8 @@ class AvailabilityModel extends Model {
 
 		$unserialized = maybe_unserialize( $raw_value );
 
-		// Legacy rows persisted `override` as `(object) array()` (and could
-		// contain other stdClass leaves from older code paths). Every consumer
-		// reads with array-bracket access — coerce to nested arrays once here
-		// at the data boundary so no downstream caller has to defend itself.
+		// Coerce to nested arrays at the data boundary so every consumer can use
+		// array-bracket access without defending against stdClass leaves.
 		if ( is_object( $unserialized ) ) {
 			$unserialized = (array) $unserialized;
 		}

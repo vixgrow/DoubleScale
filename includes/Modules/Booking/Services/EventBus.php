@@ -17,9 +17,9 @@
  *   EventBus::dispatch( 'booking.cancelled', $booking, [ 'actor' => 'attendee' ] );
  *
  * After the structured handler loop runs, the bus also fires a bare WP
- * action `doublescale_booking_{event}` so legacy subscribers
- * (integrations, notifications) keep working without knowing the bus
- * exists. The `booking.` namespace is stripped from the event name first.
+ * action `doublescale_booking_{event}` so third-party subscribers
+ * (integrations, notifications) can hook in without coupling to the bus
+ * itself. The `booking.` namespace is stripped from the event name first.
  * Example: `'booking.created'` → `'doublescale_booking_created'`.
  *
  * @package DoubleScale

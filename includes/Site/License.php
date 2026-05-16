@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use Automatic_Upgrader_Skin;
 use Plugin_Upgrader;
 
@@ -524,8 +524,8 @@ class License {
 		add_action(
 			'init',
 			function() {
-				if ( Plugin::instance()->daily_tasks->get_next_timestamp( 'license_update' ) === false ) {
-					Plugin::instance()->daily_tasks->schedule_recurring(
+				if ( PluginKernel::instance()->daily_tasks->get_next_timestamp( 'license_update' ) === false ) {
+					PluginKernel::instance()->daily_tasks->schedule_recurring(
 						time(),
 						DAY_IN_SECONDS,
 						'license_update'
@@ -535,7 +535,7 @@ class License {
 		);
 
 		// scheduled task callback.
-		Plugin::instance()->daily_tasks->register_callback(
+		PluginKernel::instance()->daily_tasks->register_callback(
 			'license_update',
 			array( $this, 'handle_license_update_task' )
 		);

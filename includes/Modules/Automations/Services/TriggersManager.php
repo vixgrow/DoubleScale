@@ -44,7 +44,6 @@ final class TriggersManager {
 	protected $sources = array();
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var TriggersManager|null
 	 */
 	private static $instance;

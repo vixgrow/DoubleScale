@@ -199,13 +199,14 @@ class Settings {
 	}
 
 	/**
-	 * Decrypt a value encrypted by encrypt_value().
+	 * Decrypt a value previously produced by {@see encrypt_value()}.
 	 *
-	 * Falls back to returning the raw value when decryption fails,
-	 * which handles migration from pre-encryption plaintext keys.
+	 * Returns the raw value unchanged when the input is not a well-formed
+	 * encrypted payload (e.g. user-supplied plaintext via filters), so callers
+	 * do not need to defend against malformed input.
 	 *
-	 * @param string $value Encrypted (or legacy plaintext) value.
-	 * @return string Decrypted plaintext.
+	 * @param string $value Possibly-encrypted value.
+	 * @return string Decrypted plaintext, or the raw input when decryption is not applicable.
 	 */
 	public static function decrypt_value( $value ) {
 		if ( empty( $value ) ) {
@@ -213,7 +214,6 @@ class Settings {
 		}
 		$decoded = base64_decode( $value, true );
 		if ( false === $decoded || strpos( $decoded, '::' ) === false ) {
-			// Not encrypted (legacy plaintext key) — return as-is.
 			return $value;
 		}
 		$parts = explode( '::', $decoded, 2 );
@@ -222,7 +222,6 @@ class Settings {
 		}
 		$key       = hash( 'sha256', SECURE_AUTH_KEY, true );
 		$decrypted = openssl_decrypt( $parts[1], 'aes-256-cbc', $key, 0, $parts[0] );
-		// If decryption fails (wrong key, corrupted data), return raw value.
 		return false === $decrypted ? $value : $decrypted;
 	}
 

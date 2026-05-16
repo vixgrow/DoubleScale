@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
 use DoubleScale\Core\Settings\Settings;
@@ -81,11 +81,6 @@ class AbandonedCart {
 		add_action( 'wp_ajax_nopriv_doublescale_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
 		add_action( 'wp_ajax_doublescale_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
 		add_action( 'wp_ajax_nopriv_doublescale_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
-		// Legacy AJAX action names (older front-end / cached assets).
-		add_action( 'wp_ajax_ds_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
-		add_action( 'wp_ajax_nopriv_ds_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
-		add_action( 'wp_ajax_ds_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
-		add_action( 'wp_ajax_nopriv_ds_opt_out_abandoned_cart', array( $this, 'opt_out_abandoned_cart' ) );
 
 		// Mark the cart as recovered when the order is processed.
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'mark_as_recoverd' ), 1 );
@@ -100,9 +95,9 @@ class AbandonedCart {
 		add_action(
 			'init',
 			function () {
-				Plugin::instance()->daily_tasks->register_callback( 'doublescale_daily', array( $this, 'check_lost_carts' ) );
-				Plugin::instance()->daily_tasks->register_callback( 'doublescale_daily', array( $this, 'check_cooling_off' ) );
-				Plugin::instance()->abandoned_cart_tasks->register_callback( 'mark_cart_recoverable', array( $this, 'mark_cart_recoverable' ) );
+				PluginKernel::instance()->daily_tasks->register_callback( 'doublescale_daily', array( $this, 'check_lost_carts' ) );
+				PluginKernel::instance()->daily_tasks->register_callback( 'doublescale_daily', array( $this, 'check_cooling_off' ) );
+				PluginKernel::instance()->abandoned_cart_tasks->register_callback( 'mark_cart_recoverable', array( $this, 'mark_cart_recoverable' ) );
 			}
 		);
 
@@ -685,7 +680,7 @@ class AbandonedCart {
 				$abandoned_cart->save();
 			} else {
 				$abandoned_cart = AbandonedCartModel::create( $data );
-				Plugin::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
+				PluginKernel::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			}
 
 			$this->save_session( $abandoned_cart->hash_key );
@@ -720,7 +715,7 @@ class AbandonedCart {
 				$abandoned_cart->save();
 			}
 
-			Plugin::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
+			PluginKernel::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			return $abandoned_cart;
 		} catch ( \Exception $e ) {
 			return false;

@@ -399,9 +399,7 @@ class RestAvailabilityController extends RestController {
 		$is_default   = (bool) $request->get_param( 'is_default' );
 
 		// Delegate to AvailabilityService so the "force first availability to
-		// be default" invariant lives in exactly one place. Previously this
-		// rule was duplicated here and missing from the legacy
-		// Availabilities::add_availability() path.
+		// be default" invariant lives in exactly one place.
 		$service = new \DoubleScale\Modules\Booking\Services\AvailabilityService();
 		$result  = $service->create_availability( $user_id, $name, $weekly_hours, $override, $timezone, $is_default );
 

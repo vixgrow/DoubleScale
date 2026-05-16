@@ -157,21 +157,12 @@ final class EmailNotifications {
 	}
 
 	/**
-	 * Check if a notification type is enabled.
-	 * Supports both 'enabled' and 'default' keys for backward compatibility.
+	 * Check whether a notification type is enabled in the per-event config.
 	 */
 	private function is_notification_enabled( $notifications, $key, $fallback = true ) {
 		$enabled = Arr::get( $notifications, $key . '.enabled' );
-		if ( null !== $enabled ) {
-			return (bool) $enabled;
-		}
 
-		$default = Arr::get( $notifications, $key . '.default' );
-		if ( null !== $default ) {
-			return (bool) $default;
-		}
-
-		return $fallback;
+		return null === $enabled ? (bool) $fallback : (bool) $enabled;
 	}
 
 	public function send_reminder_emails() {

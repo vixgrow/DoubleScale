@@ -16,16 +16,17 @@ use Illuminate\Support\Arr;
 use DoubleScale\Modules\Booking\Models\AvailabilityModel;
 
 /**
- * Availabilities class - Backward compatibility wrapper
- * 
- * This class now acts as a wrapper around the AvailabilityModel
- * to maintain backward compatibility while transitioning to the model-based approach.
+ * Availabilities service facade.
+ *
+ * Exposes a static, array-shaped surface over {@see AvailabilityModel} for
+ * call sites (EventModel, REST controllers) that pass availabilities around
+ * as plain arrays.
  */
 class Availabilities
 {
 
 	/**
-	 * Option Name - kept for legacy compatibility
+	 * Option Name.
 	 *
 	 * @var string
 	 */
@@ -105,8 +106,7 @@ class Availabilities
 	public static function add_availability($availability)
 	{
 		// Delegates to AvailabilityService so the "force first as default"
-		// invariant is applied consistently. Returns the same compatible
-		// shape the legacy callers expect.
+		// invariant is applied consistently.
 		$service = new AvailabilityService();
 		$result  = $service->create_availability(
 			Arr::get($availability, 'user_id'),

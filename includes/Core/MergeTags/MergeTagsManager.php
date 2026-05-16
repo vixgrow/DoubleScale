@@ -51,7 +51,6 @@ final class MergeTagsManager {
 	protected $current_post_id = null;
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var MergeTagsManager|null
 	 */
 	private static $instance;
@@ -109,7 +108,7 @@ final class MergeTagsManager {
 	public function restore_campaign_context( $campaign_id ) {
 		global $wpdb;
 
-		$events_table = $wpdb->prefix . 'doublescale_campaign_events';
+		$events_table = esc_sql( $wpdb->prefix . 'doublescale_campaign_events' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$post_id = $wpdb->get_var(

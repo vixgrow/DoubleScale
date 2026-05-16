@@ -5,7 +5,7 @@
  * @package DoubleScale
  */
 
-namespace DoubleScale\Modules\Booking\Integration\REST_API;
+namespace DoubleScale\Modules\Booking\Integration\Rest;
 
 use DoubleScale\Modules\Booking\Abstracts\Integration;
 use DoubleScale\Modules\Booking\Abstracts\REST_Controller;

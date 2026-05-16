@@ -136,7 +136,7 @@ class AutomatedCampaignHandler {
 		global $wpdb;
 
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( self::STUCK_THRESHOLD_MINUTES * MINUTE_IN_SECONDS ) );
-		$table     = $wpdb->prefix . 'doublescale_campaigns';
+		$table     = esc_sql( $wpdb->prefix . 'doublescale_campaigns' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$stuck_campaigns = $wpdb->get_results(
@@ -290,7 +290,7 @@ class AutomatedCampaignHandler {
 	public function cleanup_old_events() {
 		global $wpdb;
 
-		$events_table  = $wpdb->prefix . 'doublescale_campaign_events';
+		$events_table  = esc_sql( $wpdb->prefix . 'doublescale_campaign_events' );
 		$retention     = self::EVENT_RETENTION_DAYS;
 		$batch_size    = 5000;
 		$total_deleted = 0;
@@ -323,7 +323,7 @@ class AutomatedCampaignHandler {
 	public function recover_stuck_events() {
 		global $wpdb;
 
-		$events_table = $wpdb->prefix . 'doublescale_campaign_events';
+		$events_table = esc_sql( $wpdb->prefix . 'doublescale_campaign_events' );
 		$threshold    = self::EVENT_STUCK_THRESHOLD_MINUTES;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -441,21 +441,18 @@ class AutomatedCampaignHandler {
 			$dedup_names[] = "_transient_doublescale_event_dedup_{$cid}_{$post->ID}";
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- each value is wrapped through $wpdb->prepare( '%s', $n ) inside the lambda; phpcs cannot trace through array_map.
+		$options_table  = esc_sql( $wpdb->options );
+		$placeholders   = implode( ',', array_fill( 0, count( $dedup_names ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$existing_dedup = $wpdb->get_col(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name IN ("
-			. implode(
-				',',
-				array_map(
-					function ( $n ) use ( $wpdb ) {
-						return $wpdb->prepare( '%s', $n );
-					},
-					$dedup_names
-				)
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT option_name FROM {$options_table} WHERE option_name IN ({$placeholders})",
+				...$dedup_names
 			)
-			. ')'
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		$already_seen = array();
 		foreach ( $existing_dedup as $name ) {
@@ -483,7 +480,7 @@ class AutomatedCampaignHandler {
 		// error_log( '[Plugin] New campaign IDs after dedup: ' . wp_json_encode( $new_campaign_ids ) );
 
 		// Phase 3: Batch INSERT events — one multi-row statement.
-		$events_table = $wpdb->prefix . 'doublescale_campaign_events';
+		$events_table = esc_sql( $wpdb->prefix . 'doublescale_campaign_events' );
 		$now          = current_time( 'mysql', true );
 		$value_rows   = array();
 		$value_args   = array();
@@ -509,27 +506,26 @@ class AutomatedCampaignHandler {
 
 		// Phase 4: Batch-set dedup transients — one multi-row INSERT IGNORE.
 		$expiry         = time() + ( MINUTE_IN_SECONDS * 5 );
-		$transient_rows = array();
 		$transient_args = array();
 
 		foreach ( $new_campaign_ids as $cid ) {
 			// Transient value row.
-			$transient_rows[] = '(%s, %s, %s)';
 			$transient_args[] = "_transient_doublescale_event_dedup_{$cid}_{$post->ID}";
 			$transient_args[] = '1';
 			$transient_args[] = 'no';
 
 			// Transient timeout row.
-			$transient_rows[] = '(%s, %s, %s)';
 			$transient_args[] = "_transient_timeout_doublescale_event_dedup_{$cid}_{$post->ID}";
 			$transient_args[] = $expiry;
 			$transient_args[] = 'no';
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $transient_rows is an array of '(%s, %s, %s)' placeholders bound via spread $transient_args.
+		$values_clause = implode( ', ', array_fill( 0, count( $new_campaign_ids ) * 2, '(%s, %s, %s)' ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES " . implode( ', ', $transient_rows ),
+				"INSERT IGNORE INTO {$options_table} (option_name, option_value, autoload) VALUES {$values_clause}",
 				...$transient_args
 			)
 		);
@@ -588,7 +584,7 @@ class AutomatedCampaignHandler {
 
 		global $wpdb;
 
-		$events_table = $wpdb->prefix . 'doublescale_campaign_events';
+		$events_table = esc_sql( $wpdb->prefix . 'doublescale_campaign_events' );
 
 		while ( true ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -938,20 +934,11 @@ class AutomatedCampaignHandler {
 	}
 
 	/**
-	 * Unschedule a campaign's cron event.
-	 *
-	 * Clears both legacy WP-Cron entries and Action Scheduler entries
-	 * so that upgrades from the old system work seamlessly.
+	 * Unschedule a campaign's recurring action.
 	 *
 	 * @param int $campaign_id Campaign ID.
 	 */
 	public function unschedule_campaign_cron( $campaign_id ) {
-		// Clear legacy WP-Cron entries (from before the Action Scheduler migration).
-		while ( $timestamp = wp_next_scheduled( self::CRON_HOOK, array( $campaign_id ) ) ) {
-			wp_unschedule_event( $timestamp, self::CRON_HOOK, array( $campaign_id ) );
-		}
-
-		// Clear Action Scheduler entries.
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( self::CRON_HOOK, array( 'campaign_id' => (int) $campaign_id ), 'doublescale' );
 		}
@@ -1107,10 +1094,11 @@ class AutomatedCampaignHandler {
 	}
 
 	/**
-	 * Normalize Action Scheduler callback args to a campaign id.
+	 * Normalise Action Scheduler callback args to a campaign id.
 	 *
-	 * Schedules pass `array( 'campaign_id' => int )` which becomes one int via
-	 * array_values(); legacy WP-Cron or bad data may pass other shapes.
+	 * Schedules pass `array( 'campaign_id' => int )` which is unpacked by
+	 * Action Scheduler via array_values(); this accessor also tolerates plain
+	 * integer or string arguments in case a job is invoked directly.
 	 *
 	 * @param mixed $arg First callback argument from the job runner.
 	 * @return int

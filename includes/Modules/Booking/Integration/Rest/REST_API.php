@@ -8,7 +8,7 @@
 namespace DoubleScale\Modules\Booking\Integration\Rest;
 
 use DoubleScale\Modules\Booking\Abstracts\Integration;
-use DoubleScale\Modules\Booking\Integration\REST_API\REST_Account_Controller;
+use DoubleScale\Modules\Booking\Integration\Rest\REST_Account_Controller;
 
 defined( 'ABSPATH' ) || exit;
 

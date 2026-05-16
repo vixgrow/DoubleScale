@@ -68,11 +68,6 @@ class TimerBlock extends EmailBlock {
 				'bottom' => 20,
 				'left'   => 20,
 			),
-
-			// Legacy properties
-			'content'             => 'Your text here',
-			'fontSize'            => 16,
-			'color'               => '#333',
 			'align'               => 'center',
 		);
 	}

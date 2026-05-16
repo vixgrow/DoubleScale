@@ -135,8 +135,9 @@ class BookingJobs {
 	/**
 	 * Schedule a completion check for a booking.
 	 *
-	 * @param BookingModel|int $booking Booking model from EventBus tail-hook
-	 *                                   (or numeric id from legacy callers).
+	 * @param BookingModel|int $booking Booking model from EventBus tail-hook,
+	 *                                   or a numeric primary key when invoked
+	 *                                   directly from cron callbacks.
 	 * @param array            $context Lifecycle context (unused).
 	 * @return void
 	 */

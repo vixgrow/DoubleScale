@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Exception;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 
 /**
  * Trigger class
@@ -108,7 +108,7 @@ abstract class Trigger {
 					continue;
 				}
 
-				Plugin::instance()->automations_tasks->enqueue_async( 'process_automations', $automation, $args );
+				PluginKernel::instance()->automations_tasks->enqueue_async( 'process_automations', $automation, $args );
 			}
 		} catch ( Exception $e ) {
 			// Log error

@@ -175,7 +175,7 @@ trait TimeframeContactFilter {
 	 */
 	protected function get_comparison_operator( $count_type ) {
 		switch ( $count_type ) {
-			case 'extactly': // Keep typo for backwards compatibility.
+			case 'extactly': // Accept misspelling as an alias for 'exactly'.
 			case 'exactly':
 				return '=';
 

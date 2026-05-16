@@ -230,7 +230,7 @@ class Settings {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string|null $from_email Optional; unused (kept for backward compatibility with callers).
+	 * @param string|null $from_email Reserved for future per-from routing; currently unused.
 	 * @return array {
 	 *     Smart route information.
 	 *

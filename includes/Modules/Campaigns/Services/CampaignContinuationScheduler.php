@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 
 /**
  * CampaignContinuationScheduler class
@@ -96,7 +96,7 @@ class CampaignContinuationScheduler {
 			);
 		}
 
-		$action_id = Plugin::instance()->campaigns_tasks->enqueue_async(
+		$action_id = PluginKernel::instance()->campaigns_tasks->enqueue_async(
 			"continue_{$this->channel}_campaign",
 			$campaign_id
 		);

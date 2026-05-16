@@ -29,7 +29,7 @@ use DoubleScale\Constants\MessageSourceTypes;
 use DoubleScale\Constants\MessageDirection;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Campaigns\Services\CampaignRateLimiter;
 use DoubleScale\Modules\Campaigns\Services\CampaignContactFilter;
@@ -188,11 +188,11 @@ abstract class AbstractCampaignProcessing {
 		// Channel is already a string ('email', 'sms', 'whatsapp')
 		$type_string = $this->channel;
 
-		Plugin::instance()->campaigns_tasks->register_callback( "doublescale_{$type_string}_campaigns", array( $this, 'process_campaigns' ) );
-		Plugin::instance()->campaigns_tasks->register_callback( "process_campaign_{$type_string}", array( $this, 'process_campaign_message' ) );
+		PluginKernel::instance()->campaigns_tasks->register_callback( "doublescale_{$type_string}_campaigns", array( $this, 'process_campaigns' ) );
+		PluginKernel::instance()->campaigns_tasks->register_callback( "process_campaign_{$type_string}", array( $this, 'process_campaign_message' ) );
 
 		// Register continuation handler (Action Scheduler fallback)
-		Plugin::instance()->campaigns_tasks->register_callback(
+		PluginKernel::instance()->campaigns_tasks->register_callback(
 			"continue_{$type_string}_campaign",
 			array( $this, 'continue_campaign_processing' )
 		);
@@ -596,7 +596,7 @@ abstract class AbstractCampaignProcessing {
 		$this->start_time = microtime( true );
 
 		// Update heartbeat at the start to track that cron is running
-		if ( ! Plugin::instance()->campaigns_tasks->update_heartbeat( "doublescale_{$this->channel}_campaigns" ) ) {
+		if ( ! PluginKernel::instance()->campaigns_tasks->update_heartbeat( "doublescale_{$this->channel}_campaigns" ) ) {
 			doublescale_get_logger()->info(
 				/* translators: %s: channel name */
 				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'doublescale'), $this->channel ),
@@ -945,7 +945,7 @@ abstract class AbstractCampaignProcessing {
 			// Don't update offset here - caller handles it after batch
 
 			$channel_string = $this->channel;
-			Plugin::instance()->campaigns_tasks->enqueue_sync(
+			PluginKernel::instance()->campaigns_tasks->enqueue_sync(
 				"process_campaign_{$channel_string}",
 				$campaign,
 				$contact,
@@ -1055,7 +1055,7 @@ abstract class AbstractCampaignProcessing {
 
 			// Requeue the task for later processing - pass the original contact model
 			$channel_string = $this->channel;
-			Plugin::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact_or_automation_contact, $campaign_message );
+			PluginKernel::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact_or_automation_contact, $campaign_message );
 			return;
 		}
 
@@ -1248,7 +1248,7 @@ abstract class AbstractCampaignProcessing {
 			}
 		}
 
-		// If it's JSON but not builder format, return as-is (might be legacy format)
+		// JSON content that isn't the builder shape — return verbatim.
 		return $content;
 	}
 

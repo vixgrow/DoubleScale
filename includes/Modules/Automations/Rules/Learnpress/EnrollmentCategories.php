@@ -142,7 +142,7 @@ class EnrollmentCategories extends Rule
 		$enrolled_course_categories = array();
 
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'learnpress_user_items';
+		$table_name = esc_sql( $wpdb->prefix . 'learnpress_user_items' );
 
 		// Check if table exists.
 		$table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));

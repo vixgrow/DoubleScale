@@ -188,10 +188,10 @@ class CommunicationTrackingModel extends Model {
 	}
 
 	/**
-	 * Activity relationship (for individual messages only, via source_id)
+	 * Activity relationship (for individual messages only, via source_id).
 	 *
-	 * For individual messages (source_type = 3), source_id points to the activity.
-	 * This provides backwards compatibility and convenience.
+	 * For individual messages (source_type = 3), source_id points to the activity
+	 * — this accessor exposes that as an Eloquent relation for convenience.
 	 *
 	 * IMPORTANT: This relationship should ONLY be used when source_type = INDIVIDUAL (3).
 	 * For campaigns/automations, source_id points to campaign/automation, not activity.

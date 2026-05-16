@@ -288,7 +288,7 @@ class AdminLoader {
 		// Important to check for authentication.
 		wp_auth_check_load();
 
-		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Legacy hook name, kept for backward compatibility.
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Plugin-prefixed action hook; the prefix-detection rule misfires on the `doublescale_` prefix here.
 		do_action( 'doublescale_admin_enqueue_scripts' );
 
 		// Enqueue scripts and styles.

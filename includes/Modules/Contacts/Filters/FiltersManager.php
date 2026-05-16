@@ -41,7 +41,6 @@ final class FiltersManager {
 	protected $groups = array();
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var FiltersManager|null
 	 */
 	private static $instance;

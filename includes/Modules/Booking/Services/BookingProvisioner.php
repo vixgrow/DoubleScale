@@ -42,10 +42,9 @@ final class BookingProvisioner {
 				$calendar->status = 'active';
 				$calendar->save();
 			}
-			// Backfill timezone for legacy/migrated host calendars that were
-			// created before the timezone meta was being seeded. Without this,
-			// the calendar settings UI ships `timezone: null` to the React
-			// state and pins the Save button to disabled.
+			// Calendars created without a stored timezone fall back to the
+			// user's site/profile timezone so the settings UI never renders
+			// `timezone: null` (which would disable the Save button).
 			if ( ! $calendar->timezone ) {
 				$calendar->timezone = self::resolve_default_timezone( $user_id );
 			}

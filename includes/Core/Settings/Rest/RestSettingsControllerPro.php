@@ -461,7 +461,8 @@ class RestSettingsControllerPro {
 		$settings['imap_available']     = true; // Always true — php-imap2 is bundled (no ext-imap needed).
 		$settings['oauth_redirect_uri'] = EmailOauth::get_redirect_uri();
 
-		// Ensure imap_provider is present (backward compat).
+		// Default imap_provider to 'custom' so the UI never receives an
+		// undefined value.
 		if ( ! isset( $settings['imap_provider'] ) ) {
 			$settings['imap_provider'] = 'custom';
 		}

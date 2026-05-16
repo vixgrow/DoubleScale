@@ -25,7 +25,7 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Constants\TrackingStatus;
 use DoubleScale\Modules\Campaigns\Services\CampaignRateLimiter;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;
 
 /**
@@ -172,7 +172,7 @@ class CampaignResender {
 		$message->status = TrackingStatus::SCHEDULED;
 		$message->save();
 
-		Plugin::instance()->campaigns_tasks->enqueue_sync(
+		PluginKernel::instance()->campaigns_tasks->enqueue_sync(
 			"process_campaign_{$this->channel}",
 			$campaign,
 			$contact,

@@ -1042,12 +1042,10 @@ class RestCalendarController extends RestController
 
 			$integrations = IntegrationsManager::instance()->get_integrations();
 
-			// IntegrationsManager is empty until the legacy namespace refactor in
-			// Booking/Integrations/* lands (see Module::register_integrations()).
-			// Fall back to the helper defaults so the conferencing UI doesn't
-			// render every provider as "Upgrade to Pro" — this IS the consolidated
-			// pro plugin, so pro availability is implied. Mark each provider as
-			// pro-available; everything else stays "not connected" (defaults).
+			// When the registry hasn't been populated yet (e.g. Pro module not
+			// booted), fall back to the helper defaults so the conferencing UI
+			// can render every provider with `has_pro_version = true` instead
+			// of an empty list.
 			if (empty($integrations)) {
 				$defaults = IntegrationsHelper::get_default_integrations('event');
 				foreach ($defaults as $slug => $integration_data) {

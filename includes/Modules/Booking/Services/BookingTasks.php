@@ -42,8 +42,8 @@ class BookingTasks {
 	 * @param array            $context Lifecycle context (unused; signature matches BookingEvents contract).
 	 */
 	public function schedule_booking_tasks( $booking, $context = array() ) {
-		// EventBus delivers the booking model directly; legacy callers that
-		// pass an integer id are still resolved for backwards compatibility.
+		// EventBus delivers the BookingModel; cron callbacks may pass the
+		// primary key directly, so resolve numeric ids here.
 		if ( is_numeric( $booking ) ) {
 			$booking = BookingModel::find( (int) $booking );
 		}

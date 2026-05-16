@@ -212,8 +212,7 @@ class ActivityAssociationModel extends Model {
 	}
 
 	/**
-	 * Convert string entity type to integer
-	 * For backward compatibility with Api requests
+	 * Convert a REST-facing entity-type string to its internal integer constant.
 	 *
 	 * @param string $entity_type_string Entity type string ('deal', 'campaign').
 	 *
@@ -229,8 +228,7 @@ class ActivityAssociationModel extends Model {
 	}
 
 	/**
-	 * Convert integer entity type to string
-	 * For backward compatibility with Api responses
+	 * Convert an internal entity-type integer to its REST-facing string label.
 	 *
 	 * @param int $entity_type_int Entity type integer.
 	 *
@@ -258,7 +256,7 @@ class ActivityAssociationModel extends Model {
 		// Validate entity type before creating
 		static::creating(
 			function ( $association ) {
-				// Convert string to integer if needed (for backward compatibility)
+				// REST may pass entity_type as 'deal'/'campaign'; normalise to int.
 				if ( is_string( $association->entity_type ) ) {
 					$association->entity_type = self::string_to_entity_type( $association->entity_type );
 				}

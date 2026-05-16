@@ -41,7 +41,6 @@ final class RulesManager
 	protected $groups = array();
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var RulesManager|null
 	 */
 	private static $instance;

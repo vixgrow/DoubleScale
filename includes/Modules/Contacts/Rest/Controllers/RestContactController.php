@@ -504,8 +504,9 @@ class RestContactController extends RestController {
 			)
 		);
 
-		// Get lead score (Pro feature; omit route when unavailable or module disabled).
-		// Must autoload (true): Pro registers the legacy FQCN via Aliases spl autoload, not at parse time.
+		// Get lead score (Pro feature; route is omitted when the module is
+		// unavailable or disabled). class_exists() is called with autoload=true
+		// because Pro provides this class lazily via its autoloader.
 		if ( class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true )
 			&& function_exists( 'doublescale_is_module_active' )
 			&& doublescale_is_module_active( 'leadscoring' ) ) {
@@ -1546,7 +1547,7 @@ class RestContactController extends RestController {
 		global $wpdb;
 
 		// Single query to get all statistics at once
-		$table = $wpdb->prefix . 'doublescale_communication_tracking';
+		$table = esc_sql( $wpdb->prefix . 'doublescale_communication_tracking' );
 
 		// Build query based on mode
 		if ($mode === CampaignChannel::STR_EMAIL) {

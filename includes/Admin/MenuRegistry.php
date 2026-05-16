@@ -5,8 +5,8 @@
  * Built-ins ship from {@see MenuRegistry::builtin_entries()}; modules append via
  * {@see MenuRegistry::add()}. Both filters run on the merged list:
  *
- *   1. `doublescale_admin_menu` (legacy name)
- *   2. `ds_admin_menu` (preferred / plan convention)
+ *   1. `doublescale_admin_menu`
+ *   2. `ds_admin_menu`
  *
  * Entries use this shape:
  *
@@ -158,14 +158,14 @@ class MenuRegistry {
 		$entries = array_merge( $builtin, self::$entries );
 
 		/**
-		 * Filter the full DoubleScale admin submenu definition (legacy hook name).
+		 * Filter the full DoubleScale admin submenu definition.
 		 *
 		 * @param array<int, array<string, mixed>> $entries
 		 */
 		$entries = apply_filters( 'doublescale_admin_menu', $entries );
 
 		/**
-		 * Preferred filter name for admin submenu rows (same shape as above).
+		 * Short-prefix alias of `doublescale_admin_menu` (same shape).
 		 *
 		 * @param array<int, array<string, mixed>> $entries
 		 */

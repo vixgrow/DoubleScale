@@ -226,8 +226,10 @@ class ActivityModel extends Model {
 	}
 
 	/**
-	 * Get deal_id accessor for backward compatibility
-	 * Returns the first associated deal's ID or null
+	 * Convenience accessor: first associated deal's ID, or null.
+	 *
+	 * Activities may be associated with multiple entities; REST callers that
+	 * want only the primary deal id read `$activity->deal_id`.
 	 *
 	 * @since 1.0.0
 	 *

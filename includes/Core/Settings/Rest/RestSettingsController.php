@@ -723,8 +723,8 @@ class RestSettingsController extends RestController {
 	 * @return true|WP_Error True if valid, WP_Error otherwise.
 	 */
 	private function validate_sms_settings( &$sms ) {
-		// Remove max_in_day if present (legacy field, not enforced)
-		// Sms providers (Twilio, etc.) enforce their own account quotas
+		// SMS providers (Twilio, etc.) enforce per-account daily quotas, so
+		// strip the field rather than persist a value we never check.
 		if ( isset( $sms['max_in_day'] ) ) {
 			unset( $sms['max_in_day'] );
 		}
@@ -762,8 +762,8 @@ class RestSettingsController extends RestController {
 	 * @return true|WP_Error
 	 */
 	private function validate_whatsapp_settings( &$whatsapp ) {
-		// Remove max_in_day if present (legacy field, not enforced)
-		// Meta WhatsApp enforces tier-based quotas (1K/10K/100K/unlimited per 24h)
+		// Meta WhatsApp enforces tier-based quotas (1K/10K/100K/unlimited per
+		// 24h), so strip the field rather than persist a value we never check.
 		if ( isset( $whatsapp['max_in_day'] ) ) {
 			unset( $whatsapp['max_in_day'] );
 		}

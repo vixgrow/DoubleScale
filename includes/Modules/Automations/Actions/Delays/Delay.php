@@ -17,7 +17,7 @@ use DoubleScale\Modules\Automations\Abstracts\Action;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 
 /**
  * Delay Action
@@ -107,7 +107,7 @@ class Delay extends Action {
 			return false;
 		}
 
-		Plugin::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id );
+		PluginKernel::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id );
 
 		return true;
 	}

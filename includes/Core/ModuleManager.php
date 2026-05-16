@@ -17,7 +17,8 @@ defined( 'ABSPATH' ) || exit;
 final class ModuleManager {
 
 	/**
-	 * Legacy Action Scheduler pairs (fallback when {@see ModuleInterface::scheduledHooks()} is empty).
+	 * Built-in Action Scheduler pairs used when a module does not declare its own
+	 * via {@see ModuleInterface::scheduledHooks()}.
 	 *
 	 * @var array<string, array<int, array{0: string, 1: string}>>
 	 */

@@ -19,7 +19,7 @@ use DoubleScale\Modules\Automations\Engine\StepNavigator;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Modules\Automations\Conditions\Process as Process_Conditions;
 
 /**
@@ -482,7 +482,7 @@ class ProcessAutomation {
 
 		// // Check if we should switch to async.
 		// if ( $this->should_switch_to_async() ) {
-			Plugin::instance()->automations_tasks->enqueue_async(
+			PluginKernel::instance()->automations_tasks->enqueue_async(
 				'process_automation_step',
 				$this->automation->id,
 				0, // parent_step_id - only used for delay steps
@@ -495,7 +495,7 @@ class ProcessAutomation {
 		// }
 
 		// // Safe to continue synchronously.
-		// Plugin::instance()->automations_tasks->enqueue_sync(
+		// PluginKernel::instance()->automations_tasks->enqueue_sync(
 		// 'process_automation_step',
 		// $this->automation,
 		// 0, // parent_step_id - only used for delay steps

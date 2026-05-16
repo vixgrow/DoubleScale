@@ -67,12 +67,10 @@ class LinkTriggers {
 	public function link_trigger_tracking() {
 		try {
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public link-trigger redirect; identity comes from the per-trigger hash + per-message track-id, both validated against the DB below.
-			$hash = '';
-			if ( isset( $_GET['doublescale-link-trigger'] ) ) {
-				$hash = sanitize_text_field( wp_unslash( $_GET['doublescale-link-trigger'] ) );
-			} elseif ( isset( $_GET['ds-link-trigger'] ) ) {
-				$hash = sanitize_text_field( wp_unslash( $_GET['ds-link-trigger'] ) );
+			if ( ! isset( $_GET['doublescale-link-trigger'] ) ) {
+				return;
 			}
+			$hash = sanitize_text_field( wp_unslash( $_GET['doublescale-link-trigger'] ) );
 			if ( empty( $hash ) ) {
 				return;
 			}

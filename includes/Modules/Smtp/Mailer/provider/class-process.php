@@ -298,9 +298,9 @@ abstract class Process {
 		$connection_from_email = $this->connection['from_email'] ?? '';
 		$from_email            = $this->phpmailer->From ?? $connection_from_email;
 
-		// Note: force_from_email is now applied earlier in PHPMailer::send()
-		// This method just returns the from email that's already been set
-		// Kept for backwards compatibility and provider-specific overrides
+		// `force_from_email` is applied earlier in PHPMailer::send(); this
+		// accessor just exposes the resolved value so providers can override
+		// it via the filter below.
 
 		return apply_filters( 'doublescale_smtp_mailer_get_from_email', $from_email, $this->provider );
 	}

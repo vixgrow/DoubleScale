@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
 use DoubleScale\Modules\Campaigns\Emails\BulkEmailSender;
@@ -1795,7 +1795,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * We prepare the footer with merge tags here, but they will be processed later
 	 * in prepare_message_content() along with the body content.
 	 *
-	 * @param string                     $message Original message content (JSON for builder, HTML for legacy)
+	 * @param string                     $message Original message content (JSON for builder emails, HTML otherwise).
 	 * @param ContactModel               $contact Contact model
 	 * @param CommunicationTrackingModel $campaign_message Campaign tracking record
 	 * @return string Footer HTML with tracking pixel (or empty if not builder email)
@@ -1909,11 +1909,11 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			// Check if this is a builder email (complete HTML document)
 			$is_builder_email = ( strpos( $message_data['body'], '<!DOCTYPE html' ) !== false || strpos( $message_data['body'], '<html' ) !== false );
 
-			// For non-builder emails, add footer and tracking using the old method
-			// Builder emails already have footer and tracking pixel injected during render
+			// Builder emails inject the footer and tracking pixel during render;
+			// for plain-HTML emails the helper appends them here instead.
 			if ( ! $is_builder_email ) {
 				doublescale_get_logger()->debug(
-					'Using legacy footer method for non-builder email',
+					'Appending footer to plain-HTML email',
 					array(
 						'source'      => 'email-campaign-processing',
 						'contact_id'  => $contact->id,

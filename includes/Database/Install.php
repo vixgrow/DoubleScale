@@ -1,6 +1,6 @@
 <?php
 /**
- * Database installation and legacy rename helpers.
+ * Database installation entry point.
  *
  * @package DoubleScale\Database
  */
@@ -17,7 +17,7 @@ use DoubleScale\Core\Database\MigrationRunner;
 use DoubleScale\Core\ModuleRegistry;
 
 /**
- * Install / upgrade entry for DoubleScale (free).
+ * Install entry for DoubleScale.
  */
 class Install {
 
@@ -55,11 +55,9 @@ class Install {
 
 	public static function check_version(): void {
 		$current_version = get_option( 'doublescale_version' );
-		$plugin_version  = DOUBLESCALE_VERSION;
 
-		if ( version_compare( (string) $current_version, $plugin_version, '<' ) ) {
+		if ( version_compare( (string) $current_version, DOUBLESCALE_VERSION, '<' ) ) {
 			self::install();
-			do_action( 'doublescale_updated' );
 		}
 	}
 
@@ -106,8 +104,6 @@ class Install {
 
 		MigrationRunner::run_all( self::migration_registry() );
 
-		self::run_version_migrations();
-
 		self::update_doublescale_version();
 
 		delete_transient( 'doublescale_installing' );
@@ -115,14 +111,5 @@ class Install {
 
 	private static function update_doublescale_version(): void {
 		update_option( 'doublescale_version', DOUBLESCALE_VERSION );
-	}
-
-	private static function run_version_migrations(): void {
-		$current_version = get_option( 'doublescale_version' );
-		if ( ! $current_version ) {
-			return;
-		}
-
-		do_action( 'doublescale_run_version_migrations', $current_version );
 	}
 }

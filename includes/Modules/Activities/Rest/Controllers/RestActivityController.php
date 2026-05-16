@@ -1070,7 +1070,7 @@ class RestActivityController extends RestController {
 		$data = array(
 			'id'                => $activity->id,
 			'contact_id'        => $activity->contact_id,
-			'deal_id'           => $activity->deal_id, // Backward compatibility
+			'deal_id'           => $activity->deal_id, // Convenience: first associated deal id.
 			'activity_type'     => $activity->activity_type,
 			'data'              => $activity->data,
 			'user_id'           => $activity->user_id,

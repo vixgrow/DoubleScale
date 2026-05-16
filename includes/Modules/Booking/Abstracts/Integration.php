@@ -182,18 +182,15 @@ abstract class Integration {
 		$this->option_name = 'doublescale_booking_' . $this->slug . '_settings';
 		$this->meta_key    = 'doublescale_booking_' . $this->slug . '_accounts';
 
-		// Optional sub-classes are instantiated defensively: the in-flight
-		// namespace refactor leaves some `Rest\REST_API` / `RemoteData`
-		// classes still using legacy paths, which would otherwise throw
-		// inside the child constructor and prevent the integration from
-		// registering its booking-lifecycle hooks. A missing REST controller
-		// degrades the integration's admin/UI surface but must not break the
-		// booking-create flow that depends on the lifecycle subscription.
+		// A third-party integration's optional sub-class constructor must not
+		// break the booking-lifecycle subscription below; a missing REST
+		// controller degrades the integration's admin surface but the
+		// booking-create flow must still complete.
 		if ( ! empty( static::$classes['rest_api'] ) ) {
 			try {
 				new static::$classes['rest_api']( $this );
 			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// Logged at the IntegrationsManager level if needed.
+				// Surfaced via IntegrationsManager logging.
 			}
 		}
 
@@ -201,7 +198,7 @@ abstract class Integration {
 			try {
 				$this->remote_data = new static::$classes['remote_data']( $this );
 			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				// Same rationale.
+				// Surfaced via IntegrationsManager logging.
 			}
 		}
 	}
@@ -322,8 +319,8 @@ abstract class Integration {
 	 * Resolve default calendar for outbound booking sync from stored account meta.
 	 *
 	 * When `config.default_calendar` is present: `null` or incomplete structure means this account
-	 * does not sync; a full object is returned as-is. When the key is absent, legacy behaviour
-	 * uses a single enabled calendar if exactly one is listed.
+	 * does not sync; a full object is returned as-is. When the key is absent, a single enabled
+	 * calendar is used if exactly one is listed.
 	 *
 	 * @param string|int $account_id Account key in host meta.
 	 * @param array      $data       Account row (name, tokens, config, ...).
@@ -362,13 +359,16 @@ abstract class Integration {
 	}
 
 	/**
-	 * Pick the account row used for outbound sync: explicit `config.default_calendar` first, else legacy resolve.
+	 * Pick the account row used for outbound sync.
+	 *
+	 * Prefers an account with an explicit `config.default_calendar`; otherwise
+	 * returns the first account that resolves to a single enabled calendar.
 	 *
 	 * @param array<string, mixed> $integration_meta Host meta map account_id => account payload.
 	 * @return array{id: string|int, data: array, default_calendar: array}|null
 	 */
 	protected function pick_host_account_for_default_calendar_sync( array $integration_meta ): ?array {
-		$legacy = null;
+		$fallback = null;
 		foreach ( $integration_meta as $account_id => $data ) {
 			if ( empty( $data ) || empty( $data['config'] ) || ! is_array( $data['config'] ) ) {
 				continue;
@@ -385,15 +385,15 @@ abstract class Integration {
 					'default_calendar' => $resolved,
 				);
 			}
-			if ( null === $legacy ) {
-				$legacy = array(
+			if ( null === $fallback ) {
+				$fallback = array(
 					'id'               => $account_id,
 					'data'             => $data,
 					'default_calendar' => $resolved,
 				);
 			}
 		}
-		return $legacy;
+		return $fallback;
 	}
 
 	/**

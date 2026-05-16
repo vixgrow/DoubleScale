@@ -93,69 +93,11 @@ final class MergeTagsManager extends \DoubleScale\Modules\Booking\Abstracts\Mana
 	 *
 	 * @return string
 	 */
-	/**
-	 * Legacy dot-notation aliases used by some frontend-generated templates.
-	 * Maps "group.slug" -> "group:slug" that the registered merge tags use.
-	 *
-	 * @var array
-	 */
-	private static $dot_aliases = array(
-		'guest.full_name' => 'guest:name',
-		'guest.name'      => 'guest:name',
-		'guest.email'     => 'guest:email',
-		'guest.note'      => 'guest:note',
-		'guest.timezone'  => 'guest:timezone',
-		'host.name'       => 'host:name',
-		'host.email'      => 'host:email',
-		'host.timezone'   => 'host:timezone',
-		'booking.event_name'    => 'booking:event_name',
-		'booking.service_name'  => 'booking:service_name',
-		'booking.start_time'    => 'booking:start_time',
-		'booking.end_time'      => 'booking:end_time',
-		'booking.event_location' => 'booking:event_location',
-		'booking.name'          => 'booking:name',
-		'booking.timezone'      => 'booking:timezone',
-		'booking.hash'          => 'booking:hash',
-		'booking.cancel_url'    => 'booking:cancel_url',
-		'booking.reschedule_url' => 'booking:reschedule_url',
-		'booking.details_url'   => 'booking:details_url',
-		'booking.confirm_url'   => 'booking:confirm_url',
-		'booking.reject_url'    => 'booking:reject_url',
-		'booking.start_date_time_for_host'    => 'booking:start_time',
-		'booking.start_date_time_for_attendee' => 'booking:start_time',
-		'booking.additional_guests'           => 'booking:additional_guests',
-	);
-
-	/**
-	 * Process Merge Tags
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string             $content Content.
-	 * @param BookingModel|null $booking Booking Model.
-	 *
-	 * @return string
-	 */
 	public function process_merge_tags( $content, $booking ) {
 		if ( ! is_string( $content ) || empty( $content ) ) {
 			return '';
 		}
 
-		// First pass: convert dot-notation tags to colon-notation
-		$content = preg_replace_callback(
-			'/\{\{([a-zA-Z_]+)\.([a-zA-Z_]+)\}\}/',
-			function ( $matches ) {
-				$dot_key = $matches[1] . '.' . $matches[2];
-				if ( isset( self::$dot_aliases[ $dot_key ] ) ) {
-					return '{{' . self::$dot_aliases[ $dot_key ] . '}}';
-				}
-				// Try direct group:slug conversion as fallback
-				return '{{' . $matches[1] . ':' . $matches[2] . '}}';
-			},
-			$content
-		);
-
-		// Second pass: process colon-notation tags (the canonical format)
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
 			function( $matches ) use ( $booking ) {

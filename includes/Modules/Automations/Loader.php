@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use DoubleScale\Plugin;
+use DoubleScale\Core\PluginKernel;
 use Exception;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
@@ -31,11 +31,7 @@ use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 final class Loader {
 
 
-
-
-
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var Loader|null
 	 */
 	private static $instance;
@@ -76,9 +72,9 @@ final class Loader {
 	 * @return void
 	 */
 	public function load_hooks() {
-		Plugin::instance()->automations_tasks->register_callback( 'process_automation_step', array( $this, 'process_automation_step' ) );
-		Plugin::instance()->automations_tasks->register_callback( 'process_automations', array( $this, 'process_automations' ) );
-		Plugin::instance()->automations_tasks->register_callback( 'process_automation_goal', array( $this, 'process_automation_goal' ) );
+		PluginKernel::instance()->automations_tasks->register_callback( 'process_automation_step', array( $this, 'process_automation_step' ) );
+		PluginKernel::instance()->automations_tasks->register_callback( 'process_automations', array( $this, 'process_automations' ) );
+		PluginKernel::instance()->automations_tasks->register_callback( 'process_automation_goal', array( $this, 'process_automation_goal' ) );
 	}
 
 	/**
@@ -108,7 +104,7 @@ final class Loader {
 				}
 				list( $automation, $args ) = $meta_args;
 			}
-			// Legacy: array format (kept for backwards compatibility)
+			// Direct invocation form: caller passes ['meta_id' => X].
 			elseif ( is_array( $automation ) && isset( $automation['meta_id'] ) ) {
 				$meta_id   = $automation['meta_id'];
 				$meta_args = doublescale_get_meta_args( $meta_id );

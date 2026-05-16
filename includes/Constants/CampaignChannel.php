@@ -204,33 +204,25 @@ class CampaignChannel {
 	}
 
 	/**
-	 * Convert channel type to CommunicationTrackingModel mode constant
+	 * Channel type → CommunicationTrackingModel mode (identity mapping).
 	 *
-	 * Since both use the same integer values, this is now a direct mapping.
-	 * Kept for backward compatibility with existing code.
+	 * Channel constants and tracking-mode constants share the same integer
+	 * values; this helper makes that intent explicit at call sites.
 	 *
 	 * @param int $channel Channel type integer.
-	 * @return int|null Tracking mode constant or null if not found
+	 * @return int Tracking mode constant.
 	 */
 	public static function to_mode( $channel ) {
-		// Channel types and tracking modes use identical integers
-		// CHANNEL_EMAIL (1) = MODE_EMAIL (1)
-		// CHANNEL_SMS (2) = MODE_SMS (2)
-		// CHANNEL_WHATSAPP (3) = MODE_WHATSAPP (3)
 		return $channel;
 	}
 
 	/**
-	 * Convert CommunicationTrackingModel mode constant to channel type
-	 *
-	 * Since both use the same integer values, this is now a direct mapping.
-	 * Kept for backward compatibility with existing code.
+	 * CommunicationTrackingModel mode → channel type (identity mapping).
 	 *
 	 * @param int $mode Tracking mode constant.
-	 * @return int|null Channel type or null if not found
+	 * @return int Channel type.
 	 */
 	public static function from_mode( $mode ) {
-		// Channel types and tracking modes use identical integers
 		return $mode;
 	}
 

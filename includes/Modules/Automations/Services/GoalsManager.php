@@ -45,7 +45,6 @@ final class GoalsManager {
 
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var GoalsManager|null
 	 */
 	private static $instance;

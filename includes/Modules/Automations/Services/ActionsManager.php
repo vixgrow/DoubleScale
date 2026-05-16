@@ -50,7 +50,6 @@ final class ActionsManager {
 
 
 	/**
-	 * @deprecated Retained for backward compatibility; prefer container resolution.
 	 * @var ActionsManager|null
 	 */
 	private static $instance;

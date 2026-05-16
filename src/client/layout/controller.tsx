@@ -43,7 +43,6 @@ import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 // import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
 import { ProFeatureNotice } from '@doublescale/components';
-import { ProUpgradeButton } from '@/components/pro-upgrade-button';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -61,7 +60,6 @@ import {
 } from '@doublescale/components';
 import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { Mail } from 'lucide-react';
-import { RocketIcon } from '@/components/icons';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -140,19 +138,11 @@ const useOnboardingRedirect = () => {
 
 export const HeaderBar = ({ page }: { page: any }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const navigate = useNavigate();
 
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
 		false
 	) as boolean;
-
-	const license = config.getLicense();
-	const hasValidLicense =
-		Boolean(license) &&
-		typeof license === 'object' &&
-		'status' in license &&
-		(license as unknown as { status: string }).status === 'valid';
 
 	useEffect(() => {
 		let isMounted = true;
@@ -219,22 +209,6 @@ export const HeaderBar = ({ page }: { page: any }) => {
 				<span className="doublescale-layout__page-title">{page.label}</span>
 			</div>
 			<div className="doublescale-layout__header-right">
-				{Boolean(
-					applyFilters('doublescale_show_activate_license', !hasValidLicense)
-				) && (
-					<a
-						href="#"
-						onClick={(e) => {
-							e.preventDefault();
-							navigate(getToLink('settings/license'));
-						}}
-						className="doublescale-layout__license-link"
-					>
-						<RocketIcon />
-						{__('Activate License', 'doublescale')}
-					</a>
-				)}
-				{!isProActive && <ProUpgradeButton />}
 				{!isProActive && <HeaderProBells />}
 				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
 				<div className="doublescale-layout__header-divider"></div>

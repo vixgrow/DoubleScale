@@ -37,10 +37,6 @@ final class Module extends AbstractModule {
 		return false;
 	}
 
-	public function dependencies(): array {
-		return array( 'core', 'contacts' );
-	}
-
 	public function register( Container $container ): void {
 		$container->singleton(
 			Services\ActivityManager::class,

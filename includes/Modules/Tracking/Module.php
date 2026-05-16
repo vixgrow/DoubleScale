@@ -38,10 +38,6 @@ final class Module extends AbstractModule {
 		return false;
 	}
 
-	public function dependencies(): array {
-		return array( 'core', 'contacts', 'automations' );
-	}
-
 	public function register( Container $container ): void {
 		$container->singleton(
 			LinkTriggers::class,

@@ -39,7 +39,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 		<DashboardContentCard
 			title={__('Recent Contacts', 'doublescale')}
 			cardClassName={cn(
-				'flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
+				'flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
 				cardClassName
 			)}
 			contentClassName={cn(
@@ -63,7 +63,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 						return (
 							<div
 								key={record.id}
-								className="rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] p-4 transition-colors hover:bg-[#F0F2F5]"
+								className="rounded-xl border border-border bg-[#F7F8FA] p-4 transition-colors hover:bg-[#F0F2F5]"
 							>
 								<div className="flex items-center justify-between gap-3">
 									<div className="flex min-w-0 flex-1 items-center gap-2">
@@ -79,14 +79,14 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 												{initials || '?'}
 											</AvatarFallback>
 										</Avatar>
-										<div className="min-w-0 truncate text-base font-semibold capitalize text-[#29292E]">
+										<div className="min-w-0 truncate text-base font-semibold capitalize text-primaryText">
 											{record.first_name || '-'} {record.last_name || '-'}
 										</div>
 									</div>
 									<NavLink to={`contacts/${record.id}`}>
-										<span className="inline-flex shrink-0 items-center gap-1 text-sm leading-6 font-medium text-[#6549CA] hover:opacity-80">
+										<span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium leading-6 text-brandPrimary transition-colors hover:text-brandPrimary/80">
 											{__('View Profile', 'doublescale')}
-											<ArrowRight width={24} height={24} color="#6549CA" />
+											<ArrowRight width={24} height={24} />
 										</span>
 									</NavLink>
 								</div>

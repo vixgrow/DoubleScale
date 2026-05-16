@@ -61,6 +61,9 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 	const isSurecartActive = ConfigAPI.isSurecartActive();
 	const lmsActive = ConfigAPI.isLmsActive();
 	const isCrmManager = useCapabilities().isCrmManager();
+	const isDealsModuleEnabled = ConfigAPI.isModuleEnabled('deals');
+	const isTasksModuleEnabled = ConfigAPI.isModuleEnabled('tasks');
+	const isAutomationsModuleEnabled = ConfigAPI.isModuleEnabled('automations');
 	if (!contact) {
 		return null;
 	}
@@ -139,13 +142,17 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 					},
 				]
 			: []),
-		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		...(isDealsModuleEnabled
+			? [{ value: 'deals', label: 'Deals', icon: <DealsIcon /> }]
+			: []),
 		{
 			value: 'lead-score',
 			label: 'Lead Score',
 			icon: <Trophy width={24} height={24} />,
 		},
-		{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> },
+		...(isTasksModuleEnabled
+			? [{ value: 'tasks', label: 'Tasks', icon: <TaskDoneIcon /> }]
+			: []),
 		{
 			value: 'meetings',
 			label: 'Meetings',
@@ -157,7 +164,7 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			label: 'Website Tracking',
 			icon: <WebsiteIcon width={24} height={24} />,
 		},
-		...(isCrmManager
+		...(isCrmManager && isAutomationsModuleEnabled
 			? [
 					{
 						value: 'automation',
@@ -250,14 +257,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 					},
 				]
 			: []),
-		{
-			value: 'deals',
-			children: (
-				<CardContent className="pt-6">
-					<Deals contact_id={contact.id} navigate={navigate} />
-				</CardContent>
-			),
-		},
+		...(isDealsModuleEnabled
+			? [
+					{
+						value: 'deals',
+						children: (
+							<CardContent className="pt-6">
+								<Deals
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
 		{
 			value: 'lead-score',
 			children: (
@@ -283,14 +297,21 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				</CardContent>
 			),
 		},
-		{
-			value: 'tasks',
-			children: (
-				<CardContent className="pt-6">
-					<Tasks contact_id={contact.id} navigate={navigate} />
-				</CardContent>
-			),
-		},
+		...(isTasksModuleEnabled
+			? [
+					{
+						value: 'tasks',
+						children: (
+							<CardContent className="pt-6">
+								<Tasks
+									contact_id={contact.id}
+									navigate={navigate}
+								/>
+							</CardContent>
+						),
+					},
+				]
+			: []),
 		{
 			value: 'notes',
 			children: (
@@ -299,14 +320,18 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				</CardContent>
 			),
 		},
-		{
-			value: 'automation',
-			children: (
-				<CardContent className="pt-6">
-					<Automation contact_id={contact.id} />
-				</CardContent>
-			),
-		},
+		...(isAutomationsModuleEnabled
+			? [
+					{
+						value: 'automation',
+						children: (
+							<CardContent className="pt-6">
+								<Automation contact_id={contact.id} />
+							</CardContent>
+						),
+					},
+				]
+			: []),
 	];
 
 	// Conditionally add Purchase History content

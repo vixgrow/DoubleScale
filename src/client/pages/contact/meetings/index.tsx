@@ -93,10 +93,13 @@ const Meetings: React.FC<MeetingsProps> = ({ contact_id }) => {
         setLoading(true);
 
         try {
+            // Pass both manually-logged meetings AND timeline-projected bookings.
+            // ActivityManager::get_activities() splits the comma string into an array
+            // and queries with whereIn().
             const response: any = await apiFetch({
                 path: addQueryArgs(`/doublescale/v1/activities`, {
                     contact_id,
-                    activity_type: 'meeting_scheduled',
+                    activity_type: 'meeting_scheduled,booking_scheduled',
                     per_page: perPage,
                     page,
                 }),

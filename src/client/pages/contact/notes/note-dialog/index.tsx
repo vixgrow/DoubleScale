@@ -193,13 +193,11 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         helperText={errors.note}
                     />
                 </div>
-                <DialogFooter className="mt-6">
+                <DialogFooter className="mt-6 flex justify-end items-center ">
                     <Button
                         onClick={handleSave}
                         disabled={isSaving}
-                        size="xl"
-                        variant="gradient"
-                        className="w-full"
+                        variant='default'
                     >
                         {isSaving
                             ? __('Saving...', 'doublescale')

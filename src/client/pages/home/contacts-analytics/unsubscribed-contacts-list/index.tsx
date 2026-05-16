@@ -43,19 +43,19 @@ export const UnsubscribedContactsTable: React.FC<
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('ID', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Title / Email', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Date', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Unsubscribe Reason', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
@@ -63,7 +63,7 @@ export const UnsubscribedContactsTable: React.FC<
 						<TableBody>
 							{contacts.map((contact, index) => (
 								<TableRow key={contact.id}>
-									<TableCell className="text-[#A1A5B7] text-sm font-semibold">
+									<TableCell className="text-muted-foreground text-sm font-semibold">
 										{index + 1}
 									</TableCell>
 									<TableCell>
@@ -75,26 +75,26 @@ export const UnsubscribedContactsTable: React.FC<
 														'') || <User />}
 											</div>
 											<div className="font-semibold">
-												<div className="text-base text-[#3F4254]">
+												<div className="text-base text-primaryText">
 													{contact.first_name || '-'}{' '}
 													{contact.last_name || '-'}
 												</div>
-												<div className="text-sm text-[#A1A5B7]">
+												<div className="text-sm text-muted-foreground">
 													{contact.email}
 												</div>
 											</div>
 										</div>
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										{format(
 											new Date(contact.created_at),
 											'yyyy-MM-dd HH:mm'
 										)}
 									</TableCell>
-									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
+									<TableCell className="text-muted-foreground font-semibold text-sm">
 										{__('No reason', 'doublescale')}
 									</TableCell>
-									<TableCell className="text-[#3F3F46] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										<NavLink to={`contacts/${contact.id}`}>
 											<div className="flex items-center gap-2">
 												<ManageIcon />

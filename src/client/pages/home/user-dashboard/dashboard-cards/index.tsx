@@ -43,7 +43,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 	return (
 		<DashboardContentCard
 			title={__('Analytics Overview', 'doublescale')}
-			cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+			cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 			contentClassName="flex min-h-0 flex-1 flex-col"
 		>
 			<div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4 lg:gap-6">
@@ -74,7 +74,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					value={formatStatCount(data.total_tags || 0)}
 					icon={<TagsIcon width={29} height={29} />}
 					iconBgClass="bg-[#FFD242]"
-					iconColor="text-[#29292E]"
+					iconColor="text-primaryText"
 				/>
 
 				<MessageStatsCard
@@ -93,7 +93,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					label={__('Active Automation', 'doublescale')}
 					value={formatStatCount(data.total_automations || 0)}
 					icon={<AutomationsIcon width={29} height={29} />}
-					iconBgClass="bg-[#6549CA]"
+					iconBgClass="bg-brandPrimary"
 					iconColor="text-white"
 				/>
 

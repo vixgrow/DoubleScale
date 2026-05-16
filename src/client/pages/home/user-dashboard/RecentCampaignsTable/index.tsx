@@ -29,7 +29,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const tableHeadClass =
-	'whitespace-nowrap capitalize text-sm leading-6 tracking-wide text-[#29292E]';
+	'whitespace-nowrap capitalize text-sm leading-6 tracking-wide text-primaryText';
 
 function campaignIsPublished(status: string): boolean {
 	const s = (status || '').toLowerCase();
@@ -53,7 +53,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 		<DashboardContentCard
 			title={__('Recent Campaigns', 'doublescale')}
 			cardClassName={cn(
-				'flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
+				'flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
 				cardClassName
 			)}
 			contentClassName={cn(
@@ -67,7 +67,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 				<EmptyState />
 			) : (
 				<div className="min-h-0 flex-1 overflow-auto">
-					<div className="overflow-hidden rounded-xl border border-[#D0D0D0]">
+					<div className="overflow-hidden rounded-xl border border-border">
 						<Table className="border-0">
 							<TableHeader className="border-b border-[#E1E3EA] bg-[#DEE1E666]">
 								<TableRow className="border-0 hover:bg-transparent">
@@ -108,18 +108,18 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 													: 'bg-[#F7F8FA] hover:bg-[#EFF1F4]'
 											)}
 										>
-											<TableCell className="whitespace-nowrap text-sm font-medium text-[#3F4254]">
+											<TableCell className="whitespace-nowrap text-sm font-medium text-primaryText">
 												{index + 1}
 											</TableCell>
-											<TableCell className="max-w-[8rem] truncate text-sm font-semibold text-[#29292E] sm:max-w-[12rem]">
+											<TableCell className="max-w-[8rem] truncate text-sm font-semibold text-primaryText sm:max-w-[12rem]">
 												{campaign.name}
 											</TableCell>
-											<TableCell className="whitespace-nowrap text-sm font-medium text-[#A1A5B7]">
+											<TableCell className="whitespace-nowrap text-sm font-medium text-muted-foreground">
 												<TimeAgoCell
 													value={campaign.created_at}
 												/>
 											</TableCell>
-											<TableCell className="whitespace-nowrap text-sm font-medium text-[#3F4254]">
+											<TableCell className="whitespace-nowrap text-sm font-medium text-primaryText">
 												{campaign.contacts_count || 0}
 											</TableCell>
 											<TableCell className="whitespace-nowrap">
@@ -128,7 +128,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 														'inline-flex rounded-lg  px-2 py-1 text-xs font-medium',
 														published
 															? ' bg-[#E4FAEC] text-[#16A34A]'
-															: ' bg-[#ECECEC] text-[#6B6C76]'
+															: ' bg-[#ECECEC] text-muted-foreground'
 													)}
 												>
 													{published
@@ -157,7 +157,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 															)
 														)
 													}
-													className="h-8 w-8 shrink-0 border-[#6549CA] text-[#6549CA] hover:bg-[#6549CA]/10 hover:text-[#6549CA]"
+													className="h-8 w-8 shrink-0 border-brandPrimary text-brandPrimary hover:bg-brandPrimary/10 hover:text-brandPrimary"
 												>
 													<ThreeDotsIcon />
 												</Button>

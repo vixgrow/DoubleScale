@@ -39,28 +39,28 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 					<Table >
 						<TableHeader>
 							<TableRow>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('ID', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Name', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Created On', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Execution Date', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Contacts', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Sent', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Status', 'doublescale')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead className="text-primaryText font-semibold">
 									{__('Action', 'doublescale')}
 								</TableHead>
 							</TableRow>
@@ -68,28 +68,28 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 						<TableBody>
 							{emails.map((email, index) => (
 								<TableRow key={email.id}>
-									<TableCell className="text-[#A1A5B7] text-sm font-semibold">
+									<TableCell className="text-muted-foreground text-sm font-semibold">
 										{index + 1}
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										{email.template?.subject || email.activity?.data?.subject || __('No Subject', 'doublescale')}
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										{format(
 											new Date(email.created_at),
 											'yyyy-MM-dd HH:mm'
 										)}
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										{format(
 											new Date(email.sent_at),
 											'yyyy-MM-dd HH:mm'
 										)}
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										1024
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										1024
 									</TableCell>
 									<TableCell>
@@ -103,7 +103,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 											{email.status}
 										</div>
 									</TableCell>
-									<TableCell className="text-[#3F3F46] font-semibold text-sm">
+									<TableCell className="text-primaryText font-semibold text-sm">
 										<NavLink
 											to={`contacts/${email.contact_id}`}
 										>

@@ -102,7 +102,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 				/>
 			}
 			cardClassName={cn(
-				'flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
+				'flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
 				cardClassName
 			)}
 			contentClassName={cn(

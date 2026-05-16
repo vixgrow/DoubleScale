@@ -25,7 +25,7 @@ import { EmptyState } from '../../no-data';
 import { cn } from '@/lib/utils';
 
 const tableHeadClass =
-	'whitespace-nowrap text-sm leading-6 capitalize tracking-wide text-[#29292E]';
+	'whitespace-nowrap text-sm leading-6 capitalize tracking-wide text-primaryText';
 
 interface RecentAutomationsTableProps {
 	automations: DashboardData['top_automations'];
@@ -44,7 +44,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 		<DashboardContentCard
 			title={__('Recent Automations', 'doublescale')}
 			cardClassName={cn(
-				'flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
+				'flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]',
 				cardClassName
 			)}
 			contentClassName={cn(
@@ -58,7 +58,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 				<EmptyState />
 			) : (
 				<div className="min-h-0 flex-1 overflow-auto">
-					<div className="overflow-hidden rounded-xl border border-[#D0D0D0]">
+					<div className="overflow-hidden rounded-xl border border-border">
 						<Table className="border-0">
 							<TableHeader className="border-b border-[#E1E3EA] bg-[#DEE1E666]">
 								<TableRow className="border-0 hover:bg-transparent">
@@ -92,13 +92,13 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 												: 'bg-[#F7F8FA] hover:bg-[#EFF1F4]'
 										)}
 									>
-										<TableCell className="whitespace-nowrap text-sm font-medium text-[#3F4254]">
+										<TableCell className="whitespace-nowrap text-sm font-medium text-primaryText">
 											{index + 1}
 										</TableCell>
-										<TableCell className="max-w-[10rem] truncate text-sm font-medium text-[#29292E] sm:max-w-[14rem]">
+										<TableCell className="max-w-[10rem] truncate text-sm font-medium text-primaryText sm:max-w-[14rem]">
 											{automation.name}
 										</TableCell>
-										<TableCell className="whitespace-nowrap text-sm text-[#3F4254]">
+										<TableCell className="whitespace-nowrap text-sm text-primaryText">
 											{automation.trigger}
 										</TableCell>
 										<TableCell className="whitespace-nowrap">
@@ -107,7 +107,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 													'inline-flex rounded-lg px-2 py-1 text-xs font-medium',
 													automation.status === 'active'
 														? ' bg-[#E4FAEC] text-[#16A34A]'
-														: ' bg-[#ECECEC] text-[#6B6C76]'
+														: ' bg-[#ECECEC] text-muted-foreground'
 												)}
 											>
 												{automation.status === 'active'
@@ -127,7 +127,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 														)
 													)
 												}
-												className="h-8 w-8 shrink-0 border-[#6549CA] text-[#6549CA] hover:bg-[#6549CA]/10 hover:text-[#6549CA]"
+												className="h-8 w-8 shrink-0 border-brandPrimary text-brandPrimary hover:bg-brandPrimary/10 hover:text-brandPrimary"
 											>
 												<ThreeDotsIcon />
 											</Button>

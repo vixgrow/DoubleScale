@@ -45,7 +45,7 @@ export const MobileAppCard: React.FC = () => {
 		<div className="relative overflow-hidden rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] bg-[#fff] p-6">
 			<button
 				onClick={handleDismiss}
-				className="absolute top-3 right-3 p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+				className="absolute top-3 right-3 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-primaryText"
 				aria-label={__('Dismiss', 'doublescale')}
 			>
 				<X size={16} />
@@ -57,10 +57,10 @@ export const MobileAppCard: React.FC = () => {
 				</div>
 
 				<div className="flex-1 min-w-0">
-					<h3 className="text-sm font-semibold text-foreground">
+					<h3 className="text-sm font-semibold text-primaryText">
 						{__('Take DoubleScale on the go', 'doublescale')}
 					</h3>
-					<p className="text-xs text-muted-foreground mt-0.5">
+					<p className="mt-0.5 text-xs text-muted-foreground">
 						{__('Manage contacts, deals, and tasks from your mobile device.', 'doublescale')}
 					</p>
 				</div>
@@ -79,7 +79,7 @@ export const MobileAppCard: React.FC = () => {
 						href={ANDROID_URL}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-border bg-card text-foreground text-xs font-medium hover:bg-muted/50 transition-colors"
+						className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card text-xs font-medium text-primaryText transition-colors hover:bg-muted/50"
 					>
 						<PlayStoreIcon />
 						{__('Google Play', 'doublescale')}

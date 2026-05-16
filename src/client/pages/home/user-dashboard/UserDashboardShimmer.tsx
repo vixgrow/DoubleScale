@@ -14,7 +14,7 @@ export const UserDashboardShimmer: React.FC = () => {
 				<div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
 					<DashboardContentCard
 						title={__('Analytics Overview', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col border-slate-200/80 bg-white shadow-sm lg:col-span-2"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)] lg:col-span-2"
 						contentClassName="flex min-h-0 flex-1 flex-col"
 					>
 						<div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
@@ -33,7 +33,7 @@ export const UserDashboardShimmer: React.FC = () => {
 
 					<DashboardContentCard
 						title={__('Quick Links', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col border-slate-200/80 bg-white shadow-sm"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 						contentClassName="flex min-h-0 flex-1 flex-col"
 						headerContent={__('(Most Used Functions)', 'doublescale')}
 					>
@@ -62,7 +62,7 @@ export const UserDashboardShimmer: React.FC = () => {
 				<div className="flex h-full min-h-0 flex-col">
 					<DashboardContentCard
 						title={__('Recent Contacts', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 						contentClassName="flex min-h-0 flex-1 flex-col"
 						viewAllLink={true}
 						viewAllLinkUrl="contacts"
@@ -71,7 +71,7 @@ export const UserDashboardShimmer: React.FC = () => {
 							{Array.from({ length: 5 }).map((_, index) => (
 								<div
 									key={index}
-									className="rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] p-4"
+									className="rounded-xl border border-border bg-[#F7F8FA] p-4"
 								>
 									<div className="flex items-start justify-between gap-3">
 										<div className="flex flex-1 items-center gap-3">
@@ -92,7 +92,7 @@ export const UserDashboardShimmer: React.FC = () => {
 				<div className="flex h-full min-h-0 flex-col">
 					<DashboardContentCard
 						title={__('Contact Analytics', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 						contentClassName="flex min-h-0 flex-1 flex-col"
 					>
 						<div className="space-y-4">
@@ -109,12 +109,12 @@ export const UserDashboardShimmer: React.FC = () => {
 				<div className="flex h-full min-h-0 flex-col">
 					<DashboardContentCard
 						title={__('Recent Automations', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 						contentClassName="flex min-h-0 flex-1 flex-col overflow-hidden"
 						viewAllLink={true}
 						viewAllLinkUrl="automations"
 					>
-						<div className="min-h-0 flex-1 overflow-auto rounded-xl border border-[#D0D0D0]">
+						<div className="min-h-0 flex-1 overflow-auto rounded-xl border border-border">
 							<div className="bg-[#DEE1E666] border-b border-[#E1E3EA] px-3 py-3">
 								<div className="flex gap-3">
 									<Skeleton className="h-3 w-8" />
@@ -146,12 +146,12 @@ export const UserDashboardShimmer: React.FC = () => {
 				<div className="flex h-full min-h-0 flex-col">
 					<DashboardContentCard
 						title={__('Recent Campaigns', 'doublescale')}
-						cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+						cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 						contentClassName="flex min-h-0 flex-1 flex-col overflow-hidden"
 						viewAllLink={true}
 						viewAllLinkUrl="campaigns"
 					>
-						<div className="min-h-0 flex-1 overflow-auto rounded-xl border border-[#D0D0D0]">
+						<div className="min-h-0 flex-1 overflow-auto rounded-xl border border-border">
 							<div className="bg-[#DEE1E666] border-b border-[#E1E3EA] px-3 py-3">
 								<div className="flex flex-wrap gap-3">
 									<Skeleton className="h-3 w-8" />

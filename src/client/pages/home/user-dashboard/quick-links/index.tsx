@@ -64,7 +64,7 @@ export const QuickLinks: FC = () => {
 	return (
 		<DashboardContentCard
 			title={__('Quick Links', 'doublescale')}
-			cardClassName="flex h-full min-h-0 w-full flex-col bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
+			cardClassName="flex h-full min-h-0 w-full flex-col border-0 bg-white rounded-[20px] shadow-[0_4px_20px_0_rgba(59,130,246,0.14)]"
 			contentClassName="flex min-h-0 flex-1 flex-col"
 			headerContent={__('(Most Used Functions)', 'doublescale')}
 		>
@@ -75,18 +75,18 @@ export const QuickLinks: FC = () => {
 						type="button"
 						onClick={() => navigate(to)}
 						className={cn(
-							'group flex w-full flex-col gap-3 rounded-xl border border-[#D0D0D0] bg-[#F7F8FA] p-3.5 text-left',
+							'group flex w-full flex-col gap-3 rounded-xl border border-border bg-[#F7F8FA] p-3.5 text-left',
 							'transition-shadow hover:border-border hover:shadow-sm',
 							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
 						)}
 					>
 						<div className="flex w-full items-start justify-between gap-2">
-							<div className="flex text-[#0D9DFC] h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D0D0D0] bg-white">
+							<div className="flex text-brandPrimary h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-white">
 								{icon}
 							</div>
 							<ExternalLinkIcon/>
 						</div>
-						<span className="whitespace-nowrap text-sm font-medium text-foreground">
+						<span className="whitespace-nowrap text-sm font-medium text-primaryText">
 							{label}
 						</span>
 					</button>

@@ -175,12 +175,6 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 		}
 	};
 
-	// Always show controls for condition steps, even if they can't move
-	// For other steps, only show if they can move in at least one direction
-	if (step.type !== 'condition' && !canMoveUp && !canMoveDown) {
-		return null;
-	}
-
 	return (
 		<TooltipProvider>
 			<div className={`doublescale-step-reorder-controls ${className}`}>

@@ -98,7 +98,7 @@ interface TriggersGroupRenderProps {
 const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	groups,
 	onChange,
-	value: _value,
+	value,
 }) => {
 	const [collapsedGroups, setCollapsedGroups] = useState<
 		Record<string, boolean>
@@ -122,8 +122,13 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 
 	useEffect(() => {
 		const initial: Record<string, boolean> = {};
-		groupsList.forEach((_, idx) => {
-			if (idx !== 0) {
+		groupsList.forEach((group, idx) => {
+			const hasSelectedTrigger =
+				!!value &&
+				group.triggers &&
+				Object.prototype.hasOwnProperty.call(group.triggers, value);
+			// Keep the group expanded when it contains the selected trigger.
+			if (idx !== 0 && !hasSelectedTrigger) {
 				initial[String(idx)] = true;
 			}
 		});
@@ -131,7 +136,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 		// We only want to reset when the category (signature) changes — the
 		// groupsList reference itself may be stable inside one category.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [groupsSignature]);
+	}, [groupsSignature, value]);
 
 	const [showProModal, setShowProModal] = useState(false);
 	const [selectedProTrigger, setSelectedProTrigger] = useState<{
@@ -312,13 +317,27 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 									{map(
 										group.triggers,
 										(trigger, triggerKey) => {
+											const isSelected =
+												value === triggerKey;
 											const triggerButton = (
 												<div
 													key={triggerKey}
-													className="flex items-center justify-between gap-4 px-4 py-3.5 transition-colors hover:bg-neutral-50/60"
+													className={cn(
+														'flex items-center justify-between gap-4 px-4 py-3.5 transition-colors',
+														isSelected
+															? 'bg-brandPrimary/5'
+															: 'hover:bg-neutral-50/60'
+													)}
 												>
 													<div className="flex min-w-0 flex-1 items-center gap-2">
-														<span className="text-sm leading-6 text-foreground">
+														<span
+															className={cn(
+																'text-sm leading-6',
+																isSelected
+																	? 'font-medium text-brandPrimary'
+																	: 'text-foreground'
+															)}
+														>
 															{trigger.label}
 														</span>
 														{trigger.is_pro &&
@@ -339,18 +358,31 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 																trigger
 															);
 														}}
-														variant="secondaryDeepBlue"
+														variant={
+															isSelected
+																? 'outline'
+																: 'secondaryDeepBlue'
+														}
 														size="sm"
 														disabled={
 															!trigger.is_pro &&
 															group.is_disabled
 														}
-														className="h-8 shrink-0 rounded-md border px-4 text-xs font-semibold uppercase tracking-wide shadow-none"
-													>
-														{__(
-															'Select',
-															'doublescale'
+														className={cn(
+															'h-8 shrink-0 rounded-md border px-4 text-xs font-semibold uppercase tracking-wide shadow-none',
+															isSelected &&
+																'border-brandPrimary text-brandPrimary'
 														)}
+													>
+														{isSelected
+															? __(
+																	'Selected',
+																	'doublescale'
+																)
+															: __(
+																	'Select',
+																	'doublescale'
+																)}
 													</Button>
 												</div>
 											);

@@ -20,7 +20,9 @@ export type NodeLayoutVariant =
 	| 'action'
 	| 'goal'
 	| 'delay'
-	| 'condition';
+	| 'condition'
+	| 'end_automation';
+
 
 interface NodeLayoutProps {
 	variant: NodeLayoutVariant;

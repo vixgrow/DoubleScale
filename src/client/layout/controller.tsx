@@ -85,10 +85,19 @@ const FORMS_PRO_FEATURE_LIST = [
 ];
 
 /**
- * The Forms module only registers when Pro is active. Missing slug + default-ON
- * toggle semantics would otherwise mount the free Forms UI and hit Pro-only REST routes.
+ * The Forms editor and REST routes only exist when DoubleScale Pro is active.
+ * Phantom `forms` rows (persisted toggles before Pro is installed) must not mount
+ * the free Forms UI — same UX as Pipelines and Tasks, which always show the
+ * upgrade notice until Pro replaces the page via navigation filters.
  */
 function isFormsModuleAvailableForEditor(): boolean {
+	const isProActive = applyFilters(
+		'doublescale_is_pro_active',
+		false
+	) as boolean;
+	if (!isProActive) {
+		return false;
+	}
 	return (
 		config.getModules().some((m) => m.slug === 'forms') &&
 		config.isModuleToggleEnabled('forms')

@@ -15,7 +15,6 @@ import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import './style.scss';
 import type { OrganizedStep } from '@doublescale/client';
 import { Fields } from '@doublescale/components';
 import { getAction, getGoal } from '@doublescale/utils';
@@ -312,6 +311,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						setSettings(value);
 					}}
 					stepId={step.id}
+					
 				/>
 			</div>
 

@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * @group smoke
+ */
 final class FreeModuleBootWithoutProTest extends TestCase {
 
 	public function test_module_registry_contains_only_free_slugs_when_pro_not_hooked(): void {

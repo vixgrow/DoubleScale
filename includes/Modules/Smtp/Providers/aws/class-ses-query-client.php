@@ -71,7 +71,7 @@ class Ses_Result implements \JsonSerializable {
 	/**
 	 * @return array<string, mixed>
 	 */
-	public function jsonSerialize() {
+	public function jsonSerialize(): array {
 		return $this->data;
 	}
 }

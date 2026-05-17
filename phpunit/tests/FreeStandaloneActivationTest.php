@@ -109,6 +109,9 @@ final class FreeStandaloneActivationTest_WpdbMock {
 	}
 }
 
+/**
+ * @group smoke
+ */
 final class FreeStandaloneActivationTest extends TestCase {
 
 	/** @var FreeStandaloneActivationTest_WpdbMock|null */

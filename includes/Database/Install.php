@@ -32,12 +32,17 @@ class Install {
 
 	/**
 	 * Ensure critical tables exist before the kernel boots (plugins_loaded runs before init).
+	 *
+	 * If only part of the schema exists (e.g. `doublescale_contacts` without `doublescale_terms`
+	 * after a partial install), run migrations again so boot-time code (automation rules, etc.)
+	 * does not query missing tables.
 	 */
 	public static function ensure_db_ready(): void {
 		global $wpdb;
 
 		$critical = array(
 			$wpdb->prefix . 'doublescale_contacts',
+			$wpdb->prefix . 'doublescale_terms',
 		);
 
 		foreach ( $critical as $table ) {

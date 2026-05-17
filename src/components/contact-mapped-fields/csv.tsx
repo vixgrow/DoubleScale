@@ -17,6 +17,8 @@ import './style.scss';
 import ConfigAPI from '@doublescale/config';
 import { isObject, map } from 'lodash';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { getMappingSelectStyles } from './mapping-select-styles';
 
 interface ContactMappedFieldsCsvProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -59,60 +61,74 @@ const ContactMappedFieldsCsv: React.FC<ContactMappedFieldsCsvProps> = ({
 		value: '',
 	});
 
+	const mappingSelectStyles = getMappingSelectStyles();
+	const readonlyFieldClass =
+		'h-10 w-full min-w-0 rounded-lg border border-border bg-[#EFF1F4] text-sm text-[#6B7280] shadow-sm disabled:opacity-100';
+
 	return (
-		<div className="flex gap-[10px] flex-col">
-			<div className="flex gap-5">
-				<div className="flex flex-1 text-[#09090B] font-normal text-base">
-					{__('Field')} <span className="text-red-600">*</span>
+
+			<div className="overflow-hidden rounded-xl border border-[#ECEEF2] bg-white p-5 sm:p-6 shadow-sm">
+				<div className="mb-6">
+					<h3 className="text-lg font-semibold leading-7 text-primaryText">
+						{__('Mapping the file', 'doublescale')}
+					</h3>
+					<p className="mt-2 text-sm leading-6 text-muted-foreground">
+						{__(
+							'Select the column field you want to map on the system to import.',
+							'doublescale'
+						)}
+					</p>
 				</div>
-				<div className="flex flex-1 pl-5 text-[#09090B] font-normal text-base">
-					{__('Contact Field')}{' '}
-					<span className="text-red-600">*</span>
+
+				<div className="flex flex-col gap-4">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+						<div className="text-sm font-semibold text-primaryText">
+							<span>{__('Field', 'doublescale')}</span>{' '}
+							<span className="text-destructive">*</span>
+						</div>
+						<div className="text-sm font-semibold text-primaryText">
+							<span>{__('Contact Field', 'doublescale')}</span>{' '}
+							<span className="text-destructive">*</span>
+						</div>
+					</div>
+					{map(fields, (_, key) => {
+						return (
+							<div
+								key={key}
+								className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-5"
+							>
+								<Input
+									value={fields[key].label}
+									disabled
+									className={cn('min-w-0', readonlyFieldClass)}
+								/>
+								<Select
+									className="react-select-container min-w-0 w-full"
+									classNamePrefix="react-select"
+									placeholder={__(
+										'Select field',
+										'doublescale'
+									)}
+									onChange={(value) => {
+										if (!isObject(value)) {
+											return;
+										}
+
+										onChange({
+											...values,
+											[key]: value.value,
+										});
+									}}
+									value={values ? getAllValue(values[key]) : null}
+									options={options}
+									styles={mappingSelectStyles}
+									isSearchable={false}
+								/>
+							</div>
+						);
+					})}
 				</div>
 			</div>
-			{map(fields, (_, key) => {
-				return (
-					<div key={key} className="flex gap-5">
-						<Input
-							value={fields[key].label}
-							disabled
-							className="flex-1"
-						/>
-						<Select
-							className="react-select-container"
-							classNamePrefix="react-select"
-							onChange={(value) => {
-								if (!isObject(value)) {
-									return;
-								}
-
-								onChange({
-									...values,
-									[key]: value.value,
-								});
-							}}
-							value={values ? getAllValue(values[key]) : null}
-							options={options}
-							styles={{
-								control: (styles) => ({
-									...styles,
-									flex: 1,
-								}),
-								container: (styles) => ({
-									...styles,
-									flex: 1,
-								}),
-								menu: (base: any) => ({
-									...base,
-									color: 'black',
-								}),
-							}}
-							isSearchable={false}
-						/>
-					</div>
-				);
-			})}
-		</div>
 	);
 };
 

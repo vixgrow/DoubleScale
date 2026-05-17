@@ -88,7 +88,7 @@ export default function ListStyles({ activeEditor }: ListStylesProps) {
 				className="h-8 w-8 p-0"
 			>
 				<List
-					className={`w-5 h-5 hover:text-color-primary ${isBulletList ? 'text-color-primary' : 'text-[#52525B]'
+					className={`w-5 h-5 hover:text-primary ${isBulletList ? 'text-primary' : 'text-[#52525B]'
 						}`}
 				/>
 			</Button>
@@ -103,7 +103,7 @@ export default function ListStyles({ activeEditor }: ListStylesProps) {
 				className="h-8 w-8 p-0"
 			>
 				<ListOrdered
-					className={`w-5 h-5 hover:text-color-primary ${isNumberedList ? 'text-color-primary' : 'text-[#52525B]'
+					className={`w-5 h-5 hover:text-primary ${isNumberedList ? 'text-primary' : 'text-[#52525B]'
 						}`}
 				/>
 			</Button>

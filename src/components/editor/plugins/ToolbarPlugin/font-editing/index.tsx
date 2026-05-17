@@ -90,7 +90,7 @@ export default function FontEditing({
 					className="h-8 w-8 p-0"
 				>
 					<Bold
-						className={`w-5 h-5 hover:text-color-primary ${isBold ? 'text-color-primary' : 'text-[#52525B]'
+						className={`w-5 h-5 hover:text-primary ${isBold ? 'text-primary' : 'text-[#52525B]'
 							}`}
 					/>
 				</Button>
@@ -107,7 +107,7 @@ export default function FontEditing({
 					className="h-8 w-8 p-0"
 				>
 					<Italic
-						className={`w-5 h-5 hover:text-color-primary ${isItalic ? 'text-color-primary' : 'text-[#52525B]'
+						className={`w-5 h-5 hover:text-primary ${isItalic ? 'text-primary' : 'text-[#52525B]'
 							}`}
 					/>
 				</Button>
@@ -124,8 +124,8 @@ export default function FontEditing({
 					className="h-8 w-8 p-0"
 				>
 					<Underline
-						className={`w-5 h-5 hover:text-color-primary ${isUnderline
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${isUnderline
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>
@@ -148,8 +148,8 @@ export default function FontEditing({
 					className="h-8 w-8 p-0"
 				>
 					<Strikethrough
-						className={`w-5 h-5 hover:text-color-primary ${isStrikethrough
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${isStrikethrough
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>

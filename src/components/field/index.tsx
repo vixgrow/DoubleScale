@@ -24,35 +24,36 @@ import {
 } from '@doublescale/components';
 import type { ReactSelectOptions } from '@doublescale/client';
 import ContactMappedFields from '../contact-mapped-fields';
-import MappedFields from '../mapped-fields';
+import MappedFields from '@/components/mapped-fields';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import APISelect from '../api-select';
-import APIMappedFields from '../api-mapped-fields';
+import APISelect from '@/components/api-select';
+import APIMappedFields from '@/components/api-mapped-fields';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Slider } from '@/components/ui/slider';
-import PipelineStageChange from '../pipeline-stage-change';
-import DealValueChange from '../deal-value-change';
-import DealOwnerChange from '../deal-owner-change';
-import EmailOpened from '../email-opened';
-import DealCustomFieldChange from '../deal-custom-field-change';
-import DiscountTypeWithAmount from '../discount-type-with-amount';
-import CouponExpiryDate from '../coupon-expiry-date';
+import PipelineStageChange from '@/components/pipeline-stage-change';
+import DealValueChange from '@/components/deal-value-change';
+import DealOwnerChange from '@/components/deal-owner-change';
+import EmailOpened from '@/components/email-opened';
+import DealCustomFieldChange from '@/components/deal-custom-field-change';
+import DiscountTypeWithAmount from '@/components/discount-type-with-amount';
+import CouponExpiryDate from '@/components/coupon-expiry-date';
 import OpenBuilder from '../open-builder';
-import { DateTimePicker } from '../date-time-picker';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { FromEmailSelector } from '../from-email-selector';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Tooltip } from '@/components/ui/tooltip';
 import { TooltipTrigger } from '@/components/ui/tooltip';
 import { TooltipContent } from '@/components/ui/tooltip';
-import EmailClicked from '../email-clicked';
-import FormSubmission from '../form-submission';
-import PageVisited from '../page-visited';
-import LoggedInOut from '../logged-in-out';
-import WasActiveInactive from '../was-active-inactive';
+import { InfiniteScrollMultiSelect } from '@/components/infinite-scroll-select/infinite-scroll-multi-select';
+import EmailClicked from '@/components/email-clicked';
+import FormSubmission from '@/components/form-submission';
+import PageVisited from '@/components/page-visited';
+import LoggedInOut from '@/components/logged-in-out';
+import WasActiveInactive from '@/components/was-active-inactive';
 interface FieldProps {
 	label?: string;
 	type: string;
@@ -76,6 +77,12 @@ interface FieldProps {
 		ajax_action?: string;
 		button_text?: string;
 		templateData?: Record<string, any>;
+		rootArrayResponse?: boolean;
+		searchParamName?: string;
+		perPage?: number;
+		apiParams?: Record<string, unknown>;
+		dataPath?: string;
+		totalPath?: string;
 	};
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
@@ -129,9 +136,9 @@ const Field: React.FC<FieldProps> = ({
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+								<HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
 							</TooltipTrigger>
-							<TooltipContent className="z-[160000] bg-gray-100 border-none w-60 text-gray-600 text-xs">
+							<TooltipContent className="z-[160000] bg-popover border border-border w-60 text-popover-foreground text-xs">
 								<p>{tooltip}</p>
 							</TooltipContent>
 						</Tooltip>
@@ -163,7 +170,7 @@ const Field: React.FC<FieldProps> = ({
 				result.push(
 					<span
 						key={`tag-${i}`}
-						className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-mono cursor-pointer hover:bg-blue-100"
+						className="inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded text-sm font-mono cursor-pointer hover:bg-primary/15"
 						onClick={() => handleCopyToClipboard(matches[i])}
 						title={__('Click to copy', 'doublescale')}
 					>
@@ -299,14 +306,11 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					type={type === 'phone' ? 'tel' : type}
 					className={cn(
-						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500',
-						disabled && 'bg-gray-100 cursor-not-allowed opacity-70'
+						'border-destructive focus-visible:ring-destructive/20',
+						disabled && 'bg-muted cursor-not-allowed opacity-70',
+						className
 					)}
-					style={{
-						borderRadius: '8px',
-					}}
 					placeholder={placeholder}
 					min={type === 'number' ? 0 : undefined}
 					max={type === 'number' && max ? max : undefined}
@@ -320,14 +324,11 @@ const Field: React.FC<FieldProps> = ({
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					className={cn(
-						'bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+						'border-destructive focus-visible:ring-destructive/20',
+						className
 					)}
 					placeholder={placeholder}
-					style={{
-						borderRadius: '8px',
-					}}
 				/>
 			);
 			break;
@@ -335,14 +336,13 @@ const Field: React.FC<FieldProps> = ({
 			const selectOptions = options || [];
 			fieldContent = (
 				<Select
-					className="react-select-container bg-white"
+					className="react-select-container bg-card"
 					classNamePrefix="react-select"
 					value={
-						value !== null && value !== undefined && value !== ''
+						value
 							? selectOptions.find(
-									(option) =>
-										String(option.value) === String(value)
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -366,6 +366,58 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'infinite_scroll_multiselect': {
+			const ims = settings;
+			const ep = endpoint || '';
+			if (!ep) {
+				fieldContent = (
+					<div className="text-sm text-destructive">
+						{__('Missing endpoint for this field.', 'doublescale')}
+					</div>
+				);
+				break;
+			}
+			fieldContent = (
+				<InfiniteScrollMultiSelect
+					value={
+						Array.isArray(value)
+							? value.map((v) =>
+									typeof v === 'number' ? v : Number(v)
+								)
+							: []
+					}
+					onChange={(next) => onChange(next)}
+					placeholder={
+						placeholder ||
+						__('Search and add…', 'doublescale')
+					}
+					apiEndpoint={ep}
+					apiParams={ims?.apiParams}
+					searchParamName={ims?.searchParamName || 'search'}
+					getOptionLabel={(item: unknown) => {
+						const p = item as {
+							name?: string;
+							sku?: string;
+						};
+						const sku =
+							p.sku && String(p.sku).trim()
+								? ` (${String(p.sku)})`
+								: '';
+						return `${p.name ?? ''}${sku}`;
+					}}
+					getOptionValue={(item: unknown) =>
+						(item as { id: number }).id
+					}
+					rootArrayResponse={ims?.rootArrayResponse === true}
+					dataPath={ims?.dataPath}
+					totalPath={ims?.totalPath}
+					perPage={ims?.perPage ?? 20}
+					disabled={disabled}
+					className={className}
+				/>
+			);
+			break;
+		}
 		case 'multiselect':
 			const multiOptions = options || [];
 			fieldContent = (
@@ -680,7 +732,7 @@ const Field: React.FC<FieldProps> = ({
 			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center justify-between">
 					{label && (
-						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-foreground font-normal text-sm">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
@@ -698,7 +750,7 @@ const Field: React.FC<FieldProps> = ({
 				<div className="flex items-center gap-3">
 					<div className="doublescale-field-input">{fieldContent}</div>
 					{label && (
-						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-foreground font-normal text-sm">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
@@ -715,7 +767,7 @@ const Field: React.FC<FieldProps> = ({
 				<div className="flex items-center gap-3">
 					<div className="doublescale-field-input">{fieldContent}</div>
 					{label && (
-						<div className="doublescale-field-label text-[#09090B] font-normal text-base">
+						<div className="doublescale-field-label text-foreground font-normal text-sm">
 							{renderLabelWithTooltip()}
 						</div>
 					)}
@@ -742,11 +794,11 @@ const Field: React.FC<FieldProps> = ({
 		return (
 			<div className={cn('doublescale-field doublescale-field-compact', compact && 'doublescale-field-compact-mode')} style={style || {}}>
 				{label && !compact && (
-					<div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+					<div className="doublescale-field-label text-foreground font-normal text-sm flex items-center justify-between mb-2">
 						{renderLabelWithTooltip()}
 					</div>
 				)}
-				<div className={cn('doublescale-field-input doublescale-field-input-compact', className)}>
+				<div className="doublescale-field-input doublescale-field-input-compact w-full min-w-0">
 					{fieldContent}
 				</div>
 				{helperText && !compact && renderHelperText(helperText)}
@@ -756,13 +808,16 @@ const Field: React.FC<FieldProps> = ({
 
 	// Default layout - label above the field
 	return (
-		<div className="doublescale-field" style={style || {}}>
+		<div className="doublescale-field w-full min-w-0" style={style || {}}>
 			{label && (
-				<div className="doublescale-field-label text-[#09090B] font-normal text-base flex items-center justify-between">
+				<div className="doublescale-field-label text-primaryText font-medium leading-6 text-sm flex flex-wrap items-center gap-x-1">
 					{renderLabelWithTooltip()}
+					{required ? (
+						<span className="text-destructive leading-none">*</span>
+					) : null}
 				</div>
 			)}
-			<div className={cn('doublescale-field-input', className)}>
+			<div className="doublescale-field-input w-full min-w-0">
 				{fieldContent}
 			</div>
 			{helperText && renderHelperText(helperText)}

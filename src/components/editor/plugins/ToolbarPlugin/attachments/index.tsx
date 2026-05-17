@@ -334,7 +334,7 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 					className="h-8 w-8 p-0"
 				>
 					<LinkIcon
-						className={`w-5 h-5 hover:text-color-primary ${isLinkActive ? 'text-color-primary' : 'text-[#52525B]'}`}
+						className={`w-5 h-5 hover:text-primary ${isLinkActive ? 'text-primary' : 'text-[#52525B]'}`}
 					/>
 				</Button>
 				<Button
@@ -344,7 +344,7 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 					size="icon"
 					className="h-8 w-8 p-0"
 				>
-					<Image className="w-5 h-5 text-[#52525B] hover:text-color-primary" />
+					<Image className="w-5 h-5 text-[#52525B] hover:text-primary" />
 				</Button>
 			</div>
 

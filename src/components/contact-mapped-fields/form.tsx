@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { pick, isObject, omit } from 'lodash';
 import { useState, useRef, useEffect } from 'react';
-import { Hash, Plus } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -25,6 +24,9 @@ import {
 } from '@/components/ui/popover';
 import TrashIcon from '@doublescale/shared/icons/trash';
 import Select from 'react-select';
+import { cn } from '@/lib/utils';
+import { getMappingSelectStyles } from './mapping-select-styles';
+import { MerageTagsIcon, PlusIcon } from '@/components/icons';
 
 interface ContactMappedFieldsFormProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -121,10 +123,10 @@ const MergeTagInput: React.FC<MergeTagInputProps> = ({
 					<Button
 						type="button"
 						size="icon"
-						className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 bg-transparent border-none hover:bg-transparent text-primary p-0 shadow-none"
+						className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 border-none bg-transparent p-0 text-[#3A3A99] shadow-none hover:bg-transparent focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0"
 						title={__('Insert merge tag', 'doublescale')}
 					>
-						<Hash className="h-4 w-4" />
+						<MerageTagsIcon width={24} height={24}/>
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent
@@ -350,209 +352,228 @@ const ContactMappedFieldsForm: React.FC<ContactMappedFieldsFormProps> = ({
 		})),
 	})).filter((group) => group.options.length > 0); // Remove empty groups
 
+	const mappingSelectStyles = getMappingSelectStyles();
+
+	const readonlyContactClass =
+		'h-10 w-full rounded-lg border border-border bg-[#EFF1F4] text-sm text-muted-foreground shadow-sm cursor-default disabled:opacity-100';
+
 	return (
-		<div className="flex gap-[10px] flex-col">
-			<div className="flex gap-5">
-				<div className="flex flex-1 text-[#09090B] font-normal text-base">
-					{__('Contact Field')}
-					<span className="text-red-600">*</span>
-				</div>
-				<div className="flex flex-1 text-[#09090B] font-normal text-base ml-[14px]">
-					{__('Field')} <span className="text-red-600">*</span>
-				</div>
-			</div>
-			{map(contactFields, (_, key) => {
-				return (
-					<div key={key} className="flex gap-3">
-					<Input
-						value={contactFields[key].label}
-						disabled
-						className="flex-1 disabled:opacity-100"
-					/>
-						{key === 'email' ? (
-							<Select
-								className="react-select-container"
-								classNamePrefix="react-select "
-								onChange={(value) => {
-									if (!isObject(value)) {
-										return;
-									}
 
-									onChange({
-										...values,
-										[key]: value.value,
-									});
-								}}
-								value={
-									values && values[key]
-										? emailOptions.find(
-											(option) =>
-												option.value === values[key]
-										)
-										: null
-								}
-								options={emailOptions}
-								styles={{
-									control: (styles) => ({
-										...styles,
-										flex: 1,
-										height: '48px',
-										borderRadius: '6px',
-										color: 'black',
-									}),
-									container: (styles) => ({
-										...styles,
-										flex: 1,
-										height: '48px',
-										borderRadius: '6px',
-										color: 'black',
-									}),
-									menu: (base: any) => ({
-										...base,
-										color: 'black',
-									}),
-								}}
-								isSearchable={false}
-							/>
-						) : (
-							<MergeTagInput
-								value={values?.[key] || ''}
-								onChange={(newValue) => {
-									onChange({
-										...values,
-										[key]: newValue,
-									});
-								}}
-								formFieldMergeTags={formFieldMergeTags}
-							/>
-						)}
-					</div>
-				);
-			})}
-
-			{/* Other Fields Section */}
-			<div className="flex flex-col gap-[10px] mt-6">
-				<div className="flex items-center gap-2">
-					<h3 className="text-[#09090B] font-medium text-base">
-						{__('Other Fields', 'doublescale')}
+			<div className="overflow-hidden rounded-xl border border-border bg-white p-6 ">
+				<div className="mb-5">
+					<h3 className="text-xl font-semibold leading-8 text-primaryText">
+						{__('Map form fields', 'doublescale')}
 					</h3>
-					<div
-						className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center cursor-help"
-						title={__(
-							'Map additional contact fields to form fields or custom values',
+					<p className="mt-2 text-sm leading-7 text-muted-foreground">
+						{__(
+							'Match each form question to a contact field. Add extra rows below for more attributes.',
 							'doublescale'
 						)}
-					>
-						<span className="text-white text-xs">i</span>
-					</div>
+					</p>
 				</div>
 
-				{otherFields.length > 0 && (
-					<div className="flex gap-5">
-						<div className="flex flex-1 text-[#09090B] font-normal text-base">
-							{__('Field Label', 'doublescale')}
+					<div className="grid grid-cols-1 mb-2 gap-4 sm:grid-cols-2 sm:gap-5">
+						<div className="text-sm font-semibold text-primaryText">
+							<span>{__('Field', 'doublescale')}</span>
+							<span className="text-destructive">*</span>
 						</div>
-						<div className="flex flex-1 text-[#09090B] font-normal text-base ml-[14px]">
-							{__('Field Value', 'doublescale')}
+						<div className="text-sm font-semibold text-primaryText">
+							<span>{__('Contact Field', 'doublescale')}</span>
+							<span className="text-destructive">*</span>
 						</div>
-						<div className="w-12"></div>
 					</div>
-				)}
+                    <div className="flex flex-col gap-5">
+					{map(contactFields, (_, key) => {
+						return (
+							<div
+								key={key}
+								className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6"
+							>
+								<div className="min-w-0">
+									{key === 'email' ? (
+										<Select
+											className="react-select-container w-full"
+											classNamePrefix="react-select"
+											placeholder={__(
+												'Select form field',
+												'doublescale'
+											)}
+											onChange={(value) => {
+												if (!isObject(value)) {
+													return;
+												}
 
-				{otherFields.map((field) => (
-					<div key={field.id} className="flex gap-3 items-start">
-						<div className="flex-1">
-							<Select
-								className="react-select-container"
-								classNamePrefix="react-select"
-								onChange={(value) => {
-									if (!isObject(value)) {
-										return;
-									}
-									updateOtherField(
-										field.id,
-										'fieldLabel',
-										value.value
-									);
-								}}
-								value={
-									field.fieldLabel
-										? allContactFieldOptions
-											.flatMap(
-												(group) => group.options
-											)
-											.find(
-												(option) =>
-													option.value ===
-													field.fieldLabel
-											)
-										: null
-								}
-								options={allContactFieldOptions}
-								styles={{
-									control: (styles) => ({
-										...styles,
-										flex: 1,
-										height: '48px',
-										borderRadius: '6px',
-										color: 'black',
-									}),
-									container: (styles) => ({
-										...styles,
-										flex: 1,
-										height: '48px',
-										borderRadius: '6px',
-										color: 'black',
-									}),
-									menu: (base: any) => ({
-										...base,
-										color: 'black',
-									}),
-								}}
-								placeholder={__('Select', 'doublescale')}
-								isSearchable={true}
-							/>
-						</div>
+												onChange({
+													...values,
+													[key]: value.value,
+												});
+											}}
+											value={
+												values && values[key]
+													? emailOptions.find(
+															(option) =>
+																option.value ===
+																values[key]
+														)
+													: null
+											}
+											options={emailOptions}
+											styles={mappingSelectStyles}
+											isSearchable={false}
+										/>
+									) : (
+										<div className="min-w-0">
+											<MergeTagInput
+												value={values?.[key] || ''}
+												onChange={(newValue) => {
+													onChange({
+														...values,
+														[key]: newValue,
+													});
+												}}
+												formFieldMergeTags={
+													formFieldMergeTags
+												}
+											/>
+										</div>
+									)}
+								</div>
+								<div className="min-w-0">
+									<Input
+										value={contactFields[key].label}
+										disabled
+										className={cn(readonlyContactClass)}
+									/>
+								</div>
+							</div>
+						);
+					})}
+					</div>
 
-						<MergeTagInput
-							value={field.fieldValue || ''}
-							onChange={(newValue) =>
-								updateOtherField(
-									field.id,
-									'fieldValue',
-									newValue
-								)
-							}
-							placeholder={__(
-								'Select a Field or Type Custom value',
+
+				{/* Other Fields Section */}
+				<div className="mt-5">
+				
+						<h3 className="text-xl font-semibold leading-8 text-primaryText">
+							{__('Additional contact fields', 'doublescale')}
+						</h3>
+						<p className="mt-2 text-sm leading-7 text-muted-foreground">
+							{__(
+								'Map optional contact attributes or merge tags. Use “Add field” for another row.',
 								'doublescale'
 							)}
-							formFieldMergeTags={formFieldMergeTags}
-						/>
+						</p>
+				
 
-						<Button
-							type="button"
-							size="icon"
-							className="shrink-0 text-destructive shadow-none border-none hover:bg-transparent hover:text-destructive p-0 bg-transparent h-12"
-							onClick={() => removeOtherField(field.id)}
-							title={__('Remove field', 'doublescale')}
-						>
-							<TrashIcon width={20} height={20} />
-						</Button>
+					{otherFields.length > 0 && (
+						<div className="mt-5 mb-2 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end sm:gap-6">
+							
+							<div className="text-sm font-semibold text-primaryText sm:col-span-1">
+								{__('Field', 'doublescale')}
+							</div>
+							<div className="text-sm font-semibold text-primaryText sm:col-span-1">
+								{__('Contact Field', 'doublescale')}
+							</div>
+							<span className="hidden w-10 sm:block" aria-hidden />
+						</div>
+					)}
+
+					<div className="flex flex-col gap-5">
+						{otherFields.map((field) => (
+							<div
+								key={field.id}
+								className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[1fr_1fr_auto]  sm:gap-6"
+							>
+								<div className="min-w-0">
+									<MergeTagInput
+										value={field.fieldValue || ''}
+										onChange={(newValue) =>
+											updateOtherField(
+												field.id,
+												'fieldValue',
+												newValue
+											)
+										}
+										placeholder={__(
+											'Select a form field or type a value',
+											'doublescale'
+										)}
+										formFieldMergeTags={
+											formFieldMergeTags
+										}
+									/>
+								</div>
+								
+								<div className="min-w-0">
+									<Select
+										className="react-select-container w-full"
+										classNamePrefix="react-select"
+										onChange={(value) => {
+											if (!isObject(value)) {
+												return;
+											}
+											updateOtherField(
+												field.id,
+												'fieldLabel',
+												value.value
+											);
+										}}
+										value={
+											field.fieldLabel
+												? allContactFieldOptions
+														.flatMap(
+															(group) =>
+																group.options
+														)
+														.find(
+															(option) =>
+																option.value ===
+																field.fieldLabel
+														)
+												: null
+										}
+										options={allContactFieldOptions}
+										styles={mappingSelectStyles}
+										placeholder={__(
+											'Select contact field',
+											'doublescale'
+										)}
+										isSearchable={true}
+									/>
+								</div>
+
+								
+
+								<div className="flex justify-end sm:justify-center">
+									<Button
+										type="button"
+										size="icon"
+										variant="ghost"
+										className="h-10 w-10 shrink-0 border border-destructive bg-white rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+										onClick={() => removeOtherField(field.id)}
+										title={__(
+											'Remove field',
+											'doublescale'
+										)}
+									>
+										<TrashIcon width={24} height={24} />
+									</Button>
+								</div>
+							</div>
+						))}
 					</div>
-				))}
 
-				<Button
-					type="button"
-					variant="secondaryDeepBlue"
-					className="w-full mt-2 gap-2 rounded-md"
-					onClick={addOtherField}
-				>
-					<Plus className="h-4 w-4" />
-					{__('Add Field', 'doublescale')}
-				</Button>
+					<Button
+						type="button"
+						variant="outline"
+						className=" mt-5 w-full gap-2 rounded-lg border border-border bg-white text-primaryText hover:bg-[#F7F8FA] sm:w-auto"
+						onClick={addOtherField}
+					>
+						<PlusIcon width={24} height={24} />
+						{__('Add field', 'doublescale')}
+					</Button>
+				</div>
 			</div>
-		</div>
 	);
 };
 

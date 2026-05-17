@@ -109,8 +109,8 @@ export default function AlignmentStyles({
 					className="h-8 w-8 p-0"
 				>
 					<AlignLeft
-						className={`w-5 h-5 hover:text-color-primary ${alignment === 'left'
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${alignment === 'left'
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>
@@ -123,8 +123,8 @@ export default function AlignmentStyles({
 					className="h-8 w-8 p-0"
 				>
 					<AlignCenter
-						className={`w-5 h-5 hover:text-color-primary ${alignment === 'center'
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${alignment === 'center'
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>
@@ -137,8 +137,8 @@ export default function AlignmentStyles({
 					className="h-8 w-8 p-0"
 				>
 					<AlignRight
-						className={`w-5 h-5 hover:text-color-primary ${alignment === 'right'
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${alignment === 'right'
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>
@@ -151,8 +151,8 @@ export default function AlignmentStyles({
 					className="h-8 w-8 p-0"
 				>
 					<AlignJustify
-						className={`w-5 h-5 hover:text-color-primary ${alignment === 'justify'
-								? 'text-color-primary'
+						className={`w-5 h-5 hover:text-primary ${alignment === 'justify'
+								? 'text-primary'
 								: 'text-[#52525B]'
 							}`}
 					/>

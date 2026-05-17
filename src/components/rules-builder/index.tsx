@@ -14,7 +14,7 @@ import { map } from 'lodash';
  */
 import { PlusIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
-import RuleGroupCard from '@/client/pages/automation/steps/workflow/conditions-modal/rule-group-card';
+import RuleGroupCard from '../../client/pages/automation/steps/workflow/conditions-modal/rule-group-card';
 
 export interface RuleItem {
 	rule: string;

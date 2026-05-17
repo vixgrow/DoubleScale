@@ -62,6 +62,7 @@ import { TaskDoneIcon as TasksIcon } from '@doublescale/components';
 import { Mail } from 'lucide-react';
 import { HeaderProBells } from '@/components/header-pro-bells';
 import AvatarIcon from '@/components/icons/avatar';
+import { RocketIcon } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
@@ -84,10 +85,19 @@ const FORMS_PRO_FEATURE_LIST = [
 ];
 
 /**
- * The Forms module only registers when Pro is active. Missing slug + default-ON
- * toggle semantics would otherwise mount the free Forms UI and hit Pro-only REST routes.
+ * The Forms editor and REST routes only exist when DoubleScale Pro is active.
+ * Phantom `forms` rows (persisted toggles before Pro is installed) must not mount
+ * the free Forms UI — same UX as Pipelines and Tasks, which always show the
+ * upgrade notice until Pro replaces the page via navigation filters.
  */
 function isFormsModuleAvailableForEditor(): boolean {
+	const isProActive = applyFilters(
+		'doublescale_is_pro_active',
+		false
+	) as boolean;
+	if (!isProActive) {
+		return false;
+	}
 	return (
 		config.getModules().some((m) => m.slug === 'forms') &&
 		config.isModuleToggleEnabled('forms')
@@ -138,17 +148,28 @@ const useOnboardingRedirect = () => {
 
 export const HeaderBar = ({ page }: { page: any }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const navigate = useNavigate();
 
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
 		false
 	) as boolean;
 
+	const license = config.getLicense();
+	const hasValidLicense =
+		license &&
+		typeof license === 'object' &&
+		'status' in license &&
+		(license as { status: string }).status === 'valid';
+
 	useEffect(() => {
 		let isMounted = true;
 		const fetchCurrentUser = async () => {
-			const globalUser = (window as Window & { doublescaleData?: { currentUser?: any } })
-				.doublescaleData?.currentUser;
+			const w = window as Window & {
+				doublescaleData?: { currentUser?: any };
+				qcData?: { currentUser?: any };
+			};
+			const globalUser = w.doublescaleData?.currentUser ?? w.qcData?.currentUser;
 			if (globalUser) {
 				setCurrentUser({
 					id: Number(globalUser.id),
@@ -210,6 +231,25 @@ export const HeaderBar = ({ page }: { page: any }) => {
 			</div>
 			<div className="doublescale-layout__header-right">
 				{!isProActive && <HeaderProBells />}
+				{isProActive &&
+					Boolean(
+						applyFilters(
+							'doublescale_show_activate_license',
+							!hasValidLicense
+						)
+					) && (
+						<a
+							href="#"
+							onClick={(e) => {
+								e.preventDefault();
+								navigate(getToLink('settings/license'));
+							}}
+							className="doublescale-layout__license-link"
+						>
+							<RocketIcon />
+							{__('Activate License', 'doublescale')}
+						</a>
+					)}
 				{applyFilters('doublescale_header_before_avatar', null) as React.ReactNode}
 				<div className="doublescale-layout__header-divider"></div>
 				<div className="doublescale-layout__header-user-info">
@@ -246,6 +286,11 @@ export const Controller = ({ page }) => {
 	return (
 		<div className="doublescale-page-component-wrapper">
 			<page.component navigate={handleNavigate} params={params} />
+			{applyFilters(
+				'doublescale_layout_controller_after',
+				null,
+				{ page }
+			) as React.ReactNode}
 		</div>
 	);
 };

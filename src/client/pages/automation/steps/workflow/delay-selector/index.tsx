@@ -13,7 +13,6 @@ import { Lock } from 'lucide-react';
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAction } from '@doublescale/utils';
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import './style.scss';
@@ -69,47 +68,46 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 
 	return (
 		<>
-			<div className="py-4">
-				<div className="flex flex-col gap-4">
-					{delayActions.map(({ key, action }) => (
-						<Card key={key} className="shadow-none border">
-							<CardHeader className="px-4 py-3 border-b">
-								<CardTitle className="text-base font-semibold text-[#1F2937]">
-									<div className="flex items-center gap-2">
-										{action?.label ||
-											__('Delay', 'doublescale')}
-										{action?.is_pro && (
-											<Lock className="h-4 w-4 text-orange-500" />
-										)}
-									</div>
-								</CardTitle>
-								{action?.description && (
-									<p className="text-sm text-muted-foreground mt-1">
-										{action.description}
-									</p>
-								)}
-							</CardHeader>
-							<CardContent className="px-4 py-3 flex justify-end">
-								<Button
-									onClick={() => handleSelect(key, action)}
-									disabled={!action?.is_pro && isSaving}
-									className={`text-primary bg-transparent shadow-none font-semibold rounded-full px-4 py-2 hover:bg-primary/10 ${
-										value === key
-											? 'border-2 border-primary'
-											: 'border'
-									}`}
-								>
-									{isSaving && value === key
-										? __('Saving...', 'doublescale')
-										: __('Select', 'doublescale')}
-								</Button>
-							</CardContent>
-						</Card>
-					))}
-				</div>
+			<div className="doublescale-delay-selector flex flex-col gap-5">
+				{delayActions.map(({ key, action }) => (
+					<div
+						key={key}
+						className="doublescale-delay-type-card flex flex-col gap-2.5 rounded-lg border border-border bg-[#F7F8FA] p-4"
+					>
+						<div className="flex items-center justify-between gap-3">
+							<h3 className="m-0 min-w-0 flex-1 p-0 text-sm font-semibold leading-tight text-foreground">
+								<span className="inline-flex items-center gap-2">
+									{action?.label || __('Delay', 'doublescale')}
+									{action?.is_pro && (
+										<Lock
+											className="h-4 w-4 shrink-0 text-orange-500"
+											aria-hidden
+										/>
+									)}
+								</span>
+							</h3>
+							<Button
+								type="button"
+								size="sm"
+								onClick={() => handleSelect(key, action)}
+								disabled={!action?.is_pro && isSaving}
+								variant="secondaryDeepBlue"
+								className=" !shrink-0 !rounded-[4px] !px-2 !py-1"
+							>
+								{isSaving && value === key
+									? __('Saving...', 'doublescale')
+									: __('Select', 'doublescale')}
+							</Button>
+						</div>
+						{action?.description && (
+							<p className="m-0  p-0 text-sm leading-snug text-muted-foreground max-w-[250px]">
+								{action.description}
+							</p>
+						)}
+					</div>
+				))}
 			</div>
 
-			{/* PRO Modal */}
 			{selectedProDelay && (
 				<ProAutomationModal
 					visible={showProModal}

@@ -3,52 +3,58 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * External dependencies
- */
-import { ChevronRight } from 'lucide-react';
-/**
  * Internal dependencies
  */
-import { ButtonsIcon, PremiumIcon } from '../../components';
+import { PremiumIcon } from '../../components';
 import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
-import { cn } from '@/lib/utils';
 
-const shellClass =
-	'flex w-full items-center justify-between rounded-xl bg-white/[0.05] px-4 py-4 text-sm text-white transition-colors';
-
+/**
+ * Shown inside the Buttons accordion when Pro is not active.
+ */
 const LockedButtons: React.FC = () => {
-	const { isInstalling, isActivating, handleUpgradeClick, isProActive } =
-		useProUpgrade();
+	const { isInstalling, isActivating, handleUpgradeClick } = useProUpgrade();
 
 	return (
-		<button
-			type="button"
-			className={cn(
-				shellClass,
-				'cursor-pointer hover:bg-white/[0.16]'
-			)}
-			onClick={() => handleUpgradeClick()}
-			disabled={isInstalling || isActivating}
-		>
-			<div className="flex min-w-0 items-center gap-3">
-				<span className="inline-flex shrink-0 text-white">
-					<ButtonsIcon width={32} height={32} />
-				</span>
-				<span className="flex min-w-0 items-center gap-2 font-medium">
-					{__('Buttons', 'doublescale')}
-					{!isProActive ? (
-						<span
-							className="inline-flex shrink-0 items-center rounded-md bg-white/10 px-1.5 py-0.5"
-							title={__('Pro feature', 'doublescale')}
-							aria-hidden
-						>
-							<PremiumIcon width={16} height={16} />
-						</span>
-					) : null}
-				</span>
+		<div className="flex flex-col items-center justify-center gap-4 px-2 py-8 text-center">
+			<div className="rounded-full bg-[#FAEADF] p-2">
+				<PremiumIcon width={30} height={30} />
 			</div>
-			<ChevronRight className="h-6 w-6 shrink-0 text-white" aria-hidden />
-		</button>
+			<p className="max-w-xs text-sm font-medium text-white">
+				{__(
+					'Unlock button theme settings with Pro',
+					'doublescale'
+				)}
+			</p>
+			<div className="relative w-full max-w-xs rounded-lg">
+				<svg
+					className="pointer-events-none absolute inset-0 z-0 h-full w-full rounded-lg text-white/45"
+					xmlns="http://www.w3.org/2000/svg"
+					aria-hidden
+				>
+					<rect
+						x="0.5"
+						y="0.5"
+						width="calc(100% - 1px)"
+						height="calc(100% - 1px)"
+						rx="7"
+						ry="7"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="1"
+						strokeDasharray="10 8"
+						vectorEffect="nonScalingStroke"
+					/>
+				</svg>
+				<button
+					type="button"
+					className="relative z-10 flex h-11 w-full items-center justify-center rounded-lg border-0 bg-transparent text-sm font-medium text-white/90 shadow-none transition-colors hover:bg-white/[0.06] disabled:pointer-events-none disabled:opacity-50"
+					onClick={() => handleUpgradeClick()}
+					disabled={isInstalling || isActivating}
+				>
+					{__('Upgrade to Pro', 'doublescale')}
+				</button>
+			</div>
+		</div>
 	);
 };
 

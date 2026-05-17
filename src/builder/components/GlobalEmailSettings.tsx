@@ -13,8 +13,14 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
  * internal dependencies
  */
 import { Input } from '@/components/ui/input';
-import { BackgroundIcon, InfoIcon, ButtonsIcon } from '@doublescale/components';
+import {
+	BackgroundIcon,
+	InfoIcon,
+	ButtonsIcon,
+	PremiumIcon,
+} from '@doublescale/components';
 import { cn } from '@/lib/utils';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import LockedButtons from './LockedButtons';
 import BackgroundSettings from './BackgroudSettings';
@@ -24,6 +30,7 @@ type ThemePanel = 'background' | 'buttons' | null;
 const GlobalEmailSettings: React.FC = () => {
 	const dispatch = useDispatch();
 	const [themePanel, setThemePanel] = useState<ThemePanel>(null);
+	const { isProActive } = useProUpgrade();
 
 	const globalSettings = useSelect(
 		(select) => select(STORE_KEY).getGlobalSettings(),
@@ -136,7 +143,14 @@ const GlobalEmailSettings: React.FC = () => {
 							<span className="inline-flex shrink-0 text-white">
 								<ButtonsIcon width={32} height={32} />
 							</span>
-							<span>{__('Buttons', 'doublescale')}</span>
+							<span className="flex items-center gap-2">
+								{__('Buttons', 'doublescale')}
+								{!isProActive ? (
+									<div className="rounded-full bg-[#FAEADF] p-1">
+										<PremiumIcon width={16} height={16} />
+									</div>
+								) : null}
+							</span>
 						</div>
 						{themePanel === 'buttons' ? (
 							<ChevronDown className="h-6 w-6 shrink-0 text-white" />

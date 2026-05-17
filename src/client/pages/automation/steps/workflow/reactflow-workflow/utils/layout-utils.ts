@@ -12,7 +12,7 @@ export const NODE_DIMENSIONS = {
     condition: { width: 380, height: 120 },
     goal: { width: 380, height: 120 },
     delay: { width: 380, height: 120 },
-    end_automation: { width: 120, height: 48 },
+    end_automation: { width: 380, height: 56 },
     add_step: { width: 30, height: 30 },
     default: { width: 380, height: 120 },
 } as const;

@@ -304,70 +304,21 @@
 		}
 	}
 
-	// Compact exit pill (terminal step)
-	&--end {
-		width: auto;
-		min-width: 112px;
-		max-width: none;
-		padding: 10px 18px;
-		gap: 10px;
-		border: 2px solid transparent;
-		border-radius: 12px;
-		background: #fee9e9;
-		box-shadow: none;
-		justify-content: center;
+	// Exit node — same width as other steps, compact single-row card
+	&--end.doublescale-reactflow-node--card-layout {
+		border: 2px solid #f5c6c6;
+		background: #fff;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 		overflow: visible;
 
 		&:hover {
-			border-color: transparent;
-			background: #fde0e0;
-			box-shadow: 0 2px 8px rgba(195, 10, 10, 0.1);
+			border-color: #e8a0a0;
+			box-shadow: 0 4px 12px rgba(195, 10, 10, 0.12);
 		}
 
 		&.doublescale-reactflow-node--selected {
 			border-color: #c30a0a !important;
-			background: #fdd8d8 !important;
 			box-shadow: 0 0 0 2px rgba(195, 10, 10, 0.15) !important;
-		}
-
-		.doublescale-reactflow-node__exit-inner {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 10px;
-		}
-
-		.doublescale-reactflow-node__exit-icon {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			color: #c30a0a;
-
-			svg {
-				width: 20px;
-				height: 20px;
-			}
-		}
-
-		.doublescale-reactflow-node__exit-label {
-			font-size: 16px;
-			font-weight: 700;
-			line-height: 1;
-			color: #c30a0a;
-			white-space: nowrap;
-		}
-
-		.doublescale-reactflow-node__dropdown {
-			top: 2px;
-			right: 2px;
-			transform: none;
-			opacity: 0;
-			transition: opacity 0.15s ease;
-		}
-
-		&:hover .doublescale-reactflow-node__dropdown {
-			opacity: 1;
 		}
 	}
 
@@ -475,6 +426,20 @@
 			.doublescale-reactflow-node__title,
 			.doublescale-reactflow-node__icon {
 				color: #0D9DFC;
+			}
+		}
+
+		.doublescale-reactflow-node__header-row--end {
+			background: #fee9e9;
+			min-height: 56px;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #c30a0a;
+			}
+
+			.doublescale-reactflow-node__title {
+				font-weight: 700;
 			}
 		}
 

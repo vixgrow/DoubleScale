@@ -105,7 +105,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	return (
 		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
 			<div
-				className={`doublescale-reactflow-node doublescale-reactflow-node--end ${
+				className={`doublescale-reactflow-node doublescale-reactflow-node--end doublescale-reactflow-node--card-layout ${
 					isSelected ? 'doublescale-reactflow-node--selected' : ''
 				}`}
 			>
@@ -117,25 +117,30 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 				{!viewMode && <StepReorderControls step={step} />}
 
-				<div className="doublescale-reactflow-node__exit-inner">
-					<span className="doublescale-reactflow-node__exit-icon">
-						<EndAutomationIcon width={20} height={20} />
-					</span>
-					<span className="doublescale-reactflow-node__exit-label">
-						{__('Exit', 'doublescale')}
-					</span>
+				<div className="doublescale-reactflow-node__card-inner">
+					<div className="doublescale-reactflow-node__header-row doublescale-reactflow-node__header-row--end">
+						<div className="doublescale-reactflow-node__header-left">
+							<div className="doublescale-reactflow-node__icon">
+								<EndAutomationIcon width={24} height={24} />
+							</div>
+							<div className="doublescale-reactflow-node__content">
+								<div className="doublescale-reactflow-node__title">
+									{__('Exit', 'doublescale')}
+								</div>
+							</div>
+						</div>
+						<NodeActionsDropdown
+							onDelete={handleDelete}
+							showEdit={false}
+							deleteLabel={__('Delete Exit', 'doublescale')}
+							deleteTitle={__('Delete this exit step?', 'doublescale')}
+							deleteDescription={__(
+								'This action cannot be undone.',
+								'doublescale'
+							)}
+						/>
+					</div>
 				</div>
-
-				<NodeActionsDropdown
-					onDelete={handleDelete}
-					showEdit={false}
-					deleteLabel={__('Delete Exit', 'doublescale')}
-					deleteTitle={__('Delete this exit step?', 'doublescale')}
-					deleteDescription={__(
-						'This action cannot be undone.',
-						'doublescale'
-					)}
-				/>
 			</div>
 		</NodeContextMenu>
 	);

@@ -65,13 +65,7 @@ class EmailBuilder {
 		// Include free block implementations.
 		require_once $emails_dir . 'Blocks/TextBlock.php';
 		require_once $emails_dir . 'Blocks/ButtonBlock.php';
-		require_once $emails_dir . 'Blocks/ImageBlock.php';
-		require_once $emails_dir . 'Blocks/HtmlBlock.php';
-		require_once $emails_dir . 'Blocks/VideoBlock.php';
-		require_once $emails_dir . 'Blocks/TableBlock.php';
-		require_once $emails_dir . 'Blocks/SignatureBlock.php';
-		require_once $emails_dir . 'Blocks/PreheaderBlock.php';
-		// Pro blocks (banner, divider, menu, product, social_media, timer) are loaded by Pro plugin.
+		// Pro blocks are loaded by the Pro plugin via the `doublescale_register_email_blocks` action.
 
 		// Include renderer.
 		require_once $emails_dir . 'EmailRenderer.php';

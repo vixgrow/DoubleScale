@@ -7,7 +7,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Modules\Campaigns\Abstracts;
+namespace DoubleScale\Modules\Emails\Abstracts;
 
 
 defined( 'ABSPATH' ) || exit;

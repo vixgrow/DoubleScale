@@ -123,21 +123,19 @@ class BlockRegistry {
 	}
 
 	/**
-	 * Register default blocks
+	 * Register the two Free blocks. Pro extends this set via the
+	 * `doublescale_register_email_blocks` action below.
 	 */
 	protected function register_default_blocks() {
-		// Free blocks
 		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\TextBlock() );
 		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\ButtonBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\ImageBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\HtmlBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\VideoBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\TableBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\SignatureBlock() );
-		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\PreheaderBlock() );
 
 		/**
-		 * Hook for registering additional email blocks (Pro blocks will be registered here)
+		 * Pro registers its 12 blocks here (Banner, Divider, Html, Image, Menu,
+		 * Preheader, Product, Signature, SocialMedia, Table, Timer, Video).
+		 * Unregistered types fall back to an empty string in render_block(), so
+		 * email templates that reference Pro blocks while Pro is inactive simply
+		 * skip those blocks rather than fataling.
 		 *
 		 * @param BlockRegistry $this Registry instance
 		 */

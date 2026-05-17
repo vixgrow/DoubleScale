@@ -47,28 +47,6 @@ final class Module extends AbstractModule {
 	public function boot( Container $container ): void {
 		parent::boot( $container );
 
-		// Register block-registration hook BEFORE EmailBuilder::instance() so we
-		// catch the doublescale_register_email_blocks action whether the registry
-		// constructs eagerly or lazily.
-		add_action( 'doublescale_register_email_blocks', array( $this, 'register_email_blocks' ) );
-
 		EmailBuilder::instance();
-	}
-
-	/**
-	 * Registers the blocks that BlockRegistry::register_default_blocks() does
-	 * not seed (Banner, Divider, Menu, Product, SocialMedia, Timer).
-	 *
-	 * Slice 2 will relocate the Pro block PHP classes to the Pro plugin and
-	 * have Pro hook this same `doublescale_register_email_blocks` action with
-	 * its own registrations; Free will then only seed Text/Button.
-	 */
-	public function register_email_blocks( $registry ) {
-		$registry->register_block( new Blocks\BannerBlock() );
-		$registry->register_block( new Blocks\DividerBlock() );
-		$registry->register_block( new Blocks\MenuBlock() );
-		$registry->register_block( new Blocks\ProductBlock() );
-		$registry->register_block( new Blocks\SocialMediaBlock() );
-		$registry->register_block( new Blocks\TimerBlock() );
 	}
 }

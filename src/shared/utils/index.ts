@@ -614,3 +614,9 @@ export {
 	groupMessagesIntoThreads,
 	type EmailRow,
 } from './contact-email-utils';
+
+export {
+	getCampaignFiltersFromSettings,
+	parseCampaignRecipientFilters,
+	type ParsedRecipientFilters,
+} from './campaignRecipientFilters';

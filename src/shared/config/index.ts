@@ -1013,16 +1013,16 @@ const createConfig = (data: ConfigData): ConfigApi => {
 
 const ConfigAPI = createConfig(configData);
 
-// @ts-ignore
-if (window.doublescale === undefined) {
+// Always attach the API — another bundle may have set `window.doublescale = {}` first
+// (e.g. ContactContext singleton) and skipped creating `config`.
+if (typeof window !== 'undefined') {
 	// @ts-ignore
-	window.doublescale = {
-		config: ConfigAPI,
-	};
+	window.doublescale = window.doublescale ?? {};
+	// @ts-ignore
+	window.doublescale.config = ConfigAPI;
 }
 
-// @ts-ignore
-export default window.doublescale.config as ConfigApi;
+export default ConfigAPI;
 export * from './types/config-data';
 export * from './types/icons-type';
 export * from './types/initial-payload';

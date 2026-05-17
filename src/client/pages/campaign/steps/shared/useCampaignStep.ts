@@ -40,7 +40,7 @@ export const useCampaignStep = () => {
 
   // Actions
   const dispatch = useDispatch('doublescale/campaign');
-  const { updateSettings, updateCampaign } = dispatch;
+  const { updateSettings, updateCampaign, saveCampaign } = dispatch;
 
   /**
    * Navigate to a specific campaign step
@@ -64,7 +64,10 @@ export const useCampaignStep = () => {
    * Properly typed wrapper around the dispatch action
    */
   const saveCampaignStep = async (step: string, stepData?: any): Promise<boolean> => {
-    return (dispatch.saveCampaignStep(step, stepData) as any) as Promise<boolean>;
+    const result = await (dispatch.saveCampaignStep(step, stepData) as Promise<
+      boolean | undefined
+    >);
+    return result === true;
   };
 
   /**
@@ -127,6 +130,7 @@ export const useCampaignStep = () => {
 
     // Actions
     saveCampaignStep,
+    saveCampaign,
     updateSettings,
     updateCampaign,
     saveCampaignSettings,

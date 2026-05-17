@@ -1,6 +1,6 @@
 <?php
 /**
- * Free plugin discovers the seven feature modules plus core without loading Pro.
+ * Free plugin discovers feature modules plus core without loading Pro.
  *
  * @package DoubleScale\Tests
  */
@@ -26,9 +26,9 @@ final class FreeModuleBootWithoutProTest extends TestCase {
 		sort( $slugs );
 
 		$this->assertSame(
-			array( 'activities', 'automations', 'booking', 'campaigns', 'contacts', 'core', 'smtp', 'tracking' ),
+			array( 'activities', 'automations', 'booking', 'campaigns', 'contacts', 'core', 'emails', 'smtp', 'tracking' ),
 			$slugs,
-			'Free tree must register exactly seven feature modules plus core when Pro is not attached.'
+			'Free tree must register the expected module slugs (core + discovered feature modules) when Pro is not attached.'
 		);
 	}
 }

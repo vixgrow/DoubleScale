@@ -2352,7 +2352,7 @@ class RestContactController extends RestController {
 				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
 			}
 
-			if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\Emails' ) ) {
+			if ( ! class_exists( '\DoubleScale\Modules\Emails\Emails' ) ) {
 				return new WP_Error(
 					'campaigns_unavailable',
 					__( 'Double opt-in email is not available in this build.', 'doublescale' ),
@@ -2360,7 +2360,7 @@ class RestContactController extends RestController {
 				);
 			}
 
-			$result = \DoubleScale\Modules\Campaigns\Emails\Emails::send_double_optin_email($contact);
+			$result = \DoubleScale\Modules\Emails\Emails::send_double_optin_email($contact);
 
 			// Log the result for troubleshooting and audit trail.
 			if (! $result) {

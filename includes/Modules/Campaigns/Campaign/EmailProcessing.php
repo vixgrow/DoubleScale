@@ -23,10 +23,10 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
-use DoubleScale\Modules\Campaigns\Emails\BulkEmailSender;
-use DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender;
-use DoubleScale\Modules\Campaigns\Emails\Emails;
-use DoubleScale\Modules\Campaigns\Emails\EmailTrackingHelper;
+use DoubleScale\Modules\Emails\BulkEmailSender;
+use DoubleScale\Modules\Emails\CurlMultiEmailSender;
+use DoubleScale\Modules\Emails\Emails;
+use DoubleScale\Modules\Emails\EmailTrackingHelper;
 use DoubleScale\Modules\Campaigns\Pipeline\CampaignProcessingPipeline;
 use DoubleScale\Modules\Campaigns\Pipeline\Strategies\IndividualDispatchStrategy;
 use DoubleScale\Modules\Campaigns\Pipeline\Strategies\BulkEmailDispatchStrategy;
@@ -96,7 +96,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Bulk batch class must be present (bundled with CRM).
-		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\BulkEmailSender' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Emails\BulkEmailSender' ) ) {
 			$this->use_bulk_sending = false;
 			return false;
 		}
@@ -105,7 +105,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$from_email = $this->get_campaign_from_email( $campaign );
 
 		// Check if bulk sending is available (smtp with bulk-capable mailer)
-		if ( ! \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::is_available( $from_email ) ) {
+		if ( ! \DoubleScale\Modules\Emails\BulkEmailSender::is_available( $from_email ) ) {
 			$this->use_bulk_sending = false;
 			return false;
 		}
@@ -123,7 +123,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 				array(
 					'code'        => 'bulk_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::get_active_mailer_slug( $from_email ),
+					'mailer'      => \DoubleScale\Modules\Emails\BulkEmailSender::get_active_mailer_slug( $from_email ),
 				)
 			);
 		}
@@ -146,7 +146,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Curl multi batch class must be present (bundled with CRM).
-		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Emails\CurlMultiEmailSender' ) ) {
 			$this->use_curl_multi_sending = false;
 			return false;
 		}
@@ -155,7 +155,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$from_email = $this->get_campaign_from_email( $campaign );
 
 		// Check if curl multi sending is available (smtp with curl multi-capable mailer like SMTP2GO)
-		if ( ! \DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender::is_available( $from_email ) ) {
+		if ( ! \DoubleScale\Modules\Emails\CurlMultiEmailSender::is_available( $from_email ) ) {
 			$this->use_curl_multi_sending = false;
 			return false;
 		}
@@ -173,7 +173,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 				array(
 					'code'        => 'curl_multi_email_enabled',
 					'campaign_id' => $campaign->id,
-					'mailer'      => \DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender::get_active_mailer_slug( $from_email ),
+					'mailer'      => \DoubleScale\Modules\Emails\CurlMultiEmailSender::get_active_mailer_slug( $from_email ),
 				)
 			);
 		}
@@ -487,7 +487,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$result = $this->with_smtp_campaign_log_context(
 			$campaign,
 			function () use ( $batch_data ) {
-				return \DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender::send_batch( $batch_data );
+				return \DoubleScale\Modules\Emails\CurlMultiEmailSender::send_batch( $batch_data );
 			}
 		);
 
@@ -797,7 +797,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$result = $this->with_smtp_campaign_log_context(
 			$campaign,
 			function () use ( $batch_data ) {
-				return \DoubleScale\Modules\Campaigns\Emails\CurlMultiEmailSender::send_batch( $batch_data );
+				return \DoubleScale\Modules\Emails\CurlMultiEmailSender::send_batch( $batch_data );
 			}
 		);
 
@@ -1258,11 +1258,11 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Convert Plugin merge tags to mailer-specific recipient variables
-		$converted_subject = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $subject );
-		$converted_body    = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $rendered_body );
+		$converted_subject = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $subject );
+		$converted_body    = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $rendered_body );
 
 		// Add tracking pixel
-		$tracking_pixel_tag = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel_tag = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
 		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $converted_body, '</body>' ) !== false ) {
 			$converted_body = str_replace( '</body>', $tracking_pixel . '</body>', $converted_body );
@@ -1287,7 +1287,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$result = $this->with_smtp_campaign_log_context(
 			$campaign,
 			function () use ( $batch_data ) {
-				return \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::send_batch( $batch_data );
+				return \DoubleScale\Modules\Emails\BulkEmailSender::send_batch( $batch_data );
 			}
 		);
 
@@ -1430,11 +1430,11 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Convert Plugin merge tags to mailer-specific recipient variables
-		$subject = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $subject );
-		$body    = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $body );
+		$subject = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $subject );
+		$body    = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $body );
 
 		// Add tracking pixel using recipient variable (mailer-specific format)
-		$tracking_pixel_tag = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
+		$tracking_pixel_tag = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( '{{tracking:tracking_pixel}}' );
 		$tracking_pixel     = '<img src="' . $tracking_pixel_tag . '" width="1" height="1" style="width:1px;height:1px;" alt="" />';
 		if ( strpos( $body, '</body>' ) !== false ) {
 			$body = str_replace( '</body>', $tracking_pixel . '</body>', $body );
@@ -1459,7 +1459,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$result = $this->with_smtp_campaign_log_context(
 			$campaign,
 			function () use ( $batch_data ) {
-				return \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::send_batch( $batch_data );
+				return \DoubleScale\Modules\Emails\BulkEmailSender::send_batch( $batch_data );
 			}
 		);
 
@@ -1539,8 +1539,8 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Render without contact context (merge tags will be handled by Mailgun)
-		if ( class_exists( '\DoubleScale\Modules\Campaigns\Emails\EmailRenderer' ) ) {
-			$renderer     = new \DoubleScale\Modules\Campaigns\Emails\EmailRenderer();
+		if ( class_exists( '\DoubleScale\Modules\Emails\EmailRenderer' ) ) {
+			$renderer     = new \DoubleScale\Modules\Emails\EmailRenderer();
 			$builder_data = $decoded['value'];
 
 			// Render with null contact - merge tags stay as placeholders
@@ -1604,8 +1604,8 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Render without contact context (merge tags will be handled by Mailgun)
-		if ( class_exists( '\DoubleScale\Modules\Campaigns\Emails\EmailRenderer' ) ) {
-			$renderer = new \DoubleScale\Modules\Campaigns\Emails\EmailRenderer();
+		if ( class_exists( '\DoubleScale\Modules\Emails\EmailRenderer' ) ) {
+			$renderer = new \DoubleScale\Modules\Emails\EmailRenderer();
 
 			// Render with null contact - merge tags stay as placeholders
 			$html = $renderer->render_from_builder_data( $builder_data, null, '', '' );
@@ -1637,7 +1637,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		}
 
 		// Convert merge tags to mailer-specific format
-		$footer = \DoubleScale\Modules\Campaigns\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $footer );
+		$footer = \DoubleScale\Modules\Emails\BulkEmailSender::convert_merge_tags_to_recipient_variables( $footer );
 
 		return $footer;
 	}
@@ -1997,7 +1997,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 			if ( is_wp_error( $result ) ) {
 				throw new \Exception( 'WP Mail Error: ' . $result->get_error_message() );
 			} elseif ( $result === false || $result === null ) {
-				$detail = \DoubleScale\Modules\Campaigns\Emails\Emails::get_last_send_failure_detail();
+				$detail = \DoubleScale\Modules\Emails\Emails::get_last_send_failure_detail();
 				$msg    = 'Email sending failed - wp_mail returned false';
 				if ( '' !== $detail ) {
 					$msg .= ': ' . $detail;

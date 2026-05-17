@@ -2,8 +2,8 @@
 /**
  * Campaigns module bootstrap.
  *
- * Owns: campaigns, templates, email builder/blocks, sequences,
- * campaign REST API, AI email builder hooks.
+ * Owns: campaigns, templates, sequences, campaign REST API, AI email builder hooks.
+ * The email builder/renderer/blocks themselves live in the Emails module.
  *
  * @package DoubleScale\Pro
  */
@@ -38,7 +38,7 @@ final class Module extends AbstractModule {
 	}
 
 	public function dependencies(): array {
-		return array( 'core', 'contacts' );
+		return array( 'core', 'contacts', 'emails' );
 	}
 
 	/**
@@ -70,11 +70,9 @@ final class Module extends AbstractModule {
 	public function boot( Container $container ): void {
 		parent::boot( $container );
 
-		Emails\EmailBuilder::instance();
 		Campaign\EmailProcessing::instance();
 		Campaign\WhatsappProcessing::instance();
 
-		add_action( 'doublescale_register_email_blocks', array( $this, 'register_email_blocks' ) );
 		add_action( 'init', array( $this, 'register_cron_schedules' ) );
 	}
 
@@ -90,12 +88,4 @@ final class Module extends AbstractModule {
 		}
 	}
 
-	public function register_email_blocks( $registry ) {
-		$registry->register_block( new Emails\Blocks\BannerBlock() );
-		$registry->register_block( new Emails\Blocks\DividerBlock() );
-		$registry->register_block( new Emails\Blocks\MenuBlock() );
-		$registry->register_block( new Emails\Blocks\ProductBlock() );
-		$registry->register_block( new Emails\Blocks\SocialMediaBlock() );
-		$registry->register_block( new Emails\Blocks\TimerBlock() );
-	}
 }

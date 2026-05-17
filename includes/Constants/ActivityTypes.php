@@ -3,7 +3,7 @@
  * Activity Types Constants
  * Defines all valid activity types in the system
  *
- * @since 1.2.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -65,7 +65,7 @@ class ActivityTypes {
 	/**
 	 * Get all valid activity types
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return array All activity type constants
 	 */
@@ -100,7 +100,7 @@ class ActivityTypes {
 	/**
 	 * Get editable activity types
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return array Editable activity types
 	 */
@@ -116,7 +116,7 @@ class ActivityTypes {
 	/**
 	 * Get system-generated activity types
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return array System-generated activity types
 	 */
@@ -133,7 +133,7 @@ class ActivityTypes {
 	/**
 	 * Get validation rule for activity types
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return string Validation rule
 	 */
@@ -144,7 +144,7 @@ class ActivityTypes {
 	/**
 	 * Check if an activity type is editable
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type Activity type to check.
 	 *
@@ -157,7 +157,7 @@ class ActivityTypes {
 	/**
 	 * Check if an activity type is system-generated
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type Activity type to check.
 	 *
@@ -170,7 +170,7 @@ class ActivityTypes {
 	/**
 	 * Check if an activity type is valid
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type Activity type to check.
 	 *
@@ -183,7 +183,7 @@ class ActivityTypes {
 	/**
 	 * Get formatted message for activity type
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type      Activity type.
 	 * @param string $user_name User who performed the action.
@@ -230,7 +230,7 @@ class ActivityTypes {
 	/**
 	 * Get activity type label
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type Activity type.
 	 *

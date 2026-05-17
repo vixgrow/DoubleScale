@@ -4,7 +4,7 @@
  *
  * Handles FCM device token registration and unregistration.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -42,7 +42,7 @@ class RestDeviceController extends WP_REST_Controller {
 	/**
 	 * Register the routes for the controller.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -98,7 +98,7 @@ class RestDeviceController extends WP_REST_Controller {
 	/**
 	 * Register a device token for the current user.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -130,7 +130,7 @@ class RestDeviceController extends WP_REST_Controller {
 	/**
 	 * Unregister a device token for the current user.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -153,7 +153,7 @@ class RestDeviceController extends WP_REST_Controller {
 	/**
 	 * Permission check — any authenticated user with CRM access.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */

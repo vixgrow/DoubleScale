@@ -791,7 +791,7 @@ export const isModuleToggleEnabled =
 			return Boolean(mod.enabled);
 		};
 
-/** @since 1.13 — alias of {@link isModuleToggleEnabled}; prefer for new code. */
+/** @since 1.0.0 — alias of {@link isModuleToggleEnabled}; prefer for new code. */
 export const isModuleActive = isModuleToggleEnabled;
 
 /**

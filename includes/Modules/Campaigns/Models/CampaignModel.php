@@ -671,7 +671,7 @@ class CampaignModel extends Model {
 					/**
 					 * Fires when a campaign is scheduled.
 					 *
-					 * @since 1.2.0
+					 * @since 1.0.0
 					 *
 					 * @param CampaignModel $campaign   The scheduled campaign.
 					 * @param string         $execute_at Scheduled execution time.

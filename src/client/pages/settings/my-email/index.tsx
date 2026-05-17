@@ -4,7 +4,7 @@
  * Simplified per-user email connection page. Users click "Connect Gmail" or
  * "Connect Outlook" — OAuth auto-configures IMAP, from_email, and enables polling.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 
 import { __, sprintf } from '@wordpress/i18n';

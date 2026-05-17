@@ -116,7 +116,7 @@ final class ModuleManager {
 	}
 
 	/**
-	 * @since 1.13.x
+	 * @since 1.0.0
 	 */
 	public static function isActive( string $slug ): bool {
 		return doublescale_is_module_active( $slug );

@@ -35,7 +35,7 @@ class LinkTriggers {
 	 *
 	 * Instantiates or reuses an instance of Link Triggers.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 *
 	 * @return LinkTriggers
 	 */

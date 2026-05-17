@@ -71,7 +71,7 @@ class Tasks {
 	/**
 	 * Get the next timestamp for a scheduled action
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param string     $hook Hook name.
 	 * @param array|null $args Args passed to hook.
@@ -124,7 +124,7 @@ class Tasks {
 	/**
 	 * Schedule recurring task
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param integer $timestamp Timestamp of run.
 	 * @param string  $hook Hook name.
@@ -155,7 +155,7 @@ class Tasks {
 	/**
 	 * Schedule recurring task
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param integer $timestamp Timestamp of first run.
 	 * @param integer $interval Interval in seconds.
@@ -254,7 +254,7 @@ class Tasks {
 	 * Uses the same hook-naming convention as schedule_recurring() and schedule_single():
 	 * the full hook name is "{$this->group}_{$hook}" within the group.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param string $hook Hook name (without group prefix).
 	 * @return void

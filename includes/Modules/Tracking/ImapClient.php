@@ -6,7 +6,7 @@
  * No ext-imap required — php-imap2 is pure PHP, but falls back to native
  * ext-imap automatically for non-OAuth connections when the extension is present.
  *
- * @since 1.1.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -103,7 +103,7 @@ class ImapClient {
 	/**
 	 * Set whether to skip SSL certificate validation.
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param bool $novalidate True to skip validation (less secure), false to enforce.
 	 * @return $this
@@ -204,7 +204,7 @@ class ImapClient {
 	/**
 	 * Switch to a different mailbox folder on the existing connection.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param string $folder Folder name (e.g. '[Gmail]/Sent Mail', 'Sent Items').
 	 * @return bool True on success, false on failure.
@@ -228,7 +228,7 @@ class ImapClient {
 	/**
 	 * List available mailbox folders.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array Array of folder name strings, or empty array on failure.
 	 */

@@ -24,14 +24,14 @@ use WP_REST_Server;
 /**
  * RestLogController is REST api controller class for log
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 class RestLogController extends RestController {
 
 	/**
 	 * REST Base
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @var string
 	 */
@@ -40,7 +40,7 @@ class RestLogController extends RestController {
 	/**
 	 * Register the routes for the controller.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -76,7 +76,7 @@ class RestLogController extends RestController {
 	/**
 	 * Get all logs.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -116,7 +116,7 @@ class RestLogController extends RestController {
 	/**
 	 * Export items
 	 *
-	 * @since 1.7.1
+	 * @since 1.0.0
 	 *
 	 * @param string $format Format.
 	 * @param array  $levels Levels.
@@ -174,7 +174,7 @@ class RestLogController extends RestController {
 	/**
 	 * Delete items from the collection
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -196,7 +196,7 @@ class RestLogController extends RestController {
 	/**
 	 * Delete one item from the collection
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -215,7 +215,7 @@ class RestLogController extends RestController {
 	/**
 	 * Delete item permission check
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -228,7 +228,7 @@ class RestLogController extends RestController {
 	/**
 	 * Check if a given request has access to get all items.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -241,7 +241,7 @@ class RestLogController extends RestController {
 	/**
 	 * Delete items permission check
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *

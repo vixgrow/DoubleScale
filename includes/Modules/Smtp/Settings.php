@@ -34,7 +34,7 @@ class Settings {
 	/**
 	 * Record which connection is about to send (primary or fallback) for error diagnostics.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $attempt Keys: connection_id, mailer, reason, message_from, saved_default_id, is_fallback, routing_adjusted.
 	 */
@@ -45,7 +45,7 @@ class Settings {
 	/**
 	 * Take and clear the last SMTP send attempt snapshot.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return array<string, mixed>|null
 	 */
@@ -58,7 +58,7 @@ class Settings {
 	/**
 	 * Human-readable line(s) describing the last noted SMTP attempt (connection, mailer, routing).
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param array<string, mixed> $attempt {@see self::note_smtp_send_attempt()}.
 	 * @return string

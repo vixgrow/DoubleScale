@@ -172,7 +172,7 @@ abstract class Settings_Controller {
 	/**
 	 * Delete settings.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -185,7 +185,7 @@ abstract class Settings_Controller {
 	/**
 	 * Checks if a given request has access to delete settings.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.

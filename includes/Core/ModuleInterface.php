@@ -53,21 +53,21 @@ interface ModuleInterface {
 	/**
 	 * Runs once when the module transitions from inactive to active (user toggle or option add).
 	 *
-	 * @since 1.13.x
+	 * @since 1.0.0
 	 */
 	public function onActivate(): void;
 
 	/**
 	 * Runs once when the module transitions from active to inactive.
 	 *
-	 * @since 1.13.x
+	 * @since 1.0.0
 	 */
 	public function onDeactivate(): void;
 
 	/**
 	 * Action Scheduler group + hook pairs to unschedule when the module turns off.
 	 *
-	 * @since 1.13.x
+	 * @since 1.0.0
 	 * @return array<int, array{0: string, 1: string}>
 	 */
 	public function scheduledHooks(): array;

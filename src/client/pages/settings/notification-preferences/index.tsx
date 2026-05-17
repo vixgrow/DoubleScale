@@ -5,7 +5,7 @@
  * - "Email & Desktop": Bell/Email/Browser channels with all categories
  * - "Mobile app": Push preferences for mobile-relevant categories only
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

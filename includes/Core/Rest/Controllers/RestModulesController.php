@@ -4,7 +4,7 @@
  *
  * Exposes module metadata and allows toggling modules on/off.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

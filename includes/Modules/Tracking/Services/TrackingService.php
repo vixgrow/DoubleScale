@@ -6,7 +6,7 @@
  * LinkTriggers, Sms, and Whatsapp singletons can be progressively
  * extracted here so REST controllers remain thin.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Modules\Tracking\Services
  */
 

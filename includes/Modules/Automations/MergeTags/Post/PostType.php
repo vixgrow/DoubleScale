@@ -5,7 +5,7 @@
  * Returns the post type label (e.g. "Post", "Page", "Product") of the
  * last published post.
  *
- * @since 1.4.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

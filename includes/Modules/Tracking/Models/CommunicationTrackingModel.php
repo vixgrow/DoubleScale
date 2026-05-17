@@ -577,7 +577,7 @@ class CommunicationTrackingModel extends Model {
 	 *
 	 * Resolves author_id to user display data, with fallback to activity from_email/from_name.
 	 *
-	 * @since 1.6.1
+	 * @since 1.0.0
 	 *
 	 * @return array|null { display_name, email, avatar_url } or null for non-individual messages.
 	 */
@@ -637,7 +637,7 @@ class CommunicationTrackingModel extends Model {
 	 * For individual messages: reads from_email/from_name stored in activity data.
 	 * For campaign messages: reads from_email/from_name from the template settings.
 	 *
-	 * @since 1.7.0
+	 * @since 1.0.0
 	 *
 	 * @return array|null { email, name } or null if unavailable.
 	 */

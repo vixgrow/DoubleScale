@@ -134,7 +134,7 @@ final class Permissions {
 	 * 1. A WordPress REST/Abilities permission_callback (supports WP_Error for detailed error responses)
 	 * 2. An internal permission check (truthy = access granted)
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param int|null $user_id User ID (null for current user).
 	 * @return true|\WP_Error True if access granted, WP_Error with reason if denied.
@@ -172,7 +172,7 @@ final class Permissions {
 	/**
 	 * Default AI access settings (applied when keys are missing).
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -191,7 +191,7 @@ final class Permissions {
 	/**
 	 * Default AI data access settings.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -207,7 +207,7 @@ final class Permissions {
 	/**
 	 * Default AI data sources settings.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */

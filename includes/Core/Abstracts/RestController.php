@@ -27,7 +27,7 @@ use WP_REST_Controller;
  * Abstract Rest Controller Class
  *
  * @extends  WP_REST_Controller
- * @since  1.0.0
+ * @since 1.0.0
  */
 abstract class RestController extends WP_REST_Controller {
 

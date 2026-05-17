@@ -5,7 +5,7 @@
  * Supports Custom IMAP, Gmail OAuth, Outlook OAuth, and smtp providers.
  * Self-contained component that manages its own fetch/save via dedicated REST endpoints.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 
 /**

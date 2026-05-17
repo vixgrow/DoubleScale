@@ -4,7 +4,7 @@
  *
  * Manages addon catalog, install and activate via AJAX.
  *
- * @since 1.5.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -19,7 +19,7 @@ use Plugin_Upgrader;
 /**
  * Store class.
  *
- * @since 1.5.0
+ * @since 1.0.0
  */
 class Store {
 

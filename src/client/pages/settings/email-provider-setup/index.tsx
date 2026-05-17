@@ -5,7 +5,7 @@
  * These credentials are used by all CRM users to connect their personal email accounts.
  * Extracted from the Shared Email (email-inbound) page into its own Mailbox sub-tab.
  *
- * @since 1.8.0
+ * @since 1.0.0
  */
 
 import { __, sprintf } from '@wordpress/i18n';

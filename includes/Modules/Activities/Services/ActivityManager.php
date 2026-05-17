@@ -45,7 +45,7 @@ final class ActivityManager {
 	 *
 	 * Instantiates or reuses an instance of ActivityManager.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 *
 	 * @return ActivityManager
 	 */
@@ -950,7 +950,7 @@ final class ActivityManager {
 	 * - date_from, date_to: Date range filter
 	 * - sort_by, sort_order: Sorting options
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param array $filters  Filter criteria.
 	 * @param int   $per_page Results per page.
@@ -1101,7 +1101,7 @@ final class ActivityManager {
 	/**
 	 * Build activities SQL for UNION query
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param array $filters Filters.
 	 * @param wpdb  $wpdb    WordPress database object.
@@ -1221,7 +1221,7 @@ final class ActivityManager {
 	/**
 	 * Build tasks SQL for UNION query
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param array $filters Filters.
 	 * @param wpdb  $wpdb    WordPress database object.
@@ -1323,7 +1323,7 @@ final class ActivityManager {
 	/**
 	 * Batch load users by IDs
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param array $user_ids User IDs.
 	 *
@@ -1362,7 +1362,7 @@ final class ActivityManager {
 	/**
 	 * Transform activity row from SQL result
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param object     $row  Activity row.
 	 * @param array|null $user User data.
@@ -1398,7 +1398,7 @@ final class ActivityManager {
 	/**
 	 * Transform task row from SQL result
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param object     $row  Task row.
 	 * @param array|null $user User data.
@@ -1430,7 +1430,7 @@ final class ActivityManager {
 	/**
 	 * Format activity message
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param string     $type Activity type.
 	 * @param array|null $user User data.
@@ -1486,7 +1486,7 @@ final class ActivityManager {
 	 * joining campaigns for context. Only included when viewing a contact's timeline
 	 * without deal/user filters.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param array  $filters Filters.
 	 * @param object $wpdb    WordPress database object.
@@ -1620,7 +1620,7 @@ final class ActivityManager {
 	 * Returns a query pair from the page_visits table. Only included when
 	 * viewing a contact's timeline without deal/user filters.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param array  $filters Filters.
 	 * @param object $wpdb    WordPress database object.
@@ -1691,7 +1691,7 @@ final class ActivityManager {
 	/**
 	 * Transform a tracking row from SQL result.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param object $row Tracking row.
 	 *
@@ -1723,7 +1723,7 @@ final class ActivityManager {
 	/**
 	 * Format tracking event message.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param string $type Activity type (email_opened, email_clicked, etc.).
 	 * @param array  $data Tracking data.
@@ -1779,7 +1779,7 @@ final class ActivityManager {
 	/**
 	 * Sanitize sort field
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param string $field Sort field.
 	 *

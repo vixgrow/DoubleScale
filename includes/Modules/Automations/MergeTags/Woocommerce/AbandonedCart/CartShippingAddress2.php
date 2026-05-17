@@ -4,7 +4,7 @@
  *
  * This class is responsible for handling the Abandoned Cart Shipping Address 2
  *
- * @since 2.0.0
+ * @since 1.0.0
  *
  * @package DoubleScale\Pro
  */

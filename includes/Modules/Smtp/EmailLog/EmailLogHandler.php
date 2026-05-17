@@ -28,7 +28,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
  *
  * @class          EmailLogHandler
  *
- * @since        1.0.0
+ * @since 1.0.0
  */
 class EmailLogHandler {
 

@@ -63,7 +63,7 @@ class CampaignRateLimiter {
 	/**
 	 * CampaignRateLimiter Instance.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @static
 	 *
 	 * @return self - Single instance

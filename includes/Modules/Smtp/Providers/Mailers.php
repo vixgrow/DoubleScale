@@ -55,7 +55,7 @@ final class Mailers {
 	 *
 	 * Instantiates or reuses an instance of smtp.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @static
 	 *
 	 * @return self - Single instance

@@ -2,7 +2,7 @@
 /**
  * Class: License
  *
- * @since 1.6.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -22,14 +22,14 @@ use Plugin_Upgrader;
 /**
  * License Class
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 class License {
 
 	/**
 	 * Plans
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @var array
 	 */
@@ -38,7 +38,7 @@ class License {
 	/**
 	 * Plugin data
 	 *
-	 * @since 1.2.3
+	 * @since 1.0.0
 	 *
 	 * @var array
 	 */
@@ -47,7 +47,7 @@ class License {
 	/**
 	 * Class instance
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @var self instance
 	 */
@@ -56,7 +56,7 @@ class License {
 	/**
 	 * Get class instance
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return self
 	 */
@@ -70,7 +70,7 @@ class License {
 	/**
 	 * Constructor
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 */
 	private function __construct() {
 		$this->define_plugin();
@@ -89,7 +89,7 @@ class License {
 	/**
 	 * Ajax install pro
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -112,7 +112,7 @@ class License {
 	/**
 	 * Ajax activate pro
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -160,7 +160,7 @@ class License {
 	/**
 	 * Define plugin data
 	 *
-	 * @since 1.2.3
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -334,7 +334,7 @@ class License {
 	/**
 	 * Define plans
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -370,7 +370,7 @@ class License {
 	/**
 	 * Check whether the current license plan meets or exceeds the required plan.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param string $required_plan The minimum plan slug required.
 	 * @return bool
@@ -394,7 +394,7 @@ class License {
 	/**
 	 * Get plans
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -405,7 +405,7 @@ class License {
 	/**
 	 * Get plan label
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param string $plan Plan key.
 	 * @return string|null
@@ -421,7 +421,7 @@ class License {
 	/**
 	 * Get current license info
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param boolean $include_key Whether to include key or not.
 	 * @return array|false
@@ -452,7 +452,7 @@ class License {
 	/**
 	 * Update license
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -515,7 +515,7 @@ class License {
 	/**
 	 * Initialize and handle license update task.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -552,7 +552,7 @@ class License {
 	/**
 	 * Handle license update task callback
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param string $trigger Trigger.
 	 * @return void
@@ -584,7 +584,7 @@ class License {
 	/**
 	 * Handle activate request
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -666,7 +666,7 @@ class License {
 	/**
 	 * Handle update request
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -684,7 +684,7 @@ class License {
 	/**
 	 * Handle deactivate request
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -711,7 +711,7 @@ class License {
 	/**
 	 * Get translated status label
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param string $status Status key.
 	 * @return string|null
@@ -751,7 +751,7 @@ class License {
 	 * Check ajax request authorization.
 	 * Sends error response and exit if not authorized.
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */

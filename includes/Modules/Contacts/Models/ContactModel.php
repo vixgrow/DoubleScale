@@ -532,7 +532,7 @@ class ContactModel extends Model
 	/**
 	 * Check if contact is subscribed to a specific channel
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $channel Channel name (email, sms, whatsapp)
 	 * @return bool True if subscribed
@@ -572,7 +572,7 @@ class ContactModel extends Model
 	/**
 	 * Unsubscribe from specific mode
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int      $mode        Mode integer (1=Email, 2=Sms, 3=Whatsapp)
 	 * @param string   $reason      Optional reason
@@ -660,7 +660,7 @@ class ContactModel extends Model
 	/**
 	 * Subscribe to specific channel
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $channel Channel name (email, sms, whatsapp)
 	 * @return bool Success
@@ -711,7 +711,7 @@ class ContactModel extends Model
 	/**
 	 * Get channel subscription statuses
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @return array Channel statuses
 	 */
@@ -727,7 +727,7 @@ class ContactModel extends Model
 	/**
 	 * Get localized channel label
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $channel Channel name (email, sms, whatsapp).
 	 * @return string Localized channel label
@@ -746,7 +746,7 @@ class ContactModel extends Model
 	/**
 	 * Get list of valid channels
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @return array Valid channel identifiers
 	 */

@@ -115,7 +115,7 @@ class Emails {
 	 * When set, this value is used as the Message-ID header, enabling
 	 * reply matching via In-Reply-To for incoming email processing.
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @var string|false
 	 */
@@ -127,7 +127,7 @@ class Emails {
 	 * When set, adds In-Reply-To and References headers so email clients
 	 * and inbound processors can thread replies to the correct conversation.
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @var string|false
 	 */
@@ -513,7 +513,7 @@ class Emails {
 	 * so we set $phpmailer->MessageID directly) and stamps an X-Plugin-Sent
 	 * header so the SENT-folder sync can recognize CRM-originated emails.
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param \PHPMailer\PHPMailer\PHPMailer $phpmailer PHPMailer instance.
 	 */

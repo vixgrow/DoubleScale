@@ -5,7 +5,7 @@
  *
  * Provides license, plan, and plugin status information.
  *
- * @since 1.5.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  * @subpackage Api
  */
@@ -25,14 +25,14 @@ use DoubleScale\Site\License;
 /**
  * RestLicenseController class.
  *
- * @since 1.5.0
+ * @since 1.0.0
  */
 class RestLicenseController extends RestController {
 
 	/**
 	 * REST Base
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @var string
 	 */
@@ -41,7 +41,7 @@ class RestLicenseController extends RestController {
 	/**
 	 * Register the routes for the controller.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -62,7 +62,7 @@ class RestLicenseController extends RestController {
 	/**
 	 * Permission check for the status endpoint.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error
@@ -82,7 +82,7 @@ class RestLicenseController extends RestController {
 	/**
 	 * Get license, plan, and plugin status.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response

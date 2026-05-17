@@ -391,7 +391,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Get email inbound settings
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @return WP_REST_Response
 	 */
@@ -476,7 +476,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Save email inbound settings
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -580,7 +580,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Supports custom IMAP, Gmail OAuth, and Outlook OAuth providers.
 	 *
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -745,7 +745,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Test IMAP connection using smtp's Gmail OAuth tokens.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param array $body Request body (may contain account_id).
 	 * @return WP_REST_Response
@@ -804,7 +804,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Test IMAP connection using smtp Pro's Outlook OAuth tokens.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param array $body Request body (may contain account_id).
 	 * @return WP_REST_Response
@@ -865,7 +865,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Get OAuth authorization URL for a provider (opens in popup).
 	 *
-	 * @since 1.4.0
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -899,7 +899,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Disconnect an OAuth provider.
 	 *
-	 * @since 1.4.0
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -935,7 +935,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Get centralized email OAuth app credentials.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @return WP_REST_Response
 	 */
@@ -965,7 +965,7 @@ class RestSettingsControllerPro {
 	 * Requires both client_id and client_secret. Writes to smtp only —
 	 * CRM does not store its own copy.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response|WP_Error
@@ -1065,7 +1065,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Removes smtp accounts/connections with user_id and clears user meta tokens.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param string $provider 'gmail' or 'outlook'.
 	 * @return int Number of users disconnected.
@@ -1201,7 +1201,7 @@ class RestSettingsControllerPro {
 	 * the correct provider and account ID are returned so the admin never has to
 	 * pick them manually. Falls back to preserving 'custom' for manual IMAP.
 	 *
-	 * @since 1.9.0
+	 * @since 1.0.0
 	 *
 	 * @param string $from_email The sending identity email address.
 	 * @return array {
@@ -1275,7 +1275,7 @@ class RestSettingsControllerPro {
 	 * Reads smtp's settings to identify configured from-emails and
 	 * whether a Gmail OAuth account is available for IMAP reuse.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array Detection result with from_emails, gmail info, etc.
 	 */
@@ -1401,7 +1401,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Refreshes the access token if expired, writing back to smtp's option.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param string $account_id Optional account ID. Uses first account if empty.
 	 * @return array|false IMAP config array or false on failure.
@@ -1535,7 +1535,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Refreshes the access token if expired, writing back to smtp's option.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @param string $account_id Optional account ID. Uses first account if empty.
 	 * @return array|false IMAP config array or false on failure.
@@ -1671,7 +1671,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Auto-provisions from the bundled service account if not yet configured.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @return WP_REST_Response
 	 */
@@ -1710,7 +1710,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Save mobile app push notification settings (enable/disable toggle).
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -1740,7 +1740,7 @@ class RestSettingsControllerPro {
 	 *
 	 * Auto-provisions from the bundled service account if not yet configured.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @return WP_REST_Response
 	 */
@@ -1855,7 +1855,7 @@ class RestSettingsControllerPro {
 	 * Unlike test_mobile_app_connection() which only validates credentials,
 	 * this sends an actual FCM message so the user can confirm delivery.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @return WP_REST_Response
 	 */
@@ -1997,7 +1997,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Encrypt a string using AES-256-CBC with a key derived from wp_salt('auth').
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @param string $plaintext Text to encrypt.
 	 * @return string|false Base64-encoded encrypted blob, or false on failure.
@@ -2021,7 +2021,7 @@ class RestSettingsControllerPro {
 	/**
 	 * Decrypt a string encrypted with encrypt_firebase().
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @param string $encrypted Base64-encoded encrypted blob.
 	 * @return string|false Decrypted text, or false on failure.
@@ -2060,7 +2060,7 @@ class RestSettingsControllerPro {
 	 * Only CRM Managers (+ admins) and Sales Managers can modify shared email settings.
 	 * Sales Reps can read (GET) but not write.
 	 *
-	 * @since 1.7.0
+	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */

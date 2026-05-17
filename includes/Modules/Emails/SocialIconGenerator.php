@@ -10,7 +10,7 @@
  * reached, new colors are snapped to the nearest existing color via Euclidean
  * distance in RGB space, so no additional files are created.
  *
- * @since 1.9.2
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

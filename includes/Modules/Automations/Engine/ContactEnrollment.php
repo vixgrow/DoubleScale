@@ -57,7 +57,7 @@ final class ContactEnrollment {
 		/**
 		 * Fires when a contact enters an automation.
 		 *
-		 * @since 1.2.0
+		 * @since 1.0.0
 		 *
 		 * @param \DoubleScale\Modules\Automations\Models\AutomationModel         $automation         The automation.
 		 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact record.

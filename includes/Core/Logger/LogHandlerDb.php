@@ -20,7 +20,7 @@ use DoubleScale\Core\Logger\Models\LogModel;
  *
  * @class          LogHandlerDb
  *
- * @since        1.0.0
+ * @since 1.0.0
  */
 class LogHandlerDb implements LogHandlerInterface {
 
@@ -94,7 +94,7 @@ class LogHandlerDb implements LogHandlerInterface {
 	/**
 	 * Get all logs
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param array|false $levels Array of levels, false for all.
 	 * @param integer     $offset Offset.

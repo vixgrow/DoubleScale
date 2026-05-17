@@ -3,7 +3,7 @@
 /**
  * ACF User Field Merge Tag
  *
- * @since 1.11.0
+ * @since 1.0.0
  *
  * @package DoubleScale\Pro
  */

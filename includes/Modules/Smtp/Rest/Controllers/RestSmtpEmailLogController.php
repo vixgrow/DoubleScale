@@ -132,7 +132,7 @@ class RestSmtpEmailLogController extends RestController {
 	/**
 	 * Resend emails
 	 *
-	 * @since 1.7.1
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|WP_REST_Response
@@ -251,7 +251,7 @@ class RestSmtpEmailLogController extends RestController {
 	/**
 	 * Resend emails permission check
 	 *
-	 * @since 1.7.1
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|bool

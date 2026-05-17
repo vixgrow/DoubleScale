@@ -38,7 +38,7 @@ class CampaignAnalytics {
 	 *
 	 * Instantiates or reuses an instance of CampaignAnalytics.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @static
 	 *
 	 * @return self - Single instance

@@ -2,7 +2,7 @@
 /**
  * Fired when a deal is updated.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Core\Events
  */
 

@@ -1034,7 +1034,7 @@ class ActivityModel extends Model {
 	 * Checks called_at, sent_at, scheduled_at in order and falls back to
 	 * created_at. This mirrors the COALESCE logic previously used in SQL.
 	 *
-	 * @since 1.2.5
+	 * @since 1.0.0
 	 *
 	 * @param ActivityModel $activity The activity instance.
 	 *

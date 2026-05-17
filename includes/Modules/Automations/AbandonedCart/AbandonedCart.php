@@ -51,7 +51,7 @@ class AbandonedCart {
 	 *
 	 * Instantiates or reuses an instance of Abandoned Cart.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 *
 	 * @return AbandonedCart
 	 */

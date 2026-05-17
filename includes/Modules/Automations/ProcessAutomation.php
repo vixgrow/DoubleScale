@@ -415,7 +415,7 @@ class ProcessAutomation {
 			/**
 			 * Fires when an automation step fails.
 			 *
-			 * @since 1.2.0
+			 * @since 1.0.0
 			 *
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationModel         $automation         The automation.
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact.
@@ -429,7 +429,7 @@ class ProcessAutomation {
 			/**
 			 * Fires when a contact completes an automation.
 			 *
-			 * @since 1.2.0
+			 * @since 1.0.0
 			 *
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationModel         $automation         The automation.
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact.

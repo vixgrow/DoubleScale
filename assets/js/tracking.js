@@ -3,7 +3,7 @@
  *
  * Tracks page visits and stores them for known/anonymous contacts.
  *
- * @since 1.2.0
+ * @since 1.0.0
  */
 (function () {
     'use strict';

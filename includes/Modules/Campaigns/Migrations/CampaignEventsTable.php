@@ -5,7 +5,7 @@
  * Stores pending event triggers for automated campaigns so that
  * no events are lost when a campaign is already processing.
  *
- * @since 1.5.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

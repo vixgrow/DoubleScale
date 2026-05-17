@@ -24,7 +24,7 @@ use WP_REST_Request;
 /**
  * Account_Controller class.
  *
- * @since 1.3.0
+ * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
 	use Account_Controller_Gettable, Account_Controller_Creatable;

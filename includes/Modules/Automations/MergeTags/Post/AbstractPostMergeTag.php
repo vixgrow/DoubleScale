@@ -5,7 +5,7 @@
  * Base class for all post-related merge tags. Centralizes post retrieval
  * from the campaign execution context.
  *
- * @since 1.4.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

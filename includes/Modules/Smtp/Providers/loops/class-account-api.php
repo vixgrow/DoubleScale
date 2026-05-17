@@ -32,7 +32,7 @@ class Account_API {
 	 *
 	 * @var string
 	 *
-	 * @since 1.3.0
+	 * @since 1.0.0
 	 */
 	protected $transactional_id;
 

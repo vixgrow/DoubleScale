@@ -9,7 +9,7 @@
  * - Personal Email: visible to all CRM roles
  * - Email Provider Setup: visible to CRM Manager (and Admin) only
  *
- * @since 1.7.0
+ * @since 1.0.0
  */
 
 import { __ } from '@wordpress/i18n';

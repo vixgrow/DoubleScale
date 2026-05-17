@@ -65,7 +65,7 @@ class Manager {
 	 *
 	 * Instantiates or reuses an instance of Manager.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 *
 	 * @return Manager
 	 */

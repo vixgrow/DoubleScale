@@ -88,7 +88,7 @@ final class Module extends AbstractModule {
 	 * Core may set {@see global $phpmailer} to {@see \WP_PHPMailer} when the global was unset; replacing
 	 * without copying would drop recipients and body.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 */
 	public function ensure_phpmailer_override(): void {
 		global $phpmailer;

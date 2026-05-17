@@ -37,7 +37,7 @@ final class AdminConfig {
 	/**
 	 * Set admin config
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -155,7 +155,7 @@ final class AdminConfig {
 	/**
 	 * Get plan levels keyed by plan slug.
 	 *
-	 * @since 1.5.0
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{label: string, level: int}>
 	 */
@@ -174,7 +174,7 @@ final class AdminConfig {
 	/**
 	 * Get addon plugins status.
 	 *
-	 * @since 1.7.0
+	 * @since 1.0.0
 	 *
 	 * @return array<string, array{slug: string, label: string, description: string, is_installed: bool, is_active: bool, plugin_file: string}>
 	 */
@@ -201,7 +201,7 @@ final class AdminConfig {
 	/**
 	 * Build module metadata for the frontend config.
 	 *
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
@@ -214,7 +214,7 @@ final class AdminConfig {
 	/**
 	 * Check whether the AI provider is configured.
 	 *
-	 * @since 1.9.0
+	 * @since 1.0.0
 	 *
 	 * @return bool True when a provider and Api key (or custom provider) are set.
 	 */
@@ -227,7 +227,7 @@ final class AdminConfig {
 	/**
 	 * Get pro plugin data
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @return array Pro plugin data including installation and activation status
 	 */
@@ -313,7 +313,7 @@ final class AdminConfig {
 	/**
 	 * Get smtp connection information
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @return array smtp connection info including verified senders
 	 */

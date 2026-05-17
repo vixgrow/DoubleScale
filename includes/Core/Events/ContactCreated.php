@@ -2,7 +2,7 @@
 /**
  * Fired when a new contact is created.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Core\Events
  */
 

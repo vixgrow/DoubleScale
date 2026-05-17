@@ -4,7 +4,7 @@
  * Centralized service for managing activities and timeline API operations.
  * Provides type-safe API calls and consistent data transformation.
  *
- * @since 1.x.0
+ * @since 1.0.0
  * @package DoubleScale
  */
 

@@ -20,7 +20,7 @@
  * is the FQCN (backslashes replaced with dots), so third-party code can
  * still use `add_action()` / `do_action()` directly if needed.
  *
- * @since 2.0.0
+ * @since 1.0.0
  * @package DoubleScale\Core\Events
  */
 

@@ -289,7 +289,7 @@ abstract class AbstractCampaignProcessing {
 					/**
 					 * Fires when a campaign fails.
 					 *
-					 * @since 1.2.0
+					 * @since 1.0.0
 					 *
 					 * @param CampaignModel $campaign      The failed campaign.
 					 * @param string         $error_message Error description.
@@ -1307,7 +1307,7 @@ abstract class AbstractCampaignProcessing {
 		/**
 		 * Fires when a campaign is completed successfully.
 		 *
-		 * @since 1.2.0
+		 * @since 1.0.0
 		 *
 		 * @param CampaignModel $campaign         The completed campaign.
 		 * @param int            $recipients_count Number of recipients processed.

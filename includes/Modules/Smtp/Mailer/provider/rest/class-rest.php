@@ -72,7 +72,7 @@ class REST extends Abstract_REST {
 	/**
 	 * Get rest data
 	 *
-	 * @since 1.6.0
+	 * @since 1.0.0
 	 *
 	 * @param Settings $settings Settings.
 	 *

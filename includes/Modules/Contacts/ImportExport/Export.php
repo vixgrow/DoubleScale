@@ -205,7 +205,7 @@ class Export {
 			/**
 			 * Fires when a contact export completes.
 			 *
-			 * @since 1.2.0
+			 * @since 1.0.0
 			 *
 			 * @param int $user_id         User who initiated the export.
 			 * @param int $exported_count  Number of contacts exported.
@@ -324,7 +324,7 @@ class Export {
 	 * This ensures all fields are quoted for better compatibility with
 	 * various Csv readers (Excel, Google Sheets, etc.)
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param resource $handle The file handle to write to.
 	 * @param array    $fields The fields to write.

@@ -332,7 +332,7 @@ class RestActivityController extends RestController {
 	 * Uses SQL UNION query via get_unified_timeline() - designed for the
 	 * "All Activity" tab that shows everything.
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -395,7 +395,7 @@ class RestActivityController extends RestController {
 	/**
 	 * Get upcoming activities and tasks (today onward, nearest first).
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
 	 *
@@ -454,7 +454,7 @@ class RestActivityController extends RestController {
 	 *
 	 * Ensures consistent response format between get_activities() and get_unified_timeline().
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param ActivityModel $activity Activity model.
 	 *
@@ -495,7 +495,7 @@ class RestActivityController extends RestController {
 	/**
 	 * Get timeline endpoint parameters
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @return array Parameters for timeline endpoint.
 	 */
@@ -561,7 +561,7 @@ class RestActivityController extends RestController {
 	/**
 	 * Normalize entity_type to integer constant
 	 *
-	 * @since 1.x.0
+	 * @since 1.0.0
 	 *
 	 * @param string|int|null $entity_type Entity type.
 	 *
@@ -1287,7 +1287,7 @@ class RestActivityController extends RestController {
 	/**
 	 * Map a deal access error code to a WP_Error response.
 	 *
-	 * @since 1.8.0
+	 * @since 1.0.0
 	 *
 	 * @param string $error_code Error code from check_deal_access().
 	 *

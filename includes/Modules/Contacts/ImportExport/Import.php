@@ -622,7 +622,7 @@ class Import {
 			/**
 			 * Fires when a contact import is completed.
 			 *
-			 * @since 1.2.0
+			 * @since 1.0.0
 			 *
 			 * @param int $user_id        The user who initiated the import.
 			 * @param int $imported_count Number of contacts successfully imported.

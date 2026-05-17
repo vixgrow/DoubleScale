@@ -5,7 +5,7 @@
  * This is an admin-only setting that affects all users.
  * Fetches and saves settings independently from the main settings page.
  *
- * @since 1.2.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 

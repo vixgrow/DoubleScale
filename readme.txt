@@ -1,6 +1,6 @@
 === DoubleScale | All-In-One Business Growth Platform ===
 Contributors: vixgrowy
-Tags: crm, marketing automation, booking, email campaigns, helpdesk
+Tags:  marketing automation, booking, email campaigns, helpdesk
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native CRM, campaigns, booking, SMTP, helpdesk, tasks, analytics, and automations in one plugin.
+WordPress-native campaigns, booking, SMTP, helpdesk, tasks, pipelines, analytics, and automations in one plugin.
 
 == Description ==
 
@@ -20,7 +20,7 @@ You shouldn't need eight separate logins, eight billing relationships, and eight
 
 DoubleScale is a single install that gives you **eight first-class modules**, every one designed to feel like a dedicated product:
 
-**1. CRM — contacts, lists, segmentation**
+**1. contacts, lists, segmentation**
 A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, full activity timeline, bulk operations, and CSV / WordPress user / WooCommerce imports. Every email, SMS, deal, booking, support ticket, and form submission stitches into one timeline per contact.
 
 **2. Campaigns — email & SMS broadcasts and sequences**

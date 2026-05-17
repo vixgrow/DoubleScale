@@ -6,7 +6,7 @@
  * RestAiEmailBuilderController to support both the existing email builder
  * and the new AI Assistant with function calling.
  *
- * @since 1.5.0
+ * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
@@ -22,7 +22,7 @@ use WP_Error;
 /**
  * AiProvider class.
  *
- * @since 1.5.0
+ * @since 1.0.0
  */
 class AiProvider {
 

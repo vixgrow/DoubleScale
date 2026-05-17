@@ -35,7 +35,7 @@ class CampaignContactFilter {
 	 *
 	 * Instantiates or reuses an instance of CampaignContactFilter.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 * @static
 	 *
 	 * @return self - Single instance

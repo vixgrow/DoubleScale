@@ -46,7 +46,7 @@ class Email
 	 *
 	 * Instantiates or reuses an instance of Email.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 *
 	 * @return Email
 	 */

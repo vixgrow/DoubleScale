@@ -41,6 +41,8 @@ interface FieldsProps {
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
 	stepId?: number;
+	requiredFields?: string[];
+	className?: string;
 }
 
 const Fields: React.FC<FieldsProps> = ({
@@ -48,6 +50,8 @@ const Fields: React.FC<FieldsProps> = ({
 	values,
 	onChange,
 	stepId,
+	requiredFields,
+	className,
 }) => {
 	const handleChange = (key: string, value: any) => {
 		const newValues = {
@@ -173,7 +177,10 @@ const Fields: React.FC<FieldsProps> = ({
 
 	// Fallback to regular field rendering if no tabs
 	return (
-		<div className="doublescale-fields" style={{ marginBottom: '20px' }}>
+		<div
+			className={className ? `doublescale-fields ${className}` : 'doublescale-fields'}
+			style={{ marginBottom: className ? undefined : '20px' }}
+		>
 			{map(fields, (field, key) => {
 				return (
 					<Field
@@ -191,6 +198,7 @@ const Fields: React.FC<FieldsProps> = ({
 						tooltip={field.tooltip}
 						defaultValue={field['default-value']}
 						helperText={processHelperText(field.helperText)}
+						required={requiredFields?.includes(key)}
 					/>
 				);
 			})}

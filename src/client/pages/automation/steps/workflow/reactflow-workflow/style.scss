@@ -305,6 +305,116 @@
 		}
 	}
 
+	// Card layout: colored header + white body (workflow + reports)
+	&--card-layout {
+		width: 380px;
+		min-width: 380px;
+		max-width: 380px;
+		flex-direction: column;
+		padding: 0;
+		gap: 0;
+		align-items: stretch;
+		overflow: hidden;
+
+		.doublescale-reactflow-node__card-inner {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.doublescale-reactflow-node__content {
+			margin-right: 0;
+		}
+
+		.doublescale-reactflow-node__icon {
+			width: auto;
+			height: auto;
+			min-width: 0;
+			padding: 0;
+			background: transparent;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+
+			svg {
+				width: 24px;
+				height: 24px;
+			}
+		}
+
+		.doublescale-reactflow-node__title {
+			font-size: 14px;
+			font-weight: 600;
+			line-height: 24px;
+		}
+
+		.doublescale-reactflow-node__subtitle {
+			font-size: 14px;
+			color: #29292E;
+			line-height: 24px;
+			font-weight: 500;
+		}
+
+		.doublescale-reactflow-node__body-row {
+			padding: 12px 16px;
+			background: #fff;
+			border-top: 1px solid #f0f0f0;
+		}
+
+		.doublescale-reactflow-node__header-row {
+			border-bottom: none;
+		}
+
+		.doublescale-reactflow-node__header-row--trigger {
+			background: #FAEADF;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #CB5301;
+			}
+		}
+
+		.doublescale-reactflow-node__header-row--action {
+			background: #E4FAEC;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #16A34A;
+			}
+		}
+
+		.doublescale-reactflow-node__header-row--delay {
+			background: #F7F4C3;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #896900;
+			}
+		}
+
+		.doublescale-reactflow-node__header-row--goal {
+			background: #EEF;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #262666;
+			}
+		}
+
+		.doublescale-reactflow-node__header-row--condition {
+			background: #D9E9F3;
+
+			.doublescale-reactflow-node__title,
+			.doublescale-reactflow-node__icon {
+				color: #0D9DFC;
+			}
+		}
+
+		&.doublescale-reactflow-node--selected {
+			background: #fff !important;
+		}
+	}
+
 	// Node Type Specific Styles
 	&--action {
 
@@ -319,12 +429,7 @@
 			font-weight: 500;
 		}
 
-		// Special layout for actions with analytics
-		&-with-analytics {
-			flex-direction: column;
-			padding: 0;
-			gap: 0;
-		}
+		// Wider nodes on Reports tab (analytics footer)
 	}
 
 	// Header Row (First row with icon, content, dropdown)
@@ -332,15 +437,14 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 16px;
-		border-bottom: 1px solid #f0f0f0;
+		padding: 12px 16px;
 		width: 100%;
 	}
 
 	&__header-left {
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 4px;
 		flex: 1;
 		min-width: 0; // Allow flex item to shrink
 	}
@@ -358,8 +462,16 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 12px;
 		padding: 12px 16px;
+		border-top: 1px solid #D0D0D0;
 		width: 100%;
+
+		>div {
+			flex: 1;
+			min-width: 0;
+			white-space: nowrap;
+		}
 	}
 
 	// Recipient info
@@ -429,21 +541,23 @@
 		background: #ffffff;
 		overflow: visible;
 
-		.doublescale-reactflow-node__content {
-			margin-right: 20px;
-			overflow: hidden;
-		}
+		&:not(.doublescale-reactflow-node--card-layout) {
+			.doublescale-reactflow-node__content {
+				margin-right: 20px;
+				overflow: hidden;
+			}
 
-		.doublescale-reactflow-node__title {
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
+			.doublescale-reactflow-node__title {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
 
-		.doublescale-reactflow-node__subtitle {
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
+			.doublescale-reactflow-node__subtitle {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
 		}
 
 		// Condition configuration status

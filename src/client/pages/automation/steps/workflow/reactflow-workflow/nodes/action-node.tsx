@@ -26,7 +26,7 @@ import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
 import { getActionLabel, hasActionWarning } from '@doublescale/utils';
-import { ActionIcon, ViewIcon } from '@doublescale/components';
+import { ActionIcon, ActionsIcon, ViewIcon } from '@doublescale/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
 import { supportsAnalytics, getChannelType } from '../constants/action-types';
 import {
@@ -174,7 +174,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 				disabled={viewMode}
 			>
 				<div
-					className={`doublescale-reactflow-node doublescale-reactflow-node--action ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && ((hasAnalytics && isConfigured) || analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--action doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && ((hasAnalytics && isConfigured) || analytics) ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<Handle
 						type="target"
@@ -186,7 +186,8 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 					{!viewMode && <StepReorderControls step={step} />}
 
 					<NodeLayout
-						icon={<ActionIcon width={23} height={23} />}
+						variant="action"
+						icon={<ActionsIcon width={24} height={24} />}
 						title={__('Action', 'doublescale')}
 						subtitle={subtitle}
 						onEdit={handleEdit}

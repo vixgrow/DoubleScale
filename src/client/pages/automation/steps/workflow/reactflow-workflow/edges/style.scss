@@ -1,42 +1,58 @@
 .doublescale-edge-add-button {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    pointer-events: all;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	pointer-events: all;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-    &:hover {
-        z-index: 1001;
-    }
+	&:hover {
+		z-index: 1001;
+	}
 
-    &--disabled {
-        pointer-events: none !important;
-    }
+	&--disabled {
+		pointer-events: none !important;
+	}
 }
 
 // Ensure edges stay below buttons
 .doublescale-edge {
-    stroke: #D7D7DA;
-    stroke-width: 2;
-    z-index: 0 !important;
+	stroke: #d7d7da;
+	stroke-width: 2;
+	z-index: 0 !important;
 }
 
-// Ensure the button is centered on the edge
 .doublescale-automation-workflow__add-step {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-    button {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	.doublescale-add-step-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		border: 1.5px solid #3a3a99;
+		background: #fff;
+		color: #3a3a99;
+		box-shadow: none;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease,
+			transform 0.15s ease;
+	}
 
-        &:hover {
-            background: #1E3A8A;
-            transform: scale(1.05);
-            transition: all 0.2s ease;
-        }
-    }
+	&:not(:disabled):hover .doublescale-add-step-trigger {
+		border-color: #262666;
+		color: #262666;
+		transform: scale(1.05);
+	}
+
+	&:disabled .doublescale-add-step-trigger {
+		opacity: 0.45;
+	}
 }

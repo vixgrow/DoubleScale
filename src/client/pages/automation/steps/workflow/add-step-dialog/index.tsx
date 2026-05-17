@@ -132,8 +132,8 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 					type="button"
 					disabled={disabled}
 					className={cn(
-						'doublescale-automation-workflow__add-step nodrag nopan mx-auto flex items-center justify-center rounded-full border-0 bg-transparent p-0 shadow-none outline-none transition-opacity disabled:pointer-events-none disabled:opacity-40',
-						!disabled && 'cursor-pointer hover:opacity-90'
+						'doublescale-automation-workflow__add-step nodrag nopan mx-auto flex items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none disabled:pointer-events-none disabled:opacity-40',
+						!disabled && 'cursor-pointer'
 					)}
 					onClick={(e) => {
 						e.stopPropagation();
@@ -143,8 +143,8 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 					}}
 					title={__('Add step here', 'doublescale')}
 				>
-					<span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
-						<PlusIcon />
+					<span className="doublescale-add-step-trigger">
+						<PlusIcon width={14} height={14} />
 					</span>
 				</button>
 

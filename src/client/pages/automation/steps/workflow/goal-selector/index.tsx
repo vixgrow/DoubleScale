@@ -9,16 +9,15 @@ import { useSelect } from '@wordpress/data';
  * External dependencies
  */
 import { map } from 'lodash';
-import { ChevronDown, ChevronRight, Layers, Lock, SquareChartGanttIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight, Layers, Lock } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import { AutomationsIcon, GoalsAutomationIcon, SureCartIcon } from '@doublescale/components';
+import { AutomationsIcon, SureCartIcon } from '@doublescale/components'; 
 import ProAutomationModal from '@doublescale/components/pro-automation-modal';
 import { cn } from '@/lib/utils';
-import './style.scss';
 import config from '@doublescale/config';
 import { getFilteredGoalsByTrigger } from '@doublescale/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -14,6 +14,7 @@ import '@xyflow/react/dist/style.css';
  * Internal dependencies
  */
 import './style.scss';
+import './edges/style.scss';
 import { useAutomationContext } from '../../../state/context';
 import type { OrganizedStep } from '@doublescale/client';
 import WorkflowVisualization from './workflow-visualization';

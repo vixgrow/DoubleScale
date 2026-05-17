@@ -1,4 +1,4 @@
-=== DoubleScale ===
+=== DoubleScale | All-In-One Business Growth Platform ===
 Contributors: vixgrowy
 Tags: crm, marketing automation, booking, email campaigns, helpdesk
 Requires at least: 5.8
@@ -78,7 +78,7 @@ Both platforms position themselves as "all-in-one." Both charge accordingly. Her
 * Enterprise tiers cross **$3,600 / month** before per-seat or per-contact surcharges.
 
 **DoubleScale** — self-hosted WordPress plugin
-* Starter (free, forever): unlimited contacts, email & SMS campaigns, automations, booking, SMTP, WooCommerce/EDD/LMS integrations
+* Starter (free, forever): unlimited contacts, email campaigns, automations, booking, SMTP
 * Growth: **$99 / month, billed yearly** — adds deals & pipelines, tasks, lead scoring, forms, custom fields, Stripe for bookings
 * Scale: **$199 / month, billed yearly** — adds the unified helpdesk inbox, full analytics, website tracking, push notifications, Twilio/WhatsApp, and CRM sync (HubSpot, ActiveCampaign, Pipedrive)
 * **No per-contact pricing. No per-seat fees. Run 200 or 200,000 contacts at the same price.**
@@ -108,19 +108,6 @@ The trade-off is honest: HubSpot and GoHighLevel are hosted SaaS, polished, and 
 = Who DoubleScale is for =
 
 Founders, agencies, marketers, course creators, e-commerce operators, and revenue teams who want **one WordPress-native operations platform** instead of stitching together eight SaaS subscriptions. From solo operators to organizations running 100k+ contacts — DoubleScale is built to scale with your business, not punish it with row-count surcharges.
-
-= Integrations =
-
-**Commerce:** WooCommerce, Easy Digital Downloads, SureCart
-**Forms (16):** Contact Form 7, Elementor Forms, Fluent Forms, Formidable, Forminator, Gravity Forms, JetFormBuilder, MetForm, Ninja Forms, WPForms, WS Form, Sure Forms, Bit Forms, Quill Forms, and others
-**LMS:** LearnDash, LifterLMS, LearnPress, Tutor LMS
-**SMTP providers (20+):** SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, Pepipost, Sendinblue, SendLayer, and more
-**Messaging (Pro):** Twilio (SMS), Meta WhatsApp Business, Slack
-**CRM sync (Pro):** ActiveCampaign, HubSpot, Pipedrive, Keap, Mautic, Ontraport
-**Email platforms (Pro):** Mailchimp, MailerLite, ConvertKit, GetResponse, Drip, Klaviyo
-**Calendars (Pro):** Google Calendar, Outlook
-**Payments (Pro):** Stripe (for bookings and transactions)
-**Webhooks & API:** Zapier-compatible, native webhooks, REST endpoints
 
 Learn more at [doublescale.io](https://doublescale.io/).
 

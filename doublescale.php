@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name:       DoubleScale
+ * Plugin Name:       DoubleScale | All-In-One Business Growth Platform
  * Plugin URI:        https://www.doublescale.io/
- * Description:       DoubleScale (free) — All-In-One Business Growth Platform
+ * Description:       DoubleScale | All-In-One Business Growth Platform
  * Version:           1.0.0
  * Author:            vixgrowy
  * Author URI:        https://www.vixgrowy.com

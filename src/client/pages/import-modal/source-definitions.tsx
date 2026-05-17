@@ -43,6 +43,19 @@ export const INTEGRATION_API_IMPORT_SLUGS = [
 	'gohighlevel',
 ] as const;
 
+/**
+ * Importers that depend on a separately-installed WordPress plugin.
+ * Hidden from the source grid when their source plugin isn't active —
+ * users with no FluentCRM / FunnelKit / MemberPress / WooCommerce installed
+ * don't need to see those sources at all.
+ */
+const PLUGIN_DEPENDENT_IMPORT_SLUGS = new Set<string>([
+	'fluentcrm',
+	'wpfunnelkit',
+	'memberpress',
+	'wc_customers',
+]);
+
 export function isIntegrationApiImportSource(slug: string): boolean {
 	return (INTEGRATION_API_IMPORT_SLUGS as readonly string[]).includes(slug);
 }
@@ -127,7 +140,10 @@ export function buildImporterSourcesList(): ImporterSourceItem[] {
 		disabled: !importer.is_active,
 		icon: getSourceIconNode(slug),
 		requiresCredentials: isIntegrationApiImportSource(slug),
-	}));
+	})).filter(
+		(item) =>
+			!(PLUGIN_DEPENDENT_IMPORT_SLUGS.has(item.value) && item.disabled)
+	);
 
 	const orderIndex = (slug: string) => {
 		const i = IMPORT_SOURCE_GRID_ORDER.indexOf(slug);

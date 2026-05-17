@@ -180,7 +180,7 @@ const adminClientConfig = {
 	},
 	optimization: {
 		...defaultConfig.optimization,
-		splitChunks: safeSplitChunks(defaultConfig.optimization?.splitChunks),
+		splitChunks: false,
 	},
 	resolve: {
 		...defaultConfig.resolve,
@@ -193,8 +193,14 @@ const adminClientConfig = {
 	},
 	plugins: [
 		...buildPlugins(
-			(pathData) => `${pathData.chunk.name.replace(/\.[^/.]+$/, '')}.css`,
-			(pathData) => `${pathData.chunk.name.replace(/\.[^/.]+$/, '')}-rtl.css`
+			(pathData) => {
+				const name = pathData.chunk.name || pathData.chunk.id;
+				return `${String(name).replace(/\.[^/.]+$/, '')}.css`;
+			},
+			(pathData) => {
+				const name = pathData.chunk.name || pathData.chunk.id;
+				return `${String(name).replace(/\.[^/.]+$/, '')}-rtl.css`;
+			}
 		),
 		sharedDefinePlugin,
 	],
@@ -225,7 +231,7 @@ const bookingRendererConfig = {
 	},
 	optimization: {
 		...defaultConfig.optimization,
-		splitChunks: safeSplitChunks(defaultConfig.optimization?.splitChunks),
+		splitChunks: false,
 	},
 	resolve: {
 		...defaultConfig.resolve,

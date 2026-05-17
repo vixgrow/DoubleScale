@@ -207,30 +207,8 @@ final class AdminConfig {
 	 */
 	private static function get_modules_config() {
 		$registry = \DoubleScale\Core\PluginKernel::instance()->get_module_registry();
-		$all      = $registry->all();
-		$result   = array();
 
-		foreach ( $all as $slug => $module ) {
-			$deps = array_filter(
-				$module->dependencies(),
-				static function ( $d ) {
-					return 'core' !== $d;
-				}
-			);
-
-			$enabled = $module->is_enabled();
-
-			$result[] = array(
-				'slug'          => $slug,
-				'label'         => $module->label(),
-				'description'   => $module->description(),
-				'enabled'       => $enabled,
-				'is_toggleable' => $module->is_toggleable(),
-				'dependencies'  => array_values( $deps ),
-			);
-		}
-
-		return $result;
+		return doublescale_build_modules_list_payload( $registry->all() );
 	}
 
 	/**

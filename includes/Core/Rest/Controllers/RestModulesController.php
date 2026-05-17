@@ -84,19 +84,21 @@ class RestModulesController extends RestController {
 			);
 		}
 
-		$all = ModuleManager::all();
-		$stored   = get_option( 'doublescale_enabled_modules', array() );
+		$all    = ModuleManager::all();
+		$stored = get_option( 'doublescale_enabled_modules', array() );
 
 		// Merge incoming with stored values.
 		$proposed = is_array( $stored ) ? $stored : array();
 		foreach ( $incoming as $slug => $enabled ) {
+			$slug   = (string) $slug;
 			$module = $all[ $slug ] ?? null;
 
-			if ( ! $module ) {
-				continue;
-			}
-
-			if ( ! $module->is_toggleable() ) {
+			if ( $module ) {
+				if ( ! $module->is_toggleable() ) {
+					continue;
+				}
+			} elseif ( ! function_exists( 'doublescale_is_phantom_module_toggle_slug' )
+				|| ! doublescale_is_phantom_module_toggle_slug( $slug ) ) {
 				continue;
 			}
 
@@ -118,33 +120,6 @@ class RestModulesController extends RestController {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function build_modules_payload(): array {
-		$all    = ModuleManager::all();
-		$stored = get_option( 'doublescale_enabled_modules', array() );
-		$stored = is_array( $stored ) ? $stored : array();
-		$result = array();
-
-		foreach ( $all as $slug => $module ) {
-			$deps = array_filter(
-				$module->dependencies(),
-				static function ( $d ) {
-					return 'core' !== $d;
-				}
-			);
-
-			$enabled = $module->is_enabled();
-
-			$result[] = array(
-				'slug'          => $slug,
-				'label'         => $module->label(),
-				'description'   => $module->description(),
-				'enabled'       => $enabled,
-				'active'        => $enabled,
-				'is_toggleable' => $module->is_toggleable(),
-				'is_explicit'   => array_key_exists( $slug, $stored ),
-				'dependencies'  => array_values( $deps ),
-			);
-		}
-
-		return $result;
+		return doublescale_build_modules_list_payload( ModuleManager::all() );
 	}
 }

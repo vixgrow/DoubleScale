@@ -63,6 +63,163 @@ function doublescale_module_slug_to_class_map(): array {
 }
 
 /**
+ * Module slugs that ship in DoubleScale Pro and can be toggled while Pro is inactive.
+ * Values persist in {@see 'doublescale_enabled_modules'} so enabling Pipelines (etc.)
+ * before Pro loads still applies once Pro registers the real module class.
+ *
+ * @return string[]
+ */
+function doublescale_phantom_module_toggle_slugs(): array {
+	$slugs = array(
+		'analytics',
+		'deals',
+		'forms',
+		'inbox',
+		'integrations',
+		'leadscoring',
+		'notifications',
+		'tasks',
+		'websitetracking',
+	);
+
+	return array_values( array_unique( apply_filters( 'doublescale_phantom_module_toggle_slugs', $slugs ) ) );
+}
+
+/**
+ * @param string $slug Module slug.
+ */
+function doublescale_is_phantom_module_toggle_slug( string $slug ): bool {
+	return in_array( $slug, doublescale_phantom_module_toggle_slugs(), true );
+}
+
+/**
+ * Label + description for REST / admin config when the Pro module class is not loaded.
+ *
+ * @param string $slug Module slug.
+ * @return array{label: string, description: string}|null
+ */
+function doublescale_phantom_module_admin_meta( string $slug ): ?array {
+	switch ( $slug ) {
+		case 'analytics':
+			return array(
+				'label'       => __( 'Analytics', 'doublescale' ),
+				'description' => __( 'Advanced reporting, dashboards, and revenue analytics.', 'doublescale' ),
+			);
+		case 'deals':
+			return array(
+				'label'       => __( 'Pipelines & Deals', 'doublescale' ),
+				'description' => __( 'Manage sales pipelines, deal stages, and track deal progress.', 'doublescale' ),
+			);
+		case 'forms':
+			return array(
+				'label'       => __( 'Forms', 'doublescale' ),
+				'description' => __( 'Build and embed contact-capture forms that sync with your CRM.', 'doublescale' ),
+			);
+		case 'inbox':
+			return array(
+				'label'       => __( 'Inbox', 'doublescale' ),
+				'description' => __( 'Unified messaging inbox for email, SMS, and WhatsApp conversations.', 'doublescale' ),
+			);
+		case 'integrations':
+			return array(
+				'label'       => __( 'Integrations', 'doublescale' ),
+				'description' => __( 'Third-party integrations for Twilio, Slack, Meta WhatsApp, and more.', 'doublescale' ),
+			);
+		case 'leadscoring':
+			return array(
+				'label'       => __( 'Lead scoring', 'doublescale' ),
+				'description' => __( 'Score contacts from behavior and profile data for prioritization.', 'doublescale' ),
+			);
+		case 'notifications':
+			return array(
+				'label'       => __( 'Notifications', 'doublescale' ),
+				'description' => __( 'In-app and push notifications for campaigns, deals, tasks, and more.', 'doublescale' ),
+			);
+		case 'tasks':
+			return array(
+				'label'       => __( 'Tasks', 'doublescale' ),
+				'description' => __( 'Create tasks, due dates, and reminders linked to contacts and deals.', 'doublescale' ),
+			);
+		case 'websitetracking':
+			return array(
+				'label'       => __( 'Website tracking', 'doublescale' ),
+				'description' => __( 'Page visits, visitor cookies, and anonymous visit stitching.', 'doublescale' ),
+			);
+		default:
+			return null;
+	}
+}
+
+/**
+ * Whether a phantom slug is enabled (same option semantics as {@see AbstractModule::is_enabled()}).
+ *
+ * @param string               $slug   Module slug.
+ * @param array<string, mixed> $stored Normalized `doublescale_enabled_modules` array.
+ */
+function doublescale_phantom_module_is_enabled( string $slug, array $stored ): bool {
+	$default = array_key_exists( $slug, $stored ) && (bool) $stored[ $slug ];
+
+	return (bool) apply_filters( 'doublescale_module_enabled_' . $slug, $default );
+}
+
+/**
+ * Merged module rows for REST and `window.doublescaleConfig.modules`.
+ *
+ * @param array<string, \DoubleScale\Core\ModuleInterface> $all Registered modules.
+ * @return array<int, array<string, mixed>>
+ */
+function doublescale_build_modules_list_payload( array $all ): array {
+	$stored = get_option( 'doublescale_enabled_modules', array() );
+	$stored = is_array( $stored ) ? $stored : array();
+	$result = array();
+
+	foreach ( $all as $slug => $module ) {
+		$deps = array_filter(
+			$module->dependencies(),
+			static function ( $d ) {
+				return 'core' !== $d;
+			}
+		);
+
+		$enabled = $module->is_enabled();
+
+		$result[] = array(
+			'slug'          => $slug,
+			'label'         => $module->label(),
+			'description'   => $module->description(),
+			'enabled'       => $enabled,
+			'active'        => $enabled,
+			'is_toggleable' => $module->is_toggleable(),
+			'is_explicit'   => array_key_exists( $slug, $stored ),
+			'dependencies'  => array_values( $deps ),
+		);
+	}
+
+	foreach ( doublescale_phantom_module_toggle_slugs() as $slug ) {
+		if ( isset( $all[ $slug ] ) ) {
+			continue;
+		}
+		$meta = doublescale_phantom_module_admin_meta( $slug );
+		if ( null === $meta ) {
+			continue;
+		}
+		$enabled = doublescale_phantom_module_is_enabled( $slug, $stored );
+		$result[] = array(
+			'slug'          => $slug,
+			'label'         => $meta['label'],
+			'description'   => $meta['description'],
+			'enabled'       => $enabled,
+			'active'        => $enabled,
+			'is_toggleable' => true,
+			'is_explicit'   => array_key_exists( $slug, $stored ),
+			'dependencies'  => array(),
+		);
+	}
+
+	return $result;
+}
+
+/**
  * Whether a discovered module is active (same storage as {@see ModuleInterface::is_enabled()}).
  * Unknown slugs return true so third-party groups are not stripped by mistake.
  *
@@ -84,6 +241,14 @@ function doublescale_is_module_active( string $slug ): bool {
 
 	$classes = doublescale_module_slug_to_class_map();
 	if ( ! isset( $classes[ $slug ] ) ) {
+		if ( doublescale_is_phantom_module_toggle_slug( $slug ) ) {
+			$stored = get_option( 'doublescale_enabled_modules', array() );
+			$stored = is_array( $stored ) ? $stored : array();
+			$v      = doublescale_phantom_module_is_enabled( $slug, $stored );
+			\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, $v );
+
+			return $v;
+		}
 		\DoubleScale\Core\ModuleRequestCache::set_enabled( $slug, true );
 
 		return true;

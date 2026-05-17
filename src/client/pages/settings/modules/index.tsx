@@ -24,7 +24,11 @@ export default function ModulesSettings() {
 	const [isSaving, setIsSaving] = useState(false);
 	const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
 
-	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
+	const isProAddonActive = Boolean(config.getProPluginData()?.is_active);
+	const displayRows = useMemo(
+		() => buildMarketingModuleDisplayRows(modules, isProAddonActive),
+		[modules, isProAddonActive]
+	);
 
 	const hasChanges = useMemo(() => Object.keys(pendingChanges).length > 0, [pendingChanges]);
 

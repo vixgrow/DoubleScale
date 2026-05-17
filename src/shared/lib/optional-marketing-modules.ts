@@ -17,6 +17,30 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'booking',
 ] as const;
 
+/**
+ * Pro-only toggles the PHP REST layer persists even when the module class is not loaded yet.
+ * Keep aligned with {@see doublescale_phantom_module_toggle_slugs()} in PHP.
+ */
+export const REST_PHANTOM_MODULE_SLUGS = [
+	'analytics',
+	'deals',
+	'forms',
+	'inbox',
+	'integrations',
+	'leadscoring',
+	'notifications',
+	'tasks',
+	'websitetracking',
+] as const;
+
+const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([
+	...OPTIONAL_MARKETING_MODULE_SLUGS,
+	...REST_PHANTOM_MODULE_SLUGS,
+]);
+
+/** Pro marketing rows: feature ships in Pro; free install still shows toggle + install copy until Pro is active. */
+const PRO_ONLY_OPTIONAL_MARKETING_SLUGS: ReadonlySet<string> = new Set(['deals', 'forms', 'tasks']);
+
 export type OptionalMarketingModuleSlug =
 	(typeof OPTIONAL_MARKETING_MODULE_SLUGS)[number];
 
@@ -91,14 +115,19 @@ function placeholderFor(
 /**
  * Always returns one row per slug in product order: merge API {@link ModuleInfo} when the
  * module is toggleable; otherwise a placeholder marked {@link DisplayMarketingModule.unavailableUntilPro}.
+ *
+ * @param isProAddonActive When true, Pro plugin is active (rows that only ship in Pro are treated as available).
  */
 export function buildMarketingModuleDisplayRows(
-	modules: ModuleInfo[]
+	modules: ModuleInfo[],
+	isProAddonActive = false
 ): DisplayMarketingModule[] {
 	return OPTIONAL_MARKETING_MODULE_SLUGS.map((slug) => {
 		const m = modules.find((x) => x.slug === slug);
 		if (m?.is_toggleable) {
-			return { ...m, unavailableUntilPro: false };
+			const unavailableUntilPro =
+				PRO_ONLY_OPTIONAL_MARKETING_SLUGS.has(slug) && !isProAddonActive;
+			return { ...m, unavailableUntilPro };
 		}
 		const p = placeholderFor(slug);
 		return {
@@ -121,6 +150,10 @@ export function getEffectiveMarketingModuleState(
 	if (row.unavailableUntilPro) {
 		if (pending[row.slug] !== undefined) {
 			return pending[row.slug];
+		}
+		const fromApiWhenDeferred = apiModules.find((m) => m.slug === row.slug);
+		if (fromApiWhenDeferred?.is_toggleable) {
+			return fromApiWhenDeferred.enabled;
 		}
 		return false;
 	}
@@ -157,7 +190,7 @@ export function reduceMarketingModulePending(
 	return out;
 }
 
-/** REST body: only slugs that exist as toggleable modules on the server. */
+/** REST body: registered toggleable modules plus deferred Pro slugs the server persists without the class loaded. */
 export function pickToggleableModulePayload(
 	pending: Record<string, boolean>,
 	apiModules: ModuleInfo[]
@@ -165,7 +198,8 @@ export function pickToggleableModulePayload(
 	const allowed = new Set(
 		apiModules.filter((m) => m.is_toggleable).map((m) => m.slug)
 	);
-	return Object.fromEntries(
-		Object.entries(pending).filter(([slug]) => allowed.has(slug))
-	);
+	for (const slug of ALL_REST_PERSISTABLE_OPTIONAL_SLUGS) {
+		allowed.add(slug);
+	}
+	return Object.fromEntries(Object.entries(pending).filter(([slug]) => allowed.has(slug)));
 }

@@ -59,7 +59,11 @@ export default function ModulesStep({
 	onPendingModuleChange,
 }: ModulesStepProps) {
 	const modules = useMemo(() => config.getModules(), []);
-	const displayRows = useMemo(() => buildMarketingModuleDisplayRows(modules), [modules]);
+	const isProAddonActive = Boolean(config.getProPluginData()?.is_active);
+	const displayRows = useMemo(
+		() => buildMarketingModuleDisplayRows(modules, isProAddonActive),
+		[modules, isProAddonActive]
+	);
 
 	const handleToggle = useCallback(
 		(slug: string, enabled: boolean) => {

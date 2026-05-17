@@ -124,7 +124,11 @@ final class ModuleManager {
 
 	public static function isToggleable( string $slug ): bool {
 		$m = self::getModule( $slug );
-		return $m ? $m->is_toggleable() : false;
+		if ( $m ) {
+			return $m->is_toggleable();
+		}
+		return function_exists( 'doublescale_is_phantom_module_toggle_slug' )
+			&& doublescale_is_phantom_module_toggle_slug( $slug );
 	}
 
 	/**

@@ -102,7 +102,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	extensions: 'system',
 };
 
-/** Top-level admin page ids shown in the free (non-Pro) sidebar. */
+/** Top-level admin page ids shown in the free (non-Pro) sidebar without a module gate. */
 const FREE_CORE_PAGE_IDS = new Set([
 	'dashboard',
 	'contacts',
@@ -112,10 +112,17 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'booking-dashboard',
 	'smtp',
 	'team-managers',
-	'sales-pipeline',
-	'tasks',
-	'forms',
 ]);
+
+/**
+ * Free-sidebar pages that map to a module slug; shown only when that module is enabled
+ * (or when DoubleScale Pro is active — full Pro shell handles visibility there).
+ */
+const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
+	'sales-pipeline': 'deals',
+	tasks: 'tasks',
+	forms: 'forms',
+};
 
 /**
  * Maps `registerAdminPage` path to a module slug for sidebar visibility when the
@@ -203,8 +210,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				);
 			})
 			.filter(([pageId, item]) => {
+				const optionalGate = FREE_OPTIONAL_SIDEBAR_PAGE_MODULE[pageId];
 				const defaultSidebar =
-					isProActive || FREE_CORE_PAGE_IDS.has(pageId);
+					isProActive ||
+					FREE_CORE_PAGE_IDS.has(pageId) ||
+					(optionalGate !== undefined && config.isModuleToggleEnabled(optionalGate));
 				const show = applyFilters(
 					'doublescale_show_admin_page_in_sidebar',
 					defaultSidebar,

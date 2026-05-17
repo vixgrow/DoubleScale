@@ -133,7 +133,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					'sm:max-w-5xl'
 				)}
 			>
-				<DialogHeader>
+				<DialogHeader className="pb-6">
 					<CustomDialogHeader
 						title={title}
 						subtitle={subtitle}
@@ -141,7 +141,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					/>
 				</DialogHeader>
 
-				<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto py-6">
+				<div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto pb-6">
 					{notice && (
 						<NoticeBanner
 							notice={notice}

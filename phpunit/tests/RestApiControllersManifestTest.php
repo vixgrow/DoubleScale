@@ -13,6 +13,9 @@ defined( 'ABSPATH' ) || exit;
 
 require_once dirname( __DIR__ ) . '/RestControllerManifestUtil.php';
 
+/**
+ * @group smoke
+ */
 final class RestApiControllersManifestTest extends TestCase {
 
 	public function test_register_rest_routes_controller_list_matches_manifest() {

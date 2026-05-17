@@ -11,9 +11,21 @@ import React from 'react';
 /**
  * Internal dependencies
  */
+import { cn } from '@/lib/utils';
 import NodeActionsDropdown from './node-actions-dropdown';
+import { ContactsIcon, ConversionRateIcon } from '@doublescale/components';
+
+export type NodeLayoutVariant =
+	| 'trigger'
+	| 'action'
+	| 'goal'
+	| 'delay'
+	| 'condition'
+	| 'end_automation';
+
 
 interface NodeLayoutProps {
+	variant: NodeLayoutVariant;
 	icon: React.ReactNode;
 	title: string;
 	subtitle: React.ReactNode;
@@ -33,6 +45,7 @@ interface NodeLayoutProps {
 }
 
 const NodeLayout: React.FC<NodeLayoutProps> = ({
+	variant,
 	icon,
 	title,
 	subtitle,
@@ -50,23 +63,21 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 	analytics,
 	customFooter,
 }) => {
-	const hasFooter = (viewMode && analytics) || customFooter;
+	const hasAnalyticsFooter = viewMode && analytics;
 
 	return (
-		<>
+		<div className="doublescale-reactflow-node__card-inner">
 			<div
-				className={
-					hasFooter ? 'doublescale-reactflow-node__header-row border-b' : ''
-				}
+				className={cn(
+					'doublescale-reactflow-node__header-row',
+					`doublescale-reactflow-node__header-row--${variant}`
+				)}
 			>
 				<div className="doublescale-reactflow-node__header-left">
 					<div className="doublescale-reactflow-node__icon">{icon}</div>
 					<div className="doublescale-reactflow-node__content">
 						<div className="doublescale-reactflow-node__title">
 							{title}
-						</div>
-						<div className="doublescale-reactflow-node__subtitle">
-							{subtitle}
 						</div>
 					</div>
 				</div>
@@ -84,29 +95,35 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 				/>
 			</div>
 
-			{/* Footer: Analytics or Custom */}
-			{viewMode && analytics && (
+			<div className="doublescale-reactflow-node__body-row">
+				<div className="doublescale-reactflow-node__subtitle">
+					{subtitle}
+				</div>
+			</div>
+
+			{hasAnalyticsFooter && (
+				
 				<div className="doublescale-reactflow-node__footer-row">
-					<div className="text-sm">
-						<span className="text-[#667085]">
-							{__('Contact:', 'doublescale')}{' '}
-						</span>
-						<span className="font-semibold text-[#344054]">
+
+					<div className="text-sm leading-6 flex items-center gap-1 text-muted-foreground">
+						<ContactsIcon width={24} height={24} />
+						<span>{__('Contacts:', 'doublescale')} </span>
+						<span className="text-foreground">
 							{analytics.contacts || 0}
 						</span>
 					</div>
-					<div className="text-sm">
-						<span className="text-[#667085]">
-							{__('Conversion Rate:', 'doublescale')}{' '}
-						</span>
-						<span className="font-semibold text-[#344054]">
+					<div className="text-sm leading-6 flex items-center gap-1 text-muted-foreground">
+						<ConversionRateIcon width={24} height={24} />
+						<span>{__('Conversion Rate:', 'doublescale')} </span>
+						<span className="text-foreground">
 							{analytics.conversion_rate || 0}%
 						</span>
 					</div>
 				</div>
+				
 			)}
 			{customFooter}
-		</>
+		</div>
 	);
 };
 

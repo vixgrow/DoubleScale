@@ -707,6 +707,35 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 		return Object.values( raw ) as TriggersGroup[];
 	}, [ currentCategoryData ] );
 
+	// When editing, switch to the category that contains the saved trigger.
+	useEffect(() => {
+		if (!visible || !automation.trigger) {
+			return;
+		}
+		for (const [categoryKey, category] of Object.entries(
+			automationTriggers
+		)) {
+			const rawGroups = category?.groups;
+			const groupsList = Array.isArray(rawGroups)
+				? rawGroups
+				: rawGroups && typeof rawGroups === 'object'
+					? Object.values(rawGroups)
+					: [];
+			const hasTrigger = groupsList.some(
+				(group) =>
+					group?.triggers &&
+					Object.prototype.hasOwnProperty.call(
+						group.triggers,
+						automation.trigger
+					)
+			);
+			if (hasTrigger) {
+				setSelectedCategory(categoryKey);
+				break;
+			}
+		}
+	}, [visible, automation.trigger, automationTriggers]);
+
 	// Scroll to notice banner when error appears
 	useEffect(() => {
 		if (error && noticeBannerRef.current) {

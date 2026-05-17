@@ -247,7 +247,6 @@ const FormsList: React.FC = () => {
 					{
 						label: __('Create Forms', 'doublescale'),
 						onClick: () => setShowCreateForm(true),
-						type: 'primary',
 						icon: <PlusIcon />,
 					},
 				]}

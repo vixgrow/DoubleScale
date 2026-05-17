@@ -113,17 +113,14 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		return null;
 	}
 
-	// Show add-step button on most edges except:
-	// 1. Edges TO add-step nodes (would be redundant)
-	// 2. Structural edges without proper step data
+	// Show add-step button on all addStepEdge connections (original behavior),
+	// except edges going TO dedicated add-step placeholder nodes.
 	const shouldShowAddStepEdge = Boolean(
-		// Don't show on edges going TO add-step nodes
 		!(target && target.startsWith('add-step')) &&
-		// Must have either a source step or be a condition branch
 		(sourceStep || condition)
 	);
 
-	if (!shouldShowAddStepEdge) {
+	if (!shouldShowAddStepEdge || viewMode) {
 		// For other cases where we don't show the plus button
 		const edgeStyle = {
 			...style,

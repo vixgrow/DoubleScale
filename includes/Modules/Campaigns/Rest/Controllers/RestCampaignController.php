@@ -22,7 +22,7 @@ use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Campaigns\Services\CampaignStatusManager;
 use DoubleScale\Pro\Modules\Inbox\Services\MessageProviderRegistry;
-use DoubleScale\Modules\Campaigns\Emails\Emails;
+use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Constants\CampaignChannel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 // use DoubleScale\Pro\Traits\MessageProviderValidation; // Moved to Pro
@@ -33,7 +33,7 @@ use DoubleScale\Modules\Campaigns\Campaign\EmailProcessing;
 // use DoubleScale\Modules\Campaigns\Campaign\SmsProcessing; // Moved to Pro
 // use DoubleScale\Modules\Campaigns\Campaign\WhatsappProcessing; // Moved to Pro
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
-use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\EmailRenderer;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 
 
@@ -597,7 +597,7 @@ class RestCampaignController extends AbstractCampaignController {
 			);
 
 			if ( ! $result ) {
-				$detail = \DoubleScale\Modules\Campaigns\Emails\Emails::get_last_send_failure_detail();
+				$detail = \DoubleScale\Modules\Emails\Emails::get_last_send_failure_detail();
 				$msg    = __( 'Failed to send test email', 'doublescale');
 				if ( '' !== $detail ) {
 					$msg .= ' ' . $detail;

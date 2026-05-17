@@ -170,7 +170,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`doublescale-reactflow-node doublescale-reactflow-node--delay ${
+				className={`doublescale-reactflow-node doublescale-reactflow-node--delay doublescale-reactflow-node--card-layout ${
 					isSelected ? 'doublescale-reactflow-node--selected' : ''
 				} ${
 					viewMode && analytics
@@ -189,7 +189,8 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 				{!viewMode && <StepReorderControls step={step} />}
 
 				<NodeLayout
-					icon={<TimerBlockIcon />}
+					variant="delay"
+					icon={<TimerBlockIcon width={22} height={22} />}
 					title={actionLabel}
 					subtitle={subtitle}
 					onEdit={handleEdit}

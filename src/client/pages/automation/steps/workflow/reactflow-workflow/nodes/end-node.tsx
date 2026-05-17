@@ -19,7 +19,7 @@ import type { AutomationStep } from '@doublescale/client';
 import NodeContextMenu from '../components/node-context-menu';
 import StepReorderControls from '../components/step-reorder-controls';
 import NodeActionsDropdown from '../components/node-actions-dropdown';
-import { Power } from 'lucide-react';
+import EndAutomationIcon from '@doublescale/shared/icons/end-automation';
 
 interface EndNodeData {
 	step: AutomationStep;
@@ -69,7 +69,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 	const handleDelete = async () => {
 		if (viewMode) return;
-		
+
 		setIsDeleting(true);
 
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
@@ -100,41 +100,45 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
 	return (
 		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-			<div className={`doublescale-reactflow-node doublescale-reactflow-node--end ${isSelected ? 'doublescale-reactflow-node--selected' : ''}`}>
+			<div
+				className={`doublescale-reactflow-node doublescale-reactflow-node--end doublescale-reactflow-node--card-layout ${
+					isSelected ? 'doublescale-reactflow-node--selected' : ''
+				}`}
+			>
 				<Handle
 					type="target"
 					position={Position.Top}
 					className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
 				/>
 
-				{/* Step Reorder Controls - hide in view mode */}
 				{!viewMode && <StepReorderControls step={step} />}
 
-				<div className="doublescale-reactflow-node__icon"><Power className='w-6 h-6' /></div>
-
-				{/* Three dots dropdown menu */}
-				<NodeActionsDropdown
-					onDelete={handleDelete}
-					showEdit={false}
-					deleteLabel={__('Delete End Node', 'doublescale')}
-					deleteTitle={__('Delete this end node?', 'doublescale')}
-					deleteDescription={__(
-						'This action cannot be undone.',
-						'doublescale'
-					)}
-				/>
-
-				<div className="doublescale-reactflow-node__content">
-					<div className="doublescale-reactflow-node__title">
-						{__('End Automation', 'doublescale')}
-					</div>
-					<div className="doublescale-reactflow-node__subtitle">
-						{__('Stop', 'doublescale')}
+				<div className="doublescale-reactflow-node__card-inner">
+					<div className="doublescale-reactflow-node__header-row doublescale-reactflow-node__header-row--end">
+						<div className="doublescale-reactflow-node__header-left">
+							<div className="doublescale-reactflow-node__icon">
+								<EndAutomationIcon width={24} height={24} />
+							</div>
+							<div className="doublescale-reactflow-node__content">
+								<div className="doublescale-reactflow-node__title">
+									{__('Exit', 'doublescale')}
+								</div>
+							</div>
+						</div>
+						<NodeActionsDropdown
+							onDelete={handleDelete}
+							showEdit={false}
+							deleteLabel={__('Delete Exit', 'doublescale')}
+							deleteTitle={__('Delete this exit step?', 'doublescale')}
+							deleteDescription={__(
+								'This action cannot be undone.',
+								'doublescale'
+							)}
+						/>
 					</div>
 				</div>
 			</div>

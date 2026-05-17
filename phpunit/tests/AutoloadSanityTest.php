@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * @group smoke
+ */
 final class AutoloadSanityTest extends TestCase {
 
 	public function test_rest_controller_abstract_loads() {

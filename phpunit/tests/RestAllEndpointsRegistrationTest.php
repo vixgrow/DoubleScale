@@ -17,6 +17,9 @@ defined( 'ABSPATH' ) || exit;
 require_once dirname( __DIR__ ) . '/RestApiEndpointTestStubs.php';
 require_once dirname( __DIR__ ) . '/RestApiEndpointTestUtil.php';
 
+/**
+ * @group smoke
+ */
 final class RestAllEndpointsRegistrationTest extends TestCase {
 
 	/**

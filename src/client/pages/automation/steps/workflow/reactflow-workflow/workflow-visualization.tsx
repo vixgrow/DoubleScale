@@ -144,9 +144,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
 		// the width of node
-		const nodeWidth = viewMode
-			? LAYOUT_CONSTANTS_VIEW_MODE.NODE_WIDTH
-			: LAYOUT_CONSTANTS.NODE_WIDTH;
+		const nodeWidth = LAYOUT_CONSTANTS.NODE_WIDTH;
 		// the width of the add step node
 		const addStepWidth = LAYOUT_CONSTANTS.ADD_STEP_WIDTH;
 		// the width of the yes and no nodes
@@ -444,9 +442,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return (
 				!current ||
 				Math.abs(current.x - new_.x) >
-					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+				LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
 				Math.abs(current.y - new_.y) >
-					LAYOUT_CONSTANTS.POSITION_THRESHOLD
+				LAYOUT_CONSTANTS.POSITION_THRESHOLD
 			);
 		});
 
@@ -524,7 +522,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	}
 
 	return (
-		<div className="doublescale-reactflow-workflow">
+		<div
+			className={`doublescale-reactflow-workflow${viewMode ? ' doublescale-reactflow-workflow--view-mode' : ''}`}
+		>
 			<div className="doublescale-reactflow-workflow__layout">
 				<div className="doublescale-reactflow-workflow__canvas">
 					<ReactFlow

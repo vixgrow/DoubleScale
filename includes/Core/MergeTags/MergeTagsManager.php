@@ -171,7 +171,7 @@ final class MergeTagsManager {
 			return;
 		}
 
-		if ( isset( $this->merge_tags[ $merge_tag->slug ] ) ) {
+		if ( isset( $this->merge_tags[ $merge_tag->group ][ $merge_tag->slug ] ) ) {
 			return;
 		}
 

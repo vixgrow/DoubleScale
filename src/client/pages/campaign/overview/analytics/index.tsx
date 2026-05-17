@@ -131,7 +131,7 @@ const Analytics: React.FC = () => {
 						{__('Campaign Performance (Analytics)', 'doublescale')}
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="flex flex-col gap-5 pt-5">
+				<CardContent className="flex flex-col gap-5 !pt-6 !px-0">
 					{/* Error message */}
 					{error && (
 						<div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">

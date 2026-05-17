@@ -2,7 +2,7 @@
  * Constants
  */
 const LAYOUT_CONSTANTS = {
-    NODE_WIDTH: 280,
+    NODE_WIDTH: 380,
     ADD_STEP_WIDTH: 30,
     NODE_YES_NO_WIDTH: 60,
     START_X: 250,
@@ -17,7 +17,7 @@ const LAYOUT_CONSTANTS = {
 
 
 const LAYOUT_CONSTANTS_VIEW_MODE = {
-    NODE_WIDTH: 280,
+    NODE_WIDTH: 380,
     CONDITION_TO_BRANCH_SPACING: 200, // Increased spacing for view mode
 } as const;
 

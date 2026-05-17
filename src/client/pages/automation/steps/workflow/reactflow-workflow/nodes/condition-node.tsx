@@ -20,7 +20,7 @@ import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { ConditionsIcon } from '@doublescale/components';
+import { ConditionAutomationIcon, ConditionsIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -158,7 +158,7 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`doublescale-reactflow-node doublescale-reactflow-node--condition ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+				className={`doublescale-reactflow-node doublescale-reactflow-node--condition doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
 					type="target"
@@ -170,7 +170,8 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 				{!viewMode && <StepReorderControls step={step} />}
 
 				<NodeLayout
-					icon={<ConditionsIcon width={23} height={23} />}
+					variant="condition"
+					icon={<ConditionAutomationIcon width={24} height={24} />}
 					title={__('Condition', 'doublescale')}
 					subtitle={subtitle}
 					onEdit={handleEdit}

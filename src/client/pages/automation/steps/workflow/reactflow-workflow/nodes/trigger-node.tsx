@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 /**
@@ -18,7 +18,6 @@ import type { Automation } from '@doublescale/client';
 import { getTriggerLabel, hasTriggerWarning } from '@doublescale/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
-import { ActionIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -28,6 +27,7 @@ import {
 import CreateAutomationModal from '../../../../../automations/create-automation-modal';
 import { useAutomationContext } from '../../../../state/context';
 import apiFetch from '@wordpress/api-fetch';
+import { TriggerIcon } from '@doublescale/components';
 
 interface TriggerNodeData {
 	automation: Automation;
@@ -219,10 +219,11 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				disabled={viewMode}
 			>
 				<div
-					className={`doublescale-reactflow-node doublescale-reactflow-node--trigger ${isTriggerVisible ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+					className={`doublescale-reactflow-node doublescale-reactflow-node--trigger doublescale-reactflow-node--card-layout ${isTriggerVisible ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 				>
 					<NodeLayout
-						icon={<ActionIcon width={23} height={23} />}
+						variant="trigger"
+						icon={<TriggerIcon />}
 						title={__('Start Workflow (Trigger)', 'doublescale')}
 						subtitle={subtitle}
 						onEdit={handleEdit}

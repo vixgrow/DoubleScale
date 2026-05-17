@@ -101,10 +101,8 @@ declare global {
  * causing the Pro plugin's useContactContext() to return defaults instead of Provider values.
  */
 function getContactContext(): React.Context<ContactContextType> {
-	// Ensure window.doublescale.contexts exists.
-	if (!window.doublescale) {
-		window.doublescale = {};
-	}
+	// Ensure window.doublescale.contexts exists (never replace an existing config).
+	window.doublescale = window.doublescale ?? {};
 	if (!window.doublescale.contexts) {
 		window.doublescale.contexts = {};
 	}

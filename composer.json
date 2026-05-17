@@ -30,7 +30,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DoubleScale\\Tests\\": "phpunit/tests/"
+            "DoubleScale\\Tests\\": "phpunit/tests/",
+            "DoubleScale\\Tests\\Integration\\": "tests/integration/"
         }
     },
     "config": {
@@ -52,7 +53,20 @@
         ],
         "format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
         "lint": "phpcs --standard=phpcs.xml.dist",
-        "test": "phpunit",
+        "test": "phpunit --bootstrap phpunit/bootstrap.php --testsuite fast",
+        "test:smoke": "phpunit --bootstrap phpunit/bootstrap.php --testsuite fast --group smoke",
+        "test:integration": "phpunit --bootstrap tests/integration/bootstrap.php --testsuite integration",
+        "test:integration:maybe": "php bin/run-integration-tests.php",
+        "test:all": [
+            "@test",
+            "@test:integration:maybe"
+        ],
+        "test:all:with-integration": [
+            "@test",
+            "@test:integration"
+        ],
+        "test:e2e": "npm run e2e",
+        "test:e2e:smoke": "npm run e2e:smoke",
         "test:watch": "phpunit-watcher watch < /dev/tty"
     }
 }

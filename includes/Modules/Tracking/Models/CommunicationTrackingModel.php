@@ -776,11 +776,11 @@ class CommunicationTrackingModel extends Model {
 			return '';
 		}
 
-		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Emails\EmailRenderer' ) ) {
+		if ( ! class_exists( '\DoubleScale\Modules\Emails\EmailRenderer' ) ) {
 			return '';
 		}
 
-		$renderer = new \DoubleScale\Modules\Campaigns\Emails\EmailRenderer();
+		$renderer = new \DoubleScale\Modules\Emails\EmailRenderer();
 		return $renderer->render_template_with_tracking( $this->template_id, $this->id, $this->contact );
 	}
 }

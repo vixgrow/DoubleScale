@@ -113,12 +113,22 @@ const Campaign: React.FC = () => {
 		}
 	}, [campaign, tab, id, navigate, currentStep]);
 
-	// Save current step when tab changes (only for draft campaigns)
+	// Save current step when tab changes via stepper/URL (draft only). Skip while a step save is in flight.
+	const saving = useSelect(
+		(select: any) => select('doublescale/campaign').isSaving(),
+		[]
+	);
 	useEffect(() => {
-		if (campaign && tab && tab !== normalizeTab(currentStep) && campaign.status === 'draft') {
-			saveCampaignStep(tab);
+		if (
+			campaign &&
+			tab &&
+			!saving &&
+			tab !== normalizeTab(currentStep) &&
+			campaign.status === 'draft'
+		) {
+			void saveCampaignStep(tab);
 		}
-	}, [tab, campaign, currentStep, saveCampaignStep]);
+	}, [tab, campaign, currentStep, saveCampaignStep, saving]);
 
 	// Clear builder initial data when leaving builder tab to avoid showing stale template on return
 	useEffect(() => {

@@ -278,3 +278,7 @@ export { default as CheckTrueIcon } from './check-true';
 export { default as ActionAutomationIcon } from './action-automation';
 export { default as ConditionAutomationIcon } from './condition-automation';
 export { default as GoalsAutomationIcon } from './goals-automation';
+export { default as SureCartIcon } from './surcart';
+export { default as ConversionRateIcon } from './conversion-rate';
+export { default as TriggerIcon } from './trigger';
+export { default as ActionsIcon } from './actions';

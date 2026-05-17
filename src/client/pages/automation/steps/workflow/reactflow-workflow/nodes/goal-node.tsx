@@ -25,7 +25,7 @@ import {
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
-import { GoalIcon } from '@doublescale/components';
+import { GoalIcon, GoalsAutomationIcon } from '@doublescale/components';
 import {
 	Tooltip,
 	TooltipContent,
@@ -172,7 +172,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`doublescale-reactflow-node doublescale-reactflow-node--goal ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
+				className={`doublescale-reactflow-node doublescale-reactflow-node--goal doublescale-reactflow-node--card-layout ${isSelected ? 'doublescale-reactflow-node--selected' : ''} ${viewMode && analytics ? 'doublescale-reactflow-node--action-with-analytics' : ''}`}
 			>
 				<Handle
 					type="target"
@@ -184,7 +184,8 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				{!viewMode && <StepReorderControls step={step} />}
 
 				<NodeLayout
-					icon={<GoalIcon width={23} height={23} />}
+					variant="goal"
+					icon={<GoalsAutomationIcon width={24} height={24} />}
 					title={__('Goal', 'doublescale')}
 					subtitle={subtitle}
 					onEdit={handleEdit}

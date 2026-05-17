@@ -202,28 +202,28 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div 
+		<div
 			className={`doublescale-reactflow-node doublescale-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'doublescale-reactflow-node--disabled' : ''}`}
 		>
-		<Handle
-			type="target"
-			position={Position.Top}
-			className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
-		/>
+			<Handle
+				type="target"
+				position={Position.Top}
+				className="doublescale-reactflow-handle doublescale-reactflow-handle--target"
+			/>
 
-		<AddStepDialog
-			visible={visible}
-			onVisibleChange={setVisible}
-			loading={loading}
-			onStepSelection={handleStepSelection}
-			disabled={viewMode}
-		/>
+			<AddStepDialog
+				visible={visible}
+				onVisibleChange={setVisible}
+				loading={loading}
+				onStepSelection={handleStepSelection}
+				disabled={viewMode}
+			/>
 
-		<Handle
-			type="source"
-			position={Position.Bottom}
-			className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
-		/>
+			<Handle
+				type="source"
+				position={Position.Bottom}
+				className="doublescale-reactflow-handle doublescale-reactflow-handle--source"
+			/>
 		</div>
 	);
 };

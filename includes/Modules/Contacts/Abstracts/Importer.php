@@ -610,8 +610,8 @@ abstract class Importer {
 	 * @return void
 	 */
 	protected function send_double_optin_email( $contact ) {
-		if ( class_exists( '\DoubleScale\Modules\Campaigns\Emails\Emails' ) ) {
-			\DoubleScale\Modules\Campaigns\Emails\Emails::send_double_optin_email( $contact );
+		if ( class_exists( '\DoubleScale\Modules\Emails\Emails' ) ) {
+			\DoubleScale\Modules\Emails\Emails::send_double_optin_email( $contact );
 		}
 	}
 

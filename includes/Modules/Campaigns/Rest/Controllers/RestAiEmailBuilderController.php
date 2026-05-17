@@ -23,7 +23,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
-use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\EmailRenderer;
 
 /**
  * RestAiEmailBuilderController class.

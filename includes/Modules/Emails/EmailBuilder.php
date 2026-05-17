@@ -50,7 +50,7 @@ class EmailBuilder {
 		$emails_dir = $base . 'includes/Modules/Emails/';
 
 		// Include block system.
-		require_once $base . 'includes/Modules/Campaigns/Abstracts/EmailBlock.php';
+		require_once $emails_dir . 'Abstracts/EmailBlock.php';
 		require_once $emails_dir . 'BlockRegistry.php';
 
 		// Include layout handlers.

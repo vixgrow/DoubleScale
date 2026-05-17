@@ -201,7 +201,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 			false
 		) as boolean;
 
-		return Object.entries(pages)
+		const builtItems = Object.entries(pages)
 			.filter(([, item]) => {
 				return (
 					!item.hidden &&
@@ -375,6 +375,12 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				return navItem;
 			});
+
+		return applyFilters(
+			'doublescale_navbar_sidebar_items',
+			builtItems,
+			{ isProActive }
+		) as NavigationItem[];
 	}, [
 		hasRequiredCapability,
 		isSalesRep,
@@ -757,6 +763,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				</SidebarContent>
 
 				<SidebarFooter className="doublescale-navbar__footer">
+					{applyFilters(
+						'doublescale_navbar_user_block',
+						null,
+						{ isCollapsed }
+					) as React.ReactNode}
 					{isCollapsed ? (
 						<TooltipProvider delayDuration={0}>
 							<Tooltip>

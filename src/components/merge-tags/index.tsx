@@ -1,14 +1,13 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { useState } from 'react';
-import { Copy } from 'lucide-react';
 import { filter, map } from 'lodash';
 
 /**
@@ -22,7 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { GradientMergeTagsIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 /**
  * Internal dependencies
@@ -97,8 +96,8 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={() => onClose()}>
 			<DialogOverlay className="z-[150500]" />
-			<DialogContent className="max-w-4xl min-w-[800px] z-[150500]">
-				<DialogHeader>
+			<DialogContent className="z-[150500] max-w-4xl gap-0 overflow-hidden rounded-2xl bg-white p-6 sm:max-w-3xl">
+				<DialogHeader className="space-y-0 p-0 text-left">
 					<CustomDialogHeader
 						title={__('Merge Tags', 'doublescale')}
 						subtitle={__(
@@ -109,53 +108,36 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 					/>
 				</DialogHeader>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-					{/* First Card - Merge Tags Tabs */}
-					<Card className="shadow-none">
-						<CardContent className="space-y-2 p-6">
-							{map(
-								automationMergeTagsWithTrigger,
-								(group, index) => (
-									<Card
-										key={index}
-										className={`cursor-pointer shadow-none transition-all duration-200 hover:shadow-md ${
-											selectedTabIndex === index
-												? 'ring-1 ring-primary bg-[#CCDFFF]'
-												: 'hover:bg-gray-50'
-										}`}
-										onClick={() =>
-											setSelectedTabIndex(index)
-										}
-									>
-										<CardContent className="p-4">
-											<div className="font-semibold text-[#3F4254] text-base">
-												{group.name}
-											</div>
-											<div className="text-xs text-[#9197A4]">
-												{__(
-													'Select one of Merge tags that related to your input.',
-													'doublescale'
-												)}
-											</div>
-										</CardContent>
-									</Card>
-								)
-							)}
-						</CardContent>
-					</Card>
-
-					{/* Second Card - Merge Tags List */}
-					<Card className="shadow-none">
-						<CardContent className="p-6">
-							{selectedGroup && (
-								<MergeTagsGroupRender
-									mergeTags={selectedGroup.mergeTags}
-									onInsertTag={onInsertTag}
-									activeTrigger={currentTrigger}
-								/>
-							)}
-						</CardContent>
-					</Card>
+				<div className="mt-4 rounded-xl border border-border bg-[#F7F8FA] p-6">
+					<div className="flex gap-4 border-b border-border pb-6">
+						{map(automationMergeTagsWithTrigger, (group, index) => {
+							const active = selectedTabIndex === index;
+							return (
+								<button
+									key={index}
+									type="button"
+									onClick={() => setSelectedTabIndex(index)}
+									className={cn(
+										'rounded-lg border p-2 text-sm transition-colors',
+										active
+											? 'border-transparent bg-secondary text-secondary-foreground'
+											: 'border-border bg-white text-foreground hover:bg-secondary hover:text-secondary-foreground'
+									)}
+								>
+									{group.name}
+								</button>
+							);
+						})}
+					</div>
+					<div className="pt-6">
+						{selectedGroup && (
+							<MergeTagsGroupRender
+								mergeTags={selectedGroup.mergeTags}
+								onInsertTag={onInsertTag}
+								activeTrigger={currentTrigger}
+							/>
+						)}
+					</div>
 				</div>
 			</DialogContent>
 		</Dialog>
@@ -198,16 +180,16 @@ const MergeTagsGroupRender: React.FC<{
 	};
 
 	return (
-		<div className="space-y-3 max-h-96 overflow-y-auto">
+		<>
 			{Object.keys(filteredMergeTags).length === 0 ? (
-				<div className="text-center text-gray-500 py-8">
-					<p>
+				<div className="py-6 text-center text-foreground">
+					<p className="text-sm font-medium">
 						{__(
 							'No merge tags available for this group.',
 							'doublescale'
 						)}
 					</p>
-					<p className="text-sm mt-2">
+					<p className="mt-2 text-xs text-muted-foreground">
 						{__(
 							'Please configure the required fields or plugin to see merge tags here.',
 							'doublescale'
@@ -215,31 +197,39 @@ const MergeTagsGroupRender: React.FC<{
 					</p>
 				</div>
 			) : (
-				map(filteredMergeTags, (tag, key) => (
-					<Button
-						key={key}
-						className="w-full py-8 justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none"
-						onClick={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							handleTagClick(tag.value);
-						}}
-					>
-						<div className="flex w-full items-center justify-between">
-							<span className="grid font-semibold text-base text-[#3F4254]">
-								{tag.name}
-								<span className="text-xs font-normal italic text-[#505255]">
+				<div className="grid max-h-[min(50vh,24rem)] grid-cols-1 gap-6 overflow-y-auto sm:grid-cols-2">
+					{map(filteredMergeTags, (tag, key) => (
+						<div
+							key={key}
+							className="flex items-center justify-between gap-3 rounded-lg border border-border bg-white p-4"
+						>
+							<div className="min-w-0 flex-1">
+								<p className="text-sm font-semibold text-foreground">
+									{tag.name}
+								</p>
+								<p className="mt-1 break-all text-sm text-muted-foreground">
 									{tag.value}
-								</span>
-							</span>
-
-							<Copy className="h-4 w-4" />
+								</p>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								className="shrink-0 border-primary bg-white text-primary hover:bg-secondary hover:text-secondary-foreground"
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									handleTagClick(tag.value);
+								}}
+							>
+								{__('Insert', 'doublescale')}
+							</Button>
 						</div>
-					</Button>
-				))
+					))}
+				</div>
 			)}
-		</div>
+		</>
 	);
 };
 
 export default MergeTagsSelector;
+

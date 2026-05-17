@@ -19,7 +19,7 @@ namespace DoubleScale\Modules\Booking\Services;
 use Illuminate\Support\Arr;
 use DoubleScale\Core\Communication\EmailIdentityResolver;
 use DoubleScale\Core\Utils\Utils as CoreUtils;
-use DoubleScale\Modules\Campaigns\Emails\Emails;
+use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Managers\MergeTagsManager;

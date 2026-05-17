@@ -24,8 +24,8 @@ use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
-use DoubleScale\Modules\Campaigns\Emails\EmailRenderer;
-use DoubleScale\Modules\Campaigns\Emails\BlockRegistry;
+use DoubleScale\Modules\Emails\EmailRenderer;
+use DoubleScale\Modules\Emails\BlockRegistry;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Constants\CampaignChannel;
 

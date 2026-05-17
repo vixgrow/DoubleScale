@@ -1209,8 +1209,8 @@ abstract class AbstractCampaignProcessing {
 		// Check if this is a builder format with type='builder' structure
 		if ( isset( $decoded['type'] ) && $decoded['type'] === 'builder' && isset( $decoded['value'] ) ) {
 			// Use EmailRenderer to convert builder JSON to HTML
-			if ( class_exists( '\DoubleScale\Modules\Campaigns\Emails\EmailRenderer' ) ) {
-				$renderer     = new \DoubleScale\Modules\Campaigns\Emails\EmailRenderer();
+			if ( class_exists( '\DoubleScale\Modules\Emails\EmailRenderer' ) ) {
+				$renderer     = new \DoubleScale\Modules\Emails\EmailRenderer();
 				$builder_data = $decoded['value'];
 
 				// Extract preview text if available

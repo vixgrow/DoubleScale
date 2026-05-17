@@ -34,6 +34,7 @@ export interface EmailColumn {
 	id: string;
 	width: number; // Percentage (e.g., 50 for 50%)
 	blocks: EmailBlock[];
+	styles?: Record<string, any>;
 }
 
 export interface EmailSection {
@@ -125,8 +126,27 @@ export interface SelectBlockAction {
 	};
 }
 
+export interface SelectSectionAction {
+	type: 'SELECT_SECTION';
+	payload: { sectionId: string };
+}
+
+export interface SelectColumnAction {
+	type: 'SELECT_COLUMN';
+	payload: { sectionId: string; columnId: string };
+}
+
 export interface ClearSelectionAction {
 	type: 'CLEAR_SELECTION';
+}
+
+export interface UpdateColumnAction {
+	type: 'UPDATE_COLUMN';
+	payload: {
+		sectionId: string;
+		columnId: string;
+		updates: Partial<Pick<EmailColumn, 'styles'>>;
+	};
 }
 
 export interface AddSectionAction {
@@ -220,7 +240,10 @@ export type EmailBuilderActionTypes =
 	| DeleteBlockAction
 	| MoveBlockAction
 	| SelectBlockAction
+	| SelectSectionAction
+	| SelectColumnAction
 	| ClearSelectionAction
+	| UpdateColumnAction
 	| AddSectionAction
 	| DeleteSectionAction
 	| UpdateSectionAction

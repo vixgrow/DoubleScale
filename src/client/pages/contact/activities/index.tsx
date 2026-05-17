@@ -10,7 +10,7 @@ import { applyFilters } from '@wordpress/hooks';
  * External dependencies
  */
 import { format } from 'date-fns';
-import { User, ArrowRight, Eye, MousePointerClick, Globe } from 'lucide-react';
+import { User, ArrowRight, Eye, MousePointerClick, Globe, XCircle, RotateCw, Clock, Ban } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -85,6 +85,14 @@ const activityTypeIcons: Record<string, React.ReactNode> = {
     sms_clicked: <MousePointerClick className="w-4 h-4" />,
     whatsapp_clicked: <MousePointerClick className="w-4 h-4" />,
     page_visited: <Globe className="w-4 h-4" />,
+    // Booking lifecycle types
+    booking_scheduled: <MeetingActivityIcon color="#CB5301" />,
+    booking_confirmed: <CheckCircleIcon />,
+    booking_pending: <Clock className="w-4 h-4" />,
+    booking_rescheduled: <RotateCw className="w-4 h-4" />,
+    booking_cancelled: <XCircle className="w-4 h-4" />,
+    booking_completed: <CheckCircleIcon />,
+    booking_rejected: <Ban className="w-4 h-4" />,
     // Task types
     task: <TaskDoneIcon color="#CB5301" />,
     call: <CallActivityIcon width={16} height={16} />,
@@ -125,6 +133,20 @@ const activityBadgeClass: Record<string, string> = {
         'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
     page_visited:
         'border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    booking_scheduled:
+        'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:text-amber-100',
+    booking_confirmed:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    booking_pending:
+        'border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-100',
+    booking_rescheduled:
+        'border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-100',
+    booking_cancelled:
+        'border-rose-500/40 bg-rose-500/10 text-rose-900 dark:text-rose-100',
+    booking_completed:
+        'border-emerald-600/35 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100',
+    booking_rejected:
+        'border-rose-500/40 bg-rose-500/10 text-rose-900 dark:text-rose-100',
     task: 'border-border bg-muted/70 text-foreground',
     call: 'border-primary/40 bg-primary/10 text-primary',
     email:
@@ -569,6 +591,62 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                     ) : null
                 );
 
+            case 'booking_scheduled':
+            case 'booking_confirmed':
+            case 'booking_pending':
+            case 'booking_rescheduled':
+            case 'booking_cancelled':
+            case 'booking_completed':
+            case 'booking_rejected':
+                return (
+                    activity.data && (
+                        <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-3 py-4 px-3">
+                            <div className="flex flex-wrap gap-4 items-center">
+                                {activity.data.event_name && (
+                                    <div className="flex gap-2 items-center font-medium text-foreground">
+                                        <MeetingActivityIcon color="#CB5301" />
+                                        <span>{activity.data.event_name as string}</span>
+                                    </div>
+                                )}
+                                {activity.data.scheduled_at && (
+                                    <div className="flex gap-2 items-center text-muted-foreground">
+                                        <StartDateIcon />
+                                        <span>
+                                            {format(
+                                                new Date(activity.data.scheduled_at as string),
+                                                'MMM d, h:mm a'
+                                            )}
+                                        </span>
+                                    </div>
+                                )}
+                                {activity.data.host_name && (
+                                    <div className="flex gap-2 items-center text-muted-foreground">
+                                        <User className="w-4 h-4" />
+                                        <span>{activity.data.host_name as string}</span>
+                                    </div>
+                                )}
+                                {activity.data.duration && (
+                                    <div className="flex gap-2 items-center text-muted-foreground">
+                                        <DurationIcon />
+                                        <span>
+                                            {activity.data.duration as number}{' '}
+                                            {__('minutes', 'doublescale')}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            {activity.data.details_url && (
+                                <a
+                                    href={activity.data.details_url as string}
+                                    className="text-sm text-primary hover:underline"
+                                >
+                                    {__('View booking', 'doublescale')}
+                                </a>
+                            )}
+                        </div>
+                    )
+                );
+
             case 'page_visited':
                 return (
                     <div className="border border-border/60 bg-[#DEE1E666] rounded-lg flex flex-col gap-2 py-3 px-3">
@@ -648,8 +726,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                             {timelineItems.map((item) => {
                                 const isTask = item.type === 'task';
                                 const isTracking = item.type === 'tracking';
+                                const isBooking = item.type === 'booking';
                                 // Use stored activity if available, otherwise construct it
-                                const activity: Activity | null = (isTask || isTracking) ? null : {
+                                const activity: Activity | null = (isTask || isTracking || isBooking) ? null : {
                                     id: item.activity_id ?? 0,
                                     contact_id: (item.activity as Record<string, unknown>)?.contact_id as number ?? 0,
                                     activity_type: item.icon_type,
@@ -660,9 +739,9 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
                                     updated_at: item.timestamp,
                                     user: item.user,
                                 };
-                                // For tracking items, build a pseudo-activity for renderActivityContent
-                                const trackingActivity: Activity | null = isTracking ? {
-                                    id: item.tracking_id ?? 0,
+                                // For tracking AND booking items, build a pseudo-activity for renderActivityContent
+                                const trackingActivity: Activity | null = (isTracking || isBooking) ? {
+                                    id: (isBooking ? item.booking_id : item.tracking_id) ?? 0,
                                     contact_id: item.contact_id ?? 0,
                                     activity_type: item.icon_type,
                                     data: item.data,
@@ -781,7 +860,7 @@ const Activities: React.FC<ActivitiesProps> = ({ contact_id }) => {
 
                                                 {/* Activity-specific content */}
                                                 {!isTask && activity && renderActivityContent(activity)}
-                                                {isTracking && trackingActivity && renderActivityContent(trackingActivity)}
+                                                {(isTracking || isBooking) && trackingActivity && renderActivityContent(trackingActivity)}
                                             </div>
                                         </div>
                                     </div>

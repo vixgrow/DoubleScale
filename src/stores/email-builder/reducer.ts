@@ -11,12 +11,15 @@ import {
 	REORDER_SECTIONS,
 	RESET_BUILDER,
 	SELECT_BLOCK,
+	SELECT_COLUMN,
+	SELECT_SECTION,
 	SET_BUILDER_STATE,
 	SET_BUTTON_SETTINGS,
 	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
+	UPDATE_COLUMN,
 	UPDATE_GLOBAL_SETTINGS,
 	UPDATE_SECTION,
 } from './constants';
@@ -289,6 +292,26 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 			};
 		}
 
+		case SELECT_SECTION: {
+			const { sectionId } = action.payload;
+			return {
+				...state,
+				selectedBlockId: null,
+				selectedSectionId: sectionId,
+				selectedColumnId: null,
+			};
+		}
+
+		case SELECT_COLUMN: {
+			const { sectionId, columnId } = action.payload;
+			return {
+				...state,
+				selectedBlockId: null,
+				selectedSectionId: sectionId,
+				selectedColumnId: columnId,
+			};
+		}
+
 		case ADD_SECTION: {
 			const { section, index } = action.payload;
 			const newSections = [...state.sections];
@@ -305,12 +328,11 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 				(section) => section.id !== sectionId
 			);
 
+			const clearSection = state.selectedSectionId === sectionId;
 			return {
 				...addToHistory(state, newSections),
-				selectedSectionId:
-					state.selectedSectionId === sectionId
-						? null
-						: state.selectedSectionId,
+				selectedSectionId: clearSection ? null : state.selectedSectionId,
+				selectedColumnId: clearSection ? null : state.selectedColumnId,
 			};
 		}
 
@@ -330,6 +352,29 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 				return section;
 			});
 
+			return addToHistory(state, newSections);
+		}
+
+		case UPDATE_COLUMN: {
+			const { sectionId, columnId, updates } = action.payload;
+			const newSections = state.sections.map((section) => {
+				if (section.id !== sectionId) return section;
+				return {
+					...section,
+					columns: section.columns.map((column) => {
+						if (column.id !== columnId) return column;
+						const { styles: updatesStyles } = updates;
+						if (!updatesStyles) return column;
+						return {
+							...column,
+							styles: {
+								...column.styles,
+								...updatesStyles,
+							},
+						};
+					}),
+				};
+			});
 			return addToHistory(state, newSections);
 		}
 

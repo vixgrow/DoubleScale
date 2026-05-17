@@ -9,12 +9,15 @@ import {
 	REORDER_SECTIONS,
 	RESET_BUILDER,
 	SELECT_BLOCK,
+	SELECT_COLUMN,
+	SELECT_SECTION,
 	SET_BUILDER_STATE,
 	SET_BUTTON_SETTINGS,
 	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
+	UPDATE_COLUMN,
 	UPDATE_GLOBAL_SETTINGS,
 	UPDATE_SECTION,
 } from './constants';
@@ -82,6 +85,30 @@ export const selectBlock = (
 
 export const clearSelection = (): EmailBuilderActionTypes => ({
 	type: CLEAR_SELECTION,
+});
+
+// Selection actions
+export const selectSection = (sectionId: string): EmailBuilderActionTypes => ({
+	type: SELECT_SECTION,
+	payload: { sectionId },
+});
+
+export const selectColumn = (
+	sectionId: string,
+	columnId: string
+): EmailBuilderActionTypes => ({
+	type: SELECT_COLUMN,
+	payload: { sectionId, columnId },
+});
+
+// Column actions
+export const updateColumn = (
+	sectionId: string,
+	columnId: string,
+	updates: Partial<{ styles: Record<string, any> }>
+): EmailBuilderActionTypes => ({
+	type: UPDATE_COLUMN,
+	payload: { sectionId, columnId, updates },
 });
 
 // Section actions

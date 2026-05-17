@@ -13,10 +13,10 @@ export const ADD_SECTION = 'ADD_SECTION';
 export const DELETE_SECTION = 'DELETE_SECTION';
 export const UPDATE_SECTION = 'UPDATE_SECTION';
 export const REORDER_SECTIONS = 'REORDER_SECTIONS';
+export const SELECT_SECTION = 'SELECT_SECTION';
 
 // Column actions
-export const ADD_COLUMN = 'ADD_COLUMN';
-export const DELETE_COLUMN = 'DELETE_COLUMN';
+export const SELECT_COLUMN = 'SELECT_COLUMN';
 export const UPDATE_COLUMN = 'UPDATE_COLUMN';
 
 // Builder actions

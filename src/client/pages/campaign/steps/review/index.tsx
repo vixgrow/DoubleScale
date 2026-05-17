@@ -33,6 +33,10 @@ import {
 	SendTestWhatsAppCard,
 } from './components';
 import { getProSmsCampaignBridge } from '@doublescale/shared/sms-pro-bridge';
+import {
+	getCampaignFiltersFromSettings,
+	parseCampaignRecipientFilters,
+} from '@doublescale/utils';
 import type {
 	NoticeMessage,
 	EmailTemplate,
@@ -126,43 +130,19 @@ const Review: React.FC = () => {
 		: '';
 
 
-	// Fetch list and tag names from filters
+	// Fetch list and tag names from filters (supports list/tag rows + legacy segment filters)
 	useEffect(() => {
 		const fetchFilterNames = async () => {
-			const filters = campaign?.settings?.filters || [];
+			const filters = getCampaignFiltersFromSettings(
+				campaign?.settings as Record<string, unknown>
+			);
 
-			// Parse filters to extract IDs
-			const includeListIds: number[] = [];
-			const includeTagIds: number[] = [];
-			const excludeListIds: number[] = [];
-			const excludeTagIds: number[] = [];
-
-			type SegmentFilter = {
-				group?: string;
-				value?: unknown[];
-				operator?: string;
-				filter?: string;
-			};
-			(filters as SegmentFilter[]).forEach((filter) => {
-				if (filter.group !== 'segments' || !filter.value?.[0]) return;
-
-				const id = Number((filter.value as unknown[])[0]);
-				const isInclude = filter.operator === 'contains';
-
-				if (filter.filter === 'lists_segment') {
-					if (isInclude) {
-						includeListIds.push(id);
-					} else {
-						excludeListIds.push(id);
-					}
-				} else if (filter.filter === 'tags_segment') {
-					if (isInclude) {
-						includeTagIds.push(id);
-					} else {
-						excludeTagIds.push(id);
-					}
-				}
-			});
+			const {
+				includeListIds,
+				includeTagIds,
+				excludeListIds,
+				excludeTagIds,
+			} = parseCampaignRecipientFilters(filters);
 
 			// Fetch list names
 			try {
@@ -225,10 +205,10 @@ const Review: React.FC = () => {
 			}
 		};
 
-		if (campaign?.settings?.filters) {
+		if (campaign?.settings) {
 			fetchFilterNames();
 		}
-	}, [campaign?.settings?.filters]);
+	}, [campaign?.settings]);
 
 	const save = async () => {
 		if (!campaign) {

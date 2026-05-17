@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils';
 const Contacts: React.FC = () => {
 	const {
 		campaign,
-		saveCampaignStep,
+		saveCampaign,
 		updateSettings,
 		goToStep,
 		saving,
@@ -168,28 +168,11 @@ const Contacts: React.FC = () => {
 		applyFetchDoneRef.current = null;
 	};
 
-	const save = async () => {
-		if (!campaign) {
-			return;
-		}
-
-		// Save just the filter type so we know which tab to open next time
-		const success = await saveCampaignStep('contacts', {
-			filter_type: filterBy,
-		});
-
-		if (success) {
-			goToStep('review');
-		}
-	};
-
 	const handleNext = async () => {
-		// Block while applying
-		if (isApplying) {
+		if (isApplying || !campaign) {
 			return;
 		}
 
-		// Block when zero recipients
 		if (totalRecipients === 0) {
 			setInlineError(
 				__('No recipients match the current filters.', 'doublescale')
@@ -198,7 +181,38 @@ const Contacts: React.FC = () => {
 		}
 
 		setInlineError(null);
-		await save();
+
+		const nextSettings = {
+			...campaign.settings,
+			current_step: 'review',
+			contacts_data: {
+				...(campaign.settings.contacts_data || {}),
+				filters,
+				contacts_count: totalRecipients,
+				lastModified: new Date().toISOString(),
+				filter_type: filterBy,
+			},
+			filters,
+		};
+		delete (nextSettings as { templates?: unknown }).templates;
+		delete (nextSettings as { is_attached?: unknown }).is_attached;
+
+		try {
+			// One save: persist recipients + advance step (avoids race with tab sync).
+			await saveCampaign({
+				settings: nextSettings,
+			} as Parameters<typeof saveCampaign>[0]);
+			goToStep('review');
+		} catch (error: unknown) {
+			const message =
+				error instanceof Error
+					? error.message
+					: __(
+							'Could not save recipients. Please try again.',
+							'doublescale'
+						);
+			setInlineError(message);
+		}
 	};
 
 	return (

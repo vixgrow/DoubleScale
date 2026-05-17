@@ -19,6 +19,21 @@ import {
 import { Check, ChevronsUpDown } from 'lucide-react';
 import config from '@/config';
 import type { DoubleScaleInfo, VerifiedSender } from '@/shared/config/types/config-data';
+
+/** SMTP/from-email config — supports free (`getDoubleScaleInfo`) and Pro (`getsmtpInfo`) APIs. */
+function readSmtpInfoFromConfig(): DoubleScaleInfo {
+	const api = config as {
+		getDoubleScaleInfo?: () => DoubleScaleInfo;
+		getsmtpInfo?: () => DoubleScaleInfo;
+	};
+	if (typeof api.getDoubleScaleInfo === 'function') {
+		return api.getDoubleScaleInfo();
+	}
+	if (typeof api.getsmtpInfo === 'function') {
+		return api.getsmtpInfo();
+	}
+	return { configured: false };
+}
 import { cn } from '@/lib/utils';
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { fetchSmtpSettings } from '../../client/pages/settings/smtp/smtp-api';
@@ -88,7 +103,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					return;
 				}
 				const mapped = smtpSettingsResponseToInfo(data);
-				const base = config.getDoubleScaleInfo();
+				const base = readSmtpInfoFromConfig();
 				// Successful GET means the bundled SMTP REST is available — never keep a stale "install plugin" hint.
 				setLiveSmtp({
 					configured: mapped.configured,
@@ -105,7 +120,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 		};
 	}, [smtpModuleOn, modulesTick]);
 
-	const smtpInfo: DoubleScaleInfo = liveSmtp ?? config.getDoubleScaleInfo();
+	const smtpInfo: DoubleScaleInfo = liveSmtp ?? readSmtpInfoFromConfig();
 
 	// Check if we have verified senders
 	const hasVerifiedSenders =

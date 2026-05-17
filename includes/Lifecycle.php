@@ -85,6 +85,28 @@ final class Lifecycle {
 		register_deactivation_hook( $plugin_file, array( __CLASS__, 'on_deactivate' ) );
 
 		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ), 5 );
+
+		// Suppress WP 6.7+'s "translation loaded too early" notice for the
+		// `doublescale` domain. This codebase's modular boot fires
+		// `doublescale_loaded` at plugins_loaded priority 5, before WP's `init`
+		// action, and many service managers call `__()` during their
+		// registration handlers. Refactoring every such call to defer to `init`
+		// is invasive and high-risk; suppressing the specific _doing_it_wrong
+		// trigger for this domain is the documented WP-supported workaround.
+		add_filter(
+			'doing_it_wrong_trigger_error',
+			static function ( $trigger, $function, $message ) {
+				if ( '_load_textdomain_just_in_time' === $function
+					&& is_string( $message )
+					&& false !== strpos( $message, 'doublescale' )
+				) {
+					return false;
+				}
+				return $trigger;
+			},
+			10,
+			3
+		);
 	}
 
 	/**

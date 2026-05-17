@@ -227,7 +227,6 @@ export const HeaderBar = ({ page }: { page: any }) => {
 	return (
 		<div className="doublescale-layout__header-bar">
 			<div className="doublescale-layout__header-left">
-				<span className="doublescale-layout__page-title">{page.label}</span>
 			</div>
 			<div className="doublescale-layout__header-right">
 				{!isProActive && <HeaderProBells />}

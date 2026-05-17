@@ -355,7 +355,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						onClose={handleClose}
 					/>
 
-					<div className="flex-1 min-h-0 space-y-4 overflow-y-auto px-5 py-4">
+					<div className="flex-1 min-h-0 space-y-4 overflow-y-auto px-6 py-5">
 						{notice && (
 							<NoticeBanner
 								notice={notice}

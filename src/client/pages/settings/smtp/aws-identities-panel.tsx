@@ -1,5 +1,5 @@
 /**
- * Amazon SES Identities panel for the DoubleScale-Pro built-in SMTP settings.
+ * Amazon SES Identities panel for the doublescale-pro built-in SMTP settings.
  *
  * Mirrors the SMTP `AccountSettings` Identities table. Backend routes are
  * registered by `Aws\REST\Settings_Controller` under `/smtp/v1/mailers/aws/...`.

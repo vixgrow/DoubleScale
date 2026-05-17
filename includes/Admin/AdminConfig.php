@@ -239,7 +239,7 @@ final class AdminConfig {
 		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
 		$plugins_dir = trailingslashit( dirname( dirname( \DOUBLESCALE_PLUGIN_FILE ) ) );
 		$candidates  = array(
-			'DoubleScale-Pro/doublescale-pro.php',
+			'doublescale-pro/doublescale-pro.php',
 		);
 		$exists      = false;
 		foreach ( $candidates as $rel ) {

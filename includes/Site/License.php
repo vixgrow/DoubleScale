@@ -173,7 +173,7 @@ class License {
 		$plugins_dir = trailingslashit( dirname( dirname( DOUBLESCALE_PLUGIN_FILE ) ) );
 
 		// get plugin data.
-		$plugin_file      = 'DoubleScale-Pro/doublescale-pro.php';
+		$plugin_file      = 'doublescale-pro/doublescale-pro.php';
 		$full_plugin_file = $plugins_dir . $plugin_file;
 		$plugin_exists    = file_exists( $full_plugin_file );
 		$plugin_data      = $plugin_exists ? get_plugin_data( $full_plugin_file, true, false ) : array();
@@ -184,7 +184,7 @@ class License {
 		$data['is_installed']     = $plugin_exists;
 		$data['is_active']        = is_plugin_active( $plugin_file );
 		$data['version']          = $plugin_data['Version'] ?? null;
-		$data['slug']             = 'DoubleScale-Pro';
+		$data['slug']             = 'doublescale-pro';
 
 		$this->plugin_data = $data;
 	}

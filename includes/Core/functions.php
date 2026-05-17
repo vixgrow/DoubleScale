@@ -163,7 +163,7 @@ if ( ! function_exists( 'doublescale_is_pro_addon_active' ) ) {
 		}
 
 		$candidates = array(
-			'DoubleScale-Pro/doublescale-pro.php',
+			'doublescale-pro/doublescale-pro.php',
 		);
 		if ( defined( 'DOUBLESCALE_PRO_PLUGIN_PATH' ) && \DOUBLESCALE_PRO_PLUGIN_PATH ) {
 			array_unshift( $candidates, (string) \DOUBLESCALE_PRO_PLUGIN_PATH );

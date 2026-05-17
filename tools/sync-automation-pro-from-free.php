@@ -11,7 +11,7 @@
 declare( strict_types = 1 );
 
 $free_base = dirname( __DIR__ ) . '/includes/Modules/Automations';
-$pro_base = dirname( __DIR__, 2 ) . '/DoubleScale-Pro/includes/Modules/Automations';
+$pro_base = dirname( __DIR__, 2 ) . '/doublescale-pro/includes/Modules/Automations';
 
 if ( ! is_dir( $free_base ) || ! is_dir( dirname( $pro_base ) ) ) {
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- CLI dev tool (not shipped); WP_Filesystem unavailable outside WP runtime.

@@ -119,7 +119,7 @@ class AwsBulkMailer extends AbstractBulkMailer {
 		if ( ! method_exists( $account_api, 'send_batch' ) ) {
 			return new WP_Error(
 				'aws_batch_not_supported',
-				__( 'AWS SES batch sending is not available in this build. Update DoubleScale-Pro or ensure the SMTP module includes AWS batch support.', 'doublescale' )
+				__( 'AWS SES batch sending is not available in this build. Update doublescale-pro or ensure the SMTP module includes AWS batch support.', 'doublescale' )
 			);
 		}
 

@@ -1,5 +1,5 @@
 /**
- * Pro-injected SMS campaign UI (set by DoubleScale-Pro before the SPA renders).
+ * Pro-injected SMS campaign UI (set by doublescale-pro before the SPA renders).
  *
  * @package DoubleScale
  */

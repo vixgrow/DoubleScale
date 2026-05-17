@@ -24,7 +24,7 @@ import type { BlocksRegistryActionTypes, BlocksRegistryState } from './types';
 // Pro stubs (name + icon + isPro: true) so they appear in the blocks sidebar
 // with a Pro badge — mirroring how the libraries panel surfaces locked items.
 // Pro extends the registry at boot via `registerBlocks({ ... })` from
-// DoubleScale-Pro/src/client/index.tsx, which merges in defaultProps/Renderer/Editor
+// doublescale-pro/src/client/index.tsx, which merges in defaultProps/Renderer/Editor
 // and flips isProActivated to true. Unknown is the safety fallback for any
 // block type the registry doesn't know about at render time.
 const proStub = (type: string, name: string, icon: React.FC<any>) => ({

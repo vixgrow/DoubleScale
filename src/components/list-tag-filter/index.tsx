@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { ContactFilterSection } from '../contact-filter';
 import { Button } from '@/components/ui/button';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 
 interface ListTagFilterProps {
 	// Nested filters array: [includeRows[], excludeRows[]]
@@ -33,9 +33,23 @@ export default function ListTagFilter({
 		Array.isArray(filters?.[1]) ? (filters?.[1] as any[]) : []
 	);
 
-	// Keep local state in sync when filters prop changes (but without any mapping)
+	// Parent rebuilds the `filters` array on every render even when its
+	// contents are stable; compare by content signature so we only re-sync
+	// local state when the upstream rows actually change.
+	const filtersSignature = useMemo(() => JSON.stringify(filters ?? []), [filters]);
+	const localSignature = useMemo(
+		() => JSON.stringify([includeData, excludeData]),
+		[includeData, excludeData]
+	);
+
 	useEffect(() => {
 		if (!Array.isArray(filters)) {
+			return;
+		}
+		// Skip the sync when local state already matches — avoids reassigning
+		// new array references for the same content (which would re-trigger
+		// the downstream onChange loop).
+		if (filtersSignature === localSignature) {
 			return;
 		}
 
@@ -48,18 +62,20 @@ export default function ListTagFilter({
 
 		setIncludeData(nextInclude);
 		setExcludeData(nextExclude);
-	}, [filters]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- signature already encodes filters content
+	}, [filtersSignature]);
 
 	// Whenever local rows change, push them up as a nested array
 	useEffect(() => {
 		if (!setFilters) return;
 
-		const nextFilters: any[][] = [includeData, excludeData];
-
-		if (JSON.stringify(nextFilters) !== JSON.stringify(filters)) {
-			setFilters(nextFilters);
+		if (filtersSignature === localSignature) {
+			return;
 		}
-	}, [includeData, excludeData, setFilters, filters]);
+
+		setFilters([includeData, excludeData]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- signatures encode the relevant state
+	}, [localSignature]);
 
 	// Function to handle clearing all filters
 	const handleClearFilters = async () => {
@@ -125,7 +141,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to send emails for this campaign. You can create multiple row to send to all of them."
 				ref={includeFilterRef}
 				onChange={setIncludeData}
-				initialRows={includeData.length ? includeData : undefined}
+				initialRows={includeData}
 			/>
 			<div className="border-t border-border"></div>
 			<ContactFilterSection

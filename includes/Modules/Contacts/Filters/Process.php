@@ -81,13 +81,86 @@ class Process {
 	 * @return Builder
 	 */
 	protected function filter_nested() {
-		// Special handling for ListTagFilter format: [includeRows[], excludeRows[]]
-		// First array is include (contains), second is exclude (does_not_contain)
-		$is_list_tag_format = count( $this->filters ) === 2
-			&& ! empty( $this->filters[0] )
-			&& is_array( $this->filters[0] )
-			&& ! empty( $this->filters[0][0] )
-			&& isset( $this->filters[0][0]['list'] ) || isset( $this->filters[0][0]['tag'] );
+		// Detect ListTagFilter payload (rows with list/tag keys, no filter/rule).
+		// Two on-wire shapes are accepted:
+		//   - Tagged flat list: each row carries `mode: 'include'|'exclude'`. This
+		//     is the canonical wire format; it survives WP core's
+		//     rest_sanitize_array() reindexing, which strips outer keys.
+		//   - Legacy positional shape: `[ [includeRows…], [excludeRows…] ]`.
+		//     Still accepted for direct PHP callers and stored campaign
+		//     settings; but on the wire it loses include/exclude semantics
+		//     when only one side is populated, so the frontend always sends
+		//     the tagged shape.
+		$is_list_tag_format = false;
+		$has_mode_tagging   = false;
+
+		foreach ( $this->filters as $slot_value ) {
+			if ( ! is_array( $slot_value ) ) {
+				continue;
+			}
+
+			// A row at this level (tagged flat form): { list/tag, mode, … }.
+			$has_list_or_tag = array_key_exists( 'list', $slot_value ) || array_key_exists( 'tag', $slot_value );
+			$is_rule_row     = array_key_exists( 'filter', $slot_value ) || array_key_exists( 'rule', $slot_value );
+			if ( $has_list_or_tag && ! $is_rule_row ) {
+				$is_list_tag_format = true;
+				if ( array_key_exists( 'mode', $slot_value ) ) {
+					$has_mode_tagging = true;
+				}
+				continue;
+			}
+
+			// A nested group of rows (legacy positional form).
+			foreach ( $slot_value as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$row_has_list_or_tag = array_key_exists( 'list', $row ) || array_key_exists( 'tag', $row );
+				$row_is_rule_row     = array_key_exists( 'filter', $row ) || array_key_exists( 'rule', $row );
+				if ( $row_has_list_or_tag && ! $row_is_rule_row ) {
+					$is_list_tag_format = true;
+					if ( array_key_exists( 'mode', $row ) ) {
+						$has_mode_tagging = true;
+					}
+				}
+			}
+		}
+
+		if ( $is_list_tag_format && $has_mode_tagging ) {
+			// Re-split tagged flat list into the two-slot shape that
+			// filter_list_tag_format() reads. Rows missing an explicit
+			// `mode` default to include — matches the section the UI puts
+			// rows into when "Send to" carries no exclude marker.
+			$includes = array();
+			$excludes = array();
+			foreach ( $this->filters as $row_or_group ) {
+				if ( ! is_array( $row_or_group ) ) {
+					continue;
+				}
+				if ( array_key_exists( 'list', $row_or_group ) || array_key_exists( 'tag', $row_or_group ) ) {
+					$mode = isset( $row_or_group['mode'] ) ? $row_or_group['mode'] : 'include';
+					if ( 'exclude' === $mode ) {
+						$excludes[] = $row_or_group;
+					} else {
+						$includes[] = $row_or_group;
+					}
+					continue;
+				}
+				// Nested group from a legacy payload mixed in.
+				foreach ( $row_or_group as $row ) {
+					if ( ! is_array( $row ) ) {
+						continue;
+					}
+					$mode = isset( $row['mode'] ) ? $row['mode'] : 'include';
+					if ( 'exclude' === $mode ) {
+						$excludes[] = $row;
+					} else {
+						$includes[] = $row;
+					}
+				}
+			}
+			$this->filters = array( $includes, $excludes );
+		}
 
 		if ( $is_list_tag_format ) {
 			return $this->filter_list_tag_format();

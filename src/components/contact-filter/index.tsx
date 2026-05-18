@@ -241,14 +241,29 @@ export const ContactFilterSection = forwardRef<
 		fetchTags(1);
 	}, [fetchLists, fetchTags]);
 
+	// Sync from parent only when the *content* of initialRows changes.
+	// Parent often passes a fresh reference on each render even when rows
+	// are unchanged; reacting to reference changes alone caused a render
+	// loop (onChange would emit a new array which the parent would
+	// normalize and pass back as a different reference, repeating forever).
+	const initialRowsSignature = useMemo(
+		() => (initialRows === undefined ? '__undef__' : JSON.stringify(initialRows)),
+		[initialRows]
+	);
+	const lastSyncedSignatureRef = useRef<string | null>(null);
 	useEffect(() => {
+		if (lastSyncedSignatureRef.current === initialRowsSignature) {
+			return;
+		}
+		lastSyncedSignatureRef.current = initialRowsSignature;
+
 		const shouldDefaultToAll = initialRows === undefined;
 		setDefaultToAll(shouldDefaultToAll);
 
 		const parsed = parseInitialSelections(initialRows);
 		setSelectedLists(parsed.lists);
 		setSelectedTags(parsed.tags);
-	}, [initialRows]);
+	}, [initialRowsSignature, initialRows]);
 
 	useEffect(() => {
 		if (!onChange) return;

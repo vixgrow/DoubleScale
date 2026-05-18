@@ -70,13 +70,26 @@ const ContactList: React.FC<ContactListProps> = ({
 
 		const perPage = isSummary ? 1 : 50;
 
+		// Flatten [includeRows, excludeRows] into a 1-D list and stamp each
+		// row with its mode. WP core's rest_sanitize_array() calls
+		// array_values() on type:'array' params, which silently drops the
+		// outer key when only one side is populated — turning an
+		// exclude-only payload into an include-only one. Tagging each row
+		// keeps include/exclude meaningful regardless of reindexing.
+		const includeRows = Array.isArray((filters as any)?.[0]) ? (filters as any)[0] : [];
+		const excludeRows = Array.isArray((filters as any)?.[1]) ? (filters as any)[1] : [];
+		const taggedFilters: any[] = [
+			...includeRows.map((row: any) => ({ ...row, mode: 'include' })),
+			...excludeRows.map((row: any) => ({ ...row, mode: 'exclude' })),
+		];
+
 		try {
 			const response = await apiFetch<{ data: Contact[]; total: number; filtered_total?: number }>(
 				{
 					path: addQueryArgs('/doublescale/v1/contacts', {
 						per_page: perPage,
 						page: pageNum,
-						filters,
+						filters: taggedFilters,
 						subscribed: true,
 						keywords: isSummary ? '' : search,
 						campaign_type: campaignType,

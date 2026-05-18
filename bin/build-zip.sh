@@ -82,7 +82,10 @@ fi
 		--no-scripts \
 		--quiet
 )
-rm -f "$STAGE_DIR/composer.json" "$STAGE_DIR/composer.lock"
+# Keep composer.json next to the generated vendor/ so wp.org's Plugin Check
+# doesn't flag "missing_composer_json_file". Drop the lock — it's not useful
+# end-users and bloats the zip.
+rm -f "$STAGE_DIR/composer.lock"
 
 echo "→ Creating $ZIP_FILE"
 (cd "$DIST_DIR" && zip -rq "$(basename "$ZIP_FILE")" "$SLUG")

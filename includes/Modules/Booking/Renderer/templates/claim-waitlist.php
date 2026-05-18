@@ -1,4 +1,7 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scope-local; populated by the parent renderer via extract().
+
+defined( 'ABSPATH' ) || exit;<?php
 
 
 defined( 'ABSPATH' ) || exit;

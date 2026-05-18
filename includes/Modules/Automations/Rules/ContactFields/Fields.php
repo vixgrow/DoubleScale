@@ -244,12 +244,14 @@ class Fields extends Rule {
 }
 
 if ( class_exists( CustomFieldModel::class ) ) {
-	$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
+	( static function () {
+		$custom_fields = CustomFieldModel::where( 'scope', 'contact' )->get();
 
-	if ( ! empty( $custom_fields ) ) {
-		foreach ( $custom_fields as $custom_field ) {
-			$rule = new Fields( $custom_field );
-			RulesManager::instance()->register( $rule );
+		if ( ! empty( $custom_fields ) ) {
+			foreach ( $custom_fields as $custom_field ) {
+				$rule = new Fields( $custom_field );
+				RulesManager::instance()->register( $rule );
+			}
 		}
-	}
+	} )();
 }

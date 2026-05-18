@@ -47,6 +47,7 @@ final class Lifecycle {
 
 		foreach ( $defaults as $name => $value ) {
 			if ( ! defined( $name ) ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- $name is bound to the DOUBLESCALE_* keys from $defaults above; all are plugin-prefixed.
 				define( $name, $value );
 			}
 		}

@@ -1,6 +1,7 @@
 <?php
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scope-local; populated by the parent renderer via extract().
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) || exit;|| exit;
 
 $icons_url = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 ?>

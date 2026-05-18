@@ -3,10 +3,7 @@
  * Aggregates built-in and module-registered admin submenu entries.
  *
  * Built-ins ship from {@see MenuRegistry::builtin_entries()}; modules append via
- * {@see MenuRegistry::add()}. Both filters run on the merged list:
- *
- *   1. `doublescale_admin_menu`
- *   2. `ds_admin_menu`
+ * {@see MenuRegistry::add()}. The merged list is filtered by `doublescale_admin_menu`.
  *
  * Entries use this shape:
  *
@@ -163,13 +160,6 @@ class MenuRegistry {
 		 * @param array<int, array<string, mixed>> $entries
 		 */
 		$entries = apply_filters( 'doublescale_admin_menu', $entries );
-
-		/**
-		 * Short-prefix alias of `doublescale_admin_menu` (same shape).
-		 *
-		 * @param array<int, array<string, mixed>> $entries
-		 */
-		$entries = apply_filters( 'ds_admin_menu', $entries );
 
 		$entries = self::filter_entries_by_registered_modules( $entries );
 

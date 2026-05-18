@@ -124,6 +124,7 @@ class LinkTriggers {
 							wp_clear_auth_cookie();
 							wp_set_current_user( $user->ID );
 							wp_set_auth_cookie( $user->ID );
+							// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WP core action; we are re-firing it after manual login from a tracked link, matching what wp_signon() does.
 							do_action( 'wp_login', $user->user_login, $user );
 						}
 					}

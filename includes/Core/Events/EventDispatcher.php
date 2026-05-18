@@ -45,6 +45,7 @@ class EventDispatcher {
 		 *
 		 * @param Event $event The event instance.
 		 */
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name derives from event FQCN (e.g. `DoubleScale.Pro.Core.Events.ContactCreated`), always prefixed.
 		do_action( $event->hook_name(), $event );
 
 		return $event;
@@ -83,6 +84,7 @@ class EventDispatcher {
 	 */
 	public static function filter( Event $event ): Event {
 		/** @var Event $result */
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name derives from event FQCN, always prefixed.
 		$result = apply_filters( $event->hook_name(), $event );
 		return $result instanceof Event ? $result : $event;
 	}

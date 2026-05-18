@@ -72,7 +72,10 @@ abstract class BaseTemplateRenderer {
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<title><?php echo esc_html( $title ?: __( 'Booking', 'doublescale' ) ); ?></title>
 			<meta name="robots" content="noindex">
-			<?php do_action( 'wp_enqueue_scripts' ); ?>
+			<?php
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WP core action; booking renderer mimics `wp_head()` flow because public pages bypass the WP template hierarchy.
+			do_action( 'wp_enqueue_scripts' );
+			?>
 		</head>
 		<body class="doublescale-booking-body">
 		<?php

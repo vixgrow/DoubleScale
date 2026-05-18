@@ -32,7 +32,7 @@ import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 import { cn } from '@/lib/utils';
 //@ts-ignore
-import csvIcon from '@doublescale/assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/icon.png';
 
 const formatFileSize = (bytes: number): string => {
 	if (bytes === 0) return '0 Bytes';

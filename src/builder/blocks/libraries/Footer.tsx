@@ -9,7 +9,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { CursorIcon } from '@doublescale/components';
 import { DraggableTemplate } from '@/builder/components/shared/DraggableTemplate';
 //@ts-ignore
-import logo from '../../../../assets/images/header-logo.png';
+import logo from '../../../../assets/images/default-logo.png';
 
 const FooterLibrary = () => {
 	const isProActive = applyFilters(

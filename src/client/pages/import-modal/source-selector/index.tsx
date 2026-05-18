@@ -22,7 +22,7 @@ import { InstallIcon } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
 import { useImportContext } from '../contexts';
 //@ts-ignore
-import csvIcon from '../../../../../assets/images/csv/csv.png';
+import csvIcon from '../../../../../assets/images/csv/icon.png';
 //@ts-ignore
 import wpusersIcon from '../../../../../assets/images/wordpress/wordpress-icon.png';
 //@ts-ignore

@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@doublescale/components';
 import { Card, CardContent } from '@/components/ui/card';
 import { useExportContext } from '../contexts';
 //@ts-ignore
-import csvIcon from '@doublescale/assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/icon.png';
 
 const ExportProgress: React.FC = () => {
 	const { total, offset } = useExportContext();

@@ -46,6 +46,7 @@ abstract class Migration {
 		// CREATE-shaped statement can make MySQL try to ADD PRIMARY KEY again and
 		// error with "Multiple primary key defined" when the migrations ledger was
 		// cleared or never recorded but the table survived (common in test DB resets).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Schema-existence check before dbDelta; caching would mask the real DDL state we need to read.
 		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $this->table_name ) );
 		if ( $exists === $this->table_name ) {
 			return;

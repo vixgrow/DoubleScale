@@ -56,7 +56,7 @@ Underneath every module is one workflow builder. **11+ trigger types** — form 
 * **GDPR by design.** You control retention, exports, and deletion. No sub-processors. Tracking data stays inside your install.
 * **Scalable.** Benchmarked at 100,000+ contacts on a single-server install. Background tasks keep the frontend fast.
 * **Deep WordPress integrations.** WooCommerce, Easy Digital Downloads, SureCart, and 4 LMS platforms (LearnDash, LifterLMS, LearnPress, Tutor LMS) all feed the CRM natively.
-* **16 form-builder integrations.** Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, Quill Forms, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and more.
+* **16 form-builder integrations.** Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and more.
 
 = How DoubleScale compares to GoHighLevel and HubSpot =
 
@@ -189,7 +189,7 @@ WordPress roles map to access patterns inside DoubleScale: sales reps see only d
 
 = Which form plugins work? =
 
-16 form builders out of the box — Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, Quill Forms, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and others. Form submissions create or update contacts with tags, lists, and field mapping.
+16 form builders out of the box — Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and others. Form submissions create or update contacts with tags, lists, and field mapping.
 
 = How do imports work? =
 

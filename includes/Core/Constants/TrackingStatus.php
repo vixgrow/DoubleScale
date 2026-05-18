@@ -7,7 +7,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Constants;
+namespace DoubleScale\Core\Constants;
 
 
 defined( 'ABSPATH' ) || exit;

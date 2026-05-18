@@ -5,11 +5,11 @@
  * @since 1.0.0
  */
 
-namespace DoubleScale\Site;
+namespace DoubleScale\Website;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Site\License;
+use DoubleScale\Website\License;
 
 
 /**

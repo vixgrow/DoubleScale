@@ -13,7 +13,7 @@ namespace DoubleScale\Modules\Contacts\Models;
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\MessageSourceTypes;
 
 /**
  * ContactUnsubscribeModel class

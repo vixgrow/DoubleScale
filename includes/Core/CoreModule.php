@@ -80,7 +80,7 @@ final class CoreModule extends AbstractModule {
 		\DoubleScale\Core\UserRoles\UserRoles::instance();
 		\DoubleScale\Core\UserRoles\LoginRedirect::instance();
 		\DoubleScale\Database\Install::init();
-		\DoubleScale\Site\Site::instance();
+		\DoubleScale\Website\Site::instance();
 
 		// The DoubleScale top-level admin menu and every CRM REST route check the
 		// `doublescale_access` capability. Historically this cap was granted as a

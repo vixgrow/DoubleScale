@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CampaignContactFilter class

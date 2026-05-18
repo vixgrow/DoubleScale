@@ -23,11 +23,11 @@ use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Campaigns\Services\CampaignStatusManager;
 use DoubleScale\Pro\Modules\Inbox\Services\MessageProviderRegistry;
 use DoubleScale\Modules\Emails\Emails;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 // use DoubleScale\Pro\Traits\MessageProviderValidation; // Moved to Pro
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\MessageSourceTypes;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 use DoubleScale\Modules\Campaigns\Campaign\EmailProcessing;
 // use DoubleScale\Modules\Campaigns\Campaign\SmsProcessing; // Moved to Pro

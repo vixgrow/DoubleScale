@@ -17,7 +17,7 @@ use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Modules\Campaigns\Services\CampaignAnalytics;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CampaignEnrichment class

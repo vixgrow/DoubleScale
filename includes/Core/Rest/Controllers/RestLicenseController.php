@@ -20,7 +20,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use DoubleScale\Core\Abstracts\RestController;
-use DoubleScale\Site\License;
+use DoubleScale\Website\License;
 
 /**
  * RestLicenseController class.

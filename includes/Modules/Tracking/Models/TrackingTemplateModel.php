@@ -12,7 +12,7 @@ namespace DoubleScale\Modules\Tracking\Models;
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * Maps to `doublescale_templates` for tracking and automation step template linkage.

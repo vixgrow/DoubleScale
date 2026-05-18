@@ -23,13 +23,13 @@ use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Campaigns\Services\CampaignAnalytics;
 use DoubleScale\Modules\Campaigns\Services\CampaignStatusManager;
-use DoubleScale\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Services\TemplateFieldMapper;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
-use DoubleScale\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\MessageSourceTypes;
 
 /**
  * AbstractCampaignController class
@@ -98,7 +98,7 @@ abstract class AbstractCampaignController extends RestController {
 	protected function get_campaign_message_query( $campaign_id ) {
 		if ( ! $this->channel ) {
 			return CommunicationTrackingModel::query()
-				->where( 'source_type', \DoubleScale\Constants\MessageSourceTypes::CAMPAIGN )
+				->where( 'source_type', \DoubleScale\Core\Constants\MessageSourceTypes::CAMPAIGN )
 				->where( 'source_id', $campaign_id );
 		}
 
@@ -112,7 +112,7 @@ abstract class AbstractCampaignController extends RestController {
 
 		return CommunicationTrackingModel::query()
 			->where( 'mode', $mode )
-			->where( 'source_type', \DoubleScale\Constants\MessageSourceTypes::CAMPAIGN )
+			->where( 'source_type', \DoubleScale\Core\Constants\MessageSourceTypes::CAMPAIGN )
 			->where( 'source_id', $campaign_id );
 	}
 

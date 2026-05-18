@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\RulesManager;
-use DoubleScale\Constants\OrderStatus as Order_Status_Constant;
+use DoubleScale\Core\Constants\OrderStatus as Order_Status_Constant;
 
 /**
  * Order Status class

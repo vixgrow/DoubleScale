@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Campaigns\Services\TemplateFieldMapper;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CampaignTemplateFactory class

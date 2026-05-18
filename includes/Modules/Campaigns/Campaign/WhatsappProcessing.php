@@ -23,7 +23,7 @@ use DoubleScale\Core\PluginKernel;
 use DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Whatsapp;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Core\Validators\PhoneValidator;
 
 /**

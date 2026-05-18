@@ -26,7 +26,7 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
 use DoubleScale\Modules\Activities\Services\ActivityManager;
 use DoubleScale\Core\UserRoles\Permissions;
-use DoubleScale\Constants\ActivityTypes;
+use DoubleScale\Core\Constants\ActivityTypes;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;

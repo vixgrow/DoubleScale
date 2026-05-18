@@ -138,7 +138,7 @@ class AutomationModel extends Model {
 	 */
 	public function messages() {
 		return $this->hasMany( CommunicationTrackingModel::class, 'source_id', 'id' )
-			->where( 'source_type', \DoubleScale\Constants\MessageSourceTypes::AUTOMATION );
+			->where( 'source_type', \DoubleScale\Core\Constants\MessageSourceTypes::AUTOMATION );
 	}
 
 	/**

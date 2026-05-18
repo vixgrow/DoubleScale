@@ -10,9 +10,9 @@
 namespace DoubleScale\Modules\Tracking\Abstracts;
 
 use DoubleScale\Core\Utils\Utils;
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\MessageSourceTypes;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;

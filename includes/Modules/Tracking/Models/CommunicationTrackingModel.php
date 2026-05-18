@@ -19,11 +19,11 @@ use DoubleScale\Modules\Tracking\Models\TrackingTemplateModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Automations\Models\AutomationStepModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
-use DoubleScale\Constants\MessageDirection;
+use DoubleScale\Core\Constants\MessageDirection;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingMetaModel;
-use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CommunicationTrackingModel class

@@ -78,7 +78,7 @@ final class ActionsManager {
 	 */
 	private function __construct() {
 		$this->set_sources();
-		add_action( 'doublescale_loaded', array( $this, 'load_actions' ) );
+		add_action( 'doublescale_ready', array( $this, 'load_actions' ) );
 	}
 
 	/**
@@ -86,7 +86,7 @@ final class ActionsManager {
 	 */
 	public function load_actions() {
 		/** @var Action[] $actions */
-		$actions = apply_filters( 'doublescale_actions', $this->actions );
+		$actions = apply_filters( 'doublescale_automation_actions', $this->actions );
 
 		// Re-register actions after filter to update sources array
 		// This allows Pro versions to properly register in the frontend
@@ -108,14 +108,14 @@ final class ActionsManager {
 		}
 
 		// Refresh integration is_disabled status after Pro plugin has registered integrations.
-		// This is necessary because set_sources() runs before doublescale_loaded,
-		// so integrations registered on doublescale_loaded (like Pro Slack) would show as disabled.
+		// This is necessary because set_sources() runs before doublescale_ready,
+		// so integrations registered on doublescale_ready (like Pro Slack) would show as disabled.
 		$this->refresh_integration_status();
 	}
 
 	/**
 	 * Refresh the is_disabled status for send_data integration groups.
-	 * Called after doublescale_loaded to pick up Pro-registered integrations.
+	 * Called after doublescale_ready to pick up Pro-registered integrations.
 	 *
 	 * @since 1.0.0
 	 */
@@ -372,7 +372,7 @@ final class ActionsManager {
 			 ),
 		 );
 
-		 $this->sources = apply_filters( 'doublescale_actions_sources', $this->sources );
+		 $this->sources = apply_filters( 'doublescale_automation_action_sources', $this->sources );
 	}
 
 	/**

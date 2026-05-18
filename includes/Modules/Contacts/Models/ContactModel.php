@@ -772,12 +772,12 @@ class ContactModel extends Model
 
 		if (! empty($lists_to_add)) {
 			$this->lists()->attach($lists_to_add, array('taxonomy_type' => 'list'));
-			do_action('doublescale_contact_lists_applied', $this, $lists_to_add);
+			do_action('doublescale_contact_list_apply', $this, $lists_to_add);
 		}
 
 		if (! empty($lists_to_remove)) {
 			$this->lists()->detach($lists_to_remove);
-			do_action('doublescale_contact_lists_removed', $this, $lists_to_remove);
+			do_action('doublescale_contact_list_remove', $this, $lists_to_remove);
 		}
 	}
 
@@ -797,7 +797,7 @@ class ContactModel extends Model
 
 		if (! empty($lists_to_add)) {
 			$this->lists()->attach($lists_to_add, array('taxonomy_type' => 'list'));
-			do_action('doublescale_contact_lists_applied', $this, $lists_to_add);
+			do_action('doublescale_contact_list_apply', $this, $lists_to_add);
 		}
 	}
 
@@ -818,12 +818,12 @@ class ContactModel extends Model
 
 		if (! empty($tags_to_add)) {
 			$this->tags()->attach($tags_to_add, array('taxonomy_type' => 'tag'));
-			do_action('doublescale_contact_tags_applied', $this, $tags_to_add);
+			do_action('doublescale_contact_tag_apply', $this, $tags_to_add);
 		}
 
 		if (! empty($tags_to_remove)) {
 			$this->tags()->detach($tags_to_remove);
-			do_action('doublescale_contact_tags_removed', $this, $tags_to_remove);
+			do_action('doublescale_contact_tag_remove', $this, $tags_to_remove);
 		}
 	}
 
@@ -843,7 +843,7 @@ class ContactModel extends Model
 
 		if (! empty($tags_to_add)) {
 			$this->tags()->attach($tags_to_add, array('taxonomy_type' => 'tag'));
-			do_action('doublescale_contact_tags_applied', $this, $tags_to_add);
+			do_action('doublescale_contact_tag_apply', $this, $tags_to_add);
 		}
 	}
 
@@ -954,7 +954,7 @@ class ContactModel extends Model
 			"eloquent.created: {$model_name}",
 			function ($contact) {
 				if ($contact->email_status !== 'unsubscribed') {
-					do_action('doublescale_contact_subscribed', $contact);
+					do_action('doublescale_contact_subscribe', $contact);
 				}
 			}
 		);
@@ -969,7 +969,7 @@ class ContactModel extends Model
 				}
 
 				if ($contact->email_status === 'unsubscribed') {
-					do_action('doublescale_contact_unsubscribed', $contact);
+					do_action('doublescale_contact_unsubscribe', $contact);
 				}
 			}
 		);

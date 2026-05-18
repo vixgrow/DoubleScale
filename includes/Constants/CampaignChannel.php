@@ -198,7 +198,7 @@ class CampaignChannel {
 		);
 
 		// Allow custom channels to define labels via filter
-		$labels = apply_filters( 'doublescale_campaign_channel_labels', $labels );
+		$labels = apply_filters( 'doublescale_channel_label_map', $labels );
 
 		return $labels[ $channel ] ?? __( 'Unknown', 'doublescale');
 	}
@@ -252,7 +252,7 @@ class CampaignChannel {
 		);
 
 		// Allow custom channels to specify if they need phone
-		$phone_channels = apply_filters( 'doublescale_campaign_channels_requiring_phone', $phone_channels );
+		$phone_channels = apply_filters( 'doublescale_phone_required_channels', $phone_channels );
 
 		return in_array( $channel, $phone_channels, true );
 	}

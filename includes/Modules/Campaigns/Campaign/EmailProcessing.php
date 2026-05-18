@@ -1757,7 +1757,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$message  = $this->render_builder_content_with_tracking( $message, $contact_or_automation_contact, $campaign_message->id, $renderer, $footer_html );
 
 		// Set channel context for merge tags
-		add_filter( 'doublescale_current_channel_context', array( $this, 'get_channel_context' ), 10 );
+		add_filter( 'doublescale_active_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		// Process merge tags in both body and footer (if footer was injected)
 		// Use the original contact model to support automation merge tags
@@ -1765,7 +1765,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 		$processed_subject = MergeTagsManager::instance()->process_merge_tags( $subject, $contact_or_automation_contact );
 
 		// Remove filter to prevent pollution
-		remove_filter( 'doublescale_current_channel_context', array( $this, 'get_channel_context' ), 10 );
+		remove_filter( 'doublescale_active_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		// Add click tracking to URLs in the message (if tracking class supports it)
 		$tracking_class = $this->get_tracking_class();
@@ -2089,6 +2089,6 @@ class EmailProcessing extends AbstractCampaignProcessing {
 
 		$default_content = '<div><p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p>' . esc_html( $unsubscribe_msg ) . ' <a href="{{contact:unsubscribe_link}}" target="_blank">' . esc_html( $unsubscribe_txt ) . '</a>.</p></div>';
 
-		return apply_filters( 'doublescale_default_email_content', $default_content );
+		return apply_filters( 'doublescale_default_mail_content', $default_content );
 	}
 }

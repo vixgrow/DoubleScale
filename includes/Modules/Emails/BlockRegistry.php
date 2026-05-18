@@ -124,7 +124,7 @@ class BlockRegistry {
 
 	/**
 	 * Register the two Free blocks. Pro extends this set via the
-	 * `doublescale_register_email_blocks` action below.
+	 * `doublescale_mail_block_register` action below.
 	 */
 	protected function register_default_blocks() {
 		$this->register_block( new \DoubleScale\Modules\Emails\Blocks\TextBlock() );
@@ -139,6 +139,6 @@ class BlockRegistry {
 		 *
 		 * @param BlockRegistry $this Registry instance
 		 */
-		do_action( 'doublescale_register_email_blocks', $this );
+		do_action( 'doublescale_mail_block_register', $this );
 	}
 }

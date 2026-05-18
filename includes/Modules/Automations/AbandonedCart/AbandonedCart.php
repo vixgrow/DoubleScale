@@ -232,7 +232,7 @@ class AbandonedCart {
 		// Clear the session.
 		$this->clear_session();
 
-		do_action( 'doublescale_abandoned_cart_recovered', $abandoned_cart );
+		do_action( 'doublescale_abandoned_cart_recover', $abandoned_cart );
 	}
 
 	/**
@@ -282,7 +282,7 @@ class AbandonedCart {
 
 		$this->add_contact( $abandoned_cart );
 
-		do_action( 'doublescale_abandoned_cart_created', $abandoned_cart );
+		do_action( 'doublescale_abandoned_cart_create', $abandoned_cart );
 	}
 
 	/**

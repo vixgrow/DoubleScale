@@ -89,7 +89,7 @@ final class AdminConfig {
 		// Get pro plugin data
 		$pro_plugin_data = self::get_pro_plugin_data();
 
-		// FormsManager may finish resolving after the first `doublescale_loaded` pass; refresh
+		// FormsManager may finish resolving after the first `doublescale_ready` pass; refresh
 		// trigger catalog so the admin SPA receives form integration rows for automations.
 		if ( class_exists( TriggersManager::class ) ) {
 			TriggersManager::instance()->sync_form_trigger_sources();

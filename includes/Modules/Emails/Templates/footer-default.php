@@ -49,7 +49,7 @@ $doublescale_background_color = '#e9eaec';
 															/* translators: %s: site name */
 															$doublescale_footer = sprintf( esc_html__( 'Sent from %s', 'doublescale'), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $doublescale_site_name ) . '</a>' );
 															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $footer is escaped above, filter allows customization
-															echo apply_filters( 'doublescale_email_footer_text', $doublescale_footer );
+															echo apply_filters( 'doublescale_mail_footer_text', $doublescale_footer );
 															?>
 
 															</td>

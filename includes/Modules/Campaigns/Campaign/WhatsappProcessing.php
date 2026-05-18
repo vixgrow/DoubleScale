@@ -87,7 +87,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	protected function prepare_message_content( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message )
 	{
 		// Set channel context for merge tags
-		add_filter('doublescale_current_channel_context', array($this, 'get_channel_context'), 10);
+		add_filter('doublescale_active_channel_context', array($this, 'get_channel_context'), 10);
 
 		// Check if template has a ContentSid/external_id
 		$content_sid = $template->get_whatsapp_content_sid();
@@ -101,7 +101,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		$message_data = $this->prepare_template_message( $template, $contact_or_automation_contact, $campaign_message );
 
 		// Remove filter to prevent pollution
-		remove_filter('doublescale_current_channel_context', array($this, 'get_channel_context'), 10);
+		remove_filter('doublescale_active_channel_context', array($this, 'get_channel_context'), 10);
 
 		return $message_data;
 	}

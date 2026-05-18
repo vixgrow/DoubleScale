@@ -56,7 +56,7 @@ abstract class AbstractTracking {
 	 */
 	public function __construct() {
 		 add_action( 'init', array( $this, 'handle_tracking' ) );
-		add_action( 'doublescale_loaded', array( $this, 'add_hooks' ) );
+		add_action( 'doublescale_ready', array( $this, 'add_hooks' ) );
 	}
 
 	/**
@@ -291,7 +291,7 @@ abstract class AbstractTracking {
 		}
 
 		// Fire action for Pro to handle (MessagingIncoming listens to this).
-		do_action( 'doublescale_process_incoming_message', $parsed_data, $this->channel, $provider );
+		do_action( 'doublescale_inbox_incoming_message_process', $parsed_data, $this->channel, $provider );
 	}
 
 	/**

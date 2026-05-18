@@ -195,8 +195,8 @@ class Emails {
 			$this->html = false;
 		}
 
-		add_action( 'doublescale_email_send_before', array( $this, 'send_before' ) );
-		add_action( 'doublescale_email_send_after', array( $this, 'send_after' ) );
+		add_action( 'doublescale_mail_send_before', array( $this, 'send_before' ) );
+		add_action( 'doublescale_mail_send_after', array( $this, 'send_after' ) );
 	}
 
 	/**
@@ -212,7 +212,7 @@ class Emails {
 			$this->from_name = get_bloginfo( 'name' );
 		}
 
-		return apply_filters( 'doublescale_email_from_name', doublescale_decode_string( $this->from_name ), $this );
+		return apply_filters( 'doublescale_mail_from_name', doublescale_decode_string( $this->from_name ), $this );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class Emails {
 			$this->from_address = get_option( 'admin_email' );
 		}
 
-		return apply_filters( 'doublescale_email_from_address', doublescale_decode_string( $this->from_address ), $this );
+		return apply_filters( 'doublescale_mail_from_address', doublescale_decode_string( $this->from_address ), $this );
 	}
 
 	/**
@@ -244,7 +244,7 @@ class Emails {
 			$this->reply_to = false;
 		}
 
-		return apply_filters( 'doublescale_email_reply_to', doublescale_decode_string( $this->reply_to ), $this );
+		return apply_filters( 'doublescale_mail_reply_to', doublescale_decode_string( $this->reply_to ), $this );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class Emails {
 			$this->cc = implode( ',', $addresses );
 		}
 
-		return apply_filters( 'doublescale_email_cc', doublescale_decode_string( $this->cc ), $this );
+		return apply_filters( 'doublescale_mail_cc', doublescale_decode_string( $this->cc ), $this );
 	}
 
 	/**
@@ -281,12 +281,12 @@ class Emails {
 	public function get_content_type() {
 
 		if ( ! $this->content_type && $this->html ) {
-			$this->content_type = apply_filters( 'doublescale_email_default_content_type', 'text/html', $this );
+			$this->content_type = apply_filters( 'doublescale_mail_default_content_type', 'text/html', $this );
 		} elseif ( ! $this->html ) {
 			$this->content_type = 'text/plain';
 		}
 
-		return apply_filters( 'doublescale_email_content_type', $this->content_type, $this );
+		return apply_filters( 'doublescale_mail_content_type', $this->content_type, $this );
 	}
 
 	/**
@@ -328,7 +328,7 @@ class Emails {
 			$this->headers .= "Content-Type: {$this->get_content_type()}; charset=utf-8\r\n";
 		}
 
-		return apply_filters( 'doublescale_email_headers', $this->headers, $this );
+		return apply_filters( 'doublescale_mail_headers', $this->headers, $this );
 	}
 
 	/**
@@ -343,7 +343,7 @@ class Emails {
 	public function build_email( $message ) {
 		// Plain text email shortcut.
 		if ( false === $this->html ) {
-			return apply_filters( 'doublescale_email_message', doublescale_decode_string( $message ), $this );
+			return apply_filters( 'doublescale_mail_message', doublescale_decode_string( $message ), $this );
 		}
 
 		/*
@@ -356,7 +356,7 @@ class Emails {
 
 		if ( $is_complete_html ) {
 			// Message is already a complete HTML document, return as-is
-			return apply_filters( 'doublescale_email_message', $message, $this );
+			return apply_filters( 'doublescale_mail_message', $message, $this );
 		}
 
 		// Process as template-based email
@@ -365,12 +365,12 @@ class Emails {
 		$this->get_template_part( 'header', $this->get_template(), true );
 
 		// Hooks into the email header.
-		do_action( 'doublescale_email_header', $this );
+		do_action( 'doublescale_mail_header', $this );
 
 		$this->get_template_part( 'body', $this->get_template(), true );
 
 		// Hooks into the email body.
-		do_action( 'doublescale_email_body', $this );
+		do_action( 'doublescale_mail_body', $this );
 
 		$this->get_template_part( 'footer', $this->get_template(), true );
 
@@ -386,7 +386,7 @@ class Emails {
 			$message = make_clickable( $message );
 		}
 
-		return apply_filters( 'doublescale_email_message', $message, $this );
+		return apply_filters( 'doublescale_mail_message', $message, $this );
 	}
 
 	/**
@@ -411,7 +411,7 @@ class Emails {
 		}
 
 		// Hooks before email is sent.
-		do_action( 'doublescale_email_send_before', $this );
+		do_action( 'doublescale_mail_send_before', $this );
 
 		/*
 		 * Allow to filter data on per-email basis,
@@ -473,7 +473,7 @@ class Emails {
 		}
 
 		// Hooks after the email is sent.
-		do_action( 'doublescale_email_send_after', $this );
+		do_action( 'doublescale_mail_send_after', $this );
 
 		return $result;
 	}
@@ -557,7 +557,7 @@ class Emails {
 			$this->template = 'default';
 		}
 
-		return apply_filters( 'doublescale_email_template', $this->template );
+		return apply_filters( 'doublescale_mail_template', $this->template );
 	}
 
 	/**
@@ -654,7 +654,7 @@ class Emails {
 			100 => DOUBLESCALE_PLUGIN_DIR . 'includes/Modules/Emails/Templates',
 		);
 
-		$file_paths = apply_filters( 'doublescale_email_template_paths', $file_paths );
+		$file_paths = apply_filters( 'doublescale_mail_template_paths', $file_paths );
 
 		// Sort the file paths based on priority.
 		ksort( $file_paths, SORT_NUMERIC );

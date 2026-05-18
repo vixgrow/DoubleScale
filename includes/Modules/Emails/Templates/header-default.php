@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$doublescale_header_image     = apply_filters( 'doublescale_email_header_image', false );
+$doublescale_header_image     = apply_filters( 'doublescale_mail_header_image', false );
 $doublescale_background_color = '#e9eaec';
 $doublescale_text_direction   = is_rtl() ? 'rtl' : 'ltr';
 ?>

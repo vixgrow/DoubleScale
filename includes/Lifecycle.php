@@ -88,7 +88,7 @@ final class Lifecycle {
 
 		// Suppress WP 6.7+'s "translation loaded too early" notice for the
 		// `doublescale` domain. This codebase's modular boot fires
-		// `doublescale_loaded` at plugins_loaded priority 5, before WP's `init`
+		// `doublescale_ready` at plugins_loaded priority 5, before WP's `init`
 		// action, and many service managers call `__()` during their
 		// registration handlers. Refactoring every such call to defer to `init`
 		// is invasive and high-risk; suppressing the specific _doing_it_wrong
@@ -160,6 +160,6 @@ final class Lifecycle {
 		/**
 		 * Fires after the DoubleScale (free) modular stack is fully initialized.
 		 */
-		do_action( 'doublescale_loaded' );
+		do_action( 'doublescale_ready' );
 	}
 }

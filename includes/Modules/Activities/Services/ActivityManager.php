@@ -63,7 +63,7 @@ final class ActivityManager {
 	 * @since 1.0.0
 	 */
 	private function __construct() {
-		add_action( 'doublescale_loaded', array( $this, 'init' ) );
+		add_action( 'doublescale_ready', array( $this, 'init' ) );
 		add_action( 'wp_login', array( $this, 'on_user_login' ), 10, 2 );
 		add_action( 'wp_logout', array( $this, 'on_user_logout' ), 10, 1 );
 	}
@@ -161,7 +161,7 @@ final class ActivityManager {
 			);
 		}
 
-		do_action( 'doublescale_note_added', $activity, $data );
+		do_action( 'doublescale_note_add', $activity, $data );
 
 		// Fire deal-specific hook for deal note notifications.
 		if ( $activity && $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && $entity_id ) {
@@ -240,7 +240,7 @@ final class ActivityManager {
 			);
 		}
 
-		do_action( 'doublescale_email_logged', $activity, $data );
+		do_action( 'doublescale_mail_log', $activity, $data );
 
 		return $activity;
 	}
@@ -303,7 +303,7 @@ final class ActivityManager {
 			);
 		}
 
-		do_action( 'doublescale_call_logged', $activity, $data );
+		do_action( 'doublescale_call_log', $activity, $data );
 
 		return $activity;
 	}
@@ -379,7 +379,7 @@ final class ActivityManager {
 			);
 		}
 
-		do_action( 'doublescale_meeting_scheduled', $activity, $data );
+		do_action( 'doublescale_meeting_schedule', $activity, $data );
 
 		return $activity;
 	}
@@ -592,7 +592,7 @@ final class ActivityManager {
 
 		$activity->save();
 
-		do_action( 'doublescale_activity_updated', $activity );
+		do_action( 'doublescale_activity_update', $activity );
 
 		return $activity;
 	}
@@ -629,12 +629,12 @@ final class ActivityManager {
 			return false;
 		}
 
-		do_action( 'doublescale_activity_before_delete', $activity );
+		do_action( 'doublescale_activity_pre_delete', $activity );
 
 		$deleted = $activity->delete();
 
 		if ( $deleted ) {
-			do_action( 'doublescale_activity_deleted', $activity_id );
+			do_action( 'doublescale_activity_delete', $activity_id );
 		}
 
 		return $deleted;
@@ -663,7 +663,7 @@ final class ActivityManager {
 			}
 		}
 
-		do_action( 'doublescale_activities_bulk_deleted', $activity_ids, $deleted_count );
+		do_action( 'doublescale_activities_bulk_delete', $activity_ids, $deleted_count );
 
 		return $deleted_count;
 	}
@@ -703,7 +703,7 @@ final class ActivityManager {
 			)
 		);
 
-		do_action( 'doublescale_activity_comment_added', $comment, $activity );
+		do_action( 'doublescale_activity_comment_add', $comment, $activity );
 
 		return $comment;
 	}
@@ -734,7 +734,7 @@ final class ActivityManager {
 		$comment->content = wp_kses_post( $content );
 		$comment->save();
 
-		do_action( 'doublescale_activity_comment_updated', $comment );
+		do_action( 'doublescale_activity_comment_update', $comment );
 
 		return $comment;
 	}
@@ -761,12 +761,12 @@ final class ActivityManager {
 			return false;
 		}
 
-		do_action( 'doublescale_activity_comment_before_delete', $comment );
+		do_action( 'doublescale_activity_comment_pre_delete', $comment );
 
 		$deleted = $comment->delete();
 
 		if ( $deleted ) {
-			do_action( 'doublescale_activity_comment_deleted', $comment_id );
+			do_action( 'doublescale_activity_comment_delete', $comment_id );
 		}
 
 		return $deleted;

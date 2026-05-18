@@ -83,7 +83,7 @@ class ListRemoved extends Goal {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'doublescale_contact_lists_removed', array( $this, 'lists_removed' ), 10, 2 );
+		add_action( 'doublescale_contact_list_remove', array( $this, 'lists_removed' ), 10, 2 );
 	}
 
 	/**

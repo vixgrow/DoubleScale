@@ -269,7 +269,7 @@ if ( ! function_exists( 'doublescale_get_logger' ) ) {
 	function doublescale_get_logger() {
 		static $logger = null;
 
-		$class = apply_filters( 'doublescale_logging_class', Logger::class );
+		$class = apply_filters( 'doublescale_log_class', Logger::class );
 
 		if ( null !== $logger && is_string( $class ) && is_a( $logger, $class ) ) {
 			return $logger;
@@ -297,7 +297,7 @@ if ( ! function_exists( 'doublescale_get_logger' ) ) {
 						/* translators: 1: provided class name, 2: filter name, 3: required interface */
 						__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'doublescale' ),
 						'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
-						'<code>doublescale_logging_class</code>',
+						'<code>doublescale_log_class</code>',
 						'<code>LoggerInterface</code>'
 					)
 				),

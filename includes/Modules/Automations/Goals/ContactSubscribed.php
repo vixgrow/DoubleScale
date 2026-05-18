@@ -81,7 +81,7 @@ class ContactSubscribed extends Goal {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'doublescale_contact_subscribed', array( $this, 'contact_subscribed' ) );
+		add_action( 'doublescale_contact_subscribe', array( $this, 'contact_subscribed' ) );
 	}
 
 	/**

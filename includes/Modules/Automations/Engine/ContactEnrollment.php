@@ -62,7 +62,7 @@ final class ContactEnrollment {
 		 * @param \DoubleScale\Modules\Automations\Models\AutomationModel         $automation         The automation.
 		 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact record.
 		 */
-		do_action( 'doublescale_automation_contact_entered', $this->automation, $automation_contact );
+		do_action( 'doublescale_automation_contact_enter', $this->automation, $automation_contact );
 
 		return $automation_contact;
 	}

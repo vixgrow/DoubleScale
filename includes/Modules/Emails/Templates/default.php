@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$doublescale_header_image = apply_filters( 'doublescale_email_header_image', false );
+$doublescale_header_image = apply_filters( 'doublescale_mail_header_image', false );
 ?>
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">

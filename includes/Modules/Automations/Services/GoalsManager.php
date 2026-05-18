@@ -73,7 +73,7 @@ final class GoalsManager {
 	 */
 	private function __construct() {
 		$this->set_sources();
-		add_action( 'doublescale_loaded', array( $this, 'load_goals' ) );
+		add_action( 'doublescale_ready', array( $this, 'load_goals' ) );
 	}
 
 	/**
@@ -81,7 +81,7 @@ final class GoalsManager {
 	 */
 	public function load_goals() {
 		/** @var Goal[] $goals */
-		$goals = apply_filters( 'doublescale_goals', $this->goals );
+		$goals = apply_filters( 'doublescale_automation_goals', $this->goals );
 
 		foreach ( $goals as $slug => $goal ) {
 			$this->goals[ $slug ] = $goal;
@@ -224,7 +224,7 @@ final class GoalsManager {
 			 ),
 		 );
 
-		 $this->sources = apply_filters( 'doublescale_goals_sources', $this->sources );
+		 $this->sources = apply_filters( 'doublescale_automation_goal_sources', $this->sources );
 	}
 
 	/**

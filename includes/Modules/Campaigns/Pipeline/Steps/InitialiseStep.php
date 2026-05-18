@@ -51,7 +51,7 @@ class InitialiseStep implements PipelineStepInterface {
 		}
 
 		// Batch size (filterable, strategy may override).
-		$ctx->batch_size = apply_filters( 'doublescale_campaign_batch_size', 100, $ctx->channel );
+		$ctx->batch_size = apply_filters( 'doublescale_campaign_batch_count', 100, $ctx->channel );
 
 		// Per-second send cap: prefer campaign setting, fall back to channel default.
 		$ctx->max_per_second = $ctx->settings['max_in_second']

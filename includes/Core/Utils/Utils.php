@@ -47,7 +47,7 @@ class Utils {
 
 		$adjusted_execution_time = $max_execution_time * 0.75;
 
-		return apply_filters( 'doublescale_max_execution_time', $adjusted_execution_time );
+		return apply_filters( 'doublescale_runtime_max_execution_time', $adjusted_execution_time );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class Utils {
 			}
 		}
 
-		return apply_filters( 'doublescale_memory_limit', $memory_limit );
+		return apply_filters( 'doublescale_runtime_memory_limit', $memory_limit );
 	}
 
 	/**

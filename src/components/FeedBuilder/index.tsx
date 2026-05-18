@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 //@ts-ignore
-import device from '@doublescale/assets/images/email-device.png';
+import device from '@doublescale/assets/images/device-frame.png';
 import { Star } from 'lucide-react';
 
 const FeedBuilder: React.FC<{

@@ -18,7 +18,7 @@ import { ImportProgressIcon, LoadingSpinner } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 //@ts-ignore
-import csvIcon from '@doublescale/assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/icon.png';
 //@ts-ignore
 import hubspotIcon from '@doublescale/assets/images/hubspot/hubspot-icon.png';
 //@ts-ignore

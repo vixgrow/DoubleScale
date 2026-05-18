@@ -12,7 +12,7 @@ import { map } from 'lodash';
  */
 import ConfigAPI from '@doublescale/config';
 //@ts-ignore
-import csvIcon from '@doublescale/assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/icon.png';
 //@ts-ignore
 import wpusersIcon from '@doublescale/assets/images/wordpress/wordpress-icon.png';
 //@ts-ignore

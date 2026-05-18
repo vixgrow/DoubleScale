@@ -13,7 +13,7 @@ import { CardHeader } from '@/components/ui/card';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 //@ts-ignore
-import csvIcon from '@doublescale/assets/images/csv/csv.png';
+import csvIcon from '@doublescale/assets/images/csv/icon.png';
 //@ts-ignore
 import wpusersLogo from '@doublescale/assets/images/wordpress/wordpress.png';
 //@ts-ignore

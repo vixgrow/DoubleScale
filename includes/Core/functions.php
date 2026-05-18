@@ -350,6 +350,7 @@ if ( ! function_exists( 'doublescale_get_meta_args' ) ) {
 	function doublescale_get_meta_args( $meta_id ) {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin table; no meta API available. Caching by ID is not useful for single-row lookups inside request-scoped helpers.
 		$meta = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}doublescale_task_meta WHERE ID = %d",

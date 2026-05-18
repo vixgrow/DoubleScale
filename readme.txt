@@ -115,7 +115,7 @@ Learn more at [doublescale.io](https://doublescale.io/).
 
 This plugin includes compiled JavaScript and CSS in the `build/` directory. Human-readable source lives in `src/`.
 
-**Public repository:** [DoubleScale on GitHub](https://github.com/DoubleScale/DoubleScale)
+**Public repository:** [DoubleScale on GitHub](https://github.com/Double-Scale/doublescale)
 
 **Build from source**
 1. Install Node.js (LTS recommended)

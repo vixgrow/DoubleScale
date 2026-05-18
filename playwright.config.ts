@@ -10,6 +10,9 @@
  * match a common wp-env-style port; override if yours differs:
  *   WP_BASE_URL=http://localhost:8888 npm run e2e
  *
+ * Pipeline UI tests (`pipeline-module.spec.ts`) need DoubleScale Pro active;
+ * without Pro they skip after the upgrade notice is shown.
+ *
  * Login for global-setup (`tests/e2e/global-setup.ts`):
  *   WP_ADMIN_USER / WP_ADMIN_PASS (default admin / password)
  *

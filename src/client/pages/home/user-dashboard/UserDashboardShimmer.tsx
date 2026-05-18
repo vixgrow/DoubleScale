@@ -5,7 +5,6 @@ import { DashboardContentCard } from '@doublescale/components';
 import { Skeleton } from '@/components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
 import { cn } from '@/lib/utils';
-import { MobileAppCard } from './mobile-app-card';
 
 export const UserDashboardShimmer: React.FC = () => {
 	return (
@@ -54,8 +53,6 @@ export const UserDashboardShimmer: React.FC = () => {
 					</DashboardContentCard>
 				</div>
 			</div>
-
-			<MobileAppCard />
 
 			{/* Recent Contacts & Contact Analytics Chart */}
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch">

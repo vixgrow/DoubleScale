@@ -15,7 +15,7 @@ namespace DoubleScale\Modules\Activities\Models;
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Constants\ActivityTypes;
+use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
@@ -160,7 +160,7 @@ class ActivityModel extends Model {
 	 */
 	public function tracking() {
 		return $this->hasOne( CommunicationTrackingModel::class, 'source_id' )
-			->where( 'source_type', \DoubleScale\Constants\MessageSourceTypes::INDIVIDUAL );
+			->where( 'source_type', \DoubleScale\Core\Constants\MessageSourceTypes::INDIVIDUAL );
 	}
 
 	/**

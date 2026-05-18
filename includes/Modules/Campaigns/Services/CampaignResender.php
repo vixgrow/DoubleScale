@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\TrackingStatus;
 use DoubleScale\Modules\Campaigns\Services\CampaignRateLimiter;
 use DoubleScale\Core\PluginKernel;
 use DoubleScale\Core\Utils\Utils;

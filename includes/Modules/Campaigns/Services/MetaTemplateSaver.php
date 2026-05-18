@@ -11,7 +11,7 @@
 namespace DoubleScale\Modules\Campaigns\Services;
 
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 defined( 'ABSPATH' ) || exit;
 

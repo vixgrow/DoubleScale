@@ -12,7 +12,7 @@ namespace DoubleScale\Modules\Tracking;
 
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Tracking\Abstracts\AbstractTracking;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 defined('ABSPATH') || exit;
 

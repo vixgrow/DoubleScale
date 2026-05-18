@@ -22,9 +22,9 @@ use DoubleScale\Modules\Contacts\Filters\Process as Contact_Filters_Process;
 use DoubleScale\Modules\Campaigns\Services\CampaignStatusManager;
 use DoubleScale\Modules\Campaigns\Services\CampaignTemplateFactory;
 use DoubleScale\Modules\Campaigns\Services\TemplateFieldMapper;
-use DoubleScale\Constants\CampaignChannel;
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\MessageSourceTypes;
 use DoubleScale\Modules\Campaigns\Services\CampaignAnalytics;
 
 /**

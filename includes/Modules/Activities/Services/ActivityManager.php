@@ -24,7 +24,7 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Activities\Models\ActivityCommentModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Core\UserRoles\Permissions;
-use DoubleScale\Constants\ActivityTypes;
+use DoubleScale\Core\Constants\ActivityTypes;
 
 /**
  * ActivityManager class
@@ -1237,7 +1237,7 @@ final class ActivityManager {
 		if ( ! empty( $filters['contact_id'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
 				't.entity_type = %d AND t.entity_id = %d',
-				\DoubleScale\Constants\TaskEntityType::CONTACT,
+				\DoubleScale\Core\Constants\TaskEntityType::CONTACT,
 				$filters['contact_id']
 			);
 		}
@@ -1248,7 +1248,7 @@ final class ActivityManager {
 			! empty( $filters['entity_id'] ) ) {
 			$where_clauses[] = $wpdb->prepare(
 				't.entity_type = %d AND t.entity_id = %d',
-				\DoubleScale\Constants\TaskEntityType::DEAL,
+				\DoubleScale\Core\Constants\TaskEntityType::DEAL,
 				$filters['entity_id']
 			);
 		}
@@ -1270,8 +1270,8 @@ final class ActivityManager {
 		$where_sql = implode( ' AND ', $where_clauses );
 
 		// Get entity type constants.
-		$contact_entity_type = \DoubleScale\Constants\TaskEntityType::CONTACT;
-		$deal_entity_type    = \DoubleScale\Constants\TaskEntityType::DEAL;
+		$contact_entity_type = \DoubleScale\Core\Constants\TaskEntityType::CONTACT;
+		$deal_entity_type    = \DoubleScale\Core\Constants\TaskEntityType::DEAL;
 
 		// Select query - normalized columns for UNION.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared

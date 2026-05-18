@@ -24,9 +24,9 @@ use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Managers\MergeTagsManager;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Constants\MessageDirection;
-use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\MessageDirection;
+use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
 
 defined( 'ABSPATH' ) || exit;
 

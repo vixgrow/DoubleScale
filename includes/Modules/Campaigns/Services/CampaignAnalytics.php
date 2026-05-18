@@ -15,9 +15,9 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Utils\Utils;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
-use DoubleScale\Constants\MessageSourceTypes;
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\MessageSourceTypes;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CampaignAnalytics class

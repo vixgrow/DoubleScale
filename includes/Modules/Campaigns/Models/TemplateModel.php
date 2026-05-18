@@ -14,7 +14,7 @@ namespace DoubleScale\Modules\Campaigns\Models;
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 
 /**

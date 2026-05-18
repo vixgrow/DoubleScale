@@ -27,7 +27,7 @@ use DoubleScale\Modules\Campaigns\Models\TemplateModel;
 use DoubleScale\Modules\Emails\EmailRenderer;
 use DoubleScale\Modules\Emails\BlockRegistry;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * RestTemplateController class

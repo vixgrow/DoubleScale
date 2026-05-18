@@ -13,7 +13,7 @@ namespace DoubleScale\Modules\Campaigns\Services;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
-use DoubleScale\Constants\MessageDirection;
+use DoubleScale\Core\Constants\MessageDirection;
 
 /**
  * WhatsappConversationWindow class

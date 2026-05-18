@@ -24,8 +24,8 @@ use DoubleScale\Modules\Automations\Models\AbandonedCartModel;
 use DoubleScale\Modules\Automations\Models\AutomationModel;
 use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Contacts\Models\ListModel;
-use DoubleScale\Constants\TrackingStatus;
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\TrackingStatus;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * RestGeneralController is REST api controller class for log

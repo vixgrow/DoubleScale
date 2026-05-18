@@ -14,7 +14,7 @@ namespace DoubleScale\Modules\Campaigns\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Constants\CampaignChannel;
+use DoubleScale\Core\Constants\CampaignChannel;
 
 /**
  * CampaignRateLimiter class

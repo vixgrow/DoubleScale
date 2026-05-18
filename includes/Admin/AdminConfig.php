@@ -23,7 +23,7 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
 use DoubleScale\Core\UserRoles\Permissions;
-use DoubleScale\Site\License;
+use DoubleScale\Website\License;
 // use DoubleScale\Modules\Deals\Services\PipelineManager; // Moved to Pro
 // use DoubleScale\Modules\Deals\Services\DealManager; // Moved to Pro
 
@@ -160,7 +160,7 @@ final class AdminConfig {
 	 * @return array<string, array{label: string, level: int}>
 	 */
 	private static function get_plan_levels() {
-		$plans  = \DoubleScale\Site\License::instance()->get_plans();
+		$plans  = \DoubleScale\Website\License::instance()->get_plans();
 		$result = array();
 		foreach ( $plans as $slug => $plan ) {
 			$result[ $slug ] = array(
@@ -179,7 +179,7 @@ final class AdminConfig {
 	 * @return array<string, array{slug: string, label: string, description: string, is_installed: bool, is_active: bool, plugin_file: string}>
 	 */
 	private static function get_addons_status() {
-		$store_addons = \DoubleScale\Site\Store::instance()->get_all_addons();
+		$store_addons = \DoubleScale\Website\Store::instance()->get_all_addons();
 		$result       = array();
 
 		foreach ( $store_addons as $slug => $addon ) {

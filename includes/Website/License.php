@@ -6,7 +6,7 @@
  * @package DoubleScale\Pro
  */
 
-namespace DoubleScale\Site;
+namespace DoubleScale\Website;
 
 
 defined( 'ABSPATH' ) || exit;

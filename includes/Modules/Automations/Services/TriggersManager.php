@@ -73,25 +73,25 @@ final class TriggersManager {
 	private function __construct() {
 		$this->set_sources();
 		$this->set_forms_sources();
-		// After {@see FormsManager::load_forms()} (priority 5 on doublescale_loaded) so
+		// After {@see FormsManager::load_forms()} (priority 5 on doublescale_ready) so
 		// `set_forms_sources()` inside `load_triggers()` sees registered form integrations.
-		add_action( 'doublescale_loaded', array( $this, 'load_triggers' ), 10 );
+		add_action( 'doublescale_ready', array( $this, 'load_triggers' ), 10 );
 	}
 
 	/**
 	 * Load triggers
 	 */
 	public function load_triggers() {
-		// Forms (and other Pro extensions) register on module boot / doublescale_loaded.
+		// Forms (and other Pro extensions) register on module boot / doublescale_ready.
 		// Rebuild form trigger sources here so they are not missed when this singleton
 		// was constructed before the Pro `forms` module finished booting.
 		$this->set_forms_sources();
 
 		/** @var Trigger[] $triggers */
-		// Pro add-on merges catalog triggers on `doublescale_triggers` (late priority): each catalog
+		// Pro add-on merges catalog triggers on `doublescale_automation_triggers` (late priority): each catalog
 		// instance uses the same `slug` as the free stub (e.g. form integrations: contactform7,
 		// fluentforms, …), so the filtered array replaces TriggerPro definitions with real Trigger hooks.
-		$triggers = apply_filters( 'doublescale_triggers', $this->triggers );
+		$triggers = apply_filters( 'doublescale_automation_triggers', $this->triggers );
 
 		// Re-register triggers after filter to update sources array
 		// This allows Pro versions to properly replace free versions in the frontend
@@ -319,7 +319,7 @@ final class TriggersManager {
 			 ),
 		 );
 
-		 $this->sources = apply_filters( 'doublescale_triggers_sources', $this->sources );
+		 $this->sources = apply_filters( 'doublescale_automation_trigger_sources', $this->sources );
 	}
 
 	/**

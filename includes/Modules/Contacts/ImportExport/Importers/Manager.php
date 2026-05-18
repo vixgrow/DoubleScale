@@ -88,7 +88,7 @@ class Manager {
 	 * Initialize the class
 	 */
 	public function init() {
-		add_action( 'doublescale_loaded', array( $this, 'register_importers' ) );
+		add_action( 'doublescale_ready', array( $this, 'register_importers' ) );
 	}
 
 	/**

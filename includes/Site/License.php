@@ -76,7 +76,7 @@ class License {
 		$this->define_plugin();
 		$this->define_plans();
 
-		add_action( 'doublescale_loaded', array( $this, 'license_update_task' ), 100 );
+		add_action( 'doublescale_ready', array( $this, 'license_update_task' ), 100 );
 
 		// ajax.
 		add_action( 'wp_ajax_doublescale_license_activate', array( $this, 'ajax_activate' ) );

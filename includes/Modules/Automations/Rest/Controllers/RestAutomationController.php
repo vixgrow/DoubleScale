@@ -448,7 +448,7 @@ class RestAutomationController extends RestController {
 			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'doublescale'), array( 'status' => 401 ) );
 		}
 
-		do_action( 'doublescale_webhook_received', $automation, $params );
+		do_action( 'doublescale_webhook_receive', $automation, $params );
 
 		return new WP_REST_Response(
 			array(

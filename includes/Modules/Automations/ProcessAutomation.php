@@ -421,7 +421,7 @@ class ProcessAutomation {
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact.
 			 * @param int                                       $step_id            The failed step ID.
 			 */
-			do_action( 'doublescale_automation_step_failed', $this->automation, $automation_contact, $current_step );
+			do_action( 'doublescale_automation_step_failure', $this->automation, $automation_contact, $current_step );
 		}
 
 		// Fire action when a contact completes an automation (next_step = 0 means no more steps).
@@ -434,7 +434,7 @@ class ProcessAutomation {
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationModel         $automation         The automation.
 			 * @param \DoubleScale\Modules\Automations\Models\AutomationContactModel $automation_contact The automation contact.
 			 */
-			do_action( 'doublescale_automation_contact_completed', $this->automation, $automation_contact );
+			do_action( 'doublescale_automation_contact_complete', $this->automation, $automation_contact );
 		}
 	}
 

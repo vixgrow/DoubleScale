@@ -51,7 +51,7 @@ class LinkTriggers {
 	 * Constructor
 	 */
 	private function __construct() {
-		add_action( 'doublescale_loaded', array( $this, 'init' ) );
+		add_action( 'doublescale_ready', array( $this, 'init' ) );
 	}
 
 	/**
@@ -164,7 +164,7 @@ class LinkTriggers {
 		$to_remove_tags = $link_trigger->get_setting( 'remove_tags', array() );
 		if ( ! empty( $to_remove_tags ) ) {
 			$contact->tags()->detach( $to_remove_tags );
-			do_action( 'doublescale_contact_tags_removed', $contact, $to_remove_tags );
+			do_action( 'doublescale_contact_tag_remove', $contact, $to_remove_tags );
 		}
 
 		$to_apply_lists = $link_trigger->get_setting( 'add_lists', array() );
@@ -175,7 +175,7 @@ class LinkTriggers {
 		$to_remove_lists = $link_trigger->get_setting( 'remove_lists', array() );
 		if ( ! empty( $to_remove_lists ) ) {
 			$contact->lists()->detach( $to_remove_lists );
-			do_action( 'doublescale_contact_lists_removed', $contact, $to_remove_lists );
+			do_action( 'doublescale_contact_list_remove', $contact, $to_remove_lists );
 		}
 	}
 }

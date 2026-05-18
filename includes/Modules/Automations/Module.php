@@ -81,7 +81,7 @@ final class Module extends AbstractModule {
 	public function boot( Container $container ): void {
 		parent::boot( $container );
 
-		add_filter( 'doublescale_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
+		add_filter( 'doublescale_mail_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
 
 		$container->get( AbandonedCart\AbandonedCart::class );
 		$container->get( Services\TriggersManager::class );
@@ -89,9 +89,9 @@ final class Module extends AbstractModule {
 		Loader::instance();
 		\DoubleScale\Core\MergeTags\MergeTagsManager::instance();
 
-		add_filter( 'doublescale_triggers', array( $this, 'register_triggers' ) );
-		add_filter( 'doublescale_actions', array( $this, 'register_actions' ) );
-		add_filter( 'doublescale_goals', array( $this, 'register_goals' ) );
+		add_filter( 'doublescale_automation_triggers', array( $this, 'register_triggers' ) );
+		add_filter( 'doublescale_automation_actions', array( $this, 'register_actions' ) );
+		add_filter( 'doublescale_automation_goals', array( $this, 'register_goals' ) );
 
 		$this->loadManifestOrGlobs(
 			array(

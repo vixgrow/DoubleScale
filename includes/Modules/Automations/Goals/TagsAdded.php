@@ -83,7 +83,7 @@ class TagsAdded extends Goal {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'doublescale_contact_tags_applied', array( $this, 'tags_applied' ), 10, 2 );
+		add_action( 'doublescale_contact_tag_apply', array( $this, 'tags_applied' ), 10, 2 );
 	}
 
 	/**

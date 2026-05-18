@@ -65,7 +65,7 @@ class EmailBuilder {
 		// Include free block implementations.
 		require_once $emails_dir . 'Blocks/TextBlock.php';
 		require_once $emails_dir . 'Blocks/ButtonBlock.php';
-		// Pro blocks are loaded by the Pro plugin via the `doublescale_register_email_blocks` action.
+		// Pro blocks are loaded by the Pro plugin via the `doublescale_mail_block_register` action.
 
 		// Include renderer.
 		require_once $emails_dir . 'EmailRenderer.php';

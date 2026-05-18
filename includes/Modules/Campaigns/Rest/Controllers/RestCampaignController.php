@@ -841,7 +841,7 @@ class RestCampaignController extends AbstractCampaignController {
 			);
 
 			// Add webhook URL for tracking (skip for non-routable URLs like localhost)
-			$webhooks_enabled = apply_filters( 'doublescale_enable_provider_webhooks', true );
+			$webhooks_enabled = apply_filters( 'doublescale_provider_webhooks_enable', true );
 			$webhook_url      = $provider->get_webhook_url( $channel );
 			if ( $webhook_url && $webhooks_enabled && \DoubleScale\Modules\Campaigns\Abstracts\AbstractCampaignProcessing::is_publicly_reachable_url( $webhook_url ) ) {
 				$message_data['StatusCallback'] = $webhook_url;
@@ -898,7 +898,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 		$default_content = '<div><p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p>' . esc_html( $unsubscribe_msg ) . ' <a href="{{contact:unsubscribe_link}}" target="_blank">' . esc_html( $unsubscribe_txt ) . '</a>.</p></div>';
 
-		return apply_filters( 'doublescale_default_test_email_content', $default_content );
+		return apply_filters( 'doublescale_default_test_mail_content', $default_content );
 	}
 
 	/**

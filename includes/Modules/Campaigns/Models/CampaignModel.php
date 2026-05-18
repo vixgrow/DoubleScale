@@ -676,7 +676,7 @@ class CampaignModel extends Model {
 					 * @param CampaignModel $campaign   The scheduled campaign.
 					 * @param string         $execute_at Scheduled execution time.
 					 */
-					do_action( 'doublescale_campaign_scheduled', $campaign, $campaign->execute_at );
+					do_action( 'doublescale_campaign_schedule', $campaign, $campaign->execute_at );
 				}
 			}
 		);

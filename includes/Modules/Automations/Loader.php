@@ -59,7 +59,7 @@ final class Loader {
 	 * constructor
 	 */
 	private function __construct() {
-		add_action( 'doublescale_loaded', array( $this, 'load_hooks' ) );
+		add_action( 'doublescale_ready', array( $this, 'load_hooks' ) );
 	}
 
 

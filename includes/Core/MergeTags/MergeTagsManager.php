@@ -379,7 +379,7 @@ final class MergeTagsManager {
 		 *
 		 * @param array $groups Registered merge tag groups
 		 */
-		$this->groups = apply_filters( 'doublescale_merge_tag_groups', $this->groups );
+		$this->groups = apply_filters( 'doublescale_mail_merge_tag_groups', $this->groups );
 	}
 
 	/**

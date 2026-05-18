@@ -160,7 +160,7 @@ abstract class AbstractCampaignProcessing {
 			array( $this, 'continue_campaign_processing' )
 		);
 
-		add_action( 'doublescale_loaded', array( $this, 'add_hooks' ) );
+		add_action( 'doublescale_ready', array( $this, 'add_hooks' ) );
 	}
 
 	/**
@@ -295,7 +295,7 @@ abstract class AbstractCampaignProcessing {
 					 * @param string         $error_message Error description.
 					 * @param string         $channel       Campaign channel (email, sms, whatsapp).
 					 */
-					do_action( 'doublescale_campaign_failed', $campaign, $error_message, $this->channel );
+					do_action( 'doublescale_campaign_failure', $campaign, $error_message, $this->channel );
 					return;
 				}
 
@@ -471,7 +471,7 @@ abstract class AbstractCampaignProcessing {
 	 * - LocalTunnel (https://localtunnel.github.io)
 	 *
 	 * To disable webhooks entirely (e.g., for testing), use this filter:
-	 * add_filter( 'doublescale_enable_provider_webhooks', '__return_false' );
+	 * add_filter( 'doublescale_provider_webhooks_enable', '__return_false' );
 	 *
 	 * @since 1.0.0
 	 * @param string $webhook_url The webhook URL to use
@@ -480,7 +480,7 @@ abstract class AbstractCampaignProcessing {
 	 */
 	protected function prepare_status_callback( $webhook_url, $data = array() ) {
 		// Allow filtering webhook behavior
-		$webhooks_enabled = apply_filters( 'doublescale_enable_provider_webhooks', true );
+		$webhooks_enabled = apply_filters( 'doublescale_provider_webhooks_enable', true );
 
 		if ( ! empty( $webhook_url ) && $webhooks_enabled && self::is_publicly_reachable_url( $webhook_url ) ) {
 			$data['StatusCallback'] = $webhook_url;
@@ -1313,7 +1313,7 @@ abstract class AbstractCampaignProcessing {
 		 * @param int            $recipients_count Number of recipients processed.
 		 * @param string         $channel          Campaign channel (email, sms, whatsapp).
 		 */
-		do_action( 'doublescale_campaign_completed', $campaign, $recipients_count, $this->channel );
+		do_action( 'doublescale_campaign_complete', $campaign, $recipients_count, $this->channel );
 	}
 
 	/**

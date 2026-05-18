@@ -72,7 +72,7 @@ class UnsubscribeLink extends MergeTag {
 		}
 
 		// Get channel from filter context (set by campaign processing)
-		$channel = apply_filters( 'doublescale_current_channel_context', 'email' );
+		$channel = apply_filters( 'doublescale_active_channel_context', 'email' );
 
 		$hash_id = $contact->hash_id;
 		$args    = array(

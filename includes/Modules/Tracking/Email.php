@@ -64,7 +64,7 @@ class Email
 	 */
 	public function __construct()
 	{
-		add_action('doublescale_loaded', array($this, 'init'));
+		add_action('doublescale_ready', array($this, 'init'));
 	}
 
 	/**
@@ -145,7 +145,7 @@ class Email
 				// Fire email opened action only on first open.
 				$contact = $tracking_entry->contact;
 				if ($contact) {
-					do_action('doublescale_email_opened', $contact);
+					do_action('doublescale_mail_open', $contact);
 				}
 			}
 
@@ -230,7 +230,7 @@ class Email
 			if (! $already_clicked) {
 				$contact = $tracking_entry->contact;
 				if ($contact) {
-					do_action('doublescale_email_clicked', $contact);
+					do_action('doublescale_mail_click', $contact);
 				}
 			}
 

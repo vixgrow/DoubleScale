@@ -198,7 +198,7 @@ class CampaignContinuationScheduler {
 	 * @return bool True if the HTTP request was dispatched without WP_Error.
 	 */
 	private function trigger_ajax( $campaign_id ) {
-		if ( ! apply_filters( 'doublescale_enable_ajax_continuation', true, $this->channel, $campaign_id ) ) {
+		if ( ! apply_filters( 'doublescale_ajax_continuation_enable', true, $this->channel, $campaign_id ) ) {
 			return false;
 		}
 

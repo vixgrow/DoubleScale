@@ -629,7 +629,7 @@ class Import {
 			 * @param int $error_count    Number of errors during import.
 			 * @param int $total          Total contacts processed.
 			 */
-			do_action( 'doublescale_import_completed', get_current_user_id(), $imported_count, $error_count, $total );
+			do_action( 'doublescale_import_complete', get_current_user_id(), $imported_count, $error_count, $total );
 		}
 
 		return $result;

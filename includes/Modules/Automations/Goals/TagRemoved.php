@@ -83,7 +83,7 @@ class TagRemoved extends Goal {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'doublescale_contact_tags_removed', array( $this, 'tags_removed' ), 10, 2 );
+		add_action( 'doublescale_contact_tag_remove', array( $this, 'tags_removed' ), 10, 2 );
 	}
 
 	/**

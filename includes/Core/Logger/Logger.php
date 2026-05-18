@@ -33,7 +33,7 @@ class Logger implements LoggerInterface {
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
 		if ( null === $handlers ) {
-			$handlers = apply_filters( 'doublescale_register_log_handlers', array() );
+			$handlers = apply_filters( 'doublescale_log_handler_register', array() );
 		}
 
 		$register_handlers = array();
@@ -127,7 +127,7 @@ class Logger implements LoggerInterface {
 	 * @return bool
 	 */
 	public function add( $handle, $message, $level = LogLevels::NOTICE ) {
-		$message = apply_filters( 'doublescale_logger_add_message', $message, $handle );
+		$message = apply_filters( 'doublescale_log_add_message', $message, $handle );
 		$this->log(
 			$level,
 			$message,
@@ -161,7 +161,7 @@ class Logger implements LoggerInterface {
 
 		if ( $this->should_handle( $level ) ) {
 			$timestamp = time();
-			$message   = apply_filters( 'doublescale_logger_log_message', $message, $level, $context );
+			$message   = apply_filters( 'doublescale_log_message', $message, $level, $context );
 
 			foreach ( $this->handlers as $handler ) {
 				$handler->handle( $timestamp, $level, $message, $context );
@@ -242,7 +242,7 @@ class Logger implements LoggerInterface {
 	}
 
 	public function clear_expired_logs() {
-		$days      = absint( apply_filters( 'doublescale_logger_days_to_retain_logs', 30 ) );
+		$days      = absint( apply_filters( 'doublescale_log_retention_days', 30 ) );
 		$timestamp = strtotime( "-{$days} days" );
 
 		foreach ( $this->handlers as $handler ) {

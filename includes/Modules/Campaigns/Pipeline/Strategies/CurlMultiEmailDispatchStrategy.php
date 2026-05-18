@@ -113,7 +113,7 @@ class CurlMultiEmailDispatchStrategy implements BatchDispatchStrategyInterface {
 	public function get_batch_size() {
 		return min(
 			\DoubleScale\Modules\Emails\CurlMultiEmailSender::get_max_batch_size(),
-			apply_filters( 'doublescale_curl_multi_campaign_batch_size', 100, $this->channel )
+			apply_filters( 'doublescale_campaign_curl_multi_batch_size', 100, $this->channel )
 		);
 	}
 

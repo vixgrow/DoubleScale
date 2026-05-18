@@ -92,7 +92,7 @@ final class CoreModule extends AbstractModule {
 		if ( is_multisite() ) {
 			add_filter( 'user_has_cap', array( $this, 'grant_super_admin_caps' ), 10, 4 );
 		}
-		add_filter( 'doublescale_register_log_handlers', array( $this, 'register_log_handlers' ) );
+		add_filter( 'doublescale_log_handler_register', array( $this, 'register_log_handlers' ) );
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
 		add_action( 'init', array( $this, 'register_cron_schedules' ) );
 

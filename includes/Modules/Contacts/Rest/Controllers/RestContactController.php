@@ -1992,7 +1992,7 @@ class RestContactController extends RestController {
 				$contact->load('custom_fields');
 			}
 
-			do_action('doublescale_contact_updated', $contact);
+			do_action('doublescale_contact_update', $contact);
 
 			return new WP_REST_Response($contact, 200);
 		} catch (Exception $e) {

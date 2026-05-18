@@ -83,7 +83,7 @@ class ListAdded extends Goal {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'doublescale_contact_lists_applied', array( $this, 'lists_applied' ), 10, 2 );
+		add_action( 'doublescale_contact_list_apply', array( $this, 'lists_applied' ), 10, 2 );
 	}
 
 	/**

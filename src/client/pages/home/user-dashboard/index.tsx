@@ -42,7 +42,6 @@ import { RecentAutomationsTable } from './recent-automations';
 import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
 import { UserDashboardShimmer } from './UserDashboardShimmer';
-import { MobileAppCard } from './mobile-app-card';
 import { useContactAnalytics } from '../use-analytics';
 // import { applyFilters } from '@wordpress/hooks'; // Uncomment when cart analytics is enabled
 
@@ -70,7 +69,6 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<MobileAppCard />
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
 				<div className="h-full min-h-0 lg:col-span-2">
 					<DashboardCards data={dashboardData} />

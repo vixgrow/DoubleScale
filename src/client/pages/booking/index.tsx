@@ -86,10 +86,17 @@ registerAdminPage('booking-dashboard', {
 	component: wrap(RedirectToCalendars),
 	label: __('Booking', 'doublescale'),
 	icon: <UpcomingCalendarIcon width={24} height={24} />,
+	// This route only redirects to `booking/calendars`; the destination
+	// sub-routes enforce their own (booking_*) capabilities. Listing
+	// unrelated CRM/sales caps here caused the sidebar click to redirect to
+	// the dashboard for users with booking caps but no CRM caps.
 	requiredCapability: [
-		'doublescale_crm_manager',
-		'doublescale_sales_manager',
-		'doublescale_sales_rep',
+		'doublescale_booking_manage_own_calendars',
+		'doublescale_booking_read_all_calendars',
+		'doublescale_booking_read_own_bookings',
+		'doublescale_booking_read_all_bookings',
+		'doublescale_booking_read_own_availability',
+		'doublescale_booking_read_all_availability',
 	],
 	requiresModule: 'booking',
 });

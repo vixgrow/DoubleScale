@@ -17,7 +17,9 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
 	adminPage: async ({ page }, use) => {
-		await page.goto('/wp-admin/');
+		// No leading slash: baseURL may be a subdirectory (e.g. …/wordpress).
+		// `/wp-admin/` would resolve to site origin root and 404.
+		await page.goto('wp-admin/');
 		await use(page);
 	},
 

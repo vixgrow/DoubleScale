@@ -17,7 +17,19 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 
-const BASE_URL = process.env.WP_BASE_URL ?? 'http://localhost:8889';
+/**
+ * Playwright resolves `goto('wp-admin/...')` with the WHATWG URL API: the base
+ * must end with `/` or the last path segment is dropped (e.g. base
+ * `http://host/wordpress` + `wp-admin/` → `http://host/wp-admin/` → 404).
+ */
+function normalizeBaseURL(raw: string | undefined): string {
+	const trimmed = typeof raw === 'string' ? raw.trim() : '';
+	const fallback = 'http://localhost:8889';
+	const base = trimmed === '' ? fallback : trimmed.replace(/\/+$/, '');
+	return `${base}/`;
+}
+
+const BASE_URL = normalizeBaseURL(process.env.WP_BASE_URL);
 
 export default defineConfig({
 	testDir: './tests/e2e',

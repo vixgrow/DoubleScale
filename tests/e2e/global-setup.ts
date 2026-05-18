@@ -16,10 +16,9 @@ const DEFAULT_BASE = 'http://localhost:8889';
 function resolveBaseURL(): string {
 	const raw = process.env.WP_BASE_URL;
 	const trimmed = typeof raw === 'string' ? raw.trim() : '';
-	if ( trimmed === '' ) {
-		return DEFAULT_BASE;
-	}
-	return trimmed.replace( /\/+$/, '' );
+	const base = trimmed === '' ? DEFAULT_BASE : trimmed.replace(/\/+$/, '');
+	// Trailing slash required for Playwright relative URLs (see playwright.config.ts).
+	return `${base}/`;
 }
 
 /**
@@ -34,6 +33,7 @@ export default async function globalSetup(_config: FullConfig) {
 		fs.mkdirSync(AUTH_DIR, { recursive: true });
 	}
 
+	const baseURL = resolveBaseURL();
 	const siteRoot = baseURL.replace( /\/+$/, '' );
 	if ( ! /^https?:\/\//i.test( siteRoot ) ) {
 		throw new Error(

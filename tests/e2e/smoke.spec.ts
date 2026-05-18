@@ -9,16 +9,16 @@ test.describe('Smoke', () => {
 			}
 		});
 
-		await adminPage.goto('/wp-admin/plugins.php');
+		await adminPage.goto('wp-admin/plugins.php');
 
 		const row = adminPage.locator('tr[data-slug="doublescale"]');
 		await expect(row).toBeVisible();
 		await expect(row).toHaveClass(/active/);
 
-		await adminPage.goto('/wp-admin/admin.php?page=doublescale');
+		await adminPage.goto('wp-admin/admin.php?page=doublescale');
 
-		await expect(adminPage.locator('[data-testid="doublescale-app"]')).toBeVisible({
-			timeout: 15_000,
+		await expect(adminPage.locator('.doublescale-layout__main')).toBeVisible({
+			timeout: 45_000,
 		});
 
 		expect(

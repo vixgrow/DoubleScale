@@ -17,7 +17,6 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
-use DoubleScale\Modules\LeadScoring\Models\LeadScoringRuleLevelModel;
 
 /**
  * Lead Score Level class
@@ -79,7 +78,12 @@ class LeadScoreLevel extends Rule
      */
     public function get_options()
     {
-        $levels  = LeadScoringRuleLevelModel::orderBy('points', 'asc')->get();
+        // Model lives in doublescale-pro only.
+        if ( ! class_exists( \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::class ) ) {
+            return array();
+        }
+
+        $levels = \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::orderBy( 'points', 'asc' )->get();
         $options = array();
 
         foreach ($levels as $level) {

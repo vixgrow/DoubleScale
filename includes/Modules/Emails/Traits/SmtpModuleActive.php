@@ -2,10 +2,6 @@
 /**
  * Bundled SMTP module detection for campaign senders
  *
- * Campaign bulk and cURL-multi paths resolve the CRM’s built-in SMTP module
- * first. Legacy standalone SMTP (or forks exposing the same constants)
- * remains supported when the bundle is not present.
- *
  * @since 1.0.0
  * @package DoubleScale\Pro
  * @subpackage Emails\Traits
@@ -19,16 +15,13 @@ defined( 'ABSPATH' ) || exit;
 trait SmtpModuleActive {
 
 	/**
-	 * Settings class that implements smart routing (bundled module preferred).
+	 * Settings class that implements smart routing (bundled SMTP module).
 	 *
 	 * @return string|null Fully qualified class name.
 	 */
 	public static function get_smtp_settings_class() {
 		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
 			return '\DoubleScale\Modules\Smtp\Settings';
-		}
-		if ( class_exists( '\smtp\Settings' ) ) {
-			return '\smtp\Settings';
 		}
 		return null;
 	}
@@ -69,65 +62,42 @@ trait SmtpModuleActive {
 	}
 
 	/**
-	 * Whether the bundled SMTP module or a legacy SMTP plugin stack is present.
+	 * Whether the bundled SMTP module is present.
 	 *
 	 * @return bool
 	 */
 	public static function is_smtp_module_active() {
-		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
-			return true;
-		}
-
-		return defined( 'smtp_PLUGIN_VERSION' );
+		return class_exists( '\DoubleScale\Modules\Smtp\Settings' )
+			|| class_exists( '\DoubleScale\Modules\Smtp\Module' );
 	}
 
 	/**
-	 * Whether Pro-tier mailer code (e.g. AWS SES) is available inside the bundle or legacy add-on.
+	 * Whether Pro-tier mailer code (e.g. AWS SES) is available in the bundled module.
 	 *
 	 * @return bool
 	 */
 	public static function is_smtp_pro_mailers_active() {
-		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
-			return class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' );
+		if ( ! self::is_smtp_module_active() ) {
+			return false;
 		}
-
-		return defined( 'smtp_PRO_PLUGIN_VERSION' );
+		return class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' );
 	}
 
 	/**
-	 * Whether the general SMTP stack meets the minimum version (bundle always passes).
+	 * Whether the bundled SMTP module meets minimum requirements (always true when loaded).
 	 *
 	 * @return bool
 	 */
 	public static function is_smtp_module_version_supported() {
-		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' )
-			|| class_exists( '\DoubleScale\Modules\Smtp\Module' ) ) {
-			return true;
-		}
-
-		if ( defined( 'smtp_PLUGIN_VERSION' ) ) {
-			return version_compare( smtp_PLUGIN_VERSION, '1.7.0', '>=' );
-		}
-
-		return false;
+		return self::is_smtp_module_active();
 	}
 
 	/**
-	 * Whether Pro mailer code meets minimum version (bundle with AWS passes).
+	 * Whether Pro mailer code is available in the bundled module.
 	 *
 	 * @return bool
 	 */
 	public static function is_smtp_pro_mailers_version_supported() {
-		if ( class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' ) ) {
-			return true;
-		}
-
-		if ( defined( 'smtp_PRO_PLUGIN_VERSION' ) ) {
-			return version_compare( smtp_PRO_PLUGIN_VERSION, '1.0.0', '>=' );
-		}
-
-		return false;
+		return class_exists( '\DoubleScale\Modules\Smtp\Providers\Aws\Accounts' );
 	}
 }

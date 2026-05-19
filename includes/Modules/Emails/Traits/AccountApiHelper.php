@@ -83,18 +83,13 @@ trait AccountApiHelper {
 	}
 
 	/**
-	 * Mailer provider instance for this slug (bundled module registry, or legacy plugin).
+	 * Mailer provider instance for this slug from the bundled SMTP module registry.
 	 *
 	 * @return object|null Mailer with public $accounts or null.
 	 */
 	protected function get_registered_mailer_instance() {
 		if ( class_exists( '\\DoubleScale\\Modules\\Smtp\\Providers\\Mailers' ) ) {
 			$mailer = \DoubleScale\Modules\Smtp\Providers\Mailers::get_mailer( $this->get_slug() );
-			return $mailer ?: null;
-		}
-		if ( class_exists( '\\smtp\\Mailers\\Mailers' ) ) {
-			$mailers = \smtp\Mailers\Mailers::instance();
-			$mailer  = $mailers->get_mailer( $this->get_slug() );
 			return $mailer ?: null;
 		}
 		return null;
@@ -110,13 +105,10 @@ trait AccountApiHelper {
 	 * @return string|null Account ID or null if not found
 	 */
 	protected function find_account_id( $from_email = null ) {
-		// Resolve the active SMTP backend's Settings class (bundled module first, then standalone).
-		$settings_class = null;
-		if ( class_exists( '\\DoubleScale\\Modules\\Smtp\\Settings' ) ) {
-			$settings_class = '\\DoubleScale\\Modules\\Smtp\\Settings';
-		} elseif ( class_exists( '\\smtp\\Settings' ) ) {
-			$settings_class = '\\smtp\\Settings';
-		}
+		// Resolve the bundled SMTP module Settings class.
+		$settings_class = class_exists( '\\DoubleScale\\Modules\\Smtp\\Settings' )
+			? '\\DoubleScale\\Modules\\Smtp\\Settings'
+			: null;
 
 		if ( $settings_class && method_exists( $settings_class, 'get_smart_route' ) ) {
 			$route = call_user_func( array( $settings_class, 'get_smart_route' ), $from_email );
@@ -146,7 +138,7 @@ trait AccountApiHelper {
 		// Fallback to direct option reading if no SMTP Settings class was available.
 		$option_name = class_exists( '\\DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth' )
 			? \DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth::smtp_routing_option_name()
-			: ( defined( 'smtp_PLUGIN_FILE' ) ? 'smtp_settings' : 'doublescale_smtp_settings' );
+			: 'doublescale_smtp_settings';
 		$settings = get_option( $option_name, array() );
 		if ( ! is_array( $settings ) ) {
 			$settings = array();

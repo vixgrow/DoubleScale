@@ -60,6 +60,39 @@ final class IntegrationsManager {
 	 * @return array
 	 */
 	public function get_options() {
-		return array();
+		return array(
+			'twilio'        => array(
+				'label'        => __( 'Twilio', 'doublescale' ),
+				'description'  => __( 'Send SMS messages to your contacts via Twilio.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
+			'stripe'        => array(
+				'label'        => __( 'Stripe', 'doublescale' ),
+				'description'  => __( 'Accept payments and manage subscriptions through Stripe.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
+			'slack'         => array(
+				'label'        => __( 'Slack', 'doublescale' ),
+				'description'  => __( 'Send notifications and updates to your Slack channels.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
+			'meta-whatsapp' => array(
+				'label'        => __( 'Meta WhatsApp', 'doublescale' ),
+				'description'  => __( 'Send WhatsApp messages to your contacts via Meta WhatsApp Business.', 'doublescale' ),
+				'fields'       => array(),
+				'is_connected' => false,
+				'settings'     => array(),
+				'is_pro'       => true,
+			),
+		);
 	}
 }

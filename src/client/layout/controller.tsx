@@ -523,7 +523,6 @@ registerAdminPage('integrations', {
 	label: __('Integrations', 'doublescale'),
 	icon: <IntegrationsIcon />,
 	requiredCapability: ['doublescale_crm_manager'],
-	requiresModule: 'integrations',
 });
 
 registerAdminPage('smtp', {

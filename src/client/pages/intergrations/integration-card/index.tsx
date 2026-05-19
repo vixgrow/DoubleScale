@@ -13,6 +13,7 @@ import { Button } from '@doublescale/components/ui/button';
 import { Skeleton } from '@doublescale/components/ui/skeleton';
 import { Check, Lock } from 'lucide-react';
 import config from '@doublescale/config';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 /**
  * Helper function to get button text based on state
@@ -57,6 +58,12 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 	) as boolean;
 	const isProFeature = integration.is_pro && !isProActive;
 	const upgradeUrl = config.getUrlDoubleScalePro();
+	const {
+		isInstalling,
+		isActivating,
+		handleUpgradeClick,
+		getUpgradeButtonText,
+	} = useProUpgrade();
 
 	return (
 		<Card className="shadow-none relative overflow-hidden h-full">
@@ -83,10 +90,16 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 							{integration.label}
 						</div>
 					</div>
-					{integration.is_connected && (
-						<div className="text-white bg-[#16A34A] rounded-full p-1">
-							<Check className="w-4 h-4" />
+					{isProFeature ? (
+						<div className="text-white bg-primary rounded-full p-1">
+							<Lock className="w-4 h-4" />
 						</div>
+					) : (
+						integration.is_connected && (
+							<div className="text-white bg-[#16A34A] rounded-full p-1">
+								<Check className="w-4 h-4" />
+							</div>
+						)
 					)}
 				</div>
 
@@ -97,30 +110,43 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 
 				{/* Action buttons */}
 				<div className="flex items-center justify-end gap-3 mt-4">
-					<Button
-						onClick={onNavigate}
-						variant="secondary"
-						className="rounded-lg"
-						disabled={isLoading}
-					>
-						{buttonText || (
-							<>
-								{__('Connect Now', 'doublescale')}
-								<PlusIcon />
-							</>
-						)}
-					</Button>
-					{integration.is_connected && (
+					{isProFeature ? (
 						<Button
-							variant="destructive"
+							onClick={() => handleUpgradeClick(upgradeUrl)}
+							variant="default"
 							className="rounded-lg"
-							onClick={onDisconnect}
-							disabled={isLoading || isProFeature}
+							disabled={isInstalling || isActivating}
 						>
-							{isLoading
-								? __('Disconnecting...', 'doublescale')
-								: __('Disconnect', 'doublescale')}
+							{getUpgradeButtonText()}
 						</Button>
+					) : (
+						<>
+							<Button
+								onClick={onNavigate}
+								variant="secondary"
+								className="rounded-lg"
+								disabled={isLoading}
+							>
+								{buttonText || (
+									<>
+										{__('Connect Now', 'doublescale')}
+										<PlusIcon />
+									</>
+								)}
+							</Button>
+							{integration.is_connected && (
+								<Button
+									variant="destructive"
+									className="rounded-lg"
+									onClick={onDisconnect}
+									disabled={isLoading}
+								>
+									{isLoading
+										? __('Disconnecting...', 'doublescale')
+										: __('Disconnect', 'doublescale')}
+								</Button>
+							)}
+						</>
 					)}
 				</div>
 			</CardContent>

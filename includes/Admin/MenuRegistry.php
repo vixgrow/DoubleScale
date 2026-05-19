@@ -111,7 +111,6 @@ class MenuRegistry {
 				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
 				'position'         => 70,
 				'group'            => 'automations',
-				'requires_module' => 'integrations',
 			),
 			array(
 				'page_title'       => __( 'SMTP', 'doublescale' ),

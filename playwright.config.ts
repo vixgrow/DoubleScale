@@ -10,8 +10,10 @@
  * match a common wp-env-style port; override if yours differs:
  *   WP_BASE_URL=http://localhost:8888 npm run e2e
  *
- * Pipeline and Tasks UI tests (`pipeline-module.spec.ts`, `tasks-module.spec.ts`)
- * need DoubleScale Pro active; without Pro they skip after the upgrade notice is shown.
+ * Pipeline, Tasks, Email Sequences, and Forms UI tests (`pipeline-module.spec.ts`,
+ * `tasks-module.spec.ts`, `email-sequences-module.spec.ts`, `forms-module.spec.ts`)
+ * need DoubleScale Pro active (Forms also requires the forms module toggle);
+ * without Pro they skip after the upgrade notice is shown.
  * `campaigns-module.spec.ts` covers email campaigns on any install; its SMS block skips
  * without the Pro SMS bridge.
  *

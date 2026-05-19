@@ -78,13 +78,23 @@ class LeadScoreLevel extends Rule
      */
     public function get_options()
     {
+        $options = array();
+
         // Model lives in doublescale-pro only.
         if ( ! class_exists( \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::class ) ) {
-            return array();
+            return $options;
         }
 
-        $levels = \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::orderBy( 'points', 'asc' )->get();
-        $options = array();
+        // Class-exists guard isn't enough: Pro registers this rule via RulesManager->register()
+        // during Module::boot(), which eagerly calls get_options(). On a fresh install (or any
+        // env where Pro's migrations haven't run yet) the table doesn't exist and the SELECT
+        // fatals the whole site. Catch the QueryException so the rule stays registered with
+        // empty options instead of taking down WordPress.
+        try {
+            $levels = \DoubleScale\Pro\Modules\LeadScoring\Models\LeadScoringRuleLevelModel::orderBy( 'points', 'asc' )->get();
+        } catch ( \Throwable $e ) {
+            return $options;
+        }
 
         foreach ($levels as $level) {
             $options[$level->id] = $level->name . ' (' . $level->points . '+ pts)';

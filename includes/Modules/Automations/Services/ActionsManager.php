@@ -96,6 +96,8 @@ final class ActionsManager {
 				$this->actions[ $action->slug ] = $action;
 			}
 
+			$this->ensure_action_group_metadata( $action->source, $action->group );
+
 			// Update the sources array with the action's fields
 			$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
 				'label'             => $action->name,
@@ -149,6 +151,7 @@ final class ActionsManager {
 		}
 
 		$this->actions[ $action->slug ] = $action;
+		$this->ensure_action_group_metadata( $action->source, $action->group );
 		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
 			'label'             => $action->name,
 			'description'       => $action->description,
@@ -383,6 +386,79 @@ final class ActionsManager {
 	 * @return array
 	 */
 	public function get_sources() {
-		 return $this->sources;
+		return $this->filter_unavailable_action_groups( $this->sources );
+	}
+
+	/**
+	 * Ensure a group row exists with a human-readable label before actions are attached.
+	 *
+	 * @param string $source    Action source key (e.g. send_data).
+	 * @param string $group_slug Group/integration slug.
+	 */
+	private function ensure_action_group_metadata( $source, $group_slug ) {
+		if ( ! isset( $this->sources[ $source ]['groups'][ $group_slug ] ) ) {
+			$this->sources[ $source ]['groups'][ $group_slug ] = array(
+				'label'   => $this->resolve_action_group_label( $source, $group_slug ),
+				'actions' => array(),
+			);
+			return;
+		}
+
+		if ( empty( $this->sources[ $source ]['groups'][ $group_slug ]['label'] ) ) {
+			$this->sources[ $source ]['groups'][ $group_slug ]['label'] = $this->resolve_action_group_label( $source, $group_slug );
+		}
+
+		if ( ! isset( $this->sources[ $source ]['groups'][ $group_slug ]['actions'] ) ) {
+			$this->sources[ $source ]['groups'][ $group_slug ]['actions'] = array();
+		}
+	}
+
+	/**
+	 * Resolve display label for an action group (Send Data integrations, LMS vendors, etc.).
+	 *
+	 * @param string $source     Action source key.
+	 * @param string $group_slug Group slug.
+	 * @return string
+	 */
+	private function resolve_action_group_label( $source, $group_slug ) {
+		if ( 'send_data' === $source ) {
+			$static_labels = array(
+				'zapier'       => __( 'Zapier', 'doublescale' ),
+				'http_request' => __( 'HTTP Request', 'doublescale' ),
+				'slack'        => __( 'Slack', 'doublescale' ),
+			);
+			if ( isset( $static_labels[ $group_slug ] ) ) {
+				return $static_labels[ $group_slug ];
+			}
+
+			$options = IntegrationsManager::instance()->get_options();
+			if ( ! empty( $options[ $group_slug ]['label'] ) ) {
+				return $options[ $group_slug ]['label'];
+			}
+		}
+
+		return ucwords( str_replace( array( '_', '-' ), ' ', $group_slug ) );
+	}
+
+	/**
+	 * Remove disabled / unavailable groups from the action library payload.
+	 *
+	 * @param array $sources Raw sources tree.
+	 * @return array
+	 */
+	private function filter_unavailable_action_groups( array $sources ) {
+		foreach ( $sources as $source_key => &$source ) {
+			if ( empty( $source['groups'] ) || ! is_array( $source['groups'] ) ) {
+				continue;
+			}
+			foreach ( $source['groups'] as $group_key => $group ) {
+				if ( ! empty( $group['is_disabled'] ) ) {
+					unset( $source['groups'][ $group_key ] );
+				}
+			}
+		}
+		unset( $source );
+
+		return $sources;
 	}
 }

@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { map } from 'lodash';
+import { map, pickBy } from 'lodash';
 import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
 
 /**
@@ -137,10 +137,20 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		setSelectedProAction(null);
 	};
 
+	// Unavailable integrations (not connected / module off) are omitted from the API;
+	// keep a client-side guard for stale config and unnamed placeholder groups.
+	const visibleGroups = pickBy(
+		groups,
+		(group) =>
+			!group.is_disabled &&
+			typeof group.label === 'string' &&
+			group.label.trim() !== ''
+	);
+
 	return (
 		<>
 			<div className="flex flex-col gap-4">
-				{map(groups, (group, key) => (
+				{map(visibleGroups, (group, key) => (
 					<Card key={key} className="shadow-none">
 						<CardHeader className="px-4 py-2 border-b-2">
 							<CardTitle className="flex items-center justify-between font-bold text-base">

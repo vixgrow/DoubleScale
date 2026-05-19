@@ -74,23 +74,61 @@ type ConditionBranchPathParams = {
 
 /**
  * Condition → Yes/No branch: shared vertical trunk from the condition node center,
- * then horizontal arm to the branch X, then vertical drop to the branch badge top.
- * Snapping to whole pixels keeps the Yes and No edges sharing identical joints
- * so the corners render without anti-aliasing gaps.
+ * then a rounded elbow to the branch X, and a vertical drop to the target.
+ * Renders an SVG `M ... L ... Q ... L ... Q ... L` path so the elbow has soft
+ * border-radius style corners while the segments stay perfectly straight.
  */
 export const getConditionBranchEdgePath = ({
 	sourceY,
 	targetX,
 	targetY,
 	trunkCenterX,
-}: ConditionBranchPathParams): [path: string, labelX: number, labelY: number] => {
+	cornerRadius = 24,
+}: ConditionBranchPathParams & {
+	cornerRadius?: number;
+}): [path: string, labelX: number, labelY: number] => {
 	const sy = snap(sourceY);
 	const ty = snap(targetY);
 	const tx = snap(targetX);
 	const trunkX = snap(trunkCenterX);
-	const junctionY = snap(sy + Math.max(32, (ty - sy) * 0.5));
+	const junctionY = snap(sy + Math.max(40, (ty - sy) * 0.45));
 
-	const path = `M ${trunkX} ${sy} L ${trunkX} ${junctionY} L ${tx} ${junctionY} L ${tx} ${ty}`;
+	const goingRight = tx > trunkX;
+	const horizontalDist = Math.abs(tx - trunkX);
+	const verticalDistTop = Math.abs(junctionY - sy);
+	const verticalDistBottom = Math.abs(ty - junctionY);
+
+	// Clamp radius to half of the shortest adjacent segment so it never overshoots.
+	const r = Math.max(
+		0,
+		Math.min(
+			cornerRadius,
+			horizontalDist / 2,
+			verticalDistTop,
+			verticalDistBottom
+		)
+	);
+
+	if (r === 0 || trunkX === tx) {
+		const path = `M ${trunkX} ${sy} L ${trunkX} ${junctionY} L ${tx} ${junctionY} L ${tx} ${ty}`;
+		return [path, snap((trunkX + tx) / 2), junctionY];
+	}
+
+	const dir = goingRight ? 1 : -1;
+	// Top corner: vertical trunk turning toward the horizontal arm.
+	const topCornerStartY = junctionY - r;
+	const topCornerEndX = trunkX + r * dir;
+	// Bottom corner: horizontal arm turning into the vertical drop to target.
+	const bottomCornerStartX = tx - r * dir;
+	const bottomCornerEndY = junctionY + r;
+
+	const path =
+		`M ${trunkX} ${sy} ` +
+		`L ${trunkX} ${topCornerStartY} ` +
+		`Q ${trunkX} ${junctionY} ${topCornerEndX} ${junctionY} ` +
+		`L ${bottomCornerStartX} ${junctionY} ` +
+		`Q ${tx} ${junctionY} ${tx} ${bottomCornerEndY} ` +
+		`L ${tx} ${ty}`;
 
 	return [path, snap((trunkX + tx) / 2), junctionY];
 };

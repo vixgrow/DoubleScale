@@ -237,27 +237,10 @@ const processStepHierarchy = (
 				y: conditionPos.y + branchSpacing,
 			};
 
-			// Create Yes branch node
-			initialNodes.push({
-				id: yesNodeId,
-				type: 'branch',
-				position: yesPosition,
-				data: {
-					condition: 'yes',
-					conditionStep: step,
-				},
-			});
-
-			// Create No branch node
-			initialNodes.push({
-				id: noNodeId,
-				type: 'branch',
-				position: noPosition,
-				data: {
-					condition: 'no',
-					conditionStep: step,
-				},
-			});
+			// Yes/No branch badge nodes are no longer rendered; the colored
+			// conditionEdge now flows directly from the Condition node into the
+			// first child (or empty-branch add-step). yesPosition/noPosition are
+			// still used below as anchors for the empty-branch add-step layout.
 
 			// Create single merge node positioned below both branches
 			const mergeId = `merge-${step.id}-level-${level}`;
@@ -403,51 +386,9 @@ const processStepHierarchy = (
 
 			const trunkCenterX = conditionPos.x + nodeWidth / 2;
 
-			// Connect condition to Yes branch node with explicit handle
-			initialEdges.push({
-				id: `${step.id}-to-yes-branch`,
-				source: step.id.toString(),
-				sourceHandle: 'yes',
-				target: yesNodeId,
-				type: 'conditionEdge',
-				label: __('Yes', 'doublescale'),
-				style: {
-					stroke: '#D7D7DA',
-					strokeWidth: 3,
-				},
-				data: {
-					condition: 'yes',
-					trunkCenterX,
-					sourceStep: step,
-					targetStep: { id: yesNodeId, type: 'branch' },
-				},
-				className: 'doublescale-condition-edge doublescale-condition-edge--yes',
-			});
-
-			// Connect condition to No branch node with explicit handle
-			initialEdges.push({
-				id: `${step.id}-to-no-branch`,
-				source: step.id.toString(),
-				sourceHandle: 'no',
-				target: noNodeId,
-				type: 'conditionEdge',
-				label: __('No', 'doublescale'),
-				style: {
-					stroke: '#D7D7DA',
-					strokeWidth: 3,
-				},
-				data: {
-					condition: 'no',
-					trunkCenterX,
-					sourceStep: step,
-					targetStep: { id: noNodeId, type: 'branch' },
-				},
-				className: 'doublescale-condition-edge doublescale-condition-edge--no',
-			});
-
-			// Connect Yes branch node to its children or merge
+			// === Yes branch: condition → first child (or empty-branch + button) ===
+			let yesTargetId: string;
 			if (yesChildren.length === 0) {
-				// Create add-step node for empty yes branch
 				const yesAddStepId = `add-step-yes-${step.id}`;
 				const yesAddStepPosition = savedPositions[yesAddStepId] || {
 					x: yesPosition.x + nodeYesNoWidth / 2 - addStepWidth / 2,
@@ -466,28 +407,6 @@ const processStepHierarchy = (
 					},
 				});
 
-				// Connect Yes branch node to add-step node
-				initialEdges.push({
-					id: `${yesNodeId}-to-add-step`,
-					source: yesNodeId,
-					target: yesAddStepId,
-					type: 'addStepEdge',
-					style: {
-						stroke: '#D7D7DA',
-						strokeWidth: 2,
-					},
-					data: {
-						condition: 'yes',
-						sourceStep: {
-							id: yesNodeId,
-							type: 'branch',
-						},
-						onStepClick,
-						targetStep: undefined,
-					},
-				});
-
-				// Connect add-step node to merge
 				initialEdges.push({
 					id: `${yesAddStepId}-to-merge`,
 					source: yesAddStepId,
@@ -504,28 +423,35 @@ const processStepHierarchy = (
 						targetStep: { id: mergeId, type: 'merge' },
 					},
 				});
+
+				yesTargetId = yesAddStepId;
 			} else {
-				// Connect Yes branch node to first yes child
-				const firstYesChild = yesChildren[0];
-				initialEdges.push({
-					id: `${yesNodeId}-to-${firstYesChild.id}`,
-					source: yesNodeId,
-					target: firstYesChild.id.toString(),
-					type: 'addStepEdge',
-					style: {
-						stroke: '#D7D7DA',
-						strokeWidth: 2,
-					},
-					data: {
-						condition: 'yes',
-						sourceStep: {
-							id: yesNodeId,
-							type: 'branch',
-						},
-						onStepClick,
-						targetStep: firstYesChild,
-					},
-				});
+				yesTargetId = yesChildren[0].id.toString();
+			}
+
+			initialEdges.push({
+				id: `${step.id}-to-yes-branch`,
+				source: step.id.toString(),
+				sourceHandle: 'yes',
+				target: yesTargetId,
+				type: 'conditionEdge',
+				label: __('Yes', 'doublescale'),
+				style: {
+					strokeWidth: 2,
+				},
+				data: {
+					condition: 'yes',
+					trunkCenterX,
+					sourceStep: step,
+					targetStep:
+						yesChildren[0] ?? { id: yesTargetId, type: 'add_step' },
+				},
+				className:
+					'doublescale-condition-edge doublescale-condition-edge--yes',
+				markerEnd: 'doublescale-condition-arrow-yes',
+			});
+
+			if (yesChildren.length > 0) {
 
 				// Connect last yes child to merge
 				const lastYesChild = yesChildren[yesChildren.length - 1];
@@ -571,9 +497,9 @@ const processStepHierarchy = (
 				}
 			}
 
-			// Connect No branch node to its children or merge
+			// === No branch: condition → first child (or empty-branch + button) ===
+			let noTargetId: string;
 			if (noChildren.length === 0) {
-				// Create add-step node for empty no branch
 				const noAddStepId = `add-step-no-${step.id}`;
 				const noAddStepPosition = savedPositions[noAddStepId] || {
 					x: noPosition.x + nodeYesNoWidth / 2 - addStepWidth / 2,
@@ -592,28 +518,6 @@ const processStepHierarchy = (
 					},
 				});
 
-				// Connect No branch node to add-step node
-				initialEdges.push({
-					id: `${noNodeId}-to-add-step`,
-					source: noNodeId,
-					target: noAddStepId,
-					type: 'addStepEdge',
-					style: {
-						stroke: '#D7D7DA',
-						strokeWidth: 2,
-					},
-					data: {
-						condition: 'no',
-						sourceStep: {
-							id: noNodeId,
-							type: 'branch',
-						},
-						onStepClick,
-						targetStep: undefined,
-					},
-				});
-
-				// Connect add-step node to merge
 				initialEdges.push({
 					id: `${noAddStepId}-to-merge`,
 					source: noAddStepId,
@@ -630,28 +534,35 @@ const processStepHierarchy = (
 						targetStep: { id: mergeId, type: 'merge' },
 					},
 				});
+
+				noTargetId = noAddStepId;
 			} else {
-				// Connect No branch node to first no child
-				const firstNoChild = noChildren[0];
-				initialEdges.push({
-					id: `${noNodeId}-to-${firstNoChild.id}`,
-					source: noNodeId,
-					target: firstNoChild.id.toString(),
-					type: 'addStepEdge',
-					style: {
-						stroke: '#D7D7DA',
-						strokeWidth: 2,
-					},
-					data: {
-						condition: 'no',
-						sourceStep: {
-							id: noNodeId,
-							type: 'branch',
-						},
-						onStepClick,
-						targetStep: firstNoChild,
-					},
-				});
+				noTargetId = noChildren[0].id.toString();
+			}
+
+			initialEdges.push({
+				id: `${step.id}-to-no-branch`,
+				source: step.id.toString(),
+				sourceHandle: 'no',
+				target: noTargetId,
+				type: 'conditionEdge',
+				label: __('No', 'doublescale'),
+				style: {
+					strokeWidth: 2,
+				},
+				data: {
+					condition: 'no',
+					trunkCenterX,
+					sourceStep: step,
+					targetStep:
+						noChildren[0] ?? { id: noTargetId, type: 'add_step' },
+				},
+				className:
+					'doublescale-condition-edge doublescale-condition-edge--no',
+				markerEnd: 'doublescale-condition-arrow-no',
+			});
+
+			if (noChildren.length > 0) {
 
 				// Connect last no child to merge
 				const lastNoChild = noChildren[noChildren.length - 1];

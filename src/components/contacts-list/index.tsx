@@ -12,7 +12,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Filter as FilterType, Contact } from '@doublescale/client';
-import {ContactsIcon} from '@doublescale/components';
+import { ContactsIcon } from '@doublescale/components';
 import { SearchIcon } from 'lucide-react';
 
 interface ContactListProps {
@@ -25,9 +25,45 @@ interface ContactListProps {
 	onTotalChange?: (total: number) => void;
 	onLoadingChange?: (loading: boolean) => void;
 	campaignType?: string;
-	/** Summary card only (campaign recipients step). Default: full list. */
-	variant?: 'full' | 'summary';
 }
+
+const RECIPIENTS_PANEL_BG = '#FAEADF';
+const RECIPIENTS_PANEL_BORDER = '#CB5301';
+
+/** Shared campaign recipients card: peach background + dashed border. */
+const RecipientsPanelShell: React.FC<{
+	children: React.ReactNode;
+	className?: string;
+	style?: React.CSSProperties;
+}> = ({ children, className = '', style }) => (
+	<div
+		className={`relative w-full self-start rounded-xl px-4 py-4 ${className}`}
+		style={{ backgroundColor: RECIPIENTS_PANEL_BG, ...style }}
+	>
+		<svg
+			className="pointer-events-none absolute inset-0 h-full w-full overflow-visible rounded-xl"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-hidden
+		>
+			<rect
+				x="1"
+				y="1"
+				width="calc(100% - 1px)"
+				height="calc(100% - 1px)"
+				rx="11"
+				ry="11"
+				fill="none"
+				stroke={RECIPIENTS_PANEL_BORDER}
+				strokeWidth="1"
+				strokeDasharray="44 32"
+				vectorEffect="non-scaling-stroke"
+			/>
+		</svg>
+		<div className="relative z-[1] flex h-full min-h-0 flex-col">
+			{children}
+		</div>
+	</div>
+);
 
 // Helper function to generate contact initials
 const getContactInitials = (firstName: string, lastName: string): string => {
@@ -46,10 +82,7 @@ const ContactList: React.FC<ContactListProps> = ({
 	onTotalChange,
 	onLoadingChange,
 	campaignType,
-	variant = 'full',
 }) => {
-	const isSummary = variant === 'summary';
-
 	// Simple local state
 	const [searchTerm, setSearchTerm] = useState('');
 	const [contacts, setContacts] = useState<Contact[]>([]);
@@ -68,7 +101,7 @@ const ContactList: React.FC<ContactListProps> = ({
 		setIsLoading(true);
 		setError(null);
 
-		const perPage = isSummary ? 1 : 50;
+		const perPage = 50;
 
 		// Flatten [includeRows, excludeRows] into a 1-D list and stamp each
 		// row with its mode. WP core's rest_sanitize_array() calls
@@ -76,33 +109,39 @@ const ContactList: React.FC<ContactListProps> = ({
 		// outer key when only one side is populated — turning an
 		// exclude-only payload into an include-only one. Tagging each row
 		// keeps include/exclude meaningful regardless of reindexing.
-		const includeRows = Array.isArray((filters as any)?.[0]) ? (filters as any)[0] : [];
-		const excludeRows = Array.isArray((filters as any)?.[1]) ? (filters as any)[1] : [];
+		const includeRows = Array.isArray((filters as any)?.[0])
+			? (filters as any)[0]
+			: [];
+		const excludeRows = Array.isArray((filters as any)?.[1])
+			? (filters as any)[1]
+			: [];
 		const taggedFilters: any[] = [
 			...includeRows.map((row: any) => ({ ...row, mode: 'include' })),
 			...excludeRows.map((row: any) => ({ ...row, mode: 'exclude' })),
 		];
 
 		try {
-			const response = await apiFetch<{ data: Contact[]; total: number; filtered_total?: number }>(
-				{
-					path: addQueryArgs('/doublescale/v1/contacts', {
-						per_page: perPage,
-						page: pageNum,
-						filters: taggedFilters,
-						subscribed: true,
-						keywords: isSummary ? '' : search,
-						campaign_type: campaignType,
-					}),
-					method: 'GET',
-				}
-			);
+			const response = await apiFetch<{
+				data: Contact[];
+				total: number;
+				filtered_total?: number;
+			}>({
+				path: addQueryArgs('/doublescale/v1/contacts', {
+					per_page: perPage,
+					page: pageNum,
+					filters: taggedFilters,
+					subscribed: true,
+					keywords: search,
+					campaign_type: campaignType,
+				}),
+				method: 'GET',
+			});
 
 			const newContacts = Array.isArray(response.data)
 				? response.data
 				: ([] as Contact[]);
 
-			if (append && !isSummary) {
+			if (append) {
 				setContacts((prev) => [...prev, ...newContacts]);
 			} else {
 				setContacts(newContacts);
@@ -113,7 +152,7 @@ const ContactList: React.FC<ContactListProps> = ({
 			// Parent steps (e.g. campaign contacts) gate "Next" on this; sync before async paint.
 			onTotalChange?.(totalCount);
 			setPage(pageNum);
-			setHasMore(!isSummary && newContacts.length === perPage);
+			setHasMore(newContacts.length === perPage);
 		} catch (err: unknown) {
 			const message =
 				err instanceof Error
@@ -168,7 +207,6 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	// Debounced search - refetch from API with search term
 	useEffect(() => {
-		if (isSummary) return;
 		if (isInitialMount.current) return;
 
 		const timer = setTimeout(() => {
@@ -176,12 +214,11 @@ const ContactList: React.FC<ContactListProps> = ({
 		}, 500);
 
 		return () => clearTimeout(timer);
-	}, [searchTerm, isSummary]);
+	}, [searchTerm]);
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
 		(e: React.UIEvent<HTMLDivElement>) => {
-			if (isSummary) return;
 			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
 			// Load more when near bottom
@@ -193,115 +230,66 @@ const ContactList: React.FC<ContactListProps> = ({
 				fetchContacts(page + 1, true, searchTerm);
 			}
 		},
-		[hasMore, isLoading, page, searchTerm, isSummary]
+		[hasMore, isLoading, page, searchTerm]
 	);
 
-	if (isSummary) {
-		const busy = isLoading || loading;
-		return (
-			<div className="relative w-full self-start rounded-xl bg-[#FAEADF] px-4 py-4">
-				<svg
-					className="pointer-events-none absolute inset-0 h-full w-full overflow-visible rounded-xl"
-					xmlns="http://www.w3.org/2000/svg"
-					aria-hidden
-				>
-					<rect
-						x="1"
-						y="1"
-						width="calc(100% - 1px)"
-						height="calc(100% - 1px)"
-						rx="11"
-						ry="11"
-						fill="none"
-						stroke="#CB5301"
-						strokeWidth="1"
-						strokeDasharray="44 32"
-						vectorEffect="non-scaling-stroke"
-					/>
-				</svg>
-				<div className="relative z-[1] flex gap-3">
-					<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
-						<ContactsIcon width={22} height={22} color="#CB5301" />
-					</div>
-					<div className="min-w-0 flex-1">
-						{error ? (
-							<p className="text-sm text-destructive">{error}</p>
-						) : (
-							<>
-								<p className="text-base font-medium text-foreground">
-									{busy
-										? __('Loading…', 'doublescale')
-										: sprintf(
-												/* translators: %s: number of recipients */
-												__(
-													'Total Recipients: %s',
-													'doublescale'
-												),
-												total.toLocaleString()
-											)}
-								</p>
-								<p className="mt-2 text-sm font-normal leading-snug text-muted-foreground">
-									{__(
-										'Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign.',
-										'doublescale'
-									)}
-								</p>
-							</>
-						)}
-					</div>
-				</div>
-			</div>
-		);
-	}
-
 	return (
-		<div
-			className="w-[45%] bg-muted/50 rounded-lg border border-gray-200 p-6 flex flex-col"
+		<RecipientsPanelShell
+			className="flex min-h-0 flex-col overflow-hidden"
 			style={{
 				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
 				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',
 			}}
 		>
-			{/* Header */}
-			<div className="flex items-center justify-between gap-4 flex-shrink-0">
-				<div className="w-1/2">
-					<div className="flex items-center gap-2 mb-2">
-						<h3 className="text-lg font-semibold text-gray-900">
-							{__('Recipients', 'doublescale')}
-						</h3>
-						<span className="text-sm font-semibold text-secondary px-3 py-1 bg-[#C6DFF333] rounded-full">
-							{total.toLocaleString()}
-						</span>
-					</div>
-					<p className="text-sm font-semibold text-gray-500">
-						{__(
-							'Recipients Total Contacts based on filters',
-							'doublescale'
-						)}
-					</p>
-				</div>
-
-				{/* Search */}
-				<div className="w-1/2 flex items-center gap-2 p-3 rounded-lg">
-					<SearchIcon className="text-gray-400" />
-					<Input
-						type="text"
-						placeholder={searchPlaceholder}
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-						style={{
-							border: 'none',
-							outline: 'none',
-							boxShadow: 'none',
-							backgroundColor: 'transparent',
-						}}
+			<div className="flex gap-3 border-b border-[#CB5301]/30 pb-4 mb-4">
+				<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white">
+					<ContactsIcon
+						width={22}
+						height={22}
+						color={RECIPIENTS_PANEL_BORDER}
 					/>
+				</div>
+				<div className="min-w-0 flex-1">
+					{error ? (
+						<p className="text-sm text-destructive">{error}</p>
+					) : (
+						<>
+							<p className="text-base font-medium text-foreground">
+								{isLoading || loading
+									? __('Loading…', 'doublescale')
+									: sprintf(
+											/* translators: %s: number of recipients */
+											__(
+												'Total Recipients: %s',
+												'doublescale'
+											),
+											total.toLocaleString()
+										)}
+							</p>
+							<p className="mt-2 text-sm font-normal leading-snug text-muted-foreground">
+								{__(
+									'Contacts must be subscribed to the selected list(s) and meet the selected conditions to receive this campaign.',
+									'doublescale'
+								)}
+							</p>
+						</>
+					)}
 				</div>
 			</div>
 
-			{/* Contacts List */}
+			<div className="flex shrink-0 items-center gap-2 px-3 h-10 border border-[#CB5301]/30 rounded-lg">
+				<SearchIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+				<Input
+					type="text"
+					placeholder={searchPlaceholder}
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+					className="h-10 flex-1 !border-0 !ring-0 !ring-offset-0  !bg-transparent px-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+				/>
+			</div>
+
 			<div
-				className="overflow-y-auto flex-1 min-h-0 mt-3"
+				className="min-h-0 flex-1 overflow-y-auto"
 				onScroll={handleScroll}
 			>
 				{(isLoading || loading) && contacts.length === 0 ? (
@@ -322,59 +310,57 @@ const ContactList: React.FC<ContactListProps> = ({
 					</div>
 				) : (
 					<>
-						{contacts.map(
-							(contact) => {
-								const fullName =
-									`${contact.first_name || ''} ${contact.last_name || ''}`.trim();
-								const initials = getContactInitials(
-									contact.first_name,
-									contact.last_name
-								);
-								const avatarUrl = (contact as any).avatar_url;
+						{contacts.map((contact) => {
+							const fullName =
+								`${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+							const initials = getContactInitials(
+								contact.first_name,
+								contact.last_name
+							);
+							const avatarUrl = (contact as any).avatar_url;
 
-								return (
-									<div
-										key={contact.id}
-										className="flex items-center gap-3 py-3 hover:bg-gray-50 cursor-pointer"
-									>
-										{/* Avatar */}
-										<Avatar className="w-12 h-12 rounded-full">
-											{avatarUrl ? (
-												<AvatarImage
-													src={avatarUrl}
-													alt={
-														fullName ||
-														contact.email
-													}
-													className="rounded-full"
-												/>
-											) : null}
-											<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
-												{initials}
-											</AvatarFallback>
-										</Avatar>
+							return (
+								<div
+									key={contact.id}
+									className="flex items-center gap-3 py-3"
+								>
+									{/* Avatar */}
+									<Avatar className="w-10 h-10 rounded-full">
+										{avatarUrl ? (
+											<AvatarImage
+												src={avatarUrl}
+												alt={fullName || contact.email}
+												className="rounded-full"
+											/>
+										) : null}
+										<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
+											{initials}
+										</AvatarFallback>
+									</Avatar>
 
-										{/* Contact Info */}
-										<div className="flex-1 min-w-0">
-											{fullName && (
-												<div className="font-semibold capitalize text-base text-foreground w-72 truncate">
-													{fullName}
-												</div>
-											)}
-											<div className="text-base text-gray-500 truncate">
-												{contact.email}
+									{/* Contact Info */}
+									<div className="flex-1 min-w-0">
+										{fullName && (
+											<div className="truncate text-sm font-semibold capitalize text-foreground">
+												{fullName}
 											</div>
+										)}
+										<div className="text-sm text-muted-foreground truncate">
+											{contact.email}
 										</div>
 									</div>
-								);
-							}
-						)}
+								</div>
+							);
+						})}
 
 						{/* Loading more indicator */}
 						{isLoading && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
-								<div className="text-gray-500 text-sm">
-									{__('Loading more contacts...', 'doublescale')}
+								<div className="text-muted-foreground text-sm">
+									{__(
+										'Loading more contacts...',
+										'doublescale'
+									)}
 								</div>
 							</div>
 						)}
@@ -382,15 +368,18 @@ const ContactList: React.FC<ContactListProps> = ({
 						{/* End of list */}
 						{!hasMore && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
-								<div className="text-gray-400 text-sm">
-									{__('No more contacts to load', 'doublescale')}
+								<div className="text-muted-foreground text-sm">
+									{__(
+										'No more contacts to load',
+										'doublescale'
+									)}
 								</div>
 							</div>
 						)}
 					</>
 				)}
 			</div>
-		</div>
+		</RecipientsPanelShell>
 	);
 };
 

@@ -314,7 +314,7 @@ class RestSmtpEmailLogController extends RestController {
 	public function get_items( $request ) {
 		$status = $this->normalize_list_status( $request->get_param( 'status' ) );
 
-		$per_page = (int) ( $request->get_param( 'per_page' ) ?? 25 );
+		$per_page = (int) ( $request->get_param( 'per_page' ) ?? 10 );
 		$per_page = max( 1, min( 200, $per_page ) );
 		$page     = max( 1, (int) ( $request->get_param( 'page' ) ?? 1 ) );
 		$offset   = $per_page * ( $page - 1 );
@@ -519,6 +519,57 @@ class RestSmtpEmailLogController extends RestController {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		return Settings::user_can_manage_smtp_rest();
+	}
+
+	/**
+	 * REST query parameters for paginated SMTP email log listing.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function get_collection_params() {
+		return array(
+			'page'       => array(
+				'description'       => __( 'Current page (1-based).', 'doublescale' ),
+				'type'              => 'integer',
+				'default'           => 1,
+				'minimum'           => 1,
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function ( $value ) {
+					return is_numeric( $value ) && (int) $value >= 1;
+				},
+			),
+			'per_page'   => array(
+				'description'       => __( 'Number of log rows per page (max 200).', 'doublescale' ),
+				'type'              => 'integer',
+				'default'           => 10,
+				'minimum'           => 1,
+				'maximum'           => 200,
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function ( $value ) {
+					return is_numeric( $value ) && (int) $value >= 1 && (int) $value <= 200;
+				},
+			),
+			'status'     => array(
+				'description' => __( 'Filter by outcome: all, succeeded, or failed.', 'doublescale' ),
+				'type'        => 'string',
+				'enum'        => array( 'all', 'succeeded', 'failed' ),
+				'default'     => 'all',
+			),
+			'search'     => array(
+				'description' => __( 'Search subject, body, headers, from, or recipients.', 'doublescale' ),
+				'type'        => 'string',
+			),
+			'start_date' => array(
+				'description' => __( 'Start date (Y-m-d), paired with end_date.', 'doublescale' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'end_date'   => array(
+				'description' => __( 'End date (Y-m-d), paired with start_date.', 'doublescale' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+		);
 	}
 
 	/**

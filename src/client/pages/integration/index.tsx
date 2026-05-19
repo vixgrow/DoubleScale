@@ -18,6 +18,7 @@ import { applyFilters } from '@wordpress/hooks';
 import './style.scss';
 import type { Integration as IntegrationType } from '@doublescale/config';
 import type { NoticeMessage } from '@doublescale/client';
+import { getApiErrorMessage } from '@doublescale/utils';
 import {
 	Dialog,
 	DialogContent,
@@ -43,19 +44,6 @@ interface IntegrationProps {
 	slug: string;
 	onSuccess?: (integrationLabel: string) => void;
 }
-
-/**
- * Extract error message from various error formats (WordPress REST API, fetch errors, etc.)
- */
-const getErrorMessage = (error: unknown, fallback: string): string => {
-	if (!error) return fallback;
-	if (typeof error === 'string') return error;
-	if (typeof error === 'object') {
-		const err = error as Record<string, any>;
-		return err.message || err.data?.message || fallback;
-	}
-	return fallback;
-};
 
 /**
  * Parse settings into initial field values based on integration type
@@ -115,7 +103,7 @@ const Integration: React.FC<IntegrationProps> = ({
 	const showError = (error: unknown, fallbackMessage: string) => {
 		setNotice({
 			type: 'error',
-			message: getErrorMessage(error, fallbackMessage),
+			message: getApiErrorMessage(error, fallbackMessage),
 		});
 	};
 

@@ -32,6 +32,22 @@ class MetaTemplateSaver {
 		$settings    = is_array( $template_data['settings'] ?? null ) ? $template_data['settings'] : array();
 		$external_id = $settings['external_id'] ?? ( $template_data['sid'] ?? '' );
 
+		// Persist external_id into settings so downstream callers (e.g. is_whatsapp_business_template,
+		// get_whatsapp_content_sid) can read it. Callers may pass sid as a top-level key without
+		// also nesting it in settings.
+		if ( ! empty( $external_id ) ) {
+			$settings['external_id'] = $external_id;
+		}
+
+		// Carry through variables/language from the request when settings doesn't already carry them
+		// - these are part of the template's identity and several consumers depend on settings.variables.
+		if ( ! isset( $settings['variables'] ) && isset( $template_data['variables'] ) ) {
+			$settings['variables'] = $template_data['variables'];
+		}
+		if ( ! isset( $settings['language'] ) && ! empty( $template_data['language'] ) ) {
+			$settings['language'] = $template_data['language'];
+		}
+
 		// Check if already exists by external_id
 		$existing = $this->find_by_external_id( $external_id );
 

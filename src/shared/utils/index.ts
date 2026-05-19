@@ -554,14 +554,32 @@ type ApiErrorShape = {
 };
 
 /**
+ * Rewrite WordPress's "<snake_case> is a required property of <parent>." validator
+ * message into a human-friendly "<Title Case> is required." form. Returns the original
+ * message untouched when it doesn't match that pattern.
+ *
+ * @param message - Raw validator message from rest_validate_value_from_schema
+ * @returns Humanized form, or the original message if no rewrite applies
+ */
+export const humanizeRequiredPropertyMessage = (message: string): string => {
+	const match = message.match(/^([a-z][a-z0-9_]*) is a required property of [a-z_]+\.$/);
+	if (!match) return message;
+	const titleCased = match[1]
+		.split('_')
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(' ');
+	return `${titleCased} is required.`;
+};
+
+/**
  * Extract a user-friendly error message from WordPress REST API errors
- * 
+ *
  * Handles multiple error formats:
  * 1. Validation errors with detailed params (rest_invalid_param)
  * 2. Standard WP_Error format with message
  * 3. Nested data.message format
  * 4. Plain string errors
- * 
+ *
  * @param error - The error object from apiFetch
  * @param fallback - Fallback message if no error message found
  * @returns User-friendly error message string
@@ -581,9 +599,9 @@ export const getApiErrorMessage = (
 				// If the field is 'settings', just show the message without the field name
 				// as it's more user-friendly
 				if (field === 'settings') {
-					return message;
+					return humanizeRequiredPropertyMessage(message);
 				}
-				return `${field}: ${message}`;
+				return `${field}: ${humanizeRequiredPropertyMessage(message)}`;
 			})
 			.join('; ');
 

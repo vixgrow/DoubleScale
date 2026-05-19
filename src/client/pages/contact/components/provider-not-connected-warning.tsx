@@ -11,21 +11,15 @@ interface ProviderNotConnectedWarningProps {
 /**
  * Shared component for displaying provider not connected warning
  * Used in SMS and WhatsApp tabs
- * 
+ *
  * For SMS: Only Twilio is available
- * For WhatsApp: Both Twilio and Meta WhatsApp are available
+ * For WhatsApp: Only Meta WhatsApp is available (Twilio WhatsApp was removed)
  */
 export function ProviderNotConnectedWarning({
 	channel,
 	onConfigureClick,
 }: ProviderNotConnectedWarningProps) {
 	const channelName = channel === 'sms' ? __('SMS', 'doublescale') : __('WhatsApp', 'doublescale');
-
-	// For SMS, only Twilio is available
-	// For WhatsApp, both Twilio and Meta WhatsApp are available
-	const providerOptions = channel === 'sms' 
-		? __('Twilio', 'doublescale')
-		: __('Twilio or Meta WhatsApp', 'doublescale');
 
 	return (
 		<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
@@ -38,7 +32,7 @@ export function ProviderNotConnectedWarning({
 								'doublescale'
 						  )
 						: __(
-								'No WhatsApp provider is configured. Please configure Twilio or Meta WhatsApp to send messages.',
+								'No WhatsApp provider is configured. Please configure Meta WhatsApp to send messages.',
 								'doublescale'
 						  )}
 				</p>

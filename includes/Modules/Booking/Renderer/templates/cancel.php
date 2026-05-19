@@ -1,39 +1,12 @@
 <?php
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scope-local; populated by the parent renderer via extract().
 
-defined( 'ABSPATH' ) || exit;|| exit;
+defined( 'ABSPATH' ) || exit;
 
 $icons_url           = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 $cancellation_reason = $fields['cancellation_reason'];
 $status              = $booking_array['status'] ?? '';
 ?>
-
-<style>
-@keyframes spin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
-}
-
-#cancel_booking_button:disabled {
-	opacity: 0.6;
-	cursor: not-allowed;
-}
-
-#loading_spinner {
-	display: inline-flex;
-	align-items: center;
-}
-
-.cancellation-denied-message {
-	background-color: #fef2f2;
-	border: 1px solid #fecaca;
-	color: #dc2626;
-	padding: 15px;
-	border-radius: 6px;
-	margin: 20px 0;
-	text-align: center;
-}
-</style>
 
 <div class="doublescale-booking-meeting">
 	<div class="details-container">
@@ -119,77 +92,3 @@ $status              = $booking_array['status'] ?? '';
 		<div class="success-message" id="success_message" aria-live="polite" hidden></div>
 	</div>
 </div>
-
-<script>
-	document.getElementById('cancel_booking_button')?.addEventListener('click', function(event) {
-		event.preventDefault();
-		
-		// Check if cancellation is allowed
-		if (!<?php echo json_encode( $can_cancel ); ?>) {
-			return;
-		}
-		
-		const textarea = document.getElementById('cancellation_reason');
-		const validation = document.getElementById('validation_message');
-		const button = document.getElementById('cancel_booking_button');
-		const buttonText = document.getElementById('button_text');
-		const loadingSpinner = document.getElementById('loading_spinner');
-		
-		if (validation) {
-			validation.textContent = '';
-		}
-
-		if (textarea && !textarea.value.trim() && <?php echo json_encode( $cancellation_reason['required'] ); ?> && <?php echo json_encode( $cancellation_reason['enabled'] ); ?>) {
-			validation.textContent = '<?php echo esc_js( __( 'This field is required.', 'doublescale' ) ); ?>';
-			textarea.classList.add('error');
-			return;
-		}
-
-		// Show loading state
-		button.disabled = true;
-		buttonText.style.display = 'none';
-		loadingSpinner.style.display = 'inline-flex';
-		loadingSpinner.style.alignItems = 'center';
-
-		const formData = new FormData();
-		formData.append('action', 'doublescale_booking_cancel_booking');
-		formData.append('nonce', '<?php echo esc_js( wp_create_nonce( 'doublescale_booking' ) ); ?>');
-		formData.append('id', '<?php echo esc_js( $booking_array['hash_id'] ); ?>');
-		if (textarea) {
-			formData.append('cancellation_reason', textarea.value);
-		}
-
-		fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
-				method: 'POST',
-				body: formData,
-			})
-			.then(response => response.json())
-			.then(data => {
-				if (data.success) {
-					// Hide input container and buttons on success
-					document.querySelector('.cancellation-container').hidden = true;
-
-					const successDiv = document.getElementById('success_message');
-					successDiv.textContent = '<?php echo esc_js( __( 'Booking successfully canceled.', 'doublescale' ) ); ?>';
-					successDiv.hidden = false;
-				} else {
-					// Reset loading state on error
-					button.disabled = false;
-					buttonText.style.display = 'inline';
-					loadingSpinner.style.display = 'none';
-					
-					validation.textContent = data.message || '<?php echo esc_js( __( 'An error occurred while canceling the booking.', 'doublescale' ) ); ?>';
-					textarea.classList.add('error');
-				}
-			})
-			.catch(() => {
-				// Reset loading state on error
-				button.disabled = false;
-				buttonText.style.display = 'inline';
-				loadingSpinner.style.display = 'none';
-				
-				validation.textContent = '<?php echo esc_js( __( 'An error occurred. Please try again later.', 'doublescale' ) ); ?>';
-				textarea.classList.add('error');
-			});
-	});
-</script>

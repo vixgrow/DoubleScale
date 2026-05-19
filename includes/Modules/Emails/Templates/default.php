@@ -12,7 +12,7 @@
  * @package DoubleScale\Pro
  * @subpackage Emails
  */
-
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- HTML email body template; emails do not run wp_head/wp_enqueue, so styles must be inlined.
 
 defined( 'ABSPATH' ) || exit;
 

@@ -51,6 +51,34 @@ final class CustomMetabox {
 	private function __construct() {
 		add_action( 'edd_view_order_details_sidebar_after', array( $this, 'edd_order_metabox' ) );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ), 99, 2 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_assets' ) );
+	}
+
+	/**
+	 * Register and conditionally enqueue the order-metabox stylesheet on
+	 * WooCommerce / EDD order edit screens.
+	 */
+	public function register_assets( $hook_suffix ): void {
+		wp_register_style(
+			'doublescale-contact-order-metabox',
+			DOUBLESCALE_PLUGIN_URL . 'assets/css/admin/contact-order-metabox.css',
+			array(),
+			DOUBLESCALE_VERSION
+		);
+
+		$is_order_screen = false;
+		$screen          = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen ) {
+			$is_order_screen =
+				'woocommerce_page_wc-orders' === $screen->id
+				|| 'shop_order' === $screen->id
+				|| 'shop_order' === $screen->post_type
+				|| false !== strpos( (string) $hook_suffix, 'edd-payment-history' );
+		}
+
+		if ( $is_order_screen ) {
+			wp_enqueue_style( 'doublescale-contact-order-metabox' );
+		}
 	}
 
 	/**
@@ -168,51 +196,6 @@ final class CustomMetabox {
 				</div>
 			</div>
 		</div>
-		<style>
-			.doublescale-edd-order-metabox .inside{
-				padding: 20px;
-			}
-			.doublescale-avatar {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				margin-bottom: 20px;
-				flex-direction: column;
-				gap: 10px;
-			}
-			.doublescale-avatar:active {
-				text-decoration: none;
-				outline: none;
-				box-shadow: none;
-			}
-			.doublescale-avatar img {
-				width: 80px;
-				height: 80px;
-				border: 6px solid #e6ebf0;
-				border-radius: 50%;
-				vertical-align: middle;
-				background-position: center center;
-				background-repeat: no-repeat;
-				background-size: cover;
-			}
-			.doublescale-contact-name {
-				font-size: 20px;
-				font-weight: bold;
-				color: #434b8c;
-				margin: 0;
-			}
-			.doublescale-contact-emails {
-				display: flex;
-				justify-content: center;
-			}
-			.doublescale-contact-emails p {
-				margin: 0;
-				border: 1px solid #e6ebf0;
-				padding: 5px;
-				background-color: #97a2e6;
-				color: #434b8c;
-			}
-		</style>
 		<?php
 	}
 }

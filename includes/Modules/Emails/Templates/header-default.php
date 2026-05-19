@@ -8,6 +8,7 @@
  * @package DoubleScale\Pro
  * @subpackage Emails
  */
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- HTML email header template; emails do not run wp_head/wp_enqueue, so styles must be inlined.
 
 
 

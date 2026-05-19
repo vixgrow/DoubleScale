@@ -178,6 +178,43 @@ abstract class BaseTemplateRenderer {
 	}
 
 	/**
+	 * Register and enqueue the template-specific CSS/JS, if a sibling
+	 * `assets/css/booking-renderer/{name}.css` or `assets/js/booking-renderer/{name}.js`
+	 * exists. Inline data (e.g. nonces, hash ids) is passed via `wp_add_inline_script`
+	 * as a `window.doublescaleBooking<Name>` object.
+	 *
+	 * @param string $template_path Path to the template being rendered.
+	 * @param array  $inline_data   Per-template values to surface to the JS layer.
+	 */
+	protected function enqueue_template_assets( string $template_path, array $inline_data = array() ): void {
+		$basename = pathinfo( $template_path, PATHINFO_FILENAME );
+		$css_rel  = 'assets/css/booking-renderer/' . $basename . '.css';
+		$js_rel   = 'assets/js/booking-renderer/' . $basename . '.js';
+		$css_abs  = DOUBLESCALE_PLUGIN_DIR . $css_rel;
+		$js_abs   = DOUBLESCALE_PLUGIN_DIR . $js_rel;
+
+		if ( file_exists( $css_abs ) ) {
+			$handle = 'doublescale-booking-template-' . $basename;
+			wp_register_style( $handle, DOUBLESCALE_PLUGIN_URL . $css_rel, array(), DOUBLESCALE_VERSION );
+			wp_enqueue_style( $handle );
+		}
+
+		if ( file_exists( $js_abs ) ) {
+			$handle = 'doublescale-booking-template-' . $basename;
+			wp_register_script( $handle, DOUBLESCALE_PLUGIN_URL . $js_rel, array(), DOUBLESCALE_VERSION, true );
+			if ( ! empty( $inline_data ) ) {
+				$object_name = 'doublescaleBooking' . str_replace( ' ', '', ucwords( str_replace( array( '-', '_' ), ' ', $basename ) ) );
+				wp_add_inline_script(
+					$handle,
+					'window.' . $object_name . ' = ' . wp_json_encode( $inline_data ) . ';',
+					'before'
+				);
+			}
+			wp_enqueue_script( $handle );
+		}
+	}
+
+	/**
 	 * Render template page helper
 	 */
 	protected function render_template_page( string $template_path, array $variables = array() ) {
@@ -186,6 +223,11 @@ abstract class BaseTemplateRenderer {
 		}
 
 		$this->enqueue_page_assets();
+		$inline_js_data = isset( $variables['__js_data'] ) && is_array( $variables['__js_data'] )
+			? $variables['__js_data']
+			: array();
+		unset( $variables['__js_data'] );
+		$this->enqueue_template_assets( $template_path, $inline_js_data );
 		extract( $variables );
 
 		echo $this->get_head( $variables['title'] ?? '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML head markup.

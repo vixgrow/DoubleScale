@@ -62,6 +62,20 @@ class CancelPageRenderer extends BaseTemplateRenderer {
 				'title'                 => __( 'Cancel Booking', 'doublescale' ),
 				'can_cancel'            => $cancel_permissions['can_cancel'],
 				'cancel_denied_message' => $cancel_permissions['message'],
+				'__js_data'             => array(
+					'canCancel'      => (bool) $cancel_permissions['can_cancel'],
+					'reasonRequired' => (bool) ( $other_fields['cancellation_reason']['required'] ?? false ),
+					'reasonEnabled'  => (bool) ( $other_fields['cancellation_reason']['enabled'] ?? false ),
+					'hashId'         => (string) ( $booking_array['hash_id'] ?? '' ),
+					'nonce'          => wp_create_nonce( 'doublescale_booking' ),
+					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+					'i18n'           => array(
+						'required'     => __( 'This field is required.', 'doublescale' ),
+						'success'      => __( 'Booking successfully canceled.', 'doublescale' ),
+						'genericError' => __( 'An error occurred while canceling the booking.', 'doublescale' ),
+						'networkError' => __( 'An error occurred. Please try again later.', 'doublescale' ),
+					),
+				),
 			)
 		);
 	}

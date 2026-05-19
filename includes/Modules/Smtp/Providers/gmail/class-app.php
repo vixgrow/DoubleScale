@@ -156,6 +156,7 @@ class App {
 			?>
 			<!DOCTYPE html>
 			<html lang="en"><head><meta charset="UTF-8"><title>OAuth error</title>
+			<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Standalone HTML response for OAuth error, terminates with exit; outside WP page lifecycle, wp_enqueue cannot run here. ?>
 			<style>body{font-family:system-ui,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;color:#222}code{background:#f4f4f4;padding:2px 6px;border-radius:4px}pre{background:#f4f4f4;padding:12px;border-radius:6px;white-space:pre-wrap;word-break:break-word}.err{color:#b00020;font-weight:600}</style>
 			</head><body>
 			<h2 class="err"><?php echo esc_html__( 'Cannot get account tokens', 'doublescale' ); ?></h2>
@@ -225,6 +226,7 @@ class App {
 		</head>
 		<body>
 			<?php echo esc_html__( "The account is added/updated successfully. If this window isn't closed automatically. Please close it and refersh your accounts select menu.", 'doublescale' ); ?>
+			<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML response for OAuth popup that messages the opener via window.opener and closes itself; outside WP page lifecycle, wp_enqueue cannot run here. ?>
 			<script>
 				if ( typeof window.opener.add_new_gmail_account === 'function' ) {
 					window.opener.add_new_gmail_account( '<?php echo  esc_attr( $account_id ); ?>', '<?php echo esc_attr( $account_name ); ?>' );

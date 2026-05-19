@@ -168,6 +168,7 @@ class App {
 		</head>
 		<body>
 			<?php echo esc_html__( "The account is added/updated successfully. If this window isn't closed automatically. Please close it and refersh your accounts select menu.", 'doublescale' ); ?>
+			<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML response for OAuth popup that messages the opener and closes itself; outside WP page lifecycle, wp_enqueue cannot run here. ?>
 			<script>
 				if ( typeof window.opener.add_new_zoho_account === 'function' ) {
 					window.opener.add_new_zoho_account( '<?php echo esc_js( $account_id ); ?>', '<?php echo esc_js( $account_name ); ?>' );

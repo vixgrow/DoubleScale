@@ -195,6 +195,7 @@ class GohighlevelOauth {
 		</head>
 		<body>
 			<p><?php echo esc_html__( "The account is added successfully. If this window isn't closed automatically. Please close it and refresh your accounts select menu.", 'doublescale' ); ?></p>
+			<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML response for OAuth popup that reloads the opener and closes itself; outside WP page lifecycle, wp_enqueue cannot run here. ?>
 			<script>
 				if ( window.opener ) {
 					try {

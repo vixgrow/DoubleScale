@@ -1,12 +1,13 @@
 <?php
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scope-local; populated by the parent renderer via extract().
-
-defined( 'ABSPATH' ) || exit;<?php
 /**
  * Weekly summary email HTML template.
  *
  * @package DoubleScale
  */
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are scope-local; populated by the parent renderer via extract().
+
+defined( 'ABSPATH' ) || exit;
 
 defined( 'ABSPATH' ) || exit;
 

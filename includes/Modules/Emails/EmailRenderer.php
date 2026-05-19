@@ -10,6 +10,7 @@
 
 namespace DoubleScale\Modules\Emails;
 
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- This file builds HTML emails (not WP pages); emails do not run wp_head/wp_enqueue, so styles must be inlined into the HTML body.
 
 defined( 'ABSPATH' ) || exit;
 

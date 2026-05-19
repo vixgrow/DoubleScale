@@ -56,6 +56,10 @@ class BookingFrontendHandler {
 			return;
 		}
 
+		// Reset the queue to drop theme/other-plugin styles that would otherwise
+		// inject into the standalone booking page. Anything our renderer needs
+		// is (re-)enqueued inside `BaseTemplateRenderer::get_head()` AFTER this
+		// action fires.
 		$wp_scripts->queue = array();
 		$wp_styles->queue  = array();
 

@@ -59,7 +59,17 @@ abstract class BaseTemplateRenderer {
 	}
 
 	/**
-	 * Get common head HTML
+	 * Get common head HTML.
+	 *
+	 * Public booking pages bypass the WP template hierarchy (`exit()` after
+	 * render), so wp_head() never runs. We mimic the essentials here:
+	 *
+	 *   1. Fire `wp_enqueue_scripts` so listeners (e.g. BookingFrontendHandler)
+	 *      get a chance to register/enqueue.
+	 *   2. Run our own enqueues AFTER that hook so they aren't wiped by the
+	 *      handler's queue reset.
+	 *   3. Print enqueued styles + head scripts so the `<link>` tags actually
+	 *      land in <head>.
 	 */
 	protected function get_head( $title = '' ) {
 		ob_start();
@@ -75,11 +85,68 @@ abstract class BaseTemplateRenderer {
 			<?php
 			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WP core action; booking renderer mimics `wp_head()` flow because public pages bypass the WP template hierarchy.
 			do_action( 'wp_enqueue_scripts' );
+			$this->enqueue_deferred_assets();
+			wp_print_styles();
+			wp_print_head_scripts();
 			?>
 		</head>
 		<body class="doublescale-booking-body">
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Slots for assets that must be enqueued AFTER `wp_enqueue_scripts` fires
+	 * (because that hook resets the queue). Populated by render_template_page /
+	 * render_react_page / render_unavailable before they call get_head().
+	 *
+	 * @var array{handles: array<int, string>, template_path: string, inline_data: array}
+	 */
+	private $deferred = array(
+		'handles'        => array(),
+		'template_path'  => '',
+		'inline_data'    => array(),
+		'react'          => false,
+	);
+
+	/**
+	 * Schedule which assets get enqueued from inside get_head() (post-hook).
+	 *
+	 * @param array{
+	 *   handles?: array<int, string>,
+	 *   template_path?: string,
+	 *   inline_data?: array,
+	 *   react?: bool
+	 * } $assets
+	 */
+	private function defer_assets( array $assets ): void {
+		$this->deferred = array_merge( $this->deferred, $assets );
+	}
+
+	/**
+	 * Run the deferred enqueues inside get_head(), after wp_enqueue_scripts fired.
+	 */
+	private function enqueue_deferred_assets(): void {
+		if ( ! empty( $this->deferred['handles'] ) ) {
+			foreach ( $this->deferred['handles'] as $handle ) {
+				if ( wp_style_is( $handle, 'registered' ) ) {
+					wp_enqueue_style( $handle );
+				}
+				if ( wp_script_is( $handle, 'registered' ) ) {
+					wp_enqueue_script( $handle );
+				}
+			}
+		}
+		if ( ! empty( $this->deferred['template_path'] ) ) {
+			$this->enqueue_template_assets(
+				$this->deferred['template_path'],
+				$this->deferred['inline_data']
+			);
+		}
+		if ( ! empty( $this->deferred['react'] ) ) {
+			wp_enqueue_script( 'doublescale-booking-renderer' );
+			wp_enqueue_style( 'doublescale-booking-renderer' );
+		}
 	}
 
 	/**
@@ -96,20 +163,23 @@ abstract class BaseTemplateRenderer {
 	}
 
 	/**
-	 * Enqueue common page assets
+	 * Queue the shared booking-page CSS/JS for the next get_head() run.
 	 */
 	protected function enqueue_page_assets() {
-		wp_enqueue_script( 'doublescale-booking-page' );
-		wp_enqueue_style( 'doublescale-booking-page' );
+		$current = $this->deferred['handles'];
+		if ( ! in_array( 'doublescale-booking-page', $current, true ) ) {
+			$current[] = 'doublescale-booking-page';
+		}
+		$this->defer_assets( array( 'handles' => $current ) );
 	}
 
 	/**
-	 * Enqueue React assets
+	 * Queue the React renderer bundle for the next get_head() run.
 	 */
 	protected function enqueue_react_assets() {
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Plugin-prefixed action; the prefix-detection rule misfires on dynamic hooks.
 		do_action( 'doublescale_booking_renderer_enqueue_scripts' );
-		wp_enqueue_script( 'doublescale-booking-renderer' );
-		wp_enqueue_style( 'doublescale-booking-renderer' );
+		$this->defer_assets( array( 'react' => true ) );
 	}
 
 	/**
@@ -227,7 +297,12 @@ abstract class BaseTemplateRenderer {
 			? $variables['__js_data']
 			: array();
 		unset( $variables['__js_data'] );
-		$this->enqueue_template_assets( $template_path, $inline_js_data );
+		$this->defer_assets(
+			array(
+				'template_path' => $template_path,
+				'inline_data'   => $inline_js_data,
+			)
+		);
 		extract( $variables );
 
 		echo $this->get_head( $variables['title'] ?? '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal trusted HTML head markup.

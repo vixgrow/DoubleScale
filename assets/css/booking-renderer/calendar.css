@@ -1,39 +1,22 @@
-/* Calendar Page Styles */
-.doublescale-booking-meeting {
-	min-height: 100vh;
-	padding: 20px;
-	position: relative;
-	z-index: 99;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
+/* Calendar listing page — calendar-specific styles
+   Layout classes (.doublescale-booking-meeting, .details-container, .title,
+   .calendar-info, .profile-picture) come from assets/css/booking-style.css. */
 
-.details-container {
-	max-width: 800px;
-	width: 100%;
-	margin: 0 auto;
-	background: white;
-	border-radius: 16px;
-	overflow: hidden;
-	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-/* Header Styles */
 .calendar-header {
-	padding: 20px;
+	padding: 20px 0;
 	text-align: center;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	color: white;
-	position: relative;
 }
 
 .featured-image {
-	margin-bottom: 30px;
+	margin-bottom: 24px;
 	border-radius: 12px;
 	overflow: hidden;
 	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	width: 100%;
 }
 
 .featured-image img {
@@ -43,45 +26,8 @@
 	display: block;
 }
 
-.profile-picture {
-	position: relative;
-	z-index: 1;
-	margin-bottom: 10px;
-	border: 1px solid #e0e0e0;
-	border-radius: 50%;
-}
-
-.profile-picture img {
-	width: 80px;
-	height: 80px;
-	border-radius: 50%;
-	object-fit: cover;
-}
-
-.title {
-	font-size: 16px;
-	font-weight: 600;
-	color: black;
-	margin-bottom: 10px;
-	position: relative;
-	z-index: 1;
-}
-
-.calendar-info {
-	border: 1px solid #D3D4D6;
-	padding: 12px 16px;
-	border-radius: 8px;
-	font-size: 16px;
-	font-weight: 600;
-	position: relative;
-	color: black;
-	z-index: 1;
-	text-align: center;
-}
-
-/* Events Container */
 .events-container {
-	padding: 20px;
+	padding: 20px 0;
 }
 
 .event-card {
@@ -109,17 +55,11 @@
 	flex: 1;
 }
 
-.event-title {
-	font-size: 24px;
-	font-weight: 600;
-	color: #1A1A1A;
-	margin-bottom: 12px;
-}
-
 .event-details {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	margin-top: 8px;
 }
 
 .event-detail {
@@ -133,7 +73,7 @@
 .detail-icon {
 	width: 16px;
 	height: 16px;
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 }
@@ -144,7 +84,6 @@
 	object-fit: contain;
 }
 
-/* Book Now Button */
 .event-actions {
 	margin-left: 20px;
 }
@@ -166,24 +105,13 @@
 	box-shadow: 0 6px 12px -2px rgba(139, 92, 246, 0.35);
 }
 
-/* Responsive Design */
+.no-events {
+	padding: 24px;
+	text-align: center;
+	color: #4a5568;
+}
+
 @media (max-width: 640px) {
-	.doublescale-booking-meeting {
-		padding: 10px;
-	}
-
-	.calendar-header {
-		padding: 40px 20px;
-	}
-
-	.title {
-		font-size: 2rem;
-	}
-
-	.events-container {
-		padding: 20px;
-	}
-
 	.event-card {
 		flex-direction: column;
 		align-items: flex-start;

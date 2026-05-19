@@ -100,13 +100,15 @@ class BookingAjax {
 			$duration = isset( $_POST['duration'] ) ? intval( wp_unslash( $_POST['duration'] ) ) : $event->duration;
 			$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
 
-			$location = isset( $_POST['location'] ) ? json_decode( wp_unslash( $_POST['location'] ), true ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; validated below via bookingValidator and booking model.
+			$location_raw = isset( $_POST['location'] ) ? json_decode( wp_unslash( $_POST['location'] ), true ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
+			$location     = is_array( $location_raw ) ? map_deep( $location_raw, 'sanitize_text_field' ) : null;
 			if ( ! $location ) {
 				throw new \Exception( __( 'Invalid location', 'doublescale' ) );
 			}
 
 			// Validate invitees if needed
-			$invitees = isset( $_POST['invitees'] ) ? json_decode( wp_unslash( $_POST['invitees'] ), true ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; validated below via validate_invitee().
+			$invitees_raw = isset( $_POST['invitees'] ) ? json_decode( wp_unslash( $_POST['invitees'] ), true ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
+			$invitees     = is_array( $invitees_raw ) ? map_deep( $invitees_raw, 'sanitize_text_field' ) : array();
 			if ( empty( $invitees ) || ! is_array( $invitees ) ) {
 				throw new \Exception( __( 'Please, add valid invitees', 'doublescale' ) );
 			}
@@ -122,7 +124,8 @@ class BookingAjax {
 
 			$fields = array();
 			if ( isset( $_POST['fields'] ) ) {
-				$fields = json_decode( wp_unslash( $_POST['fields'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON payload; field values are sanitised per-field by the booking service downstream.
+				$fields_raw = json_decode( wp_unslash( $_POST['fields'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
+				$fields     = is_array( $fields_raw ) ? map_deep( $fields_raw, 'sanitize_text_field' ) : array();
 			}
 
 			$host_ids = isset( $_POST['host_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['host_ids'] ) ) : null;

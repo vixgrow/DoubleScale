@@ -87,6 +87,11 @@ class SubscriptionManager {
 	 * @return string
 	 */
 	public function get_head() {
+		// Ensure our handles exist before enqueueing — this method runs early
+		// (on wp_loaded), before the `wp_enqueue_scripts` action where
+		// register_scripts() would normally fire.
+		$this->register_scripts();
+
 		ob_start();
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -352,6 +357,12 @@ class SubscriptionManager {
 		$channel_label = ContactModel::get_channel_label( $channel );
 		$site_name     = get_bloginfo( 'name' );
 
+		// This method is reached on `wp_loaded` (before the `wp_enqueue_scripts`
+		// action where `register_scripts()` normally runs). Register the handles
+		// lazily here so wp_enqueue_style/script actually adds them to the queue
+		// when wp_head() later prints styles.
+		$this->register_scripts();
+
 		wp_enqueue_style( 'doublescale-unsubscribe-form' );
 		wp_enqueue_script( 'doublescale-unsubscribe-form' );
 		wp_add_inline_script(
@@ -540,6 +551,9 @@ class SubscriptionManager {
 		$site_name = get_bloginfo( 'name' );
 		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'doublescale') : __( 'You\'re Unsubscribed', 'doublescale');
 
+		// Called via the AJAX response path before `wp_enqueue_scripts` runs;
+		// register handles lazily so the enqueue actually sticks.
+		$this->register_scripts();
 		wp_enqueue_style( 'doublescale-unsubscribe-success' );
 		?>
 		<!DOCTYPE html>

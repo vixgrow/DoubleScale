@@ -18,6 +18,8 @@
  * without the Pro SMS bridge.
  * `smtp-module.spec.ts` covers built-in SMTP (Connections + Logs); skips when the smtp
  * module toggle is off.
+ * `booking-module.spec.ts` covers Booking (Calendars, Bookings list, Settings); skips when
+ * the booking module toggle is off or booking capabilities are missing.
  *
  * Login for global-setup (`tests/e2e/global-setup.ts`):
  *   WP_ADMIN_USER / WP_ADMIN_PASS (default admin / password)

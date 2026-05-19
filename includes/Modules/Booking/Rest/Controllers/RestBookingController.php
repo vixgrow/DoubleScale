@@ -74,24 +74,7 @@ class RestBookingController extends RestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => array(
-						'keyword'  => array(
-							'description' => __( 'Keyword to search.', 'doublescale' ),
-							'type'        => 'string',
-						),
-						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'doublescale' ),
-							'type'        => 'integer',
-						),
-						'page'     => array(
-							'description' => __( 'Page number.', 'doublescale' ),
-							'type'        => 'integer',
-						),
-						'filter'   => array(
-							'description' => __( 'Filter the results.', 'doublescale' ),
-							'type'        => 'object',
-						),
-					),
+					'args'                => $this->get_collection_params(),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -329,6 +312,42 @@ class RestBookingController extends RestController {
 				 ),
 			 ),
 		 );
+	}
+
+	/**
+	 * Get collection params.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		return array(
+			'keyword'  => array(
+				'description'       => __( 'Keyword to search.', 'doublescale' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'per_page' => array(
+				'description'       => __( 'Number of items to fetch.', 'doublescale' ),
+				'type'              => 'integer',
+				'default'           => 10,
+				'minimum'           => 1,
+				'maximum'           => 100,
+				'sanitize_callback' => 'absint',
+			),
+			'page'     => array(
+				'description'       => __( 'Page number.', 'doublescale' ),
+				'type'              => 'integer',
+				'default'           => 1,
+				'minimum'           => 1,
+				'sanitize_callback' => 'absint',
+			),
+			'filter'   => array(
+				'description' => __( 'Filter the results.', 'doublescale' ),
+				'type'        => 'object',
+			),
+		);
 	}
 
 	/**

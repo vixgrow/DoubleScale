@@ -1,7 +1,12 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * External dependencies
  */
-import { EdgeProps, BaseEdge } from '@xyflow/react';
+import { EdgeProps, BaseEdge, EdgeLabelRenderer } from '@xyflow/react';
 
 /**
  * Internal dependencies
@@ -50,6 +55,16 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 		trunkCenterX,
 	});
 
+	// Place the Yes/No badge on the vertical drop segment of the branch
+	// (below the elbow, above the target arrow) so it visually belongs to
+	// that specific branch rather than the shared trunk.
+	const junctionY = sourceY + Math.max(40, (adjustedTargetY - sourceY) * 0.45);
+	const badgeX = targetX;
+	const badgeY = junctionY + (adjustedTargetY - junctionY) * 0.45;
+	const badgeLabel = condition === 'yes'
+		? __('Yes', 'doublescale')
+		: __('No', 'doublescale');
+
 	const edgeStyle = {
 		...style,
 		stroke: color,
@@ -81,6 +96,30 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 				markerEnd={`url(#${markerId})`}
 				className={`doublescale-condition-edge doublescale-condition-edge--${condition}`}
 			/>
+			<EdgeLabelRenderer>
+				<div
+					className={`doublescale-condition-edge__badge doublescale-condition-edge__badge--${condition}`}
+					style={{
+						position: 'absolute',
+						transform: `translate(-50%, -50%) translate(${badgeX}px, ${badgeY}px)`,
+						pointerEvents: 'all',
+						background: '#ffffff',
+						color,
+						border: `1px solid ${color}`,
+						borderRadius: 6,
+						padding: '2px 8px',
+						fontSize: 11,
+						fontWeight: 600,
+						lineHeight: 1.2,
+						letterSpacing: 0.2,
+						boxShadow: `0 1px 2px ${color}33`,
+						userSelect: 'none',
+						whiteSpace: 'nowrap',
+					}}
+				>
+					{badgeLabel}
+				</div>
+			</EdgeLabelRenderer>
 		</>
 	);
 };

@@ -373,8 +373,12 @@ abstract class AbstractTracking {
 			}
 		}
 
-		// Check request body format
-		$raw_body  = file_get_contents( 'php://input' );
+		// Check request body format. Only used for provider detection (looking
+		// at structural shape); the actual webhook payload is re-read and verified
+		// by the selected provider before any value is acted on.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- php://input is the only way to read the raw request body for provider detection.
+		$raw_body = file_get_contents( 'php://input' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Used only for shape-based provider detection; no values from this decode reach business logic.
 		$json_data = json_decode( $raw_body, true );
 
 		// Meta uses "entry" array structure (JSON)

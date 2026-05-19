@@ -143,6 +143,27 @@ test.describe('Email campaigns', () => {
 			.first();
 		await expect(bulkTrigger).toBeEnabled({ timeout: 10_000 });
 	});
+
+	test('pagination footer when list has records', async ({ adminPage }) => {
+		const shell = campaignsShell(adminPage);
+		const table = shell.getByRole('table');
+
+		if (!(await table.isVisible().catch(() => false))) {
+			test.skip();
+		}
+
+		const dataRows = table.locator('tbody tr');
+		if ((await dataRows.count()) === 0) {
+			test.skip();
+		}
+
+		await expect(
+			shell.getByText(/Showing \d+ of \d+ results/i)
+		).toBeVisible({ timeout: 10_000 });
+		await expect(
+			shell.getByText('Per page', { exact: true })
+		).toBeVisible();
+	});
 });
 
 /**

@@ -63,6 +63,25 @@ export default async function globalSetup(_config: FullConfig) {
 		page.click('input#wp-submit'),
 	]);
 
+	const layoutProbe = await page.goto(
+		new URL('wp-admin/admin.php?page=doublescale', `${siteRoot}/`).href
+	);
+	if (layoutProbe && !layoutProbe.ok()) {
+		throw new Error(
+			`Login succeeded but DoubleScale admin returned HTTP ${layoutProbe.status()}. Check WP_BASE_URL (${siteRoot}).`
+		);
+	}
+	const denied = await page
+		.getByText(/sorry, you are not allowed to access this page/i)
+		.isVisible()
+		.catch(() => false);
+	if (denied) {
+		throw new Error(
+			`User "${username}" cannot access DoubleScale admin (WordPress capability). ` +
+				'Use an Administrator or a user with doublescale_access / doublescale_crm_manager.'
+		);
+	}
+
 	await context.storageState({ path: STORAGE_STATE });
 	await browser.close();
 }

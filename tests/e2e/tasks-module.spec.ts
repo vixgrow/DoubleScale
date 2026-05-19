@@ -156,4 +156,26 @@ test.describe('Tasks module (Pro only)', () => {
 			adminPage.getByRole('button', { name: /^Delete$/i })
 		).toBeVisible();
 	});
+
+	test('Pro: pagination footer when more than one page', async ({
+		adminPage,
+	}) => {
+		const table = adminPage.getByRole('table');
+		if (!(await table.isVisible().catch(() => false))) {
+			test.skip();
+		}
+
+		const showing = adminPage.getByText(/Showing \d+ to \d+ of \d+ results/i);
+		if (!(await showing.isVisible().catch(() => false))) {
+			test.skip(
+				true,
+				'Tasks pagination appears only when total_pages > 1.'
+			);
+		}
+
+		await expect(showing).toBeVisible();
+		await expect(
+			adminPage.getByRole('navigation', { name: /pagination/i })
+		).toBeVisible();
+	});
 });

@@ -339,7 +339,7 @@ const AutomationsList: React.FC = () => {
 		<div className="doublescale-automations-list flex min-h-0 flex-1 flex-col">
 			<div className="shrink-0">
 				<PageHeader
-					title={__('AutomationsList', 'doublescale')}
+					title={__('Automations', 'doublescale')}
 					actions={[
 						{
 							label: __('Create Automation', 'doublescale'),

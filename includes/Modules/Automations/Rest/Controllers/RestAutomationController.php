@@ -287,11 +287,16 @@ class RestAutomationController extends RestController {
 			'page'     => array(
 				'description'       => __( 'Current page of the collection.', 'doublescale'),
 				'type'              => 'integer',
+				'default'           => 1,
+				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
 			),
 			'per_page' => array(
 				'description'       => __( 'Maximum number of items to be returned in result set.', 'doublescale'),
 				'type'              => 'integer',
+				'default'           => 10,
+				'minimum'           => 1,
+				'maximum'           => 200,
 				'sanitize_callback' => 'absint',
 			),
 			'from'     => array(

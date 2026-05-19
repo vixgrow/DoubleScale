@@ -6,19 +6,26 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { EdgeProps, BaseEdge } from '@xyflow/react';
+import { EdgeProps, BaseEdge, EdgeLabelRenderer } from '@xyflow/react';
 
 /**
  * Internal dependencies
  */
 import type { AutomationStep } from '@doublescale/client';
+import { getConditionBranchEdgePath } from '../utils/edge-path-utils';
 
 interface ConditionEdgeData {
 	sourceStep?: AutomationStep;
 	targetStep?: AutomationStep;
 	condition?: 'yes' | 'no';
+	trunkCenterX?: number;
 	label?: string;
 }
+
+const BRANCH_COLORS = {
+	yes: '#22c55e', // tailwind green-500
+	no: '#ef4444', // tailwind red-500
+} as const;
 
 const ConditionEdge: React.FC<EdgeProps> = ({
 	id,
@@ -32,44 +39,87 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 }) => {
 	const edgeData = data as ConditionEdgeData;
 	const condition = edgeData?.condition || (label === 'Yes' ? 'yes' : 'no');
-	const isYes = condition === 'yes';
+	const trunkCenterX = edgeData?.trunkCenterX ?? sourceX;
+	const color = BRANCH_COLORS[condition];
+	const markerId = `doublescale-cond-arrow-${condition}-${id}`;
 
-	// Create symmetric curves for both Yes and No branches
-	const branchDirection = isYes ? -1 : 1; // Left for Yes (-1), Right for No (1)
+	// Stop the path just above the target so the arrow tip lands cleanly on
+	// the target's top edge rather than overlapping the next node's chrome.
+	const arrowGap = 8;
+	const adjustedTargetY = Math.max(sourceY + 1, targetY - arrowGap);
 
-	// Symmetric curve parameters to ensure equal heights
-	const horizontalSpread = 60; // How far to spread horizontally from center
-	const curveHeight = 80; // Consistent curve height for both branches
-	const targetOffset = 20; // Small offset for target positioning
+	const [edgePath] = getConditionBranchEdgePath({
+		sourceY,
+		targetX,
+		targetY: adjustedTargetY,
+		trunkCenterX,
+	});
 
-	// Calculate symmetric control points
-	const cp1X = sourceX + branchDirection * horizontalSpread;
-	const cp1Y = sourceY + curveHeight;
+	// Place the Yes/No badge on the vertical drop segment of the branch
+	// (below the elbow, above the target arrow) so it visually belongs to
+	// that specific branch rather than the shared trunk.
+	const junctionY = sourceY + Math.max(40, (adjustedTargetY - sourceY) * 0.45);
+	const badgeX = targetX;
+	const badgeY = junctionY + (adjustedTargetY - junctionY) * 0.45;
+	const badgeLabel = condition === 'yes'
+		? __('Yes', 'doublescale')
+		: __('No', 'doublescale');
 
-	const cp2X = targetX + branchDirection * targetOffset;
-	const cp2Y = targetY - curveHeight;
-
-	// Create symmetric cubic bezier path for both branches
-	const edgePath = `M ${sourceX} ${sourceY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${targetX} ${targetY}`;
-
-	// Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
-		stroke: '#D7D7DA', // Unified color for all conditions
-		strokeWidth: 1, // Slightly reduced thickness for cleaner look
+		stroke: color,
+		strokeWidth: style.strokeWidth ?? 2,
 		strokeLinecap: 'round' as const,
 		strokeLinejoin: 'round' as const,
-		transition: 'all 0.2s ease',
+		fill: 'none' as const,
 	};
 
 	return (
 		<>
+			<defs>
+				<marker
+					id={markerId}
+					viewBox="0 0 10 10"
+					refX="9"
+					refY="5"
+					markerWidth="8"
+					markerHeight="8"
+					orient="auto-start-reverse"
+				>
+					<path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
+				</marker>
+			</defs>
 			<BaseEdge
 				id={id}
 				path={edgePath}
 				style={edgeStyle}
+				markerEnd={`url(#${markerId})`}
 				className={`doublescale-condition-edge doublescale-condition-edge--${condition}`}
 			/>
+			<EdgeLabelRenderer>
+				<div
+					className={`doublescale-condition-edge__badge doublescale-condition-edge__badge--${condition}`}
+					style={{
+						position: 'absolute',
+						transform: `translate(-50%, -50%) translate(${badgeX}px, ${badgeY}px)`,
+						pointerEvents: 'all',
+						background: '#ffffff',
+						color,
+						border: `1px solid ${color}`,
+						borderRadius: 6,
+						padding: '2px 8px',
+						fontSize: 11,
+						fontWeight: 600,
+						lineHeight: 1.2,
+						letterSpacing: 0.2,
+						boxShadow: `0 1px 2px ${color}33`,
+						userSelect: 'none',
+						whiteSpace: 'nowrap',
+					}}
+				>
+					{badgeLabel}
+				</div>
+			</EdgeLabelRenderer>
 		</>
 	);
 };

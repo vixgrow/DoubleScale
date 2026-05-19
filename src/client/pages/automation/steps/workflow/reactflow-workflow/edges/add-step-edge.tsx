@@ -11,7 +11,6 @@ import { useDispatch } from '@wordpress/data';
  */
 import {
 	EdgeProps,
-	getBezierPath,
 	EdgeLabelRenderer,
 	BaseEdge,
 	Position,
@@ -23,6 +22,7 @@ import {
 import type { AutomationStep } from '@doublescale/client';
 import { useAutomationContext } from '../../../../state/context';
 import { AddStepDialog } from '../../add-step-dialog';
+import { getOrthogonalEdgePath } from '../utils/edge-path-utils';
 import './style.scss';
 
 interface AddStepEdgeData {
@@ -121,29 +121,25 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	);
 
 	if (!shouldShowAddStepEdge || viewMode) {
-		// For other cases where we don't show the plus button
 		const edgeStyle = {
 			...style,
-			stroke: '#D7D7DA', // Unified color for all edges
+			stroke: '#D7D7DA',
 			strokeWidth: 2,
+			strokeLinecap: 'square' as const,
+			strokeLinejoin: 'miter' as const,
+			shapeRendering: 'crispEdges' as const,
 		};
 
-		return (
-			<BaseEdge
-				id={id}
-				path={
-					getBezierPath({
-						sourceX,
-						sourceY,
-						sourcePosition: sourcePosition || Position.Bottom,
-						targetX,
-						targetY,
-						targetPosition: targetPosition || Position.Top,
-					})[0]
-				}
-				style={edgeStyle}
-			/>
-		);
+		const [edgePath] = getOrthogonalEdgePath({
+			sourceX,
+			sourceY,
+			sourcePosition: sourcePosition || Position.Bottom,
+			targetX,
+			targetY,
+			targetPosition: targetPosition || Position.Top,
+		});
+
+		return <BaseEdge id={id} path={edgePath} style={edgeStyle} />;
 	}
 
 	const handleStepSelection = async (type: string) => {
@@ -314,37 +310,13 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		}
 	};
 
-	// Determine the correct source and target positions based on edge data
-	const getCorrectSourcePosition = (): Position => {
-		const edgeData = data as AddStepEdgeData;
-		if (
-			edgeData &&
-			edgeData.sourceStep &&
-			edgeData.sourceStep.type === 'condition'
-		) {
-			// For condition nodes, use the specific handle based on condition
-			if (edgeData.condition === 'yes') {
-				return Position.Left; // Yes branch from left handle
-			} else if (edgeData.condition === 'no') {
-				return Position.Right; // No branch from right handle
-			}
-		}
-		// For all other cases, use bottom handle
-		return sourcePosition || Position.Bottom;
-	};
-
-	const getCorrectTargetPosition = (): Position => {
-		// For target nodes, usually top unless specified otherwise
-		return targetPosition || Position.Top;
-	};
-
-	const [edgePath, labelX, labelY] = getBezierPath({
+	const [edgePath, labelX, labelY] = getOrthogonalEdgePath({
 		sourceX,
 		sourceY,
-		sourcePosition: getCorrectSourcePosition(),
+		sourcePosition: sourcePosition || Position.Bottom,
 		targetX,
 		targetY,
-		targetPosition: getCorrectTargetPosition(),
+		targetPosition: targetPosition || Position.Top,
 	});
 
 	// Use CSS class for edge styling and ensure proper z-index

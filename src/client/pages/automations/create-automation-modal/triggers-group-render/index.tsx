@@ -149,10 +149,29 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 	const isProActive = proPluginData.is_active;
 
 	// Helper function to get tooltip message for disabled triggers
-	const getDisabledTooltip = (groupLabel: string) => {
+	const getDisabledTooltip = (group: TriggersGroup) => {
+		const groupLabel = group.label;
+		if (group.disabled_reason === 'forms_module_off') {
+			return __(
+				'The Forms module is turned off. Enable it under Settings → Modules to use these triggers.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Deal') {
+			return __(
+				'The Pipelines & Deals module is turned off. Enable it under Settings → Modules to use these triggers.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Forms') {
+			return __(
+				'The Forms module is turned off. Enable it under Settings → Modules to use these triggers.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'Booking') {
 			return __(
-				'Booking module is not enabled. Enable the Booking module to use these triggers.',
+				'The Booking module is turned off. Enable it under Settings → Modules to use these triggers.',
 				'doublescale'
 			);
 		}
@@ -294,7 +313,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 												</TooltipTrigger>
 												<TooltipContent>
 													{getDisabledTooltip(
-														group.label
+														group
 													)}
 												</TooltipContent>
 											</Tooltip>
@@ -403,7 +422,7 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 															</TooltipTrigger>
 															<TooltipContent>
 																{getDisabledTooltip(
-																	group.label
+																	group
 																)}
 															</TooltipContent>
 														</Tooltip>

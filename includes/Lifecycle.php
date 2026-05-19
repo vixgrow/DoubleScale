@@ -61,10 +61,47 @@ final class Lifecycle {
 
 		require_once $dir . 'includes/safe-redirect.php';
 		require_once $dir . 'dependencies/libraries/load.php';
-		require_once $dir . 'dependencies/vendor/autoload.php';
 
-		if ( file_exists( $dir . 'vendor/autoload.php' ) ) {
-			require_once $dir . 'vendor/autoload.php';
+		$doublescale_scoped_deps     = $dir . 'dependencies/build/vendor/scoper-autoload.php';
+		$vendor_autoload             = $dir . 'dependencies/vendor/autoload.php';
+		$doublescale_root_composer   = $dir . 'vendor/autoload.php';
+		$doublescale_composer_loader = null;
+
+		if ( file_exists( $doublescale_scoped_deps ) ) {
+			$doublescale_composer_loader = require $doublescale_scoped_deps;
+		} elseif ( file_exists( $vendor_autoload ) ) {
+			require_once $vendor_autoload;
+		} elseif ( file_exists( $doublescale_root_composer ) ) {
+			$doublescale_composer_loader = require $doublescale_root_composer;
+		}
+
+		if ( $doublescale_composer_loader instanceof \Composer\Autoload\ClassLoader
+			&& file_exists( $doublescale_scoped_deps )
+			&& file_exists( $doublescale_root_composer ) ) {
+			$doublescale_root_classmap = $dir . 'vendor/composer/autoload_classmap.php';
+			if ( is_readable( $doublescale_root_classmap ) ) {
+				$doublescale_classmap        = require $doublescale_root_classmap;
+				$doublescale_includes_root   = $dir . 'includes/';
+				$doublescale_plugin_map      = array();
+				foreach ( $doublescale_classmap as $doublescale_fqcn => $doublescale_path ) {
+					if ( 0 !== strpos( $doublescale_fqcn, 'DoubleScale\\' ) ) {
+						continue;
+					}
+					if ( 0 === strpos( $doublescale_fqcn, 'DoubleScale\\Tests\\' ) ) {
+						continue;
+					}
+					if ( 0 === strpos( $doublescale_fqcn, 'DoubleScale\\Vendor\\' ) ) {
+						continue;
+					}
+					if ( 0 !== strpos( $doublescale_path, $doublescale_includes_root ) ) {
+						continue;
+					}
+					$doublescale_plugin_map[ $doublescale_fqcn ] = $doublescale_path;
+				}
+				if ( $doublescale_plugin_map ) {
+					$doublescale_composer_loader->addClassMap( $doublescale_plugin_map );
+				}
+			}
 		}
 
 		if ( file_exists( $dir . 'includes/Autoload.php' ) ) {

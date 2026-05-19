@@ -182,21 +182,26 @@ export async function saveMailerAppSettings(
 	});
 }
 
-export async function fetchSmtpEmailLogs(params: {
+/** Paginated SMTP log list (`GET /doublescale/v1/smtp/email-log`). */
+export type SmtpEmailLogsResponse = {
+	items?: unknown[];
+	total_items?: number;
+	total_pages?: number;
 	page?: number;
+	per_page?: number;
+};
+
+export async function fetchSmtpEmailLogs(params: {
+	/** 1-based page (server-side pagination). */
+	page?: number;
+	/** Rows per page; server clamps to 1–200 (default 10). */
 	per_page?: number;
 	status?: string;
 	search?: string;
 	/** Local calendar day, `Y-m-d` — paired with `end_date` for GMT range filter */
 	start_date?: string;
 	end_date?: string;
-}): Promise<{
-	items?: unknown[];
-	total_items?: number;
-	total_pages?: number;
-	page?: number;
-	per_page?: number;
-}> {
+}): Promise<SmtpEmailLogsResponse> {
 	const q = new URLSearchParams();
 	if (params.page != null) {
 		q.set('page', String(params.page));

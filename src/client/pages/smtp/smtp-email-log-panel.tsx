@@ -12,6 +12,8 @@ import {
 	CardContent,
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { fetchSmtpEmailLogs } from '../settings/smtp/smtp-api';
 import SmtpEmailLogTable, {
 	type SmtpLogFilter,
@@ -51,6 +53,9 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 }) => {
 	const [logLoading, setLogLoading] = useState(false);
 	const [logs, setLogs] = useState<EmailLogRow[]>([]);
+	const [page, setPage] = useState(1);
+	const [perPage, setPerPage] = useState(10);
+	const [totalItems, setTotalItems] = useState(0);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteSelectedAction, setDeleteSelectedAction] = useState<
 		(() => void) | null
@@ -74,13 +79,25 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 		return '';
 	}, [dateRange.from, dateRange.to]);
 
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords: totalItems,
+		setPage,
+		setPerPage,
+	});
+
+	useEffect(() => {
+		setPage(1);
+	}, [debouncedSearch, dateRangeKey]);
+
 	const loadLogs = useCallback(async () => {
 		setLogLoading(true);
 		setError(null);
 		try {
 			const params: Parameters<typeof fetchSmtpEmailLogs>[0] = {
-				page: 1,
-				per_page: 100,
+				page,
+				per_page: perPage,
 			};
 			if (activeFilter !== 'all') {
 				params.status = activeFilter;
@@ -94,6 +111,19 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 				params.end_date = formatLocalYmd(dateRange.to);
 			}
 			const res = await fetchSmtpEmailLogs(params);
+			const nextTotalItems = res.total_items ?? 0;
+			const nextTotalPages = Math.max(
+				1,
+				res.total_pages ??
+					(perPage > 0 ? Math.ceil(nextTotalItems / perPage) : 1)
+			);
+
+			if (page > nextTotalPages) {
+				setPage(nextTotalPages);
+				return;
+			}
+
+			setTotalItems(nextTotalItems);
 			setLogs((res.items || []) as EmailLogRow[]);
 		} catch (e: unknown) {
 			setError(
@@ -104,7 +134,7 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 		} finally {
 			setLogLoading(false);
 		}
-	}, [activeFilter, dateRangeKey, debouncedSearch]);
+	}, [activeFilter, dateRangeKey, debouncedSearch, page, perPage]);
 
 	useEffect(() => {
 		void loadLogs();
@@ -145,11 +175,17 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 						logLoading={logLoading}
 						controlledFilters={{
 							activeFilter,
-							onActiveFilterChange: setActiveFilter,
+							onActiveFilterChange: (next) => {
+								setPage(1);
+								setActiveFilter(next);
+							},
 							searchQuery,
 							onSearchQueryChange: setSearchQuery,
 							dateRange,
-							onDateRangeChange: setDateRange,
+							onDateRangeChange: (next) => {
+								setPage(1);
+								setDateRange(next);
+							},
 						}}
 						onLogsMutated={() => void loadLogs()}
 						onActionError={(msg) => setError(msg)}
@@ -157,6 +193,9 @@ const SmtpEmailLogPanel: React.FC<SmtpEmailLogPanelProps> = ({
 						onBulkDeletingChange={onBulkDeletingChange}
 						onDeleteSelectedActionChange={setDeleteSelectedAction}
 					/>
+					{totalItems > 0 && (
+						<DataTablePagination table={serverSideTable} />
+					)}
 				</CardContent>
 			</Card>
 		</div>

@@ -12,9 +12,9 @@ import type { AutomationStep } from '@doublescale/client';
  * Edge types
  */
 export enum EdgeType {
-    DEFAULT = 'default',
+    DEFAULT = 'straightEdge',
     CONDITION = 'conditionEdge',
-    ADD_STEP = 'addStepEdge'
+    ADD_STEP = 'addStepEdge',
 }
 
 /**

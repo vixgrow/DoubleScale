@@ -173,13 +173,19 @@ abstract class AbstractTracking {
 		}
 
 		// Get raw body before WordPress processes it (needed for Meta signature verification)
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- php://input is the only way to read the raw request body for HMAC signature verification.
 		$raw_body = file_get_contents( 'php://input' );
 
-		// Parse JSON for Meta, use $_POST for Twilio
+		// Parse JSON for Meta, use $_POST for Twilio. The payload is treated as
+		// untrusted until $provider->process_webhook() validates the HMAC/signature
+		// (Meta) or matches the auth token (Twilio) and returns a sanitized
+		// $webhook_result struct. Downstream code uses fields off $webhook_result,
+		// not off $webhook_data directly.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw webhook body; provider verifies signature before any value is acted on.
 		$webhook_data = json_decode( $raw_body, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			// Not JSON, use $_POST (Twilio format)
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Twilio webhook fallback; provider validates the request via auth token before any field is acted on.
 			$webhook_data = $_POST;
 		}
 

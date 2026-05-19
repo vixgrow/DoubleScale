@@ -219,9 +219,9 @@ class RestContactController extends RestController {
 							'required'    => true,
 						),
 						'body'    => array(
-							'description' => __('Message body (HTML for email, plain text for Sms/Whatsapp).', 'doublescale'),
+							'description' => __('Message body (HTML for email, plain text for SMS, ignored for WhatsApp templates).', 'doublescale'),
 							'type'        => 'string',
-							'required'    => true,
+							'required'    => false,
 						),
 						'subject' => array(
 							'description' => __('Email subject (required for email, ignored for Sms/Whatsapp).', 'doublescale'),
@@ -2423,7 +2423,7 @@ class RestContactController extends RestController {
 			);
 		}
 
-		// Validate email requires subject.
+		// Validate email requires subject and body.
 		if ($channel === CampaignChannel::STR_EMAIL && empty($request->get_param('subject'))) {
 			return new WP_Error(
 				'missing_subject',
@@ -2432,27 +2432,34 @@ class RestContactController extends RestController {
 			);
 		}
 
-		// Route to appropriate sender based on channel.
-		switch ($channel) {
-			case CampaignChannel::STR_EMAIL:
-				$sender = new \DoubleScale\Modules\Inbox\IndividualMessaging\EmailIndividualSender();
-				break;
-
-			case CampaignChannel::STR_SMS:
-				$sender = new \DoubleScale\Modules\Inbox\IndividualMessaging\SmsIndividualSender();
-				break;
-
-			case CampaignChannel::STR_WHATSAPP:
-				$sender = new \DoubleScale\Modules\Inbox\IndividualMessaging\WhatsappIndividualSender();
-				break;
-
-			default:
-				return new WP_Error(
-					'invalid_channel',
-					__('Invalid channel specified.', 'doublescale'),
-					array('status' => 400)
-				);
+		if ($channel === CampaignChannel::STR_EMAIL && empty($request->get_param('body'))) {
+			return new WP_Error(
+				'missing_body',
+				__('Body is required for email messages.', 'doublescale'),
+				array('status' => 400)
+			);
 		}
+
+		// Route to appropriate sender based on channel. SMS and WhatsApp ship with
+		// the Pro plugin; in standalone-free mode we return a clear error rather
+		// than fatally crashing on a missing class.
+		$sender_class_by_channel = array(
+			CampaignChannel::STR_EMAIL    => \DoubleScale\Modules\Inbox\IndividualMessaging\EmailIndividualSender::class,
+			CampaignChannel::STR_SMS      => '\\DoubleScale\\Modules\\Inbox\\IndividualMessaging\\SmsIndividualSender',
+			CampaignChannel::STR_WHATSAPP => '\\DoubleScale\\Modules\\Inbox\\IndividualMessaging\\WhatsappIndividualSender',
+		);
+
+		$sender_class = $sender_class_by_channel[$channel] ?? null;
+
+		if (! $sender_class || ! class_exists($sender_class)) {
+			return new WP_Error(
+				'sender_unavailable',
+				__('Sending messages on this channel requires the DoubleScale Pro plugin.', 'doublescale'),
+				array('status' => 501)
+			);
+		}
+
+		$sender = new $sender_class();
 
 		return $sender->send($request);
 	}

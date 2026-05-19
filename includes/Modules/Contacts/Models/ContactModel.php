@@ -116,7 +116,7 @@ class ContactModel extends Model
 		// which makes every address fail validation.
 		'email'          => 'required',
 		'phone'          => 'nullable|regex:/^\+?[0-9]+$/',
-		'whatsapp_phone' => 'nullable|regex:/^\+[0-9]{1,15}$/',
+		'whatsapp_phone' => 'nullable|regex:/^\+[1-9][0-9]{0,14}$/',
 		'zip'            => 'nullable|numeric',
 	);
 

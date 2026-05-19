@@ -548,7 +548,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						deleteKeyCode={null}
 						defaultEdgeOptions={{
 							animated: false,
-							type: 'default',
+							type: 'straightEdge',
 							style: EDGE_STYLES.DEFAULT,
 						}}
 						elevateEdgesOnSelect={!viewMode}

@@ -12,6 +12,7 @@ import {
 } from '../../../../../../types';
 import AddStepEdge from '../edges/add-step-edge';
 import ConditionEdge from '../edges/condition-edge';
+import StraightEdge from '../edges/straight-edge';
 import ActionNode from '../nodes/action-node';
 import AddStepNode from '../nodes/add-step-node';
 import BranchNode from '../nodes/branch-node';
@@ -65,6 +66,7 @@ const NODE_TYPES = {
 const EDGE_TYPES: EdgeTypes = {
 	addStepEdge: AddStepEdge,
 	conditionEdge: ConditionEdge,
+	straightEdge: StraightEdge,
 };
 
 export type { WorkflowVisualizationProps, PositionCalculationParams };

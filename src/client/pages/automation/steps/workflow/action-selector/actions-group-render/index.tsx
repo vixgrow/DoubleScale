@@ -53,6 +53,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 
 	// Helper function to get tooltip message for disabled actions
 	const getDisabledTooltip = (groupLabel: string) => {
+		if (groupLabel === 'Deal') {
+			return __(
+				'The Pipelines & Deals module is turned off. Enable it under Settings → Modules to use these actions.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these actions.',

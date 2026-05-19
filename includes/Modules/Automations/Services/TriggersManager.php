@@ -178,8 +178,10 @@ final class TriggersManager {
 						 'triggers' => array(),
 					 ),
 					 'deal'          => array(
-						 'label'    => __( 'Deal', 'doublescale'),
-						 'triggers' => array(),
+						 'label'       => __( 'Deal', 'doublescale'),
+						 'triggers'    => array(),
+						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							 || ! doublescale_is_module_active( 'deals' ),
 					 ),
 				 ),
 			 ),
@@ -336,6 +338,32 @@ final class TriggersManager {
 	 * @return void
 	 */
 	public function set_forms_sources() {
+		$forms_module_off = ! function_exists( 'doublescale_is_module_active' )
+			|| ! doublescale_is_module_active( 'forms' );
+
+		// Form integrations (WPForms, Gravity, Fluent, …) self-register via
+		// TriggersManager::register() → store_trigger_in_sources(), which seeds
+		// $this->sources['forms']['groups'][<vendor>] regardless of module state.
+		// When the Forms module is off, FormsManager isn't loaded, so we just
+		// force every already-registered vendor group to is_disabled = true and
+		// let the frontend show each one with the "(Not Available)" tooltip.
+		if ( $forms_module_off ) {
+			if ( isset( $this->sources['forms']['groups'] ) && is_array( $this->sources['forms']['groups'] ) ) {
+				foreach ( $this->sources['forms']['groups'] as &$group ) {
+					$group['is_disabled']     = true;
+					$group['disabled_reason'] = 'forms_module_off';
+					if ( ! empty( $group['triggers'] ) && is_array( $group['triggers'] ) ) {
+						foreach ( $group['triggers'] as &$trigger_row ) {
+							$trigger_row['is_disabled'] = true;
+						}
+						unset( $trigger_row );
+					}
+				}
+				unset( $group );
+			}
+			return;
+		}
+
 		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
 			return;
 		}

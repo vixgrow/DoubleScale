@@ -189,8 +189,8 @@ const processStepHierarchy = (
 
 			let center = conditionPos.x + nodeWidth / 2 - nodeYesNoWidth / 2;
 			const maxWidth = Math.max(yesWidth, noWidth);
-			const yesX = center - maxWidth / 2;
-			const noX = center + maxWidth / 2;
+			const fallbackYesX = center - maxWidth / 2;
+			const fallbackNoX = center + maxWidth / 2;
 
 			// Always create Yes/No branch nodes for semantic branching
 			const yesNodeId = `branch-yes-${step.id}`;
@@ -201,7 +201,33 @@ const processStepHierarchy = (
 				? LAYOUT_CONSTANTS_VIEW_MODE.CONDITION_TO_BRANCH_SPACING
 				: 150;
 
-			// Use the already calculated branch positions for proper alignment
+			// Align Yes/No badges to the X-center of their first child so the
+			// connector becomes a single continuous trunk + vertical drop.
+			// Falls back to the legacy symmetric layout when a branch is empty.
+			const yesBranchCenterX = (() => {
+				const firstYesChild = yesChildren[0];
+				if (firstYesChild) {
+					const childPos = getNodePositionLocal(
+						firstYesChild.id.toString()
+					);
+					return childPos.x + nodeWidth / 2;
+				}
+				return fallbackYesX + nodeYesNoWidth / 2;
+			})();
+			const noBranchCenterX = (() => {
+				const firstNoChild = noChildren[0];
+				if (firstNoChild) {
+					const childPos = getNodePositionLocal(
+						firstNoChild.id.toString()
+					);
+					return childPos.x + nodeWidth / 2;
+				}
+				return fallbackNoX + nodeYesNoWidth / 2;
+			})();
+
+			const yesX = yesBranchCenterX - nodeYesNoWidth / 2;
+			const noX = noBranchCenterX - nodeYesNoWidth / 2;
+
 			const yesPosition = savedPositions[yesNodeId] || {
 				x: yesX,
 				y: conditionPos.y + branchSpacing,
@@ -375,6 +401,8 @@ const processStepHierarchy = (
 				analyticsData
 			);
 
+			const trunkCenterX = conditionPos.x + nodeWidth / 2;
+
 			// Connect condition to Yes branch node with explicit handle
 			initialEdges.push({
 				id: `${step.id}-to-yes-branch`,
@@ -389,6 +417,7 @@ const processStepHierarchy = (
 				},
 				data: {
 					condition: 'yes',
+					trunkCenterX,
 					sourceStep: step,
 					targetStep: { id: yesNodeId, type: 'branch' },
 				},
@@ -409,6 +438,7 @@ const processStepHierarchy = (
 				},
 				data: {
 					condition: 'no',
+					trunkCenterX,
 					sourceStep: step,
 					targetStep: { id: noNodeId, type: 'branch' },
 				},
@@ -463,7 +493,7 @@ const processStepHierarchy = (
 					source: yesAddStepId,
 					target: mergeId,
 					targetHandle: 'yes',
-					type: 'default',
+					type: 'straightEdge',
 					style: {
 						stroke: '#D7D7DA',
 						strokeWidth: 2,
@@ -589,7 +619,7 @@ const processStepHierarchy = (
 					source: noAddStepId,
 					target: mergeId,
 					targetHandle: 'no',
-					type: 'default',
+					type: 'straightEdge',
 					style: {
 						stroke: '#D7D7DA',
 						strokeWidth: 2,

@@ -226,6 +226,7 @@ export type TriggersGroup = {
 		[triggerName: string]: Trigger;
 	};
 	is_disabled?: boolean;
+	disabled_reason?: string;
 };
 
 export type AutomationTriggers = {

@@ -1052,8 +1052,8 @@ class RestAutomationController extends RestController {
 					'label'  => 'Double Scale Pro',
 				),
 				'deal'          => array(
-					'plugin' => '',
-					'label'  => 'Double Scale Pro',
+					'module' => 'deals',
+					'label'  => 'Pipelines & Deals',
 				),
 			),
 			'woocommerce' => array(
@@ -1168,6 +1168,14 @@ class RestAutomationController extends RestController {
 		// in {@see TriggersManager} but list/detail dependency checks never surface the Pro warning
 		// (unlike CRM triggers such as Contact Subscribed).
 		if ( 'forms' === ( $trigger->source ?? '' ) ) {
+			if ( function_exists( 'doublescale_is_module_active' ) && ! doublescale_is_module_active( 'forms' ) ) {
+				return array(
+					'is_active'    => false,
+					'is_pro'       => false,
+					'message'      => __( 'This trigger requires the Forms module to be enabled under Settings → Modules.', 'doublescale' ),
+					'plugin_label' => __( 'Forms', 'doublescale' ),
+				);
+			}
 			if ( ! empty( $trigger->is_pro ) && function_exists( 'doublescale_is_pro_addon_active' ) && ! doublescale_is_pro_addon_active() ) {
 				return array(
 					'is_active'    => false,

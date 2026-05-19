@@ -195,6 +195,7 @@ export function connectChildMergesToParentMerges(
                         parentMergeId,
                         {
                             edgeId: `${childMergeId}-to-parent-merge`,
+                            edgeType: EdgeType.DEFAULT,
                             targetHandle: targetHandle,
                             sourceStep: {
                                 id: childMergeId,
@@ -205,7 +206,7 @@ export function connectChildMergesToParentMerges(
                                 type: 'merge',
                             },
                             fromBranch: conditionStep.condition,
-                            fromChildMerge: true
+                            fromChildMerge: true,
                         }
                     );
                 }
@@ -252,12 +253,13 @@ export function connectChildMergesToSubsequentSteps(
                     nextStep.id.toString(),
                     {
                         edgeId: `${childMergeId}-to-${nextStep.id}`,
+                        edgeType: EdgeType.DEFAULT,
                         sourceStep: {
                             id: childMergeId,
                             type: 'merge',
                         },
                         targetStep: nextStep,
-                        fromChildMerge: true
+                        fromChildMerge: true,
                     }
                 );
             }
@@ -435,12 +437,13 @@ export function connectMergesToSubsequentSteps(
                             nextStep.id.toString(),
                             {
                                 edgeId: `${mergeId}-to-${nextStep.id}`,
+                                edgeType: EdgeType.DEFAULT,
                                 sourceStep: {
                                     id: mergeId,
                                     type: 'merge',
                                 },
                                 targetStep: nextStep,
-                                fromMerge: true
+                                fromMerge: true,
                             }
                         );
                     }
@@ -503,12 +506,13 @@ export function connectFinalMergeToSubsequentSteps(
                 nextStep.id.toString(),
                 {
                     edgeId: `${rootMergeId}-to-${nextStep.id}`,
+                    edgeType: EdgeType.DEFAULT,
                     sourceStep: {
                         id: rootMergeId,
                         type: 'merge',
                     },
                     targetStep: nextStep,
-                    fromMerge: true
+                    fromMerge: true,
                 }
             );
         }

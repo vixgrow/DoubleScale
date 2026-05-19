@@ -207,8 +207,10 @@ final class ActionsManager {
 						 'actions' => array(),
 					 ),
 					 'deal'    => array(
-						 'label'   => __( 'Deal', 'doublescale'),
-						 'actions' => array(),
+						 'label'       => __( 'Deal', 'doublescale'),
+						 'actions'     => array(),
+						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							 || ! doublescale_is_module_active( 'deals' ),
 					 ),
 				 ),
 			 ),

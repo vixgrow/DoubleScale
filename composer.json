@@ -42,7 +42,8 @@
         "allow-plugins": {
             "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+        },
+        "autoloader-suffix": "DoubleScale"
     },
     "scripts": {
         "post-install-cmd": [
@@ -50,6 +51,13 @@
         ],
         "post-update-cmd": [
             "cd dependencies && composer update"
+        ],
+        "scope:vendor": [
+            "test -f php-scoper.phar || curl -LSs https://github.com/humbug/php-scoper/releases/download/0.17.7/php-scoper.phar -o php-scoper.phar",
+            "test -f dependencies/vendor/autoload.php || (echo 'ERROR: Run cd dependencies && composer install before scope:vendor' >&2 && exit 1)",
+            "@php php-scoper.phar add-prefix --config=dependencies/scoper.inc.php --force --output-dir=dependencies/build",
+            "@php tools/fix-scoper-output.php",
+            "cd dependencies && composer dump-autoload --working-dir=build --classmap-authoritative --no-scripts"
         ],
         "format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
         "lint": "phpcs --standard=phpcs.xml.dist",

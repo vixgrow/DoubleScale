@@ -267,9 +267,9 @@ if ( ! function_exists( 'apply_filters' ) ) {
 }
 
 require_once $plugin_root . '/vendor/autoload.php';
-$__ds_dep_autoload = $plugin_root . '/dependencies/vendor/autoload.php';
-if ( is_readable( $__ds_dep_autoload ) ) {
-	require_once $__ds_dep_autoload;
+if ( is_file( $plugin_root . '/dependencies/build/vendor/scoper-autoload.php' ) ) {
+	require_once $plugin_root . '/dependencies/build/vendor/scoper-autoload.php';
+} elseif ( is_readable( $plugin_root . '/dependencies/vendor/autoload.php' ) ) {
+	require_once $plugin_root . '/dependencies/vendor/autoload.php';
 }
-unset( $__ds_dep_autoload );
 require_once $plugin_root . '/includes/Autoload.php';

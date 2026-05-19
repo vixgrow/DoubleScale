@@ -1,0 +1,94 @@
+<?php
+/**
+ * PHP-Scoper: prefixes `dependencies/vendor` (SMTP-style single tree).
+ *
+ * Prerequisite: run `cd dependencies && composer install` so `dependencies/vendor/` exists locally
+ * (that directory is not committed; only `dependencies/build/` is shipped in git).
+ *
+ * Run from plugin root: `composer scope:vendor` (writes `dependencies/build/`).
+ * Runtime loads only `dependencies/build/vendor/scoper-autoload.php` when present
+ * so Guzzle / SendGrid / etc. do not clash with other plugins.
+ *
+ * WPEloquent ships bundled Illuminate — those namespaces must never be prefixed
+ * or you split contracts vs implementations (PHP 8.1+ fatals).
+ *
+ * @package DoubleScale
+ */
+
+declare(strict_types=1);
+
+use Isolated\Symfony\Component\Finder\Finder;
+
+return [
+	'prefix'                  => 'DoubleScale\\Vendor',
+	'expose-global-constants' => true,
+	'expose-global-classes'   => true,
+	'expose-global-functions' => true,
+	'expose-namespaces'       => array(
+		'SendGrid',
+		'Postmark',
+		'Brevo',
+	),
+	'exclude-namespaces'      => array(
+		'Composer',
+		'GuzzleHttp',
+		'Psr\\Http',
+		'Psr\\Log',
+		'Illuminate',
+		'WPEloquent',
+		'Carbon',
+		'League',
+		'Javanile',
+		// Doctrine: optional cache adapters in some SDKs; partial prefix breaks implements clauses.
+		'Doctrine',
+	),
+	'exclude-files'           => array(
+		__DIR__ . '/composer.json',
+		__DIR__ . '/composer.lock',
+	),
+	'finders'                 => array(
+		Finder::create()
+			->files()
+			->ignoreVCS( true )
+			->notName( '/.*\\.md|.*\\.dist|Makefile|composer\\.json|composer\\.lock/' )
+			->exclude(
+				array(
+					'doc',
+					'test',
+					'test_old',
+					'tests',
+					'Tests',
+					'vendor-bin',
+				)
+			)
+			->in( __DIR__ . '/vendor' ),
+		Finder::create()->append(
+			array(
+				__DIR__ . '/composer.json',
+				__DIR__ . '/composer.lock',
+			)
+		),
+	),
+	'patchers'                => array(
+		/**
+		 * Prefix dynamic class strings used by Brevo / SendGrid clients.
+		 */
+		static function ( string $file_path, string $prefix, string $contents ): string {
+			$p = str_replace( '\\', '\\\\', $prefix );
+
+			$contents = str_replace(
+				'\'\\\\Brevo\\\\Client\\\\Model\\\\',
+				'\'' . $p . '\\\\Brevo\\\\Client\\\\Model\\\\',
+				$contents
+			);
+
+			$contents = str_replace(
+				'\'\\\\SendGrid\\\\Mail\\\\',
+				'\'' . $p . '\\\\SendGrid\\\\Mail\\\\',
+				$contents
+			);
+
+			return $contents;
+		},
+	),
+];

@@ -112,6 +112,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'booking-dashboard',
 	'smtp',
 	'team-managers',
+	'integrations',
 ]);
 
 /**
@@ -138,7 +139,6 @@ const PATH_TO_MODULE: Record<string, string> = {
 	forms: 'forms',
 	'email-sequences': 'campaigns',
 	'analytics-and-reports': 'analytics',
-	integrations: 'integrations',
 	booking: 'booking',
 	'abandoned-carts': 'campaigns',
 	'ai-hub': 'automations',

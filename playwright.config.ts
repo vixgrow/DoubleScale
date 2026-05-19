@@ -16,6 +16,8 @@
  * without Pro they skip after the upgrade notice is shown.
  * `campaigns-module.spec.ts` covers email campaigns on any install; its SMS block skips
  * without the Pro SMS bridge.
+ * `smtp-module.spec.ts` covers built-in SMTP (Connections + Logs); skips when the smtp
+ * module toggle is off.
  *
  * Login for global-setup (`tests/e2e/global-setup.ts`):
  *   WP_ADMIN_USER / WP_ADMIN_PASS (default admin / password)

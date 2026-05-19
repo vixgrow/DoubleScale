@@ -29,7 +29,8 @@ class MetaTemplateSaver {
 	 * @return TemplateModel
 	 */
 	public function save_on_use( array $template_data ): TemplateModel {
-		$external_id = $template_data['settings']['external_id'] ?? $template_data['sid'];
+		$settings    = is_array( $template_data['settings'] ?? null ) ? $template_data['settings'] : array();
+		$external_id = $settings['external_id'] ?? ( $template_data['sid'] ?? '' );
 
 		// Check if already exists by external_id
 		$existing = $this->find_by_external_id( $external_id );
@@ -55,7 +56,7 @@ class MetaTemplateSaver {
 				'category' => 'whatsapp_business',
 				'body'     => $template_data['body'],
 				'settings' => array_merge(
-					$template_data['settings'],
+					$settings,
 					array(
 						'saved_at' => current_time( 'mysql' ),
 					)

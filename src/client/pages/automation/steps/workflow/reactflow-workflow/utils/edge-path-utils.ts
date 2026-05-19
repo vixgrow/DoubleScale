@@ -42,21 +42,27 @@ export const getOrthogonalEdgePath = ({
 		return [`M ${sx} ${sy} L ${tx} ${ty}`, sx, snap((sy + ty) / 2)];
 	}
 
-	// Nested merge → parent merge (target enters from yes/no side handle)
+	// Nested merge → parent merge (target enters from yes/no side handle).
+	// Keep the add-step button on the vertical drop directly below the source
+	// so it appears under the last step rather than on the horizontal jog.
 	if (
 		sourcePosition === Position.Bottom &&
 		(targetPosition === Position.Left ||
 			targetPosition === Position.Right)
 	) {
 		const path = `M ${sx} ${sy} L ${sx} ${ty} L ${tx} ${ty}`;
-		return [path, snap((sx + tx) / 2), ty];
+		const labelY = snap(sy + (ty - sy) * 0.65);
+		return [path, sx, labelY];
 	}
 
-	// Standard top-down elbow routing
+	// Standard top-down elbow routing.
+	// Place the add-step button on the vertical segment under the source so
+	// the "+" sits directly below the last step, not on the horizontal jog.
 	const midY = snap((sy + ty) / 2);
 	const path = `M ${sx} ${sy} L ${sx} ${midY} L ${tx} ${midY} L ${tx} ${ty}`;
+	const labelY = snap(sy + (midY - sy) * 0.5);
 
-	return [path, snap((sx + tx) / 2), midY];
+	return [path, sx, labelY];
 };
 
 type ConditionBranchPathParams = {

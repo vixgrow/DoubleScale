@@ -18,7 +18,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
  */
 class AbandonedCartCreated extends TriggerPro {
 
-/**
+	/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -59,14 +59,6 @@ class AbandonedCartCreated extends TriggerPro {
 	 * @var string
 	 */
 	public $group = 'cart';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
 }
 
 TriggersManager::instance()->register( new AbandonedCartCreated() );

@@ -3,8 +3,8 @@
  * Automations module bootstrap.
  *
  * Owns: automation models, triggers, actions, goals, rules, conditions, REST,
- * WooCommerce abandoned-cart capture/recovery hooks, abandoned-cart REST,
- * and automation processing. CRM vendor integrations are provided by the Pro add-on.
+ * and automation processing. CRM vendor integrations and the WooCommerce
+ * abandoned-cart capture/recovery feature are provided by the Pro add-on.
  *
  * @package DoubleScale\Pro
  */
@@ -44,11 +44,6 @@ final class Module extends AbstractModule {
 
 	public function register( Container $container ): void {
 		$container->singleton(
-			AbandonedCart\AbandonedCart::class,
-			static fn() => AbandonedCart\AbandonedCart::instance()
-		);
-
-		$container->singleton(
 			Services\TriggersManager::class,
 			static fn() => Services\TriggersManager::instance()
 		);
@@ -74,7 +69,6 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestAutomationController::class,
 			Rest\Controllers\RestAutomationStepController::class,
 			Rest\Controllers\RestAutomationContactController::class,
-			Rest\Controllers\RestAbandonedCartController::class,
 		);
 	}
 
@@ -83,7 +77,6 @@ final class Module extends AbstractModule {
 
 		add_filter( 'doublescale_mail_merge_tag_groups', array( $this, 'register_merge_tag_groups' ) );
 
-		$container->get( AbandonedCart\AbandonedCart::class );
 		$container->get( Services\TriggersManager::class );
 		$container->get( Services\ActionsManager::class );
 		Loader::instance();

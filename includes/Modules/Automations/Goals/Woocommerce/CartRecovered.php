@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart Recovered goal — definition only in the free plugin. Runtime implementation ships in DoubleScale Pro.
+ * WooCommerce Cart Recovered goal — definition only in the free plugin. Runtime implementation ships in DoubleScale Pro.
  *
  * @package DoubleScale\Pro
  */
@@ -10,16 +10,12 @@ namespace DoubleScale\Modules\Automations\Goals\Woocommerce;
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 use DoubleScale\Modules\Automations\Abstracts\GoalPro;
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
 
 /**
- * Cart Recovered goal stub.
+ * WooCommerce cart recovered goal stub.
  */
 class CartRecovered extends GoalPro {
 

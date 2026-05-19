@@ -321,7 +321,7 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-		case 'cart':
+			case 'cart':
 				const CartComponent = applyFilters(
 					'doublescale_settings_cart_settings',
 					() => (
@@ -497,8 +497,8 @@ const SettingsPage: React.FC = () => {
 			label: 'WhatsApp',
 			icon: <WhatsAppIcon width={24} height={24} />,
 		},
-	{
-		value: 'cart',
+		{
+			value: 'cart',
 			label: 'Cart',
 			icon: <CartIcon />,
 		},

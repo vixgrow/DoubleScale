@@ -22,7 +22,6 @@ use Illuminate\Validation\Factory as ValidatorFactory;
  * @property-read Tasks            $campaigns_tasks
  * @property-read Tasks            $automations_tasks
  * @property-read Tasks            $daily_tasks
- * @property-read Tasks            $abandoned_cart_tasks
  * @property-read Tasks            $forms_tasks
  */
 final class PluginKernel {
@@ -38,12 +37,11 @@ final class PluginKernel {
 	 * @var array<string, string>
 	 */
 	private static $property_bindings = array(
-		'campaigns_tasks'      => 'tasks.campaigns',
-		'automations_tasks'    => 'tasks.automations',
-		'daily_tasks'          => 'tasks.daily',
-		'abandoned_cart_tasks' => 'tasks.abandoned_cart',
-		'forms_tasks'          => 'tasks.forms',
-		'validator'            => ValidatorFactory::class,
+		'campaigns_tasks'   => 'tasks.campaigns',
+		'automations_tasks' => 'tasks.automations',
+		'daily_tasks'       => 'tasks.daily',
+		'forms_tasks'       => 'tasks.forms',
+		'validator'         => ValidatorFactory::class,
 	);
 
 	public static function instance(): self {
@@ -97,12 +95,6 @@ final class PluginKernel {
 			'tasks.daily',
 			static function () {
 				return new Tasks( 'doublescale_daily' );
-			}
-		);
-		$this->container->singleton(
-			'tasks.abandoned_cart',
-			static function () {
-				return new Tasks( 'doublescale_abandoned_cart' );
 			}
 		);
 		$this->container->singleton(

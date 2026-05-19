@@ -89,13 +89,7 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({
 				return data
 					? applyFilters(
 							'doublescale_analytics_cart_content',
-							<ProFeatureNotice
-								featureName={__('Cart Analytics', 'doublescale')}
-								description={__(
-									'Analyze cart performance, conversion rates, and sales metrics across your pipeline.',
-									'doublescale'
-								)}
-							/>,
+							null,
 							data,
 							navigate,
 							params

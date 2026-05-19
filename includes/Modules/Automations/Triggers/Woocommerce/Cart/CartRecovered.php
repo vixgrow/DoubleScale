@@ -18,7 +18,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
  */
 class CartRecovered extends TriggerPro {
 
-/**
+	/**
 	 * Trigger Name
 	 *
 	 * @var string
@@ -37,7 +37,7 @@ class CartRecovered extends TriggerPro {
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when an abandoned cart is recovered (customer completes purchase).';
+	public $description = 'This trigger will be fired when an abandoned cart is recovered.';
 
 	/**
 	 * Trigger Attributes
@@ -59,14 +59,6 @@ class CartRecovered extends TriggerPro {
 	 * @var string
 	 */
 	public $group = 'cart';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
 }
 
 TriggersManager::instance()->register( new CartRecovered() );

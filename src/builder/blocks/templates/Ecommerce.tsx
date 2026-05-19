@@ -5,19 +5,12 @@ import { __ } from '@wordpress/i18n';
 
 //@ts-ignore
 import orderConfirmation from '../../../../assets/images/templates/Order-Confirmation.png';
-//@ts-ignore
-import abandonedCart from '../../../../assets/images/templates/Abandoned-Cart.png';
 
 const templateItems = [
 	{
 		id: 'order-confirmation',
 		title: __('Order Confirmation', 'doublescale'),
 		image: orderConfirmation,
-	},
-	{
-		id: 'abandoned-cart',
-		title: __('Abandoned Cart', 'doublescale'),
-		image: abandonedCart,
 	},
 ];
 

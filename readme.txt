@@ -48,62 +48,15 @@ Multiple team members can work in DoubleScale at once. WordPress roles map to ac
 
 Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened — flow into **multi-step automations** with conditional branches, time delays, and webhook calls. Actions include: send email, send SMS, tag, score, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
 
-= Why teams replace 5+ SaaS subscriptions with DoubleScale =
+= Key capabilities =
 
-* **One contact record, eight surfaces.** A new sign-up doesn't have to be synced across five tools — it's already everywhere.
-* **No per-contact pricing. Ever.** Other CRMs charge by contact count. We charge by team plan. Run 200 contacts or 200,000 — same price.
-* **Self-hosted, native to WordPress.** Your contact records, deals, email history, support threads, and tracking events all live in your WordPress database, on your server. No iframe, no third-party cloud, no vendor lock-in.
-* **GDPR by design.** You control retention, exports, and deletion. No sub-processors. Tracking data stays inside your install.
-* **Scalable.** Benchmarked at 100,000+ contacts on a single-server install. Background tasks keep the frontend fast.
-* **Deep WordPress integrations.** WooCommerce, Easy Digital Downloads, SureCart, and 4 LMS platforms (LearnDash, LifterLMS, LearnPress, Tutor LMS) all feed the CRM natively.
-* **16 form-builder integrations.** Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, WS Form, and more.
-
-= How DoubleScale compares to GoHighLevel and HubSpot =
-
-Both platforms position themselves as "all-in-one." Both charge accordingly. Here's what their public pricing looks like alongside DoubleScale (as of 2026):
-
-**GoHighLevel** — cloud-hosted, agency-oriented
-* Starter: **$97 / month** — limited sub-accounts, contact caps per location, per-message SMS/email fees on top
-* Unlimited: **$297 / month** — agency-tier with sub-account creation, still charges per-segment for email and per-segment for SMS
-* SaaS Pro: **$497 / month** — adds resale features, still pays usage-based fees for every send
-* What you don't own: your data sits on GHL infrastructure. Cancel = export and rebuild elsewhere.
-
-**HubSpot** — cloud SaaS, contact-tiered
-* Marketing Hub Professional: **$890 / month** for the first 2,000 marketing contacts — **price climbs as your contact list grows** (~$45 per additional 1,000 contacts at this tier)
-* Sales Hub Professional: **$90 / seat / month** — billed per user
-* Service Hub Professional: **$90 / seat / month** — billed per user
-* Operations Hub Professional: **$720 / month**
-* CMS Hub Professional: **$360 / month**
-* **Marketing + Sales + Service + Ops Pro for a 5-person team starting at 2k contacts: ~$2,500 / month** — and that's before you grow.
-* Enterprise tiers cross **$3,600 / month** before per-seat or per-contact surcharges.
-
-**DoubleScale** — self-hosted WordPress plugin
-* Starter (free, forever): unlimited contacts, email campaigns, automations, booking, SMTP
-* Growth: **$99 / month, billed yearly** — adds deals & pipelines, tasks, lead scoring, forms, custom fields, Stripe for bookings
-* Scale: **$199 / month, billed yearly** — adds the unified helpdesk inbox, full analytics, website tracking, push notifications, Twilio/WhatsApp, and CRM sync (HubSpot, ActiveCampaign, Pipedrive)
-* **No per-contact pricing. No per-seat fees. Run 200 or 200,000 contacts at the same price.**
-
-**Side-by-side, the same workload:**
-
-A team with 5 users, 25,000 contacts, sending email & SMS campaigns, running pipelines, scheduling bookings, and managing customer support:
-
-* GoHighLevel Unlimited: **~$297 / month** + per-send usage fees (typically $50–$200 extra)
-* HubSpot Marketing Pro + Sales Pro + Service Pro: **~$1,840 / month** at 25k contacts (Marketing Hub Pro alone bills ~$1,400/mo at that contact count, plus seats)
-* **DoubleScale Scale: $199 / month — your data, your server, unlimited contacts, every module included**
-
-The trade-off is honest: HubSpot and GoHighLevel are hosted SaaS, polished, and require zero infrastructure. DoubleScale lives in your WordPress install — which means a few minutes of setup, a hosting bill you already pay, and a one-time decision to keep your customer data on your own servers.
-
-*Pricing references: hubspot.com/pricing, gohighlevel.com/pricing. Verify current rates on their respective sites; both vendors adjust pricing periodically.*
-
-= What you can throw away after installing DoubleScale =
-
-* Your standalone CRM (HubSpot, Pipedrive, ActiveCampaign)
-* Your email marketing platform (Mailchimp, ConvertKit, Klaviyo)
-* Your transactional email plugin (WP Mail SMTP, FluentSMTP)
-* Your booking app (Calendly, Acuity, SimplyBook)
-* Your task tracker (for customer work — ClickUp, Asana, Trello)
-* Your reporting layer (Databox, custom BI dashboards)
-* Your automation glue (Zapier — for anything happening inside your WordPress site)
+* One contact record shared across every module — campaigns, bookings, tasks, helpdesk threads, and deals all attach to the same contact.
+* Unlimited contacts and custom fields with no per-contact or per-seat fees.
+* Self-hosted: all records live in your own WordPress database; no third-party cloud, no vendor lock-in.
+* GDPR-friendly: per-contact exports, hard-delete workflows, consent tracking per channel, retention rules, and unsubscribe handling.
+* Benchmarked at 100,000+ contacts on a single-server install. Background processing keeps the frontend fast.
+* Deep WordPress integrations: WooCommerce, Easy Digital Downloads, SureCart, and LMS plugins (LearnDash, LifterLMS, LearnPress, Tutor LMS) feed the CRM natively.
+* 16 form-builder integrations, including Contact Form 7, Gravity Forms, WPForms, Fluent Forms, Elementor Forms, Formidable, Forminator, Ninja Forms, MetForm, JetFormBuilder, Bit Forms, Sure Forms, and WS Form.
 
 = Who DoubleScale is for =
 
@@ -229,38 +182,155 @@ Privacy-minded operators have access to: per-contact GDPR exports, hard-delete w
 
 == External Services ==
 
-DoubleScale connects to external services **only when you configure** those integrations. No data is transmitted without your API keys, webhooks, or explicit provider setup.
+DoubleScale connects to external services **only when you configure** those integrations. No data is transmitted without your API keys, OAuth grants, or explicit provider setup. Each provider listed below is independent of DoubleScale; using one means you also agree to that provider's terms and privacy policy.
 
-**ActiveCampaign (optional)**
-* Purpose: Contact sync
-* Data: Contact fields you map
-* Provider: ActiveCampaign LLC — account-specific API host
-* Terms: https://www.activecampaign.com/legal/terms-of-service
-* Privacy: https://www.activecampaign.com/legal/privacy-policy
+= AI services =
 
-**HubSpot (optional)**
-* Purpose: Contact and deal sync
-* Provider: HubSpot, Inc. — `https://api.hubapi.com`
-* Terms: https://legal.hubspot.com/terms-of-service
-* Privacy: https://legal.hubspot.com/privacy-policy
+**OpenAI (optional)**
+* Purpose: AI-assisted email composition and template generation.
+* Data sent: The prompt text and any campaign content you submit through the AI builder. Sent only when you click an AI generate action.
+* Endpoint: `https://api.openai.com`
+* Terms: https://openai.com/policies/terms-of-use
+* Privacy: https://openai.com/policies/privacy-policy
 
-**Twilio (optional, Pro)**
-* Purpose: SMS sending and inbound conversations
-* Data: Phone numbers, message content
-* Provider: Twilio Inc. — `https://api.twilio.com`
-* Terms: https://www.twilio.com/legal/tos
-* Privacy: https://www.twilio.com/legal/privacy
+**Google Gemini (optional)**
+* Purpose: Alternative AI provider for email composition.
+* Data sent: Prompt text and campaign content, only when you click an AI generate action.
+* Endpoint: `https://generativelanguage.googleapis.com`
+* Terms: https://policies.google.com/terms
+* Privacy: https://policies.google.com/privacy
 
-**Stripe (optional, Pro)**
-* Purpose: Booking payments
-* Provider: Stripe, Inc. — `https://api.stripe.com`
-* Terms: https://stripe.com/legal
-* Privacy: https://stripe.com/privacy
+= SMTP / email providers =
 
-**SMTP providers (optional)**
-SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and others — each governed by their own terms and privacy policy. Configured per-connection with your own credentials.
+Each SMTP provider is selectable per connection. When you configure one, DoubleScale sends outgoing mail (email content, recipient addresses, headers) to that provider's API; nothing is sent until you save credentials.
 
-Disable any connector by removing credentials or turning off the related automations. Using a provider means you agree to their agreements and privacy practices.
+**SendGrid**
+* Endpoint: `https://api.sendgrid.com`
+* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
+
+**Mailgun**
+* Endpoint: `https://api.mailgun.net`
+* Terms: https://www.mailgun.com/terms · Privacy: https://www.mailgun.com/privacy-policy
+
+**Postmark**
+* Endpoint: `https://api.postmarkapp.com`
+* Terms: https://postmarkapp.com/terms-of-service · Privacy: https://postmarkapp.com/privacy-policy
+
+**SparkPost**
+* Endpoint: `https://api.sparkpost.com`
+* Terms: https://www.messagebird.com/en/legal/terms-of-use · Privacy: https://www.messagebird.com/en/legal/privacy
+
+**SMTP.com**
+* Endpoint: `https://api.smtp.com`
+* Terms: https://www.smtp.com/terms-of-service/ · Privacy: https://www.smtp.com/privacy-policy/
+
+**SMTP2GO**
+* Endpoint: `https://api.smtp2go.com`
+* Terms: https://www.smtp2go.com/terms-of-service/ · Privacy: https://www.smtp2go.com/privacy-policy/
+
+**MailerSend**
+* Endpoint: `https://api.mailersend.com`
+* Terms: https://www.mailersend.com/legal/terms · Privacy: https://www.mailersend.com/legal/privacy-policy
+
+**Mailjet**
+* Endpoint: `https://api.mailjet.com`
+* Terms: https://www.mailjet.com/legal/terms · Privacy: https://www.mailjet.com/privacy-policy/
+
+**Brevo (formerly Sendinblue)**
+* Endpoint: `https://api.brevo.com`
+* Terms: https://www.brevo.com/legal/termsofuse/ · Privacy: https://www.brevo.com/legal/privacypolicy/
+
+**Mandrill**
+* Endpoint: `https://mandrillapp.com/api`
+* Terms: https://mailchimp.com/legal/terms/ · Privacy: https://mailchimp.com/legal/privacy/
+
+**ElasticEmail**
+* Endpoint: `https://api.elasticemail.com`
+* Terms: https://elasticemail.com/resources/usage-policies/terms-of-use/ · Privacy: https://elasticemail.com/resources/usage-policies/privacy-policy/
+
+**SendLayer**
+* Endpoint: `https://console.sendlayer.com/api`
+* Terms: https://sendlayer.com/terms-of-service/ · Privacy: https://sendlayer.com/privacy-policy/
+
+**SocketLabs**
+* Endpoint: `https://inject.socketlabs.com`
+* Terms: https://www.socketlabs.com/master-services-agreement/ · Privacy: https://www.socketlabs.com/privacy-policy/
+
+**Loops**
+* Endpoint: `https://app.loops.so/api`
+* Terms: https://loops.so/terms · Privacy: https://loops.so/privacy
+
+**Amazon SES**
+* Endpoint: AWS regional endpoints (e.g., `https://email.us-east-1.amazonaws.com`)
+* Terms: https://aws.amazon.com/service-terms/ · Privacy: https://aws.amazon.com/privacy/
+
+= OAuth-based mail providers =
+
+**Gmail / Google Workspace**
+* Purpose: Send mail through your Google account via OAuth.
+* Data sent: Outgoing email content; profile email read on connect to identify the account.
+* Endpoints: `https://www.googleapis.com/oauth2/*`, `https://gmail.googleapis.com`
+* Terms: https://policies.google.com/terms · Privacy: https://policies.google.com/privacy
+
+**Microsoft Outlook / 365**
+* Purpose: Send mail through your Microsoft account via OAuth.
+* Data sent: Outgoing email content; profile read on connect to identify the account.
+* Endpoints: `https://login.microsoftonline.com`, `https://graph.microsoft.com`
+* Terms: https://www.microsoft.com/legal/terms-of-use · Privacy: https://privacy.microsoft.com/privacystatement
+
+**Zoho Mail**
+* Purpose: Send mail through your Zoho account via OAuth.
+* Endpoints: `https://accounts.zoho.com`, `https://mail.zoho.com/api`
+* Terms: https://www.zoho.com/terms.html · Privacy: https://www.zoho.com/privacy.html
+
+= CRM sync providers (Pro) =
+
+**ActiveCampaign**
+* Purpose: Two-way contact sync.
+* Data sent: Contact fields you map.
+* Endpoint: Your account's ActiveCampaign API host.
+* Terms: https://www.activecampaign.com/legal/terms-of-service · Privacy: https://www.activecampaign.com/legal/privacy-policy
+
+**HubSpot**
+* Purpose: Two-way contact and deal sync.
+* Endpoint: `https://api.hubapi.com`
+* Terms: https://legal.hubspot.com/terms-of-service · Privacy: https://legal.hubspot.com/privacy-policy
+
+**Pipedrive**
+* Purpose: Two-way contact and deal sync.
+* Endpoint: `https://api.pipedrive.com`
+* Terms: https://www.pipedrive.com/en/terms-of-service · Privacy: https://www.pipedrive.com/en/privacy
+
+**GoHighLevel**
+* Purpose: Contact sync via OAuth.
+* Endpoints: `https://marketplace.gohighlevel.com`, `https://services.leadconnectorhq.com`
+* Terms: https://www.gohighlevel.com/terms-of-service · Privacy: https://www.gohighlevel.com/privacy-policy
+
+= Messaging providers (Pro) =
+
+**Twilio**
+* Purpose: SMS sending and inbound conversations.
+* Data sent: Phone numbers and message content.
+* Endpoint: `https://api.twilio.com`
+* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
+
+**Meta WhatsApp Business**
+* Purpose: WhatsApp sending and inbound conversations.
+* Data sent: Phone numbers and message content via the WhatsApp Business Cloud API.
+* Endpoint: `https://graph.facebook.com`
+* Terms: https://www.whatsapp.com/legal/business-terms · Privacy: https://www.whatsapp.com/legal/business-data-transfer-addendum
+
+= Payments (Pro) =
+
+**Stripe**
+* Purpose: Process booking payments.
+* Data sent: Booking amount, currency, and the payer email for receipts.
+* Endpoint: `https://api.stripe.com`
+* Terms: https://stripe.com/legal · Privacy: https://stripe.com/privacy
+
+= Disabling =
+
+Disable any connector by removing its credentials in **DoubleScale → Settings** or by deactivating the related automation. Outgoing API calls only happen when you trigger an action that requires the configured service.
 
 == Credits ==
 

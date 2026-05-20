@@ -45,7 +45,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 	onWaitingListSlotSelected,
 }) => {
 	const [selectedAvailability, setSelectedAvailability] = useState<
-		string | null
+		Record<string, unknown> | null
 	>(null);
 	const [waitingListEnabled, setWaitingListEnabled] = useState(false);
 

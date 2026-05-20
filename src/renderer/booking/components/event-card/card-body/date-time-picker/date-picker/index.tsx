@@ -1,15 +1,16 @@
-import { Calendar } from 'antd';
 import dayjs from 'dayjs';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import './style.scss';
 import isBetween from 'dayjs/plugin/isBetween';
 import isToday from 'dayjs/plugin/isToday';
-import { __ } from '@wordpress/i18n';
 import { RendererEvent } from '@/types/booking';
 import { Dayjs } from 'dayjs';
 import PreviousIcon from '../../../../../icons/previous-icon';
 import NextIcon from '../../../../../icons/next-icon';
 import { css } from '@emotion/css';
+import { Calendar } from '@/components/ui/calendar';
+import type { DayButtonProps, MonthCaptionProps } from 'react-day-picker';
+import { cn } from '@/lib/utils';
 
 dayjs.extend(isBetween);
 dayjs.extend(isToday);
@@ -28,6 +29,112 @@ interface DatePickerProps {
 	lightColor: string;
 	setIsLoading: (isLoading: boolean) => void;
 	setWaitingListEnabled?: (enabled: boolean) => void;
+}
+
+type BookingDayButtonProps = DayButtonProps & {
+	baseColor: string;
+	lightColor: string;
+};
+
+function BookingDayButton({
+	day,
+	modifiers,
+	className,
+	baseColor,
+	lightColor,
+	...buttonProps
+}: BookingDayButtonProps) {
+	const isSelected = modifiers.selected;
+	const isAvailable = modifiers.available;
+	const isTodayMarker = modifiers.today;
+	const isDisabled = modifiers.disabled;
+
+	const dayStyles = css`
+		${isSelected
+			? `
+			background-color: ${baseColor} !important;
+			color: #fff !important;
+		`
+			: isAvailable && !isDisabled
+				? `
+			background-color: ${lightColor} !important;
+			color: #29292E !important;
+		`
+				: isDisabled
+					? `
+			color: #29292E !important;
+			cursor: not-allowed !important;
+			background: transparent !important;
+		`
+					: ''}
+	`;
+
+	return (
+		<button
+			type="button"
+			className={cn(
+				'calendar-date',
+				isSelected && 'selected-date',
+				isAvailable && !isDisabled && !isSelected && 'highlight-date',
+				isTodayMarker && 'calendar-date--today',
+				dayStyles,
+				isDisabled && 'calendar-date--disabled',
+				className
+			)}
+			{...buttonProps}
+		>
+			<div className="date-number">{day.date.getDate()}</div>
+			{isTodayMarker && <div className="dot" />}
+		</button>
+	);
+}
+
+function BookingMonthCaption({
+	calendarMonth,
+	baseColor,
+	lightColor,
+	onPrevMonth,
+	onNextMonth,
+	nextDisabled,
+}: MonthCaptionProps & {
+	baseColor: string;
+	lightColor: string;
+	onPrevMonth: () => void;
+	onNextMonth: () => void;
+	nextDisabled: boolean;
+}) {
+	const navBtnClass = css`
+		background-color: ${lightColor};
+		color: ${baseColor};
+	`;
+
+	return (
+		<div className="calendar-header">
+			<button
+				type="button"
+				onClick={onPrevMonth}
+				className={cn('nav-arrow', navBtnClass)}
+			>
+				<PreviousIcon />
+			</button>
+			<div className="month-label">
+				{dayjs(calendarMonth.date).format('MMMM YYYY')}
+			</div>
+			<button
+				type="button"
+				onClick={onNextMonth}
+				disabled={nextDisabled}
+				className={cn('nav-arrow', navBtnClass)}
+				style={
+					nextDisabled
+						? { opacity: 0.5, cursor: 'not-allowed' }
+						: undefined
+				}
+			>
+				<NextIcon />
+			</button>
+		</div>
+	);
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -58,6 +165,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 	useEffect(() => {
 		setIsLoading(true);
 	}, []);
+
 	const fetchAvailability = async (date: Dayjs, calendar_id?: number) => {
 		const formData = new FormData();
 		formData.append('action', 'doublescale_booking_booking_slots');
@@ -79,7 +187,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 			if (response.ok) {
 				const data = await response.json();
 				if (data && data.success && data.data && data.data.slots) {
-					setSelectedAvailability((prevAvailability) => ({
+					setSelectedAvailability((prevAvailability: any) => ({
 						...prevAvailability,
 						...data.data.slots,
 					}));
@@ -109,17 +217,17 @@ const DatePicker: React.FC<DatePickerProps> = ({
 						);
 					}
 				}
-		} else {
-			console.error(
-				'Error fetching availability: Server returned',
-				response.status
-			);
+			} else {
+				console.error(
+					'Error fetching availability: Server returned',
+					response.status
+				);
+				setIsLoading(false);
+			}
+		} catch (error) {
+			console.error('Error fetching availability:', error);
 			setIsLoading(false);
 		}
-	} catch (error) {
-		console.error('Error fetching availability:', error);
-		setIsLoading(false);
-	}
 	};
 
 	useEffect(() => {
@@ -139,108 +247,131 @@ const DatePicker: React.FC<DatePickerProps> = ({
 		}
 	}, [currentMonth]);
 
-	const renderDateCell = (value) => {
-		const isSameDay =
-			selectedDate &&
-			value.format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD');
-		const availableSlots =
-			selectedAvailability &&
-			selectedAvailability[value.format('YYYY-MM-DD')];
-		const isAvailable = availableSlots !== undefined;
-		const isCurrentDay = value.isSame(dayjs(), 'day');
-
-		const className = isSameDay
-			? `calendar-date selected-date ${css`
-					background-color: ${baseColor};
-				`}`
-			: isAvailable
-				? `calendar-date highlight-date ${css`
-						background-color: ${lightColor};
-						color: ${baseColor};
-					`}`
-				: 'calendar-date';
-
-		return (
-			<div className={className}>
-				<div className="date-number">{value.date()}</div>
-				{isCurrentDay && (
-					<div
-						className={`dot ${css`
-							background-color: ${baseColor};
-						`}`}
-					/>
-				)}
-			</div>
-		);
-	};
-
-	const renderHeader = ({ value }) => {
-		const handlePrevMonth = () => {
-			const newValue = value.clone().subtract(1, 'month');
-			setCurrentMonth(newValue);
-			setReachedEndDate(false);
-		};
-
-		const handleNextMonth = () => {
-			if (!reachedEndDate) {
-				const newValue = value.clone().add(1, 'month');
-				setCurrentMonth(newValue);
+	const isDateAvailable = useCallback(
+		(date: Date) => {
+			if (!selectedAvailability) {
+				return false;
 			}
-		};
+			return (
+				selectedAvailability[dayjs(date).format('YYYY-MM-DD')] !==
+				undefined
+			);
+		},
+		[selectedAvailability]
+	);
 
-		return (
-			<div className="calendar-header">
-				<button
-					onClick={handlePrevMonth}
-					className={`nav-arrow ${css`
-						background-color: ${lightColor};
-						color: ${baseColor};
-					`}`}
-				>
-					<PreviousIcon />
-				</button>
-				<div className="month-label">{value.format('MMMM YYYY')}</div>
-				<button
-					onClick={handleNextMonth}
-					className={`nav-arrow ${css`
-						background-color: ${lightColor};
-						color: ${baseColor};
-					`}`}
-					disabled={reachedEndDate}
-					style={
-						reachedEndDate
-							? { opacity: 0.5, cursor: 'not-allowed' }
-							: {}
-					}
-				>
-					<NextIcon />
-				</button>
-			</div>
-		);
+	const isDateDisabled = useCallback(
+		(date: Date) => {
+			const current = dayjs(date);
+			if (current.isBefore(dayjs(), 'day')) {
+				return true;
+			}
+			if (!selectedAvailability) {
+				return true;
+			}
+			return (
+				selectedAvailability[current.format('YYYY-MM-DD')] === undefined
+			);
+		},
+		[selectedAvailability]
+	);
+
+	const DayButtonComponent = useMemo(
+		() =>
+			function DayBtn(props: DayButtonProps) {
+				return (
+					<BookingDayButton
+						{...props}
+						baseColor={baseColor}
+						lightColor={lightColor}
+					/>
+				);
+			},
+		[baseColor, lightColor]
+	);
+
+	const handlePrevMonth = () => {
+		setCurrentMonth((prev) => prev.subtract(1, 'month'));
+		setReachedEndDate(false);
 	};
 
-	const disabledDate = (current: Dayjs): boolean => {
-		if (current.isBefore(dayjs(), 'day')) {
-			return true;
+	const handleNextMonth = () => {
+		if (!reachedEndDate) {
+			setCurrentMonth((prev) => prev.add(1, 'month'));
 		}
-		if (!selectedAvailability) {
-			return true;
-		}
-		return selectedAvailability[current.format('YYYY-MM-DD')] === undefined;
 	};
+
+	const MonthCaptionComponent = useMemo(
+		() =>
+			function Caption(props: MonthCaptionProps) {
+				return (
+					<BookingMonthCaption
+						{...props}
+						baseColor={baseColor}
+						lightColor={lightColor}
+						onPrevMonth={handlePrevMonth}
+						onNextMonth={handleNextMonth}
+						nextDisabled={reachedEndDate}
+					/>
+				);
+			},
+		[baseColor, lightColor, reachedEndDate]
+	);
 
 	return (
 		<Calendar
-			fullscreen={false}
-			value={currentMonth}
-			onSelect={(date) => {
-				setSelectedDate(date);
-				setCurrentMonth(date);
-			}}
-			disabledDate={disabledDate}
-			fullCellRender={renderDateCell}
-			headerRender={renderHeader}
+			mode="single"
+			required
+			showOutsideDays
+			fixedWeeks
 			className="custom-calendar"
+			style={
+				{
+					'--booking-primary-color': baseColor,
+				} as React.CSSProperties
+			}
+			month={currentMonth.toDate()}
+			onMonthChange={(month) => {
+				if (month) {
+					setCurrentMonth(dayjs(month));
+				}
+			}}
+			selected={selectedDate?.toDate()}
+			onSelect={(date) => {
+				if (!date) {
+					return;
+				}
+				const next = dayjs(date).startOf('day');
+				setSelectedDate(next);
+				setCurrentMonth(next);
+			}}
+			disabled={isDateDisabled}
+			modifiers={{
+				available: (date) =>
+					isDateAvailable(date) && !isDateDisabled(date),
+				today: (date) => dayjs(date).isToday(),
+			}}
+			classNames={{
+				root: 'custom-calendar-root',
+				months: 'custom-calendar-months',
+				month: 'custom-calendar-month',
+				month_caption: 'custom-calendar-caption',
+				nav: 'hidden',
+				month_grid: 'custom-calendar-grid',
+				weekdays: 'custom-calendar-weekdays',
+				weekday: 'custom-calendar-weekday',
+				week: 'custom-calendar-week',
+				day: 'custom-calendar-day',
+				disabled: 'custom-calendar-day-disabled',
+				outside: 'custom-calendar-day-outside',
+				today: 'custom-calendar-day-today',
+				selected: 'custom-calendar-day-selected',
+			}}
+			components={{
+				MonthCaption: MonthCaptionComponent,
+				DayButton: DayButtonComponent,
+				Chevron: () => <span />,
+			}}
 		/>
 	);
 };

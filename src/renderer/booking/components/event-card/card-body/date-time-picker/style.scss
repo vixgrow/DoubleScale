@@ -1,6 +1,14 @@
 .date-time-picker {
 	display: flex;
 	gap: 20px;
+	align-items: stretch;
+
+	.custom-calendar,
+	.time-picker-container {
+		min-height: 442px;
+		height: 442px;
+		box-sizing: border-box;
+	}
 }
 
 .date-time-title {
@@ -8,6 +16,7 @@
 	font-size: 20px;
 	padding: 0;
 	padding-bottom: 15px;
+	color: #29292E;
 }
 
 .date-time-header {
@@ -38,6 +47,17 @@
 @media screen and (max-width: 768px) {
 	.date-time-picker {
 		flex-direction: column;
+
+		.custom-calendar,
+		.time-picker-container {
+			min-height: auto;
+			height: auto;
+		}
+
+		.time-picker-container {
+			min-height: 320px;
+			height: 320px;
+		}
 	}
 }
 

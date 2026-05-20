@@ -1,11 +1,30 @@
 import { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { __ } from '@wordpress/i18n';
 import { RendererEvent, EventTypes } from '@/types/booking';
 import './style.scss';
 import { css } from '@emotion/css';
 import InfoIcon from '../../../../../icons/info-icon';
 import { doAction, applyFilters } from '@wordpress/hooks';
+
+dayjs.extend(customParseFormat);
+
+const getSlotTime = (start: string): string => {
+	if (!start) {
+		return '';
+	}
+	if (start.includes('T')) {
+		const parsed = dayjs(start);
+		return parsed.isValid() ? parsed.format('HH:mm') : '';
+	}
+	const timeString = start.split(' ')[1];
+	if (!timeString) {
+		return '';
+	}
+	const [hours, minutes] = timeString.split(':');
+	return `${hours}:${minutes}`;
+};
 
 interface TimeSlot {
 	time: string;
@@ -21,7 +40,7 @@ interface TimeSlot {
 }
 
 interface TimePickerProps {
-	selectedAvailability: string | null;
+	selectedAvailability: Record<string, unknown> | null;
 	selectedDate: Dayjs;
 	selectedTime: string | null;
 	setSelectedTime: (time: string) => void;
@@ -51,11 +70,13 @@ const TimePicker: React.FC<TimePickerProps> = ({
 	waitingListEnabled = false,
 	onWaitingListSlotSelected,
 }) => {
-	// Helper function to format time based on timeFormat prop
 	const formatTimeDisplay = (time: string) => {
-		// time is in HH:mm format
 		const displayFormat = timeFormat === '24' ? 'HH:mm' : 'hh:mm A';
-		return dayjs(time, 'HH:mm').format(displayFormat);
+		const parsed = dayjs(time, ['HH:mm', 'H:mm', 'HH:mm:ss'], true);
+		if (!parsed.isValid()) {
+			return time;
+		}
+		return parsed.format(displayFormat);
 	};
 
 	const getTimeSlots = (): TimeSlot[] => {
@@ -107,11 +128,13 @@ const TimePicker: React.FC<TimePickerProps> = ({
 					if (!slot || !slot.start) {
 						return [];
 					}
-					const timeString = slot.start.split(' ')[1];
-					const time = timeString.split(':');
+					const time = getSlotTime(slot.start);
+					if (!time) {
+						return [];
+					}
 					return [
 						{
-							time: `${time[0]}:${time[1]}`,
+							time,
 							remaining: slot.remaining,
 							hosts_ids: slot.hosts_ids,
 							waiting_list_count: slot.waiting_list_count,

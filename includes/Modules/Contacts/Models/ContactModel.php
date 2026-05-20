@@ -22,7 +22,6 @@ use DoubleScale\Modules\Automations\Models\AutomationContactModel;
 use DoubleScale\Core\Models\UserModel;
 use DoubleScale\Modules\Automations\Models\AutomationContactProcessesModel;
 use DoubleScale\Modules\Contacts\Models\ContactUnsubscribeModel;
-// use DoubleScale\Modules\Deals\Models\DealModel; // Moved to Pro
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel; // Optional explicit import; class autoloads when Pro is active.
 use DoubleScale\Core\Utils\Utils;
 
@@ -410,8 +409,9 @@ class ContactModel extends Model
 	 */
 	public function deals()
 	{
-		if (class_exists('DoubleScale\Modules\Deals\Models\DealModel')) {
-			return $this->hasMany(\DoubleScale\Modules\Deals\Models\DealModel::class, 'contact_id', 'id');
+		$deal_model = doublescale_resolve_deal_model_class();
+		if ($deal_model) {
+			return $this->hasMany($deal_model, 'contact_id', 'id');
 		}
 		return null;
 	}
@@ -426,8 +426,9 @@ class ContactModel extends Model
 	 */
 	public function active_deals()
 	{
-		if (class_exists('DoubleScale\Modules\Deals\Models\DealModel')) {
-			return $this->hasMany(\DoubleScale\Modules\Deals\Models\DealModel::class, 'contact_id', 'id')->where('status', 'open');
+		$deal_model = doublescale_resolve_deal_model_class();
+		if ($deal_model) {
+			return $this->hasMany($deal_model, 'contact_id', 'id')->where('status', 'open');
 		}
 		return null;
 	}

@@ -377,9 +377,9 @@ class ActivityModel extends Model {
 				$old_stage_name = __( 'Unknown Stage', 'doublescale');
 				$new_stage_name = __( 'Unknown Stage', 'doublescale');
 
-				if ( class_exists( '\DoubleScale\Modules\Deals\Models\PipelineStageModel' ) ) {
-					$old_stage = \DoubleScale\Modules\Deals\Models\PipelineStageModel::find( $this->data['old_stage_id'] ?? 0 );
-					$new_stage = \DoubleScale\Modules\Deals\Models\PipelineStageModel::find( $this->data['new_stage_id'] ?? 0 );
+				if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\PipelineStageModel' ) ) {
+					$old_stage = \DoubleScale\Pro\Modules\Deals\Models\PipelineStageModel::find( $this->data['old_stage_id'] ?? 0 );
+					$new_stage = \DoubleScale\Pro\Modules\Deals\Models\PipelineStageModel::find( $this->data['new_stage_id'] ?? 0 );
 
 					$old_stage_name = $old_stage ? $old_stage->name : $old_stage_name;
 					$new_stage_name = $new_stage ? $new_stage->name : $new_stage_name;

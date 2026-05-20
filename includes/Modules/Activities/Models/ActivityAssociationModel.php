@@ -135,8 +135,9 @@ class ActivityAssociationModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo|null
 	 */
 	public function deal() {
-		if ( class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
-			return $this->belongsTo( '\DoubleScale\Modules\Deals\Models\DealModel', 'entity_id', 'id' )
+		$deal_model = doublescale_resolve_deal_model_class();
+		if ( $deal_model ) {
+			return $this->belongsTo( $deal_model, 'entity_id', 'id' )
 				->where( 'entity_type', self::ENTITY_TYPE_DEAL );
 		}
 		return null;

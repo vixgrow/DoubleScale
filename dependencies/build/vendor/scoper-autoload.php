@@ -6,8 +6,1364 @@ $loader = require_once __DIR__.'/autoload.php';
 
 // Exposed classes. For more information see:
 // https://github.com/humbug/php-scoper/blob/master/docs/configuration.md#exposing-classes
-if (!class_exists('ComposerAutoloaderInit6607129099ed9005200b64191c148699', false) && !interface_exists('ComposerAutoloaderInit6607129099ed9005200b64191c148699', false) && !trait_exists('ComposerAutoloaderInit6607129099ed9005200b64191c148699', false)) {
-    spl_autoload_call('DoubleScale\Vendor\ComposerAutoloaderInit6607129099ed9005200b64191c148699');
+if (!class_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false) && !interface_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false) && !trait_exists('ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da', false)) {
+    spl_autoload_call('DoubleScale\Vendor\ComposerAutoloaderInit16ae31899de823e17ba816de66fa67da');
+}
+if (!class_exists('SendGrid\Stats\Stats', false) && !interface_exists('SendGrid\Stats\Stats', false) && !trait_exists('SendGrid\Stats\Stats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Stats\Stats');
+}
+if (!class_exists('SendGrid\Mail\Bcc', false) && !interface_exists('SendGrid\Mail\Bcc', false) && !trait_exists('SendGrid\Mail\Bcc', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Bcc');
+}
+if (!class_exists('SendGrid\Mail\BatchId', false) && !interface_exists('SendGrid\Mail\BatchId', false) && !trait_exists('SendGrid\Mail\BatchId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BatchId');
+}
+if (!class_exists('SendGrid\Mail\Mail', false) && !interface_exists('SendGrid\Mail\Mail', false) && !trait_exists('SendGrid\Mail\Mail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Mail');
+}
+if (!class_exists('SendGrid\Mail\Ganalytics', false) && !interface_exists('SendGrid\Mail\Ganalytics', false) && !trait_exists('SendGrid\Mail\Ganalytics', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Ganalytics');
+}
+if (!class_exists('SendGrid\Mail\ClickTracking', false) && !interface_exists('SendGrid\Mail\ClickTracking', false) && !trait_exists('SendGrid\Mail\ClickTracking', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\ClickTracking');
+}
+if (!class_exists('SendGrid\Mail\BypassSpamManagement', false) && !interface_exists('SendGrid\Mail\BypassSpamManagement', false) && !trait_exists('SendGrid\Mail\BypassSpamManagement', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BypassSpamManagement');
+}
+if (!class_exists('SendGrid\Mail\TrackingSettings', false) && !interface_exists('SendGrid\Mail\TrackingSettings', false) && !trait_exists('SendGrid\Mail\TrackingSettings', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\TrackingSettings');
+}
+if (!class_exists('SendGrid\Mail\IpPoolName', false) && !interface_exists('SendGrid\Mail\IpPoolName', false) && !trait_exists('SendGrid\Mail\IpPoolName', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\IpPoolName');
+}
+if (!class_exists('SendGrid\Mail\TypeException', false) && !interface_exists('SendGrid\Mail\TypeException', false) && !trait_exists('SendGrid\Mail\TypeException', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\TypeException');
+}
+if (!class_exists('SendGrid\Mail\Cc', false) && !interface_exists('SendGrid\Mail\Cc', false) && !trait_exists('SendGrid\Mail\Cc', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Cc');
+}
+if (!class_exists('SendGrid\Mail\SendAt', false) && !interface_exists('SendGrid\Mail\SendAt', false) && !trait_exists('SendGrid\Mail\SendAt', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\SendAt');
+}
+if (!class_exists('SendGrid\Mail\EmailAddress', false) && !interface_exists('SendGrid\Mail\EmailAddress', false) && !trait_exists('SendGrid\Mail\EmailAddress', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\EmailAddress');
+}
+if (!class_exists('SendGrid\Mail\From', false) && !interface_exists('SendGrid\Mail\From', false) && !trait_exists('SendGrid\Mail\From', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\From');
+}
+if (!class_exists('SendGrid\Mail\Content', false) && !interface_exists('SendGrid\Mail\Content', false) && !trait_exists('SendGrid\Mail\Content', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Content');
+}
+if (!class_exists('SendGrid\Mail\PlainTextContent', false) && !interface_exists('SendGrid\Mail\PlainTextContent', false) && !trait_exists('SendGrid\Mail\PlainTextContent', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\PlainTextContent');
+}
+if (!class_exists('SendGrid\Mail\SandBoxMode', false) && !interface_exists('SendGrid\Mail\SandBoxMode', false) && !trait_exists('SendGrid\Mail\SandBoxMode', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\SandBoxMode');
+}
+if (!class_exists('SendGrid\Mail\Category', false) && !interface_exists('SendGrid\Mail\Category', false) && !trait_exists('SendGrid\Mail\Category', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Category');
+}
+if (!class_exists('SendGrid\Mail\Asm', false) && !interface_exists('SendGrid\Mail\Asm', false) && !trait_exists('SendGrid\Mail\Asm', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Asm');
+}
+if (!class_exists('SendGrid\Mail\CustomArg', false) && !interface_exists('SendGrid\Mail\CustomArg', false) && !trait_exists('SendGrid\Mail\CustomArg', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\CustomArg');
+}
+if (!class_exists('SendGrid\Mail\TemplateId', false) && !interface_exists('SendGrid\Mail\TemplateId', false) && !trait_exists('SendGrid\Mail\TemplateId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\TemplateId');
+}
+if (!class_exists('SendGrid\Mail\BypassListManagement', false) && !interface_exists('SendGrid\Mail\BypassListManagement', false) && !trait_exists('SendGrid\Mail\BypassListManagement', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BypassListManagement');
+}
+if (!class_exists('SendGrid\Mail\To', false) && !interface_exists('SendGrid\Mail\To', false) && !trait_exists('SendGrid\Mail\To', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\To');
+}
+if (!class_exists('SendGrid\Mail\Header', false) && !interface_exists('SendGrid\Mail\Header', false) && !trait_exists('SendGrid\Mail\Header', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Header');
+}
+if (!class_exists('SendGrid\Mail\BypassBounceManagement', false) && !interface_exists('SendGrid\Mail\BypassBounceManagement', false) && !trait_exists('SendGrid\Mail\BypassBounceManagement', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BypassBounceManagement');
+}
+if (!class_exists('SendGrid\Mail\GroupId', false) && !interface_exists('SendGrid\Mail\GroupId', false) && !trait_exists('SendGrid\Mail\GroupId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\GroupId');
+}
+if (!class_exists('SendGrid\Mail\Attachment', false) && !interface_exists('SendGrid\Mail\Attachment', false) && !trait_exists('SendGrid\Mail\Attachment', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Attachment');
+}
+if (!class_exists('SendGrid\Mail\GroupsToDisplay', false) && !interface_exists('SendGrid\Mail\GroupsToDisplay', false) && !trait_exists('SendGrid\Mail\GroupsToDisplay', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\GroupsToDisplay');
+}
+if (!class_exists('SendGrid\Mail\HtmlContent', false) && !interface_exists('SendGrid\Mail\HtmlContent', false) && !trait_exists('SendGrid\Mail\HtmlContent', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\HtmlContent');
+}
+if (!class_exists('SendGrid\Mail\SpamCheck', false) && !interface_exists('SendGrid\Mail\SpamCheck', false) && !trait_exists('SendGrid\Mail\SpamCheck', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\SpamCheck');
+}
+if (!class_exists('SendGrid\Mail\OpenTracking', false) && !interface_exists('SendGrid\Mail\OpenTracking', false) && !trait_exists('SendGrid\Mail\OpenTracking', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\OpenTracking');
+}
+if (!class_exists('SendGrid\Mail\MimeType', false) && !interface_exists('SendGrid\Mail\MimeType', false) && !trait_exists('SendGrid\Mail\MimeType', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\MimeType');
+}
+if (!class_exists('SendGrid\Mail\SubscriptionTracking', false) && !interface_exists('SendGrid\Mail\SubscriptionTracking', false) && !trait_exists('SendGrid\Mail\SubscriptionTracking', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\SubscriptionTracking');
+}
+if (!class_exists('SendGrid\Mail\Section', false) && !interface_exists('SendGrid\Mail\Section', false) && !trait_exists('SendGrid\Mail\Section', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Section');
+}
+if (!class_exists('SendGrid\Mail\Substitution', false) && !interface_exists('SendGrid\Mail\Substitution', false) && !trait_exists('SendGrid\Mail\Substitution', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Substitution');
+}
+if (!class_exists('SendGrid\Mail\Footer', false) && !interface_exists('SendGrid\Mail\Footer', false) && !trait_exists('SendGrid\Mail\Footer', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Footer');
+}
+if (!class_exists('SendGrid\Mail\Subject', false) && !interface_exists('SendGrid\Mail\Subject', false) && !trait_exists('SendGrid\Mail\Subject', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Subject');
+}
+if (!class_exists('SendGrid\Mail\MailSettings', false) && !interface_exists('SendGrid\Mail\MailSettings', false) && !trait_exists('SendGrid\Mail\MailSettings', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\MailSettings');
+}
+if (!class_exists('SendGrid\Mail\ReplyTo', false) && !interface_exists('SendGrid\Mail\ReplyTo', false) && !trait_exists('SendGrid\Mail\ReplyTo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\ReplyTo');
+}
+if (!class_exists('SendGrid\Mail\Personalization', false) && !interface_exists('SendGrid\Mail\Personalization', false) && !trait_exists('SendGrid\Mail\Personalization', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\Personalization');
+}
+if (!class_exists('SendGrid\Mail\BypassUnsubscribeManagement', false) && !interface_exists('SendGrid\Mail\BypassUnsubscribeManagement', false) && !trait_exists('SendGrid\Mail\BypassUnsubscribeManagement', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BypassUnsubscribeManagement');
+}
+if (!class_exists('SendGrid\Mail\BccSettings', false) && !interface_exists('SendGrid\Mail\BccSettings', false) && !trait_exists('SendGrid\Mail\BccSettings', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Mail\BccSettings');
+}
+if (!class_exists('SendGrid\Contacts\RecipientForm', false) && !interface_exists('SendGrid\Contacts\RecipientForm', false) && !trait_exists('SendGrid\Contacts\RecipientForm', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Contacts\RecipientForm');
+}
+if (!class_exists('SendGrid\Contacts\Recipient', false) && !interface_exists('SendGrid\Contacts\Recipient', false) && !trait_exists('SendGrid\Contacts\Recipient', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Contacts\Recipient');
+}
+if (!class_exists('SendGrid', false) && !interface_exists('SendGrid', false) && !trait_exists('SendGrid', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid');
+}
+if (!class_exists('BaseSendGridClientInterface', false) && !interface_exists('BaseSendGridClientInterface', false) && !trait_exists('BaseSendGridClientInterface', false)) {
+    spl_autoload_call('DoubleScale\Vendor\BaseSendGridClientInterface');
+}
+if (!class_exists('SendGrid\EventWebhook\EventWebhookHeader', false) && !interface_exists('SendGrid\EventWebhook\EventWebhookHeader', false) && !trait_exists('SendGrid\EventWebhook\EventWebhookHeader', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\EventWebhook\EventWebhookHeader');
+}
+if (!class_exists('SendGrid\EventWebhook\EventWebhook', false) && !interface_exists('SendGrid\EventWebhook\EventWebhook', false) && !trait_exists('SendGrid\EventWebhook\EventWebhook', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\EventWebhook\EventWebhook');
+}
+if (!class_exists('TwilioEmail', false) && !interface_exists('TwilioEmail', false) && !trait_exists('TwilioEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\TwilioEmail');
+}
+if (!class_exists('SendGrid\Helper\Assert', false) && !interface_exists('SendGrid\Helper\Assert', false) && !trait_exists('SendGrid\Helper\Assert', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Helper\Assert');
+}
+if (!class_exists('SendGrid\Exception\InvalidRequest', false) && !interface_exists('SendGrid\Exception\InvalidRequest', false) && !trait_exists('SendGrid\Exception\InvalidRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Exception\InvalidRequest');
+}
+if (!class_exists('SendGrid\Client', false) && !interface_exists('SendGrid\Client', false) && !trait_exists('SendGrid\Client', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Client');
+}
+if (!class_exists('SendGrid\Response', false) && !interface_exists('SendGrid\Response', false) && !trait_exists('SendGrid\Response', false)) {
+    spl_autoload_call('DoubleScale\Vendor\SendGrid\Response');
+}
+if (!class_exists('Brevo\Client\Configuration', false) && !interface_exists('Brevo\Client\Configuration', false) && !trait_exists('Brevo\Client\Configuration', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Configuration');
+}
+if (!class_exists('Brevo\Client\ObjectSerializer', false) && !interface_exists('Brevo\Client\ObjectSerializer', false) && !trait_exists('Brevo\Client\ObjectSerializer', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\ObjectSerializer');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2015', false) && !interface_exists('Brevo\Client\Model\InlineResponse2015', false) && !trait_exists('Brevo\Client\Model\InlineResponse2015', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2015');
+}
+if (!class_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidLogs', false) && !interface_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidLogs', false) && !trait_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidLogs', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInboundEmailEventsByUuidLogs');
+}
+if (!class_exists('Brevo\Client\Model\GetInboundEmailEventsByUuid', false) && !interface_exists('Brevo\Client\Model\GetInboundEmailEventsByUuid', false) && !trait_exists('Brevo\Client\Model\GetInboundEmailEventsByUuid', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInboundEmailEventsByUuid');
+}
+if (!class_exists('Brevo\Client\Model\GetFolderLists', false) && !interface_exists('Brevo\Client\Model\GetFolderLists', false) && !trait_exists('Brevo\Client\Model\GetFolderLists', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetFolderLists');
+}
+if (!class_exists('Brevo\Client\Model\CreateDomainModelDnsRecordsDkimRecord', false) && !interface_exists('Brevo\Client\Model\CreateDomainModelDnsRecordsDkimRecord', false) && !trait_exists('Brevo\Client\Model\CreateDomainModelDnsRecordsDkimRecord', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateDomainModelDnsRecordsDkimRecord');
+}
+if (!class_exists('Brevo\Client\Model\CreateSmsCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\CreateSmsCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\CreateSmsCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSmsCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\Body3', false) && !interface_exists('Brevo\Client\Model\Body3', false) && !trait_exists('Brevo\Client\Model\Body3', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body3');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountUpdatePlanRequest', false) && !interface_exists('Brevo\Client\Model\SubAccountUpdatePlanRequest', false) && !trait_exists('Brevo\Client\Model\SubAccountUpdatePlanRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountUpdatePlanRequest');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountRelayData', false) && !interface_exists('Brevo\Client\Model\GetAccountRelayData', false) && !trait_exists('Brevo\Client\Model\GetAccountRelayData', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountRelayData');
+}
+if (!class_exists('Brevo\Client\Model\GetUserPermissionPrivileges', false) && !interface_exists('Brevo\Client\Model\GetUserPermissionPrivileges', false) && !trait_exists('Brevo\Client\Model\GetUserPermissionPrivileges', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetUserPermissionPrivileges');
+}
+if (!class_exists('Brevo\Client\Model\UpdateCampaignStatus', false) && !interface_exists('Brevo\Client\Model\UpdateCampaignStatus', false) && !trait_exists('Brevo\Client\Model\UpdateCampaignStatus', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateCampaignStatus');
+}
+if (!class_exists('Brevo\Client\Model\GetAllExternalFeeds', false) && !interface_exists('Brevo\Client\Model\GetAllExternalFeeds', false) && !trait_exists('Brevo\Client\Model\GetAllExternalFeeds', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAllExternalFeeds');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsAppConfig', false) && !interface_exists('Brevo\Client\Model\GetWhatsAppConfig', false) && !trait_exists('Brevo\Client\Model\GetWhatsAppConfig', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsAppConfig');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsappCampaigns', false) && !interface_exists('Brevo\Client\Model\GetWhatsappCampaigns', false) && !trait_exists('Brevo\Client\Model\GetWhatsappCampaigns', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsappCampaigns');
+}
+if (!class_exists('Brevo\Client\Model\GetWebhookAuth', false) && !interface_exists('Brevo\Client\Model\GetWebhookAuth', false) && !trait_exists('Brevo\Client\Model\GetWebhookAuth', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWebhookAuth');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse201', false) && !interface_exists('Brevo\Client\Model\InlineResponse201', false) && !trait_exists('Brevo\Client\Model\InlineResponse201', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse201');
+}
+if (!class_exists('Brevo\Client\Model\SendTestEmail', false) && !interface_exists('Brevo\Client\Model\SendTestEmail', false) && !trait_exists('Brevo\Client\Model\SendTestEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendTestEmail');
+}
+if (!class_exists('Brevo\Client\Model\CreateSenderIps', false) && !interface_exists('Brevo\Client\Model\CreateSenderIps', false) && !trait_exists('Brevo\Client\Model\CreateSenderIps', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSenderIps');
+}
+if (!class_exists('Brevo\Client\Model\CreateModel', false) && !interface_exists('Brevo\Client\Model\CreateModel', false) && !trait_exists('Brevo\Client\Model\CreateModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateModel');
+}
+if (!class_exists('Brevo\Client\Model\AddContactToList', false) && !interface_exists('Brevo\Client\Model\AddContactToList', false) && !trait_exists('Brevo\Client\Model\AddContactToList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AddContactToList');
+}
+if (!class_exists('Brevo\Client\Model\CreateExternalFeed', false) && !interface_exists('Brevo\Client\Model\CreateExternalFeed', false) && !trait_exists('Brevo\Client\Model\CreateExternalFeed', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateExternalFeed');
+}
+if (!class_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidAttachments', false) && !interface_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidAttachments', false) && !trait_exists('Brevo\Client\Model\GetInboundEmailEventsByUuidAttachments', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInboundEmailEventsByUuidAttachments');
+}
+if (!class_exists('Brevo\Client\Model\Body2', false) && !interface_exists('Brevo\Client\Model\Body2', false) && !trait_exists('Brevo\Client\Model\Body2', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body2');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsEventReportEvents', false) && !interface_exists('Brevo\Client\Model\GetSmsEventReportEvents', false) && !trait_exists('Brevo\Client\Model\GetSmsEventReportEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsEventReportEvents');
+}
+if (!class_exists('Brevo\Client\Model\Body', false) && !interface_exists('Brevo\Client\Model\Body', false) && !trait_exists('Brevo\Client\Model\Body', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body');
+}
+if (!class_exists('Brevo\Client\Model\CreateReseller', false) && !interface_exists('Brevo\Client\Model\CreateReseller', false) && !trait_exists('Brevo\Client\Model\CreateReseller', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateReseller');
+}
+if (!class_exists('Brevo\Client\Model\UploadImageToGallery', false) && !interface_exists('Brevo\Client\Model\UploadImageToGallery', false) && !trait_exists('Brevo\Client\Model\UploadImageToGallery', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UploadImageToGallery');
+}
+if (!class_exists('Brevo\Client\Model\CreateSmtpTemplateSender', false) && !interface_exists('Brevo\Client\Model\CreateSmtpTemplateSender', false) && !trait_exists('Brevo\Client\Model\CreateSmtpTemplateSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSmtpTemplateSender');
+}
+if (!class_exists('Brevo\Client\Model\Body6', false) && !interface_exists('Brevo\Client\Model\Body6', false) && !trait_exists('Brevo\Client\Model\Body6', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body6');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailTo1', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailTo1', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailTo1', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailTo1');
+}
+if (!class_exists('Brevo\Client\Model\GetProcesses', false) && !interface_exists('Brevo\Client\Model\GetProcesses', false) && !trait_exists('Brevo\Client\Model\GetProcesses', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetProcesses');
+}
+if (!class_exists('Brevo\Client\Model\GetChildDomains', false) && !interface_exists('Brevo\Client\Model\GetChildDomains', false) && !trait_exists('Brevo\Client\Model\GetChildDomains', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildDomains');
+}
+if (!class_exists('Brevo\Client\Model\VariablesItems', false) && !interface_exists('Brevo\Client\Model\VariablesItems', false) && !trait_exists('Brevo\Client\Model\VariablesItems', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\VariablesItems');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedListCampaignStats', false) && !interface_exists('Brevo\Client\Model\GetExtendedListCampaignStats', false) && !trait_exists('Brevo\Client\Model\GetExtendedListCampaignStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedListCampaignStats');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedClient', false) && !interface_exists('Brevo\Client\Model\GetExtendedClient', false) && !trait_exists('Brevo\Client\Model\GetExtendedClient', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedClient');
+}
+if (!class_exists('Brevo\Client\Model\AbTestCampaignResultStatistics', false) && !interface_exists('Brevo\Client\Model\AbTestCampaignResultStatistics', false) && !trait_exists('Brevo\Client\Model\AbTestCampaignResultStatistics', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestCampaignResultStatistics');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsappEventReport', false) && !interface_exists('Brevo\Client\Model\GetWhatsappEventReport', false) && !trait_exists('Brevo\Client\Model\GetWhatsappEventReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsappEventReport');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfoCredits', false) && !interface_exists('Brevo\Client\Model\GetChildInfoCredits', false) && !trait_exists('Brevo\Client\Model\GetChildInfoCredits', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfoCredits');
+}
+if (!class_exists('Brevo\Client\Model\ModelInterface', false) && !interface_exists('Brevo\Client\Model\ModelInterface', false) && !trait_exists('Brevo\Client\Model\ModelInterface', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ModelInterface');
+}
+if (!class_exists('Brevo\Client\Model\GetWATemplates', false) && !interface_exists('Brevo\Client\Model\GetWATemplates', false) && !trait_exists('Brevo\Client\Model\GetWATemplates', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWATemplates');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateBatchProducts', false) && !interface_exists('Brevo\Client\Model\CreateUpdateBatchProducts', false) && !trait_exists('Brevo\Client\Model\CreateUpdateBatchProducts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateBatchProducts');
+}
+if (!class_exists('Brevo\Client\Model\GetOrders', false) && !interface_exists('Brevo\Client\Model\GetOrders', false) && !trait_exists('Brevo\Client\Model\GetOrders', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetOrders');
+}
+if (!class_exists('Brevo\Client\Model\GetSsoToken', false) && !interface_exists('Brevo\Client\Model\GetSsoToken', false) && !trait_exists('Brevo\Client\Model\GetSsoToken', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSsoToken');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsappCampaignsCampaigns', false) && !interface_exists('Brevo\Client\Model\GetWhatsappCampaignsCampaigns', false) && !trait_exists('Brevo\Client\Model\GetWhatsappCampaignsCampaigns', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsappCampaignsCampaigns');
+}
+if (!class_exists('Brevo\Client\Model\GetCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\GetCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\GetCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacBlockedContactsReason', false) && !interface_exists('Brevo\Client\Model\GetTransacBlockedContactsReason', false) && !trait_exists('Brevo\Client\Model\GetTransacBlockedContactsReason', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacBlockedContactsReason');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfoApiKeys', false) && !interface_exists('Brevo\Client\Model\GetChildInfoApiKeys', false) && !trait_exists('Brevo\Client\Model\GetChildInfoApiKeys', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfoApiKeys');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountMarketingAutomation', false) && !interface_exists('Brevo\Client\Model\GetAccountMarketingAutomation', false) && !trait_exists('Brevo\Client\Model\GetAccountMarketingAutomation', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountMarketingAutomation');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesInbox', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesInbox', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesInbox', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesInbox');
+}
+if (!class_exists('Brevo\Client\Model\NoteId', false) && !interface_exists('Brevo\Client\Model\NoteId', false) && !trait_exists('Brevo\Client\Model\NoteId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\NoteId');
+}
+if (!class_exists('Brevo\Client\Model\UpdateContact', false) && !interface_exists('Brevo\Client\Model\UpdateContact', false) && !trait_exists('Brevo\Client\Model\UpdateContact', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateContact');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsDelivered', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsDelivered', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsDelivered', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsDelivered');
+}
+if (!class_exists('Brevo\Client\Model\AbTestVersionClicksInner', false) && !interface_exists('Brevo\Client\Model\AbTestVersionClicksInner', false) && !trait_exists('Brevo\Client\Model\AbTestVersionClicksInner', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestVersionClicksInner');
+}
+if (!class_exists('Brevo\Client\Model\PostSendSmsTestFailed', false) && !interface_exists('Brevo\Client\Model\PostSendSmsTestFailed', false) && !trait_exists('Brevo\Client\Model\PostSendSmsTestFailed', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PostSendSmsTestFailed');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCreditsEmails', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCreditsEmails', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCreditsEmails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCreditsEmails');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacEmailContent', false) && !interface_exists('Brevo\Client\Model\GetTransacEmailContent', false) && !trait_exists('Brevo\Client\Model\GetTransacEmailContent', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacEmailContent');
+}
+if (!class_exists('Brevo\Client\Model\RequestSmsRecipientExport', false) && !interface_exists('Brevo\Client\Model\RequestSmsRecipientExport', false) && !trait_exists('Brevo\Client\Model\RequestSmsRecipientExport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestSmsRecipientExport');
+}
+if (!class_exists('Brevo\Client\Model\BodyVariablesItems', false) && !interface_exists('Brevo\Client\Model\BodyVariablesItems', false) && !trait_exists('Brevo\Client\Model\BodyVariablesItems', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\BodyVariablesItems');
+}
+if (!class_exists('Brevo\Client\Model\GetWebhooks', false) && !interface_exists('Brevo\Client\Model\GetWebhooks', false) && !trait_exists('Brevo\Client\Model\GetWebhooks', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWebhooks');
+}
+if (!class_exists('Brevo\Client\Model\GetInvitedUsersListUsers', false) && !interface_exists('Brevo\Client\Model\GetInvitedUsersListUsers', false) && !trait_exists('Brevo\Client\Model\GetInvitedUsersListUsers', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInvitedUsersListUsers');
+}
+if (!class_exists('Brevo\Client\Model\GetIps', false) && !interface_exists('Brevo\Client\Model\GetIps', false) && !trait_exists('Brevo\Client\Model\GetIps', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetIps');
+}
+if (!class_exists('Brevo\Client\Model\CreateCategoryModel', false) && !interface_exists('Brevo\Client\Model\CreateCategoryModel', false) && !trait_exists('Brevo\Client\Model\CreateCategoryModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateCategoryModel');
+}
+if (!class_exists('Brevo\Client\Model\GetFolders', false) && !interface_exists('Brevo\Client\Model\GetFolders', false) && !trait_exists('Brevo\Client\Model\GetFolders', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetFolders');
+}
+if (!class_exists('Brevo\Client\Model\Body13', false) && !interface_exists('Brevo\Client\Model\Body13', false) && !trait_exists('Brevo\Client\Model\Body13', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body13');
+}
+if (!class_exists('Brevo\Client\Model\Body5', false) && !interface_exists('Brevo\Client\Model\Body5', false) && !trait_exists('Brevo\Client\Model\Body5', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body5');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestFeatures', false) && !interface_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestFeatures', false) && !trait_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestFeatures', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountUpdatePlanRequestFeatures');
+}
+if (!class_exists('Brevo\Client\Model\GetContactCampaignStatsTransacAttributes', false) && !interface_exists('Brevo\Client\Model\GetContactCampaignStatsTransacAttributes', false) && !trait_exists('Brevo\Client\Model\GetContactCampaignStatsTransacAttributes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactCampaignStatsTransacAttributes');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsCampaignOverview', false) && !interface_exists('Brevo\Client\Model\GetSmsCampaignOverview', false) && !trait_exists('Brevo\Client\Model\GetSmsCampaignOverview', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsCampaignOverview');
+}
+if (!class_exists('Brevo\Client\Model\UpdateChildDomain', false) && !interface_exists('Brevo\Client\Model\UpdateChildDomain', false) && !trait_exists('Brevo\Client\Model\UpdateChildDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateChildDomain');
+}
+if (!class_exists('Brevo\Client\Model\PostContactInfo', false) && !interface_exists('Brevo\Client\Model\PostContactInfo', false) && !trait_exists('Brevo\Client\Model\PostContactInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PostContactInfo');
+}
+if (!class_exists('Brevo\Client\Model\ConversationsMessageFileImageInfo', false) && !interface_exists('Brevo\Client\Model\ConversationsMessageFileImageInfo', false) && !trait_exists('Brevo\Client\Model\ConversationsMessageFileImageInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ConversationsMessageFileImageInfo');
+}
+if (!class_exists('Brevo\Client\Model\GetCouponCollection', false) && !interface_exists('Brevo\Client\Model\GetCouponCollection', false) && !trait_exists('Brevo\Client\Model\GetCouponCollection', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCouponCollection');
+}
+if (!class_exists('Brevo\Client\Model\UpdateSmtpTemplate', false) && !interface_exists('Brevo\Client\Model\UpdateSmtpTemplate', false) && !trait_exists('Brevo\Client\Model\UpdateSmtpTemplate', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateSmtpTemplate');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfo', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfo', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponsePlanInfo');
+}
+if (!class_exists('Brevo\Client\Model\AbTestCampaignResultClickedLinks', false) && !interface_exists('Brevo\Client\Model\AbTestCampaignResultClickedLinks', false) && !trait_exists('Brevo\Client\Model\AbTestCampaignResultClickedLinks', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestCampaignResultClickedLinks');
+}
+if (!class_exists('Brevo\Client\Model\UpdateExternalFeed', false) && !interface_exists('Brevo\Client\Model\UpdateExternalFeed', false) && !trait_exists('Brevo\Client\Model\UpdateExternalFeed', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateExternalFeed');
+}
+if (!class_exists('Brevo\Client\Model\GetIpFromSender', false) && !interface_exists('Brevo\Client\Model\GetIpFromSender', false) && !trait_exists('Brevo\Client\Model\GetIpFromSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetIpFromSender');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsCampaign', false) && !interface_exists('Brevo\Client\Model\GetSmsCampaign', false) && !trait_exists('Brevo\Client\Model\GetSmsCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsCampaign');
+}
+if (!class_exists('Brevo\Client\Model\CreateApiKeyRequest', false) && !interface_exists('Brevo\Client\Model\CreateApiKeyRequest', false) && !trait_exists('Brevo\Client\Model\CreateApiKeyRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateApiKeyRequest');
+}
+if (!class_exists('Brevo\Client\Model\CreateCoupons', false) && !interface_exists('Brevo\Client\Model\CreateCoupons', false) && !trait_exists('Brevo\Client\Model\CreateCoupons', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateCoupons');
+}
+if (!class_exists('Brevo\Client\Model\Putresendcancelinvitation', false) && !interface_exists('Brevo\Client\Model\Putresendcancelinvitation', false) && !trait_exists('Brevo\Client\Model\Putresendcancelinvitation', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Putresendcancelinvitation');
+}
+if (!class_exists('Brevo\Client\Model\DealAttributes', false) && !interface_exists('Brevo\Client\Model\DealAttributes', false) && !trait_exists('Brevo\Client\Model\DealAttributes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\DealAttributes');
+}
+if (!class_exists('Brevo\Client\Model\AddChildDomain', false) && !interface_exists('Brevo\Client\Model\AddChildDomain', false) && !trait_exists('Brevo\Client\Model\AddChildDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AddChildDomain');
+}
+if (!class_exists('Brevo\Client\Model\WhatsappCampStats', false) && !interface_exists('Brevo\Client\Model\WhatsappCampStats', false) && !trait_exists('Brevo\Client\Model\WhatsappCampStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\WhatsappCampStats');
+}
+if (!class_exists('Brevo\Client\Model\GetCorporateInvitedUsersListFeatureAccess', false) && !interface_exists('Brevo\Client\Model\GetCorporateInvitedUsersListFeatureAccess', false) && !trait_exists('Brevo\Client\Model\GetCorporateInvitedUsersListFeatureAccess', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCorporateInvitedUsersListFeatureAccess');
+}
+if (!class_exists('Brevo\Client\Model\CreateApiKeyResponse', false) && !interface_exists('Brevo\Client\Model\CreateApiKeyResponse', false) && !trait_exists('Brevo\Client\Model\CreateApiKeyResponse', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateApiKeyResponse');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedCampaignStats', false) && !interface_exists('Brevo\Client\Model\GetExtendedCampaignStats', false) && !trait_exists('Brevo\Client\Model\GetExtendedCampaignStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedCampaignStats');
+}
+if (!class_exists('Brevo\Client\Model\Body14', false) && !interface_exists('Brevo\Client\Model\Body14', false) && !trait_exists('Brevo\Client\Model\Body14', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body14');
+}
+if (!class_exists('Brevo\Client\Model\CreateProductModel', false) && !interface_exists('Brevo\Client\Model\CreateProductModel', false) && !trait_exists('Brevo\Client\Model\CreateProductModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateProductModel');
+}
+if (!class_exists('Brevo\Client\Model\SsoTokenRequest', false) && !interface_exists('Brevo\Client\Model\SsoTokenRequest', false) && !trait_exists('Brevo\Client\Model\SsoTokenRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SsoTokenRequest');
+}
+if (!class_exists('Brevo\Client\Model\UpdateList', false) && !interface_exists('Brevo\Client\Model\UpdateList', false) && !trait_exists('Brevo\Client\Model\UpdateList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateList');
+}
+if (!class_exists('Brevo\Client\Model\GetChildrenList', false) && !interface_exists('Brevo\Client\Model\GetChildrenList', false) && !trait_exists('Brevo\Client\Model\GetChildrenList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildrenList');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsCampaignStats', false) && !interface_exists('Brevo\Client\Model\GetSmsCampaignStats', false) && !trait_exists('Brevo\Client\Model\GetSmsCampaignStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsCampaignStats');
+}
+if (!class_exists('Brevo\Client\Model\InviteAdminUser', false) && !interface_exists('Brevo\Client\Model\InviteAdminUser', false) && !trait_exists('Brevo\Client\Model\InviteAdminUser', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InviteAdminUser');
+}
+if (!class_exists('Brevo\Client\Model\RemainingCreditModelChild', false) && !interface_exists('Brevo\Client\Model\RemainingCreditModelChild', false) && !trait_exists('Brevo\Client\Model\RemainingCreditModelChild', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RemainingCreditModelChild');
+}
+if (!class_exists('Brevo\Client\Model\GetProcess', false) && !interface_exists('Brevo\Client\Model\GetProcess', false) && !trait_exists('Brevo\Client\Model\GetProcess', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetProcess');
+}
+if (!class_exists('Brevo\Client\Model\Note', false) && !interface_exists('Brevo\Client\Model\Note', false) && !trait_exists('Brevo\Client\Model\Note', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Note');
+}
+if (!class_exists('Brevo\Client\Model\GetExternalFeedByUUIDHeaders', false) && !interface_exists('Brevo\Client\Model\GetExternalFeedByUUIDHeaders', false) && !trait_exists('Brevo\Client\Model\GetExternalFeedByUUIDHeaders', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExternalFeedByUUIDHeaders');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestCredits', false) && !interface_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestCredits', false) && !trait_exists('Brevo\Client\Model\SubAccountUpdatePlanRequestCredits', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountUpdatePlanRequestCredits');
+}
+if (!class_exists('Brevo\Client\Model\AuthenticateDomainModel', false) && !interface_exists('Brevo\Client\Model\AuthenticateDomainModel', false) && !trait_exists('Brevo\Client\Model\AuthenticateDomainModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AuthenticateDomainModel');
+}
+if (!class_exists('Brevo\Client\Model\Contact', false) && !interface_exists('Brevo\Client\Model\Contact', false) && !trait_exists('Brevo\Client\Model\Contact', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Contact');
+}
+if (!class_exists('Brevo\Client\Model\UpdateAttribute', false) && !interface_exists('Brevo\Client\Model\UpdateAttribute', false) && !trait_exists('Brevo\Client\Model\UpdateAttribute', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateAttribute');
+}
+if (!class_exists('Brevo\Client\Model\GetList', false) && !interface_exists('Brevo\Client\Model\GetList', false) && !trait_exists('Brevo\Client\Model\GetList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetList');
+}
+if (!class_exists('Brevo\Client\Model\CreateDoiContact', false) && !interface_exists('Brevo\Client\Model\CreateDoiContact', false) && !trait_exists('Brevo\Client\Model\CreateDoiContact', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateDoiContact');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsUserUnsubscription', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsUserUnsubscription', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsUserUnsubscription', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsUserUnsubscription');
+}
+if (!class_exists('Brevo\Client\Model\UpdateEmailCampaignSender', false) && !interface_exists('Brevo\Client\Model\UpdateEmailCampaignSender', false) && !trait_exists('Brevo\Client\Model\UpdateEmailCampaignSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateEmailCampaignSender');
+}
+if (!class_exists('Brevo\Client\Model\Body11', false) && !interface_exists('Brevo\Client\Model\Body11', false) && !trait_exists('Brevo\Client\Model\Body11', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body11');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacEmailsListTransactionalEmails', false) && !interface_exists('Brevo\Client\Model\GetTransacEmailsListTransactionalEmails', false) && !trait_exists('Brevo\Client\Model\GetTransacEmailsListTransactionalEmails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacEmailsListTransactionalEmails');
+}
+if (!class_exists('Brevo\Client\Model\FileDownloadableLink', false) && !interface_exists('Brevo\Client\Model\FileDownloadableLink', false) && !trait_exists('Brevo\Client\Model\FileDownloadableLink', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\FileDownloadableLink');
+}
+if (!class_exists('Brevo\Client\Model\GetExternalFeedByUUID', false) && !interface_exists('Brevo\Client\Model\GetExternalFeedByUUID', false) && !trait_exists('Brevo\Client\Model\GetExternalFeedByUUID', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExternalFeedByUUID');
+}
+if (!class_exists('Brevo\Client\Model\GetEmailCampaigns', false) && !interface_exists('Brevo\Client\Model\GetEmailCampaigns', false) && !trait_exists('Brevo\Client\Model\GetEmailCampaigns', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetEmailCampaigns');
+}
+if (!class_exists('Brevo\Client\Model\GetScheduledEmailByMessageId', false) && !interface_exists('Brevo\Client\Model\GetScheduledEmailByMessageId', false) && !trait_exists('Brevo\Client\Model\GetScheduledEmailByMessageId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetScheduledEmailByMessageId');
+}
+if (!class_exists('Brevo\Client\Model\GetContactCampaignStats', false) && !interface_exists('Brevo\Client\Model\GetContactCampaignStats', false) && !trait_exists('Brevo\Client\Model\GetContactCampaignStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactCampaignStats');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsappCampaignOverview', false) && !interface_exists('Brevo\Client\Model\GetWhatsappCampaignOverview', false) && !trait_exists('Brevo\Client\Model\GetWhatsappCampaignOverview', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsappCampaignOverview');
+}
+if (!class_exists('Brevo\Client\Model\GetInvitedUsersList', false) && !interface_exists('Brevo\Client\Model\GetInvitedUsersList', false) && !trait_exists('Brevo\Client\Model\GetInvitedUsersList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInvitedUsersList');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfoApiKeysV2', false) && !interface_exists('Brevo\Client\Model\GetChildInfoApiKeysV2', false) && !trait_exists('Brevo\Client\Model\GetChildInfoApiKeysV2', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfoApiKeysV2');
+}
+if (!class_exists('Brevo\Client\Model\CreateWhatsAppCampaign', false) && !interface_exists('Brevo\Client\Model\CreateWhatsAppCampaign', false) && !trait_exists('Brevo\Client\Model\CreateWhatsAppCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateWhatsAppCampaign');
+}
+if (!class_exists('Brevo\Client\Model\Body9', false) && !interface_exists('Brevo\Client\Model\Body9', false) && !trait_exists('Brevo\Client\Model\Body9', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body9');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailReplyTo', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailReplyTo', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailReplyTo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailReplyTo');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsOpened', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsOpened', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsOpened', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsOpened');
+}
+if (!class_exists('Brevo\Client\Model\CreateSmtpEmail', false) && !interface_exists('Brevo\Client\Model\CreateSmtpEmail', false) && !trait_exists('Brevo\Client\Model\CreateSmtpEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSmtpEmail');
+}
+if (!class_exists('Brevo\Client\Model\RequestContactImport', false) && !interface_exists('Brevo\Client\Model\RequestContactImport', false) && !trait_exists('Brevo\Client\Model\RequestContactImport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestContactImport');
+}
+if (!class_exists('Brevo\Client\Model\FileData', false) && !interface_exists('Brevo\Client\Model\FileData', false) && !trait_exists('Brevo\Client\Model\FileData', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\FileData');
+}
+if (!class_exists('Brevo\Client\Model\RequestContactExportCustomContactFilter', false) && !interface_exists('Brevo\Client\Model\RequestContactExportCustomContactFilter', false) && !trait_exists('Brevo\Client\Model\RequestContactExportCustomContactFilter', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestContactExportCustomContactFilter');
+}
+if (!class_exists('Brevo\Client\Model\GetAggregatedReport', false) && !interface_exists('Brevo\Client\Model\GetAggregatedReport', false) && !trait_exists('Brevo\Client\Model\GetAggregatedReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAggregatedReport');
+}
+if (!class_exists('Brevo\Client\Model\RequestContactImportJsonBody', false) && !interface_exists('Brevo\Client\Model\RequestContactImportJsonBody', false) && !trait_exists('Brevo\Client\Model\RequestContactImportJsonBody', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestContactImportJsonBody');
+}
+if (!class_exists('Brevo\Client\Model\Body12', false) && !interface_exists('Brevo\Client\Model\Body12', false) && !trait_exists('Brevo\Client\Model\Body12', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body12');
+}
+if (!class_exists('Brevo\Client\Model\RequestContactExport', false) && !interface_exists('Brevo\Client\Model\RequestContactExport', false) && !trait_exists('Brevo\Client\Model\RequestContactExport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestContactExport');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsAdminUnsubscription', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsAdminUnsubscription', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsAdminUnsubscription', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptionsAdminUnsubscription');
+}
+if (!class_exists('Brevo\Client\Model\UpdateSmsCampaign', false) && !interface_exists('Brevo\Client\Model\UpdateSmsCampaign', false) && !trait_exists('Brevo\Client\Model\UpdateSmsCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateSmsCampaign');
+}
+if (!class_exists('Brevo\Client\Model\ConversationsMessage', false) && !interface_exists('Brevo\Client\Model\ConversationsMessage', false) && !trait_exists('Brevo\Client\Model\ConversationsMessage', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ConversationsMessage');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfoFeatures', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfoFeatures', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponsePlanInfoFeatures', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponsePlanInfoFeatures');
+}
+if (!class_exists('Brevo\Client\Model\CreateWhatsAppCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\CreateWhatsAppCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\CreateWhatsAppCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateWhatsAppCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\DealsList', false) && !interface_exists('Brevo\Client\Model\DealsList', false) && !trait_exists('Brevo\Client\Model\DealsList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\DealsList');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacBlockedContacts', false) && !interface_exists('Brevo\Client\Model\GetTransacBlockedContacts', false) && !trait_exists('Brevo\Client\Model\GetTransacBlockedContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacBlockedContacts');
+}
+if (!class_exists('Brevo\Client\Model\GetEmailEventReportEvents', false) && !interface_exists('Brevo\Client\Model\GetEmailEventReportEvents', false) && !trait_exists('Brevo\Client\Model\GetEmailEventReportEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetEmailEventReportEvents');
+}
+if (!class_exists('Brevo\Client\Model\GetFolder', false) && !interface_exists('Brevo\Client\Model\GetFolder', false) && !trait_exists('Brevo\Client\Model\GetFolder', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetFolder');
+}
+if (!class_exists('Brevo\Client\Model\SendSms', false) && !interface_exists('Brevo\Client\Model\SendSms', false) && !trait_exists('Brevo\Client\Model\SendSms', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSms');
+}
+if (!class_exists('Brevo\Client\Model\GetContactCampaignStatsClicked', false) && !interface_exists('Brevo\Client\Model\GetContactCampaignStatsClicked', false) && !trait_exists('Brevo\Client\Model\GetContactCampaignStatsClicked', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactCampaignStatsClicked');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsLinks', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsLinks', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsLinks', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsLinks');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailMessageVersions', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailMessageVersions', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailMessageVersions', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailMessageVersions');
+}
+if (!class_exists('Brevo\Client\Model\Body1', false) && !interface_exists('Brevo\Client\Model\Body1', false) && !trait_exists('Brevo\Client\Model\Body1', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body1');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateFolder', false) && !interface_exists('Brevo\Client\Model\CreateUpdateFolder', false) && !trait_exists('Brevo\Client\Model\CreateUpdateFolder', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateFolder');
+}
+if (!class_exists('Brevo\Client\Model\EmailExportRecipients', false) && !interface_exists('Brevo\Client\Model\EmailExportRecipients', false) && !trait_exists('Brevo\Client\Model\EmailExportRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\EmailExportRecipients');
+}
+if (!class_exists('Brevo\Client\Model\DealAttributesInner', false) && !interface_exists('Brevo\Client\Model\DealAttributesInner', false) && !trait_exists('Brevo\Client\Model\DealAttributesInner', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\DealAttributesInner');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateBatchProductsModel', false) && !interface_exists('Brevo\Client\Model\CreateUpdateBatchProductsModel', false) && !trait_exists('Brevo\Client\Model\CreateUpdateBatchProductsModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateBatchProductsModel');
+}
+if (!class_exists('Brevo\Client\Model\Body8', false) && !interface_exists('Brevo\Client\Model\Body8', false) && !trait_exists('Brevo\Client\Model\Body8', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body8');
+}
+if (!class_exists('Brevo\Client\Model\Otp', false) && !interface_exists('Brevo\Client\Model\Otp', false) && !trait_exists('Brevo\Client\Model\Otp', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Otp');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatistics', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatistics', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatistics', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatistics');
+}
+if (!class_exists('Brevo\Client\Model\CreateAttribute', false) && !interface_exists('Brevo\Client\Model\CreateAttribute', false) && !trait_exists('Brevo\Client\Model\CreateAttribute', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateAttribute');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponse', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponse', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponse', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponse');
+}
+if (!class_exists('Brevo\Client\Model\GetAllExternalFeedsFeeds', false) && !interface_exists('Brevo\Client\Model\GetAllExternalFeedsFeeds', false) && !trait_exists('Brevo\Client\Model\GetAllExternalFeedsFeeds', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAllExternalFeedsFeeds');
+}
+if (!class_exists('Brevo\Client\Model\GetAccount', false) && !interface_exists('Brevo\Client\Model\GetAccount', false) && !trait_exists('Brevo\Client\Model\GetAccount', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccount');
+}
+if (!class_exists('Brevo\Client\Model\GetAttributesAttributes', false) && !interface_exists('Brevo\Client\Model\GetAttributesAttributes', false) && !trait_exists('Brevo\Client\Model\GetAttributesAttributes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAttributesAttributes');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedClientAddress', false) && !interface_exists('Brevo\Client\Model\GetExtendedClientAddress', false) && !trait_exists('Brevo\Client\Model\GetExtendedClientAddress', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedClientAddress');
+}
+if (!class_exists('Brevo\Client\Model\AbTestVersionStats', false) && !interface_exists('Brevo\Client\Model\AbTestVersionStats', false) && !trait_exists('Brevo\Client\Model\AbTestVersionStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestVersionStats');
+}
+if (!class_exists('Brevo\Client\Model\OrderProducts', false) && !interface_exists('Brevo\Client\Model\OrderProducts', false) && !trait_exists('Brevo\Client\Model\OrderProducts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\OrderProducts');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesUsers', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesUsers', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesUsers', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesUsers');
+}
+if (!class_exists('Brevo\Client\Model\GetSendersList', false) && !interface_exists('Brevo\Client\Model\GetSendersList', false) && !trait_exists('Brevo\Client\Model\GetSendersList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSendersList');
+}
+if (!class_exists('Brevo\Client\Model\ConversationsMessageFile', false) && !interface_exists('Brevo\Client\Model\ConversationsMessageFile', false) && !trait_exists('Brevo\Client\Model\ConversationsMessageFile', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ConversationsMessageFile');
+}
+if (!class_exists('Brevo\Client\Model\GetCorporateInvitedUsersList', false) && !interface_exists('Brevo\Client\Model\GetCorporateInvitedUsersList', false) && !trait_exists('Brevo\Client\Model\GetCorporateInvitedUsersList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCorporateInvitedUsersList');
+}
+if (!class_exists('Brevo\Client\Model\Pipeline', false) && !interface_exists('Brevo\Client\Model\Pipeline', false) && !trait_exists('Brevo\Client\Model\Pipeline', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Pipeline');
+}
+if (!class_exists('Brevo\Client\Model\CreateCouponCollection', false) && !interface_exists('Brevo\Client\Model\CreateCouponCollection', false) && !trait_exists('Brevo\Client\Model\CreateCouponCollection', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateCouponCollection');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailBcc', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailBcc', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailBcc', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailBcc');
+}
+if (!class_exists('Brevo\Client\Model\GetInboundEmailEvents', false) && !interface_exists('Brevo\Client\Model\GetInboundEmailEvents', false) && !trait_exists('Brevo\Client\Model\GetInboundEmailEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInboundEmailEvents');
+}
+if (!class_exists('Brevo\Client\Model\SendReport', false) && !interface_exists('Brevo\Client\Model\SendReport', false) && !trait_exists('Brevo\Client\Model\SendReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendReport');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacBlockedContactsContacts', false) && !interface_exists('Brevo\Client\Model\GetTransacBlockedContactsContacts', false) && !trait_exists('Brevo\Client\Model\GetTransacBlockedContactsContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacBlockedContactsContacts');
+}
+if (!class_exists('Brevo\Client\Model\ExportWebhooksHistory', false) && !interface_exists('Brevo\Client\Model\ExportWebhooksHistory', false) && !trait_exists('Brevo\Client\Model\ExportWebhooksHistory', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ExportWebhooksHistory');
+}
+if (!class_exists('Brevo\Client\Model\GetContactDetails', false) && !interface_exists('Brevo\Client\Model\GetContactDetails', false) && !trait_exists('Brevo\Client\Model\GetContactDetails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactDetails');
+}
+if (!class_exists('Brevo\Client\Model\AbTestCampaignResult', false) && !interface_exists('Brevo\Client\Model\AbTestCampaignResult', false) && !trait_exists('Brevo\Client\Model\AbTestCampaignResult', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestCampaignResult');
+}
+if (!class_exists('Brevo\Client\Model\CreateChild', false) && !interface_exists('Brevo\Client\Model\CreateChild', false) && !trait_exists('Brevo\Client\Model\CreateChild', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateChild');
+}
+if (!class_exists('Brevo\Client\Model\AbTestVersionClicks', false) && !interface_exists('Brevo\Client\Model\AbTestVersionClicks', false) && !trait_exists('Brevo\Client\Model\AbTestVersionClicks', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AbTestVersionClicks');
+}
+if (!class_exists('Brevo\Client\Model\GetChildAccountCreationStatus', false) && !interface_exists('Brevo\Client\Model\GetChildAccountCreationStatus', false) && !trait_exists('Brevo\Client\Model\GetChildAccountCreationStatus', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildAccountCreationStatus');
+}
+if (!class_exists('Brevo\Client\Model\CreateList', false) && !interface_exists('Brevo\Client\Model\CreateList', false) && !trait_exists('Brevo\Client\Model\CreateList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateList');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponse', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponse', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponse', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponse');
+}
+if (!class_exists('Brevo\Client\Model\GetCampaignOverview', false) && !interface_exists('Brevo\Client\Model\GetCampaignOverview', false) && !trait_exists('Brevo\Client\Model\GetCampaignOverview', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCampaignOverview');
+}
+if (!class_exists('Brevo\Client\Model\CreateDomainModelDnsRecords', false) && !interface_exists('Brevo\Client\Model\CreateDomainModelDnsRecords', false) && !trait_exists('Brevo\Client\Model\CreateDomainModelDnsRecords', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateDomainModelDnsRecords');
+}
+if (!class_exists('Brevo\Client\Model\GetProducts', false) && !interface_exists('Brevo\Client\Model\GetProducts', false) && !trait_exists('Brevo\Client\Model\GetProducts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetProducts');
+}
+if (!class_exists('Brevo\Client\Model\GetWATemplatesTemplates', false) && !interface_exists('Brevo\Client\Model\GetWATemplatesTemplates', false) && !trait_exists('Brevo\Client\Model\GetWATemplatesTemplates', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWATemplatesTemplates');
+}
+if (!class_exists('Brevo\Client\Model\PostContactInfoContacts', false) && !interface_exists('Brevo\Client\Model\PostContactInfoContacts', false) && !trait_exists('Brevo\Client\Model\PostContactInfoContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PostContactInfoContacts');
+}
+if (!class_exists('Brevo\Client\Model\UpdateCouponCollection', false) && !interface_exists('Brevo\Client\Model\UpdateCouponCollection', false) && !trait_exists('Brevo\Client\Model\UpdateCouponCollection', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateCouponCollection');
+}
+if (!class_exists('Brevo\Client\Model\GetCampaignStats', false) && !interface_exists('Brevo\Client\Model\GetCampaignStats', false) && !trait_exists('Brevo\Client\Model\GetCampaignStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCampaignStats');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacAggregatedSmsReport', false) && !interface_exists('Brevo\Client\Model\GetTransacAggregatedSmsReport', false) && !trait_exists('Brevo\Client\Model\GetTransacAggregatedSmsReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacAggregatedSmsReport');
+}
+if (!class_exists('Brevo\Client\Model\GetSmtpTemplateOverview', false) && !interface_exists('Brevo\Client\Model\GetSmtpTemplateOverview', false) && !trait_exists('Brevo\Client\Model\GetSmtpTemplateOverview', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmtpTemplateOverview');
+}
+if (!class_exists('Brevo\Client\Model\CreateEmailCampaignSender', false) && !interface_exists('Brevo\Client\Model\CreateEmailCampaignSender', false) && !trait_exists('Brevo\Client\Model\CreateEmailCampaignSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateEmailCampaignSender');
+}
+if (!class_exists('Brevo\Client\Model\UpdateBatchContactsContacts', false) && !interface_exists('Brevo\Client\Model\UpdateBatchContactsContacts', false) && !trait_exists('Brevo\Client\Model\UpdateBatchContactsContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateBatchContactsContacts');
+}
+if (!class_exists('Brevo\Client\Model\GetSmtpTemplates', false) && !interface_exists('Brevo\Client\Model\GetSmtpTemplates', false) && !trait_exists('Brevo\Client\Model\GetSmtpTemplates', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmtpTemplates');
+}
+if (!class_exists('Brevo\Client\Model\InviteAdminUserPrivileges', false) && !interface_exists('Brevo\Client\Model\InviteAdminUserPrivileges', false) && !trait_exists('Brevo\Client\Model\InviteAdminUserPrivileges', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InviteAdminUserPrivileges');
+}
+if (!class_exists('Brevo\Client\Model\CompaniesList', false) && !interface_exists('Brevo\Client\Model\CompaniesList', false) && !trait_exists('Brevo\Client\Model\CompaniesList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CompaniesList');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfo', false) && !interface_exists('Brevo\Client\Model\GetChildInfo', false) && !trait_exists('Brevo\Client\Model\GetChildInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfo');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2014', false) && !interface_exists('Brevo\Client\Model\InlineResponse2014', false) && !trait_exists('Brevo\Client\Model\InlineResponse2014', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2014');
+}
+if (!class_exists('Brevo\Client\Model\CreateContact', false) && !interface_exists('Brevo\Client\Model\CreateContact', false) && !trait_exists('Brevo\Client\Model\CreateContact', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateContact');
+}
+if (!class_exists('Brevo\Client\Model\AddCredits', false) && !interface_exists('Brevo\Client\Model\AddCredits', false) && !trait_exists('Brevo\Client\Model\AddCredits', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\AddCredits');
+}
+if (!class_exists('Brevo\Client\Model\GetWhatsappEventReportEvents', false) && !interface_exists('Brevo\Client\Model\GetWhatsappEventReportEvents', false) && !trait_exists('Brevo\Client\Model\GetWhatsappEventReportEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWhatsappEventReportEvents');
+}
+if (!class_exists('Brevo\Client\Model\InviteuserPrivileges', false) && !interface_exists('Brevo\Client\Model\InviteuserPrivileges', false) && !trait_exists('Brevo\Client\Model\InviteuserPrivileges', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InviteuserPrivileges');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoAddress', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoAddress', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoAddress', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponseBillingInfoAddress');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfo', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfo', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponseBillingInfo');
+}
+if (!class_exists('Brevo\Client\Model\GetCategoryDetails', false) && !interface_exists('Brevo\Client\Model\GetCategoryDetails', false) && !trait_exists('Brevo\Client\Model\GetCategoryDetails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCategoryDetails');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedCampaignStatsGlobalStats', false) && !interface_exists('Brevo\Client\Model\GetExtendedCampaignStatsGlobalStats', false) && !trait_exists('Brevo\Client\Model\GetExtendedCampaignStatsGlobalStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedCampaignStatsGlobalStats');
+}
+if (!class_exists('Brevo\Client\Model\WhatsappCampTemplate', false) && !interface_exists('Brevo\Client\Model\WhatsappCampTemplate', false) && !trait_exists('Brevo\Client\Model\WhatsappCampTemplate', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\WhatsappCampTemplate');
+}
+if (!class_exists('Brevo\Client\Model\CompanyAttributes', false) && !interface_exists('Brevo\Client\Model\CompanyAttributes', false) && !trait_exists('Brevo\Client\Model\CompanyAttributes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CompanyAttributes');
+}
+if (!class_exists('Brevo\Client\Model\GetContactCampaignStatsOpened', false) && !interface_exists('Brevo\Client\Model\GetContactCampaignStatsOpened', false) && !trait_exists('Brevo\Client\Model\GetContactCampaignStatsOpened', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactCampaignStatsOpened');
+}
+if (!class_exists('Brevo\Client\Model\NoteData', false) && !interface_exists('Brevo\Client\Model\NoteData', false) && !trait_exists('Brevo\Client\Model\NoteData', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\NoteData');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailTo', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailTo', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailTo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailTo');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsClicked', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsClicked', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsClicked', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsClicked');
+}
+if (!class_exists('Brevo\Client\Model\RemoveContactFromList', false) && !interface_exists('Brevo\Client\Model\RemoveContactFromList', false) && !trait_exists('Brevo\Client\Model\RemoveContactFromList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RemoveContactFromList');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateContactModel', false) && !interface_exists('Brevo\Client\Model\CreateUpdateContactModel', false) && !trait_exists('Brevo\Client\Model\CreateUpdateContactModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateContactModel');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeatures', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeatures', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeatures', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeatures');
+}
+if (!class_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoName', false) && !interface_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoName', false) && !trait_exists('Brevo\Client\Model\MasterDetailsResponseBillingInfoName', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\MasterDetailsResponseBillingInfoName');
+}
+if (!class_exists('Brevo\Client\Model\UploadImageModel', false) && !interface_exists('Brevo\Client\Model\UploadImageModel', false) && !trait_exists('Brevo\Client\Model\UploadImageModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UploadImageModel');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailCc', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailCc', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailCc', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailCc');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2012', false) && !interface_exists('Brevo\Client\Model\InlineResponse2012', false) && !trait_exists('Brevo\Client\Model\InlineResponse2012', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2012');
+}
+if (!class_exists('Brevo\Client\Model\GetSmtpTemplateOverviewSender', false) && !interface_exists('Brevo\Client\Model\GetSmtpTemplateOverviewSender', false) && !trait_exists('Brevo\Client\Model\GetSmtpTemplateOverviewSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmtpTemplateOverviewSender');
+}
+if (!class_exists('Brevo\Client\Model\Deal', false) && !interface_exists('Brevo\Client\Model\Deal', false) && !trait_exists('Brevo\Client\Model\Deal', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Deal');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2001', false) && !interface_exists('Brevo\Client\Model\InlineResponse2001', false) && !trait_exists('Brevo\Client\Model\InlineResponse2001', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2001');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountRelay', false) && !interface_exists('Brevo\Client\Model\GetAccountRelay', false) && !trait_exists('Brevo\Client\Model\GetAccountRelay', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountRelay');
+}
+if (!class_exists('Brevo\Client\Model\Body7', false) && !interface_exists('Brevo\Client\Model\Body7', false) && !trait_exists('Brevo\Client\Model\Body7', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body7');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateCategories', false) && !interface_exists('Brevo\Client\Model\CreateUpdateCategories', false) && !trait_exists('Brevo\Client\Model\CreateUpdateCategories', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateCategories');
+}
+if (!class_exists('Brevo\Client\Model\FileList', false) && !interface_exists('Brevo\Client\Model\FileList', false) && !trait_exists('Brevo\Client\Model\FileList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\FileList');
+}
+if (!class_exists('Brevo\Client\Model\GetEmailEventReport', false) && !interface_exists('Brevo\Client\Model\GetEmailEventReport', false) && !trait_exists('Brevo\Client\Model\GetEmailEventReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetEmailEventReport');
+}
+if (!class_exists('Brevo\Client\Model\CreateWebhook', false) && !interface_exists('Brevo\Client\Model\CreateWebhook', false) && !trait_exists('Brevo\Client\Model\CreateWebhook', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateWebhook');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateProducts', false) && !interface_exists('Brevo\Client\Model\CreateUpdateProducts', false) && !trait_exists('Brevo\Client\Model\CreateUpdateProducts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateProducts');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacEmailsList', false) && !interface_exists('Brevo\Client\Model\GetTransacEmailsList', false) && !trait_exists('Brevo\Client\Model\GetTransacEmailsList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacEmailsList');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateCategory', false) && !interface_exists('Brevo\Client\Model\CreateUpdateCategory', false) && !trait_exists('Brevo\Client\Model\CreateUpdateCategory', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateCategory');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountsResponse', false) && !interface_exists('Brevo\Client\Model\SubAccountsResponse', false) && !trait_exists('Brevo\Client\Model\SubAccountsResponse', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountsResponse');
+}
+if (!class_exists('Brevo\Client\Model\GetSharedTemplateUrl', false) && !interface_exists('Brevo\Client\Model\GetSharedTemplateUrl', false) && !trait_exists('Brevo\Client\Model\GetSharedTemplateUrl', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSharedTemplateUrl');
+}
+if (!class_exists('Brevo\Client\Model\CreateSender', false) && !interface_exists('Brevo\Client\Model\CreateSender', false) && !trait_exists('Brevo\Client\Model\CreateSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSender');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCredits', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCredits', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCredits', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoCredits');
+}
+if (!class_exists('Brevo\Client\Model\GetUserPermission', false) && !interface_exists('Brevo\Client\Model\GetUserPermission', false) && !trait_exists('Brevo\Client\Model\GetUserPermission', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetUserPermission');
+}
+if (!class_exists('Brevo\Client\Model\GetInboundEmailEventsEvents', false) && !interface_exists('Brevo\Client\Model\GetInboundEmailEventsEvents', false) && !trait_exists('Brevo\Client\Model\GetInboundEmailEventsEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInboundEmailEventsEvents');
+}
+if (!class_exists('Brevo\Client\Model\GetIpsFromSender', false) && !interface_exists('Brevo\Client\Model\GetIpsFromSender', false) && !trait_exists('Brevo\Client\Model\GetIpsFromSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetIpsFromSender');
+}
+if (!class_exists('Brevo\Client\Model\GetAttributesEnumeration', false) && !interface_exists('Brevo\Client\Model\GetAttributesEnumeration', false) && !trait_exists('Brevo\Client\Model\GetAttributesEnumeration', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAttributesEnumeration');
+}
+if (!class_exists('Brevo\Client\Model\RemoveCredits', false) && !interface_exists('Brevo\Client\Model\RemoveCredits', false) && !trait_exists('Brevo\Client\Model\RemoveCredits', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RemoveCredits');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\GetSmsCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\GetSmsCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\GetCategories', false) && !interface_exists('Brevo\Client\Model\GetCategories', false) && !trait_exists('Brevo\Client\Model\GetCategories', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCategories');
+}
+if (!class_exists('Brevo\Client\Model\UpdateSender', false) && !interface_exists('Brevo\Client\Model\UpdateSender', false) && !trait_exists('Brevo\Client\Model\UpdateSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateSender');
+}
+if (!class_exists('Brevo\Client\Model\CreateSenderModel', false) && !interface_exists('Brevo\Client\Model\CreateSenderModel', false) && !trait_exists('Brevo\Client\Model\CreateSenderModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSenderModel');
+}
+if (!class_exists('Brevo\Client\Model\UpdateAttributeEnumeration', false) && !interface_exists('Brevo\Client\Model\UpdateAttributeEnumeration', false) && !trait_exists('Brevo\Client\Model\UpdateAttributeEnumeration', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateAttributeEnumeration');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmail', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmail', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmail');
+}
+if (!class_exists('Brevo\Client\Model\Company', false) && !interface_exists('Brevo\Client\Model\Company', false) && !trait_exists('Brevo\Client\Model\Company', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Company');
+}
+if (!class_exists('Brevo\Client\Model\SendReportEmail', false) && !interface_exists('Brevo\Client\Model\SendReportEmail', false) && !trait_exists('Brevo\Client\Model\SendReportEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendReportEmail');
+}
+if (!class_exists('Brevo\Client\Model\PipelineStage', false) && !interface_exists('Brevo\Client\Model\PipelineStage', false) && !trait_exists('Brevo\Client\Model\PipelineStage', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PipelineStage');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2002', false) && !interface_exists('Brevo\Client\Model\InlineResponse2002', false) && !trait_exists('Brevo\Client\Model\InlineResponse2002', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2002');
+}
+if (!class_exists('Brevo\Client\Model\TaskReminder', false) && !interface_exists('Brevo\Client\Model\TaskReminder', false) && !trait_exists('Brevo\Client\Model\TaskReminder', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\TaskReminder');
+}
+if (!class_exists('Brevo\Client\Model\BlockDomain', false) && !interface_exists('Brevo\Client\Model\BlockDomain', false) && !trait_exists('Brevo\Client\Model\BlockDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\BlockDomain');
+}
+if (!class_exists('Brevo\Client\Model\PostSendFailed', false) && !interface_exists('Brevo\Client\Model\PostSendFailed', false) && !trait_exists('Brevo\Client\Model\PostSendFailed', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PostSendFailed');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailSender', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailSender', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailSender');
+}
+if (!class_exists('Brevo\Client\Model\CreateDomainModel', false) && !interface_exists('Brevo\Client\Model\CreateDomainModel', false) && !trait_exists('Brevo\Client\Model\CreateDomainModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateDomainModel');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailAttachment', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailAttachment', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailAttachment', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailAttachment');
+}
+if (!class_exists('Brevo\Client\Model\GetScheduledEmailByBatchIdBatches', false) && !interface_exists('Brevo\Client\Model\GetScheduledEmailByBatchIdBatches', false) && !trait_exists('Brevo\Client\Model\GetScheduledEmailByBatchIdBatches', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetScheduledEmailByBatchIdBatches');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacSmsReport', false) && !interface_exists('Brevo\Client\Model\GetTransacSmsReport', false) && !trait_exists('Brevo\Client\Model\GetTransacSmsReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacSmsReport');
+}
+if (!class_exists('Brevo\Client\Model\GetBlockedDomains', false) && !interface_exists('Brevo\Client\Model\GetBlockedDomains', false) && !trait_exists('Brevo\Client\Model\GetBlockedDomains', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetBlockedDomains');
+}
+if (!class_exists('Brevo\Client\Model\SendWhatsappMessage', false) && !interface_exists('Brevo\Client\Model\SendWhatsappMessage', false) && !trait_exists('Brevo\Client\Model\SendWhatsappMessage', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendWhatsappMessage');
+}
+if (!class_exists('Brevo\Client\Model\UpdateEmailCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\UpdateEmailCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\UpdateEmailCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateEmailCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\Body10', false) && !interface_exists('Brevo\Client\Model\Body10', false) && !trait_exists('Brevo\Client\Model\Body10', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body10');
+}
+if (!class_exists('Brevo\Client\Model\UpdateChild', false) && !interface_exists('Brevo\Client\Model\UpdateChild', false) && !trait_exists('Brevo\Client\Model\UpdateChild', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateChild');
+}
+if (!class_exists('Brevo\Client\Model\OrderBatch', false) && !interface_exists('Brevo\Client\Model\OrderBatch', false) && !trait_exists('Brevo\Client\Model\OrderBatch', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\OrderBatch');
+}
+if (!class_exists('Brevo\Client\Model\GetChildDomain', false) && !interface_exists('Brevo\Client\Model\GetChildDomain', false) && !trait_exists('Brevo\Client\Model\GetChildDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildDomain');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountPlan', false) && !interface_exists('Brevo\Client\Model\GetAccountPlan', false) && !trait_exists('Brevo\Client\Model\GetAccountPlan', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountPlan');
+}
+if (!class_exists('Brevo\Client\Model\CreatedBatchId', false) && !interface_exists('Brevo\Client\Model\CreatedBatchId', false) && !trait_exists('Brevo\Client\Model\CreatedBatchId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreatedBatchId');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfoApiKeysV3', false) && !interface_exists('Brevo\Client\Model\GetChildInfoApiKeysV3', false) && !trait_exists('Brevo\Client\Model\GetChildInfoApiKeysV3', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfoApiKeysV3');
+}
+if (!class_exists('Brevo\Client\Model\CreatedProcessId', false) && !interface_exists('Brevo\Client\Model\CreatedProcessId', false) && !trait_exists('Brevo\Client\Model\CreatedProcessId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreatedProcessId');
+}
+if (!class_exists('Brevo\Client\Model\UpdateChildAccountStatus', false) && !interface_exists('Brevo\Client\Model\UpdateChildAccountStatus', false) && !trait_exists('Brevo\Client\Model\UpdateChildAccountStatus', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateChildAccountStatus');
+}
+if (!class_exists('Brevo\Client\Model\CreateSmsCampaign', false) && !interface_exists('Brevo\Client\Model\CreateSmsCampaign', false) && !trait_exists('Brevo\Client\Model\CreateSmsCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSmsCampaign');
+}
+if (!class_exists('Brevo\Client\Model\GetCorporateInvitedUsersListGroups', false) && !interface_exists('Brevo\Client\Model\GetCorporateInvitedUsersListGroups', false) && !trait_exists('Brevo\Client\Model\GetCorporateInvitedUsersListGroups', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCorporateInvitedUsersListGroups');
+}
+if (!class_exists('Brevo\Client\Model\RequestContactImportNewList', false) && !interface_exists('Brevo\Client\Model\RequestContactImportNewList', false) && !trait_exists('Brevo\Client\Model\RequestContactImportNewList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RequestContactImportNewList');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateProduct', false) && !interface_exists('Brevo\Client\Model\CreateUpdateProduct', false) && !trait_exists('Brevo\Client\Model\CreateUpdateProduct', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateProduct');
+}
+if (!class_exists('Brevo\Client\Model\CreateWhatsAppTemplate', false) && !interface_exists('Brevo\Client\Model\CreateWhatsAppTemplate', false) && !trait_exists('Brevo\Client\Model\CreateWhatsAppTemplate', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateWhatsAppTemplate');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetails', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetails', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetails');
+}
+if (!class_exists('Brevo\Client\Model\CreateEmailCampaign', false) && !interface_exists('Brevo\Client\Model\CreateEmailCampaign', false) && !trait_exists('Brevo\Client\Model\CreateEmailCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateEmailCampaign');
+}
+if (!class_exists('Brevo\Client\Model\ErrorModel', false) && !interface_exists('Brevo\Client\Model\ErrorModel', false) && !trait_exists('Brevo\Client\Model\ErrorModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ErrorModel');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2011', false) && !interface_exists('Brevo\Client\Model\InlineResponse2011', false) && !trait_exists('Brevo\Client\Model\InlineResponse2011', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2011');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedCampaignOverviewSender', false) && !interface_exists('Brevo\Client\Model\GetExtendedCampaignOverviewSender', false) && !trait_exists('Brevo\Client\Model\GetExtendedCampaignOverviewSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedCampaignOverviewSender');
+}
+if (!class_exists('Brevo\Client\Model\GetDomainConfigurationModel', false) && !interface_exists('Brevo\Client\Model\GetDomainConfigurationModel', false) && !trait_exists('Brevo\Client\Model\GetDomainConfigurationModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetDomainConfigurationModel');
+}
+if (!class_exists('Brevo\Client\Model\CreateDomain', false) && !interface_exists('Brevo\Client\Model\CreateDomain', false) && !trait_exists('Brevo\Client\Model\CreateDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateDomain');
+}
+if (!class_exists('Brevo\Client\Model\GetIp', false) && !interface_exists('Brevo\Client\Model\GetIp', false) && !trait_exists('Brevo\Client\Model\GetIp', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetIp');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfo', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfo', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfo', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfo');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedList', false) && !interface_exists('Brevo\Client\Model\GetExtendedList', false) && !trait_exists('Brevo\Client\Model\GetExtendedList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedList');
+}
+if (!class_exists('Brevo\Client\Model\GetSegmentsSegments', false) && !interface_exists('Brevo\Client\Model\GetSegmentsSegments', false) && !trait_exists('Brevo\Client\Model\GetSegmentsSegments', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSegmentsSegments');
+}
+if (!class_exists('Brevo\Client\Model\DeleteHardbounces', false) && !interface_exists('Brevo\Client\Model\DeleteHardbounces', false) && !trait_exists('Brevo\Client\Model\DeleteHardbounces', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\DeleteHardbounces');
+}
+if (!class_exists('Brevo\Client\Model\GetDomainsList', false) && !interface_exists('Brevo\Client\Model\GetDomainsList', false) && !trait_exists('Brevo\Client\Model\GetDomainsList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetDomainsList');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesLandingPage', false) && !interface_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesLandingPage', false) && !trait_exists('Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesLandingPage', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountDetailsResponsePlanInfoFeaturesLandingPage');
+}
+if (!class_exists('Brevo\Client\Model\GetStatsByDevice', false) && !interface_exists('Brevo\Client\Model\GetStatsByDevice', false) && !trait_exists('Brevo\Client\Model\GetStatsByDevice', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetStatsByDevice');
+}
+if (!class_exists('Brevo\Client\Model\TaskTypes', false) && !interface_exists('Brevo\Client\Model\TaskTypes', false) && !trait_exists('Brevo\Client\Model\TaskTypes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\TaskTypes');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsMessagesSent', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsMessagesSent', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsMessagesSent', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsMessagesSent');
+}
+if (!class_exists('Brevo\Client\Model\CompanyAttributesInner', false) && !interface_exists('Brevo\Client\Model\CompanyAttributesInner', false) && !trait_exists('Brevo\Client\Model\CompanyAttributesInner', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CompanyAttributesInner');
+}
+if (!class_exists('Brevo\Client\Model\GetContacts', false) && !interface_exists('Brevo\Client\Model\GetContacts', false) && !trait_exists('Brevo\Client\Model\GetContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContacts');
+}
+if (!class_exists('Brevo\Client\Model\CreateSubAccount', false) && !interface_exists('Brevo\Client\Model\CreateSubAccount', false) && !trait_exists('Brevo\Client\Model\CreateSubAccount', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSubAccount');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedCampaignOverview', false) && !interface_exists('Brevo\Client\Model\GetExtendedCampaignOverview', false) && !trait_exists('Brevo\Client\Model\GetExtendedCampaignOverview', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedCampaignOverview');
+}
+if (!class_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptions', false) && !interface_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptions', false) && !trait_exists('Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptions', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetExtendedContactDetailsStatisticsUnsubscriptions');
+}
+if (!class_exists('Brevo\Client\Model\GetLists', false) && !interface_exists('Brevo\Client\Model\GetLists', false) && !trait_exists('Brevo\Client\Model\GetLists', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetLists');
+}
+if (!class_exists('Brevo\Client\Model\SendTestSms', false) && !interface_exists('Brevo\Client\Model\SendTestSms', false) && !trait_exists('Brevo\Client\Model\SendTestSms', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendTestSms');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountAppsToggleRequest', false) && !interface_exists('Brevo\Client\Model\SubAccountAppsToggleRequest', false) && !trait_exists('Brevo\Client\Model\SubAccountAppsToggleRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountAppsToggleRequest');
+}
+if (!class_exists('Brevo\Client\Model\GetAttributes', false) && !interface_exists('Brevo\Client\Model\GetAttributes', false) && !trait_exists('Brevo\Client\Model\GetAttributes', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAttributes');
+}
+if (!class_exists('Brevo\Client\Model\PutRevokeUserPermission', false) && !interface_exists('Brevo\Client\Model\PutRevokeUserPermission', false) && !trait_exists('Brevo\Client\Model\PutRevokeUserPermission', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\PutRevokeUserPermission');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse200', false) && !interface_exists('Brevo\Client\Model\InlineResponse200', false) && !trait_exists('Brevo\Client\Model\InlineResponse200', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse200');
+}
+if (!class_exists('Brevo\Client\Model\SendTransacSms', false) && !interface_exists('Brevo\Client\Model\SendTransacSms', false) && !trait_exists('Brevo\Client\Model\SendTransacSms', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendTransacSms');
+}
+if (!class_exists('Brevo\Client\Model\Task', false) && !interface_exists('Brevo\Client\Model\Task', false) && !trait_exists('Brevo\Client\Model\Task', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Task');
+}
+if (!class_exists('Brevo\Client\Model\NoteList', false) && !interface_exists('Brevo\Client\Model\NoteList', false) && !trait_exists('Brevo\Client\Model\NoteList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\NoteList');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsEventReport', false) && !interface_exists('Brevo\Client\Model\GetSmsEventReport', false) && !trait_exists('Brevo\Client\Model\GetSmsEventReport', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsEventReport');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacSmsReportReports', false) && !interface_exists('Brevo\Client\Model\GetTransacSmsReportReports', false) && !trait_exists('Brevo\Client\Model\GetTransacSmsReportReports', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacSmsReportReports');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateBatchCategoryModel', false) && !interface_exists('Brevo\Client\Model\CreateUpdateBatchCategoryModel', false) && !trait_exists('Brevo\Client\Model\CreateUpdateBatchCategoryModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateBatchCategoryModel');
+}
+if (!class_exists('Brevo\Client\Model\GetSmsCampaigns', false) && !interface_exists('Brevo\Client\Model\GetSmsCampaigns', false) && !trait_exists('Brevo\Client\Model\GetSmsCampaigns', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSmsCampaigns');
+}
+if (!class_exists('Brevo\Client\Model\GetStatsByDomain', false) && !interface_exists('Brevo\Client\Model\GetStatsByDomain', false) && !trait_exists('Brevo\Client\Model\GetStatsByDomain', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetStatsByDomain');
+}
+if (!class_exists('Brevo\Client\Model\CreateAttributeEnumeration', false) && !interface_exists('Brevo\Client\Model\CreateAttributeEnumeration', false) && !trait_exists('Brevo\Client\Model\CreateAttributeEnumeration', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateAttributeEnumeration');
+}
+if (!class_exists('Brevo\Client\Model\Inviteuser', false) && !interface_exists('Brevo\Client\Model\Inviteuser', false) && !trait_exists('Brevo\Client\Model\Inviteuser', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Inviteuser');
+}
+if (!class_exists('Brevo\Client\Model\CreateEmailCampaignRecipients', false) && !interface_exists('Brevo\Client\Model\CreateEmailCampaignRecipients', false) && !trait_exists('Brevo\Client\Model\CreateEmailCampaignRecipients', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateEmailCampaignRecipients');
+}
+if (!class_exists('Brevo\Client\Model\ComponentItems', false) && !interface_exists('Brevo\Client\Model\ComponentItems', false) && !trait_exists('Brevo\Client\Model\ComponentItems', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ComponentItems');
+}
+if (!class_exists('Brevo\Client\Model\CreateSmtpTemplate', false) && !interface_exists('Brevo\Client\Model\CreateSmtpTemplate', false) && !trait_exists('Brevo\Client\Model\CreateSmtpTemplate', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSmtpTemplate');
+}
+if (!class_exists('Brevo\Client\Model\GetDomainsListDomains', false) && !interface_exists('Brevo\Client\Model\GetDomainsListDomains', false) && !trait_exists('Brevo\Client\Model\GetDomainsListDomains', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetDomainsListDomains');
+}
+if (!class_exists('Brevo\Client\Model\UpdateSmtpTemplateSender', false) && !interface_exists('Brevo\Client\Model\UpdateSmtpTemplateSender', false) && !trait_exists('Brevo\Client\Model\UpdateSmtpTemplateSender', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateSmtpTemplateSender');
+}
+if (!class_exists('Brevo\Client\Model\GetEmailCampaign', false) && !interface_exists('Brevo\Client\Model\GetEmailCampaign', false) && !trait_exists('Brevo\Client\Model\GetEmailCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetEmailCampaign');
+}
+if (!class_exists('Brevo\Client\Model\ScheduleSmtpEmail', false) && !interface_exists('Brevo\Client\Model\ScheduleSmtpEmail', false) && !trait_exists('Brevo\Client\Model\ScheduleSmtpEmail', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ScheduleSmtpEmail');
+}
+if (!class_exists('Brevo\Client\Model\ManageIp', false) && !interface_exists('Brevo\Client\Model\ManageIp', false) && !trait_exists('Brevo\Client\Model\ManageIp', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\ManageIp');
+}
+if (!class_exists('Brevo\Client\Model\UpdateWebhook', false) && !interface_exists('Brevo\Client\Model\UpdateWebhook', false) && !trait_exists('Brevo\Client\Model\UpdateWebhook', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateWebhook');
+}
+if (!class_exists('Brevo\Client\Model\GetSendersListSenders', false) && !interface_exists('Brevo\Client\Model\GetSendersListSenders', false) && !trait_exists('Brevo\Client\Model\GetSendersListSenders', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSendersListSenders');
+}
+if (!class_exists('Brevo\Client\Model\SubAccountsResponseSubAccounts', false) && !interface_exists('Brevo\Client\Model\SubAccountsResponseSubAccounts', false) && !trait_exists('Brevo\Client\Model\SubAccountsResponseSubAccounts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SubAccountsResponseSubAccounts');
+}
+if (!class_exists('Brevo\Client\Model\GetTransacEmailContentEvents', false) && !interface_exists('Brevo\Client\Model\GetTransacEmailContentEvents', false) && !trait_exists('Brevo\Client\Model\GetTransacEmailContentEvents', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetTransacEmailContentEvents');
+}
+if (!class_exists('Brevo\Client\Model\TaskList', false) && !interface_exists('Brevo\Client\Model\TaskList', false) && !trait_exists('Brevo\Client\Model\TaskList', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\TaskList');
+}
+if (!class_exists('Brevo\Client\Model\OrderBilling', false) && !interface_exists('Brevo\Client\Model\OrderBilling', false) && !trait_exists('Brevo\Client\Model\OrderBilling', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\OrderBilling');
+}
+if (!class_exists('Brevo\Client\Model\RemainingCreditModelReseller', false) && !interface_exists('Brevo\Client\Model\RemainingCreditModelReseller', false) && !trait_exists('Brevo\Client\Model\RemainingCreditModelReseller', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RemainingCreditModelReseller');
+}
+if (!class_exists('Brevo\Client\Model\InlineResponse2013', false) && !interface_exists('Brevo\Client\Model\InlineResponse2013', false) && !trait_exists('Brevo\Client\Model\InlineResponse2013', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\InlineResponse2013');
+}
+if (!class_exists('Brevo\Client\Model\Body4', false) && !interface_exists('Brevo\Client\Model\Body4', false) && !trait_exists('Brevo\Client\Model\Body4', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Body4');
+}
+if (!class_exists('Brevo\Client\Model\UpdateBatchContactsModel', false) && !interface_exists('Brevo\Client\Model\UpdateBatchContactsModel', false) && !trait_exists('Brevo\Client\Model\UpdateBatchContactsModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateBatchContactsModel');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountActivity', false) && !interface_exists('Brevo\Client\Model\GetAccountActivity', false) && !trait_exists('Brevo\Client\Model\GetAccountActivity', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountActivity');
+}
+if (!class_exists('Brevo\Client\Model\GetInvitedUsersListFeatureAccess', false) && !interface_exists('Brevo\Client\Model\GetInvitedUsersListFeatureAccess', false) && !trait_exists('Brevo\Client\Model\GetInvitedUsersListFeatureAccess', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetInvitedUsersListFeatureAccess');
+}
+if (!class_exists('Brevo\Client\Model\RemainingCreditModel', false) && !interface_exists('Brevo\Client\Model\RemainingCreditModel', false) && !trait_exists('Brevo\Client\Model\RemainingCreditModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\RemainingCreditModel');
+}
+if (!class_exists('Brevo\Client\Model\GetReportsReports', false) && !interface_exists('Brevo\Client\Model\GetReportsReports', false) && !trait_exists('Brevo\Client\Model\GetReportsReports', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetReportsReports');
+}
+if (!class_exists('Brevo\Client\Model\GetContactCampaignStatsUnsubscriptions', false) && !interface_exists('Brevo\Client\Model\GetContactCampaignStatsUnsubscriptions', false) && !trait_exists('Brevo\Client\Model\GetContactCampaignStatsUnsubscriptions', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetContactCampaignStatsUnsubscriptions');
+}
+if (!class_exists('Brevo\Client\Model\CreateSubAccountResponse', false) && !interface_exists('Brevo\Client\Model\CreateSubAccountResponse', false) && !trait_exists('Brevo\Client\Model\CreateSubAccountResponse', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateSubAccountResponse');
+}
+if (!class_exists('Brevo\Client\Model\GetAccountActivityLogs', false) && !interface_exists('Brevo\Client\Model\GetAccountActivityLogs', false) && !trait_exists('Brevo\Client\Model\GetAccountActivityLogs', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetAccountActivityLogs');
+}
+if (!class_exists('Brevo\Client\Model\GetSegments', false) && !interface_exists('Brevo\Client\Model\GetSegments', false) && !trait_exists('Brevo\Client\Model\GetSegments', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSegments');
+}
+if (!class_exists('Brevo\Client\Model\UpdateEmailCampaign', false) && !interface_exists('Brevo\Client\Model\UpdateEmailCampaign', false) && !trait_exists('Brevo\Client\Model\UpdateEmailCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateEmailCampaign');
+}
+if (!class_exists('Brevo\Client\Model\CreateUpdateBatchCategory', false) && !interface_exists('Brevo\Client\Model\CreateUpdateBatchCategory', false) && !trait_exists('Brevo\Client\Model\CreateUpdateBatchCategory', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\CreateUpdateBatchCategory');
+}
+if (!class_exists('Brevo\Client\Model\GetProductDetails', false) && !interface_exists('Brevo\Client\Model\GetProductDetails', false) && !trait_exists('Brevo\Client\Model\GetProductDetails', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetProductDetails');
+}
+if (!class_exists('Brevo\Client\Model\UpdateWhatsAppCampaign', false) && !interface_exists('Brevo\Client\Model\UpdateWhatsAppCampaign', false) && !trait_exists('Brevo\Client\Model\UpdateWhatsAppCampaign', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateWhatsAppCampaign');
+}
+if (!class_exists('Brevo\Client\Model\GetChildInfoStatistics', false) && !interface_exists('Brevo\Client\Model\GetChildInfoStatistics', false) && !trait_exists('Brevo\Client\Model\GetChildInfoStatistics', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetChildInfoStatistics');
+}
+if (!class_exists('Brevo\Client\Model\GetStatsByBrowser', false) && !interface_exists('Brevo\Client\Model\GetStatsByBrowser', false) && !trait_exists('Brevo\Client\Model\GetStatsByBrowser', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetStatsByBrowser');
+}
+if (!class_exists('Brevo\Client\Model\GetClient', false) && !interface_exists('Brevo\Client\Model\GetClient', false) && !trait_exists('Brevo\Client\Model\GetClient', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetClient');
+}
+if (!class_exists('Brevo\Client\Model\Order', false) && !interface_exists('Brevo\Client\Model\Order', false) && !trait_exists('Brevo\Client\Model\Order', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Order');
+}
+if (!class_exists('Brevo\Client\Model\GetWebhook', false) && !interface_exists('Brevo\Client\Model\GetWebhook', false) && !trait_exists('Brevo\Client\Model\GetWebhook', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWebhook');
+}
+if (!class_exists('Brevo\Client\Model\SendSmtpEmailReplyTo1', false) && !interface_exists('Brevo\Client\Model\SendSmtpEmailReplyTo1', false) && !trait_exists('Brevo\Client\Model\SendSmtpEmailReplyTo1', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\SendSmtpEmailReplyTo1');
+}
+if (!class_exists('Brevo\Client\Model\UpdateBatchContacts', false) && !interface_exists('Brevo\Client\Model\UpdateBatchContacts', false) && !trait_exists('Brevo\Client\Model\UpdateBatchContacts', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\UpdateBatchContacts');
+}
+if (!class_exists('Brevo\Client\Model\GetCorporateInvitedUsersListUsers', false) && !interface_exists('Brevo\Client\Model\GetCorporateInvitedUsersListUsers', false) && !trait_exists('Brevo\Client\Model\GetCorporateInvitedUsersListUsers', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetCorporateInvitedUsersListUsers');
+}
+if (!class_exists('Brevo\Client\Model\GetSendersListIps', false) && !interface_exists('Brevo\Client\Model\GetSendersListIps', false) && !trait_exists('Brevo\Client\Model\GetSendersListIps', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetSendersListIps');
+}
+if (!class_exists('Brevo\Client\Model\GetWebhookHeaders', false) && !interface_exists('Brevo\Client\Model\GetWebhookHeaders', false) && !trait_exists('Brevo\Client\Model\GetWebhookHeaders', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetWebhookHeaders');
+}
+if (!class_exists('Brevo\Client\Model\GetDeviceBrowserStats', false) && !interface_exists('Brevo\Client\Model\GetDeviceBrowserStats', false) && !trait_exists('Brevo\Client\Model\GetDeviceBrowserStats', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetDeviceBrowserStats');
+}
+if (!class_exists('Brevo\Client\Model\GetScheduledEmailByBatchId', false) && !interface_exists('Brevo\Client\Model\GetScheduledEmailByBatchId', false) && !trait_exists('Brevo\Client\Model\GetScheduledEmailByBatchId', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetScheduledEmailByBatchId');
+}
+if (!class_exists('Brevo\Client\Model\GetReports', false) && !interface_exists('Brevo\Client\Model\GetReports', false) && !trait_exists('Brevo\Client\Model\GetReports', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\GetReports');
+}
+if (!class_exists('Brevo\Client\Model\Pipelines', false) && !interface_exists('Brevo\Client\Model\Pipelines', false) && !trait_exists('Brevo\Client\Model\Pipelines', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Model\Pipelines');
+}
+if (!class_exists('Brevo\Client\Api\TransactionalSMSApi', false) && !interface_exists('Brevo\Client\Api\TransactionalSMSApi', false) && !trait_exists('Brevo\Client\Api\TransactionalSMSApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\TransactionalSMSApi');
+}
+if (!class_exists('Brevo\Client\Api\ExternalFeedsApi', false) && !interface_exists('Brevo\Client\Api\ExternalFeedsApi', false) && !trait_exists('Brevo\Client\Api\ExternalFeedsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ExternalFeedsApi');
+}
+if (!class_exists('Brevo\Client\Api\NotesApi', false) && !interface_exists('Brevo\Client\Api\NotesApi', false) && !trait_exists('Brevo\Client\Api\NotesApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\NotesApi');
+}
+if (!class_exists('Brevo\Client\Api\TransactionalWhatsAppApi', false) && !interface_exists('Brevo\Client\Api\TransactionalWhatsAppApi', false) && !trait_exists('Brevo\Client\Api\TransactionalWhatsAppApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\TransactionalWhatsAppApi');
+}
+if (!class_exists('Brevo\Client\Api\SMSCampaignsApi', false) && !interface_exists('Brevo\Client\Api\SMSCampaignsApi', false) && !trait_exists('Brevo\Client\Api\SMSCampaignsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\SMSCampaignsApi');
+}
+if (!class_exists('Brevo\Client\Api\SendersApi', false) && !interface_exists('Brevo\Client\Api\SendersApi', false) && !trait_exists('Brevo\Client\Api\SendersApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\SendersApi');
+}
+if (!class_exists('Brevo\Client\Api\AttributesApi', false) && !interface_exists('Brevo\Client\Api\AttributesApi', false) && !trait_exists('Brevo\Client\Api\AttributesApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\AttributesApi');
+}
+if (!class_exists('Brevo\Client\Api\FilesApi', false) && !interface_exists('Brevo\Client\Api\FilesApi', false) && !trait_exists('Brevo\Client\Api\FilesApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\FilesApi');
+}
+if (!class_exists('Brevo\Client\Api\WebhooksApi', false) && !interface_exists('Brevo\Client\Api\WebhooksApi', false) && !trait_exists('Brevo\Client\Api\WebhooksApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\WebhooksApi');
+}
+if (!class_exists('Brevo\Client\Api\ListsApi', false) && !interface_exists('Brevo\Client\Api\ListsApi', false) && !trait_exists('Brevo\Client\Api\ListsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ListsApi');
+}
+if (!class_exists('Brevo\Client\Api\DomainsApi', false) && !interface_exists('Brevo\Client\Api\DomainsApi', false) && !trait_exists('Brevo\Client\Api\DomainsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\DomainsApi');
+}
+if (!class_exists('Brevo\Client\Api\EmailCampaignsApi', false) && !interface_exists('Brevo\Client\Api\EmailCampaignsApi', false) && !trait_exists('Brevo\Client\Api\EmailCampaignsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\EmailCampaignsApi');
+}
+if (!class_exists('Brevo\Client\Api\AccountApi', false) && !interface_exists('Brevo\Client\Api\AccountApi', false) && !trait_exists('Brevo\Client\Api\AccountApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\AccountApi');
+}
+if (!class_exists('Brevo\Client\Api\FoldersApi', false) && !interface_exists('Brevo\Client\Api\FoldersApi', false) && !trait_exists('Brevo\Client\Api\FoldersApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\FoldersApi');
+}
+if (!class_exists('Brevo\Client\Api\ContactsApi', false) && !interface_exists('Brevo\Client\Api\ContactsApi', false) && !trait_exists('Brevo\Client\Api\ContactsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ContactsApi');
+}
+if (!class_exists('Brevo\Client\Api\CouponsApi', false) && !interface_exists('Brevo\Client\Api\CouponsApi', false) && !trait_exists('Brevo\Client\Api\CouponsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\CouponsApi');
+}
+if (!class_exists('Brevo\Client\Api\ProcessApi', false) && !interface_exists('Brevo\Client\Api\ProcessApi', false) && !trait_exists('Brevo\Client\Api\ProcessApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ProcessApi');
+}
+if (!class_exists('Brevo\Client\Api\UserApi', false) && !interface_exists('Brevo\Client\Api\UserApi', false) && !trait_exists('Brevo\Client\Api\UserApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\UserApi');
+}
+if (!class_exists('Brevo\Client\Api\WhatsAppCampaignsApi', false) && !interface_exists('Brevo\Client\Api\WhatsAppCampaignsApi', false) && !trait_exists('Brevo\Client\Api\WhatsAppCampaignsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\WhatsAppCampaignsApi');
+}
+if (!class_exists('Brevo\Client\Api\CRMApi', false) && !interface_exists('Brevo\Client\Api\CRMApi', false) && !trait_exists('Brevo\Client\Api\CRMApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\CRMApi');
+}
+if (!class_exists('Brevo\Client\Api\ResellerApi', false) && !interface_exists('Brevo\Client\Api\ResellerApi', false) && !trait_exists('Brevo\Client\Api\ResellerApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ResellerApi');
+}
+if (!class_exists('Brevo\Client\Api\TasksApi', false) && !interface_exists('Brevo\Client\Api\TasksApi', false) && !trait_exists('Brevo\Client\Api\TasksApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\TasksApi');
+}
+if (!class_exists('Brevo\Client\Api\InboundParsingApi', false) && !interface_exists('Brevo\Client\Api\InboundParsingApi', false) && !trait_exists('Brevo\Client\Api\InboundParsingApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\InboundParsingApi');
+}
+if (!class_exists('Brevo\Client\Api\EcommerceApi', false) && !interface_exists('Brevo\Client\Api\EcommerceApi', false) && !trait_exists('Brevo\Client\Api\EcommerceApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\EcommerceApi');
+}
+if (!class_exists('Brevo\Client\Api\MasterAccountApi', false) && !interface_exists('Brevo\Client\Api\MasterAccountApi', false) && !trait_exists('Brevo\Client\Api\MasterAccountApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\MasterAccountApi');
+}
+if (!class_exists('Brevo\Client\Api\DealsApi', false) && !interface_exists('Brevo\Client\Api\DealsApi', false) && !trait_exists('Brevo\Client\Api\DealsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\DealsApi');
+}
+if (!class_exists('Brevo\Client\Api\CompaniesApi', false) && !interface_exists('Brevo\Client\Api\CompaniesApi', false) && !trait_exists('Brevo\Client\Api\CompaniesApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\CompaniesApi');
+}
+if (!class_exists('Brevo\Client\Api\ConversationsApi', false) && !interface_exists('Brevo\Client\Api\ConversationsApi', false) && !trait_exists('Brevo\Client\Api\ConversationsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\ConversationsApi');
+}
+if (!class_exists('Brevo\Client\Api\TransactionalEmailsApi', false) && !interface_exists('Brevo\Client\Api\TransactionalEmailsApi', false) && !trait_exists('Brevo\Client\Api\TransactionalEmailsApi', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\Api\TransactionalEmailsApi');
+}
+if (!class_exists('Brevo\Client\ApiException', false) && !interface_exists('Brevo\Client\ApiException', false) && !trait_exists('Brevo\Client\ApiException', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\ApiException');
+}
+if (!class_exists('Brevo\Client\HeaderSelector', false) && !interface_exists('Brevo\Client\HeaderSelector', false) && !trait_exists('Brevo\Client\HeaderSelector', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Brevo\Client\HeaderSelector');
+}
+if (!class_exists('Postmark\PostmarkAdminClient', false) && !interface_exists('Postmark\PostmarkAdminClient', false) && !trait_exists('Postmark\PostmarkAdminClient', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\PostmarkAdminClient');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationSpamComplaintTrigger', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationSpamComplaintTrigger', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationSpamComplaintTrigger', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationSpamComplaintTrigger');
+}
+if (!class_exists('Postmark\Models\Webhooks\HttpAuth', false) && !interface_exists('Postmark\Models\Webhooks\HttpAuth', false) && !trait_exists('Postmark\Models\Webhooks\HttpAuth', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\HttpAuth');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationDeliveryTrigger', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationDeliveryTrigger', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationDeliveryTrigger', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationDeliveryTrigger');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationSubscriptionChange', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationSubscriptionChange', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationSubscriptionChange', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationSubscriptionChange');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationClickTrigger', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationClickTrigger', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationClickTrigger', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationClickTrigger');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationTriggers', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationTriggers', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationTriggers', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationTriggers');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationBounceTrigger', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationBounceTrigger', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationBounceTrigger', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationBounceTrigger');
+}
+if (!class_exists('Postmark\Models\Webhooks\WebhookConfigurationOpenTrigger', false) && !interface_exists('Postmark\Models\Webhooks\WebhookConfigurationOpenTrigger', false) && !trait_exists('Postmark\Models\Webhooks\WebhookConfigurationOpenTrigger', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Webhooks\WebhookConfigurationOpenTrigger');
+}
+if (!class_exists('Postmark\Models\CaseInsensitiveArray', false) && !interface_exists('Postmark\Models\CaseInsensitiveArray', false) && !trait_exists('Postmark\Models\CaseInsensitiveArray', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\CaseInsensitiveArray');
+}
+if (!class_exists('Postmark\Models\PostmarkException', false) && !interface_exists('Postmark\Models\PostmarkException', false) && !trait_exists('Postmark\Models\PostmarkException', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\PostmarkException');
+}
+if (!class_exists('Postmark\Models\DynamicResponseModel', false) && !interface_exists('Postmark\Models\DynamicResponseModel', false) && !trait_exists('Postmark\Models\DynamicResponseModel', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\DynamicResponseModel');
+}
+if (!class_exists('Postmark\Models\PostmarkAttachment', false) && !interface_exists('Postmark\Models\PostmarkAttachment', false) && !trait_exists('Postmark\Models\PostmarkAttachment', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\PostmarkAttachment');
+}
+if (!class_exists('Postmark\Models\Suppressions\SuppressionChangeRequest', false) && !interface_exists('Postmark\Models\Suppressions\SuppressionChangeRequest', false) && !trait_exists('Postmark\Models\Suppressions\SuppressionChangeRequest', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\Models\Suppressions\SuppressionChangeRequest');
+}
+if (!class_exists('Postmark\PostmarkClientBase', false) && !interface_exists('Postmark\PostmarkClientBase', false) && !trait_exists('Postmark\PostmarkClientBase', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\PostmarkClientBase');
+}
+if (!class_exists('Postmark\PostmarkClient', false) && !interface_exists('Postmark\PostmarkClient', false) && !trait_exists('Postmark\PostmarkClient', false)) {
+    spl_autoload_call('DoubleScale\Vendor\Postmark\PostmarkClient');
 }
 
 // Exposed functions. For more information see:
@@ -342,6 +1698,11 @@ if (!function_exists('with')) {
         return \DoubleScale\Vendor\with(...func_get_args());
     }
 }
+if (!function_exists('http_get_last_response_headers')) {
+    function http_get_last_response_headers() {
+        return \DoubleScale\Vendor\http_get_last_response_headers(...func_get_args());
+    }
+}
 if (!function_exists('app')) {
     function app() {
         return \DoubleScale\Vendor\app(...func_get_args());
@@ -360,6 +1721,51 @@ if (!function_exists('getHtmlAttribute')) {
 if (!function_exists('getOpenCollectiveSponsors')) {
     function getOpenCollectiveSponsors() {
         return \DoubleScale\Vendor\getOpenCollectiveSponsors(...func_get_args());
+    }
+}
+if (!function_exists('helloEmail')) {
+    function helloEmail() {
+        return \DoubleScale\Vendor\helloEmail(...func_get_args());
+    }
+}
+if (!function_exists('kitchenSink')) {
+    function kitchenSink() {
+        return \DoubleScale\Vendor\kitchenSink(...func_get_args());
+    }
+}
+if (!function_exists('sendHelloEmail')) {
+    function sendHelloEmail() {
+        return \DoubleScale\Vendor\sendHelloEmail(...func_get_args());
+    }
+}
+if (!function_exists('sendKitchenSink')) {
+    function sendKitchenSink() {
+        return \DoubleScale\Vendor\sendKitchenSink(...func_get_args());
+    }
+}
+if (!function_exists('buildRecipientForm')) {
+    function buildRecipientForm() {
+        return \DoubleScale\Vendor\buildRecipientForm(...func_get_args());
+    }
+}
+if (!function_exists('recipientFormSubmit')) {
+    function recipientFormSubmit() {
+        return \DoubleScale\Vendor\recipientFormSubmit(...func_get_args());
+    }
+}
+if (!function_exists('isValidSignature')) {
+    function isValidSignature() {
+        return \DoubleScale\Vendor\isValidSignature(...func_get_args());
+    }
+}
+if (!function_exists('buildHelloEmail')) {
+    function buildHelloEmail() {
+        return \DoubleScale\Vendor\buildHelloEmail(...func_get_args());
+    }
+}
+if (!function_exists('buildSendgridObject')) {
+    function buildSendgridObject() {
+        return \DoubleScale\Vendor\buildSendgridObject(...func_get_args());
     }
 }
 if (!function_exists('litespeed_finish_request')) {

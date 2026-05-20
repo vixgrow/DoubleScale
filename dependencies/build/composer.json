@@ -1,6 +1,6 @@
 {
     "name": "doublescale/doublescale-deps",
-    "description": "Composer dependencies for DoubleScale plugin runtime (Carbon, CSV).",
+    "description": "Composer dependencies for DoubleScale plugin runtime (Carbon, CSV, SMTP mailer SDKs).",
     "repositories": [
         {
             "type": "vcs",
@@ -11,14 +11,19 @@
         "doublescale/wpeloquent": "^1.0.0",
         "nesbot/carbon": "^2.0",
         "carbonphp/carbon-doctrine-types": "^1.0",
-        "league/csv": "9.7.4"
+        "league/csv": "9.7.4",
+        "guzzlehttp/guzzle": "^7.0",
+        "sendgrid/sendgrid": "~8.1",
+        "getbrevo/brevo-php": "2.0.0",
+        "wildbit/postmark-php": "^4.0",
+        "doctrine/cache": "^1.10"
     },
     "config": {
         "allow-plugins": {
             "composer/installers": true
         },
         "platform": {
-            "php": "7.3.33"
+            "php": "7.4"
         },
         "sort-packages": true
     },

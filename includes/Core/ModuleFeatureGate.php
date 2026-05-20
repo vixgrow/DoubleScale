@@ -79,7 +79,6 @@ function doublescale_phantom_module_toggle_slugs(): array {
 		'leadscoring',
 		'notifications',
 		'tasks',
-		'websitetracking',
 	);
 
 	return array_values( array_unique( apply_filters( 'doublescale_phantom_module_toggle_slugs', $slugs ) ) );
@@ -139,11 +138,6 @@ function doublescale_phantom_module_admin_meta( string $slug ): ?array {
 			return array(
 				'label'       => __( 'Tasks', 'doublescale' ),
 				'description' => __( 'Create tasks, due dates, and reminders linked to contacts and deals.', 'doublescale' ),
-			);
-		case 'websitetracking':
-			return array(
-				'label'       => __( 'Website tracking', 'doublescale' ),
-				'description' => __( 'Page visits, visitor cookies, and anonymous visit stitching.', 'doublescale' ),
 			);
 		default:
 			return null;

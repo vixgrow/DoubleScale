@@ -368,30 +368,6 @@ class License {
 	}
 
 	/**
-	 * Check whether the current license plan meets or exceeds the required plan.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $required_plan The minimum plan slug required.
-	 * @return bool
-	 */
-	public function is_plan_accessible( $required_plan ) {
-		if ( empty( $required_plan ) ) {
-			return true;
-		}
-
-		$license = get_option( 'doublescale_license' );
-		if ( empty( $license['plan'] ) || empty( $license['status'] ) || 'valid' !== $license['status'] ) {
-			return false;
-		}
-
-		$current_level  = $this->plans[ $license['plan'] ]['level'] ?? 0;
-		$required_level = $this->plans[ $required_plan ]['level'] ?? 0;
-
-		return $current_level >= $required_level;
-	}
-
-	/**
 	 * Get plans
 	 *
 	 * @since 1.0.0

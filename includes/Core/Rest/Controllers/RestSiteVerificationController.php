@@ -25,7 +25,13 @@ class RestSiteVerificationController extends RestController {
 	const TEMP_TOKEN_TTL = 900; // 15 minutes
 
 	public function register_routes() {
-		 // Verify site
+		// Verify site.
+		//
+		// Public endpoint by design: returns plugin name + version + SSL
+		// status. The DoubleScale mobile app calls this BEFORE login to
+		// confirm the host is a real DoubleScale install and that
+		// Application Passwords are available. No sensitive data is
+		// exposed and the response shape is identical for every caller.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/verify',
@@ -38,7 +44,18 @@ class RestSiteVerificationController extends RestController {
 			)
 		);
 
-		// Login (username/password)
+		// Login (username/password).
+		//
+		// Public endpoint by design: this is the auth handshake itself —
+		// the caller cannot be authenticated yet because they are obtaining
+		// credentials. Safeguards in login():
+		//   * SSL is enforced (HTTP returns 403).
+		//   * Credentials are validated via wp_authenticate(), so the WP
+		//     core hooks for rate-limiting / two-factor / login lockout
+		//     plugins still apply.
+		//   * On success only a short-lived (15 min) one-time temp token
+		//     is issued; the user must follow up with create-app-password
+		//     to obtain a long-lived credential.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/login',
@@ -61,7 +78,12 @@ class RestSiteVerificationController extends RestController {
 			)
 		);
 
-		// Create Application Password (with temp token)
+		// Create Application Password (with temp token).
+		//
+		// Not public — `check_temp_token` validates the one-time token issued
+		// by /login above, ties the request to that user, and enforces token
+		// expiry (15 minutes). The endpoint is reachable only as part of the
+		// mobile-app login flow.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/create-app-password',

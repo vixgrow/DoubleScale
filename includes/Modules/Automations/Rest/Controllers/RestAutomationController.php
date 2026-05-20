@@ -215,6 +215,15 @@ class RestAutomationController extends RestController {
 		);
 
 		// Receive a webhook.
+		//
+		// Public endpoint by design: this is the inbound HTTP webhook that
+		// third-party services (Zapier, custom integrations, etc.) POST to in
+		// order to trigger a DoubleScale automation. Caller cannot present a WP
+		// cookie/nonce because it is not a logged-in WordPress user.
+		// Authentication is enforced inside receive_webhook(): the request
+		// must include the matching `doublescale_key` (a per-automation secret
+		// generated when the automation is created); requests with a missing
+		// or wrong key are rejected.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/webhook',

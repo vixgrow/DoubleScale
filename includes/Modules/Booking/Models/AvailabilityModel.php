@@ -56,7 +56,12 @@ class AvailabilityModel extends Model {
 	}
 
 	public function getValueAttribute() {
-		return $this->attributes['value'] ? maybe_unserialize( $this->attributes['value'] ) : array();
+		// Route the read through getValueDataAttribute so a single
+		// normalization path handles stdClass leaves, serialized strings,
+		// and missing data. Otherwise callers using ->value would silently
+		// see a different shape than callers using ->value_data, and the
+		// set* helpers below would read one shape while writing another.
+		return $this->getValueDataAttribute();
 	}
 
 	public function setValueAttribute( $value ) {
@@ -89,13 +94,11 @@ class AvailabilityModel extends Model {
 	}
 
 	public function getWeeklyHoursAttribute() {
-		$value_data = $this->getValueDataAttribute();
-		return Arr::get( $value_data, 'weekly_hours', array() );
+		return Arr::get( $this->getValueDataAttribute(), 'weekly_hours', array() );
 	}
 
 	public function getOverrideAttribute() {
-		$value_data = $this->getValueDataAttribute();
-		return Arr::get( $value_data, 'override', array() );
+		return Arr::get( $this->getValueDataAttribute(), 'override', array() );
 	}
 
 	public function setWeeklyHours( $weekly_hours ) {
@@ -152,15 +155,41 @@ class AvailabilityModel extends Model {
 	public static function createDefaultForUser( $user_id ) {
 		$default_data = self::getDefaultAvailability();
 
+		// Seed the schedule in the site's configured timezone, not UTC.
+		// `09:00`–`17:00` are wall-clock times the host actually means in
+		// their local zone; storing them under UTC made the booking page
+		// render 9 AM Cairo as 12 PM and 5 PM as 8 PM, exposing slots
+		// hours after the host had stopped working. `wp_timezone_string()`
+		// honours both `timezone_string` and the `gmt_offset` fallback.
 		return self::create(
 			array(
 				'user_id'    => $user_id,
 				'name'       => $default_data['name'],
 				'value'      => $default_data['value'],
-				'timezone'   => 'UTC',
+				'timezone'   => self::resolveSiteTimezone(),
 				'is_default' => true,
 			)
 		);
+	}
+
+	/**
+	 * Resolve a usable IANA timezone string for default availabilities.
+	 * Falls back to UTC only when the site has no timezone configured at all.
+	 *
+	 * @return string
+	 */
+	public static function resolveSiteTimezone() {
+		if ( function_exists( 'wp_timezone_string' ) ) {
+			$tz = wp_timezone_string();
+			if ( ! empty( $tz ) ) {
+				// wp_timezone_string() can return numeric offsets like "+02:00"
+				// which DateTimeZone accepts but downstream code (and the UI)
+				// is friendlier with named zones. Keep the offset form when
+				// that's all the site has, but prefer a named zone if set.
+				return $tz;
+			}
+		}
+		return 'UTC';
 	}
 
 	public static function getUserDefault( $user_id ) {

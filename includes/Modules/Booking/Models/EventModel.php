@@ -1243,18 +1243,40 @@ class EventModel extends Model {
 				}
 
 				if ( $user_id && $this->type === 'round-robin' ) {
-					$availabilities = array_filter(
-						$availabilities,
-						function ( $avail ) use ( $user_id ) {
-							return isset( $avail['user_id'] ) && $avail['user_id'] == $user_id;
-						}
+					$wanted_ids = is_array( $user_id ) ? array_map( 'intval', $user_id ) : array( (int) $user_id );
+					$filtered   = array_values(
+						array_filter(
+							$availabilities,
+							function ( $avail ) use ( $wanted_ids ) {
+								return isset( $avail['user_id'] ) && in_array( (int) $avail['user_id'], $wanted_ids, true );
+							}
+						)
 					);
-					$filtered = array_values( $availabilities );
 					if ( ! empty( $filtered ) ) {
+						// Replace the collected availabilities with the filtered
+						// set so downstream consumers (users_availability,
+						// merge helpers, slot loops) only see the targeted host.
+						$availabilities = $filtered;
 						$first                        = $filtered[0];
-						$availability['weekly_hours']  = $first['weekly_hours'];
-						$availability['override']      = $first['override'];
-						$availability['timezone']      = $first['timezone'];
+						$availability['weekly_hours'] = $first['weekly_hours'];
+						$availability['override']     = $first['override'];
+						$availability['timezone']     = $first['timezone'];
+					} else {
+						// Requested host isn't on this event — surface that as
+						// an empty schedule instead of silently falling back to
+						// the event's primary availability, which would otherwise
+						// expose slots that don't belong to that host.
+						doublescale_get_logger()->warning(
+							'Round-robin availability requested for a host not in hosts_schedules',
+							array(
+								'source'   => 'booking-event-model',
+								'event_id' => (int) $this->id,
+								'host_id'  => is_array( $user_id ) ? array_map( 'intval', $user_id ) : (int) $user_id,
+							)
+						);
+						$availabilities               = array();
+						$availability['weekly_hours'] = array();
+						$availability['override']     = array();
 					}
 				} elseif ( count( $availabilities ) > 0 ) {
 					if ( $this->type === 'collective' ) {
@@ -1577,29 +1599,58 @@ class EventModel extends Model {
 	/**
 	 * Get intersection between two time blocks.
 	 *
+	 * Compares blocks as "minutes from midnight" rather than via strtotime()
+	 * on a bare "HH:MM" string. strtotime() would resolve the time against
+	 * today's local date on the host, which is unstable across DST
+	 * transitions and across server timezones — two perfectly identical
+	 * "09:00" blocks could come out off by an hour on the spring-forward
+	 * day. Minute math is timezone-independent and safe.
+	 *
 	 * @param array $block1 First time block
 	 * @param array $block2 Second time block
 	 * @return array|null Intersection block or null if no overlap
 	 */
 	private function getTimeBlockIntersection( $block1, $block2 ) {
-		$start1 = strtotime( $block1['start'] );
-		$end1   = strtotime( $block1['end'] );
-		$start2 = strtotime( $block2['start'] );
-		$end2   = strtotime( $block2['end'] );
+		$start1 = $this->time_to_minutes( $block1['start'] );
+		$end1   = $this->time_to_minutes( $block1['end'] );
+		$start2 = $this->time_to_minutes( $block2['start'] );
+		$end2   = $this->time_to_minutes( $block2['end'] );
 
-		// Find the overlap
 		$overlap_start = max( $start1, $start2 );
 		$overlap_end   = min( $end1, $end2 );
 
-		// Check if there's actual overlap
 		if ( $overlap_start >= $overlap_end ) {
-			return null; // No overlap
+			return null;
 		}
 
 		return array(
-			'start' => gmdate( 'H:i', $overlap_start ),
-			'end'   => gmdate( 'H:i', $overlap_end ),
+			'start' => $this->minutes_to_time( $overlap_start ),
+			'end'   => $this->minutes_to_time( $overlap_end ),
 		);
+	}
+
+	/**
+	 * Convert a wall-clock "HH:MM" / "HH:MM:SS" string to minutes from midnight.
+	 *
+	 * @param string $time
+	 * @return int
+	 */
+	private function time_to_minutes( $time ) {
+		$parts = explode( ':', (string) $time );
+		$h     = isset( $parts[0] ) ? (int) $parts[0] : 0;
+		$m     = isset( $parts[1] ) ? (int) $parts[1] : 0;
+		return ( $h * 60 ) + $m;
+	}
+
+	/**
+	 * Format minutes-from-midnight back to "HH:MM".
+	 *
+	 * @param int $minutes
+	 * @return string
+	 */
+	private function minutes_to_time( $minutes ) {
+		$minutes = max( 0, (int) $minutes );
+		return sprintf( '%02d:%02d', intdiv( $minutes, 60 ), $minutes % 60 );
 	}
 
 	/**
@@ -1664,29 +1715,45 @@ class EventModel extends Model {
 	/**
 	 * Apply frequency limits to ensure booking constraints are respected.
 	 *
-	 * @param \DateTime|string|int $start_date Start date (DateTime object, timestamp or string).
+	 * Returns the broadest unit ('days'|'weeks'|'months') whose limit is
+	 * exhausted for $start_date, or null when every limit still has room.
+	 * The caller uses the unit to decide how far to skip ahead in the day
+	 * loop: a 'weeks' hit means every remaining day in that week is also
+	 * full, so we shouldn't re-check them per time-block.
+	 *
+	 * @param \DateTime $start_date Start date.
+	 * @return string|null Broadest exhausted unit, or null.
 	 */
 	private function apply_frequency_limits( $start_date ) {
 		if ( ! Arr::get( $this->limits, 'frequency.enable', false ) ) {
-			return;
+			return null;
 		}
 
-		$frequency_limits = Arr::get( $this->limits, 'frequency.limits', array() );
-		foreach ( $frequency_limits as $frequency ) {
-			if ( ! $frequency['limit'] || ! $frequency['unit'] ) {
-				throw new \Exception( esc_html__( 'Frequency limit or unit is not set', 'doublescale' ) );
+		$reached = null;
+		foreach ( Arr::get( $this->limits, 'frequency.limits', array() ) as $frequency ) {
+			$limit = (int) Arr::get( $frequency, 'limit', 0 );
+			$unit  = Arr::get( $frequency, 'unit' );
+
+			// 0 / missing limit means "not configured" — treat as disabled.
+			if ( $limit <= 0 || ! $unit ) {
+				continue;
 			}
 
-			$this->validate_frequency_limits( $frequency['limit'], $frequency['unit'], $start_date, __( 'Event reached the frequency limit', 'doublescale' ) );
+			if ( $this->validate_frequency_limits( $limit, $unit, $start_date ) ) {
+				$reached = $this->widen_limit_unit( $reached, $unit );
+			}
 		}
+		return $reached;
 	}
 
 	/**
 	 *  Validate booking frequency limits.
+	 *
+	 *  @return bool True if the limit is reached for the window containing $start_date.
 	 */
-	private function validate_frequency_limits( $limit, $unit, $start_date, $message ) {
+	private function validate_frequency_limits( $limit, $unit, $start_date ) {
 		if ( ! in_array( $unit, array( 'days', 'weeks', 'months' ), true ) ) {
-			throw new \Exception( esc_html__( 'Invalid frequency unit', 'doublescale' ) );
+			return false;
 		}
 
 		switch ( $unit ) {
@@ -1749,52 +1816,85 @@ class EventModel extends Model {
 				break;
 		}
 
-		$start_time = $start->format( 'Y-m-d H:i:s' );
-		$end_time   = $end->format( 'Y-m-d H:i:s' );
+		// BookingModel stores start_time / end_time as UTC strings, so we
+		// convert the window's boundaries to UTC before comparing. Using
+		// the availability-local clock here would slide the comparison
+		// window by the host's UTC offset and either skip late-night
+		// bookings from the previous calendar day or pull in early-morning
+		// bookings from the next one — both pre-existing edges that made
+		// the limit count off by a few rows around midnight.
+		$utc        = new \DateTimeZone( 'UTC' );
+		$start_time = ( clone $start )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+		$end_time   = ( clone $end )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
 
 		$query = BookingModel::where( 'event_id', $this->id )
 			->where( 'start_time', '>=', $start_time )
 			->where( 'end_time', '<=', $end_time )
 			->whereNotIn( 'status', BookingModel::NON_ACTIVE_STATUSES );
 
-		$result = $query->count();
-
-		if ( $result >= $limit ) {
-			throw new \Exception( esc_html( $message ) );
-		}
+		return $query->count() >= $limit;
 	}
 
 	/**
 	 * Apply duration limits to ensure total booking time is within allowed constraints.
 	 *
-	 * @param \DateTime|string|int $start_date Start date (DateTime object, timestamp or string).
+	 * @param \DateTime $start_date Start date.
+	 * @return string|null Broadest exhausted unit, or null.
 	 */
 	private function apply_duration_limits( $start_date ) {
 		if ( ! Arr::get( $this->limits, 'duration.enable', false ) ) {
-			return;
+			return null;
 		}
 
-		$duration_limits = Arr::get( $this->limits, 'duration.limits', array() );
-		foreach ( $duration_limits as $duration ) {
-			if ( ! $duration['limit'] || ! $duration['unit'] ) {
-				throw new \Exception( esc_html__( 'Duration limit or unit is not set', 'doublescale' ) );
+		$reached = null;
+		foreach ( Arr::get( $this->limits, 'duration.limits', array() ) as $duration_limit ) {
+			$limit = (int) Arr::get( $duration_limit, 'limit', 0 );
+			$unit  = Arr::get( $duration_limit, 'unit' );
+
+			if ( $limit <= 0 || ! $unit ) {
+				continue;
 			}
 
-			$this->validate_duration_limit( $duration['limit'], $duration['unit'], $start_date, __( 'Event reached the duration limit', 'doublescale' ), true );
+			if ( $this->validate_duration_limit( $limit, $unit, $start_date ) ) {
+				$reached = $this->widen_limit_unit( $reached, $unit );
+			}
 		}
+		return $reached;
 	}
 
 	/**
-	 * Validate booking limits (frequency or duration).
+	 * Pick the broader of two limit units. Used to merge multiple exhausted
+	 * limits — a 'weeks' hit subsumes a 'days' hit because the entire week
+	 * is full anyway.
 	 *
-	 * @param int    $limit      Limit value.
-	 * @param string $unit       Unit of the limit (days, weeks, months).
-	 * @param int    $start_time Start timestamp.
-	 * @param int    $end_time   End timestamp.
-	 * @param string $message    Error message to display if the limit is exceeded.
-	 * @param bool   $sum        Whether to sum bookings (for duration limits).
+	 * @param string|null $current Current broadest unit.
+	 * @param string      $candidate Candidate unit.
+	 * @return string Broadest unit.
 	 */
-	private function validate_duration_limit( $limit, $unit, $start_date, $message, $sum = false ) {
+	private function widen_limit_unit( $current, $candidate ) {
+		$rank = array( 'days' => 1, 'weeks' => 2, 'months' => 3 );
+		if ( ! isset( $rank[ $candidate ] ) ) {
+			return $current ?? $candidate;
+		}
+		if ( null === $current || ( $rank[ $candidate ] > ( $rank[ $current ] ?? 0 ) ) ) {
+			return $candidate;
+		}
+		return $current;
+	}
+
+	/**
+	 * Validate booking duration limits — total minutes already booked in
+	 * the window vs. the configured cap.
+	 *
+	 * @param int       $limit      Limit value (minutes).
+	 * @param string    $unit       Window unit (days, weeks, months).
+	 * @param \DateTime $start_date Start datetime under check.
+	 * @return bool True if the limit is reached.
+	 */
+	private function validate_duration_limit( $limit, $unit, $start_date ) {
+		if ( ! in_array( $unit, array( 'days', 'weeks', 'months' ), true ) ) {
+			return false;
+		}
 		switch ( $unit ) {
 			case 'days':
 				$start = clone $start_date;
@@ -1855,8 +1955,13 @@ class EventModel extends Model {
 				break;
 		}
 
-		$start_time = $start->format( 'Y-m-d H:i:s' );
-		$end_time   = $end->format( 'Y-m-d H:i:s' );
+		// See validate_frequency_limits — booking times are persisted in
+		// UTC, so the window boundaries have to be converted before being
+		// compared, otherwise the day/week/month cut-off slides by the
+		// host's UTC offset.
+		$utc        = new \DateTimeZone( 'UTC' );
+		$start_time = ( clone $start )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+		$end_time   = ( clone $end )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
 
 		$query = BookingModel::where( 'event_id', $this->id )
 			->where( 'start_time', '>=', $start_time )
@@ -1868,9 +1973,7 @@ class EventModel extends Model {
 			$duration += $booking->slot_time;
 		}
 
-		if ( $duration >= $limit ) {
-			throw new \Exception( esc_html( $message ) );
-		}
+		return $duration >= $limit;
 	}
 
 	/**
@@ -1923,42 +2026,94 @@ class EventModel extends Model {
 			$current_date_formatted = gmdate( 'Y-m-d', $current_date );
 			$day_of_week            = strtolower( gmdate( 'l', $current_date ) );
 
-			// Check for date-specific override first
-			$has_override = false;
-			$time_blocks  = array();
-
+			$time_blocks            = array();
 			$effective_availability = $this->get_effective_availability();
 
 			if ( isset( $effective_availability['override'][ $current_date_formatted ] ) ) {
-				// We have a date-specific override for this day
-				$has_override = true;
-				$time_blocks  = $effective_availability['override'][ $current_date_formatted ];
+				$time_blocks = $effective_availability['override'][ $current_date_formatted ];
 			} elseif ( empty( $effective_availability['weekly_hours'][ $day_of_week ]['off'] ) ) {
-				// Fall back to regular weekly hours if no override exists
-				$time_blocks = $effective_availability['weekly_hours'][ $day_of_week ]['times'];
+				$time_blocks = $effective_availability['weekly_hours'][ $day_of_week ]['times'] ?? array();
 			}
 
-			// If we have time blocks (either from override or weekly hours), process them
-			if ( ! empty( $time_blocks ) ) {
-				foreach ( $time_blocks as $time_block ) {
-					$day_start = new \DateTime( $current_date_formatted . ' ' . $time_block['start'], new \DateTimeZone( $effective_availability['timezone'] ) );
-					$day_end   = new \DateTime( $current_date_formatted . ' ' . $time_block['end'], new \DateTimeZone( $effective_availability['timezone'] ) );
-					try {
-						$this->apply_frequency_limits( $day_start );
-						$this->apply_duration_limits( $day_start );
-					} catch ( \Exception $e ) {
-						continue; // Skip this time block if frequency limits are exceeded
-					}
-					$day_start->setTimezone( new \DateTimeZone( $timezone ) );
-					$day_end->setTimezone( new \DateTimeZone( $timezone ) );
+			if ( empty( $time_blocks ) ) {
+				continue;
+			}
+
+			// Frequency / duration limits are window-level (day / week / month).
+			// Check once per day using the day's reference time, then act on
+			// the broadest exhausted unit:
+			//   - 'days'   → skip remaining time-blocks of THIS day only.
+			//   - 'weeks'  → skip ahead to next week (every remaining day in
+			//                the current week is also full).
+			//   - 'months' → skip ahead to next month.
+			// The previous implementation threw inside the time-block loop
+			// and only `continue`d, which silently checked the same window
+			// once per block and wasted queries.
+			$day_ref_dt   = new \DateTime( $current_date_formatted . ' 12:00:00', new \DateTimeZone( $effective_availability['timezone'] ) );
+			$freq_reached = $this->apply_frequency_limits( $day_ref_dt );
+			$dur_reached  = $this->apply_duration_limits( $day_ref_dt );
+			$reached      = null;
+			if ( null !== $freq_reached ) {
+				$reached = $freq_reached;
+			}
+			if ( null !== $dur_reached ) {
+				$reached = $this->widen_limit_unit( $reached, $dur_reached );
+			}
+
+			if ( 'weeks' === $reached || 'months' === $reached ) {
+				$current_date = $this->advance_past_limit_window( $current_date, $reached, $effective_availability['timezone'] );
+				continue;
+			}
+			if ( 'days' === $reached ) {
+				continue;
+			}
+
+			foreach ( $time_blocks as $time_block ) {
+				$day_start = new \DateTime( $current_date_formatted . ' ' . $time_block['start'], new \DateTimeZone( $effective_availability['timezone'] ) );
+				$day_end   = new \DateTime( $current_date_formatted . ' ' . $time_block['end'], new \DateTimeZone( $effective_availability['timezone'] ) );
+
+				$day_start->setTimezone( new \DateTimeZone( $timezone ) );
+				$day_end->setTimezone( new \DateTimeZone( $timezone ) );
 
 				$slots = $this->generate_slots_for_time_block( $day_start, $day_end, $duration, $timezone, $current_date, $slots, $user_id, $include_full_slots );
 			}
 		}
+
+		return $slots;
 	}
 
-	return $slots;
-}
+	/**
+	 * Advance the day-loop cursor past the end of the current week or month
+	 * so subsequent iterations don't re-check a window that's already full.
+	 * Returns a timestamp aligned with the loop's `strtotime('+1 day')` step.
+	 *
+	 * @param int    $current_ts  Current loop cursor (seconds since epoch).
+	 * @param string $unit        'weeks' or 'months'.
+	 * @param string $timezone    Availability timezone.
+	 * @return int Adjusted cursor — the next `+1 day` step lands in the next window.
+	 */
+	private function advance_past_limit_window( $current_ts, $unit, $timezone ) {
+		$tz  = new \DateTimeZone( $timezone );
+		$dt  = ( new \DateTime( '@' . $current_ts ) )->setTimezone( $tz );
+
+		if ( 'months' === $unit ) {
+			$dt->modify( 'last day of this month' );
+			return $dt->getTimestamp();
+		}
+
+		// 'weeks' — jump to the last day of the configured week (Sun by default).
+		$settings   = get_option( 'doublescale_booking_settings', array() );
+		$start_from = isset( $settings['general']['start_from'] ) ? ucfirst( strtolower( $settings['general']['start_from'] ) ) : 'Monday';
+		$day_map    = array( 'Sunday' => 0, 'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4, 'Friday' => 5, 'Saturday' => 6 );
+		$start_num  = $day_map[ $start_from ] ?? 1;
+		$cur_num    = (int) $dt->format( 'w' );
+		$offset     = ( $cur_num - $start_num + 7 ) % 7;
+		$days_left  = 6 - $offset;
+		if ( $days_left > 0 ) {
+			$dt->modify( "+{$days_left} days" );
+		}
+		return $dt->getTimestamp();
+	}
 
 	/**
 	 * Generate slots for a specific time block, considering buffers, minimum notices, and current day adjustments.
@@ -1977,8 +2132,15 @@ class EventModel extends Model {
 		$current_time = new \DateTime( 'now', new \DateTimeZone( $this->get_effective_availability()['timezone'] ) );
 		$current_time->setTimezone( new \DateTimeZone( $timezone ) );
 
-		// Get minimum notice settings
-		$min_notice      = Arr::get( $this->limits, 'general.minimum_notices', 4 );
+		// Get minimum notice settings. A null/missing value falls back to
+		// 4 hours (legacy default). An explicit 0 disables the lead-time
+		// — previously `Arr::get(..., 4)` only applied when the key was
+		// missing, but `(int) 0` got compared with `if ( $min_notice > 0 )`
+		// below and ended up equivalent to disabled anyway; the bug was
+		// the default unit ('hours') being applied to a raw 4 without
+		// any unit context. We now explicitly distinguish the two.
+		$min_notice_raw  = Arr::get( $this->limits, 'general.minimum_notices', null );
+		$min_notice      = ( null === $min_notice_raw || '' === $min_notice_raw ) ? 4 : (int) $min_notice_raw;
 		$min_notice_unit = Arr::get( $this->limits, 'general.minimum_notice_unit', 'hours' );
 
 		// Get time slot interval from event limits data
@@ -2389,172 +2551,34 @@ class EventModel extends Model {
 				);
 
 			case 'round-robin':
-				$team_members   = $this->get_team_scheduling_member_ids();
-				$availabilities = $this->get_effective_availability()['users_availability'] ?? array();
-
-				// For round-robin, check if ANY team member is available
-				$available_members   = 0;
-				$available_hosts_ids = array();
-				foreach ( $team_members as $team_member_id ) {
-					if ( $this->get_effective_availability()['is_common'] ) {
-						$is_member_available = true;
-					} else {
-						$is_member_available = false;
-
-						// First, check team member's individual availability schedule
-						if ( ! empty( $availabilities ) ) {
-							// Find this team member's availability from the collected availabilities
-							$member_availability = null;
-							foreach ( $availabilities as $avail ) {
-								if ( isset( $avail['user_id'] ) && $avail['user_id'] == $team_member_id ) {
-									$member_availability = $avail;
-									break;
-								}
-							}
-
-							// If we found the member's availability, check if they're available during this time
-							if ( $member_availability ) {
-								$is_member_available = $this->checkMemberAvailabilitySchedule( $member_availability, $day_start, $day_end );
-							}
-						} else {
-							// Fallback: get team member's default availability
-							$member_default_availability = Availabilities::get_user_default_availability( $team_member_id );
-							if ( $member_default_availability ) {
-								$is_member_available = $this->checkMemberAvailabilitySchedule( $member_default_availability, $day_start, $day_end );
-							}
-						}
-					}
-
-					// If member is available according to their schedule, check for booking conflicts
-					if ( $is_member_available ) {
-						$member_slots_query = BookingModel::query()
-							->whereHas(
-								'hosts',
-								function ( $q ) use ( $team_member_id ) {
-									$q->where( 'user_id', $team_member_id );
-								}
-							)
-							->whereNotIn( 'status', BookingModel::NON_ACTIVE_STATUSES )
-							->where(
-								function ( $query ) use ( $day_start, $day_end, $buffer_before, $buffer_after ) {
-									$query->where(
-										function ( $q ) use ( $day_start, $day_end, $buffer_before, $buffer_after ) {
-											$q->where(
-												function ( $subq ) use ( $day_start, $buffer_after ) {
-													$subq->whereRaw( 'DATE_ADD(end_time, INTERVAL ? MINUTE) > ?', array( $buffer_after, $day_start->format( 'Y-m-d H:i:s' ) ) );
-												}
-											)
-												->where(
-													function ( $subq ) use ( $day_end, $buffer_before ) {
-														$subq->whereRaw( 'DATE_SUB(start_time, INTERVAL ? MINUTE) < ?', array( $buffer_before, $day_end->format( 'Y-m-d H:i:s' ) ) );
-													}
-												);
-										}
-									);
-								}
-							);
-						$member_slots       = $member_slots_query->count();
-
-						// If this member has no conflicting bookings and is available according to schedule
-						if ( $member_slots === 0 ) {
-							$available_members++;
-							$available_hosts_ids[] = $team_member_id;
-						}
-					}
-				}
-
-				// For round-robin, return 1 if ANY team member is available
-				return array(
-					'slots'     => $available_members,
-					'hosts_ids' => $available_hosts_ids,
-				);
-
 			case 'collective':
-				$team_members   = $this->get_team_scheduling_member_ids();
-				$availabilities = $this->get_effective_availability()['users_availability'] ?? array();
+				$team_members = $this->get_team_scheduling_member_ids();
 
-				if ( empty( $team_members ) ) {
+				if ( 'collective' === $this->type && empty( $team_members ) ) {
 					return array(
 						'slots'     => 0,
 						'hosts_ids' => array(),
 					);
 				}
 
-				// For collective, ALL hosts on this event must be available
-				$total_members       = count( $team_members );
 				$available_members   = 0;
 				$available_hosts_ids = array();
-
 				foreach ( $team_members as $team_member_id ) {
-					if ( $this->get_effective_availability()['is_common'] ) {
-						$is_member_available = true;
-					} else {
-						$is_member_available = false;
-
-						// First, check team member's individual availability schedule
-						if ( ! empty( $availabilities ) ) {
-							// Find this team member's availability from the collected availabilities
-							$member_availability = null;
-							foreach ( $availabilities as $avail ) {
-								if ( isset( $avail['user_id'] ) && $avail['user_id'] == $team_member_id ) {
-									$member_availability = $avail;
-									break;
-								}
-							}
-
-							// If we found the member's availability, check if they're available during this time
-							if ( $member_availability ) {
-								$is_member_available = $this->checkMemberAvailabilitySchedule( $member_availability, $day_start, $day_end );
-							}
-						} else {
-							// Fallback: get team member's default availability
-							$member_default_availability = Availabilities::get_user_default_availability( $team_member_id );
-							if ( $member_default_availability ) {
-								$is_member_available = $this->checkMemberAvailabilitySchedule( $member_default_availability, $day_start, $day_end );
-							}
-						}
-					}
-
-					// If member is available according to their schedule, check for booking conflicts
-					if ( $is_member_available ) {
-						$member_slots_query = BookingModel::query()
-							->whereHas(
-								'hosts',
-								function ( $q ) use ( $team_member_id ) {
-									$q->where( 'user_id', $team_member_id );
-								}
-							)
-							->whereNotIn( 'status', BookingModel::NON_ACTIVE_STATUSES )
-							->where(
-								function ( $query ) use ( $day_start, $day_end, $buffer_before, $buffer_after ) {
-									$query->where(
-										function ( $q ) use ( $day_start, $day_end, $buffer_before, $buffer_after ) {
-											$q->where(
-												function ( $subq ) use ( $day_start, $buffer_after ) {
-													$subq->whereRaw( 'DATE_ADD(end_time, INTERVAL ? MINUTE) > ?', array( $buffer_after, $day_start->format( 'Y-m-d H:i:s' ) ) );
-												}
-											)
-												->where(
-													function ( $subq ) use ( $day_end, $buffer_before ) {
-														$subq->whereRaw( 'DATE_SUB(start_time, INTERVAL ? MINUTE) < ?', array( $buffer_before, $day_end->format( 'Y-m-d H:i:s' ) ) );
-													}
-												);
-										}
-									);
-								}
-							);
-						$member_slots       = $member_slots_query->count();
-
-						// If this member has no conflicting bookings and is available according to schedule
-						if ( $member_slots === 0 ) {
-							$available_members++;
-							$available_hosts_ids[] = $team_member_id;
-						}
+					if ( $this->is_team_member_available_for_slot( $team_member_id, $day_start, $day_end, $buffer_before, $buffer_after ) ) {
+						$available_members++;
+						$available_hosts_ids[] = $team_member_id;
 					}
 				}
 
-				// For collective, return 1 only if ALL team members are available
-				$slots_available = ( $available_members === $total_members ) ? 1 : 0;
+				if ( 'round-robin' === $this->type ) {
+					return array(
+						'slots'     => $available_members,
+						'hosts_ids' => $available_hosts_ids,
+					);
+				}
+
+				// collective — every host on the event must be free.
+				$slots_available = ( $available_members === count( $team_members ) ) ? 1 : 0;
 				return array(
 					'slots'     => $slots_available,
 					'hosts_ids' => $slots_available ? $available_hosts_ids : array(),
@@ -2599,40 +2623,120 @@ class EventModel extends Model {
 	 * @return bool
 	 */
 	public function get_slot_availability_count( $start_time, $end_time, $timezone, $user_id = null ) {
-		$availability         = $this->getTeamAvailability( $this->get_effective_availability(), $user_id );
-		$start_date_formatted = $start_time->format( 'Y-m-d' );
+		$availability = $this->getTeamAvailability( $this->get_effective_availability(), $user_id );
+		$avail_tz_id  = $availability['timezone'] ?? 'UTC';
+		$avail_tz     = new \DateTimeZone( $avail_tz_id );
 
-		// Check for date-specific override first
-		if ( isset( $availability['override'][ $start_date_formatted ] ) ) {
-			// We have a date-specific override for this day
-			foreach ( $availability['override'][ $start_date_formatted ] as $time_block ) {
-				$day_start = new \DateTime( $start_date_formatted . ' ' . $time_block['start'], new \DateTimeZone( $availability['timezone'] ) );
-				$day_end   = new \DateTime( $start_date_formatted . ' ' . $time_block['end'], new \DateTimeZone( $availability['timezone'] ) );
+		// Resolve "which day is this slot on?" inside the availability's
+		// own timezone. Using $start_time's current TZ (often the visitor's
+		// or UTC) crossed midnight on the availability side and made us
+		// miss overrides that were keyed by the local date, plus picked
+		// the wrong weekday near DST boundaries.
+		$slot_start_in_avail = ( clone $start_time )->setTimezone( $avail_tz );
+		$slot_end_in_avail   = ( clone $end_time )->setTimezone( $avail_tz );
+		$avail_date          = $slot_start_in_avail->format( 'Y-m-d' );
+		$avail_day_of_week   = strtolower( $slot_start_in_avail->format( 'l' ) );
 
-				if ( $start_time >= $day_start && $end_time <= $day_end ) {
-					$slots = $this->check_available_slots( $start_time, $end_time, $user_id );
-					return $slots['slots'];
-				}
-			}
+		$time_blocks = array();
+		if ( isset( $availability['override'][ $avail_date ] ) ) {
+			$time_blocks = $availability['override'][ $avail_date ];
 		} else {
-			// Fall back to regular weekly hours
-			$weekly_hours = $availability['weekly_hours'] ?? array();
-			$day_of_week  = strtolower( gmdate( 'l', $start_time->getTimestamp() ) ); // Get the day of the week (e.g., Monday, Tuesday)
+			$day_schedule = $availability['weekly_hours'][ $avail_day_of_week ] ?? null;
+			if ( $day_schedule && empty( $day_schedule['off'] ) ) {
+				$time_blocks = $day_schedule['times'] ?? array();
+			}
+		}
 
-			if ( ! $weekly_hours[ $day_of_week ]['off'] ) {
-				foreach ( $weekly_hours[ $day_of_week ]['times'] as $time_block ) {
-					$day_start = new \DateTime( gmdate( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['start'], new \DateTimeZone( $availability['timezone'] ) );
-					$day_end   = new \DateTime( gmdate( 'Y-m-d', $start_time->getTimestamp() ) . ' ' . $time_block['end'], new \DateTimeZone( $availability['timezone'] ) );
+		foreach ( $time_blocks as $time_block ) {
+			$day_start = new \DateTime( $avail_date . ' ' . $time_block['start'], $avail_tz );
+			$day_end   = new \DateTime( $avail_date . ' ' . $time_block['end'], $avail_tz );
 
-					if ( $start_time >= $day_start && $end_time <= $day_end ) {
-						$slots = $this->check_available_slots( $start_time, $end_time, $user_id );
-						return $slots['slots'];
-					}
-				}
+			if ( $slot_start_in_avail >= $day_start && $slot_end_in_avail <= $day_end ) {
+				$slots = $this->check_available_slots( $start_time, $end_time, $user_id );
+				return $slots['slots'];
 			}
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Resolve whether a team member is available for a slot, combining their
+	 * schedule (or the shared schedule when is_common is true) with a check
+	 * that they don't already have a conflicting booking + buffer window.
+	 *
+	 * Previously the slot check short-circuited to "available" whenever
+	 * is_common was true, which meant a shared schedule covering 9–5 still
+	 * exposed 7–9 slots: nothing actually verified the slot fell inside
+	 * the shared working hours. We now apply the same schedule check for
+	 * both the per-host and shared paths.
+	 *
+	 * @param int       $team_member_id WP user ID of the host.
+	 * @param \DateTime $day_start      Slot start in UTC.
+	 * @param \DateTime $day_end        Slot end in UTC.
+	 * @param int       $buffer_before  Minutes of buffer before each booking.
+	 * @param int       $buffer_after   Minutes of buffer after each booking.
+	 * @return bool True if the member is on schedule AND has no conflict.
+	 */
+	private function is_team_member_available_for_slot( $team_member_id, $day_start, $day_end, $buffer_before, $buffer_after ) {
+		$effective       = $this->get_effective_availability();
+		$is_common       = ! empty( $effective['is_common'] );
+		$availabilities  = $effective['users_availability'] ?? array();
+		$schedule_to_use = null;
+
+		if ( $is_common ) {
+			// Treat the merged event-level availability as the shared
+			// schedule. checkMemberAvailabilitySchedule reads weekly_hours
+			// / override / timezone, so we just hand it the effective row.
+			$schedule_to_use = array(
+				'weekly_hours' => $effective['weekly_hours'] ?? array(),
+				'override'     => $effective['override'] ?? array(),
+				'timezone'     => $effective['timezone'] ?? 'UTC',
+			);
+		} else {
+			foreach ( $availabilities as $avail ) {
+				if ( isset( $avail['user_id'] ) && (int) $avail['user_id'] === (int) $team_member_id ) {
+					$schedule_to_use = $avail;
+					break;
+				}
+			}
+			if ( ! $schedule_to_use ) {
+				$schedule_to_use = Availabilities::get_user_default_availability( $team_member_id );
+			}
+		}
+
+		if ( ! $schedule_to_use ) {
+			return false;
+		}
+
+		if ( ! $this->checkMemberAvailabilitySchedule( $schedule_to_use, $day_start, $day_end ) ) {
+			return false;
+		}
+
+		$conflict_count = BookingModel::query()
+			->whereHas(
+				'hosts',
+				function ( $q ) use ( $team_member_id ) {
+					$q->where( 'user_id', $team_member_id );
+				}
+			)
+			->whereNotIn( 'status', BookingModel::NON_ACTIVE_STATUSES )
+			->where(
+				function ( $query ) use ( $day_start, $day_end, $buffer_before, $buffer_after ) {
+					$query->where(
+						function ( $subq ) use ( $day_start, $buffer_after ) {
+							$subq->whereRaw( 'DATE_ADD(end_time, INTERVAL ? MINUTE) > ?', array( $buffer_after, $day_start->format( 'Y-m-d H:i:s' ) ) );
+						}
+					)->where(
+						function ( $subq ) use ( $day_end, $buffer_before ) {
+							$subq->whereRaw( 'DATE_SUB(start_time, INTERVAL ? MINUTE) < ?', array( $buffer_before, $day_end->format( 'Y-m-d H:i:s' ) ) );
+						}
+					);
+				}
+			)
+			->count();
+
+		return 0 === $conflict_count;
 	}
 
 	/**

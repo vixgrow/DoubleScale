@@ -124,172 +124,91 @@ class RestAvailabilityController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'availability',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'           => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-				 'user_id'      => array(
-					 'description' => __( 'User ID.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-				 ),
-				 'name'         => array(
-					 'description' => __( 'Name.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-				 ),
-				 'weekly_hours' => array(
-					 'description' => __( 'Weekly hours.', 'doublescale' ),
-					 'type'        => 'object',
-					 'properties'  => array(
-						 'monday'    => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'tuesday'   => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'wednesday' => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'thursday'  => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'friday'    => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'saturday'  => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-						 'sunday'    => array(
-							 'type'       => 'object',
-							 'properties' => array(
-								 'start' => array(
-									 'type' => 'string',
-								 ),
-								 'end'   => array(
-									 'type' => 'string',
-								 ),
-								 'off'   => array(
-									 'type' => 'boolean',
-								 ),
-							 ),
-						 ),
-					 ),
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-				 ),
-				 'override'     => array(
-					 'description' => __( 'Override.', 'doublescale' ),
-					 'type'        => 'object',
-					 'properties'  => array(
-						 'days'  => array(
-							 'type'  => 'array',
-							 'items' => array(
-								 'type' => 'string',
-							 ),
-						 ),
-						 'hours' => array(
-							 'type'  => 'array',
-							 'items' => array(
-								 'type'       => 'object',
-								 'properties' => array(
-									 'start' => array(
-										 'type' => 'string',
-									 ),
-									 'end'   => array(
-										 'type' => 'string',
-									 ),
-								 ),
-							 ),
-						 ),
-					 ),
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => false,
-				 ),
-				 'is_default'   => array(
-					 'description' => __( 'Is default.', 'doublescale' ),
-					 'type'        => 'boolean',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => false,
-					 'default'     => false,
-				 ),
-			 ),
-		 );
+		// Shape of one day's schedule. Matches what the slot generator reads
+		// (EventModel::generate_daily_slots → weekly_hours[day]['times']) and
+		// what AvailabilityModel::getDefaultAvailability() writes. The earlier
+		// schema described a `{start,end,off}` single-block shape that never
+		// matched runtime — keep this aligned with the producer/consumer.
+		$day_schedule_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'times' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'start' => array( 'type' => 'string' ),
+							'end'   => array( 'type' => 'string' ),
+						),
+					),
+				),
+				'off'   => array( 'type' => 'boolean' ),
+			),
+		);
+
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'availability',
+			'type'       => 'object',
+			'properties' => array(
+				'id'           => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'user_id'      => array(
+					'description' => __( 'User ID.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+				),
+				'name'         => array(
+					'description' => __( 'Name.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+				),
+				'weekly_hours' => array(
+					'description' => __( 'Weekly hours.', 'doublescale' ),
+					'type'        => 'object',
+					'properties'  => array(
+						'monday'    => $day_schedule_schema,
+						'tuesday'   => $day_schedule_schema,
+						'wednesday' => $day_schedule_schema,
+						'thursday'  => $day_schedule_schema,
+						'friday'    => $day_schedule_schema,
+						'saturday'  => $day_schedule_schema,
+						'sunday'    => $day_schedule_schema,
+					),
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+				),
+				'override'     => array(
+					'description'          => __( 'Per-date overrides keyed by Y-m-d, each value an array of time blocks.', 'doublescale' ),
+					'type'                 => 'object',
+					'additionalProperties' => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'start' => array( 'type' => 'string' ),
+								'end'   => array( 'type' => 'string' ),
+							),
+						),
+					),
+					'context'              => array( 'view', 'edit' ),
+					'required'             => false,
+				),
+				'is_default'   => array(
+					'description' => __( 'Is default.', 'doublescale' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => false,
+					'default'     => false,
+				),
+			),
+		);
 	}
 
 	/**
@@ -395,7 +314,15 @@ class RestAvailabilityController extends RestController {
 		$override     = $request->get_param( 'value' )['override'] ?? array();
 		$user_id      = $request->get_param( 'user_id' ) ? $request->get_param( 'user_id' ) : get_current_user_id();
 		$name         = $request->get_param( 'name' );
+		// Fall back to the site's timezone when the client doesn't send one,
+		// instead of letting AvailabilityService default to a bare 'UTC'.
+		// 'UTC' as a silent default meant `09:00`–`17:00` working hours got
+		// interpreted in UTC and rendered hours late for the host's actual
+		// timezone (e.g. 09:00 UTC → 12:00 PM in Cairo, 17:00 UTC → 8:00 PM).
 		$timezone     = $request->get_param( 'timezone' );
+		if ( empty( $timezone ) ) {
+			$timezone = AvailabilityModel::resolveSiteTimezone();
+		}
 		$is_default   = (bool) $request->get_param( 'is_default' );
 
 		// Delegate to AvailabilityService so the "force first availability to
@@ -721,17 +648,26 @@ class RestAvailabilityController extends RestController {
 				$total_events_count += $events->count();
 				$all_events          = array_merge( $all_events, $events->toArray() );
 			} else {
-				// For team calendars, check availability_meta
-				$events_count = 0;
-				$events       = array();
-
-				// Get all events for this calendar
+				// For team calendars, an event is "using" this availability
+				// when either: (a) is_common=true AND the event's
+				// availability_id == this row, or (b) is_common=false AND
+				// hosts_schedules[user_id] == this row. The previous code
+				// only checked (b), so a deletion preflight could miss
+				// shared-team events still pointing here.
+				$events_count    = 0;
+				$events          = array();
 				$calendar_events = EventModel::where( 'calendar_id', $calendar->id )->where( 'availability_type', 'existing' )->get();
 
 				foreach ( $calendar_events as $event ) {
-					// Get availability meta from the event itself
-					$availability_meta = maybe_unserialize( $event->availability_meta );
-					if ( ! $availability_meta['is_common'] && $availability_meta['hosts_schedules'][ $user_id ] === $availability_id ) {
+					$availability_meta = $event->availability_meta;
+					$is_common         = ! empty( $availability_meta['is_common'] );
+
+					$uses_common = $is_common && (int) $event->availability_id === (int) $availability_id;
+					$uses_host   = ! $is_common
+						&& isset( $availability_meta['hosts_schedules'][ $user_id ] )
+						&& (int) $availability_meta['hosts_schedules'][ $user_id ] === (int) $availability_id;
+
+					if ( $uses_common || $uses_host ) {
 						$events_count++;
 						$events[] = $event;
 					}
@@ -795,11 +731,18 @@ class RestAvailabilityController extends RestController {
 		// Get all calendars that the user is in
 		$calendars = CalendarModel::where( 'user_id', $user_id )->get();
 
+		// availability_type='existing' is the case that references the row
+		// we're about to delete via availability_id / hosts_schedules — those
+		// are the ones that need to be repointed to the user's default.
+		// availability_type='custom' stores the schedule inline in
+		// availability_meta and doesn't track the row we're deleting, so we
+		// leave it alone. The earlier code had this filter inverted, which
+		// meant deletion left orphan references on every existing-type event.
 		foreach ( $calendars as $calendar ) {
 			if ( $calendar->type === 'host' ) {
 				$host_events = EventModel::where( 'availability_id', $availability->id )
 					->where( 'calendar_id', $calendar->id )
-					->where( 'availability_type', 'custom' )
+					->where( 'availability_type', 'existing' )
 					->get();
 
 				foreach ( $host_events as $event ) {
@@ -807,25 +750,31 @@ class RestAvailabilityController extends RestController {
 					$event->save();
 				}
 			} else {
-				$team_events = EventModel::where( 'calendar_id', $calendar->id )->where( 'availability_type', 'custom' )->get();
+				$team_events = EventModel::where( 'calendar_id', $calendar->id )->where( 'availability_type', 'existing' )->get();
 
 				foreach ( $team_events as $event ) {
 					$availability_meta = $event->availability_meta;
+					$dirty             = false;
 
-					if ( $availability_meta['is_common'] ) {
-						// Replace the availability_id with default
-						if ( $event->availability_id === $availability->id ) {
-							$event->availability_id = $default_availability->id;
-							$event->save();
-						}
+					// is_common=true uses the event's availability_id only.
+					if ( ! empty( $availability_meta['is_common'] ) && (int) $event->availability_id === (int) $availability->id ) {
+						$event->availability_id = $default_availability->id;
+						$dirty                  = true;
 					}
 
-					// Also check hosts_schedules for this specific availability
+					// hosts_schedules is only consulted when is_common=false,
+					// but rewrite it whenever it points at the row we're
+					// deleting so stale entries don't leak if the event later
+					// flips back to per-host schedules.
 					if ( isset( $availability_meta['hosts_schedules'][ $user_id ] ) &&
-						 $availability_meta['hosts_schedules'][ $user_id ] === $availability->id ) {
+						(int) $availability_meta['hosts_schedules'][ $user_id ] === (int) $availability->id ) {
 
 						$availability_meta['hosts_schedules'][ $user_id ] = $default_availability->id;
 						$event->availability_meta                         = $availability_meta;
+						$dirty                                            = true;
+					}
+
+					if ( $dirty ) {
 						$event->save();
 					}
 				}

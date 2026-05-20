@@ -97,11 +97,16 @@ class Availabilities
 	}
 
 	/**
-	 * Add Availability
+	 * Add Availability.
+	 *
+	 * Returns the WP_Error from AvailabilityService instead of swallowing
+	 * it as an empty array, so callers can distinguish "missing data" from
+	 * "validation failed" and surface the actual reason. The previous
+	 * silent-fail made provisioning bugs invisible.
 	 *
 	 * @param array $availability
 	 *
-	 * @return array
+	 * @return array|\WP_Error
 	 */
 	public static function add_availability($availability)
 	{
@@ -118,7 +123,15 @@ class Availabilities
 		);
 
 		if (is_wp_error($result)) {
-			return array();
+			doublescale_get_logger()->warning(
+				'Failed to add availability',
+				array(
+					'source'  => 'booking-availabilities-facade',
+					'code'    => $result->get_error_code(),
+					'message' => $result->get_error_message(),
+				)
+			);
+			return $result;
 		}
 
 		$model = AvailabilityModel::find($result['id']);
@@ -208,13 +221,17 @@ class Availabilities
 		$default_data = AvailabilityModel::getDefaultAvailability();
 
 		return array(
-			'id' => 'default',
-			'is_default' => true,
-			'user_id' => 'system',
-			'name' => $default_data['name'],
+			'id'           => 'default',
+			'is_default'   => true,
+			'user_id'      => 'system',
+			'name'         => $default_data['name'],
 			'weekly_hours' => $default_data['weekly_hours'],
-			'override' => $default_data['override'],
-			'timezone' => 'Africa/Cairo',
+			'override'     => $default_data['override'] ?? array(),
+			// Use the site's configured timezone instead of a hard-coded
+			// Africa/Cairo. The previous value silently bound every
+			// fallback host to Cairo time regardless of where the site
+			// actually lived.
+			'timezone'     => AvailabilityModel::resolveSiteTimezone(),
 		);
 	}
 

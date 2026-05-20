@@ -37,9 +37,32 @@ class BookingService {
 	 * @return BookingModel
 	 * @throws \Exception If booking fails.
 	 */
-	public function book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $invitees, $location, $status = 'scheduled', $fields = array(), $user_id = null ) {
+	public function book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $invitees, $location, $status = 'scheduled', $fields = array(), $user_id = null, $skip_availability_check = false ) {
 		$end_date = clone $start_date;
 		$end_date->modify( "+{$duration} minutes" );
+
+		// Defense in depth: re-verify the slot is inside the event's
+		// availability (weekly_hours / override) and within all configured
+		// limits. Callers do this too, but we re-run it here so a missed
+		// check at the boundary can't quietly book a slot outside hours.
+		// `$skip_availability_check` is only honored when an admin route
+		// has already gated the request behind a manage-bookings cap.
+		//
+		// For round-robin we pass the host array so the schedule lookup
+		// can target any of the chosen hosts; for one-to-one / group we
+		// pass the single host id. Collective ignores $user_id at the
+		// schedule layer (it always walks team_members), so the value
+		// doesn't matter there.
+		if ( ! $skip_availability_check ) {
+			$host_for_check = $user_id;
+			if ( is_array( $user_id ) && 'round-robin' !== $event->type ) {
+				$host_for_check = $user_id[0] ?? null;
+			}
+			$slot_count = $event->get_booking_available_slots( $start_date, $duration, $timezone, $host_for_check );
+			if ( ! $slot_count ) {
+				throw new \Exception( esc_html__( 'Sorry, this time slot is not available.', 'doublescale' ) );
+			}
+		}
 
 		$utc              = new \DateTimeZone( 'UTC' );
 		$start_utc_string = ( clone $start_date )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );

@@ -1443,7 +1443,7 @@ class RestEventController extends RestController {
 	}
 
 	// Update event availability
-	private function update_event_host_availability( $event_availability ) {
+	private function update_event_host_availability( $event_availability, $current_event_id = null ) {
 		try {
 			// Check if event_availability is provided and not empty
 			if ( empty( $event_availability ) ) {
@@ -1461,6 +1461,24 @@ class RestEventController extends RestController {
 					'rest_event_error',
 					__( 'Availability record not found', 'doublescale' ),
 					array( 'status' => 404 )
+				);
+			}
+
+			// Guard against silent global edits: if more than one event
+			// references this availability row, the in-event edit would
+			// rewrite the schedule for every other event too. Refuse and
+			// point the user at the central editor (Booking → Availability)
+			// so the change is deliberate. We only count events other than
+			// the one we're saving so re-saving the same event still works.
+			$other_event_count = EventModel::where( 'availability_id', $availability->id );
+			if ( $current_event_id ) {
+				$other_event_count = $other_event_count->where( 'id', '!=', $current_event_id );
+			}
+			if ( $other_event_count->count() > 0 ) {
+				return new WP_Error(
+					'rest_event_availability_shared',
+					__( 'This availability is used by other events. Edit it from Booking → Availability, or switch this event to a custom schedule.', 'doublescale' ),
+					array( 'status' => 409 )
 				);
 			}
 
@@ -1560,18 +1578,39 @@ class RestEventController extends RestController {
 		}
 	}
 
-	// Handle availability updates based on calendar type and settings
+	// Handle availability updates based on calendar type and settings.
+	//
+	// Branches we handle here only target shared AvailabilityModel rows.
+	// For `availability_type === 'custom'` the schedule lives inside
+	// availability_meta['custom_availability'] and is already persisted by
+	// the caller serializing availability_meta — there's nothing extra to
+	// do on the AvailabilityModel side, so we explicitly fall through.
+	//
+	// To prevent one event from silently rewriting the schedule of every
+	// other event that shares the same AvailabilityModel row, we count
+	// usages before saving and refuse the in-event edit when the row is
+	// shared. The user is asked to go to Booking → Availability instead.
 	private function handle_availability_update( $event, $availability_type, $availability_meta, $event_availability, $team_availability ) {
 		try {
-			if ( $event->calendar->type === 'host' && $availability_type === 'existing' ) {
-				return $this->update_event_host_availability( $event_availability );
+			$calendar_type = $event->calendar->type;
+			$is_common     = is_array( $availability_meta ) ? ( $availability_meta['is_common'] ?? null ) : null;
+
+			if ( 'custom' === $availability_type ) {
+				// Per-event snapshot lives in availability_meta — nothing to
+				// write on the shared AvailabilityModel row. We intentionally
+				// stop here so a custom schedule never mutates a global row.
+				return true;
 			}
 
-			if ( $event->calendar->type === 'team' && $availability_meta['is_common'] === true && $availability_type === 'existing' ) {
-				return $this->update_event_host_availability( $event_availability );
+			if ( 'host' === $calendar_type && 'existing' === $availability_type ) {
+				return $this->update_event_host_availability( $event_availability, $event->id );
 			}
 
-			if ( $event->calendar->type === 'team' && $availability_meta['is_common'] === false ) {
+			if ( 'team' === $calendar_type && true === $is_common && 'existing' === $availability_type ) {
+				return $this->update_event_host_availability( $event_availability, $event->id );
+			}
+
+			if ( 'team' === $calendar_type && false === $is_common && 'existing' === $availability_type ) {
 				return $this->update_event_team_availability( $event, $team_availability );
 			}
 

@@ -120,8 +120,6 @@ class BookingAjax {
 				throw new \Exception( __( 'Invalid event type', 'doublescale' ) );
 			}
 
-			$available_slots = $event->get_booking_available_slots( $start_date, $duration, $timezone );
-
 			$fields = array();
 			if ( isset( $_POST['fields'] ) ) {
 				$fields_raw = json_decode( wp_unslash( $_POST['fields'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
@@ -138,6 +136,13 @@ class BookingAjax {
 					$host_id = $host_ids;
 				}
 			}
+
+			// Pass the chosen host(s) to the availability lookup so we check
+			// the schedule of the actual host being booked, not just the
+			// event's primary host. Without this, a round-robin/collective
+			// event could expose a slot that's free for host A but the
+			// booking gets assigned to host B who is off at that time.
+			$available_slots = $event->get_booking_available_slots( $start_date, $duration, $timezone, $host_id );
 
 			$calendar_id = $event->calendar_id;
 
@@ -369,7 +374,17 @@ class BookingAjax {
 
 			$bookable = $booking->getBookableEntity();
 			if ( $bookable && method_exists( $bookable, 'get_booking_available_slots' ) ) {
-				$available_slots = $bookable->get_booking_available_slots( $start_date, $duration, $timezone );
+				// Use the booking's existing host so the availability check
+				// targets the same person being rescheduled. Otherwise the
+				// check would run against the event's primary user and could
+				// approve a slot that's outside the assigned host's schedule.
+				$existing_host_ids = $booking->hosts()->pluck( 'user_id' )->all();
+				$host_for_check    = ! empty( $existing_host_ids )
+					? ( in_array( $bookable->type ?? '', array( 'round-robin', 'collective' ), true )
+						? $existing_host_ids
+						: ( count( $existing_host_ids ) === 1 ? (int) $existing_host_ids[0] : $existing_host_ids ) )
+					: null;
+				$available_slots   = $bookable->get_booking_available_slots( $start_date, $duration, $timezone, $host_for_check );
 				if ( ! $available_slots ) {
 					throw new \Exception( __( 'Sorry, This booking is not available', 'doublescale' ) );
 				}

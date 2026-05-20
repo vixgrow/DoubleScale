@@ -487,7 +487,14 @@ class RestBookingController extends RestController {
 				}
 			}
 
-			if ( ! $ignore_availability ) {
+			// `ignore_availability` is an admin shortcut for inserting bookings
+			// outside the configured schedule (e.g. backfilling). Only trust it
+			// when the request comes from a user who can manage all bookings;
+			// otherwise fall through to the normal availability check so a
+			// crafted public request can't bypass the schedule.
+			$can_skip_availability = $ignore_availability && current_user_can( 'doublescale_booking_manage_all_bookings' );
+
+			if ( ! $can_skip_availability ) {
 				$start_date      = BookingValidator::validate_start_date( $start_date, $timezone );
 				$available_slots = $event->get_booking_available_slots( $start_date, $duration, $timezone, $host_id );
 				if ( ! $available_slots ) {
@@ -510,7 +517,7 @@ class RestBookingController extends RestController {
 			$validate_invitee = $booking_service->validate_invitee( $event, $invitee );
 
 			$calendar_id = $event->calendar_id;
-			$booking     = $booking_service->book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $validate_invitee, $location, $status, $fields, $host_id );
+			$booking     = $booking_service->book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $validate_invitee, $location, $status, $fields, $host_id, $can_skip_availability );
 
 			$bookings   = array();
 			$bookings[] = $booking;

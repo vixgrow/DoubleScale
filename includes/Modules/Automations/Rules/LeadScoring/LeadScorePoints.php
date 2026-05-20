@@ -103,10 +103,6 @@ class LeadScorePoints extends Rule
             return 0;
         }
 
-        if (class_exists('\DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager')) {
-            return (int) \DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager::get_lead_score_points($contact);
-        }
-
         $points = \doublescale_get_contact_meta($contact->id, 'lead_score_points', true);
 
         if ($points === '' || $points === null || false === $points) {

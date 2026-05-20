@@ -37,7 +37,7 @@ use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Core\Constants\CampaignChannel;
 use DoubleScale\Core\Constants\MessageSourceTypes;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
-use DoubleScale\Modules\LeadScoring\LeadScoringManager;
+use DoubleScale\Pro\Modules\LeadScoring\LeadScoringManager;
 
 /**
  * RestContactController is REST api controller class for log
@@ -507,7 +507,7 @@ class RestContactController extends RestController {
 		// Get lead score (Pro feature; route is omitted when the module is
 		// unavailable or disabled). class_exists() is called with autoload=true
 		// because Pro provides this class lazily via its autoloader.
-		if ( class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true )
+		if ( class_exists( LeadScoringManager::class, true )
 			&& function_exists( 'doublescale_is_module_active' )
 			&& doublescale_is_module_active( 'leadscoring' ) ) {
 			register_rest_route(
@@ -1047,7 +1047,7 @@ class RestContactController extends RestController {
 	 */
 	public function get_lead_score($request)
 	{
-		if ( ! class_exists( \DoubleScale\Modules\LeadScoring\LeadScoringManager::class, true ) ) {
+		if ( ! class_exists( LeadScoringManager::class, true ) ) {
 			return new WP_Error( 'not_available', __( 'Lead scoring is not available', 'doublescale' ), array( 'status' => 404 ) );
 		}
 		if ( ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'leadscoring' ) ) {

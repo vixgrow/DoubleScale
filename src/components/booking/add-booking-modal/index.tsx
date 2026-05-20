@@ -304,7 +304,7 @@ const AddBookingModal: React.FC<AddBookingModalProps> = ({
 		}
 
 		// Custom fields (rendered by QuestionsComponents) are stored under
-		// `fields-{id}` in the antd Form.Item naming — the `fields-` prefix
+		// `fields-{id}` in the  Form.Item naming — the `fields-` prefix
 		// is stripped by getFields() before POSTing.
 		const customFields = fields?.custom || {};
 		for (const [key, def] of Object.entries(customFields)) {

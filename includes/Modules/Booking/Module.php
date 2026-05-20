@@ -249,7 +249,13 @@ final class Module extends AbstractModule {
 	 */
 	private function register_provisioner_hooks( Container $container ): void {
 		// One-shot bulk provisioning for existing users.
-		if ( ! get_option( 'doublescale_booking_provisioned' ) ) {
+		// Re-run when the calendars table is empty even if the option flag is
+		// set, so the dev workflow of "drop plugin tables + reactivate" still
+		// provisions host calendars (option lives in wp_options, calendars in
+		// the dropped plugin table — without this they go out of sync).
+		$needs_bulk_provision = ! get_option( 'doublescale_booking_provisioned' )
+			|| ! Models\CalendarModel::query()->exists();
+		if ( $needs_bulk_provision ) {
 			$provisioner = $container->get( Services\BookingProvisioner::class );
 
 			$users = get_users(

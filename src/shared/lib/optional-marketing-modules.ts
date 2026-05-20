@@ -30,7 +30,6 @@ export const REST_PHANTOM_MODULE_SLUGS = [
 	'leadscoring',
 	'notifications',
 	'tasks',
-	'websitetracking',
 ] as const;
 
 const ALL_REST_PERSISTABLE_OPTIONAL_SLUGS: ReadonlySet<string> = new Set([

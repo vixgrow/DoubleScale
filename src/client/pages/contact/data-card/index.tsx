@@ -39,7 +39,6 @@ import {
 	WebsiteIcon,
 } from '@doublescale/components';
 import ConfigAPI from '@doublescale/config';
-import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import Courses from '../courses';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import Meetings from '../meetings';
@@ -284,16 +283,10 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			value: 'website_tracking',
 			children: (
 				<CardContent className="pt-6">
-					{ConfigAPI.isModuleEnabled('websitetracking') ? (
-						<WebsiteTracking
-							contact_id={contact.id}
-							navigate={navigate}
-						/>
-					) : (
-						<ModuleDisabledNotice
-							featureName={__('Website Tracking', 'doublescale')}
-						/>
-					)}
+					<WebsiteTracking
+						contact_id={contact.id}
+						navigate={navigate}
+					/>
 				</CardContent>
 			),
 		},

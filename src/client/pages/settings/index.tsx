@@ -16,7 +16,6 @@ import { applyFilters } from '@wordpress/hooks';
  * DoubleScale dependencies
  */
 import { useNavigate, useParams, getToLink } from '@doublescale/navigation';
-import config from '@doublescale/config';
 
 /**
  * Internal dependencies
@@ -52,7 +51,6 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 import ModulesSettings from './modules';
-import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import SystemSettings from './system';
 import License from './license';
 import MobileAppSettings from './mobile-app';
@@ -72,6 +70,12 @@ const CUSTOM_FIELDS_PRO_FEATURES = [
 		'Drag-and-drop ordering and full REST API management',
 		'doublescale'
 	),
+];
+
+const WEBSITE_TRACKING_PRO_FEATURES = [
+	__('Track page visits for contacts on your website', 'doublescale'),
+	__('Stitch anonymous visitors to contacts on first identify', 'doublescale'),
+	__('Configure data retention with per-day or keep-forever rules', 'doublescale'),
 ];
 
 const TABS_WITHOUT_SAVE_BUTTON_LIST = [
@@ -353,13 +357,6 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'website_tracking':
-				if (!config.isModuleEnabled('websitetracking')) {
-					return (
-						<ModuleDisabledNotice
-							featureName={__('Website Tracking', 'doublescale')}
-						/>
-					);
-				}
 				const WebsiteTrackingComponent = applyFilters(
 					'doublescale_settings_website_tracking_settings',
 					() => (
@@ -369,6 +366,7 @@ const SettingsPage: React.FC = () => {
 								'Track page visits for contacts on your website and manage data retention settings with DoubleScale Pro.',
 								'doublescale'
 							)}
+							features={WEBSITE_TRACKING_PRO_FEATURES}
 						/>
 					)
 				) as React.ComponentType<{

@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Button } from 'antd';
+
 import { X } from 'lucide-react';
 
 /**
@@ -16,6 +16,8 @@ import { X } from 'lucide-react';
 import ConfigAPI from '@doublescale/config';
 import upgradePlanArt from '@doublescale/assets/images/upgrade-plan.png';
 import UpgradePlanIcon from './upgrade-plan-icon';
+import { Button } from '@doublescale/shared/ui/button';
+
 
 const DISMISS_STORAGE_KEY = 'doublescale.dashboard.upgradeHeroDismissed';
 
@@ -70,20 +72,20 @@ const UpgradeHeroBanner: React.FC = () => {
 					</p>
 					<div className="doublescale-upgrade-hero-banner__actions">
 						<Button
-							type="default"
-							className="doublescale-upgrade-hero-banner__btn-primary"
+							variant='secondaryDeepBlue'
+							className="hover:bg-white"
 							onClick={() => {
 								window.open(plansUrl, '_blank', 'noopener,noreferrer');
 							}}
 						>
-							<span className="doublescale-upgrade-hero-banner__sparkle inline-flex items-center gap-2">
+							<span className=" text-brandPrimary inline-flex items-center gap-2">
 								<UpgradePlanIcon />
 								{__('Upgrade plan', 'doublescale')}
 							</span>
 						</Button>
 						<Button
-							type="default"
-							className="doublescale-upgrade-hero-banner__btn-secondary"
+							variant='secondaryDeepBlue'
+							className="hover:bg-white"
 							onClick={() => {
 								window.open(plansUrl, '_blank', 'noopener,noreferrer');
 							}}

@@ -2,9 +2,11 @@ import { __ } from '@wordpress/i18n';
 import { AdvancedSettings, Fields, RendererAdvancedSettings } from '@/types/booking';
 import './style.scss';
 import LeftArrowIcon from '../../../../icons/left-arrow-icon';
-import { Alert, Form, Spin } from 'antd';
 import FormField from '../../../inputs';
-import { useEffect, useState } from 'react';
+import { BookingForm as RendererForm } from '../../../inputs/form-bridge';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, AlertDescription } from '@doublescale/shared/ui/alert';
+import { Spinner } from '@doublescale/shared/ui/spinner';
 import { useApi } from '@/hooks/booking';
 import { css } from '@emotion/css';
 import { applyFilters } from '@wordpress/hooks';
@@ -56,7 +58,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
 	loadingText,
 	isWaitingListSlot = false,
 }) => {
-	const [form] = Form.useForm();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submissionError, setSubmissionError] = useState<string | null>(null);
 	const [countryCode, setCountryCode] = useState<string>('us');
@@ -126,17 +127,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
 		});
 	}, []);
 
-	useEffect(() => {
-		if (prefilledData) {
-			const initialValues: Record<string, any> = {};
-			if (prefilledData.name) initialValues.name = prefilledData.name;
-			if (prefilledData.email) initialValues.email = prefilledData.email;
+	const prefilledValues = useMemo(() => {
+		const values: Record<string, string> = {};
 
-			if (Object.keys(initialValues).length > 0) {
-				form.setFieldsValue(initialValues);
-			}
+		if (prefilledData?.name) {
+			values.name = prefilledData.name;
 		}
-	}, [prefilledData, form]);
+		if (prefilledData?.email) {
+			values.email = prefilledData.email;
+		}
+
+		return values;
+	}, [prefilledData?.email, prefilledData?.name]);
 
 	return (
 		<div className="questions-container">
@@ -151,11 +153,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
 			</div>
 			{waitingListNotice}
 			{sortedFields.length > 0 && (
-				<Form
-					layout="vertical"
-					onFinish={handleFinish}
-					form={form}
-					requiredMark={false}
+				<RendererForm
+					initialValues={prefilledValues}
+					onSubmit={handleFinish}
 				>
 					{sortedFields.map(
 						(fieldKey, index) =>
@@ -171,15 +171,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
 					)}
 					{submissionError && (
 						<Alert
-							message={submissionError}
-							type="error"
-							showIcon
-							closable
-							onClose={() => setSubmissionError(null)}
-							style={{ marginBottom: 16 }}
-						/>
+							variant="destructive"
+							className="mb-4"
+						>
+							<AlertDescription>{submissionError}</AlertDescription>
+						</Alert>
 					)}
-					<Form.Item className="schedule-btn-container">
+					<div className="schedule-btn-container">
 						<button
 							className={`schedule-btn ${css`
 								background-color: ${baseColor};
@@ -192,18 +190,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
 						>
 							{isSubmitting ? (
 								<>
-									<Spin
-										size="small"
-										style={{ marginRight: '8px' }}
-									/>
+									<Spinner className="mr-2" />
 									{submittingText}
 								</>
 							) : (
 								submitButtonText
 							)}
 						</button>
-					</Form.Item>
-				</Form>
+					</div>
+				</RendererForm>
 			)}
 		</div>
 	);

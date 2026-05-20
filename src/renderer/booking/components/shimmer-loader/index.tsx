@@ -1,4 +1,4 @@
-import { Col, Row, Skeleton, Space } from 'antd';
+import { Skeleton } from '@doublescale/shared/ui/skeleton';
 
 const ShimmerLoader = () => {
 	return (
@@ -9,45 +9,33 @@ const ShimmerLoader = () => {
 				background: '#fff',
 			}}
 		>
-			<Row align="middle" gutter={16}>
-				<Col>
-					<Skeleton.Avatar active size="large" shape="circle" />
-				</Col>
-			</Row>
 
-			<div style={{ marginTop: 24 }}>
-				<Space direction="vertical" size={16} style={{ width: '100%' }}>
-					<Skeleton.Input
-						active
-						size="default"
-						style={{ width: '70%' }}
-					/>
-					<Skeleton.Input
-						active
-						size="small"
-						style={{ width: '90%' }}
-					/>
-					<Skeleton.Input
-						active
-						size="small"
-						style={{ width: '80%' }}
-					/>
-				</Space>
+			<div className="flex items-center gap-4">
+				<Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+			</div>
+			<div
+				className="mt-6 flex w-full flex-col"
+				style={{ gap: 16 }}
+			>
+				<Skeleton className="h-8 w-[70%] rounded-md" />
+
+				<Skeleton className="h-6 w-[90%] rounded-md" />
+
+				<Skeleton className="h-6 w-[80%] rounded-md" />
 			</div>
 
-			<div style={{ marginTop: 32 }}>
-				<Skeleton.Input
-					active
-					block
-					style={{ height: 200, borderRadius: 8 }}
+			<div className="mt-8">
+				<Skeleton
+					className="w-full rounded-lg"
+					style={{ height: 200 }}
 				/>
 			</div>
 
-			<Row gutter={16} style={{ marginTop: 24 }}>
-				<Col span={6}>
-					<Skeleton.Input active style={{ width: '50%' }} />
-				</Col>
-			</Row>
+			<div className="mt-6 grid grid-cols-12 gap-4">
+				<div className="col-span-3">
+					<Skeleton className="h-8 w-1/2 rounded-md" />
+				</div>
+			</div>
 		</div>
 	);
 };

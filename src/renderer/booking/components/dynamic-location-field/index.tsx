@@ -1,6 +1,26 @@
-import { Form, Input } from 'antd';
+import { Input } from '@doublescale/shared/ui/input';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import {
+	BookingFormItem,
+	BookingFormItemShouldUpdate,
+} from '../inputs/form-bridge';
+
+const PhoneInputField = ({
+	value,
+	onChange,
+	country,
+}: {
+	value?: string;
+	onChange?: (value: string) => void;
+	country: string;
+}) => (
+	<PhoneInput
+		country={country}
+		value={value || ''}
+		onChange={(phone) => onChange?.(phone)}
+	/>
+);
 
 /**
  * Renders dynamic fields for a selected location type
@@ -28,14 +48,15 @@ const DynamicLocationFields = ({
 	countryCode,
 }: DynamicLocationFieldsProps) => {
 	return (
-		<Form.Item noStyle shouldUpdate>
+		<BookingFormItemShouldUpdate>
 			{({ getFieldValue }) => {
 				const selectedType = getFieldValue('location');
 				if (
 					selectedType !== 'attendee_address' &&
 					selectedType !== 'attendee_phone'
-				)
+				) {
 					return null;
+				}
 
 				return (
 					<>
@@ -45,9 +66,10 @@ const DynamicLocationFields = ({
 								location.fields &&
 								Object.entries(location.fields).map(
 									([_, field]) => (
-										<Form.Item
+										<BookingFormItem
 											key="location-data"
 											name="location-data"
+											shouldUnregister
 											label={
 												<div className="form-label">
 													<p>
@@ -72,7 +94,7 @@ const DynamicLocationFields = ({
 											}
 										>
 											{field.type === 'phone' ? (
-												<PhoneInput
+												<PhoneInputField
 													country={countryCode}
 												/>
 											) : (
@@ -82,14 +104,14 @@ const DynamicLocationFields = ({
 													}
 												/>
 											)}
-										</Form.Item>
+										</BookingFormItem>
 									)
 								)
 						)}
 					</>
 				);
 			}}
-		</Form.Item>
+		</BookingFormItemShouldUpdate>
 	);
 };
 

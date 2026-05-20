@@ -1199,7 +1199,8 @@ const IntegrationDetailsPage: React.FC<Props> = ({
                                             isProVersion &&
                                             appleIntegrationUiLocked)
                                     }
-                                    className="border-none shadow-none text-primary text-base font-medium inline-flex items-center gap-2"
+                                    variant="secondaryDeepBlue"
+                                    className="text-base font-medium inline-flex items-center gap-2"
                                 >
                                     {connectLoading ? (
                                         <Spinner className="h-4 w-4" />

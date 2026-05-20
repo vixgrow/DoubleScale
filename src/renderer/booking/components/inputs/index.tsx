@@ -6,10 +6,7 @@ import 'react-phone-input-2/lib/style.css';
 import { Input } from '@doublescale/shared/ui/input';
 import { Textarea } from '@doublescale/shared/ui/textarea';
 import { Checkbox } from '@doublescale/shared/ui/checkbox';
-import {
-	RadioGroup,
-	RadioGroupItem,
-} from '@doublescale/shared/ui/radio-group';
+import BookingRadioCards from '../booking-radio-cards';
 import {
 	Select,
 	SelectContent,
@@ -19,10 +16,15 @@ import {
 } from '@doublescale/shared/ui/select';
 import { Slider } from '@doublescale/shared/ui/slider';
 
+import { cn } from '@/lib/utils';
 import { BookingFormItem } from './form-bridge';
 import getValidationRules from './validation-rules';
 import Locations from '../locations';
 import './style.scss';
+import './control-styles.scss';
+
+const BOOKING_INPUT_CLASS = 'doublescale-input-control';
+const BOOKING_TEXTAREA_CLASS = 'doublescale-textarea-control';
 
 type Option = string | { label: string; value: string };
 
@@ -49,9 +51,11 @@ const TextInput = ({
 	value,
 	onChange,
 	onBlur,
+	className,
 	...rest
 }: BridgeProps & React.InputHTMLAttributes<HTMLInputElement>) => (
 	<Input
+		className={cn(BOOKING_INPUT_CLASS, className)}
 		value={(value as string | number | undefined) ?? ''}
 		onChange={(e) => onChange?.(e.target.value)}
 		onBlur={onBlur}
@@ -63,9 +67,11 @@ const TextareaInput = ({
 	value,
 	onChange,
 	onBlur,
+	className,
 	...rest
 }: BridgeProps & React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
 	<Textarea
+		className={cn(BOOKING_TEXTAREA_CLASS, className)}
 		value={(value as string | undefined) ?? ''}
 		onChange={(e) => onChange?.(e.target.value)}
 		onBlur={onBlur}
@@ -77,9 +83,11 @@ const NumberInput = ({
 	value,
 	onChange,
 	onBlur,
+	className,
 	...rest
 }: BridgeProps & React.InputHTMLAttributes<HTMLInputElement>) => (
 	<Input
+		className={cn(BOOKING_INPUT_CLASS, className)}
 		type="number"
 		value={(value as string | number | undefined) ?? ''}
 		onChange={(e) => {
@@ -145,34 +153,24 @@ const SelectField = ({ value, onChange, options = [], placeholder }: SelectField
 
 type RadioFieldProps = BridgeProps & { options?: Option[] };
 
-const RadioField = ({ value, onChange, options = [] }: RadioFieldProps) => (
-	<RadioGroup
-		value={(value as string | undefined) ?? ''}
-		onValueChange={(next) => onChange?.(next)}
-		className="mt-2 flex flex-col gap-3"
-	>
-		{options.map((option, index) => {
-			const opt = isObjectOption(option)
-				? option
-				: { label: String(option), value: String(option) };
-			const id = `radio-${opt.value}-${index}`;
-			return (
-				<label
-					key={opt.value}
-					htmlFor={id}
-					className="flex items-center gap-2.5 cursor-pointer text-[15px] leading-none text-[#29292E]"
-				>
-					<RadioGroupItem
-						value={opt.value}
-						id={id}
-						className="h-[18px] w-[18px] border border-[#D0D0D0] data-[state=checked]:border-[#3A3A99] [&_svg]:h-2 [&_svg]:w-2 [&_svg]:fill-[#3A3A99] [&_svg]:text-[#3A3A99]"
-					/>
-					<span>{opt.label}</span>
-				</label>
-			);
-		})}
-	</RadioGroup>
-);
+const RadioField = ({ value, onChange, options = [] }: RadioFieldProps) => {
+	const normalized = options.map((option) => {
+		const opt = isObjectOption(option)
+			? option
+			: { label: String(option), value: String(option) };
+		return { value: opt.value, label: opt.label };
+	});
+
+	return (
+		<BookingRadioCards
+			value={(value as string | undefined) ?? ''}
+			onChange={(next) => onChange?.(next)}
+			options={normalized.map(({ value: v, label }) => ({ value: v, label }))}
+			idPrefix="field-radio"
+			layout={normalized.length === 2 ? 'horizontal' : 'vertical'}
+		/>
+	);
+};
 
 type CheckboxFieldProps = BridgeProps & {
 	checked?: boolean;
@@ -225,6 +223,8 @@ const PhoneField = ({ value, onChange, country }: PhoneFieldProps) => (
 		country={country}
 		value={(value as string | undefined) ?? ''}
 		onChange={(next) => onChange?.(next)}
+		inputClass="doublescale-input-control"
+		containerClass="w-full"
 	/>
 );
 

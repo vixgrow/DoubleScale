@@ -1,6 +1,7 @@
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
+import { cn } from '@/lib/utils';
 import { Input } from '@doublescale/shared/ui/input';
 import {
 	BookingFormItem,
@@ -35,9 +36,11 @@ const TextBridge = ({
 	value,
 	onChange,
 	onBlur,
+	className,
 	...rest
 }: BridgeProps & React.InputHTMLAttributes<HTMLInputElement>) => (
 	<Input
+		className={cn('doublescale-input-control', className)}
 		value={(value as string | undefined) ?? ''}
 		onChange={(e) => onChange?.(e.target.value)}
 		onBlur={onBlur}
@@ -54,6 +57,8 @@ const PhoneBridge = ({
 		country={country}
 		value={(value as string | undefined) ?? ''}
 		onChange={(next) => onChange?.(next)}
+		inputClass="doublescale-input-control"
+		containerClass="w-full"
 	/>
 );
 
@@ -73,7 +78,7 @@ const DynamicLocationFields = ({
 				}
 
 				return (
-					<>
+					<div className="location-followup-fields">
 						{locations.map(
 							(location) =>
 								location.value === selectedType &&
@@ -117,7 +122,7 @@ const DynamicLocationFields = ({
 									)
 								)
 						)}
-					</>
+					</div>
 				);
 			}}
 		</BookingFormItemShouldUpdate>

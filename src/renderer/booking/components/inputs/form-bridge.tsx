@@ -264,7 +264,7 @@ export function BookingFormItem({
 				}
 
 				return (
-					<div style={style}>
+					<div className="booking-form-item" style={style}>
 						{label}
 						{React.cloneElement(children, childProps)}
 						{fieldState.error?.message ? (

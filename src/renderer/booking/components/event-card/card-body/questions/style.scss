@@ -30,6 +30,8 @@
 .schedule-btn-container {
 	display: flex;
 	justify-content: flex-end;
+	margin-top: 1.5rem;
+	padding-top: 0.5rem;
 }
 
 .schedule-btn {
@@ -37,11 +39,9 @@
 	color: #ffffff;
 	font-weight: 400;
 	font-size: 14px;
-	border-radius: 100px;
+	border-radius: 10px;
 	border: none;
-	padding: 12px 24px;
+	padding: 8px 16px;
 }
 
-.schedule-btn:hover {
-	background-color: #7b1fa2;
-}
+

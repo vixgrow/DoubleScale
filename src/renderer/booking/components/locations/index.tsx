@@ -2,12 +2,10 @@ import { __ } from '@wordpress/i18n';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
+import { cn } from '@/lib/utils';
 import { Input } from '@doublescale/shared/ui/input';
-import {
-	RadioGroup,
-	RadioGroupItem,
-} from '@doublescale/shared/ui/radio-group';
 import { BookingFormItem } from '../inputs/form-bridge';
+import BookingRadioCards from '../booking-radio-cards';
 import DynamicLocationFields from '../dynamic-location-field';
 
 interface Field {
@@ -43,38 +41,24 @@ const RadioFieldBridge = ({
 	onChange,
 	options,
 }: BridgeProps & { options: Option[] }) => (
-	<RadioGroup
+	<BookingRadioCards
 		value={(value as string | undefined) ?? ''}
-		onValueChange={(next) => onChange?.(next)}
-		className="mt-2 flex flex-col gap-3"
-	>
-		{options.map((option) => {
-			const id = `location-${option.value}`;
-			return (
-				<label
-					key={option.value}
-					htmlFor={id}
-					className="flex items-center gap-2.5 cursor-pointer text-[15px] leading-none text-[#29292E]"
-				>
-					<RadioGroupItem
-						value={option.value}
-						id={id}
-						className="h-[18px] w-[18px] border border-[#D0D0D0] data-[state=checked]:border-[#3A3A99] [&_svg]:h-2 [&_svg]:w-2 [&_svg]:fill-[#3A3A99] [&_svg]:text-[#3A3A99]"
-					/>
-					<span>{option.label}</span>
-				</label>
-			);
-		})}
-	</RadioGroup>
+		onChange={(next) => onChange?.(next)}
+		options={options}
+		idPrefix="location"
+		layout="vertical"
+	/>
 );
 
 const TextBridge = ({
 	value,
 	onChange,
 	onBlur,
+	className,
 	...rest
 }: BridgeProps & React.InputHTMLAttributes<HTMLInputElement>) => (
 	<Input
+		className={cn('doublescale-input-control', className)}
 		value={(value as string | undefined) ?? ''}
 		onChange={(e) => onChange?.(e.target.value)}
 		onBlur={onBlur}
@@ -91,6 +75,8 @@ const PhoneBridge = ({
 		country={country}
 		value={(value as string | undefined) ?? ''}
 		onChange={(next) => onChange?.(next)}
+		inputClass="doublescale-input-control"
+		containerClass="w-full"
 	/>
 );
 
@@ -101,7 +87,7 @@ const HiddenBridge = ({ value }: BridgeProps) => (
 const Locations = ({ locationFields, countryCode }: LocationsProps) => {
 	if (locationFields.options.length > 1) {
 		return (
-			<>
+			<div className="locations-field-group">
 				<BookingFormItem
 					name="location"
 					label={
@@ -119,7 +105,7 @@ const Locations = ({ locationFields, countryCode }: LocationsProps) => {
 					locations={locationFields.options}
 					countryCode={countryCode}
 				/>
-			</>
+			</div>
 		);
 	}
 

@@ -6,9 +6,9 @@ module.exports = {
 		'./src/client/pages/**/*.ts',
 		'./src/client/pages/**/*.tsx',
 		'./src/components/**/*.tsx',
-		'./src/shared/**/*.tsx',
+		'./src/shared/**/*.{ts,tsx}',
 		'./src/builder/**/*.tsx',
-		'./src/renderer/**/*.tsx',
+		'./src/renderer/**/*.{ts,tsx}',
 	],
 	theme: {
 		container: {
@@ -134,6 +134,11 @@ module.exports = {
 		},
 	},
 	safelist: [
+		'doublescale-input-control',
+		'doublescale-textarea-control',
+		'doublescale-radio-card',
+		'bg-secondary',
+		'border-primary',
 		// Gray
 		'bg-gray-200',
 		'text-gray-600',

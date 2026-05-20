@@ -1,0 +1,129 @@
+
+@mixin doublescale-text-control {
+	box-sizing: border-box;
+	width: 100% !important;
+	border-radius: var(--radius, 0.5rem) !important;
+	border: 1px solid hsl(var(--border)) !important;
+	background-color: #fff !important;
+	font-family: theme('fontFamily.sans');
+	font-size: 0.875rem !important;
+	line-height: 1.25rem !important;
+	color: hsl(var(--foreground)) !important;
+	box-shadow: none !important;
+	transition-property: color, background-color, border-color, box-shadow;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 150ms;
+	appearance: none;
+
+	&::placeholder {
+		color: hsl(var(--muted-foreground)) !important;
+	}
+
+	&:focus {
+		outline: none !important;
+		border-color: #3a3a99 !important;
+		box-shadow: 0 0 0 2px rgb(58 58 153 / 0.2) !important;
+	}
+
+	&:disabled {
+		cursor: not-allowed !important;
+		opacity: 0.5 !important;
+	}
+}
+
+#doublescale-booking-booking-page,
+#doublescale-booking-reschedule-page {
+	.doublescale-input-control {
+		@include doublescale-text-control;
+		display: flex;
+		height: 2.5rem !important;
+		align-items: center;
+		padding: 0.5rem 0.75rem !important;
+	}
+
+	.doublescale-textarea-control {
+		@include doublescale-text-control;
+		display: flex;
+		min-height: 5rem;
+		padding: 0.625rem 0.875rem !important;
+	}
+
+	.react-tel-input {
+		width: 100%;
+
+		.form-control {
+			@include doublescale-text-control;
+			display: flex;
+			height: 2.5rem !important;
+			align-items: center;
+			padding: 0.5rem 0.75rem 0.5rem 3rem !important;
+		}
+
+		.flag-dropdown,
+		.selected-flag {
+			border-radius: var(--radius, 0.5rem) 0 0 var(--radius, 0.5rem) !important;
+			border: 1px solid hsl(var(--border)) !important;
+			border-right: 0 !important;
+			background-color: #fff !important;
+		}
+	}
+
+	// Card radios — same pattern as settings “Default Time Format”
+	.doublescale-radio-card {
+		box-sizing: border-box;
+		border: 1px solid hsl(var(--border)) !important;
+		border-radius: var(--radius, 0.5rem) !important;
+		padding: 0.75rem !important;
+		background-color: #fff !important;
+		color: #3f4254 !important;
+
+		&:has([data-state='checked']) {
+			background-color: hsl(var(--secondary)) !important;
+			border-color: hsl(var(--primary)) !important;
+		}
+	}
+
+	// Fix shared RadioGroupItem inner dot on storefront (Lucide Circle is 0.8×0.6rem
+	// and theme flex rules squash it into a vertical pill). No shared/ui changes needed.
+	.doublescale-radio-card button[role='radio'] {
+		flex-shrink: 0 !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		width: 1rem !important;
+		height: 1rem !important;
+		min-width: 1rem !important;
+		min-height: 1rem !important;
+		padding: 0 !important;
+		border-radius: 9999px !important;
+		border: 2px solid hsl(var(--primary)) !important;
+		background-color: #fff !important;
+		box-shadow: none !important;
+		color: hsl(var(--primary)) !important;
+
+		&[data-state='checked'] {
+			border-color: hsl(var(--primary)) !important;
+			color: hsl(var(--primary)) !important;
+		}
+
+		&:focus-visible {
+			outline: none !important;
+			box-shadow: 0 0 0 1px hsl(var(--ring)) !important;
+		}
+
+		span {
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			line-height: 0 !important;
+		}
+
+		svg {
+			width: 0.5rem !important;
+			height: 0.5rem !important;
+			min-width: 0.5rem !important;
+			min-height: 0.5rem !important;
+			flex-shrink: 0 !important;
+		}
+	}
+}

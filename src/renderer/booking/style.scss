@@ -1,6 +1,8 @@
 // Tailwind utilities for shadcn components used in the public booking renderer.
 // `@tailwind base` is intentionally skipped — the renderer mounts onto third-party
 // WordPress themes and preflight would reset host styles.
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind components;
 @tailwind utilities;
 
@@ -33,4 +35,8 @@
 	--input: 0 0% 82%;
 	--ring: 240 45% 41%;
 	--radius: 0.5rem;
+
+	font-family: theme('fontFamily.sans');
+	color: hsl(var(--foreground));
+	-webkit-font-smoothing: antialiased;
 }

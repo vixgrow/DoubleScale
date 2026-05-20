@@ -1,10 +1,12 @@
-import { Form, Input } from 'antd';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
-/**
- * Renders dynamic fields for a selected location type
- */
+import { Input } from '@doublescale/shared/ui/input';
+import {
+	BookingFormItem,
+	BookingFormItemShouldUpdate,
+} from '../inputs/form-bridge';
+
 interface Field {
 	label: string;
 	type: string;
@@ -23,19 +25,52 @@ interface DynamicLocationFieldsProps {
 	countryCode: string;
 }
 
+type BridgeProps = {
+	value?: unknown;
+	onChange?: (next: unknown) => void;
+	onBlur?: () => void;
+};
+
+const TextBridge = ({
+	value,
+	onChange,
+	onBlur,
+	...rest
+}: BridgeProps & React.InputHTMLAttributes<HTMLInputElement>) => (
+	<Input
+		value={(value as string | undefined) ?? ''}
+		onChange={(e) => onChange?.(e.target.value)}
+		onBlur={onBlur}
+		{...rest}
+	/>
+);
+
+const PhoneBridge = ({
+	value,
+	onChange,
+	country,
+}: BridgeProps & { country?: string }) => (
+	<PhoneInput
+		country={country}
+		value={(value as string | undefined) ?? ''}
+		onChange={(next) => onChange?.(next)}
+	/>
+);
+
 const DynamicLocationFields = ({
 	locations,
 	countryCode,
 }: DynamicLocationFieldsProps) => {
 	return (
-		<Form.Item noStyle shouldUpdate>
+		<BookingFormItemShouldUpdate>
 			{({ getFieldValue }) => {
 				const selectedType = getFieldValue('location');
 				if (
 					selectedType !== 'attendee_address' &&
 					selectedType !== 'attendee_phone'
-				)
+				) {
 					return null;
+				}
 
 				return (
 					<>
@@ -45,9 +80,19 @@ const DynamicLocationFields = ({
 								location.fields &&
 								Object.entries(location.fields).map(
 									([_, field]) => (
-										<Form.Item
+										<BookingFormItem
 											key="location-data"
 											name="location-data"
+											rules={
+												field.required
+													? [
+															{
+																required: true,
+																message: `${field.label} is required`,
+															},
+														]
+													: []
+											}
 											label={
 												<div className="form-label">
 													<p>
@@ -60,36 +105,22 @@ const DynamicLocationFields = ({
 													</p>
 												</div>
 											}
-											rules={
-												field.required
-													? [
-															{
-																required: true,
-																message: `${field.label} is required`,
-															},
-														]
-													: []
-											}
 										>
 											{field.type === 'phone' ? (
-												<PhoneInput
-													country={countryCode}
-												/>
+												<PhoneBridge country={countryCode} />
 											) : (
-												<Input
-													placeholder={
-														field.placeholder
-													}
+												<TextBridge
+													placeholder={field.placeholder}
 												/>
 											)}
-										</Form.Item>
+										</BookingFormItem>
 									)
 								)
 						)}
 					</>
 				);
 			}}
-		</Form.Item>
+		</BookingFormItemShouldUpdate>
 	);
 };
 

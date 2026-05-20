@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-// import Select from 'react-select';
-import { Select, SelectProps } from 'antd';
 import { map } from 'lodash';
 
 /**
@@ -10,10 +8,20 @@ import { map } from 'lodash';
  */
 import ConfigAPI from '@/config/booking';
 import { getCurrentTimezone } from '@/utils/booking';
+import { cn } from '@/lib/utils';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@doublescale/shared/ui/select';
 
-interface TimezoneSelectProps extends SelectProps {
+interface TimezoneSelectProps {
 	value: string | null;
 	onChange: (value: string) => void;
+	className?: string;
+	disabled?: boolean;
 }
 
 /**
@@ -22,28 +30,31 @@ interface TimezoneSelectProps extends SelectProps {
 const TimezoneSelect: React.FC<TimezoneSelectProps> = ({
 	value,
 	onChange,
-	...rest
+	className,
+	disabled,
 }) => {
 	const timezones = ConfigAPI.getTimezones();
 
-	const options = map(timezones, (label, val) => ({
-		label,
-		value: val,
-	}));
+	const currentValue = value ?? getCurrentTimezone();
+	const currentLabel = timezones?.[currentValue] ?? currentValue;
 
 	return (
-		<Select<string>
-			size="middle"
-			value={value ?? getCurrentTimezone()}
-			onChange={(newVal) => onChange(newVal)}
-			options={options}
-			{...rest}
-			getPopupContainer={(trigger) =>
-				trigger.parentElement || document.body
-			}
-			popupMatchSelectWidth={false}
-			dropdownStyle={{ minWidth: '100%', width: 'auto' }}
-		/>
+		<Select
+			value={currentValue}
+			onValueChange={onChange}
+			disabled={disabled}
+		>
+			<SelectTrigger className={cn('h-9 w-auto gap-2', className)}>
+				<SelectValue>{currentLabel}</SelectValue>
+			</SelectTrigger>
+			<SelectContent className="max-h-[300px]">
+				{map(timezones, (label, val) => (
+					<SelectItem key={val} value={val}>
+						{label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
 	);
 };
 

@@ -8,6 +8,7 @@ module.exports = {
 		'./src/components/**/*.tsx',
 		'./src/shared/**/*.tsx',
 		'./src/builder/**/*.tsx',
+		'./src/renderer/**/*.tsx',
 	],
 	theme: {
 		container: {

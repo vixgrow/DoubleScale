@@ -2,9 +2,12 @@ import { __ } from '@wordpress/i18n';
 import { AdvancedSettings, Fields, RendererAdvancedSettings } from '@/types/booking';
 import './style.scss';
 import LeftArrowIcon from '../../../../icons/left-arrow-icon';
-import { Alert, Form, Spin } from 'antd';
+import { Alert, AlertDescription } from '@doublescale/shared/ui/alert';
+import { Spinner } from '@doublescale/shared/ui/spinner';
+import { X } from 'lucide-react';
 import FormField from '../../../inputs';
-import { useEffect, useState } from 'react';
+import { BookingForm } from '../../../inputs/form-bridge';
+import { useEffect, useMemo, useState } from 'react';
 import { useApi } from '@/hooks/booking';
 import { css } from '@emotion/css';
 import { applyFilters } from '@wordpress/hooks';
@@ -34,7 +37,7 @@ const defaultFields: Fields = {
 interface BookingFormProps {
 	fields?: Fields;
 	setStep: (step: number) => void;
-	onSubmit: (values: any) => void;
+	onSubmit: (values: Record<string, unknown>) => void;
 	baseColor: string;
 	darkColor: string;
 	prefilledData?: { name?: string; email?: string };
@@ -44,7 +47,7 @@ interface BookingFormProps {
 	isWaitingListSlot?: boolean;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({
+const BookingFormPage: React.FC<BookingFormProps> = ({
 	fields,
 	setStep,
 	onSubmit,
@@ -56,15 +59,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
 	loadingText,
 	isWaitingListSlot = false,
 }) => {
-	const [form] = Form.useForm();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submissionError, setSubmissionError] = useState<string | null>(null);
 	const [countryCode, setCountryCode] = useState<string>('us');
 	const { callApi } = useApi();
 
-	const activeFields = fields && Object.keys(fields.system || {}).length > 0
-		? fields
-		: defaultFields;
+	const activeFields =
+		fields && Object.keys(fields.system || {}).length > 0
+			? fields
+			: defaultFields;
 
 	const defaultButtonText = __(
 		advancedSettings?.submit_button_text || submitButtonFallback,
@@ -97,7 +100,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
 		(a, b) => allFields[a].order - allFields[b].order
 	);
 
-	const handleFinish = async (values: Record<string, any>) => {
+	const initialValues = useMemo(() => {
+		const init: Record<string, unknown> = {};
+		if (prefilledData?.name) init.name = prefilledData.name;
+		if (prefilledData?.email) init.email = prefilledData.email;
+		return init;
+	}, [prefilledData]);
+
+	const handleFinish = async (values: Record<string, unknown>) => {
 		try {
 			setIsSubmitting(true);
 			setSubmissionError(null);
@@ -126,18 +136,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
 		});
 	}, []);
 
-	useEffect(() => {
-		if (prefilledData) {
-			const initialValues: Record<string, any> = {};
-			if (prefilledData.name) initialValues.name = prefilledData.name;
-			if (prefilledData.email) initialValues.email = prefilledData.email;
-
-			if (Object.keys(initialValues).length > 0) {
-				form.setFieldsValue(initialValues);
-			}
-		}
-	}, [prefilledData, form]);
-
 	return (
 		<div className="questions-container">
 			<div className="questions-header">
@@ -151,11 +149,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
 			</div>
 			{waitingListNotice}
 			{sortedFields.length > 0 && (
-				<Form
-					layout="vertical"
-					onFinish={handleFinish}
-					form={form}
-					requiredMark={false}
+				<BookingForm
+					onSubmit={handleFinish}
+					initialValues={initialValues}
 				>
 					{sortedFields.map(
 						(fieldKey, index) =>
@@ -170,16 +166,19 @@ const BookingForm: React.FC<BookingFormProps> = ({
 							)
 					)}
 					{submissionError && (
-						<Alert
-							message={submissionError}
-							type="error"
-							showIcon
-							closable
-							onClose={() => setSubmissionError(null)}
-							style={{ marginBottom: 16 }}
-						/>
+						<Alert variant="destructive" className="mb-4 flex items-start justify-between gap-2">
+							<AlertDescription>{submissionError}</AlertDescription>
+							<button
+								type="button"
+								onClick={() => setSubmissionError(null)}
+								className="p-0 bg-transparent border-0 cursor-pointer text-destructive"
+								aria-label={__('Dismiss', 'doublescale')}
+							>
+								<X className="h-4 w-4" />
+							</button>
+						</Alert>
 					)}
-					<Form.Item className="schedule-btn-container">
+					<div className="schedule-btn-container">
 						<button
 							className={`schedule-btn ${css`
 								background-color: ${baseColor};
@@ -192,21 +191,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
 						>
 							{isSubmitting ? (
 								<>
-									<Spin
-										size="small"
-										style={{ marginRight: '8px' }}
-									/>
+									<Spinner className="mr-2 h-4 w-4" />
 									{submittingText}
 								</>
 							) : (
 								submitButtonText
 							)}
 						</button>
-					</Form.Item>
-				</Form>
+					</div>
+				</BookingForm>
 			)}
 		</div>
 	);
 };
 
-export default BookingForm;
+export default BookingFormPage;

@@ -102,16 +102,23 @@ class BookingFrontendHandler {
 			true
 		);
 
+		$timezones = \DateTimeZone::listIdentifiers();
+		$tz_map    = array();
+		foreach ( $timezones as $tz ) {
+			$tz_map[ $tz ] = $tz;
+		}
+
 		wp_localize_script(
 			'doublescale-booking-renderer',
 			'doublescale_booking_config',
 			apply_filters(
 				'doublescale_booking_config',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'nonce'    => wp_create_nonce( 'doublescale_booking' ),
-					'url'      => home_url(),
-					'lang'     => get_locale(),
+					'ajax_url'  => admin_url( 'admin-ajax.php' ),
+					'nonce'     => wp_create_nonce( 'doublescale_booking' ),
+					'url'       => home_url(),
+					'lang'      => get_locale(),
+					'timezones' => $tz_map,
 				)
 			)
 		);

@@ -27,11 +27,24 @@ const parentData: Partial<ConfigData> =
 		? (window.doublescaleConfig as Partial<ConfigData>)
 		: {}) as Partial<ConfigData>;
 
+// The public booking renderer is a separate SPA bundled at build/renderer/
+// and gets its own `window.doublescale_booking_config` payload (set by
+// BookingFrontendHandler.php). When the admin payload is absent, fall back
+// to the renderer payload so shared booking utilities (timezones, locale, …)
+// work on the public booking page too.
+const rendererData: Partial<ConfigData> =
+	(typeof window !== 'undefined' &&
+	(window as unknown as { doublescale_booking_config?: Partial<ConfigData> })
+		.doublescale_booking_config
+		? ((window as unknown as { doublescale_booking_config: Partial<ConfigData> })
+				.doublescale_booking_config)
+		: {}) as Partial<ConfigData>;
+
 const serverData: Partial<ConfigData> =
 	((typeof window !== 'undefined' && window.doublescaleConfig) as
 		| { booking?: Partial<ConfigData> }
 		| undefined
-	)?.booking ?? {};
+	)?.booking ?? rendererData;
 
 const configData: ConfigData = {
 	blogName: serverData.blogName || parentData.blogName || '',

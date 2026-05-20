@@ -5,7 +5,6 @@ export const COLORS = [
   { name: "Light Green", hex: "#E4FAEC" },
   { name: "Light Red", hex: "#FBE8E8" },
   { name: "Light Gray", hex: "#F8F8F8" },
-  { name: "Blue Transparent", hex: "#5570F129" },
   { name: "Mint", hex: "#EFFFF5" },
   { name: "Sky Blue", hex: "#E4EEFD" },
   { name: "Soft Blue", hex: "#EEF5FF" },

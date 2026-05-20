@@ -29,7 +29,7 @@ export type ConfigData = Record<string, unknown> & {
 	importers: Importers;
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
-	dealPriorities: DealPriority[];
+	dealPriorities: Record<string, DealPriority>;
 	doublescaleInfo: DoubleScaleInfo;
 	license: License | false;
 	proPluginData: ProPluginData;

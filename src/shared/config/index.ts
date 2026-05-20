@@ -114,7 +114,7 @@ const configData: ConfigData = {
 		defaultUserCapabilities,
 	defaultStages: (serverData.defaultStages as DefaultStage[] | undefined) ?? [],
 	dealPriorities:
-		(serverData.dealPriorities as DealPriority[] | undefined) ?? [],
+		(serverData.dealPriorities as Record<string, DealPriority> | undefined) ?? {},
 	doublescaleInfo:
 		(serverData.smtpInfo as DoubleScaleInfo | undefined) ??
 		(serverData.doublescaleInfo as DoubleScaleInfo | undefined) ?? {
@@ -680,7 +680,7 @@ export const setDefaultStages = (data: ConfigData) => (value: DefaultStage[]) =>
  * 
  * @returns DealPriority[]
  */
-export const getDealPriorities = (data: ConfigData): DealPriority[] => {
+export const getDealPriorities = (data: ConfigData): Record<string, DealPriority> => {
 	return data.dealPriorities;
 };
 
@@ -690,7 +690,7 @@ export const getDealPriorities = (data: ConfigData): DealPriority[] => {
  * @param data the json environment configuration to use for getting config values
  * @param value the value to set
  */
-export const setDealPriorities = (data: ConfigData) => (value: DealPriority[]) => {
+export const setDealPriorities = (data: ConfigData) => (value: Record<string, DealPriority>) => {
 	data.dealPriorities = value;
 };
 
@@ -910,8 +910,8 @@ export interface ConfigApi {
 	setUserCapabilities: (value: UserCapabilities) => void;
 	getDefaultStages: () => DefaultStage[];
 	setDefaultStages: (value: DefaultStage[]) => void;
-	getDealPriorities: () => DealPriority[];
-	setDealPriorities: (value: DealPriority[]) => void;
+	getDealPriorities: () => Record<string, DealPriority>;
+	setDealPriorities: (value: Record<string, DealPriority>) => void;
 	getDoubleScaleInfo: () => DoubleScaleInfo;
 	setDoubleScaleInfo: (value: DoubleScaleInfo) => void;
 	getCurrency: () => string;

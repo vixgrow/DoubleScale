@@ -56,6 +56,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 		onFiltersChange({
 			search: '',
 			ownerId: null,
+			owner: null,
 			expectedCloseDateRange: { from: null, to: null },
 			createdDateRange: { from: null, to: null },
 			valueRange: { min: null, max: null },
@@ -100,11 +101,13 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 
 							<InfiniteScrollSelect
 								value={filters.ownerId || undefined}
-								onValueChange={(value) =>
-									handleFilterChange(
-										'ownerId',
-										value ? Number(value) : null
-									)
+								selectedItem={filters.owner ?? undefined}
+								onValueChange={(value, item) =>
+									onFiltersChange({
+										...filters,
+										ownerId: value ? Number(value) : null,
+										owner: value && item ? item : null,
+									})
 								}
 								placeholder={__('Select All Owner', 'doublescale')}
 								apiEndpoint="/doublescale/v1/user-management/users/frontend"

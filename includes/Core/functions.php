@@ -202,9 +202,6 @@ if ( ! function_exists( 'doublescale_resolve_deal_model_class' ) ) {
 		if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\DealModel' ) ) {
 			return '\DoubleScale\Pro\Modules\Deals\Models\DealModel';
 		}
-		if ( class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
-			return '\DoubleScale\Modules\Deals\Models\DealModel';
-		}
 		return null;
 	}
 }

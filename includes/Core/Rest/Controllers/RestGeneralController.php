@@ -82,19 +82,13 @@ class RestGeneralController extends RestController {
 	}
 
 	/**
-	 * Resolves DealModel FQCN when the Deals module is installed.
-	 *
-	 * Tries the canonical Pro namespace first, then the unprefixed alias that
-	 * Pro's autoloader exposes.
+	 * Resolves DealModel FQCN when the Pro Deals module is installed.
 	 *
 	 * @return class-string|null
 	 */
 	private function resolve_deal_model_class(): ?string {
 		if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\DealModel' ) ) {
 			return '\DoubleScale\Pro\Modules\Deals\Models\DealModel';
-		}
-		if ( class_exists( '\DoubleScale\Modules\Deals\Models\DealModel' ) ) {
-			return '\DoubleScale\Modules\Deals\Models\DealModel';
 		}
 
 		return null;

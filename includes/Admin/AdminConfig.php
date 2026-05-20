@@ -24,8 +24,6 @@ use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Website\License;
-// use DoubleScale\Modules\Deals\Services\PipelineManager; // Moved to Pro
-// use DoubleScale\Modules\Deals\Services\DealManager; // Moved to Pro
 
 /**
  * Admin SPA configuration emitter.
@@ -129,8 +127,12 @@ final class AdminConfig {
 				'importers'           => Importers_Manager::instance()->get_options(),
 				'userCapabilities'    => $user_capabilities,
 				'currentUser'         => $current_user,
-				'defaultStages'       => class_exists( 'DoubleScale\Modules\Deals\Services\PipelineManager' ) ? \DoubleScale\Modules\Deals\Services\PipelineManager::instance()->get_default_stages() : array(),
-				'dealPriorities'      => class_exists( 'DoubleScale\Modules\Deals\Services\DealManager' ) ? \DoubleScale\Modules\Deals\Services\DealManager::instance()->get_deal_priorities() : array(),
+				'defaultStages'       => class_exists( 'DoubleScale\Pro\Modules\Deals\Services\PipelineManager' )
+					? \DoubleScale\Pro\Modules\Deals\Services\PipelineManager::instance()->get_default_stages()
+					: array(),
+				'dealPriorities'      => class_exists( 'DoubleScale\Pro\Modules\Deals\Services\DealManager' )
+					? \DoubleScale\Pro\Modules\Deals\Services\DealManager::instance()->get_deal_priorities()
+					: array(),
 				'smtpInfo'       => $smtp_info,
 				'currency'            => Settings::get_currency(),
 				'urlDoubleScalePro' => $url_doublescale_pro,

@@ -118,7 +118,9 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 				{!viewMode && <StepReorderControls step={step} />}
 
 				<div className="doublescale-reactflow-node__card-inner">
-					<div className="doublescale-reactflow-node__header-row doublescale-reactflow-node__header-row--end">
+					<div
+						className={`doublescale-reactflow-node__header-row doublescale-reactflow-node__header-row--end${viewMode ? ' doublescale-reactflow-node__header-row--reports' : ''}`}
+					>
 						<div className="doublescale-reactflow-node__header-left">
 							<div className="doublescale-reactflow-node__icon">
 								<EndAutomationIcon width={24} height={24} />
@@ -129,16 +131,18 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 								</div>
 							</div>
 						</div>
-						<NodeActionsDropdown
-							onDelete={handleDelete}
-							showEdit={false}
-							deleteLabel={__('Delete Exit', 'doublescale')}
-							deleteTitle={__('Delete this exit step?', 'doublescale')}
-							deleteDescription={__(
-								'This action cannot be undone.',
-								'doublescale'
-							)}
-						/>
+						{!viewMode && (
+							<NodeActionsDropdown
+								onDelete={handleDelete}
+								showEdit={false}
+								deleteLabel={__('Delete Exit', 'doublescale')}
+								deleteTitle={__('Delete this exit step?', 'doublescale')}
+								deleteDescription={__(
+									'This action cannot be undone.',
+									'doublescale'
+								)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

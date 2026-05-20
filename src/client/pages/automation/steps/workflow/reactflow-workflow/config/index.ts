@@ -6,8 +6,10 @@ const LAYOUT_CONSTANTS = {
 	ADD_STEP_WIDTH: 30,
 	NODE_YES_NO_WIDTH: 60,
 	START_X: 250,
-	START_Y: 50,
+	START_Y: 16,
 	INCREMENT_Y: 250,
+	/** Pixels between tab bar and top of trigger (used with setViewport) */
+	VIEWPORT_TOP_GAP: 24,
 	EDGE_STROKE_WIDTH: 2,
 	CONDITION_EDGE_STROKE_WIDTH: 3,
 	MINIMAP_HEIGHT: 120,

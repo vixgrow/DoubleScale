@@ -70,7 +70,8 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 			<div
 				className={cn(
 					'doublescale-reactflow-node__header-row',
-					`doublescale-reactflow-node__header-row--${variant}`
+					`doublescale-reactflow-node__header-row--${variant}`,
+					viewMode && 'doublescale-reactflow-node__header-row--reports'
 				)}
 			>
 				<div className="doublescale-reactflow-node__header-left">
@@ -81,18 +82,20 @@ const NodeLayout: React.FC<NodeLayoutProps> = ({
 						</div>
 					</div>
 				</div>
-				<NodeActionsDropdown
-					onEdit={onEdit}
-					onDelete={onDelete}
-					onChangeTrigger={onChangeTrigger}
-					editLabel={editLabel}
-					deleteLabel={deleteLabel}
-					changeTriggerLabel={changeTriggerLabel}
-					deleteTitle={deleteTitle}
-					deleteDescription={deleteDescription}
-					showDelete={showDelete}
-					showChangeTrigger={showChangeTrigger}
-				/>
+				{!viewMode && (
+					<NodeActionsDropdown
+						onEdit={onEdit}
+						onDelete={onDelete}
+						onChangeTrigger={onChangeTrigger}
+						editLabel={editLabel}
+						deleteLabel={deleteLabel}
+						changeTriggerLabel={changeTriggerLabel}
+						deleteTitle={deleteTitle}
+						deleteDescription={deleteDescription}
+						showDelete={showDelete}
+						showChangeTrigger={showChangeTrigger}
+					/>
+				)}
 			</div>
 
 			<div className="doublescale-reactflow-node__body-row">

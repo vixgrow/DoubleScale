@@ -92,6 +92,33 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	});
 	// Track previous sidebar state to detect when it closes
 	const prevSidebarOpenRef = useRef<boolean>(false);
+	const initialViewportSetRef = useRef(false);
+
+	const focusViewportOnTrigger = useCallback(
+		(duration = 0) => {
+			const trigger = reactFlowInstance?.getNode('trigger');
+			if (!trigger || !reactFlowInstance) {
+				return;
+			}
+
+			const canvasEl = document.querySelector(
+				'.doublescale-reactflow-workflow__canvas'
+			);
+			const canvasWidth =
+				canvasEl?.getBoundingClientRect().width ?? 800;
+			const zoom = 1;
+			const topGap = LAYOUT_CONSTANTS.VIEWPORT_TOP_GAP;
+			const nodeCenterX =
+				trigger.position.x + LAYOUT_CONSTANTS.NODE_WIDTH / 2;
+
+			// Pin trigger near top of canvas — fitView centers one node and leaves a huge gap
+			const x = canvasWidth / 2 - nodeCenterX * zoom;
+			const y = topGap - trigger.position.y * zoom;
+
+			void reactFlowInstance.setViewport({ x, y, zoom }, { duration });
+		},
+		[reactFlowInstance]
+	);
 
 	// ReactFlow state management
 	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -296,6 +323,44 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		isTriggerVisible,
 	]);
 
+	useEffect(() => {
+		initialViewportSetRef.current = false;
+	}, [automation?.id]);
+
+	// After refresh: anchor on trigger with gap below tabs (not full-workflow fitView)
+	useEffect(() => {
+		if (!reactFlowInstance || nodesState.length === 0) {
+			return undefined;
+		}
+		if (initialViewportSetRef.current || isTriggerVisible || currentStep?.id) {
+			return undefined;
+		}
+
+		const timer = setTimeout(() => {
+			focusViewportOnTrigger(0);
+			initialViewportSetRef.current = true;
+		}, 50);
+
+		const retry = setTimeout(() => {
+			if (!initialViewportSetRef.current) {
+				focusViewportOnTrigger(0);
+				initialViewportSetRef.current = true;
+			}
+		}, 300);
+
+		return () => {
+			clearTimeout(timer);
+			clearTimeout(retry);
+		};
+	}, [
+		automation?.id,
+		nodesState.length,
+		reactFlowInstance,
+		focusViewportOnTrigger,
+		isTriggerVisible,
+		currentStep?.id,
+	]);
+
 	// Track sidebar state and handle focus out when it closes
 	useEffect(() => {
 		if (!reactFlowInstance) return undefined;
@@ -312,10 +377,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					action: null,
 					type: null,
 				};
-				reactFlowInstance.fitView({
-					duration: 400,
-					padding: 0.2,
-				});
+				focusViewportOnTrigger(400);
+				initialViewportSetRef.current = true;
 			}, 100);
 
 			prevSidebarOpenRef.current = isSidebarOpen;
@@ -325,7 +388,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		// Update previous sidebar state
 		prevSidebarOpenRef.current = isSidebarOpen;
 		return undefined;
-	}, [isSidebarOpen, reactFlowInstance]);
+	}, [isSidebarOpen, reactFlowInstance, focusViewportOnTrigger]);
 
 	// Focus on selected node when currentStep changes or trigger is selected
 	useEffect(() => {
@@ -338,14 +401,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				const node = reactFlowInstance.getNode('trigger');
 
 				if (node) {
-					// Center the view on the trigger node with animation
-					reactFlowInstance.fitView({
-						nodes: [{ id: 'trigger' }],
-						duration: 400,
-						padding: 0.5,
-						minZoom: 0.8,
-						maxZoom: 1.2,
-					});
+					focusViewportOnTrigger(400);
 				}
 			}, 100); // Small delay to ensure nodes are updated
 
@@ -419,6 +475,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		isTriggerVisible,
 		reactFlowInstance,
 		nodesState,
+		focusViewportOnTrigger,
 	]);
 
 	// ========== POSITION MANAGEMENT ==========
@@ -535,8 +592,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						onNodeClick={viewMode ? undefined : onNodeClick}
 						nodeTypes={NODE_TYPES}
 						edgeTypes={EDGE_TYPES}
-						fitView
-						fitViewOptions={{ padding: 0.2 }}
 						nodesConnectable={false}
 						elementsSelectable={!viewMode}
 						nodesDraggable={false}

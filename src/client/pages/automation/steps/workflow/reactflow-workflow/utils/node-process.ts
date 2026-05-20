@@ -22,10 +22,11 @@ const initializeTrigger = (
 	viewMode = false,
 	analyticsData = []
 ) => {
-	// Always add trigger node at the top
-	const triggerPosition = savedPositions['trigger'] || {
-		x: startX,
-		y: startY,
+	// Always add trigger node at the top (clamp saved Y so it stays below the tab bar)
+	const savedTrigger = savedPositions['trigger'];
+	const triggerPosition = {
+		x: savedTrigger?.x ?? startX,
+		y: Math.max(savedTrigger?.y ?? startY, startY),
 	};
 	
 	// Get trigger analytics

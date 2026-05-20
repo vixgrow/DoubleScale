@@ -183,7 +183,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 			<span
 				style={{
 					fontWeight: 'bold',
-					color: hasWarning ? '#f59e0b' : 'green',
+					color: hasWarning ? '#f59e0b' : '#29292E',
 				}}
 			>
 				{triggerName}

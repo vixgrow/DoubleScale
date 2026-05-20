@@ -101,6 +101,33 @@
 	.react-flow__attribution {
 		display: none;
 	}
+
+	// Reports tab: centered header, no three-dots menu
+	&--view-mode {
+		.doublescale-reactflow-node--card-layout {
+			.doublescale-reactflow-node__header-row--reports {
+				justify-content: center;
+
+				.doublescale-reactflow-node__header-left {
+					flex: 0 1 auto;
+					justify-content: center;
+					gap: 8px;
+				}
+
+				.doublescale-reactflow-node__content {
+					flex: 0 1 auto;
+				}
+
+				.doublescale-reactflow-node__title {
+					text-align: center;
+				}
+			}
+
+			.doublescale-reactflow-node__subtitle {
+				color: #29292e;
+			}
+		}
+	}
 }
 
 // Loading State Styles
@@ -378,9 +405,13 @@
 
 		.doublescale-reactflow-node__subtitle {
 			font-size: 14px;
-			color: #29292E;
+			color: #29292e;
 			line-height: 24px;
 			font-weight: 500;
+		}
+
+		.doublescale-reactflow-node--trigger .doublescale-reactflow-node__subtitle {
+			color: #29292e;
 		}
 
 		.doublescale-reactflow-node__body-row {

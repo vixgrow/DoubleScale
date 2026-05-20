@@ -75,6 +75,34 @@ final class Lifecycle {
 			$doublescale_composer_loader = require $doublescale_root_composer;
 		}
 
+		/*
+		 * If the scoper-autoload was previously included (e.g. by Pro's
+		 * bootstrap when Pro loads before Free), `require` returns true
+		 * instead of the ClassLoader. Recover the existing loader by scanning
+		 * the spl autoload chain for the Composer ClassLoader whose vendor dir
+		 * is rooted under this plugin.
+		 */
+		if ( ! $doublescale_composer_loader instanceof \Composer\Autoload\ClassLoader ) {
+			$doublescale_vendor_dir = $dir . 'dependencies/build/vendor';
+			foreach ( spl_autoload_functions() as $doublescale_spl_fn ) {
+				if ( ! is_array( $doublescale_spl_fn ) || ! isset( $doublescale_spl_fn[0] ) ) {
+					continue;
+				}
+				$doublescale_spl_obj = $doublescale_spl_fn[0];
+				if ( ! $doublescale_spl_obj instanceof \Composer\Autoload\ClassLoader ) {
+					continue;
+				}
+				foreach ( $doublescale_spl_obj->getPrefixesPsr4() as $doublescale_paths ) {
+					foreach ( (array) $doublescale_paths as $doublescale_path ) {
+						if ( 0 === strpos( $doublescale_path, $doublescale_vendor_dir ) ) {
+							$doublescale_composer_loader = $doublescale_spl_obj;
+							break 3;
+						}
+					}
+				}
+			}
+		}
+
 		if ( $doublescale_composer_loader instanceof \Composer\Autoload\ClassLoader
 			&& file_exists( $doublescale_scoped_deps )
 			&& file_exists( $doublescale_root_composer ) ) {

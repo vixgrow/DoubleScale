@@ -341,7 +341,7 @@ const Automation: React.FC = () => {
 					hideCloseButton={!loading && !!automation}
 					className="w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none flex flex-col"
 					style={{
-						paddingTop: '10px',
+						paddingTop: '0px',
 						paddingLeft: '0px',
 						paddingRight: '0px',
 						paddingBottom: '0px',
@@ -574,8 +574,8 @@ const Automation: React.FC = () => {
 									</div>
 								</div>
 
-								{/* Tab row */}
-								<div className="flex justify-center gap-5 border-t border-[#E4E7EC] p-3">
+								{/* Tab row — bottom shadow over workflow canvas */}
+								<div className="relative z-10 flex justify-center gap-5 border-t border-[#E4E7EC] bg-white p-3 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
 									{tabs.map((tab) => {
 										const Icon = tab.icon;
 										const isActive =

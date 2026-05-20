@@ -137,8 +137,8 @@
 		box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 	}
 
-	// Selected state when editing in sidebar
-	&--selected {
+	// Selected state when editing in sidebar (non–card-layout nodes)
+	&--selected:not(&--card-layout) {
 		border-color: #1890ff !important;
 		background-color: #e6f7ff !important;
 		box-shadow:
@@ -286,10 +286,10 @@
 		}
 	}
 
-	// Common hover and selected states for standard nodes
-	&--trigger,
-	&--action,
-	&--goal {
+	// Legacy flat styles — card-layout nodes use rules above
+	&--trigger:not(&--card-layout),
+	&--action:not(&--card-layout),
+	&--goal:not(&--card-layout) {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
 
@@ -332,13 +332,22 @@
 		gap: 0;
 		align-items: stretch;
 		overflow: visible;
+		background: #fff;
+		border: 1px solid #e4e7ec;
+		border-radius: 12px;
+		box-shadow: 0 4px 20px 0 rgba(59, 130, 246, 0.14);
+
+		&:hover {
+			border-color: #d0d5dd;
+			box-shadow: 0 4px 20px 0 rgba(59, 130, 246, 0.18);
+		}
 
 		.doublescale-reactflow-node__card-inner {
 			display: flex;
 			flex-direction: column;
 			width: 100%;
 			overflow: hidden;
-			border-radius: 10px;
+			border-radius: 12px;
 		}
 
 		.doublescale-reactflow-node__content {
@@ -389,7 +398,17 @@
 
 			.doublescale-reactflow-node__title,
 			.doublescale-reactflow-node__icon {
-				color: #CB5301;
+				color: #cb5301;
+			}
+		}
+
+		&--trigger.doublescale-reactflow-node--card-layout {
+			&.doublescale-reactflow-node--selected {
+				border-color: #3a3a99 !important;
+				background: #fff !important;
+				box-shadow:
+					0 4px 20px 0 rgba(59, 130, 246, 0.14),
+					0 0 0 2px rgba(58, 58, 153, 0.12) !important;
 			}
 		}
 
@@ -445,6 +464,10 @@
 
 		&.doublescale-reactflow-node--selected {
 			background: #fff !important;
+			border-color: #3a3a99 !important;
+			box-shadow:
+				0 4px 20px 0 rgba(59, 130, 246, 0.14),
+				0 0 0 2px rgba(58, 58, 153, 0.12) !important;
 		}
 	}
 

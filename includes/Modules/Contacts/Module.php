@@ -114,5 +114,53 @@ final class Module extends AbstractModule {
 			},
 			20
 		);
+
+		/**
+		 * Register Activity filters that query Pro-owned tables only when their owning
+		 * modules are active. `page_visits` lives under `websitetracking` (Pro, non-toggleable);
+		 * `form_submissions` lives under `forms` (Pro, toggleable). Hiding the filters at
+		 * registration time keeps them out of segment builder UIs and prevents SQL errors
+		 * against missing tables on Free-standalone installs or when modules are disabled.
+		 */
+		add_action(
+			'doublescale_ready',
+			static function (): void {
+				if ( ! function_exists( 'doublescale_is_module_active' ) ) {
+					return;
+				}
+
+				$mgr = Filters\FiltersManager::instance();
+
+				if ( doublescale_is_module_active( 'websitetracking' )
+					&& class_exists( Filters\Activity\PageVisited::class, true )
+					&& ! array_key_exists( 'activity_page_visited', $mgr->get_filters() ) ) {
+					try {
+						$mgr->register( new Filters\Activity\PageVisited() );
+					} catch ( \Throwable $e ) {
+						// Duplicate registration or invalid state — do not break bootstrap.
+					}
+				}
+
+				// "Was Active" sums activities + form_submissions + page_visits. Only register
+				// when at least one of the Pro tables it depends on is available; apply() will
+				// skip any missing table at query time as a defense-in-depth fallback.
+				$has_websitetracking = doublescale_is_module_active( 'websitetracking' );
+				$has_forms           = doublescale_is_module_active( 'forms' );
+				if ( ( $has_websitetracking || $has_forms )
+					&& class_exists( Filters\Activity\WasActiveInactive::class, true ) ) {
+					try {
+						if ( ! array_key_exists( 'activity_was_active', $mgr->get_filters() ) ) {
+							$mgr->register( new Filters\Activity\WasActiveInactive( 'Was Active', 'was_active', 'activity_was_active' ) );
+						}
+						if ( ! array_key_exists( 'activity_was_not_active', $mgr->get_filters() ) ) {
+							$mgr->register( new Filters\Activity\WasActiveInactive( 'Was Not Active', 'was_not_active', 'activity_was_not_active' ) );
+						}
+					} catch ( \Throwable $e ) {
+						// Duplicate registration or invalid state — do not break bootstrap.
+					}
+				}
+			},
+			20
+		);
 	}
 }

@@ -131,6 +131,14 @@ class WasActiveInactive extends Filter {
 		$table_page_visits      = $wpdb->prefix . 'doublescale_page_visits';
 		$table_contacts         = $wpdb->prefix . 'doublescale_contacts';
 
+		// Defense-in-depth: only sum from tables that exist. Pro-owned tables
+		// (`form_submissions`, `page_visits`) may be missing on Free-standalone
+		// installs or when their owning modules never bootstrapped.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
+		$has_form_submissions = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_form_submissions ) ) === $table_form_submissions;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
+		$has_page_visits      = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_page_visits ) ) === $table_page_visits;
+
 		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data );
 		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );
 
@@ -143,26 +151,27 @@ class WasActiveInactive extends Filter {
 			$expected_count = 0;
 		}
 
-		// Count total activities across all three tables
+		$sum_parts = array(
+			"(SELECT COUNT(*) FROM {$table_activities} WHERE {$table_activities}.contact_id = {$table_contacts}.id {$sql_timeframe})",
+		);
+		$bindings  = $time_bindings;
+
+		if ( $has_form_submissions ) {
+			$sum_parts[] = "(SELECT COUNT(*) FROM {$table_form_submissions} WHERE {$table_form_submissions}.contact_id = {$table_contacts}.id {$sql_timeframe})";
+			$bindings    = array_merge( $bindings, $time_bindings );
+		}
+		if ( $has_page_visits ) {
+			$sum_parts[] = "(SELECT COUNT(*) FROM {$table_page_visits} WHERE {$table_page_visits}.contact_id = {$table_contacts}.id {$sql_timeframe})";
+			$bindings    = array_merge( $bindings, $time_bindings );
+		}
+
+		$bindings[] = $expected_count;
+
 		$query->whereRaw(
-			"(
-				(SELECT COUNT(*) FROM {$table_activities} WHERE {$table_activities}.contact_id = {$table_contacts}.id {$sql_timeframe})
-				+
-				(SELECT COUNT(*) FROM {$table_form_submissions} WHERE {$table_form_submissions}.contact_id = {$table_contacts}.id {$sql_timeframe})
-				+
-				(SELECT COUNT(*) FROM {$table_page_visits} WHERE {$table_page_visits}.contact_id = {$table_contacts}.id {$sql_timeframe})
-			) {$operator} ?",
-			array_merge(
-				$time_bindings,
-				$time_bindings,
-				$time_bindings,
-				array( $expected_count )
-			)
+			'( ' . implode( ' + ', $sum_parts ) . " ) {$operator} ?",
+			$bindings
 		);
 
 		return $query;
 	}
 }
-
-FiltersManager::instance()->register( new WasActiveInactive( 'Was Active', 'was_active', 'activity_was_active' ) );
-FiltersManager::instance()->register( new WasActiveInactive( 'Was Not Active', 'was_not_active', 'activity_was_not_active' ) );

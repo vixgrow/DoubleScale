@@ -123,6 +123,14 @@ class PageVisited extends Filter {
 	public function apply( Builder $query, $filter = array() ) {
 		global $wpdb;
 
+		// Defense-in-depth: skip if the Pro-owned tracking table isn't present
+		// (Free-standalone install, or websitetracking never bootstrapped).
+		$table_activities = $wpdb->prefix . 'doublescale_page_visits';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_activities ) ) !== $table_activities ) {
+			return $query;
+		}
+
 		$value = $filter['value'] ?? array();
 
 		$page_guid      = $value['guid'] ?? '';
@@ -138,8 +146,7 @@ class PageVisited extends Filter {
 
 		$operator = $this->get_comparison_operator( $count_type );
 
-		$table_activities = $wpdb->prefix . 'doublescale_page_visits';
-		$table_contacts   = $wpdb->prefix . 'doublescale_contacts';
+		$table_contacts = $wpdb->prefix . 'doublescale_contacts';
 
 		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data );
 		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );
@@ -211,5 +218,3 @@ class PageVisited extends Filter {
 		return array( $path );
 	}
 }
-
-FiltersManager::instance()->register( new PageVisited() );

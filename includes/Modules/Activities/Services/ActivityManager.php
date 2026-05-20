@@ -999,10 +999,12 @@ final class ActivityManager {
 			$count_queries[]  = $activities_sql['count'];
 		}
 
-		// Include tasks when Pro is active.
+		// Include tasks when Pro is active AND the Tasks module is enabled.
+		// Class existence proves Pro loaded; the option toggle proves the admin
+		// hasn't disabled the module (table persists across module disables).
 		// Note: activity_type filtering is handled by get_activities(), not here.
 		// This method always returns all activities + tasks (when Pro active).
-		if ( $pro_active ) {
+		if ( $pro_active && ( ! function_exists( 'doublescale_is_module_active' ) || doublescale_is_module_active( 'tasks' ) ) ) {
 			$tasks_sql = $this->build_tasks_union_sql( $filters, $wpdb );
 			if ( $tasks_sql ) {
 				$select_queries[] = $tasks_sql['select'];
@@ -1012,18 +1014,24 @@ final class ActivityManager {
 
 		// Include tracking events (opens/clicks) and page visits when viewing
 		// a contact timeline without deal/user filters.
-		$tracking_sqls = $this->build_tracking_union_sqls( $filters, $wpdb );
-		if ( $tracking_sqls ) {
-			foreach ( $tracking_sqls as $sql ) {
-				$select_queries[] = $sql['select'];
-				$count_queries[]  = $sql['count'];
+		if ( ! function_exists( 'doublescale_is_module_active' ) || doublescale_is_module_active( 'tracking' ) ) {
+			$tracking_sqls = $this->build_tracking_union_sqls( $filters, $wpdb );
+			if ( $tracking_sqls ) {
+				foreach ( $tracking_sqls as $sql ) {
+					$select_queries[] = $sql['select'];
+					$count_queries[]  = $sql['count'];
+				}
 			}
 		}
 
-		$page_visits_sql = $this->build_page_visits_union_sql( $filters, $wpdb );
-		if ( $page_visits_sql ) {
-			$select_queries[] = $page_visits_sql['select'];
-			$count_queries[]  = $page_visits_sql['count'];
+		// Page visits table is owned by Pro's WebsiteTracking module — without
+		// this gate, a Free-standalone install hits "Table doesn't exist".
+		if ( ! function_exists( 'doublescale_is_module_active' ) || doublescale_is_module_active( 'websitetracking' ) ) {
+			$page_visits_sql = $this->build_page_visits_union_sql( $filters, $wpdb );
+			if ( $page_visits_sql ) {
+				$select_queries[] = $page_visits_sql['select'];
+				$count_queries[]  = $page_visits_sql['count'];
+			}
 		}
 
 		// If no queries, return empty.

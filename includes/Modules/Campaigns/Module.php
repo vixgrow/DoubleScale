@@ -63,7 +63,6 @@ final class Module extends AbstractModule {
 		return array(
 			Rest\Controllers\RestCampaignController::class,
 			Rest\Controllers\RestTemplateController::class,
-			Rest\Controllers\RestAiEmailBuilderController::class,
 		);
 	}
 

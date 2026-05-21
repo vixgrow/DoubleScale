@@ -1,7 +1,5 @@
 [
-    "RestAbandonedCartController",
     "RestActivityController",
-    "RestAiEmailBuilderController",
     "RestAutomationContactController",
     "RestAutomationController",
     "RestAutomationStepController",

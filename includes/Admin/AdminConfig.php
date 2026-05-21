@@ -221,6 +221,9 @@ final class AdminConfig {
 	 * @return bool True when a provider and Api key (or custom provider) are set.
 	 */
 	private static function is_ai_configured() {
+		if ( ! defined( 'DOUBLESCALE_PRO_PLUGIN_DIR' ) ) {
+			return false;
+		}
 		$ai = Settings::get( 'ai', array() );
 		return ! empty( $ai['provider'] )
 			&& ( 'custom' === $ai['provider'] || ! empty( $ai['api_key'] ) );

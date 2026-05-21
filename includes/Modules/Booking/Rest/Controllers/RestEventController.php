@@ -1088,7 +1088,9 @@ class RestEventController extends RestController {
 					: null;
 			}
 
-			$event->setReserveTimesAttribute( $reserve_times );
+			if ( $request->has_param( 'reserve_times' ) ) {
+				$event->setReserveTimesAttribute( $reserve_times );
+			}
 
 			$waiting_list = $request->get_param( 'waiting_list' );
 			if ( isset( $waiting_list ) ) {

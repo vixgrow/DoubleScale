@@ -110,7 +110,7 @@ export type Event = {
 	hosts?: Host[];
 	fields?: EventMetaData[];
 	availability?: Availability;
-	reserve: boolean;
+	reserve_times: boolean;
 	payments_settings: PaymentsSettings;
 	connected_integrations: {
 		apple: ConnectedIntegrationsFields;

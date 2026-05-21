@@ -201,6 +201,7 @@ const AvailabilityLimits = forwardRef<EventTabHandle, EventTabProps>(
 			setEventAvailability(event.availability || null);
 			setAvailabilityMeta(event.availability_meta || null);
 			setAvailabilityType(event.availability_type);
+			setReservetimes(event.reserve_times ?? false);
 		}, [event]);
 
 		useImperativeHandle(ref, () => ({

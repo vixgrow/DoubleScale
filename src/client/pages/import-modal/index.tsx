@@ -91,7 +91,7 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 	);
 
 	const breadcrumbItems = getImportBreadcrumbItems(source, wizardStep);
-	const isNaturalHeightWizardStep = wizardStep === 3;
+	const isWizardStep = wizardStep > 1;
 
 	const handleBreadcrumbNavigate = (href: string) => {
 		onDismiss();
@@ -116,11 +116,7 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 				<div
 					className={cn(
 						'import-modal-content mx-auto flex w-full max-w-[1680px] flex-col rounded-[20px] bg-white p-6 pb-8 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]',
-						wizardStep > 1 &&
-							!isNaturalHeightWizardStep &&
-							'import-modal-content--wizard min-h-0 flex-1',
-						isNaturalHeightWizardStep &&
-							'import-modal-content--natural-height'
+						isWizardStep && 'import-modal-content--natural-height'
 					)}
 				>
 					{wizardStep > 1 && source && (
@@ -155,23 +151,9 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 						</>
 					) : (
 						<>
-							<div
-								className={cn(
-									'import-modal-wizard__layout flex min-w-0 gap-6',
-									isNaturalHeightWizardStep
-										? 'import-modal-wizard__layout--natural items-start'
-										: 'min-h-0 flex-1'
-								)}
-							>
+							<div className="import-modal-wizard__layout import-modal-wizard__layout--natural flex min-w-0 items-start gap-6">
 								<ImportWizardSidebar />
-								<div
-									className={cn(
-										'import-modal-wizard__main min-w-0 flex-1',
-										isNaturalHeightWizardStep &&
-											'import-modal-wizard__main--natural',
-										!isNaturalHeightWizardStep && 'min-h-0'
-									)}
-								>
+								<div className="import-modal-wizard__main import-modal-wizard__main--natural min-w-0 flex-1">
 									<MainContent
 										onImportComplete={handleImportComplete}
 									/>

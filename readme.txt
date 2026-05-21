@@ -168,7 +168,7 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 
 = How do I get help? =
 
-Documentation: [doublescale.io/docs](https://doublescale.io/docs). Community support via WordPress.org. Pro tiers include email and priority support.
+Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
 
@@ -193,6 +193,11 @@ Privacy-minded operators have access to: per-contact GDPR exports, hard-delete w
 == External Services ==
 
 DoubleScale connects to external services **only when you configure** those integrations. No data is transmitted without your API keys, OAuth grants, or explicit provider setup. Each provider listed below is independent of DoubleScale; using one means you also agree to that provider's terms and privacy policy.
+
+For every service below:
+
+* **Endpoint** — API base URL used after you save credentials (not a public marketing or documentation page; it may not load in a browser).
+* **Terms** / **Privacy** — Public legal pages for that provider. These are the URLs WordPress reviewers and site owners should open to read each service's policies.
 
 = AI services =
 
@@ -344,13 +349,11 @@ Disable any connector by removing its credentials in **DoubleScale → Settings*
 
 == Credits ==
 
-* **Website:** [doublescale.io](https://doublescale.io)
-* **Documentation:** [doublescale.io/docs](https://doublescale.io/docs)
+* **Website & documentation:** [doublescale.io](https://doublescale.io)
 
 == Support ==
 
-* **Docs:** [doublescale.io/docs](https://doublescale.io/docs)
-* **Website:** [doublescale.io](https://doublescale.io)
+* **Website & documentation:** [doublescale.io](https://doublescale.io)
 * **WordPress.org support:** https://wordpress.org/support/plugin/doublescale/ (when the plugin listing is public)
 
 == Contribute ==

@@ -139,17 +139,6 @@ const QuestionInputs: React.FC<QuestionInputsProps> = ({
 				/>
 			)}
 
-			{type === 'phone' && (
-				<div className="flex items-center gap-2">
-					<Checkbox
-						className="custom-checkbox"
-						checked={values.settings?.sms || false}
-						onCheckedChange={(checked) => updateSetting('sms', Boolean(checked))}
-					/>
-					<span>{__('Use this number for sending sms notification', 'doublescale')}</span>
-				</div>
-			)}
-
 			{(type === 'select' || type === 'multiple_select' || type === 'radio' || type === 'checkbox_group') &&
 				fieldKey !== 'location-select' && (
 					<>

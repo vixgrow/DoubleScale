@@ -60,7 +60,26 @@ const QuestionInfo: React.FC<QuestionInfoProps> = ({
 						allFields[fieldKey].group === 'system' ||
 						allFields[fieldKey].group === 'location' ||
 						allFields[fieldKey].group === 'other'
-					} />
+					}
+				>
+					<SelectTrigger className="min-w-[160px]">
+						<SelectValue placeholder={__('Select type', 'doublescale')} />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="text">{__('Text', 'doublescale')}</SelectItem>
+						<SelectItem value="textarea">{__('Textarea', 'doublescale')}</SelectItem>
+						<SelectItem value="email">{__('Email', 'doublescale')}</SelectItem>
+						<SelectItem value="phone">{__('Phone', 'doublescale')}</SelectItem>
+						<SelectItem value="url">{__('URL', 'doublescale')}</SelectItem>
+						<SelectItem value="number">{__('Number', 'doublescale')}</SelectItem>
+						<SelectItem value="checkbox">{__('Checkbox', 'doublescale')}</SelectItem>
+						<SelectItem value="select">{__('Select', 'doublescale')}</SelectItem>
+						<SelectItem value="multiple_select">{__('Multiple Select', 'doublescale')}</SelectItem>
+						<SelectItem value="radio">{__('Radio', 'doublescale')}</SelectItem>
+						<SelectItem value="time">{__('Time', 'doublescale')}</SelectItem>
+						<SelectItem value="terms">{__('Terms', 'doublescale')}</SelectItem>
+					</SelectContent>
+				</Select>
 			</div>
             <div className="flex gap-2">
 				{allFields[fieldKey].group == 'system' && (

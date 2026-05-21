@@ -142,7 +142,7 @@ final class AdminConfig {
 				'addons'              => self::get_addons_status(),
 				'storeNonce'          => wp_create_nonce( 'doublescale-admin' ),
 			'aiConfigured'        => self::is_ai_configured(),
-			'aiAssistantEnabled'  => false,
+			'aiAssistantEnabled'  => self::is_ai_assistant_enabled(),
 			'modules'             => self::get_modules_config(),
 			)
 		);
@@ -224,6 +224,33 @@ final class AdminConfig {
 		$ai = Settings::get( 'ai', array() );
 		return ! empty( $ai['provider'] )
 			&& ( 'custom' === $ai['provider'] || ! empty( $ai['api_key'] ) );
+	}
+
+	/**
+	 * Check whether the AI Assistant addon is active and the current user has access.
+	 *
+	 * The addon hooks `doublescale_admin_config` to flip this to true when
+	 * it loads, but we also detect it eagerly here so the flag is accurate
+	 * even if the addon's hook fires after this method runs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private static function is_ai_assistant_enabled() {
+		if ( ! self::is_ai_configured() ) {
+			return false;
+		}
+
+		$store = \DoubleScale\Website\Store::instance();
+		$addon = $store->get_addon( 'ai-assistant' );
+
+		if ( ! $addon || empty( $addon['is_active'] ) ) {
+			return false;
+		}
+
+		$result = Permissions::has_ai_access();
+		return true === $result;
 	}
 
 	/**

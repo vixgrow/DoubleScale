@@ -77,9 +77,8 @@ const SECTION_ORDER: Record<string, { label: string; order: number }> = {
 	main: { label: __('Main', 'doublescale'), order: 0 },
 	crm: { label: __('CRM', 'doublescale'), order: 1 },
 	marketing: { label: __('Marketing', 'doublescale'), order: 2 },
-	ai: { label: __('AI', 'doublescale'), order: 3 },
-	insights: { label: __('Insights', 'doublescale'), order: 4 },
-	system: { label: __('System', 'doublescale'), order: 5 },
+	insights: { label: __('Insights', 'doublescale'), order: 3 },
+	system: { label: __('System', 'doublescale'), order: 4 },
 };
 
 const PATH_TO_SECTION: Record<string, string> = {
@@ -93,7 +92,6 @@ const PATH_TO_SECTION: Record<string, string> = {
 	forms: 'marketing',
 	automations: 'marketing',
 	'email-sequences': 'marketing',
-	'ai-hub': 'ai',
 	'analytics-and-reports': 'insights',
 	integrations: 'system',
 	'smtp/:tab?': 'system',
@@ -141,7 +139,6 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'analytics-and-reports': 'analytics',
 	booking: 'booking',
 	'abandoned-carts': 'campaigns',
-	'ai-hub': 'automations',
 	extensions: 'integrations',
 };
 

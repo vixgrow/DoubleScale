@@ -98,9 +98,7 @@ class Store {
 				'name'        => 'AI Assistant',
 				'slug'        => 'ai-assistant',
 				'description' => __( 'AI-powered CRM assistant with chat panel, tool calling, conversation history, and MCP tools for managing contacts, deals, campaigns, and more.', 'doublescale' ),
-				'plugin_file' => file_exists( $plugins_dir . 'DoubleScale-AIAssistant/doublescale-ai-assistant.php' )
-					? 'DoubleScale-AIAssistant/doublescale-ai-assistant.php'
-					: 'DS-AIAssistant/ds-ai-assistant.php',
+				'plugin_file' => self::resolve_ai_assistant_plugin_file( $plugins_dir ),
 				'image'       => 'ai-assistant/ai-assistant.svg',
 				'plan'        => 'plus',
 			),
@@ -261,6 +259,27 @@ class Store {
 		}
 
 		wp_send_json_success( esc_html__( 'Addon activated successfully', 'doublescale' ), 200 );
+	}
+
+	/**
+	 * Resolve the AI Assistant plugin file path across naming conventions.
+	 *
+	 * @param string $plugins_dir Absolute path to the plugins directory.
+	 * @return string Plugin file relative path.
+	 */
+	private static function resolve_ai_assistant_plugin_file( $plugins_dir ) {
+		$candidates = array(
+			'DoubleScale-AIAssistant/doublescale-ai-assistant.php',
+			'DS-AIAssistant/ds-ai-assistant.php',
+		);
+
+		foreach ( $candidates as $file ) {
+			if ( file_exists( $plugins_dir . $file ) ) {
+				return $file;
+			}
+		}
+
+		return $candidates[0];
 	}
 
 	/**

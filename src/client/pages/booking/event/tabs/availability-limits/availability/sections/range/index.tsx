@@ -6,8 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { format, parseISO, startOfDay } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { format, startOfDay } from 'date-fns';
 
 /**
  * Internal dependencies
@@ -17,13 +16,7 @@ import type { AvailabilityRange } from '@/types/booking';
 import { Input } from '@/components/ui/input';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { RadioCard } from '@/components/booking';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+import { NativeDatePicker } from '@/components/ui/native-date-picker';
 
 interface RangeSectionProps {
 	range: AvailabilityRange;
@@ -37,32 +30,13 @@ const formatDateString = (date: Date | undefined): string => {
 	return format(date, 'yyyy-MM-dd');
 };
 
-const parseDate = (dateString: string | undefined): Date | undefined => {
-	if (!dateString) return undefined;
-	try {
-		return parseISO(dateString);
-	} catch {
-		return undefined;
-	}
-};
-
 const RangeSection: React.FC<RangeSectionProps> = ({
 	range,
 	onRangeTypeChange,
 	onDaysChange,
 	onDateRangeChange,
 }) => {
-	const startDate = parseDate(range.start_date);
-	const endDate = parseDate(range.end_date);
-
 	const today = startOfDay(new Date());
-
-	const disabledBeforeToday = (date: Date) => date < today;
-
-	const disabledBeforeStart = (date: Date) => {
-		if (date < today) return true;
-		return startDate ? date < startDate : false;
-	};
 
 	return (
 		<div className="flex flex-col gap-2.5 mt-5">
@@ -114,72 +88,32 @@ const RangeSection: React.FC<RangeSectionProps> = ({
 				/>
 			)}
 			{range.type === 'date_range' && (
-				<div className="flex gap-5 mt-4">
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								className="w-full h-[48px] justify-start font-normal rounded-lg"
-							>
-								<CalendarIcon className="mr-2 h-4 w-4 text-[#9BA7B7]" />
-								<span className="text-[#9BA7B7] pr-2">
-									{__('From', 'doublescale')}
-								</span>
-								{startDate
-									? format(startDate, 'MM/dd/yyyy')
-									: __('Start Date', 'doublescale')}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={startDate}
-								onSelect={(date) => {
-									if (date) {
-										onDateRangeChange(
-											formatDateString(date),
-											range.end_date ?? ''
-										);
-									}
-								}}
-								disabled={disabledBeforeToday}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
-
-					<Popover>
-						<PopoverTrigger asChild>
-							<Button
-								variant="outline"
-								className="w-full h-[48px] justify-start font-normal rounded-lg"
-							>
-								<CalendarIcon className="mr-2 h-4 w-4 text-[#9BA7B7]" />
-								<span className="text-[#9BA7B7] pr-2">
-									{__('To', 'doublescale')}
-								</span>
-								{endDate
-									? format(endDate, 'MM/dd/yyyy')
-									: __('End Date', 'doublescale')}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0" align="start">
-							<Calendar
-								mode="single"
-								selected={endDate}
-								onSelect={(date) => {
-									if (date) {
-										onDateRangeChange(
-											range.start_date ?? '',
-											formatDateString(date)
-										);
-									}
-								}}
-								disabled={disabledBeforeStart}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
+				<div className="relative z-0 flex gap-5 mt-4 overflow-visible">
+					<NativeDatePicker
+						className="w-full"
+						variant="outline"
+						displayFormat="short"
+						prefix={__('From', 'doublescale')}
+						placeholder={__('Start Date', 'doublescale')}
+						value={range.start_date}
+						min={formatDateString(today)}
+						max={range.end_date || undefined}
+						onChange={(start_date) =>
+							onDateRangeChange(start_date, range.end_date ?? '')
+						}
+					/>
+					<NativeDatePicker
+						className="w-full"
+						variant="outline"
+						displayFormat="short"
+						prefix={__('To', 'doublescale')}
+						placeholder={__('End Date', 'doublescale')}
+						value={range.end_date}
+						min={range.start_date || formatDateString(today)}
+						onChange={(end_date) =>
+							onDateRangeChange(range.start_date ?? '', end_date)
+						}
+					/>
 				</div>
 			)}
 		</div>

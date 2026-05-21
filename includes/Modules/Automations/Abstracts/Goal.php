@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -93,7 +92,7 @@ abstract class Goal {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact Contact Model.
-	 * @param array         $data Data.
+	 * @param array        $data Data.
 	 *
 	 * @return void
 	 */
@@ -124,7 +123,7 @@ abstract class Goal {
 			}
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Error processing goal', 'doublescale'),
+				__( 'Error processing goal', 'doublescale' ),
 				array(
 					'code'  => 'goal_error',
 					'error' => array(
@@ -142,7 +141,7 @@ abstract class Goal {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation Contact Model.
-	 * @param array                    $data Data.
+	 * @param array                  $data Data.
 	 *
 	 * @return bool
 	 */

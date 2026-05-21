@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Tracking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -173,7 +172,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		 return $this->belongsTo( ContactModel::class, 'contact_id' );
+		return $this->belongsTo( ContactModel::class, 'contact_id' );
 	}
 
 	/**
@@ -360,7 +359,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return bool
 	 */
 	public function is_whatsapp() {
-		 return $this->mode === self::MODE_WHATSAPP;
+		return $this->mode === self::MODE_WHATSAPP;
 	}
 
 	/**
@@ -497,7 +496,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return bool
 	 */
 	public function is_sent() {
-		 return $this->status === TrackingStatus::SENT;
+		return $this->status === TrackingStatus::SENT;
 	}
 
 	/**
@@ -543,7 +542,7 @@ class CommunicationTrackingModel extends Model {
 	 * @return string
 	 */
 	public function getStatusClassAttribute() {
-		 return TrackingStatus::get_status_class( $this->status );
+		return TrackingStatus::get_status_class( $this->status );
 	}
 
 	/**
@@ -719,7 +718,7 @@ class CommunicationTrackingModel extends Model {
 	 * Boot method for model events
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		// Update campaign message counts when message status changes
 		static::saved(
@@ -731,10 +730,10 @@ class CommunicationTrackingModel extends Model {
 					self::MODE_WHATSAPP => 'doublescale_campaign_whatsapp_status_changed',
 				);
 
-			if ( isset( $mode_actions[ $message->mode ] ) ) {
-				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook names are prefixed with 'doublescale_'.
-				do_action( $mode_actions[ $message->mode ], $message );
-			}
+				if ( isset( $mode_actions[ $message->mode ] ) ) {
+					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook names are prefixed with 'doublescale_'.
+					do_action( $mode_actions[ $message->mode ], $message );
+				}
 			}
 		);
 	}

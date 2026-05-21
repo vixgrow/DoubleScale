@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -71,7 +70,7 @@ class RestAutomationController extends RestController {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'The IDs of the items to delete.', 'doublescale'),
+							'description' => __( 'The IDs of the items to delete.', 'doublescale' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
@@ -130,17 +129,17 @@ class RestAutomationController extends RestController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'per_page' => array(
-							'description'       => __( 'Maximum number of items to be returned in result set.', 'doublescale'),
+							'description'       => __( 'Maximum number of items to be returned in result set.', 'doublescale' ),
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
 						'page'     => array(
-							'description'       => __( 'Current page of the collection.', 'doublescale'),
+							'description'       => __( 'Current page of the collection.', 'doublescale' ),
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
 						'keyword'  => array(
-							'description'       => __( 'Search keyword.', 'doublescale'),
+							'description'       => __( 'Search keyword.', 'doublescale' ),
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -234,12 +233,12 @@ class RestAutomationController extends RestController {
 					'permission_callback' => '__return_true',
 					'args'                => array(
 						'doublescale_id'  => array(
-							'description' => __( 'The automation ID.', 'doublescale'),
+							'description' => __( 'The automation ID.', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'doublescale_key' => array(
-							'description' => __( 'The automation key.', 'doublescale'),
+							'description' => __( 'The automation key.', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
@@ -259,17 +258,17 @@ class RestAutomationController extends RestController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'automation_id' => array(
-							'description' => __( 'The automation ID.', 'doublescale'),
+							'description' => __( 'The automation ID.', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'is_check'      => array(
-							'description' => __( 'Whether to check conditions.', 'doublescale'),
+							'description' => __( 'Whether to check conditions.', 'doublescale' ),
 							'type'        => 'boolean',
 							'default'     => true,
 						),
 						'is_delete'     => array(
-							'description' => __( 'Whether to delete conditions.', 'doublescale'),
+							'description' => __( 'Whether to delete conditions.', 'doublescale' ),
 							'type'        => 'boolean',
 							'default'     => false,
 						),
@@ -289,19 +288,19 @@ class RestAutomationController extends RestController {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Search keyword.', 'doublescale'),
+				'description'       => __( 'Search keyword.', 'doublescale' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'page'     => array(
-				'description'       => __( 'Current page of the collection.', 'doublescale'),
+				'description'       => __( 'Current page of the collection.', 'doublescale' ),
 				'type'              => 'integer',
 				'default'           => 1,
 				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
 			),
 			'per_page' => array(
-				'description'       => __( 'Maximum number of items to be returned in result set.', 'doublescale'),
+				'description'       => __( 'Maximum number of items to be returned in result set.', 'doublescale' ),
 				'type'              => 'integer',
 				'default'           => 10,
 				'minimum'           => 1,
@@ -309,12 +308,12 @@ class RestAutomationController extends RestController {
 				'sanitize_callback' => 'absint',
 			),
 			'from'     => array(
-				'description' => __( 'Start date for filtering automations.', 'doublescale'),
+				'description' => __( 'Start date for filtering automations.', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'to'       => array(
-				'description' => __( 'End date for filtering automations.', 'doublescale'),
+				'description' => __( 'End date for filtering automations.', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
@@ -329,56 +328,56 @@ class RestAutomationController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'automation',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'         => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale'),
-					 'type'        => 'integer',
-					 'readonly'    => true,
-				 ),
-				 'name'       => array(
-					 'description' => __( 'The name of the automation.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'trigger'    => array(
-					 'description' => __( 'The trigger of the automation.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'status'     => array(
-					 'description' => __( 'The status of the automation.', 'doublescale'),
-					 'type'        => 'string',
-					 'enum'        => array( 'active', 'inactive' ),
-					 'default'     => 'active',
-				 ),
-				 'settings'   => array(
-					 'description' => __( 'The settings of the automation.', 'doublescale'),
-					 'type'        => 'object',
-				 ),
-				 'created_at' => array(
-					 'description' => __( 'The date the automation was created.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'readonly'    => true,
-				 ),
-				 'updated_at' => array(
-					 'description' => __( 'The date the automation was last updated.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'automation',
+			'type'       => 'object',
+			'properties' => array(
+				'id'         => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
+				'name'       => array(
+					'description' => __( 'The name of the automation.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'trigger'    => array(
+					'description' => __( 'The trigger of the automation.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'status'     => array(
+					'description' => __( 'The status of the automation.', 'doublescale' ),
+					'type'        => 'string',
+					'enum'        => array( 'active', 'inactive' ),
+					'default'     => 'active',
+				),
+				'settings'   => array(
+					'description' => __( 'The settings of the automation.', 'doublescale' ),
+					'type'        => 'object',
+				),
+				'created_at' => array(
+					'description' => __( 'The date the automation was created.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'readonly'    => true,
+				),
+				'updated_at' => array(
+					'description' => __( 'The date the automation was last updated.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -454,12 +453,12 @@ class RestAutomationController extends RestController {
 
 		$automation = AutomationModel::find( $webhook_id );
 		if ( ! $automation ) {
-			return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		$stored_key = $automation->get_setting( 'webhook_key' );
 		if ( ! $stored_key || ! hash_equals( $stored_key, $request_key ) ) {
-			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'doublescale'), array( 'status' => 401 ) );
+			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'doublescale' ), array( 'status' => 401 ) );
 		}
 
 		do_action( 'doublescale_webhook_receive', $automation, $params );
@@ -597,7 +596,7 @@ class RestAutomationController extends RestController {
 			$steps = AutomationStepModel::where( 'automation_id', $id )->get();
 
 			if ( ! $steps ) {
-				return new WP_Error( 'not_found', __( 'Steps not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Steps not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$steps = $steps->toArray();
@@ -667,7 +666,7 @@ class RestAutomationController extends RestController {
 			)->find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Check plugin dependencies and add warnings
@@ -695,7 +694,7 @@ class RestAutomationController extends RestController {
 			$automation                    = AutomationModel::create( $automation_data );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'error', __( 'Failed to create automation.', 'doublescale'), array( 'status' => 500 ) );
+				return new WP_Error( 'error', __( 'Failed to create automation.', 'doublescale' ), array( 'status' => 500 ) );
 			}
 
 			$is_form = false;
@@ -739,7 +738,7 @@ class RestAutomationController extends RestController {
 			$automation = AutomationModel::find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$automation_data = $this->prepare_automation( $request );
@@ -781,7 +780,7 @@ class RestAutomationController extends RestController {
 			$automation = AutomationModel::find( $id );
 
 			if ( ! $automation ) {
-				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$automation->delete();
@@ -805,12 +804,12 @@ class RestAutomationController extends RestController {
 		try {
 			$ids = $request->get_param( 'ids' );
 			if ( empty( $ids ) ) {
-				return new WP_Error( 'error', __( 'No IDs provided.', 'doublescale'), array( 'status' => 400 ) );
+				return new WP_Error( 'error', __( 'No IDs provided.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			$automations = AutomationModel::find( $ids );
 			if ( ! $automations ) {
-				return new WP_Error( 'not_found', __( 'Automations not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Automations not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			foreach ( $automations as $automation ) {
@@ -861,7 +860,7 @@ class RestAutomationController extends RestController {
 					$warnings[]   = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Form trigger requires Plugin Pro to be installed and activated.', 'doublescale'),
+						'message' => __( 'Form trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
 					);
 					$update_trigger_settings( $automation->trigger, true );
 				} elseif ( empty( $form ) || ! $form->is_enabled() ) {
@@ -869,7 +868,7 @@ class RestAutomationController extends RestController {
 					$warnings[]   = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Trigger requires a plugin that is not currently active.', 'doublescale'),
+						'message' => __( 'Trigger requires a plugin that is not currently active.', 'doublescale' ),
 					);
 					$update_trigger_settings( $automation->trigger, true );
 				} else {
@@ -934,7 +933,7 @@ class RestAutomationController extends RestController {
 					} catch ( \Exception $e ) {
 						// Action not found - plugin missing
 						$has_warnings    = true;
-						$warning_message = __( 'Action requires a plugin that is not currently active.', 'doublescale');
+						$warning_message = __( 'Action requires a plugin that is not currently active.', 'doublescale' );
 						$warnings[]      = array(
 							'type'    => 'action',
 							'step_id' => $step->id,
@@ -1010,7 +1009,7 @@ class RestAutomationController extends RestController {
 					} catch ( \Exception $e ) {
 						// Goal not found - plugin missing
 						$has_warnings    = true;
-						$warning_message = __( 'Goal requires a plugin that is not currently active.', 'doublescale');
+						$warning_message = __( 'Goal requires a plugin that is not currently active.', 'doublescale' );
 						$warnings[]      = array(
 							'type'    => 'goal',
 							'step_id' => $step->id,
@@ -1158,7 +1157,7 @@ class RestAutomationController extends RestController {
 						'is_active'    => $is_active,
 						'is_pro'       => true,
 						'message'      => sprintf(
-							__( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale'),
+							__( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1170,7 +1169,7 @@ class RestAutomationController extends RestController {
 						'is_active'    => false,
 						'is_pro'       => false,
 						/* translators: %s: plugin name */
-						'message'      => sprintf( __( 'This trigger requires %s to be installed and activated.', 'doublescale'), $dependency['label'] ),
+						'message'      => sprintf( __( 'This trigger requires %s to be installed and activated.', 'doublescale' ), $dependency['label'] ),
 						'plugin_label' => $dependency['label'],
 					);
 				}
@@ -1313,7 +1312,7 @@ class RestAutomationController extends RestController {
 						'is_active'    => $is_active,
 						'is_pro'       => $is_pro,
 						'message'      => sprintf(
-							__( 'This action requires Plugin Pro to be installed and activated.', 'doublescale'),
+							__( 'This action requires Plugin Pro to be installed and activated.', 'doublescale' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1324,7 +1323,7 @@ class RestAutomationController extends RestController {
 						'is_active'    => false,
 						'message'      => sprintf(
 							/* translators: %s: plugin name */
-							__( 'This action requires %s to be installed and activated.', 'doublescale'),
+							__( 'This action requires %s to be installed and activated.', 'doublescale' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1465,13 +1464,13 @@ class RestAutomationController extends RestController {
 			if ( $unavailable_count === 1 ) {
 				$message = sprintf(
 					/* translators: %s: plugin name */
-					__( 'This condition uses 1 rule that requires %s to be installed and activated.', 'doublescale'),
+					__( 'This condition uses 1 rule that requires %s to be installed and activated.', 'doublescale' ),
 					$unique_groups
 				);
 			} else {
 				$message = sprintf(
 					/* translators: %1$d: number of rules, %2$s: plugin names */
-					__( 'This condition uses %1$d rules that require plugins (%2$s) to be installed and activated.', 'doublescale'),
+					__( 'This condition uses %1$d rules that require plugins (%2$s) to be installed and activated.', 'doublescale' ),
 					$unavailable_count,
 					$unique_groups
 				);
@@ -1525,7 +1524,7 @@ class RestAutomationController extends RestController {
 						'is_active'    => $is_active,
 						'is_pro'       => true,
 						'message'      => sprintf(
-							__( 'This goal requires Plugin Pro to be installed and activated.', 'doublescale'),
+							__( 'This goal requires Plugin Pro to be installed and activated.', 'doublescale' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1538,7 +1537,7 @@ class RestAutomationController extends RestController {
 						'is_pro'       => false,
 						'message'      => sprintf(
 							/* translators: %s: plugin name */
-							__( 'This goal requires %s to be installed and activated.', 'doublescale'),
+							__( 'This goal requires %s to be installed and activated.', 'doublescale' ),
 							$dependency['label']
 						),
 						'plugin_label' => $dependency['label'],
@@ -1574,20 +1573,20 @@ class RestAutomationController extends RestController {
 		if ( ! class_exists( 'DoubleScale\Modules\Automations\Services\RulesManager' ) ) {
 			return new WP_Error(
 				'missing_dependency',
-				__( 'Double Scale Pro is not installed. Please install and activate Double Scale Pro to use this automation.', 'doublescale'),
+				__( 'Double Scale Pro is not installed. Please install and activate Double Scale Pro to use this automation.', 'doublescale' ),
 				array( 'status' => 500 )
 			);
 		}
 
 		$automation = AutomationModel::find( $automation_id );
 		if ( ! $automation ) {
-			return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		// get trigger
 		$trigger = TriggersManager::instance()->get_trigger( $automation->trigger );
 		if ( ! $trigger ) {
-			return new WP_Error( 'not_found', __( 'Trigger not found.', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Trigger not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		$trigger_source = $trigger->source;
@@ -1611,7 +1610,7 @@ class RestAutomationController extends RestController {
 						$required_triggers = isset( $group_manager['triggers'] ) ? $group_manager['triggers'] : array();
 
 						if ( $group_slug === $trigger_source || in_array( $trigger_slug, $required_triggers ) ) {
-							$count++;
+							++$count;
 							if ( $is_check ) {
 								return new WP_REST_Response(
 									array(

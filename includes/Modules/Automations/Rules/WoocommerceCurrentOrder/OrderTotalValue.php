@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -73,10 +72,10 @@ class OrderTotalValue extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'greater_than' => __( 'Greater than', 'doublescale'),
-			'less_than'    => __( 'Less than', 'doublescale'),
-			'equal'        => __( 'equal', 'doublescale'),
-			'not_equal'    => __( 'does not equal', 'doublescale'),
+			'greater_than' => __( 'Greater than', 'doublescale' ),
+			'less_than'    => __( 'Less than', 'doublescale' ),
+			'equal'        => __( 'equal', 'doublescale' ),
+			'not_equal'    => __( 'does not equal', 'doublescale' ),
 		);
 	}
 
@@ -107,7 +106,7 @@ class OrderTotalValue extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
@@ -127,7 +126,7 @@ class OrderTotalValue extends Rule {
 				return $value < $rule_value;
 			default:
 				return false;
-		};
+		}
 	}
 }
 

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
@@ -200,7 +199,7 @@ class CampaignEnrichment {
 	 * Returns array of stats to be set as campaign attributes
 	 *
 	 * @param CampaignModel $campaign Campaign model
-	 * @param array          $analytics_stats Raw analytics stats
+	 * @param array         $analytics_stats Raw analytics stats
 	 *
 	 * @return array Normalized stats
 	 */

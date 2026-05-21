@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -28,8 +27,8 @@ use DoubleScale\Core\Utils\Utils;
 /**
  * ContactModel class
  */
-class ContactModel extends Model
-{
+class ContactModel extends Model {
+
 
 
 	/**
@@ -92,7 +91,7 @@ class ContactModel extends Model
 	 *
 	 * @var array
 	 */
-	protected $appends = array('avatar_url');
+	protected $appends = array( 'avatar_url' );
 
 	/**
 	 * Tracking context for merge tags
@@ -141,11 +140,10 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function lists()
-	{
-		return $this->belongsToMany(ListModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id')
-			->wherePivot('taxonomy_type', 'list')
-			->withPivot('taxonomy_type');
+	public function lists() {
+		return $this->belongsToMany( ListModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
+			->wherePivot( 'taxonomy_type', 'list' )
+			->withPivot( 'taxonomy_type' );
 	}
 
 	/**
@@ -155,11 +153,10 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function tags()
-	{
-		return $this->belongsToMany(TagModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id')
-			->wherePivot('taxonomy_type', 'tag')
-			->withPivot('taxonomy_type');
+	public function tags() {
+		return $this->belongsToMany( TagModel::class, 'doublescale_contact_taxonomy_relationship', 'contact_id', 'taxonomy_id' )
+			->wherePivot( 'taxonomy_type', 'tag' )
+			->withPivot( 'taxonomy_type' );
 	}
 
 	/**
@@ -169,12 +166,11 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany|null
 	 */
-	public function custom_fields()
-	{
-		if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
-			return $this->belongsToMany(\DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::class, 'doublescale_custom_field_relationship', 'entity_id', 'custom_field_id')
-				->withPivot('value')
-				->wherePivot('entity_type', 'contact');
+	public function custom_fields() {
+		if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
+			return $this->belongsToMany( \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::class, 'doublescale_custom_field_relationship', 'entity_id', 'custom_field_id' )
+				->withPivot( 'value' )
+				->wherePivot( 'entity_type', 'contact' );
 		}
 		return null;
 	}
@@ -186,9 +182,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function user()
-	{
-		return $this->belongsTo(UserModel::class, 'email', 'user_email');
+	public function user() {
+		return $this->belongsTo( UserModel::class, 'email', 'user_email' );
 	}
 
 	/**
@@ -198,8 +193,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
-	public function campaign_emails()
-	{
+	public function campaign_emails() {
 		if ( ! class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
@@ -213,8 +207,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function orders()
-	{
+	public function orders() {
 		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\WcOrderModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
@@ -228,8 +221,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function edd_orders()
-	{
+	public function edd_orders() {
 		if ( ! class_exists( '\DoubleScale\Modules\Campaigns\Models\EddOrderModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
@@ -245,14 +237,13 @@ class ContactModel extends Model
 	 *
 	 * @return string|null
 	 */
-	public function get_custom_field($custom_field_id)
-	{
-		if (! class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
+	public function get_custom_field( $custom_field_id ) {
+		if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 			return null;
 		}
 
-		$custom_field = $this->custom_fields->where('id', $custom_field_id)->first();
-		if ($custom_field) {
+		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
+		if ( $custom_field ) {
 			return $custom_field->pivot->value ?? '';
 		}
 
@@ -266,9 +257,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function notes()
-	{
-		return $this->activities()->where('activity_type', 'note');
+	public function notes() {
+		return $this->activities()->where( 'activity_type', 'note' );
 	}
 
 	/**
@@ -278,9 +268,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function activities()
-	{
-		return $this->hasMany(ActivityModel::class, 'contact_id', 'id');
+	public function activities() {
+		return $this->hasMany( ActivityModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -290,8 +279,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function communication_tracking()
-	{
+	public function communication_tracking() {
 		if ( ! class_exists( '\DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
@@ -305,8 +293,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function form_submissions()
-	{
+	public function form_submissions() {
 		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Models\FormSubmissionModel' ) ) {
 			return $this->hasMany( ActivityModel::class, 'contact_id', 'id' )->whereRaw( '1 = 0' );
 		}
@@ -321,8 +308,7 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
 	 */
-	public function page_visits()
-	{
+	public function page_visits() {
 		if ( class_exists( 'DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel' ) ) {
 			return $this->hasMany( \DoubleScale\Modules\WebsiteTracking\Models\PageVisitModel::class, 'contact_id', 'id' );
 		}
@@ -336,9 +322,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function unsubscribes()
-	{
-		return $this->hasMany(ContactUnsubscribeModel::class, 'contact_id', 'id');
+	public function unsubscribes() {
+		return $this->hasMany( ContactUnsubscribeModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -348,16 +333,15 @@ class ContactModel extends Model
 	 *
 	 * @return array
 	 */
-	public function getNotesAttribute()
-	{
+	public function getNotesAttribute() {
 		// Check if notes relationship is loaded
-		if (! $this->relationLoaded('notes')) {
+		if ( ! $this->relationLoaded( 'notes' ) ) {
 			return array();
 		}
 
 		// Transform activities to note format
-		return $this->getRelation('notes')->map(
-			function ($activity) {
+		return $this->getRelation( 'notes' )->map(
+			function ( $activity ) {
 				return $activity->to_note_format();
 			}
 		)->values()->toArray();
@@ -370,9 +354,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function automation_contacts()
-	{
-		return $this->hasMany(AutomationContactModel::class, 'contact_id', 'id');
+	public function automation_contacts() {
+		return $this->hasMany( AutomationContactModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -382,9 +365,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function processes()
-	{
-		return $this->hasMany(AutomationContactProcessesModel::class, 'contact_id', 'id');
+	public function processes() {
+		return $this->hasMany( AutomationContactProcessesModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -394,9 +376,8 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function meta()
-	{
-		return $this->hasMany(ContactMetaModel::class, 'contact_id', 'id');
+	public function meta() {
+		return $this->hasMany( ContactMetaModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -407,11 +388,10 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
 	 */
-	public function deals()
-	{
+	public function deals() {
 		$deal_model = doublescale_resolve_deal_model_class();
-		if ($deal_model) {
-			return $this->hasMany($deal_model, 'contact_id', 'id');
+		if ( $deal_model ) {
+			return $this->hasMany( $deal_model, 'contact_id', 'id' );
 		}
 		return null;
 	}
@@ -424,11 +404,10 @@ class ContactModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
 	 */
-	public function active_deals()
-	{
+	public function active_deals() {
 		$deal_model = doublescale_resolve_deal_model_class();
-		if ($deal_model) {
-			return $this->hasMany($deal_model, 'contact_id', 'id')->where('status', 'open');
+		if ( $deal_model ) {
+			return $this->hasMany( $deal_model, 'contact_id', 'id' )->where( 'status', 'open' );
 		}
 		return null;
 	}
@@ -441,13 +420,12 @@ class ContactModel extends Model
 	 *
 	 * @return float
 	 */
-	public function getTotalDealValueAttribute()
-	{
+	public function getTotalDealValueAttribute() {
 		$deals = $this->deals();
-		if (! $deals) {
+		if ( ! $deals ) {
 			return 0;
 		}
-		return $deals->where('status', 'won')->sum('value');
+		return $deals->where( 'status', 'won' )->sum( 'value' );
 	}
 
 	/**
@@ -458,10 +436,9 @@ class ContactModel extends Model
 	 *
 	 * @return int
 	 */
-	public function getActiveDealsCountAttribute()
-	{
+	public function getActiveDealsCountAttribute() {
 		$active_deals = $this->active_deals();
-		if (! $active_deals) {
+		if ( ! $active_deals ) {
 			return 0;
 		}
 		return $active_deals->count();
@@ -474,18 +451,17 @@ class ContactModel extends Model
 	 *
 	 * @return string
 	 */
-	public function getAvatarUrlAttribute()
-	{
+	public function getAvatarUrlAttribute() {
 		$email = $this->email;
 		$size  = 96; // Default avatar size
 
 		// Get the user ID if this email belongs to a WordPress user
-		$user    = get_user_by('email', $email);
+		$user    = get_user_by( 'email', $email );
 		$user_id = $user ? $user->ID : 0;
 
 		// Use get_avatar_url() with email and size
 		// If user_id is 0, it will use the email for Gravatar
-		$avatar_url = get_avatar_url($user_id ? $user_id : $email, array('size' => $size));
+		$avatar_url = get_avatar_url( $user_id ? $user_id : $email, array( 'size' => $size ) );
 
 		return $avatar_url;
 	}
@@ -497,8 +473,7 @@ class ContactModel extends Model
 	 *
 	 * @return AutomationModel
 	 */
-	public function automation()
-	{
+	public function automation() {
 		return $this->automation_contact->automation;
 	}
 
@@ -511,9 +486,8 @@ class ContactModel extends Model
 	 *
 	 * @return ContactModel
 	 */
-	public static function get_by_email($email)
-	{
-		return self::where('email', $email)->first();
+	public static function get_by_email( $email ) {
+		return self::where( 'email', $email )->first();
 	}
 
 	/**
@@ -525,9 +499,8 @@ class ContactModel extends Model
 	 *
 	 * @return ContactModel
 	 */
-	public static function get_by_hash_id($hash_id)
-	{
-		return self::where('hash_id', $hash_id)->first();
+	public static function get_by_hash_id( $hash_id ) {
+		return self::where( 'hash_id', $hash_id )->first();
 	}
 
 	/**
@@ -538,32 +511,31 @@ class ContactModel extends Model
 	 * @param string $channel Channel name (email, sms, whatsapp)
 	 * @return bool True if subscribed
 	 */
-	public function is_subscribed_to_channel($channel)
-	{
+	public function is_subscribed_to_channel( $channel ) {
 		// Validate channel
-		if (! in_array($channel, self::get_valid_channels(), true)) {
+		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
 			return false;
 		}
 
 		// Check channel-specific status
 		$status_field = $channel . '_status';
-		$status_value = $this->getAttribute($status_field);
+		$status_value = $this->getAttribute( $status_field );
 
 		// Handle NULL gracefully (shouldn't happen with NOT NULL constraint, but defensive)
-		if (is_null($status_value)) {
+		if ( is_null( $status_value ) ) {
 			return true; // Default to subscribed
 		}
 
 		// All channels: 'blocked', 'unsubscribed' = not subscribed
-		$excluded_statuses = array('blocked', 'unsubscribed');
+		$excluded_statuses = array( 'blocked', 'unsubscribed' );
 
 		// Email-only statuses: 'bounced', 'unverified'
-		if ('email' === $channel) {
+		if ( 'email' === $channel ) {
 			$excluded_statuses[] = 'bounced';
 			$excluded_statuses[] = 'unverified';
 		}
 
-		if (in_array($status_value, $excluded_statuses, true)) {
+		if ( in_array( $status_value, $excluded_statuses, true ) ) {
 			return false;
 		}
 
@@ -581,8 +553,7 @@ class ContactModel extends Model
 	 * @param int|null $source_id   Campaign ID or Automation ID
 	 * @return bool Success
 	 */
-	public function unsubscribe_from_mode($mode, $reason = '', $source_type = null, $source_id = null)
-	{
+	public function unsubscribe_from_mode( $mode, $reason = '', $source_type = null, $source_id = null ) {
 		// Map mode to channel for status field
 		$channel_map = array(
 			1 => 'email',
@@ -590,15 +561,15 @@ class ContactModel extends Model
 			3 => 'whatsapp',
 		);
 
-		if (! isset($channel_map[$mode])) {
+		if ( ! isset( $channel_map[ $mode ] ) ) {
 			return false;
 		}
 
-		$channel      = $channel_map[$mode];
+		$channel      = $channel_map[ $mode ];
 		$status_field = $channel . '_status';
 
 		// Check if already unsubscribed
-		if ('unsubscribed' === $this->getAttribute($status_field)) {
+		if ( 'unsubscribed' === $this->getAttribute( $status_field ) ) {
 			return true;
 		}
 
@@ -615,8 +586,8 @@ class ContactModel extends Model
 				$source_type,
 				$source_id
 			);
-		} catch (\Exception $e) {
-			if (function_exists('doublescale_get_logger')) {
+		} catch ( \Exception $e ) {
+			if ( function_exists( 'doublescale_get_logger' ) ) {
 				doublescale_get_logger()->error(
 					'Failed to record unsubscribe',
 					array(
@@ -630,13 +601,13 @@ class ContactModel extends Model
 			}
 		}
 
-		$channel_label = self::get_channel_label($channel);
+		$channel_label = self::get_channel_label( $channel );
 		/* translators: %s: channel label (e.g., Email, Sms, WhatsApp) */
-		$note_text = sprintf(__('Contact unsubscribed from %s.', 'doublescale'), $channel_label);
+		$note_text = sprintf( __( 'Contact unsubscribed from %s.', 'doublescale' ), $channel_label );
 
-		if (! empty($reason)) {
+		if ( ! empty( $reason ) ) {
 			/* translators: %s: unsubscribe reason */
-			$note_text .= ' ' . sprintf(__('Reason: %s', 'doublescale'), $reason);
+			$note_text .= ' ' . sprintf( __( 'Reason: %s', 'doublescale' ), $reason );
 		}
 
 		ActivityModel::create(
@@ -644,7 +615,7 @@ class ContactModel extends Model
 				'contact_id'    => $this->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __('Unsubscribed', 'doublescale'),
+					'title' => __( 'Unsubscribed', 'doublescale' ),
 					'type'  => 'system',
 					'note'  => $note_text,
 				),
@@ -653,7 +624,7 @@ class ContactModel extends Model
 		);
 
 		// Fire action
-		do_action("doublescale_{$channel}_unsubscribed", $this);
+		do_action( "doublescale_{$channel}_unsubscribed", $this );
 
 		return true;
 	}
@@ -666,17 +637,16 @@ class ContactModel extends Model
 	 * @param string $channel Channel name (email, sms, whatsapp)
 	 * @return bool Success
 	 */
-	public function subscribe_to_channel($channel)
-	{
+	public function subscribe_to_channel( $channel ) {
 		// Validate channel
-		if (! in_array($channel, self::get_valid_channels(), true)) {
+		if ( ! in_array( $channel, self::get_valid_channels(), true ) ) {
 			return false;
 		}
 
 		$status_field = $channel . '_status';
 
 		// Check if already subscribed
-		if ('subscribed' === $this->getAttribute($status_field)) {
+		if ( 'subscribed' === $this->getAttribute( $status_field ) ) {
 			return true; // Already subscribed
 		}
 
@@ -687,24 +657,24 @@ class ContactModel extends Model
 		$this->save();
 
 		// Create system note
-		$channel_label = self::get_channel_label($channel);
+		$channel_label = self::get_channel_label( $channel );
 
 		ActivityModel::create(
 			array(
 				'contact_id'    => $this->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __('Subscribed', 'doublescale'),
+					'title' => __( 'Subscribed', 'doublescale' ),
 					'type'  => 'system',
 					/* translators: %s: channel label (e.g., Email, Sms, WhatsApp) */
-					'note'  => sprintf(__('Contact subscribed to %s.', 'doublescale'), $channel_label),
+					'note'  => sprintf( __( 'Contact subscribed to %s.', 'doublescale' ), $channel_label ),
 				),
 				'user_id'       => get_current_user_id() ?: null,
 			)
 		);
 
 		// Fire channel-specific action
-		do_action("doublescale_{$channel}_subscribed", $this);
+		do_action( "doublescale_{$channel}_subscribed", $this );
 
 		return true;
 	}
@@ -716,12 +686,11 @@ class ContactModel extends Model
 	 *
 	 * @return array Channel statuses
 	 */
-	public function get_channel_subscriptions()
-	{
+	public function get_channel_subscriptions() {
 		return array(
-			'email'    => $this->getAttribute('email_status'),
-			'sms'      => $this->getAttribute('sms_status'),
-			'whatsapp' => $this->getAttribute('whatsapp_status'),
+			'email'    => $this->getAttribute( 'email_status' ),
+			'sms'      => $this->getAttribute( 'sms_status' ),
+			'whatsapp' => $this->getAttribute( 'whatsapp_status' ),
 		);
 	}
 
@@ -733,15 +702,14 @@ class ContactModel extends Model
 	 * @param string $channel Channel name (email, sms, whatsapp).
 	 * @return string Localized channel label
 	 */
-	public static function get_channel_label($channel)
-	{
+	public static function get_channel_label( $channel ) {
 		$labels = array(
-			'email'    => __('emails', 'doublescale'),
-			'sms'      => __('Sms messages', 'doublescale'),
-			'whatsapp' => __('Whatsapp messages', 'doublescale'),
+			'email'    => __( 'emails', 'doublescale' ),
+			'sms'      => __( 'Sms messages', 'doublescale' ),
+			'whatsapp' => __( 'Whatsapp messages', 'doublescale' ),
 		);
 
-		return $labels[$channel] ?? __('communications', 'doublescale');
+		return $labels[ $channel ] ?? __( 'communications', 'doublescale' );
 	}
 
 	/**
@@ -751,9 +719,8 @@ class ContactModel extends Model
 	 *
 	 * @return array Valid channel identifiers
 	 */
-	public static function get_valid_channels()
-	{
-		return array('email', 'sms', 'whatsapp');
+	public static function get_valid_channels() {
+		return array( 'email', 'sms', 'whatsapp' );
 	}
 
 	/**
@@ -765,20 +732,19 @@ class ContactModel extends Model
 	 *
 	 * @return void
 	 */
-	public function sync_lists($lists)
-	{
-		$existing_lists  = $this->lists->pluck('id')->toArray();
-		$lists_to_add    = array_diff($lists, $existing_lists);
-		$lists_to_remove = array_diff($existing_lists, $lists);
+	public function sync_lists( $lists ) {
+		$existing_lists  = $this->lists->pluck( 'id' )->toArray();
+		$lists_to_add    = array_diff( $lists, $existing_lists );
+		$lists_to_remove = array_diff( $existing_lists, $lists );
 
-		if (! empty($lists_to_add)) {
-			$this->lists()->attach($lists_to_add, array('taxonomy_type' => 'list'));
-			do_action('doublescale_contact_list_apply', $this, $lists_to_add);
+		if ( ! empty( $lists_to_add ) ) {
+			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 
-		if (! empty($lists_to_remove)) {
-			$this->lists()->detach($lists_to_remove);
-			do_action('doublescale_contact_list_remove', $this, $lists_to_remove);
+		if ( ! empty( $lists_to_remove ) ) {
+			$this->lists()->detach( $lists_to_remove );
+			do_action( 'doublescale_contact_list_remove', $this, $lists_to_remove );
 		}
 	}
 
@@ -791,14 +757,13 @@ class ContactModel extends Model
 	 *
 	 * @return void
 	 */
-	public function add_lists($lists)
-	{
-		$existing_lists = $this->lists->pluck('id')->toArray();
-		$lists_to_add   = array_diff($lists, $existing_lists);
+	public function add_lists( $lists ) {
+		$existing_lists = $this->lists->pluck( 'id' )->toArray();
+		$lists_to_add   = array_diff( $lists, $existing_lists );
 
-		if (! empty($lists_to_add)) {
-			$this->lists()->attach($lists_to_add, array('taxonomy_type' => 'list'));
-			do_action('doublescale_contact_list_apply', $this, $lists_to_add);
+		if ( ! empty( $lists_to_add ) ) {
+			$this->lists()->attach( $lists_to_add, array( 'taxonomy_type' => 'list' ) );
+			do_action( 'doublescale_contact_list_apply', $this, $lists_to_add );
 		}
 	}
 
@@ -811,20 +776,19 @@ class ContactModel extends Model
 	 *
 	 * @return void
 	 */
-	public function sync_tags($tags)
-	{
-		$existing_tags  = $this->tags->pluck('id')->toArray();
-		$tags_to_add    = array_diff($tags, $existing_tags);
-		$tags_to_remove = array_diff($existing_tags, $tags);
+	public function sync_tags( $tags ) {
+		$existing_tags  = $this->tags->pluck( 'id' )->toArray();
+		$tags_to_add    = array_diff( $tags, $existing_tags );
+		$tags_to_remove = array_diff( $existing_tags, $tags );
 
-		if (! empty($tags_to_add)) {
-			$this->tags()->attach($tags_to_add, array('taxonomy_type' => 'tag'));
-			do_action('doublescale_contact_tag_apply', $this, $tags_to_add);
+		if ( ! empty( $tags_to_add ) ) {
+			$this->tags()->attach( $tags_to_add, array( 'taxonomy_type' => 'tag' ) );
+			do_action( 'doublescale_contact_tag_apply', $this, $tags_to_add );
 		}
 
-		if (! empty($tags_to_remove)) {
-			$this->tags()->detach($tags_to_remove);
-			do_action('doublescale_contact_tag_remove', $this, $tags_to_remove);
+		if ( ! empty( $tags_to_remove ) ) {
+			$this->tags()->detach( $tags_to_remove );
+			do_action( 'doublescale_contact_tag_remove', $this, $tags_to_remove );
 		}
 	}
 
@@ -837,14 +801,13 @@ class ContactModel extends Model
 	 *
 	 * @return void
 	 */
-	public function add_tags($tags)
-	{
-		$existing_tags = $this->tags->pluck('id')->toArray();
-		$tags_to_add   = array_diff($tags, $existing_tags);
+	public function add_tags( $tags ) {
+		$existing_tags = $this->tags->pluck( 'id' )->toArray();
+		$tags_to_add   = array_diff( $tags, $existing_tags );
 
-		if (! empty($tags_to_add)) {
-			$this->tags()->attach($tags_to_add, array('taxonomy_type' => 'tag'));
-			do_action('doublescale_contact_tag_apply', $this, $tags_to_add);
+		if ( ! empty( $tags_to_add ) ) {
+			$this->tags()->attach( $tags_to_add, array( 'taxonomy_type' => 'tag' ) );
+			do_action( 'doublescale_contact_tag_apply', $this, $tags_to_add );
 		}
 	}
 
@@ -854,33 +817,32 @@ class ContactModel extends Model
 	 * @param array $options
 	 * @return bool
 	 */
-	public function save(array $options = array())
-	{
+	public function save( array $options = array() ) {
 		// Ensure events are registered if this is a new contact
-		if (! $this->exists) {
+		if ( ! $this->exists ) {
 			$dispatcher = static::getEventDispatcher();
 			$model_name = static::class;
 			$event_name = "eloquent.creating: {$model_name}";
-			$listeners  = $dispatcher->getListeners($event_name);
+			$listeners  = $dispatcher->getListeners( $event_name );
 
 			// If no listeners, re-register events on current dispatcher
-			if (count($listeners) === 0) {
-				$this->registerEventsOnDispatcher($dispatcher, $model_name);
+			if ( count( $listeners ) === 0 ) {
+				$this->registerEventsOnDispatcher( $dispatcher, $model_name );
 			}
 		}
 
-		if (! empty($this->rules)) {
+		if ( ! empty( $this->rules ) ) {
 			$this->trim();
 			$email = $this->attributes['email'] ?? '';
-			if (! is_string($email) || '' === $email) {
+			if ( ! is_string( $email ) || '' === $email ) {
 				throw new \Exception( esc_html( $this->messages['email.required'] ) );
 			}
-			if (! is_email($email)) {
+			if ( ! is_email( $email ) ) {
 				throw new \Exception( esc_html( $this->messages['email.email'] ) );
 			}
 		}
 
-		return parent::save($options);
+		return parent::save( $options );
 	}
 
 	/**
@@ -889,14 +851,13 @@ class ContactModel extends Model
 	 * @param array $attributes
 	 * @return static
 	 */
-	public static function create(array $attributes = array())
-	{
+	public static function create( array $attributes = array() ) {
 		// Ensure boot is called by creating a temporary instance
 		new static();
 
 		// Create the actual instance using standard Eloquent approach
 		$instance = new static();
-		$instance->fill($attributes);
+		$instance->fill( $attributes );
 		$instance->save();
 
 		return $instance;
@@ -909,17 +870,16 @@ class ContactModel extends Model
 	 *
 	 * @return ContactModel
 	 */
-	public static function createOrUpdate($data)
-	{
-		$contact = self::where('email', $data['email'] ?? '')->first();
+	public static function createOrUpdate( $data ) {
+		$contact = self::where( 'email', $data['email'] ?? '' )->first();
 
-		if (! $contact) {
+		if ( ! $contact ) {
 			// Use create() to ensure events fire
-			return self::create($data);
+			return self::create( $data );
 		}
 
 		// For updates, use fill + save to trigger saved event
-		$contact->fill($data);
+		$contact->fill( $data );
 		$contact->save();
 
 		return $contact;
@@ -932,12 +892,11 @@ class ContactModel extends Model
 	 * @param string $model_name Model class name
 	 * @return void
 	 */
-	private function registerEventsOnDispatcher($dispatcher, $model_name)
-	{
+	private function registerEventsOnDispatcher( $dispatcher, $model_name ) {
 		// Creating event
 		$dispatcher->listen(
 			"eloquent.creating: {$model_name}",
-			function ($contact) {
+			function ( $contact ) {
 				$contact->hash_id = Utils::generate_hash_key();
 			}
 		);
@@ -945,17 +904,17 @@ class ContactModel extends Model
 		// Saving event
 		$dispatcher->listen(
 			"eloquent.saving: {$model_name}",
-			function ($contact) {
-				unset($contact->revenue);
+			function ( $contact ) {
+				unset( $contact->revenue );
 			}
 		);
 
 		// Created event - fire subscribed for genuinely new contacts.
 		$dispatcher->listen(
 			"eloquent.created: {$model_name}",
-			function ($contact) {
-				if ($contact->email_status !== 'unsubscribed') {
-					do_action('doublescale_contact_subscribe', $contact);
+			function ( $contact ) {
+				if ( $contact->email_status !== 'unsubscribed' ) {
+					do_action( 'doublescale_contact_subscribe', $contact );
 				}
 			}
 		);
@@ -963,14 +922,14 @@ class ContactModel extends Model
 		// Updated event - fire unsubscribed only when email_status actually changed.
 		$dispatcher->listen(
 			"eloquent.updated: {$model_name}",
-			function ($contact) {
+			function ( $contact ) {
 				// getChanges() returns only fields that changed in this update.
-				if (! array_key_exists('email_status', $contact->getChanges())) {
+				if ( ! array_key_exists( 'email_status', $contact->getChanges() ) ) {
 					return;
 				}
 
-				if ($contact->email_status === 'unsubscribed') {
-					do_action('doublescale_contact_unsubscribe', $contact);
+				if ( $contact->email_status === 'unsubscribed' ) {
+					do_action( 'doublescale_contact_unsubscribe', $contact );
 				}
 			}
 		);
@@ -978,29 +937,29 @@ class ContactModel extends Model
 		// Deleting event
 		$dispatcher->listen(
 			"eloquent.deleting: {$model_name}",
-			function ($contact) {
+			function ( $contact ) {
 				// Delete note activities for this contact
-				ActivityModel::where('contact_id', $contact->id)
-					->where('activity_type', 'note')
+				ActivityModel::where( 'contact_id', $contact->id )
+					->where( 'activity_type', 'note' )
 					->delete();
 				$contact->automation_contacts()->delete();
 			}
 		);
 
 		// Retrieved event (if WooCommerce is active)
-		if (doublescale_is_plugin_active('woocommerce/woocommerce.php')) {
+		if ( doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			$dispatcher->listen(
 				"eloquent.retrieved: {$model_name}",
-				function ($contact) {
+				function ( $contact ) {
 					// Only compute revenue when orders are explicitly loaded.
-					if (! $contact->relationLoaded('orders')) {
+					if ( ! $contact->relationLoaded( 'orders' ) ) {
 						return;
 					}
 
 					$orders  = $contact->orders;
 					$revenue = 0;
 
-					foreach ($orders as $order) {
+					foreach ( $orders as $order ) {
 						$revenue += $order->total_amount;
 					}
 
@@ -1018,28 +977,27 @@ class ContactModel extends Model
 	 *
 	 * @return void
 	 */
-	public static function boot()
-	{
+	public static function boot() {
 		// Use global flag to prevent multiple event registrations
 		global $doublescale_contact_events_registered;
 
 		parent::boot();
 
-		if ($doublescale_contact_events_registered) {
+		if ( $doublescale_contact_events_registered ) {
 			return;
 		}
 		$doublescale_contact_events_registered = true;
 
 		// Get the event dispatcher
 		$dispatcher = static::getEventDispatcher();
-		if (! $dispatcher) {
+		if ( ! $dispatcher ) {
 			return;
 		}
 
 		// Register events directly with the dispatcher
 		$model_name = static::class;
 		$instance   = new static();
-		$instance->registerEventsOnDispatcher($dispatcher, $model_name);
+		$instance->registerEventsOnDispatcher( $dispatcher, $model_name );
 	}
 
 	/**
@@ -1049,8 +1007,7 @@ class ContactModel extends Model
 	 * @param int $tracking_id Communication tracking ID
 	 * @return self
 	 */
-	public function set_tracking_context($tracking_id)
-	{
+	public function set_tracking_context( $tracking_id ) {
 		$this->tracking_context_id = $tracking_id;
 		return $this;
 	}
@@ -1060,8 +1017,7 @@ class ContactModel extends Model
 	 *
 	 * @return int|null Communication tracking ID or null if not set
 	 */
-	public function get_tracking_context()
-	{
+	public function get_tracking_context() {
 		return $this->tracking_context_id;
 	}
 
@@ -1070,9 +1026,8 @@ class ContactModel extends Model
 	 *
 	 * @return bool
 	 */
-	public function has_tracking_context()
-	{
-		return ! is_null($this->tracking_context_id);
+	public function has_tracking_context() {
+		return ! is_null( $this->tracking_context_id );
 	}
 
 	/**
@@ -1080,8 +1035,7 @@ class ContactModel extends Model
 	 *
 	 * @return self
 	 */
-	public function clear_tracking_context()
-	{
+	public function clear_tracking_context() {
 		$this->tracking_context_id = null;
 		return $this;
 	}

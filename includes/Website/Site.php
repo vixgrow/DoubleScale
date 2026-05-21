@@ -81,7 +81,6 @@ class Site {
 			);
 		}
 
-
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 
@@ -91,5 +90,4 @@ class Site {
 			'data'    => $response_body,
 		);
 	}
-
 }

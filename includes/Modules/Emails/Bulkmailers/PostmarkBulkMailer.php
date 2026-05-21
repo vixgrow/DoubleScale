@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -97,7 +96,7 @@ class PostmarkBulkMailer extends AbstractBulkMailer {
 		if ( ! $account_api ) {
 			return new WP_Error(
 				'postmark_not_configured',
-				__( 'Postmark is not properly configured.', 'doublescale')
+				__( 'Postmark is not properly configured.', 'doublescale' )
 			);
 		}
 
@@ -105,7 +104,7 @@ class PostmarkBulkMailer extends AbstractBulkMailer {
 		if ( ! method_exists( $account_api, 'send_batch' ) ) {
 			return new WP_Error(
 				'postmark_batch_not_supported',
-				__( 'Postmark batch sending is not available. Please update smtp.', 'doublescale')
+				__( 'Postmark batch sending is not available. Please update smtp.', 'doublescale' )
 			);
 		}
 
@@ -158,7 +157,7 @@ class PostmarkBulkMailer extends AbstractBulkMailer {
 		return array(
 			'success'    => true,
 			'message_id' => $message_id,
-			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale'),
+			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale' ),
 			'sent_count' => $result['sent_count'] ?? count( $batch_data['recipients'] ),
 			'failed'     => $result['failed'] ?? array(),
 		);
@@ -185,5 +184,4 @@ class PostmarkBulkMailer extends AbstractBulkMailer {
 
 		return $headers;
 	}
-
 }

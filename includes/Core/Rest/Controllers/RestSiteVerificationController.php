@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -49,13 +48,13 @@ class RestSiteVerificationController extends RestController {
 		// Public endpoint by design: this is the auth handshake itself —
 		// the caller cannot be authenticated yet because they are obtaining
 		// credentials. Safeguards in login():
-		//   * SSL is enforced (HTTP returns 403).
-		//   * Credentials are validated via wp_authenticate(), so the WP
-		//     core hooks for rate-limiting / two-factor / login lockout
-		//     plugins still apply.
-		//   * On success only a short-lived (15 min) one-time temp token
-		//     is issued; the user must follow up with create-app-password
-		//     to obtain a long-lived credential.
+		// * SSL is enforced (HTTP returns 403).
+		// * Credentials are validated via wp_authenticate(), so the WP
+		// core hooks for rate-limiting / two-factor / login lockout
+		// plugins still apply.
+		// * On success only a short-lived (15 min) one-time temp token
+		// is issued; the user must follow up with create-app-password
+		// to obtain a long-lived credential.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/login',
@@ -128,7 +127,7 @@ class RestSiteVerificationController extends RestController {
 		if ( ! is_ssl() ) {
 			return new WP_Error(
 				'ssl_required',
-				__( 'SSL is required for login.', 'doublescale'),
+				__( 'SSL is required for login.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -141,7 +140,7 @@ class RestSiteVerificationController extends RestController {
 		if ( is_wp_error( $user ) ) {
 			return new WP_Error(
 				'login_failed',
-				__( 'Invalid username or password.', 'doublescale'),
+				__( 'Invalid username or password.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -158,7 +157,7 @@ class RestSiteVerificationController extends RestController {
 				'user_id' => $user->ID,
 				'token'   => $token,
 				'expires' => $expires,
-				'message' => __( 'Login successful. Temporary token issued.', 'doublescale'),
+				'message' => __( 'Login successful. Temporary token issued.', 'doublescale' ),
 			),
 			200
 		);
@@ -172,7 +171,7 @@ class RestSiteVerificationController extends RestController {
 		if ( ! $this->is_application_password_available() ) {
 			return new WP_Error(
 				'application_password_not_available',
-				__( 'Application password is not available. Please contact support.', 'doublescale'),
+				__( 'Application password is not available. Please contact support.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -213,7 +212,7 @@ class RestSiteVerificationController extends RestController {
 		if ( ! $token ) {
 			return new WP_Error(
 				'missing_token',
-				__( 'Temporary token is required.', 'doublescale'),
+				__( 'Temporary token is required.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -229,7 +228,7 @@ class RestSiteVerificationController extends RestController {
 		if ( empty( $users ) ) {
 			return new WP_Error(
 				'invalid_token',
-				__( 'Invalid token.', 'doublescale'),
+				__( 'Invalid token.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -240,7 +239,7 @@ class RestSiteVerificationController extends RestController {
 		if ( time() > $expiry ) {
 			return new WP_Error(
 				'token_expired',
-				__( 'Token expired.', 'doublescale'),
+				__( 'Token expired.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}

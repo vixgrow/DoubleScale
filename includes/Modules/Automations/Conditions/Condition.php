@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Conditions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
@@ -44,7 +43,7 @@ class Condition {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation contact
-	 * @param array                    $rules Rules
+	 * @param array                  $rules Rules
 	 *
 	 * @return void
 	 */

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Notifications\Services\DeviceTokenService;
@@ -113,7 +112,7 @@ class RestDeviceController extends WP_REST_Controller {
 		if ( ! $result ) {
 			return new WP_Error(
 				'registration_failed',
-				__( 'Failed to register device token.', 'doublescale'),
+				__( 'Failed to register device token.', 'doublescale' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -121,7 +120,7 @@ class RestDeviceController extends WP_REST_Controller {
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'Device registered successfully.', 'doublescale'),
+				'message' => __( 'Device registered successfully.', 'doublescale' ),
 			),
 			200
 		);
@@ -144,7 +143,7 @@ class RestDeviceController extends WP_REST_Controller {
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'Device unregistered successfully.', 'doublescale'),
+				'message' => __( 'Device unregistered successfully.', 'doublescale' ),
 			),
 			200
 		);

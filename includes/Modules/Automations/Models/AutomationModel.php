@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -313,7 +312,7 @@ class AutomationModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		self::deleting(
 			function ( $automation ) {

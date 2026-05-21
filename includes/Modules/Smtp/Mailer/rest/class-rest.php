@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Mailer;
@@ -49,5 +48,4 @@ class REST {
 			new static::$classes['settings_controller']( $this->mailer );
 		}
 	}
-
 }

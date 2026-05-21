@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -106,4 +105,3 @@ class LayoutHandlerRegistry {
 		return $this->handlers;
 	}
 }
-

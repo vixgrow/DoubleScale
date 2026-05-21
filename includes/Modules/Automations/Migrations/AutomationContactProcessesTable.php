@@ -11,8 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Migrations;
 
-
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Database\Migration;

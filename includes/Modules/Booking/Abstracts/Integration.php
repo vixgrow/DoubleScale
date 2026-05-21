@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;

@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Booking;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Roles;

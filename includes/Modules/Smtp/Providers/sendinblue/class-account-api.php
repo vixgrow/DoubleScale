@@ -106,7 +106,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 500 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue;
@@ -119,17 +119,17 @@ class Account_API {
 		}
 
 		// Build the sender object
-		$sender = [
+		$sender = array(
 			'email' => $batch_args['from_email'] ?? '',
-		];
+		);
 		if ( ! empty( $batch_args['from_name'] ) ) {
 			$sender['name'] = $batch_args['from_name'];
 		}
 
 		// Track results
-		$sent_count   = 0;
-		$failed       = [];
-		$message_ids  = [];
+		$sent_count  = 0;
+		$failed      = array();
+		$message_ids = array();
 
 		// Get API instance
 		$api_instance = $this->get_api_instance();
@@ -137,15 +137,15 @@ class Account_API {
 		// Send to each recipient individually with personalization
 		foreach ( $recipients as $email ) {
 			// Build the email body
-			$email_body = [
+			$email_body = array(
 				'sender'  => $sender,
-				'to'      => [
-					[
+				'to'      => array(
+					array(
 						'email' => $email,
-					],
-				],
+					),
+				),
 				'subject' => $batch_args['subject'] ?? '',
-			];
+			);
 
 			// Add HTML content
 			if ( ! empty( $batch_args['html'] ) ) {
@@ -159,9 +159,9 @@ class Account_API {
 
 			// Add reply-to
 			if ( ! empty( $batch_args['reply_to'] ) ) {
-				$email_body['replyTo'] = [
+				$email_body['replyTo'] = array(
 					'email' => $batch_args['reply_to'],
-				];
+				);
 			}
 
 			// Add personalization params for this recipient
@@ -184,24 +184,24 @@ class Account_API {
 				$result          = $api_instance->sendTransacEmail( $send_smtp_email );
 
 				if ( $result->getMessageId() ) {
-					$sent_count++;
+					++$sent_count;
 					$message_ids[] = $result->getMessageId();
 				} else {
-					$failed[] = [
+					$failed[] = array(
 						'email' => $email,
 						'error' => __( 'No message ID returned', 'doublescale' ),
-					];
+					);
 				}
 			} catch ( \Exception $e ) {
-				$failed[] = [
+				$failed[] = array(
 					'email' => $email,
 					'error' => $e->getMessage(),
-				];
+				);
 			}
 		}
 
 		// Build result
-		$result = [
+		$result = array(
 			'id'          => ! empty( $message_ids ) ? $message_ids[0] : '',
 			'message'     => sprintf(
 				/* translators: 1: sent count, 2: total count */
@@ -212,7 +212,7 @@ class Account_API {
 			'sent_count'  => $sent_count,
 			'failed'      => $failed,
 			'message_ids' => $message_ids,
-		];
+		);
 
 		// Log the batch
 		$this->log_batch_emails( $batch_args, $recipients, $sent_count > 0 ? $result : new WP_Error( 'all_failed', __( 'All emails failed to send.', 'doublescale' ) ) );
@@ -222,7 +222,7 @@ class Account_API {
 			return new WP_Error(
 				'batch_send_failed',
 				__( 'All emails in batch failed to send.', 'doublescale' ),
-				[ 'failed' => $failed ]
+				array( 'failed' => $failed )
 			);
 		}
 
@@ -256,10 +256,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find Sendinblue/Brevo connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'sendinblue' ) {
@@ -282,14 +282,14 @@ class Account_API {
 		// Log one entry for the batch (not per recipient to avoid log spam)
 		$subject         = $batch_args['subject'] ?? '';
 		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers         = $batch_args['headers'] ?? [];
-		$attachments     = [];
-		$recipients_data = [
+		$headers         = $batch_args['headers'] ?? array();
+		$attachments     = array();
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => $batch_args['reply_to'] ?? '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Conditions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Conditions\Condition;
@@ -47,7 +46,7 @@ class Process {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation contact
-	 * @param array                    $conditions Conditions
+	 * @param array                  $conditions Conditions
 	 *
 	 * @return void
 	 */

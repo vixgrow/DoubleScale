@@ -148,13 +148,13 @@ final class Module extends AbstractModule {
 
 		MenuRegistry::add(
 			array(
-				'page_title'       => __( 'Booking', 'doublescale' ),
-				'menu_title'       => __( 'Booking', 'doublescale' ),
-				'capability'       => 'doublescale_access',
-				'slug'             => 'doublescale&path=booking',
-				'callback'         => array( AdminLoader::class, 'page_wrapper' ),
-				'position'         => 45,
-				'group'            => 'sales',
+				'page_title'      => __( 'Booking', 'doublescale' ),
+				'menu_title'      => __( 'Booking', 'doublescale' ),
+				'capability'      => 'doublescale_access',
+				'slug'            => 'doublescale&path=booking',
+				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
+				'position'        => 45,
+				'group'           => 'sales',
 				'requires_module' => 'booking',
 			)
 		);
@@ -340,5 +340,4 @@ final class Module extends AbstractModule {
 		add_action( 'wpmu_delete_user', $purge, 10, 1 );
 		add_action( 'remove_user_from_blog', $purge, 10, 1 );
 	}
-
 }

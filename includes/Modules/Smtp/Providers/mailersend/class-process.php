@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\MailerSend;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -33,10 +32,10 @@ class Process extends Abstract_Process {
 
 		$name = sanitize_text_field( $name );
 
-		$this->headers['headers'][] = [
+		$this->headers['headers'][] = array(
 			'name'  => $name,
 			'value' => $value,
-		];
+		);
 	}
 
 	/**
@@ -53,9 +52,9 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['from'] = [
+		$this->body['from'] = array(
 			'email' => $email,
-		];
+		);
 
 		if ( ! empty( $name ) ) {
 			$this->body['from']['name'] = $name;
@@ -89,13 +88,12 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$this->body[ $type ][] = [
+				$this->body[ $type ][] = array(
 					'email' => $email_address,
 					'name'  => $name,
-				];
+				);
 			}
 		}
-
 	}
 
 	/**
@@ -131,12 +129,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['html'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['text'] = $content;
-			} else {
-				$this->body['html'] = $content;
-			}
+		} else {
+			$this->body['html'] = $content;
 		}
 	}
 
@@ -153,10 +149,10 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['reply_to'] = [
+		$this->body['reply_to'] = array(
 			'email' => $emails[0][0],
 			'name'  => $emails[0][1] ?? '',
-		];
+		);
 	}
 
 	/**
@@ -183,7 +179,7 @@ class Process extends Abstract_Process {
 			$this->body['attachments'][] = array(
 				'content'     => base64_encode( $this->filesystem->get_contents( $filepath ) ),
 				'filename'    => $filename,
-				'disposition' => in_array( $attachment[6], [ 'inline', 'attachment' ], true ) ? $attachment[6] : 'attachment',
+				'disposition' => in_array( $attachment[6], array( 'inline', 'attachment' ), true ) ? $attachment[6] : 'attachment',
 				'id'          => empty( $attachment[7] ) ? '' : trim( (string) $attachment[7] ),
 			);
 		}
@@ -275,10 +271,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'MailerSend Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_mailersend_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -289,6 +285,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

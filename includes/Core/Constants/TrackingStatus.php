@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -54,12 +53,12 @@ class TrackingStatus {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING   => __( 'Pending', 'doublescale'),
-			self::SENT      => __( 'Sent', 'doublescale'),
-			self::FAILED    => __( 'Failed', 'doublescale'),
-			self::DELIVERED => __( 'Delivered', 'doublescale'),
-			self::SCHEDULED => __( 'Scheduled', 'doublescale'),
-			self::READ      => __( 'Read', 'doublescale'),
+			self::PENDING   => __( 'Pending', 'doublescale' ),
+			self::SENT      => __( 'Sent', 'doublescale' ),
+			self::FAILED    => __( 'Failed', 'doublescale' ),
+			self::DELIVERED => __( 'Delivered', 'doublescale' ),
+			self::SCHEDULED => __( 'Scheduled', 'doublescale' ),
+			self::READ      => __( 'Read', 'doublescale' ),
 		);
 	}
 
@@ -71,7 +70,7 @@ class TrackingStatus {
 	 */
 	public static function get_name( $status ) {
 		$statuses = self::get_all();
-		return $statuses[ $status ] ?? __( 'Unknown', 'doublescale');
+		return $statuses[ $status ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**
@@ -187,4 +186,3 @@ class TrackingStatus {
 		return $colors[ $status ] ?? 'default';
 	}
 }
-

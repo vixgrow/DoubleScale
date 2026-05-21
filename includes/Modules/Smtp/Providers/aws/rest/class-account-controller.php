@@ -28,7 +28,8 @@ require_once dirname( __DIR__ ) . '/class-ses-query-client.php';
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -52,20 +53,20 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'access_key' => [
+		return array(
+			'access_key' => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'secret_key' => [
+			),
+			'secret_key' => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'region'     => [
+			),
+			'region'     => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -120,5 +121,4 @@ class Account_Controller extends Abstract_Account_Controller {
 			return new WP_Error( 'doublescale_smtp_aws_error', $e->getMessage() );
 		}
 	}
-
 }

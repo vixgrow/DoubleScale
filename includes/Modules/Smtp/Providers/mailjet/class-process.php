@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Mailjet;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -120,12 +119,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['Html-part'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['Text-part'] = $content;
-			} else {
-				$this->body['Html-part'] = $content;
-			}
+		} else {
+			$this->body['Html-part'] = $content;
 		}
 	}
 
@@ -253,10 +250,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Mailjet Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_mailjet_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -267,6 +264,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

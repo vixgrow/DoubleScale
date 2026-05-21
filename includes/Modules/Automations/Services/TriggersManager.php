@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -117,14 +116,20 @@ final class TriggersManager {
 	 */
 	public function register( $trigger ) {
 		if ( ! $trigger instanceof Trigger ) {
-			throw new Exception( esc_html( // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-				__( 'Invalid trigger', 'doublescale') ) );
+			throw new Exception(
+				esc_html( // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
+					__( 'Invalid trigger', 'doublescale' )
+				)
+			);
 		}
 
 		if ( isset( $this->triggers[ $trigger->slug ] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new Exception( esc_html( /* translators: %s: trigger name */
-				sprintf( __( 'Trigger %s already registered', 'doublescale'), $trigger->name ) ) );
+			throw new Exception(
+				esc_html( /* translators: %s: trigger name */
+					sprintf( __( 'Trigger %s already registered', 'doublescale' ), $trigger->name )
+				)
+			);
 		}
 
 		$this->triggers[ $trigger->slug ] = $trigger;
@@ -157,171 +162,171 @@ final class TriggersManager {
 	 * @return array
 	 */
 	public function set_sources() {
-		 $this->sources = array(
-			 'crm'         => array(
-				 'label'  => __( 'CRM', 'doublescale'),
-				 'groups' => array(
-					 'contact'       => array(
-						 'label'    => __( 'Contact', 'doublescale'),
-						 'triggers' => array(),
-					 ),
-					 'messaging'     => array(
-						 'label'    => __( 'Messaging', 'doublescale'),
-						 'triggers' => array(),
-					 ),
-					 'link_triggers' => array(
-						 'label'    => __( 'Link Triggers', 'doublescale'),
-						 'triggers' => array(),
-					 ),
-					 'webhooks'      => array(
-						 'label'    => __( 'Webhooks', 'doublescale'),
-						 'triggers' => array(),
-					 ),
-					 'deal'          => array(
-						 'label'       => __( 'Deal', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							 || ! doublescale_is_module_active( 'deals' ),
-					 ),
-				 ),
-			 ),
-			 'woocommerce' => array(
-				 'label'  => __( 'WooCommerce', 'doublescale'),
-				 'groups' => array(
-					 'order'        => array(
-						 'label'       => __( 'Order', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-					 'cart'         => array(
-						 'label'       => __( 'Cart', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-					 'review'       => array(
-						 'label'       => __( 'Review', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-					 'subscription' => array(
-						 'label'       => __( 'Subscription', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
-					 ),
-					 'wishlist'     => array(
-						 'label'       => __( 'Wishlist', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
-					 ),
-					 'membership'   => array(
-						 'label'       => __( 'Membership', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
-					 ),
-				 ),
-			 ),
-			 'wp'          => array(
-				 'label'  => __( 'WordPress', 'doublescale'),
-				 'groups' => array(
-					 'user' => array(
-						 'label'    => __( 'User', 'doublescale'),
-						 'triggers' => array(),
-					 ),
-				 ),
-			 ),
-			 'edd'         => array(
-				 'label'  => __( 'Easy Digital Downloads', 'doublescale'),
-				 'groups' => array(
-					 'order' => array(
-						 'label'       => __( 'Order', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
-					 ),
-				 ),
-			 ),
-			 'lms'         => array(
-				 'label'  => __( 'LMS', 'doublescale'),
-				 'groups' => array(
-					 'learndash'  => array(
-						 'label'       => __( 'LearnDash', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
-					 ),
-					 'tutorlms'   => array(
-						 'label'       => __( 'Tutor LMS', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'tutor/tutor.php' ),
-					 ),
-					 'lifterlms'  => array(
-						 'label'       => __( 'LifterLMS', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ),
-					 ),
-					 'learnpress' => array(
-						 'label'       => __( 'LearnPress', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
-					 ),
-				 ),
-			 ),
-			 'memberpress' => array(
-				 'label'  => __( 'MemberPress', 'doublescale'),
-				 'groups' => array(
-					 'memberpress' => array(
-						 'label'       => __( 'MemberPress', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
-					 ),
-				 ),
-			 ),
-			 'pmpro'       => array(
-				 'label'  => __( 'Paid Memberships Pro', 'doublescale'),
-				 'groups' => array(
-					 'pmpro' => array(
-						 'label'       => __( 'Paid Memberships Pro', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! defined( 'PMPRO_VERSION' ),
-					 ),
-				 ),
-			 ),
-			 'booking'     => array(
-				 'label'  => __( 'Booking', 'doublescale'),
-				 'groups' => array(
-					 'booking' => array(
-						 'label'       => __( 'Booking', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							 || ! doublescale_is_module_active( 'booking' ),
-					 ),
-				 ),
-			 ),
-			 'forms'       => array(
-				 'label'  => __( 'Forms', 'doublescale'),
-				 'groups' => array(),
-			 ),
-			 'surecart'    => array(
-				 'label'  => __( 'SureCart', 'doublescale'),
-				 'groups' => array(
-					 'order' => array(
-						 'label'       => __( 'Order', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
-					 ),
-				 ),
-			 ),
-			 'video'       => array(
-				 'label'  => __( 'Video', 'doublescale'),
-				 'groups' => array(
-					 'prestoplayer' => array(
-						 'label'       => __( 'Presto Player', 'doublescale'),
-						 'triggers'    => array(),
-						 'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
-					 ),
-				 ),
-			 ),
-		 );
+		$this->sources = array(
+			'crm'         => array(
+				'label'  => __( 'CRM', 'doublescale' ),
+				'groups' => array(
+					'contact'       => array(
+						'label'    => __( 'Contact', 'doublescale' ),
+						'triggers' => array(),
+					),
+					'messaging'     => array(
+						'label'    => __( 'Messaging', 'doublescale' ),
+						'triggers' => array(),
+					),
+					'link_triggers' => array(
+						'label'    => __( 'Link Triggers', 'doublescale' ),
+						'triggers' => array(),
+					),
+					'webhooks'      => array(
+						'label'    => __( 'Webhooks', 'doublescale' ),
+						'triggers' => array(),
+					),
+					'deal'          => array(
+						'label'       => __( 'Deal', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'deals' ),
+					),
+				),
+			),
+			'woocommerce' => array(
+				'label'  => __( 'WooCommerce', 'doublescale' ),
+				'groups' => array(
+					'order'        => array(
+						'label'       => __( 'Order', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+					'cart'         => array(
+						'label'       => __( 'Cart', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+					'review'       => array(
+						'label'       => __( 'Review', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+					'subscription' => array(
+						'label'       => __( 'Subscription', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+					),
+					'wishlist'     => array(
+						'label'       => __( 'Wishlist', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
+					),
+					'membership'   => array(
+						'label'       => __( 'Membership', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+					),
+				),
+			),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'doublescale' ),
+				'groups' => array(
+					'user' => array(
+						'label'    => __( 'User', 'doublescale' ),
+						'triggers' => array(),
+					),
+				),
+			),
+			'edd'         => array(
+				'label'  => __( 'Easy Digital Downloads', 'doublescale' ),
+				'groups' => array(
+					'order' => array(
+						'label'       => __( 'Order', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
+					),
+				),
+			),
+			'lms'         => array(
+				'label'  => __( 'LMS', 'doublescale' ),
+				'groups' => array(
+					'learndash'  => array(
+						'label'       => __( 'LearnDash', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+					),
+					'tutorlms'   => array(
+						'label'       => __( 'Tutor LMS', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'tutor/tutor.php' ),
+					),
+					'lifterlms'  => array(
+						'label'       => __( 'LifterLMS', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ),
+					),
+					'learnpress' => array(
+						'label'       => __( 'LearnPress', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
+					),
+				),
+			),
+			'memberpress' => array(
+				'label'  => __( 'MemberPress', 'doublescale' ),
+				'groups' => array(
+					'memberpress' => array(
+						'label'       => __( 'MemberPress', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+					),
+				),
+			),
+			'pmpro'       => array(
+				'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
+				'groups' => array(
+					'pmpro' => array(
+						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+					),
+				),
+			),
+			'booking'     => array(
+				'label'  => __( 'Booking', 'doublescale' ),
+				'groups' => array(
+					'booking' => array(
+						'label'       => __( 'Booking', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'booking' ),
+					),
+				),
+			),
+			'forms'       => array(
+				'label'  => __( 'Forms', 'doublescale' ),
+				'groups' => array(),
+			),
+			'surecart'    => array(
+				'label'  => __( 'SureCart', 'doublescale' ),
+				'groups' => array(
+					'order' => array(
+						'label'       => __( 'Order', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+					),
+				),
+			),
+			'video'       => array(
+				'label'  => __( 'Video', 'doublescale' ),
+				'groups' => array(
+					'prestoplayer' => array(
+						'label'       => __( 'Presto Player', 'doublescale' ),
+						'triggers'    => array(),
+						'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
+					),
+				),
+			),
+		);
 
-		 $this->sources = apply_filters( 'doublescale_automation_trigger_sources', $this->sources );
+		$this->sources = apply_filters( 'doublescale_automation_trigger_sources', $this->sources );
 	}
 
 	/**
@@ -368,7 +373,7 @@ final class TriggersManager {
 			return;
 		}
 		$this->sources['forms']['groups'] = array();
-		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
+		$forms                            = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
 
 		$skip_slugs = array();
 		if ( class_exists( '\DoubleScale\Modules\Automations\Triggers\Forms\AbstractFormSubmittedTrigger' ) ) {
@@ -390,7 +395,7 @@ final class TriggersManager {
 				'is_disabled' => ! $form->is_enabled(),
 				'triggers'    => array(
 					$form->slug => array(
-						'label'       => __( 'Form Submitted', 'doublescale'),
+						'label'       => __( 'Form Submitted', 'doublescale' ),
 						'description' => $form->description,
 						'fields'      => $form->get_form_options(),
 						'is_disabled' => ! $form->is_enabled(),
@@ -409,7 +414,7 @@ final class TriggersManager {
 	 * @return array
 	 */
 	public function get_sources() {
-		 return $this->sources;
+		return $this->sources;
 	}
 
 	/**
@@ -419,11 +424,11 @@ final class TriggersManager {
 	 */
 	private function store_trigger_in_sources( Trigger $trigger ): void {
 		$row = array(
-			'label'         => $trigger->name,
-			'description'   => $trigger->description,
-			'fields'        => $trigger->get_fields(),
-			'is_pro'        => $trigger->is_pro,
-			'is_disabled'   => false,
+			'label'       => $trigger->name,
+			'description' => $trigger->description,
+			'fields'      => $trigger->get_fields(),
+			'is_pro'      => $trigger->is_pro,
+			'is_disabled' => false,
 		);
 
 		if ( 'forms' === $trigger->source ) {
@@ -444,7 +449,7 @@ final class TriggersManager {
 					'triggers'    => array(),
 				);
 			}
-			$this->sources['forms']['groups'][ $trigger->group ]['is_disabled'] = $row['is_disabled'];
+			$this->sources['forms']['groups'][ $trigger->group ]['is_disabled']                = $row['is_disabled'];
 			$this->sources['forms']['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = $row;
 
 			return;

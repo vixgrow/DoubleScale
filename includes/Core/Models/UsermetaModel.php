@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Core\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;

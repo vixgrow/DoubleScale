@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceSubscription;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -72,7 +71,7 @@ class SubscriptionPaymentGateway extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		 return true;
+		return true;
 	}
 
 	/**
@@ -84,8 +83,8 @@ class SubscriptionPaymentGateway extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => \__( 'Is', 'doublescale'),
-			'not_is' => \__( 'Is not', 'doublescale'),
+			'is'     => \__( 'Is', 'doublescale' ),
+			'not_is' => \__( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -97,7 +96,7 @@ class SubscriptionPaymentGateway extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 $result          = array();
+		$result           = array();
 		$result['manual'] = __( 'Manual Renewal', 'doublescale' );
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			if ( 'yes' === $gateway->enabled && in_array( 'subscriptions', $gateway->supports, true ) ) {
@@ -144,7 +143,7 @@ class SubscriptionPaymentGateway extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

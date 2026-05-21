@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Data\BookingDataFormatter;
@@ -103,10 +102,10 @@ abstract class BaseTemplateRenderer {
 	 * @var array{handles: array<int, string>, template_path: string, inline_data: array}
 	 */
 	private $deferred = array(
-		'handles'        => array(),
-		'template_path'  => '',
-		'inline_data'    => array(),
-		'react'          => false,
+		'handles'       => array(),
+		'template_path' => '',
+		'inline_data'   => array(),
+		'react'         => false,
 	);
 
 	/**

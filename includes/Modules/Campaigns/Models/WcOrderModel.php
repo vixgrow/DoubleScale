@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -20,8 +19,8 @@ use WPEloquent\Eloquent\Model;
 /**
  * WcOrderModel class
  */
-class WcOrderModel extends Model
-{
+class WcOrderModel extends Model {
+
 
 	/**
 	 * Table name
@@ -90,9 +89,8 @@ class WcOrderModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function contact()
-	{
-		return $this->belongsTo(ContactModel::class, 'email', 'billing_email');
+	public function contact() {
+		return $this->belongsTo( ContactModel::class, 'email', 'billing_email' );
 	}
 
 	/**
@@ -100,25 +98,24 @@ class WcOrderModel extends Model
 	 *
 	 * @since 1.0.0
 	 */
-	public static function boot()
-	{
+	public static function boot() {
 		parent::boot();
 
 		// Add order status name not slug while retrieving
 		static::retrieved(
-			function ($order) {
+			function ( $order ) {
 				$status        = $order->status;
-				$order->status = wc_get_order_status_name($status);
+				$order->status = wc_get_order_status_name( $status );
 
 				// Use HPOS-aware URL and avoid HTML entity escaping.
 				if (
-					class_exists('Automattic\Woocommerce\Utilities\OrderUtil')
-					&& method_exists('Automattic\Woocommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled')
+					class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
+					&& method_exists( 'Automattic\Woocommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled' )
 					&& \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
 				) {
-					$order->url = admin_url('admin.php?page=wc-orders&action=edit&id=' . absint($order->id));
+					$order->url = admin_url( 'admin.php?page=wc-orders&action=edit&id=' . absint( $order->id ) );
 				} else {
-					$order->url = get_edit_post_link($order->id, '');
+					$order->url = get_edit_post_link( $order->id, '' );
 				}
 			}
 		);

@@ -5,7 +5,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 class ConfirmPageRenderer extends BaseTemplateRenderer {
@@ -35,8 +34,8 @@ class ConfirmPageRenderer extends BaseTemplateRenderer {
 		$reschedule_permissions = $this->check_reschedule_permissions( $advanced_settings, $booking_array, $timezone );
 
 		// Include waiting list position if booking is in waiting status.
-		$is_waiting              = 'waiting' === $booking->status;
-		$waiting_list_position   = $is_waiting ? $booking->waiting_list_position : null;
+		$is_waiting            = 'waiting' === $booking->status;
+		$waiting_list_position = $is_waiting ? $booking->waiting_list_position : null;
 
 		$template_path = __DIR__ . '/templates/confirm.php';
 

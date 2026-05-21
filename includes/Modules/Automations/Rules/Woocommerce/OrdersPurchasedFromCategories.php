@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Woocommerce;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -58,7 +57,7 @@ class OrdersPurchasedFromCategories extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		 return true;
+		return true;
 	}
 
 	/**
@@ -70,9 +69,9 @@ class OrdersPurchasedFromCategories extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'matches_any_of'  => __( 'Matches any of', 'doublescale'),
-			'matches_none_of' => __( 'Matches none of', 'doublescale'),
-			'matches_all_of'  => __( 'Matches all of', 'doublescale'),
+			'matches_any_of'  => __( 'Matches any of', 'doublescale' ),
+			'matches_none_of' => __( 'Matches none of', 'doublescale' ),
+			'matches_all_of'  => __( 'Matches all of', 'doublescale' ),
 		);
 	}
 
@@ -181,7 +180,7 @@ class OrdersPurchasedFromCategories extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

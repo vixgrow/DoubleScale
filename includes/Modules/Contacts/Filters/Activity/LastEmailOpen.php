@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Activity;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -68,11 +67,11 @@ class LastEmailOpen extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'before'  => __( 'Before', 'doublescale'),
-			'after'   => __( 'After', 'doublescale'),
-			'on'      => __( 'On', 'doublescale'),
-			'between' => __( 'Between', 'doublescale'),
-			'within'  => __( 'Within', 'doublescale'),
+			'before'  => __( 'Before', 'doublescale' ),
+			'after'   => __( 'After', 'doublescale' ),
+			'on'      => __( 'On', 'doublescale' ),
+			'between' => __( 'Between', 'doublescale' ),
+			'within'  => __( 'Within', 'doublescale' ),
 		);
 	}
 
@@ -99,7 +98,7 @@ class LastEmailOpen extends Filter {
 		// Convert string to date
 		if ( is_array( $value ) ) {
 			$value = array_map(
-				function( $val ) {
+				function ( $val ) {
 					$date = new \DateTime( $val );
 					if ( $date ) {
 						return $date->format( 'Y-m-d' );

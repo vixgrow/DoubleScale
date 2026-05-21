@@ -35,7 +35,7 @@ class CampaignEmailLogSource {
 		if ( $campaign->is_email_sequence() ) {
 			return array(
 				'crm_source' => array(
-					'kind' => 'email_sequence',
+					'kind'  => 'email_sequence',
 					'label' => $name,
 					'path'  => 'email-sequences/' . (int) $campaign->id,
 				),
@@ -55,7 +55,7 @@ class CampaignEmailLogSource {
 
 			return array(
 				'crm_source' => array(
-					'kind' => 'sequence_mail',
+					'kind'  => 'sequence_mail',
 					'label' => $label,
 					'path'  => 'email-sequences/' . $path_id,
 				),
@@ -64,7 +64,7 @@ class CampaignEmailLogSource {
 
 		return array(
 			'crm_source' => array(
-				'kind' => 'campaign',
+				'kind'  => 'campaign',
 				'label' => $name,
 				'path'  => 'campaigns/' . (int) $campaign->id . '/overview',
 			),

@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Provider;
@@ -126,7 +125,7 @@ trait Account_Controller_Creatable {
 			array(
 				'id'          => $account_id,
 				'name'        => $account_data['name'],
-				'credentials' => $account_data['credentials'] ?? [],
+				'credentials' => $account_data['credentials'] ?? array(),
 			),
 			$account_exists ? 200 : 201
 		);
@@ -154,5 +153,4 @@ trait Account_Controller_Creatable {
 	public function create_item_permissions_check( $request ) {
 		return Settings::user_can_manage_smtp_rest();
 	}
-
 }

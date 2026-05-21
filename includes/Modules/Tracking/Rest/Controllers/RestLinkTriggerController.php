@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Tracking\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -64,7 +63,7 @@ class RestLinkTriggerController extends RestController {
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'IDs of the link triggers.', 'doublescale'),
+							'description' => __( 'IDs of the link triggers.', 'doublescale' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
@@ -82,7 +81,7 @@ class RestLinkTriggerController extends RestController {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the object.', 'doublescale'),
+						'description' => __( 'Unique identifier for the object.', 'doublescale' ),
 						'type'        => 'integer',
 					),
 				),
@@ -115,34 +114,34 @@ class RestLinkTriggerController extends RestController {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Limit results to those matching a string.', 'doublescale'),
+				'description'       => __( 'Limit results to those matching a string.', 'doublescale' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'per_page' => array(
-				'description' => __( 'Number of items to return in one page.', 'doublescale'),
+				'description' => __( 'Number of items to return in one page.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 10,
 			),
 			'page'     => array(
-				'description' => __( 'Current page of the collection.', 'doublescale'),
+				'description' => __( 'Current page of the collection.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'ids'      => array(
-				'description' => __( 'IDs of the link triggers.', 'doublescale'),
+				'description' => __( 'IDs of the link triggers.', 'doublescale' ),
 				'type'        => 'array',
 				'items'       => array(
 					'type' => 'integer',
 				),
 			),
 			'from'     => array(
-				'description' => __( 'Start date for filtering link triggers.', 'doublescale'),
+				'description' => __( 'Start date for filtering link triggers.', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'to'       => array(
-				'description' => __( 'End date for filtering link triggers.', 'doublescale'),
+				'description' => __( 'End date for filtering link triggers.', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
@@ -157,62 +156,62 @@ class RestLinkTriggerController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'link_trigger',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'          => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale'),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'readonly'    => true,
-				 ),
-				 'name'        => array(
-					 'description' => __( 'Name of the link trigger.', 'doublescale'),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-				 ),
-				 'hash'        => array(
-					 'description' => __( 'Unique hash for the link trigger.', 'doublescale'),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'readonly'    => true,
-				 ),
-				 'status'      => array(
-					 'description' => __( 'Status of the link trigger.', 'doublescale'),
-					 'type'        => 'string',
-					 'enum'        => array( 'active', 'inactive' ),
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'default'     => 'active',
-				 ),
-				 'settings'    => array(
-					 'description' => __( 'Settings of the link trigger.', 'doublescale'),
-					 'type'        => 'object',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-				 ),
-				 'click_count' => array(
-					 'description' => __( 'Click count of the link trigger.', 'doublescale'),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'readonly'    => true,
-				 ),
-				 'created_at'  => array(
-					 'description' => __( 'The date the link trigger was created.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'readonly'    => true,
-				 ),
-				 'updated_at'  => array(
-					 'description' => __( 'The date the link trigger was last updated.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'context'     => array( 'view', 'edit', 'embed' ),
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'link_trigger',
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'name'        => array(
+					'description' => __( 'Name of the link trigger.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit', 'embed' ),
+				),
+				'hash'        => array(
+					'description' => __( 'Unique hash for the link trigger.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'status'      => array(
+					'description' => __( 'Status of the link trigger.', 'doublescale' ),
+					'type'        => 'string',
+					'enum'        => array( 'active', 'inactive' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'default'     => 'active',
+				),
+				'settings'    => array(
+					'description' => __( 'Settings of the link trigger.', 'doublescale' ),
+					'type'        => 'object',
+					'context'     => array( 'view', 'edit', 'embed' ),
+				),
+				'click_count' => array(
+					'description' => __( 'Click count of the link trigger.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'created_at'  => array(
+					'description' => __( 'The date the link trigger was created.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'updated_at'  => array(
+					'description' => __( 'The date the link trigger was last updated.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -288,7 +287,7 @@ class RestLinkTriggerController extends RestController {
 			$link_trigger = LinkTriggerModel::find( $id );
 
 			if ( ! $link_trigger ) {
-				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $link_trigger, 200 );
@@ -333,7 +332,7 @@ class RestLinkTriggerController extends RestController {
 			$link_trigger = LinkTriggerModel::find( $id );
 
 			if ( ! $link_trigger ) {
-				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$link_trigger_data = $this->prepare_link_trigger( $request );
@@ -361,7 +360,7 @@ class RestLinkTriggerController extends RestController {
 			$link_trigger = LinkTriggerModel::find( $id );
 
 			if ( ! $link_trigger ) {
-				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'doublescale_link_trigger_not_found', __( 'Link trigger not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$link_trigger->delete();

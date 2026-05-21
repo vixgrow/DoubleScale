@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\SurecartCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -59,10 +58,10 @@ class OrderTotal extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'is'           => __( 'Is', 'doublescale'),
-			'is_not'       => __( 'Is not', 'doublescale'),
-			'greater_than' => __( 'Greater than', 'doublescale'),
-			'lower_than'   => __( 'Lower than', 'doublescale'),
+			'is'           => __( 'Is', 'doublescale' ),
+			'is_not'       => __( 'Is not', 'doublescale' ),
+			'greater_than' => __( 'Greater than', 'doublescale' ),
+			'lower_than'   => __( 'Lower than', 'doublescale' ),
 		);
 	}
 

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -352,7 +351,7 @@ class Emails {
 
 		// Check if message is already a complete HTML document (from EmailRenderer)
 		$is_complete_html = strpos( $message, '<!DOCTYPE html' ) !== false ||
-					   strpos( $message, '<html' ) !== false;
+						strpos( $message, '<html' ) !== false;
 
 		if ( $is_complete_html ) {
 			// Message is already a complete HTML document, return as-is
@@ -435,7 +434,7 @@ class Emails {
 		$prepared_message = $this->build_email( $data['message'] );
 
 		$wp_mail_failed_message = '';
-		$wp_mail_failed_cb      = static function( $error ) use ( &$wp_mail_failed_message ) {
+		$wp_mail_failed_cb      = static function ( $error ) use ( &$wp_mail_failed_message ) {
 			if ( ! $error instanceof \WP_Error ) {
 				return;
 			}
@@ -686,7 +685,7 @@ class Emails {
 			$result     = $emails->send( $contact->email, $subject, $content );
 
 			doublescale_get_logger()->info(
-				__( 'Double opt-in email sent', 'doublescale'),
+				__( 'Double opt-in email sent', 'doublescale' ),
 				array(
 					'contact_id' => $contact->id,
 					'email'      => $contact->email,
@@ -696,7 +695,7 @@ class Emails {
 			return $result;
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Error sending double opt-in email', 'doublescale'),
+				__( 'Error sending double opt-in email', 'doublescale' ),
 				array(
 					'contact_id' => $contact->id ?? null,
 					'error'      => $e->getMessage(),

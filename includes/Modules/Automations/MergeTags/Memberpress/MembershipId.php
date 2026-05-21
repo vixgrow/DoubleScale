@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Memberpress;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -47,7 +46,7 @@ class MembershipId extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel $contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param string                 $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */

@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Woocommerce;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
@@ -17,7 +16,7 @@ use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
  */
 class ChangeOrderStatus extends ProAutomationStubAction {
 
-/**
+	/**
 	 * Action Name
 	 *
 	 * @var string
@@ -57,7 +56,7 @@ class ChangeOrderStatus extends ProAutomationStubAction {
 	 *
 	 * @var array
 	 */
-	public $required_triggers = array('wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded');
+	public $required_triggers = array( 'wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded' );
 
 
 	/**

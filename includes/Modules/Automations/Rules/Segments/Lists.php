@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Segments;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -23,8 +22,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Lists class
  */
-class Lists extends Rule
-{
+class Lists extends Rule {
+
 
 	/**
 	 * Name
@@ -78,15 +77,14 @@ class Lists extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'               => __('Is', 'doublescale'),
-			'is_not'           => __('Is not', 'doublescale'),
-			'contains'         => __('Contains', 'doublescale'),
-			'does_not_contain' => __('Does not contain', 'doublescale'),
-			'is_empty'         => __('Is empty', 'doublescale'),
-			'is_not_empty'     => __('Is not empty', 'doublescale'),
+			'is'               => __( 'Is', 'doublescale' ),
+			'is_not'           => __( 'Is not', 'doublescale' ),
+			'contains'         => __( 'Contains', 'doublescale' ),
+			'does_not_contain' => __( 'Does not contain', 'doublescale' ),
+			'is_empty'         => __( 'Is empty', 'doublescale' ),
+			'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 		);
 	}
 
@@ -99,14 +97,13 @@ class Lists extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options($list_name = '')
-	{
+	public function get_options( $list_name = '' ) {
 		$lists = array();
 
-		if ('' === $list_name) {
-			$lists = ListModel::paginate(10, array('*'), 'page', 1);
+		if ( '' === $list_name ) {
+			$lists = ListModel::paginate( 10, array( '*' ), 'page', 1 );
 		} else {
-			$lists = ListModel::where('name', 'LIKE', '%' . $list_name . '%')->paginate(10, array('*'), 'page', 1);
+			$lists = ListModel::where( 'name', 'LIKE', '%' . $list_name . '%' )->paginate( 10, array( '*' ), 'page', 1 );
 		}
 
 		return $lists;
@@ -121,12 +118,11 @@ class Lists extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
-		$ids     = $contact->lists->pluck('id')->toArray();
+		$ids     = $contact->lists->pluck( 'id' )->toArray();
 		return $ids;
 	}
 }
 
-RulesManager::instance()->register(new Lists());
+RulesManager::instance()->register( new Lists() );

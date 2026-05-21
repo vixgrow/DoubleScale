@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -48,4 +47,3 @@ interface LayoutHandlerInterface {
 	 */
 	public function get_name(): string;
 }
-

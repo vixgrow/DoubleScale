@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\EventLocations;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\Location;

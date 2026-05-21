@@ -6,7 +6,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 class CalendarPageRenderer extends BaseTemplateRenderer {
@@ -36,10 +35,13 @@ class CalendarPageRenderer extends BaseTemplateRenderer {
 		}
 
 		$template_path = __DIR__ . '/templates/calendar.php';
-		
-		return $this->render_template_page( $template_path, [
-			'calendar' => $calendar,
-			'title'    => $calendar->name ?? __( 'Calendar', 'doublescale' )
-		]);
+
+		return $this->render_template_page(
+			$template_path,
+			array(
+				'calendar' => $calendar,
+				'title'    => $calendar->name ?? __( 'Calendar', 'doublescale' ),
+			)
+		);
 	}
 }

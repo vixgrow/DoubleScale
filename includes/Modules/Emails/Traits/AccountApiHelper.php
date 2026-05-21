@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Emails\Traits;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -139,7 +138,7 @@ trait AccountApiHelper {
 		$option_name = class_exists( '\\DoubleScale\\Pro\\Modules\\Inbox\\Oauth\\EmailOauth' )
 			? \DoubleScale\Pro\Modules\Inbox\Oauth\EmailOauth::smtp_routing_option_name()
 			: 'doublescale_smtp_settings';
-		$settings = get_option( $option_name, array() );
+		$settings    = get_option( $option_name, array() );
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
 		}
@@ -266,7 +265,7 @@ trait AccountApiHelper {
 	protected function log_account_api_error( $error_message ) {
 		doublescale_get_logger()->error(
 			/* translators: %s: mailer name */
-			sprintf( __( 'Failed to get %s Account Api', 'doublescale'), ucfirst( $this->get_slug() ) ),
+			sprintf( __( 'Failed to get %s Account Api', 'doublescale' ), ucfirst( $this->get_slug() ) ),
 			array(
 				'code'   => 'bulk_email_' . $this->get_slug() . '_api_error',
 				'error'  => $error_message,

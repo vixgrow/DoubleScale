@@ -183,7 +183,7 @@ abstract class Importer {
 	 * @return array
 	 */
 	public function get_credentials() {
-		 return array();
+		return array();
 	}
 
 	/**
@@ -231,7 +231,7 @@ abstract class Importer {
 	 */
 	public function import() {
 		if ( ! $this->is_active() ) {
-			return new \WP_Error( 'importer_not_active', __( 'The importer is not active', 'doublescale') );
+			return new \WP_Error( 'importer_not_active', __( 'The importer is not active', 'doublescale' ) );
 		}
 		$this->start_time = microtime( true );
 		return $this->run();
@@ -331,10 +331,8 @@ abstract class Importer {
 					if ( $auto_create ) {
 						$list = ListModel::getOrCreate( $name );
 						$contact->lists()->syncWithPivotValues( array( $list->id ), array( 'taxonomy_type' => 'list' ), false );
-					} else {
-						if ( ! empty( $assign_to ) ) {
+					} elseif ( ! empty( $assign_to ) ) {
 							$contact->lists()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'list' ), false );
-						}
 					}
 				}
 
@@ -351,10 +349,8 @@ abstract class Importer {
 					if ( $auto_create ) {
 						$tag = TagModel::getOrCreate( $name );
 						$contact->tags()->syncWithPivotValues( array( $tag->id ), array( 'taxonomy_type' => 'tag' ), false );
-					} else {
-						if ( ! empty( $assign_to ) ) {
+					} elseif ( ! empty( $assign_to ) ) {
 							$contact->tags()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'tag' ), false );
-						}
 					}
 				}
 
@@ -376,7 +372,7 @@ abstract class Importer {
 
 			return 'skipped';
 		} catch ( \Exception $e ) {
-			$error_message = __( 'Error importing contact', 'doublescale') . ': ' . $e->getMessage();
+			$error_message = __( 'Error importing contact', 'doublescale' ) . ': ' . $e->getMessage();
 			doublescale_get_logger()->error(
 				$error_message,
 				array(
@@ -403,7 +399,7 @@ abstract class Importer {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact Contact model.
-	 * @param object|array  $subscriber Subscriber data.
+	 * @param object|array $subscriber Subscriber data.
 	 *
 	 * @return void
 	 */
@@ -505,8 +501,8 @@ abstract class Importer {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact Contact model.
-	 * @param int           $custom_field_id Custom field ID.
-	 * @param mixed         $value Field value.
+	 * @param int          $custom_field_id Custom field ID.
+	 * @param mixed        $value Field value.
 	 *
 	 * @return void
 	 */
@@ -581,7 +577,7 @@ abstract class Importer {
 
 		// If no group name provided, use default
 		if ( empty( $group_name ) ) {
-			$group_name = __( 'Imported Fields', 'doublescale');
+			$group_name = __( 'Imported Fields', 'doublescale' );
 			$group_slug = 'imported-fields';
 		} else {
 			$group_slug = sanitize_title( $group_name );
@@ -650,13 +646,13 @@ abstract class Importer {
 			foreach ( $subscribers as $subscriber ) {
 				$result = $this->import_contact( $subscriber, $mapping );
 				if ( false === $result ) {
-					$failed++;
+					++$failed;
 				} elseif ( 'skipped' === $result ) {
-					$skipped++;
+					++$skipped;
 				} else {
-					$imported++;
+					++$imported;
 				}
-				$offset++;
+				++$offset;
 			}
 
 			// Check if offset is greater than or equal to total
@@ -706,14 +702,14 @@ abstract class Importer {
 			foreach ( $batch_result['contacts'] as $subscriber ) {
 				$result = $this->import_contact( $subscriber, $mapping );
 				if ( false === $result ) {
-					$failed++;
+					++$failed;
 				} elseif ( 'skipped' === $result ) {
-					$skipped++;
+					++$skipped;
 				} else {
-					$imported++;
+					++$imported;
 				}
-				$processed_in_session++;
-				$current_offset++;
+				++$processed_in_session;
+				++$current_offset;
 			}
 
 			// Update cursor for next iteration

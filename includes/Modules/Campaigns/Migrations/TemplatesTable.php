@@ -10,8 +10,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Migrations;
 
-
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Database\Migration;
@@ -72,5 +70,4 @@ class TemplatesTable extends Migration {
 
 		return $query;
 	}
-
 }

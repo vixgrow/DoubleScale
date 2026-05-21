@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Helpers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -126,7 +125,7 @@ class IntegrationsHelper {
 		if ( $context === 'manager' ) {
 			return array(
 
-				'google'             => array(
+				'google'  => array(
 					'name'         => 'Google Calendar/Meet',
 					'description'  => 'Google Calendar Integration',
 					'icon'         => $pro_icons_base ? $pro_icons_base . 'google/icon.svg' : '',
@@ -136,7 +135,7 @@ class IntegrationsHelper {
 					'is_global'    => false,
 				),
 
-				'outlook'            => array(
+				'outlook' => array(
 					'name'         => 'Outlook Calendar/MS Teams Conferencing',
 					'description'  => 'Outlook Calendar Integration',
 					'icon'         => $pro_icons_base ? $pro_icons_base . 'outlook/icon.svg' : '',
@@ -145,7 +144,7 @@ class IntegrationsHelper {
 					'has_accounts' => true,
 					'is_global'    => false,
 				),
-				'zoom'               => array(
+				'zoom'    => array(
 					'name'         => 'Zoom Integration',
 					'description'  => 'Zoom Meeting Integration',
 					'icon'         => $pro_icons_base ? $pro_icons_base . 'zoom/icon.svg' : '',
@@ -154,7 +153,7 @@ class IntegrationsHelper {
 					'has_accounts' => false,
 					'is_global'    => false,
 				),
-				'apple'              => array(
+				'apple'   => array(
 					'name'         => 'Apple Calendar',
 					'description'  => 'Apple Calendar Integration',
 					'icon'         => $pro_icons_base ? $pro_icons_base . 'apple/icon.svg' : '',
@@ -167,7 +166,7 @@ class IntegrationsHelper {
 		} else {
 			// For event context or default
 			return array(
-				'google'             => array(
+				'google'  => array(
 					'name'            => 'Google',
 					'connected'       => false,
 					'has_accounts'    => false,
@@ -175,7 +174,7 @@ class IntegrationsHelper {
 					'has_get_started' => false,
 					'has_pro_version' => false,
 				),
-				'outlook'            => array(
+				'outlook' => array(
 					'name'            => 'Outlook',
 					'connected'       => false,
 					'has_accounts'    => false,
@@ -184,7 +183,7 @@ class IntegrationsHelper {
 					'has_get_started' => false,
 					'has_pro_version' => false,
 				),
-				'apple'              => array(
+				'apple'   => array(
 					'name'            => 'Apple',
 					'connected'       => false,
 					'has_accounts'    => false,
@@ -192,7 +191,7 @@ class IntegrationsHelper {
 					'has_get_started' => false,
 					'has_pro_version' => false,
 				),
-				'zoom'               => array(
+				'zoom'    => array(
 					'name'            => 'Zoom',
 					'connected'       => false,
 					'has_accounts'    => false,

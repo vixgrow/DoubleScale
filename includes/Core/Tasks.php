@@ -526,7 +526,7 @@ class Tasks {
 		// Log cleanup results
 		if ( function_exists( 'doublescale_get_logger' ) ) {
 			doublescale_get_logger()->info(
-				__( 'Task cleanup completed', 'doublescale'),
+				__( 'Task cleanup completed', 'doublescale' ),
 				array(
 					'code'  => 'task_cleanup_completed',
 					'stats' => $stats,

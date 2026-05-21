@@ -145,22 +145,29 @@ class ImapClient {
 				$error_message = implode( '; ', $errors );
 			} elseif ( ! empty( $captured_warnings ) ) {
 				// Clean up warning messages (remove function prefix for readability).
-				$error_message = implode( '; ', array_map(
-					function ( $w ) {
-						// Strip "imap_open(): " or "imap2_open(): " prefix.
-						return preg_replace( '/^imap2?_open\(\):\s*/i', '', $w );
-					},
-					$captured_warnings
-				) );
+				$error_message = implode(
+					'; ',
+					array_map(
+						function ( $w ) {
+							// Strip "imap_open(): " or "imap2_open(): " prefix.
+							return preg_replace( '/^imap2?_open\(\):\s*/i', '', $w );
+						},
+						$captured_warnings
+					)
+				);
 			} else {
-				$error_message = __( 'Unknown error — check server hostname, port, and encryption settings.', 'doublescale');
+				$error_message = __( 'Unknown error — check server hostname, port, and encryption settings.', 'doublescale' );
 			}
 
-			throw new \RuntimeException( esc_html( sprintf(
+			throw new \RuntimeException(
+				esc_html(
+					sprintf(
 					/* translators: %s: IMAP error message */
-					__( 'Failed to connect to IMAP server: %s', 'doublescale'),
-					$error_message
-				) ) );
+						__( 'Failed to connect to IMAP server: %s', 'doublescale' ),
+						$error_message
+					)
+				)
+			);
 		}
 	}
 

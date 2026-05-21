@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Activities\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -134,7 +133,7 @@ class ActivityModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		 return $this->belongsTo( ContactModel::class, 'contact_id' );
+		return $this->belongsTo( ContactModel::class, 'contact_id' );
 	}
 
 	/**
@@ -363,19 +362,19 @@ class ActivityModel extends Model {
 	 * @return string
 	 */
 	public function getFormattedMessageAttribute() {
-		$user_name = $this->user ? $this->user->display_name : __( 'Unknown User', 'doublescale');
+		$user_name = $this->user ? $this->user->display_name : __( 'Unknown User', 'doublescale' );
 
 		switch ( $this->activity_type ) {
 			case 'created':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s created this deal', 'doublescale'),
+					__( '%s created this deal', 'doublescale' ),
 					$user_name
 				);
 
 			case 'stage_changed':
-				$old_stage_name = __( 'Unknown Stage', 'doublescale');
-				$new_stage_name = __( 'Unknown Stage', 'doublescale');
+				$old_stage_name = __( 'Unknown Stage', 'doublescale' );
+				$new_stage_name = __( 'Unknown Stage', 'doublescale' );
 
 				if ( class_exists( '\DoubleScale\Pro\Modules\Deals\Models\PipelineStageModel' ) ) {
 					$old_stage = \DoubleScale\Pro\Modules\Deals\Models\PipelineStageModel::find( $this->data['old_stage_id'] ?? 0 );
@@ -387,7 +386,7 @@ class ActivityModel extends Model {
 
 				return sprintf(
 					/* translators: 1: user name, 2: old stage name, 3: new stage name */
-					__( '%1$s moved deal from "%2$s" to "%3$s"', 'doublescale'),
+					__( '%1$s moved deal from "%2$s" to "%3$s"', 'doublescale' ),
 					$user_name,
 					$old_stage_name,
 					$new_stage_name
@@ -396,7 +395,7 @@ class ActivityModel extends Model {
 			case 'value_changed':
 				return sprintf(
 					/* translators: 1: user name, 2: old value, 3: new value */
-					__( '%1$s changed deal value from %2$s to %3$s', 'doublescale'),
+					__( '%1$s changed deal value from %2$s to %3$s', 'doublescale' ),
 					$user_name,
 					$this->data['old_value'] ?? 0,
 					$this->data['new_value'] ?? 0
@@ -407,21 +406,21 @@ class ActivityModel extends Model {
 				if ( 'won' === $status ) {
 					return sprintf(
 						/* translators: %s: user name */
-						__( '%s marked deal as won', 'doublescale'),
+						__( '%s marked deal as won', 'doublescale' ),
 						$user_name
 					);
 				} elseif ( 'lost' === $status ) {
 					$reason = ! empty( $this->data['reason'] ) ? ' - ' . $this->data['reason'] : '';
 					return sprintf(
 						/* translators: 1: user name, 2: reason */
-						__( '%1$s marked deal as lost%2$s', 'doublescale'),
+						__( '%1$s marked deal as lost%2$s', 'doublescale' ),
 						$user_name,
 						$reason
 					);
 				}
 				return sprintf(
 					/* translators: 1: user name, 2: status */
-					__( '%1$s changed deal status to %2$s', 'doublescale'),
+					__( '%1$s changed deal status to %2$s', 'doublescale' ),
 					$user_name,
 					$status
 				);
@@ -429,7 +428,7 @@ class ActivityModel extends Model {
 			case 'note':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s added a note', 'doublescale'),
+					__( '%s added a note', 'doublescale' ),
 					$user_name
 				);
 
@@ -439,7 +438,7 @@ class ActivityModel extends Model {
 				$contact_name  = $this->data['contact_name'] ?? '';
 
 				$sender = $user_name;
-				if ( __( 'Unknown User', 'doublescale') === $sender ) {
+				if ( __( 'Unknown User', 'doublescale' ) === $sender ) {
 					$from_email = $this->data['from_email'] ?? '';
 					if ( ! empty( $from_email ) ) {
 						$sender = $from_email;
@@ -448,14 +447,14 @@ class ActivityModel extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s sent an email', 'doublescale'),
+					__( '%s sent an email', 'doublescale' ),
 					$sender
 				);
 
 				if ( ! empty( $subject ) ) {
 					$message .= sprintf(
 						/* translators: %s: email subject */
-						__( ' with subject "%s"', 'doublescale'),
+						__( ' with subject "%s"', 'doublescale' ),
 						$subject
 					);
 				}
@@ -464,7 +463,7 @@ class ActivityModel extends Model {
 					$recipient = ! empty( $contact_name ) ? $contact_name : $contact_email;
 					$message  .= sprintf(
 						/* translators: %s: recipient */
-						__( ' to %s', 'doublescale'),
+						__( ' to %s', 'doublescale' ),
 						$recipient
 					);
 				}
@@ -475,17 +474,17 @@ class ActivityModel extends Model {
 				$subject    = $this->data['subject'] ?? '';
 				$from_email = $this->data['from_email'] ?? '';
 
-				$sender  = ! empty( $from_email ) ? $from_email : __( 'a contact', 'doublescale');
+				$sender  = ! empty( $from_email ) ? $from_email : __( 'a contact', 'doublescale' );
 				$message = sprintf(
 					/* translators: %s: sender email */
-					__( '%s sent a reply', 'doublescale'),
+					__( '%s sent a reply', 'doublescale' ),
 					$sender
 				);
 
 				if ( ! empty( $subject ) ) {
 					$message .= sprintf(
 						/* translators: %s: email subject */
-						__( ' with subject "%s"', 'doublescale'),
+						__( ' with subject "%s"', 'doublescale' ),
 						$subject
 					);
 				}
@@ -499,14 +498,14 @@ class ActivityModel extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s logged a call', 'doublescale'),
+					__( '%s logged a call', 'doublescale' ),
 					$user_name
 				);
 
 				if ( ! empty( $phone_number ) ) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' to %s', 'doublescale'),
+						__( ' to %s', 'doublescale' ),
 						$phone_number
 					);
 				}
@@ -514,7 +513,7 @@ class ActivityModel extends Model {
 				if ( ! empty( $outcome ) ) {
 					$message .= sprintf(
 						/* translators: %s: call outcome */
-						__( ' with outcome: %s', 'doublescale'),
+						__( ' with outcome: %s', 'doublescale' ),
 						$outcome
 					);
 				}
@@ -522,7 +521,7 @@ class ActivityModel extends Model {
 				if ( $duration ) {
 					$message .= sprintf(
 						/* translators: %d: duration in minutes */
-						__( ' (Duration: %d minutes)', 'doublescale'),
+						__( ' (Duration: %d minutes)', 'doublescale' ),
 						$duration
 					);
 				}
@@ -536,7 +535,7 @@ class ActivityModel extends Model {
 
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s scheduled a meeting', 'doublescale'),
+					__( '%s scheduled a meeting', 'doublescale' ),
 					$user_name
 				);
 
@@ -547,7 +546,7 @@ class ActivityModel extends Model {
 				if ( ! empty( $attendee_name ) ) {
 					$message .= sprintf(
 						/* translators: %s: attendee name */
-						__( ' with %s', 'doublescale'),
+						__( ' with %s', 'doublescale' ),
 						$attendee_name
 					);
 				}
@@ -556,7 +555,7 @@ class ActivityModel extends Model {
 					$formatted_date = date_i18n( 'M j, Y \a\t g:i A', strtotime( $scheduled_at ) );
 					$message       .= sprintf(
 						/* translators: %s: scheduled date */
-						__( ' for %s', 'doublescale'),
+						__( ' for %s', 'doublescale' ),
 						$formatted_date
 					);
 				}
@@ -565,11 +564,11 @@ class ActivityModel extends Model {
 
 			case 'sms_received':
 				$sms_from = $this->data['from'] ?? '';
-				$message  = __( 'Sms received', 'doublescale');
+				$message  = __( 'Sms received', 'doublescale' );
 				if ( ! empty( $sms_from ) ) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' from %s', 'doublescale'),
+						__( ' from %s', 'doublescale' ),
 						$sms_from
 					);
 				}
@@ -577,11 +576,11 @@ class ActivityModel extends Model {
 
 			case 'whatsapp_received':
 				$wa_from = $this->data['from'] ?? '';
-				$message = __( 'Whatsapp message received', 'doublescale');
+				$message = __( 'Whatsapp message received', 'doublescale' );
 				if ( ! empty( $wa_from ) ) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' from %s', 'doublescale'),
+						__( ' from %s', 'doublescale' ),
 						$wa_from
 					);
 				}
@@ -591,13 +590,13 @@ class ActivityModel extends Model {
 				$sms_to  = $this->data['to'] ?? '';
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s sent an Sms', 'doublescale'),
+					__( '%s sent an Sms', 'doublescale' ),
 					$user_name
 				);
 				if ( ! empty( $sms_to ) ) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' to %s', 'doublescale'),
+						__( ' to %s', 'doublescale' ),
 						$sms_to
 					);
 				}
@@ -607,13 +606,13 @@ class ActivityModel extends Model {
 				$wa_to   = $this->data['to'] ?? '';
 				$message = sprintf(
 					/* translators: %s: user name */
-					__( '%s sent a WhatsApp message', 'doublescale'),
+					__( '%s sent a WhatsApp message', 'doublescale' ),
 					$user_name
 				);
 				if ( ! empty( $wa_to ) ) {
 					$message .= sprintf(
 						/* translators: %s: phone number */
-						__( ' to %s', 'doublescale'),
+						__( ' to %s', 'doublescale' ),
 						$wa_to
 					);
 				}
@@ -623,14 +622,14 @@ class ActivityModel extends Model {
 				$ip_address = $this->data['ip_address'] ?? '';
 				$message    = sprintf(
 					/* translators: %s: user name */
-					__( '%s logged in', 'doublescale'),
+					__( '%s logged in', 'doublescale' ),
 					$user_name
 				);
 
 				if ( ! empty( $ip_address ) ) {
 					$message .= sprintf(
 						/* translators: %s: IP address */
-						__( ' from IP: %s', 'doublescale'),
+						__( ' from IP: %s', 'doublescale' ),
 						$ip_address
 					);
 				}
@@ -640,14 +639,14 @@ class ActivityModel extends Model {
 			case 'logged_out':
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s logged out', 'doublescale'),
+					__( '%s logged out', 'doublescale' ),
 					$user_name
 				);
 
 			default:
 				return sprintf(
 					/* translators: %s: user name */
-					__( '%s performed an action', 'doublescale'),
+					__( '%s performed an action', 'doublescale' ),
 					$user_name
 				);
 		}
@@ -773,7 +772,7 @@ class ActivityModel extends Model {
 	 * @return bool
 	 */
 	public function is_note() {
-		 return 'note' === $this->activity_type;
+		return 'note' === $this->activity_type;
 	}
 
 	/**
@@ -784,7 +783,7 @@ class ActivityModel extends Model {
 	 * @return bool
 	 */
 	public function is_editable() {
-		 return ActivityTypes::is_editable_type( $this->activity_type );
+		return ActivityTypes::is_editable_type( $this->activity_type );
 	}
 
 	/**
@@ -996,7 +995,7 @@ class ActivityModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		static::creating(
 			function ( $activity ) {

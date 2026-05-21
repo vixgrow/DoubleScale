@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Segments;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -23,8 +22,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Tags class
  */
-class Tags extends Rule
-{
+class Tags extends Rule {
+
 
 	/**
 	 * Name
@@ -79,15 +78,14 @@ class Tags extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'               => __('Is', 'doublescale'),
-			'is_not'           => __('Is not', 'doublescale'),
-			'contains'         => __('Contains', 'doublescale'),
-			'does_not_contain' => __('Does not contain', 'doublescale'),
-			'is_empty'         => __('Is empty', 'doublescale'),
-			'is_not_empty'     => __('Is not empty', 'doublescale'),
+			'is'               => __( 'Is', 'doublescale' ),
+			'is_not'           => __( 'Is not', 'doublescale' ),
+			'contains'         => __( 'Contains', 'doublescale' ),
+			'does_not_contain' => __( 'Does not contain', 'doublescale' ),
+			'is_empty'         => __( 'Is empty', 'doublescale' ),
+			'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 		);
 	}
 
@@ -100,14 +98,13 @@ class Tags extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options($list_name = '')
-	{
+	public function get_options( $list_name = '' ) {
 		$tags = array();
 
-		if ('' === $list_name) {
-			$tags = ListModel::paginate(10, array('*'), 'page', 1);
+		if ( '' === $list_name ) {
+			$tags = ListModel::paginate( 10, array( '*' ), 'page', 1 );
 		} else {
-			$tags = ListModel::where('name', 'LIKE', '%' . $list_name . '%')->paginate(10, array('*'), 'page', 1);
+			$tags = ListModel::where( 'name', 'LIKE', '%' . $list_name . '%' )->paginate( 10, array( '*' ), 'page', 1 );
 		}
 
 		return $tags;
@@ -122,12 +119,11 @@ class Tags extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
-		$ids     = $contact->tags->pluck('id')->toArray();
+		$ids     = $contact->tags->pluck( 'id' )->toArray();
 		return $ids;
 	}
 }
 
-RulesManager::instance()->register(new Tags());
+RulesManager::instance()->register( new Tags() );

@@ -178,7 +178,7 @@ class CampaignRateLimiter {
 			$this->init_second_tracker( $channel );
 		}
 
-		$this->second_trackers[ $channel ]['count']++;
+		++$this->second_trackers[ $channel ]['count'];
 	}
 
 	/**
@@ -331,7 +331,7 @@ class CampaignRateLimiter {
 
 		doublescale_get_logger()->info(
 			/* translators: %s: channel type (email, sms, whatsapp) */
-			sprintf( __( 'Daily %s count reset.', 'doublescale'), $type ),
+			sprintf( __( 'Daily %s count reset.', 'doublescale' ), $type ),
 			array(
 				'code'    => "daily_{$type}_count_reset",
 				'channel' => $type,
@@ -352,7 +352,7 @@ class CampaignRateLimiter {
 
 		doublescale_get_logger()->info(
 			/* translators: %s: channel type (email, sms, whatsapp) */
-			sprintf( __( 'Daily %s limit reached.', 'doublescale'), $type ),
+			sprintf( __( 'Daily %s limit reached.', 'doublescale' ), $type ),
 			array(
 				'code'    => "daily_{$type}_limit_reached",
 				'channel' => $type,

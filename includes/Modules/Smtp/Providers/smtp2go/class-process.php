@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTP2GO;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -33,10 +32,10 @@ class Process extends Abstract_Process {
 
 		$name = sanitize_text_field( $name );
 
-		$this->headers['custom_headers'][] = [
+		$this->headers['custom_headers'][] = array(
 			'header' => $name,
 			'value'  => $value,
-		];
+		);
 	}
 
 	/**
@@ -53,7 +52,7 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['sender'] = $this->phpmailer->addrFormat( [ $email, $name ] );
+		$this->body['sender'] = $this->phpmailer->addrFormat( array( $email, $name ) );
 	}
 
 	/**
@@ -83,10 +82,9 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$this->body[ $type ][] = $this->phpmailer->addrFormat( [ $email_address, $name ] );
+				$this->body[ $type ][] = $this->phpmailer->addrFormat( array( $email_address, $name ) );
 			}
 		}
-
 	}
 
 	/**
@@ -122,12 +120,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['html_body'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['text_body'] = $content;
-			} else {
-				$this->body['html_body'] = $content;
-			}
+		} else {
+			$this->body['html_body'] = $content;
 		}
 	}
 
@@ -149,10 +145,10 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['custom_headers'][] = [
+		$this->body['custom_headers'][] = array(
 			'header' => 'Reply-To',
 			'value'  => $addresses,
-		];
+		);
 	}
 
 	/**
@@ -270,10 +266,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'SMTP2GO Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_smtp2go_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -284,6 +280,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

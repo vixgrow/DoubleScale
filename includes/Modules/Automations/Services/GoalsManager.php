@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -121,13 +120,13 @@ final class GoalsManager {
 	public function register( Goal $goal ) {
 		if ( ! $goal instanceof Goal ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new Exception( esc_html__( 'Invalid goal', 'doublescale') );
+			throw new Exception( esc_html__( 'Invalid goal', 'doublescale' ) );
 		}
 
 		if ( isset( $this->goals[ $goal->slug ] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 			/* translators: %s: goal name */
-			throw new Exception( sprintf( esc_html__( 'Goal %s already registered', 'doublescale'), esc_html( $goal->name )) );
+			throw new Exception( sprintf( esc_html__( 'Goal %s already registered', 'doublescale' ), esc_html( $goal->name ) ) );
 		}
 
 		$this->goals[ $goal->slug ] = $goal;
@@ -166,7 +165,7 @@ final class GoalsManager {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: goal slug */
-		throw new Exception( sprintf( esc_html__( 'Goal %s not found', 'doublescale'), esc_html( $slug )) );
+		throw new Exception( sprintf( esc_html__( 'Goal %s not found', 'doublescale' ), esc_html( $slug ) ) );
 	}
 
 	/**
@@ -186,45 +185,45 @@ final class GoalsManager {
 	 * @return array
 	 */
 	public function set_sources() {
-		 $this->sources = array(
-			 'automation'  => array(
-				 'label'  => __( 'Automation', 'doublescale'),
-				 'groups' => array(
-					 'contact' => array(
-						 'label' => __( 'Contact', 'doublescale'),
-						 'goals' => array(),
-					 ),
-				 ),
-			 ),
-			 'woocommerce' => array(
-				 'label'  => __( 'WooCommerce', 'doublescale'),
-				 'groups' => array(
-					 'coupon' => array(
-						 'label'       => __( 'Coupon', 'doublescale'),
-						 'goals'       => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-					 'cart'   => array(
-						 'label'       => __( 'Cart', 'doublescale'),
-						 'goals'       => array(),
-						 'triggers'    => array( 'wc_abandoned_cart_created' ),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-				 ),
-			 ),
-			 'surecart'    => array(
-				 'label'  => __( 'SureCart', 'doublescale'),
-				 'groups' => array(
-					 'order' => array(
-						 'label'       => __( 'Order', 'doublescale'),
-						 'goals'       => array(),
-						 'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
-					 ),
-				 ),
-			 ),
-		 );
+		$this->sources = array(
+			'automation'  => array(
+				'label'  => __( 'Automation', 'doublescale' ),
+				'groups' => array(
+					'contact' => array(
+						'label' => __( 'Contact', 'doublescale' ),
+						'goals' => array(),
+					),
+				),
+			),
+			'woocommerce' => array(
+				'label'  => __( 'WooCommerce', 'doublescale' ),
+				'groups' => array(
+					'coupon' => array(
+						'label'       => __( 'Coupon', 'doublescale' ),
+						'goals'       => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+					'cart'   => array(
+						'label'       => __( 'Cart', 'doublescale' ),
+						'goals'       => array(),
+						'triggers'    => array( 'wc_abandoned_cart_created' ),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+				),
+			),
+			'surecart'    => array(
+				'label'  => __( 'SureCart', 'doublescale' ),
+				'groups' => array(
+					'order' => array(
+						'label'       => __( 'Order', 'doublescale' ),
+						'goals'       => array(),
+						'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
+					),
+				),
+			),
+		);
 
-		 $this->sources = apply_filters( 'doublescale_automation_goal_sources', $this->sources );
+		$this->sources = apply_filters( 'doublescale_automation_goal_sources', $this->sources );
 	}
 
 	/**
@@ -233,6 +232,6 @@ final class GoalsManager {
 	 * @return array
 	 */
 	public function get_sources() {
-		 return $this->sources;
+		return $this->sources;
 	}
 }

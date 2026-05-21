@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Logger;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Logger\Models\LogModel;
@@ -134,9 +133,9 @@ class LogHandlerDb implements LogHandlerInterface {
 				$plugin         = '';
 				$main_namespace = explode( '\\', $log->source )[0];
 				if ( 'DoubleScale' === $main_namespace ) {
-					$plugin = esc_html__( 'Core', 'doublescale');
+					$plugin = esc_html__( 'Core', 'doublescale' );
 				} else {
-					$plugin = esc_html__( 'Pro', 'doublescale');
+					$plugin = esc_html__( 'Pro', 'doublescale' );
 				}
 
 				// prepare context
@@ -293,5 +292,4 @@ class LogHandlerDb implements LogHandlerInterface {
 		}
 		return $filename;
 	}
-
 }

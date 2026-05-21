@@ -180,7 +180,6 @@ file_put_contents( $ics_path, $ics_content );
 	<?php
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public booking confirmation page; the `embed_type` query string only controls layout, no auth context.
 	if ( ! isset( $_GET['embed_type'] ) || sanitize_text_field( wp_unslash( $_GET['embed_type'] ) ) !== 'Inline' ) :
-		;
 		?>
 		<?php if ( ! empty( $is_waiting ) || ( ! $can_cancel && ! $can_reschedule ) ) : ?>
 		<div></div>

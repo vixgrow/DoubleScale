@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use phpDocumentor\Reflection\DocBlock\Tag;
@@ -72,9 +71,9 @@ class RemoveTags extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel      $automation Automation Model.
+	 * @param AutomationModel     $automation Automation Model.
 	 * @param AutomationStepModel $step Automation Step Model.
-	 * @param ContactModel         $contact Contact Model.
+	 * @param ContactModel        $contact Contact Model.
 	 */
 	public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact ) {
 		$tags_ids = $step->get_setting( 'tags', array() );
@@ -99,7 +98,7 @@ class RemoveTags extends Action {
 	public function get_fields() {
 		return array(
 			'tags' => array(
-				'label'    => __( 'Tags', 'doublescale'),
+				'label'    => __( 'Tags', 'doublescale' ),
 				'type'     => 'tags',
 				'multiple' => true,
 			),

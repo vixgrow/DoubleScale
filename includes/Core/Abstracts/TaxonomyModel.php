@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Core\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -229,7 +228,7 @@ class TaxonomyModel extends Model {
 	 * @since 1.0.0
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		// Get the event dispatcher
 		$dispatcher = static::getEventDispatcher();

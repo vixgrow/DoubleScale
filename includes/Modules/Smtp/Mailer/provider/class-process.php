@@ -330,8 +330,8 @@ abstract class Process {
 	 * @since 1.0.0
 	 */
 	public function get_email_details() {
-		$email_details = [
-			'from'        => $this->phpmailer->addrFormat( [ $this->get_from_email(), $this->get_from_name() ] ),
+		$email_details = array(
+			'from'        => $this->phpmailer->addrFormat( array( $this->get_from_email(), $this->get_from_name() ) ),
 			'to'          => $this->addrs_format( $this->phpmailer->getToAddresses() ),
 			'cc'          => $this->addrs_format( $this->phpmailer->getCcAddresses() ),
 			'bcc'         => $this->addrs_format( $this->phpmailer->getBccAddresses() ),
@@ -341,12 +341,12 @@ abstract class Process {
 			'plain'       => $this->phpmailer->AltBody,
 			'html'        => $this->phpmailer->Body,
 			'attachments' => array_map(
-				function( $attachment ) {
+				function ( $attachment ) {
 					return $attachment[1];
 				},
 				$this->phpmailer->getAttachments()
 			),
-		];
+		);
 
 		return apply_filters( 'doublescale_smtp_mailer_get_email_details', $email_details, $this->provider );
 	}
@@ -361,7 +361,7 @@ abstract class Process {
 	 * @return string
 	 */
 	public function addrs_format( $addresses ) {
-		$addrs = [];
+		$addrs = array();
 
 		foreach ( $addresses as $user ) {
 			$email = isset( $user[0] ) ? $user[0] : false;
@@ -404,13 +404,13 @@ abstract class Process {
 		$headers       = $email_details['headers'];
 		$attachments   = $email_details['attachments'];
 		$from          = $email_details['from'];
-		$recipients    = [
+		$recipients    = array(
 			'to'       => $email_details['to'],
 			'cc'       => $email_details['cc'],
 			'bcc'      => $email_details['bcc'],
 			'reply_to' => $email_details['reply_to'],
-		];
-		$email_data    = [
+		);
+		$email_data    = array(
 			'subject'     => $subject,
 			'body'        => $body,
 			'headers'     => $headers,
@@ -419,15 +419,15 @@ abstract class Process {
 			'recipients'  => $recipients,
 			'status'      => $result['status'],
 			'response'    => $result['response'],
-		];
+		);
 
 		if ( self::FAILED === $result['status'] ) {
 			$this->handle_failed_email(
 				$result['response'],
-				[
+				array(
 					'to'      => $email_details['to'],
 					'subject' => $subject,
-				]
+				)
 			);
 		}
 

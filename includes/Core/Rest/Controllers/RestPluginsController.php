@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
@@ -57,7 +56,7 @@ class RestPluginsController extends RestController {
 						'plugins' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Comma-separated list of plugin file paths.', 'doublescale'),
+							'description'       => __( 'Comma-separated list of plugin file paths.', 'doublescale' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -77,13 +76,13 @@ class RestPluginsController extends RestController {
 						'download_url' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Zip download URL from WordPress.org.', 'doublescale'),
+							'description'       => __( 'Zip download URL from WordPress.org.', 'doublescale' ),
 							'sanitize_callback' => 'esc_url_raw',
 						),
 						'plugin_file'  => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'doublescale'),
+							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'doublescale' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -103,7 +102,7 @@ class RestPluginsController extends RestController {
 						'plugin_file' => array(
 							'required'          => true,
 							'type'              => 'string',
-							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'doublescale'),
+							'description'       => __( 'Plugin file path, e.g. slug/slug.php.', 'doublescale' ),
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -127,7 +126,7 @@ class RestPluginsController extends RestController {
 
 		return new WP_Error(
 			'doublescale_rest_plugins_forbidden',
-			__( 'Sorry, you are not allowed to manage plugins.', 'doublescale'),
+			__( 'Sorry, you are not allowed to manage plugins.', 'doublescale' ),
 			array( 'status' => 403 )
 		);
 	}
@@ -149,7 +148,7 @@ class RestPluginsController extends RestController {
 		if ( empty( $plugins ) ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_invalid',
-				__( 'No plugins specified.', 'doublescale'),
+				__( 'No plugins specified.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -220,7 +219,7 @@ class RestPluginsController extends RestController {
 		if ( empty( $download_url ) || empty( $plugin_file ) ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_missing_params',
-				__( 'Both download_url and plugin_file are required.', 'doublescale'),
+				__( 'Both download_url and plugin_file are required.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -230,7 +229,7 @@ class RestPluginsController extends RestController {
 		if ( empty( $parsed_url['host'] ) || 'downloads.wordpress.org' !== $parsed_url['host'] ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_invalid_source',
-				__( 'Only installs from the WordPress.org plugins directory are allowed.', 'doublescale'),
+				__( 'Only installs from the WordPress.org plugins directory are allowed.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -246,7 +245,7 @@ class RestPluginsController extends RestController {
 		if ( ! $fs_initialized ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_fs_error',
-				__( 'Unable to initialize the filesystem Api.', 'doublescale'),
+				__( 'Unable to initialize the filesystem Api.', 'doublescale' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -296,7 +295,7 @@ class RestPluginsController extends RestController {
 		if ( ! $actual_plugin_file ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_plugin_file_not_found',
-				__( 'Plugin installed successfully but plugin file could not be found.', 'doublescale'),
+				__( 'Plugin installed successfully but plugin file could not be found.', 'doublescale' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -336,7 +335,7 @@ class RestPluginsController extends RestController {
 		if ( empty( $plugin_file ) ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_missing_params',
-				__( 'Plugin file is required.', 'doublescale'),
+				__( 'Plugin file is required.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -350,7 +349,7 @@ class RestPluginsController extends RestController {
 		if ( ! file_exists( $plugin_path ) ) {
 			return new WP_Error(
 				'doublescale_rest_plugins_not_installed',
-				__( 'Plugin is not installed.', 'doublescale'),
+				__( 'Plugin is not installed.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -374,5 +373,3 @@ class RestPluginsController extends RestController {
 		);
 	}
 }
-
-

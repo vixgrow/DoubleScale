@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {

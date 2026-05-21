@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -67,7 +66,7 @@ class OrderPaymentGateway extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'equal' => __( 'Equal', 'doublescale'),
+			'equal' => __( 'Equal', 'doublescale' ),
 		);
 	}
 
@@ -79,7 +78,7 @@ class OrderPaymentGateway extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 $options = array();
+		$options  = array();
 		$gateways = \WC()->payment_gateways->payment_gateways();
 
 		if ( ! empty( $gateways ) ) {
@@ -117,7 +116,7 @@ class OrderPaymentGateway extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

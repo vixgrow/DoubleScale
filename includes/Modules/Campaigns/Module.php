@@ -56,7 +56,6 @@ final class Module extends AbstractModule {
 			Services\CampaignStatusManager::class,
 			static fn() => Services\CampaignStatusManager::instance()
 		);
-
 	}
 
 	public function restControllers(): array {
@@ -86,5 +85,4 @@ final class Module extends AbstractModule {
 			$tasks->schedule_recurring( time(), 60, 'doublescale_email_campaigns' );
 		}
 	}
-
 }

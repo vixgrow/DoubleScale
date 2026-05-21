@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Action;
@@ -71,7 +70,7 @@ class RemoveLists extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel         $automation Automation Model.
+	 * @param AutomationModel        $automation Automation Model.
 	 * @param AutomationStepModel    $step Automation Step Model.
 	 * @param AutomationContactModel $contact Contact Model.
 	 */
@@ -98,7 +97,7 @@ class RemoveLists extends Action {
 	public function get_fields() {
 		return array(
 			'lists' => array(
-				'label'    => __( 'Lists', 'doublescale'),
+				'label'    => __( 'Lists', 'doublescale' ),
 				'type'     => 'lists',
 				'multiple' => true,
 			),

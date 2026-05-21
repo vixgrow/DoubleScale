@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -121,13 +120,13 @@ class ActivityTypes {
 	 * @return array System-generated activity types
 	 */
 	public static function get_system_types() {
-		 return array(
-			 self::CREATED,
-			 self::DEAL_CREATED,
-			 self::STAGE_CHANGED,
-			 self::VALUE_CHANGED,
-			 self::STATUS_CHANGED,
-		 );
+		return array(
+			self::CREATED,
+			self::DEAL_CREATED,
+			self::STAGE_CHANGED,
+			self::VALUE_CHANGED,
+			self::STATUS_CHANGED,
+		);
 	}
 
 	/**
@@ -177,7 +176,7 @@ class ActivityTypes {
 	 * @return bool
 	 */
 	public static function is_valid_type( $type ) {
-		 return in_array( $type, self::get_all_types(), true );
+		return in_array( $type, self::get_all_types(), true );
 	}
 
 	/**
@@ -192,39 +191,39 @@ class ActivityTypes {
 	 */
 	public static function get_activity_message( $type, $user_name = null ) {
 		if ( null === $user_name ) {
-			$user_name = __( 'Unknown User', 'doublescale');
+			$user_name = __( 'Unknown User', 'doublescale' );
 		}
 
 		$messages = array(
 			/* translators: %s: user name */
-			self::NOTE              => sprintf( __( '%s added a note', 'doublescale'), $user_name ),
+			self::NOTE              => sprintf( __( '%s added a note', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::EMAIL_SENT        => sprintf( __( '%s sent an email', 'doublescale'), $user_name ),
-			self::EMAIL_RECEIVED    => __( 'Email received', 'doublescale'),
+			self::EMAIL_SENT        => sprintf( __( '%s sent an email', 'doublescale' ), $user_name ),
+			self::EMAIL_RECEIVED    => __( 'Email received', 'doublescale' ),
 			/* translators: %s: user name */
-			self::CALL_LOGGED       => sprintf( __( '%s logged a call', 'doublescale'), $user_name ),
+			self::CALL_LOGGED       => sprintf( __( '%s logged a call', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::MEETING_SCHEDULED => sprintf( __( '%s scheduled a meeting', 'doublescale'), $user_name ),
+			self::MEETING_SCHEDULED => sprintf( __( '%s scheduled a meeting', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::SMS_SENT          => sprintf( __( '%s sent an Sms', 'doublescale'), $user_name ),
-			self::SMS_RECEIVED      => __( 'Sms received', 'doublescale'),
+			self::SMS_SENT          => sprintf( __( '%s sent an Sms', 'doublescale' ), $user_name ),
+			self::SMS_RECEIVED      => __( 'Sms received', 'doublescale' ),
 			/* translators: %s: user name */
-			self::WHATSAPP_SENT     => sprintf( __( '%s sent a WhatsApp message', 'doublescale'), $user_name ),
-			self::WHATSAPP_RECEIVED => __( 'Whatsapp message received', 'doublescale'),
+			self::WHATSAPP_SENT     => sprintf( __( '%s sent a WhatsApp message', 'doublescale' ), $user_name ),
+			self::WHATSAPP_RECEIVED => __( 'Whatsapp message received', 'doublescale' ),
 			/* translators: %s: user name */
-			self::DEAL_CREATED      => sprintf( __( '%s created this record', 'doublescale'), $user_name ),
+			self::DEAL_CREATED      => sprintf( __( '%s created this record', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::STAGE_CHANGED     => sprintf( __( '%s changed the stage', 'doublescale'), $user_name ),
+			self::STAGE_CHANGED     => sprintf( __( '%s changed the stage', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'doublescale'), $user_name ),
+			self::VALUE_CHANGED     => sprintf( __( '%s updated the value', 'doublescale' ), $user_name ),
 			/* translators: %s: user name */
-			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'doublescale'), $user_name ),
-			self::LOGGED_IN         => __( 'Contact logged in', 'doublescale'),
-			self::LOGGED_OUT        => __( 'Contact logged out', 'doublescale'),
+			self::STATUS_CHANGED    => sprintf( __( '%s changed the status', 'doublescale' ), $user_name ),
+			self::LOGGED_IN         => __( 'Contact logged in', 'doublescale' ),
+			self::LOGGED_OUT        => __( 'Contact logged out', 'doublescale' ),
 		);
 
 		/* translators: %s: user name */
-		return isset( $messages[ $type ] ) ? $messages[ $type ] : sprintf( __( '%s performed an action', 'doublescale'), ucfirst( $user_name ) );
+		return isset( $messages[ $type ] ) ? $messages[ $type ] : sprintf( __( '%s performed an action', 'doublescale' ), ucfirst( $user_name ) );
 	}
 
 	/**
@@ -238,22 +237,22 @@ class ActivityTypes {
 	 */
 	public static function get_type_label( $type ) {
 		$labels = array(
-			self::NOTE              => __( 'Note', 'doublescale'),
-			self::EMAIL_SENT        => __( 'Email Sent', 'doublescale'),
-			self::EMAIL_RECEIVED    => __( 'Email Received', 'doublescale'),
-			self::CALL_LOGGED       => __( 'Call Logged', 'doublescale'),
-			self::MEETING_SCHEDULED => __( 'Meeting Scheduled', 'doublescale'),
-			self::SMS_SENT          => __( 'Sms Sent', 'doublescale'),
-			self::SMS_RECEIVED      => __( 'Sms Received', 'doublescale'),
-			self::WHATSAPP_SENT     => __( 'Whatsapp Sent', 'doublescale'),
-			self::WHATSAPP_RECEIVED => __( 'Whatsapp Received', 'doublescale'),
-			self::CREATED           => __( 'Created', 'doublescale'),
-			self::DEAL_CREATED      => __( 'Deal Created', 'doublescale'),
-			self::STAGE_CHANGED     => __( 'Stage Changed', 'doublescale'),
-			self::VALUE_CHANGED     => __( 'Value Changed', 'doublescale'),
-			self::STATUS_CHANGED    => __( 'Status Changed', 'doublescale'),
-			self::LOGGED_IN         => __( 'Logged In', 'doublescale'),
-			self::LOGGED_OUT        => __( 'Logged Out', 'doublescale'),
+			self::NOTE                => __( 'Note', 'doublescale' ),
+			self::EMAIL_SENT          => __( 'Email Sent', 'doublescale' ),
+			self::EMAIL_RECEIVED      => __( 'Email Received', 'doublescale' ),
+			self::CALL_LOGGED         => __( 'Call Logged', 'doublescale' ),
+			self::MEETING_SCHEDULED   => __( 'Meeting Scheduled', 'doublescale' ),
+			self::SMS_SENT            => __( 'Sms Sent', 'doublescale' ),
+			self::SMS_RECEIVED        => __( 'Sms Received', 'doublescale' ),
+			self::WHATSAPP_SENT       => __( 'Whatsapp Sent', 'doublescale' ),
+			self::WHATSAPP_RECEIVED   => __( 'Whatsapp Received', 'doublescale' ),
+			self::CREATED             => __( 'Created', 'doublescale' ),
+			self::DEAL_CREATED        => __( 'Deal Created', 'doublescale' ),
+			self::STAGE_CHANGED       => __( 'Stage Changed', 'doublescale' ),
+			self::VALUE_CHANGED       => __( 'Value Changed', 'doublescale' ),
+			self::STATUS_CHANGED      => __( 'Status Changed', 'doublescale' ),
+			self::LOGGED_IN           => __( 'Logged In', 'doublescale' ),
+			self::LOGGED_OUT          => __( 'Logged Out', 'doublescale' ),
 			self::BOOKING_SCHEDULED   => __( 'Booking Scheduled', 'doublescale' ),
 			self::BOOKING_CONFIRMED   => __( 'Booking Confirmed', 'doublescale' ),
 			self::BOOKING_PENDING     => __( 'Booking Pending', 'doublescale' ),

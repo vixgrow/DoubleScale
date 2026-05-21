@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTP;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -178,11 +177,11 @@ class Process extends Abstract_Process {
 				esc_html__( 'PHPMailer Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_phpmailer_send_error',
-					'error' => [
+					'error' => array(
 						'code'  => $exc->getCode(),
 						'error' => $exc->getMessage(),
 						'data'  => $exc->getTraceAsString(),
-					],
+					),
 				)
 			);
 			$this->log_result(

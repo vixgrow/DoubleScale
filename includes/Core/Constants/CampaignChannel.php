@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -190,17 +189,17 @@ class CampaignChannel {
 	 */
 	public static function get_label( $channel ) {
 		$labels = array(
-			self::CHANNEL_EMAIL          => __( 'Email', 'doublescale'),
-			self::CHANNEL_SMS            => __( 'Sms', 'doublescale'),
-			self::CHANNEL_WHATSAPP       => __( 'WhatsApp', 'doublescale'),
-			self::CHANNEL_SEQUENCE_MAIL  => __( 'Sequence Mail', 'doublescale'),
-			self::CHANNEL_EMAIL_SEQUENCE => __( 'Email Sequence', 'doublescale'),
+			self::CHANNEL_EMAIL          => __( 'Email', 'doublescale' ),
+			self::CHANNEL_SMS            => __( 'Sms', 'doublescale' ),
+			self::CHANNEL_WHATSAPP       => __( 'WhatsApp', 'doublescale' ),
+			self::CHANNEL_SEQUENCE_MAIL  => __( 'Sequence Mail', 'doublescale' ),
+			self::CHANNEL_EMAIL_SEQUENCE => __( 'Email Sequence', 'doublescale' ),
 		);
 
 		// Allow custom channels to define labels via filter
 		$labels = apply_filters( 'doublescale_channel_label_map', $labels );
 
-		return $labels[ $channel ] ?? __( 'Unknown', 'doublescale');
+		return $labels[ $channel ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

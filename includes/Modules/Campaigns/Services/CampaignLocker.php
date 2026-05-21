@@ -48,8 +48,8 @@ class CampaignLocker {
 	public function acquire( $lock_key, $lock_duration ) {
 		global $wpdb;
 
-		$current_time      = time();
-		$expiry_threshold  = $current_time - self::EXPIRY_SECONDS;
+		$current_time     = time();
+		$expiry_threshold = $current_time - self::EXPIRY_SECONDS;
 
 		// Check whether a live lock already exists.
 		$last_time = $wpdb->get_var(

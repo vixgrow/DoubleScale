@@ -16,12 +16,12 @@
  *     listeners can subscribe via `do_action`): `completed`, `rejected`,
  *     `waiting_list_joined`, `waiting_list_available`.
  *
-	 * Hook contracts (post-dispatch, fired for every event regardless of class):
-	 *   do_action( "doublescale_booking_{$event}", BookingModel $booking, array $context )
-	 *
-	 * Note: emission reloads the booking via {@see BookingModel::find()}. For a hard
-	 * delete, fire cancellation from a {@see BookingModel} `deleting` hook (before the
-	 * row is removed), not `deleted`, or subscribers that need DB state will not run.
+ * Hook contracts (post-dispatch, fired for every event regardless of class):
+ *   do_action( "doublescale_booking_{$event}", BookingModel $booking, array $context )
+ *
+ * Note: emission reloads the booking via {@see BookingModel::find()}. For a hard
+ * delete, fire cancellation from a {@see BookingModel} `deleting` hook (before the
+ * row is removed), not `deleted`, or subscribers that need DB state will not run.
  *
  * @package DoubleScale
  */

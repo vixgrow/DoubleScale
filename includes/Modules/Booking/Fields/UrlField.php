@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Fields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\FieldType;
@@ -60,14 +59,14 @@ class UrlField extends FieldType {
 	 */
 	public function validate_value( $value ) {
 		if ( empty( $value ) && $this->is_required ) {
-			$this->is_valid       = false;
+			$this->is_valid = false;
 			/* translators: %s: field label */
 			$this->validation_err = sprintf( __( '%s is required', 'doublescale' ), $this->label );
 			return;
 		}
 
 		if ( ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
-			$this->is_valid       = false;
+			$this->is_valid = false;
 			/* translators: %s: field label */
 			$this->validation_err = sprintf( __( '%s is not a valid URL', 'doublescale' ), $this->label );
 		}

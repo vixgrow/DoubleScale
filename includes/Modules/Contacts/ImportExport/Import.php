@@ -303,10 +303,10 @@ class Import {
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from FunnelKit plugin tables.
 
-		$table_name       = $wpdb->prefix . 'bwf_contact';
-		$terms_table      = $wpdb->prefix . 'bwfan_terms';
-		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
-		$mapping          = array(
+		$table_name  = $wpdb->prefix . 'bwf_contact';
+		$terms_table = $wpdb->prefix . 'bwfan_terms';
+		$total       = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$mapping     = array(
 			'first_name' => 'f_name',
 			'last_name'  => 'l_name',
 			'email'      => 'email',
@@ -322,7 +322,7 @@ class Import {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) use ( $wpdb, $table_name, $terms_table ) {
+			function ( $offset ) use ( $wpdb, $table_name, $terms_table ) {
 				return $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT c.*, 
@@ -362,9 +362,9 @@ class Import {
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is from WooCommerce plugin.
 
-		$table_name       = $wpdb->prefix . 'wc_customer_lookup';
-		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
-		$mapping          = array(
+		$table_name = $wpdb->prefix . 'wc_customer_lookup';
+		$total      = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$mapping    = array(
 			'first_name' => 'first_name',
 			'last_name'  => 'last_name',
 			'email'      => 'email',
@@ -377,7 +377,7 @@ class Import {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) use ( $wpdb, $table_name ) {
+			function ( $offset ) use ( $wpdb, $table_name ) {
 				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
 			},
 			$mapping
@@ -407,7 +407,7 @@ class Import {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) {
+			function ( $offset ) {
 				return UserModel::offset( $offset )->limit( 20 )->get();
 			},
 			$mapping
@@ -429,19 +429,19 @@ class Import {
 	public function import_from_csv( $file_name, $mapping ) {
 		$this->start_time = microtime( true );
 		if ( ! Security::prepare_upload_dir() ) {
-			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale' ) );
 		}
 
-		$mapping          = array_flip( $mapping );
-		$file_path        = Security::get_upload_file_path( $file_name );
-		$csv              = Reader::createFromPath( $file_path, 'r' );
+		$mapping   = array_flip( $mapping );
+		$file_path = Security::get_upload_file_path( $file_name );
+		$csv       = Reader::createFromPath( $file_path, 'r' );
 		$csv->setHeaderOffset( 0 );
 		$total = count( $csv );
 
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) use ( $csv ) {
+			function ( $offset ) use ( $csv ) {
 				$stmt        = ( new Statement() )->offset( $offset )->limit( 20 );
 				$subscribers = $stmt->process( $csv );
 				return $subscribers;
@@ -511,10 +511,8 @@ class Import {
 					if ( $auto_create ) {
 						$list = ListModel::getOrCreate( $name );
 						$contact->lists()->syncWithPivotValues( array( $list->id ), array( 'taxonomy_type' => 'list' ), false );
-					} else {
-						if ( ! empty( $assign_to ) ) {
+					} elseif ( ! empty( $assign_to ) ) {
 							$contact->lists()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'list' ), false );
-						}
 					}
 				}
 
@@ -531,10 +529,8 @@ class Import {
 					if ( $auto_create ) {
 						$tag = TagModel::getOrCreate( $name );
 						$contact->tags()->syncWithPivotValues( array( $tag->id ), array( 'taxonomy_type' => 'tag' ), false );
-					} else {
-						if ( ! empty( $assign_to ) ) {
+					} elseif ( ! empty( $assign_to ) ) {
 							$contact->tags()->syncWithPivotValues( $assign_to, array( 'taxonomy_type' => 'tag' ), false );
-						}
 					}
 				}
 
@@ -592,11 +588,11 @@ class Import {
 				foreach ( $subscribers as $subscriber ) {
 					$import_result = $this->import_contact( $subscriber, $mapping );
 					if ( is_wp_error( $import_result ) ) {
-						$error_count++;
+						++$error_count;
 					} else {
-						$imported_count++;
+						++$imported_count;
 					}
-					$offset++;
+					++$offset;
 				}
 
 				// Check if offset is greater than or equal to total

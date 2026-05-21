@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DateTime;
@@ -44,7 +43,7 @@ class BookingActions {
 		add_action( 'wp_loaded', array( $this, 'init' ) );
 	}
 
-	
+
 
 	public function init() {
 		$this->booking_actions();
@@ -59,7 +58,7 @@ class BookingActions {
 		}
 
 		try {
-			$id      = sanitize_text_field( Arr::get( $_GET, 'id', null ) );
+			$id = sanitize_text_field( Arr::get( $_GET, 'id', null ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			$booking = $this->bookingValidatorClass::validate_booking( $id );
 
@@ -130,5 +129,4 @@ class BookingActions {
 		$this->process_booking_action( 'reschedule', 'rescheduled', __( 'Booking rescheduled', 'doublescale' ), __( 'Booking rescheduled by Attendee', 'doublescale' ) );
 		$this->process_booking_action( 'cancel', 'cancelled', __( 'Booking cancelled', 'doublescale' ), __( 'Booking cancelled by Attendee', 'doublescale' ) );
 	}
-
 }

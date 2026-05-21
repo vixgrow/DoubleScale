@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Core\Logger;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
@@ -70,7 +69,7 @@ class Logger implements LoggerInterface {
 			$threshold = LogLevels::get_level_severity( $threshold );
 		}
 
-		$this->handlers   = $register_handlers;
+		$this->handlers  = $register_handlers;
 		$this->threshold = $threshold;
 	}
 

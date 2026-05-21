@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Models\BookingModel;
@@ -29,10 +28,10 @@ class BookingTasks {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'doublescale_booking_created',     array( $this, 'schedule_booking_tasks' ), 10, 2 );
-		add_action( 'doublescale_booking_confirmed',   array( $this, 'schedule_booking_tasks' ), 10, 2 );
+		add_action( 'doublescale_booking_created', array( $this, 'schedule_booking_tasks' ), 10, 2 );
+		add_action( 'doublescale_booking_confirmed', array( $this, 'schedule_booking_tasks' ), 10, 2 );
 		add_action( 'doublescale_booking_rescheduled', array( $this, 'schedule_booking_tasks' ), 10, 2 );
-		add_action( 'doublescale_booking_cancelled',   array( $this, 'cancel_scheduled_reminders' ), 10, 2 );
+		add_action( 'doublescale_booking_cancelled', array( $this, 'cancel_scheduled_reminders' ), 10, 2 );
 	}
 
 	/**
@@ -90,8 +89,8 @@ class BookingTasks {
 	 * Schedule reminders for a specific type (organizer or attendee).
 	 *
 	 * @param BookingModel $booking The booking model.
-	 * @param string        $type    The type of reminder (e.g., 'organizer_reminder').
-	 * @param string        $hook    The hook to trigger.
+	 * @param string       $type    The type of reminder (e.g., 'organizer_reminder').
+	 * @param string       $hook    The hook to trigger.
 	 */
 	private function schedule_reminders( $booking, $type, $hook ) {
 		$notification_settings = $booking->getNotificationSettings();

@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -28,35 +27,34 @@ class Settings_Controller extends Abstract_Settings_Controller {
 	 * @return array
 	 */
 	public function get_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'settings',
 			'type'                 => 'object',
-			'context'              => [ 'view' ],
-			'properties'           => [
-				'app' => [
+			'context'              => array( 'view' ),
+			'properties'           => array(
+				'app' => array(
 					'type'       => 'object',
-					'context'    => [ 'view' ],
-					'properties' => [
-						'client_id'     => [
+					'context'    => array( 'view' ),
+					'properties' => array(
+						'client_id'     => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-						'client_secret' => [
+							'context'  => array( 'view' ),
+						),
+						'client_secret' => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-					],
-				],
-			],
-			'additionalProperties' => [
-				'context' => [],
-			],
-		];
+							'context'  => array( 'view' ),
+						),
+					),
+				),
+			),
+			'additionalProperties' => array(
+				'context' => array(),
+			),
+		);
 
 		return rest_default_additional_properties_to_false( $schema );
 	}
-
 }

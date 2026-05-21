@@ -51,5 +51,4 @@ class ElasticEmail extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

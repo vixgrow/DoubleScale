@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -196,7 +195,7 @@ class CampaignModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function sms() {
-		 return $this->messages()->sms();
+		return $this->messages()->sms();
 	}
 
 	/**
@@ -218,7 +217,7 @@ class CampaignModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function sequences_mail() {
-		return $this->hasMany( CampaignModel::class, 'parent_id' )->where( 'type', CampaignChannel::CHANNEL_SEQUENCE_MAIL );
+		return $this->hasMany( self::class, 'parent_id' )->where( 'type', CampaignChannel::CHANNEL_SEQUENCE_MAIL );
 	}
 
 	/**
@@ -229,7 +228,7 @@ class CampaignModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function parent() {
-		return $this->belongsTo( CampaignModel::class, 'parent_id' );
+		return $this->belongsTo( self::class, 'parent_id' );
 	}
 
 
@@ -252,8 +251,8 @@ class CampaignModel extends Model {
 	}
 
 	public function getSubjectAttribute() {
-		 $template_ids = $this->get_template_ids();
-		$template      = reset( $template_ids );
+		$template_ids = $this->get_template_ids();
+		$template     = reset( $template_ids );
 		if ( $template ) {
 			$template = TemplateModel::find( $template );
 			if ( $template ) {
@@ -277,8 +276,8 @@ class CampaignModel extends Model {
 
 
 	public function getPreviewTextAttribute() {
-		 $template_ids = $this->get_template_ids();
-		$template      = reset( $template_ids );
+		$template_ids = $this->get_template_ids();
+		$template     = reset( $template_ids );
 		if ( $template ) {
 			$template = TemplateModel::find( $template );
 			if ( $template ) {
@@ -418,7 +417,7 @@ class CampaignModel extends Model {
 	 * @return bool
 	 */
 	public function is_sms_campaign() {
-		 return $this->get_type() === CampaignChannel::CHANNEL_SMS;
+		return $this->get_type() === CampaignChannel::CHANNEL_SMS;
 	}
 
 	/**
@@ -615,7 +614,7 @@ class CampaignModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		// Save templates when saving the campaign
 		static::saving(
@@ -643,8 +642,8 @@ class CampaignModel extends Model {
 				// (e.g. completed run left offset == audience count, or filters/count changed).
 				// Do not clear when resuming from "paused" — offset must continue mid-flight.
 				if ( $campaign->isDirty( 'status' ) && CampaignStatusManager::PROCESSING === $campaign->status ) {
-					$previous   = $campaign->getOriginal( 'status' );
-					$automated  = ! empty( $settings['automated'] );
+					$previous  = $campaign->getOriginal( 'status' );
+					$automated = ! empty( $settings['automated'] );
 					if ( ! $automated && CampaignStatusManager::PAUSED !== $previous ) {
 						$type_int = (int) $campaign->getOriginal( 'type' );
 						$slug     = CampaignChannel::to_string( $type_int );

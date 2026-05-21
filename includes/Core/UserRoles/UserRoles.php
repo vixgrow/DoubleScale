@@ -12,8 +12,6 @@
 
 namespace DoubleScale\Core\UserRoles;
 
-
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -87,11 +85,11 @@ final class UserRoles {
 		$roles = self::get_roles();
 
 		foreach ( $roles as $role => $label ) {
-			if ( $role === UserRoles::CRM_MANAGER ) {
+			if ( $role === self::CRM_MANAGER ) {
 				$capabilities = self::get_crm_manager_capabilities();
-			} elseif ( $role === UserRoles::SALES_MANAGER ) {
+			} elseif ( $role === self::SALES_MANAGER ) {
 				$capabilities = self::get_sales_manager_capabilities();
-			} elseif ( $role === UserRoles::SALES_REP ) {
+			} elseif ( $role === self::SALES_REP ) {
 				$capabilities = self::get_sales_rep_capabilities();
 			}
 
@@ -146,21 +144,21 @@ final class UserRoles {
 	 */
 	private static function get_capabilities() {
 		return array(
-			'common'                  => array(
+			'common'            => array(
 				'doublescale_access',           // Basic CRM access
 				'doublescale_view_contacts',    // View contacts
 				'doublescale_view_deals',       // View deals
 				'doublescale_view_activities',  // View activities
 				'read',                     // For Wordpress
 			),
-			UserRoles::SALES_REP     => array(
+			self::SALES_REP     => array(
 				'doublescale_edit_own_deals',     // Edit own deals
 				'doublescale_create_deals',       // Create new deals (assigned to self)
 				'doublescale_edit_own_contacts',  // Edit own contacts
 				'doublescale_create_contacts',    // Create new contacts
 				'doublescale_create_activities',  // Create activities
 			),
-			UserRoles::SALES_MANAGER => array(
+			self::SALES_MANAGER => array(
 				'doublescale_manage_deals',       // Manage all deals (CRUD for all deals)
 				'doublescale_view_all_deals',     // View all deals (assigned to anyone)
 				'doublescale_create_activities',  // Create activities
@@ -168,7 +166,7 @@ final class UserRoles {
 				'doublescale_import_data',        // Import data
 				'doublescale_export_data',        // Export data
 			),
-			UserRoles::CRM_MANAGER   => array(
+			self::CRM_MANAGER   => array(
 				'doublescale_manage',             // Full CRM management
 				'doublescale_manage_users',       // Manage CRM users
 				'doublescale_manage_settings',    // Manage CRM settings
@@ -195,9 +193,9 @@ final class UserRoles {
 	public static function all_capabilities() {
 		return array_merge(
 			self::get_capabilities()['common'],
-			self::get_capabilities()[ UserRoles::CRM_MANAGER ],
-			self::get_capabilities()[ UserRoles::SALES_MANAGER ],
-			self::get_capabilities()[ UserRoles::SALES_REP ]
+			self::get_capabilities()[ self::CRM_MANAGER ],
+			self::get_capabilities()[ self::SALES_MANAGER ],
+			self::get_capabilities()[ self::SALES_REP ]
 		);
 	}
 
@@ -211,9 +209,9 @@ final class UserRoles {
 	 */
 	public static function get_roles() {
 		return array(
-			UserRoles::CRM_MANAGER   => __( 'CRM Manager', 'doublescale'),
-			UserRoles::SALES_MANAGER => __( 'Sales Manager', 'doublescale'),
-			UserRoles::SALES_REP     => __( 'Sales Rep', 'doublescale'),
+			self::CRM_MANAGER   => __( 'CRM Manager', 'doublescale' ),
+			self::SALES_MANAGER => __( 'Sales Manager', 'doublescale' ),
+			self::SALES_REP     => __( 'Sales Rep', 'doublescale' ),
 		);
 	}
 
@@ -238,8 +236,8 @@ final class UserRoles {
 	public static function get_crm_manager_capabilities() {
 		return array_merge(
 			self::get_capabilities()['common'],
-			self::get_capabilities()[ UserRoles::CRM_MANAGER ],
-			self::get_capabilities()[ UserRoles::SALES_REP ]
+			self::get_capabilities()[ self::CRM_MANAGER ],
+			self::get_capabilities()[ self::SALES_REP ]
 		);
 	}
 
@@ -255,8 +253,8 @@ final class UserRoles {
 	public static function get_sales_manager_capabilities() {
 		return array_merge(
 			self::get_capabilities()['common'],
-			self::get_capabilities()[ UserRoles::SALES_REP ],
-			self::get_capabilities()[ UserRoles::SALES_MANAGER ]
+			self::get_capabilities()[ self::SALES_REP ],
+			self::get_capabilities()[ self::SALES_MANAGER ]
 		);
 	}
 
@@ -270,7 +268,7 @@ final class UserRoles {
 	public static function get_sales_rep_capabilities() {
 		return array_merge(
 			self::get_capabilities()['common'],
-			self::get_capabilities()[ UserRoles::SALES_REP ]
+			self::get_capabilities()[ self::SALES_REP ]
 		);
 	}
 }

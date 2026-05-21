@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\SurecartCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -59,8 +58,8 @@ class OrderCurrency extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Is', 'doublescale'),
-			'is_not' => __( 'Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 

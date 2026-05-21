@@ -14,7 +14,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline\Steps;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {

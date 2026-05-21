@@ -60,61 +60,60 @@ class RestContactController extends RestController {
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes()
-	{
+	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_items'),
-					'permission_callback' => array($this, 'get_items_permissions_check'),
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'keyword'            => array(
-							'description' => __('Keyword to search.', 'doublescale'),
+							'description' => __( 'Keyword to search.', 'doublescale' ),
 							'type'        => 'string',
 						),
 						'per_page'           => array(
-							'description' => __('Number of items to fetch.', 'doublescale'),
+							'description' => __( 'Number of items to fetch.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'page'               => array(
-							'description' => __('Page number.', 'doublescale'),
+							'description' => __( 'Page number.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'filters'            => array(
-							'description' => __('Filters to apply.', 'doublescale'),
+							'description' => __( 'Filters to apply.', 'doublescale' ),
 							'type'        => 'array',
 						),
 						'subscribed'         => array(
-							'description' => __('Subscribed contacts.', 'doublescale'),
+							'description' => __( 'Subscribed contacts.', 'doublescale' ),
 							'type'        => 'boolean',
 						),
 						'campaign_type'      => array(
-							'description' => __('Campaign type for filtering contacts.', 'doublescale'),
+							'description' => __( 'Campaign type for filtering contacts.', 'doublescale' ),
 							'type'        => 'string',
 							'enum'        => CampaignChannel::get_core_channel_strings(),
 						),
 						'has_whatsapp_phone' => array(
-							'description' => __('Filter contacts by WhatsApp phone presence.', 'doublescale'),
+							'description' => __( 'Filter contacts by WhatsApp phone presence.', 'doublescale' ),
 							'type'        => 'boolean',
 						),
 					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'create_item'),
-					'permission_callback' => array($this, 'create_item_permissions_check'),
-					'args'                => $this->get_endpoint_args_for_item_schema(WP_REST_Server::CREATABLE),
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array($this, 'delete_items'),
-					'permission_callback' => array($this, 'delete_items_permissions_check'),
+					'callback'            => array( $this, 'delete_items' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __('Contact IDs.', 'doublescale'),
+							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -129,19 +128,19 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_item'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array($this, 'update_item'),
-					'permission_callback' => array($this, 'update_item_permissions_check'),
-					'args'                => $this->get_endpoint_args_for_item_schema(false),
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( false ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array($this, 'delete_item'),
-					'permission_callback' => array($this, 'delete_item_permissions_check'),
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				),
 			)
 		);
@@ -153,19 +152,19 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_contact_notes'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
+					'callback'            => array( $this, 'get_contact_notes' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'per_page' => array(
-							'description' => __('Number of items to fetch.', 'doublescale'),
+							'description' => __( 'Number of items to fetch.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'page'     => array(
-							'description' => __('Page number.', 'doublescale'),
+							'description' => __( 'Page number.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 					),
@@ -180,11 +179,11 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'send_opt_in_email'),
-					'permission_callback' => array($this, 'send_opt_in_email_permissions_check'),
+					'callback'            => array( $this, 'send_opt_in_email' ),
+					'permission_callback' => array( $this, 'send_opt_in_email_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 					),
@@ -199,32 +198,32 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'send_message'),
-					'permission_callback' => array($this, 'send_message_permissions_check'),
+					'callback'            => array( $this, 'send_message' ),
+					'permission_callback' => array( $this, 'send_message_permissions_check' ),
 					'args'                => array(
 						'id'      => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'channel' => array(
-							'description' => __('Communication channel: email, sms, or whatsapp.', 'doublescale'),
+							'description' => __( 'Communication channel: email, sms, or whatsapp.', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => CampaignChannel::get_core_channel_strings(),
 						),
 						'to'      => array(
-							'description' => __('Recipient (email address or phone number in E.164 format).', 'doublescale'),
+							'description' => __( 'Recipient (email address or phone number in E.164 format).', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'body'    => array(
-							'description' => __('Message body (HTML for email, plain text for SMS, ignored for WhatsApp templates).', 'doublescale'),
+							'description' => __( 'Message body (HTML for email, plain text for SMS, ignored for WhatsApp templates).', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => false,
 						),
 						'subject' => array(
-							'description' => __('Email subject (required for email, ignored for Sms/Whatsapp).', 'doublescale'),
+							'description' => __( 'Email subject (required for email, ignored for Sms/Whatsapp).', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => false,
 						),
@@ -240,19 +239,19 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_automation_contacts'),
-					'permission_callback' => array($this, 'get_automation_contacts_permissions_check'),
+					'callback'            => array( $this, 'get_automation_contacts' ),
+					'permission_callback' => array( $this, 'get_automation_contacts_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'per_page' => array(
-							'description' => __('Number of items to fetch.', 'doublescale'),
+							'description' => __( 'Number of items to fetch.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'page'     => array(
-							'description' => __('Page number.', 'doublescale'),
+							'description' => __( 'Page number.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 					),
@@ -267,8 +266,8 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_filters'),
-					'permission_callback' => array($this, 'get_items_permissions_check'),
+					'callback'            => array( $this, 'get_filters' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 			)
 		);
@@ -279,22 +278,22 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_analytics'),
-					'permission_callback' => array($this, 'get_analytics_permissions_check'),
+					'callback'            => array( $this, 'get_analytics' ),
+					'permission_callback' => array( $this, 'get_analytics_permissions_check' ),
 					'args'                => array(
 						'interval'   => array(
-							'description' => __('Interval for the analytics.', 'doublescale'),
+							'description' => __( 'Interval for the analytics.', 'doublescale' ),
 							'type'        => 'string',
-							'enum'        => array('custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year'),
+							'enum'        => array( 'custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
 							'required'    => false,
 						),
 						'start_date' => array(
-							'description' => __('Start date for the analytics.', 'doublescale'),
+							'description' => __( 'Start date for the analytics.', 'doublescale' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
 						'end_date'   => array(
-							'description' => __('End date for the analytics.', 'doublescale'),
+							'description' => __( 'End date for the analytics.', 'doublescale' ),
 							'type'        => 'string',
 							'format'      => 'date',
 						),
@@ -310,15 +309,15 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'add_to_lists'),
-					'permission_callback' => array($this, 'add_to_lists_permissions_check'),
+					'callback'            => array( $this, 'add_to_lists' ),
+					'permission_callback' => array( $this, 'add_to_lists_permissions_check' ),
 					'args'                => array(
 						'ids'      => array(
-							'description' => __('Contact IDs.', 'doublescale'),
+							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
 						),
 						'list_ids' => array(
-							'description' => __('Lists to add.', 'doublescale'),
+							'description' => __( 'Lists to add.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -333,15 +332,15 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'remove_from_lists'),
-					'permission_callback' => array($this, 'remove_from_lists_permissions_check'),
+					'callback'            => array( $this, 'remove_from_lists' ),
+					'permission_callback' => array( $this, 'remove_from_lists_permissions_check' ),
 					'args'                => array(
 						'ids'      => array(
-							'description' => __('Contact IDs.', 'doublescale'),
+							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
 						),
 						'list_ids' => array(
-							'description' => __('Lists to remove.', 'doublescale'),
+							'description' => __( 'Lists to remove.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -356,15 +355,15 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'add_tags'),
-					'permission_callback' => array($this, 'add_tags_permissions_check'),
+					'callback'            => array( $this, 'add_tags' ),
+					'permission_callback' => array( $this, 'add_tags_permissions_check' ),
 					'args'                => array(
 						'ids'     => array(
-							'description' => __('Contact IDs.', 'doublescale'),
+							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
 						),
 						'tag_ids' => array(
-							'description' => __('Tags to add.', 'doublescale'),
+							'description' => __( 'Tags to add.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -379,15 +378,15 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array($this, 'remove_tags'),
-					'permission_callback' => array($this, 'remove_tags_permissions_check'),
+					'callback'            => array( $this, 'remove_tags' ),
+					'permission_callback' => array( $this, 'remove_tags_permissions_check' ),
 					'args'                => array(
 						'ids'     => array(
-							'description' => __('Contact IDs.', 'doublescale'),
+							'description' => __( 'Contact IDs.', 'doublescale' ),
 							'type'        => 'array',
 						),
 						'tag_ids' => array(
-							'description' => __('Tags to remove.', 'doublescale'),
+							'description' => __( 'Tags to remove.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -406,28 +405,28 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_messages'),
-					'permission_callback' => array($this, 'get_messages_permissions_check'),
+					'callback'            => array( $this, 'get_messages' ),
+					'permission_callback' => array( $this, 'get_messages_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'mode'     => array(
-							'description' => __('Message channel: email, sms, or whatsapp.', 'doublescale'),
+							'description' => __( 'Message channel: email, sms, or whatsapp.', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => false,
 							'enum'        => CampaignChannel::get_core_channel_strings(),
 							'default'     => 'email',
 						),
 						'per_page' => array(
-							'description' => __('Number of items to fetch.', 'doublescale'),
+							'description' => __( 'Number of items to fetch.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 25,
 						),
 						'page'     => array(
-							'description' => __('Page number.', 'doublescale'),
+							'description' => __( 'Page number.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
@@ -443,40 +442,40 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_purchase_history'),
-					'permission_callback' => array($this, 'get_purchase_history_permissions_check'),
+					'callback'            => array( $this, 'get_purchase_history' ),
+					'permission_callback' => array( $this, 'get_purchase_history_permissions_check' ),
 					'args'                => array(
 						'id'                => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'woo_page'          => array(
-							'description' => __('WooCommerce page number.', 'doublescale'),
+							'description' => __( 'WooCommerce page number.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'woo_per_page'      => array(
-							'description' => __('WooCommerce items per page.', 'doublescale'),
+							'description' => __( 'WooCommerce items per page.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
 						'edd_page'          => array(
-							'description' => __('EDD page number.', 'doublescale'),
+							'description' => __( 'EDD page number.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'edd_per_page'      => array(
-							'description' => __('EDD items per page.', 'doublescale'),
+							'description' => __( 'EDD items per page.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
 						'surecart_page'     => array(
-							'description' => __('SureCart page number.', 'doublescale'),
+							'description' => __( 'SureCart page number.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
 						'surecart_per_page' => array(
-							'description' => __('SureCart items per page.', 'doublescale'),
+							'description' => __( 'SureCart items per page.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 10,
 						),
@@ -492,11 +491,11 @@ class RestContactController extends RestController {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array($this, 'get_lms_courses'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
+					'callback'            => array( $this, 'get_lms_courses' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'id' => array(
-							'description' => __('Contact ID.', 'doublescale'),
+							'description' => __( 'Contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 					),
@@ -516,11 +515,11 @@ class RestContactController extends RestController {
 				array(
 					array(
 						'methods'             => WP_REST_Server::READABLE,
-						'callback'            => array($this, 'get_lead_score'),
-						'permission_callback' => array($this, 'get_item_permissions_check'),
+						'callback'            => array( $this, 'get_lead_score' ),
+						'permission_callback' => array( $this, 'get_item_permissions_check' ),
 						'args'                => array(
 							'id' => array(
-								'description' => __('Contact ID.', 'doublescale'),
+								'description' => __( 'Contact ID.', 'doublescale' ),
 								'type'        => 'integer',
 							),
 						),
@@ -537,34 +536,33 @@ class RestContactController extends RestController {
 	 *
 	 * @return array $schema The contact schema
 	 */
-	public function get_item_schema()
-	{
+	public function get_item_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'contact',
 			'type'       => 'object',
 			'properties' => array(
 				'id'              => array(
-					'description' => __('Unique identifier for the object.', 'doublescale'),
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
 					'type'        => 'integer',
 					'readonly'    => true,
 				),
 				'first_name'      => array(
-					'description'  => __('First name of the contact.', 'doublescale'),
+					'description'  => __( 'First name of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'last_name'       => array(
-					'description'  => __('Last name of the contact.', 'doublescale'),
+					'description'  => __( 'Last name of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'email'           => array(
-					'description'  => __('Email of the contact.', 'doublescale'),
+					'description'  => __( 'Email of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'required'     => true,
 					'args_options' => array(
@@ -572,29 +570,29 @@ class RestContactController extends RestController {
 					),
 				),
 				'phone'           => array(
-					'description'  => __('Phone number of the contact.', 'doublescale'),
+					'description'  => __( 'Phone number of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'whatsapp_phone'  => array(
-					'description'  => __('Whatsapp phone number of the contact in E.164 format (e.g., +12025551234).', 'doublescale'),
+					'description'  => __( 'Whatsapp phone number of the contact in E.164 format (e.g., +12025551234).', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => function ($value, $request, $param) {
+						'validate_callback' => function ( $value, $request, $param ) {
 							// Allow empty values (null, empty string, or false)
-							if (is_null($value) || $value === '' || $value === false) {
+							if ( is_null( $value ) || $value === '' || $value === false ) {
 								return true;
 							}
 							// Validate E.164 format if value is provided
-							if (! preg_match('/^\+[0-9]{1,15}$/', $value)) {
+							if ( ! preg_match( '/^\+[0-9]{1,15}$/', $value ) ) {
 								return new WP_Error(
 									'rest_invalid_param',
 									/* translators: %s: field name (phone, mobile, etc.) */
-									sprintf(__('%s must be in E.164 format (e.g., +12025551234)', 'doublescale'), $param),
-									array('status' => 400)
+									sprintf( __( '%s must be in E.164 format (e.g., +12025551234)', 'doublescale' ), $param ),
+									array( 'status' => 400 )
 								);
 							}
 							return true;
@@ -602,69 +600,69 @@ class RestContactController extends RestController {
 					),
 				),
 				'address_1'       => array(
-					'description'  => __('Address line 1 of the contact.', 'doublescale'),
+					'description'  => __( 'Address line 1 of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'address_2'       => array(
-					'description'  => __('Address line 2 of the contact.', 'doublescale'),
+					'description'  => __( 'Address line 2 of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'city'            => array(
-					'description'  => __('City of the contact.', 'doublescale'),
+					'description'  => __( 'City of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'state'           => array(
-					'description'  => __('State of the contact.', 'doublescale'),
+					'description'  => __( 'State of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'country'         => array(
-					'description'  => __('Country of the contact.', 'doublescale'),
+					'description'  => __( 'Country of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'zip'             => array(
-					'description'  => __('Zip code of the contact.', 'doublescale'),
+					'description'  => __( 'Zip code of the contact.', 'doublescale' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'email_status'    => array(
-					'description'  => __('Email subscription status.', 'doublescale'),
+					'description'  => __( 'Email subscription status.', 'doublescale' ),
 					'type'         => 'string',
-					'enum'         => array('subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified'),
+					'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'blocked', 'unverified' ),
 					'default'      => 'subscribed',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'sms_status'      => array(
-					'description'  => __('Sms subscription status.', 'doublescale'),
+					'description'  => __( 'Sms subscription status.', 'doublescale' ),
 					'type'         => 'string',
-					'enum'         => array('subscribed', 'unsubscribed', 'blocked'),
+					'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					'default'      => 'subscribed',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'whatsapp_status' => array(
-					'description'  => __('Whatsapp subscription status.', 'doublescale'),
+					'description'  => __( 'Whatsapp subscription status.', 'doublescale' ),
 					'type'         => 'string',
-					'enum'         => array('subscribed', 'unsubscribed', 'blocked'),
+					'enum'         => array( 'subscribed', 'unsubscribed', 'blocked' ),
 					'default'      => 'subscribed',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -673,13 +671,13 @@ class RestContactController extends RestController {
 				'created_at'      => array(
 					'type'        => 'string',
 					'description' => 'Created at',
-					'context'     => array('view', 'edit', 'embed'),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'updated_at'      => array(
 					'type'        => 'string',
 					'description' => 'Updated at',
-					'context'     => array('view', 'edit', 'embed'),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 			),
@@ -695,27 +693,26 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_lms_courses($request)
-	{
+	public function get_lms_courses( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			$is_learndash_active  = doublescale_is_plugin_active('sfwd-lms/sfwd_lms.php');
-			$is_tutor_active      = doublescale_is_plugin_active('tutor/tutor.php');
-			$is_lifterlms_active  = doublescale_is_plugin_active('lifterlms/lifterlms.php');
-			$is_learnpress_active = doublescale_is_plugin_active('learnpress/learnpress.php');
+			$is_learndash_active  = doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' );
+			$is_tutor_active      = doublescale_is_plugin_active( 'tutor/tutor.php' );
+			$is_lifterlms_active  = doublescale_is_plugin_active( 'lifterlms/lifterlms.php' );
+			$is_learnpress_active = doublescale_is_plugin_active( 'learnpress/learnpress.php' );
 
-			if (! $is_learndash_active && ! $is_tutor_active && ! $is_lifterlms_active && ! $is_learnpress_active) {
-				return new WP_Error('error', 'No LMS plugin is active', array('status' => 400));
+			if ( ! $is_learndash_active && ! $is_tutor_active && ! $is_lifterlms_active && ! $is_learnpress_active ) {
+				return new WP_Error( 'error', 'No LMS plugin is active', array( 'status' => 400 ) );
 			}
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$user = get_user_by('email', $contact->email);
-			if (! $user) {
+			$user = get_user_by( 'email', $contact->email );
+			if ( ! $user ) {
 				return new WP_REST_Response(
 					array(
 						'data'  => array(),
@@ -728,34 +725,34 @@ class RestContactController extends RestController {
 			$result = array();
 
 			// LearnDash courses.
-			if ($is_learndash_active) {
-				$result = array_merge($result, $this->get_learndash_courses($user->ID));
+			if ( $is_learndash_active ) {
+				$result = array_merge( $result, $this->get_learndash_courses( $user->ID ) );
 			}
 
 			// TutorLMS courses.
-			if ($is_tutor_active) {
-				$result = array_merge($result, $this->get_tutor_courses($user->ID));
+			if ( $is_tutor_active ) {
+				$result = array_merge( $result, $this->get_tutor_courses( $user->ID ) );
 			}
 
 			// LifterLMS courses.
-			if ($is_lifterlms_active) {
-				$result = array_merge($result, $this->get_lifterlms_courses($user->ID));
+			if ( $is_lifterlms_active ) {
+				$result = array_merge( $result, $this->get_lifterlms_courses( $user->ID ) );
 			}
 
 			// LearnPress courses.
-			if ($is_learnpress_active) {
-				$result = array_merge($result, $this->get_learnpress_courses($user->ID));
+			if ( $is_learnpress_active ) {
+				$result = array_merge( $result, $this->get_learnpress_courses( $user->ID ) );
 			}
 
 			return new WP_REST_Response(
 				array(
 					'data'  => $result,
-					'total' => count($result),
+					'total' => count( $result ),
 				),
 				200
 			);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -768,23 +765,22 @@ class RestContactController extends RestController {
 	 *
 	 * @return array
 	 */
-	private function get_learndash_courses($user_id)
-	{
+	private function get_learndash_courses( $user_id ) {
 		$result  = array();
-		$courses = learndash_user_get_enrolled_courses($user_id);
+		$courses = learndash_user_get_enrolled_courses( $user_id );
 
-		foreach ($courses as $course_id) {
-			$course = get_post($course_id);
-			if ($course) {
-				$completed_on = learndash_user_get_course_completed_date($user_id, $course_id);
-				$started_on   = ld_course_access_from($user_id, $course_id);
+		foreach ( $courses as $course_id ) {
+			$course = get_post( $course_id );
+			if ( $course ) {
+				$completed_on = learndash_user_get_course_completed_date( $user_id, $course_id );
+				$started_on   = ld_course_access_from( $user_id, $course_id );
 				$result[]     = array(
 					'id'           => $course->ID,
 					'name'         => $course->post_title,
-					'url'          => get_edit_post_link($course->ID),
-					'status'       => learndash_course_status($course_id, $user_id),
-					'completed_on' => $completed_on ? gmdate('Y-m-d H:i:s', $completed_on) : null,
-					'started_on'   => $started_on ? gmdate('Y-m-d H:i:s', $started_on) : null,
+					'url'          => get_edit_post_link( $course->ID ),
+					'status'       => learndash_course_status( $course_id, $user_id ),
+					'completed_on' => $completed_on ? gmdate( 'Y-m-d H:i:s', $completed_on ) : null,
+					'started_on'   => $started_on ? gmdate( 'Y-m-d H:i:s', $started_on ) : null,
 					'lms'          => 'learndash',
 				);
 			}
@@ -802,26 +798,25 @@ class RestContactController extends RestController {
 	 *
 	 * @return array
 	 */
-	private function get_tutor_courses($user_id)
-	{
+	private function get_tutor_courses( $user_id ) {
 		$result = array();
 
-		if (! function_exists('tutor_utils')) {
+		if ( ! function_exists( 'tutor_utils' ) ) {
 			return $result;
 		}
 
-		$enrolled_courses = tutor_utils()->get_enrolled_courses_by_user($user_id);
+		$enrolled_courses = tutor_utils()->get_enrolled_courses_by_user( $user_id );
 
-		if ($enrolled_courses && $enrolled_courses->have_posts()) {
-			while ($enrolled_courses->have_posts()) {
+		if ( $enrolled_courses && $enrolled_courses->have_posts() ) {
+			while ( $enrolled_courses->have_posts() ) {
 				$enrolled_courses->the_post();
 				$course_id    = get_the_ID();
-				$is_completed = tutor_utils()->is_completed_course($course_id, $user_id);
+				$is_completed = tutor_utils()->is_completed_course( $course_id, $user_id );
 
 				// Get completion date if completed.
 				// TutorLMS stores completion in comments table with comment_type = 'course_completed'.
 				$completed_on = null;
-				if ($is_completed) {
+				if ( $is_completed ) {
 					global $wpdb;
 					$completion_comment = $wpdb->get_row(
 						$wpdb->prepare(
@@ -831,7 +826,7 @@ class RestContactController extends RestController {
 							'course_completed'
 						)
 					);
-					if ($completion_comment && ! empty($completion_comment->comment_date)) {
+					if ( $completion_comment && ! empty( $completion_comment->comment_date ) ) {
 						$completed_on = $completion_comment->comment_date;
 					}
 				}
@@ -839,18 +834,18 @@ class RestContactController extends RestController {
 				// Get enrollment date.
 				// Note: tutor_utils()->is_enrolled() returns an object with ID, post_author, post_date, etc.
 				$started_on = null;
-				$enrolled   = tutor_utils()->is_enrolled($course_id, $user_id);
-				if ($enrolled && isset($enrolled->post_date)) {
+				$enrolled   = tutor_utils()->is_enrolled( $course_id, $user_id );
+				if ( $enrolled && isset( $enrolled->post_date ) ) {
 					$started_on = $enrolled->post_date;
 				}
 
 				// Determine status (use underscores to match frontend STATUS_STYLES keys).
-				if ($is_completed) {
+				if ( $is_completed ) {
 					$status = 'completed';
 				} else {
 					// Check progress.
-					$progress = tutor_utils()->get_course_completed_percent($course_id, $user_id);
-					if ($progress > 0) {
+					$progress = tutor_utils()->get_course_completed_percent( $course_id, $user_id );
+					if ( $progress > 0 ) {
 						$status = 'in_progress';
 					} else {
 						$status = 'not_started';
@@ -860,7 +855,7 @@ class RestContactController extends RestController {
 				$result[] = array(
 					'id'           => $course_id,
 					'name'         => get_the_title(),
-					'url'          => get_edit_post_link($course_id),
+					'url'          => get_edit_post_link( $course_id ),
 					'status'       => $status,
 					'completed_on' => $completed_on,
 					'started_on'   => $started_on,
@@ -882,48 +877,47 @@ class RestContactController extends RestController {
 	 *
 	 * @return array
 	 */
-	private function get_lifterlms_courses($user_id)
-	{
+	private function get_lifterlms_courses( $user_id ) {
 		$result = array();
 
-		if (! function_exists('llms_get_student')) {
+		if ( ! function_exists( 'llms_get_student' ) ) {
 			return $result;
 		}
 
-		$student = llms_get_student($user_id);
-		if (! $student) {
+		$student = llms_get_student( $user_id );
+		if ( ! $student ) {
 			return $result;
 		}
 
-		$courses = $student->get_courses(array('limit' => 10000));
-		if (empty($courses['results'])) {
+		$courses = $student->get_courses( array( 'limit' => 10000 ) );
+		if ( empty( $courses['results'] ) ) {
 			return $result;
 		}
 
-		foreach ($courses['results'] as $course_id) {
-			$course = get_post($course_id);
-			if (! $course) {
+		foreach ( $courses['results'] as $course_id ) {
+			$course = get_post( $course_id );
+			if ( ! $course ) {
 				continue;
 			}
 
 			// Get enrollment status.
-			$enrollment_status = $student->get_enrollment_status($course_id);
-			$is_complete       = $student->is_complete($course_id, 'course');
+			$enrollment_status = $student->get_enrollment_status( $course_id );
+			$is_complete       = $student->is_complete( $course_id, 'course' );
 
 			// Get dates.
-			$started_on   = $student->get_enrollment_date($course_id, 'enrolled');
+			$started_on   = $student->get_enrollment_date( $course_id, 'enrolled' );
 			$completed_on = null;
-			if ($is_complete) {
-				$completed_on = $student->get_completion_date($course_id);
+			if ( $is_complete ) {
+				$completed_on = $student->get_completion_date( $course_id );
 			}
 
 			// Determine status.
-			if ($is_complete) {
+			if ( $is_complete ) {
 				$status = 'completed';
-			} elseif ('enrolled' === $enrollment_status) {
+			} elseif ( 'enrolled' === $enrollment_status ) {
 				// Check progress.
-				$progress = $student->get_progress($course_id, 'course');
-				if ($progress > 0) {
+				$progress = $student->get_progress( $course_id, 'course' );
+				if ( $progress > 0 ) {
 					$status = 'in_progress';
 				} else {
 					$status = 'not_started';
@@ -935,7 +929,7 @@ class RestContactController extends RestController {
 			$result[] = array(
 				'id'           => $course->ID,
 				'name'         => $course->post_title,
-				'url'          => get_edit_post_link($course->ID),
+				'url'          => get_edit_post_link( $course->ID ),
 				'status'       => $status,
 				'completed_on' => $completed_on,
 				'started_on'   => $started_on,
@@ -955,11 +949,10 @@ class RestContactController extends RestController {
 	 *
 	 * @return array
 	 */
-	private function get_learnpress_courses($user_id)
-	{
+	private function get_learnpress_courses( $user_id ) {
 		$result = array();
 
-		if (! defined('LP_PLUGIN_FILE')) {
+		if ( ! defined( 'LP_PLUGIN_FILE' ) ) {
 			return $result;
 		}
 
@@ -967,8 +960,8 @@ class RestContactController extends RestController {
 		$table_name = $wpdb->prefix . 'learnpress_user_items';
 
 		// Check if table exists.
-		$table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
-		if (! $table_exists) {
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		if ( ! $table_exists ) {
 			return $result;
 		}
 
@@ -983,20 +976,20 @@ class RestContactController extends RestController {
 		);
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		if (empty($enrollments)) {
+		if ( empty( $enrollments ) ) {
 			return $result;
 		}
 
-		foreach ($enrollments as $enrollment) {
-			$course = get_post($enrollment->item_id);
-			if (! $course) {
+		foreach ( $enrollments as $enrollment ) {
+			$course = get_post( $enrollment->item_id );
+			if ( ! $course ) {
 				continue;
 			}
 
 			// Determine status based on graduation field.
-			if ('passed' === $enrollment->graduation) {
+			if ( 'passed' === $enrollment->graduation ) {
 				$status = 'completed';
-			} elseif ('enrolled' === $enrollment->status || 'finished' === $enrollment->status) {
+			} elseif ( 'enrolled' === $enrollment->status || 'finished' === $enrollment->status ) {
 				$status = 'in_progress';
 			} else {
 				$status = 'not_started';
@@ -1004,17 +997,17 @@ class RestContactController extends RestController {
 
 			// Get completion date if passed.
 			$completed_on = null;
-			if ('passed' === $enrollment->graduation && ! empty($enrollment->end_time) && '0000-00-00 00:00:00' !== $enrollment->end_time) {
+			if ( 'passed' === $enrollment->graduation && ! empty( $enrollment->end_time ) && '0000-00-00 00:00:00' !== $enrollment->end_time ) {
 				$completed_on = $enrollment->end_time;
 			}
 
 			$result[] = array(
 				'id'           => $course->ID,
 				'name'         => $course->post_title,
-				'url'          => get_edit_post_link($course->ID),
+				'url'          => get_edit_post_link( $course->ID ),
 				'status'       => $status,
 				'completed_on' => $completed_on,
-				'started_on'   => ! empty($enrollment->start_time) && '0000-00-00 00:00:00' !== $enrollment->start_time ? $enrollment->start_time : null,
+				'started_on'   => ! empty( $enrollment->start_time ) && '0000-00-00 00:00:00' !== $enrollment->start_time ? $enrollment->start_time : null,
 				'lms'          => 'learnpress',
 			);
 		}
@@ -1031,8 +1024,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool
 	 */
-	public function get_lms_courses_permissions_check($request)
-	{
+	public function get_lms_courses_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -1045,8 +1037,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_lead_score($request)
-	{
+	public function get_lead_score( $request ) {
 		if ( ! class_exists( LeadScoringManager::class, true ) ) {
 			return new WP_Error( 'not_available', __( 'Lead scoring is not available', 'doublescale' ), array( 'status' => 404 ) );
 		}
@@ -1055,17 +1046,17 @@ class RestContactController extends RestController {
 		}
 
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
 			// Get the lead score data
-			$lead_score_data = LeadScoringManager::get_lead_score($contact);
+			$lead_score_data = LeadScoringManager::get_lead_score( $contact );
 
-			if (! $lead_score_data) {
+			if ( ! $lead_score_data ) {
 				return new WP_REST_Response(
 					array(
 						'points' => 0,
@@ -1086,9 +1077,9 @@ class RestContactController extends RestController {
 				) : null,
 			);
 
-			return new WP_REST_Response($response, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $response, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1101,25 +1092,24 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_purchase_history($request)
-	{
+	public function get_purchase_history( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
 			$results = array(
-				'edd'      => $this->get_edd_purchase_history($contact, $request),
-				'wc'       => $this->get_wc_purchase_history($contact, $request),
-				'surecart' => $this->get_surecart_purchase_history($contact, $request),
+				'edd'      => $this->get_edd_purchase_history( $contact, $request ),
+				'wc'       => $this->get_wc_purchase_history( $contact, $request ),
+				'surecart' => $this->get_surecart_purchase_history( $contact, $request ),
 			);
 
-			return new WP_REST_Response($results, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $results, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1128,8 +1118,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return array
 	 */
-	private function get_default_purchase_history()
-	{
+	private function get_default_purchase_history() {
 		return array(
 			'orders'              => array(),
 			'total'               => 0,
@@ -1144,37 +1133,36 @@ class RestContactController extends RestController {
 	/**
 	 * Get EDD purchase history for a contact
 	 *
-	 * @param ContactModel   $contact
+	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
 	 * @return array
 	 */
-	private function get_edd_purchase_history($contact, $request)
-	{
+	private function get_edd_purchase_history( $contact, $request ) {
 		$result = $this->get_default_purchase_history();
 
-		if (! defined('EDD_PLUGIN_FILE')) {
+		if ( ! defined( 'EDD_PLUGIN_FILE' ) ) {
 			return $result;
 		}
 
-		$page     = (int) $request->get_param('edd_page');
-		$per_page = (int) $request->get_param('edd_per_page');
-		$offset   = ($page - 1) * $per_page;
+		$page     = (int) $request->get_param( 'edd_page' );
+		$per_page = (int) $request->get_param( 'edd_per_page' );
+		$offset   = ( $page - 1 ) * $per_page;
 
 		$base_query  = $contact->edd_orders();
 		$total_count = $base_query->count();
 
-		if ($total_count === 0) {
+		if ( $total_count === 0 ) {
 			return $result;
 		}
 
-		$paid_query = $contact->edd_orders()->whereIn('status', array('complete', 'edd_subscription'));
+		$paid_query = $contact->edd_orders()->whereIn( 'status', array( 'complete', 'edd_subscription' ) );
 
-		$result['orders']     = $base_query->orderBy('date_created', 'desc')->skip($offset)->take($per_page)->get();
+		$result['orders']     = $base_query->orderBy( 'date_created', 'desc' )->skip( $offset )->take( $per_page )->get();
 		$result['total']      = $total_count;
-		$result['revenue']    = $paid_query->sum('total');
-		$result['average']    = $paid_query->avg('total');
-		$result['last_order'] = $contact->edd_orders()->orderBy('date_created', 'desc')->value('date_created');
-		$result['currency']   = edd_get_option('currency', 'USD');
+		$result['revenue']    = $paid_query->sum( 'total' );
+		$result['average']    = $paid_query->avg( 'total' );
+		$result['last_order'] = $contact->edd_orders()->orderBy( 'date_created', 'desc' )->value( 'date_created' );
+		$result['currency']   = edd_get_option( 'currency', 'USD' );
 
 		return $result;
 	}
@@ -1187,17 +1175,16 @@ class RestContactController extends RestController {
 	 * @param int $order_id
 	 * @return string|null
 	 */
-	private function get_wc_order_edit_url($order_id)
-	{
+	private function get_wc_order_edit_url( $order_id ) {
 		if (
-			class_exists('Automattic\Woocommerce\Utilities\OrderUtil')
-			&& method_exists('Automattic\Woocommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled')
+			class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
+			&& method_exists( 'Automattic\Woocommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled' )
 			&& \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
 		) {
-			return admin_url('admin.php?page=wc-orders&action=edit&id=' . absint($order_id));
+			return admin_url( 'admin.php?page=wc-orders&action=edit&id=' . absint( $order_id ) );
 		}
 
-		return get_edit_post_link(absint($order_id), '');
+		return get_edit_post_link( absint( $order_id ), '' );
 	}
 
 	/**
@@ -1212,67 +1199,74 @@ class RestContactController extends RestController {
 	 * @param WP_REST_Request $request
 	 * @return array
 	 */
-	private function get_wc_purchase_history($contact, $request)
-	{
+	private function get_wc_purchase_history( $contact, $request ) {
 		$result = $this->get_default_purchase_history();
 
-		if (! doublescale_is_plugin_active('woocommerce/woocommerce.php')) {
+		if ( ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			return $result;
 		}
 
-		$page          = (int) $request->get_param('woo_page');
-		$per_page      = (int) $request->get_param('woo_per_page');
-		$offset        = ($page - 1) * $per_page;
-		$paid_statuses = array('wc-completed', 'wc-processing');
+		$page          = (int) $request->get_param( 'woo_page' );
+		$per_page      = (int) $request->get_param( 'woo_per_page' );
+		$offset        = ( $page - 1 ) * $per_page;
+		$paid_statuses = array( 'wc-completed', 'wc-processing' );
 		$email         = $contact->email;
 
 		// wc_get_orders() with a string $customer matches BOTH _customer_user
 		// (resolved to a user by email) and billing_email — which catches
 		// guest orders, orders missing the customer-user link, and orders
 		// where the user changed their account email after purchase.
-		$total_count = count(wc_get_orders(array(
-			'customer' => $email,
-			'limit'    => -1,
-			'return'   => 'ids',
-		)));
+		$total_count = count(
+			wc_get_orders(
+				array(
+					'customer' => $email,
+					'limit'    => -1,
+					'return'   => 'ids',
+				)
+			)
+		);
 
 		// Default the headline currency to the store currency so an empty
 		// purchase history still has a sensible label.
 		$result['currency'] = get_woocommerce_currency();
 
-		if ($total_count === 0) {
+		if ( $total_count === 0 ) {
 			return $result;
 		}
 
-		$wc_orders = wc_get_orders(array(
-			'customer' => $email,
-			'limit'    => $per_page,
-			'offset'   => $offset,
-			'orderby'  => 'date',
-			'order'    => 'DESC',
-		));
+		$wc_orders = wc_get_orders(
+			array(
+				'customer' => $email,
+				'limit'    => $per_page,
+				'offset'   => $offset,
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+			)
+		);
 
 		$formatted_orders = array_map(
-			function ($order) {
+			function ( $order ) {
 				$date_created = $order->get_date_created();
 				return array(
 					'id'           => $order->get_id(),
-					'total_amount' => floatval($order->get_total()),
-					'date'         => $date_created ? $date_created->format('Y-m-d H:i:s') : null,
-					'url'          => $this->get_wc_order_edit_url($order->get_id()),
-					'status'       => wc_get_order_status_name($order->get_status()),
-					'subtotal'     => floatval($order->get_subtotal()),
+					'total_amount' => floatval( $order->get_total() ),
+					'date'         => $date_created ? $date_created->format( 'Y-m-d H:i:s' ) : null,
+					'url'          => $this->get_wc_order_edit_url( $order->get_id() ),
+					'status'       => wc_get_order_status_name( $order->get_status() ),
+					'subtotal'     => floatval( $order->get_subtotal() ),
 					'currency'     => $order->get_currency(),
 				);
 			},
 			$wc_orders
 		);
 
-		$paid_orders = wc_get_orders(array(
-			'customer' => $email,
-			'status'   => $paid_statuses,
-			'limit'    => -1,
-		));
+		$paid_orders = wc_get_orders(
+			array(
+				'customer' => $email,
+				'status'   => $paid_statuses,
+				'limit'    => -1,
+			)
+		);
 
 		// Group paid revenue by order currency. Summing across currencies
 		// produces a meaningless total, so the headline cards report only
@@ -1280,40 +1274,40 @@ class RestContactController extends RestController {
 		// revenue_by_currency for richer UI rendering later.
 		$revenue_by_currency = array();
 		$count_by_currency   = array();
-		foreach ($paid_orders as $order) {
+		foreach ( $paid_orders as $order ) {
 			$currency = $order->get_currency() ?: get_woocommerce_currency();
 
-			if (! isset($revenue_by_currency[$currency])) {
-				$revenue_by_currency[$currency] = 0.0;
-				$count_by_currency[$currency]   = 0;
+			if ( ! isset( $revenue_by_currency[ $currency ] ) ) {
+				$revenue_by_currency[ $currency ] = 0.0;
+				$count_by_currency[ $currency ]   = 0;
 			}
 
-			$revenue_by_currency[$currency] += floatval($order->get_total());
-			$count_by_currency[$currency]++;
+			$revenue_by_currency[ $currency ] += floatval( $order->get_total() );
+			++$count_by_currency[ $currency ];
 		}
 
 		$dominant_currency = '';
 		$dominant_count    = -1;
-		foreach ($count_by_currency as $currency => $count) {
-			if ($count > $dominant_count) {
+		foreach ( $count_by_currency as $currency => $count ) {
+			if ( $count > $dominant_count ) {
 				$dominant_currency = $currency;
 				$dominant_count    = $count;
 			}
 		}
 
-		if ('' !== $dominant_currency) {
+		if ( '' !== $dominant_currency ) {
 			$result['currency'] = $dominant_currency;
-			$result['revenue']  = $revenue_by_currency[$dominant_currency];
-			$result['average']  = $count_by_currency[$dominant_currency] > 0
-				? ($revenue_by_currency[$dominant_currency] / $count_by_currency[$dominant_currency])
+			$result['revenue']  = $revenue_by_currency[ $dominant_currency ];
+			$result['average']  = $count_by_currency[ $dominant_currency ] > 0
+				? ( $revenue_by_currency[ $dominant_currency ] / $count_by_currency[ $dominant_currency ] )
 				: 0;
 		}
 
 		$result['orders']              = $formatted_orders;
 		$result['total']               = $total_count;
 		$result['revenue_by_currency'] = $revenue_by_currency;
-		$result['last_order']          = ! empty($wc_orders) && $wc_orders[0]->get_date_created()
-			? $wc_orders[0]->get_date_created()->format('Y-m-d H:i:s')
+		$result['last_order']          = ! empty( $wc_orders ) && $wc_orders[0]->get_date_created()
+			? $wc_orders[0]->get_date_created()->format( 'Y-m-d H:i:s' )
 			: null;
 
 		return $result;
@@ -1322,45 +1316,44 @@ class RestContactController extends RestController {
 	/**
 	 * Get SureCart purchase history for a contact
 	 *
-	 * @param ContactModel   $contact
+	 * @param ContactModel    $contact
 	 * @param WP_REST_Request $request
 	 * @return array
 	 */
-	private function get_surecart_purchase_history($contact, $request)
-	{
+	private function get_surecart_purchase_history( $contact, $request ) {
 		$result = $this->get_default_purchase_history();
 
-		if (! defined('SURECART_PLUGIN_FILE') || ! class_exists('\Surecart\Models\Customer')) {
+		if ( ! defined( 'SURECART_PLUGIN_FILE' ) || ! class_exists( '\Surecart\Models\Customer' ) ) {
 			return $result;
 		}
 
-		$customer = \Surecart\Models\Customer::byEmail($contact->email);
-		if (! $customer || is_wp_error($customer)) {
+		$customer = \Surecart\Models\Customer::byEmail( $contact->email );
+		if ( ! $customer || is_wp_error( $customer ) ) {
 			return $result;
 		}
 
 		// SureCart's Model::get() returns an array of model objects directly
 		$sc_orders = \Surecart\Models\Order::where(
 			array(
-				'customer_ids' => array($customer->id),
+				'customer_ids' => array( $customer->id ),
 			)
-		)->with(array('checkout'))->get();
+		)->with( array( 'checkout' ) )->get();
 
-		if (! is_array($sc_orders) || empty($sc_orders)) {
+		if ( ! is_array( $sc_orders ) || empty( $sc_orders ) ) {
 			return $result;
 		}
 
-		$excluded_statuses = array('canceled', 'cancelled', 'refunded', 'failed');
+		$excluded_statuses = array( 'canceled', 'cancelled', 'refunded', 'failed' );
 		$formatted_orders  = array();
 		$total_revenue     = 0;
 		$paid_count        = 0;
 
-		foreach ($sc_orders as $order) {
+		foreach ( $sc_orders as $order ) {
 			$order_status = $order->status ?? '';
-			$order_total  = isset($order->checkout->total_amount) ? ($order->checkout->total_amount / 100) : 0;
-			$is_paid      = ! in_array($order_status, $excluded_statuses, true);
+			$order_total  = isset( $order->checkout->total_amount ) ? ( $order->checkout->total_amount / 100 ) : 0;
+			$is_paid      = ! in_array( $order_status, $excluded_statuses, true );
 
-			if ($is_paid) {
+			if ( $is_paid ) {
 				$total_revenue += $order_total;
 				++$paid_count;
 			}
@@ -1369,27 +1362,27 @@ class RestContactController extends RestController {
 				'id'           => $order->id ?? '',
 				'number'       => $order->number ?? '',
 				'total_amount' => $order_total,
-				'date'         => isset($order->created_at) ? gmdate('Y-m-d H:i:s', $order->created_at) : null,
-				'url'          => admin_url('admin.php?page=sc-orders&action=edit&id=' . ($order->id ?? '')),
+				'date'         => isset( $order->created_at ) ? gmdate( 'Y-m-d H:i:s', $order->created_at ) : null,
+				'url'          => admin_url( 'admin.php?page=sc-orders&action=edit&id=' . ( $order->id ?? '' ) ),
 				'status'       => $order_status,
 				'order_type'   => $order->order_type ?? '',
-				'currency'     => isset($order->checkout->currency) ? strtoupper($order->checkout->currency) : 'USD',
+				'currency'     => isset( $order->checkout->currency ) ? strtoupper( $order->checkout->currency ) : 'USD',
 			);
 		}
 
-		$total_count = count($formatted_orders);
+		$total_count = count( $formatted_orders );
 
 		// SureCart Api does not support pagination natively, so paginate the result set.
-		$page     = (int) $request->get_param('surecart_page');
-		$per_page = (int) $request->get_param('surecart_per_page');
-		$offset   = ($page - 1) * $per_page;
+		$page     = (int) $request->get_param( 'surecart_page' );
+		$per_page = (int) $request->get_param( 'surecart_per_page' );
+		$offset   = ( $page - 1 ) * $per_page;
 
-		$paged_orders = array_slice($formatted_orders, $offset, $per_page);
+		$paged_orders = array_slice( $formatted_orders, $offset, $per_page );
 
 		$result['orders']     = $paged_orders;
 		$result['total']      = $total_count;
 		$result['revenue']    = $total_revenue;
-		$result['average']    = $paid_count > 0 ? ($total_revenue / $paid_count) : 0;
+		$result['average']    = $paid_count > 0 ? ( $total_revenue / $paid_count ) : 0;
 		$result['last_order'] = $formatted_orders[0]['date'] ?? null;
 		$result['currency']   = $formatted_orders[0]['currency'] ?? 'USD';
 
@@ -1405,73 +1398,72 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_messages($request)
-	{
+	public function get_messages( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$mode       = $request->get_param('mode') ?: CommunicationTrackingModel::MODE_EMAIL; // Default to email (1)
-			$per_page   = $request->get_param('per_page') ?: 25;
-			$page       = $request->get_param('page') ?: 1;
+			$contact_id = $request->get_param( 'id' );
+			$mode       = $request->get_param( 'mode' ) ?: CommunicationTrackingModel::MODE_EMAIL; // Default to email (1)
+			$per_page   = $request->get_param( 'per_page' ) ?: 25;
+			$page       = $request->get_param( 'page' ) ?: 1;
 
 			// Validate contact exists (using helper)
-			$contact = $this->validate_contact_exists($contact_id);
-			if (is_wp_error($contact)) {
+			$contact = $this->validate_contact_exists( $contact_id );
+			if ( is_wp_error( $contact ) ) {
 				return $contact;
 			}
 
 			// Map channel to tracking mode (using helper)
-			$tracking_mode = $this->map_mode_to_tracking_mode($mode);
-			if (is_wp_error($tracking_mode)) {
+			$tracking_mode = $this->map_mode_to_tracking_mode( $mode );
+			if ( is_wp_error( $tracking_mode ) ) {
 				return $tracking_mode;
 			}
 
 			// Get ALL messages (campaigns + individual) for this channel
-			$messages_query = CommunicationTrackingModel::where('contact_id', $contact_id)
-				->where('mode', $tracking_mode)
+			$messages_query = CommunicationTrackingModel::where( 'contact_id', $contact_id )
+				->where( 'mode', $tracking_mode )
 				->with(
 					array(
-						'campaign'                    => function ($query) {
-							$query->select('id', 'name', 'type');
+						'campaign'                    => function ( $query ) {
+							$query->select( 'id', 'name', 'type' );
 						},
-						'template'                    => function ($query) {
-							$query->select('id', 'subject', 'body', 'settings');
+						'template'                    => function ( $query ) {
+							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
-						'activity'                    => function ($query) {
-							$query->select('id', 'contact_id', 'activity_type', 'data', 'user_id', 'created_at');
+						'activity'                    => function ( $query ) {
+							$query->select( 'id', 'contact_id', 'activity_type', 'data', 'user_id', 'created_at' );
 						}, // Include activity content for individual messages (email_sent, sms_sent, whatsapp_sent)
-						'communication_tracking_meta' => function ($query) {
-							$query->select('id', 'communication_tracking_id', 'meta_key', 'meta_value');
+						'communication_tracking_meta' => function ( $query ) {
+							$query->select( 'id', 'communication_tracking_id', 'meta_key', 'meta_value' );
 						}, // Include merge tag values for historical rendering
 					)
 				)
-				->orderBy('created_at', 'desc');
+				->orderBy( 'created_at', 'desc' );
 
 			// Execute paginated query
-			$messages = $messages_query->paginate($per_page, array('*'), 'page', $page);
+			$messages = $messages_query->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// source_id is polymorphic: for campaigns it points to a campaign,
 			// for individual messages it points to an activity. The eager-loaded
 			// "campaign" and "activity" relations both key off source_id, so
 			// they can accidentally cross-match (e.g. activity ID 2 matches
 			// campaign ID 2). Null out the wrong relation on each record.
-			foreach ($messages->items() as $msg) {
-				if ((int) $msg->source_type !== MessageSourceTypes::CAMPAIGN) {
-					$msg->setRelation('campaign', null);
+			foreach ( $messages->items() as $msg ) {
+				if ( (int) $msg->source_type !== MessageSourceTypes::CAMPAIGN ) {
+					$msg->setRelation( 'campaign', null );
 				}
-				if ((int) $msg->source_type !== MessageSourceTypes::INDIVIDUAL) {
-					$msg->setRelation('activity', null);
+				if ( (int) $msg->source_type !== MessageSourceTypes::INDIVIDUAL ) {
+					$msg->setRelation( 'activity', null );
 				}
 			}
 
 			// Resolve stored merge tag values in template subjects for display.
-			foreach ($messages->items() as $msg) {
-				if ($msg->template && $msg->template->subject) {
-					$msg->resolved_subject = $msg->render_original_content($msg->template->subject);
+			foreach ( $messages->items() as $msg ) {
+				if ( $msg->template && $msg->template->subject ) {
+					$msg->resolved_subject = $msg->render_original_content( $msg->template->subject );
 				}
 			}
 
 			// Get statistics in a single query (using helper - 80% faster!)
-			$statistics = $this->get_message_statistics($contact_id, $tracking_mode, $mode);
+			$statistics = $this->get_message_statistics( $contact_id, $tracking_mode, $mode );
 
 			// Merge messages with statistics
 			$result = array_merge(
@@ -1482,9 +1474,9 @@ class RestContactController extends RestController {
 				$statistics
 			);
 
-			return new WP_REST_Response($result, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $result, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -1495,22 +1487,21 @@ class RestContactController extends RestController {
 	 *
 	 * @return int|WP_Error Tracking mode constant or WP_Error.
 	 */
-	private function map_mode_to_tracking_mode($mode)
-	{
+	private function map_mode_to_tracking_mode( $mode ) {
 		// If it's already an integer, validate it directly
-		if (is_int($mode) || ctype_digit((string) $mode)) {
+		if ( is_int( $mode ) || ctype_digit( (string) $mode ) ) {
 			$mode_int    = (int) $mode;
-			$valid_modes = array(CommunicationTrackingModel::MODE_EMAIL, CommunicationTrackingModel::MODE_SMS, CommunicationTrackingModel::MODE_WHATSAPP);
+			$valid_modes = array( CommunicationTrackingModel::MODE_EMAIL, CommunicationTrackingModel::MODE_SMS, CommunicationTrackingModel::MODE_WHATSAPP );
 
-			if (in_array($mode_int, $valid_modes, true)) {
+			if ( in_array( $mode_int, $valid_modes, true ) ) {
 				return $mode_int;
 			}
 
 			return new WP_Error(
 				'invalid_mode',
 				/* translators: %d: invalid mode number */
-				sprintf(__('Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'doublescale'), $mode_int),
-				array('status' => 400)
+				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'doublescale' ), $mode_int ),
+				array( 'status' => 400 )
 			);
 		}
 
@@ -1521,16 +1512,16 @@ class RestContactController extends RestController {
 			CampaignChannel::STR_WHATSAPP => CommunicationTrackingModel::MODE_WHATSAPP,
 		);
 
-		if (! isset($mode_map[$mode])) {
+		if ( ! isset( $mode_map[ $mode ] ) ) {
 			return new WP_Error(
 				'invalid_mode',
 				/* translators: %s: invalid mode string */
-				sprintf(__('Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'doublescale'), $mode),
-				array('status' => 400)
+				sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'doublescale' ), $mode ),
+				array( 'status' => 400 )
 			);
 		}
 
-		return $mode_map[$mode];
+		return $mode_map[ $mode ];
 	}
 
 	/**
@@ -1542,15 +1533,14 @@ class RestContactController extends RestController {
 	 *
 	 * @return array Statistics array.
 	 */
-	private function get_message_statistics($contact_id, $tracking_mode, $mode)
-	{
+	private function get_message_statistics( $contact_id, $tracking_mode, $mode ) {
 		global $wpdb;
 
 		// Single query to get all statistics at once
 		$table = esc_sql( $wpdb->prefix . 'doublescale_communication_tracking' );
 
 		// Build query based on mode
-		if ($mode === CampaignChannel::STR_EMAIL) {
+		if ( $mode === CampaignChannel::STR_EMAIL ) {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table is the prefixed tracking table name; all values bound via prepare().
 			$query = $wpdb->prepare(
 				"SELECT
@@ -1570,20 +1560,20 @@ class RestContactController extends RestController {
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
-			$stats = $wpdb->get_row($query);
+			$stats = $wpdb->get_row( $query );
 
-			$total_sent     = (int) ($stats->total_sent ?? 0);
-			$total_opened   = (int) ($stats->total_opened ?? 0);
-			$total_clicked  = (int) ($stats->total_clicked ?? 0);
-			$total_received = (int) ($stats->total_received ?? 0);
+			$total_sent     = (int) ( $stats->total_sent ?? 0 );
+			$total_opened   = (int) ( $stats->total_opened ?? 0 );
+			$total_clicked  = (int) ( $stats->total_clicked ?? 0 );
+			$total_received = (int) ( $stats->total_received ?? 0 );
 
 			return array(
 				'total_sent'     => $total_sent,
 				'total_opened'   => $total_opened,
 				'total_clicked'  => $total_clicked,
 				'total_received' => $total_received,
-				'open_rate'      => $total_sent > 0 ? round(($total_opened / $total_sent) * 100, 2) : 0,
-				'click_rate'     => $total_sent > 0 ? round(($total_clicked / $total_sent) * 100, 2) : 0,
+				'open_rate'      => $total_sent > 0 ? round( ( $total_opened / $total_sent ) * 100, 2 ) : 0,
+				'click_rate'     => $total_sent > 0 ? round( ( $total_clicked / $total_sent ) * 100, 2 ) : 0,
 			);
 		} else {
 			// Sms/Whatsapp statistics
@@ -1607,12 +1597,12 @@ class RestContactController extends RestController {
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above with $wpdb->prepare().
-			$stats = $wpdb->get_row($query);
+			$stats = $wpdb->get_row( $query );
 
 			return array(
-				'total_sent'      => (int) ($stats->total_sent ?? 0),
-				'total_delivered' => (int) ($stats->total_delivered ?? 0),
-				'total_failed'    => (int) ($stats->total_failed ?? 0),
+				'total_sent'      => (int) ( $stats->total_sent ?? 0 ),
+				'total_delivered' => (int) ( $stats->total_delivered ?? 0 ),
+				'total_failed'    => (int) ( $stats->total_failed ?? 0 ),
 			);
 		}
 	}
@@ -1624,15 +1614,14 @@ class RestContactController extends RestController {
 	 *
 	 * @return ContactModel|WP_Error Contact model or WP_Error.
 	 */
-	private function validate_contact_exists($contact_id)
-	{
-		$contact = ContactModel::find($contact_id);
+	private function validate_contact_exists( $contact_id ) {
+		$contact = ContactModel::find( $contact_id );
 
-		if (! $contact) {
+		if ( ! $contact ) {
 			return new WP_Error(
 				'contact_not_found',
-				__('Contact not found', 'doublescale'),
-				array('status' => 404)
+				__( 'Contact not found', 'doublescale' ),
+				array( 'status' => 404 )
 			);
 		}
 
@@ -1646,8 +1635,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool
 	 */
-	public function get_messages_permissions_check($request)
-	{
+	public function get_messages_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
 	}
 
@@ -1660,11 +1648,10 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_filters($request)
-	{
+	public function get_filters( $request ) {
 		$filters = FiltersManager::instance()->get_groups();
 
-		return new WP_REST_Response($filters, 200);
+		return new WP_REST_Response( $filters, 200 );
 	}
 
 	/**
@@ -1676,119 +1663,118 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function get_items($request)
-	{
+	public function get_items( $request ) {
 		try {
-			$per_page           = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-			$page               = $request->get_param('page') ? $request->get_param('page') : 1;
-			$keywords           = $request->get_param('keywords') ?? '';
+			$per_page           = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page               = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keywords           = $request->get_param( 'keywords' ) ?? '';
 			$filters            = $this->normalize_contact_filters_param( $request->get_param( 'filters' ) );
-			$subscribed         = $request->get_param('subscribed') ?? false;
-			$campaign_type      = $request->get_param('campaign_type') ?? null;
-			$has_whatsapp_phone = $request->get_param('has_whatsapp_phone') ?? null;
-			$from               = $request->get_param('from') ?? null;
-			$to                 = $request->get_param('to') ?? null;
+			$subscribed         = $request->get_param( 'subscribed' ) ?? false;
+			$campaign_type      = $request->get_param( 'campaign_type' ) ?? null;
+			$has_whatsapp_phone = $request->get_param( 'has_whatsapp_phone' ) ?? null;
+			$from               = $request->get_param( 'from' ) ?? null;
+			$to                 = $request->get_param( 'to' ) ?? null;
 			$query              = ContactModel::query();
 			$total_count        = $query->count();
 
 			// Start with base query and load relationships
 			// Load custom_fields when the CustomField model is available.
-			$relationships = array('lists', 'tags', 'notes');
-			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
+			$relationships = array( 'lists', 'tags', 'notes' );
+			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				$relationships[] = 'custom_fields';
 			}
 			if (
-				doublescale_is_plugin_active('woocommerce/woocommerce.php')
-				&& class_exists('Automattic\Woocommerce\Utilities\OrderUtil')
+				doublescale_is_plugin_active( 'woocommerce/woocommerce.php' )
+				&& class_exists( 'Automattic\Woocommerce\Utilities\OrderUtil' )
 				&& \Automattic\Woocommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
 			) {
 				$relationships[] = 'orders';
 			}
-			$contacts = $query->with($relationships);
+			$contacts = $query->with( $relationships );
 
 			// Apply date range filters
-			if ($from) {
-				$contacts->where('created_at', '>=', $from);
+			if ( $from ) {
+				$contacts->where( 'created_at', '>=', $from );
 			}
-			if ($to) {
-				$contacts->where('created_at', '<=', $to);
+			if ( $to ) {
+				$contacts->where( 'created_at', '<=', $to );
 			}
 
 			// Apply filters FIRST to narrow down the results
-			if ($filters) {
-				$filters_process = new Contact_Filters_Process($contacts, $filters);
+			if ( $filters ) {
+				$filters_process = new Contact_Filters_Process( $contacts, $filters );
 				$contacts        = $filters_process->filter();
 			}
 
 			// Apply subscription filter
-			if ($subscribed) {
-				$contacts = $contacts->where('email_status', 'subscribed');
+			if ( $subscribed ) {
+				$contacts = $contacts->where( 'email_status', 'subscribed' );
 			}
 
 			// Apply campaign type filter (email/phone availability + channel status)
-			if ($campaign_type) {
+			if ( $campaign_type ) {
 				// Convert campaign_type to integer format for processing
 				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
-				if (is_numeric($campaign_type)) {
+				if ( is_numeric( $campaign_type ) ) {
 					$campaign_type_int = (int) $campaign_type;
 				} else {
-					$campaign_type_int = CampaignChannel::to_integer($campaign_type);
+					$campaign_type_int = CampaignChannel::to_integer( $campaign_type );
 				}
 
 				// Convert back to string for channel status field lookup
-				$campaign_type_string = CampaignChannel::to_string($campaign_type_int);
+				$campaign_type_string = CampaignChannel::to_string( $campaign_type_int );
 
-				if ($campaign_type_string) {
+				if ( $campaign_type_string ) {
 					// Apply channel-specific status filter (e.g., sms_status = 'subscribed')
 					$channel_status_field = $campaign_type_string . '_status';
-					$contacts             = $contacts->where($channel_status_field, 'subscribed');
+					$contacts             = $contacts->where( $channel_status_field, 'subscribed' );
 
 					if ( class_exists( '\DoubleScale\Modules\Campaigns\Services\CampaignContactFilter' ) ) {
 						$campaign_contact_filter = \DoubleScale\Modules\Campaigns\Services\CampaignContactFilter::instance();
-						$contacts                = $campaign_contact_filter->apply_campaign_type_filter($contacts, $campaign_type_int);
+						$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
 					}
 				}
 			}
 
 			// Apply WhatsApp phone filter
-			if (! is_null($has_whatsapp_phone)) {
-				if ($has_whatsapp_phone) {
-					$contacts = $contacts->whereNotNull('whatsapp_phone')
-						->where('whatsapp_phone', '!=', '');
+			if ( ! is_null( $has_whatsapp_phone ) ) {
+				if ( $has_whatsapp_phone ) {
+					$contacts = $contacts->whereNotNull( 'whatsapp_phone' )
+						->where( 'whatsapp_phone', '!=', '' );
 				} else {
 					$contacts = $contacts->where(
-						function ($query) {
-							$query->whereNull('whatsapp_phone')
-								->orWhere('whatsapp_phone', '=', '');
+						function ( $query ) {
+							$query->whereNull( 'whatsapp_phone' )
+								->orWhere( 'whatsapp_phone', '=', '' );
 						}
 					);
 				}
 			}
 
 			// Apply keyword search AFTER filters (search within filtered results)
-			if ('' !== $keywords) {
+			if ( '' !== $keywords ) {
 				$contacts = $contacts->where(
-					function ($query) use ($keywords) {
-						$query->where('first_name', 'like', '%' . $keywords . '%')
-							->orWhere('last_name', 'like', '%' . $keywords . '%')
-							->orWhere('email', 'like', '%' . $keywords . '%')
-							->orWhere('phone', 'like', '%' . $keywords . '%')
-							->orWhere('whatsapp_phone', 'like', '%' . $keywords . '%');
+					function ( $query ) use ( $keywords ) {
+						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
+							->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
+							->orWhere( 'email', 'like', '%' . $keywords . '%' )
+							->orWhere( 'phone', 'like', '%' . $keywords . '%' )
+							->orWhere( 'whatsapp_phone', 'like', '%' . $keywords . '%' );
 					}
 				);
 			}
 
 			// Paginate and get results (pagination automatically handles total count)
 			// Note: paginate() returns total in the response, so filtered_total comes from pagination
-			$contacts       = $contacts->orderBy('created_at', 'desc')->paginate($per_page, array('*'), 'page', $page);
+			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// Compute revenue after pagination so eager-loaded orders are available.
-			if (doublescale_is_plugin_active('woocommerce/woocommerce.php')) {
+			if ( doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 				$currency = \get_woocommerce_currency();
-				foreach ($contacts as $contact) {
-					if ($contact->relationLoaded('orders')) {
+				foreach ( $contacts as $contact ) {
+					if ( $contact->relationLoaded( 'orders' ) ) {
 						$revenue = 0;
-						foreach ($contact->orders as $order) {
+						foreach ( $contact->orders as $order ) {
 							$revenue += $order->total_amount;
 						}
 						$contact->revenue = $revenue . ' ' . $currency;
@@ -1805,8 +1791,8 @@ class RestContactController extends RestController {
 				),
 				200
 			);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1819,43 +1805,42 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function create_item($request)
-	{
-		$email = $request->get_param('email');
+	public function create_item( $request ) {
+		$email = $request->get_param( 'email' );
 
 		// Check if email already exists
-		$contact = ContactModel::where('email', $email)->first();
-		if ($contact) {
-			return new WP_Error('contact_exists', 'Contact already exists', array('status' => 400));
+		$contact = ContactModel::where( 'email', $email )->first();
+		if ( $contact ) {
+			return new WP_Error( 'contact_exists', 'Contact already exists', array( 'status' => 400 ) );
 		}
 
 		try {
-			$contact_data = $this->prepare_contact($request);
-			$contact      = ContactModel::create($contact_data);
+			$contact_data = $this->prepare_contact( $request );
+			$contact      = ContactModel::create( $contact_data );
 
-			$sync_lists = $this->sync_lists($request, $contact);
-			if (is_wp_error($sync_lists)) {
+			$sync_lists = $this->sync_lists( $request, $contact );
+			if ( is_wp_error( $sync_lists ) ) {
 				return $sync_lists;
 			}
 
-			$sync_tags = $this->sync_tags($request, $contact);
-			if (is_wp_error($sync_tags)) {
+			$sync_tags = $this->sync_tags( $request, $contact );
+			if ( is_wp_error( $sync_tags ) ) {
 				return $sync_tags;
 			}
 
-			$sync_custom_fields = $this->sync_custom_fields($request, $contact);
-			if (is_wp_error($sync_custom_fields)) {
+			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
+			if ( is_wp_error( $sync_custom_fields ) ) {
 				return $sync_custom_fields;
 			}
 
-			$sync_notes = $this->sync_notes($request, $contact);
-			if (is_wp_error($sync_notes)) {
+			$sync_notes = $this->sync_notes( $request, $contact );
+			if ( is_wp_error( $sync_notes ) ) {
 				return $sync_notes;
 			}
 
-			return new WP_REST_Response($contact, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1868,21 +1853,20 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function delete_items($request)
-	{
+	public function delete_items( $request ) {
 		try {
-			$contact_ids = $request->get_param('ids') ? $request->get_param('ids') : array();
-			$contacts    = ContactModel::find($contact_ids);
+			$contact_ids = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
+			$contacts    = ContactModel::find( $contact_ids );
 
-			if (! $contacts) {
-				return new WP_Error('not_found', 'Contacts not found', array('status' => 404));
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			ContactModel::destroy($contact_ids);
+			ContactModel::destroy( $contact_ids );
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1895,21 +1879,20 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function delete_item($request)
-	{
+	public function delete_item( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
 			$contact->delete();
 
-			return new WP_REST_Response($contact, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1922,25 +1905,24 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function get_item($request)
-	{
+	public function get_item( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
 			// Load relationships — include custom_fields when the model is available.
-			$contact->load(array('lists', 'tags'));
-			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
-				$contact->load('custom_fields');
+			$contact->load( array( 'lists', 'tags' ) );
+			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
+				$contact->load( 'custom_fields' );
 			}
 
-			return new WP_REST_Response($contact, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -1953,50 +1935,49 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function update_item($request)
-	{
+	public function update_item( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$contact_data = $this->prepare_contact($request);
-			$contact->update($contact_data);
+			$contact_data = $this->prepare_contact( $request );
+			$contact->update( $contact_data );
 
-			$sync_lists = $this->sync_lists($request, $contact);
-			if (is_wp_error($sync_lists)) {
+			$sync_lists = $this->sync_lists( $request, $contact );
+			if ( is_wp_error( $sync_lists ) ) {
 				return $sync_lists;
 			}
 
-			$sync_tags = $this->sync_tags($request, $contact);
-			if (is_wp_error($sync_tags)) {
+			$sync_tags = $this->sync_tags( $request, $contact );
+			if ( is_wp_error( $sync_tags ) ) {
 				return $sync_tags;
 			}
 
-			$sync_custom_fields = $this->sync_custom_fields($request, $contact);
-			if (is_wp_error($sync_custom_fields)) {
+			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
+			if ( is_wp_error( $sync_custom_fields ) ) {
 				return $sync_custom_fields;
 			}
 
-			$sync_notes = $this->sync_notes($request, $contact);
-			if (is_wp_error($sync_notes)) {
+			$sync_notes = $this->sync_notes( $request, $contact );
+			if ( is_wp_error( $sync_notes ) ) {
 				return $sync_notes;
 			}
 
 			// Load relationships — include custom_fields when the model is available.
-			$contact->load(array('lists', 'tags'));
-			if (class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
-				$contact->load('custom_fields');
+			$contact->load( array( 'lists', 'tags' ) );
+			if ( class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
+				$contact->load( 'custom_fields' );
 			}
 
-			do_action('doublescale_contact_update', $contact);
+			do_action( 'doublescale_contact_update', $contact );
 
-			return new WP_REST_Response($contact, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2009,26 +1990,25 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function get_contact_notes($request)
-	{
+	public function get_contact_notes( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$per_page   = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-			$page       = $request->get_param('page') ? $request->get_param('page') : 1;
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$activities = ActivityModel::notes()
-				->forContact($contact_id)
-				->orderBy('created_at', 'desc')
-				->paginate($per_page, array('*'), 'page', $page);
+				->forContact( $contact_id )
+				->orderBy( 'created_at', 'desc' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
 			// Transform the paginated data to note format
-			$notes_data = collect($activities->items())->map(
-				function ($activity) {
+			$notes_data = collect( $activities->items() )->map(
+				function ( $activity ) {
 					return $activity->to_note_format();
 				}
 			)->values()->toArray();
@@ -2037,9 +2017,9 @@ class RestContactController extends RestController {
 			$paginated_array         = $activities->toArray();
 			$paginated_array['data'] = $notes_data;
 
-			return new WP_REST_Response($paginated_array, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $paginated_array, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2052,24 +2032,23 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response $response The response data.
 	 */
-	public function get_automation_contacts($request)
-	{
+	public function get_automation_contacts( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-			$page     = $request->get_param('page') ? $request->get_param('page') : 1;
-			$contacts = $contact->automation_contacts()->orderBy('created_at', 'desc')->paginate($per_page, array('*'), 'page', $page);
-			$contacts->load('automation.steps', 'contact', 'processes.step', 'current_step', 'next_step');
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts->load( 'automation.steps', 'contact', 'processes.step', 'current_step', 'next_step' );
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2082,28 +2061,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return array $contact The contact model.
 	 */
-	protected function prepare_contact($request)
-	{
+	protected function prepare_contact( $request ) {
 		$contact = array(
-			'first_name'      => $request->get_param('first_name'),
-			'last_name'       => $request->get_param('last_name'),
-			'email'           => $request->get_param('email'),
-			'phone'           => $request->get_param('phone'),
-			'whatsapp_phone'  => $request->get_param('whatsapp_phone'),
-			'address_1'       => $request->get_param('address_1'),
-			'address_2'       => $request->get_param('address_2'),
-			'city'            => $request->get_param('city'),
-			'state'           => $request->get_param('state'),
-			'country'         => $request->get_param('country'),
-			'zip'             => $request->get_param('zip'),
-			'email_status'    => $request->get_param('email_status'),
-			'sms_status'      => $request->get_param('sms_status'),
-			'whatsapp_status' => $request->get_param('whatsapp_status'),
+			'first_name'      => $request->get_param( 'first_name' ),
+			'last_name'       => $request->get_param( 'last_name' ),
+			'email'           => $request->get_param( 'email' ),
+			'phone'           => $request->get_param( 'phone' ),
+			'whatsapp_phone'  => $request->get_param( 'whatsapp_phone' ),
+			'address_1'       => $request->get_param( 'address_1' ),
+			'address_2'       => $request->get_param( 'address_2' ),
+			'city'            => $request->get_param( 'city' ),
+			'state'           => $request->get_param( 'state' ),
+			'country'         => $request->get_param( 'country' ),
+			'zip'             => $request->get_param( 'zip' ),
+			'email_status'    => $request->get_param( 'email_status' ),
+			'sms_status'      => $request->get_param( 'sms_status' ),
+			'whatsapp_status' => $request->get_param( 'whatsapp_status' ),
 		);
 
-		foreach ($contact as $key => $value) {
-			if (is_null($value)) {
-				unset($contact[$key]);
+		foreach ( $contact as $key => $value ) {
+			if ( is_null( $value ) ) {
+				unset( $contact[ $key ] );
 			}
 		}
 
@@ -2116,39 +2094,38 @@ class RestContactController extends RestController {
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @param ContactModel   $contact The contact model.
+	 * @param ContactModel    $contact The contact model.
 	 *
 	 * @return void
 	 */
-	protected function sync_lists($request, $contact)
-	{
+	protected function sync_lists( $request, $contact ) {
 		try {
-			$lists = $request->get_param('lists');
-			if (is_array($lists)) {
-				if (empty($lists)) {
-					$contact->sync_lists(array());
+			$lists = $request->get_param( 'lists' );
+			if ( is_array( $lists ) ) {
+				if ( empty( $lists ) ) {
+					$contact->sync_lists( array() );
 					return;
 				}
 				$lists_arr = array();
 
-				foreach ($lists as $list) {
-					if (isset($list['type']) && 'new' === $list['type']) {
-						$list = ListModel::create(array('name' => $list['name']));
-						if ($list) {
+				foreach ( $lists as $list ) {
+					if ( isset( $list['type'] ) && 'new' === $list['type'] ) {
+						$list = ListModel::create( array( 'name' => $list['name'] ) );
+						if ( $list ) {
 							$lists_arr[] = $list->id;
 						}
 					} else {
-						$list = ListModel::find($list['id']);
-						if ($list) {
+						$list = ListModel::find( $list['id'] );
+						if ( $list ) {
 							$lists_arr[] = $list->id;
 						}
 					}
 				}
 
-				$contact->sync_lists($lists_arr);
+				$contact->sync_lists( $lists_arr );
 			}
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2158,40 +2135,39 @@ class RestContactController extends RestController {
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @param ContactModel   $contact The contact model.
+	 * @param ContactModel    $contact The contact model.
 	 *
 	 * @return void
 	 */
-	protected function sync_tags($request, $contact)
-	{
+	protected function sync_tags( $request, $contact ) {
 		try {
-			$tags = $request->get_param('tags');
-			if (is_array($tags)) {
-				if (empty($tags)) {
-					$contact->sync_tags(array());
+			$tags = $request->get_param( 'tags' );
+			if ( is_array( $tags ) ) {
+				if ( empty( $tags ) ) {
+					$contact->sync_tags( array() );
 					return;
 				}
 
 				$tags_arr = array();
 
-				foreach ($tags as $tag) {
-					if (isset($tag['type']) && 'new' === $tag['type']) {
-						$tag = TagModel::create(array('name' => $tag['name']));
-						if ($tag) {
+				foreach ( $tags as $tag ) {
+					if ( isset( $tag['type'] ) && 'new' === $tag['type'] ) {
+						$tag = TagModel::create( array( 'name' => $tag['name'] ) );
+						if ( $tag ) {
 							$tags_arr[] = $tag->id;
 						}
 					} else {
-						$tag = TagModel::find($tag['id']);
-						if ($tag) {
+						$tag = TagModel::find( $tag['id'] );
+						if ( $tag ) {
 							$tags_arr[] = $tag->id;
 						}
 					}
 				}
 
-				$contact->sync_tags($tags_arr);
+				$contact->sync_tags( $tags_arr );
 			}
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2204,40 +2180,39 @@ class RestContactController extends RestController {
 	 *
 	 * @return void|WP_Error
 	 */
-	protected function sync_custom_fields($request, $contact)
-	{
+	protected function sync_custom_fields( $request, $contact ) {
 		try {
 			// Custom fields are PRO-only feature
-			if (! class_exists('DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel')) {
+			if ( ! class_exists( 'DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel' ) ) {
 				return;
 			}
 
-			$custom_fields = $request->get_param('custom_fields');
-			if ($custom_fields) {
+			$custom_fields = $request->get_param( 'custom_fields' );
+			if ( $custom_fields ) {
 				$custom_fields_arr = array();
 
-				foreach ($custom_fields as $custom_field) {
+				foreach ( $custom_fields as $custom_field ) {
 					// Check if custom field exists
-					$custom_field_model = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find($custom_field['id']);
-					if (! $custom_field_model) {
-						return new WP_Error('error', __('Custom field not found', 'doublescale'), array('status' => 400));
+					$custom_field_model = \DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel::find( $custom_field['id'] );
+					if ( ! $custom_field_model ) {
+						return new WP_Error( 'error', __( 'Custom field not found', 'doublescale' ), array( 'status' => 400 ) );
 					}
-					$validated = $custom_field_model->validate_value($custom_field['value']);
+					$validated = $custom_field_model->validate_value( $custom_field['value'] );
 
-					if (! $validated) {
+					if ( ! $validated ) {
 						continue;
 					}
 
-					$custom_fields_arr[$custom_field['id']] = array(
+					$custom_fields_arr[ $custom_field['id'] ] = array(
 						'value'       => $custom_field['value'],
 						'entity_type' => 'contact',
 					);
 				}
 
-				$contact->custom_fields()->sync($custom_fields_arr);
+				$contact->custom_fields()->sync( $custom_fields_arr );
 			}
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2250,28 +2225,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return void|WP_Error
 	 */
-	protected function sync_notes($request, $contact)
-	{
+	protected function sync_notes( $request, $contact ) {
 		try {
-			$notes = $request->get_param('notes');
-			if ($notes) {
-				foreach ($notes as $note) {
+			$notes = $request->get_param( 'notes' );
+			if ( $notes ) {
+				foreach ( $notes as $note ) {
 					ActivityModel::create(
 						array(
 							'contact_id'    => $contact->id,
 							'activity_type' => 'note',
 							'data'          => array(
-								'title' => sanitize_text_field($note['title'] ?? ''),
-								'type'  => sanitize_text_field($note['type'] ?? 'note'),
-								'note'  => sanitize_text_field($note['text'] ?? ''),
+								'title' => sanitize_text_field( $note['title'] ?? '' ),
+								'type'  => sanitize_text_field( $note['type'] ?? 'note' ),
+								'note'  => sanitize_text_field( $note['text'] ?? '' ),
 							),
 							'user_id'       => get_current_user_id() ?: null,
 						)
 					);
 				}
 			}
-		} catch (Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 400));
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
 
@@ -2284,38 +2258,37 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_analytics($request)
-	{
+	public function get_analytics( $request ) {
 		try {
-			$interval   = $request->get_param('interval') ? $request->get_param('interval') : 'last_30_days';
-			$start_date = $request->get_param('start_date') ? $request->get_param('start_date') : '';
-			$end_date   = $request->get_param('end_date') ? $request->get_param('end_date') : '';
+			$interval   = $request->get_param( 'interval' ) ? $request->get_param( 'interval' ) : 'last_30_days';
+			$start_date = $request->get_param( 'start_date' ) ? $request->get_param( 'start_date' ) : '';
+			$end_date   = $request->get_param( 'end_date' ) ? $request->get_param( 'end_date' ) : '';
 
-			if ('custom' !== $interval) {
-				$start_date = Utils::get_start_date($interval, $start_date);
-				$end_date   = Utils::get_end_date($interval, $end_date);
+			if ( 'custom' !== $interval ) {
+				$start_date = Utils::get_start_date( $interval, $start_date );
+				$end_date   = Utils::get_end_date( $interval, $end_date );
 			}
 
-			$dates              = Utils::get_dates_between_dates($start_date, $end_date);
+			$dates              = Utils::get_dates_between_dates( $start_date, $end_date );
 			$type               = $dates['type'] ?? 'hour';
 			$total_contacts     = ContactModel::count();
-			$total_subscribed   = ContactModel::where('email_status', 'subscribed')->count();
-			$total_unsubscribed = ContactModel::where('email_status', 'unsubscribed')->count();
+			$total_subscribed   = ContactModel::where( 'email_status', 'subscribed' )->count();
+			$total_unsubscribed = ContactModel::where( 'email_status', 'unsubscribed' )->count();
 			$contacts           = array();
 
-			foreach ($dates['dates'] as $date) {
-				switch ($type) {
+			foreach ( $dates['dates'] as $date ) {
+				switch ( $type ) {
 					case 'hour':
-						$contacts[$date] = ContactModel::whereBetween('created_at', array($date, gmdate('Y-m-d H:i:s', strtotime($date . ' +1 hour'))))->count();
+						$contacts[ $date ] = ContactModel::whereBetween( 'created_at', array( $date, gmdate( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
 						break;
 					case 'day':
-						$contacts[$date] = ContactModel::whereDay('created_at', gmdate('d', strtotime($date)))->count();
+						$contacts[ $date ] = ContactModel::whereDay( 'created_at', gmdate( 'd', strtotime( $date ) ) )->count();
 						break;
 					case 'month':
-						$contacts[$date] = ContactModel::whereMonth('created_at', gmdate('m', strtotime($date)))->count();
+						$contacts[ $date ] = ContactModel::whereMonth( 'created_at', gmdate( 'm', strtotime( $date ) ) )->count();
 						break;
 					case 'year':
-						$contacts[$date] = ContactModel::whereYear('created_at', gmdate('Y', strtotime($date)))->count();
+						$contacts[ $date ] = ContactModel::whereYear( 'created_at', gmdate( 'Y', strtotime( $date ) ) )->count();
 						break;
 				}
 			}
@@ -2327,9 +2300,9 @@ class RestContactController extends RestController {
 				'total_subscribed'   => $total_subscribed,
 				'total_unsubscribed' => $total_unsubscribed,
 			);
-			return new WP_REST_Response($analytics, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $analytics, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2342,14 +2315,13 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function send_opt_in_email($request)
-	{
+	public function send_opt_in_email( $request ) {
 		try {
-			$contact_id = $request->get_param('id');
-			$contact    = ContactModel::find($contact_id);
+			$contact_id = $request->get_param( 'id' );
+			$contact    = ContactModel::find( $contact_id );
 
-			if (! $contact) {
-				return new WP_Error('not_found', 'Contact not found', array('status' => 404));
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
 			if ( ! class_exists( '\DoubleScale\Modules\Emails\Emails' ) ) {
@@ -2360,13 +2332,13 @@ class RestContactController extends RestController {
 				);
 			}
 
-			$result = \DoubleScale\Modules\Emails\Emails::send_double_optin_email($contact);
+			$result = \DoubleScale\Modules\Emails\Emails::send_double_optin_email( $contact );
 
 			// Log the result for troubleshooting and audit trail.
-			if (! $result) {
+			if ( ! $result ) {
 				LogModel::create(
 					array(
-						'timestamp' => gmdate('Y-m-d H:i:s'),
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
 						'level'     => 400,
 						'message'   => 'Failed to send double opt-in confirmation email',
 						'source'    => 'DoubleScale\Modules\Contacts\Rest\Controllers\RestContactController',
@@ -2382,7 +2354,7 @@ class RestContactController extends RestController {
 			} else {
 				LogModel::create(
 					array(
-						'timestamp' => gmdate('Y-m-d H:i:s'),
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
 						'level'     => 600,
 						'message'   => 'Double opt-in confirmation email sent successfully',
 						'source'    => 'DoubleScale\Modules\Contacts\Rest\Controllers\RestContactController',
@@ -2395,9 +2367,9 @@ class RestContactController extends RestController {
 				);
 			}
 
-			return new WP_REST_Response(array('success' => $result), 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( array( 'success' => $result ), 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2410,33 +2382,32 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function send_message($request)
-	{
-		$channel = $request->get_param('channel');
+	public function send_message( $request ) {
+		$channel = $request->get_param( 'channel' );
 
 		// Validate channel parameter.
-		if (! in_array($channel, CampaignChannel::get_core_channel_strings(), true)) {
+		if ( ! in_array( $channel, CampaignChannel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
-				__('Invalid channel. Must be email, sms, or whatsapp.', 'doublescale'),
-				array('status' => 400)
+				__( 'Invalid channel. Must be email, sms, or whatsapp.', 'doublescale' ),
+				array( 'status' => 400 )
 			);
 		}
 
 		// Validate email requires subject and body.
-		if ($channel === CampaignChannel::STR_EMAIL && empty($request->get_param('subject'))) {
+		if ( $channel === CampaignChannel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
-				__('Subject is required for email messages.', 'doublescale'),
-				array('status' => 400)
+				__( 'Subject is required for email messages.', 'doublescale' ),
+				array( 'status' => 400 )
 			);
 		}
 
-		if ($channel === CampaignChannel::STR_EMAIL && empty($request->get_param('body'))) {
+		if ( $channel === CampaignChannel::STR_EMAIL && empty( $request->get_param( 'body' ) ) ) {
 			return new WP_Error(
 				'missing_body',
-				__('Body is required for email messages.', 'doublescale'),
-				array('status' => 400)
+				__( 'Body is required for email messages.', 'doublescale' ),
+				array( 'status' => 400 )
 			);
 		}
 
@@ -2449,19 +2420,19 @@ class RestContactController extends RestController {
 			CampaignChannel::STR_WHATSAPP => '\\DoubleScale\\Modules\\Inbox\\IndividualMessaging\\WhatsappIndividualSender',
 		);
 
-		$sender_class = $sender_class_by_channel[$channel] ?? null;
+		$sender_class = $sender_class_by_channel[ $channel ] ?? null;
 
-		if (! $sender_class || ! class_exists($sender_class)) {
+		if ( ! $sender_class || ! class_exists( $sender_class ) ) {
 			return new WP_Error(
 				'sender_unavailable',
-				__('Sending messages on this channel requires the DoubleScale Pro plugin.', 'doublescale'),
-				array('status' => 501)
+				__( 'Sending messages on this channel requires the DoubleScale Pro plugin.', 'doublescale' ),
+				array( 'status' => 501 )
 			);
 		}
 
 		$sender = new $sender_class();
 
-		return $sender->send($request);
+		return $sender->send( $request );
 	}
 
 	/**
@@ -2473,8 +2444,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool
 	 */
-	public function send_message_permissions_check($request)
-	{
+	public function send_message_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
 	}
 
@@ -2487,28 +2457,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function add_to_lists($request)
-	{
+	public function add_to_lists( $request ) {
 		try {
-			$contact_ids = $request->get_param('ids');
-			$list_ids    = $request->get_param('list_ids');
+			$contact_ids = $request->get_param( 'ids' );
+			$list_ids    = $request->get_param( 'list_ids' );
 
-			if (! $list_ids) {
-				return new WP_Error('error', 'Lists not found', array('status' => 404));
+			if ( ! $list_ids ) {
+				return new WP_Error( 'error', 'Lists not found', array( 'status' => 404 ) );
 			}
 
-			$contacts = ContactModel::find($contact_ids);
-			if (! $contacts) {
-				return new WP_Error('not_found', 'Contacts not found', array('status' => 404));
+			$contacts = ContactModel::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			foreach ($contacts as $contact) {
-				$contact->add_lists($list_ids);
+			foreach ( $contacts as $contact ) {
+				$contact->add_lists( $list_ids );
 			}
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2523,28 +2492,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function remove_from_lists($request)
-	{
+	public function remove_from_lists( $request ) {
 		try {
-			$contact_ids = $request->get_param('ids');
-			$list_ids    = $request->get_param('list_ids');
+			$contact_ids = $request->get_param( 'ids' );
+			$list_ids    = $request->get_param( 'list_ids' );
 
-			if (! $list_ids) {
-				return new WP_Error('error', 'Lists not found', array('status' => 404));
+			if ( ! $list_ids ) {
+				return new WP_Error( 'error', 'Lists not found', array( 'status' => 404 ) );
 			}
 
-			$contacts = ContactModel::find($contact_ids);
-			if (! $contacts) {
-				return new WP_Error('not_found', 'Contacts not found', array('status' => 404));
+			$contacts = ContactModel::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			foreach ($contacts as $contact) {
-				$contact->lists()->detach($list_ids);
+			foreach ( $contacts as $contact ) {
+				$contact->lists()->detach( $list_ids );
 			}
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2559,28 +2527,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function add_tags($request)
-	{
+	public function add_tags( $request ) {
 		try {
-			$contact_ids = $request->get_param('ids');
-			$tags_ids    = $request->get_param('tag_ids');
+			$contact_ids = $request->get_param( 'ids' );
+			$tags_ids    = $request->get_param( 'tag_ids' );
 
-			if (! $tags_ids) {
-				return new WP_Error('error', 'Tags not found', array('status' => 404));
+			if ( ! $tags_ids ) {
+				return new WP_Error( 'error', 'Tags not found', array( 'status' => 404 ) );
 			}
 
-			$contacts = ContactModel::find($contact_ids);
-			if (! $contacts) {
-				return new WP_Error('not_found', 'Contacts not found', array('status' => 404));
+			$contacts = ContactModel::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			foreach ($contacts as $contact) {
-				$contact->add_tags($tags_ids);
+			foreach ( $contacts as $contact ) {
+				$contact->add_tags( $tags_ids );
 			}
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2595,28 +2562,27 @@ class RestContactController extends RestController {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function remove_tags($request)
-	{
+	public function remove_tags( $request ) {
 		try {
-			$contact_ids = $request->get_param('ids');
-			$tags_ids    = $request->get_param('tag_ids');
+			$contact_ids = $request->get_param( 'ids' );
+			$tags_ids    = $request->get_param( 'tag_ids' );
 
-			if (! $tags_ids) {
-				return new WP_Error('error', 'Tags not found', array('status' => 404));
+			if ( ! $tags_ids ) {
+				return new WP_Error( 'error', 'Tags not found', array( 'status' => 404 ) );
 			}
 
-			$contacts = ContactModel::find($contact_ids);
-			if (! $contacts) {
-				return new WP_Error('not_found', 'Contacts not found', array('status' => 404));
+			$contacts = ContactModel::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			foreach ($contacts as $contact) {
-				$contact->tags()->detach($tags_ids);
+			foreach ( $contacts as $contact ) {
+				$contact->tags()->detach( $tags_ids );
 			}
 
-			return new WP_REST_Response($contacts, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -2631,8 +2597,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function get_items_permissions_check($request)
-	{
+	public function get_items_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
 	}
 
@@ -2645,8 +2610,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function create_item_permissions_check($request)
-	{
+	public function create_item_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
 	}
 
@@ -2659,8 +2623,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function delete_items_permissions_check($request)
-	{
+	public function delete_items_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2673,8 +2636,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function update_item_permissions_check($request)
-	{
+	public function update_item_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2687,8 +2649,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function delete_item_permissions_check($request)
-	{
+	public function delete_item_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2701,8 +2662,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function get_item_permissions_check($request)
-	{
+	public function get_item_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
 	}
 
@@ -2715,8 +2675,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool $response Permission check result.
 	 */
-	public function get_automation_contacts_permissions_check($request)
-	{
+	public function get_automation_contacts_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2729,8 +2688,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function send_opt_in_email_permissions_check($request)
-	{
+	public function send_opt_in_email_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2743,8 +2701,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function get_analytics_permissions_check($request)
-	{
+	public function get_analytics_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2757,8 +2714,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function add_to_lists_permissions_check($request)
-	{
+	public function add_to_lists_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2771,8 +2727,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function remove_from_lists_permissions_check($request)
-	{
+	public function remove_from_lists_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2785,8 +2740,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function add_tags_permissions_check($request)
-	{
+	public function add_tags_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2799,8 +2753,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function remove_tags_permissions_check($request)
-	{
+	public function remove_tags_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 
@@ -2813,8 +2766,7 @@ class RestContactController extends RestController {
 	 *
 	 * @return bool
 	 */
-	public function get_purchase_history_permissions_check($request)
-	{
+	public function get_purchase_history_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 

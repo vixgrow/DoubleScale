@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -76,18 +75,18 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				throw new Exception( $result->get_error_message() );
 			}
 
-			$options = [
-				[
+			$options = array(
+				array(
 					'value' => $result['data']['email'],
 					'label' => $result['data']['email'],
-				],
-			];
+				),
+			);
 
 			return new \WP_REST_Response(
-				[
+				array(
 					'success' => true,
 					'options' => $options,
-				],
+				),
 				200
 			);
 		} catch ( Exception $e ) {
@@ -95,10 +94,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'ElasticEmail Getting User Profile Error', 'doublescale' ),
 				array(
 					'code'  => 'elasticemail_get_user_profile_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 

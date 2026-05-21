@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
@@ -23,7 +22,7 @@ abstract class ProAutomationStubAction extends ActionPro {
 	/**
 	 * Free catalog path: never run real side effects here; {@see ProcessAutomation} also skips when is_pro.
 	 *
-	 * @param AutomationModel         $automation Automation model.
+	 * @param AutomationModel        $automation Automation model.
 	 * @param AutomationStepModel    $step Step model.
 	 * @param AutomationContactModel $automation_contact Enrollment row.
 	 * @return bool

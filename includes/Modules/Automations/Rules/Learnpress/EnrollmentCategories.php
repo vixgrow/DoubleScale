@@ -24,8 +24,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Enrollment Categories class
  */
-class EnrollmentCategories extends Rule
-{
+class EnrollmentCategories extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -69,8 +69,7 @@ class EnrollmentCategories extends Rule
 	 *
 	 * @return bool
 	 */
-	public function has_options()
-	{
+	public function has_options() {
 		return true;
 	}
 
@@ -81,12 +80,11 @@ class EnrollmentCategories extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'matches_any_of'  => __('Matches any of', 'doublescale'),
-			'matches_none_of' => __('Matches none of', 'doublescale'),
-			'matches_all_of'  => __('Matches all of', 'doublescale'),
+			'matches_any_of'  => __( 'Matches any of', 'doublescale' ),
+			'matches_none_of' => __( 'Matches none of', 'doublescale' ),
+			'matches_all_of'  => __( 'Matches all of', 'doublescale' ),
 		);
 	}
 
@@ -97,8 +95,7 @@ class EnrollmentCategories extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		$categories = get_terms(
 			array(
 				'taxonomy'   => 'course_category',
@@ -107,10 +104,10 @@ class EnrollmentCategories extends Rule
 		);
 
 		$options = array();
-		if (! is_wp_error($categories) && ! empty($categories)) {
-			foreach ($categories as $category) {
-				if (isset($category->term_id) && isset($category->name)) {
-					$options[$category->term_id] = wp_kses_post($category->name);
+		if ( ! is_wp_error( $categories ) && ! empty( $categories ) ) {
+			foreach ( $categories as $category ) {
+				if ( isset( $category->term_id ) && isset( $category->name ) ) {
+					$options[ $category->term_id ] = wp_kses_post( $category->name );
 				}
 			}
 		}
@@ -126,16 +123,15 @@ class EnrollmentCategories extends Rule
 	 *
 	 * @return array Array of category IDs from enrolled courses
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
-		if (! $contact || empty($contact->email)) {
+		if ( ! $contact || empty( $contact->email ) ) {
 			return array();
 		}
 
-		$user = get_user_by('email', $contact->email);
-		if (! $user) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return array();
 		}
 
@@ -145,25 +141,27 @@ class EnrollmentCategories extends Rule
 		$table_name = esc_sql( $wpdb->prefix . 'learnpress_user_items' );
 
 		// Check if table exists.
-		$table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
-		if (! $table_exists) {
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		if ( ! $table_exists ) {
 			return array();
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the LearnPress-prefixed user_items table; user id bound via prepare().
-		$results = $wpdb->get_results($wpdb->prepare(
-			"SELECT item_id FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
-			$user->ID
-		));
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT item_id FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
+				$user->ID
+			)
+		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		if (! empty($results)) {
-			foreach ($results as $row) {
-				$course_categories = get_the_terms($row->item_id, 'course_category');
+		if ( ! empty( $results ) ) {
+			foreach ( $results as $row ) {
+				$course_categories = get_the_terms( $row->item_id, 'course_category' );
 
-				if (! is_wp_error($course_categories) && ! empty($course_categories)) {
-					foreach ($course_categories as $category) {
-						if (isset($category->term_id)) {
+				if ( ! is_wp_error( $course_categories ) && ! empty( $course_categories ) ) {
+					foreach ( $course_categories as $category ) {
+						if ( isset( $category->term_id ) ) {
 							$enrolled_course_categories[] = (int) $category->term_id;
 						}
 					}
@@ -171,7 +169,7 @@ class EnrollmentCategories extends Rule
 			}
 		}
 
-		return array_unique(array_map('intval', $enrolled_course_categories));
+		return array_unique( array_map( 'intval', $enrolled_course_categories ) );
 	}
 
 	/**
@@ -180,36 +178,35 @@ class EnrollmentCategories extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$enrolled_categories = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$enrolled_categories = $this->get_value( $automation_contact );
 		$operator            = $rule['operator'] ?? '';
 		$rule_categories     = $rule['value'] ?? array();
 
-		if (! is_array($rule_categories)) {
-			$rule_categories = array($rule_categories);
+		if ( ! is_array( $rule_categories ) ) {
+			$rule_categories = array( $rule_categories );
 		}
 
-		if (! is_array($enrolled_categories)) {
+		if ( ! is_array( $enrolled_categories ) ) {
 			$enrolled_categories = array();
 		}
 
-		$enrolled_categories = array_map('intval', $enrolled_categories);
-		$rule_categories     = array_map('intval', $rule_categories);
+		$enrolled_categories = array_map( 'intval', $enrolled_categories );
+		$rule_categories     = array_map( 'intval', $rule_categories );
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'matches_any_of':
-				return ! empty(array_intersect($enrolled_categories, $rule_categories));
+				return ! empty( array_intersect( $enrolled_categories, $rule_categories ) );
 
 			case 'matches_none_of':
-				return empty(array_intersect($enrolled_categories, $rule_categories));
+				return empty( array_intersect( $enrolled_categories, $rule_categories ) );
 
 			case 'matches_all_of':
-				return empty(array_diff($rule_categories, $enrolled_categories));
+				return empty( array_diff( $rule_categories, $enrolled_categories ) );
 
 			default:
 				return false;
@@ -220,8 +217,8 @@ class EnrollmentCategories extends Rule
 add_action(
 	'init',
 	function () {
-		if (\doublescale_is_plugin_active('learnpress/learnpress.php')) {
-			RulesManager::instance()->register(new EnrollmentCategories());
+		if ( \doublescale_is_plugin_active( 'learnpress/learnpress.php' ) ) {
+			RulesManager::instance()->register( new EnrollmentCategories() );
 		}
 	},
 	99

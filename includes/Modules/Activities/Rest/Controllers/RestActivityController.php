@@ -18,7 +18,6 @@
 
 namespace DoubleScale\Modules\Activities\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
@@ -193,28 +192,28 @@ class RestActivityController extends RestController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'contact_id'  => array(
-							'description' => __( 'Filter by contact ID.', 'doublescale'),
+							'description' => __( 'Filter by contact ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'entity_id'   => array(
-							'description' => __( 'Filter by entity ID (e.g., deal ID).', 'doublescale'),
+							'description' => __( 'Filter by entity ID (e.g., deal ID).', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'entity_type' => array(
-							'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'doublescale'),
+							'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'doublescale' ),
 							'type'        => array( 'string', 'integer' ),
 						),
 						'user_id'     => array(
-							'description' => __( 'Filter by user ID.', 'doublescale'),
+							'description' => __( 'Filter by user ID.', 'doublescale' ),
 							'type'        => 'integer',
 						),
 						'per_page'    => array(
-							'description' => __( 'Number of items per page.', 'doublescale'),
+							'description' => __( 'Number of items per page.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 20,
 						),
 						'page'        => array(
-							'description' => __( 'Page number.', 'doublescale'),
+							'description' => __( 'Page number.', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => 1,
 						),
@@ -269,7 +268,7 @@ class RestActivityController extends RestController {
 		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',
-				__( 'Deal activities require Plugin Pro plugin', 'doublescale'),
+				__( 'Deal activities require Plugin Pro plugin', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -302,7 +301,7 @@ class RestActivityController extends RestController {
 		$activities = ActivityManager::instance()->get_activities( $filters, $per_page, $page );
 
 		if ( null === $activities ) {
-			return new WP_Error( 'access_denied', __( 'Access denied', 'doublescale'), array( 'status' => 403 ) );
+			return new WP_Error( 'access_denied', __( 'Access denied', 'doublescale' ), array( 'status' => 403 ) );
 		}
 
 		// Transform to unified format for frontend compatibility.
@@ -349,7 +348,7 @@ class RestActivityController extends RestController {
 		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',
-				__( 'Deal timeline requires Plugin Pro plugin', 'doublescale'),
+				__( 'Deal timeline requires Plugin Pro plugin', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -410,7 +409,7 @@ class RestActivityController extends RestController {
 		if ( $entity_type === \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL && ! $pro_active ) {
 			return new WP_Error(
 				'pro_required',
-				__( 'Deal timeline requires Plugin Pro plugin', 'doublescale'),
+				__( 'Deal timeline requires Plugin Pro plugin', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -503,55 +502,55 @@ class RestActivityController extends RestController {
 		return array(
 			// Contact filtering.
 			'contact_id'  => array(
-				'description' => __( 'Filter by contact ID.', 'doublescale'),
+				'description' => __( 'Filter by contact ID.', 'doublescale' ),
 				'type'        => 'integer',
 			),
 			// Entity (deal) filtering.
 			'entity_id'   => array(
-				'description' => __( 'Filter by entity ID (e.g., deal ID).', 'doublescale'),
+				'description' => __( 'Filter by entity ID (e.g., deal ID).', 'doublescale' ),
 				'type'        => 'integer',
 			),
 			'entity_type' => array(
-				'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'doublescale'),
+				'description' => __( 'Filter by entity type. Use "deal" or 1 for deals.', 'doublescale' ),
 				'type'        => array( 'string', 'integer' ),
 			),
 			// User filtering.
 			'user_id'     => array(
-				'description' => __( 'Filter by user ID.', 'doublescale'),
+				'description' => __( 'Filter by user ID.', 'doublescale' ),
 				'type'        => 'integer',
 			),
 			// Date filtering.
 			'date_from'   => array(
-				'description' => __( 'Filter by start date (YYYY-MM-DD).', 'doublescale'),
+				'description' => __( 'Filter by start date (YYYY-MM-DD).', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'date_to'     => array(
-				'description' => __( 'Filter by end date (YYYY-MM-DD).', 'doublescale'),
+				'description' => __( 'Filter by end date (YYYY-MM-DD).', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			// Sorting.
 			'sort_by'     => array(
-				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'doublescale'),
+				'description' => __( 'Sort by field. activity_date sorts by the actual event time.', 'doublescale' ),
 				'type'        => 'string',
 				'default'     => 'activity_date',
 				'enum'        => array( 'created_at', 'updated_at', 'activity_date' ),
 			),
 			'sort_order'  => array(
-				'description' => __( 'Sort order.', 'doublescale'),
+				'description' => __( 'Sort order.', 'doublescale' ),
 				'type'        => 'string',
 				'default'     => 'desc',
 				'enum'        => array( 'asc', 'desc' ),
 			),
 			// Pagination.
 			'per_page'    => array(
-				'description' => __( 'Number of items per page.', 'doublescale'),
+				'description' => __( 'Number of items per page.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 20,
 			),
 			'page'        => array(
-				'description' => __( 'Page number.', 'doublescale'),
+				'description' => __( 'Page number.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
@@ -600,7 +599,7 @@ class RestActivityController extends RestController {
 		$activity = ActivityManager::instance()->get_activity( $activity_id, $with_comments );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $activity, $request );
@@ -625,17 +624,17 @@ class RestActivityController extends RestController {
 		);
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $data['content'] ) && empty( $data['title'] ) ) {
-			return new WP_Error( 'missing_content', __( 'Note content or title is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Note content or title is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$activity = ActivityManager::instance()->add_note( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to add note', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -673,13 +672,13 @@ class RestActivityController extends RestController {
 		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$activity = ActivityManager::instance()->log_email( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to log email', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -710,13 +709,13 @@ class RestActivityController extends RestController {
 		);
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$activity = ActivityManager::instance()->log_call( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to log call', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -759,13 +758,13 @@ class RestActivityController extends RestController {
 		}
 
 		if ( empty( $data['contact_id'] ) && empty( $data['entity_id'] ) ) {
-			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_entity', __( 'Contact ID or Entity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$activity = ActivityManager::instance()->schedule_meeting( $data );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to schedule meeting', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$activity->load( array( 'user', 'associations' ) );
@@ -786,21 +785,21 @@ class RestActivityController extends RestController {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		// Get the activity to check its type.
 		$activity = ActivityModel::find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		// Check if activity is editable.
 		if ( ! $activity->is_editable() ) {
 			return new WP_Error(
 				'activity_not_editable',
-				__( 'This activity type cannot be edited. Only user-created activities (notes, calls, emails, meetings) can be modified.', 'doublescale'),
+				__( 'This activity type cannot be edited. Only user-created activities (notes, calls, emails, meetings) can be modified.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -844,7 +843,7 @@ class RestActivityController extends RestController {
 		$updated_activity = ActivityManager::instance()->update_activity( $activity_id, $data, $user_id );
 
 		if ( ! $updated_activity ) {
-			return new WP_Error( 'update_failed', __( 'Failed to update activity or access denied', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'update_failed', __( 'Failed to update activity or access denied', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$updated_activity->load( array( 'user' ) );
@@ -865,21 +864,21 @@ class RestActivityController extends RestController {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		// Get the activity to check its type.
 		$activity = ActivityModel::find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		// Check if activity is editable.
 		if ( ! $activity->is_editable() ) {
 			return new WP_Error(
 				'activity_not_deletable',
-				__( 'This activity type cannot be deleted. Only user-created activities (notes, calls, emails, meetings) can be removed.', 'doublescale'),
+				__( 'This activity type cannot be deleted. Only user-created activities (notes, calls, emails, meetings) can be removed.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -887,7 +886,7 @@ class RestActivityController extends RestController {
 		$deleted = ActivityManager::instance()->delete_activity( $activity_id, $user_id );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'delete_failed', __( 'Failed to delete activity or access denied', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'delete_failed', __( 'Failed to delete activity or access denied', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
@@ -905,7 +904,7 @@ class RestActivityController extends RestController {
 		$user_id      = get_current_user_id();
 
 		if ( ! is_array( $activity_ids ) || empty( $activity_ids ) ) {
-			return new WP_Error( 'invalid_data', __( 'Activity IDs array is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_data', __( 'Activity IDs array is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$deleted_count = ActivityManager::instance()->bulk_delete_activities( $activity_ids, $user_id );
@@ -926,7 +925,7 @@ class RestActivityController extends RestController {
 		$activity = ActivityModel::with( 'comments.user' )->find( $activity_id );
 
 		if ( ! $activity ) {
-			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'activity_not_found', __( 'Activity not found', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		$data = array();
@@ -950,17 +949,17 @@ class RestActivityController extends RestController {
 		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
-			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_activity_id', __( 'Activity ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $content ) ) {
-			return new WP_Error( 'missing_content', __( 'Comment content is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Comment content is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$comment = ActivityManager::instance()->add_comment( $activity_id, $content, $user_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'creation_failed', __( 'Failed to add comment', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to add comment', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$comment->load( 'user' );
@@ -982,17 +981,17 @@ class RestActivityController extends RestController {
 		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
-			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		if ( empty( $content ) ) {
-			return new WP_Error( 'missing_content', __( 'Comment content is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_content', __( 'Comment content is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$comment = ActivityManager::instance()->update_comment( $comment_id, $content, $user_id );
 
 		if ( ! $comment ) {
-			return new WP_Error( 'update_failed', __( 'Failed to update comment or access denied', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'update_failed', __( 'Failed to update comment or access denied', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		$comment->load( 'user' );
@@ -1013,13 +1012,13 @@ class RestActivityController extends RestController {
 		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
-			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_comment_id', __( 'Comment ID is required', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$deleted = ActivityManager::instance()->delete_comment( $comment_id, $user_id );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'delete_failed', __( 'Failed to delete comment or access denied', 'doublescale'), array( 'status' => 500 ) );
+			return new WP_Error( 'delete_failed', __( 'Failed to delete comment or access denied', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
@@ -1061,7 +1060,7 @@ class RestActivityController extends RestController {
 	/**
 	 * Prepare the item for the REST response
 	 *
-	 * @param ActivityModel  $activity Activity object.
+	 * @param ActivityModel   $activity Activity object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
@@ -1162,51 +1161,51 @@ class RestActivityController extends RestController {
 		return array(
 			// Entity filtering.
 			'contact_id'    => array(
-				'description' => __( 'Filter by contact ID', 'doublescale'),
+				'description' => __( 'Filter by contact ID', 'doublescale' ),
 				'type'        => 'integer',
 			),
 			'entity_type'   => array(
-				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'doublescale'),
+				'description' => __( 'Entity type: deal, campaign, or numeric (1=deal, 2=campaign)', 'doublescale' ),
 				'type'        => 'string',
 			),
 			'entity_id'     => array(
-				'description' => __( 'Entity ID (used with entity_type)', 'doublescale'),
+				'description' => __( 'Entity ID (used with entity_type)', 'doublescale' ),
 				'type'        => 'integer',
 			),
 
 			// User filtering.
 			'user_id'       => array(
-				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'doublescale'),
+				'description' => __( 'Filter by user ID (activity creator or task assignee)', 'doublescale' ),
 				'type'        => 'integer',
 			),
 
 			// Activity type filtering (filters activities only, tasks are excluded when this is set).
 			'activity_type' => array(
-				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'doublescale'),
+				'description' => __( 'Filter by activity type (e.g., note, call_logged, email_sent, meeting_scheduled). When set, only activities of this type are returned (no tasks).', 'doublescale' ),
 				'type'        => 'string',
 			),
 
 			// Date filtering.
 			'date_from'     => array(
-				'description' => __( 'Filter from date (Y-m-d)', 'doublescale'),
+				'description' => __( 'Filter from date (Y-m-d)', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 			'date_to'       => array(
-				'description' => __( 'Filter to date (Y-m-d)', 'doublescale'),
+				'description' => __( 'Filter to date (Y-m-d)', 'doublescale' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
 
 			// Sorting.
 			'sort_by'       => array(
-				'description' => __( 'Sort field: activity_date (actual event time) or created_at (record creation)', 'doublescale'),
+				'description' => __( 'Sort field: activity_date (actual event time) or created_at (record creation)', 'doublescale' ),
 				'type'        => 'string',
 				'enum'        => array( 'activity_date', 'created_at' ),
 				'default'     => 'activity_date',
 			),
 			'sort_order'    => array(
-				'description' => __( 'Sort direction: asc, desc', 'doublescale'),
+				'description' => __( 'Sort direction: asc, desc', 'doublescale' ),
 				'type'        => 'string',
 				'enum'        => array( 'asc', 'desc' ),
 				'default'     => 'desc',
@@ -1214,14 +1213,14 @@ class RestActivityController extends RestController {
 
 			// Pagination.
 			'per_page'      => array(
-				'description' => __( 'Items per page', 'doublescale'),
+				'description' => __( 'Items per page', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 20,
 				'minimum'     => 1,
 				'maximum'     => 100,
 			),
 			'page'          => array(
-				'description' => __( 'Page number', 'doublescale'),
+				'description' => __( 'Page number', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 1,
 				'minimum'     => 1,
@@ -1296,16 +1295,16 @@ class RestActivityController extends RestController {
 	private function map_deal_error( string $error_code ): WP_Error {
 		switch ( $error_code ) {
 			case 'not_found':
-				return new WP_Error( 'deal_not_found', __( 'Deal not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'deal_not_found', __( 'Deal not found', 'doublescale' ), array( 'status' => 404 ) );
 
 			case 'no_pro':
-				return new WP_Error( 'pro_required', __( 'Deal features require Plugin Pro', 'doublescale'), array( 'status' => 400 ) );
+				return new WP_Error( 'pro_required', __( 'Deal features require Plugin Pro', 'doublescale' ), array( 'status' => 400 ) );
 
 			case 'forbidden':
-				return new WP_Error( 'access_denied', __( 'You do not have permission to access this deal', 'doublescale'), array( 'status' => 403 ) );
+				return new WP_Error( 'access_denied', __( 'You do not have permission to access this deal', 'doublescale' ), array( 'status' => 403 ) );
 
 			default:
-				return new WP_Error( 'access_denied', __( 'Access denied', 'doublescale'), array( 'status' => 403 ) );
+				return new WP_Error( 'access_denied', __( 'Access denied', 'doublescale' ), array( 'status' => 403 ) );
 		}
 	}
 }

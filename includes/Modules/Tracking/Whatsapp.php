@@ -14,13 +14,13 @@ use DoubleScale\Modules\Tracking\Models\CommunicationTrackingModel;
 use DoubleScale\Modules\Tracking\Abstracts\AbstractTracking;
 use DoubleScale\Core\Constants\CampaignChannel;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WhatsApp Tracking Class
  */
-class Whatsapp extends AbstractTracking
-{
+class Whatsapp extends AbstractTracking {
+
 	/**
 	 * Communication channel
 	 *
@@ -33,8 +33,7 @@ class Whatsapp extends AbstractTracking
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_hooks()
-	{
+	public function add_hooks() {
 		$this->register_standard_hooks();
 	}
 
@@ -43,8 +42,7 @@ class Whatsapp extends AbstractTracking
 	 *
 	 * @since 1.0.0
 	 */
-	public function handle_tracking()
-	{
+	public function handle_tracking() {
 		$this->handle_standard_tracking();
 	}
 
@@ -54,8 +52,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return void
 	 */
-	public function handle_webhook()
-	{
+	public function handle_webhook() {
 		$this->process_provider_webhook();
 	}
 
@@ -65,9 +62,8 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return string
 	 */
-	public static function get_webhook_url()
-	{
-		return admin_url('admin-ajax.php?action=doublescale_whatsapp_webhook');
+	public static function get_webhook_url() {
+		return admin_url( 'admin-ajax.php?action=doublescale_whatsapp_webhook' );
 	}
 
 	/**
@@ -76,8 +72,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected function get_campaign_model_class()
-	{
+	protected function get_campaign_model_class() {
 		return CommunicationTrackingModel::class;
 	}
 
@@ -87,8 +82,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return int
 	 */
-	protected function get_campaign_mode()
-	{
+	protected function get_campaign_mode() {
 		return CommunicationTrackingModel::MODE_WHATSAPP;
 	}
 
@@ -98,8 +92,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected static function get_tracking_action()
-	{
+	protected static function get_tracking_action() {
 		return 'whatsapp_click';
 	}
 
@@ -109,8 +102,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected static function get_unsubscribe_action()
-	{
+	protected static function get_unsubscribe_action() {
 		return 'whatsapp_unsubscribe';
 	}
 
@@ -120,8 +112,7 @@ class Whatsapp extends AbstractTracking
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected static function get_channel_type()
-	{
+	protected static function get_channel_type() {
 		return CampaignChannel::STR_WHATSAPP;
 	}
 }

@@ -108,7 +108,7 @@ class Account_API {
 		if ( ! empty( $body['error'] ) ) {
 			return new WP_Error( 'send_error', $body['error'] );
 		}
-		if( ! empty( $body['errors'] ) ) {
+		if ( ! empty( $body['errors'] ) ) {
 			return new WP_Error( 'send_error', $body['errors'][0]['message'] );
 		}
 

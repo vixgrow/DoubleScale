@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Pmpro;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Order Total class
  */
-class OrderTotal extends Rule
-{
+class OrderTotal extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -70,13 +69,12 @@ class OrderTotal extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'           => __('Is', 'doublescale'),
-			'is_not'       => __('Is not', 'doublescale'),
-			'greater_than' => __('Greater than', 'doublescale'),
-			'lower_than'   => __('Lower than', 'doublescale'),
+			'is'           => __( 'Is', 'doublescale' ),
+			'is_not'       => __( 'Is not', 'doublescale' ),
+			'greater_than' => __( 'Greater than', 'doublescale' ),
+			'lower_than'   => __( 'Lower than', 'doublescale' ),
 		);
 	}
 
@@ -89,9 +87,8 @@ class OrderTotal extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		$total = $automation_contact->get_data('total');
+	public function get_value( $automation_contact ) {
+		$total = $automation_contact->get_data( 'total' );
 		return $total ? (string) $total : '0';
 	}
 }
@@ -99,8 +96,8 @@ class OrderTotal extends Rule
 add_action(
 	'init',
 	function () {
-		if (defined('PMPRO_VERSION')) {
-			RulesManager::instance()->register(new OrderTotal());
+		if ( defined( 'PMPRO_VERSION' ) ) {
+			RulesManager::instance()->register( new OrderTotal() );
 		}
 	},
 	99

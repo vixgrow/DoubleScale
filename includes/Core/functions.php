@@ -58,7 +58,7 @@ if ( ! function_exists( 'doublescale_get_manifest_path' ) ) {
 			return '';
 		}
 
-		$basedir = rtrim( $basedir, "/\\" );
+		$basedir = rtrim( $basedir, '/\\' );
 		$dir     = $basedir . '/doublescale/cache/manifests';
 		if ( ! is_dir( $dir ) && function_exists( 'wp_mkdir_p' ) ) {
 			wp_mkdir_p( $dir );

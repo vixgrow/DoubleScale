@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -39,5 +38,4 @@ abstract class Settings_Controller extends Abstract_Settings_Controller {
 
 		return parent::delete( $request );
 	}
-
 }

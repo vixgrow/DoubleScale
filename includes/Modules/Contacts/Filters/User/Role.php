@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\User;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -68,8 +67,8 @@ class Role extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Matches', 'doublescale'),
-			'is_not' => __( 'Does not match', 'doublescale'),
+			'is'     => __( 'Matches', 'doublescale' ),
+			'is_not' => __( 'Does not match', 'doublescale' ),
 		);
 	}
 

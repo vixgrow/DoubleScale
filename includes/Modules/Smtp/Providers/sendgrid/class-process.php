@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SendGrid;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -148,12 +147,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->email->addContent( 'text/html', $content['html'] );
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->email->addContent( 'text/plain', $content );
-			} else {
-				$this->email->addContent( 'text/html', $content );
-			}
+		} else {
+			$this->email->addContent( 'text/html', $content );
 		}
 	}
 
@@ -259,12 +256,12 @@ class Process extends Abstract_Process {
 
 			if ( 202 === $response_code ) {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::SUCCEEDED,
-						'response' => [
+						'response' => array(
 							'message' => $results->body(),
-						],
-					]
+						),
+					)
 				);
 				return true;
 			} else {
@@ -275,20 +272,20 @@ class Process extends Abstract_Process {
 				esc_html__( 'SendGrid API Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_sendgrid_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
 						'data'    => $e->getTraceAsString(),
-					],
+					),
 				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
-					'response' => [
+					'response' => array(
 						'message' => $e->getMessage(),
-					],
-				]
+					),
+				)
 			);
 			return false;
 		}

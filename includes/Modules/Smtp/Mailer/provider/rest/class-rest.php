@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -80,7 +79,7 @@ class REST extends Abstract_REST {
 	 */
 	protected function get_rest_data( $settings ) {
 		if ( $this->mailer->accounts ) {
- 			return array('accounts' =>  $this->mailer->accounts->get_accounts());
+			return array( 'accounts' => $this->mailer->accounts->get_accounts() );
 		}
 		return array();
 	}

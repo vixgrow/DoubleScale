@@ -71,5 +71,4 @@ class Gmail extends Provider {
 
 		$this->app = new App( $this );
 	}
-
 }

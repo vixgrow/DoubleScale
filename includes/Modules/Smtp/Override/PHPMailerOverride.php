@@ -104,13 +104,13 @@ class PHPMailerOverride extends \PHPMailer\PHPMailer\PHPMailer {
 		$route_reason     = isset( $route['primary_route_reason'] ) ? (string) $route['primary_route_reason'] : 'default';
 		Settings::note_smtp_send_attempt(
 			array(
-				'connection_id'      => (string) $default_connection_id,
-				'mailer'             => (string) ( $default_connection['mailer'] ?? '' ),
-				'reason'             => $route_reason,
-				'message_from'       => (string) $original_from,
-				'saved_default_id'   => $saved_default_id,
-				'is_fallback'        => false,
-				'routing_adjusted'   => ! empty( $route['routing_adjusted'] ),
+				'connection_id'    => (string) $default_connection_id,
+				'mailer'           => (string) ( $default_connection['mailer'] ?? '' ),
+				'reason'           => $route_reason,
+				'message_from'     => (string) $original_from,
+				'saved_default_id' => $saved_default_id,
+				'is_fallback'      => false,
+				'routing_adjusted' => ! empty( $route['routing_adjusted'] ),
 			)
 		);
 		$result = $mailer->process( $this, $default_connection_id, $default_connection )->send();
@@ -149,13 +149,13 @@ class PHPMailerOverride extends \PHPMailer\PHPMailer\PHPMailer {
 
 			Settings::note_smtp_send_attempt(
 				array(
-					'connection_id'      => (string) $fallback_connection_id,
-					'mailer'             => (string) ( $fallback_connection['mailer'] ?? '' ),
-					'reason'             => $route_reason,
-					'message_from'       => (string) $original_from,
-					'saved_default_id'   => $saved_default_id,
-					'is_fallback'        => true,
-					'routing_adjusted'   => false,
+					'connection_id'    => (string) $fallback_connection_id,
+					'mailer'           => (string) ( $fallback_connection['mailer'] ?? '' ),
+					'reason'           => $route_reason,
+					'message_from'     => (string) $original_from,
+					'saved_default_id' => $saved_default_id,
+					'is_fallback'      => true,
+					'routing_adjusted' => false,
 				)
 			);
 			$result = $mailer->process( $this, $fallback_connection_id, $fallback_connection )->send();

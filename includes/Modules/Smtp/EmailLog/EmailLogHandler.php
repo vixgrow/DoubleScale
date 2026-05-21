@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\EmailLog;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -196,7 +195,7 @@ class EmailLogHandler {
 			global $wpdb;
 			$search_wildcard = '%' . $wpdb->esc_like( $search ) . '%';
 			$query->where(
-				function( $q ) use ( $search_wildcard ) {
+				function ( $q ) use ( $search_wildcard ) {
 					$q->where( 'subject', 'like', $search_wildcard )
 						->orWhere( 'body', 'like', $search_wildcard )
 						->orWhere( 'headers', 'like', $search_wildcard )
@@ -237,9 +236,9 @@ class EmailLogHandler {
 			}
 		}
 
-		$ctx           = maybe_unserialize( $log['context'] );
-		$source_label  = '';
-		$source_link   = '';
+		$ctx          = maybe_unserialize( $log['context'] );
+		$source_label = '';
+		$source_link  = '';
 		if ( is_array( $ctx ) && ! empty( $ctx['crm_source']['path'] ) && is_string( $ctx['crm_source']['path'] ) ) {
 			$source_label = isset( $ctx['crm_source']['label'] ) ? (string) $ctx['crm_source']['label'] : '';
 			$source_link  = admin_url( 'admin.php?page=doublescale&path=' . rawurlencode( $ctx['crm_source']['path'] ) );
@@ -326,7 +325,7 @@ class EmailLogHandler {
 			global $wpdb;
 			$search_wildcard = '%' . $wpdb->esc_like( $search ) . '%';
 			$query->where(
-				function( $q ) use ( $search_wildcard ) {
+				function ( $q ) use ( $search_wildcard ) {
 					$q->where( 'subject', 'like', $search_wildcard )
 						->orWhere( 'body', 'like', $search_wildcard )
 						->orWhere( 'headers', 'like', $search_wildcard )

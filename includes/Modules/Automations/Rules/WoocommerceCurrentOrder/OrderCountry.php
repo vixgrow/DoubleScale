@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -64,10 +63,10 @@ class OrderCountry extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'includes_in'     => __( 'includes in', 'doublescale'),
-			'not_includes_in' => __( 'not includes in', 'doublescale'),
-			'empty'           => __( 'empty', 'doublescale'),
-			'not_empty'       => __( 'not empty', 'doublescale'),
+			'includes_in'     => __( 'includes in', 'doublescale' ),
+			'not_includes_in' => __( 'not includes in', 'doublescale' ),
+			'empty'           => __( 'empty', 'doublescale' ),
+			'not_empty'       => __( 'not empty', 'doublescale' ),
 		);
 	}
 
@@ -79,7 +78,7 @@ class OrderCountry extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 $countries = new \WC_Countries();
+		$countries = new \WC_Countries();
 		return $countries->get_countries();
 	}
 
@@ -121,7 +120,7 @@ class OrderCountry extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

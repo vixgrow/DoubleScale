@@ -6,7 +6,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;

@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Models\BookingModel;
@@ -95,7 +94,7 @@ abstract class MergeTag {
 	 * Get value
 	 *
 	 * @param BookingModel $booking Booking model.
-	 * @param array         $options Options.
+	 * @param array        $options Options.
 	 *
 	 * @return string
 	 */

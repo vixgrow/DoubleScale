@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\REST as Abstract_REST;
@@ -30,5 +29,4 @@ class REST extends Abstract_REST {
 		'settings_controller' => Settings_Controller::class,
 		'account_controller'  => Account_Controller::class,
 	);
-
 }

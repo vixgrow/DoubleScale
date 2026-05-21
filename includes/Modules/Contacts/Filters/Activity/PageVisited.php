@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Activity;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -90,13 +89,13 @@ class PageVisited extends Filter {
 		return array();
 	}
 
-	 /**
-	  * Get options
-	  *
-	  * @since 1.0.0
-	  *
-	  * @return array
-	  */
+	/**
+	 * Get options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
 	public function get_options() {
 		if ( ! isset( $GLOBALS['wp_rewrite'] ) ) {
 			global $wp_rewrite;

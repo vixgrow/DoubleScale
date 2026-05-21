@@ -167,5 +167,4 @@ class Account_API {
 	public function get_password() {
 		return $this->password;
 	}
-
 }

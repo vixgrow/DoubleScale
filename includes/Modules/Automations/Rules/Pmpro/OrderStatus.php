@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Pmpro;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Order Status class
  */
-class OrderStatus extends Rule
-{
+class OrderStatus extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -70,11 +69,10 @@ class OrderStatus extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'     => __('Is', 'doublescale'),
-			'is_not' => __('Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -85,16 +83,15 @@ class OrderStatus extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		return array(
-			'success'   => __('Success', 'doublescale'),
-			'cancelled' => __('Cancelled', 'doublescale'),
-			'pending'   => __('Pending', 'doublescale'),
-			'refunded'  => __('Refunded', 'doublescale'),
-			'error'     => __('Error', 'doublescale'),
-			'review'    => __('Review', 'doublescale'),
-			'token'     => __('Token', 'doublescale'),
+			'success'   => __( 'Success', 'doublescale' ),
+			'cancelled' => __( 'Cancelled', 'doublescale' ),
+			'pending'   => __( 'Pending', 'doublescale' ),
+			'refunded'  => __( 'Refunded', 'doublescale' ),
+			'error'     => __( 'Error', 'doublescale' ),
+			'review'    => __( 'Review', 'doublescale' ),
+			'token'     => __( 'Token', 'doublescale' ),
 		);
 	}
 
@@ -107,17 +104,16 @@ class OrderStatus extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		return $automation_contact->get_data('status') ?? '';
+	public function get_value( $automation_contact ) {
+		return $automation_contact->get_data( 'status' ) ?? '';
 	}
 }
 
 add_action(
 	'init',
 	function () {
-		if (defined('PMPRO_VERSION')) {
-			RulesManager::instance()->register(new OrderStatus());
+		if ( defined( 'PMPRO_VERSION' ) ) {
+			RulesManager::instance()->register( new OrderStatus() );
 		}
 	},
 	99

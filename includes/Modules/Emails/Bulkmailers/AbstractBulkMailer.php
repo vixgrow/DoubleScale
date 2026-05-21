@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Traits\AccountApiHelper;
@@ -128,21 +127,21 @@ abstract class AbstractBulkMailer {
 		if ( empty( $batch_data['recipients'] ) || ! is_array( $batch_data['recipients'] ) ) {
 			return new WP_Error(
 				'invalid_recipients',
-				__( 'Recipients array is required.', 'doublescale')
+				__( 'Recipients array is required.', 'doublescale' )
 			);
 		}
 
 		if ( empty( $batch_data['subject'] ) ) {
 			return new WP_Error(
 				'missing_subject',
-				__( 'Email subject is required.', 'doublescale')
+				__( 'Email subject is required.', 'doublescale' )
 			);
 		}
 
 		if ( empty( $batch_data['html'] ) ) {
 			return new WP_Error(
 				'missing_body',
-				__( 'Email body is required.', 'doublescale')
+				__( 'Email body is required.', 'doublescale' )
 			);
 		}
 
@@ -152,7 +151,7 @@ abstract class AbstractBulkMailer {
 				'batch_too_large',
 				sprintf(
 					/* translators: %s: dynamic value */
-					__( 'Batch size exceeds maximum of %d recipients.', 'doublescale'),
+					__( 'Batch size exceeds maximum of %d recipients.', 'doublescale' ),
 					$max_batch_size
 				)
 			);
@@ -183,7 +182,7 @@ abstract class AbstractBulkMailer {
 	protected function log_send_attempt( $batch_data ) {
 		doublescale_get_logger()->info(
 			/* translators: %s: mailer name */
-			sprintf( __( 'Sending bulk email via %s', 'doublescale'), ucfirst( $this->slug ) ),
+			sprintf( __( 'Sending bulk email via %s', 'doublescale' ), ucfirst( $this->slug ) ),
 			array(
 				'code'            => 'bulk_email_send_attempt',
 				'mailer'          => $this->slug,
@@ -202,7 +201,7 @@ abstract class AbstractBulkMailer {
 	 */
 	protected function log_send_success( $batch_data, $message_id ) {
 		doublescale_get_logger()->info(
-			__( 'Bulk email sent successfully', 'doublescale'),
+			__( 'Bulk email sent successfully', 'doublescale' ),
 			array(
 				'code'            => 'bulk_email_send_success',
 				'mailer'          => $this->slug,
@@ -221,7 +220,7 @@ abstract class AbstractBulkMailer {
 	 */
 	protected function log_send_failure( $batch_data, $error ) {
 		doublescale_get_logger()->error(
-			__( 'Bulk email send failed', 'doublescale'),
+			__( 'Bulk email send failed', 'doublescale' ),
 			array(
 				'code'            => 'bulk_email_send_error',
 				'mailer'          => $this->slug,

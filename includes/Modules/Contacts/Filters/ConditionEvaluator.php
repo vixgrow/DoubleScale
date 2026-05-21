@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -54,7 +53,7 @@ class ConditionEvaluator {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array         $conditions Nested conditions array
+	 * @param array        $conditions Nested conditions array
 	 * @param ContactModel $contact    Contact model
 	 *
 	 * @return bool True if contact matches conditions
@@ -98,7 +97,7 @@ class ConditionEvaluator {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array         $condition Single condition array
+	 * @param array        $condition Single condition array
 	 * @param ContactModel $contact   Contact model
 	 *
 	 * @return bool True if condition matches
@@ -106,7 +105,7 @@ class ConditionEvaluator {
 	public function evaluate_single_condition( array $condition, ContactModel $contact ) {
 		// Handle RuleItem format (from RulesBuilder / REST): rule + selectedGroup or "group" alias.
 		if ( isset( $condition['rule'] ) && ( isset( $condition['selectedGroup'] ) || isset( $condition['group'] ) ) ) {
-			$group = isset( $condition['selectedGroup'] ) ? $condition['selectedGroup'] : $condition['group'];
+			$group     = isset( $condition['selectedGroup'] ) ? $condition['selectedGroup'] : $condition['group'];
 			$condition = array(
 				'filter'   => $condition['rule'],
 				'group'    => $group,
@@ -309,8 +308,8 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not/contains/does_not_contain/is_empty/is_not_empty)
-	 * @param mixed         $value    List ID(s)
+	 * @param string       $operator Operator (is/is_not/contains/does_not_contain/is_empty/is_not_empty)
+	 * @param mixed        $value    List ID(s)
 	 *
 	 * @return bool
 	 */
@@ -370,8 +369,8 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not/contains/does_not_contain/is_empty/is_not_empty)
-	 * @param mixed         $value    Tag ID(s)
+	 * @param string       $operator Operator (is/is_not/contains/does_not_contain/is_empty/is_not_empty)
+	 * @param mixed        $value    Tag ID(s)
 	 *
 	 * @return bool
 	 */
@@ -431,7 +430,7 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not)
+	 * @param string       $operator Operator (is/is_not)
 	 *
 	 * @return bool
 	 */
@@ -461,8 +460,8 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not)
-	 * @param mixed         $value    Role(s) to check
+	 * @param string       $operator Operator (is/is_not)
+	 * @param mixed        $value    Role(s) to check
 	 *
 	 * @return bool
 	 */
@@ -517,8 +516,8 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not/greater_than/lower_than)
-	 * @param mixed         $value    Points value to compare
+	 * @param string       $operator Operator (is/is_not/greater_than/lower_than)
+	 * @param mixed        $value    Points value to compare
 	 *
 	 * @return bool
 	 */
@@ -559,8 +558,8 @@ class ConditionEvaluator {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact  Contact model
-	 * @param string        $operator Operator (is/is_not/is_empty/is_not_empty)
-	 * @param mixed         $value    Level ID(s) to check
+	 * @param string       $operator Operator (is/is_not/is_empty/is_not_empty)
+	 * @param mixed        $value    Level ID(s) to check
 	 *
 	 * @return bool
 	 */
@@ -684,7 +683,7 @@ class ConditionEvaluator {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array         $condition Condition array
+	 * @param array        $condition Condition array
 	 * @param ContactModel $contact   Contact model
 	 *
 	 * @return bool

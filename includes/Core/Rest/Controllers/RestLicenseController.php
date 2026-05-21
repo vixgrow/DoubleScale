@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -74,7 +73,7 @@ class RestLicenseController extends RestController {
 
 		return new WP_Error(
 			'doublescale_rest_license_forbidden',
-			__( 'Sorry, you are not allowed to access this endpoint.', 'doublescale'),
+			__( 'Sorry, you are not allowed to access this endpoint.', 'doublescale' ),
 			array( 'status' => 403 )
 		);
 	}

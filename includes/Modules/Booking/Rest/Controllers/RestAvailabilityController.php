@@ -319,11 +319,11 @@ class RestAvailabilityController extends RestController {
 		// 'UTC' as a silent default meant `09:00`–`17:00` working hours got
 		// interpreted in UTC and rendered hours late for the host's actual
 		// timezone (e.g. 09:00 UTC → 12:00 PM in Cairo, 17:00 UTC → 8:00 PM).
-		$timezone     = $request->get_param( 'timezone' );
+		$timezone = $request->get_param( 'timezone' );
 		if ( empty( $timezone ) ) {
 			$timezone = AvailabilityModel::resolveSiteTimezone();
 		}
-		$is_default   = (bool) $request->get_param( 'is_default' );
+		$is_default = (bool) $request->get_param( 'is_default' );
 
 		// Delegate to AvailabilityService so the "force first availability to
 		// be default" invariant lives in exactly one place.
@@ -668,7 +668,7 @@ class RestAvailabilityController extends RestController {
 						&& (int) $availability_meta['hosts_schedules'][ $user_id ] === (int) $availability_id;
 
 					if ( $uses_common || $uses_host ) {
-						$events_count++;
+						++$events_count;
 						$events[] = $event;
 					}
 				}
@@ -718,8 +718,8 @@ class RestAvailabilityController extends RestController {
 			doublescale_get_logger()->warning(
 				'No default availability when handling deletion',
 				array(
-					'source'         => 'booking-availability-rest',
-					'user_id'        => (int) $availability->user_id,
+					'source'          => 'booking-availability-rest',
+					'user_id'         => (int) $availability->user_id,
 					'availability_id' => (int) $availability->id,
 				)
 			);
@@ -771,7 +771,7 @@ class RestAvailabilityController extends RestController {
 
 						$availability_meta['hosts_schedules'][ $user_id ] = $default_availability->id;
 						$event->availability_meta                         = $availability_meta;
-						$dirty                                            = true;
+						$dirty = true;
 					}
 
 					if ( $dirty ) {
@@ -784,10 +784,10 @@ class RestAvailabilityController extends RestController {
 		doublescale_get_logger()->info(
 			'Replaced availability references with default after deletion',
 			array(
-				'source'                 => 'booking-availability-rest',
-				'user_id'                => (int) $availability->user_id,
+				'source'                  => 'booking-availability-rest',
+				'user_id'                 => (int) $availability->user_id,
 				'deleted_availability_id' => (int) $availability->id,
-				'replacement_id'         => (int) $default_availability->id,
+				'replacement_id'          => (int) $default_availability->id,
 			)
 		);
 	}

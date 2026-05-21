@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -119,31 +118,66 @@ class AvailabilityModel extends Model {
 			'value' => array(
 				'weekly_hours' => array(
 					'monday'    => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => false,
 					),
 					'tuesday'   => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => false,
 					),
 					'wednesday' => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => false,
 					),
 					'thursday'  => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => false,
 					),
 					'friday'    => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => false,
 					),
 					'saturday'  => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => true,
 					),
 					'sunday'    => array(
-						'times' => array( array( 'start' => '09:00', 'end' => '17:00' ) ),
+						'times' => array(
+							array(
+								'start' => '09:00',
+								'end'   => '17:00',
+							),
+						),
 						'off'   => true,
 					),
 				),

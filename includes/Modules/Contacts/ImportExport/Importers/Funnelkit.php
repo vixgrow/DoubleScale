@@ -184,12 +184,12 @@ class Funnelkit extends Importer {
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'doublescale'),
+				'label'   => __( 'Lists', 'doublescale' ),
 				'options' => $this->get_lists(),
 			),
 			'tags_mapping'  => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags', 'doublescale'),
+				'label'   => __( 'Tags', 'doublescale' ),
 				'options' => $this->get_tags(),
 			),
 		);

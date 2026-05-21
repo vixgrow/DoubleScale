@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -140,7 +139,7 @@ class CampaignResender {
 
 				foreach ( $failed_messages as $message ) {
 					$this->resend_single_message( $campaign, $message->contact, $message );
-					$last_offset++;
+					++$last_offset;
 					update_option( $offset_key, $last_offset );
 				}
 			}
@@ -163,8 +162,8 @@ class CampaignResender {
 	/**
 	 * Reschedule a single failed message for re-processing.
 	 *
-	 * @param CampaignModel               $campaign
-	 * @param ContactModel                $contact
+	 * @param CampaignModel              $campaign
+	 * @param ContactModel               $contact
 	 * @param CommunicationTrackingModel $message
 	 * @return void
 	 */
@@ -184,7 +183,7 @@ class CampaignResender {
 	 * Mark a campaign as completed after all failed messages have been re-queued.
 	 *
 	 * @param CampaignModel $campaign
-	 * @param string         $offset_key
+	 * @param string        $offset_key
 	 * @return void
 	 */
 	private function complete_resending( CampaignModel $campaign, $offset_key ) {
@@ -220,8 +219,8 @@ class CampaignResender {
 	 * Fetch a batch of failed messages.
 	 *
 	 * @param CampaignModel $campaign
-	 * @param int            $offset
-	 * @param int            $limit
+	 * @param int           $offset
+	 * @param int           $limit
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
 	private function get_failed_messages( CampaignModel $campaign, $offset, $limit ) {

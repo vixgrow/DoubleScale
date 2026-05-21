@@ -51,5 +51,4 @@ class Aws extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

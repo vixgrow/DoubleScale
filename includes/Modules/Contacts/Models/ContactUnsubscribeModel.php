@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Contacts\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -17,7 +16,7 @@ use DoubleScale\Core\Constants\MessageSourceTypes;
 
 /**
  * ContactUnsubscribeModel class
- * 
+ *
  * Tracks contact unsubscribe events with source attribution
  * Uses integer constants matching CommunicationTrackingModel
  */
@@ -152,7 +151,7 @@ class ContactUnsubscribeModel extends Model {
 	 */
 	public function scopeBySource( $query, $source_type, $source_id ) {
 		return $query->where( 'source_type', $source_type )
-					 ->where( 'source_id', $source_id );
+					->where( 'source_id', $source_id );
 	}
 
 	/**
@@ -165,7 +164,7 @@ class ContactUnsubscribeModel extends Model {
 	 */
 	public function scopeForCampaign( $query, $campaign_id ) {
 		return $query->where( 'source_type', self::SOURCE_CAMPAIGN )
-					 ->where( 'source_id', $campaign_id );
+					->where( 'source_id', $campaign_id );
 	}
 
 	/**
@@ -178,7 +177,7 @@ class ContactUnsubscribeModel extends Model {
 	 */
 	public function scopeForAutomation( $query, $automation_id ) {
 		return $query->where( 'source_type', self::SOURCE_AUTOMATION )
-					 ->where( 'source_id', $automation_id );
+					->where( 'source_id', $automation_id );
 	}
 
 	/**

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Tracking;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Tracking\Models\LinkTriggerModel;
@@ -85,9 +84,9 @@ class LinkTriggers {
 			$link_trigger->click_count = $link_trigger->click_count + 1;
 			$link_trigger->save();
 
-			$track_id = isset( $_GET['track-id'] ) ? sanitize_text_field( wp_unslash( $_GET['track-id'] ) ) : '';
-		$campaign_email = CommunicationTrackingModel::where( 'hash_key', $track_id )
-			->where('mode', CommunicationTrackingModel::MODE_EMAIL)
+			$track_id       = isset( $_GET['track-id'] ) ? sanitize_text_field( wp_unslash( $_GET['track-id'] ) ) : '';
+			$campaign_email = CommunicationTrackingModel::where( 'hash_key', $track_id )
+			->where( 'mode', CommunicationTrackingModel::MODE_EMAIL )
 				->first();
 			if ( ! $campaign_email ) {
 				\doublescale_safe_redirect( $redirect_url );
@@ -137,7 +136,7 @@ class LinkTriggers {
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Link Trigger Tracking Error', 'doublescale'),
+				__( 'Link Trigger Tracking Error', 'doublescale' ),
 				array(
 					'code'  => 'link_trigger_tracking',
 					'error' => array(
@@ -154,7 +153,7 @@ class LinkTriggers {
 	 * Sync Contact Data
 	 *
 	 * @param LinkTriggerModel $link_trigger Link Trigger Model.
-	 * @param ContactModel      $contact      Contact Model.
+	 * @param ContactModel     $contact      Contact Model.
 	 */
 	public function sync_contact_data( LinkTriggerModel $link_trigger, $contact ) {
 		$to_apply_tags = $link_trigger->get_setting( 'add_tags', array() );

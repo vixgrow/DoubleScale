@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Booking;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -46,7 +45,7 @@ class AdditionalGuests extends MergeTag {
 	 * Get Value
 	 *
 	 * @param BookingModel $booking Booking model.
-	 * @param array         $options Options.
+	 * @param array        $options Options.
 	 *
 	 * @return string
 	 */

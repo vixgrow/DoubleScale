@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\PaymentGateway\Rest;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\PaymentGateway\PaymentGateway;

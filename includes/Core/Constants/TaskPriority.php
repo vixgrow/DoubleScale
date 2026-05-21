@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -41,9 +40,9 @@ class TaskPriority {
 	 */
 	public static function get_all() {
 		return array(
-			self::LOW    => __( 'Low', 'doublescale'),
-			self::MEDIUM => __( 'Medium', 'doublescale'),
-			self::HIGH   => __( 'High', 'doublescale'),
+			self::LOW    => __( 'Low', 'doublescale' ),
+			self::MEDIUM => __( 'Medium', 'doublescale' ),
+			self::HIGH   => __( 'High', 'doublescale' ),
 		);
 	}
 
@@ -55,7 +54,7 @@ class TaskPriority {
 	 */
 	public static function get_label( $priority ) {
 		$priorities = self::get_all();
-		return $priorities[ $priority ] ?? __( 'Unknown', 'doublescale');
+		return $priorities[ $priority ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

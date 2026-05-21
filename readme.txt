@@ -78,6 +78,16 @@ This plugin includes compiled JavaScript and CSS in the `build/` directory. Huma
 
 Outputs include client bundles under `build/`. Third-party libraries are listed in `package.json`.
 
+**Lint / code standards**
+
+The PHP code follows the WordPress Coding Standards (WPCS 3.x) with `WordPress-Extra` (security sniffs) and `PHPCompatibilityWP` enabled.
+
+1. `composer install` — installs PHPCS, WPCS, and the rest of the dev tools.
+2. `composer lint` — runs `phpcs --standard=phpcs.xml.dist` against `doublescale.php`, `includes/`, `bin/`, and `phpunit/`.
+3. `composer format` — runs `phpcbf` to auto-fix what it can (whitespace, indentation, brace style).
+
+For plugin-structure / readme / asset-organization checks, install the official [Plugin Check](https://wordpress.org/plugins/plugin-check/) plugin into a local WordPress install and run it via **Tools → Plugin Check**. Plugin Check is the same tool the WordPress.org review team runs.
+
 == Installation ==
 
 = Automatic =

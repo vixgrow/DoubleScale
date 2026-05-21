@@ -13,7 +13,7 @@ final class StepNavigator {
 
 	/**
 	 * @param \DoubleScale\Modules\Automations\Models\AutomationModel|object $automation Automation with steps() relation (tests may pass a lightweight fake).
-	 * @param object                                                               $step       Step row (parent_id, order, condition, id).
+	 * @param object                                                         $step       Step row (parent_id, order, condition, id).
 	 * @return object|null
 	 */
 	public static function get_next_step( $automation, $step ) {

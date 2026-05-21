@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;

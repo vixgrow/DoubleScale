@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Utils\Utils;
@@ -134,10 +133,10 @@ class Export {
 		try {
 			$is_new_file = ! file_exists( $file_path );
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming CSV append; WP_Filesystem has no streaming append API.
-			$handle      = fopen( $file_path, $is_new_file ? 'w' : 'a' );
+			$handle = fopen( $file_path, $is_new_file ? 'w' : 'a' );
 
 			if ( false === $handle ) {
-				return new WP_Error( 'csv_create_error', __( 'Failed to create export file', 'doublescale'), array( 'status' => 500 ) );
+				return new WP_Error( 'csv_create_error', __( 'Failed to create export file', 'doublescale' ), array( 'status' => 500 ) );
 			}
 
 			// Write headers for new file
@@ -145,7 +144,7 @@ class Export {
 				$this->write_csv_line( $handle, $headers );
 			}
 		} catch ( Exception $e ) {
-			return new WP_Error( 'csv_create_error', __( 'Failed to create export file: ', 'doublescale') . $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'csv_create_error', __( 'Failed to create export file: ', 'doublescale' ) . $e->getMessage(), array( 'status' => 500 ) );
 		}
 
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
@@ -176,7 +175,7 @@ class Export {
 
 				try {
 					$this->write_csv_line( $handle, $contact_array );
-					$this->offset++;
+					++$this->offset;
 				} catch ( Exception $e ) {
 					fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the streaming CSV handle opened above.
 					// Clean up partial file on error
@@ -185,7 +184,7 @@ class Export {
 					}
 					return new WP_Error(
 						'csv_write_error',
-						__( 'Failed to write to export file: ', 'doublescale') . $e->getMessage(),
+						__( 'Failed to write to export file: ', 'doublescale' ) . $e->getMessage(),
 						array( 'status' => 500 )
 					);
 				}
@@ -272,7 +271,7 @@ class Export {
 				if ( ! is_string( $slug ) && ! is_int( $slug ) ) {
 					continue;
 				}
-				$key = is_int( $slug ) ? (string) $slug : $slug;
+				$key          = is_int( $slug ) ? (string) $slug : $slug;
 				$flat[ $key ] = array(
 					'name'      => $def['label'] ?? $def['name'] ?? $key,
 					'is_custom' => $is_custom_group,
@@ -294,25 +293,25 @@ class Export {
 			$contact_fields = $this->get_contact_fields_flat_from_utils();
 		}
 		$contact_fields['lists']        = array(
-			'name' => __( 'Lists', 'doublescale'),
+			'name' => __( 'Lists', 'doublescale' ),
 		);
 		$contact_fields['tags']         = array(
-			'name' => __( 'Tags', 'doublescale'),
+			'name' => __( 'Tags', 'doublescale' ),
 		);
 		$contact_fields['created_at']   = array(
-			'name' => __( 'Created At', 'doublescale'),
+			'name' => __( 'Created At', 'doublescale' ),
 		);
 		$contact_fields['updated_at']   = array(
-			'name' => __( 'Updated At', 'doublescale'),
+			'name' => __( 'Updated At', 'doublescale' ),
 		);
 		$contact_fields['last_opened']  = array(
-			'name' => __( 'Last Open', 'doublescale'),
+			'name' => __( 'Last Open', 'doublescale' ),
 		);
 		$contact_fields['last_clicked'] = array(
-			'name' => __( 'Last Click', 'doublescale'),
+			'name' => __( 'Last Click', 'doublescale' ),
 		);
 		$contact_fields['last_sent']    = array(
-			'name' => __( 'Last Sent', 'doublescale'),
+			'name' => __( 'Last Sent', 'doublescale' ),
 		);
 
 		return $contact_fields;

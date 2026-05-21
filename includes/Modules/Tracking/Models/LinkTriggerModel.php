@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Tracking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;

@@ -131,7 +131,7 @@ final class EmailLogExport {
 
 			foreach ( $logs as $log ) {
 				$existing_content .= wp_json_encode( $log ) . ",\n";
-				$params['offset']++;
+				++$params['offset'];
 			}
 		}
 

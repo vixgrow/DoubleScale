@@ -130,7 +130,7 @@ class EventBus {
 		$retried = 0;
 
 		foreach ( $due_runs as $run ) {
-			$retried++;
+			++$retried;
 
 			$booking = BookingModel::find( $run->booking_id );
 			if ( ! $booking ) {

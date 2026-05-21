@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Traits\EntityProperties;
@@ -60,7 +59,7 @@ abstract class FieldType {
 
 	/**
 	 * Multiple
-	 * 
+	 *
 	 * @var boolean
 	 */
 	public $multiple = false;

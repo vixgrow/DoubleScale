@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Goals;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -92,7 +91,7 @@ class ListRemoved extends Goal {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact
-	 * @param array         $lists
+	 * @param array        $lists
 	 * @return void
 	 */
 	public function lists_removed( ContactModel $contact, $lists ) {
@@ -109,7 +108,7 @@ class ListRemoved extends Goal {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation Contact Model.
-	 * @param array                    $data Data.
+	 * @param array                  $data Data.
 	 *
 	 * @return bool
 	 */
@@ -137,7 +136,7 @@ class ListRemoved extends Goal {
 	public function get_fields() {
 		return array(
 			'lists' => array(
-				'label'    => __( 'Lists', 'doublescale'),
+				'label'    => __( 'Lists', 'doublescale' ),
 				'type'     => 'lists',
 				'multiple' => true,
 			),

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\PostMark\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -25,7 +24,8 @@ use Postmark\PostmarkClient;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -49,16 +49,16 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'api_key'           => [
+		return array(
+			'api_key'           => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'message_stream_id' => [
+			),
+			'message_stream_id' => array(
 				'type'     => 'string',
 				'required' => false,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -80,13 +80,12 @@ class Account_Controller extends Abstract_Account_Controller {
 		try {
 			$client = new PostmarkClient( $api_key );
 			$server = $client->getServer();
-			return [
+			return array(
 				'id'   => $account_name,
 				'name' => $account_id,
-			];
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'doublescale_smtp_postmark_api_key_invalid', __( 'API key is invalid.', 'doublescale' ) );
 		}
 	}
-
 }

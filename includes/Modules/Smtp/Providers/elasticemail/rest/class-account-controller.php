@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -25,7 +24,8 @@ use WP_REST_Request;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -49,12 +49,12 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'api_key' => [
+		return array(
+			'api_key' => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -76,13 +76,13 @@ class Account_Controller extends Abstract_Account_Controller {
 		$api_key  = sanitize_text_field( $api_key );
 		$response = wp_remote_request(
 			'https://api.elasticemail.com/v2/account/load?apikey=' . $api_key,
-			[
+			array(
 				'method'  => 'GET',
-				'headers' => [
+				'headers' => array(
 					'Accept'       => 'application/json',
 					'Content-Type' => 'application/json',
-				],
-			]
+				),
+			)
 		);
 
 		$body = wp_remote_retrieve_body( $response );
@@ -95,10 +95,9 @@ class Account_Controller extends Abstract_Account_Controller {
 			$account_id = $body['data']['publicaccountid'];
 		}
 
-		return [
+		return array(
 			'id'   => $account_id,
 			'name' => $account_name,
-		];
+		);
 	}
-
 }

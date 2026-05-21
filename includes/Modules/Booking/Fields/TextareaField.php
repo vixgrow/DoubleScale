@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Fields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Fields\TextField;

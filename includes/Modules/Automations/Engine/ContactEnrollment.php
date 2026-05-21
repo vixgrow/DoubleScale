@@ -33,7 +33,7 @@ final class ContactEnrollment {
 	 */
 	public function add_contact() {
 		$multiple_runs = $this->automation->get_setting( 'multiple_runs', false );
-		$contact        = $this->args['contact'] ?? null;
+		$contact       = $this->args['contact'] ?? null;
 
 		if ( ! $contact ) {
 			$contact = $this->maybe_create_contact();

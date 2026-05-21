@@ -41,7 +41,7 @@ abstract class REST_Integration_Controller extends REST_Controller {
 	 */
 	public function __construct( Integration $integration ) {
 		$this->integration = $integration;
-		$this->rest_base    = 'integrations/' . $this->integration->slug;
+		$this->rest_base   = 'integrations/' . $this->integration->slug;
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}

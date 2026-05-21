@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\Subscription;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -58,7 +57,7 @@ class SubscriptionPaymentMethod extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel $contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param string                 $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
@@ -77,7 +76,7 @@ class SubscriptionPaymentMethod extends MergeTag {
 			return '';
 		}
 
-		return  $subscription->get_payment_method_to_display();
+		return $subscription->get_payment_method_to_display();
 	}
 }
 

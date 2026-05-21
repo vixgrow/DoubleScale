@@ -51,5 +51,4 @@ class SMTP2GO extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

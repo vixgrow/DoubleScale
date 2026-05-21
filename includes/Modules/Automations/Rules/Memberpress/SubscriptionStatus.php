@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Memberpress;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Subscription Status class
  */
-class SubscriptionStatus extends Rule
-{
+class SubscriptionStatus extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -71,11 +70,10 @@ class SubscriptionStatus extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'     => __('Is', 'doublescale'),
-			'is_not' => __('Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -86,13 +84,12 @@ class SubscriptionStatus extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		return array(
-			'active'    => __('Active', 'doublescale'),
-			'suspended' => __('Suspended', 'doublescale'),
-			'cancelled' => __('Cancelled', 'doublescale'),
-			'pending'   => __('Pending', 'doublescale'),
+			'active'    => __( 'Active', 'doublescale' ),
+			'suspended' => __( 'Suspended', 'doublescale' ),
+			'cancelled' => __( 'Cancelled', 'doublescale' ),
+			'pending'   => __( 'Pending', 'doublescale' ),
 		);
 	}
 
@@ -105,17 +102,16 @@ class SubscriptionStatus extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		return $automation_contact->get_data('status') ?? '';
+	public function get_value( $automation_contact ) {
+		return $automation_contact->get_data( 'status' ) ?? '';
 	}
 }
 
 add_action(
 	'init',
 	function () {
-		if (defined('MEPR_PLUGIN_NAME')) {
-			RulesManager::instance()->register(new SubscriptionStatus());
+		if ( defined( 'MEPR_PLUGIN_NAME' ) ) {
+			RulesManager::instance()->register( new SubscriptionStatus() );
 		}
 	},
 	99

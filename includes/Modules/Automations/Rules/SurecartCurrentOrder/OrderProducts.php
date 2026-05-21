@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\SurecartCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -59,10 +58,10 @@ class OrderProducts extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'includes'         => __( 'Includes', 'doublescale'),
-			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale'),
-			'includes_all'     => __( 'Includes all', 'doublescale'),
-			'not_includes_all' => __( 'Includes none of (match all)', 'doublescale'),
+			'includes'         => __( 'Includes', 'doublescale' ),
+			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale' ),
+			'includes_all'     => __( 'Includes all', 'doublescale' ),
+			'not_includes_all' => __( 'Includes none of (match all)', 'doublescale' ),
 		);
 	}
 
@@ -124,7 +123,7 @@ class OrderProducts extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

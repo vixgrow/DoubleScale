@@ -48,7 +48,7 @@ class REST_Account_Controller extends REST_Controller {
 	 */
 	public function __construct( Integration $integration ) {
 		$this->integration = $integration;
-		$this->rest_base    = 'integrations/' . $this->integration->slug . '/(?P<calendar_id>[\d]+)/' . $this->rest_base;
+		$this->rest_base   = 'integrations/' . $this->integration->slug . '/(?P<calendar_id>[\d]+)/' . $this->rest_base;
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}

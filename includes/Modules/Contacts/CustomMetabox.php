@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -110,8 +109,8 @@ final class CustomMetabox {
 
 		add_meta_box(
 			'doublescale-contact-metabox',
-			__( 'DoubleScale contact', 'doublescale'),
-			function() use ( $contact ) {
+			__( 'DoubleScale contact', 'doublescale' ),
+			function () use ( $contact ) {
 				$this->generate_contact_metabox_html( $contact->email );
 			},
 			$post_type,
@@ -172,7 +171,7 @@ final class CustomMetabox {
 
 		?>
 		<div class="doublescale-edd-order-metabox postbox">
-			<h2 class="hndle"><?php esc_html_e( 'DoubleScale contact', 'doublescale'); ?></h2>
+			<h2 class="hndle"><?php esc_html_e( 'DoubleScale contact', 'doublescale' ); ?></h2>
 			<div class="inside">
 				<a class="doublescale-avatar" href="<?php echo esc_url( $profile_url ); ?>">
 					<img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $contact->first_name . ' ' . $contact->last_name ); ?>" class="doublescale-avatar-img">
@@ -182,15 +181,15 @@ final class CustomMetabox {
 				</a>
 				<div class="doublescale-contact-emails">
 					<p>
-						<strong><?php esc_html_e( 'Emails:', 'doublescale'); ?></strong>
+						<strong><?php esc_html_e( 'Emails:', 'doublescale' ); ?></strong>
 						<?php echo esc_html( $total_emails ); ?>
 					</p>
 					<p>
-						<strong><?php esc_html_e( 'Opened:', 'doublescale'); ?></strong>
+						<strong><?php esc_html_e( 'Opened:', 'doublescale' ); ?></strong>
 						<?php echo esc_html( $total_opened_emails ); ?>
 					</p>
 					<p>
-						<strong><?php esc_html_e( 'Clicked:', 'doublescale'); ?></strong>
+						<strong><?php esc_html_e( 'Clicked:', 'doublescale' ); ?></strong>
 						<?php echo esc_html( $total_clicked_emails ); ?>
 					</p>
 				</div>

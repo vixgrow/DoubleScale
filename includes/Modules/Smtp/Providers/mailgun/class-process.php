@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Mailgun;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -58,7 +57,7 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['from'] = $this->phpmailer->addrFormat( [ $email, $name ] );
+		$this->body['from'] = $this->phpmailer->addrFormat( array( $email, $name ) );
 	}
 
 	/**
@@ -82,7 +81,6 @@ class Process extends Abstract_Process {
 
 			$this->body[ $type ] = $this->addrs_format( $emails );
 		}
-
 	}
 
 	/**
@@ -118,12 +116,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['html'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['text'] = $content;
-			} else {
-				$this->body['html'] = $content;
-			}
+		} else {
+			$this->body['html'] = $content;
 		}
 	}
 
@@ -157,7 +153,7 @@ class Process extends Abstract_Process {
 		}
 
 		$payload = '';
-		$data    = [];
+		$data    = array();
 
 		foreach ( $attachments as $attachment ) {
 			$filepath = isset( $attachment[0] ) ? $attachment[0] : false;
@@ -168,10 +164,10 @@ class Process extends Abstract_Process {
 				continue;
 			}
 
-			$data[] = [
+			$data[] = array(
 				'content' => $file,
 				'name'    => $filename,
-			];
+			);
 		}
 
 		if ( ! empty( $data ) ) {
@@ -298,10 +294,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Mailgun Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_mailgun_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -312,6 +308,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

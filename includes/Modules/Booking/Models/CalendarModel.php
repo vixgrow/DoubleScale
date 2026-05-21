@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -68,7 +67,7 @@ class CalendarModel extends Model {
 	}
 
 	public function setTimezoneAttribute( $value ) {
-		$meta = $this->meta()->firstOrNew( array( 'meta_key' => 'timezone' ) );
+		$meta             = $this->meta()->firstOrNew( array( 'meta_key' => 'timezone' ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}
@@ -95,7 +94,7 @@ class CalendarModel extends Model {
 	}
 
 	public function update_meta( $key, $value ) {
-		$meta = $this->meta()->where( 'meta_key', $key )->firstOrNew( array( 'meta_key' => $key ) );
+		$meta             = $this->meta()->where( 'meta_key', $key )->firstOrNew( array( 'meta_key' => $key ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}

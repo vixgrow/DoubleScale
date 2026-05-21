@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -34,8 +33,8 @@ class MessageDirection {
 	 */
 	public static function get_all() {
 		return array(
-			self::OUTBOUND => __( 'Outbound', 'doublescale'),
-			self::INBOUND  => __( 'Inbound', 'doublescale'),
+			self::OUTBOUND => __( 'Outbound', 'doublescale' ),
+			self::INBOUND  => __( 'Inbound', 'doublescale' ),
 		);
 	}
 
@@ -47,7 +46,7 @@ class MessageDirection {
 	 */
 	public static function get_name( $direction ) {
 		$directions = self::get_all();
-		return $directions[ $direction ] ?? __( 'Unknown', 'doublescale');
+		return $directions[ $direction ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

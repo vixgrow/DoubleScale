@@ -107,17 +107,17 @@ class Account_API {
 	public function send( $args ) {
 		$response = wp_remote_request(
 			$this->url . '/messages',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Authorization' => 'Zoho-oauthtoken ' . $this->access_token,
 					'Content-Type'  => 'application/json; charset=' . get_option( 'blog_charset' ),
 					'Cache-Control' => 'no-cache',
-				],
+				),
 				'body'    => wp_json_encode( $args ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -161,14 +161,14 @@ class Account_API {
 
 		$response = wp_remote_request(
 			$url,
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Authorization' => 'Zoho-oauthtoken ' . $this->access_token,
 					'Content-Type'  => 'application/octet-stream',
-				],
+				),
 				'body'    => $args,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -203,14 +203,14 @@ class Account_API {
 	public function get_accounts() {
 		$response = wp_remote_get(
 			"https://mail.zoho.{$this->region}/api/accounts",
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Authorization' => 'Zoho-oauthtoken ' . $this->access_token,
 					'Content-Type'  => 'application/json; charset=' . get_option( 'blog_charset' ),
 					'Cache-Control' => 'no-cache',
-				],
-			]
+				),
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

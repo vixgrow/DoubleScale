@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -31,7 +30,7 @@ abstract class AbstractLayoutHandler implements LayoutHandlerInterface {
 				isset( $blocks[ $i ]['props']['inlineLayout'] ) && $blocks[ $i ]['props']['inlineLayout'] &&
 				isset( $blocks[ $i ]['props']['containerId'] ) && $blocks[ $i ]['props']['containerId'] === $container_id ) {
 			$collected[] = $blocks[ $i ];
-			$i++;
+			++$i;
 		}
 
 		return $collected;

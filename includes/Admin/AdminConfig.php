@@ -40,7 +40,7 @@ final class AdminConfig {
 	 * @return void
 	 */
 	public static function set_admin_config() {
-		 // Admin email address.
+		// Admin email address.
 		$admin_email = get_option( 'admin_email' );
 		$ajax_url    = admin_url( 'admin-ajax.php' );
 		$nonce       = wp_create_nonce( 'doublescale-admin' );
@@ -49,14 +49,14 @@ final class AdminConfig {
 		//
 		// Two buckets are exposed to the SPA:
 		//
-		//   1. CRM role flags — used by `useCapabilities()` for role-based UI
-		//      (sidebar grouping, settings tab gating, etc.). These already
-		//      collapse Administrator into CRM Manager — see
-		//      {@see Permissions::is_crm_manager()}.
-		//   2. Booking module caps — every cap from
-		//      {@see BookingCapabilities::get_all_capabilities()} resolved via
-		//      WP's `current_user_can()`. Lets `requiredCapability:` arrays in
-		//      `registerAdminPage` reference booking caps directly.
+		// 1. CRM role flags — used by `useCapabilities()` for role-based UI
+		// (sidebar grouping, settings tab gating, etc.). These already
+		// collapse Administrator into CRM Manager — see
+		// {@see Permissions::is_crm_manager()}.
+		// 2. Booking module caps — every cap from
+		// {@see BookingCapabilities::get_all_capabilities()} resolved via
+		// WP's `current_user_can()`. Lets `requiredCapability:` arrays in
+		// `registerAdminPage` reference booking caps directly.
 		$user_capabilities = array(
 			'doublescale_crm_manager'   => Permissions::is_crm_manager(),
 			'doublescale_sales_manager' => Permissions::is_sales_manager(),
@@ -98,7 +98,7 @@ final class AdminConfig {
 			array(
 				'blogName'            => get_bloginfo( 'name' ),
 				'adminUrl'            => admin_url(),
-				'menuSlug'            => apply_filters( 'doublescale_admin_menu_slug', 'doublescale'),
+				'menuSlug'            => apply_filters( 'doublescale_admin_menu_slug', 'doublescale' ),
 				'adminEmail'          => $admin_email,
 				'ajaxUrl'             => $ajax_url,
 				'nonce'               => $nonce,
@@ -120,9 +120,9 @@ final class AdminConfig {
 				'isWoocommerceActive' => (bool) doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 				'isEddActive'         => defined( 'EDD_PLUGIN_FILE' ),
 				'isSurecartActive'    => defined( 'SURECART_PLUGIN_FILE' ),
-				'isLmsActive'           => (bool) ( doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) || doublescale_is_plugin_active( 'tutor/tutor.php' ) || doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ) || doublescale_is_plugin_active( 'learnpress/learnpress.php' ) ),
-				'isMemberpressActive'   => defined( 'MEPR_PLUGIN_NAME' ),
-				'isPmproActive'         => defined( 'PMPRO_VERSION' ),
+				'isLmsActive'         => (bool) ( doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) || doublescale_is_plugin_active( 'tutor/tutor.php' ) || doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ) || doublescale_is_plugin_active( 'learnpress/learnpress.php' ) ),
+				'isMemberpressActive' => defined( 'MEPR_PLUGIN_NAME' ),
+				'isPmproActive'       => defined( 'PMPRO_VERSION' ),
 				'mergeTags'           => MergeTagsManager::instance()->get_groups(),
 				'importers'           => Importers_Manager::instance()->get_options(),
 				'userCapabilities'    => $user_capabilities,
@@ -133,17 +133,17 @@ final class AdminConfig {
 				'dealPriorities'      => class_exists( 'DoubleScale\Pro\Modules\Deals\Services\DealManager' )
 					? \DoubleScale\Pro\Modules\Deals\Services\DealManager::instance()->get_deal_priorities()
 					: array(),
-				'smtpInfo'       => $smtp_info,
+				'smtpInfo'            => $smtp_info,
 				'currency'            => Settings::get_currency(),
-				'urlDoubleScalePro' => $url_doublescale_pro,
+				'urlDoubleScalePro'   => $url_doublescale_pro,
 				'license'             => $license_info ? $license_info : false,
 				'planLevels'          => self::get_plan_levels(),
 				'proPluginData'       => $pro_plugin_data,
 				'addons'              => self::get_addons_status(),
 				'storeNonce'          => wp_create_nonce( 'doublescale-admin' ),
-			'aiConfigured'        => self::is_ai_configured(),
-			'aiAssistantEnabled'  => self::is_ai_assistant_enabled(),
-			'modules'             => self::get_modules_config(),
+				'aiConfigured'        => self::is_ai_configured(),
+				'aiAssistantEnabled'  => self::is_ai_assistant_enabled(),
+				'modules'             => self::get_modules_config(),
 			)
 		);
 

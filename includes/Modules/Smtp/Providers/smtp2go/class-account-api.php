@@ -56,16 +56,16 @@ class Account_API {
 		$args['api_key'] = $this->api_key;
 		$response        = wp_remote_request(
 			'https://api.smtp2go.com/v3/email/send',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => $this->api_key,
-				],
+				),
 				'body'    => wp_json_encode( $args ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -173,7 +173,7 @@ class Account_API {
 				$parsed = $this->parse_response( $response, $http_code );
 
 				if ( $parsed['success'] ) {
-					$results['sent_count']++;
+					++$results['sent_count'];
 					if ( ! empty( $parsed['message_id'] ) ) {
 						$results['message_ids'][ $email ] = $parsed['message_id'];
 					}
@@ -199,7 +199,7 @@ class Account_API {
 				'html_body'     => $request_data['html_body'] ?? '',
 				'text_body'     => $request_data['text_body'] ?? '',
 				'sender'        => $request_data['sender'] ?? '',
-				'headers'       => $request_data['custom_headers'] ?? [],
+				'headers'       => $request_data['custom_headers'] ?? array(),
 				'connection_id' => $first_email_data['connection_id'] ?? '',
 				'account_id'    => $first_email_data['account_id'] ?? '',
 			);
@@ -292,10 +292,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find SMTP2GO connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'smtp2go' ) {
@@ -311,17 +311,17 @@ class Account_API {
 		$response = is_wp_error( $result ) ? $result->get_error_message() : $result;
 
 		// Log one entry for the batch (not per recipient to avoid log spam)
-		$subject     = $batch_args['subject'] ?? '';
-		$body        = $batch_args['html_body'] ?? $batch_args['text_body'] ?? '';
-		$headers     = $batch_args['headers'] ?? [];
-		$attachments = [];
-		$from        = $batch_args['sender'] ?? '';
-		$recipients_data = [
+		$subject         = $batch_args['subject'] ?? '';
+		$body            = $batch_args['html_body'] ?? $batch_args['text_body'] ?? '';
+		$headers         = $batch_args['headers'] ?? array();
+		$attachments     = array();
+		$from            = $batch_args['sender'] ?? '';
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',

@@ -1,7 +1,5 @@
 {
-    "RestAbandonedCartController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAbandonedCartController",
     "RestActivityController": "DoubleScale\\Modules\\Activities\\Rest\\Controllers\\RestActivityController",
-    "RestAiEmailBuilderController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestAiEmailBuilderController",
     "RestAutomationContactController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationContactController",
     "RestAutomationController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationController",
     "RestAutomationStepController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationStepController",

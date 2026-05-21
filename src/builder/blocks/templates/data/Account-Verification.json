@@ -16,7 +16,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img13.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img13.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -73,7 +73,7 @@
                   "id": "block-3",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img14.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img14.png",
                     "alt": "Verification",
                     "width": "35%",
                     "height": "auto",
@@ -183,7 +183,7 @@
                 }
               ],
               "styles": {
-                "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg6.png)",
+                "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg6.png)",
                 "backgroundRepeat": "no-repeat",
                 "backgroundSize": "100% 100%",
                 "backgroundPosition": "center"
@@ -264,7 +264,7 @@
                   "id": "block-9",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img15.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img15.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -358,7 +358,7 @@
                   "id": "block-12",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/Divider2.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/Divider2.png",
                     "alt": "Divider",
                     "width": "100%",
                     "height": "auto",
@@ -411,7 +411,7 @@
         "backgroundImage": {
           "id": 0,
           "name": "Background",
-          "url": "http://images.doublescale.io/templates-images/greetings/bg5.png",
+          "url": "{{ASSETS_URL}}templates-images/greetings/bg5.png",
           "size": 0
         },
         "backgroundRepeat": "no-repeat",

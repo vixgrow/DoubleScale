@@ -3,8 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-//@ts-ignore
-import plainText from '../../../../assets/images/templates/plain-Text.png';
+import plainText from '@doublescale/assets/images/templates/plain_Text.png';
 
 const templateItems = [
 	{

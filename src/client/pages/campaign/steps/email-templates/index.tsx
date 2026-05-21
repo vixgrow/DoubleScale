@@ -14,8 +14,8 @@ import {
 	AiIcon,
 	MyTemplatesSidebarIcon,
 	ReadyToUseIcon,
-	PanelLayout, 
-	PlayIcon, 
+	PanelLayout,
+	PlayIcon,
 	ThreeDotsIcon
 } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
@@ -43,19 +43,16 @@ import {
 	ArrowLeft,
 	ArrowUpFromLine,
 	Plus,
-} from 'lucide-react'; 
+} from 'lucide-react';
 import AIEmailBuilder from '../templates/ai-email-builder';
 import PreviewEyeIcon from '@doublescale/shared/icons/preview-eye';
 
 const BUILDER_INITIAL_KEY = 'doublescale_campaign_builder_initial';
 
 const resolveAssetUrls = (obj: unknown): unknown => {
-	const proBase = configApi.getProPluginDirUrl();
-	const base =
-		typeof proBase === 'string' && proBase.length > 0
-			? proBase
-			: configApi.getPluginDirUrl();
-	const baseUrl = base.replace(/\/?$/, '/') + 'assets/images/templates/';
+	// Template images live in the free plugin `assets/` (see `@doublescale/assets` in webpack).
+	const baseUrl =
+		configApi.getPluginDirUrl().replace(/\/?$/, '/') + 'assets/images/';
 	const json = JSON.stringify(obj);
 	return JSON.parse(json.replace(/\{\{ASSETS_URL\}\}/g, baseUrl));
 };
@@ -93,7 +90,7 @@ const ReadyToUseTemplateCard = ({
 					className="h-9 w-9 rounded-lg bg-white shadow-sm hover:bg-secondary"
 					aria-label={__('preview', 'doublescale')}
 				>
-					<PreviewEyeIcon width={24} height={24} color="#3A3A98"/>
+					<PreviewEyeIcon width={24} height={24} color="#3A3A98" />
 				</Button>
 			</div>
 		</div>
@@ -157,7 +154,7 @@ const MyTemplateCard = ({
 							onSelect={() => onPreview(template)}
 							className="cursor-pointer gap-2"
 						>
-							<PreviewEyeIcon width={16} height={16} color="#3A3A98"/>
+							<PreviewEyeIcon width={16} height={16} color="#3A3A98" />
 							{__('Preview', 'doublescale')}
 						</DropdownMenuItem>
 						<DropdownMenuItem

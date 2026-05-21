@@ -16,7 +16,7 @@
 									"id": "block-1",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/plain-text/Logo.png",
+										"src": "{{ASSETS_URL}}templates-images/plain-text/Logo.png",
 										"alt": "Logo",
 										"width": "auto",
 										"height": "auto",
@@ -135,7 +135,7 @@
 									"id": "block-3",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img1.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img1.png",
 										"alt": "Hero",
 										"width": "100%",
 										"height": "auto",
@@ -241,7 +241,7 @@
 									"id": "block-7",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img2.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img2.png",
 										"alt": "Star",
 										"width": "18",
 										"height": "auto",
@@ -310,7 +310,7 @@
 									"id": "block-9",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img3.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img3.png",
 										"alt": "Feedback Meter",
 										"width": "75%",
 										"height": "auto",
@@ -394,7 +394,7 @@
 									"id": "block-12",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img2.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img2.png",
 										"alt": "Star",
 										"width": "26",
 										"height": "auto",
@@ -471,7 +471,7 @@
 									"id": "block-14",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img4.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img4.png",
 										"alt": "Support Center",
 										"width": "36",
 										"height": "auto",
@@ -567,7 +567,7 @@
 									"id": "block-17",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img5.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img5.png",
 										"alt": "Knowledge Base",
 										"width": "36",
 										"height": "auto",
@@ -667,7 +667,7 @@
 									"id": "block-20",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img6.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img6.png",
 										"alt": "Thank You",
 										"width": "auto",
 										"height": "auto",

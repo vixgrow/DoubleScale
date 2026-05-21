@@ -16,7 +16,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img10.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img10.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -79,7 +79,7 @@
             {
               "id": "column-3",
               "styles": {
-                "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg2.png)",
+                "backgroundImage": "url({{ASSETS_URL}}templates-images/announcements/bg2.png)",
                 "backgroundRepeat": "no-repeat",
                 "backgroundSize": "96% 100%",
                 "backgroundPosition": "center top",
@@ -214,7 +214,7 @@
                   "id": "block-6",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img11.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img11.png",
                     "alt": "Update Icon",
                     "width": "24",
                     "height": "auto",
@@ -288,7 +288,7 @@
                   "id": "block-9",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img11.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img11.png",
                     "alt": "Update Icon",
                     "width": "24",
                     "height": "auto",
@@ -372,7 +372,7 @@
                   "id": "block-12",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img11.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img11.png",
                     "alt": "Update Icon",
                     "width": "24",
                     "height": "auto",
@@ -446,7 +446,7 @@
                   "id": "block-15",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img11.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img11.png",
                     "alt": "Update Icon",
                     "width": "24",
                     "height": "auto",
@@ -570,7 +570,7 @@
                   "id": "block-19",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img12.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img12.png",
                     "alt": "Consent Icon",
                     "width": "24",
                     "height": "auto",

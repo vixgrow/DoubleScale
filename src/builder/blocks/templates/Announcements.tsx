@@ -3,14 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
-//@ts-ignore
-import newFeatureRelease from '../../../../assets/images/templates/New-Feature-Release.png';
-//@ts-ignore
-import productLaunch from '../../../../assets/images/templates/Product-Launch.png';
-//@ts-ignore
-import policyTermsUpdates from '../../../../assets/images/templates/Policy-Terms.png';
-//@ts-ignore
-import offers from '../../../../assets/images/templates/Offers.png';
+import newFeatureRelease from '@doublescale/assets/images/templates/New_Feature_Release.png';
+import productLaunch from '@doublescale/assets/images/templates/product_launch.png';
+import policyTermsUpdates from '@doublescale/assets/images/templates/Policy_Terms.png';
+import offers from '@doublescale/assets/images/templates/Offers.png';
 
 const templateItems = [
 	{

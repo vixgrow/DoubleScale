@@ -18,8 +18,18 @@ import accountVerification from '@/builder/blocks/templates/data/Account-Verific
 import plainText from '@/builder/blocks/templates/data/Plain-Text.json';
 import newBlogPost from '@/builder/blocks/templates/data/New-Blog-Post.json';
 import customerSurvey from '@/builder/blocks/templates/data/Customer-Survey.json';
-
-const TEMPLATES_IMAGE_BASE = 'http://images.doublescale.io/templates-images';
+import newFeatureReleaseImg from '@doublescale/assets/images/templates/New_Feature_Release.png';
+import productLaunchImg from '@doublescale/assets/images/templates/product_launch.png';
+import policyTermsImg from '@doublescale/assets/images/templates/Policy_Terms.png';
+import offersImg from '@doublescale/assets/images/templates/Offers.png';
+import blackFridayImg from '@doublescale/assets/images/templates/Black_Friday.png';
+import welcomeImg from '@doublescale/assets/images/templates/Welcome.png';
+import thankYouImg from '@doublescale/assets/images/templates/Thank_You.png';
+import onboardingImg from '@doublescale/assets/images/templates/Onboarding_Guide.png';
+import accountVerificationImg from '@doublescale/assets/images/templates/Account_Verification.png';
+import plainTextImg from '@doublescale/assets/images/templates/plain_Text.png';
+import newBlogPostImg from '@doublescale/assets/images/templates/New_Blog_Post.png';
+import customerSurveyImg from '@doublescale/assets/images/templates/Customer_Survey.png';
 
 export interface TemplateItemConfig {
 	id: string;
@@ -43,25 +53,25 @@ export const TEMPLATE_CATEGORIES: CategoryConfig[] = [
 				id: 'new-feature-release',
 				title: __('New Feature Release', 'doublescale'),
 				data: newFeatureRelease,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/New-Feature-Release.png`,
+				imageUrl: newFeatureReleaseImg,
 			},
 			{
 				id: 'product-launch',
 				title: __('Product Launch', 'doublescale'),
 				data: productLaunch,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Product-Launch.png`,
+				imageUrl: productLaunchImg,
 			},
 			{
 				id: 'policy-terms-updates',
 				title: __('Policy & Terms Updates', 'doublescale'),
 				data: policyTermsUpdates,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Policy-Terms.png`,
+				imageUrl: policyTermsImg,
 			},
 			{
 				id: 'offers',
 				title: __('Offers', 'doublescale'),
 				data: offers,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Offers.png`,
+				imageUrl: offersImg,
 			},
 		],
 	},
@@ -73,7 +83,7 @@ export const TEMPLATE_CATEGORIES: CategoryConfig[] = [
 				id: 'black-friday',
 				title: __('Black Friday', 'doublescale'),
 				data: blackFriday,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Black-Friday.png`,
+				imageUrl: blackFridayImg,
 			},
 		],
 	},
@@ -85,25 +95,25 @@ export const TEMPLATE_CATEGORIES: CategoryConfig[] = [
 				id: 'welcome-series',
 				title: __('Welcome Series', 'doublescale'),
 				data: welcomeSeries,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Welcome.png`,
+				imageUrl: welcomeImg,
 			},
 			{
 				id: 'thank-you-joining',
 				title: __('Thank You for Joining', 'doublescale'),
 				data: thankYouForJoining,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Thank-You-for-Joining.png`,
+				imageUrl: thankYouImg,
 			},
 			{
 				id: 'onboarding-guide',
 				title: __('Onboarding Guide', 'doublescale'),
 				data: onboardingGuide,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Onboarding-Guide.png`,
+				imageUrl: onboardingImg,
 			},
 			{
 				id: 'account-verification',
 				title: __('Account Verification', 'doublescale'),
 				data: accountVerification,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Account-Verification.png`,
+				imageUrl: accountVerificationImg,
 			},
 		],
 	},
@@ -120,7 +130,7 @@ export const TEMPLATE_CATEGORIES: CategoryConfig[] = [
 				id: 'plain-text',
 				title: __('Plain Text', 'doublescale'),
 				data: plainText,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/plain-Text.png`,
+				imageUrl: plainTextImg,
 			},
 		],
 	},
@@ -132,13 +142,13 @@ export const TEMPLATE_CATEGORIES: CategoryConfig[] = [
 				id: 'new-blog-post',
 				title: __('New Blog Post', 'doublescale'),
 				data: newBlogPost,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/New-Blog-Post.png`,
+				imageUrl: newBlogPostImg,
 			},
 			{
 				id: 'customer-survey',
 				title: __('Customer Survey', 'doublescale'),
 				data: customerSurvey,
-				imageUrl: `${TEMPLATES_IMAGE_BASE}/templates/Customer-Survey.png`,
+				imageUrl: customerSurveyImg,
 			},
 		],
 	},

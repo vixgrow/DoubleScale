@@ -16,7 +16,7 @@
 									"id": "block-1",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img1.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img1.png",
 										"alt": "Logo",
 										"width": "auto",
 										"height": "auto",
@@ -99,7 +99,7 @@
 									"id": "block-4",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img2.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img2.png",
 										"alt": "Handshake",
 										"width": "50%",
 										"height": "auto",
@@ -205,7 +205,7 @@
 									"id": "block-7",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img3.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img3.png",
 										"alt": "Guide screenshot",
 										"width": "100%",
 										"height": "auto",
@@ -454,7 +454,7 @@
 									"id": "block-15",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img4.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img4.png",
 										"alt": "Guide screenshot",
 										"width": "100%",
 										"height": "auto",
@@ -533,7 +533,7 @@
 									"id": "block-17",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img3.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img3.png",
 										"alt": "Guide screenshot",
 										"width": "100%",
 										"height": "auto",
@@ -782,7 +782,7 @@
 									"id": "block-25",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img4.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img4.png",
 										"alt": "Guide screenshot",
 										"width": "100%",
 										"height": "auto",
@@ -877,7 +877,7 @@
 									"id": "block-27",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/greetings/img1.png",
+										"src": "{{ASSETS_URL}}templates-images/greetings/img1.png",
 										"alt": "Logo",
 										"width": "auto",
 										"height": "auto",

@@ -83,7 +83,10 @@
 				"shared/hooks/*"
 			],
 			"@doublescale/assets": [
-				"assets/*"
+				"../assets"
+			],
+			"@doublescale/assets/*": [
+				"../assets/*"
 			],
 			"@/components/ui/*": [
 				"shared/ui/*"

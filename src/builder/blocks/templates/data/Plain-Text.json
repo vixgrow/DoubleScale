@@ -16,7 +16,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/plain-text/Logo.png",
+                    "src": "{{ASSETS_URL}}templates-images/plain-text/Logo.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -173,7 +173,7 @@
                   "id": "block-5",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/plain-text/plain-text-img-1.png",
+                    "src": "{{ASSETS_URL}}templates-images/plain-text/plain-text-img-1.png",
                     "alt": "Hero Image",
                     "width": "75%",
                     "height": "auto",
@@ -268,7 +268,7 @@
                   "type": "video",
                   "props": {
                     "videoUrl": "https://www.youtube.com/watch?v=2J-ycNN-9g4",
-                    "imageUrl": "http://images.doublescale.io/templates-images/plain-text/plain-text-img-2.png",
+                    "imageUrl": "{{ASSETS_URL}}templates-images/plain-text/plain-text-img-2.png",
                     "alt": "Video",
                     "width": "100%",
                     "height": "auto",

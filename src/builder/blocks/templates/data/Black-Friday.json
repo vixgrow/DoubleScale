@@ -16,7 +16,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/Logo.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/Logo.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -140,7 +140,7 @@
                   "id": "block-3",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/img1.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/img1.png",
                     "alt": "Black Friday",
                     "width": "100%",
                     "height": "auto",
@@ -156,7 +156,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/holiday/bg1.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/holiday/bg1.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -287,7 +287,7 @@
                   "id": "block-8",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/img2.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/img2.png",
                     "alt": "Free Shipping",
                     "width": "auto",
                     "height": "auto",
@@ -335,7 +335,7 @@
                   "id": "block-10",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/img3.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/img3.png",
                     "alt": "Express Delivery",
                     "width": "auto",
                     "height": "auto",
@@ -383,7 +383,7 @@
                   "id": "block-12",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/img4.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/img4.png",
                     "alt": "Free Returns",
                     "width": "auto",
                     "height": "auto",
@@ -425,7 +425,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/holiday/bg2.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/holiday/bg2.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -590,7 +590,7 @@
                   "id": "block-18",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/holiday/img5.png",
+                    "src": "{{ASSETS_URL}}templates-images/holiday/img5.png",
                     "alt": "Footer Accent",
                     "width": "auto",
                     "height": "auto",

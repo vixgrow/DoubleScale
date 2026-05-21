@@ -15,7 +15,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img14.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img14.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -57,7 +57,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/announcements/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -101,7 +101,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/img13.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/announcements/img13.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -209,7 +209,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg4.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/announcements/bg4.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -269,7 +269,7 @@
                   "id": "block-9",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -297,7 +297,7 @@
                   "id": "block-10",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -325,7 +325,7 @@
                   "id": "block-11",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -363,7 +363,7 @@
                   "id": "block-12",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -391,7 +391,7 @@
                   "id": "block-13",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -419,7 +419,7 @@
                   "id": "block-14",
                   "type": "product",
                   "props": {
-                    "imageSrc": "http://images.doublescale.io/templates-images/announcements/img3.png",
+                    "imageSrc": "{{ASSETS_URL}}templates-images/announcements/img3.png",
                     "imageAlt": "Product Name",
                     "width": "100%",
                     "title": "Product Name",
@@ -483,7 +483,7 @@
                   "id": "block-16",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/announcements/img14.png",
+                    "src": "{{ASSETS_URL}}templates-images/announcements/img14.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -596,7 +596,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/announcements/bg5.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/announcements/bg5.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",

@@ -12,7 +12,7 @@
 							"id": "column-1",
 							"width": 70,
 							"styles": {
-								"backgroundImage": "url(http://images.doublescale.io/templates-images/engagement/bg2.png)",
+								"backgroundImage": "url({{ASSETS_URL}}templates-images/engagement/bg2.png)",
 								"backgroundRepeat": "no-repeat",
 								"backgroundSize": "100% 100%",
 								"backgroundPosition": "center",
@@ -23,7 +23,7 @@
 									"id": "block-1",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/plain-text/Logo.png",
+										"src": "{{ASSETS_URL}}templates-images/plain-text/Logo.png",
 										"alt": "Logo",
 										"width": "auto",
 										"height": "auto",
@@ -46,7 +46,7 @@
 							"id": "column-2",
 							"width": 30,
 							"styles": {
-								"backgroundImage": "url(http://images.doublescale.io/templates-images/engagement/bg3.png)",
+								"backgroundImage": "url({{ASSETS_URL}}templates-images/engagement/bg3.png)",
 								"backgroundRepeat": "no-repeat",
 								"backgroundSize": "100% 100%",
 								"backgroundPosition": "center",
@@ -75,7 +75,7 @@
 					],
 					"styles": {
 						"backgroundColor": "#FBF2EB",
-						"backgroundImage": "url(http://images.doublescale.io/templates-images/engagement/bg1.png)",
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/engagement/bg1.png)",
 						"backgroundRepeat": "no-repeat",
 						"backgroundSize": "100% 100%",
 						"backgroundPosition": "center top",
@@ -172,7 +172,7 @@
 									"id": "block-5",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img8.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img8.png",
 										"alt": "Article Highlight",
 										"width": "100%",
 										"height": "auto",
@@ -297,7 +297,7 @@
 									"id": "block-9",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img9.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img9.png",
 										"alt": "Team Collaboration",
 										"width": "100%",
 										"height": "auto",
@@ -324,7 +324,7 @@
 									"id": "block-10",
 									"type": "image",
 									"props": {
-										"src": "http://images.doublescale.io/templates-images/engagement/img10.png",
+										"src": "{{ASSETS_URL}}templates-images/engagement/img10.png",
 										"alt": "Business Meeting",
 										"width": "100%",
 										"height": "auto",

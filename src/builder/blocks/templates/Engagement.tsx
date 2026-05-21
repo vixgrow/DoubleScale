@@ -3,10 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 
-//@ts-ignore
-import newBlogPost from '../../../../assets/images/templates/New-Blog-Post.png';
-//@ts-ignore
-import customerFeedbackSurvey from '../../../../assets/images/templates/Customer-Survey.png';
+import newBlogPost from '@doublescale/assets/images/templates/New_Blog_Post.png';
+import customerFeedbackSurvey from '@doublescale/assets/images/templates/Customer_Survey.png';
 
 const templateItems = [
 	{
@@ -15,8 +13,8 @@ const templateItems = [
 		image: newBlogPost,
 	},
 	{
-		id: 'customer-survey',
-		title: __('Customer Survey', 'doublescale'),
+		id: 'customer-feedback-survey',
+		title: __('Customer Feedback Survey', 'doublescale'),
 		image: customerFeedbackSurvey,
 	},
 ];

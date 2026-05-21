@@ -16,7 +16,7 @@
                   "id": "block-1",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img5.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
                     "alt": "Sparkle",
                     "width": "auto",
                     "height": "auto",
@@ -38,7 +38,7 @@
                   "id": "block-2",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img5.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
                     "alt": "Sparkle",
                     "width": "auto",
                     "height": "auto",
@@ -70,7 +70,7 @@
                   "id": "block-3",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img10.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img10.png",
                     "alt": "Welcome On Board",
                     "width": "75%",
                     "height": "auto",
@@ -86,7 +86,7 @@
                   "id": "block-4",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img6.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img6.png",
                     "alt": "Rocket",
                     "width": "50%",
                     "height": "auto",
@@ -170,7 +170,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg1.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg1.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "cover",
             "backgroundPosition": "top",
@@ -190,7 +190,7 @@
                   "id": "block-7",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img7.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img7.png",
                     "alt": "Benefits person",
                     "width": "100%",
                     "height": "auto",
@@ -238,7 +238,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -325,7 +325,7 @@
                   "id": "block-12",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img8.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img8.png",
                     "alt": "Gift",
                     "width": "130px",
                     "height": "auto",
@@ -341,7 +341,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -357,7 +357,7 @@
               "id": "column-8",
               "width": 100,
               "styles": {
-                "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg2.png)",
+                "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg2.png)",
                 "backgroundRepeat": "no-repeat",
                 "backgroundSize": "100% 100%",
                 "backgroundPosition": "center",
@@ -395,7 +395,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -442,7 +442,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -462,7 +462,7 @@
                   "id": "block-16",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/img9.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/img9.png",
                     "alt": "Logo",
                     "width": "auto",
                     "height": "auto",
@@ -627,7 +627,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",
@@ -647,7 +647,7 @@
                   "id": "block-22",
                   "type": "image",
                   "props": {
-                    "src": "http://images.doublescale.io/templates-images/greetings/Divider.png",
+                    "src": "{{ASSETS_URL}}templates-images/greetings/Divider.png",
                     "alt": "Divider",
                     "width": "100%",
                     "height": "auto",
@@ -689,7 +689,7 @@
             }
           ],
           "styles": {
-            "backgroundImage": "url(http://images.doublescale.io/templates-images/greetings/bg3.png)",
+            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
             "backgroundRepeat": "no-repeat",
             "backgroundSize": "100% 100%",
             "backgroundPosition": "center",

@@ -3,8 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-//@ts-ignore
-import BlackFriday from '../../../../assets/images/templates/Black-Friday.png';
+import BlackFriday from '@doublescale/assets/images/templates/Black_Friday.png';
 
 const templateItems = [
 	{

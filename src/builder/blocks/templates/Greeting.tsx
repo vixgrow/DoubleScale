@@ -3,14 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
-//@ts-ignore
-import welcomeSeries from '../../../../assets/images/templates/Welcome.png';
-//@ts-ignore
-import thankYouJoining from '../../../../assets/images/templates/Thank-You-for-Joining.png';
-//@ts-ignore
-import onboardingGuide from '../../../../assets/images/templates/Onboarding-Guide.png';
-//@ts-ignore
-import accountVerification from '../../../../assets/images/templates/Account-Verification.png';
+import welcomeSeries from '@doublescale/assets/images/templates/Welcome.png';
+import thankYouJoining from '@doublescale/assets/images/templates/Thank_You.png';
+import onboardingGuide from '@doublescale/assets/images/templates/Onboarding_Guide.png';
+import accountVerification from '@doublescale/assets/images/templates/Account_Verification.png';
 
 const templateItems = [
 	{

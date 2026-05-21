@@ -42,4 +42,4 @@ $cmd       = escapeshellarg( PHP_BINARY ) . ' '
 	. '--testsuite integration';
 
 passthru( $cmd, $exit_code );
-exit( is_int( $exit_code ) ? $exit_code : 1 );
+exit( is_int( $exit_code ) ? (int) $exit_code : 1 );

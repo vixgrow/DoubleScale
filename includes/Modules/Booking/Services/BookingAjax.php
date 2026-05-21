@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Booking\Services\BookingValidator;
 use DoubleScale\Modules\Booking\Services\BookingService;
 use DoubleScale\Modules\Booking\Services\BookingEvents;
+use DoubleScale\Modules\Booking\Services\BookingInput;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Models\AvailabilityModel;
 use DoubleScale\Modules\Booking\Models\BookedSlotModel;
@@ -100,9 +101,8 @@ class BookingAjax {
 			$duration = isset( $_POST['duration'] ) ? intval( wp_unslash( $_POST['duration'] ) ) : $event->duration;
 			$duration = $this->bookingValidatorClass::validate_duration( $duration, $event->duration );
 
-			$location_raw = isset( $_POST['location'] ) ? json_decode( wp_unslash( $_POST['location'] ), true ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
-			$location     = is_array( $location_raw ) ? map_deep( $location_raw, 'sanitize_text_field' ) : null;
-			if ( ! $location ) {
+			$location = BookingInput::get_json_post( 'location' );
+			if ( empty( $location ) ) {
 				throw new \Exception( __( 'Invalid location', 'doublescale' ) );
 			}
 
@@ -120,10 +120,9 @@ class BookingAjax {
 				);
 			}
 
-			// Validate invitees if needed
-			$invitees_raw = isset( $_POST['invitees'] ) ? json_decode( wp_unslash( $_POST['invitees'] ), true ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
-			$invitees     = is_array( $invitees_raw ) ? map_deep( $invitees_raw, 'sanitize_text_field' ) : array();
-			if ( empty( $invitees ) || ! is_array( $invitees ) ) {
+			// Validate invitees if needed.
+			$invitees = BookingInput::get_json_post( 'invitees' );
+			if ( empty( $invitees ) ) {
 				throw new \Exception( __( 'Please, add valid invitees', 'doublescale' ) );
 			}
 
@@ -134,11 +133,7 @@ class BookingAjax {
 				throw new \Exception( __( 'Invalid event type', 'doublescale' ) );
 			}
 
-			$fields = array();
-			if ( isset( $_POST['fields'] ) ) {
-				$fields_raw = json_decode( wp_unslash( $_POST['fields'] ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw JSON; every leaf is sanitized by map_deep() on the next line.
-				$fields     = is_array( $fields_raw ) ? map_deep( $fields_raw, 'sanitize_text_field' ) : array();
-			}
+			$fields = BookingInput::get_json_post( 'fields' );
 
 			$host_ids = isset( $_POST['host_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['host_ids'] ) ) : null;
 			$host_id  = null;

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -51,11 +50,11 @@ class TaskType {
 	 */
 	public static function get_all() {
 		$types = array(
-			self::CALL      => __( 'Call', 'doublescale'),
-			self::EMAIL     => __( 'Email', 'doublescale'),
-			self::MEETING   => __( 'Meeting', 'doublescale'),
-			self::TODO      => __( 'To-Do', 'doublescale'),
-			self::FOLLOW_UP => __( 'Follow Up', 'doublescale'),
+			self::CALL      => __( 'Call', 'doublescale' ),
+			self::EMAIL     => __( 'Email', 'doublescale' ),
+			self::MEETING   => __( 'Meeting', 'doublescale' ),
+			self::TODO      => __( 'To-Do', 'doublescale' ),
+			self::FOLLOW_UP => __( 'Follow Up', 'doublescale' ),
 		);
 
 		/**
@@ -74,7 +73,7 @@ class TaskType {
 	 */
 	public static function get_label( $type ) {
 		$types = self::get_all();
-		return $types[ $type ] ?? __( 'Unknown', 'doublescale');
+		return $types[ $type ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

@@ -117,7 +117,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 1000 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue;
@@ -201,12 +201,12 @@ class Account_API {
 			$status_code = $response->statusCode();
 
 			if ( $status_code === 202 ) {
-				$result = [
+				$result = array(
 					'id'         => '', // SendGrid doesn't return message ID in batch send
 					'message'    => __( 'Batch email sent successfully.', 'doublescale' ),
 					'sent_count' => count( $recipients ),
-					'failed'     => [],
-				];
+					'failed'     => array(),
+				);
 
 				// Log the batch
 				$this->log_batch_emails( $batch_args, $recipients, $result );
@@ -217,10 +217,10 @@ class Account_API {
 				$error = new WP_Error(
 					'sendgrid_batch_error',
 					__( 'SendGrid API error.', 'doublescale' ),
-					[
+					array(
 						'status' => $status_code,
 						'body'   => $body,
-					]
+					)
 				);
 
 				$this->log_batch_emails( $batch_args, $recipients, $error );
@@ -231,7 +231,7 @@ class Account_API {
 			$error = new WP_Error(
 				'sendgrid_exception',
 				$e->getMessage(),
-				[ 'code' => $e->getCode() ]
+				array( 'code' => $e->getCode() )
 			);
 
 			$this->log_batch_emails( $batch_args, $recipients, $error );
@@ -267,10 +267,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find SendGrid connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'sendgrid' ) {
@@ -293,14 +293,14 @@ class Account_API {
 		// Log one entry for the batch (not per recipient to avoid log spam)
 		$subject         = $batch_args['subject'] ?? '';
 		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers         = $batch_args['headers'] ?? [];
-		$attachments     = [];
-		$recipients_data = [
+		$headers         = $batch_args['headers'] ?? array();
+		$attachments     = array();
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => $batch_args['reply_to'] ?? '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',

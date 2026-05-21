@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Activity;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -98,13 +97,13 @@ class EmailClicked extends Filter {
 		);
 	}
 
-	 /**
-	  * Get options
-	  *
-	  * @since 1.0.0
-	  *
-	  * @return array
-	  */
+	/**
+	 * Get options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
 	public function get_options() {
 		return array();
 	}

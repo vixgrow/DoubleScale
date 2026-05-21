@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -96,7 +95,7 @@ class MailgunBulkMailer extends AbstractBulkMailer {
 		if ( ! $account_api ) {
 			return new WP_Error(
 				'mailgun_not_configured',
-				__( 'Mailgun is not properly configured.', 'doublescale')
+				__( 'Mailgun is not properly configured.', 'doublescale' )
 			);
 		}
 
@@ -104,7 +103,7 @@ class MailgunBulkMailer extends AbstractBulkMailer {
 		if ( ! method_exists( $account_api, 'send_batch' ) ) {
 			return new WP_Error(
 				'mailgun_batch_not_supported',
-				__( 'Mailgun batch sending is not available. Please update smtp.', 'doublescale')
+				__( 'Mailgun batch sending is not available. Please update smtp.', 'doublescale' )
 			);
 		}
 
@@ -151,7 +150,7 @@ class MailgunBulkMailer extends AbstractBulkMailer {
 		return array(
 			'success'    => true,
 			'message_id' => $message_id,
-			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale'),
+			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale' ),
 			'sent_count' => count( $batch_data['recipients'] ),
 			'failed'     => array(),
 		);
@@ -184,5 +183,4 @@ class MailgunBulkMailer extends AbstractBulkMailer {
 
 		return $headers;
 	}
-
 }

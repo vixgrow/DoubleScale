@@ -16,7 +16,6 @@
 
 namespace DoubleScale\Core\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\ModuleManager;

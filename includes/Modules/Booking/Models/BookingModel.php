@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -202,7 +201,7 @@ class BookingModel extends Model {
 	}
 
 	public function update_meta( $key, $value ) {
-		$meta = $this->meta()->where( 'meta_key', $key )->firstOrNew( array( 'meta_key' => $key ) );
+		$meta             = $this->meta()->where( 'meta_key', $key )->firstOrNew( array( 'meta_key' => $key ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}
@@ -225,7 +224,7 @@ class BookingModel extends Model {
 	}
 
 	public function setTimezoneAttribute( $value ) {
-		$meta = $this->meta()->firstOrNew( array( 'meta_key' => 'timezone' ) );
+		$meta             = $this->meta()->firstOrNew( array( 'meta_key' => 'timezone' ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}
@@ -236,13 +235,13 @@ class BookingModel extends Model {
 	}
 
 	public function setLocationAttribute( $value ) {
-		$meta = $this->meta()->firstOrNew( array( 'meta_key' => 'location' ) );
+		$meta             = $this->meta()->firstOrNew( array( 'meta_key' => 'location' ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}
 
 	public function setFieldsAttribute( $value ) {
-		$meta = $this->meta()->firstOrNew( array( 'meta_key' => 'fields' ) );
+		$meta             = $this->meta()->firstOrNew( array( 'meta_key' => 'fields' ) );
 		$meta->meta_value = maybe_serialize( $value );
 		$meta->save();
 	}
@@ -374,7 +373,14 @@ class BookingModel extends Model {
 
 			do_action( 'doublescale_booking_payment_failed', $this );
 
-			BookingEvents::emit( 'cancelled', (int) $this->id, array( 'actor' => 'system', 'reason' => 'payment_failed' ) );
+			BookingEvents::emit(
+				'cancelled',
+				(int) $this->id,
+				array(
+					'actor'  => 'system',
+					'reason' => 'payment_failed',
+				)
+			);
 		}
 	}
 
@@ -416,7 +422,14 @@ class BookingModel extends Model {
 		// integrations (Google, Outlook, Apple, Zoom) would never remove remote events.
 		static::deleting(
 			function ( $booking ) {
-				BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'system', 'reason' => 'deleted' ) );
+				BookingEvents::emit(
+					'cancelled',
+					(int) $booking->id,
+					array(
+						'actor'  => 'system',
+						'reason' => 'deleted',
+					)
+				);
 			}
 		);
 

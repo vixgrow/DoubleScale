@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Loops;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -73,7 +72,6 @@ class Process extends Abstract_Process {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -109,12 +107,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['dataVariables']['body'] = $content['html'];
 			}
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
+				$this->body['dataVariables']['body'] = $content;
 		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
-				$this->body['dataVariables']['body'] = $content;
-			} else {
-				$this->body['dataVariables']['body'] = $content;
-			}
+			$this->body['dataVariables']['body'] = $content;
 		}
 	}
 
@@ -242,10 +238,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Loops Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_loops_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -256,6 +252,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

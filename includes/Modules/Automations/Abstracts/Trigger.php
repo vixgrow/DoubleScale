@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -121,7 +120,7 @@ abstract class Trigger {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationModel $automation Automation Model
-	 * @param array            $args Arguments
+	 * @param array           $args Arguments
 	 *
 	 * @return bool
 	 */

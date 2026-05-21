@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Blocks;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Abstracts\EmailBlock;
@@ -33,7 +32,7 @@ class TextBlock extends EmailBlock {
 	 * @return string
 	 */
 	public function get_name(): string {
-		return __( 'Text', 'doublescale');
+		return __( 'Text', 'doublescale' );
 	}
 
 	/**
@@ -74,7 +73,7 @@ class TextBlock extends EmailBlock {
 	/**
 	 * Render block
 	 *
-	 * @param array                                       $props Block properties
+	 * @param array                                    $props Block properties
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -152,12 +151,15 @@ class TextBlock extends EmailBlock {
 
 		// Inject inherited styles into block-level tags in content so email clients
 		// that don't inherit from the wrapper <div> still render correctly.
-		$content = $this->inject_inherited_styles( $content, array(
-			'font-size'   => $font_size . 'px',
-			'font-family' => $props['fontFamily'],
-			'line-height' => $props['lineHeight'],
-			'color'       => $props['color'],
-		) );
+		$content = $this->inject_inherited_styles(
+			$content,
+			array(
+				'font-size'   => $font_size . 'px',
+				'font-family' => $props['fontFamily'],
+				'line-height' => $props['lineHeight'],
+				'color'       => $props['color'],
+			)
+		);
 
 		return "<div style=\"{$style_string}\">{$content}</div>";
 	}
@@ -286,6 +288,3 @@ class TextBlock extends EmailBlock {
 		return "{$top}px {$right}px {$bottom}px {$left}px";
 	}
 }
-
-
-

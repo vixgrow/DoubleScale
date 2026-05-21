@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -70,26 +69,26 @@ class Mailerlite extends Importer {
 		$mapping       = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Email field is required.', 'doublescale') );
+			throw new \Exception( __( 'Email field is required.', 'doublescale' ) );
 		}
 
 		$api             = $this->get_api();
 		$groups_response = $api->get_groups();
 		if ( ! $groups_response['success'] ) {
 			doublescale_get_logger()->error(
-				__( 'MailerLite: Error fetching groups', 'doublescale'),
+				__( 'MailerLite: Error fetching groups', 'doublescale' ),
 				array(
 					'code'     => 'mailerlite_get_groups',
 					'response' => $groups_response,
 				)
 			);
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Error fetching groups', 'doublescale') );
+			throw new \Exception( __( 'Error fetching groups', 'doublescale' ) );
 		}
 
 		if ( empty( $groups_response['data'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'There are no groups to import subscribers from', 'doublescale') );
+			throw new \Exception( __( 'There are no groups to import subscribers from', 'doublescale' ) );
 		}
 
 		$groups = $groups_response['data'];
@@ -194,7 +193,7 @@ class Mailerlite extends Importer {
 	public function get_credentials() {
 		return array(
 			'api_key' => array(
-				'label' => __( 'Api Key', 'doublescale'),
+				'label' => __( 'Api Key', 'doublescale' ),
 				'type'  => 'text',
 			),
 		);
@@ -210,14 +209,14 @@ class Mailerlite extends Importer {
 		$response = $api->get_fields();
 		if ( ! $response['success'] ) {
 			doublescale_get_logger()->error(
-				__( 'MailerLite: Error fetching fields', 'doublescale'),
+				__( 'MailerLite: Error fetching fields', 'doublescale' ),
 				array(
 					'code'     => 'mailerlite_get_fields',
 					'response' => $response,
 				)
 			);
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Error fetching fields', 'doublescale') );
+			throw new \Exception( __( 'Error fetching fields', 'doublescale' ) );
 		}
 
 		$fields = array();
@@ -240,14 +239,14 @@ class Mailerlite extends Importer {
 		$response = $api->get_groups();
 		if ( ! $response['success'] ) {
 			doublescale_get_logger()->error(
-				__( 'MailerLite: Error fetching groups', 'doublescale'),
+				__( 'MailerLite: Error fetching groups', 'doublescale' ),
 				array(
 					'code'     => 'mailerlite_get_groups',
 					'response' => $response,
 				)
 			);
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Error fetching groups', 'doublescale') );
+			throw new \Exception( __( 'Error fetching groups', 'doublescale' ) );
 		}
 
 		$groups = array();
@@ -270,7 +269,7 @@ class Mailerlite extends Importer {
 	public function get_api() {
 		if ( empty( $this->credentials['api_key'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Api Key is required.', 'doublescale') );
+			throw new \Exception( __( 'Api Key is required.', 'doublescale' ) );
 		}
 		return new Api( $this->credentials['api_key'] );
 	}
@@ -283,13 +282,13 @@ class Mailerlite extends Importer {
 	public function get_fields() {
 		return array(
 			'mapping'      => array(
-				'label'   => __( 'Mapped Fields', 'doublescale'),
+				'label'   => __( 'Mapped Fields', 'doublescale' ),
 				'type'    => 'contact_mapped_fields',
 				'options' => $this->get_fields_options(),
 			),
 			'tags_mapping' => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Groups Mapping', 'doublescale'),
+				'label'   => __( 'Groups Mapping', 'doublescale' ),
 				'options' => $this->get_groups(),
 			),
 		);

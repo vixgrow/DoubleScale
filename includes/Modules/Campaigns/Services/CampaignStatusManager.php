@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 final class CampaignStatusManager {
@@ -82,16 +81,16 @@ final class CampaignStatusManager {
 	 */
 	public function get_status_labels() {
 		return array(
-			self::DRAFT      => __( 'Draft', 'doublescale'),
-			self::INACTIVE   => __( 'Inactive', 'doublescale'),
-			self::ACTIVE     => __( 'Active', 'doublescale'),
-			self::SCHEDULED  => __( 'Scheduled', 'doublescale'),
-			self::PROCESSING => __( 'Processing', 'doublescale'),
-			self::COMPLETED  => __( 'Completed', 'doublescale'),
-			self::RESENDING  => __( 'Resending', 'doublescale'),
-			self::PAUSED     => __( 'Paused', 'doublescale'),
-			self::CANCELLED  => __( 'Cancelled', 'doublescale'),
-			self::FAILED     => __( 'Failed', 'doublescale'),
+			self::DRAFT      => __( 'Draft', 'doublescale' ),
+			self::INACTIVE   => __( 'Inactive', 'doublescale' ),
+			self::ACTIVE     => __( 'Active', 'doublescale' ),
+			self::SCHEDULED  => __( 'Scheduled', 'doublescale' ),
+			self::PROCESSING => __( 'Processing', 'doublescale' ),
+			self::COMPLETED  => __( 'Completed', 'doublescale' ),
+			self::RESENDING  => __( 'Resending', 'doublescale' ),
+			self::PAUSED     => __( 'Paused', 'doublescale' ),
+			self::CANCELLED  => __( 'Cancelled', 'doublescale' ),
+			self::FAILED     => __( 'Failed', 'doublescale' ),
 		);
 	}
 

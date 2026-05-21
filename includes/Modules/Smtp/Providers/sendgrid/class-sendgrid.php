@@ -51,5 +51,4 @@ class SendGrid extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,10 +43,10 @@ class MessageSourceTypes {
 	 */
 	public static function get_all_types() {
 		return array(
-			self::CAMPAIGN   => __( 'Campaign', 'doublescale'),
-			self::AUTOMATION => __( 'Automation', 'doublescale'),
-			self::INDIVIDUAL => __( 'Individual', 'doublescale'),
-			self::BOOKING    => __( 'Booking', 'doublescale'),
+			self::CAMPAIGN   => __( 'Campaign', 'doublescale' ),
+			self::AUTOMATION => __( 'Automation', 'doublescale' ),
+			self::INDIVIDUAL => __( 'Individual', 'doublescale' ),
+			self::BOOKING    => __( 'Booking', 'doublescale' ),
 		);
 	}
 
@@ -59,7 +58,7 @@ class MessageSourceTypes {
 	 */
 	public static function get_type_label( $type ) {
 		$types = self::get_all_types();
-		return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Unknown', 'doublescale');
+		return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Unknown', 'doublescale' );
 	}
 
 	/**

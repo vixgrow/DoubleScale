@@ -13,6 +13,8 @@ export function getMappingSelectStyles(): StylesConfig<
 		container: (base) => ({
 			...base,
 			width: '100%',
+			maxWidth: '100%',
+			minWidth: 0,
 		}),
 		control: (base, state) => ({
 			...reactSelectControl(base as Record<string, unknown>, state),
@@ -59,8 +61,12 @@ export function getMappingSelectStyles(): StylesConfig<
 			borderRadius: 8,
 			border: '1px solid #ECEEF2',
 			boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.08)',
-			overflow: 'hidden',
-			zIndex: 30,
+			overflow: 'visible',
+			zIndex: 160010,
+		}),
+		menuPortal: (base) => ({
+			...base,
+			zIndex: 160010,
 		}),
 		menuList: (base) => ({
 			...base,

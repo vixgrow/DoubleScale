@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTPcom\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -25,7 +24,8 @@ use WP_REST_Request;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -49,16 +49,16 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'api_key'     => [
+		return array(
+			'api_key'     => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'sender_name' => [
+			),
+			'sender_name' => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -80,14 +80,14 @@ class Account_Controller extends Abstract_Account_Controller {
 		$api_key  = sanitize_text_field( $api_key );
 		$response = wp_remote_request(
 			'https://api.smtp.com/v4/account',
-			[
+			array(
 				'method'  => 'GET',
-				'headers' => [
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $api_key,
-				],
-			]
+				),
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -107,10 +107,9 @@ class Account_Controller extends Abstract_Account_Controller {
 
 		}
 
-		return [
+		return array(
 			'id'   => $account_id,
 			'name' => $account_name,
-		];
+		);
 	}
-
 }

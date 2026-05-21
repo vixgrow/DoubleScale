@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -83,14 +82,14 @@ class Process {
 	protected function filter_nested() {
 		// Detect ListTagFilter payload (rows with list/tag keys, no filter/rule).
 		// Two on-wire shapes are accepted:
-		//   - Tagged flat list: each row carries `mode: 'include'|'exclude'`. This
-		//     is the canonical wire format; it survives WP core's
-		//     rest_sanitize_array() reindexing, which strips outer keys.
-		//   - Legacy positional shape: `[ [includeRows…], [excludeRows…] ]`.
-		//     Still accepted for direct PHP callers and stored campaign
-		//     settings; but on the wire it loses include/exclude semantics
-		//     when only one side is populated, so the frontend always sends
-		//     the tagged shape.
+		// - Tagged flat list: each row carries `mode: 'include'|'exclude'`. This
+		// is the canonical wire format; it survives WP core's
+		// rest_sanitize_array() reindexing, which strips outer keys.
+		// - Legacy positional shape: `[ [includeRows…], [excludeRows…] ]`.
+		// Still accepted for direct PHP callers and stored campaign
+		// settings; but on the wire it loses include/exclude semantics
+		// when only one side is populated, so the frontend always sends
+		// the tagged shape.
 		$is_list_tag_format = false;
 		$has_mode_tagging   = false;
 
@@ -207,7 +206,7 @@ class Process {
 								function ( $and_query ) use ( $group_filters ) {
 									// Apply all filters in this group (AND logic)
 									foreach ( $group_filters as $filter ) {
-										  $and_query = $this->add_filter_to_query( $and_query, $filter );
+											$and_query = $this->add_filter_to_query( $and_query, $filter );
 									}
 								}
 							);
@@ -408,7 +407,7 @@ class Process {
 		// RuleItem has: rule, operator, value, selectedGroup (or "group" alias).
 		// Filter needs: filter, group, operator, value.
 		if ( isset( $filter['rule'] ) && ( isset( $filter['selectedGroup'] ) || isset( $filter['group'] ) ) ) {
-			$group = isset( $filter['selectedGroup'] ) ? $filter['selectedGroup'] : $filter['group'];
+			$group  = isset( $filter['selectedGroup'] ) ? $filter['selectedGroup'] : $filter['group'];
 			$filter = array(
 				'filter'   => $filter['rule'],
 				'group'    => $group,

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SparkPost;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -82,9 +81,9 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$user_data = [
+				$user_data = array(
 					'address' => $email_address,
-				];
+				);
 
 				if ( ! empty( $name ) ) {
 					$user_data['name'] = sanitize_text_field( $name );
@@ -131,12 +130,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['content']['html'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['content']['text'] = $content;
-			} else {
-				$this->body['content']['html'] = $content;
-			}
+		} else {
+			$this->body['content']['html'] = $content;
 		}
 	}
 
@@ -204,7 +201,7 @@ class Process extends Abstract_Process {
 		 *
 		 * @param array $headers Email headers.
 		 */
-		$headers = apply_filters( 'doublescale_smtp_sparkpost_mailer_get_headers', $this->body['content']['headers'] ?? [] );
+		$headers = apply_filters( 'doublescale_smtp_sparkpost_mailer_get_headers', $this->body['content']['headers'] ?? array() );
 
 		return $headers;
 	}
@@ -254,10 +251,10 @@ class Process extends Abstract_Process {
 
 			if ( isset( $send_email['results'] ) && 1 === $send_email['results']['total_accepted_recipients'] ) {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::SUCCEEDED,
 						'response' => $send_email,
-					]
+					)
 				);
 				return true;
 			} else {
@@ -266,20 +263,20 @@ class Process extends Abstract_Process {
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
 				esc_html__( 'SparkPost API Error', 'doublescale' ),
-				[
+				array(
 					'code'  => 'doublescale_smtp_sparkpost_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
 						'data'    => $e->getTraceAsString(),
-					],
-				]
+					),
+				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
 					'response' => $e->getMessage(),
-				]
+				)
 			);
 			return false;
 		}

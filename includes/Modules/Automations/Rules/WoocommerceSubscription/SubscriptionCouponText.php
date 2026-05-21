@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceSubscription;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -69,10 +68,10 @@ class SubscriptionCouponText extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'starts_with'        => \__( 'Starts with', 'doublescale'),
-			'ends_with'          => \__( 'Ends with', 'doublescale'),
-			'any_contains'       => \__( 'Any contains', 'doublescale'),
-			'any_matches_exactly' => \__( 'Any matches exactly', 'doublescale'),
+			'starts_with'         => \__( 'Starts with', 'doublescale' ),
+			'ends_with'           => \__( 'Ends with', 'doublescale' ),
+			'any_contains'        => \__( 'Any contains', 'doublescale' ),
+			'any_matches_exactly' => \__( 'Any matches exactly', 'doublescale' ),
 		);
 	}
 
@@ -87,7 +86,7 @@ class SubscriptionCouponText extends Rule {
 	 */
 	public function get_value( $automation_contact ) {
 		$subscription_id = $automation_contact->get_data( 'subscription_id' );
-		
+
 		if ( ! \function_exists( 'wcs_get_subscription' ) ) {
 			return array();
 		}
@@ -114,7 +113,7 @@ class SubscriptionCouponText extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

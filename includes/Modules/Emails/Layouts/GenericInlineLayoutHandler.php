@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,7 +23,7 @@ class GenericInlineLayoutHandler extends AbstractLayoutHandler {
 	 */
 	public function can_handle( array $block ): bool {
 		return isset( $block['props']['inlineLayout'] ) && $block['props']['inlineLayout'] &&
-			   isset( $block['props']['containerId'] );
+				isset( $block['props']['containerId'] );
 	}
 
 	/**

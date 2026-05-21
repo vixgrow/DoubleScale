@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Woocommerce;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -64,7 +63,7 @@ class IsGuest extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'equal' => __( 'equal', 'doublescale'),
+			'equal' => __( 'equal', 'doublescale' ),
 		);
 	}
 
@@ -77,10 +76,10 @@ class IsGuest extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 return array(
-			 'yes' => __( 'Yes', 'doublescale'),
-			 'no'  => __( 'No', 'doublescale'),
-		 );
+		return array(
+			'yes' => __( 'Yes', 'doublescale' ),
+			'no'  => __( 'No', 'doublescale' ),
+		);
 	}
 
 	/**
@@ -110,7 +109,7 @@ class IsGuest extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

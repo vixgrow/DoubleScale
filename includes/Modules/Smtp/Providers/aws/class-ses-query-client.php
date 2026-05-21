@@ -124,20 +124,20 @@ class Ses_Query_Client {
 		$body = self::build_form_body( $params );
 		$url  = 'https://' . $this->host . '/';
 
-		$amz_date    = gmdate( 'Ymd\THis\Z' );
-		$date_stamp  = gmdate( 'Ymd' );
+		$amz_date     = gmdate( 'Ymd\THis\Z' );
+		$date_stamp   = gmdate( 'Ymd' );
 		$payload_hash = hash( 'sha256', $body );
 
-		$canonical_headers  = 'content-type:application/x-www-form-urlencoded; charset=UTF-8' . "\n" .
+		$canonical_headers = 'content-type:application/x-www-form-urlencoded; charset=UTF-8' . "\n" .
 			'host:' . $this->host . "\n" .
 			'x-amz-content-sha256:' . $payload_hash . "\n" .
 			'x-amz-date:' . $amz_date . "\n";
-		$signed_headers     = 'content-type;host;x-amz-content-sha256;x-amz-date';
-		$canonical_request  = "POST\n/\n\n{$canonical_headers}\n{$signed_headers}\n{$payload_hash}";
+		$signed_headers    = 'content-type;host;x-amz-content-sha256;x-amz-date';
+		$canonical_request = "POST\n/\n\n{$canonical_headers}\n{$signed_headers}\n{$payload_hash}";
 
-		$algorithm         = 'AWS4-HMAC-SHA256';
-		$credential_scope  = $date_stamp . '/' . $this->region . '/ses/aws4_request';
-		$string_to_sign    = $algorithm . "\n{$amz_date}\n{$credential_scope}\n" . hash( 'sha256', $canonical_request );
+		$algorithm        = 'AWS4-HMAC-SHA256';
+		$credential_scope = $date_stamp . '/' . $this->region . '/ses/aws4_request';
+		$string_to_sign   = $algorithm . "\n{$amz_date}\n{$credential_scope}\n" . hash( 'sha256', $canonical_request );
 
 		$signing_key = $this->get_signing_key( $date_stamp );
 		$signature   = hash_hmac( 'sha256', $string_to_sign, $signing_key );
@@ -151,7 +151,7 @@ class Ses_Query_Client {
 				'timeout' => 90,
 				'headers' => array(
 					'Host'                 => $this->host,
-					'Authorization'      => $auth,
+					'Authorization'        => $auth,
 					'X-Amz-Date'           => $amz_date,
 					'X-Amz-Content-Sha256' => $payload_hash,
 					'Content-Type'         => 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -235,13 +235,13 @@ class Ses_Query_Client {
 	private function parse_response( $xml_body, $action ) {
 		$xml_body = trim( (string) $xml_body );
 		if ( $xml_body === '' ) {
-			throw new Ses_Exception( esc_html( 'Empty SES response body.' ) );
+			throw new Ses_Exception( esc_html__( 'Empty SES response body.', 'doublescale' ) );
 		}
 
 		libxml_use_internal_errors( true );
 		$xml = simplexml_load_string( $xml_body );
 		if ( false === $xml ) {
-			throw new Ses_Exception( esc_html( 'Invalid SES XML response.' ) );
+			throw new Ses_Exception( esc_html__( 'Invalid SES XML response.', 'doublescale' ) );
 		}
 
 		$root_name = $xml->getName();
@@ -251,9 +251,9 @@ class Ses_Query_Client {
 				$ens = $xml->children();
 			}
 			if ( isset( $ens->Error->Code, $ens->Error->Message ) ) {
-				throw new Ses_Exception( esc_html( (string) $ens->Error->Message, (string) $ens->Error->Code ) );
+				throw new Ses_Exception( esc_html( (string) $ens->Error->Code . ': ' . (string) $ens->Error->Message ) );
 			}
-			throw new Ses_Exception( esc_html( 'SES ErrorResponse without detail.' ) );
+			throw new Ses_Exception( esc_html__( 'SES ErrorResponse without detail.', 'doublescale' ) );
 		}
 
 		$ns = $xml->children( self::SES_NS );
@@ -367,7 +367,7 @@ class Ses_Client {
 	 * @return Ses_Result
 	 */
 	public function createTemplate( array $input ) {
-		$t    = $input['Template'] ?? array();
+		$t      = $input['Template'] ?? array();
 		$params = array(
 			'Action'                => 'CreateTemplate',
 			'Template.TemplateName' => (string) ( $t['TemplateName'] ?? '' ),
@@ -388,18 +388,18 @@ class Ses_Client {
 	 */
 	public function sendBulkTemplatedEmail( array $input ) {
 		$params = array(
-			'Action'               => 'SendBulkTemplatedEmail',
-			'Source'               => (string) ( $input['Source'] ?? '' ),
-			'Template'             => (string) ( $input['Template'] ?? '' ),
-			'DefaultTemplateData'  => (string) ( $input['DefaultTemplateData'] ?? '{}' ),
+			'Action'              => 'SendBulkTemplatedEmail',
+			'Source'              => (string) ( $input['Source'] ?? '' ),
+			'Template'            => (string) ( $input['Template'] ?? '' ),
+			'DefaultTemplateData' => (string) ( $input['DefaultTemplateData'] ?? '{}' ),
 		);
-		$dests = $input['Destinations'] ?? array();
-		$n     = 0;
+		$dests  = $input['Destinations'] ?? array();
+		$n      = 0;
 		foreach ( (array) $dests as $dest ) {
 			++$n;
 			$to = $dest['Destination']['ToAddresses'][0] ?? '';
 			$params[ 'Destinations.member.' . $n . '.Destination.ToAddresses.member.1' ] = (string) $to;
-			$params[ 'Destinations.member.' . $n . '.ReplacementTemplateData' ]       = (string) ( $dest['ReplacementTemplateData'] ?? '{}' );
+			$params[ 'Destinations.member.' . $n . '.ReplacementTemplateData' ]          = (string) ( $dest['ReplacementTemplateData'] ?? '{}' );
 		}
 		if ( ! empty( $input['ReplyToAddresses'] ) && is_array( $input['ReplyToAddresses'] ) ) {
 			$r = 0;
@@ -443,8 +443,8 @@ class Ses_Client {
 	public function listIdentities( array $input ) {
 		$res = $this->query->post(
 			array(
-				'Action'        => 'ListIdentities',
-				'IdentityType'  => (string) ( $input['IdentityType'] ?? 'EmailAddress' ),
+				'Action'       => 'ListIdentities',
+				'IdentityType' => (string) ( $input['IdentityType'] ?? 'EmailAddress' ),
 			)
 		);
 		$this->throw_if_wp_error( $res );

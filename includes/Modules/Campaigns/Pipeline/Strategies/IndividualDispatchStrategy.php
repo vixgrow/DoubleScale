@@ -13,7 +13,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline\Strategies;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -98,7 +97,7 @@ class IndividualDispatchStrategy implements BatchDispatchStrategyInterface {
 				$ctx->rate_limiter->record_sent( $ctx->channel );
 			}
 
-			$ctx->offset++;
+			++$ctx->offset;
 		}
 
 		return BatchResult::ok();

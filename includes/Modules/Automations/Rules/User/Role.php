@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\User;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Role class
  */
-class Role extends Rule
-{
+class Role extends Rule {
+
 
 	/**
 	 * Name
@@ -68,20 +67,19 @@ class Role extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		// Get all WordPress roles
 		global $wp_roles;
 
-		if (! isset($wp_roles)) {
+		if ( ! isset( $wp_roles ) ) {
 			$wp_roles = new \WP_Roles();
 		}
 
 		$roles   = $wp_roles->roles;
 		$options = array();
 
-		foreach ($roles as $role => $role_data) {
-			$options[$role] = $role_data['name'];
+		foreach ( $roles as $role => $role_data ) {
+			$options[ $role ] = $role_data['name'];
 		}
 
 		return $options;
@@ -96,15 +94,14 @@ class Role extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
-		$user_id = $automation_contact->get_data('user_id', null);
-		if (! $user_id) {
+	public function get_value( $automation_contact ) {
+		$user_id = $automation_contact->get_data( 'user_id', null );
+		if ( ! $user_id ) {
 			return null;
 		}
 
-		$user = get_userdata($user_id);
-		if (! $user) {
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
 			return null;
 		}
 
@@ -112,4 +109,4 @@ class Role extends Rule
 	}
 }
 
-RulesManager::instance()->register(new Role());
+RulesManager::instance()->register( new Role() );

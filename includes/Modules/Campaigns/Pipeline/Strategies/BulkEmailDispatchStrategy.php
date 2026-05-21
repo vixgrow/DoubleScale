@@ -13,7 +13,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline\Strategies;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -77,8 +76,8 @@ class BulkEmailDispatchStrategy implements BatchDispatchStrategyInterface {
 		}
 
 		// Load the campaign template (required for bulk sending).
-		$template_ids = $ctx->campaign->get_template_ids();
-		$template_id  = reset( $template_ids );
+		$template_ids   = $ctx->campaign->get_template_ids();
+		$template_id    = reset( $template_ids );
 		$this->template = TemplateModel::find( $template_id );
 
 		if ( ! $this->template ) {

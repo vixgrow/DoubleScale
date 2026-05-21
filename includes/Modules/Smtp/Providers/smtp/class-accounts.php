@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTP;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Accounts as Abstract_Accounts;
@@ -31,5 +30,4 @@ class Accounts extends Abstract_Accounts {
 	protected function init_account_api( $account_id, $account_data ) {
 		return new Account_API( $account_data['credentials']['smtp_host'], $account_data['credentials']['smtp_port'], $account_data['credentials']['encryption'], $account_data['credentials']['auto_tls'], $account_data['credentials']['authentication'], $account_data['credentials']['username'], $account_data['credentials']['password'] );
 	}
-
 }

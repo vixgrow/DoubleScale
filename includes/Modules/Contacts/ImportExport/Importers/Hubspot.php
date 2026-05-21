@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -62,7 +61,7 @@ class Hubspot extends Importer {
 	 * Run importer
 	 */
 	public function run() {
-		 $api = $this->get_api();
+		$api = $this->get_api();
 
 		// Cache metadata once at start to avoid repeated Api calls
 		$this->cache_metadata( $api );
@@ -71,7 +70,7 @@ class Hubspot extends Importer {
 
 		$total_response = $api->get_contacts_count();
 		if ( ! $total_response['success'] ) {
-			$error_message = __( 'Hubspot: Error fetching contacts count', 'doublescale');
+			$error_message = __( 'Hubspot: Error fetching contacts count', 'doublescale' );
 			$error_details = array(
 				'code'     => 'hubspot_get_contacts_count',
 				'response' => $total_response,
@@ -304,13 +303,13 @@ class Hubspot extends Importer {
 	 * @return array
 	 */
 	public function get_credentials() {
-		 return array(
-			 'access_token' => array(
-				 'label'       => __( 'Access Token', 'doublescale'),
-				 'type'        => 'text',
-				 'description' => __( 'Hubspot Private App Access Token', 'doublescale'),
-			 ),
-		 );
+		return array(
+			'access_token' => array(
+				'label'       => __( 'Access Token', 'doublescale' ),
+				'type'        => 'text',
+				'description' => __( 'Hubspot Private App Access Token', 'doublescale' ),
+			),
+		);
 	}
 
 	/**
@@ -323,7 +322,7 @@ class Hubspot extends Importer {
 	public function get_api() {
 		if ( empty( $this->credentials['access_token'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Hubspot Access Token is required.', 'doublescale') );
+			throw new \Exception( __( 'Hubspot Access Token is required.', 'doublescale' ) );
 		}
 
 		$access_token = trim( $this->credentials['access_token'] );
@@ -331,7 +330,7 @@ class Hubspot extends Importer {
 		// Basic validation for Hubspot access token format
 		if ( strlen( $access_token ) < 20 ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Hubspot Access Token appears to be invalid. Please verify your token.', 'doublescale') );
+			throw new \Exception( __( 'Hubspot Access Token appears to be invalid. Please verify your token.', 'doublescale' ) );
 		}
 
 		return new Api( $access_token );
@@ -349,7 +348,7 @@ class Hubspot extends Importer {
 
 			if ( ! $response['success'] ) {
 				doublescale_get_logger()->error(
-					__( 'Hubspot: Error fetching lists', 'doublescale'),
+					__( 'Hubspot: Error fetching lists', 'doublescale' ),
 					array(
 						'code'     => 'hubspot_get_lists',
 						'response' => $response,
@@ -369,7 +368,7 @@ class Hubspot extends Importer {
 			return $options;
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Hubspot: Exception fetching lists', 'doublescale'),
+				__( 'Hubspot: Exception fetching lists', 'doublescale' ),
 				array(
 					'code'  => 'hubspot_get_lists_exception',
 					'error' => $e->getMessage(),
@@ -388,7 +387,7 @@ class Hubspot extends Importer {
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'doublescale'),
+				'label'   => __( 'Lists', 'doublescale' ),
 				'options' => $this->get_lists(),
 			),
 		);

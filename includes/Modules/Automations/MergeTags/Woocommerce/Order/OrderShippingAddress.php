@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\Order;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -55,7 +54,7 @@ class OrderShippingAddress extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel automation_contact Contact Model.
-	 * @param string                                                    $merge_tag Merge Tag.
+	 * @param string                                                  $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
@@ -67,7 +66,7 @@ class OrderShippingAddress extends MergeTag {
 		}
 
 		// Formats available: default, comma, address_1, address_2.
-		$format           = $this->get_format( $merge_tag );
+		$format = $this->get_format( $merge_tag );
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core hook.
 		$address          = apply_filters( 'woocommerce_order_formatted_shipping_address', $order->get_address( 'shipping' ), $order );
 		$formated_address = '';

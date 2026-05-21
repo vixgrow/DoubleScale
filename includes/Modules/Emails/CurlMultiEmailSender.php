@@ -15,7 +15,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Curlmulti\AbstractCurlMultiMailer;
@@ -118,7 +117,7 @@ class CurlMultiEmailSender {
 		$mailer_slug = self::get_active_mailer_slug( $from_email );
 
 		if ( ! $mailer_slug || ! isset( self::$mailer_classes[ $mailer_slug ] ) ) {
-			self::$mailer_instance     = null;
+			self::$mailer_instance    = null;
 			self::$cached_mailer_slug = null;
 			return null;
 		}
@@ -130,8 +129,8 @@ class CurlMultiEmailSender {
 			return self::$mailer_instance;
 		}
 
-		$mailer_class              = self::$mailer_classes[ $mailer_slug ];
-		self::$mailer_instance     = new $mailer_class();
+		$mailer_class             = self::$mailer_classes[ $mailer_slug ];
+		self::$mailer_instance    = new $mailer_class();
 		self::$cached_mailer_slug = $mailer_slug;
 
 		if ( $from_email !== null ) {
@@ -258,7 +257,7 @@ class CurlMultiEmailSender {
 		if ( ! $mailer ) {
 			return new WP_Error(
 				'no_curl_multi_mailer',
-				__( 'No cURL Multi-capable mailer is configured in the SMTP module for this sender.', 'doublescale')
+				__( 'No cURL Multi-capable mailer is configured in the SMTP module for this sender.', 'doublescale' )
 			);
 		}
 
@@ -267,7 +266,7 @@ class CurlMultiEmailSender {
 				'mailer_not_available',
 				sprintf(
 					/* translators: %s: mailer name */
-					__( '%s is not properly configured.', 'doublescale'),
+					__( '%s is not properly configured.', 'doublescale' ),
 					ucfirst( $mailer->get_slug() )
 				)
 			);
@@ -320,7 +319,7 @@ class CurlMultiEmailSender {
 	 * @since 1.0.0
 	 */
 	public static function reset() {
-		self::$mailer_instance     = null;
+		self::$mailer_instance    = null;
 		self::$cached_mailer_slug = null;
 	}
 }

@@ -1,7 +1,7 @@
 /**
  * wordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
@@ -21,13 +21,34 @@ import { Breadcrumb } from '@doublescale/components';
 import { getToLink, useNavigate } from '@doublescale/navigation';
 import { ImportProvider, useImportContext } from './contexts';
 import SourceGrid from './source-grid';
-import SourceHeader from './source-header';
 import MainContent from './main-content';
+import StepNavigation from './steps-navigation';
 import {
-	isIntegrationApiImportSource,
-	isThreeStepImportSource,
-} from './source-definitions';
+	ImportSourceFlowBar,
+	ImportWizardSidebar,
+} from './components/import-wizard-chrome';
+import { getImportWizardActiveStepLabel } from './source-definitions';
+import { useImportActions } from './use-importActions';
 import './style.scss';
+
+function getImportBreadcrumbItems(source: string, wizardStep: number) {
+	const items = [
+		{
+			label: __('Contacts List', 'doublescale'),
+			href: 'contacts',
+		},
+		{
+			label: __('Importing Contacts', 'doublescale'),
+		},
+	];
+
+	const activeStepLabel = getImportWizardActiveStepLabel(source, wizardStep);
+	if (activeStepLabel) {
+		items.push({ label: activeStepLabel });
+	}
+
+	return items;
+}
 
 interface Props {
 	open: boolean;
@@ -40,74 +61,22 @@ interface ImportModalContentProps {
 	onCompleted: () => void;
 }
 
-function StepSegmentBar({
-	totalSteps,
-	activeStep,
-}: {
-	totalSteps: number;
-	activeStep: number;
-}) {
-	return (
-		<div
-			className="flex w-full gap-1.5"
-			role="progressbar"
-			aria-valuenow={activeStep}
-			aria-valuemin={1}
-			aria-valuemax={totalSteps}
-			aria-label={__('Import steps', 'doublescale')}
-		>
-			{Array.from({ length: totalSteps }, (_, i) => {
-				const stepIndex = i + 1;
-				const complete = activeStep > stepIndex;
-				const active = activeStep === stepIndex;
-				return (
-					<div
-						key={stepIndex}
-						className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-muted"
-					>
-						<div
-							className={cn(
-								'h-full rounded-full transition-all duration-500 ease-out',
-								complete && 'w-full bg-primary',
-								active && !complete && 'w-full bg-primary/70',
-								!active && !complete && 'w-0 bg-transparent'
-							)}
-						/>
-					</div>
-				);
-			})}
-		</div>
-	);
-}
-
 const ImportModalContent: React.FC<ImportModalContentProps> = ({
 	onDismiss,
 	onCompleted,
 }) => {
 	const navigate = useNavigate();
-	const { state, returnToSourceStep, dispatch } = useImportContext();
+	const { state, dispatch } = useImportContext();
 	const { wizardStep, source } = state;
-
-	const totalSteps = !source ? 1 : isThreeStepImportSource(source) ? 3 : 2;
-	const displayStep =
-		wizardStep === 1 ? 1 : isThreeStepImportSource(source) ? wizardStep : 2;
-
-	const stepLabel =
-		wizardStep === 1
-			? __('Choose import source', 'doublescale')
-			: source === 'csv' && wizardStep === 2
-				? __('Upload your CSV file', 'doublescale')
-				: source === 'csv' && wizardStep === 3
-					? __('Map columns to contact fields', 'doublescale')
-					: isIntegrationApiImportSource(source) && wizardStep === 2
-						? __('Connect your account', 'doublescale')
-						: isIntegrationApiImportSource(source) && wizardStep === 3
-							? __('Map fields and import', 'doublescale')
-							: __('Connect, map, and import', 'doublescale');
+	const { importContacts } = useImportActions();
 
 	const handleImportComplete = async () => {
 		await onCompleted();
 		onDismiss();
+	};
+
+	const handleImportContacts = async () => {
+		await importContacts();
 	};
 
 	const handleContinueFromSource = () => {
@@ -116,16 +85,13 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 	};
 
-	const headerSubtitle =
-		wizardStep === 1
-			? __(
-					'Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; other sources use two.',
-					'doublescale'
-				)
-			: __(
-					'Follow the stages below. You can change the source until you start importing.',
-					'doublescale'
-				);
+	const headerSubtitle = __(
+		'Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; other sources use two.',
+		'doublescale'
+	);
+
+	const breadcrumbItems = getImportBreadcrumbItems(source, wizardStep);
+	const isWizardStep = wizardStep > 1;
 
 	const handleBreadcrumbNavigate = (href: string) => {
 		onDismiss();
@@ -134,108 +100,71 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 
 	return (
 		<>
-			<DialogHeader className="shrink-0 border-b border-border/50 bg-white/90 pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
+			<DialogHeader className="shrink-0 border-b border-border/50 bg-white pb-0">
 				<DialogTitle className="sr-only">
 					{__('Import contacts', 'doublescale')}
 				</DialogTitle>
-				<div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center justify-between gap-3 px-6 py-3 ">
+				<div className="mx-auto w-full max-w-[1680px] px-6 pt-3 pb-3">
 					<Breadcrumb
-						items={[
-							{
-								label: __('Contacts List', 'doublescale'),
-								href: 'contacts',
-							},
-							{
-								label: __('Importing Contacts', 'doublescale'),
-							},
-						]}
+						items={breadcrumbItems}
 						handleNavigate={handleBreadcrumbNavigate}
 					/>
 				</div>
 			</DialogHeader>
 
-			<div className="import-modal-page-scroll mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto p-6 bg-[#F7F8FA]">
-				<div className="import-modal-content flex shrink-0 flex-col rounded-[20px] bg-[#fff] p-6 pb-8 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
-					<div className="shrink-0 space-y-2.5">
-						<h2 className="text-left font-bold tracking-tight text-foreground leading-9 text-2xl">
-							{__('Import contacts', 'doublescale')}
-						</h2>
-						<p className="text-left text-base leading-6 text-muted-foreground">
-							{headerSubtitle}
-						</p>
-					</div>
-
+			<div className="import-modal-page-scroll mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto bg-[#F7F8FA] p-6">
+				<div
+					className={cn(
+						'import-modal-content mx-auto flex w-full max-w-[1680px] flex-col rounded-[20px] bg-white p-6 pb-8 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]',
+						isWizardStep && 'import-modal-content--natural-height'
+					)}
+				>
 					{wizardStep > 1 && source && (
-						<div className="mt-5 shrink-0 ">
-							<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-								<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-									{sprintf(
-										/* translators: 1: current step, 2: total steps */
-										__('Step %1$d of %2$d', 'doublescale'),
-										displayStep,
-										totalSteps
-									)}
-								</p>
-								<span
-									className="hidden h-3 w-px bg-border sm:inline"
-									aria-hidden
-								/>
-								<Button
-									type="button"
-									variant="link"
-									size="sm"
-									className="h-auto p-0 text-sm font-medium text-primary"
-									onClick={returnToSourceStep}
-									disabled={state.importing}
-								>
-									{__('Choose another source', 'doublescale')}
-								</Button>
-							</div>
-							<div className="mt-3">
-								<StepSegmentBar
-									totalSteps={totalSteps}
-									activeStep={displayStep}
-								/>
-							</div>
-							<p className="mt-2 text-sm font-medium text-foreground">
-								{stepLabel}
-							</p>
+						<div className="import-modal__flow-bar-top mb-6 shrink-0">
+							<ImportSourceFlowBar />
 						</div>
 					)}
 
-					<div
-						className={cn(
-							'import-modal__body mt-6',
-							wizardStep === 1 ? 'shrink-0' : 'min-h-0 flex-1'
-						)}
-					>
-						{wizardStep === 1 ? (
-							<SourceGrid />
-						) : (
-							<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-								<SourceHeader />
-								<div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6 sm:py-8">
+					{wizardStep === 1 ? (
+						<>
+							<div className="shrink-0 space-y-2.5">
+								<h2 className="text-left text-2xl font-bold leading-9 tracking-tight text-foreground">
+									{__('Import contacts', 'doublescale')}
+								</h2>
+								<p className="text-left text-base leading-6 text-muted-foreground">
+									{headerSubtitle}
+								</p>
+							</div>
+							<div className="import-modal__body mt-6 shrink-0">
+								<SourceGrid />
+							</div>
+							<div className="import-modal__footer">
+								<Button
+									type="button"
+									variant="default"
+									disabled={!source || state.importing}
+									onClick={handleContinueFromSource}
+								>
+									{__('Continue', 'doublescale')}
+								</Button>
+							</div>
+						</>
+					) : (
+						<>
+							<div className="import-modal-wizard__layout import-modal-wizard__layout--natural flex min-w-0 items-start gap-6">
+								<ImportWizardSidebar />
+								<div className="import-modal-wizard__main import-modal-wizard__main--natural min-w-0 flex-1">
 									<MainContent
 										onImportComplete={handleImportComplete}
 									/>
 								</div>
 							</div>
-						)}
-					</div>
-
-					{wizardStep === 1 && (
-						<div className="import-modal__footer">
-							<Button
-								type="button"
-								variant="default"
-								
-								
-								disabled={!source || state.importing}
-								onClick={handleContinueFromSource}
-							>
-								{__('Continue', 'doublescale')}
-							</Button>
-						</div>
+							<div className="import-modal__wizard-footer mt-6 shrink-0 pt-6">
+								<StepNavigation
+									onImportContacts={handleImportContacts}
+								/>
+							</div>
+						</>
 					)}
 				</div>
 			</div>

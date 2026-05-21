@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Activities\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -252,7 +251,7 @@ class ActivityAssociationModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		// Validate entity type before creating
 		static::creating(

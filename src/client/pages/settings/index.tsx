@@ -404,7 +404,7 @@ const SettingsPage: React.FC = () => {
 						<ProFeatureNotice
 							featureName={__('Link Triggers', 'doublescale')}
 							description={__(
-								'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with DoubleScale Pro.',
+								'Create trackable short links that count clicks, fire automations, and sync tags or lists on the contact — available with DoubleScale Pro.',
 								'doublescale'
 							)}
 						/>

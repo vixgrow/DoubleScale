@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Curlmulti;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Providers\SMTP2GO\Account_API;
@@ -180,7 +179,7 @@ class Smtp2goCurlMultiMailer extends AbstractCurlMultiMailer {
 		$account_api = new Account_API( $credentials['api_key'] );
 
 		// Send chunk using Account_API with optional logging callback
-		$log_callback = function( $email, $request_data, $response, $http_code, $error, $type ) {
+		$log_callback = function ( $email, $request_data, $response, $http_code, $error, $type ) {
 			/**
 			 * Fires when SMTP2GO email data is being sent or received.
 			 *

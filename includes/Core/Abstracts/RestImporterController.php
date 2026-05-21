@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Core\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {

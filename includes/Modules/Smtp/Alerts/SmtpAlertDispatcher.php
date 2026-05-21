@@ -303,7 +303,10 @@ final class SmtpAlertDispatcher {
 					__( '%s alert request error', 'doublescale' ),
 					ucfirst( $channel )
 				),
-				array( 'response' => $response, 'context' => $context )
+				array(
+					'response' => $response,
+					'context'  => $context,
+				)
 			);
 			return;
 		}

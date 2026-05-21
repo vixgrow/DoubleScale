@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Zip class
  */
-class Zip extends Rule
-{
+class Zip extends Rule {
+
 
 	/**
 	 * Name
@@ -80,11 +79,10 @@ class Zip extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 		return $contact->zip;
 	}
 }
 
-RulesManager::instance()->register(new Zip());
+RulesManager::instance()->register( new Zip() );

@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Crm\Slack;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
@@ -17,7 +16,7 @@ use DoubleScale\Modules\Automations\Abstracts\ProAutomationStubAction;
  */
 class SendToChannel extends ProAutomationStubAction {
 
-/**
+	/**
 	 * Action Name
 	 *
 	 * @var string

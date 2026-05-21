@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Campaign;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1684,7 +1683,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * @return int
 	 */
 	public function get_message_mode() {
-		 return CommunicationTrackingModel::MODE_EMAIL;
+		return CommunicationTrackingModel::MODE_EMAIL;
 	}
 
 	/**
@@ -1693,7 +1692,7 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * @return string
 	 */
 	public function get_channel_context() {
-		 return 'email';
+		return 'email';
 	}
 
 	/**
@@ -1715,9 +1714,9 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * 3. Process all merge tags (body + footer)
 	 * 4. Add click tracking and unsubscribe links
 	 *
-	 * @param TemplateModel                                                                   $template Template model
+	 * @param TemplateModel                                                               $template Template model
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model
-	 * @param CommunicationTrackingModel                                                      $campaign_message Campaign tracking record
+	 * @param CommunicationTrackingModel                                                  $campaign_message Campaign tracking record
 	 * @return array Message data array with subject, body, recipient, hash_key
 	 */
 	protected function prepare_message_content( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ) {
@@ -1869,8 +1868,8 @@ class EmailProcessing extends AbstractCampaignProcessing {
 	 * Merge CRM deep-link info into the SMTP module email log for this send.
 	 *
 	 * @template T
-	 * @param CampaignModel  $campaign Campaign (broadcast, email sequence, or sequence step).
-	 * @param callable(): T    $callback Operation that triggers wp_mail / SMTP send + log.
+	 * @param CampaignModel $campaign Campaign (broadcast, email sequence, or sequence step).
+	 * @param callable(): T $callback Operation that triggers wp_mail / SMTP send + log.
 	 * @return T
 	 */
 	protected function with_smtp_campaign_log_context( CampaignModel $campaign, callable $callback ) {

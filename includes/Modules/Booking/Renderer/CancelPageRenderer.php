@@ -6,7 +6,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 class CancelPageRenderer extends BaseTemplateRenderer {

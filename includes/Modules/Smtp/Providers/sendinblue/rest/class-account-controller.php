@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SendInBlue\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Brevo\Client\Configuration;
@@ -27,7 +26,8 @@ use WP_REST_Request;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -51,16 +51,16 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'api_key'        => [
+		return array(
+			'api_key'        => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'sending_domain' => [
+			),
+			'sending_domain' => array(
 				'type'     => 'string',
 				'required' => false,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -85,13 +85,12 @@ class Account_Controller extends Abstract_Account_Controller {
 		try {
 			$result = $api_instance->getAccount();
 
-			return [
+			return array(
 				'id'   => $account_id,
 				'name' => $account_name,
-			];
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'doublescale_smtp_sendinblue_api_key_invalid', __( 'API key is invalid.', 'doublescale' ) );
 		}
 	}
-
 }

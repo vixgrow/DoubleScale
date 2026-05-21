@@ -73,15 +73,15 @@ class EmailRenderer {
 	 * Constructor
 	 */
 	public function __construct() {
-		 $this->block_registry = BlockRegistry::instance();
+		$this->block_registry = BlockRegistry::instance();
 	}
 
 	/**
 	 * Render email template
 	 *
-	 * @param int                                         $template_id Template ID
+	 * @param int                                      $template_id Template ID
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
-	 * @param int|null                                    $tracking_id Optional tracking ID for stored merge tag values
+	 * @param int|null                                 $tracking_id Optional tracking ID for stored merge tag values
 	 * @return string HTML output
 	 */
 	public function render_template( $template_id, $contact = null, $tracking_id = null ) {
@@ -133,10 +133,10 @@ class EmailRenderer {
 	 * Render builder content directly from builder data (without template ID)
 	 * Useful for email sequences and campaigns where content is stored in email_body field
 	 *
-	 * @param array                                       $builder_data Builder content data (sections, globalSettings, buttonSettings)
+	 * @param array                                    $builder_data Builder content data (sections, globalSettings, buttonSettings)
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
-	 * @param string                                      $preview_text Optional preview text
-	 * @param string                                      $footer_html Optional footer HTML to inject before </body> tag
+	 * @param string                                   $preview_text Optional preview text
+	 * @param string                                   $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
 	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '', $footer_html = '' ) {
@@ -192,11 +192,11 @@ class EmailRenderer {
 	/**
 	 * Build email HTML structure
 	 *
-	 * @param array                                       $content Template content
-	 * @param array                                       $global_settings Global email settings
+	 * @param array                                    $content Template content
+	 * @param array                                    $global_settings Global email settings
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
-	 * @param string                                      $preview_text Preview text for email clients
-	 * @param string                                      $footer_html Optional footer HTML
+	 * @param string                                   $preview_text Preview text for email clients
+	 * @param string                                   $footer_html Optional footer HTML
 	 * @return string HTML output
 	 */
 	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
@@ -400,7 +400,7 @@ class EmailRenderer {
 	 * Note: Conditional section rendering is a Pro feature. If Pro is not active
 	 * but conditions exist, the section will render for all contacts (graceful degradation).
 	 *
-	 * @param array                                       $section Section data
+	 * @param array                                    $section Section data
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model
 	 * @return bool True if section should be rendered
 	 */
@@ -465,7 +465,7 @@ class EmailRenderer {
 	 * - min-width forces stacking on small screens (NO media query needed!)
 	 * - max-width prevents overflow on desktop
 	 *
-	 * @param array                                       $section Section data
+	 * @param array                                    $section Section data
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -516,8 +516,8 @@ class EmailRenderer {
 		$section_style_string = $this->build_style_string( $section_styles );
 
 		// Get canvas width; content width is reduced by horizontal padding
-		$canvas_width = isset( $this->canvas_width ) ? $this->canvas_width : 900;
-		$content_width = max( 200, $canvas_width - $padding_px['left'] - $padding_px['right'] );
+		$canvas_width        = isset( $this->canvas_width ) ? $this->canvas_width : 900;
+		$content_width       = max( 200, $canvas_width - $padding_px['left'] - $padding_px['right'] );
 		$this->content_width = $content_width;
 
 		// Start section — wrap with a div for margin if needed
@@ -562,11 +562,11 @@ class EmailRenderer {
 				// which would break if nested inside a parent mso block).
 				//
 				// Structure per column:
-				//   <!--[if mso]><table><tr><td ...><![endif]-->
-				//   <div> (column wrapper visible to all clients)
-				//     <table> block content </table>
-				//   </div>
-				//   <!--[if mso]></td></tr></table><![endif]-->
+				// <!--[if mso]><table><tr><td ...><![endif]-->
+				// <div> (column wrapper visible to all clients)
+				// <table> block content </table>
+				// </div>
+				// <!--[if mso]></td></tr></table><![endif]-->
 				// =============================================
 
 				// Wrapper div eliminates whitespace between inline-block columns
@@ -609,7 +609,7 @@ class EmailRenderer {
 						$container_styles['background-position'] = $col_parsed['bg_position'];
 					}
 					$container_style_str = $this->build_style_string( $container_styles );
-					$bgcolor_attr = ! empty( $col_parsed['bg_color'] ) ? ' bgcolor="' . esc_attr( $col_parsed['bg_color'] ) . '"' : '';
+					$bgcolor_attr        = ! empty( $col_parsed['bg_color'] ) ? ' bgcolor="' . esc_attr( $col_parsed['bg_color'] ) . '"' : '';
 
 					$html .= '<div class="mobile-container"' . $bgcolor_attr . ' style="' . esc_attr( $container_style_str ) . '">';
 					$html .= '<table border="0" cellspacing="0" cellpadding="0" width="100%" style="overflow-wrap:anywhere;word-wrap:anywhere;font-size:initial"><tbody><tr>';
@@ -704,7 +704,7 @@ class EmailRenderer {
 	 * Render blocks in a column with template-aware layout handling
 	 * Uses the Layout Handler Registry pattern
 	 *
-	 * @param array                                       $blocks Array of blocks
+	 * @param array                                    $blocks Array of blocks
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -736,7 +736,7 @@ class EmailRenderer {
 				$html .= '<tr><td style="padding: 0;">';
 				$html .= $this->render_block( $block, $contact );
 				$html .= '</td></tr>';
-				$i++;
+				++$i;
 			}
 		}
 
@@ -746,7 +746,7 @@ class EmailRenderer {
 	/**
 	 * Render a block
 	 *
-	 * @param array                                       $block Block data
+	 * @param array                                    $block Block data
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -783,22 +783,45 @@ class EmailRenderer {
 	 * @return array{top:int,right:int,bottom:int,left:int}
 	 */
 	private function parse_padding_to_px( $padding ) {
-		$default = array( 'top' => 0, 'right' => 0, 'bottom' => 0, 'left' => 0 );
+		$default = array(
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
 		if ( empty( $padding ) ) {
 			return $default;
 		}
 		$parts = preg_split( '/\s+/', trim( $padding ), 4 );
-		$px    = array_map( function ( $p ) {
-			return max( 0, (int) preg_replace( '/[^0-9]/', '', $p ) );
-		}, $parts );
+		$px    = array_map(
+			function ( $p ) {
+				return max( 0, (int) preg_replace( '/[^0-9]/', '', $p ) );
+			},
+			$parts
+		);
 		if ( count( $px ) === 1 ) {
-			return array( 'top' => $px[0], 'right' => $px[0], 'bottom' => $px[0], 'left' => $px[0] );
+			return array(
+				'top'    => $px[0],
+				'right'  => $px[0],
+				'bottom' => $px[0],
+				'left'   => $px[0],
+			);
 		}
 		if ( count( $px ) === 2 ) {
-			return array( 'top' => $px[0], 'right' => $px[1], 'bottom' => $px[0], 'left' => $px[1] );
+			return array(
+				'top'    => $px[0],
+				'right'  => $px[1],
+				'bottom' => $px[0],
+				'left'   => $px[1],
+			);
 		}
 		if ( count( $px ) >= 4 ) {
-			return array( 'top' => $px[0], 'right' => $px[1], 'bottom' => $px[2], 'left' => $px[3] );
+			return array(
+				'top'    => $px[0],
+				'right'  => $px[1],
+				'bottom' => $px[2],
+				'left'   => $px[3],
+			);
 		}
 		return $default;
 	}
@@ -839,8 +862,8 @@ class EmailRenderer {
 	 * Render template with tracking context
 	 * Convenience method that automatically sets tracking context and renders
 	 *
-	 * @param int                                         $template_id Template ID
-	 * @param int                                         $tracking_id Communication tracking ID
+	 * @param int                                      $template_id Template ID
+	 * @param int                                      $tracking_id Communication tracking ID
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model (optional, will be fetched from tracking if not provided)
 	 * @return string HTML output
 	 */
@@ -931,7 +954,7 @@ class EmailRenderer {
 					break;
 				case 'background-position':
 					$result['bg_position'] = $value;
-					$bg_parts[]           = "background-position:{$value};";
+					$bg_parts[]            = "background-position:{$value};";
 					break;
 			}
 		}
@@ -959,5 +982,4 @@ class EmailRenderer {
 			$this->tracking_section_ids = array();
 		}
 	}
-
 }

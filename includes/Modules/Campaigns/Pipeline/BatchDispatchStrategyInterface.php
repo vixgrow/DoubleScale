@@ -17,7 +17,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +44,7 @@ interface BatchDispatchStrategyInterface {
 	 * - Dispatching the contacts (send / enqueue)
 	 * - Advancing $ctx->offset for every contact processed
 	 *
-	 * @param CampaignContext                               $ctx
+	 * @param CampaignContext                          $ctx
 	 * @param \Illuminate\Database\Eloquent\Collection $contacts
 	 * @return BatchResult
 	 */

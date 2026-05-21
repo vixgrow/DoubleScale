@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -96,7 +95,7 @@ class SendgridBulkMailer extends AbstractBulkMailer {
 		if ( ! $account_api ) {
 			return new WP_Error(
 				'sendgrid_not_configured',
-				__( 'SendGrid is not properly configured.', 'doublescale')
+				__( 'SendGrid is not properly configured.', 'doublescale' )
 			);
 		}
 
@@ -104,7 +103,7 @@ class SendgridBulkMailer extends AbstractBulkMailer {
 		if ( ! method_exists( $account_api, 'send_batch' ) ) {
 			return new WP_Error(
 				'sendgrid_batch_not_supported',
-				__( 'SendGrid batch sending is not available. Please update smtp.', 'doublescale')
+				__( 'SendGrid batch sending is not available. Please update smtp.', 'doublescale' )
 			);
 		}
 
@@ -157,7 +156,7 @@ class SendgridBulkMailer extends AbstractBulkMailer {
 		return array(
 			'success'    => true,
 			'message_id' => $message_id,
-			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale'),
+			'message'    => $result['message'] ?? __( 'Batch sent successfully', 'doublescale' ),
 			'sent_count' => $result['sent_count'] ?? count( $batch_data['recipients'] ),
 			'failed'     => $result['failed'] ?? array(),
 		);
@@ -185,5 +184,4 @@ class SendgridBulkMailer extends AbstractBulkMailer {
 
 		return $headers;
 	}
-
 }

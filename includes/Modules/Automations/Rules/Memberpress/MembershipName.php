@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Memberpress;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Membership Name class
  */
-class MembershipName extends Rule
-{
+class MembershipName extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -76,11 +75,10 @@ class MembershipName extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'     => __('Is', 'doublescale'),
-			'is_not' => __('Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -91,11 +89,10 @@ class MembershipName extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		$options = array();
 
-		if (! defined('MEPR_PLUGIN_NAME')) {
+		if ( ! defined( 'MEPR_PLUGIN_NAME' ) ) {
 			return $options;
 		}
 
@@ -107,13 +104,13 @@ class MembershipName extends Rule
 			)
 		);
 
-		if (empty($memberships) || ! is_array($memberships)) {
+		if ( empty( $memberships ) || ! is_array( $memberships ) ) {
 			return $options;
 		}
 
-		foreach ($memberships as $membership) {
-			if (is_object($membership) && isset($membership->ID)) {
-				$options[ (int) $membership->ID ] = wp_kses_post(get_the_title($membership->ID));
+		foreach ( $memberships as $membership ) {
+			if ( is_object( $membership ) && isset( $membership->ID ) ) {
+				$options[ (int) $membership->ID ] = wp_kses_post( get_the_title( $membership->ID ) );
 			}
 		}
 
@@ -129,9 +126,8 @@ class MembershipName extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		$membership_id = $automation_contact->get_data('membership_id');
+	public function get_value( $automation_contact ) {
+		$membership_id = $automation_contact->get_data( 'membership_id' );
 		return $membership_id ? (string) $membership_id : '';
 	}
 }
@@ -139,8 +135,8 @@ class MembershipName extends Rule
 add_action(
 	'init',
 	function () {
-		if (defined('MEPR_PLUGIN_NAME')) {
-			RulesManager::instance()->register(new MembershipName());
+		if ( defined( 'MEPR_PLUGIN_NAME' ) ) {
+			RulesManager::instance()->register( new MembershipName() );
 		}
 	},
 	99

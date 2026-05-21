@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\MergeTags\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -62,7 +61,7 @@ class SubscribeLink extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param ContactModel $contact Contact Model.
-	 * @param string        $merge_tag Merge Tag.
+	 * @param string       $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
@@ -74,7 +73,7 @@ class SubscribeLink extends MergeTag {
 		$hash_id = $contact->hash_id;
 		$args    = array(
 			'doublescale-subscribe' => '1',
-			'id'                 => $hash_id,
+			'id'                    => $hash_id,
 		);
 		$link    = add_query_arg( $args, home_url() );
 

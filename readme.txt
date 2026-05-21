@@ -78,6 +78,16 @@ This plugin includes compiled JavaScript and CSS in the `build/` directory. Huma
 
 Outputs include client bundles under `build/`. Third-party libraries are listed in `package.json`.
 
+**Lint / code standards**
+
+The PHP code follows the WordPress Coding Standards (WPCS 3.x) with `WordPress-Extra` (security sniffs) and `PHPCompatibilityWP` enabled.
+
+1. `composer install` — installs PHPCS, WPCS, and the rest of the dev tools.
+2. `composer lint` — runs `phpcs --standard=phpcs.xml.dist` against `doublescale.php`, `includes/`, `bin/`, and `phpunit/`.
+3. `composer format` — runs `phpcbf` to auto-fix what it can (whitespace, indentation, brace style).
+
+For plugin-structure / readme / asset-organization checks, install the official [Plugin Check](https://wordpress.org/plugins/plugin-check/) plugin into a local WordPress install and run it via **Tools → Plugin Check**. Plugin Check is the same tool the WordPress.org review team runs.
+
 == Installation ==
 
 = Automatic =
@@ -158,7 +168,7 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 
 = How do I get help? =
 
-Documentation: [doublescale.io/docs](https://doublescale.io/docs). Community support via WordPress.org. Pro tiers include email and priority support.
+Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
 
@@ -183,6 +193,11 @@ Privacy-minded operators have access to: per-contact GDPR exports, hard-delete w
 == External Services ==
 
 DoubleScale connects to external services **only when you configure** those integrations. No data is transmitted without your API keys, OAuth grants, or explicit provider setup. Each provider listed below is independent of DoubleScale; using one means you also agree to that provider's terms and privacy policy.
+
+For every service below:
+
+* **Endpoint** — API base URL used after you save credentials (not a public marketing or documentation page; it may not load in a browser).
+* **Terms** / **Privacy** — Public legal pages for that provider. These are the URLs WordPress reviewers and site owners should open to read each service's policies.
 
 = AI services =
 
@@ -218,19 +233,19 @@ Each SMTP provider is selectable per connection. When you configure one, DoubleS
 
 **SparkPost**
 * Endpoint: `https://api.sparkpost.com`
-* Terms: https://www.messagebird.com/en/legal/terms-of-use · Privacy: https://www.messagebird.com/en/legal/privacy
+* Terms: https://www.sparkpost.com/legal/terms-of-use · Privacy: https://bird.com/en/legal/privacy
 
 **SMTP.com**
 * Endpoint: `https://api.smtp.com`
-* Terms: https://www.smtp.com/terms-of-service/ · Privacy: https://www.smtp.com/privacy-policy/
+* Terms: https://smtp.com/terms-of-service · Privacy: https://smtp.com/privacy-policy
 
 **SMTP2GO**
 * Endpoint: `https://api.smtp2go.com`
-* Terms: https://www.smtp2go.com/terms-of-service/ · Privacy: https://www.smtp2go.com/privacy-policy/
+* Terms: https://www.smtp2go.com/terms/ · Privacy: https://www.smtp2go.com/privacy/
 
 **MailerSend**
 * Endpoint: `https://api.mailersend.com`
-* Terms: https://www.mailersend.com/legal/terms · Privacy: https://www.mailersend.com/legal/privacy-policy
+* Terms: https://www.mailersend.com/legal/terms-of-use · Privacy: https://www.mailersend.com/legal/privacy-policy
 
 **Mailjet**
 * Endpoint: `https://api.mailjet.com`
@@ -254,7 +269,7 @@ Each SMTP provider is selectable per connection. When you configure one, DoubleS
 
 **SocketLabs**
 * Endpoint: `https://inject.socketlabs.com`
-* Terms: https://www.socketlabs.com/master-services-agreement/ · Privacy: https://www.socketlabs.com/privacy-policy/
+* Terms: https://www.socketlabs.com/terms-of-use · Privacy: https://www.socketlabs.com/privacy-policy/
 
 **Loops**
 * Endpoint: `https://app.loops.so/api`
@@ -334,13 +349,11 @@ Disable any connector by removing its credentials in **DoubleScale → Settings*
 
 == Credits ==
 
-* **Website:** [doublescale.io](https://doublescale.io)
-* **Documentation:** [doublescale.io/docs](https://doublescale.io/docs)
+* **Website & documentation:** [doublescale.io](https://doublescale.io)
 
 == Support ==
 
-* **Docs:** [doublescale.io/docs](https://doublescale.io/docs)
-* **Website:** [doublescale.io](https://doublescale.io)
+* **Website & documentation:** [doublescale.io](https://doublescale.io)
 * **WordPress.org support:** https://wordpress.org/support/plugin/doublescale/ (when the plugin listing is public)
 
 == Contribute ==

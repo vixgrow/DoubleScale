@@ -24,8 +24,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Last Enrollment Date class
  */
-class LastEnrollmentDate extends Rule
-{
+class LastEnrollmentDate extends Rule {
+
 
 	/**
 	 * Name
@@ -70,14 +70,13 @@ class LastEnrollmentDate extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'before'  => __('Before', 'doublescale'),
-			'after'   => __('After', 'doublescale'),
-			'on'      => __('On', 'doublescale'),
-			'between' => __('Between', 'doublescale'),
-			'within'  => __('Within', 'doublescale'),
+			'before'  => __( 'Before', 'doublescale' ),
+			'after'   => __( 'After', 'doublescale' ),
+			'on'      => __( 'On', 'doublescale' ),
+			'between' => __( 'Between', 'doublescale' ),
+			'within'  => __( 'Within', 'doublescale' ),
 		);
 	}
 
@@ -90,16 +89,15 @@ class LastEnrollmentDate extends Rule
 	 *
 	 * @return string|null Last enrollment date in Y-m-d format or null if no enrollments
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
-		if (! $contact || empty($contact->email)) {
+		if ( ! $contact || empty( $contact->email ) ) {
 			return null;
 		}
 
-		$user = get_user_by('email', $contact->email);
-		if (! $user) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return null;
 		}
 
@@ -107,21 +105,23 @@ class LastEnrollmentDate extends Rule
 		$table_name = esc_sql( $wpdb->prefix . 'learnpress_user_items' );
 
 		// Check if table exists.
-		$table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
-		if (! $table_exists) {
+		$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+		if ( ! $table_exists ) {
 			return null;
 		}
 
 		// Get the latest enrollment date.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table_name is the LearnPress-prefixed user_items table; user id bound via prepare().
-		$result = $wpdb->get_var($wpdb->prepare(
-			"SELECT MAX(start_time) FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
-			$user->ID
-		));
+		$result = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT MAX(start_time) FROM {$table_name} WHERE user_id = %d AND item_type = 'lp_course' AND status = 'enrolled'",
+				$user->ID
+			)
+		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		if ($result) {
-			return gmdate('Y-m-d', strtotime($result));
+		if ( $result ) {
+			return gmdate( 'Y-m-d', strtotime( $result ) );
 		}
 
 		return null;
@@ -133,49 +133,48 @@ class LastEnrollmentDate extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$last_enrollment_date = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$last_enrollment_date = $this->get_value( $automation_contact );
 		$operator             = $rule['operator'] ?? '';
 		$rule_value           = $rule['value'] ?? '';
 
-		if (empty($last_enrollment_date)) {
+		if ( empty( $last_enrollment_date ) ) {
 			return false;
 		}
 
-		$enrollment_timestamp = strtotime($last_enrollment_date);
+		$enrollment_timestamp = strtotime( $last_enrollment_date );
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'before':
-				$rule_timestamp = strtotime($rule_value);
+				$rule_timestamp = strtotime( $rule_value );
 				return $enrollment_timestamp < $rule_timestamp;
 
 			case 'after':
-				$rule_timestamp = strtotime($rule_value);
+				$rule_timestamp = strtotime( $rule_value );
 				return $enrollment_timestamp > $rule_timestamp;
 
 			case 'on':
-				$rule_timestamp = strtotime($rule_value);
-				return gmdate('Y-m-d', $enrollment_timestamp) === gmdate('Y-m-d', $rule_timestamp);
+				$rule_timestamp = strtotime( $rule_value );
+				return gmdate( 'Y-m-d', $enrollment_timestamp ) === gmdate( 'Y-m-d', $rule_timestamp );
 
 			case 'between':
-				if (! is_array($rule_value) || count($rule_value) < 2) {
+				if ( ! is_array( $rule_value ) || count( $rule_value ) < 2 ) {
 					return false;
 				}
-				$start_timestamp = strtotime($rule_value[0]);
-				$end_timestamp   = strtotime($rule_value[1]);
+				$start_timestamp = strtotime( $rule_value[0] );
+				$end_timestamp   = strtotime( $rule_value[1] );
 				return $enrollment_timestamp >= $start_timestamp && $enrollment_timestamp <= $end_timestamp;
 
 			case 'within':
-				if (! is_numeric($rule_value)) {
+				if ( ! is_numeric( $rule_value ) ) {
 					return false;
 				}
 				$days_ago         = (int) $rule_value;
-				$cutoff_timestamp = strtotime("-{$days_ago} days");
+				$cutoff_timestamp = strtotime( "-{$days_ago} days" );
 				return $enrollment_timestamp >= $cutoff_timestamp;
 
 			default:
@@ -187,8 +186,8 @@ class LastEnrollmentDate extends Rule
 add_action(
 	'init',
 	function () {
-		if (\doublescale_is_plugin_active('learnpress/learnpress.php')) {
-			RulesManager::instance()->register(new LastEnrollmentDate());
+		if ( \doublescale_is_plugin_active( 'learnpress/learnpress.php' ) ) {
+			RulesManager::instance()->register( new LastEnrollmentDate() );
 		}
 	},
 	99

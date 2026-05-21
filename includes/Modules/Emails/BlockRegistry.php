@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Blocks\EmailBlockInterface;
@@ -91,8 +90,8 @@ class BlockRegistry {
 	/**
 	 * Render a block
 	 *
-	 * @param string                                    $type Block type
-	 * @param array                                     $props Block properties
+	 * @param string                                   $type Block type
+	 * @param array                                    $props Block properties
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */

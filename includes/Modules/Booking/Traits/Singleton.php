@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Traits;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**

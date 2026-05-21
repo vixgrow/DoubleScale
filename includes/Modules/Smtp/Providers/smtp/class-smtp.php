@@ -51,5 +51,4 @@ class SMTP extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

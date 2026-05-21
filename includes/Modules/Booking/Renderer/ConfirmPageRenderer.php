@@ -5,7 +5,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 class ConfirmPageRenderer extends BaseTemplateRenderer {
@@ -35,20 +34,22 @@ class ConfirmPageRenderer extends BaseTemplateRenderer {
 		$reschedule_permissions = $this->check_reschedule_permissions( $advanced_settings, $booking_array, $timezone );
 
 		// Include waiting list position if booking is in waiting status.
-		$is_waiting              = 'waiting' === $booking->status;
-		$waiting_list_position   = $is_waiting ? $booking->waiting_list_position : null;
+		$is_waiting            = 'waiting' === $booking->status;
+		$waiting_list_position = $is_waiting ? $booking->waiting_list_position : null;
 
 		$template_path = __DIR__ . '/templates/confirm.php';
 
 		return $this->render_template_page(
 			$template_path,
 			array(
-				'booking_array'         => $booking_array,
-				'title'                 => $booking->getBookableName() ?: __( 'Booking Confirmation', 'doublescale' ),
-				'can_cancel'            => $cancel_permissions['can_cancel'],
-				'can_reschedule'        => $reschedule_permissions['can_reschedule'],
-				'is_waiting'            => $is_waiting,
-				'waiting_list_position' => $waiting_list_position,
+				'booking_array'             => $booking_array,
+				'title'                     => $booking->getBookableName() ?: __( 'Booking Confirmation', 'doublescale' ),
+				'can_cancel'                => $cancel_permissions['can_cancel'],
+				'cancel_denied_message'     => $cancel_permissions['message'],
+				'can_reschedule'            => $reschedule_permissions['can_reschedule'],
+				'reschedule_denied_message' => $reschedule_permissions['message'],
+				'is_waiting'                => $is_waiting,
+				'waiting_list_position'     => $waiting_list_position,
 			)
 		);
 	}

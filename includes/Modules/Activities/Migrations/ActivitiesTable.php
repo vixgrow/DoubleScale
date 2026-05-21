@@ -10,8 +10,6 @@
 
 namespace DoubleScale\Modules\Activities\Migrations;
 
-
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Database\Migration;
@@ -39,17 +37,17 @@ class ActivitiesTable extends Migration {
 	 */
 	public function get_query() {
 		/**
-		  * Unified Activities Table Fields:
-		  *
-		  * id: BIGINT(20) NOT NULL AUTO_INCREMENT
-		  * contact_id: BIGINT(20) NULL - FK to contacts (for quick filtering)
-		  * activity_type: VARCHAR(50) NOT NULL - Type of activity (email_sent, sms_sent, note_added, etc.)
-		  * data: JSON NULL - All activity-specific data including subject/body
-		  * user_id: BIGINT(20) UNSIGNED NULL - User who performed action
-		  * activity_date: DATETIME NULL - When activity occurred (indexed for sorting/filtering)
-		  * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		  * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-		  */
+		 * Unified Activities Table Fields:
+		 *
+		 * id: BIGINT(20) NOT NULL AUTO_INCREMENT
+		 * contact_id: BIGINT(20) NULL - FK to contacts (for quick filtering)
+		 * activity_type: VARCHAR(50) NOT NULL - Type of activity (email_sent, sms_sent, note_added, etc.)
+		 * data: JSON NULL - All activity-specific data including subject/body
+		 * user_id: BIGINT(20) UNSIGNED NULL - User who performed action
+		 * activity_date: DATETIME NULL - When activity occurred (indexed for sorting/filtering)
+		 * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		 * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
 			contact_id BIGINT(20) NULL COMMENT "FK to contacts for quick filtering",
 			activity_type VARCHAR(50) NOT NULL COMMENT "email_sent, sms_sent, note_added, call_logged, meeting_scheduled, created, deal_created, stage_changed, etc.",

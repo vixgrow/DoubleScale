@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Activity;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -137,7 +136,7 @@ class WasActiveInactive extends Filter {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
 		$has_form_submissions = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_form_submissions ) ) === $table_form_submissions;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-shot existence check; caching would mask DDL state.
-		$has_page_visits      = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_page_visits ) ) === $table_page_visits;
+		$has_page_visits = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_page_visits ) ) === $table_page_visits;
 
 		$sql_timeframe = $this->build_timeframe_sql( $timeframe_data );
 		$time_bindings = $this->get_timeframe_bindings( $timeframe_data );

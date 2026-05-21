@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\Managers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
@@ -88,7 +87,7 @@ final class MergeTagsManager extends \DoubleScale\Modules\Booking\Abstracts\Mana
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string             $content Content.
+	 * @param string            $content Content.
 	 * @param BookingModel|null $booking Booking Model.
 	 *
 	 * @return string
@@ -100,7 +99,7 @@ final class MergeTagsManager extends \DoubleScale\Modules\Booking\Abstracts\Mana
 
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
-			function( $matches ) use ( $booking ) {
+			function ( $matches ) use ( $booking ) {
 				$group   = $matches[1];
 				$slug    = $matches[2];
 				$options = array();

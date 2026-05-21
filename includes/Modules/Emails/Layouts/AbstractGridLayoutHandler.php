@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -39,7 +38,7 @@ abstract class AbstractGridLayoutHandler extends AbstractLayoutHandler {
 	 */
 	public function can_handle( array $block ): bool {
 		return isset( $block['props']['inlineLayout'] ) && $block['props']['inlineLayout'] &&
-			   isset( $block['props']['containerId'] ) && $block['props']['containerId'] === $this->get_container_id();
+				isset( $block['props']['containerId'] ) && $block['props']['containerId'] === $this->get_container_id();
 	}
 
 	/**

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -72,7 +71,7 @@ class OrderShippingMethod extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'equal' => __( 'Equal', 'doublescale'),
+			'equal' => __( 'Equal', 'doublescale' ),
 		);
 	}
 
@@ -84,8 +83,8 @@ class OrderShippingMethod extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 $methods = \WC()->shipping()->get_shipping_methods();
-		$options  = array();
+		$methods = \WC()->shipping()->get_shipping_methods();
+		$options = array();
 		foreach ( $methods as $method ) {
 			$options[ $method->id ] = $method->method_title;
 		}
@@ -128,7 +127,7 @@ class OrderShippingMethod extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
@@ -142,7 +141,7 @@ class OrderShippingMethod extends Rule {
 				return $value === $rule_value;
 			default:
 				return false;
-		};
+		}
 	}
 }
 

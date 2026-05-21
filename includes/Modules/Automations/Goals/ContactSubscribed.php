@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Goals;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {

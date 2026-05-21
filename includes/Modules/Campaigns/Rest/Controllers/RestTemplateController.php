@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\CampaignModel;
@@ -123,22 +122,22 @@ class RestTemplateController extends RestController {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'merge_tags'  => array(
-							'description' => __( 'Merge tags to use in the template', 'doublescale'),
+							'description' => __( 'Merge tags to use in the template', 'doublescale' ),
 							'type'        => 'object',
 							'default'     => array(),
 						),
 						'contact_id'  => array(
-							'description' => __( 'Contact ID to use for merge tags', 'doublescale'),
+							'description' => __( 'Contact ID to use for merge tags', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => null,
 						),
 						'tracking_id' => array(
-							'description' => __( 'Communication tracking ID to use stored merge tag values', 'doublescale'),
+							'description' => __( 'Communication tracking ID to use stored merge tag values', 'doublescale' ),
 							'type'        => 'integer',
 							'default'     => null,
 						),
 						'preview'     => array(
-							'description' => __( 'Whether this is a preview render (strips tracking elements). If not provided, auto-detected based on context: true when no contact_id/tracking_id, false otherwise.', 'doublescale'),
+							'description' => __( 'Whether this is a preview render (strips tracking elements). If not provided, auto-detected based on context: true when no contact_id/tracking_id, false otherwise.', 'doublescale' ),
 							'type'        => 'boolean',
 							'default'     => null,
 						),
@@ -158,13 +157,13 @@ class RestTemplateController extends RestController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'type'   => array(
-							'description' => __( 'Filter by template type.', 'doublescale'),
+							'description' => __( 'Filter by template type.', 'doublescale' ),
 							'type'        => 'string',
 							'default'     => CampaignChannel::STR_EMAIL,
 							'enum'        => CampaignChannel::get_core_channel_strings(),
 						),
 						'search' => array(
-							'description'       => __( 'Search templates by name.', 'doublescale'),
+							'description'       => __( 'Search templates by name.', 'doublescale' ),
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -195,63 +194,63 @@ class RestTemplateController extends RestController {
 	 * @return array $schema The template schema
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'template',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'         => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale'),
-					 'type'        => 'integer',
-					 'readonly'    => true,
-				 ),
-				 'name'       => array(
-					 'description' => __( 'Name of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'type'       => array(
-					 'description' => __( 'Type of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'enum'        => CampaignChannel::get_core_channel_strings(),
-				 ),
-				 'body'       => array(
-					 'description' => __( 'Body of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => false,
-				 ),
-				 'settings'   => array(
-					 'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'doublescale'),
-					 'type'        => array( 'object', 'null' ),
-				 ),
-				 'created_at' => array(
-					 'description' => __( 'Creation time of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'readonly'    => false,
-				 ),
-				 'updated_at' => array(
-					 'description' => __( 'Update time of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'readonly'    => false,
-				 ),
-				 'thumbnail'  => array(
-					 'description' => __( 'Thumbnail URL of the template.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => false,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'esc_url_raw',
-					 ),
-				 ),
-				 'hidden'     => array(
-					 'description' => __( 'Whether the template is hidden from users.', 'doublescale'),
-					 'type'        => 'boolean',
-					 'required'    => false,
-					 'default'     => false,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'template',
+			'type'       => 'object',
+			'properties' => array(
+				'id'         => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
+				'name'       => array(
+					'description' => __( 'Name of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'type'       => array(
+					'description' => __( 'Type of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'enum'        => CampaignChannel::get_core_channel_strings(),
+				),
+				'body'       => array(
+					'description' => __( 'Body of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => false,
+				),
+				'settings'   => array(
+					'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'doublescale' ),
+					'type'        => array( 'object', 'null' ),
+				),
+				'created_at' => array(
+					'description' => __( 'Creation time of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'readonly'    => false,
+				),
+				'updated_at' => array(
+					'description' => __( 'Update time of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'readonly'    => false,
+				),
+				'thumbnail'  => array(
+					'description' => __( 'Thumbnail URL of the template.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => false,
+					'arg_options' => array(
+						'sanitize_callback' => 'esc_url_raw',
+					),
+				),
+				'hidden'     => array(
+					'description' => __( 'Whether the template is hidden from users.', 'doublescale' ),
+					'type'        => 'boolean',
+					'required'    => false,
+					'default'     => false,
+				),
+			),
+		);
 	}
 
 	/**
@@ -265,53 +264,53 @@ class RestTemplateController extends RestController {
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
-				'description'       => __( 'Limit results to those matching a string.', 'doublescale'),
+				'description'       => __( 'Limit results to those matching a string.', 'doublescale' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'search'   => array(
-				'description'       => __( 'Search templates by name.', 'doublescale'),
+				'description'       => __( 'Search templates by name.', 'doublescale' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'type'     => array(
-				'description' => __( 'Filter by template type.', 'doublescale'),
+				'description' => __( 'Filter by template type.', 'doublescale' ),
 				'type'        => 'string',
 				'default'     => CampaignChannel::STR_EMAIL,
 				'enum'        => CampaignChannel::get_core_channel_strings(),
 			),
 			'category' => array(
-				'description'       => __( 'Filter by template category.', 'doublescale'),
+				'description'       => __( 'Filter by template category.', 'doublescale' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'hidden'   => array(
-				'description' => __( 'Filter by hidden status.', 'doublescale'),
+				'description' => __( 'Filter by hidden status.', 'doublescale' ),
 				'type'        => 'integer',
 				'enum'        => array( 0, 1 ),
 			),
 			'is_pro'   => array(
-				'description' => __( 'Filter by pro status.', 'doublescale'),
+				'description' => __( 'Filter by pro status.', 'doublescale' ),
 				'type'        => 'integer',
 				'enum'        => array( 0, 1 ),
 			),
 			'per_page' => array(
-				'description' => __( 'Number of items to return in one page.', 'doublescale'),
+				'description' => __( 'Number of items to return in one page.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 20,
 			),
 			'page'     => array(
-				'description' => __( 'Current page of the collection.', 'doublescale'),
+				'description' => __( 'Current page of the collection.', 'doublescale' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
 			'orderby'  => array(
-				'description' => __( 'Order by field.', 'doublescale'),
+				'description' => __( 'Order by field.', 'doublescale' ),
 				'type'        => 'string',
 				'default'     => 'id',
 			),
 			'order'    => array(
-				'description' => __( 'Order direction.', 'doublescale'),
+				'description' => __( 'Order direction.', 'doublescale' ),
 				'type'        => 'string',
 				'default'     => 'DESC',
 				'enum'        => array( 'ASC', 'DESC' ),
@@ -446,7 +445,7 @@ class RestTemplateController extends RestController {
 			$template    = TemplateModel::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $template, 200 );
@@ -490,7 +489,7 @@ class RestTemplateController extends RestController {
 			$template    = TemplateModel::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$template_data = $this->prepare_template( $request );
@@ -538,7 +537,7 @@ class RestTemplateController extends RestController {
 			$template = TemplateModel::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Check if template has been used in any sent messages
@@ -635,7 +634,7 @@ class RestTemplateController extends RestController {
 			$templates    = TemplateModel::find_many( $template_ids );
 
 			if ( ! $templates ) {
-				return new WP_Error( 'error', __( 'Templates not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Templates not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			TemplateModel::destroy( $template_ids );
@@ -661,7 +660,7 @@ class RestTemplateController extends RestController {
 			$template    = TemplateModel::find( $template_id );
 
 			if ( ! $template ) {
-				return new WP_Error( 'error', __( 'Template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'error', __( 'Template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$template->delete();
@@ -869,7 +868,7 @@ class RestTemplateController extends RestController {
 		if ( empty( $html ) ) {
 			return new WP_Error(
 				'rendering_failed',
-				__( 'Failed to render template', 'doublescale'),
+				__( 'Failed to render template', 'doublescale' ),
 				array( 'status' => 500 )
 			);
 		}

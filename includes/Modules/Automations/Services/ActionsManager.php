@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -177,7 +176,7 @@ final class ActionsManager {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
 		/* translators: %s: action slug */
-		throw new Exception( sprintf( esc_html__( 'Action %s not found', 'doublescale'), esc_html( $slug )) );
+		throw new Exception( sprintf( esc_html__( 'Action %s not found', 'doublescale' ), esc_html( $slug ) ) );
 	}
 
 	/**
@@ -188,7 +187,7 @@ final class ActionsManager {
 	 * @return array
 	 */
 	public function get_actions() {
-		 return $this->actions;
+		return $this->actions;
 	}
 
 	/**
@@ -197,187 +196,187 @@ final class ActionsManager {
 	 * @return array
 	 */
 	public function set_sources() {
-		 $this->sources = array(
-			 'crm'         => array(
-				 'label'  => __( 'CRM', 'doublescale'),
-				 'groups' => array(
-					 'contact' => array(
-						 'label'   => __( 'Contact', 'doublescale'),
-						 'actions' => array(),
-					 ),
-					 'delay'   => array(
-						 'label'   => __( 'Delay', 'doublescale'),
-						 'actions' => array(),
-					 ),
-					 'deal'    => array(
-						 'label'       => __( 'Deal', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
-							 || ! doublescale_is_module_active( 'deals' ),
-					 ),
-				 ),
-			 ),
-			 'woocommerce' => array(
-				 'label'  => __( 'WooCommerce', 'doublescale'),
-				 'groups' => array(
-					 'order'  => array(
-						 'label'       => __( 'Order', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-					 'coupon' => array(
-						 'label'       => __( 'Coupon', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
-					 ),
-				 ),
-			 ),
-			 'wp'          => array(
-				 'label'  => __( 'WordPress', 'doublescale'),
-				 'groups' => array(
-					 'user' => array(
-						 'label'   => __( 'User', 'doublescale'),
-						 'actions' => array(),
-					 ),
-				 ),
-			 ),
-			 'lms'         => array(
-				 'label'  => __( 'LMS', 'doublescale'),
-				 'groups' => array(
-					 'learndash'  => array(
-						 'is_disabled' => ! doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
-						 'label'       => __( 'LearnDash', 'doublescale'),
-						 'actions'     => array(),
-					 ),
-					 'tutorlms'   => array(
-						 'is_disabled' => ! doublescale_is_plugin_active( 'tutor/tutor.php' ),
-						 'label'       => __( 'Tutor LMS', 'doublescale'),
-						 'actions'     => array(),
-					 ),
-					 'lifterlms'  => array(
-						 'is_disabled' => ! doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ),
-						 'label'       => __( 'LifterLMS', 'doublescale'),
-						 'actions'     => array(),
-					 ),
-					 'learnpress' => array(
-						 'is_disabled' => ! doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
-						 'label'       => __( 'LearnPress', 'doublescale'),
-						 'actions'     => array(),
-					 ),
-				 ),
-			 ),
-			 'memberpress' => array(
-				 'label'  => __( 'MemberPress', 'doublescale'),
-				 'groups' => array(
-					 'memberpress' => array(
-						 'label'       => __( 'MemberPress', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
-					 ),
-				 ),
-			 ),
-			 'pmpro'       => array(
-				 'label'  => __( 'Paid Memberships Pro', 'doublescale'),
-				 'groups' => array(
-					 'pmpro' => array(
-						 'label'       => __( 'Paid Memberships Pro', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! defined( 'PMPRO_VERSION' ),
-					 ),
-				 ),
-			 ),
-			 'email'       => array(
-				 'label'  => __( 'Email', 'doublescale'),
-				 'groups' => array(
-					 'email' => array(
-						 'label'   => __( 'Email', 'doublescale'),
-						 'actions' => array(),
-					 ),
-				 ),
-			 ),
-			 'message'     => array(
-				 'label'  => __( 'Messaging', 'doublescale'),
-				 'groups' => array(
-					 'sms'      => array(
-						 'label'   => __( 'Sms', 'doublescale'),
-						 'actions' => array(),
-					 ),
-					 'whatsapp' => array(
-						 'label'   => __( 'WhatsApp', 'doublescale'),
-						 'actions' => array(),
-					 ),
-				 ),
-			 ),
-			 'send_data'   => array(
-				 'label'  => __( 'Send Data', 'doublescale'),
-				 'groups' => array(
-					 // 'activecampaign' => array(
-					 // 'label'   => __( 'ActiveCampaign', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'convertkit'     => array(
-					 // 'label'   => __( 'ConvertKit', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'drip'           => array(
-					 // 'label'   => __( 'Drip', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'getresponse'    => array(
-					 // 'label'   => __( 'GetResponse', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'hubspot'        => array(
-					 // 'label'   => __( 'Hubspot', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'keap'           => array(
-					 // 'label'   => __( 'Keap', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'klaviyo'        => array(
-					 // 'label'   => __( 'Klaviyo', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'mailchimp'      => array(
-					 // 'label'   => __( 'Mailchimp', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'mailerlite'     => array(
-					 // 'label'   => __( 'MailerLite', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-					 // 'mautic'         => array(
-					 // 'label'   => __( 'Mautic', 'doublescale'),
-					 // 'actions' => array(),
-					 // ),
-				 'slack'            => array(
-					 'label'   => __( 'Slack', 'doublescale'),
-					 'actions' => array(),
-				 ),
-					 'zapier'       => array(
-						 'label'   => __( 'Zapier', 'doublescale'),
-						 'actions' => array(),
-					 ),
-					 'http_request' => array(
-						 'label'   => __( 'HTTP Request', 'doublescale'),
-						 'actions' => array(),
-					 ),
-				 ),
-			 ),
-			 'video'       => array(
-				 'label'  => __( 'Video', 'doublescale'),
-				 'groups' => array(
-					 'prestoplayer' => array(
-						 'label'       => __( 'Presto Player', 'doublescale'),
-						 'actions'     => array(),
-						 'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
-					 ),
-				 ),
-			 ),
-		 );
+		$this->sources = array(
+			'crm'         => array(
+				'label'  => __( 'CRM', 'doublescale' ),
+				'groups' => array(
+					'contact' => array(
+						'label'   => __( 'Contact', 'doublescale' ),
+						'actions' => array(),
+					),
+					'delay'   => array(
+						'label'   => __( 'Delay', 'doublescale' ),
+						'actions' => array(),
+					),
+					'deal'    => array(
+						'label'       => __( 'Deal', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'deals' ),
+					),
+				),
+			),
+			'woocommerce' => array(
+				'label'  => __( 'WooCommerce', 'doublescale' ),
+				'groups' => array(
+					'order'  => array(
+						'label'       => __( 'Order', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+					'coupon' => array(
+						'label'       => __( 'Coupon', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					),
+				),
+			),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'doublescale' ),
+				'groups' => array(
+					'user' => array(
+						'label'   => __( 'User', 'doublescale' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'lms'         => array(
+				'label'  => __( 'LMS', 'doublescale' ),
+				'groups' => array(
+					'learndash'  => array(
+						'is_disabled' => ! doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+						'label'       => __( 'LearnDash', 'doublescale' ),
+						'actions'     => array(),
+					),
+					'tutorlms'   => array(
+						'is_disabled' => ! doublescale_is_plugin_active( 'tutor/tutor.php' ),
+						'label'       => __( 'Tutor LMS', 'doublescale' ),
+						'actions'     => array(),
+					),
+					'lifterlms'  => array(
+						'is_disabled' => ! doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ),
+						'label'       => __( 'LifterLMS', 'doublescale' ),
+						'actions'     => array(),
+					),
+					'learnpress' => array(
+						'is_disabled' => ! doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
+						'label'       => __( 'LearnPress', 'doublescale' ),
+						'actions'     => array(),
+					),
+				),
+			),
+			'memberpress' => array(
+				'label'  => __( 'MemberPress', 'doublescale' ),
+				'groups' => array(
+					'memberpress' => array(
+						'label'       => __( 'MemberPress', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
+					),
+				),
+			),
+			'pmpro'       => array(
+				'label'  => __( 'Paid Memberships Pro', 'doublescale' ),
+				'groups' => array(
+					'pmpro' => array(
+						'label'       => __( 'Paid Memberships Pro', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! defined( 'PMPRO_VERSION' ),
+					),
+				),
+			),
+			'email'       => array(
+				'label'  => __( 'Email', 'doublescale' ),
+				'groups' => array(
+					'email' => array(
+						'label'   => __( 'Email', 'doublescale' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'message'     => array(
+				'label'  => __( 'Messaging', 'doublescale' ),
+				'groups' => array(
+					'sms'      => array(
+						'label'   => __( 'Sms', 'doublescale' ),
+						'actions' => array(),
+					),
+					'whatsapp' => array(
+						'label'   => __( 'WhatsApp', 'doublescale' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'send_data'   => array(
+				'label'  => __( 'Send Data', 'doublescale' ),
+				'groups' => array(
+					// 'activecampaign' => array(
+					// 'label'   => __( 'ActiveCampaign', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'convertkit'     => array(
+					// 'label'   => __( 'ConvertKit', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'drip'           => array(
+					// 'label'   => __( 'Drip', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'getresponse'    => array(
+					// 'label'   => __( 'GetResponse', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'hubspot'        => array(
+					// 'label'   => __( 'Hubspot', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'keap'           => array(
+					// 'label'   => __( 'Keap', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'klaviyo'        => array(
+					// 'label'   => __( 'Klaviyo', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'mailchimp'      => array(
+					// 'label'   => __( 'Mailchimp', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'mailerlite'     => array(
+					// 'label'   => __( 'MailerLite', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+					// 'mautic'         => array(
+					// 'label'   => __( 'Mautic', 'doublescale'),
+					// 'actions' => array(),
+					// ),
+				'slack'            => array(
+					'label'   => __( 'Slack', 'doublescale' ),
+					'actions' => array(),
+				),
+					'zapier'       => array(
+						'label'   => __( 'Zapier', 'doublescale' ),
+						'actions' => array(),
+					),
+					'http_request' => array(
+						'label'   => __( 'HTTP Request', 'doublescale' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'video'       => array(
+				'label'  => __( 'Video', 'doublescale' ),
+				'groups' => array(
+					'prestoplayer' => array(
+						'label'       => __( 'Presto Player', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! defined( 'PRESTO_PLAYER_PLUGIN_FILE' ),
+					),
+				),
+			),
+		);
 
-		 $this->sources = apply_filters( 'doublescale_automation_action_sources', $this->sources );
+		$this->sources = apply_filters( 'doublescale_automation_action_sources', $this->sources );
 	}
 
 	/**

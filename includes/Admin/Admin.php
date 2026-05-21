@@ -68,7 +68,7 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function admin_hooks() {
-		 add_action( 'admin_menu', array( $this, 'create_admin_menu_pages' ) );
+		add_action( 'admin_menu', array( $this, 'create_admin_menu_pages' ) );
 	}
 
 	/**
@@ -77,8 +77,8 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function create_admin_menu_pages() {
-		$menu_title   = apply_filters( 'doublescale_admin_menu_title', __( 'DoubleScale', 'doublescale') );
-		$menu_slug    = apply_filters( 'doublescale_admin_menu_slug', 'doublescale');
+		$menu_title   = apply_filters( 'doublescale_admin_menu_title', __( 'DoubleScale', 'doublescale' ) );
+		$menu_slug    = apply_filters( 'doublescale_admin_menu_slug', 'doublescale' );
 		$default_slug = 'doublescale';
 
 		// When the slug is customised (e.g. by white labeling), register a hidden
@@ -115,7 +115,7 @@ class Admin {
 			</svg>
 			'
 		);
-		$menu_icon = apply_filters( 'doublescale_admin_menu_icon', $default_icon );
+		$menu_icon    = apply_filters( 'doublescale_admin_menu_icon', $default_icon );
 
 		add_menu_page(
 			$menu_title,

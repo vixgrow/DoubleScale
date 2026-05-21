@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Settings;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -192,8 +191,8 @@ class Settings {
 		if ( empty( $value ) ) {
 			return '';
 		}
-		$key = hash( 'sha256', SECURE_AUTH_KEY, true );
-		$iv  = openssl_random_pseudo_bytes( 16 );
+		$key       = hash( 'sha256', SECURE_AUTH_KEY, true );
+		$iv        = openssl_random_pseudo_bytes( 16 );
 		$encrypted = openssl_encrypt( $value, 'aes-256-cbc', $key, 0, $iv );
 		return base64_encode( $iv . '::' . $encrypted );
 	}
@@ -224,5 +223,4 @@ class Settings {
 		$decrypted = openssl_decrypt( $parts[1], 'aes-256-cbc', $key, 0, $parts[0] );
 		return false === $decrypted ? $value : $decrypted;
 	}
-
 }

@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Edd\Order;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -56,7 +55,7 @@ class OrderCurrency extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel $contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param string                 $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */

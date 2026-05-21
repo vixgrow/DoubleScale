@@ -46,21 +46,21 @@ class Account_API {
 	 * @return WP_Error|array
 	 */
 	public function send( $args ) {
-		$body     = [
+		$body     = array(
 			'key'     => $this->api_key,
 			'message' => $args,
-		];
+		);
 		$response = wp_remote_request(
 			'https://mandrillapp.com/api/1.0/messages/send',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Accept'       => 'application/json',
 					'Content-Type' => 'application/json',
-				],
+				),
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

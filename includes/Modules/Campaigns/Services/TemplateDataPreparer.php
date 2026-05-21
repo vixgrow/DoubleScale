@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**

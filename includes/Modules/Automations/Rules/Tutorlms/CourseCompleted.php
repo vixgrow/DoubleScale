@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Tutorlms;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Course Completed class
  */
-class CourseCompleted extends Rule
-{
+class CourseCompleted extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -67,11 +66,10 @@ class CourseCompleted extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'includes'     => __('includes', 'doublescale'),
-			'not_includes' => __('not includes', 'doublescale'),
+			'includes'     => __( 'includes', 'doublescale' ),
+			'not_includes' => __( 'not includes', 'doublescale' ),
 		);
 	}
 
@@ -82,11 +80,10 @@ class CourseCompleted extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		$options = array();
 
-		if (! function_exists('tutor')) {
+		if ( ! function_exists( 'tutor' ) ) {
 			return $options;
 		}
 
@@ -99,23 +96,23 @@ class CourseCompleted extends Rule
 			)
 		);
 
-		if (empty($courses) || ! is_array($courses)) {
+		if ( empty( $courses ) || ! is_array( $courses ) ) {
 			return $options;
 		}
 
-		foreach ($courses as $course) {
-			if (is_object($course)) {
-				$id    = isset($course->ID) ? (int) $course->ID : 0;
-				$title = get_the_title($id);
-			} elseif (is_array($course)) {
-				$id    = isset($course['ID']) ? (int) $course['ID'] : 0;
-				$title = get_post_field('post_title', $id);
+		foreach ( $courses as $course ) {
+			if ( is_object( $course ) ) {
+				$id    = isset( $course->ID ) ? (int) $course->ID : 0;
+				$title = get_the_title( $id );
+			} elseif ( is_array( $course ) ) {
+				$id    = isset( $course['ID'] ) ? (int) $course['ID'] : 0;
+				$title = get_post_field( 'post_title', $id );
 			} else {
 				continue;
 			}
 
-			if ($id) {
-				$options[$id] = wp_kses_post($title);
+			if ( $id ) {
+				$options[ $id ] = wp_kses_post( $title );
 			}
 		}
 
@@ -131,35 +128,34 @@ class CourseCompleted extends Rule
 	 *
 	 * @return array Array of completed course IDs
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
-		if (! $contact || empty($contact->email)) {
+		if ( ! $contact || empty( $contact->email ) ) {
 			return array();
 		}
 
-		$user = get_user_by('email', $contact->email);
-		if (! $user) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return array();
 		}
 
-		if (! function_exists('tutor_utils')) {
+		if ( ! function_exists( 'tutor_utils' ) ) {
 			return array();
 		}
 
 		$completed_courses = array();
 
 		// Get enrolled courses first
-		$enrolled_courses = tutor_utils()->get_enrolled_courses_ids_by_user($user->ID);
+		$enrolled_courses = tutor_utils()->get_enrolled_courses_ids_by_user( $user->ID );
 
-		if (empty($enrolled_courses) || ! is_array($enrolled_courses)) {
+		if ( empty( $enrolled_courses ) || ! is_array( $enrolled_courses ) ) {
 			return array();
 		}
 
 		// Check which enrolled courses are completed
-		foreach ($enrolled_courses as $course_id) {
-			if (tutor_utils()->is_completed_course($course_id, $user->ID)) {
+		foreach ( $enrolled_courses as $course_id ) {
+			if ( tutor_utils()->is_completed_course( $course_id, $user->ID ) ) {
 				$completed_courses[] = (int) $course_id;
 			}
 		}
@@ -173,32 +169,31 @@ class CourseCompleted extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$completed_courses = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$completed_courses = $this->get_value( $automation_contact );
 		$operator          = $rule['operator'] ?? '';
 		$rule_courses      = $rule['value'] ?? array();
 
 		// Ensure rule_courses is an array
-		if (! is_array($rule_courses)) {
+		if ( ! is_array( $rule_courses ) ) {
 			$rule_courses = array();
 		}
 
 		// Convert to integers for comparison
-		$rule_courses = array_map('intval', $rule_courses);
+		$rule_courses = array_map( 'intval', $rule_courses );
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'includes':
 				// User has completed at least one of the specified courses
-				return ! empty(array_intersect($completed_courses, $rule_courses));
+				return ! empty( array_intersect( $completed_courses, $rule_courses ) );
 
 			case 'not_includes':
 				// User has not completed any of the specified courses
-				return empty(array_intersect($completed_courses, $rule_courses));
+				return empty( array_intersect( $completed_courses, $rule_courses ) );
 
 			default:
 				return false;
@@ -209,8 +204,8 @@ class CourseCompleted extends Rule
 add_action(
 	'init',
 	function () {
-		if (\doublescale_is_plugin_active('tutor/tutor.php')) {
-			RulesManager::instance()->register(new CourseCompleted());
+		if ( \doublescale_is_plugin_active( 'tutor/tutor.php' ) ) {
+			RulesManager::instance()->register( new CourseCompleted() );
 		}
 	},
 	99

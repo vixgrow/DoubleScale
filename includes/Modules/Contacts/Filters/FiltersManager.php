@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -70,7 +69,7 @@ final class FiltersManager {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		 $this->set_groups();
+		$this->set_groups();
 	}
 
 	/**
@@ -83,31 +82,31 @@ final class FiltersManager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'name'    => __( 'Contact', 'doublescale'),
+				'name'    => __( 'Contact', 'doublescale' ),
 				'filters' => array(),
 			),
 			'lead_scoring'   => array(
-				'name'    => __( 'Lead Scoring', 'doublescale'),
+				'name'    => __( 'Lead Scoring', 'doublescale' ),
 				'filters' => array(),
 			),
 			'contact_fields' => array(
-				'name'    => __( 'Contact Fields', 'doublescale'),
+				'name'    => __( 'Contact Fields', 'doublescale' ),
 				'filters' => array(),
 			),
 			'segments'       => array(
-				'name'    => __( 'Segments', 'doublescale'),
+				'name'    => __( 'Segments', 'doublescale' ),
 				'filters' => array(),
 			),
 			'user'           => array(
-				'name'    => __( 'User', 'doublescale'),
+				'name'    => __( 'User', 'doublescale' ),
 				'filters' => array(),
 			),
 			'activity'       => array(
-				'name'    => __( 'Activity', 'doublescale'),
+				'name'    => __( 'Activity', 'doublescale' ),
 				'filters' => array(),
 			),
 			'submission'     => array(
-				'name'    => __( 'Submission', 'doublescale'),
+				'name'    => __( 'Submission', 'doublescale' ),
 				'filters' => array(),
 			),
 		);
@@ -151,7 +150,7 @@ final class FiltersManager {
 	 * @return array
 	 */
 	public function get_filters() {
-		 return $this->filters;
+		return $this->filters;
 	}
 
 	/**

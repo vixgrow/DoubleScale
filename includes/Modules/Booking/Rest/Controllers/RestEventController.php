@@ -285,134 +285,134 @@ class RestEventController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'event',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'            => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view' ),
-					 'readonly'    => true,
-				 ),
-				 'hash_id'       => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view' ),
-					 'readonly'    => true,
-				 ),
-				 'calendar_id'   => array(
-					 'description' => __( 'Calendar ID.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'user_id'       => array(
-					 'description' => __( 'User ID.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'name'          => array(
-					 'description' => __( 'Event name.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'is_disabled'   => array(
-					 'description' => __( 'Is event disabled.', 'doublescale' ),
-					 'type'        => 'boolean',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'description'   => array(
-					 'description' => __( 'Event description.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'slug'          => array(
-					 'description' => __( 'Event slug.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_title',
-					 ),
-				 ),
-				 'status'        => array(
-					 'description' => __( 'Event status.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-					 'enum'        => array( 'active', 'inactive' ),
-				 ),
-				 'type'          => array(
-					 'description' => __( 'Event type.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-					 'enum'        => array( 'one-to-one', 'group', 'round-robin', 'collective' ),
-				 ),
-				 'duration'      => array(
-					 'description' => __( 'Event duration.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'color'         => array(
-					 'description' => __( 'Event color.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'visibility'    => array(
-					 'description' => __( 'Event visibility.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-					 'enum'        => array( 'public', 'private' ),
-				 ),
-				 'reserve_times' => array(
-					 'description' => __( 'Reserve times.', 'doublescale' ),
-					 'type'        => 'boolean',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'created_at'    => array(
-					 'description' => __( 'Event created at.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-				 'updated_at'    => array(
-					 'description' => __( 'Event updated at.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'event',
+			'type'       => 'object',
+			'properties' => array(
+				'id'            => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'hash_id'       => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'calendar_id'   => array(
+					'description' => __( 'Calendar ID.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'user_id'       => array(
+					'description' => __( 'User ID.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'name'          => array(
+					'description' => __( 'Event name.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'is_disabled'   => array(
+					'description' => __( 'Is event disabled.', 'doublescale' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'description'   => array(
+					'description' => __( 'Event description.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'slug'          => array(
+					'description' => __( 'Event slug.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
+				),
+				'status'        => array(
+					'description' => __( 'Event status.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'enum'        => array( 'active', 'inactive' ),
+				),
+				'type'          => array(
+					'description' => __( 'Event type.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'enum'        => array( 'one-to-one', 'group', 'round-robin', 'collective' ),
+				),
+				'duration'      => array(
+					'description' => __( 'Event duration.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'color'         => array(
+					'description' => __( 'Event color.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'visibility'    => array(
+					'description' => __( 'Event visibility.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'enum'        => array( 'public', 'private' ),
+				),
+				'reserve_times' => array(
+					'description' => __( 'Reserve times.', 'doublescale' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'created_at'    => array(
+					'description' => __( 'Event created at.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'updated_at'    => array(
+					'description' => __( 'Event updated at.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -438,7 +438,10 @@ class RestEventController extends RestController {
 			if ( ( 'all' === $user || get_current_user_id() !== $user ) && ! current_user_can( 'doublescale_booking_read_all_calendars' ) ) {
 				doublescale_get_logger()->warning(
 					'Permission denied to access events',
-					array( 'source' => 'booking-event-rest', 'user_id' => get_current_user_id() )
+					array(
+						'source'  => 'booking-event-rest',
+						'user_id' => get_current_user_id(),
+					)
 				);
 				return new WP_Error( 'rest_event_error', __( 'You do not have permission', 'doublescale' ), array( 'status' => 403 ) );
 			}
@@ -520,9 +523,9 @@ class RestEventController extends RestController {
 
 			if ( empty( $location ) ) {
 						doublescale_get_logger()->warning(
-				'Event location is required for event creation',
-				array( 'source' => 'booking-event-rest' )
-			);
+							'Event location is required for event creation',
+							array( 'source' => 'booking-event-rest' )
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event location is required.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
@@ -534,7 +537,10 @@ class RestEventController extends RestController {
 				$wpdb->query( 'ROLLBACK' );
 				doublescale_get_logger()->warning(
 					'Conferencing location requires Pro add-on',
-					array( 'source' => 'booking-event-rest', 'location_type' => $pro_required_type )
+					array(
+						'source'        => 'booking-event-rest',
+						'location_type' => $pro_required_type,
+					)
 				);
 				return new WP_Error(
 					'rest_event_error',
@@ -552,7 +558,10 @@ class RestEventController extends RestController {
 				$wpdb->query( 'ROLLBACK' );
 				doublescale_get_logger()->warning(
 					'Calendar not found for event creation',
-					array( 'source' => 'booking-event-rest', 'calendar_id' => (int) $calendar_id )
+					array(
+						'source'      => 'booking-event-rest',
+						'calendar_id' => (int) $calendar_id,
+					)
 				);
 				return new WP_Error( 'rest_event_error', __( 'You must add event to a calendar.', 'doublescale' ), array( 'status' => 400 ) );
 			}
@@ -564,7 +573,11 @@ class RestEventController extends RestController {
 				$wpdb->query( 'ROLLBACK' );
 				doublescale_get_logger()->warning(
 					'Invalid event type for calendar type',
-					array( 'source' => 'booking-event-rest', 'event_type' => $type, 'calendar_type' => $calendar->type )
+					array(
+						'source'        => 'booking-event-rest',
+						'event_type'    => $type,
+						'calendar_type' => $calendar->type,
+					)
 				);
 				return new WP_Error( 'rest_event_error', __( 'Invalid event type.', 'doublescale' ), array( 'status' => 400 ) );
 			}
@@ -575,7 +588,10 @@ class RestEventController extends RestController {
 					$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->warning(
 						'Team event requires at least one host',
-						array( 'source' => 'booking-event-rest', 'calendar_id' => (int) $calendar_id )
+						array(
+							'source'      => 'booking-event-rest',
+							'calendar_id' => (int) $calendar_id,
+						)
 					);
 					return new WP_Error( 'rest_event_error', __( 'Team events require at least one host to be selected.', 'doublescale' ), array( 'status' => 400 ) );
 				}
@@ -591,7 +607,10 @@ class RestEventController extends RestController {
 					$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->warning(
 						'Payment validation failed during create',
-						array( 'source' => 'booking-event-rest', 'reason' => $validation_result->get_error_message() )
+						array(
+							'source' => 'booking-event-rest',
+							'reason' => $validation_result->get_error_message(),
+						)
 					);
 					return $validation_result;
 				}
@@ -630,7 +649,10 @@ class RestEventController extends RestController {
 					$user_label = $this->describe_host_for_error( (int) $hosts[0] );
 					doublescale_get_logger()->warning(
 						'Default availability not found for team member',
-						array( 'source' => 'booking-event-rest', 'host' => $user_label )
+						array(
+							'source' => 'booking-event-rest',
+							'host'   => $user_label,
+						)
 					);
 					return new WP_Error(
 						'rest_event_error',
@@ -650,9 +672,12 @@ class RestEventController extends RestController {
 						$wpdb->query( 'ROLLBACK' );
 						$user_label = $this->describe_host_for_error( (int) $host );
 						doublescale_get_logger()->warning(
-						'Default availability not found for team member',
-						array( 'source' => 'booking-event-rest', 'host' => $user_label )
-					);
+							'Default availability not found for team member',
+							array(
+								'source' => 'booking-event-rest',
+								'host'   => $user_label,
+							)
+						);
 						return new WP_Error(
 							'rest_event_error',
 							sprintf(
@@ -680,9 +705,9 @@ class RestEventController extends RestController {
 			if ( ! $event->id ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Failed to create event in database',
-				array( 'source' => 'booking-event-rest' )
-			);
+							'Failed to create event in database',
+							array( 'source' => 'booking-event-rest' )
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not created', 'doublescale' ), array( 'status' => 500 ) );
 			}
 
@@ -712,15 +737,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in create_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "create_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in create_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'create_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -752,9 +777,9 @@ class RestEventController extends RestController {
 
 			if ( ! $ids ) {
 						doublescale_get_logger()->warning(
-				'No event IDs provided for deletion',
-				array( 'source' => 'booking-event-rest' )
-			);
+							'No event IDs provided for deletion',
+							array( 'source' => 'booking-event-rest' )
+						);
 				return new WP_Error( 'rest_event_error', __( 'No events to delete', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
@@ -763,9 +788,12 @@ class RestEventController extends RestController {
 
 				if ( ! $event ) {
 							doublescale_get_logger()->warning(
-				'Event not found for deletion ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+								'Event not found for deletion ',
+								array(
+									'source'   => 'booking-event-rest',
+									'event_id' => (int) $id,
+								)
+							);
 					return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 				}
 
@@ -775,15 +803,15 @@ class RestEventController extends RestController {
 			return new WP_REST_Response( $ids, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in delete_items",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "delete_items",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in delete_items',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'delete_items',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -817,9 +845,12 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 						doublescale_get_logger()->warning(
-				'Event not found ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error(
 					'rest_event_not_found',
 					__( 'Event not found', 'doublescale' ),
@@ -853,15 +884,15 @@ class RestEventController extends RestController {
 			return new WP_REST_Response( $event, 200 );
 		} catch ( \Throwable $e ) { // Catch Throwable
 					doublescale_get_logger()->error(
-				"Booking event controller exception in get_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "get_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in get_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'get_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -881,9 +912,12 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 						doublescale_get_logger()->warning(
-				'Event not found for range retrieval ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for range retrieval ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -894,15 +928,15 @@ class RestEventController extends RestController {
 			return new WP_REST_Response( $data, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in get_item_range",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "get_item_range",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in get_item_range',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'get_item_range',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -922,24 +956,27 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 						doublescale_get_logger()->warning(
-				'Event not found for fields retrieval ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for fields retrieval ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $event->fields, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in get_fields",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "get_fields",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in get_fields',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'get_fields',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -989,6 +1026,9 @@ class RestEventController extends RestController {
 			$group_settings      = $request->get_param( 'group_settings' );
 			$event_range         = $request->get_param( 'event_range' );
 			$advanced_settings   = $request->get_param( 'advanced_settings' );
+			if ( is_array( $advanced_settings ) ) {
+				$advanced_settings = $this->sanitize_advanced_settings( $advanced_settings );
+			}
 			$email_notifications = $request->get_param( 'email_notifications' );
 			$sms_notifications   = $request->get_param( 'sms_notifications' );
 			$payments_settings   = $request->get_param( 'payments_settings' );
@@ -1001,9 +1041,12 @@ class RestEventController extends RestController {
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Event not found for update ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for update ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1017,7 +1060,10 @@ class RestEventController extends RestController {
 					$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->warning(
 						'Payment validation failed during update',
-						array( 'source' => 'booking-event-rest', 'reason' => $validation_result->get_error_message() )
+						array(
+							'source' => 'booking-event-rest',
+							'reason' => $validation_result->get_error_message(),
+						)
 					);
 					return $validation_result;
 				}
@@ -1032,7 +1078,11 @@ class RestEventController extends RestController {
 					$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->warning(
 						'Conferencing location requires Pro add-on',
-						array( 'source' => 'booking-event-rest', 'location_type' => $pro_required_type, 'event_id' => (int) $id )
+						array(
+							'source'        => 'booking-event-rest',
+							'location_type' => $pro_required_type,
+							'event_id'      => (int) $id,
+						)
 					);
 					return new WP_Error(
 						'rest_event_error',
@@ -1051,8 +1101,8 @@ class RestEventController extends RestController {
 			// the previous array_filter() stripped every falsy value, so things
 			// like description, payments_settings, and availability_id could
 			// never be reset once set.
-			$updated     = array();
-			$param_map   = array(
+			$updated   = array();
+			$param_map = array(
 				'name'                => $name,
 				'description'         => $description,
 				'status'              => $status,
@@ -1133,7 +1183,10 @@ class RestEventController extends RestController {
 				$wpdb->query( 'ROLLBACK' );
 				doublescale_get_logger()->warning(
 					'Availability update failed',
-					array( 'source' => 'booking-event-rest', 'reason' => $result->get_error_message() )
+					array(
+						'source' => 'booking-event-rest',
+						'reason' => $result->get_error_message(),
+					)
 				);
 				return $result;
 			}
@@ -1147,15 +1200,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in update_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "update_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in update_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'update_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1181,9 +1234,12 @@ class RestEventController extends RestController {
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Event not found for availability update ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for availability update ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1192,7 +1248,10 @@ class RestEventController extends RestController {
 				$wpdb->query( 'ROLLBACK' );
 				doublescale_get_logger()->warning(
 					'Host availability update failed',
-					array( 'source' => 'booking-event-rest', 'reason' => $result->get_error_message() )
+					array(
+						'source' => 'booking-event-rest',
+						'reason' => $result->get_error_message(),
+					)
 				);
 				return $result;
 			}
@@ -1203,15 +1262,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in update_item_availability",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "update_item_availability",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in update_item_availability',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'update_item_availability',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1236,9 +1295,12 @@ class RestEventController extends RestController {
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Event not found for fields update ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for fields update ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1250,15 +1312,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in update_fields",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "update_fields",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in update_fields',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'update_fields',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1296,9 +1358,12 @@ class RestEventController extends RestController {
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Event not found for deletion ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for deletion ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1315,15 +1380,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in delete_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "delete_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in delete_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'delete_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1361,9 +1426,12 @@ class RestEventController extends RestController {
 			if ( ! $event ) {
 				$wpdb->query( 'ROLLBACK' );
 						doublescale_get_logger()->warning(
-				'Event not found for duplication ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for duplication ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1375,15 +1443,15 @@ class RestEventController extends RestController {
 			global $wpdb;
 			$wpdb->query( 'ROLLBACK' );
 					doublescale_get_logger()->error(
-				"Booking event controller exception in duplicate_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "duplicate_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in duplicate_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'duplicate_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1417,9 +1485,12 @@ class RestEventController extends RestController {
 
 			if ( ! $event ) {
 						doublescale_get_logger()->warning(
-				'Event not found for meta retrieval ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for meta retrieval ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
@@ -1428,23 +1499,35 @@ class RestEventController extends RestController {
 			if ( ! isset( $event->{$key} ) ) {
 				doublescale_get_logger()->warning(
 					'Meta key not found',
-					array( 'source' => 'booking-event-rest', 'meta_key' => $key, 'event_id' => (int) $id )
+					array(
+						'source'   => 'booking-event-rest',
+						'meta_key' => $key,
+						'event_id' => (int) $id,
+					)
 				);
 				return new WP_Error( 'rest_event_error', __( 'Meta not found', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			// For advanced_settings, merge with defaults so legacy events (or events
+			// missing keys added in newer versions) return the full expected shape
+			// instead of an empty/partial object that crashes the React form.
+			if ( 'advanced_settings' === $key ) {
+				$defaults = EventFields::instance()->get_default_advanced_settings();
+				$meta     = is_array( $meta ) ? array_merge( $defaults, $meta ) : $defaults;
 			}
 
 			return new WP_REST_Response( $meta, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in get_meta",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "get_meta",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in get_meta',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'get_meta',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
@@ -1465,9 +1548,12 @@ class RestEventController extends RestController {
 			$event  = EventModel::find( $id );
 			if ( ! $event ) {
 						doublescale_get_logger()->warning(
-				'Event not found for disable status update ',
-				array( 'source' => 'booking-event-rest', 'event_id' => (int) $id )
-			);
+							'Event not found for disable status update ',
+							array(
+								'source'   => 'booking-event-rest',
+								'event_id' => (int) $id,
+							)
+						);
 				return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 			$event->is_disabled = $status;
@@ -1475,17 +1561,61 @@ class RestEventController extends RestController {
 			return new WP_REST_Response( $event, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in disable_item",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "disable_item",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in disable_item',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'disable_item',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Sanitize advanced_settings payload before persisting.
+	 *
+	 * Coerces time values to positive integers (DateTime::modify breaks on
+	 * zero/negative durations) and locks enum-like fields to known values.
+	 */
+	private function sanitize_advanced_settings( array $settings ) {
+		$allowed_units = array( 'minutes', 'hours', 'days' );
+
+		foreach ( array( 'cannot_cancel_time_value', 'cannot_reschedule_time_value', 'confirmation_time_value' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) ) {
+				$value             = (int) $settings[ $key ];
+				$settings[ $key ] = $value > 0 ? $value : 1;
+			}
+		}
+
+		foreach ( array( 'cannot_cancel_time_unit', 'cannot_reschedule_time_unit', 'confirmation_time_unit' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) && ! in_array( $settings[ $key ], $allowed_units, true ) ) {
+				$settings[ $key ] = 'hours';
+			}
+		}
+
+		foreach ( array( 'cannot_cancel_time', 'cannot_reschedule_time' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) && ! in_array( $settings[ $key ], array( 'event_start', 'less_than' ), true ) ) {
+				$settings[ $key ] = 'event_start';
+			}
+		}
+
+		// If redirect is disabled, scrub URL + query string so a stale value
+		// can't leak back via getAdvancedSettings() on the next booking.
+		// Only clear keys that the client actually sent so the stored shape
+		// doesn't grow with synthetic '' values on every save.
+		if ( array_key_exists( 'redirect_after_submit', $settings ) && empty( $settings['redirect_after_submit'] ) ) {
+			if ( array_key_exists( 'redirect_url', $settings ) ) {
+				$settings['redirect_url'] = '';
+			}
+			if ( array_key_exists( 'redirect_query_string', $settings ) ) {
+				$settings['redirect_query_string'] = '';
+			}
+		}
+
+		return $settings;
 	}
 
 	// Update event availability
@@ -1501,7 +1631,10 @@ class RestEventController extends RestController {
 			if ( ! $availability ) {
 				doublescale_get_logger()->warning(
 					'Availability record not found',
-					array( 'source' => 'booking-event-rest', 'availability_id' => $event_availability['id'] )
+					array(
+						'source'          => 'booking-event-rest',
+						'availability_id' => $event_availability['id'],
+					)
 				);
 				return new WP_Error(
 					'rest_event_error',
@@ -1550,7 +1683,10 @@ class RestEventController extends RestController {
 				if ( ! $updated ) {
 					doublescale_get_logger()->warning(
 						'Failed to update availability record',
-						array( 'source' => 'booking-event-rest', 'availability_id' => $event_availability['id'] )
+						array(
+							'source'          => 'booking-event-rest',
+							'availability_id' => $event_availability['id'],
+						)
 					);
 					return new WP_Error(
 						'rest_event_error',
@@ -1577,15 +1713,15 @@ class RestEventController extends RestController {
 			}
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in update_event_host_availability",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "update_event_host_availability",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in update_event_host_availability',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'update_event_host_availability',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			throw $e;
 		}
 	}
@@ -1598,7 +1734,10 @@ class RestEventController extends RestController {
 				if ( ! $model ) {
 					doublescale_get_logger()->warning(
 						'Availability not found for team member',
-						array( 'source' => 'booking-event-rest', 'availability_id' => $availabilityData['id'] )
+						array(
+							'source'          => 'booking-event-rest',
+							'availability_id' => $availabilityData['id'],
+						)
 					);
 					return new WP_Error(
 						'rest_event_error',
@@ -1611,15 +1750,15 @@ class RestEventController extends RestController {
 			}
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in update_event_team_availability",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "update_event_team_availability",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in update_event_team_availability',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'update_event_team_availability',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			throw $e;
 		}
 	}
@@ -1663,15 +1802,15 @@ class RestEventController extends RestController {
 			return true; // No specific availability update needed
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in handle_availability_update",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "handle_availability_update",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in handle_availability_update',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'handle_availability_update',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			throw $e;
 		}
 	}
@@ -1731,15 +1870,15 @@ class RestEventController extends RestController {
 			);
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
-				"Booking event controller exception in get_latest_events",
-				array(
-					"source"    => "booking-event-rest",
-					"method"    => "get_latest_events",
-					"exception" => $e->getMessage(),
-					"file"      => $e->getFile(),
-					"line"      => $e->getLine(),
-				)
-			);
+						'Booking event controller exception in get_latest_events',
+						array(
+							'source'    => 'booking-event-rest',
+							'method'    => 'get_latest_events',
+							'exception' => $e->getMessage(),
+							'file'      => $e->getFile(),
+							'line'      => $e->getLine(),
+						)
+					);
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}

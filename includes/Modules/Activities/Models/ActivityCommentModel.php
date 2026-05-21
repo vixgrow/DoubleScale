@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Activities\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Models\UserModel;
@@ -129,7 +128,7 @@ class ActivityCommentModel extends Model {
 	 * @return string
 	 */
 	public function getTimeAgoAttribute() {
-		return human_time_diff( $this->created_at->timestamp, current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'doublescale');
+		return human_time_diff( $this->created_at->timestamp, current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'doublescale' );
 	}
 
 	/**
@@ -151,4 +150,3 @@ class ActivityCommentModel extends Model {
 		);
 	}
 }
-

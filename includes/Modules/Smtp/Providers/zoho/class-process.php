@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Zoho;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
@@ -32,7 +31,7 @@ class Process extends Abstract_Process {
 	 * @param string $name
 	 */
 	public function set_from( $email, $name ) {
-		$this->body['fromAddress'] = $this->phpmailer->addrFormat( [ $email, $name ] );
+		$this->body['fromAddress'] = $this->phpmailer->addrFormat( array( $email, $name ) );
 	}
 
 	/**
@@ -90,14 +89,12 @@ class Process extends Abstract_Process {
 				$this->body['mailFormat'] = 'html';
 				$this->body['content']    = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['mailFormat'] = 'plaintext';
 				$this->body['content']    = $content;
-			} else {
-				$this->body['mailFormat'] = 'html';
-				$this->body['content']    = $content;
-			}
+		} else {
+			$this->body['mailFormat'] = 'html';
+			$this->body['content']    = $content;
 		}
 	}
 
@@ -144,7 +141,7 @@ class Process extends Abstract_Process {
 					throw new \Exception( $response->get_error_message() );
 				}
 
-				$attachment = $response['data'] ?? [];
+				$attachment = $response['data'] ?? array();
 				doublescale_get_logger()->info(
 					esc_html__( 'Zoho Upload Attachment', 'doublescale' ),
 					array(
@@ -157,10 +154,10 @@ class Process extends Abstract_Process {
 					esc_html__( 'Zoho Upload Attachment Error', 'doublescale' ),
 					array(
 						'code'  => 'doublescale_smtp_zoho_upload_attachment_error',
-						'error' => [
+						'error' => array(
 							'code'  => $e->getCode(),
 							'error' => $e->getMessage(),
-						],
+						),
 					)
 				);
 			}
@@ -218,10 +215,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Zoho Send Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_zoho_send_error',
-					'error' => [
+					'error' => array(
 						'code'  => $e->getCode(),
 						'error' => $e->getMessage(),
-					],
+					),
 				)
 			);
 			$this->log_result(

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SendLayer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -81,9 +80,9 @@ class Process extends Abstract_Process {
 				if ( ! filter_var( $email_address, FILTER_VALIDATE_EMAIL ) ) {
 					continue;
 				}
-				$user_data = [
+				$user_data = array(
 					'email' => $email_address,
-				];
+				);
 				if ( ! empty( $name ) ) {
 					$user_data['name'] = sanitize_text_field( $name );
 				}
@@ -136,14 +135,12 @@ class Process extends Abstract_Process {
 				$this->body['ContentType'] = 'HTML';
 				$this->body['HTMLContent'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['ContentType']  = 'Plain';
 				$this->body['PlainContent'] = $content;
-			} else {
-				$this->body['ContentType'] = 'HTML';
-				$this->body['HTMLContent'] = $content;
-			}
+		} else {
+			$this->body['ContentType'] = 'HTML';
+			$this->body['HTMLContent'] = $content;
 		}
 	}
 
@@ -169,15 +166,15 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$user_data = [
+		$user_data = array(
 			'email' => $email,
-		];
+		);
 
 		if ( ! empty( $name ) ) {
 			$user_data['name'] = sanitize_text_field( $name );
 		}
 
-		$this->body['ReplyTo'] = [ $user_data ];
+		$this->body['ReplyTo'] = array( $user_data );
 	}
 
 	/**
@@ -234,7 +231,7 @@ class Process extends Abstract_Process {
 		 *
 		 * @param array $headers Email headers.
 		 */
-		$headers = apply_filters( 'doublescale_smtp_sendlayer_mailer_get_headers', $this->body['Headers'] ?? [] );
+		$headers = apply_filters( 'doublescale_smtp_sendlayer_mailer_get_headers', $this->body['Headers'] ?? array() );
 
 		return $headers;
 	}
@@ -281,29 +278,29 @@ class Process extends Abstract_Process {
 			}
 
 			$this->log_result(
-				[
+				array(
 					'status'   => self::SUCCEEDED,
 					'response' => $send_email,
-				]
+				)
 			);
 
 			return true;
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
 				esc_html__( 'SendLayer API Error', 'doublescale' ),
-				[
+				array(
 					'code'  => 'doublescale_smtp_sendlayer_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
-				]
+					),
+				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
 					'response' => $e->getMessage(),
-				]
+				)
 			);
 			return false;
 		}

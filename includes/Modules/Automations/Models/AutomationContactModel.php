@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -104,7 +103,7 @@ class AutomationContactModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		 return $this->belongsTo( ContactModel::class, 'contact_id', 'id' );
+		return $this->belongsTo( ContactModel::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -177,7 +176,7 @@ class AutomationContactModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		// Delete all the contact processes when the contact is deleted
 		static::deleting(

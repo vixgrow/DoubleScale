@@ -12,9 +12,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
-
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -70,14 +67,14 @@ class OrderStatus {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING_PAYMENT => __( 'Pending Payment', 'doublescale'),
-			self::PROCESSING      => __( 'Processing', 'doublescale'),
-			self::ON_HOLD         => __( 'On Hold', 'doublescale'),
-			self::COMPLETED       => __( 'Completed', 'doublescale'),
-			self::CANCELLED       => __( 'Cancelled', 'doublescale'),
-			self::REFUNDED        => __( 'Refunded', 'doublescale'),
-			self::FAILED          => __( 'Failed', 'doublescale'),
-			self::CHECKOUT_DRAFT  => __( 'Checkout Draft', 'doublescale'),
+			self::PENDING_PAYMENT => __( 'Pending Payment', 'doublescale' ),
+			self::PROCESSING      => __( 'Processing', 'doublescale' ),
+			self::ON_HOLD         => __( 'On Hold', 'doublescale' ),
+			self::COMPLETED       => __( 'Completed', 'doublescale' ),
+			self::CANCELLED       => __( 'Cancelled', 'doublescale' ),
+			self::REFUNDED        => __( 'Refunded', 'doublescale' ),
+			self::FAILED          => __( 'Failed', 'doublescale' ),
+			self::CHECKOUT_DRAFT  => __( 'Checkout Draft', 'doublescale' ),
 		);
 	}
 }

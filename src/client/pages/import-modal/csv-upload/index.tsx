@@ -8,26 +8,17 @@ import { addQueryArgs } from '@wordpress/url';
  * external dependencies
  */
 import React, { useRef, useState } from 'react';
-import { CircleX } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 /**
  * internal dependencies
  */
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-} from '@/components/ui/card';
+import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import {
-	CheckCircleIcon,
-	DeleteIcon,
-	LoadingSpinner,
-} from '@doublescale/components';
+import { Button } from '@/components/ui/button';
+import { DeleteIcon } from '@doublescale/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
 import { cn } from '@/lib/utils';
@@ -162,8 +153,8 @@ const CsvUpload: React.FC = () => {
 	const renderUploadArea = () => (
 		<div
 			className={cn(
-				'cursor-pointer rounded-xl border-2 border-dashed border-border/80 bg-muted/5 p-10 text-center transition-colors',
-				'hover:border-primary/40 hover:bg-muted/10 sm:p-14'
+				'cursor-pointer rounded-2xl border-2 border-dashed border-border bg-white p-6 text-center transition-colors',
+				'hover:border-primary sm:p-14'
 			)}
 			onClick={handleUploadClick}
 			onDragOver={handleDragOver}
@@ -193,81 +184,120 @@ const CsvUpload: React.FC = () => {
 		</div>
 	);
 
+	const hasUploadedFile =
+		Boolean(fileData) || Boolean(fileInfo.file) || isUploading;
+
 	const renderFileCard = () => {
-		const totalSize = fileInfo.file
-			? formatFileSize(fileInfo.file.size)
-			: '';
+		const fileName =
+			fileInfo.file?.name || fileData?.file_name || '';
+		const totalBytes = fileInfo.file?.size ?? 0;
+		const totalSize = totalBytes ? formatFileSize(totalBytes) : '';
 		const uploadedSize = formatFileSize(fileInfo.uploadedSize);
+		const isComplete = !isUploading && Boolean(fileData);
+		const sizeLabel = totalSize
+			? `${uploadedSize} ${__('of', 'doublescale')} ${totalSize}`
+			: '';
 
 		return (
-			<div className="flex flex-col items-stretch">
-				<Card className="w-full rounded-xl border border-border/70 shadow-none">
-					<CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 p-5 sm:p-6">
-						<span className="min-w-0 flex-1 break-all text-sm font-medium leading-snug text-foreground sm:text-base">
-							{fileData?.file_name}
-						</span>
-						<button
-							type="button"
-							onClick={removeFile}
-							className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-							aria-label={__('Remove file', 'doublescale')}
-						>
-							{isUploading ? (
-								<CircleX className="h-6 w-6" aria-hidden />
-							) : (
-								<DeleteIcon width={24} height={24} />
-							)}
-						</button>
-					</CardHeader>
-
-					<CardContent className="px-5 pb-5 pt-0 sm:px-6 sm:pb-6">
+			<div className="import-modal-csv-file">
+				<div className="import-modal-csv-file__row">
+					<img
+						src={csvIcon}
+						alt=""
+						className="import-modal-csv-file__icon"
+					/>
+					<div className="import-modal-csv-file__info">
+						<p className="import-modal-csv-file__name-row">
+							<span className="import-modal-csv-file__name">
+								{fileName}
+							</span>
+							{sizeLabel ? (
+								<>
+									<span
+										className="import-modal-csv-file__separator"
+										aria-hidden
+									>
+										{' - '}
+									</span>
+									<span className="import-modal-csv-file__size">
+										{sizeLabel}
+									</span>
+								</>
+							) : null}
+						</p>
 						{isUploading ? (
-							<div className="space-y-3">
-								<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-									<span>
-										{uploadedSize} {__('of', 'doublescale')} {totalSize}
-									</span>
-									<span className="text-muted-foreground/60">·</span>
-									<LoadingSpinner size={18} />
-									<span className="font-medium text-foreground">
-										{__('Uploading...', 'doublescale')}
-									</span>
-								</div>
-								<Progress value={uploadProgress} className="h-2 w-full" />
-							</div>
-						) : (
-							<div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-								<span className="text-muted-foreground">{totalSize}</span>
-								<span className="text-muted-foreground/60">·</span>
-								<CheckCircleIcon />
-								<span className="font-medium text-emerald-600 dark:text-emerald-500">
-									{__('Completed', 'doublescale')}
+							<div className="import-modal-csv-file__uploading">
+								<span className="import-modal-csv-file__status import-modal-csv-file__status--uploading">
+									{__('Uploading...', 'doublescale')}
 								</span>
+								<Progress
+									value={uploadProgress}
+									className="import-modal-csv-file__progress"
+								/>
 							</div>
-						)}
-					</CardContent>
-				</Card>
+						) : isComplete ? (
+							<span className="import-modal-csv-file__badge">
+								{__('Completed', 'doublescale')}
+							</span>
+						) : null}
+					</div>
+					<button
+						type="button"
+						onClick={removeFile}
+						className="import-modal-csv-file__remove"
+						aria-label={__('Remove file', 'doublescale')}
+						disabled={isUploading}
+					>
+						<DeleteIcon width={20} height={20} />
+					</button>
+				</div>
 			</div>
 		);
 	};
 
+	const exampleCsv = `first_name,last_name,email\nJohn,Doe,john@example.com`;
+
+	const handleDownloadExample = () => {
+		const blob = new Blob([exampleCsv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'doublescale-contacts-example.csv';
+		link.click();
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="space-y-6">
-			<div className="space-y-2">
-				<CardTitle className="text-lg font-semibold leading-snug text-foreground">
-					{__('Upload CSV file', 'doublescale')}
-				</CardTitle>
-				<CardDescription className="text-sm leading-relaxed text-muted-foreground">
-					{__(
-						'Your file must include columns for contact data (for example first name, last name, and email). Maximum file size 12 MB.',
-						'doublescale'
-					)}
-				</CardDescription>
+			<div className="flex flex-col gap-3 bg-[#F7F8FA] rounded-xl p-6 border border-border">
+				<div className=" flex items-center gap-6 justify-between">
+					<div className='min-w-0 space-y-3'>
+						<CardTitle className="text-xl font-semibold leading-8 text-foreground">
+							{__('Upload CSV file', 'doublescale')}
+						</CardTitle>
+						<CardDescription className="text-base leading-7 text-muted-foreground">
+							{__(
+								'Your file must include a column with either first name, last name and etc... for each contact. (Maximum file size 12 MB)',
+								'doublescale'
+							)}
+						</CardDescription>
+					</div>
+					<Button
+						type="button"
+						variant="secondaryDeepBlue"
+						onClick={handleDownloadExample}
+					>
+						<Download className="h-4 w-4" aria-hidden />
+						{__('Download example file (.csv)', 'doublescale')}
+					</Button>
+				</div>
+				{isFetching && <Skeleton className="h-40 w-full rounded-lg" />}
+				{!isFetching &&
+					(hasUploadedFile ? renderFileCard() : renderUploadArea())}
 			</div>
 
-			{isFetching && <Skeleton className="h-40 w-full rounded-lg" />}
 
-			{!isFetching && <>{!fileData ? renderUploadArea() : renderFileCard()}</>}
+
 		</div>
 	);
 };

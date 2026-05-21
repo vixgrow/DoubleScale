@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -136,7 +135,7 @@ Options -Indexes
 		$rules = explode( "\n", $rules );
 
 		if ( ! function_exists( 'insert_with_markers' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/misc.php' );
+			require_once ABSPATH . 'wp-admin/includes/misc.php';
 		}
 		return insert_with_markers( $htaccess, 'DoubleScale Import-Export', $rules );
 	}

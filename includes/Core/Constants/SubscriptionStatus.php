@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -64,13 +63,13 @@ class SubscriptionStatus {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING        => __( 'Pending', 'doublescale'),
-			self::ACTIVE         => __( 'Active', 'doublescale'),
-			self::ON_HOLD        => __( 'On Hold', 'doublescale'),
-			self::CANCELLED      => __( 'Cancelled', 'doublescale'),
-			self::SWITCHED       => __( 'Switched', 'doublescale'),
-			self::EXPIRED        => __( 'Expired', 'doublescale'),
-			self::PENDING_CANCEL => __( 'Pending Cancellation', 'doublescale'),
+			self::PENDING        => __( 'Pending', 'doublescale' ),
+			self::ACTIVE         => __( 'Active', 'doublescale' ),
+			self::ON_HOLD        => __( 'On Hold', 'doublescale' ),
+			self::CANCELLED      => __( 'Cancelled', 'doublescale' ),
+			self::SWITCHED       => __( 'Switched', 'doublescale' ),
+			self::EXPIRED        => __( 'Expired', 'doublescale' ),
+			self::PENDING_CANCEL => __( 'Pending Cancellation', 'doublescale' ),
 		);
 	}
 

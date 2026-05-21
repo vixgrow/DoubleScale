@@ -3,7 +3,6 @@
 
 namespace DoubleScale\Modules\Emails\Blocks;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;

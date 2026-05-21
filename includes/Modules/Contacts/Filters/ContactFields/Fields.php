@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\ContactFields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -23,8 +22,8 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Fields class
  */
-class Fields extends Filter
-{
+class Fields extends Filter {
+
 
 	/**
 	 * Name
@@ -74,8 +73,7 @@ class Fields extends Filter
 	/**
 	 * Constructor
 	 */
-	public function __construct($custom_field)
-	{
+	public function __construct( $custom_field ) {
 		$this->custom_field = $custom_field;
 		$this->name         = $custom_field->name;
 		$this->slug         = 'contact_field_' . $custom_field->id;
@@ -91,63 +89,62 @@ class Fields extends Filter
 	 *
 	 * @return Builder
 	 */
-	public function apply(Builder $query, $filter = array())
-	{
-		$operator = isset($filter['operator']) ? $filter['operator'] : 'is';
-		$value    = isset($filter['value']) ? $filter['value'] : array();
+	public function apply( Builder $query, $filter = array() ) {
+		$operator = isset( $filter['operator'] ) ? $filter['operator'] : 'is';
+		$value    = isset( $filter['value'] ) ? $filter['value'] : array();
 
-		if (empty($value)) {
+		if ( empty( $value ) ) {
 			return $query;
 		}
 
 		$field_id = $this->custom_field->id;
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'is':
 				$query->whereHas(
 					'custom_fields',
-					function ($query) use ($field_id, $value) {
-						$query->where('custom_field_id', $field_id)->where('value', $value);
+					function ( $query ) use ( $field_id, $value ) {
+						$query->where( 'custom_field_id', $field_id )->where( 'value', $value );
 					}
 				);
 				break;
 			case 'is_not':
 				$query->whereHas(
 					'custom_fields',
-					function ($query) use ($field_id, $value) {
-						$query->where('custom_field_id', $field_id)->where('value', '!=', $value);
+					function ( $query ) use ( $field_id, $value ) {
+						$query->where( 'custom_field_id', $field_id )->where( 'value', '!=', $value );
 					}
 				);
 				break;
 			case 'contains':
 				$query->whereHas(
 					'custom_fields',
-					function ($query) use ($field_id, $value) {
-						$query->where('custom_field_id', $field_id)->where('value', 'like', '%' . $value . '%');
+					function ( $query ) use ( $field_id, $value ) {
+						$query->where( 'custom_field_id', $field_id )->where( 'value', 'like', '%' . $value . '%' );
 					}
 				);
 				break;
 			case 'does_not_contain':
 				$query->whereHas(
 					'custom_fields',
-					function ($query) use ($field_id, $value) {
-						$query->where('custom_field_id', $field_id)->where('value', 'not like', '%' . $value . '%');
+					function ( $query ) use ( $field_id, $value ) {
+						$query->where( 'custom_field_id', $field_id )->where( 'value', 'not like', '%' . $value . '%' );
 					}
 				);
 				break;
 			case 'is_empty':
 				$query->whereDoesntHave(
 					'custom_fields',
-					function ($query) use ($field_id) {
-						$query->where('custom_field_id', $field_id);
+					function ( $query ) use ( $field_id ) {
+						$query->where( 'custom_field_id', $field_id );
 					}
 				);
 				break;
 			case 'is_not_empty':
 				$query->whereHas(
 					'custom_fields',
-					function ($query) use ($field_id) {
-						$query->where('custom_field_id', $field_id);
+					function ( $query ) use ( $field_id ) {
+						$query->where( 'custom_field_id', $field_id );
 					}
 				);
 				break;

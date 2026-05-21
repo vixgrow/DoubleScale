@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -59,14 +58,14 @@ class App {
 		}
 
 		$auth_url = add_query_arg(
-			[
+			array(
 				'response_type' => 'code',
 				'access_type'   => 'offline',
 				'client_id'     => $app_credentials['client_id'],
 				'redirect_uri'  => $this->get_redirect_uri(),
 				'state'         => 'smtp-outlook',
 				'scope'         => 'openid profile offline_access User.Read Mail.ReadWrite Mail.Send',
-			],
+			),
 			'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
 		);
 		\doublescale_safe_redirect( $auth_url );
@@ -102,13 +101,13 @@ class App {
 
 		// get account tokens.
 		$tokens = $this->get_tokens(
-			[
+			array(
 				'grant_type'    => 'authorization_code',
 				'code'          => $code,
 				'client_id'     => $app_credentials['client_id'],
 				'client_secret' => $app_credentials['client_secret'],
 				'redirect_uri'  => $this->get_redirect_uri(),
-			]
+			)
 		);
 
 		if ( empty( $tokens ) ) {
@@ -117,7 +116,7 @@ class App {
 		}
 
 		// get account details.
-		$account_api       = new Account_API( $this, '', [ 'credentials' => $tokens ] );
+		$account_api       = new Account_API( $this, '', array( 'credentials' => $tokens ) );
 		$accounts_response = $account_api->get_profile();
 
 		if ( is_wp_error( $accounts_response ) ) {
@@ -129,10 +128,10 @@ class App {
 		$account_name = $account->mail;
 		$account_id   = str_replace( '@outlook.com', '', $account->displayName );
 
-		$account_data = [
+		$account_data = array(
 			'name'        => $account_name,
 			'credentials' => $tokens,
-		];
+		);
 
 		// check account existence.
 		if ( in_array( $account_id, array_keys( $this->provider->accounts->get_accounts() ), true ) ) {
@@ -183,9 +182,9 @@ class App {
 	public function get_tokens( $query ) {
 		$response = wp_remote_post(
 			'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-			[
+			array(
 				'body' => $query,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -216,7 +215,7 @@ class App {
 	 */
 	public function refresh_tokens( $account_id, $refresh_token = null ) {
 		if ( empty( $refresh_token ) ) {
-			$refresh_token = $this->provider->accounts->get_accounts( [ 'credentials' ] )[ $account_id ]['credentials']['refresh_token'];
+			$refresh_token = $this->provider->accounts->get_accounts( array( 'credentials' ) )[ $account_id ]['credentials']['refresh_token'];
 		}
 
 		$app_credentials = $this->get_app_credentials();
@@ -226,12 +225,12 @@ class App {
 		}
 
 		$tokens = $this->get_tokens(
-			[
+			array(
 				'grant_type'    => 'refresh_token',
 				'refresh_token' => $refresh_token,
 				'client_id'     => $app_credentials['client_id'],
 				'client_secret' => $app_credentials['client_secret'],
-			]
+			)
 		);
 
 		if ( empty( $tokens ) ) {
@@ -240,9 +239,9 @@ class App {
 
 		$updated = $this->provider->accounts->update_account(
 			$account_id,
-			[
+			array(
 				'credentials' => $tokens,
-			],
+			),
 			false
 		);
 		if ( empty( $updated ) ) {
@@ -261,7 +260,7 @@ class App {
 	 * @return array|false Array of client_id & client_secret. false on failure.
 	 */
 	public function get_app_credentials() {
-		$app_settings = $this->provider->settings->get( 'app' ) ?? [];
+		$app_settings = $this->provider->settings->get( 'app' ) ?? array();
 		if ( empty( $app_settings['client_id'] ) || empty( $app_settings['client_secret'] ) ) {
 			return false;
 		} else {
@@ -277,5 +276,4 @@ class App {
 	public function get_redirect_uri() {
 		return admin_url( 'admin.php' );
 	}
-
 }

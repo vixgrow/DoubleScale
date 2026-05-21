@@ -14,7 +14,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\ContactFields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -120,57 +119,57 @@ class Fields extends Rule {
 		switch ( $this->custom_field->type ) {
 			case 'number':
 				return array(
-					'is'           => __( 'Is', 'doublescale'),
-					'is_not'       => __( 'Is not', 'doublescale'),
-					'greater_than' => __( 'Greater than', 'doublescale'),
-					'lower_than'   => __( 'Less than', 'doublescale'),
-					'is_empty'     => __( 'Is empty', 'doublescale'),
-					'is_not_empty' => __( 'Is not empty', 'doublescale'),
+					'is'           => __( 'Is', 'doublescale' ),
+					'is_not'       => __( 'Is not', 'doublescale' ),
+					'greater_than' => __( 'Greater than', 'doublescale' ),
+					'lower_than'   => __( 'Less than', 'doublescale' ),
+					'is_empty'     => __( 'Is empty', 'doublescale' ),
+					'is_not_empty' => __( 'Is not empty', 'doublescale' ),
 				);
 
 			case 'date':
 				return array(
-					'is'           => __( 'Is', 'doublescale'),
-					'is_not'       => __( 'Is not', 'doublescale'),
-					'greater_than' => __( 'Is after', 'doublescale'),
-					'lower_than'   => __( 'Is before', 'doublescale'),
-					'is_empty'     => __( 'Is empty', 'doublescale'),
-					'is_not_empty' => __( 'Is not empty', 'doublescale'),
+					'is'           => __( 'Is', 'doublescale' ),
+					'is_not'       => __( 'Is not', 'doublescale' ),
+					'greater_than' => __( 'Is after', 'doublescale' ),
+					'lower_than'   => __( 'Is before', 'doublescale' ),
+					'is_empty'     => __( 'Is empty', 'doublescale' ),
+					'is_not_empty' => __( 'Is not empty', 'doublescale' ),
 				);
 
 			case 'select':
 			case 'radio':
 				return array(
-					'is'           => __( 'Is', 'doublescale'),
-					'is_not'       => __( 'Is not', 'doublescale'),
-					'is_empty'     => __( 'Is empty', 'doublescale'),
-					'is_not_empty' => __( 'Is not empty', 'doublescale'),
+					'is'           => __( 'Is', 'doublescale' ),
+					'is_not'       => __( 'Is not', 'doublescale' ),
+					'is_empty'     => __( 'Is empty', 'doublescale' ),
+					'is_not_empty' => __( 'Is not empty', 'doublescale' ),
 				);
 
 			case 'multiselect':
 				return array(
-					'contains'         => __( 'Contains', 'doublescale'),
-					'does_not_contain' => __( 'Does not contain', 'doublescale'),
-					'is_empty'         => __( 'Is empty', 'doublescale'),
-					'is_not_empty'     => __( 'Is not empty', 'doublescale'),
+					'contains'         => __( 'Contains', 'doublescale' ),
+					'does_not_contain' => __( 'Does not contain', 'doublescale' ),
+					'is_empty'         => __( 'Is empty', 'doublescale' ),
+					'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 				);
 
 			case 'checkbox':
 			case 'boolean':
 				return array(
-					'is' => __( 'Is', 'doublescale'),
+					'is' => __( 'Is', 'doublescale' ),
 				);
 
 			default:
 				return array(
-					'is'               => __( 'Is', 'doublescale'),
-					'is_not'           => __( 'Is not', 'doublescale'),
-					'contains'         => __( 'Contains', 'doublescale'),
-					'does_not_contain' => __( 'Does not contain', 'doublescale'),
-					'starts_with'      => __( 'Starts with', 'doublescale'),
-					'ends_with'        => __( 'Ends with', 'doublescale'),
-					'is_empty'         => __( 'Is empty', 'doublescale'),
-					'is_not_empty'     => __( 'Is not empty', 'doublescale'),
+					'is'               => __( 'Is', 'doublescale' ),
+					'is_not'           => __( 'Is not', 'doublescale' ),
+					'contains'         => __( 'Contains', 'doublescale' ),
+					'does_not_contain' => __( 'Does not contain', 'doublescale' ),
+					'starts_with'      => __( 'Starts with', 'doublescale' ),
+					'ends_with'        => __( 'Ends with', 'doublescale' ),
+					'is_empty'         => __( 'Is empty', 'doublescale' ),
+					'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 				);
 		}
 	}
@@ -183,7 +182,7 @@ class Fields extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		 return in_array( $this->custom_field->type, array( 'select', 'multiselect', 'radio', 'checkbox', 'boolean' ), true );
+		return in_array( $this->custom_field->type, array( 'select', 'multiselect', 'radio', 'checkbox', 'boolean' ), true );
 	}
 
 	/**
@@ -196,8 +195,8 @@ class Fields extends Rule {
 	public function get_options() {
 		if ( in_array( $this->custom_field->type, array( 'checkbox', 'boolean' ), true ) ) {
 			return array(
-				'true'  => __( 'Checked', 'doublescale'),
-				'false' => __( 'Unchecked', 'doublescale'),
+				'true'  => __( 'Checked', 'doublescale' ),
+				'false' => __( 'Unchecked', 'doublescale' ),
 			);
 		}
 

@@ -141,13 +141,13 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 	}, [validationStatus]);
 
 	return (
-		<div className="space-y-6">
-			<Card className="space-y-4 p-6 shadow-none rounded-2xl">
-				<CardHeader className="p-0 mb-4">
-					<CardTitle className="text-2xl font-normal text-[#09090B]">
+		// <div className="space-y-6">
+			<Card className=" p-6 flex flex-col gap-6 border border-border bg-[#F7F8FA] shadow-none rounded-xl">
+				<CardHeader className="p-0 ">
+					<CardTitle className="text-xl font-semibold leading-8 text-foreground">
 						{importer.name} {__('Data Import Tool', 'doublescale')}
 					</CardTitle>
-					<div className="text-[#71717A] text-lg">
+					<div className="text-base mt-3 leading-7 text-muted-foreground">
 						{__(
 							'Start syncing your contacts to the DoubleScale using your API credentials.',
 							'doublescale'
@@ -155,7 +155,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 					</div>
 				</CardHeader>
 
-				<CardContent className="p-0 space-y-4">
+				<CardContent className="flex flex-col gap-6 p-0">
 					{/* GoHighLevel uses OAuth, all other providers use regular credentials */}
 					{source === 'gohighlevel' ? (
 						<GoHighLevelOAuth
@@ -176,23 +176,25 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 						/>
 					) : (
 						<>
-							{map(importer.credentials, (field, key) => {
-								// Skip info fields - they're handled in InstructionsCard
-								if (field.type === 'info') return null;
+							<div className="import-modal-credentials__fields flex flex-col gap-6">
+								{map(importer.credentials, (field, key) => {
+									// Skip info fields - they're handled in InstructionsCard
+									if (field.type === 'info') return null;
 
-								return (
-									<CredentialField
-										key={key}
-										fieldKey={key}
-										field={field}
-										value={credentials[key]}
-										source={source}
-										onChange={(value) =>
-											updateCredentials(key, value)
-										}
-									/>
-								);
-							})}
+									return (
+										<CredentialField
+											key={key}
+											fieldKey={key}
+											field={field}
+											value={credentials[key]}
+											source={source}
+											onChange={(value) =>
+												updateCredentials(key, value)
+											}
+										/>
+									);
+								})}
+							</div>
 
 							<ValidationAlert
 								status={validationStatus}
@@ -202,10 +204,12 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
 						</>
 					)}
 				</CardContent>
+
+				<InstructionsCard importer={importer} source={source} />
 			</Card>
 
-			<InstructionsCard importer={importer} source={source} />
-		</div>
+
+		// </div>
 	);
 };
 
@@ -255,7 +259,7 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
 	const helpText = getFieldHelpText();
 
 	return (
-		<div className="space-y-2">
+		<div className="import-modal-credentials__field flex flex-col gap-2">
 			<Field
 				label={field.label}
 				type={field.type}
@@ -263,7 +267,11 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
 				onChange={onChange}
 				placeholder={field.label}
 			/>
-			{helpText && <p className="text-sm text-gray-500">{helpText}</p>}
+			{helpText && (
+				<p className="mt-1 text-sm leading-6 text-muted-foreground">
+					{helpText}
+				</p>
+			)}
 		</div>
 	);
 };
@@ -420,9 +428,9 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 		: instructions || getDefaultInstructions();
 
 	return (
-		<Card className="bg-[#F6F6F6] rounded-xl shadow-none border border-gray-200">
+		<Card className="bg-white rounded-xl shadow-none border border-border">
 			<CardContent className="p-6 space-y-3">
-				<CardTitle className="text-2xl font-normal text-[#09090B] mb-2">
+				<CardTitle className="text-base font-semibold leading-8 text-foreground">
 					{infoField?.title ||
 						__(
 							`Find your ${importer.name} credentials`,
@@ -432,13 +440,13 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 
 				{infoField ? (
 					<div
-						className="text-lg text-[#71717A] space-y-2"
+						className="text-sm text-muted-foreground leading-6 space-y-2"
 						dangerouslySetInnerHTML={{
 							__html: infoField.description || '',
 						}}
 					/>
 				) : (
-					<ul className="list-decimal list-inside text-lg text-[#71717A] space-y-2">
+					<ul className="list-decimal list-inside text-sm text-muted-foreground leading-6 space-y-2">
 						{currentInstructions.steps.map(
 							(step: string, index: number) => (
 								<li key={index}>{step}</li>
@@ -452,7 +460,7 @@ const InstructionsCard: React.FC<InstructionsCardProps> = ({
 						href={currentInstructions.docUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center text-base text-[#274C77] hover:underline mt-4"
+						className="inline-flex items-center text-base text-primary hover:underline"
 					>
 						<ArrowUpLeft className="w-4 h-4 mr-1" />
 						{currentInstructions.docText}

@@ -91,15 +91,15 @@ class Account_API {
 	public function send( $args ) {
 		$response = wp_remote_request(
 			'https://graph.microsoft.com/v1.0/me/sendMail',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Content-Type'  => 'text/plain',
 					'Authorization' => 'Bearer ' . $this->access_token,
-				],
+				),
 				'body'    => $args,
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -135,13 +135,13 @@ class Account_API {
 	public function get_profile() {
 		$response = wp_remote_get(
 			'https://graph.microsoft.com/v1.0/me',
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->access_token,
-				],
-			]
+				),
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

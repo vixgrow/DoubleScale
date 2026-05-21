@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -96,7 +95,7 @@ class MailersendBulkMailer extends AbstractBulkMailer {
 		if ( ! $account_api ) {
 			return new WP_Error(
 				'mailersend_not_configured',
-				__( 'MailerSend is not properly configured.', 'doublescale')
+				__( 'MailerSend is not properly configured.', 'doublescale' )
 			);
 		}
 
@@ -104,7 +103,7 @@ class MailersendBulkMailer extends AbstractBulkMailer {
 		if ( ! method_exists( $account_api, 'send_batch' ) ) {
 			return new WP_Error(
 				'mailersend_batch_not_supported',
-				__( 'MailerSend batch sending is not available. Please update smtp.', 'doublescale')
+				__( 'MailerSend batch sending is not available. Please update smtp.', 'doublescale' )
 			);
 		}
 
@@ -154,10 +153,9 @@ class MailersendBulkMailer extends AbstractBulkMailer {
 			'success'       => true,
 			'message_id'    => $message_id,
 			'bulk_email_id' => $message_id,
-			'message'       => $result['message'] ?? __( 'Batch sent successfully', 'doublescale'),
+			'message'       => $result['message'] ?? __( 'Batch sent successfully', 'doublescale' ),
 			'sent_count'    => count( $batch_data['recipients'] ),
 			'failed'        => array(),
 		);
 	}
-
 }

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Automations\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;

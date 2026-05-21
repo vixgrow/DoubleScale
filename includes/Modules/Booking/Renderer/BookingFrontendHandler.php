@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\Renderer;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -47,9 +46,9 @@ class BookingFrontendHandler {
 		global $wp_scripts, $wp_styles;
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public booking link: identity comes from the hash in the URL, no nonce applies.
-		$calendar_slug = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) );
-		$booking_qs    = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking', '' ) );
-		$event_slug_qs = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_event', '' ) );
+		$calendar_slug = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) ) );
+		$booking_qs    = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking', '' ) ) );
+		$event_slug_qs = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_event', '' ) ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( ! $calendar_slug && ! $booking_qs && ! $event_slug_qs ) {
@@ -67,10 +66,10 @@ class BookingFrontendHandler {
 		$plugin_url = defined( 'DOUBLESCALE_PLUGIN_URL' ) ? \DOUBLESCALE_PLUGIN_URL : '';
 		$version    = defined( 'DOUBLESCALE_VERSION' ) ? \DOUBLESCALE_VERSION : '1.0.0';
 
-		$asset_file  = $plugin_dir . 'build/renderer/index.asset.php';
-		$asset       = file_exists( $asset_file ) ? require $asset_file : null;
-		$deps        = isset( $asset['dependencies'] ) ? $asset['dependencies'] : array();
-		$ver         = isset( $asset['version'] ) ? $asset['version'] : $version;
+		$asset_file = $plugin_dir . 'build/renderer/index.asset.php';
+		$asset      = file_exists( $asset_file ) ? require $asset_file : null;
+		$deps       = isset( $asset['dependencies'] ) ? $asset['dependencies'] : array();
+		$ver        = isset( $asset['version'] ) ? $asset['version'] : $version;
 
 		wp_register_script(
 			'doublescale-booking-renderer',
@@ -149,12 +148,12 @@ class BookingFrontendHandler {
 
 	public function route_frontend() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public booking link: identity comes from the URL hash; route_frontend handles unauthenticated visitors.
-		$hash               = sanitize_text_field( Arr::get( $_GET, 'id', '' ) );
-		$type               = sanitize_text_field( Arr::get( $_GET, 'type', '' ) );
-		$calendar_slug      = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) );
-		$booking_qs         = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking', '' ) );
-		$event_slug         = sanitize_text_field( Arr::get( $_GET, 'event', '' ) );
-		$direct_event_slug  = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_event', '' ) );
+		$hash              = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'id', '' ) ) );
+		$type              = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'type', '' ) ) );
+		$calendar_slug     = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) ) );
+		$booking_qs        = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking', '' ) ) );
+		$event_slug        = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'event', '' ) ) );
+		$direct_event_slug = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_event', '' ) ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Direct event share link (`?doublescale_booking_event=<slug>`): resolve the
@@ -189,9 +188,9 @@ class BookingFrontendHandler {
 
 	public function hide_admin_bar( $show_bar ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public booking link detection for admin-bar suppression.
-		$calendar_slug = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) );
-		$booking_qs    = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking', '' ) );
-		$event_slug_qs = sanitize_text_field( Arr::get( $_GET, 'doublescale_booking_event', '' ) );
+		$calendar_slug = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_calendar', '' ) ) );
+		$booking_qs    = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking', '' ) ) );
+		$event_slug_qs = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'doublescale_booking_event', '' ) ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		if ( $calendar_slug || $booking_qs || $event_slug_qs ) {

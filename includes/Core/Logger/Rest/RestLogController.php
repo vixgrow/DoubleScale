@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Logger\Rest;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
@@ -125,7 +124,7 @@ class RestLogController extends RestController {
 	private function export_items( $format, $levels ) {
 		$logs = LogHandlerDb::get_all( $levels );
 		if ( empty( $logs ) ) {
-			return new WP_Error( 'doublescale_cannot_find_logs', esc_html__( 'Cannot find any logs', 'doublescale'), array( 'status' => 404 ) );
+			return new WP_Error( 'doublescale_cannot_find_logs', esc_html__( 'Cannot find any logs', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
 		$rows = array();
@@ -145,7 +144,7 @@ class RestLogController extends RestController {
 				$this->export_json( $rows );
 				break;
 			default:
-				return new WP_Error( 'doublescale_unknown_logs_export_format', esc_html__( 'Unknown export format', 'doublescale'), array( 'status' => 422 ) );
+				return new WP_Error( 'doublescale_unknown_logs_export_format', esc_html__( 'Unknown export format', 'doublescale' ), array( 'status' => 422 ) );
 		}
 	}
 
@@ -156,7 +155,7 @@ class RestLogController extends RestController {
 	 * @return void
 	 */
 	private function export_json( $rows ) {
-		$filename = esc_html__( 'Logs export', 'doublescale') . '.json';
+		$filename = esc_html__( 'Logs export', 'doublescale' ) . '.json';
 
 		if ( ini_get( 'display_errors' ) ) {
 			ini_set( 'display_errors', '0' ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- streaming a JSON file download; PHP warnings must be suppressed so the output isn't corrupted with HTML.
@@ -206,7 +205,7 @@ class RestLogController extends RestController {
 		$deleted = LogHandlerDb::delete( $request->get_param( 'id' ) );
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'doublescale_logs_db_error_on_deleting_log', __( 'Error on deleting log in db!', 'doublescale'), array( 'status' => 422 ) );
+			return new WP_Error( 'doublescale_logs_db_error_on_deleting_log', __( 'Error on deleting log in db!', 'doublescale' ), array( 'status' => 422 ) );
 		}
 
 		return new WP_REST_Response();

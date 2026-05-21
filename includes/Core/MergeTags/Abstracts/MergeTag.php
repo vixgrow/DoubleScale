@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Core\MergeTags\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Models\AutomationContactModel;
@@ -69,11 +68,11 @@ abstract class MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel|ContactModel|null $contact Contact Model.
-	 * @param string                                      $merge_tag Merge Tag.
+	 * @param string                                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	abstract public function get_value( $contact, $merge_tag = '');
+	abstract public function get_value( $contact, $merge_tag = '' );
 
 	/**
 	 * Is Automation Contact
@@ -90,7 +89,7 @@ abstract class MergeTag {
 	 * Get tag value
 	 *
 	 * @param AutomationContactModel|ContactModel|null $contact_or_automation_contact.
-	 * @param string                                      $merge_tag Merge Tag.
+	 * @param string                                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */

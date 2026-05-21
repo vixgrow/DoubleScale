@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Submission;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;

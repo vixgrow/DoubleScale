@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -20,8 +19,8 @@ use WPEloquent\Eloquent\Model;
 /**
  * EddOrderModel class
  */
-class EddOrderModel extends Model
-{
+class EddOrderModel extends Model {
+
 
 	/**
 	 * Table name
@@ -122,9 +121,8 @@ class EddOrderModel extends Model
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function contact()
-	{
-		return $this->belongsTo(ContactModel::class, 'email', 'email');
+	public function contact() {
+		return $this->belongsTo( ContactModel::class, 'email', 'email' );
 	}
 
 	/**
@@ -132,13 +130,12 @@ class EddOrderModel extends Model
 	 *
 	 * @since 1.0.0
 	 */
-	public static function boot()
-	{
+	public static function boot() {
 		parent::boot();
 
 		static::retrieved(
-			function ($order) {
-				$order->url = admin_url('edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $order->id);
+			function ( $order ) {
+				$order->url = admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $order->id );
 			}
 		);
 	}

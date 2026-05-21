@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Blocks\EmailBlockInterface;
@@ -25,7 +24,7 @@ abstract class EmailBlock implements EmailBlockInterface {
 	/**
 	 * Process merge tags in content
 	 *
-	 * @param string                                    $content Content with merge tags
+	 * @param string                                   $content Content with merge tags
 	 * @param ContactModel|AutomationContactModel|null $contact Contact model for merge tags
 	 * @return string Processed content
 	 */

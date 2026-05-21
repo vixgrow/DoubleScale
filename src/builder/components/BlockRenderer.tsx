@@ -19,6 +19,7 @@ import {
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '@doublescale/utils/templateUtils';
 import { ImageResizeHandles } from './ImageResizeHandles';
+import ConfigApi from '@doublescale/config';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -94,7 +95,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	);
 
 	const isTextBlock = block.type === 'text';
-	const isTextAiChrome = isTextBlock && !isThisTemplateBlock;
+	const isTextAiChrome = isTextBlock && !isThisTemplateBlock && ConfigApi.isAiConfigured();
 	const [aiPopoverOpen, setAiPopoverOpen] = useState(false);
 
 	useEffect(() => {

@@ -3,8 +3,8 @@
  * Runs migration files registered by modules, tracking what has already run
  * in a dedicated `{prefix}doublescale_migrations` table.
  *
-	 * `Install::install()` delegates here: each enabled module’s `Migrations/*.php`
-	 * runs in dependency order; tracked in `{prefix}doublescale_migrations`.
+ * `Install::install()` delegates here: each enabled module’s `Migrations/*.php`
+ * runs in dependency order; tracked in `{prefix}doublescale_migrations`.
  *
  * @package DoubleScale\Pro
  */

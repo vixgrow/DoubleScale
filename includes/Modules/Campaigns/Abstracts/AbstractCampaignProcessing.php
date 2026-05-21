@@ -150,12 +150,12 @@ abstract class AbstractCampaignProcessing {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->settings                = Settings::get( $this->channel, array() );
-		$this->max_execution_time      = Utils::get_max_execution_time();
-		$this->rate_limiter            = CampaignRateLimiter::instance();
-		$this->contact_filter          = CampaignContactFilter::instance();
-		$this->locker                  = new CampaignLocker();
-		$this->continuation_scheduler  = new CampaignContinuationScheduler(
+		$this->settings               = Settings::get( $this->channel, array() );
+		$this->max_execution_time     = Utils::get_max_execution_time();
+		$this->rate_limiter           = CampaignRateLimiter::instance();
+		$this->contact_filter         = CampaignContactFilter::instance();
+		$this->locker                 = new CampaignLocker();
+		$this->continuation_scheduler = new CampaignContinuationScheduler(
 			$this->channel,
 			array( $this, 'continue_campaign_processing' )
 		);
@@ -223,7 +223,7 @@ abstract class AbstractCampaignProcessing {
 		if ( ! $this->locker->acquire( $lock_key, $lock_duration ) ) {
 			doublescale_get_logger()->debug(
 				/* translators: %s: channel name (email, sms, whatsapp) */
-				sprintf( __( 'Campaign %s continuation skipped - already being processed', 'doublescale'), $this->channel ),
+				sprintf( __( 'Campaign %s continuation skipped - already being processed', 'doublescale' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_continuation_locked",
 					'campaign_id' => $campaign_id,
@@ -250,7 +250,7 @@ abstract class AbstractCampaignProcessing {
 			if ( $last_offset !== false && $last_offset == $current_offset ) {
 				// No progress made - increment counter
 				$no_progress_count = (int) get_transient( $no_progress_key );
-				$no_progress_count++;
+				++$no_progress_count;
 
 				// Maximum consecutive "no progress" attempts (configurable, default 5)
 				$max_no_progress = apply_filters(
@@ -264,12 +264,12 @@ abstract class AbstractCampaignProcessing {
 					// Too many consecutive attempts with no progress - mark as failed
 					$error_message = sprintf(
 						/* translators: %d: number of consecutive attempts */
-						__( 'Campaign failed: no progress after %d consecutive attempts', 'doublescale'),
+						__( 'Campaign failed: no progress after %d consecutive attempts', 'doublescale' ),
 						$no_progress_count
 					);
 					doublescale_get_logger()->error(
 						/* translators: %1$s: channel name, %2$d: number of consecutive attempts */
-						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'doublescale'), $this->channel, $no_progress_count ),
+						sprintf( __( 'Campaign %1$s failed: no progress after %2$d consecutive attempts', 'doublescale' ), $this->channel, $no_progress_count ),
 						array(
 							'code'        => "{$this->channel}_no_progress_limit_exceeded",
 							'campaign_id' => $campaign_id,
@@ -303,7 +303,7 @@ abstract class AbstractCampaignProcessing {
 				set_transient( $no_progress_key, $no_progress_count, HOUR_IN_SECONDS );
 				doublescale_get_logger()->info(
 					/* translators: %1$s: channel name, %2$d: current attempt number, %3$d: maximum attempts */
-					sprintf( __( 'Campaign %1$s continuation made no progress (attempt %2$d/%3$d)', 'doublescale'), $this->channel, $no_progress_count, $max_no_progress ),
+					sprintf( __( 'Campaign %1$s continuation made no progress (attempt %2$d/%3$d)', 'doublescale' ), $this->channel, $no_progress_count, $max_no_progress ),
 					array(
 						'code'        => "{$this->channel}_no_progress",
 						'campaign_id' => $campaign_id,
@@ -344,8 +344,8 @@ abstract class AbstractCampaignProcessing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array                        $message_data Prepared message data
-	 * @param ContactModel                $contact Contact model
+	 * @param array                      $message_data Prepared message data
+	 * @param ContactModel               $contact Contact model
 	 * @param CommunicationTrackingModel $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
@@ -359,11 +359,15 @@ abstract class AbstractCampaignProcessing {
 
 			// Validate provider is configured before attempting to send
 			if ( ! $provider->is_configured() ) {
-				throw new \Exception( esc_html( sprintf(
-						'%s provider (%s) is not configured. Please configure it in Settings > Integrations before sending messages.',
-						ucfirst( $this->channel ),
-						$provider->get_provider_name()
-					) ) );
+				throw new \Exception(
+					esc_html(
+						sprintf(
+							'%s provider (%s) is not configured. Please configure it in Settings > Integrations before sending messages.',
+							ucfirst( $this->channel ),
+							$provider->get_provider_name()
+						)
+					)
+				);
 			}
 
 			// Prepare message data for provider Api
@@ -407,9 +411,9 @@ abstract class AbstractCampaignProcessing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array                        $result Api result
+	 * @param array                      $result Api result
 	 * @param CommunicationTrackingModel $campaign_message Campaign message record
-	 * @param ContactModel                $contact Contact model
+	 * @param ContactModel               $contact Contact model
 	 * @return array Processed result
 	 */
 	protected function handle_provider_response( $result, CommunicationTrackingModel $campaign_message, ContactModel $contact ) {
@@ -446,7 +450,7 @@ abstract class AbstractCampaignProcessing {
 	protected function handle_provider_error( \Exception $e ) {
 		doublescale_get_logger()->error(
 			/* translators: %s: channel name (email, sms, whatsapp) */
-			sprintf( __( '%s send error.', 'doublescale'), ucfirst( $this->channel ) ),
+			sprintf( __( '%s send error.', 'doublescale' ), ucfirst( $this->channel ) ),
 			array(
 				'code'  => "{$this->channel}_send_error",
 				'error' => $e->getMessage(),
@@ -554,8 +558,8 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Send message - must be implemented by child classes
 	 *
-	 * @param array                        $message_data Prepared message data
-	 * @param ContactModel                $contact Contact model
+	 * @param array                      $message_data Prepared message data
+	 * @param ContactModel               $contact Contact model
 	 * @param CommunicationTrackingModel $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
@@ -599,7 +603,7 @@ abstract class AbstractCampaignProcessing {
 		if ( ! PluginKernel::instance()->campaigns_tasks->update_heartbeat( "doublescale_{$this->channel}_campaigns" ) ) {
 			doublescale_get_logger()->info(
 				/* translators: %s: channel name */
-				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'doublescale'), $this->channel ),
+				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'doublescale' ), $this->channel ),
 				array(
 					'channel' => $this->channel,
 					'context' => 'campaign_processing_start',
@@ -633,7 +637,7 @@ abstract class AbstractCampaignProcessing {
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
 				/* translators: %s: channel name */
-				sprintf( __( '%s Campaign processing error.', 'doublescale'), ucfirst( $this->channel ) ),
+				sprintf( __( '%s Campaign processing error.', 'doublescale' ), ucfirst( $this->channel ) ),
 				array(
 					'code'  => "{$this->channel}_campaign_error",
 					'error' => array(
@@ -679,7 +683,7 @@ abstract class AbstractCampaignProcessing {
 		// Validate campaign type
 		if ( $campaign->type !== $this->channel ) {
 			doublescale_get_logger()->error(
-				__( 'Campaign type mismatch detected.', 'doublescale'),
+				__( 'Campaign type mismatch detected.', 'doublescale' ),
 				array(
 					'code'          => 'campaign_type_mismatch',
 					'campaign_id'   => $campaign->id,
@@ -705,7 +709,7 @@ abstract class AbstractCampaignProcessing {
 		if ( ! $this->locker->acquire( $lock_key, $lock_duration ) ) {
 			doublescale_get_logger()->info(
 				/* translators: %s: channel name */
-				sprintf( __( 'Campaign %s already being processed by another worker, skipping', 'doublescale'), $this->channel ),
+				sprintf( __( 'Campaign %s already being processed by another worker, skipping', 'doublescale' ), $this->channel ),
 				array(
 					'code'        => "{$this->channel}_campaign_locked",
 					'campaign_id' => $campaign->id,
@@ -753,7 +757,7 @@ abstract class AbstractCampaignProcessing {
 			$this->channel,
 			$campaign->id
 		);
-		$offset_key = "doublescale_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
+		$offset_key    = "doublescale_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}";
 
 		$ctx = new CampaignContext();
 
@@ -885,7 +889,7 @@ abstract class AbstractCampaignProcessing {
 						'recipient_invalid',
 						sprintf(
 							/* translators: %s: skip reason */
-							__( 'Contact skipped: %s', 'doublescale'),
+							__( 'Contact skipped: %s', 'doublescale' ),
 							$skip_reason
 						)
 					);
@@ -903,7 +907,7 @@ abstract class AbstractCampaignProcessing {
 			if ( ! $template_id ) {
 				doublescale_get_logger()->error(
 					/* translators: %s: channel name */
-					sprintf( __( 'No template found for %s campaign.', 'doublescale'), $this->channel ),
+					sprintf( __( 'No template found for %s campaign.', 'doublescale' ), $this->channel ),
 					array(
 						'code'        => "{$this->channel}_no_template",
 						'campaign_id' => $campaign->id,
@@ -954,7 +958,7 @@ abstract class AbstractCampaignProcessing {
 
 			doublescale_get_logger()->info(
 				/* translators: %s: channel name */
-				sprintf( __( 'Campaign %s enqueued.', 'doublescale'), $this->channel ),
+				sprintf( __( 'Campaign %s enqueued.', 'doublescale' ), $this->channel ),
 				array(
 					'code'             => "add_campaign_{$this->channel}",
 					'campaign_message' => array(
@@ -972,7 +976,7 @@ abstract class AbstractCampaignProcessing {
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
 				/* translators: %s: channel name */
-				sprintf( __( 'Add campaign %s error.', 'doublescale'), $this->channel ),
+				sprintf( __( 'Add campaign %s error.', 'doublescale' ), $this->channel ),
 				array(
 					'code'  => "add_campaign_{$this->channel}",
 					'error' => array(
@@ -994,9 +998,9 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Process campaign message - unified logic for all types
 	 *
-	 * @param CampaignModel                         $campaign
+	 * @param CampaignModel                       $campaign
 	 * @param ContactModel|AutomationContactModel $contact_or_automation_contact Contact or Automation Contact Model
-	 * @param CommunicationTrackingModel           $campaign_message
+	 * @param CommunicationTrackingModel          $campaign_message
 	 * @return void
 	 */
 	public function process_campaign_message( CampaignModel $campaign, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ) {
@@ -1023,7 +1027,7 @@ abstract class AbstractCampaignProcessing {
 
 				doublescale_get_logger()->error(
 					/* translators: %s: channel name */
-					sprintf( __( '%s message failed after memory limit retries', 'doublescale'), ucfirst( $this->channel ) ),
+					sprintf( __( '%s message failed after memory limit retries', 'doublescale' ), ucfirst( $this->channel ) ),
 					array(
 						'code'         => "{$this->channel}_memory_retry_exceeded",
 						'tracking_id'  => $campaign_message->id,
@@ -1043,7 +1047,7 @@ abstract class AbstractCampaignProcessing {
 			// Log retry attempt
 			doublescale_get_logger()->info(
 				/* translators: %1$s: channel name, %2$d: retry attempt number (1-3) */
-				sprintf( __( '%1$s message requeued due to memory limit (attempt %2$d/3)', 'doublescale'), ucfirst( $this->channel ), $retry_count + 1 ),
+				sprintf( __( '%1$s message requeued due to memory limit (attempt %2$d/3)', 'doublescale' ), ucfirst( $this->channel ), $retry_count + 1 ),
 				array(
 					'code'         => "{$this->channel}_memory_requeue",
 					'tracking_id'  => $campaign_message->id,
@@ -1077,11 +1081,15 @@ abstract class AbstractCampaignProcessing {
 			// Get template data
 			$template = \DoubleScale\Modules\Campaigns\Models\TemplateModel::find( $campaign_message->template_id );
 			if ( ! $template ) {
-				throw new \Exception( esc_html( sprintf(
-					/* translators: %s: channel name */
-						__( 'Template not found for %s campaign', 'doublescale'),
-						$this->channel
-					) ) );
+				throw new \Exception(
+					esc_html(
+						sprintf(
+						/* translators: %s: channel name */
+							__( 'Template not found for %s campaign', 'doublescale' ),
+							$this->channel
+						)
+					)
+				);
 			}
 
 			// Validate template content
@@ -1115,9 +1123,9 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Prepare message content - unified logic for all types
 	 *
-	 * @param \DoubleScale\Modules\Campaigns\Models\TemplateModel    $template
-	 * @param ContactModel|AutomationContactModel $contact_or_automation_contact Contact or Automation Contact Model for merge tags
-	 * @param CommunicationTrackingModel           $campaign_message
+	 * @param \DoubleScale\Modules\Campaigns\Models\TemplateModel $template
+	 * @param ContactModel|AutomationContactModel                 $contact_or_automation_contact Contact or Automation Contact Model for merge tags
+	 * @param CommunicationTrackingModel                          $campaign_message
 	 * @return array Prepared message data
 	 */
 	protected function prepare_message_content( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ) {
@@ -1190,11 +1198,11 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Render builder content with conditional section tracking
 	 *
-	 * @param string                                 $content The content to render (could be HTML or JSON)
+	 * @param string                              $content The content to render (could be HTML or JSON)
 	 * @param ContactModel|AutomationContactModel $contact_or_automation_contact Contact model for merge tags
-	 * @param int|null                               $tracking_id Communication tracking ID (null if not yet created)
-	 * @param object|null                            &$renderer Renderer instance (passed by reference to capture rendered section IDs)
-	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @param int|null                            $tracking_id Communication tracking ID (null if not yet created)
+	 * @param object|null                         &$renderer Renderer instance (passed by reference to capture rendered section IDs)
+	 * @param string                              $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string Rendered HTML content
 	 */
 	protected function render_builder_content_with_tracking( $content, $contact_or_automation_contact, $tracking_id = null, &$renderer = null, $footer_html = '' ) {
@@ -1255,9 +1263,9 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Render builder content to HTML if it's in builder JSON format
 	 *
-	 * @param string                                 $content The content to render (could be HTML or JSON)
+	 * @param string                              $content The content to render (could be HTML or JSON)
 	 * @param ContactModel|AutomationContactModel $contact_or_automation_contact Contact model for merge tags
-	 * @param string                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @param string                              $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string Rendered HTML content
 	 */
 	protected function render_builder_content( $content, $contact_or_automation_contact, $footer_html = '' ) {
@@ -1270,7 +1278,7 @@ abstract class AbstractCampaignProcessing {
 	 * Complete campaign
 	 *
 	 * @param CampaignModel $campaign
-	 * @param int            $recipients_count
+	 * @param int           $recipients_count
 	 * @return void
 	 */
 	protected function complete_campaign( CampaignModel $campaign, $recipients_count ) {
@@ -1287,7 +1295,7 @@ abstract class AbstractCampaignProcessing {
 
 		doublescale_get_logger()->info(
 			/* translators: %s: dynamic value */
-			sprintf( __( '%s Campaign completed.', 'doublescale'), ucfirst( $this->channel ) ),
+			sprintf( __( '%s Campaign completed.', 'doublescale' ), ucfirst( $this->channel ) ),
 			array(
 				'code'       => "{$this->channel}_campaign_completed",
 				'campaign'   => array(
@@ -1344,7 +1352,7 @@ abstract class AbstractCampaignProcessing {
 	 * Handle send result - unified logic for all types
 	 *
 	 * @param CommunicationTrackingModel $campaign_message
-	 * @param array                        $result Send result
+	 * @param array                      $result Send result
 	 * @return void
 	 */
 	protected function handle_send_result( CommunicationTrackingModel $campaign_message, $result ) {
@@ -1367,7 +1375,7 @@ abstract class AbstractCampaignProcessing {
 			if ( isset( $result['error'] ) ) {
 				doublescale_get_logger()->error(
 					/* translators: %1$s: channel name, %2$s: error message */
-					sprintf( __( '%1$s message failed: %2$s', 'doublescale'), ucfirst( $this->channel ), $result['error'] ),
+					sprintf( __( '%1$s message failed: %2$s', 'doublescale' ), ucfirst( $this->channel ), $result['error'] ),
 					array(
 						'campaign_id' => $campaign_message->source_id,
 						'contact_id'  => $campaign_message->contact_id,
@@ -1380,7 +1388,7 @@ abstract class AbstractCampaignProcessing {
 			if ( isset( $result['debug'] ) ) {
 				doublescale_get_logger()->debug(
 					/* translators: %s: channel name */
-					sprintf( __( '%s message failed with debug info', 'doublescale'), ucfirst( $this->channel ) ),
+					sprintf( __( '%s message failed with debug info', 'doublescale' ), ucfirst( $this->channel ) ),
 					$result['debug']
 				);
 			}
@@ -1422,7 +1430,7 @@ abstract class AbstractCampaignProcessing {
 		 */
 		$footer_text = apply_filters(
 			'doublescale_message_opt_out_footer',
-			__( 'Reply STOP to unsubscribe', 'doublescale'),
+			__( 'Reply STOP to unsubscribe', 'doublescale' ),
 			$this->channel
 		);
 
@@ -1498,8 +1506,8 @@ abstract class AbstractCampaignProcessing {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param CampaignModel               $campaign
-	 * @param ContactModel                $contact
+	 * @param CampaignModel              $campaign
+	 * @param ContactModel               $contact
 	 * @param CommunicationTrackingModel $campaign_message
 	 * @return void
 	 */
@@ -1509,7 +1517,7 @@ abstract class AbstractCampaignProcessing {
 
 		doublescale_get_logger()->error(
 			/* translators: %s: channel name */
-			sprintf( __( 'Failed to connect to message provider for %s campaign.', 'doublescale'), $this->channel ),
+			sprintf( __( 'Failed to connect to message provider for %s campaign.', 'doublescale' ), $this->channel ),
 			array(
 				'code'        => 'provider_connect_failed',
 				'campaign_id' => $campaign->id,
@@ -1521,15 +1529,15 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Log campaign processing result
 	 *
-	 * @param CampaignModel               $campaign
-	 * @param ContactModel                $contact
+	 * @param CampaignModel              $campaign
+	 * @param ContactModel               $contact
 	 * @param CommunicationTrackingModel $campaign_message
 	 * @return void
 	 */
 	protected function log_campaign_processing_result( $campaign, $contact, $campaign_message ) {
 		doublescale_get_logger()->info(
 			/* translators: %s: channel name */
-			sprintf( __( 'Campaign %s message processed.', 'doublescale'), ucfirst( $this->channel ) ),
+			sprintf( __( 'Campaign %s message processed.', 'doublescale' ), ucfirst( $this->channel ) ),
 			array(
 				'code'        => "campaign_{$this->channel}_processed",
 				'status'      => $campaign_message->status,
@@ -1542,10 +1550,10 @@ abstract class AbstractCampaignProcessing {
 	/**
 	 * Log campaign processing error
 	 *
-	 * @param CampaignModel               $campaign
-	 * @param ContactModel                $contact
+	 * @param CampaignModel              $campaign
+	 * @param ContactModel               $contact
 	 * @param CommunicationTrackingModel $campaign_message
-	 * @param \Exception                   $exception
+	 * @param \Exception                 $exception
 	 * @return void
 	 */
 	protected function log_campaign_processing_error( $campaign, $contact, $campaign_message, $exception ) {
@@ -1554,7 +1562,7 @@ abstract class AbstractCampaignProcessing {
 
 		doublescale_get_logger()->error(
 			/* translators: %s: channel name */
-			sprintf( __( 'Campaign %s message processing error.', 'doublescale'), ucfirst( $this->channel ) ),
+			sprintf( __( 'Campaign %s message processing error.', 'doublescale' ), ucfirst( $this->channel ) ),
 			array(
 				'code'        => "campaign_{$this->channel}_error",
 				'error'       => $exception->getMessage(),
@@ -1578,8 +1586,8 @@ abstract class AbstractCampaignProcessing {
 	 *
 	 * Kept as a public method so any existing callers continue to work.
 	 *
-	 * @param CampaignModel               $campaign
-	 * @param ContactModel                $contact
+	 * @param CampaignModel              $campaign
+	 * @param ContactModel               $contact
 	 * @param CommunicationTrackingModel $message
 	 * @return void
 	 */
@@ -1622,30 +1630,34 @@ abstract class AbstractCampaignProcessing {
 	 * Validate template content comprehensively
 	 *
 	 * @param \DoubleScale\Modules\Campaigns\Models\TemplateModel $template Template to validate
-	 * @param string                              $campaign_type Campaign type
+	 * @param string                                              $campaign_type Campaign type
 	 * @throws \Exception If template validation fails
 	 * @return bool True if valid
 	 */
 	protected function validate_template( $template, $campaign_type ) {
 		if ( ! $template ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( esc_html( sprintf(
+			throw new \Exception(
+				esc_html(
+					sprintf(
 					/* translators: %s: campaign type (email, sms, whatsapp) */
-					__( 'Template not found for %s campaign', 'doublescale'),
-					$campaign_type
-				) ) );
+						__( 'Template not found for %s campaign', 'doublescale' ),
+						$campaign_type
+					)
+				)
+			);
 		}
 
 		// Check for empty body
 		if ( empty( trim( $template->body ) ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( esc_html__( 'Template body cannot be empty', 'doublescale') );
+			throw new \Exception( esc_html__( 'Template body cannot be empty', 'doublescale' ) );
 		}
 
 		// Check for subject in email templates
 		if ( $campaign_type === CampaignChannel::STR_EMAIL && empty( trim( $template->subject ) ) ) {
 			doublescale_get_logger()->info(
-				__( 'Email template missing subject', 'doublescale'),
+				__( 'Email template missing subject', 'doublescale' ),
 				array( 'template_id' => $template->id )
 			);
 		}
@@ -1654,7 +1666,7 @@ abstract class AbstractCampaignProcessing {
 		if ( $campaign_type === CampaignChannel::STR_EMAIL ) {
 			if ( ! $this->is_valid_html( $template->body ) ) {
 				doublescale_get_logger()->info(
-					__( 'Email template contains potentially invalid HTML', 'doublescale'),
+					__( 'Email template contains potentially invalid HTML', 'doublescale' ),
 					array( 'template_id' => $template->id )
 				);
 			}
@@ -1678,7 +1690,7 @@ abstract class AbstractCampaignProcessing {
 			if ( strlen( $plain_text ) > 1600 ) { // Sms limit is typically 1600 chars
 				doublescale_get_logger()->info(
 					/* translators: %1$s: campaign type, %2$d: character count */
-					sprintf( __( '%1$s template content may be too long (%2$d characters)', 'doublescale'), ucfirst( $campaign_type ), strlen( $plain_text ) ),
+					sprintf( __( '%1$s template content may be too long (%2$d characters)', 'doublescale' ), ucfirst( $campaign_type ), strlen( $plain_text ) ),
 					array(
 						'template_id' => $template->id,
 						'length'      => strlen( $plain_text ),
@@ -1766,7 +1778,7 @@ abstract class AbstractCampaignProcessing {
 		if ( $hours > 0 ) {
 			$human_readable = sprintf(
 				/* translators: 1: hours, 2: minutes, 3: seconds */
-				__( '%1$d hours, %2$d minutes, %3$d seconds', 'doublescale'),
+				__( '%1$d hours, %2$d minutes, %3$d seconds', 'doublescale' ),
 				$hours,
 				$minutes,
 				$seconds
@@ -1774,14 +1786,14 @@ abstract class AbstractCampaignProcessing {
 		} elseif ( $minutes > 0 ) {
 			$human_readable = sprintf(
 				/* translators: 1: minutes, 2: seconds */
-				__( '%1$d minutes, %2$d seconds', 'doublescale'),
+				__( '%1$d minutes, %2$d seconds', 'doublescale' ),
 				$minutes,
 				$seconds
 			);
 		} else {
 			$human_readable = sprintf(
 				/* translators: %d: seconds */
-				__( '%d seconds', 'doublescale'),
+				__( '%d seconds', 'doublescale' ),
 				$seconds
 			);
 		}
@@ -1794,6 +1806,4 @@ abstract class AbstractCampaignProcessing {
 			'end_time'       => gmdate( 'Y-m-d H:i:s', (int) $end_time ),
 		);
 	}
-
-
 }

@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -66,7 +65,7 @@ class Gohighlevel extends Importer {
 	 * Run importer
 	 */
 	public function run() {
-		 $api = $this->get_api();
+		$api = $this->get_api();
 
 		// GoHighLevel uses direct field mapping (no transformation needed)
 		$mapping = $this->mapping ?: array(
@@ -80,7 +79,7 @@ class Gohighlevel extends Importer {
 
 		$total_response = $api->get_contacts_count();
 		if ( ! $total_response['success'] ) {
-			$error_message = __( 'GoHighLevel: Error fetching contacts count', 'doublescale');
+			$error_message = __( 'GoHighLevel: Error fetching contacts count', 'doublescale' );
 			$error_details = array(
 				'code'     => 'gohighlevel_get_contacts_count',
 				'response' => $total_response,
@@ -308,13 +307,13 @@ class Gohighlevel extends Importer {
 	 * @return array
 	 */
 	public function get_credentials() {
-		 // Check if user has active OAuth session
+		// Check if user has active OAuth session
 		$stored_tokens = \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_stored_tokens();
 		if ( $stored_tokens ) {
 			return array(
 				'oauth_status' => array(
 					'type'         => 'oauth_connected',
-					'label'        => __( 'Connected to GoHighLevel', 'doublescale'),
+					'label'        => __( 'Connected to GoHighLevel', 'doublescale' ),
 					'connected_at' => date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $stored_tokens['created_at'] ),
 					'expires_in'   => max( 0, $stored_tokens['expires_at'] - time() ),
 				),
@@ -325,47 +324,47 @@ class Gohighlevel extends Importer {
 		return array(
 			'oauth_setup' => array(
 				'type'               => 'oauth_setup_required',
-				'label'              => __( 'Setup OAuth Connection', 'doublescale'),
-				'description'        => __( 'Configure your GoHighLevel OAuth app credentials to connect and import contacts.', 'doublescale'),
+				'label'              => __( 'Setup OAuth Connection', 'doublescale' ),
+				'description'        => __( 'Configure your GoHighLevel OAuth app credentials to connect and import contacts.', 'doublescale' ),
 				'fields'             => array(
 					'client_id'     => array(
-						'label'       => __( 'Client ID', 'doublescale'),
+						'label'       => __( 'Client ID', 'doublescale' ),
 						'type'        => 'text',
 						'required'    => true,
-						'description' => __( 'Your GoHighLevel app Client ID from the marketplace', 'doublescale'),
+						'description' => __( 'Your GoHighLevel app Client ID from the marketplace', 'doublescale' ),
 					),
 					'client_secret' => array(
-						'label'       => __( 'Client Secret', 'doublescale'),
+						'label'       => __( 'Client Secret', 'doublescale' ),
 						'type'        => 'password',
 						'required'    => true,
-						'description' => __( 'Your GoHighLevel app Client Secret (keep this confidential)', 'doublescale'),
+						'description' => __( 'Your GoHighLevel app Client Secret (keep this confidential)', 'doublescale' ),
 					),
 				),
 				'redirect_url'       => \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_redirect_uri(),
 				'setup_instructions' => array(
-					'title'    => __( 'Setup Instructions', 'doublescale'),
+					'title'    => __( 'Setup Instructions', 'doublescale' ),
 					'steps'    => array(
 						array(
-							'title'   => __( 'Create GoHighLevel App', 'doublescale'),
+							'title'   => __( 'Create GoHighLevel App', 'doublescale' ),
 							'details' => array(
-								__( 'Go to GoHighLevel Marketplace → My Apps → Create App', 'doublescale'),
-								__( 'Set the app name and description', 'doublescale'),
+								__( 'Go to GoHighLevel Marketplace → My Apps → Create App', 'doublescale' ),
+								__( 'Set the app name and description', 'doublescale' ),
 							),
 						),
 						array(
-							'title'   => __( 'Configure Permissions', 'doublescale'),
+							'title'   => __( 'Configure Permissions', 'doublescale' ),
 							'details' => array(
-								__( 'Set scopes: contacts.readonly', 'doublescale'),
-								__( 'Add redirect URL: ', 'doublescale') . \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_redirect_uri(),
-								__( 'Note: The app will access contacts from all authorized locations', 'doublescale'),
+								__( 'Set scopes: contacts.readonly', 'doublescale' ),
+								__( 'Add redirect URL: ', 'doublescale' ) . \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_redirect_uri(),
+								__( 'Note: The app will access contacts from all authorized locations', 'doublescale' ),
 							),
 						),
 						array(
-							'title'   => __( 'Get Credentials', 'doublescale'),
+							'title'   => __( 'Get Credentials', 'doublescale' ),
 							'details' => array(
-								__( 'Go to Client Keys section', 'doublescale'),
-								__( 'Copy Client ID and Client Secret', 'doublescale'),
-								__( 'Paste them in the form above', 'doublescale'),
+								__( 'Go to Client Keys section', 'doublescale' ),
+								__( 'Copy Client ID and Client Secret', 'doublescale' ),
+								__( 'Paste them in the form above', 'doublescale' ),
 							),
 						),
 					),
@@ -383,11 +382,11 @@ class Gohighlevel extends Importer {
 	 * @return Api
 	 */
 	public function get_api() {
-		 // Get OAuth tokens from session storage
+		// Get OAuth tokens from session storage
 		$stored_tokens = \DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::get_stored_tokens();
 		if ( ! $stored_tokens ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Please connect to your GoHighLevel account using OAuth first', 'doublescale') );
+			throw new \Exception( __( 'Please connect to your GoHighLevel account using OAuth first', 'doublescale' ) );
 		}
 
 		// Check if tokens are expired
@@ -395,7 +394,7 @@ class Gohighlevel extends Importer {
 			// Clear expired tokens
 			\DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::clear_stored_tokens();
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Your GoHighLevel OAuth connection has expired. Please reconnect.', 'doublescale') );
+			throw new \Exception( __( 'Your GoHighLevel OAuth connection has expired. Please reconnect.', 'doublescale' ) );
 		}
 
 		return new Api( $stored_tokens['access_token'] );
@@ -422,7 +421,7 @@ class Gohighlevel extends Importer {
 			$test_response = $api->get_contacts_count();
 
 			if ( empty( $test_response['success'] ) || $test_response['success'] !== true ) {
-				$error_message = __( 'GoHighLevel OAuth connection has expired or is invalid. Please reconnect your account.', 'doublescale');
+				$error_message = __( 'GoHighLevel OAuth connection has expired or is invalid. Please reconnect your account.', 'doublescale' );
 				if ( isset( $test_response['code'] ) && $test_response['code'] === 401 ) {
 					\DoubleScale\Modules\Integrations\Gohighlevel\GohighlevelOauth::clear_stored_tokens();
 				}

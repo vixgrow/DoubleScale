@@ -39,7 +39,7 @@ final class CoreModule extends AbstractModule {
 		if ( ! defined( 'DOUBLESCALE_PLUGIN_DIR' ) ) {
 			return array();
 		}
-		$base = DOUBLESCALE_PLUGIN_DIR;
+		$base   = DOUBLESCALE_PLUGIN_DIR;
 		$logger = (array) glob( $base . 'includes/Core/Logger/Migrations/*.php' );
 		sort( $logger );
 		$task_meta = $base . 'includes/Core/Database/Migrations/TaskMetaTable.php';

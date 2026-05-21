@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -21,8 +20,8 @@ use DoubleScale\Modules\Automations\Abstracts\Rule;
 /**
  * Rules class
  */
-final class RulesManager
-{
+final class RulesManager {
+
 
 	/**
 	 * Registed rules
@@ -56,9 +55,8 @@ final class RulesManager
 	 *
 	 * @return RulesManager
 	 */
-	public static function instance()
-	{
-		if (is_null(self::$instance)) {
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
 
@@ -70,24 +68,22 @@ final class RulesManager
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		$this->set_groups();
-		add_action('init', array($this, 'register_forms_rules'));
+		add_action( 'init', array( $this, 'register_forms_rules' ) );
 	}
 
 	/**
 	 * Register Forms Rules
 	 */
-	public function register_forms_rules()
-	{
+	public function register_forms_rules() {
 		if ( ! class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' )
 			|| ! class_exists( '\DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend' ) ) {
 			return;
 		}
 		$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
-		foreach ($forms as $form) {
-			$this->register(new \DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend($form));
+		foreach ( $forms as $form ) {
+			$this->register( new \DoubleScale\Modules\Automations\Rules\Forms\FormFieldRuleBackend( $form ) );
 		}
 	}
 
@@ -98,73 +94,72 @@ final class RulesManager
 	 *
 	 * @return void
 	 */
-	public function set_groups()
-	{
+	public function set_groups() {
 		$this->groups = array(
 			'contact'                   => array(
-				'name'  => __('Contact', 'doublescale'),
+				'name'  => __( 'Contact', 'doublescale' ),
 				'key'   => 'contact',
 				'rules' => array(),
 			),
 			'lead_scoring'              => array(
-				'name'  => __('Lead Scoring', 'doublescale'),
+				'name'  => __( 'Lead Scoring', 'doublescale' ),
 				'key'   => 'lead_scoring',
 				'rules' => array(),
 			),
 			'contact_fields'            => array(
-				'name'  => __('Contact Fields', 'doublescale'),
+				'name'  => __( 'Contact Fields', 'doublescale' ),
 				'key'   => 'contact_fields',
 				'rules' => array(),
 			),
 			'segments'                  => array(
-				'name'  => __('Segments', 'doublescale'),
+				'name'  => __( 'Segments', 'doublescale' ),
 				'key'   => 'segments',
 				'rules' => array(),
 			),
 			'user'                      => array(
-				'name'  => __('User', 'doublescale'),
+				'name'  => __( 'User', 'doublescale' ),
 				'key'   => 'user',
 				'rules' => array(),
 			),
 			'automation'                => array(
-				'name'  => __('Automation', 'doublescale'),
+				'name'  => __( 'Automation', 'doublescale' ),
 				'key'   => 'automation',
 				'rules' => array(),
 			),
 			'activity'                  => array(
-				'name'  => __('Activity', 'doublescale'),
+				'name'  => __( 'Activity', 'doublescale' ),
 				'key'   => 'activity',
 				'rules' => array(),
 			),
 			'woocommerce_current_order' => array(
-				'name'        => __('WooCommerce Current Order', 'doublescale'),
+				'name'        => __( 'WooCommerce Current Order', 'doublescale' ),
 				'key'         => 'woocommerce_current_order',
 				'rules'       => array(),
-				'triggers'    => array('wc_order_created', 'wc_order_completed', 'wc_order_refunded', 'wc_order_status_changed', 'wc_order_item_stock_reduced'),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce/woocommerce.php'),
+				'triggers'    => array( 'wc_order_created', 'wc_order_completed', 'wc_order_refunded', 'wc_order_status_changed', 'wc_order_item_stock_reduced' ),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce'               => array(
-				'name'        => __('WooCommerce', 'doublescale'),
+				'name'        => __( 'WooCommerce', 'doublescale' ),
 				'key'         => 'woocommerce',
 				'rules'       => array(),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce/woocommerce.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce_membership'    => array(
-				'name'        => __('WooCommerce Membership', 'doublescale'),
+				'name'        => __( 'WooCommerce Membership', 'doublescale' ),
 				'key'         => 'woocommerce_membership',
 				'rules'       => array(),
-				'triggers'    => array('wc_membership_created', 'wc_membership_status_changed'),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce-memberships/woocommerce-memberships.php'),
+				'triggers'    => array( 'wc_membership_created', 'wc_membership_status_changed' ),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 			),
 			'woocommerce_whishlist'     => array(
-				'name'        => __('WooCommerce Whishlist', 'doublescale'),
+				'name'        => __( 'WooCommerce Whishlist', 'doublescale' ),
 				'key'         => 'woocommerce_whishlist',
 				'rules'       => array(),
-				'triggers'    => array('wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder'),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce-wishlists/woocommerce-wishlists.php'),
+				'triggers'    => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
 			),
 			'woocommerce_subscription'  => array(
-				'name'        => __('WooCommerce Subscription', 'doublescale'),
+				'name'        => __( 'WooCommerce Subscription', 'doublescale' ),
 				'key'         => 'woocommerce_subscription',
 				'rules'       => array(),
 				'triggers'    => array(
@@ -178,54 +173,54 @@ final class RulesManager
 					'wc_subscription_before_renewal',
 					'wc_subscription_before_end',
 				),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce-subscriptions/woocommerce-subscriptions.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 			),
 			'woocommerce_review'        => array(
-				'name'        => __('WooCommerce Review', 'doublescale'),
+				'name'        => __( 'WooCommerce Review', 'doublescale' ),
 				'key'         => 'woocommerce_review',
 				'rules'       => array(),
-				'triggers'    => array('wc_review_received'),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce/woocommerce.php'),
+				'triggers'    => array( 'wc_review_received' ),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'cart'                      => array(
-				'name'        => __('Cart', 'doublescale'),
+				'name'        => __( 'Cart', 'doublescale' ),
 				'key'         => 'cart',
 				'rules'       => array(),
-				'triggers'    => array('wc_abandoned_cart_created'),
-				'is_disabled' => ! \doublescale_is_plugin_active('woocommerce/woocommerce.php'),
+				'triggers'    => array( 'wc_abandoned_cart_created' ),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'learndash'                 => array(
-				'name'        => __('LearnDash', 'doublescale'),
+				'name'        => __( 'LearnDash', 'doublescale' ),
 				'key'         => 'learn_dash',
 				'rules'       => array(),
-				'is_disabled' => ! \doublescale_is_plugin_active('sfwd-lms/sfwd_lms.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 			'tutorlms'                  => array(
-				'name'        => __('Tutor LMS', 'doublescale'),
+				'name'        => __( 'Tutor LMS', 'doublescale' ),
 				'key'         => 'tutorlms',
 				'rules'       => array(),
-				'is_disabled' => ! \doublescale_is_plugin_active('tutor/tutor.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'tutor/tutor.php' ),
 			),
 			'lifterlms'                 => array(
-				'name'        => __('LifterLMS', 'doublescale'),
+				'name'        => __( 'LifterLMS', 'doublescale' ),
 				'key'         => 'lifterlms',
 				'rules'       => array(),
-				'is_disabled' => ! \doublescale_is_plugin_active('lifterlms/lifterlms.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'lifterlms/lifterlms.php' ),
 			),
 			'learnpress'                => array(
-				'name'        => __('LearnPress', 'doublescale'),
+				'name'        => __( 'LearnPress', 'doublescale' ),
 				'key'         => 'learnpress',
 				'rules'       => array(),
-				'is_disabled' => ! \doublescale_is_plugin_active('learnpress/learnpress.php'),
+				'is_disabled' => ! \doublescale_is_plugin_active( 'learnpress/learnpress.php' ),
 			),
 			'memberpress'               => array(
-				'name'        => __('MemberPress', 'doublescale'),
+				'name'        => __( 'MemberPress', 'doublescale' ),
 				'key'         => 'memberpress',
 				'rules'       => array(),
-				'is_disabled' => ! defined('MEPR_PLUGIN_NAME'),
+				'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
 			),
 			'pmpro'                     => array(
-				'name'        => __('Paid Memberships Pro', 'doublescale'),
+				'name'        => __( 'Paid Memberships Pro', 'doublescale' ),
 				'key'         => 'pmpro',
 				'rules'       => array(),
 				'triggers'    => array(
@@ -237,29 +232,29 @@ final class RulesManager
 					'pmpro_order_added',
 					'pmpro_order_updated',
 				),
-				'is_disabled' => ! defined('PMPRO_VERSION'),
+				'is_disabled' => ! defined( 'PMPRO_VERSION' ),
 			),
 			'surecart_current_order'    => array(
-				'name'        => __('SureCart Current Order', 'doublescale'),
+				'name'        => __( 'SureCart Current Order', 'doublescale' ),
 				'key'         => 'surecart_current_order',
 				'rules'       => array(),
-				'triggers'    => array('surecart_order_success', 'surecart_order_refunded'),
-				'is_disabled' => ! defined('SURECART_PLUGIN_FILE'),
+				'triggers'    => array( 'surecart_order_success', 'surecart_order_refunded' ),
+				'is_disabled' => ! defined( 'SURECART_PLUGIN_FILE' ),
 			),
 
 			'submission'                => array(
-				'name'  => __('Submissions', 'doublescale'),
+				'name'  => __( 'Submissions', 'doublescale' ),
 				'key'   => 'submission',
 				'rules' => array(),
 			),
 			'deal'                      => array(
-				'name'     => __('Deals', 'doublescale'),
+				'name'     => __( 'Deals', 'doublescale' ),
 				'key'      => 'deal',
 				'rules'    => array(),
 				'triggers' => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
 			'deal_fields'               => array(
-				'name'     => __('Deal Fields', 'doublescale'),
+				'name'     => __( 'Deal Fields', 'doublescale' ),
 				'key'      => 'deal_fields',
 				'rules'    => array(),
 				'triggers' => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
@@ -268,12 +263,12 @@ final class RulesManager
 
 		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {
 			$forms = \DoubleScale\Pro\Modules\Forms\Services\FormsManager::instance()->get_all_forms();
-			foreach ($forms as $form) {
-				$this->groups[$form->slug] = array(
+			foreach ( $forms as $form ) {
+				$this->groups[ $form->slug ] = array(
 					'name'        => $form->name,
 					'rules'       => array(),
 					'key'         => $form->slug,
-					'triggers'    => array($form->slug),
+					'triggers'    => array( $form->slug ),
 					'is_disabled' => ! $form->is_enabled(),
 				);
 			}
@@ -294,18 +289,17 @@ final class RulesManager
 	 * @throws Exception If trigger is not an instance of Trigger
 	 * @return void
 	 */
-	public function register(Rule $rule)
-	{
-		if (! $rule instanceof Rule) {
-			throw new Exception('Rule must be an instance of Rule');
+	public function register( Rule $rule ) {
+		if ( ! $rule instanceof Rule ) {
+			throw new Exception( 'Rule must be an instance of Rule' );
 		}
 
-		if (isset($this->rules[$rule->slug])) {
+		if ( isset( $this->rules[ $rule->slug ] ) ) {
 			return;
 		}
 
-		$this->rules[$rule->slug]                           = $rule;
-		$this->groups[$rule->group]['rules'][$rule->slug] = array(
+		$this->rules[ $rule->slug ]                           = $rule;
+		$this->groups[ $rule->group ]['rules'][ $rule->slug ] = array(
 			'name'              => $rule->name,
 			'type'              => $rule->type,
 			'operators'         => $rule->get_operators(),
@@ -322,8 +316,7 @@ final class RulesManager
 	 *
 	 * @return array
 	 */
-	public function get_rules()
-	{
+	public function get_rules() {
 		return $this->rules;
 	}
 
@@ -336,14 +329,13 @@ final class RulesManager
 	 *
 	 * @return Rule|null
 	 */
-	public function get_rule($slug)
-	{
-		if (isset($this->rules[$slug])) {
-			return $this->rules[$slug];
+	public function get_rule( $slug ) {
+		if ( isset( $this->rules[ $slug ] ) ) {
+			return $this->rules[ $slug ];
 		}
 
-		foreach ($this->rules as $registered_slug => $rule) {
-			if (substr($registered_slug, -1) === '_' && strpos($slug, $registered_slug) === 0) {
+		foreach ( $this->rules as $registered_slug => $rule ) {
+			if ( substr( $registered_slug, -1 ) === '_' && strpos( $slug, $registered_slug ) === 0 ) {
 				return $rule;
 			}
 		}
@@ -358,8 +350,7 @@ final class RulesManager
 	 *
 	 * @return array
 	 */
-	public function get_groups()
-	{
+	public function get_groups() {
 		$groups = $this->groups;
 
 		if ( function_exists( 'doublescale_filter_automation_rules_groups_for_modules' ) ) {
@@ -378,14 +369,13 @@ final class RulesManager
 	 *
 	 * @return array
 	 */
-	public function get_groups_by_slugs($slugs)
-	{
+	public function get_groups_by_slugs( $slugs ) {
 		$groups = array();
 		$all    = $this->get_groups();
 
-		foreach ($slugs as $slug) {
-			if (isset($all[$slug])) {
-				$groups[$slug] = $all[$slug];
+		foreach ( $slugs as $slug ) {
+			if ( isset( $all[ $slug ] ) ) {
+				$groups[ $slug ] = $all[ $slug ];
 			}
 		}
 
@@ -401,8 +391,7 @@ final class RulesManager
 	 *
 	 * @return array
 	 */
-	public function get_group_by_slug($slug)
-	{
+	public function get_group_by_slug( $slug ) {
 		$all = $this->get_groups();
 
 		return $all[ $slug ] ?? null;

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Action;
@@ -71,9 +70,9 @@ class AddTags extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel      $automation Automation Model.
+	 * @param AutomationModel     $automation Automation Model.
 	 * @param AutomationStepModel $step Automation Step Model.
-	 * @param ContactModel         $contact Contact Model.
+	 * @param ContactModel        $contact Contact Model.
 	 *
 	 * @return bool
 	 */
@@ -99,7 +98,7 @@ class AddTags extends Action {
 	public function get_fields() {
 		return array(
 			'tags' => array(
-				'label'    => __( 'Tags', 'doublescale'),
+				'label'    => __( 'Tags', 'doublescale' ),
 				'type'     => 'tags',
 				'multiple' => true,
 			),

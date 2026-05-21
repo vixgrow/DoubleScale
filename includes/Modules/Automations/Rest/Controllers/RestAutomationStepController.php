@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -91,13 +90,13 @@ class RestAutomationStepController extends RestController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'direction'     => array(
-							'description' => __( 'Direction to move the step (up or down)', 'doublescale'),
+							'description' => __( 'Direction to move the step (up or down)', 'doublescale' ),
 							'type'        => 'string',
 							'enum'        => array( 'up', 'down' ),
 							'required'    => true,
 						),
 						'updated_steps' => array(
-							'description' => __( 'Array of steps with updated orders', 'doublescale'),
+							'description' => __( 'Array of steps with updated orders', 'doublescale' ),
 							'type'        => 'object',
 							'required'    => true,
 						),
@@ -127,89 +126,89 @@ class RestAutomationStepController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'automation-step',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'            => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale'),
-					 'type'        => 'integer',
-					 'readonly'    => true,
-				 ),
-				 'automation_id' => array(
-					 'description' => __( 'The ID of the automation this step belongs to.', 'doublescale'),
-					 'type'        => 'integer',
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'parent_id'     => array(
-					 'description' => __( 'The ID of the parent step.', 'doublescale'),
-					 'type'        => 'integer',
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'action'        => array(
-					 'description' => __( 'The action of the step.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => false,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'type'          => array(
-					 'description' => __( 'The type of the step.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'condition'     => array(
-					 'description' => __( 'The condition of the step.', 'doublescale'),
-					 'type'        => 'string',
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'status'        => array(
-					 'description' => __( 'The status of the step.', 'doublescale'),
-					 'type'        => 'string',
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'settings'      => array(
-					 'description' => __( 'The settings of the step.', 'doublescale'),
-					 'type'        => 'object',
-					 'arg_options' => array(
-						 'validate_callback' => array( $this, 'validate_item_settings' ),
-					 ),
-				 ),
-				 'order'         => array(
-					 'description' => __( 'Order of the list.', 'doublescale'),
-					 'type'        => 'integer',
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'created_at'    => array(
-					 'description' => __( 'The date the object was created.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'readonly'    => true,
-				 ),
-				 'updated_at'    => array(
-					 'description' => __( 'The date the object was last modified.', 'doublescale'),
-					 'type'        => 'string',
-					 'format'      => 'date-time',
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'automation-step',
+			'type'       => 'object',
+			'properties' => array(
+				'id'            => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
+				'automation_id' => array(
+					'description' => __( 'The ID of the automation this step belongs to.', 'doublescale' ),
+					'type'        => 'integer',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'parent_id'     => array(
+					'description' => __( 'The ID of the parent step.', 'doublescale' ),
+					'type'        => 'integer',
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'action'        => array(
+					'description' => __( 'The action of the step.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => false,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'type'          => array(
+					'description' => __( 'The type of the step.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'condition'     => array(
+					'description' => __( 'The condition of the step.', 'doublescale' ),
+					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'status'        => array(
+					'description' => __( 'The status of the step.', 'doublescale' ),
+					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'settings'      => array(
+					'description' => __( 'The settings of the step.', 'doublescale' ),
+					'type'        => 'object',
+					'arg_options' => array(
+						'validate_callback' => array( $this, 'validate_item_settings' ),
+					),
+				),
+				'order'         => array(
+					'description' => __( 'Order of the list.', 'doublescale' ),
+					'type'        => 'integer',
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'created_at'    => array(
+					'description' => __( 'The date the object was created.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'readonly'    => true,
+				),
+				'updated_at'    => array(
+					'description' => __( 'The date the object was last modified.', 'doublescale' ),
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -289,7 +288,7 @@ class RestAutomationStepController extends RestController {
 			$automation_step = AutomationStepModel::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $automation_step, 200 );
@@ -321,7 +320,7 @@ class RestAutomationStepController extends RestController {
 			$automation_step = AutomationStepModel::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$step_data = $this->prepare_step( $request );
@@ -329,10 +328,10 @@ class RestAutomationStepController extends RestController {
 			doublescale_get_logger()->error(
 				'REST: About to save automation step',
 				array(
-					'step_id'        => $automation_step->id,
-					'prepared_data'  => $step_data,
+					'step_id'          => $automation_step->id,
+					'prepared_data'    => $step_data,
 					'current_settings' => $automation_step->settings,
-					'code'           => 'rest_automation_step_before_save',
+					'code'             => 'rest_automation_step_before_save',
 				)
 			);
 
@@ -344,10 +343,10 @@ class RestAutomationStepController extends RestController {
 			doublescale_get_logger()->error(
 				'REST: After save automation step',
 				array(
-					'step_id'        => $automation_step->id,
-					'final_settings' => $automation_step->settings,
+					'step_id'          => $automation_step->id,
+					'final_settings'   => $automation_step->settings,
 					'has_template_ids' => isset( $automation_step->settings['template_ids'] ),
-					'code'           => 'rest_automation_step_after_save',
+					'code'             => 'rest_automation_step_after_save',
 				)
 			);
 
@@ -381,7 +380,7 @@ class RestAutomationStepController extends RestController {
 			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			if ( 'draft' === $automation_step->status ) {
@@ -419,12 +418,12 @@ class RestAutomationStepController extends RestController {
 			$automation_step = AutomationStepModel::find( $step_id );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Validate direction
 			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
-				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'doublescale'), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			// Update the orders based on the frontend calculations
@@ -472,9 +471,9 @@ class RestAutomationStepController extends RestController {
 	private function resolve_action_label( $step ) {
 		if ( ! empty( $step->action ) && ( 'action' === $step->type || 'delay' === $step->type || 'goal' === $step->type ) ) {
 			try {
-				$action                      = ActionsManager::instance()->get_action( $step->action );
-				$settings                    = $step->settings ?: array();
-				$settings['_action_label']   = $action->name;
+				$action                    = ActionsManager::instance()->get_action( $step->action );
+				$settings                  = $step->settings ?: array();
+				$settings['_action_label'] = $action->name;
 				unset( $settings['_action_warning'] );
 				unset( $settings['_action_warning_message'] );
 				$step->settings = $settings;
@@ -541,13 +540,13 @@ class RestAutomationStepController extends RestController {
 			$automation_step = AutomationStepModel::find( $step_id );
 
 			if ( ! $automation_step ) {
-				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Validate step supports analytics.
 			$analytics_actions = array( 'send_email', 'send_sms', 'send_whatsapp' );
 			if ( ! in_array( $automation_step->action, $analytics_actions, true ) ) {
-				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'doublescale'), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			// Get all analytics in a single optimized query with JOIN to contacts table.

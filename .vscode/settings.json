@@ -1,0 +1,44 @@
+{
+	"//": "Shared editor config for DoubleScale. Install the recommended extensions (see .vscode/extensions.json) to get fix-on-save for PHP via PHPCBF and TypeScript/SCSS via Prettier.",
+
+	"phpsab.executablePathCS": "/var/www/html/site/wp-content/plugins/doublescale/vendor/bin/phpcs",
+	"phpsab.executablePathCBF": "/var/www/html/site/wp-content/plugins/doublescale/vendor/bin/phpcbf",
+	"phpsab.standard": "/var/www/html/site/wp-content/plugins/doublescale/phpcs.xml.dist",
+	"phpsab.fixerEnable": true,
+	"phpsab.snifferEnable": true,
+	"phpsab.snifferMode": "onSave",
+	"phpsab.snifferShowSources": true,
+	"phpsab.fixerArguments": ["--no-cache"],
+	"phpsab.snifferArguments": ["--no-cache"],
+
+	"editor.formatOnSave": true,
+	"[php]": {
+		"editor.defaultFormatter": "valeryanm.vscode-phpsab",
+		"editor.formatOnSave": true,
+		"editor.insertSpaces": false,
+		"editor.tabSize": 4
+	},
+
+	"[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[javascriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+	"files.exclude": {
+		"**/build": true,
+		"**/vendor": true,
+		"**/dependencies/vendor": true,
+		"**/node_modules": true
+	},
+	"search.exclude": {
+		"**/build": true,
+		"**/vendor": true,
+		"**/dependencies/vendor": true,
+		"**/node_modules": true,
+		"**/*.min.js": true,
+		"**/*.min.css": true
+	}
+}

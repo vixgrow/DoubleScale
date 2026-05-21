@@ -48,15 +48,15 @@ class Account_API {
 	public function send( $args ) {
 		$response = wp_remote_post(
 			'https://api.mailersend.com/v1/email',
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_token,
-				],
+				),
 				'body'    => wp_json_encode( $args ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -115,7 +115,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 500 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue;
@@ -128,26 +128,26 @@ class Account_API {
 		}
 
 		// Build the from object
-		$from = [
+		$from = array(
 			'email' => $batch_args['from_email'] ?? '',
-		];
+		);
 		if ( ! empty( $batch_args['from_name'] ) ) {
 			$from['name'] = $batch_args['from_name'];
 		}
 
 		// Build array of email objects for bulk sending
-		$emails = [];
+		$emails = array();
 
 		foreach ( $recipients as $email ) {
-			$email_object = [
+			$email_object = array(
 				'from'    => $from,
-				'to'      => [
-					[
+				'to'      => array(
+					array(
 						'email' => $email,
-					],
-				],
+					),
+				),
 				'subject' => $batch_args['subject'] ?? '',
-			];
+			);
 
 			// Add HTML body
 			if ( ! empty( $batch_args['html'] ) ) {
@@ -161,19 +161,19 @@ class Account_API {
 
 			// Add reply-to
 			if ( ! empty( $batch_args['reply_to'] ) ) {
-				$email_object['reply_to'] = [
+				$email_object['reply_to'] = array(
 					'email' => $batch_args['reply_to'],
-				];
+				);
 			}
 
 			// Add personalization data for this recipient
 			if ( ! empty( $batch_args['recipient_variables'][ $email ] ) ) {
-				$email_object['personalization'] = [
-					[
+				$email_object['personalization'] = array(
+					array(
 						'email' => $email,
 						'data'  => $batch_args['recipient_variables'][ $email ],
-					],
-				];
+					),
+				);
 			}
 
 			// Add tags
@@ -182,28 +182,30 @@ class Account_API {
 			}
 
 			// Add tracking settings
-			$email_object['settings'] = [
+			$email_object['settings'] = array(
 				'track_clicks' => true,
 				'track_opens'  => true,
-			];
+			);
 
 			$emails[] = $email_object;
 		}
-		
+
 		// Send bulk email request
 		$response = wp_remote_post(
 			'https://api.mailersend.com/v1/bulk-email',
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_token,
-				],
-				'body' => wp_json_encode([
-					'messages' => $emails,
-				]),
+				),
+				'body'    => wp_json_encode(
+					array(
+						'messages' => $emails,
+					)
+				),
 				'timeout' => 120,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -218,17 +220,24 @@ class Account_API {
 		// Check for success (202 Accepted)
 		if ( $status_code !== 202 ) {
 			$error_message = $body_data['message'] ?? __( 'Unknown API error.', 'doublescale' );
-			$error         = new WP_Error( 'mailersend_bulk_error', $error_message, [ 'status' => $status_code, 'body' => $body ] );
+			$error         = new WP_Error(
+				'mailersend_bulk_error',
+				$error_message,
+				array(
+					'status' => $status_code,
+					'body'   => $body,
+				)
+			);
 			$this->log_batch_emails( $batch_args, $recipients, $error );
 			return $error;
 		}
 
 		// Build success result
-		$result = [
+		$result = array(
 			'id'            => $body_data['bulk_email_id'] ?? '',
 			'message'       => $body_data['message'] ?? __( 'Bulk email is being processed.', 'doublescale' ),
 			'bulk_email_id' => $body_data['bulk_email_id'] ?? '',
-		];
+		);
 
 		// Log the batch emails
 		$this->log_batch_emails( $batch_args, $recipients, $result );
@@ -263,10 +272,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find MailerSend connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'mailersend' ) {
@@ -287,16 +296,16 @@ class Account_API {
 		$from       = ! empty( $from_name ) ? "{$from_name} <{$from_email}>" : $from_email;
 
 		// Log one entry for the batch (not per recipient to avoid log spam)
-		$subject     = $batch_args['subject'] ?? '';
-		$body        = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers     = [];
-		$attachments = [];
-		$recipients_data = [
+		$subject         = $batch_args['subject'] ?? '';
+		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
+		$headers         = array();
+		$attachments     = array();
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => $batch_args['reply_to'] ?? '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',
@@ -325,13 +334,13 @@ class Account_API {
 	public function get_bulk_status( $bulk_email_id ) {
 		$response = wp_remote_get(
 			'https://api.mailersend.com/v1/bulk-email/' . $bulk_email_id,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_token,
-				],
+				),
 				'timeout' => 30,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -343,7 +352,7 @@ class Account_API {
 		$body_data   = json_decode( $body, true );
 
 		if ( $status_code !== 200 ) {
-			return new WP_Error( 'mailersend_status_error', __( 'Failed to get bulk email status.', 'doublescale' ), [ 'status' => $status_code ] );
+			return new WP_Error( 'mailersend_status_error', __( 'Failed to get bulk email status.', 'doublescale' ), array( 'status' => $status_code ) );
 		}
 
 		return $body_data['data'] ?? $body_data;

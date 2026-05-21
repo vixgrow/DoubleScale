@@ -139,16 +139,16 @@ class MetaWhatsappErrorCodes {
 	 */
 	public static function get_error_message( int $error_code ): string {
 		$messages = array(
-			self::OFFERS_ANNOUNCEMENTS_BLOCKED => __( 'User has opted out of promotional messages.', 'doublescale'),
-			self::USER_BLOCKED                 => __( 'User has blocked this business.', 'doublescale'),
-			self::SPAM_RATE_LIMIT              => __( 'Too many messages flagged as spam.', 'doublescale'),
-			self::MESSAGE_UNDELIVERABLE        => __( 'Message could not be delivered.', 'doublescale'),
-			self::REENGAGEMENT_REQUIRED        => __( 'Conversation window expired. Use a template message.', 'doublescale'),
-			self::TEMPLATE_NOT_APPROVED        => __( 'Template not found or not approved.', 'doublescale'),
-			self::INVALID_PARAMETER            => __( 'Invalid parameter in request.', 'doublescale'),
-			self::RATE_LIMIT                   => __( 'Rate limit exceeded. Try again later.', 'doublescale'),
+			self::OFFERS_ANNOUNCEMENTS_BLOCKED => __( 'User has opted out of promotional messages.', 'doublescale' ),
+			self::USER_BLOCKED                 => __( 'User has blocked this business.', 'doublescale' ),
+			self::SPAM_RATE_LIMIT              => __( 'Too many messages flagged as spam.', 'doublescale' ),
+			self::MESSAGE_UNDELIVERABLE        => __( 'Message could not be delivered.', 'doublescale' ),
+			self::REENGAGEMENT_REQUIRED        => __( 'Conversation window expired. Use a template message.', 'doublescale' ),
+			self::TEMPLATE_NOT_APPROVED        => __( 'Template not found or not approved.', 'doublescale' ),
+			self::INVALID_PARAMETER            => __( 'Invalid parameter in request.', 'doublescale' ),
+			self::RATE_LIMIT                   => __( 'Rate limit exceeded. Try again later.', 'doublescale' ),
 		);
 
-		return $messages[ $error_code ] ?? __( 'Unknown error occurred.', 'doublescale');
+		return $messages[ $error_code ] ?? __( 'Unknown error occurred.', 'doublescale' );
 	}
 }

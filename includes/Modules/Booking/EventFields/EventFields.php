@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\EventFields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -205,132 +204,132 @@ class EventFields {
 	 * @return array
 	 */
 	public function get_default_email_notification_settings() {
-		 return array(
-			 'attendee_confirmation'          => array(
-				 'label'    => __( 'Attendee Confirmation', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Confirmation', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'attendee_confirmation' ),
-				 ),
-			 ),
-			 'organizer_notification'         => array(
-				 'label'    => __( 'Organizer Notification', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'New Booking', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'organizer_notification' ),
-				 ),
-			 ),
-			 'attendee_reminder'              => array(
-				 'label'    => __( 'Attendee Reminder', 'doublescale' ),
-				 'default'  => false,
-				 'template' => array(
-					 'subject' => __( 'Booking Reminder', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'attendee_reminder' ),
-				 ),
-				 'times'    => array(
-					 array(
-						 'unit'  => 'hours',
-						 'value' => 24,
-					 ),
-				 ),
-			 ),
-			 'organizer_reminder'             => array(
-				 'label'    => __( 'Organizer Reminder', 'doublescale' ),
-				 'default'  => false,
-				 'template' => array(
-					 'subject' => __( 'Booking Reminder', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'organizer_reminder' ),
-				 ),
-				 'times'    => array(
-					 array(
-						 'unit'  => 'hours',
-						 'value' => 24,
-					 ),
-				 ),
-			 ),
-			 'attendee_cancelled_organizer'   => array(
-				 'label'    => __( 'Booking Cancelled by Attendee to Organizer', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Cancelled', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'attendee_cancelled_organizer' ),
-				 ),
-			 ),
-			 'organizer_cancelled_attendee'   => array(
-				 'label'    => __( 'Booking Cancelled by Organizer to Attendee', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Cancelled', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'organizer_cancelled_attendee' ),
-				 ),
-			 ),
-			 'attendee_rescheduled_organizer' => array(
-				 'label'    => __( 'Booking Rescheduled by Attendee to Organizer', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Rescheduled', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'attendee_rescheduled_organizer' ),
-				 ),
-			 ),
-			 'organizer_rescheduled_attendee' => array(
-				 'label'    => __( 'Booking Rescheduled by Organizer to Attendee', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Rescheduled', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'organizer_rescheduled_attendee' ),
-				 ),
-			 ),
-			 'host_approval'                  => array(
-				 'label'    => __( 'Host Approval', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Request', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'host_approval' ),
-				 ),
-			 ),
-			 'host_rejection'                 => array(
-				 'label'    => __( 'Host Rejection', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Rejected', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'host_rejection' ),
-				 ),
-			 ),
-			 'host_approved_attendee'         => array(
-				 'label'    => __( 'Host Approved to Attendee', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Your Booking is Confirmed!', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'host_approved_attendee' ),
-				 ),
-			 ),
-			 'attendee_submitted'             => array(
-				 'label'    => __( 'Booking Submitted by Attendee', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'Booking Pending Confirmation', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'attendee_submitted' ),
-				 ),
-			 ),
-			 'waiting_list_confirmation'      => array(
-				 'label'    => __( 'Waiting List Confirmation', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'You\'ve Joined the Waiting List', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'waiting_list_confirmation' ),
-				 ),
-			 ),
-			 'waiting_list_availability'      => array(
-				 'label'    => __( 'Waiting List Spot Available', 'doublescale' ),
-				 'default'  => true,
-				 'template' => array(
-					 'subject' => __( 'A Spot is Now Available!', 'doublescale' ),
-					 'message' => $this->get_default_email_body_template( 'waiting_list_availability' ),
-				 ),
-			 ),
-		 );
+		return array(
+			'attendee_confirmation'          => array(
+				'label'    => __( 'Attendee Confirmation', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Confirmation', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'attendee_confirmation' ),
+				),
+			),
+			'organizer_notification'         => array(
+				'label'    => __( 'Organizer Notification', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'New Booking', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'organizer_notification' ),
+				),
+			),
+			'attendee_reminder'              => array(
+				'label'    => __( 'Attendee Reminder', 'doublescale' ),
+				'default'  => false,
+				'template' => array(
+					'subject' => __( 'Booking Reminder', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'attendee_reminder' ),
+				),
+				'times'    => array(
+					array(
+						'unit'  => 'hours',
+						'value' => 24,
+					),
+				),
+			),
+			'organizer_reminder'             => array(
+				'label'    => __( 'Organizer Reminder', 'doublescale' ),
+				'default'  => false,
+				'template' => array(
+					'subject' => __( 'Booking Reminder', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'organizer_reminder' ),
+				),
+				'times'    => array(
+					array(
+						'unit'  => 'hours',
+						'value' => 24,
+					),
+				),
+			),
+			'attendee_cancelled_organizer'   => array(
+				'label'    => __( 'Booking Cancelled by Attendee to Organizer', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Cancelled', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'attendee_cancelled_organizer' ),
+				),
+			),
+			'organizer_cancelled_attendee'   => array(
+				'label'    => __( 'Booking Cancelled by Organizer to Attendee', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Cancelled', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'organizer_cancelled_attendee' ),
+				),
+			),
+			'attendee_rescheduled_organizer' => array(
+				'label'    => __( 'Booking Rescheduled by Attendee to Organizer', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Rescheduled', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'attendee_rescheduled_organizer' ),
+				),
+			),
+			'organizer_rescheduled_attendee' => array(
+				'label'    => __( 'Booking Rescheduled by Organizer to Attendee', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Rescheduled', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'organizer_rescheduled_attendee' ),
+				),
+			),
+			'host_approval'                  => array(
+				'label'    => __( 'Host Approval', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Request', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'host_approval' ),
+				),
+			),
+			'host_rejection'                 => array(
+				'label'    => __( 'Host Rejection', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Rejected', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'host_rejection' ),
+				),
+			),
+			'host_approved_attendee'         => array(
+				'label'    => __( 'Host Approved to Attendee', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Your Booking is Confirmed!', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'host_approved_attendee' ),
+				),
+			),
+			'attendee_submitted'             => array(
+				'label'    => __( 'Booking Submitted by Attendee', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'Booking Pending Confirmation', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'attendee_submitted' ),
+				),
+			),
+			'waiting_list_confirmation'      => array(
+				'label'    => __( 'Waiting List Confirmation', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'You\'ve Joined the Waiting List', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'waiting_list_confirmation' ),
+				),
+			),
+			'waiting_list_availability'      => array(
+				'label'    => __( 'Waiting List Spot Available', 'doublescale' ),
+				'default'  => true,
+				'template' => array(
+					'subject' => __( 'A Spot is Now Available!', 'doublescale' ),
+					'message' => $this->get_default_email_body_template( 'waiting_list_availability' ),
+				),
+			),
+		);
 	}
 
 	/**
@@ -809,7 +808,7 @@ class EventFields {
 			'allow_multiple_bookings'      => false,
 			'maximum_bookings'             => 1,
 			'attendee_cannot_cancel'       => false,
-			'cannot_canel_time'            => 'event_start',
+			'cannot_cancel_time'           => 'event_start',
 			'cannot_cancel_time_value'     => 24,
 			'cannot_cancel_time_unit'      => 'hours',
 			'permission_denied_message'    => __( 'You do not have permission to view this page.', 'doublescale' ),

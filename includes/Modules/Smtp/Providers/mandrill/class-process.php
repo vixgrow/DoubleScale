@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Mandrill;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -84,14 +83,13 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$this->body['to'][] = [
+				$this->body['to'][] = array(
 					'name'  => $name,
 					'email' => $email_address,
 					'type'  => $type,
-				];
+				);
 			}
 		}
-
 	}
 
 	/**
@@ -127,12 +125,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['html'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['text'] = $content;
-			} else {
-				$this->body['html'] = $content;
-			}
+		} else {
+			$this->body['html'] = $content;
 		}
 	}
 
@@ -260,10 +256,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Mandrill Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_mandrill_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -274,6 +270,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SparkPost\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -25,7 +24,8 @@ use WP_REST_Request;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -49,16 +49,16 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'api_key' => [
+		return array(
+			'api_key' => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'region'  => [
+			),
+			'region'  => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -77,10 +77,9 @@ class Account_Controller extends Abstract_Account_Controller {
 			return new WP_Error( 'invalid_api_key', __( 'Invalid API key.', 'doublescale' ) );
 		}
 
-		return [
+		return array(
 			'id'   => $account_id,
 			'name' => $account_name,
-		];
+		);
 	}
-
 }

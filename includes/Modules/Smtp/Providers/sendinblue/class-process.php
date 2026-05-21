@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SendInBlue;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -142,12 +141,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['htmlContent'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['textContent'] = $content;
-			} else {
-				$this->body['htmlContent'] = $content;
-			}
+		} else {
+			$this->body['htmlContent'] = $content;
 		}
 	}
 
@@ -235,7 +232,7 @@ class Process extends Abstract_Process {
 		 *
 		 * @param array $headers Email headers.
 		 */
-		$headers = apply_filters( 'doublescale_smtp_sendinblue_mailer_get_headers', $this->body['headers'] ?? [] );
+		$headers = apply_filters( 'doublescale_smtp_sendinblue_mailer_get_headers', $this->body['headers'] ?? array() );
 
 		return $headers;
 	}
@@ -280,12 +277,12 @@ class Process extends Abstract_Process {
 			$result       = $api_instance->sendTransacEmail( $this->get_body() );
 			if ( $result->getMessageId() ) {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::SUCCEEDED,
-						'response' => [
+						'response' => array(
 							'message_id' => $result->getMessageId(),
-						],
-					]
+						),
+					)
 				);
 				return true;
 			} else {
@@ -296,19 +293,19 @@ class Process extends Abstract_Process {
 				esc_html__( 'SendInBlue API Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_sendinblue_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
-					'response' => [
+					'response' => array(
 						'message' => $e->getMessage(),
-					],
-				]
+					),
+				)
 			);
 			return false;
 		}

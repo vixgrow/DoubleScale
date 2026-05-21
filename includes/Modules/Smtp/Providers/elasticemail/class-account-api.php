@@ -49,13 +49,13 @@ class Account_API {
 	public function send( $args, $content_type = 'application/json' ) {
 		$response = wp_remote_request(
 			'https://api.elasticemail.com/v2/email/send?apikey=' . $this->api_key,
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Content-Type' => $content_type,
-				],
+				),
 				'body'    => $args,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -121,7 +121,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 10000 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue;
@@ -135,11 +135,11 @@ class Account_API {
 
 		// Build recipients array with Fields for personalization (merge tags)
 		// Elastic Email will replace {field} in subject/body with these values server-side
-		$recipients_data = [];
+		$recipients_data = array();
 		foreach ( $recipients as $email ) {
-			$recipient = [
+			$recipient = array(
 				'Email' => $email,
-			];
+			);
 
 			// Add merge fields for this recipient
 			if ( ! empty( $batch_args['recipient_variables'][ $email ] ) ) {
@@ -155,29 +155,29 @@ class Account_API {
 		$from       = ! empty( $from_name ) ? "{$from_name} <{$from_email}>" : $from_email;
 
 		// Build the Bulk API v4 payload
-		$payload = [
+		$payload = array(
 			'Recipients' => $recipients_data,
-			'Content'    => [
+			'Content'    => array(
 				'From'    => $from,
 				'Subject' => $batch_args['subject'] ?? '',
-				'Body'    => [],
-			],
-		];
+				'Body'    => array(),
+			),
+		);
 
 		// Add HTML body
 		if ( ! empty( $batch_args['html'] ) ) {
-			$payload['Content']['Body'][] = [
+			$payload['Content']['Body'][] = array(
 				'ContentType' => 'HTML',
 				'Content'     => $batch_args['html'],
-			];
+			);
 		}
 
 		// Add text body
 		if ( ! empty( $batch_args['text'] ) ) {
-			$payload['Content']['Body'][] = [
+			$payload['Content']['Body'][] = array(
 				'ContentType' => 'PlainText',
 				'Content'     => $batch_args['text'],
-			];
+			);
 		}
 
 		// Add reply-to
@@ -186,29 +186,28 @@ class Account_API {
 		}
 
 		// Add tracking options
-		$payload['Options'] = [
+		$payload['Options'] = array(
 			'TrackOpens'  => true,
 			'TrackClicks' => true,
-		];
+		);
 
 		// Add channel/campaign for tracking
 		if ( ! empty( $batch_args['tags'] ) && is_array( $batch_args['tags'] ) ) {
 			$payload['Options']['ChannelName'] = $batch_args['tags'][0];
 		}
 
-
 		// Send via Elastic Email Bulk API v4 (single request for all recipients)
 		$response = wp_remote_post(
 			'https://api.elasticemail.com/v4/emails',
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'                => 'application/json',
 					'Content-Type'          => 'application/json',
 					'X-ElasticEmail-ApiKey' => $this->api_key,
-				],
+				),
 				'body'    => wp_json_encode( $payload ),
 				'timeout' => 120,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -223,19 +222,26 @@ class Account_API {
 		// Check for errors
 		if ( $status_code >= 400 || ( isset( $body_data['Success'] ) && $body_data['Success'] === false ) ) {
 			$error_message = $body_data['Error'] ?? $body_data['Message'] ?? __( 'Unknown API error.', 'doublescale' );
-			$error         = new WP_Error( 'elasticemail_error', $error_message, [ 'status' => $status_code, 'body' => $body ] );
+			$error         = new WP_Error(
+				'elasticemail_error',
+				$error_message,
+				array(
+					'status' => $status_code,
+					'body'   => $body,
+				)
+			);
 			$this->log_batch_emails( $batch_args, $recipients, $error );
 			return $error;
 		}
 
 		// Success - build result
-		$result = [
+		$result = array(
 			'id'             => $body_data['MessageID'] ?? $body_data['TransactionID'] ?? '',
 			'message'        => __( 'Batch email sent successfully.', 'doublescale' ),
 			'sent_count'     => count( $recipients ),
-			'failed'         => [],
+			'failed'         => array(),
 			'transaction_id' => $body_data['TransactionID'] ?? '',
-		];
+		);
 
 		$this->log_batch_emails( $batch_args, $recipients, $result );
 
@@ -266,9 +272,9 @@ class Account_API {
 
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'elasticemail' ) {
@@ -289,14 +295,14 @@ class Account_API {
 
 		$subject         = $batch_args['subject'] ?? '';
 		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers         = [];
-		$attachments     = [];
-		$recipients_data = [
+		$headers         = array();
+		$attachments     = array();
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => $batch_args['reply_to'] ?? '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',
@@ -321,13 +327,13 @@ class Account_API {
 	public function get_account() {
 		$response = wp_remote_get(
 			'https://api.elasticemail.com/v2/account/load?apikey=' . $this->api_key,
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json; charset=' . get_option( 'blog_charset' ),
 					'Cache-Control' => 'no-cache',
-				],
-			]
+				),
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
@@ -77,7 +76,7 @@ class TemplateFieldMapper {
 	 * Used by CampaignModel::get_templates()
 	 *
 	 * @param TemplateModel $template Template model from database
-	 * @param string         $campaign_type Campaign type
+	 * @param string        $campaign_type Campaign type
 	 * @return array Formatted template data for Api response
 	 */
 	public static function template_to_array( TemplateModel $template, $campaign_type ) {

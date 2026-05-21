@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTPcom\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\REST as Abstract_REST;
@@ -29,5 +28,4 @@ class REST extends Abstract_REST {
 	protected static $classes = array(
 		'account_controller' => Account_Controller::class,
 	);
-
 }

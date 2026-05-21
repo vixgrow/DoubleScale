@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Membership;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
@@ -18,7 +17,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
  */
 class MembershipCreated extends TriggerPro {
 
-/**
+	/**
 	 * Admin membership ID for tracking admin-created memberships
 	 *
 	 * @var int|null

@@ -180,15 +180,25 @@ file_put_contents( $ics_path, $ics_content );
 	<?php
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public booking confirmation page; the `embed_type` query string only controls layout, no auth context.
 	if ( ! isset( $_GET['embed_type'] ) || sanitize_text_field( wp_unslash( $_GET['embed_type'] ) ) !== 'Inline' ) :
-		;
 		?>
-		<?php if ( ! empty( $is_waiting ) || ( ! $can_cancel && ! $can_reschedule ) ) : ?>
-		<div></div>
-	
-
+		<?php if ( ! empty( $is_waiting ) ) : ?>
+			<div></div>
+		<?php elseif ( ! $can_cancel && ! $can_reschedule ) : ?>
+			<?php
+			$combined_denied_message = trim( (string) ( $cancel_denied_message ?? '' ) );
+			if ( '' === $combined_denied_message ) {
+				$combined_denied_message = trim( (string) ( $reschedule_denied_message ?? '' ) );
+			}
+			?>
+			<?php if ( '' !== $combined_denied_message ) : ?>
+				<div class="confirmation-footer">
+					<div class="permission-denied-message">
+						<?php echo wp_kses_post( $combined_denied_message ); ?>
+					</div>
+				</div>
+			<?php endif; ?>
 		<?php else : ?>
-		<div class="confirmation-footer">
-			<?php if ( $can_cancel || $can_reschedule ) : ?>
+			<div class="confirmation-footer">
 				<div class="change-options">
 					<p><?php esc_html_e( 'Need to make a change?', 'doublescale' ); ?>
 						<?php if ( $can_cancel && $can_reschedule ) : ?>
@@ -206,11 +216,7 @@ file_put_contents( $ics_path, $ics_content );
 						<?php endif; ?>
 					</p>
 				</div>
-				<?php endif; ?>
 			</div>
-			<?php endif; ?>
-
-
-		</div>
+		<?php endif; ?>
 	<?php endif; ?>
 </div>

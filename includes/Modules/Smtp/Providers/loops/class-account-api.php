@@ -60,16 +60,16 @@ class Account_API {
 		$args['transactionalId'] = $this->transactional_id;
 		$response                = wp_remote_request(
 			'https://app.loops.so/api/v1/transactional',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_key,
-				],
+				),
 				'body'    => wp_json_encode( $args ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

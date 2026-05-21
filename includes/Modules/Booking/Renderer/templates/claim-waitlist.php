@@ -5,11 +5,11 @@ defined( 'ABSPATH' ) || exit;
 
 $icons_url = plugins_url( 'includes/Modules/Booking/Renderer/templates/icons/', DOUBLESCALE_PLUGIN_FILE );
 
-$event_name  = $booking_array['event']['name'] ?? '';
-$start_time  = $booking_array['start_time'] ?? '';
-$slot_time   = $booking_array['slot_time'] ?? 30;
-$location    = $booking_array['location_value'] ?? '';
-$timezone    = $booking_array['timezone'] ?? 'UTC';
+$event_name = $booking_array['event']['name'] ?? '';
+$start_time = $booking_array['start_time'] ?? '';
+$slot_time  = $booking_array['slot_time'] ?? 30;
+$location   = $booking_array['location_value'] ?? '';
+$timezone   = $booking_array['timezone'] ?? 'UTC';
 
 $global_settings = get_option( 'doublescale_booking_settings', array() );
 $time_format     = $global_settings['general']['time_format'] ?? '12';
@@ -48,15 +48,15 @@ try {
 			<h2 class="event-title"><?php echo esc_html( $event_name ); ?></h2>
 
 			<?php if ( ! empty( $booking_array['hosts'] ) && is_array( $booking_array['hosts'] ) ) : ?>
-			<?php
-			$host_names = array();
-			foreach ( $booking_array['hosts'] as $host ) :
-				if ( ! empty( $host['name'] ) ) :
-					$host_names[] = esc_html( $host['name'] );
-				endif;
+				<?php
+				$host_names = array();
+				foreach ( $booking_array['hosts'] as $host ) :
+					if ( ! empty( $host['name'] ) ) :
+						$host_names[] = esc_html( $host['name'] );
+					endif;
 			endforeach;
-			?>
-			<?php if ( ! empty( $host_names ) ) : ?>
+				?>
+				<?php if ( ! empty( $host_names ) ) : ?>
 			<p>
 				<span><img src="<?php echo esc_url( $icons_url . 'profile.svg' ); ?>" alt="Host" /></span>
 				<span><?php echo implode( ' - ', $host_names ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $host_names entries are individually esc_html'd above. ?></span>

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions\Delays;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Action;
@@ -79,7 +78,7 @@ class Delay extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel         $automation Automation Model.
+	 * @param AutomationModel        $automation Automation Model.
 	 * @param AutomationStepModel    $step Automation Step Model.
 	 * @param AutomationContactModel $contact Contact Model.
 	 *
@@ -123,15 +122,15 @@ class Delay extends Action {
 		return array(
 			'delay' => array(
 				'type'  => 'number',
-				'label' => __( 'Delay', 'doublescale'),
+				'label' => __( 'Delay', 'doublescale' ),
 			),
 			'unit'  => array(
 				'type'    => 'select',
-				'label'   => __( 'Unit', 'doublescale'),
+				'label'   => __( 'Unit', 'doublescale' ),
 				'options' => array(
-					'minutes' => __( 'Minutes', 'doublescale'),
-					'hours'   => __( 'Hours', 'doublescale'),
-					'days'    => __( 'Days', 'doublescale'),
+					'minutes' => __( 'Minutes', 'doublescale' ),
+					'hours'   => __( 'Hours', 'doublescale' ),
+					'days'    => __( 'Days', 'doublescale' ),
 				),
 			),
 		);

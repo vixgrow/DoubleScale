@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Contacts\MergeTags\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldModel;
@@ -72,7 +71,7 @@ class ContactCustomField extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param ContactModel $contact Contact Model.
-	 * @param string        $merge_tag Full slug segment from the template (may include contact_field: prefix).
+	 * @param string       $merge_tag Full slug segment from the template (may include contact_field: prefix).
 	 *
 	 * @return string
 	 */

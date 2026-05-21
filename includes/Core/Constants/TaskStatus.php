@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -51,8 +50,8 @@ class TaskStatus {
 	 */
 	public static function get_db_statuses() {
 		return array(
-			self::PENDING   => __( 'Pending', 'doublescale'),
-			self::COMPLETED => __( 'Completed', 'doublescale'),
+			self::PENDING   => __( 'Pending', 'doublescale' ),
+			self::COMPLETED => __( 'Completed', 'doublescale' ),
 		);
 	}
 
@@ -63,11 +62,11 @@ class TaskStatus {
 	 */
 	public static function get_all() {
 		return array(
-			self::PENDING   => __( 'Pending', 'doublescale'),
-			self::COMPLETED => __( 'Completed', 'doublescale'),
-			self::OVERDUE   => __( 'Overdue', 'doublescale'),
-			self::UPCOMING  => __( 'Upcoming', 'doublescale'),
-			self::DUE_TODAY => __( 'Due Today', 'doublescale'),
+			self::PENDING   => __( 'Pending', 'doublescale' ),
+			self::COMPLETED => __( 'Completed', 'doublescale' ),
+			self::OVERDUE   => __( 'Overdue', 'doublescale' ),
+			self::UPCOMING  => __( 'Upcoming', 'doublescale' ),
+			self::DUE_TODAY => __( 'Due Today', 'doublescale' ),
 		);
 	}
 
@@ -79,7 +78,7 @@ class TaskStatus {
 	 */
 	public static function get_label( $status ) {
 		$statuses = self::get_all();
-		return $statuses[ $status ] ?? __( 'Unknown', 'doublescale');
+		return $statuses[ $status ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

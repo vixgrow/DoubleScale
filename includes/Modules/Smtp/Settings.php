@@ -50,7 +50,7 @@ class Settings {
 	 * @return array<string, mixed>|null
 	 */
 	public static function consume_smtp_send_attempt() {
-		$out                           = self::$last_smtp_send_attempt;
+		$out                          = self::$last_smtp_send_attempt;
 		self::$last_smtp_send_attempt = null;
 		return $out;
 	}
@@ -252,7 +252,7 @@ class Settings {
 			$connections = array();
 		}
 
-		$connection_exists = static function( $id ) use ( $connections ) {
+		$connection_exists = static function ( $id ) use ( $connections ) {
 			return is_string( $id ) && $id !== '' && isset( $connections[ $id ] );
 		};
 
@@ -277,11 +277,11 @@ class Settings {
 
 		// If explicit connection is set via filter, use it; otherwise use filtered/default connection.
 		if ( $explicit_connection ) {
-			$default_connection_id  = $explicit_connection;
-			$primary_route_reason   = 'explicit';
+			$default_connection_id = $explicit_connection;
+			$primary_route_reason  = 'explicit';
 		} else {
 			$default_connection_id = $filtered_connection_id;
-			$primary_route_reason   = 'default';
+			$primary_route_reason  = 'default';
 		}
 
 		// Final fallback to first connection
@@ -304,14 +304,14 @@ class Settings {
 		$fallback_connection    = $fallback_connection_id ? ( $connections[ $fallback_connection_id ] ?? null ) : null;
 
 		return array(
-			'default_connection_id'            => $default_connection_id,
-			'default_connection'               => $default_connection,
-			'fallback_connection_id'           => $fallback_connection_id,
-			'fallback_connection'              => $fallback_connection,
-			'connections'                      => $connections,
-			'primary_route_reason'             => $primary_route_reason,
-			'settings_default_connection_id'   => $settings_default_connection,
-			'routing_adjusted'                 => $routing_adjusted,
+			'default_connection_id'          => $default_connection_id,
+			'default_connection'             => $default_connection,
+			'fallback_connection_id'         => $fallback_connection_id,
+			'fallback_connection'            => $fallback_connection,
+			'connections'                    => $connections,
+			'primary_route_reason'           => $primary_route_reason,
+			'settings_default_connection_id' => $settings_default_connection,
+			'routing_adjusted'               => $routing_adjusted,
 		);
 	}
 
@@ -402,8 +402,8 @@ class Settings {
 				$pre_app   = ( is_array( $prev_mail ) && isset( $prev_mail['app'] ) && is_array( $prev_mail['app'] ) )
 					? $prev_mail['app']
 					: array();
-				$pre_id = isset( $pre_app['client_id'] ) ? (string) $pre_app['client_id'] : '';
-				$pre_cs = isset( $pre_app['client_secret'] ) ? trim( (string) $pre_app['client_secret'] ) : '';
+				$pre_id    = isset( $pre_app['client_id'] ) ? (string) $pre_app['client_id'] : '';
+				$pre_cs    = isset( $pre_app['client_secret'] ) ? trim( (string) $pre_app['client_secret'] ) : '';
 				if ( $pre_cs !== '' && $pre_id === (string) $oauth['client_id'] ) {
 					$oauth['client_secret'] = (string) $pre_app['client_secret'];
 				}
@@ -424,7 +424,7 @@ class Settings {
 			);
 
 			if ( 'zoho' === $slug ) {
-				$region          = isset( $oauth['region'] ) ? (string) $oauth['region'] : '';
+				$region        = isset( $oauth['region'] ) ? (string) $oauth['region'] : '';
 				$app['region'] = '' !== $region ? $region : 'com';
 			}
 
@@ -499,5 +499,4 @@ class Settings {
 		}
 		return $out;
 	}
-
 }

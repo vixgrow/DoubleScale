@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Fields\Types;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\FieldType;

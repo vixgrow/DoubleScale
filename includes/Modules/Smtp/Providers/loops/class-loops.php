@@ -51,5 +51,4 @@ class Loops extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

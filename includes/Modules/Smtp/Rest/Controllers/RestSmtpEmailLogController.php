@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -154,7 +153,7 @@ class RestSmtpEmailLogController extends RestController {
 			if ( empty( $log ) ) {
 				continue;
 			}
-			$email = [
+			$email = array(
 				'to'          => $log['recipients']['to'],
 				'from'        => $log['from'],
 				'cc'          => $log['recipients']['cc'],
@@ -164,7 +163,7 @@ class RestSmtpEmailLogController extends RestController {
 				'body'        => $log['body'],
 				'headers'     => $log['headers'],
 				'attachments' => $log['attachments'],
-			];
+			);
 
 			$to      = $email['to'];
 			$subject = $email['subject'];
@@ -210,7 +209,7 @@ class RestSmtpEmailLogController extends RestController {
 
 			add_filter(
 				'doublescale_smtp_mailer_log_result',
-				function( $result, $email_data ) use ( $log ) {
+				function ( $result, $email_data ) use ( $log ) {
 					$resend_count = $log['resend_count'] ?? 0;
 					if ( 'succeeded' === $email_data['status'] && 'succeeded' === $log['status'] ) {
 						// Update resent count.
@@ -219,11 +218,11 @@ class RestSmtpEmailLogController extends RestController {
 
 					EmailLogHandler::update(
 						$log['log_id'],
-						[
+						array(
 							'resend_count' => $resend_count,
 							'status'       => $email_data['status'],
-							'response'     => $email_data['response'] ?? [],
-						]
+							'response'     => $email_data['response'] ?? array(),
+						)
 					);
 					return false;
 				},
@@ -426,15 +425,15 @@ class RestSmtpEmailLogController extends RestController {
 	 */
 	public function export_items( $request ) {
 		return EmailLogExport::export_items(
-			[
+			array(
 				'file_id'     => $request->get_param( 'file_id' ),
 				'file_prefix' => 'email',
 				'download'    => $request->get_param( 'download' ) ?? false,
 				'filter'      => $request->get_param( 'status' ) ?? false,
 				'offset'      => intval( $request->get_param( 'offset' ) ?? 0 ),
 				'limit'       => 100,
-			],
-			[ EmailLogHandler::class, 'get_all' ]
+			),
+			array( EmailLogHandler::class, 'get_all' )
 		);
 	}
 
@@ -640,5 +639,4 @@ class RestSmtpEmailLogController extends RestController {
 
 		return $value;
 	}
-
 }

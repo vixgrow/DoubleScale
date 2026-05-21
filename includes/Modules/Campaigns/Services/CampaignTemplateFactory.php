@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Campaigns\Models\TemplateModel;
@@ -93,7 +92,7 @@ class CampaignTemplateFactory {
 				);
 				continue;
 			}
-			$template           = $template_processor->process( $template_data, $campaign_status );
+			$template = $template_processor->process( $template_data, $campaign_status );
 
 			if ( $template ) {
 				$template_ids[] = $template->id;
@@ -332,7 +331,7 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 	 * @return string
 	 */
 	public function get_default_name() {
-		return __( 'Email Campaign Template', 'doublescale');
+		return __( 'Email Campaign Template', 'doublescale' );
 	}
 
 	/**
@@ -430,7 +429,7 @@ class WhatsApp_Template_Processor extends Abstract_Template_Processor {
 	 * @return string
 	 */
 	public function get_default_name() {
-		return __( 'Whatsapp Campaign Template', 'doublescale');
+		return __( 'Whatsapp Campaign Template', 'doublescale' );
 	}
 
 	/**

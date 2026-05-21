@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceSubscription;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -72,12 +71,12 @@ class SubscriptionTotal extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'is_equal_to'                 => __( 'is equal to', 'doublescale'),
-			'is_not_equal_to'             => __( 'is not equal to', 'doublescale'),
-			'is_greater_than'             => __( 'is greater than', 'doublescale'),
-			'is_less_than'                => __( 'is less than', 'doublescale'),
-			'is_greater_than_or_equal_to' => __( 'is greater than or equal to', 'doublescale'),
-			'is_less_than_or_equal_to'    => __( 'is less than or equal to', 'doublescale'),
+			'is_equal_to'                 => __( 'is equal to', 'doublescale' ),
+			'is_not_equal_to'             => __( 'is not equal to', 'doublescale' ),
+			'is_greater_than'             => __( 'is greater than', 'doublescale' ),
+			'is_less_than'                => __( 'is less than', 'doublescale' ),
+			'is_greater_than_or_equal_to' => __( 'is greater than or equal to', 'doublescale' ),
+			'is_less_than_or_equal_to'    => __( 'is less than or equal to', 'doublescale' ),
 		);
 	}
 
@@ -114,7 +113,7 @@ class SubscriptionTotal extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
@@ -138,7 +137,7 @@ class SubscriptionTotal extends Rule {
 				return $value <= $rule_value;
 			default:
 				return false;
-		};
+		}
 	}
 }
 

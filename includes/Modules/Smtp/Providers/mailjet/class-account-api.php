@@ -244,7 +244,7 @@ class Account_API {
 
 		foreach ( $body_data['Messages'] as $index => $msg_result ) {
 			if ( $msg_result['Status'] === 'success' ) {
-				$sent_count++;
+				++$sent_count;
 			} else {
 				$failed[] = array(
 					'email' => $recipients[ $index ] ?? '',

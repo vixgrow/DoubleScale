@@ -13,7 +13,7 @@
 declare( strict_types = 1 );
 
 $plugin_root = dirname( __DIR__ );
-$_tests_dir   = getenv( 'WP_TESTS_DIR' );
+$_tests_dir  = getenv( 'WP_TESTS_DIR' );
 
 if ( ! is_string( $_tests_dir ) || '' === $_tests_dir ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
@@ -42,4 +42,4 @@ $cmd       = escapeshellarg( PHP_BINARY ) . ' '
 	. '--testsuite integration';
 
 passthru( $cmd, $exit_code );
-exit( is_int( $exit_code ) ? $exit_code : 1 );
+exit( is_int( $exit_code ) ? (int) $exit_code : 1 );

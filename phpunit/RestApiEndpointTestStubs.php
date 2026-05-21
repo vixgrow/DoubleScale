@@ -18,9 +18,9 @@ $GLOBALS['__doublescale_phpunit_rest_registrations'] = array();
 if ( ! class_exists( 'WP_REST_Server', false ) ) {
 	class WP_REST_Server {
 		public const READABLE   = 1;
-		public const CREATABLE = 2;
-		public const EDITABLE  = 4;
-		public const DELETABLE = 8;
+		public const CREATABLE  = 2;
+		public const EDITABLE   = 4;
+		public const DELETABLE  = 8;
 		public const ALLMETHODS = self::READABLE | self::CREATABLE | self::EDITABLE | self::DELETABLE;
 	}
 }

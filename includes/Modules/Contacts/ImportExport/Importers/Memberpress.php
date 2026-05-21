@@ -185,21 +185,21 @@ class Memberpress extends Importer {
 		return array(
 			'membership_filter' => array(
 				'type'    => 'membership_filter',
-				'label'   => __( 'Filter by Membership', 'doublescale'),
+				'label'   => __( 'Filter by Membership', 'doublescale' ),
 				'options' => $memberships,
-				'tooltip' => __( 'Select which MemberPress memberships to import. Only members with a completed transaction for the selected memberships will be imported. Leave empty to import all members.', 'doublescale'),
+				'tooltip' => __( 'Select which MemberPress memberships to import. Only members with a completed transaction for the selected memberships will be imported. Leave empty to import all members.', 'doublescale' ),
 			),
 			'lists_mapping'     => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Memberships to Lists Mapping', 'doublescale'),
+				'label'   => __( 'Memberships to Lists Mapping', 'doublescale' ),
 				'options' => $memberships,
-				'tooltip' => __( 'Map MemberPress memberships to Plugin lists. For each membership level (e.g. Gold, Basic), you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin lists to add contacts to, or 2) "Auto Create" - Automatically create a new Plugin list with the same name as the membership. Contacts will only be added to lists for memberships they have a completed transaction for.', 'doublescale'),
+				'tooltip' => __( 'Map MemberPress memberships to Plugin lists. For each membership level (e.g. Gold, Basic), you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin lists to add contacts to, or 2) "Auto Create" - Automatically create a new Plugin list with the same name as the membership. Contacts will only be added to lists for memberships they have a completed transaction for.', 'doublescale' ),
 			),
 			'tags_mapping'      => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Memberships to Tags Mapping', 'doublescale'),
+				'label'   => __( 'Memberships to Tags Mapping', 'doublescale' ),
 				'options' => $memberships,
-				'tooltip' => __( 'Map MemberPress memberships to Plugin tags. For each membership level (e.g. Gold, Basic), you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin tags to apply to contacts, or 2) "Auto Create" - Automatically create a new Plugin tag with the same name as the membership. Contacts will only receive tags for memberships they have a completed transaction for.', 'doublescale'),
+				'tooltip' => __( 'Map MemberPress memberships to Plugin tags. For each membership level (e.g. Gold, Basic), you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin tags to apply to contacts, or 2) "Auto Create" - Automatically create a new Plugin tag with the same name as the membership. Contacts will only receive tags for memberships they have a completed transaction for.', 'doublescale' ),
 			),
 		);
 	}

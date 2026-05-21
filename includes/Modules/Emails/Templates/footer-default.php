@@ -47,7 +47,7 @@ $doublescale_background_color = '#e9eaec';
 																$doublescale_site_name = wp_parse_url( home_url(), PHP_URL_HOST );
 															}
 															/* translators: %s: site name */
-															$doublescale_footer = sprintf( esc_html__( 'Sent from %s', 'doublescale'), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $doublescale_site_name ) . '</a>' );
+															$doublescale_footer = sprintf( esc_html__( 'Sent from %s', 'doublescale' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . esc_html( $doublescale_site_name ) . '</a>' );
 															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $footer is escaped above, filter allows customization
 															echo apply_filters( 'doublescale_mail_footer_text', $doublescale_footer );
 															?>

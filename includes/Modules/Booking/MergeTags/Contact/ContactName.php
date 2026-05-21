@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;

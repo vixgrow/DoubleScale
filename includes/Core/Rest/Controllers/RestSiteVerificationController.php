@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -22,16 +21,23 @@ use DoubleScale\Core\Abstracts\RestController;
 class RestSiteVerificationController extends RestController {
 	protected $rest_base = 'site';
 
-	const TEMP_TOKEN_TTL = 900; // 15 minutes
+	const TEMP_TOKEN_TTL          = 900; // 15 minutes
+	const LOGIN_ATTEMPT_WINDOW    = 300; // 5 minutes
+	const LOGIN_ATTEMPT_THRESHOLD = 5;
 
 	public function register_routes() {
 		// Verify site.
 		//
-		// Public endpoint by design: returns plugin name + version + SSL
-		// status. The DoubleScale mobile app calls this BEFORE login to
-		// confirm the host is a real DoubleScale install and that
-		// Application Passwords are available. No sensitive data is
-		// exposed and the response shape is identical for every caller.
+		// Public by design (`permission_callback` => `__return_true`). The
+		// response only contains the plugin name, version, SSL state, and
+		// whether WP Application Passwords are available — all information
+		// already discoverable from any WP install (`/wp-json/`, the login
+		// page, etc.). No user data, no auth state, no enumeration vector;
+		// the response shape is identical for every caller.
+		//
+		// The DoubleScale mobile app calls this BEFORE login to confirm the
+		// host is a real DoubleScale install and that Application Passwords
+		// are available.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/verify',
@@ -46,16 +52,22 @@ class RestSiteVerificationController extends RestController {
 
 		// Login (username/password).
 		//
-		// Public endpoint by design: this is the auth handshake itself —
-		// the caller cannot be authenticated yet because they are obtaining
-		// credentials. Safeguards in login():
-		//   * SSL is enforced (HTTP returns 403).
+		// Public by design (`permission_callback` => `__return_true`): this IS
+		// the auth handshake — the caller cannot be authenticated yet because
+		// they are obtaining credentials. Safeguards in login():
+		//   * SSL is enforced (HTTP returns 403/`ssl_required`).
 		//   * Credentials are validated via wp_authenticate(), so the WP
-		//     core hooks for rate-limiting / two-factor / login lockout
+		//     core hooks for rate-limiting / two-factor / login-lockout
 		//     plugins still apply.
-		//   * On success only a short-lived (15 min) one-time temp token
+		//   * A per-IP transient throttle returns 429 after
+		//     LOGIN_ATTEMPT_THRESHOLD failures inside LOGIN_ATTEMPT_WINDOW —
+		//     this covers the REST surface for lockout plugins that only
+		//     hook wp-login.php.
+		//   * On success only a short-lived (15 min) single-use temp token
 		//     is issued; the user must follow up with create-app-password
-		//     to obtain a long-lived credential.
+		//     to obtain a long-lived credential. The token is HMAC-hashed
+		//     before being stored in user meta, so DB read access alone
+		//     cannot replay it.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/login',
@@ -80,10 +92,13 @@ class RestSiteVerificationController extends RestController {
 
 		// Create Application Password (with temp token).
 		//
-		// Not public — `check_temp_token` validates the one-time token issued
-		// by /login above, ties the request to that user, and enforces token
-		// expiry (15 minutes). The endpoint is reachable only as part of the
-		// mobile-app login flow.
+		// NOT public — `check_temp_token` is a real permission callback that
+		// validates the one-time token issued by /login above, ties the
+		// request to that user via `wp_set_current_user`, and enforces the
+		// 15-minute expiry. The endpoint is reachable only as the second
+		// step of the mobile-app login flow. SSL is also enforced inside
+		// `create_application_password` so a long-lived credential never
+		// leaves the server over plaintext.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/create-app-password',
@@ -128,8 +143,18 @@ class RestSiteVerificationController extends RestController {
 		if ( ! is_ssl() ) {
 			return new WP_Error(
 				'ssl_required',
-				__( 'SSL is required for login.', 'doublescale'),
+				__( 'SSL is required for login.', 'doublescale' ),
 				array( 'status' => 403 )
+			);
+		}
+
+		$attempt_key = $this->login_attempt_key( $request );
+		$attempts    = (int) get_transient( $attempt_key );
+		if ( $attempts >= self::LOGIN_ATTEMPT_THRESHOLD ) {
+			return new WP_Error(
+				'too_many_attempts',
+				__( 'Too many failed login attempts. Please try again later.', 'doublescale'),
+				array( 'status' => 429 )
 			);
 		}
 
@@ -139,17 +164,23 @@ class RestSiteVerificationController extends RestController {
 		);
 
 		if ( is_wp_error( $user ) ) {
+			set_transient( $attempt_key, $attempts + 1, self::LOGIN_ATTEMPT_WINDOW );
 			return new WP_Error(
 				'login_failed',
-				__( 'Invalid username or password.', 'doublescale'),
+				__( 'Invalid username or password.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
 
+		delete_transient( $attempt_key );
+
 		$token   = wp_generate_password( 64, false );
 		$expires = time() + self::TEMP_TOKEN_TTL;
 
-		update_user_meta( $user->ID, 'doublescale_temp_token', $token );
+		// Store the HMAC of the token, never the token itself. The plaintext
+		// is returned to the client only in this response; a DB-read attacker
+		// cannot replay the token because they only see the hash.
+		update_user_meta( $user->ID, 'doublescale_temp_token', $this->hash_token( $token ) );
 		update_user_meta( $user->ID, 'doublescale_temp_token_expiry', $expires );
 
 		return new WP_REST_Response(
@@ -158,7 +189,7 @@ class RestSiteVerificationController extends RestController {
 				'user_id' => $user->ID,
 				'token'   => $token,
 				'expires' => $expires,
-				'message' => __( 'Login successful. Temporary token issued.', 'doublescale'),
+				'message' => __( 'Login successful. Temporary token issued.', 'doublescale' ),
 			),
 			200
 		);
@@ -169,10 +200,18 @@ class RestSiteVerificationController extends RestController {
 	 */
 	public function create_application_password( WP_REST_Request $request ) {
 
+		if ( ! is_ssl() ) {
+			return new WP_Error(
+				'ssl_required',
+				__( 'SSL is required to create an application password.', 'doublescale'),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( ! $this->is_application_password_available() ) {
 			return new WP_Error(
 				'application_password_not_available',
-				__( 'Application password is not available. Please contact support.', 'doublescale'),
+				__( 'Application password is not available. Please contact support.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -213,15 +252,17 @@ class RestSiteVerificationController extends RestController {
 		if ( ! $token ) {
 			return new WP_Error(
 				'missing_token',
-				__( 'Temporary token is required.', 'doublescale'),
+				__( 'Temporary token is required.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
 
+		$incoming_hash = $this->hash_token( $token );
+
 		$users = get_users(
 			array(
 				'meta_key'   => 'doublescale_temp_token',
-				'meta_value' => $token,
+				'meta_value' => $incoming_hash,
 				'number'     => 1,
 			)
 		);
@@ -229,22 +270,37 @@ class RestSiteVerificationController extends RestController {
 		if ( empty( $users ) ) {
 			return new WP_Error(
 				'invalid_token',
+				__( 'Invalid token.', 'doublescale' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$user          = $users[0];
+		$stored_hash   = (string) get_user_meta( $user->ID, 'doublescale_temp_token', true );
+
+		// Defence in depth: even though `get_users` did an exact-match lookup,
+		// re-compare with a constant-time check so future refactors of the
+		// lookup path cannot introduce a timing leak.
+		if ( ! hash_equals( $stored_hash, $incoming_hash ) ) {
+			return new WP_Error(
+				'invalid_token',
 				__( 'Invalid token.', 'doublescale'),
 				array( 'status' => 401 )
 			);
 		}
 
-		$user   = $users[0];
 		$expiry = (int) get_user_meta( $user->ID, 'doublescale_temp_token_expiry', true );
 
 		if ( time() > $expiry ) {
 			return new WP_Error(
 				'token_expired',
-				__( 'Token expired.', 'doublescale'),
+				__( 'Token expired.', 'doublescale' ),
 				array( 'status' => 401 )
 			);
 		}
 
+		// REST-only context bind so `wp_get_current_user()` downstream resolves
+		// to the token holder. No cookie is set, no persistent session created.
 		wp_set_current_user( $user->ID );
 		return true;
 	}
@@ -252,5 +308,26 @@ class RestSiteVerificationController extends RestController {
 	private function is_application_password_available() {
 		return function_exists( 'wp_is_application_passwords_available' )
 			&& wp_is_application_passwords_available();
+	}
+
+	/**
+	 * Hash a temp token for at-rest storage / comparison.
+	 *
+	 * Uses `wp_salt('auth')` so the hash is tied to the site secret — copying
+	 * the user_meta row to another install does not produce a usable token.
+	 */
+	private function hash_token( string $token ): string {
+		return hash_hmac( 'sha256', $token, wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * Per-IP transient key for the /site/login attempt counter.
+	 */
+	private function login_attempt_key( WP_REST_Request $request ): string {
+		$ip = '';
+		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		}
+		return 'doublescale_login_attempts_' . md5( $ip );
 	}
 }

@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -76,13 +75,13 @@ class Csv extends Importer {
 	 */
 	public function run() {
 		if ( ! Security::prepare_upload_dir() ) {
-			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Could not create the import working directory.', 'doublescale' ) );
 		}
 
 		$mapping = array_flip( $this->mapping );
 		if ( ! isset( $mapping['email'] ) || empty( $mapping['email'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( esc_html__( 'Email field is required.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Email field is required.', 'doublescale' ) );
 		}
 
 		$file_path = Security::get_upload_file_path( $this->file_name );
@@ -93,7 +92,7 @@ class Csv extends Importer {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) use ( $csv ) {
+			function ( $offset ) use ( $csv ) {
 				$stmt        = ( new Statement() )->offset( $offset )->limit( 20 );
 				$subscribers = $stmt->process( $csv );
 				return $subscribers;
@@ -116,7 +115,7 @@ class Csv extends Importer {
 	public function get_fields() {
 		return array(
 			'file_name' => array(
-				'label'      => __( 'File Name', 'doublescale'),
+				'label'      => __( 'File Name', 'doublescale' ),
 				'type'       => 'file',
 				'conditions' => array(
 					'relation' => 'and',
@@ -129,7 +128,7 @@ class Csv extends Importer {
 				),
 			),
 			'mapping'   => array(
-				'label'      => __( 'Mapping', 'doublescale'),
+				'label'      => __( 'Mapping', 'doublescale' ),
 				'type'       => 'contact_mapped_fields',
 				'conditions' => array(
 					'relation' => 'and',

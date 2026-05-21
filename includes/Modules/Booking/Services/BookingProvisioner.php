@@ -193,7 +193,8 @@ final class BookingProvisioner {
 		return false;
 	}
 
-	/* ------------------------------------------------------------------ *
+	/*
+	------------------------------------------------------------------ *
 	 * Action listeners (wired in Module::boot()).
 	 *
 	 * `on_role_assigned` / `on_role_revoked` fire from the CRM Team REST

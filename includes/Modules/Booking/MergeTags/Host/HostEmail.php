@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Host;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
@@ -19,8 +18,8 @@ use DoubleScale\Modules\Booking\Models\BookingModel;
 /**
  * Host email Merge Tag
  */
-class HostEmail extends MergeTag
-{
+class HostEmail extends MergeTag {
+
 
 	/**
 	 * Name
@@ -47,12 +46,11 @@ class HostEmail extends MergeTag
 	 * Get value
 	 *
 	 * @param BookingModel $booking
-	 * @param array         $options
+	 * @param array        $options
 	 * @return string
 	 */
-	public function get_value($booking, $options = array())
-	{
-		if (isset($booking) && isset($booking->calendar) && isset($booking->calendar->user) && isset($booking->calendar->user->user_email)) {
+	public function get_value( $booking, $options = array() ) {
+		if ( isset( $booking ) && isset( $booking->calendar ) && isset( $booking->calendar->user ) && isset( $booking->calendar->user->user_email ) ) {
 			return $booking->calendar->user->user_email;
 		}
 

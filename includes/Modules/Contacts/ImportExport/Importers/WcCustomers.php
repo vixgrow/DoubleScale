@@ -77,7 +77,7 @@ class WcCustomers extends Importer {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) use ( $wpdb, $table_name ) {
+			function ( $offset ) use ( $wpdb, $table_name ) {
 				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
 			},
 			$mapping

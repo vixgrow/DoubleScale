@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Booking\Data;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DateTime;
@@ -85,9 +84,9 @@ class BookingDataFormatter {
 			$zoom_meta = $booking->get_meta( 'zoom_event_details', array() );
 			$join_url  = Arr::get( $zoom_meta, 'meeting.join_url', '' );
 			if ( is_string( $join_url ) && filter_var( $join_url, FILTER_VALIDATE_URL ) ) {
-				$value                                      = $join_url;
-				$booking_array['location']['value']         = $join_url;
-				$booking_array['location']['label']         = $booking_array['location']['label'] ?? __( 'Zoom', 'doublescale' );
+				$value                              = $join_url;
+				$booking_array['location']['value'] = $join_url;
+				$booking_array['location']['label'] = $booking_array['location']['label'] ?? __( 'Zoom', 'doublescale' );
 			}
 		}
 

@@ -66,71 +66,75 @@ const ContactMappedFieldsCsv: React.FC<ContactMappedFieldsCsvProps> = ({
 		'h-10 w-full min-w-0 rounded-lg border border-border bg-[#EFF1F4] text-sm text-[#6B7280] shadow-sm disabled:opacity-100';
 
 	return (
-
-			<div className="overflow-hidden rounded-xl border border-[#ECEEF2] bg-white p-5 sm:p-6 shadow-sm">
-				<div className="mb-6">
-					<h3 className="text-lg font-semibold leading-7 text-primaryText">
-						{__('Mapping the file', 'doublescale')}
-					</h3>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
-						{__(
-							'Select the column field you want to map on the system to import.',
-							'doublescale'
-						)}
-					</p>
-				</div>
-
-				<div className="flex flex-col gap-4">
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-						<div className="text-sm font-semibold text-primaryText">
-							<span>{__('Field', 'doublescale')}</span>{' '}
-							<span className="text-destructive">*</span>
-						</div>
-						<div className="text-sm font-semibold text-primaryText">
-							<span>{__('Contact Field', 'doublescale')}</span>{' '}
-							<span className="text-destructive">*</span>
-						</div>
-					</div>
-					{map(fields, (_, key) => {
-						return (
-							<div
-								key={key}
-								className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-5"
-							>
-								<Input
-									value={fields[key].label}
-									disabled
-									className={cn('min-w-0', readonlyFieldClass)}
-								/>
-								<Select
-									className="react-select-container min-w-0 w-full"
-									classNamePrefix="react-select"
-									placeholder={__(
-										'Select field',
-										'doublescale'
-									)}
-									onChange={(value) => {
-										if (!isObject(value)) {
-											return;
-										}
-
-										onChange({
-											...values,
-											[key]: value.value,
-										});
-									}}
-									value={values ? getAllValue(values[key]) : null}
-									options={options}
-									styles={mappingSelectStyles}
-									isSearchable={false}
-								/>
-							</div>
-						);
-					})}
-				</div>
+		<div className="contact-mapped-fields-csv-section">
+			<div className="mb-6">
+				<h3 className="text-lg font-semibold leading-7 text-primaryText">
+					{__('Mapping the file', 'doublescale')}
+				</h3>
+				<p className="mt-2 text-sm leading-6 text-muted-foreground">
+					{__(
+						'Select the column field you want to map on the system to import.',
+						'doublescale'
+					)}
+				</p>
 			</div>
+
+			<div className="contact-mapped-fields-csv-rows flex flex-col gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+					<div className="text-sm font-semibold text-primaryText">
+						<span>{__('Field', 'doublescale')}</span>{' '}
+						<span className="text-destructive">*</span>
+					</div>
+					<div className="text-sm font-semibold text-primaryText">
+						<span>{__('Contact Field', 'doublescale')}</span>{' '}
+						<span className="text-destructive">*</span>
+					</div>
+				</div>
+				{map(fields, (_, key) => (
+					<div
+						key={key}
+						className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-5"
+					>
+						<Input
+							value={fields[key].label}
+							disabled
+							className={cn('min-w-0', readonlyFieldClass)}
+						/>
+						<Select
+							className="react-select-container min-w-0 w-full"
+							classNamePrefix="react-select"
+							placeholder={__('Select field', 'doublescale')}
+							onChange={(option) => {
+								if (
+									!isObject(option) ||
+									!('value' in option)
+								) {
+									return;
+								}
+
+								onChange({
+									...values,
+									[key]: String(
+										(option as { value: string }).value
+									),
+								});
+							}}
+							value={values ? getAllValue(values[key]) : null}
+							options={options}
+							styles={mappingSelectStyles}
+							isSearchable={false}
+							menuPortalTarget={
+								typeof document !== 'undefined'
+									? document.body
+									: null
+							}
+							menuPosition="fixed"
+						/>
+					</div>
+				))}
+			</div>
+		</div>
 	);
 };
 
 export default ContactMappedFieldsCsv;
-

@@ -145,8 +145,8 @@ final class BookingAdminConfig {
 				$booking_caps[ $cap ] = true;
 			}
 		}
-		$config['booking']['capabilities']                  = $booking_caps;
-		$config['booking']['currentUser']['capabilities']   = $booking_caps;
+		$config['booking']['capabilities']                = $booking_caps;
+		$config['booking']['currentUser']['capabilities'] = $booking_caps;
 
 		$payment_gateways = (array) apply_filters( 'doublescale_booking_payment_gateways', array() );
 		$gw_options       = array();

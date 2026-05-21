@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -60,7 +59,7 @@ class OrderPurchasedFromCategories extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		 return true;
+		return true;
 	}
 
 	/**
@@ -72,10 +71,10 @@ class OrderPurchasedFromCategories extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'includes'         => __( 'includes', 'doublescale'),
-			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale'),
-			'includes_all'     => __( 'includes all', 'doublescale'),
-			'not_includes_all' => __( 'includes none of (match all)', 'doublescale'),
+			'includes'         => __( 'includes', 'doublescale' ),
+			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale' ),
+			'includes_all'     => __( 'includes all', 'doublescale' ),
+			'not_includes_all' => __( 'includes none of (match all)', 'doublescale' ),
 		);
 	}
 
@@ -150,7 +149,7 @@ class OrderPurchasedFromCategories extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */

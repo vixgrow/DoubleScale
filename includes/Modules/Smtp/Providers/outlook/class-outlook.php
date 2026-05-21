@@ -71,5 +71,4 @@ class Outlook extends Provider {
 
 		$this->app = new App( $this );
 	}
-
 }

@@ -74,11 +74,11 @@ function doublescale_rest_collect_flat_endpoints(): array {
 		$configs = doublescale_rest_flatten_endpoint_configs( $reg['args'] );
 		foreach ( $configs as $cfg ) {
 			$flat[] = array(
-				'namespace'    => (string) $reg['namespace'],
-				'route'        => (string) $reg['route'],
-				'methods'      => $cfg['methods'] ?? null,
-				'callback'     => $cfg['callback'] ?? null,
-				'permission'   => $cfg['permission_callback'] ?? null,
+				'namespace'  => (string) $reg['namespace'],
+				'route'      => (string) $reg['route'],
+				'methods'    => $cfg['methods'] ?? null,
+				'callback'   => $cfg['callback'] ?? null,
+				'permission' => $cfg['permission_callback'] ?? null,
 			);
 		}
 	}

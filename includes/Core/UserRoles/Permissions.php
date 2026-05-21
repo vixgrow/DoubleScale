@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Core\UserRoles;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
@@ -145,7 +144,7 @@ final class Permissions {
 
 		// Provider must be configured (hard requirement for everyone).
 		if ( empty( $ai_settings['provider'] ) ) {
-			return new \WP_Error( 'ai_not_configured', __( 'AI provider not configured.', 'doublescale'), array( 'status' => 400 ) );
+			return new \WP_Error( 'ai_not_configured', __( 'AI provider not configured.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$user_role = self::get_user_role( $user_id );
@@ -157,13 +156,13 @@ final class Permissions {
 
 		// Master switch (only governs non-admin roles).
 		if ( empty( $access['enabled'] ) ) {
-			return new \WP_Error( 'ai_disabled', __( 'AI features are disabled.', 'doublescale'), array( 'status' => 403 ) );
+			return new \WP_Error( 'ai_disabled', __( 'AI features are disabled.', 'doublescale' ), array( 'status' => 403 ) );
 		}
 
 		$allowed_roles = $access['allowed_roles'] ?? array( UserRoles::CRM_MANAGER, UserRoles::ADMINISTRATOR );
 
 		if ( ! in_array( $user_role, $allowed_roles, true ) ) {
-			return new \WP_Error( 'ai_no_access', __( 'Your role does not have AI access.', 'doublescale'), array( 'status' => 403 ) );
+			return new \WP_Error( 'ai_no_access', __( 'Your role does not have AI access.', 'doublescale' ), array( 'status' => 403 ) );
 		}
 
 		return true;

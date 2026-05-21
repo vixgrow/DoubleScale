@@ -100,7 +100,7 @@ class UnsubscribePage {
 			<title>
 			<?php
 				/* translators: %s: site name */
-				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'doublescale'), $site_name ) );
+				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'doublescale' ), $site_name ) );
 			?>
 			</title>
 			<?php wp_head(); ?>
@@ -113,23 +113,23 @@ class UnsubscribePage {
 				</svg>
 			</div>
 
-			<h1><?php esc_html_e( 'You\'ve Been Unsubscribed', 'doublescale'); ?></h1>
+			<h1><?php esc_html_e( 'You\'ve Been Unsubscribed', 'doublescale' ); ?></h1>
 
 			<p class="message">
 				<?php
 				/* translators: %s: site name */
-				echo esc_html( sprintf( __( 'You have been successfully unsubscribed from %s. You will no longer receive these communications.', 'doublescale'), $site_name ) );
+				echo esc_html( sprintf( __( 'You have been successfully unsubscribed from %s. You will no longer receive these communications.', 'doublescale' ), $site_name ) );
 				?>
 			</p>
 
 			<a href="<?php echo esc_url( home_url() ); ?>" class="home-button">
-				<?php esc_html_e( 'Back to Homepage', 'doublescale'); ?>
+				<?php esc_html_e( 'Back to Homepage', 'doublescale' ); ?>
 			</a>
 
 			<p class="footer-note">
 				<?php
 				/* translators: %s: site name */
-				echo esc_html( sprintf( __( 'If this was a mistake, you can re-subscribe by contacting %s.', 'doublescale'), $site_name ) );
+				echo esc_html( sprintf( __( 'If this was a mistake, you can re-subscribe by contacting %s.', 'doublescale' ), $site_name ) );
 				?>
 			</p>
 		</div>

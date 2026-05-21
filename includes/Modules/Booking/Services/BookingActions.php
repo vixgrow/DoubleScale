@@ -58,7 +58,7 @@ class BookingActions {
 		}
 
 		try {
-			$id = sanitize_text_field( Arr::get( $_GET, 'id', null ) );
+			$id = sanitize_text_field( wp_unslash( Arr::get( $_GET, 'id', null ) ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 			$booking = $this->bookingValidatorClass::validate_booking( $id );
 

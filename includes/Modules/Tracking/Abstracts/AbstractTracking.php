@@ -184,9 +184,14 @@ abstract class AbstractTracking {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw webhook body; provider verifies signature before any value is acted on.
 		$webhook_data = json_decode( $raw_body, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			// Not JSON, use $_POST (Twilio format)
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Twilio webhook fallback; provider validates the request via auth token before any field is acted on.
-			$webhook_data = $_POST;
+			// Not JSON, use $_POST (Twilio form-encoded format). We sanitize early
+			// — wp_unslash() strips WordPress' magic-quotes slashes and map_deep()
+			// recursively applies sanitize_text_field to every scalar leaf. Twilio's
+			// payload is single-line form fields (MessageSid, From, To, Body, etc.),
+			// so sanitize_text_field is the correct sanitizer. The provider still
+			// performs signature/auth-token verification on top of this.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook receiver; auth comes from the provider's signature/auth-token check inside process_webhook(), not from a WP nonce.
+			$webhook_data = map_deep( wp_unslash( $_POST ), 'sanitize_text_field' );
 		}
 
 		// Process webhook through provider (handles signature verification and parsing)

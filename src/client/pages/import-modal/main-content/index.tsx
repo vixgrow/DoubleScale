@@ -117,12 +117,10 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 						Object.keys(importer.credentials || {}).length > 0 &&
 						!importing &&
 						!isFetching && (
-							<div className="space-y-3">
-								<h3 className="text-lg font-semibold leading-snug text-foreground">
-									{__('Connect your account', 'doublescale')}
-								</h3>
+							
+
 								<ApiCredentials importer={importer} />
-							</div>
+
 						)}
 				</div>
 

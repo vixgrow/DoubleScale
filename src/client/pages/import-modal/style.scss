@@ -301,6 +301,18 @@
 	margin-left: auto;
 }
 
+.import-modal-credentials__fields {
+	width: 100%;
+}
+
+.import-modal-credentials__field {
+	width: 100%;
+
+	.doublescale-field {
+		margin-bottom: 0;
+	}
+}
+
 .import-modal-csv-file {
 	border-radius: 16px;
 	border: 2px dashed #D0D0D0;

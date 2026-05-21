@@ -4,6 +4,7 @@ import type { ExtendedLocation, IntegrationType } from '../types';
 import { IntegrationHelper } from '../helpers';
 import { INTEGRATION_ICONS, INTEGRATION_NAMES } from '../constants';
 import { Calendar } from '@/types/booking';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 
 import LocationRow from './LocationRow';
 
@@ -25,11 +26,17 @@ const ConferencingSection: React.FC<ConferencingSectionProps> = ({
 	messageColor,
 }) => {
 	const isServiceContext = !calendar;
+	const { isProActive, handleUpgradeClick, getUpgradeButtonText } = useProUpgrade();
 
 	const isIntegrationDisabled = (type: IntegrationType): boolean => {
 		// If integration is already selected, allow unchecking
 		if (locations.some((loc) => loc.type === type)) {
 			return false;
+		}
+
+		// Conferencing requires the Pro plugin to be installed and active
+		if (!isProActive) {
+			return true;
 		}
 
 		// Service context: all linked providers must have the integration set up
@@ -101,6 +108,21 @@ const ConferencingSection: React.FC<ConferencingSectionProps> = ({
 		type: IntegrationType,
 		calendar?: Calendar
 	): { message: string; className?: string; color?: string } => {
+		// Conferencing integrations require the Pro plugin
+		if (!isProActive) {
+			return {
+				message: sprintf(
+					/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
+					__(
+						'Upgrade to Pro to use %s.',
+						'doublescale'
+					),
+					INTEGRATION_NAMES[type]
+				),
+				className: 'text-[#458DC7] text-[12px] italic',
+			};
+		}
+
 		// Service context: messages about provider readiness
 		if (isServiceContext) {
 			if (integrationHelper.hasNoProviders(type)) {
@@ -259,8 +281,22 @@ const ConferencingSection: React.FC<ConferencingSectionProps> = ({
 
 	return (
         <div className='flex flex-col gap-2.5 justify-start items-start'>
-            <div className="text-[#09090B] text-[16px]">
-				{__('Conferencing', 'doublescale')}
+            <div className="flex items-center justify-between w-full">
+				<div className="text-[#09090B] text-[16px]">
+					{__('Conferencing', 'doublescale')}
+				</div>
+				{!isProActive && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.preventDefault();
+							handleUpgradeClick();
+						}}
+						className="text-[#458DC7] text-[12px] italic underline hover:no-underline"
+					>
+						{getUpgradeButtonText()}
+					</button>
+				)}
 			</div>
             {renderIntegrationCheckbox('google-meet')}
             {renderIntegrationCheckbox('zoom')}

@@ -526,6 +526,27 @@ class RestEventController extends RestController {
 				return new WP_Error( 'rest_event_error', __( 'Event location is required.', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
+			// Conferencing locations (Google Meet / Zoom / MS Teams) are Pro-only.
+			// Reject the request before any DB writes so stale admin pages can't
+			// sneak a Pro-only location in after the Pro plugin is deactivated.
+			$pro_required_type = LocationsManager::find_pro_conferencing_type( $location );
+			if ( $pro_required_type && ! LocationsManager::is_pro_active() ) {
+				$wpdb->query( 'ROLLBACK' );
+				doublescale_get_logger()->warning(
+					'Conferencing location requires Pro add-on',
+					array( 'source' => 'booking-event-rest', 'location_type' => $pro_required_type )
+				);
+				return new WP_Error(
+					'rest_event_error',
+					sprintf(
+						/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
+						__( '%s requires the Pro add-on. Please install and activate DoubleScale Pro to use this location.', 'doublescale' ),
+						LocationsManager::get_conferencing_label( $pro_required_type )
+					),
+					array( 'status' => 403 )
+				);
+			}
+
 			$calendar = CalendarModel::find( $calendar_id );
 			if ( ! $calendar ) {
 				$wpdb->query( 'ROLLBACK' );
@@ -999,6 +1020,29 @@ class RestEventController extends RestController {
 						array( 'source' => 'booking-event-rest', 'reason' => $validation_result->get_error_message() )
 					);
 					return $validation_result;
+				}
+			}
+
+			// Conferencing locations (Google Meet / Zoom / MS Teams) are Pro-only.
+			// Only validate when the client actually sent a `location` param so
+			// updates that don't touch the location aren't gated.
+			if ( $request->has_param( 'location' ) && ! empty( $location ) ) {
+				$pro_required_type = LocationsManager::find_pro_conferencing_type( $location );
+				if ( $pro_required_type && ! LocationsManager::is_pro_active() ) {
+					$wpdb->query( 'ROLLBACK' );
+					doublescale_get_logger()->warning(
+						'Conferencing location requires Pro add-on',
+						array( 'source' => 'booking-event-rest', 'location_type' => $pro_required_type, 'event_id' => (int) $id )
+					);
+					return new WP_Error(
+						'rest_event_error',
+						sprintf(
+							/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
+							__( '%s requires the Pro add-on. Please install and activate DoubleScale Pro to use this location.', 'doublescale' ),
+							LocationsManager::get_conferencing_label( $pro_required_type )
+						),
+						array( 'status' => 403 )
+					);
 				}
 			}
 

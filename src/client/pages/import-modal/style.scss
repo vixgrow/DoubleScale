@@ -26,6 +26,14 @@
 	flex-shrink: 0;
 }
 
+.import-modal-content--wizard {
+	min-height: 0;
+}
+
+.import-modal__flow-bar-top {
+	flex-shrink: 0;
+}
+
 .import-modal__body {
 	display: flex;
 	flex-direction: column;
@@ -104,5 +112,204 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.import-modal-wizard__layout {
+	align-items: flex-start;
+	min-height: 0;
+	flex: 1;
+}
+
+.import-modal-wizard__main {
+	min-height: 0;
+}
+
+.import-modal-content--natural-height {
+	flex: none;
+	flex-grow: 0;
+	flex-shrink: 0;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	min-height: auto;
+	height: auto;
+	overflow: visible;
+}
+
+.import-modal-wizard__layout--natural {
+	flex: none;
+	flex-grow: 0;
+	flex-shrink: 0;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	min-height: auto;
+	height: auto;
+	overflow: visible;
+}
+
+.import-modal-wizard__main--natural {
+	flex: 1 1 0%;
+	min-width: 0;
+	max-width: 100%;
+	min-height: auto;
+	height: auto;
+	overflow: visible;
+}
+
+.import-modal-mapping {
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	height: auto;
+	min-height: 0;
+	max-height: none;
+	overflow: visible;
+
+	> .contact-mapped-fields-csv-section {
+		width: 100%;
+		max-width: 100%;
+	}
+
+	.import-modal-contact-profile-form {
+		width: 100%;
+		max-width: 100%;
+
+		.doublescale-field,
+		.doublescale-paginated-select,
+		.doublescale-field-input {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+		}
+
+		.react-select-container {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+		}
+	}
+}
+
+
+.import-modal__wizard-sidebar {
+	width: 260px;
+	flex-shrink: 0;
+	height: fit-content;
+	border-radius: 16px;
+	background: #F7F8FA;
+	border: 1px solid #D0D0D0;
+	padding: 24px;
+}
+
+.import-modal__wizard-steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.import-modal__wizard-step {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding-bottom: 32px;
+
+	&:last-child {
+		padding-bottom: 0;
+
+		.import-modal__wizard-step-line {
+			display: none;
+		}
+	}
+
+	&.is-active {
+		.import-modal__wizard-step-marker {
+			background: #3A3A99;
+			color: #fff;
+			border-color: #3A3A99;
+		}
+
+		.import-modal__wizard-step-label {
+			color: #3A3A99;
+			font-weight: 600;
+		}
+	}
+
+	&.is-complete {
+		.import-modal__wizard-step-marker {
+			background: #16A34A;
+			color: #fff;
+			border-color: #16A34A;
+		}
+
+		.import-modal__wizard-step-label {
+			color: #16A34A;
+			font-weight: 600;
+		}
+
+		.import-modal__wizard-step-line {
+			background: #3A3A99;
+		}
+	}
+}
+
+.import-modal__wizard-step-marker {
+	display: flex;
+	height: 32px;
+	width: 32px;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9999px;
+	border: 1px solid #D0D0D0;
+	background: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	color: #29292E;
+}
+
+.import-modal__wizard-step-label {
+	padding-top: 4px;
+	font-size: 14px;
+	line-height: 1.43;
+	color: #29292E;
+}
+
+.import-modal__wizard-step-line {
+	position: absolute;
+	left: 15px;
+	top: 36px;
+	bottom: 4px;
+	width: 2px;
+	background: #D0D0D0;
+}
+
+.import-modal__wizard-footer {
+	width: 100%;
+}
+
+.import-modal__footer-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	width: 100%;
+}
+
+.import-modal__footer-actions-right {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 24px;
+	margin-left: auto;
 }
 

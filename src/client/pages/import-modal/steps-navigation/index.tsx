@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 /**
  * internal dependencies
  */
@@ -72,15 +72,24 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 	const chooseAnotherBtn = (
 		<Button
 			type="button"
-			variant="outline"
-			size="default"
+			variant="secondaryDeepBlue"
 			onClick={returnToSourceStep}
 			disabled={importing}
-			className="gap-2 border-border/80 text-sm font-medium"
 		>
 			<ArrowLeft className="h-4 w-4" aria-hidden />
 			{__('Choose another source', 'doublescale')}
 		</Button>
+	);
+
+	const renderFooter = (rightActions: React.ReactNode) => (
+		<div className="import-modal__footer-actions">
+			<div className="import-modal__footer-actions-left shrink-0">
+				{chooseAnotherBtn}
+			</div>
+			<div className="import-modal__footer-actions-right">
+				{rightActions}
+			</div>
+		</div>
 	);
 
 	// API integrations — wizard step 2: credentials only
@@ -89,90 +98,81 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 		isIntegrationApiImportSource(source) &&
 		wizardStep === 2
 	) {
-		return (
-			<div className="mt-8 space-y-4 border-t border-border/60 pt-6">
-				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-					{chooseAnotherBtn}
-					<Button
-						onClick={() => {
-							getSourceData();
-						}}
-						disabled={
-							!validateCredentials() ||
-							isFetching ||
-							isUploading ||
-							importing
-						}
-						className="gap-2 sm:ml-auto"
-					>
-						<span>
-							{isFetching
-								? __('Validating...', 'doublescale')
-								: __('Connect & fetch data', 'doublescale')}
-						</span>
-						<ArrowRight className="h-4 w-4" aria-hidden />
-					</Button>
-				</div>
-			</div>
+		return renderFooter(
+			<Button
+				onClick={() => {
+					getSourceData();
+				}}
+				disabled={
+					!validateCredentials() ||
+					isFetching ||
+					isUploading ||
+					importing
+				}
+				className="gap-2"
+			>
+				<span>
+					{isFetching
+						? __('Validating...', 'doublescale')
+						: __('Connect & fetch data', 'doublescale')}
+				</span>
+			</Button>
 		);
 	}
 
 	// Step 1 navigation (CSV upload, or two-step importers on wizard 2)
 	if (currentStep === 1) {
-		return (
-			<div className="mt-8 flex flex-col gap-3 border-t border-border/60 pt-6 sm:flex-row sm:items-center sm:justify-between">
-				{chooseAnotherBtn}
-				<Button
-					onClick={handleNext}
-					disabled={
-						(source === 'csv' &&
-							wizardStep === 2 &&
-							!canProceedCsvUploadToMapping()) ||
-						(['wpfunnelkit', 'fluentcrm', 'memberpress'].includes(source) &&
-							!sourceData) ||
-						isFetching ||
-						isUploading ||
-						importing
-					}
-					className="gap-2 sm:ml-auto"
-				>
-					<span>
-						{isFetching
-							? __('Loading...', 'doublescale')
-							: source === 'csv' && wizardStep === 2
-								? __('Next: map columns', 'doublescale')
-								: __('Import contacts', 'doublescale')}
-					</span>
-					<ArrowRight className="h-4 w-4" aria-hidden />
-				</Button>
-			</div>
+		return renderFooter(
+			<Button
+				onClick={handleNext}
+				disabled={
+					(source === 'csv' &&
+						wizardStep === 2 &&
+						!canProceedCsvUploadToMapping()) ||
+					(['wpfunnelkit', 'fluentcrm', 'memberpress'].includes(
+						source
+					) &&
+						!sourceData) ||
+					isFetching ||
+					isUploading ||
+					importing
+				}
+				className="gap-2"
+			>
+				<span>
+					{isFetching
+						? __('Loading...', 'doublescale')
+						: source === 'csv' && wizardStep === 2
+							? __('Next Step', 'doublescale')
+							: __('Import contacts', 'doublescale')}
+				</span>
+			</Button>
 		);
 	}
 
 	// CSV mapping (wizard 3) or API integration mapping (wizard 3)
-	return (
-		<div className="mt-8 flex flex-col gap-3 border-t border-border/60 pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-			{chooseAnotherBtn}
-			<div className="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:justify-end">
-				<Button
-					variant="outline"
-					onClick={handleBack}
-					disabled={importing}
-					className="gap-2"
-				>
-					<ArrowLeft className="h-4 w-4" aria-hidden />
-					{isIntegrationApiImportSource(source) && wizardStep === 3
-						? __('Back to connection', 'doublescale')
-						: __('Back', 'doublescale')}
-				</Button>
-				<Button onClick={onImportContacts} disabled={importing} className="gap-2">
-					{importing
-						? __('Importing...', 'doublescale')
-						: __('Import contacts', 'doublescale')}
-					<ArrowRight className="h-4 w-4" aria-hidden />
-				</Button>
-			</div>
-		</div>
+	return renderFooter(
+		<>
+			<Button
+				variant="secondaryDeepBlue"
+				onClick={handleBack}
+				disabled={importing}
+			>
+				<ArrowLeft className="h-4 w-4" aria-hidden />
+				{isIntegrationApiImportSource(source) && wizardStep === 3
+					? __('Back to connection', 'doublescale')
+					: __('Back', 'doublescale')}
+			</Button>
+			<Button
+				onClick={onImportContacts}
+				disabled={importing}
+				className="gap-2"
+			>
+				{importing
+					? __('Importing...', 'doublescale')
+					: __('Import contacts', 'doublescale')}
+			</Button>
+		</>
 	);
 };
 

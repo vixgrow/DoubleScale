@@ -14,7 +14,6 @@
     "RestEventController": "DoubleScale\\Modules\\Booking\\Rest\\Controllers\\RestEventController",
     "RestGeneralController": "DoubleScale\\Core\\Rest\\Controllers\\RestGeneralController",
     "RestImportExportController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestImportExportController",
-    "RestLinkTriggerController": "DoubleScale\\Modules\\Tracking\\Rest\\Controllers\\RestLinkTriggerController",
     "RestListController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestListController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",

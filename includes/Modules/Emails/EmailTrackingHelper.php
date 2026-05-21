@@ -101,7 +101,9 @@ class EmailTrackingHelper {
 				// Get link trigger hash
 				$hash = $query_args['doublescale-link-trigger'] ?? '';
 
-				$link_trigger_class = '\DoubleScale\Modules\Tracking\Models\LinkTriggerModel';
+				// Link triggers ship with the Pro add-on; if Pro is not active
+				// the class is absent and we skip the per-link rewrite.
+				$link_trigger_class = '\DoubleScale\Pro\Modules\LinkTriggers\Models\LinkTriggerModel';
 				$link_trigger       = null;
 
 				if ( class_exists( $link_trigger_class ) ) {

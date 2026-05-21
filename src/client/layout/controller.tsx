@@ -26,8 +26,6 @@ import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import ContactsLeadScoringRoute from '../pages/contacts/lead-scoring-route';
 import Campaign from '../pages/campaign';
-import LinkTriggers from '../pages/link-triggers';
-import LinkTrigger from '../pages/link-trigger';
 import Integrations from '../pages/intergrations';
 import Templates from '../pages/templates';
 import Template from '../pages/template';
@@ -498,22 +496,6 @@ registerAdminPage('form', {
 			/>
 		),
 	label: __('Form', 'doublescale'),
-	hidden: true,
-});
-
-registerAdminPage('link-triggers', {
-	path: 'link-triggers',
-	component: () => <LinkTriggers />,
-	label: __('Link Triggers', 'doublescale'),
-	icon: <ToolsIcon />,
-	requiredCapability: ['doublescale_crm_manager'],
-	hidden: true, // Hidden from sidebar - accessible via Settings
-});
-
-registerAdminPage('link-trigger', {
-	path: 'link-triggers/:id',
-	component: () => <LinkTrigger />,
-	label: __('Link Trigger', 'doublescale'),
 	hidden: true,
 });
 

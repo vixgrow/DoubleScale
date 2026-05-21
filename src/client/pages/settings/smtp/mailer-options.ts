@@ -313,7 +313,7 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'doublescale'
 		),
 		docLabel: __('SMTP.com API', 'doublescale'),
-		docUrl: 'https://www.smtp.com/api/',
+		docUrl: 'https://www.smtp.com/smtp-api-documentation/',
 	},
 	elasticemail: {
 		category: 'api',
@@ -323,7 +323,7 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'doublescale'
 		),
 		docLabel: __('Elastic Email API', 'doublescale'),
-		docUrl: 'https://elasticemail.com/resources/developer/',
+		docUrl: 'https://elasticemail.com/developers/api-documentation/rest-api',
 	},
 	outlook: {
 		category: 'oauth',
@@ -348,8 +348,8 @@ export const SMTP_MAILER_UI_META: Record<string, SmtpMailerUiMeta> = {
 			'Choose the correct Zoho domain, enter OAuth client credentials, save, then authorize in wp-admin and select the Zoho mailbox account.',
 			'doublescale'
 		),
-		docLabel: __('Zoho Mail API', 'doublescale'),
-		docUrl: 'https://www.zoho.com/mail/help/dev-platform.html',
+		docLabel: __('Zoho Mail OAuth', 'doublescale'),
+		docUrl: 'https://www.zoho.com/mail/help/api/using-oauth-2.html',
 	},
 	socketlabs: {
 		category: 'api',

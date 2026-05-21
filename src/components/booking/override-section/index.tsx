@@ -1,7 +1,5 @@
 import { __ } from '@wordpress/i18n';
 import { isEmpty } from 'lodash';
-import { format, parse } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
 
 import type { DateOverrides, TimeSlot } from '@/types/booking';
 import { LimitsAddIcon, TrashIcon } from '@/components/booking';
@@ -10,12 +8,7 @@ import './style.scss';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+import { NativeDatePicker } from '@/components/ui/native-date-picker';
 
 interface OverrideSectionProps {
 	dateOverrides: DateOverrides;
@@ -129,33 +122,15 @@ const OverrideSection: React.FC<OverrideSectionProps> = ({
                                 <div key={`${date}-${index}-${key}`} className='flex items-center gap-2.5'>
                                     <div
                                         className='flex items-center gap-2.5 border border-[#E4E7EC] p-2 rounded-lg flex-1'>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant='ghost'
-                                                    className='justify-start font-normal flex-1 px-2'
-                                                >
-                                                    <CalendarIcon className='mr-2 h-4 w-4' />
-                                                    {date
-                                                        ? format(parse(date, 'yyyy-MM-dd', new Date()), 'PPP')
-                                                        : __('Pick a date', 'doublescale')}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className='w-auto p-0' align='start'>
-                                                <Calendar
-                                                    mode='single'
-                                                    selected={date ? parse(date, 'yyyy-MM-dd', new Date()) : undefined}
-                                                    onSelect={(d) =>
-                                                        onDateChange(
-                                                            d ? format(d, 'yyyy-MM-dd') : null,
-                                                            date,
-                                                            index
-                                                        )
-                                                    }
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
+                                        <NativeDatePicker
+                                            className="flex-1"
+                                            variant="ghost"
+                                            value={date}
+                                            placeholder={__('Pick a date', 'doublescale')}
+                                            onChange={(newDate) =>
+                                                onDateChange(newDate, date, index)
+                                            }
+                                        />
 
                                         <div className="border-l-2 border-[#E4E7EC] h-5"></div>
 

@@ -6,9 +6,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { format, parse } from 'date-fns';
-
 /**
  * Internal dependencies
  */
@@ -24,12 +21,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+import { NativeDatePicker } from '@/components/ui/native-date-picker';
 
 interface OverrideModalProps {
 	isVisible: boolean;
@@ -74,26 +66,13 @@ const OverrideModal: React.FC<OverrideModalProps> = ({
                     <div className='flex flex-col gap-5'>
                         <div className='flex flex-col gap-2.5'>
                             <span>{__('Select a Date', 'doublescale')}</span>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant='outline' className='justify-start font-normal'>
-                                        <CalendarIcon className='mr-2 h-4 w-4' />
-                                        {selectedDate
-                                            ? format(parse(selectedDate, 'yyyy-MM-dd', new Date()), 'PPP')
-                                            : __('Pick a date', 'doublescale')}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className='w-auto p-0' align='start'>
-                                    <Calendar
-                                        mode='single'
-                                        selected={selectedDate ? parse(selectedDate, 'yyyy-MM-dd', new Date()) : undefined}
-                                        onSelect={(d) =>
-                                            onDateChange(d ? format(d, 'yyyy-MM-dd') : null)
-                                        }
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <NativeDatePicker
+                                className="w-full"
+                                variant="outline"
+                                value={selectedDate ?? ''}
+                                placeholder={__('Pick a date', 'doublescale')}
+                                onChange={(value) => onDateChange(value)}
+                            />
                         </div>
 
                         <div className='flex flex-col gap-2.5'>

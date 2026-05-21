@@ -161,6 +161,7 @@ class EventModel extends Model {
 		'payments_settings',
 		'advanced_settings',
 		'waiting_list_settings',
+		'reserve_times',
 	);
 
 	/**
@@ -315,20 +316,20 @@ class EventModel extends Model {
 	/**
 	 * Set the event reserve times
 	 *
-	 * @param array $value
+	 * @param bool $value
 	 * @return void
 	 */
 	public function setReserveTimesAttribute( $value ) {
-		$this->update_meta( 'reserve_times', $value );
+		$this->update_meta( 'reserve_times', (bool) $value );
 	}
 
 	/**
 	 * Get the event reserve times
 	 *
-	 * @return array
+	 * @return bool
 	 */
 	public function getReserveTimesAttribute() {
-		return $this->get_meta( 'reserve_times', array() );
+		return (bool) $this->get_meta( 'reserve_times', false );
 	}
 
 	/**

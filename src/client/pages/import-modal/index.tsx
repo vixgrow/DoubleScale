@@ -13,10 +13,12 @@ import { cn } from '@/lib/utils';
 import {
 	Dialog,
 	DialogContent,
+	DialogHeader,
 	DialogTitle,
-	DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Breadcrumb } from '@doublescale/components';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import { ImportProvider, useImportContext } from './contexts';
 import SourceGrid from './source-grid';
 import SourceHeader from './source-header';
@@ -25,6 +27,7 @@ import {
 	isIntegrationApiImportSource,
 	isThreeStepImportSource,
 } from './source-definitions';
+import './style.scss';
 
 interface Props {
 	open: boolean;
@@ -81,7 +84,8 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 	onDismiss,
 	onCompleted,
 }) => {
-	const { state, returnToSourceStep } = useImportContext();
+	const navigate = useNavigate();
+	const { state, returnToSourceStep, dispatch } = useImportContext();
 	const { wizardStep, source } = state;
 
 	const totalSteps = !source ? 1 : isThreeStepImportSource(source) ? 3 : 2;
@@ -106,35 +110,64 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 		onDismiss();
 	};
 
-	return (
-		<div className="relative flex max-h-[min(90vh,940px)] min-h-[min(52vh,520px)] flex-col overflow-hidden rounded-[inherit] bg-card">
-			<div
-				className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-primary via-primary/90 to-primary/60"
-				aria-hidden
-			/>
+	const handleContinueFromSource = () => {
+		if (!source || state.importing) return;
+		dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
+		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+	};
 
-			<header className="relative shrink-0 border-b border-border/50 bg-card px-5 pb-5 pt-6 sm:px-8 sm:pb-6 sm:pt-7 pr-14 sm:pr-16">
-				<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-					<div className="min-w-0 flex-1 space-y-1.5">
-						<DialogTitle className="text-left text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
+	const headerSubtitle =
+		wizardStep === 1
+			? __(
+					'Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; other sources use two.',
+					'doublescale'
+				)
+			: __(
+					'Follow the stages below. You can change the source until you start importing.',
+					'doublescale'
+				);
+
+	const handleBreadcrumbNavigate = (href: string) => {
+		onDismiss();
+		navigate(getToLink(href));
+	};
+
+	return (
+		<>
+			<DialogHeader className="shrink-0 border-b border-border/50 bg-white/90 pb-0 shadow-[inset_0_-1px_0_0_rgba(15,23,42,0.06)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
+				<DialogTitle className="sr-only">
+					{__('Import contacts', 'doublescale')}
+				</DialogTitle>
+				<div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center justify-between gap-3 px-6 py-3 ">
+					<Breadcrumb
+						items={[
+							{
+								label: __('Contacts List', 'doublescale'),
+								href: 'contacts',
+							},
+							{
+								label: __('Importing Contacts', 'doublescale'),
+							},
+						]}
+						handleNavigate={handleBreadcrumbNavigate}
+					/>
+				</div>
+			</DialogHeader>
+
+			<div className="import-modal-page-scroll mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto p-6 bg-[#F7F8FA]">
+				<div className="import-modal-content flex shrink-0 flex-col rounded-[20px] bg-[#fff] p-6 pb-8 shadow-[0px_4px_20px_0px_rgba(59,130,246,0.14)]">
+					<div className="shrink-0 space-y-2.5">
+						<h2 className="text-left font-bold tracking-tight text-foreground leading-9 text-2xl">
 							{__('Import contacts', 'doublescale')}
-						</DialogTitle>
-						<DialogDescription className="text-left text-sm leading-relaxed text-muted-foreground ">
-							{wizardStep === 1
-								? __(
-										'Pick one source from the grid. CSV and connected platforms (MailerLite, ActiveCampaign, HubSpot, Pipedrive, GoHighLevel) use three steps; FluentCRM, FunnelKit, MemberPress, WordPress users, WooCommerce, and other sources use two.',
-										'doublescale'
-									)
-								: __(
-										'Follow the stages below. You can change the source until you start importing.',
-										'doublescale'
-									)}
-						</DialogDescription>
+						</h2>
+						<p className="text-left text-base leading-6 text-muted-foreground">
+							{headerSubtitle}
+						</p>
 					</div>
 
 					{wizardStep > 1 && source && (
-						<div className="flex w-full flex-col gap-2.5 lg:max-w-sm">
-							<div className="flex w-full flex-wrap items-center gap-x-3 gap-y-1">
+						<div className="mt-5 shrink-0 ">
+							<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 								<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
 									{sprintf(
 										/* translators: 1: current step, 2: total steps */
@@ -143,7 +176,10 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 										totalSteps
 									)}
 								</p>
-								<span className="hidden h-3 w-px bg-border sm:inline" aria-hidden />
+								<span
+									className="hidden h-3 w-px bg-border sm:inline"
+									aria-hidden
+								/>
 								<Button
 									type="button"
 									variant="link"
@@ -155,29 +191,55 @@ const ImportModalContent: React.FC<ImportModalContentProps> = ({
 									{__('Choose another source', 'doublescale')}
 								</Button>
 							</div>
-							<StepSegmentBar
-								totalSteps={totalSteps}
-								activeStep={displayStep}
-							/>
-							<p className="text-sm font-medium leading-snug text-foreground">
+							<div className="mt-3">
+								<StepSegmentBar
+									totalSteps={totalSteps}
+									activeStep={displayStep}
+								/>
+							</div>
+							<p className="mt-2 text-sm font-medium text-foreground">
 								{stepLabel}
 							</p>
 						</div>
 					)}
-				</div>
-			</header>
 
-			{wizardStep === 1 ? (
-				<SourceGrid />
-			) : (
-				<div className="flex min-h-0 flex-1 flex-col">
-					<SourceHeader />
-					<div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
-						<MainContent onImportComplete={handleImportComplete} />
+					<div
+						className={cn(
+							'import-modal__body mt-6',
+							wizardStep === 1 ? 'shrink-0' : 'min-h-0 flex-1'
+						)}
+					>
+						{wizardStep === 1 ? (
+							<SourceGrid />
+						) : (
+							<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+								<SourceHeader />
+								<div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6 sm:py-8">
+									<MainContent
+										onImportComplete={handleImportComplete}
+									/>
+								</div>
+							</div>
+						)}
 					</div>
+
+					{wizardStep === 1 && (
+						<div className="import-modal__footer">
+							<Button
+								type="button"
+								variant="default"
+								
+								
+								disabled={!source || state.importing}
+								onClick={handleContinueFromSource}
+							>
+								{__('Continue', 'doublescale')}
+							</Button>
+						</div>
+					)}
 				</div>
-			)}
-		</div>
+			</div>
+		</>
 	);
 };
 
@@ -204,6 +266,7 @@ const ImportModalInner: React.FC<Props> = ({
 	return (
 		<Dialog
 			open={open}
+			modal={false}
 			onOpenChange={(value) => {
 				if (!value) {
 					handleDismiss();
@@ -212,15 +275,15 @@ const ImportModalInner: React.FC<Props> = ({
 		>
 			<DialogContent
 				className={cn(
-					'z-[150000] gap-0 overflow-hidden p-0',
-					'w-[calc(100vw-1rem)] max-w-[1200px]',
-					'max-h-[min(94vh,960px)] rounded-xl border border-border/80',
-					'bg-card shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)]',
-					'data-[state=open]:animate-in data-[state=closed]:animate-out',
-					'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-					'data-[state=closed]:zoom-out-[0.99] data-[state=open]:zoom-in-[0.99]',
-					'data-[state=open]:slide-in-from-bottom-2 data-[state=closed]:slide-out-to-bottom-2'
+					'doublescale-import-modal z-[150000] flex h-screen max-h-screen w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-gradient-to-br from-slate-50 via-[#eef1f7] to-slate-100/95 p-0 shadow-none',
+					'[&>button]:right-6 [&>button]:top-4 [&>button]:text-muted-foreground [&>button]:hover:bg-muted/60 sm:[&>button]:right-10 sm:[&>button]:top-5'
 				)}
+				style={{
+					paddingTop: 0,
+					paddingLeft: 0,
+					paddingRight: 0,
+					paddingBottom: 0,
+				}}
 			>
 				<ImportModalContent
 					onDismiss={handleDismiss}

@@ -12,7 +12,6 @@
     "RestEventController",
     "RestGeneralController",
     "RestImportExportController",
-    "RestLinkTriggerController",
     "RestListController",
     "RestLogController",
     "RestModulesController",

@@ -1,4 +1,53 @@
+.contact-mapped-fields-csv-section {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	flex-grow: 0;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	height: auto;
+	max-height: none;
+	overflow: visible;
+	border-radius: 12px;
+	border: 1px solid #d0d0d0;
+	background: #F7F8FA;
+	padding: 24px;
+
+	.contact-mapped-fields-csv-rows {
+		flex: none;
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		height: auto;
+		max-height: none;
+		overflow: visible;
+
+		.grid {
+			min-width: 0;
+		}
+
+		.grid>* {
+			min-width: 0;
+		}
+
+		input {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.react-select-container {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+		}
+	}
+}
+
 .doublescale-contact-mapped-fields {
+
 	// Styling for merge tag button
 	.merge-tag-button {
 		transition: all 0.2s ease;

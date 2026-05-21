@@ -2,9 +2,10 @@
 /**
  * Tracking module bootstrap.
  *
- * Owns: email/SMS/WhatsApp tracking, link triggers, IMAP client helper, related
- * models/migrations, and link-trigger REST API. Website/page-visit tracking is
- * in the Website Tracking module.
+ * Owns: email/SMS/WhatsApp tracking, IMAP client helper, and related
+ * communication-tracking models/migrations. Link triggers were moved to the
+ * Pro add-on (DoubleScale\Pro\Modules\LinkTriggers); website/page-visit
+ * tracking is in the Website Tracking module.
  *
  * @package DoubleScale\Modules\Tracking
  */
@@ -27,7 +28,7 @@ final class Module extends AbstractModule {
 	}
 
 	public function description(): string {
-		return __( 'Email, SMS, and channel tracking with link triggers.', 'doublescale' );
+		return __( 'Email, SMS, and channel tracking.', 'doublescale' );
 	}
 
 	public function version(): string {
@@ -39,11 +40,6 @@ final class Module extends AbstractModule {
 	}
 
 	public function register( Container $container ): void {
-		$container->singleton(
-			LinkTriggers::class,
-			static fn() => LinkTriggers::instance()
-		);
-
 		$container->singleton(
 			Email::class,
 			static fn() => Email::instance()
@@ -57,17 +53,10 @@ final class Module extends AbstractModule {
 		$container->singleton( Services\TrackingService::class );
 	}
 
-	public function restControllers(): array {
-		return array(
-			Rest\Controllers\RestLinkTriggerController::class,
-		);
-	}
-
 	public function boot( Container $container ): void {
 		parent::boot( $container );
 
 		$container->get( Email::class );
 		$container->get( Whatsapp::class );
-		$container->get( LinkTriggers::class );
 	}
 }

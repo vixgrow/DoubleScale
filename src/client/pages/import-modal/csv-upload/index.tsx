@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
  * external dependencies
  */
 import React, { useRef, useState } from 'react';
-import { CircleX } from 'lucide-react';
+import { CircleX, Download } from 'lucide-react';
 
 /**
  * internal dependencies
@@ -23,6 +23,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
 	CheckCircleIcon,
 	DeleteIcon,
@@ -162,8 +163,8 @@ const CsvUpload: React.FC = () => {
 	const renderUploadArea = () => (
 		<div
 			className={cn(
-				'cursor-pointer rounded-xl border-2 border-dashed border-border/80 bg-muted/5 p-10 text-center transition-colors',
-				'hover:border-primary/40 hover:bg-muted/10 sm:p-14'
+				'cursor-pointer rounded-2xl border-2 border-dashed border-border bg-white p-6 text-center transition-colors',
+				'hover:border-primary sm:p-14'
 			)}
 			onClick={handleUploadClick}
 			onDragOver={handleDragOver}
@@ -251,23 +252,48 @@ const CsvUpload: React.FC = () => {
 		);
 	};
 
+	const exampleCsv = `first_name,last_name,email\nJohn,Doe,john@example.com`;
+
+	const handleDownloadExample = () => {
+		const blob = new Blob([exampleCsv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'doublescale-contacts-example.csv';
+		link.click();
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="space-y-6">
-			<div className="space-y-2">
-				<CardTitle className="text-lg font-semibold leading-snug text-foreground">
-					{__('Upload CSV file', 'doublescale')}
-				</CardTitle>
-				<CardDescription className="text-sm leading-relaxed text-muted-foreground">
-					{__(
-						'Your file must include columns for contact data (for example first name, last name, and email). Maximum file size 12 MB.',
-						'doublescale'
-					)}
-				</CardDescription>
+			<div className="flex flex-col gap-3 bg-[#F7F8FA] rounded-xl p-6 border border-border">
+				<div className=" flex items-center gap-6 justify-between">
+					<div className='min-w-0 space-y-3'>
+						<CardTitle className="text-xl font-semibold leading-8 text-foreground">
+							{__('Upload CSV file', 'doublescale')}
+						</CardTitle>
+						<CardDescription className="text-base leading-7 text-muted-foreground">
+							{__(
+								'Your file must include a column with either first name, last name and etc... for each contact. (Maximum file size 12 MB)',
+								'doublescale'
+							)}
+						</CardDescription>
+					</div>
+					<Button
+						type="button"
+						variant="secondaryDeepBlue"
+						onClick={handleDownloadExample}
+					>
+						<Download className="h-4 w-4" aria-hidden />
+						{__('Download example file (.csv)', 'doublescale')}
+					</Button>
+				</div>
+				{isFetching && <Skeleton className="h-40 w-full rounded-lg" />}
+				{!isFetching && <>{!fileData ? renderUploadArea() : renderFileCard()}</>}
 			</div>
 
-			{isFetching && <Skeleton className="h-40 w-full rounded-lg" />}
 
-			{!isFetching && <>{!fileData ? renderUploadArea() : renderFileCard()}</>}
+
 		</div>
 	);
 };

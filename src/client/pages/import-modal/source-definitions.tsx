@@ -68,6 +68,79 @@ export function isThreeStepImportSource(source: string): boolean {
 	return source === 'csv' || isIntegrationApiImportSource(source);
 }
 
+export type ImportWizardStepItem = {
+	id: number;
+	label: string;
+};
+
+/** Shared wizard step labels for sidebar + breadcrumb (wizard step 2+). */
+export function getImportWizardSteps(
+	source: string,
+	wizardStep: number
+): { steps: ImportWizardStepItem[]; activeStepId: number } | null {
+	if (!source || wizardStep < 2) {
+		return null;
+	}
+
+	if (source === 'csv') {
+		return {
+			steps: [
+				{
+					id: 1,
+					label: __('Upload CSV file', 'doublescale'),
+				},
+				{
+					id: 2,
+					label: __('Mapping & Contact Profile', 'doublescale'),
+				},
+			],
+			activeStepId: wizardStep === 2 ? 1 : 2,
+		};
+	}
+
+	if (isIntegrationApiImportSource(source)) {
+		return {
+			steps: [
+				{
+					id: 1,
+					label: __('Connect your account', 'doublescale'),
+				},
+				{
+					id: 2,
+					label: __('Mapping & Contact Profile', 'doublescale'),
+				},
+			],
+			activeStepId: wizardStep === 2 ? 1 : 2,
+		};
+	}
+
+	if (!isThreeStepImportSource(source)) {
+		return {
+			steps: [
+				{
+					id: 1,
+					label: __('Configure import', 'doublescale'),
+				},
+			],
+			activeStepId: 1,
+		};
+	}
+
+	return null;
+}
+
+export function getImportWizardActiveStepLabel(
+	source: string,
+	wizardStep: number
+): string | null {
+	const config = getImportWizardSteps(source, wizardStep);
+	if (!config) {
+		return null;
+	}
+	const active = config.steps.find((s) => s.id === config.activeStepId);
+	return active?.label ?? null;
+}
+
 export type ImporterSourceItem = {
 	label: string;
 	value: string;

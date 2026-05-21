@@ -11,16 +11,13 @@ import { map } from 'lodash';
  * internal dependencies
  */
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card } from '@/components/ui/card';
 import CsvUpload from '../csv-upload';
 import ApiCredentials from '../credentials-form';
 import FieldMapping from '../field-mapping';
 import ContactProfile from '../contact-profile';
-import StepNavigation from '../steps-navigation';
 import ImportProgress from '../import-progress';
 import { ContactMappedFields } from '@doublescale/components';
 import { useImportContext } from '../contexts';
-import { useImportActions } from '../use-importActions';
 import ConfigAPI from '@doublescale/config';
 import {
 	isIntegrationApiImportSource,
@@ -45,16 +42,8 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		values,
 	} = state;
 
-	const { importContacts } = useImportActions();
 	const importers = ConfigAPI.getImporters();
 	const importer = source ? importers[source] || null : null;
-
-	const handleImportContacts = async () => {
-		const success = await importContacts();
-		if (success) {
-			// ImportProgress shows Close
-		}
-	};
 
 	if (importing || showingCompletion) {
 		return <ImportProgress onComplete={onImportComplete} />;
@@ -66,79 +55,48 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 
 	// CSV — step 2: file upload only
 	if (source === 'csv' && wizardStep === 2) {
-		return (
-			<>
-				<CsvUpload />
-				<StepNavigation onImportContacts={handleImportContacts} />
-			</>
-		);
+		return <CsvUpload />;
 	}
 
 	// CSV — step 3: column mapping + profile + import
 	if (source === 'csv' && wizardStep === 3) {
-		return (
-			<div className="w-full">
-				<div className="mx-auto max-w-4xl">
-					{fileData && (
-						<Card className="mb-6 rounded-xl border border-border/70 shadow-none">
-							<div className="space-y-4 p-5 sm:p-6">
-								<div className="space-y-2">
-									<h3 className="text-lg font-semibold leading-snug text-foreground">
-										{__('Map your columns', 'doublescale')}
-									</h3>
-									<p className="text-sm leading-relaxed text-muted-foreground">
-										{__(
-											'Match each CSV column to a contact field before importing.',
-											'doublescale'
-										)}
-									</p>
-								</div>
+		const csvColumns = fileData
+			? fileData.header_columns.reduce(
+				(acc, col) => {
+					acc[col] = { label: col };
+					return acc;
+				},
+				{} as Record<string, { label: string }>
+			)
+			: {};
 
-								{importer && sourceData && (
-									<div>
-										{map(
-											sourceData,
-											(field, key) =>
-												field.type === 'contact_mapped_fields' && (
-													<div key={key} className="space-y-2">
-														<label className="text-sm font-medium text-foreground">
-															{field.label}
-														</label>
-														<ContactMappedFields
-															fields={
-																fileData
-																	? fileData.header_columns.reduce(
-																			(acc, col) => {
-																				acc[col] = { label: col };
-																				return acc;
-																			},
-																			{} as Record<string, { label: string }>
-																		)
-																	: field.options
-															}
-															values={values[key] || {}}
-															onChange={(value) => updateValues(key, value)}
-															source={source}
-														/>
-													</div>
-												)
-										)}
-									</div>
-								)}
-							</div>
-						</Card>
+		return (
+			<div className="import-modal-mapping flex min-w-0 w-full max-w-full flex-col gap-6">
+				{fileData &&
+					importer &&
+					sourceData &&
+					map(
+						sourceData,
+						(field, key) =>
+							field.type === 'contact_mapped_fields' && (
+								<ContactMappedFields
+									key={key}
+									fields={csvColumns}
+									values={values[key] || {}}
+									onChange={(value) =>
+										updateValues(key, value)
+									}
+									source={source}
+								/>
+							)
 					)}
 
-					<div className="mt-6">
-						<ContactProfile
-							showStatusField={['csv', 'wpusers', 'wc_customers'].includes(
-								source
-							)}
-						/>
-					</div>
-
-					<StepNavigation onImportContacts={handleImportContacts} />
-				</div>
+				<ContactProfile
+					showStatusField={['csv', 'wpusers', 'wc_customers'].includes(
+						source
+					)}
+					importSectionLayout
+				/>
 			</div>
 		);
 	}
@@ -168,7 +126,6 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 						)}
 				</div>
 
-				<StepNavigation onImportContacts={handleImportContacts} />
 			</>
 		);
 	}
@@ -181,13 +138,9 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		sourceData
 	) {
 		return (
-			<div className="space-y-6">
-				<h3 className="text-lg font-semibold leading-snug text-foreground">
-					{__('Configure import', 'doublescale')}
-				</h3>
+			<div className="import-modal-mapping flex min-w-0 w-full max-w-full flex-col gap-6">
 				<FieldMapping importer={importer} />
-				<ContactProfile />
-				<StepNavigation onImportContacts={handleImportContacts} />
+				<ContactProfile importSectionLayout />
 			</div>
 		);
 	}
@@ -233,7 +186,6 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 						)}
 				</div>
 
-				<StepNavigation onImportContacts={handleImportContacts} />
 			</>
 		);
 	}

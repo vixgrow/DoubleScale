@@ -228,19 +228,19 @@ Each SMTP provider is selectable per connection. When you configure one, DoubleS
 
 **SparkPost**
 * Endpoint: `https://api.sparkpost.com`
-* Terms: https://www.messagebird.com/en/legal/terms-of-use · Privacy: https://www.messagebird.com/en/legal/privacy
+* Terms: https://www.sparkpost.com/legal/terms-of-use · Privacy: https://bird.com/en/legal/privacy
 
 **SMTP.com**
 * Endpoint: `https://api.smtp.com`
-* Terms: https://www.smtp.com/terms-of-service/ · Privacy: https://www.smtp.com/privacy-policy/
+* Terms: https://smtp.com/terms-of-service · Privacy: https://smtp.com/privacy-policy
 
 **SMTP2GO**
 * Endpoint: `https://api.smtp2go.com`
-* Terms: https://www.smtp2go.com/terms-of-service/ · Privacy: https://www.smtp2go.com/privacy-policy/
+* Terms: https://www.smtp2go.com/terms/ · Privacy: https://www.smtp2go.com/privacy/
 
 **MailerSend**
 * Endpoint: `https://api.mailersend.com`
-* Terms: https://www.mailersend.com/legal/terms · Privacy: https://www.mailersend.com/legal/privacy-policy
+* Terms: https://www.mailersend.com/legal/terms-of-use · Privacy: https://www.mailersend.com/legal/privacy-policy
 
 **Mailjet**
 * Endpoint: `https://api.mailjet.com`
@@ -264,7 +264,7 @@ Each SMTP provider is selectable per connection. When you configure one, DoubleS
 
 **SocketLabs**
 * Endpoint: `https://inject.socketlabs.com`
-* Terms: https://www.socketlabs.com/master-services-agreement/ · Privacy: https://www.socketlabs.com/privacy-policy/
+* Terms: https://www.socketlabs.com/terms-of-use · Privacy: https://www.socketlabs.com/privacy-policy/
 
 **Loops**
 * Endpoint: `https://app.loops.so/api`

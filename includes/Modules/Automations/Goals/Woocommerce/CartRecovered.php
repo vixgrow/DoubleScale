@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Goals\Woocommerce;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\GoalPro;

@@ -2,7 +2,6 @@
 
 namespace DoubleScale\Modules\Tracking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -33,8 +32,8 @@ class CommunicationTrackingMetaModel extends Model {
 	/**
 	 * Capture merge tags using pre-extracted keys (optimized approach)
 	 *
-	 * @param int                                                     $communication_tracking_id Communication tracking ID
-	 * @param array                                                   $merge_tag_keys Pre-extracted merge tag keys
+	 * @param int                                                                         $communication_tracking_id Communication tracking ID
+	 * @param array                                                                       $merge_tag_keys Pre-extracted merge tag keys
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model
 	 * @return CommunicationTrackingMetaModel
 	 */

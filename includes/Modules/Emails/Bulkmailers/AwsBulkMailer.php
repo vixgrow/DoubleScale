@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Emails\Bulkmailers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Traits\SmtpModuleActive;
@@ -200,5 +199,4 @@ class AwsBulkMailer extends AbstractBulkMailer {
 
 		return $headers;
 	}
-
 }

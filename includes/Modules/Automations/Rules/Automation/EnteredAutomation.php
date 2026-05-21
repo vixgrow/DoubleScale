@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Automation;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -23,8 +22,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * EnteredAutomation class
  */
-class EnteredAutomation extends Rule
-{
+class EnteredAutomation extends Rule {
+
 
 	/**
 	 * Name
@@ -71,18 +70,17 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options($automation_name = '')
-	{
+	public function get_options( $automation_name = '' ) {
 		$options = array();
 
-		if ('' === $automation_name) {
-			$automations = AutomationModel::paginate(10, array('*'), 'page', 1);
+		if ( '' === $automation_name ) {
+			$automations = AutomationModel::paginate( 10, array( '*' ), 'page', 1 );
 		} else {
-			$automations = AutomationModel::where('name', 'LIKE', '%' . $automation_name . '%')->paginate(10, array('*'), 'page', 1);
+			$automations = AutomationModel::where( 'name', 'LIKE', '%' . $automation_name . '%' )->paginate( 10, array( '*' ), 'page', 1 );
 		}
 
-		foreach ($automations as $automation) {
-			$options[$automation->id] = $automation->name;
+		foreach ( $automations as $automation ) {
+			$options[ $automation->id ] = $automation->name;
 		}
 
 		return $options;
@@ -97,8 +95,7 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
 		return $contact->id;
@@ -111,12 +108,11 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'any'  => __('Match any', 'doublescale'),
-			'all'  => __('Match all', 'doublescale'),
-			'none' => __('Match none', 'doublescale'),
+			'any'  => __( 'Match any', 'doublescale' ),
+			'all'  => __( 'Match all', 'doublescale' ),
+			'none' => __( 'Match none', 'doublescale' ),
 		);
 	}
 
@@ -126,23 +122,22 @@ class EnteredAutomation extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$value      = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$value      = $this->get_value( $automation_contact );
 		$operator   = $rule['operator'];
 		$rule_value = $rule['value'];
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'any':
-				return $this->is_any_met($value, $rule_value);
+				return $this->is_any_met( $value, $rule_value );
 			case 'all':
-				return $this->is_all_met($value, $rule_value);
+				return $this->is_all_met( $value, $rule_value );
 			case 'none':
-				return $this->is_none_met($value, $rule_value);
+				return $this->is_none_met( $value, $rule_value );
 		}
 	}
 
@@ -156,10 +151,9 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return bool
 	 */
-	private function is_any_met($contact_id, $automation_ids)
-	{
-		$automations = AutomationContactModel::where('contact_id', $contact_id)
-			->whereIn('automation_id', $automation_ids)
+	private function is_any_met( $contact_id, $automation_ids ) {
+		$automations = AutomationContactModel::where( 'contact_id', $contact_id )
+			->whereIn( 'automation_id', $automation_ids )
 			->get();
 
 		return $automations->count() > 0;
@@ -175,13 +169,12 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return bool
 	 */
-	private function is_all_met($contact_id, $automation_ids)
-	{
-		$automations = AutomationContactModel::where('contact_id', $contact_id)
-			->whereIn('automation_id', $automation_ids)
+	private function is_all_met( $contact_id, $automation_ids ) {
+		$automations = AutomationContactModel::where( 'contact_id', $contact_id )
+			->whereIn( 'automation_id', $automation_ids )
 			->get();
 
-		return $automations->count() === count($automation_ids);
+		return $automations->count() === count( $automation_ids );
 	}
 
 	/**
@@ -194,14 +187,13 @@ class EnteredAutomation extends Rule
 	 *
 	 * @return bool
 	 */
-	private function is_none_met($contact_id, $automation_ids)
-	{
-		$automations = AutomationContactModel::where('contact_id', $contact_id)
-			->whereIn('automation_id', $automation_ids)
+	private function is_none_met( $contact_id, $automation_ids ) {
+		$automations = AutomationContactModel::where( 'contact_id', $contact_id )
+			->whereIn( 'automation_id', $automation_ids )
 			->get();
 
 		return $automations->count() === 0;
 	}
 }
 
-RulesManager::instance()->register(new EnteredAutomation());
+RulesManager::instance()->register( new EnteredAutomation() );

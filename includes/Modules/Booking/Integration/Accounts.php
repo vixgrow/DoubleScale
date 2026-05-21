@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Booking\Integration;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\Integration;
@@ -78,7 +77,7 @@ class Accounts {
 			return $cached['data'];
 		}
 
-		$data = $callback();
+		$data          = $callback();
 		$cache[ $key ] = array(
 			'time' => time(),
 			'data' => $data,

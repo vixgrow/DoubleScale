@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -47,7 +46,7 @@ class SideBySideLayoutHandler extends AbstractLayoutHandler {
 				$right_blocks[] = $block;
 			}
 
-			$i++;
+			++$i;
 		}
 
 		$gap           = '5px';

@@ -108,9 +108,9 @@ final class Lifecycle {
 			&& file_exists( $doublescale_root_composer ) ) {
 			$doublescale_root_classmap = $dir . 'vendor/composer/autoload_classmap.php';
 			if ( is_readable( $doublescale_root_classmap ) ) {
-				$doublescale_classmap        = require $doublescale_root_classmap;
-				$doublescale_includes_root   = $dir . 'includes/';
-				$doublescale_plugin_map      = array();
+				$doublescale_classmap      = require $doublescale_root_classmap;
+				$doublescale_includes_root = $dir . 'includes/';
+				$doublescale_plugin_map    = array();
 				foreach ( $doublescale_classmap as $doublescale_fqcn => $doublescale_path ) {
 					if ( 0 !== strpos( $doublescale_fqcn, 'DoubleScale\\' ) ) {
 						continue;

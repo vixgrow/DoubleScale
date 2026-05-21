@@ -55,21 +55,21 @@ class Account_API {
 	 * @return WP_Error|array
 	 */
 	public function send( $args ) {
-		$body     = [
+		$body     = array(
 			'serverId' => $this->server_id,
-			'Messages' => [ $args ],
-		];
+			'Messages' => array( $args ),
+		);
 		$response = wp_remote_request(
 			'https://inject.socketlabs.com/api/v1/email',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_key,
-				],
+				),
 				'body'    => wp_json_encode( $body ),
 				'timeout' => 60,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

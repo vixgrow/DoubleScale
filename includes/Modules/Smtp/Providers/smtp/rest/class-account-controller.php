@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTP\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -25,7 +24,8 @@ use WP_REST_Request;
  * @since 1.0.0
  */
 class Account_Controller extends Abstract_Account_Controller {
-	use Account_Controller_Gettable, Account_Controller_Creatable;
+	use Account_Controller_Gettable;
+	use Account_Controller_Creatable;
 
 	/**
 	 * Register controller routes
@@ -49,37 +49,37 @@ class Account_Controller extends Abstract_Account_Controller {
 	 * @return array
 	 */
 	protected function get_credentials_schema() {
-		return [
-			'smtp_host'      => [
+		return array(
+			'smtp_host'      => array(
 				'type'     => 'string',
 				'required' => true,
-			],
-			'smtp_port'      => [
-				'type'     => [ 'integer', 'string' ],
+			),
+			'smtp_port'      => array(
+				'type'     => array( 'integer', 'string' ),
 				'required' => true,
-			],
-			'encryption'     => [
+			),
+			'encryption'     => array(
 				'type'     => 'string',
 				'required' => true,
-				'enum'     => [
+				'enum'     => array(
 					'none',
 					'ssl',
 					'tls',
-				],
-			],
-			'auto_tls'       => [
+				),
+			),
+			'auto_tls'       => array(
 				'type' => 'boolean',
-			],
-			'authentication' => [
+			),
+			'authentication' => array(
 				'type' => 'boolean',
-			],
-			'username'       => [
+			),
+			'username'       => array(
 				'type' => 'string',
-			],
-			'password'       => [
+			),
+			'password'       => array(
 				'type' => 'string',
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -124,5 +124,4 @@ class Account_Controller extends Abstract_Account_Controller {
 			'name' => $account_name,
 		);
 	}
-
 }

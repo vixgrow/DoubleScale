@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\MergeTags\Woocommerce\Membership;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\MergeTags\Abstracts\MergeTag;
@@ -61,7 +60,7 @@ class UserMembershipId extends MergeTag {
 	 * Get Merge Tag Value
 	 *
 	 * @param AutomationContactModel $contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param string                 $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */

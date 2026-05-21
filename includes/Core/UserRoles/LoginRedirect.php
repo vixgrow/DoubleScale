@@ -149,4 +149,3 @@ final class LoginRedirect {
 		return admin_url( 'admin.php?page=' . self::CRM_DASHBOARD_SLUG );
 	}
 }
-

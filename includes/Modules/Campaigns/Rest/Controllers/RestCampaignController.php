@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -75,17 +74,17 @@ class RestCampaignController extends AbstractCampaignController {
 			array(
 				'args' => array(
 					'id'       => array(
-						'description' => __( 'Campaign ID', 'doublescale'),
+						'description' => __( 'Campaign ID', 'doublescale' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'per_page' => array(
-						'description' => __( 'Items per page', 'doublescale'),
+						'description' => __( 'Items per page', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'     => array(
-						'description' => __( 'Page number', 'doublescale'),
+						'description' => __( 'Page number', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -96,7 +95,7 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'status' => array(
-							'description' => __( 'Message status filter', 'doublescale'),
+							'description' => __( 'Message status filter', 'doublescale' ),
 							'type'        => 'string',
 							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed', 'pending', 'delivered', 'scheduled' ),
 							'required'    => false,
@@ -113,17 +112,17 @@ class RestCampaignController extends AbstractCampaignController {
 			array(
 				'args' => array(
 					'id'       => array(
-						'description' => __( 'Campaign ID', 'doublescale'),
+						'description' => __( 'Campaign ID', 'doublescale' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'per_page' => array(
-						'description' => __( 'Items per page', 'doublescale'),
+						'description' => __( 'Items per page', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'     => array(
-						'description' => __( 'Page number', 'doublescale'),
+						'description' => __( 'Page number', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -143,17 +142,17 @@ class RestCampaignController extends AbstractCampaignController {
 			array(
 				'args' => array(
 					'id'       => array(
-						'description' => __( 'Campaign ID', 'doublescale'),
+						'description' => __( 'Campaign ID', 'doublescale' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'per_page' => array(
-						'description' => __( 'Items per page', 'doublescale'),
+						'description' => __( 'Items per page', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'     => array(
-						'description' => __( 'Page number', 'doublescale'),
+						'description' => __( 'Page number', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -173,22 +172,22 @@ class RestCampaignController extends AbstractCampaignController {
 			array(
 				'args' => array(
 					'id'        => array(
-						'description' => __( 'Campaign ID', 'doublescale'),
+						'description' => __( 'Campaign ID', 'doublescale' ),
 						'type'        => 'integer',
 						'required'    => true,
 					),
 					'run_batch' => array(
-						'description' => __( 'Run batch identifier (YYYY-MM-DD HH:MM)', 'doublescale'),
+						'description' => __( 'Run batch identifier (YYYY-MM-DD HH:MM)', 'doublescale' ),
 						'type'        => 'string',
 						'required'    => true,
 					),
 					'per_page'  => array(
-						'description' => __( 'Items per page', 'doublescale'),
+						'description' => __( 'Items per page', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 10,
 					),
 					'page'      => array(
-						'description' => __( 'Page number', 'doublescale'),
+						'description' => __( 'Page number', 'doublescale' ),
 						'type'        => 'integer',
 						'default'     => 1,
 					),
@@ -199,7 +198,7 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'status' => array(
-							'description' => __( 'Message status filter', 'doublescale'),
+							'description' => __( 'Message status filter', 'doublescale' ),
 							'type'        => 'string',
 							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed', 'pending', 'delivered', 'scheduled' ),
 							'required'    => false,
@@ -220,12 +219,12 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'id'         => array(
-							'description' => __( 'Campaign ID', 'doublescale'),
+							'description' => __( 'Campaign ID', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'message_id' => array(
-							'description' => __( 'Message/Tracking ID', 'doublescale'),
+							'description' => __( 'Message/Tracking ID', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
@@ -245,40 +244,40 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array(
 						'channel'    => array(
-							'description' => __( 'Channel type', 'doublescale'),
+							'description' => __( 'Channel type', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => CampaignChannel::get_core_channel_strings(),
 						),
 						// Email parameters.
 						'email'      => array(
-							'description' => __( 'Email address (for email channel)', 'doublescale'),
+							'description' => __( 'Email address (for email channel)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						'subject'    => array(
-							'description' => __( 'Email subject (for email channel)', 'doublescale'),
+							'description' => __( 'Email subject (for email channel)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						'from_name'  => array(
-							'description' => __( 'From name (for email channel)', 'doublescale'),
+							'description' => __( 'From name (for email channel)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						'from_email' => array(
-							'description' => __( 'From email (for email channel)', 'doublescale'),
+							'description' => __( 'From email (for email channel)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						'reply_to'   => array(
-							'description' => __( 'Reply-to email (for email channel)', 'doublescale'),
+							'description' => __( 'Reply-to email (for email channel)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						// Sms/Whatsapp parameters.
 						'phone'      => array(
-							'description' => __( 'Phone number (for Sms/Whatsapp channels)', 'doublescale'),
+							'description' => __( 'Phone number (for Sms/Whatsapp channels)', 'doublescale' ),
 							'type'        => 'string',
 						),
 						// Common parameter.
 						'message'    => array(
-							'description' => __( 'Message content (body for email, message for Sms/Whatsapp)', 'doublescale'),
+							'description' => __( 'Message content (body for email, message for Sms/Whatsapp)', 'doublescale' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
@@ -298,12 +297,12 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array(
 						'id'     => array(
-							'description' => __( 'Campaign ID', 'doublescale'),
+							'description' => __( 'Campaign ID', 'doublescale' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
 						'emails' => array(
-							'description' => __( 'Array of email addresses to send test emails to', 'doublescale'),
+							'description' => __( 'Array of email addresses to send test emails to', 'doublescale' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'string' ),
 							'required'    => true,
@@ -324,7 +323,7 @@ class RestCampaignController extends AbstractCampaignController {
 					'permission_callback' => array( $this, 'bulk_delete_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'Array of campaign IDs to delete', 'doublescale'),
+							'description' => __( 'Array of campaign IDs to delete', 'doublescale' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'integer' ),
 							'required'    => true,
@@ -376,7 +375,7 @@ class RestCampaignController extends AbstractCampaignController {
 		if ( $type === CampaignChannel::STR_WHATSAPP ) {
 			return new WP_Error(
 				'whatsapp_campaigns_disabled',
-				__( 'Whatsapp campaigns are not available. WhatsApp messaging is supported for automations and individual contact messaging only.', 'doublescale'),
+				__( 'Whatsapp campaigns are not available. WhatsApp messaging is supported for automations and individual contact messaging only.', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -389,7 +388,7 @@ class RestCampaignController extends AbstractCampaignController {
 		if ( ! in_array( $type, $valid_campaign_channels, true ) ) {
 			return new WP_Error(
 				'invalid_type',
-				__( 'Invalid campaign type. Must be "email" or "sms".', 'doublescale'),
+				__( 'Invalid campaign type. Must be "email" or "sms".', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -526,7 +525,7 @@ class RestCampaignController extends AbstractCampaignController {
 		if ( empty( $channel ) ) {
 			return new WP_Error(
 				'missing_channel',
-				__( 'Channel parameter is required', 'doublescale'),
+				__( 'Channel parameter is required', 'doublescale' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -540,7 +539,7 @@ class RestCampaignController extends AbstractCampaignController {
 		if ( $channel === CampaignChannel::STR_SMS && ! class_exists( \DoubleScale\Pro\Modules\Campaigns\Sms\SmsProcessing::class ) ) {
 			return new WP_Error(
 				'pro_feature_required',
-				__( 'Sms campaigns require Plugin Pro', 'doublescale'),
+				__( 'Sms campaigns require Plugin Pro', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -566,7 +565,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( empty( $email ) ) {
 				return new WP_Error(
 					'missing_email',
-					__( 'Email address is required for email channel', 'doublescale'),
+					__( 'Email address is required for email channel', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -574,7 +573,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( empty( $subject ) ) {
 				return new WP_Error(
 					'missing_subject',
-					__( 'Subject is required for email channel', 'doublescale'),
+					__( 'Subject is required for email channel', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -598,7 +597,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 			if ( ! $result ) {
 				$detail = \DoubleScale\Modules\Emails\Emails::get_last_send_failure_detail();
-				$msg    = __( 'Failed to send test email', 'doublescale');
+				$msg    = __( 'Failed to send test email', 'doublescale' );
 				if ( '' !== $detail ) {
 					$msg .= ' ' . $detail;
 				}
@@ -610,7 +609,7 @@ class RestCampaignController extends AbstractCampaignController {
 			}
 
 			return new WP_REST_Response(
-				array( 'message' => __( 'Test email sent successfully', 'doublescale') ),
+				array( 'message' => __( 'Test email sent successfully', 'doublescale' ) ),
 				200
 			);
 		} catch ( \Exception $e ) {
@@ -631,7 +630,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 			// Validate emails array
 			if ( empty( $emails ) || ! is_array( $emails ) ) {
-				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'doublescale'), array( 'status' => 400 ) );
+				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'doublescale' ), array( 'status' => 400 ) );
 			}
 
 			// Validate all email addresses
@@ -647,7 +646,7 @@ class RestCampaignController extends AbstractCampaignController {
 					'invalid_emails',
 					sprintf(
 						/* translators: %s: comma-separated list of invalid email addresses */
-						__( 'Invalid email address(es): %s', 'doublescale'),
+						__( 'Invalid email address(es): %s', 'doublescale' ),
 						implode( ', ', $invalid_emails )
 					),
 					array( 'status' => 400 )
@@ -657,7 +656,7 @@ class RestCampaignController extends AbstractCampaignController {
 			// Get campaign
 			$campaign = CampaignModel::find( $campaign_id );
 			if ( ! $campaign ) {
-				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Get template ID from campaign
@@ -667,13 +666,13 @@ class RestCampaignController extends AbstractCampaignController {
 			$template_id = $campaign_settings['template_ids'][0] ?? $campaign_settings['templates'][0]['id'] ?? null;
 
 			if ( ! $template_id ) {
-				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Get template
 			$template = TemplateModel::find( $template_id );
 			if ( ! $template ) {
-				return new WP_Error( 'template_not_found', __( 'Template not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'template_not_found', __( 'Template not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Extract template settings
@@ -705,7 +704,7 @@ class RestCampaignController extends AbstractCampaignController {
 				$body_content   = $email_renderer->render_template( $template_id, $contact );
 
 				if ( empty( $body_content ) ) {
-					$failed_count++;
+					++$failed_count;
 					$failed_emails[] = $recipient_email;
 					continue;
 				}
@@ -717,9 +716,9 @@ class RestCampaignController extends AbstractCampaignController {
 				$result = $email_sender->send( $recipient_email, $processed_subject, $body_content );
 
 				if ( $result ) {
-					$sent_count++;
+					++$sent_count;
 				} else {
-					$failed_count++;
+					++$failed_count;
 					$failed_emails[] = $recipient_email;
 				}
 			}
@@ -749,7 +748,7 @@ class RestCampaignController extends AbstractCampaignController {
 						'success'       => true,
 						'message'       => sprintf(
 							/* translators: 1: number of successful sends, 2: number of failures */
-							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'doublescale'),
+							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'doublescale' ),
 							$sent_count,
 							$failed_count
 						),
@@ -764,7 +763,7 @@ class RestCampaignController extends AbstractCampaignController {
 					'send_failed',
 					sprintf(
 						/* translators: %s: comma-separated list of failed email addresses */
-						__( 'Failed to send test email to: %s', 'doublescale'),
+						__( 'Failed to send test email to: %s', 'doublescale' ),
 						implode( ', ', $failed_emails )
 					),
 					array( 'status' => 500 )
@@ -791,7 +790,7 @@ class RestCampaignController extends AbstractCampaignController {
 				return new WP_Error(
 					'missing_phone',
 					/* translators: %s: channel name (e.g., Sms, WhatsApp) */
-					sprintf( __( 'Phone number is required for %s channel', 'doublescale'), $channel ),
+					sprintf( __( 'Phone number is required for %s channel', 'doublescale' ), $channel ),
 					array( 'status' => 400 )
 				);
 			}
@@ -799,7 +798,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( empty( $message ) ) {
 				return new WP_Error(
 					'missing_message',
-					__( 'Message content is required', 'doublescale'),
+					__( 'Message content is required', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -811,7 +810,7 @@ class RestCampaignController extends AbstractCampaignController {
 				return new WP_Error(
 					'provider_not_configured',
 					/* translators: %s: channel name (e.g., Sms, WhatsApp) */
-					sprintf( __( 'No provider configured for %s channel. Please configure it in Settings > Integrations.', 'doublescale'), $channel ),
+					sprintf( __( 'No provider configured for %s channel. Please configure it in Settings > Integrations.', 'doublescale' ), $channel ),
 					array( 'status' => 422 )
 				);
 			}
@@ -830,7 +829,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 			// Add opt-out footer for Sms test messages (match campaign behavior)
 			if ( $channel === CampaignChannel::STR_SMS ) {
-				$footer_text        = apply_filters( 'doublescale_message_opt_out_footer', __( 'Reply STOP to unsubscribe', 'doublescale'), $channel );
+				$footer_text        = apply_filters( 'doublescale_message_opt_out_footer', __( 'Reply STOP to unsubscribe', 'doublescale' ), $channel );
 				$processed_message .= "\n\n" . $footer_text;
 			}
 
@@ -852,7 +851,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 			// Handle result
 			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
-				$error_message = $result['error'] ?? __( 'Failed to send test message', 'doublescale');
+				$error_message = $result['error'] ?? __( 'Failed to send test message', 'doublescale' );
 
 				// Check for provider error details
 				if ( isset( $result['metadata']['error_details'] ) ) {
@@ -872,7 +871,7 @@ class RestCampaignController extends AbstractCampaignController {
 
 			return new WP_REST_Response(
 				/* translators: %s: channel name in uppercase (e.g., Sms, WHATSAPP) */
-				array( 'message' => sprintf( __( 'Test %s sent successfully', 'doublescale'), $channel_upper ) ),
+				array( 'message' => sprintf( __( 'Test %s sent successfully', 'doublescale' ), $channel_upper ) ),
 				200
 			);
 		} catch ( \Exception $e ) {
@@ -888,13 +887,13 @@ class RestCampaignController extends AbstractCampaignController {
 	private function get_default_test_email_content() {
 		$greeting = sprintf(
 			/* translators: %1$s: first name merge tag, %2$s: last name merge tag */
-			__( 'Hi %1$s %2$s,', 'doublescale'),
+			__( 'Hi %1$s %2$s,', 'doublescale' ),
 			'{{contact:first_name}}',
 			'{{contact:last_name}}'
 		);
-		$thank_you       = __( 'Thank you for subscribing to our updates.', 'doublescale');
+		$thank_you       = __( 'Thank you for subscribing to our updates.', 'doublescale' );
 		$unsubscribe_msg = __( "Don't want to stay in the loop? We'll be sad to see you go, but you can click here to", 'doublescale' );
-		$unsubscribe_txt = __( 'unsubscribe', 'doublescale');
+		$unsubscribe_txt = __( 'unsubscribe', 'doublescale' );
 
 		$default_content = '<div><p>' . esc_html( $greeting ) . '</p><p>' . esc_html( $thank_you ) . '</p><p>' . esc_html( $unsubscribe_msg ) . ' <a href="{{contact:unsubscribe_link}}" target="_blank">' . esc_html( $unsubscribe_txt ) . '</a>.</p></div>';
 
@@ -914,7 +913,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( empty( $campaign_ids ) || ! is_array( $campaign_ids ) ) {
 				return new WP_Error(
 					'invalid_ids',
-					__( 'Invalid campaign IDs provided', 'doublescale'),
+					__( 'Invalid campaign IDs provided', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -925,7 +924,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( $campaigns->isEmpty() ) {
 				return new WP_Error(
 					'campaigns_not_found',
-					__( 'No campaigns found with the provided IDs', 'doublescale'),
+					__( 'No campaigns found with the provided IDs', 'doublescale' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -936,7 +935,7 @@ class RestCampaignController extends AbstractCampaignController {
 			return new WP_REST_Response(
 				array(
 					'deleted' => count( $campaign_ids ),
-					'message' => __( 'Campaigns deleted successfully', 'doublescale'),
+					'message' => __( 'Campaigns deleted successfully', 'doublescale' ),
 				),
 				200
 			);
@@ -971,7 +970,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( ! $campaign ) {
 				return new WP_Error(
 					'campaign_not_found',
-					__( 'Campaign not found', 'doublescale'),
+					__( 'Campaign not found', 'doublescale' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -981,7 +980,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( ! $tracking ) {
 				return new WP_Error(
 					'message_not_found',
-					__( 'Message not found', 'doublescale'),
+					__( 'Message not found', 'doublescale' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -990,7 +989,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( (int) $tracking->source_id !== $campaign_id || (int) $tracking->source_type !== MessageSourceTypes::CAMPAIGN ) {
 				return new WP_Error(
 					'invalid_message',
-					__( 'Message does not belong to this campaign', 'doublescale'),
+					__( 'Message does not belong to this campaign', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 			}
@@ -1000,7 +999,7 @@ class RestCampaignController extends AbstractCampaignController {
 			if ( ! $contact ) {
 				return new WP_Error(
 					'contact_not_found',
-					__( 'Contact not found', 'doublescale'),
+					__( 'Contact not found', 'doublescale' ),
 					array( 'status' => 404 )
 				);
 			}
@@ -1020,7 +1019,7 @@ class RestCampaignController extends AbstractCampaignController {
 					} else {
 						return new WP_Error(
 							'pro_feature_required',
-							__( 'Sms campaigns require Plugin Pro', 'doublescale'),
+							__( 'Sms campaigns require Plugin Pro', 'doublescale' ),
 							array( 'status' => 403 )
 						);
 					}
@@ -1032,7 +1031,7 @@ class RestCampaignController extends AbstractCampaignController {
 					} else {
 						return new WP_Error(
 							'pro_feature_required',
-							__( 'Whatsapp campaigns require Plugin Pro', 'doublescale'),
+							__( 'Whatsapp campaigns require Plugin Pro', 'doublescale' ),
 							array( 'status' => 403 )
 						);
 					}
@@ -1040,7 +1039,7 @@ class RestCampaignController extends AbstractCampaignController {
 				default:
 					return new WP_Error(
 						'invalid_campaign_type',
-						__( 'Invalid campaign type', 'doublescale'),
+						__( 'Invalid campaign type', 'doublescale' ),
 						array( 'status' => 400 )
 					);
 			}
@@ -1051,7 +1050,7 @@ class RestCampaignController extends AbstractCampaignController {
 			return rest_ensure_response(
 				array(
 					'success' => true,
-					'message' => __( 'Message queued for resending', 'doublescale'),
+					'message' => __( 'Message queued for resending', 'doublescale' ),
 				)
 			);
 		} catch ( \Exception $e ) {
@@ -1082,7 +1081,7 @@ class RestCampaignController extends AbstractCampaignController {
 			// Get campaign to determine channel type
 			$campaign = CampaignModel::find( $campaign_id );
 			if ( ! $campaign ) {
-				return new WP_Error( 'not_found', __( 'Campaign not found', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Campaign not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			// Determine mode integer based on campaign type
@@ -1147,5 +1146,4 @@ class RestCampaignController extends AbstractCampaignController {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
-
 }

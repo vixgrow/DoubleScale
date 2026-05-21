@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Fields;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Fields\Types\RadioField;
@@ -98,46 +97,46 @@ class ContactFields {
 	private function setup_fields() {
 		$this->fields = array(
 			'first_name' => array(
-				'name'     => __( 'First Name', 'doublescale'),
+				'name'     => __( 'First Name', 'doublescale' ),
 				'type'     => $this->types['text'],
 				'required' => true,
 			),
 			'last_name'  => array(
-				'name'     => __( 'Last Name', 'doublescale'),
+				'name'     => __( 'Last Name', 'doublescale' ),
 				'type'     => $this->types['text'],
 				'required' => true,
 			),
 			'email'      => array(
-				'name'     => __( 'Email', 'doublescale'),
+				'name'     => __( 'Email', 'doublescale' ),
 				'type'     => $this->types['email'],
 				'required' => true,
 			),
 			'address_1'  => array(
-				'name' => __( 'Address 1', 'doublescale'),
+				'name' => __( 'Address 1', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 			'address_2'  => array(
-				'name' => __( 'Address 2', 'doublescale'),
+				'name' => __( 'Address 2', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 			'city'       => array(
-				'name' => __( 'City', 'doublescale'),
+				'name' => __( 'City', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 			'state'      => array(
-				'name' => __( 'State', 'doublescale'),
+				'name' => __( 'State', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 			'country'    => array(
-				'name' => __( 'Country', 'doublescale'),
+				'name' => __( 'Country', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 			'zip'        => array(
-				'name' => __( 'Zip', 'doublescale'),
+				'name' => __( 'Zip', 'doublescale' ),
 				'type' => $this->types['number'],
 			),
 			'phone'      => array(
-				'name' => __( 'Phone', 'doublescale'),
+				'name' => __( 'Phone', 'doublescale' ),
 				'type' => $this->types['text'],
 			),
 		);
@@ -167,7 +166,7 @@ class ContactFields {
 	/**
 	 * Get field value
 	 *
-	 * @param string        $field Field.
+	 * @param string       $field Field.
 	 * @param ContactModel $contact Contact Model.
 	 *
 	 * @return mixed

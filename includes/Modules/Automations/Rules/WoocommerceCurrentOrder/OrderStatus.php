@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceCurrentOrder;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -72,8 +71,8 @@ class OrderStatus extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'equal'     => __( 'Equal', 'doublescale'),
-			'not_equal' => __( 'Not equal', 'doublescale'),
+			'equal'     => __( 'Equal', 'doublescale' ),
+			'not_equal' => __( 'Not equal', 'doublescale' ),
 		);
 	}
 
@@ -85,7 +84,7 @@ class OrderStatus extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		 return Order_Status_Constant::get_all();
+		return Order_Status_Constant::get_all();
 	}
 
 	/**
@@ -116,7 +115,7 @@ class OrderStatus extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
@@ -132,7 +131,7 @@ class OrderStatus extends Rule {
 				return $value !== $rule_value;
 			default:
 				return false;
-		};
+		}
 	}
 }
 

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\User;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -23,8 +22,8 @@ use DoubleScale\Core\Models\UserModel;
 /**
  * Username class
  */
-class Username extends Rule
-{
+class Username extends Rule {
+
 
 	/**
 	 * Name
@@ -71,12 +70,11 @@ class Username extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options($keyword = '')
-	{
-		$users   = UserModel::where('user_login', 'like', '%' . $keyword . '%')->get();
+	public function get_options( $keyword = '' ) {
+		$users   = UserModel::where( 'user_login', 'like', '%' . $keyword . '%' )->get();
 		$options = array();
-		foreach ($users as $user) {
-			$options[$user->ID] = $user->user_login;
+		foreach ( $users as $user ) {
+			$options[ $user->ID ] = $user->user_login;
 		}
 
 		return $options;
@@ -91,10 +89,9 @@ class Username extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
-		$user_id = $automation_contact->get_data('user_id', null);
-		if (! $user_id) {
+	public function get_value( $automation_contact ) {
+		$user_id = $automation_contact->get_data( 'user_id', null );
+		if ( ! $user_id ) {
 			return null;
 		}
 
@@ -102,4 +99,4 @@ class Username extends Rule
 	}
 }
 
-RulesManager::instance()->register(new Username());
+RulesManager::instance()->register( new Username() );

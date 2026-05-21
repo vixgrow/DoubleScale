@@ -197,7 +197,7 @@ function doublescale_build_modules_list_payload( array $all ): array {
 		if ( null === $meta ) {
 			continue;
 		}
-		$enabled = doublescale_phantom_module_is_enabled( $slug, $stored );
+		$enabled  = doublescale_phantom_module_is_enabled( $slug, $stored );
 		$result[] = array(
 			'slug'          => $slug,
 			'label'         => $meta['label'],

@@ -48,15 +48,15 @@ class Account_API {
 	public function send( $args ) {
 		$response = wp_remote_request(
 			'https://console.sendlayer.com/api/v1/email',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Accept'        => 'application/json',
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $this->api_key,
-				],
+				),
 				'body'    => wp_json_encode( $args ),
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {

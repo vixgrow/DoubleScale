@@ -229,89 +229,89 @@ class RestBookingController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'booking',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'           => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-				 'hash_id'      => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-				 'event_id'     => array(
-					 'description' => __( 'Event ID.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'absint',
-					 ),
-				 ),
-				 'contact_id'   => array(
-					 'description' => __( 'Contact ID.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'start_date'   => array(
-					 'description' => __( 'Start date.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'slot_time'    => array(
-					 'description' => __( 'Slot time.', 'doublescale' ),
-					 'type'        => 'integer',
-					 'context'     => array( 'view', 'edit' ),
-					 'required'    => true,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
-				 'source'       => array(
-					 'description' => __( 'Source.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'status'       => array(
-					 'description' => __( 'Status.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'cancelled_by' => array(
-					 'description' => __( 'Cancelled by.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'event_url'    => array(
-					 'description' => __( 'Event URL.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-				 ),
-				 'created_at'   => array(
-					 'description' => __( 'Creation time.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-				 'updated_at'   => array(
-					 'description' => __( 'Update time.', 'doublescale' ),
-					 'type'        => 'string',
-					 'context'     => array( 'view', 'edit' ),
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'booking',
+			'type'       => 'object',
+			'properties' => array(
+				'id'           => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'hash_id'      => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'event_id'     => array(
+					'description' => __( 'Event ID.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'contact_id'   => array(
+					'description' => __( 'Contact ID.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'start_date'   => array(
+					'description' => __( 'Start date.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'slot_time'    => array(
+					'description' => __( 'Slot time.', 'doublescale' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'source'       => array(
+					'description' => __( 'Source.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'status'       => array(
+					'description' => __( 'Status.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'cancelled_by' => array(
+					'description' => __( 'Cancelled by.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'event_url'    => array(
+					'description' => __( 'Event URL.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'created_at'   => array(
+					'description' => __( 'Creation time.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'updated_at'   => array(
+					'description' => __( 'Update time.', 'doublescale' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -1205,7 +1205,7 @@ class RestBookingController extends RestController {
 				// Make sure we're only counting days within our target month
 				if ( gmdate( 'Y-m', strtotime( $booking->created_at ) ) === "$year-$month" ) {
 					// Increment the "booked" counter for the creation date
-					$days_with_data[ (string) $created_day ]['booked']++;
+					++$days_with_data[ (string) $created_day ]['booked'];
 				}
 
 				// Make sure we're only counting days within our target month
@@ -1213,10 +1213,10 @@ class RestBookingController extends RestController {
 					// Increment status counters for the appointment date
 					switch ( $booking->status ) {
 						case $this->STATUS_COMPLETED:
-							$days_with_data[ (string) $booking_day ]['completed']++;
+							++$days_with_data[ (string) $booking_day ]['completed'];
 							break;
 						case $this->STATUS_CANCELLED:
-							$days_with_data[ (string) $booking_day ]['cancelled']++;
+							++$days_with_data[ (string) $booking_day ]['cancelled'];
 							break;
 					}
 				}

@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Triggers\Link;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;

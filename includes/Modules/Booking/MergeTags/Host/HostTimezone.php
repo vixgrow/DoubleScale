@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Host;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
@@ -45,12 +44,11 @@ class HostTimezone extends MergeTag {
 	 * Get value
 	 *
 	 * @param BookingModel $booking
-	 * @param array         $options
+	 * @param array        $options
 	 * @return string
 	 */
-	public function get_value($booking, $options = array())
-	{
-		return isset($booking) && isset($booking->calendar) && isset($booking->calendar->timezone)
+	public function get_value( $booking, $options = array() ) {
+		return isset( $booking ) && isset( $booking->calendar ) && isset( $booking->calendar->timezone )
 			? $booking->calendar->timezone
 			: '';
 	}

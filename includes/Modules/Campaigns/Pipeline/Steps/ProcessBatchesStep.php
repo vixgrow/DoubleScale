@@ -14,7 +14,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Pipeline\Steps;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,8 +52,8 @@ class ProcessBatchesStep implements PipelineStepInterface {
 			return;
 		}
 
-		$batch_size  = $this->strategy->get_batch_size() ?: $ctx->batch_size;
-		$loop_delay  = $this->strategy->get_loop_delay_microseconds();
+		$batch_size = $this->strategy->get_batch_size() ?: $ctx->batch_size;
+		$loop_delay = $this->strategy->get_loop_delay_microseconds();
 
 		while (
 			$ctx->get_execution_time() < $ctx->max_execution_time

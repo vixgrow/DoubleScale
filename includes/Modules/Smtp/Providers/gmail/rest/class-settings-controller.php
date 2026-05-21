@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -29,33 +28,33 @@ class Settings_Controller extends Abstract_Settings_Controller {
 	 * @return array
 	 */
 	public function get_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'settings',
 			'type'                 => 'object',
-			'context'              => [ 'view' ],
-			'properties'           => [
-				'app' => [
+			'context'              => array( 'view' ),
+			'properties'           => array(
+				'app' => array(
 					'type'       => 'object',
-					'context'    => [ 'view' ],
-					'properties' => [
-						'client_id'     => [
+					'context'    => array( 'view' ),
+					'properties' => array(
+						'client_id'     => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-						'client_secret' => [
+							'context'  => array( 'view' ),
+						),
+						'client_secret' => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-					],
-				],
-			],
-			'additionalProperties' => [
-				'context' => [],
-			],
-		];
+							'context'  => array( 'view' ),
+						),
+					),
+				),
+			),
+			'additionalProperties' => array(
+				'context' => array(),
+			),
+		);
 
 		return rest_default_additional_properties_to_false( $schema );
 	}
@@ -106,18 +105,18 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				throw new \Exception( $result->get_error_message() );
 			}
 
-			$options = [
-				[
+			$options = array(
+				array(
 					'value' => $result->emailAddress,
 					'label' => $result->emailAddress,
-				],
-			];
+				),
+			);
 
 			return new \WP_REST_Response(
-				[
+				array(
 					'success' => true,
 					'options' => $options,
-				],
+				),
 				200
 			);
 		} catch ( \Exception $e ) {
@@ -125,10 +124,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Gmail Getting User Profile Error', 'doublescale' ),
 				array(
 					'code'  => 'gmail_get_user_profile_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 

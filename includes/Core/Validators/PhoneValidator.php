@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Validators;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -66,14 +65,14 @@ class PhoneValidator {
 		if ( empty( $phone ) ) {
 			return array(
 				'valid' => false,
-				'error' => __( 'Phone number is required', 'doublescale'),
+				'error' => __( 'Phone number is required', 'doublescale' ),
 			);
 		}
 
 		if ( ! self::is_valid( $phone ) ) {
 			$error_message = sprintf(
 				/* translators: %s: example phone number */
-				__( 'Invalid phone number format. Please use E.164 format (e.g., %s)', 'doublescale'),
+				__( 'Invalid phone number format. Please use E.164 format (e.g., %s)', 'doublescale' ),
 				'+1234567890'
 			);
 
@@ -143,7 +142,7 @@ class PhoneValidator {
 	 * @return string Human-readable format description
 	 */
 	public static function get_format_description() {
-		return __( 'E.164 format: +[country code][number] (e.g., +1234567890)', 'doublescale');
+		return __( 'E.164 format: +[country code][number] (e.g., +1234567890)', 'doublescale' );
 	}
 
 	/**

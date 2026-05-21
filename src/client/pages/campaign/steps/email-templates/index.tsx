@@ -433,7 +433,8 @@ const EmailTemplatesStep: React.FC = () => {
 								</p>
 							</div>
 						</div>
-						<div className="flex gap-4 flex-shrink-0">
+					<div className="flex gap-4 flex-shrink-0">
+						{configApi.isAiConfigured() && (
 							<Button
 								variant="secondary"
 								onClick={() => setAiBuilderVisible(true)}
@@ -442,7 +443,8 @@ const EmailTemplatesStep: React.FC = () => {
 								<AiIcon width={32} height={32} />
 								{__('Generate With AI', 'doublescale')}
 							</Button>
-							<Button
+						)}
+						<Button
 								variant="default"
 								onClick={handleStartFromScratch}
 								className="rounded-md"

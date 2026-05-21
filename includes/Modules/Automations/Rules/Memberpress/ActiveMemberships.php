@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Memberpress;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Active Memberships class
  */
-class ActiveMemberships extends Rule
-{
+class ActiveMemberships extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -59,13 +58,12 @@ class ActiveMemberships extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'includes'         => __('includes', 'doublescale'),
-			'not_includes_in'  => __('Does not include (in any)', 'doublescale'),
-			'includes_all'     => __('includes all', 'doublescale'),
-			'not_includes_all' => __('includes none of (match all)', 'doublescale'),
+			'includes'         => __( 'includes', 'doublescale' ),
+			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale' ),
+			'includes_all'     => __( 'includes all', 'doublescale' ),
+			'not_includes_all' => __( 'includes none of (match all)', 'doublescale' ),
 		);
 	}
 
@@ -76,11 +74,10 @@ class ActiveMemberships extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
+	public function get_options() {
 		$options = array();
 
-		if (! defined('MEPR_PLUGIN_NAME')) {
+		if ( ! defined( 'MEPR_PLUGIN_NAME' ) ) {
 			return $options;
 		}
 
@@ -92,13 +89,13 @@ class ActiveMemberships extends Rule
 			)
 		);
 
-		if (empty($memberships) || ! is_array($memberships)) {
+		if ( empty( $memberships ) || ! is_array( $memberships ) ) {
 			return $options;
 		}
 
-		foreach ($memberships as $membership) {
-			if (is_object($membership) && isset($membership->ID)) {
-				$options[ (int) $membership->ID ] = wp_kses_post(get_the_title($membership->ID));
+		foreach ( $memberships as $membership ) {
+			if ( is_object( $membership ) && isset( $membership->ID ) ) {
+				$options[ (int) $membership->ID ] = wp_kses_post( get_the_title( $membership->ID ) );
 			}
 		}
 
@@ -114,27 +111,26 @@ class ActiveMemberships extends Rule
 	 *
 	 * @return array Array of active membership IDs
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
-		if (! $contact || empty($contact->email)) {
+		if ( ! $contact || empty( $contact->email ) ) {
 			return array();
 		}
 
-		$user = get_user_by('email', $contact->email);
-		if (! $user) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return array();
 		}
 
-		if (! defined('MEPR_PLUGIN_NAME') || ! class_exists('MeprUser')) {
+		if ( ! defined( 'MEPR_PLUGIN_NAME' ) || ! class_exists( 'MeprUser' ) ) {
 			return array();
 		}
 
-		$mepr_user = new \MeprUser($user->ID);
-		$active    = $mepr_user->active_product_subscriptions('ids');
+		$mepr_user = new \MeprUser( $user->ID );
+		$active    = $mepr_user->active_product_subscriptions( 'ids' );
 
-		return array_map('intval', array_unique(array_filter($active)));
+		return array_map( 'intval', array_unique( array_filter( $active ) ) );
 	}
 
 	/**
@@ -143,34 +139,33 @@ class ActiveMemberships extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$active_memberships = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$active_memberships = $this->get_value( $automation_contact );
 		$operator           = $rule['operator'] ?? '';
 		$rule_memberships   = $rule['value'] ?? array();
 
-		if (! is_array($rule_memberships)) {
+		if ( ! is_array( $rule_memberships ) ) {
 			$rule_memberships = array();
 		}
 
-		$rule_memberships = array_map('intval', $rule_memberships);
+		$rule_memberships = array_map( 'intval', $rule_memberships );
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'includes':
-				return ! empty(array_intersect($active_memberships, $rule_memberships));
+				return ! empty( array_intersect( $active_memberships, $rule_memberships ) );
 
 			case 'not_includes_in':
-				return empty(array_intersect($active_memberships, $rule_memberships));
+				return empty( array_intersect( $active_memberships, $rule_memberships ) );
 
 			case 'includes_all':
-				return empty(array_diff($rule_memberships, $active_memberships));
+				return empty( array_diff( $rule_memberships, $active_memberships ) );
 
 			case 'not_includes_all':
-				return ! empty(array_diff($rule_memberships, $active_memberships));
+				return ! empty( array_diff( $rule_memberships, $active_memberships ) );
 
 			default:
 				return false;
@@ -181,8 +176,8 @@ class ActiveMemberships extends Rule
 add_action(
 	'init',
 	function () {
-		if (defined('MEPR_PLUGIN_NAME')) {
-			RulesManager::instance()->register(new ActiveMemberships());
+		if ( defined( 'MEPR_PLUGIN_NAME' ) ) {
+			RulesManager::instance()->register( new ActiveMemberships() );
 		}
 	},
 	99

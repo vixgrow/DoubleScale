@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -87,7 +86,7 @@ final class Loader {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationModel|array|int $automation Either the automation model (sync), array with meta_id, or meta_id int (async).
-	 * @param array|null                 $args       The trigger arguments (only for sync calls).
+	 * @param array|null                $args       The trigger arguments (only for sync calls).
 	 *
 	 * @return void
 	 */
@@ -131,7 +130,7 @@ final class Loader {
 			$process_automation->start();
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Process Automations Error', 'doublescale'),
+				__( 'Process Automations Error', 'doublescale' ),
 				array(
 					'code'  => 'process_automations_error',
 					'error' => array(
@@ -150,8 +149,8 @@ final class Loader {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationModel|int $automation The automation model or meta_id integer.
-	 * @param int                  $step_id      The step.
-	 * @param int                  $automation_contact_id      The automation contact.
+	 * @param int                 $step_id      The step.
+	 * @param int                 $automation_contact_id      The automation contact.
 	 * @return void
 	 */
 	public function process_automation_step( $automation, $step_id = null, $automation_contact_id = null ) {
@@ -194,7 +193,7 @@ final class Loader {
 			$automation_process->process_step( $step, $automation_contact_id );
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Process Automation Step Error: ', 'doublescale'),
+				__( 'Process Automation Step Error: ', 'doublescale' ),
 				array(
 					'code'  => 'process_automation_step',
 					'error' => array(
@@ -213,7 +212,7 @@ final class Loader {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationStepModel $step The automation model.
-	 * @param int                   $automation_contact_id The automation contact ID.
+	 * @param int                 $automation_contact_id The automation contact ID.
 	 *
 	 * @return void
 	 */
@@ -250,7 +249,7 @@ final class Loader {
 			}
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'Process Automation Goal Error: ', 'doublescale'),
+				__( 'Process Automation Goal Error: ', 'doublescale' ),
 				array(
 					'code'  => 'process_automation_goal',
 					'error' => array(

@@ -77,7 +77,7 @@ class Settings {
 			// Shallow merge replaces the whole `app` array — an empty client_secret from the UI
 			// (masked field) must not wipe the stored secret or Google token exchange fails.
 			if ( isset( $new_settings['app'] ) && is_array( $new_settings['app'] ) ) {
-				$prev_app = isset( $previous_settings['app'] ) && is_array( $previous_settings['app'] )
+				$prev_app            = isset( $previous_settings['app'] ) && is_array( $previous_settings['app'] )
 					? $previous_settings['app']
 					: array();
 				$new_settings['app'] = $this->merge_oauth_app_credentials( $prev_app, $new_settings['app'] );

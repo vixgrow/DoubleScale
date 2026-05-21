@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Email class
  */
-class Email extends Rule
-{
+class Email extends Rule {
+
 
 	/**
 	 * Name
@@ -79,11 +78,10 @@ class Email extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 		return $contact->email;
 	}
 }
 
-RulesManager::instance()->register(new Email());
+RulesManager::instance()->register( new Email() );

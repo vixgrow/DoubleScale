@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST\Traits;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Provider;
@@ -90,5 +89,4 @@ trait Account_Controller_Gettable {
 	public function get_item_permissions_check( $request ) {
 		return Settings::user_can_manage_smtp_rest();
 	}
-
 }

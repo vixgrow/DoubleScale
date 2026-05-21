@@ -41,8 +41,8 @@ abstract class API {
 	}
 
 	/**
-	 * @param string          $path Path (may include leading slash).
-	 * @param array<mixed>    $args Query args for GET.
+	 * @param string       $path Path (may include leading slash).
+	 * @param array<mixed> $args Query args for GET.
 	 * @return array{success: bool, code: mixed, data: mixed}
 	 */
 	public function get( $path, $args = array() ) {
@@ -147,9 +147,9 @@ abstract class API {
 	abstract public function request_remote( $method, $path, $body = null );
 
 	/**
-	 * @param bool               $success Outcome.
-	 * @param int|string|null    $code    HTTP status or null.
-	 * @param mixed              $data    Decoded body or error payload.
+	 * @param bool            $success Outcome.
+	 * @param int|string|null $code    HTTP status or null.
+	 * @param mixed           $data    Decoded body or error payload.
 	 * @return array{success: bool, code: mixed, data: mixed}
 	 */
 	public function prepare_response( $success, $code, $data ) {

@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -132,5 +131,4 @@ class Account_Controller extends RestController {
 	public function delete_item_permissions_check( $request ) {
 		return Settings::user_can_manage_smtp_rest();
 	}
-
 }

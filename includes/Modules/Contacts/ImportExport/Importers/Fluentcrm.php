@@ -58,7 +58,7 @@ class Fluentcrm extends Importer {
 	 * Run importer
 	 */
 	public function run() {
-		 global $wpdb;
+		global $wpdb;
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are from Fluentcrm plugin tables.
 
@@ -290,21 +290,21 @@ class Fluentcrm extends Importer {
 		$fields = array(
 			'lists_mapping'         => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists Mapping', 'doublescale'),
+				'label'   => __( 'Lists Mapping', 'doublescale' ),
 				'options' => $this->get_lists(),
-				'tooltip' => __( 'Map Fluentcrm lists to Plugin lists. For each Fluentcrm list, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin lists to add contacts to (useful for renaming or consolidating lists), or 2) "Auto Create" - Automatically create a new Plugin list with the same name as the Fluentcrm list (useful for preserving your original list structure). Contacts will only be added to lists they belonged to in Fluentcrm.', 'doublescale'),
+				'tooltip' => __( 'Map Fluentcrm lists to Plugin lists. For each Fluentcrm list, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin lists to add contacts to (useful for renaming or consolidating lists), or 2) "Auto Create" - Automatically create a new Plugin list with the same name as the Fluentcrm list (useful for preserving your original list structure). Contacts will only be added to lists they belonged to in Fluentcrm.', 'doublescale' ),
 			),
 			'tags_mapping'          => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags Mapping', 'doublescale'),
+				'label'   => __( 'Tags Mapping', 'doublescale' ),
 				'options' => $this->get_tags(),
-				'tooltip' => __( 'Map Fluentcrm tags to Plugin tags. For each Fluentcrm tag, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin tags to apply to contacts (useful for renaming or consolidating tags), or 2) "Auto Create" - Automatically create a new Plugin tag with the same name as the Fluentcrm tag (useful for preserving your original tag structure). Contacts will only receive tags they had in Fluentcrm.', 'doublescale'),
+				'tooltip' => __( 'Map Fluentcrm tags to Plugin tags. For each Fluentcrm tag, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin tags to apply to contacts (useful for renaming or consolidating tags), or 2) "Auto Create" - Automatically create a new Plugin tag with the same name as the Fluentcrm tag (useful for preserving your original tag structure). Contacts will only receive tags they had in Fluentcrm.', 'doublescale' ),
 			),
 			'custom_fields_mapping' => array(
 				'type'    => 'custom_fields_mapping',
-				'label'   => __( 'Custom Fields Mapping', 'doublescale'),
+				'label'   => __( 'Custom Fields Mapping', 'doublescale' ),
 				'options' => $this->get_custom_fields(),
-				'tooltip' => __( 'Map Fluentcrm custom fields to Plugin custom fields. For each Fluentcrm custom field, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin custom fields to map the data to (useful for renaming or consolidating fields), or 2) "Auto Create" - Automatically create a new Plugin custom field with the same name as the Fluentcrm field (useful for preserving your original field structure). Only contacts with values in these fields will have them imported.', 'doublescale'),
+				'tooltip' => __( 'Map Fluentcrm custom fields to Plugin custom fields. For each Fluentcrm custom field, you can either: 1) "Assign to (Plugin)" - Choose one or more existing Plugin custom fields to map the data to (useful for renaming or consolidating fields), or 2) "Auto Create" - Automatically create a new Plugin custom field with the same name as the Fluentcrm field (useful for preserving your original field structure). Only contacts with values in these fields will have them imported.', 'doublescale' ),
 			),
 		);
 		return $fields;

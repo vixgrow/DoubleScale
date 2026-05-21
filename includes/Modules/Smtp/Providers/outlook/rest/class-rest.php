@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\REST as Abstract_REST;
@@ -42,7 +41,7 @@ class REST extends Abstract_REST {
 	protected function get_rest_data( $settings ) {
 		$rest_data = parent::get_rest_data( $settings );
 
-		$app              = $this->mailer->settings->get( 'app' ) ?? [];
+		$app              = $this->mailer->settings->get( 'app' ) ?? array();
 		$rest_data['app'] = $app;
 		return $rest_data;
 	}

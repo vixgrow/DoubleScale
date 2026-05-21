@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Logger\Migrations;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Database\Migration;

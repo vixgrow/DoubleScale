@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -80,14 +79,14 @@ abstract class Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'               => __( 'Is', 'doublescale'),
-			'is_not'           => __( 'Is not', 'doublescale'),
-			'contains'         => __( 'Contains', 'doublescale'),
-			'does_not_contain' => __( 'Does not contain', 'doublescale'),
-			'starts_with'      => __( 'Starts with', 'doublescale'),
-			'ends_with'        => __( 'Ends with', 'doublescale'),
-			'is_empty'         => __( 'Is empty', 'doublescale'),
-			'is_not_empty'     => __( 'Is not empty', 'doublescale'),
+			'is'               => __( 'Is', 'doublescale' ),
+			'is_not'           => __( 'Is not', 'doublescale' ),
+			'contains'         => __( 'Contains', 'doublescale' ),
+			'does_not_contain' => __( 'Does not contain', 'doublescale' ),
+			'starts_with'      => __( 'Starts with', 'doublescale' ),
+			'ends_with'        => __( 'Ends with', 'doublescale' ),
+			'is_empty'         => __( 'Is empty', 'doublescale' ),
+			'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 		);
 	}
 

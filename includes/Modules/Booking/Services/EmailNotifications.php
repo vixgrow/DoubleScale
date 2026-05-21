@@ -53,13 +53,13 @@ final class EmailNotifications {
 	 * transport cannot abort the booking-create response.
 	 */
 	public function init_hooks(): void {
-		add_action( 'doublescale_booking_created',     array( $this, 'on_created' ), 10, 2 );
-		add_action( 'doublescale_booking_cancelled',   array( $this, 'on_cancelled' ), 10, 2 );
+		add_action( 'doublescale_booking_created', array( $this, 'on_created' ), 10, 2 );
+		add_action( 'doublescale_booking_cancelled', array( $this, 'on_cancelled' ), 10, 2 );
 		add_action( 'doublescale_booking_rescheduled', array( $this, 'on_rescheduled' ), 10, 2 );
-		add_action( 'doublescale_booking_confirmed',   array( $this, 'on_confirmed' ), 10, 2 );
-		add_action( 'doublescale_booking_pending',     array( $this, 'on_pending' ), 10, 2 );
-		add_action( 'doublescale_booking_rejected',    array( $this, 'on_rejected' ), 10, 2 );
-		add_action( 'doublescale_booking_waiting_list_joined',    array( $this, 'on_waiting_list_joined' ), 10, 2 );
+		add_action( 'doublescale_booking_confirmed', array( $this, 'on_confirmed' ), 10, 2 );
+		add_action( 'doublescale_booking_pending', array( $this, 'on_pending' ), 10, 2 );
+		add_action( 'doublescale_booking_rejected', array( $this, 'on_rejected' ), 10, 2 );
+		add_action( 'doublescale_booking_waiting_list_joined', array( $this, 'on_waiting_list_joined' ), 10, 2 );
 		add_action( 'doublescale_booking_waiting_list_available', array( $this, 'on_waiting_list_available' ), 10, 2 );
 
 		add_action( 'init', array( $this, 'send_reminder_emails' ) );
@@ -72,64 +72,88 @@ final class EmailNotifications {
 	// ------------------------------------------------------------------
 
 	public function on_created( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_booking_created_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_booking_created_email( $b );
+			}
+		);
 	}
 
 	public function on_cancelled( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) use ( $context ) {
-			$actor = is_array( $context ) ? ( $context['actor'] ?? '' ) : '';
-			// Email content differs by who initiated the cancel. For system-driven
-			// cancellations (payment timeout / deletion) we fall through to the
-			// attendee variant since there's no organizer action to acknowledge.
-			if ( 'organizer' === $actor ) {
-				$this->send_organizer_cancelled_email( $b );
-			} else {
-				$this->send_attendee_cancelled_email( $b );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) use ( $context ) {
+				$actor = is_array( $context ) ? ( $context['actor'] ?? '' ) : '';
+				// Email content differs by who initiated the cancel. For system-driven
+				// cancellations (payment timeout / deletion) we fall through to the
+				// attendee variant since there's no organizer action to acknowledge.
+				if ( 'organizer' === $actor ) {
+					$this->send_organizer_cancelled_email( $b );
+				} else {
+					$this->send_attendee_cancelled_email( $b );
+				}
 			}
-		} );
+		);
 	}
 
 	public function on_rescheduled( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) use ( $context ) {
-			$actor = is_array( $context ) ? ( $context['actor'] ?? '' ) : '';
-			if ( 'organizer' === $actor ) {
-				$this->send_organizer_rescheduled_email( $b );
-			} else {
-				$this->send_attendee_rescheduled_email( $b );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) use ( $context ) {
+				$actor = is_array( $context ) ? ( $context['actor'] ?? '' ) : '';
+				if ( 'organizer' === $actor ) {
+					$this->send_organizer_rescheduled_email( $b );
+				} else {
+					$this->send_attendee_rescheduled_email( $b );
+				}
 			}
-		} );
+		);
 	}
 
 	public function on_confirmed( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_booking_confirmed_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_booking_confirmed_email( $b );
+			}
+		);
 	}
 
 	public function on_pending( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_booking_pending_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_booking_pending_email( $b );
+			}
+		);
 	}
 
 	public function on_rejected( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_booking_rejected_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_booking_rejected_email( $b );
+			}
+		);
 	}
 
 	public function on_waiting_list_joined( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_waiting_list_confirmation_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_waiting_list_confirmation_email( $b );
+			}
+		);
 	}
 
 	public function on_waiting_list_available( $booking, $context = array() ): void {
-		$this->safely( $booking, function ( BookingModel $b ) {
-			$this->send_waiting_list_availability_email( $b );
-		} );
+		$this->safely(
+			$booking,
+			function ( BookingModel $b ) {
+				$this->send_waiting_list_availability_email( $b );
+			}
+		);
 	}
 
 	/**
@@ -843,9 +867,9 @@ final class EmailNotifications {
 			return null;
 		}
 
-		$summary  = $booking->event->name ?? __( 'Booking', 'doublescale' );
-		$location = is_string( $booking->location ) ? $booking->location : '';
-		$uid      = sprintf( 'doublescale-booking-%d@%s', (int) $booking->id, wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$summary   = $booking->event->name ?? __( 'Booking', 'doublescale' );
+		$location  = is_string( $booking->location ) ? $booking->location : '';
+		$uid       = sprintf( 'doublescale-booking-%d@%s', (int) $booking->id, wp_parse_url( home_url(), PHP_URL_HOST ) );
 		$organizer = '';
 		if ( $booking->calendar && $booking->calendar->user ) {
 			$organizer = sprintf( 'ORGANIZER;CN=%s:mailto:%s', $booking->calendar->user->display_name, $booking->calendar->user->user_email );

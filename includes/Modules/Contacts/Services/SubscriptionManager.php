@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -101,7 +100,7 @@ class SubscriptionManager {
 			<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
 			<meta http-equiv="Imagetoolbar" content="No"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title><?php esc_html_e( 'Request Unsubscribe', 'doublescale'); ?></title>
+			<title><?php esc_html_e( 'Request Unsubscribe', 'doublescale' ); ?></title>
 			<meta name="robots" content="noindex">
 			<?php
 				wp_enqueue_style( 'doublescale-public' );
@@ -153,9 +152,9 @@ class SubscriptionManager {
 				'contact_id'    => $contact->id,
 				'activity_type' => 'note',
 				'data'          => array(
-					'title' => __( 'Subscribed', 'doublescale'),
+					'title' => __( 'Subscribed', 'doublescale' ),
 					'type'  => 'system',
-					'note'  => __( 'Contact subscribed to the email list.', 'doublescale'),
+					'note'  => __( 'Contact subscribed to the email list.', 'doublescale' ),
 				),
 				'user_id'       => null,
 			)
@@ -210,11 +209,11 @@ class SubscriptionManager {
 	public function get_default_message() {
 		ob_start();
 		?>
-		<h2><?php esc_html_e( 'Subscription Confirmed', 'doublescale'); ?></h2>
-		<p><?php esc_html_e( 'You have successfully subscribed to our mailing list.', 'doublescale'); ?></p>
+		<h2><?php esc_html_e( 'Subscription Confirmed', 'doublescale' ); ?></h2>
+		<p><?php esc_html_e( 'You have successfully subscribed to our mailing list.', 'doublescale' ); ?></p>
 		<div>
-			<p><?php esc_html_e( 'Thank you for subscribing!', 'doublescale'); ?></p>
-			<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'doublescale'); ?></a>
+			<p><?php esc_html_e( 'Thank you for subscribing!', 'doublescale' ); ?></p>
+			<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'doublescale' ); ?></a>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -231,13 +230,13 @@ class SubscriptionManager {
 		$reason  = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : 'other';
 
 		if ( ! $id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale') ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale' ) ) );
 		}
 
 		try {
 			$contact = ContactModel::get_by_hash_id( $id );
 			if ( ! $contact ) {
-				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale') ) );
+				wp_send_json_error( array( 'message' => __( 'Invalid ID', 'doublescale' ) ) );
 			}
 
 			// Try to find the most recent tracking record for source context
@@ -333,10 +332,10 @@ class SubscriptionManager {
 				<p>
 				<?php
 					/* translators: %s: channel name (email, Sms, WhatsApp) */
-					echo sprintf( esc_html__( 'You have already unsubscribed from %s.', 'doublescale'), esc_html( $channel_label ) );
+					printf( esc_html__( 'You have already unsubscribed from %s.', 'doublescale' ), esc_html( $channel_label ) );
 				?>
 				</p>
-				<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'doublescale'); ?></a>
+				<a href="<?php echo esc_url( home_url() ); ?>"><?php esc_html_e( 'Go to Home', 'doublescale' ); ?></a>
 			</div>
 		</div>
 		<?php
@@ -349,7 +348,7 @@ class SubscriptionManager {
 	 * Get Unsubscribe Form - Styled version
 	 *
 	 * @param ContactModel $contact Contact.
-	 * @param string        $channel Channel (email, sms, whatsapp).
+	 * @param string       $channel Channel (email, sms, whatsapp).
 	 *
 	 * @return string
 	 */
@@ -391,7 +390,7 @@ class SubscriptionManager {
 			<title>
 			<?php
 				/* translators: %s: site name */
-				echo esc_html( sprintf( __( 'Unsubscribe - %s', 'doublescale'), $site_name ) );
+				echo esc_html( sprintf( __( 'Unsubscribe - %s', 'doublescale' ), $site_name ) );
 			?>
 			</title>
 			<?php wp_head(); ?>
@@ -408,12 +407,12 @@ class SubscriptionManager {
 				<h3>
 				<?php
 					/* translators: %s: channel name (email, Sms, WhatsApp) */
-					echo sprintf( esc_html__( 'Unsubscribe from %s', 'doublescale'), esc_html( $channel_label ) );
+					printf( esc_html__( 'Unsubscribe from %s', 'doublescale' ), esc_html( $channel_label ) );
 				?>
 				</h3>
 				
 				<p class="intro-text">
-					<?php esc_html_e( 'We\'re sorry to see you go. Please let us know why you\'re unsubscribing.', 'doublescale'); ?>
+					<?php esc_html_e( 'We\'re sorry to see you go. Please let us know why you\'re unsubscribing.', 'doublescale' ); ?>
 				</p>
 
 				<div class="error-message" id="error-message"></div>
@@ -426,7 +425,7 @@ class SubscriptionManager {
 					
 					<div class="doublescale-form-item">
 						<label for="contact_info">
-							<?php echo 'email' === $channel ? esc_html__( 'Email', 'doublescale') : esc_html__( 'Phone', 'doublescale'); ?>
+							<?php echo 'email' === $channel ? esc_html__( 'Email', 'doublescale' ) : esc_html__( 'Phone', 'doublescale' ); ?>
 						</label>
 						<input
 							type="text"
@@ -437,30 +436,30 @@ class SubscriptionManager {
 					</div>
 					
 					<div class="doublescale-form-item">
-						<label for="reason"><?php esc_html_e( 'Reason for unsubscribing', 'doublescale'); ?></label>
+						<label for="reason"><?php esc_html_e( 'Reason for unsubscribing', 'doublescale' ); ?></label>
 						<div class="doublescale-form-radio-group">
 							<label>
 								<input type="radio" name="reason" value="spam">
 								<?php
 									/* translators: %s: channel name (emails, messages, etc.) */
-									echo esc_html( sprintf( __( 'I consider these %s to be spam', 'doublescale'), $channel_label ) );
+									echo esc_html( sprintf( __( 'I consider these %s to be spam', 'doublescale' ), $channel_label ) );
 								?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="not-interested">
 								<?php
 									/* translators: %s: channel name (emails, messages, etc.) */
-									echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'doublescale'), $channel_label ) );
+									echo esc_html( sprintf( __( 'I am no longer interested in these %s', 'doublescale' ), $channel_label ) );
 								?>
 							</label>
 							<label>
 								<input type="radio" name="reason" value="other" checked>
-								<?php esc_html_e( 'Other', 'doublescale'); ?>
+								<?php esc_html_e( 'Other', 'doublescale' ); ?>
 							</label>
 						</div>
 					</div>
 					
-					<button type="submit"><?php esc_html_e( 'Confirm Unsubscribe', 'doublescale'); ?></button>
+					<button type="submit"><?php esc_html_e( 'Confirm Unsubscribe', 'doublescale' ); ?></button>
 				</form>
 			</div>
 
@@ -475,7 +474,7 @@ class SubscriptionManager {
 	 * Hide contact info (email or phone)
 	 *
 	 * @param ContactModel $contact Contact.
-	 * @param string        $channel Channel.
+	 * @param string       $channel Channel.
 	 *
 	 * @return string
 	 */
@@ -549,7 +548,7 @@ class SubscriptionManager {
 	 */
 	private function render_styled_unsubscribe_page( $already_unsubscribed = false ) {
 		$site_name = get_bloginfo( 'name' );
-		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'doublescale') : __( 'You\'re Unsubscribed', 'doublescale');
+		$title     = $already_unsubscribed ? __( 'Already Unsubscribed', 'doublescale' ) : __( 'You\'re Unsubscribed', 'doublescale' );
 
 		// Called via the AJAX response path before `wp_enqueue_scripts` runs;
 		// register handles lazily so the enqueue actually sticks.
@@ -565,7 +564,7 @@ class SubscriptionManager {
 			<title>
 			<?php
 				/* translators: %s: site name */
-				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'doublescale'), $site_name ) );
+				echo esc_html( sprintf( __( 'Unsubscribed - %s', 'doublescale' ), $site_name ) );
 			?>
 			</title>
 			<?php wp_print_styles( 'doublescale-unsubscribe-success' ); ?>
@@ -583,25 +582,25 @@ class SubscriptionManager {
 				<p class="message">
 					<?php
 					if ( $already_unsubscribed ) {
-						esc_html_e( 'You have already unsubscribed from our mailing list.', 'doublescale');
+						esc_html_e( 'You have already unsubscribed from our mailing list.', 'doublescale' );
 					} else {
-						esc_html_e( 'You have been successfully unsubscribed from our mailing list. We\'re sorry to see you go, but we respect your decision.', 'doublescale');
+						esc_html_e( 'You have been successfully unsubscribed from our mailing list. We\'re sorry to see you go, but we respect your decision.', 'doublescale' );
 					}
 					?>
 				</p>
 
 				<?php if ( ! $already_unsubscribed ) : ?>
 				<p class="message">
-					<?php esc_html_e( 'You will no longer receive emails from us.', 'doublescale'); ?>
+					<?php esc_html_e( 'You will no longer receive emails from us.', 'doublescale' ); ?>
 				</p>
 				<?php endif; ?>
 
 				<a href="<?php echo esc_url( home_url() ); ?>" class="home-button">
-					<?php esc_html_e( 'Back to Home', 'doublescale'); ?>
+					<?php esc_html_e( 'Back to Home', 'doublescale' ); ?>
 				</a>
 
 				<div class="footer-note">
-					<?php esc_html_e( 'Changed your mind? You can resubscribe anytime by contacting us.', 'doublescale'); ?>
+					<?php esc_html_e( 'Changed your mind? You can resubscribe anytime by contacting us.', 'doublescale' ); ?>
 				</div>
 			</div>
 		</body>

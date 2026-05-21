@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Smtp\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
@@ -110,11 +109,11 @@ class RestSmtpSendTestController extends RestController {
 
 		add_filter( 'doublescale_smtp_explicit_connection', $explicit, 10, 0 );
 
-		$blogname     = get_option( 'blogname', '' );
-		$admin_email  = get_option( 'admin_email', '' );
-		$subject      = __( 'DoubleScale SMTP Test', 'doublescale' );
-		$body_plain   = __( 'This is a test email sent from DoubleScale SMTP.', 'doublescale' );
-		$body_html    = '<p>' . esc_html( $body_plain ) . '</p>';
+		$blogname    = get_option( 'blogname', '' );
+		$admin_email = get_option( 'admin_email', '' );
+		$subject     = __( 'DoubleScale SMTP Test', 'doublescale' );
+		$body_plain  = __( 'This is a test email sent from DoubleScale SMTP.', 'doublescale' );
+		$body_html   = '<p>' . esc_html( $body_plain ) . '</p>';
 
 		if ( '' !== $custom_message ) {
 			if ( 'html' === $content_type ) {
@@ -141,7 +140,7 @@ class RestSmtpSendTestController extends RestController {
 			'Content-Type: ' . $content_head . '; charset=UTF-8',
 		);
 		if ( $admin_email ) {
-			$from = $blogname ? sprintf( '%s <%s>', $blogname, $admin_email ) : $admin_email;
+			$from      = $blogname ? sprintf( '%s <%s>', $blogname, $admin_email ) : $admin_email;
 			$headers[] = 'From: ' . $from;
 		}
 

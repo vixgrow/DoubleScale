@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Core\Utils;
 
-
 defined( 'ABSPATH' ) || exit;
 
 // use DoubleScale\Pro\Modules\CustomFields\Models\CustomFieldsGroupModel; // Pro
@@ -76,7 +75,7 @@ class Utils {
 	 * @return string
 	 */
 	public static function get_memory_limit() {
-		 $memory_limit = '128M';
+		$memory_limit = '128M';
 
 		if ( function_exists( 'ini_get' ) ) {
 			$memory_limit = ini_get( 'memory_limit' );
@@ -135,50 +134,50 @@ class Utils {
 	public static function get_contact_fields() {
 		$fields = array(
 			0 => array(
-				'label'  => __( 'Default Fields', 'doublescale'),
+				'label'  => __( 'Default Fields', 'doublescale' ),
 				'fields' => array(
 					'first_name'     => array(
-						'label' => __( 'First Name', 'doublescale'),
+						'label' => __( 'First Name', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'last_name'      => array(
-						'label' => __( 'Last Name', 'doublescale'),
+						'label' => __( 'Last Name', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'email'          => array(
-						'label' => __( 'Email', 'doublescale'),
+						'label' => __( 'Email', 'doublescale' ),
 						'type'  => 'email',
 					),
 					'phone'          => array(
-						'label' => __( 'Phone', 'doublescale'),
+						'label' => __( 'Phone', 'doublescale' ),
 						'type'  => 'phone',
 					),
 					'address_1'      => array(
-						'label' => __( 'Address 1', 'doublescale'),
+						'label' => __( 'Address 1', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'address_2'      => array(
-						'label' => __( 'Address 2', 'doublescale'),
+						'label' => __( 'Address 2', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'city'           => array(
-						'label' => __( 'City', 'doublescale'),
+						'label' => __( 'City', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'state'          => array(
-						'label' => __( 'State', 'doublescale'),
+						'label' => __( 'State', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'country'        => array(
-						'label' => __( 'Country', 'doublescale'),
+						'label' => __( 'Country', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'zip'            => array(
-						'label' => __( 'Zip', 'doublescale'),
+						'label' => __( 'Zip', 'doublescale' ),
 						'type'  => 'text',
 					),
 					'whatsapp_phone' => array(
-						'label' => __( 'Whatsapp Phone', 'doublescale'),
+						'label' => __( 'Whatsapp Phone', 'doublescale' ),
 						'type'  => 'phone',
 					),
 				),

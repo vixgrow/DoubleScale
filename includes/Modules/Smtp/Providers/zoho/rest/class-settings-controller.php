@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Zoho\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -31,38 +30,38 @@ class Settings_Controller extends Abstract_Settings_Controller {
 	 * @return array
 	 */
 	public function get_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'settings',
 			'type'                 => 'object',
-			'context'              => [ 'view' ],
-			'properties'           => [
-				'app' => [
+			'context'              => array( 'view' ),
+			'properties'           => array(
+				'app' => array(
 					'type'       => 'object',
-					'context'    => [ 'view' ],
-					'properties' => [
-						'region'        => [
+					'context'    => array( 'view' ),
+					'properties' => array(
+						'region'        => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-						'client_id'     => [
+							'context'  => array( 'view' ),
+						),
+						'client_id'     => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-						'client_secret' => [
+							'context'  => array( 'view' ),
+						),
+						'client_secret' => array(
 							'type'     => 'string',
 							'required' => true,
-							'context'  => [ 'view' ],
-						],
-					],
-				],
-			],
-			'additionalProperties' => [
-				'context' => [],
-			],
-		];
+							'context'  => array( 'view' ),
+						),
+					),
+				),
+			),
+			'additionalProperties' => array(
+				'context' => array(),
+			),
+		);
 
 		return rest_default_additional_properties_to_false( $schema );
 	}
@@ -112,25 +111,25 @@ class Settings_Controller extends Abstract_Settings_Controller {
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
 			}
-			$options = [];
+			$options = array();
 			foreach ( $result->data as $account ) {
 				if ( empty( $account->sendMailDetails ) ) {
 					continue;
 				}
 
 				foreach ( $account->sendMailDetails as $sendMailDetail ) {
-					$options[] = [
+					$options[] = array(
 						'label' => $sendMailDetail->fromAddress,
 						'value' => $sendMailDetail->fromAddress,
-					];
+					);
 				}
 			}
 
 			return new \WP_REST_Response(
-				[
+				array(
 					'success' => true,
 					'options' => $options,
-				],
+				),
 				200
 			);
 		} catch ( Exception $e ) {
@@ -138,10 +137,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Zoho Getting User Profile Error', 'doublescale' ),
 				array(
 					'code'  => 'zoho_get_user_profile_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Memberpress;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Transaction Amount class
  */
-class TransactionAmount extends Rule
-{
+class TransactionAmount extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -72,13 +71,12 @@ class TransactionAmount extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'           => __('Is', 'doublescale'),
-			'is_not'       => __('Is not', 'doublescale'),
-			'greater_than' => __('Greater than', 'doublescale'),
-			'lower_than'   => __('Lower than', 'doublescale'),
+			'is'           => __( 'Is', 'doublescale' ),
+			'is_not'       => __( 'Is not', 'doublescale' ),
+			'greater_than' => __( 'Greater than', 'doublescale' ),
+			'lower_than'   => __( 'Lower than', 'doublescale' ),
 		);
 	}
 
@@ -91,9 +89,8 @@ class TransactionAmount extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		$amount = $automation_contact->get_data('amount');
+	public function get_value( $automation_contact ) {
+		$amount = $automation_contact->get_data( 'amount' );
 		return $amount ? (string) $amount : '0';
 	}
 }
@@ -101,8 +98,8 @@ class TransactionAmount extends Rule
 add_action(
 	'init',
 	function () {
-		if (defined('MEPR_PLUGIN_NAME')) {
-			RulesManager::instance()->register(new TransactionAmount());
+		if ( defined( 'MEPR_PLUGIN_NAME' ) ) {
+			RulesManager::instance()->register( new TransactionAmount() );
 		}
 	},
 	99

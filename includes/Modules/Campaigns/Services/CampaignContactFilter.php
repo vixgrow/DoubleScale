@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -132,7 +131,7 @@ class CampaignContactFilter {
 		$recipient_field = CampaignChannel::get_recipient_field( $channel_int );
 
 		$query->whereNotNull( $recipient_field )
-			  ->where( $recipient_field, '!=', '' );
+				->where( $recipient_field, '!=', '' );
 
 		return $query;
 	}
@@ -150,7 +149,7 @@ class CampaignContactFilter {
 	public function log_skipped_contact( $contact_id, $campaign_id, $type, $reason ) {
 		doublescale_get_logger()->info(
 			/* translators: %s: reason why contact was skipped */
-			sprintf( __( 'Contact skipped - %s', 'doublescale'), $reason ),
+			sprintf( __( 'Contact skipped - %s', 'doublescale' ), $reason ),
 			array(
 				'contact_id'  => $contact_id,
 				'campaign_id' => $campaign_id,

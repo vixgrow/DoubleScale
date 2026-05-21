@@ -101,11 +101,11 @@ class Process extends Abstract_Process {
 
 			$this->phpmailer->preSend();
 
-			$body   = [
-				'RawMessage' => [
+			$body   = array(
+				'RawMessage' => array(
 					'Data' => $this->phpmailer->getSentMIMEMessage(),
-				],
-			];
+				),
+			);
 			$client = $account_api->get_client();
 			$result = $client->sendRawEmail( $body );
 
@@ -113,9 +113,9 @@ class Process extends Abstract_Process {
 				$this->log_result(
 					array(
 						'status'   => self::SUCCEEDED,
-						'response' => [
+						'response' => array(
 							'MessageId' => $result->get( 'MessageId' ),
-						],
+						),
 					)
 				);
 				return true;
@@ -134,10 +134,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Aws Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_aws_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(

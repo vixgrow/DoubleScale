@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Website;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -97,7 +96,7 @@ class License {
 		$this->check_authorization();
 
 		if ( $this->plugin_data['is_installed'] ) {
-			wp_send_json_error( esc_html__( 'Double Scale Pro is already installed', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Double Scale Pro is already installed', 'doublescale' ), 403 );
 			exit;
 		}
 
@@ -120,12 +119,12 @@ class License {
 		$this->check_authorization();
 
 		if ( ! $this->plugin_data['is_installed'] ) {
-			wp_send_json_error( esc_html__( 'Double Scale Pro is not installed', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Double Scale Pro is not installed', 'doublescale' ), 403 );
 			exit;
 		}
 
 		if ( $this->plugin_data['is_active'] ) {
-			wp_send_json_error( esc_html__( 'Double Scale Pro is already active', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Double Scale Pro is already active', 'doublescale' ), 403 );
 			exit;
 		}
 
@@ -144,7 +143,7 @@ class License {
 				// )
 				// );
 			}
-			wp_send_json_success( esc_html__( 'Double Scale Pro activated successfully', 'doublescale'), 200 );
+			wp_send_json_success( esc_html__( 'Double Scale Pro activated successfully', 'doublescale' ), 200 );
 		} catch ( \Exception $e ) {
 			// doublescale_get_logger()->error(
 			// esc_html__( 'Cannot activate Plugin Pro', 'doublescale'),
@@ -153,7 +152,7 @@ class License {
 			// 'error' => $e,
 			// )
 			// );
-			wp_send_json_error( esc_html__( 'Cannot activate Plugin Pro, check log for details', 'doublescale') );
+			wp_send_json_error( esc_html__( 'Cannot activate Plugin Pro, check log for details', 'doublescale' ) );
 		}
 	}
 
@@ -166,7 +165,7 @@ class License {
 	 */
 	private function define_plugin() {
 		if ( ! function_exists( 'is_plugin_active' ) || ! function_exists( 'get_plugin_data' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		// base dir of plugins (with trailing slash) instead of WP_PLUGIN_DIR.
@@ -199,7 +198,7 @@ class License {
 		if ( $this->plugin_data['is_installed'] ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Double Scale Pro is already installed', 'doublescale'),
+				'message' => esc_html__( 'Double Scale Pro is already installed', 'doublescale' ),
 			);
 		}
 
@@ -208,7 +207,7 @@ class License {
 		if ( ! $license ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'No license found', 'doublescale'),
+				'message' => esc_html__( 'No license found', 'doublescale' ),
 			);
 		}
 
@@ -234,7 +233,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot get plugin info, please check your license', 'doublescale'),
+				'message' => esc_html__( 'Cannot get plugin info, please check your license', 'doublescale' ),
 			);
 		}
 
@@ -248,7 +247,7 @@ class License {
 		if ( ! $filesystem_access ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install Plugin Pro plugin automatically, please download it and install it manually', 'doublescale'),
+				'message' => esc_html__( 'Cannot install Plugin Pro plugin automatically, please download it and install it manually', 'doublescale' ),
 			);
 		}
 
@@ -272,7 +271,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale'),
+				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale' ),
 			);
 		}
 
@@ -288,7 +287,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale'),
+				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale' ),
 			);
 		}
 
@@ -312,7 +311,7 @@ class License {
 			// );
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale'),
+				'message' => esc_html__( 'Cannot install Plugin Pro plugin, check log for details', 'doublescale' ),
 			);
 		}
 
@@ -327,7 +326,7 @@ class License {
 		// );
 		return array(
 			'success' => true,
-			'message' => esc_html__( 'Double Scale Pro plugin installed successfully', 'doublescale'),
+			'message' => esc_html__( 'Double Scale Pro plugin installed successfully', 'doublescale' ),
 		);
 	}
 
@@ -341,27 +340,27 @@ class License {
 	private function define_plans() {
 		$this->plans = array(
 			'basic'          => array(
-				'label' => esc_html__( 'Basic', 'doublescale'),
+				'label' => esc_html__( 'Basic', 'doublescale' ),
 				'level' => 1,
 			),
 			'plus'           => array(
-				'label' => esc_html__( 'Plus', 'doublescale'),
+				'label' => esc_html__( 'Plus', 'doublescale' ),
 				'level' => 2,
 			),
 			'enterprise'     => array(
-				'label' => esc_html__( 'Enterprise', 'doublescale'),
+				'label' => esc_html__( 'Enterprise', 'doublescale' ),
 				'level' => 3,
 			),
 			'basic-ltd'      => array(
-				'label' => esc_html__( 'Basic LTD', 'doublescale'),
+				'label' => esc_html__( 'Basic LTD', 'doublescale' ),
 				'level' => 1,
 			),
 			'plus-ltd'       => array(
-				'label' => esc_html__( 'Plus LTD', 'doublescale'),
+				'label' => esc_html__( 'Plus LTD', 'doublescale' ),
 				'level' => 2,
 			),
 			'enterprise-ltd' => array(
-				'label' => esc_html__( 'Enterprise LTD', 'doublescale'),
+				'label' => esc_html__( 'Enterprise LTD', 'doublescale' ),
 				'level' => 3,
 			),
 		);
@@ -438,7 +437,7 @@ class License {
 		if ( empty( $license['key'] ) ) {
 			return array(
 				'success' => false,
-				'message' => esc_html__( 'No license key found', 'doublescale'),
+				'message' => esc_html__( 'No license key found', 'doublescale' ),
 			);
 		}
 
@@ -456,7 +455,7 @@ class License {
 			$license['last_check'] = gmdate( 'Y-m-d H:i:s' );
 			update_option( 'doublescale_license', $license );
 
-			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'doublescale');
+			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'doublescale' );
 			return array(
 				'success' => false,
 				'message' => $message,
@@ -499,7 +498,7 @@ class License {
 		// schedule task.
 		add_action(
 			'init',
-			function() {
+			function () {
 				if ( PluginKernel::instance()->daily_tasks->get_next_timestamp( 'license_update' ) === false ) {
 					PluginKernel::instance()->daily_tasks->schedule_recurring(
 						time(),
@@ -569,7 +568,7 @@ class License {
 
 		// check current license.
 		if ( ! empty( get_option( 'doublescale_license' ) ) ) {
-			wp_send_json_error( esc_html__( 'Current license must be deactivated first', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Current license must be deactivated first', 'doublescale' ), 403 );
 			exit;
 		}
 
@@ -577,7 +576,7 @@ class License {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce is verified in the AJAX bootstrap before this handler runs.
 		$license_key = isset( $_POST['license_key'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) ) : '';
 		if ( empty( $license_key ) ) {
-			wp_send_json_error( esc_html__( 'License key is required', 'doublescale'), 400 );
+			wp_send_json_error( esc_html__( 'License key is required', 'doublescale' ), 400 );
 			exit;
 		}
 
@@ -591,7 +590,7 @@ class License {
 
 		// failed request.
 		if ( ! $response['success'] ) {
-			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'doublescale');
+			$message = $response['message'] ?? esc_html__( 'An error occurred, please try again', 'doublescale' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
@@ -600,9 +599,9 @@ class License {
 		if ( ! ( $response['data']['success'] ?? false ) ) {
 			$status_label = $this->get_status_label( $response['data']['error'] ?? null );
 			if ( $status_label ) {
-				$message = esc_html__( 'License error', 'doublescale') . ": $status_label";
+				$message = esc_html__( 'License error', 'doublescale' ) . ": $status_label";
 			} else {
-				$message = esc_html__( 'An error occurred, please try again', 'doublescale');
+				$message = esc_html__( 'An error occurred, please try again', 'doublescale' );
 			}
 
 			wp_send_json_error( $message, 422 );
@@ -610,13 +609,13 @@ class License {
 		}
 
 		if ( 'valid' !== $response['data']['license'] ) {
-			$message = esc_html__( 'Invalid license', 'doublescale');
+			$message = esc_html__( 'Invalid license', 'doublescale' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
 
 		if ( empty( $response['data']['plan'] ) ) {
-			$message = esc_html__( 'Server error, please contact the support', 'doublescale');
+			$message = esc_html__( 'Server error, please contact the support', 'doublescale' );
 			wp_send_json_error( $message, 422 );
 			exit;
 		}
@@ -681,7 +680,7 @@ class License {
 			delete_option( 'doublescale_license' );
 		}
 
-		wp_send_json_success( esc_html__( 'License removed successfully', 'doublescale'), 200 );
+		wp_send_json_success( esc_html__( 'License removed successfully', 'doublescale' ), 200 );
 	}
 
 	/**
@@ -695,28 +694,28 @@ class License {
 	public function get_status_label( $status ) {
 		switch ( $status ) {
 			case 'valid':
-				return esc_html__( 'Valid', 'doublescale');
+				return esc_html__( 'Valid', 'doublescale' );
 
 			case 'expired':
-				return esc_html__( 'Expired', 'doublescale');
+				return esc_html__( 'Expired', 'doublescale' );
 
 			case 'disabled':
 			case 'revoked':
-				return esc_html__( 'Disabled', 'doublescale');
+				return esc_html__( 'Disabled', 'doublescale' );
 
 			case 'missing':
 			case 'invalid':
-				return esc_html__( 'Invalid', 'doublescale');
+				return esc_html__( 'Invalid', 'doublescale' );
 
 			case 'inactive':
 			case 'site_inactive':
-				return esc_html__( 'Not active for this website', 'doublescale');
+				return esc_html__( 'Not active for this website', 'doublescale' );
 
 			case 'item_name_mismatch':
-				return esc_html__( 'Invalid key for a plan', 'doublescale');
+				return esc_html__( 'Invalid key for a plan', 'doublescale' );
 
 			case 'no_activations_left':
-				return esc_html__( 'Key reached its activation limit', 'doublescale');
+				return esc_html__( 'Key reached its activation limit', 'doublescale' );
 
 			default:
 				return null;
@@ -734,15 +733,14 @@ class License {
 	private function check_authorization() {
 		// check for valid nonce field.
 		if ( ! check_ajax_referer( 'doublescale-admin', '_nonce', false ) ) {
-			wp_send_json_error( esc_html__( 'Invalid nonce', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Invalid nonce', 'doublescale' ), 403 );
 			exit;
 		}
 
 		// check for user capability.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( esc_html__( 'Forbidden', 'doublescale'), 403 );
+			wp_send_json_error( esc_html__( 'Forbidden', 'doublescale' ), 403 );
 			exit;
 		}
 	}
-
 }

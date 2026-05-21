@@ -206,7 +206,7 @@ class Account_API {
 			foreach ( $results as $index => $result ) {
 				// Use property access (not getter methods) - DynamicResponseModel uses __get magic method
 				if ( $result->Message === 'OK' ) {
-					$sent_count++;
+					++$sent_count;
 				} else {
 					$failed[] = array(
 						'email' => $recipients[ $index ] ?? '',

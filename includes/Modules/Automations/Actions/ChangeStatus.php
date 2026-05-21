@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Automations\Actions;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Action;
@@ -70,7 +69,7 @@ class ChangeStatus extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel         $automation Automation Model.
+	 * @param AutomationModel        $automation Automation Model.
 	 * @param AutomationStepModel    $step Automation Step Model.
 	 * @param AutomationContactModel $contact Contact Model.
 	 */
@@ -97,13 +96,13 @@ class ChangeStatus extends Action {
 		return array(
 			'new_status' => array(
 				'type'     => 'select',
-				'label'    => __( 'New Status', 'doublescale'),
+				'label'    => __( 'New Status', 'doublescale' ),
 				'required' => true,
 				'options'  => array(
-					'unverified'   => __( 'Unverified', 'doublescale'),
-					'subscribed'   => __( 'Subscribed', 'doublescale'),
-					'unsubscribed' => __( 'Unsubscribed', 'doublescale'),
-					'bounced'      => __( 'Bounced', 'doublescale'),
+					'unverified'   => __( 'Unverified', 'doublescale' ),
+					'subscribed'   => __( 'Subscribed', 'doublescale' ),
+					'unsubscribed' => __( 'Unsubscribed', 'doublescale' ),
+					'bounced'      => __( 'Bounced', 'doublescale' ),
 				),
 			),
 		);

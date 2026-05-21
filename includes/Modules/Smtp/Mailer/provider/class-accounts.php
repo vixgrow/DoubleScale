@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Mailer\Provider;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -66,7 +65,7 @@ abstract class Accounts {
 		foreach ( $this->get_accounts_data() as $account_id => $account_data ) {
 			$accounts[ $account_id ] = ! empty( $account_data_keys ) ? array_filter(
 				$account_data,
-				function( $key ) use ( $account_data_keys ) {
+				function ( $key ) use ( $account_data_keys ) {
 					return in_array( $key, $account_data_keys, true );
 				},
 				ARRAY_FILTER_USE_KEY
@@ -281,5 +280,4 @@ abstract class Accounts {
 
 		return true;
 	}
-
 }

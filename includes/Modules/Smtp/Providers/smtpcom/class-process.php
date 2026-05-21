@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SMTPcom;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -49,10 +48,10 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['originator']['from'] = [
+		$this->body['originator']['from'] = array(
 			'address' => $email,
 			'name'    => sanitize_text_field( $name ),
-		];
+		);
 	}
 
 	/**
@@ -82,9 +81,9 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$user_data = [
+				$user_data = array(
 					'address' => $email_address,
-				];
+				);
 
 				if ( ! empty( $name ) ) {
 					$user_data['name'] = sanitize_text_field( $name );
@@ -128,51 +127,49 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$default_part = [
+		$default_part = array(
 			'type'    => 'plain/text',
 			'charset' => $this->phpmailer->CharSet,
 			'content' => '',
-		];
+		);
 
-		$parts = [];
+		$parts = array();
 
 		if ( is_array( $content ) ) {
 
 			if ( ! empty( $content['text'] ) ) {
 				$parts[] = array_merge(
 					$default_part,
-					[
+					array(
 						'content' => $content['text'],
-					]
+					)
 				);
 			}
 
 			if ( ! empty( $content['html'] ) ) {
 				$parts[] = array_merge(
 					$default_part,
-					[
+					array(
 						'type'    => 'text/html',
 						'content' => $content['html'],
-					]
+					)
 				);
 			}
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
+				$parts[] = array_merge(
+					$default_part,
+					array(
+						'content' => $content,
+					)
+				);
 		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
-				$parts[] = array_merge(
-					$default_part,
-					[
-						'content' => $content,
-					]
-				);
-			} else {
-				$parts[] = array_merge(
-					$default_part,
-					[
-						'type'    => 'text/html',
-						'content' => $content,
-					]
-				);
-			}
+			$parts[] = array_merge(
+				$default_part,
+				array(
+					'type'    => 'text/html',
+					'content' => $content,
+				)
+			);
 		}
 
 		$this->body['body']['parts'] = $parts;
@@ -200,9 +197,9 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$user_data = [
+		$user_data = array(
 			'address' => $email,
-		];
+		);
 
 		if ( ! empty( $name ) ) {
 			$user_data['name'] = sanitize_text_field( $name );
@@ -239,7 +236,7 @@ class Process extends Abstract_Process {
 				'content'     => base64_encode( $this->filesystem->get_contents( $filepath ) ),
 				'filename'    => $filename,
 				'type'        => mime_content_type( $filepath ),
-				'disposition' => in_array( $attachment[6], [ 'inline', 'attachment' ], true ) ? $attachment[6] : 'attachment',
+				'disposition' => in_array( $attachment[6], array( 'inline', 'attachment' ), true ) ? $attachment[6] : 'attachment',
 				'cid'         => empty( $attachment[7] ) ? '' : trim( (string) $attachment[7] ),
 				'encoding'    => $ext === 'pdf' ? 'base64' : 'quoted-printable',
 			);
@@ -314,10 +311,10 @@ class Process extends Abstract_Process {
 
 			if ( 'success' === $send_email['status'] ) {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::SUCCEEDED,
 						'response' => $send_email,
-					]
+					)
 				);
 				return true;
 			} else {
@@ -328,17 +325,17 @@ class Process extends Abstract_Process {
 				esc_html__( 'SMTPcom API Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_smtpcom_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
 					'response' => $e->getMessage(),
-				]
+				)
 			);
 			return false;
 		}

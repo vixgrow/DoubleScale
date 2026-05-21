@@ -14,7 +14,6 @@
 
 namespace DoubleScale\Modules\Emails\Curlmulti;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Traits\AccountApiHelper;
@@ -227,7 +226,7 @@ abstract class AbstractCurlMultiMailer {
 				'not_configured',
 				sprintf(
 					/* translators: %s: mailer name */
-					__( '%s is not properly configured.', 'doublescale'),
+					__( '%s is not properly configured.', 'doublescale' ),
 					ucfirst( $this->slug )
 				)
 			);
@@ -313,21 +312,21 @@ abstract class AbstractCurlMultiMailer {
 		if ( empty( $batch_data['recipients'] ) || ! is_array( $batch_data['recipients'] ) ) {
 			return new WP_Error(
 				'invalid_recipients',
-				__( 'Recipients array is required.', 'doublescale')
+				__( 'Recipients array is required.', 'doublescale' )
 			);
 		}
 
 		if ( empty( $batch_data['subject'] ) ) {
 			return new WP_Error(
 				'missing_subject',
-				__( 'Email subject is required.', 'doublescale')
+				__( 'Email subject is required.', 'doublescale' )
 			);
 		}
 
 		if ( empty( $batch_data['html'] ) ) {
 			return new WP_Error(
 				'missing_body',
-				__( 'Email body is required.', 'doublescale')
+				__( 'Email body is required.', 'doublescale' )
 			);
 		}
 
@@ -337,7 +336,7 @@ abstract class AbstractCurlMultiMailer {
 				'batch_too_large',
 				sprintf(
 					/* translators: %d: maximum batch size */
-					__( 'Batch size exceeds maximum of %d recipients.', 'doublescale'),
+					__( 'Batch size exceeds maximum of %d recipients.', 'doublescale' ),
 					$max_batch_size
 				)
 			);
@@ -354,7 +353,7 @@ abstract class AbstractCurlMultiMailer {
 	protected function log_send_attempt( $batch_data ) {
 		doublescale_get_logger()->info(
 			/* translators: %s: mailer name */
-			sprintf( __( 'Sending emails via %s cURL Multi', 'doublescale'), ucfirst( $this->slug ) ),
+			sprintf( __( 'Sending emails via %s cURL Multi', 'doublescale' ), ucfirst( $this->slug ) ),
 			array(
 				'code'            => 'curl_multi_send_attempt',
 				'mailer'          => $this->slug,
@@ -373,7 +372,7 @@ abstract class AbstractCurlMultiMailer {
 	 */
 	protected function log_send_success( $batch_data, $sent_count ) {
 		doublescale_get_logger()->info(
-			__( 'cURL Multi email batch sent successfully', 'doublescale'),
+			__( 'cURL Multi email batch sent successfully', 'doublescale' ),
 			array(
 				'code'        => 'curl_multi_send_success',
 				'mailer'      => $this->slug,
@@ -391,7 +390,7 @@ abstract class AbstractCurlMultiMailer {
 	 */
 	protected function log_partial_failure( $batch_data, $results ) {
 		doublescale_get_logger()->info(
-			__( 'cURL Multi email batch partially failed', 'doublescale'),
+			__( 'cURL Multi email batch partially failed', 'doublescale' ),
 			array(
 				'code'         => 'curl_multi_partial_failure',
 				'mailer'       => $this->slug,

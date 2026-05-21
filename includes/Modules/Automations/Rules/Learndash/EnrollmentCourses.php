@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Learndash;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Enrollment Courses class
  */
-class EnrollmentCourses extends Rule
-{
+class EnrollmentCourses extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -67,24 +66,22 @@ class EnrollmentCourses extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'includes'         => __('includes', 'doublescale'),
-			'not_includes_in'  => __('Does not include (in any)', 'doublescale'),
-			'includes_all'     => __('includes all', 'doublescale'),
-			'not_includes_all' => __('includes none of (match all)', 'doublescale'),
+			'includes'         => __( 'includes', 'doublescale' ),
+			'not_includes_in'  => __( 'Does not include (in any)', 'doublescale' ),
+			'includes_all'     => __( 'includes all', 'doublescale' ),
+			'not_includes_all' => __( 'includes none of (match all)', 'doublescale' ),
 		);
 	}
 
-	public function get_options()
-	{
+	public function get_options() {
 		$options = array();
 
-		if (function_exists('learndash_get_courses')) {
+		if ( function_exists( 'learndash_get_courses' ) ) {
 			$courses = learndash_get_courses();
 
-			if (is_object($courses) && isset($courses->posts)) {
+			if ( is_object( $courses ) && isset( $courses->posts ) ) {
 				$courses = $courses->posts;
 			}
 		} else {
@@ -98,23 +95,23 @@ class EnrollmentCourses extends Rule
 			);
 		}
 
-		if (empty($courses) || ! is_array($courses)) {
+		if ( empty( $courses ) || ! is_array( $courses ) ) {
 			return $options;
 		}
 
-		foreach ($courses as $course) {
-			if (is_object($course)) {
-				$id    = isset($course->ID) ? (int) $course->ID : 0;
-				$title = get_the_title($id);
-			} elseif (is_array($course)) {
-				$id    = isset($course['ID']) ? (int) $course['ID'] : 0;
-				$title = get_post_field('post_title', $id);
+		foreach ( $courses as $course ) {
+			if ( is_object( $course ) ) {
+				$id    = isset( $course->ID ) ? (int) $course->ID : 0;
+				$title = get_the_title( $id );
+			} elseif ( is_array( $course ) ) {
+				$id    = isset( $course['ID'] ) ? (int) $course['ID'] : 0;
+				$title = get_post_field( 'post_title', $id );
 			} else {
 				continue;
 			}
 
-			if ($id) {
-				$options[$id] = wp_kses_post($title);
+			if ( $id ) {
+				$options[ $id ] = wp_kses_post( $title );
 			}
 		}
 
@@ -132,35 +129,34 @@ class EnrollmentCourses extends Rule
 	 *
 	 * @return array Array of enrolled course IDs
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 
-		if (! $contact || empty($contact->email)) {
+		if ( ! $contact || empty( $contact->email ) ) {
 			return array();
 		}
 
 		// Get user by email
-		$user = get_user_by('email', $contact->email);
-		if (! $user) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return array();
 		}
 
 		$enrolled_courses = array();
 
 		// Get enrolled courses using LearnDash function if available
-		if (function_exists('learndash_user_get_enrolled_courses')) {
-			$enrolled_courses = learndash_user_get_enrolled_courses($user->ID);
+		if ( function_exists( 'learndash_user_get_enrolled_courses' ) ) {
+			$enrolled_courses = learndash_user_get_enrolled_courses( $user->ID );
 		} else {
 			// Fallback: Get courses from user meta
-			$enrolled_courses = get_user_meta($user->ID, '_sfwd-courses', true);
-			if (! is_array($enrolled_courses)) {
+			$enrolled_courses = get_user_meta( $user->ID, '_sfwd-courses', true );
+			if ( ! is_array( $enrolled_courses ) ) {
 				$enrolled_courses = array();
 			}
 		}
 
 		// Ensure we return an array of integers
-		return array_map('intval', array_filter($enrolled_courses));
+		return array_map( 'intval', array_filter( $enrolled_courses ) );
 	}
 
 	/**
@@ -169,40 +165,39 @@ class EnrollmentCourses extends Rule
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
-	public function is_met(AutomationContactModel $automation_contact, $rule = array())
-	{
-		$enrolled_courses = $this->get_value($automation_contact);
+	public function is_met( AutomationContactModel $automation_contact, $rule = array() ) {
+		$enrolled_courses = $this->get_value( $automation_contact );
 		$operator         = $rule['operator'] ?? '';
 		$rule_courses     = $rule['value'] ?? array();
 
 		// Ensure rule_courses is an array
-		if (! is_array($rule_courses)) {
+		if ( ! is_array( $rule_courses ) ) {
 			$rule_courses = array();
 		}
 
 		// Convert to integers for comparison
-		$rule_courses = array_map('intval', $rule_courses);
+		$rule_courses = array_map( 'intval', $rule_courses );
 
-		switch ($operator) {
+		switch ( $operator ) {
 			case 'includes':
 				// User is enrolled in at least one of the specified courses
-				return ! empty(array_intersect($enrolled_courses, $rule_courses));
+				return ! empty( array_intersect( $enrolled_courses, $rule_courses ) );
 
 			case 'not_includes_in':
 				// User is not enrolled in any of the specified courses
-				return empty(array_intersect($enrolled_courses, $rule_courses));
+				return empty( array_intersect( $enrolled_courses, $rule_courses ) );
 
 			case 'includes_all':
 				// User is enrolled in all of the specified courses
-				return empty(array_diff($rule_courses, $enrolled_courses));
+				return empty( array_diff( $rule_courses, $enrolled_courses ) );
 
 			case 'not_includes_all':
 				// User is not enrolled in all of the specified courses (missing at least one)
-				return ! empty(array_diff($rule_courses, $enrolled_courses));
+				return ! empty( array_diff( $rule_courses, $enrolled_courses ) );
 
 			default:
 				return false;
@@ -215,13 +210,13 @@ class EnrollmentCourses extends Rule
 add_action(
 	'init',
 	function () {
-		if (class_exists('SFWD_LMS')) {
-			RulesManager::instance()->register(new EnrollmentCourses());
+		if ( class_exists( 'SFWD_LMS' ) ) {
+			RulesManager::instance()->register( new EnrollmentCourses() );
 		} else {
 			add_action(
 				'learndash_loaded',
 				function () {
-					RulesManager::instance()->register(new EnrollmentCourses());
+					RulesManager::instance()->register( new EnrollmentCourses() );
 				}
 			);
 		}

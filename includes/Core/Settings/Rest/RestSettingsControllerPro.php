@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Core\Settings\Rest;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Pro\Modules\Inbox\Services\BounceHandlerManager;
@@ -78,11 +77,11 @@ class RestSettingsControllerPro {
 		if ( ! empty( $settings['imap'] ) && is_array( $settings['imap'] ) && ! empty( $settings['imap']['password'] ) ) {
 			$settings['imap']['password'] = '********';
 		}
-		$settings['from_email'] = $settings['from_email'] ?? '';
-		$settings['from_name']  = $settings['from_name'] ?? '';
-		$settings['reply_to']   = $settings['reply_to'] ?? '';
-		$settings['defaults']   = $defaults;
-		$settings['oauth']    = array(
+		$settings['from_email']            = $settings['from_email'] ?? '';
+		$settings['from_name']             = $settings['from_name'] ?? '';
+		$settings['reply_to']              = $settings['reply_to'] ?? '';
+		$settings['defaults']              = $defaults;
+		$settings['oauth']                 = array(
 			'gmail'   => array(
 				'connected'    => false,
 				'email'        => '',
@@ -98,9 +97,9 @@ class RestSettingsControllerPro {
 			'gmail'   => false,
 			'outlook' => false,
 		);
-		$settings['oauth_redirect_uri'] = '';
-		$settings['imap_available']     = self::has_imap_client();
-		$settings['smtp_detection']    = array(
+		$settings['oauth_redirect_uri']    = '';
+		$settings['imap_available']        = self::has_imap_client();
+		$settings['smtp_detection']        = array(
 			'has_smtp'           => false,
 			'from_emails'        => array(),
 			'gmail_detected'     => false,
@@ -132,7 +131,7 @@ class RestSettingsControllerPro {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => array(
 					'provider' => array(
-						'description'       => __( 'Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers.', 'doublescale'),
+						'description'       => __( 'Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers.', 'doublescale' ),
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_text_field',
@@ -271,7 +270,7 @@ class RestSettingsControllerPro {
 				'permission_callback' => array( $this, 'permissions_check' ),
 				'args'                => array(
 					'channel' => array(
-						'description'       => __( 'Optional channel to filter results (e.g., sms, whatsapp). If not provided, returns all channels.', 'doublescale'),
+						'description'       => __( 'Optional channel to filter results (e.g., sms, whatsapp). If not provided, returns all channels.', 'doublescale' ),
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_text_field',
@@ -311,7 +310,7 @@ class RestSettingsControllerPro {
 				'invalid_provider',
 				sprintf(
 					/* translators: 1: provider slug, 2: available providers */
-					__( 'Provider "%1$s" not found. Available providers: %2$s', 'doublescale'),
+					__( 'Provider "%1$s" not found. Available providers: %2$s', 'doublescale' ),
 					$provider,
 					implode( ', ', array_keys( $urls ) )
 				),
@@ -347,14 +346,14 @@ class RestSettingsControllerPro {
 		// Build webhook URLs for all messaging channels
 		$webhooks = array(
 			'sms'      => array(
-				'name'        => __( 'Sms Incoming Messages', 'doublescale'),
+				'name'        => __( 'Sms Incoming Messages', 'doublescale' ),
 				'url'         => MessagingIncoming::get_webhook_url( 'sms' ),
-				'description' => __( 'Configure this URL in your Twilio phone number settings under "A MESSAGE COMES IN"', 'doublescale'),
+				'description' => __( 'Configure this URL in your Twilio phone number settings under "A MESSAGE COMES IN"', 'doublescale' ),
 			),
 			'whatsapp' => array(
-				'name'        => __( 'Whatsapp Incoming Messages', 'doublescale'),
+				'name'        => __( 'Whatsapp Incoming Messages', 'doublescale' ),
 				'url'         => MessagingIncoming::get_webhook_url( 'whatsapp' ),
-				'description' => __( 'Configure this URL in your Meta WhatsApp Business webhook settings', 'doublescale'),
+				'description' => __( 'Configure this URL in your Meta WhatsApp Business webhook settings', 'doublescale' ),
 			),
 		);
 
@@ -365,7 +364,7 @@ class RestSettingsControllerPro {
 					'invalid_channel',
 					sprintf(
 						/* translators: 1: channel slug, 2: available channels */
-						__( 'Channel "%1$s" not found. Available channels: %2$s', 'doublescale'),
+						__( 'Channel "%1$s" not found. Available channels: %2$s', 'doublescale' ),
 						$channel,
 						implode( ', ', array_keys( $webhooks ) )
 					),
@@ -437,16 +436,16 @@ class RestSettingsControllerPro {
 		$settings['defaults'] = $defaults;
 
 		// Sanitize OAuth data — only expose connection status, not credentials.
-		$oauth = $settings['oauth'] ?? array();
+		$oauth           = $settings['oauth'] ?? array();
 		$sanitized_oauth = array();
 
 		foreach ( array( 'gmail', 'outlook' ) as $provider ) {
 			$provider_data = $oauth[ $provider ] ?? array();
 
 			$sanitized_oauth[ $provider ] = array(
-				'connected'     => EmailOauth::is_connected( $provider ),
-				'email'         => $provider_data['email'] ?? '',
-				'needs_reauth'  => ! empty( $provider_data['needs_reauth'] ),
+				'connected'    => EmailOauth::is_connected( $provider ),
+				'email'        => $provider_data['email'] ?? '',
+				'needs_reauth' => ! empty( $provider_data['needs_reauth'] ),
 			);
 		}
 		$settings['oauth'] = $sanitized_oauth;
@@ -485,7 +484,7 @@ class RestSettingsControllerPro {
 		$body = $request->get_json_params();
 
 		if ( empty( $body ) ) {
-			return new WP_Error( 'invalid_data', __( 'No settings provided.', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_data', __( 'No settings provided.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		// Get existing settings to preserve masked passwords and OAuth tokens.
@@ -511,7 +510,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => true,
-					'message' => __( 'Sending identity saved.', 'doublescale'),
+					'message' => __( 'Sending identity saved.', 'doublescale' ),
 				),
 				200
 			);
@@ -526,18 +525,24 @@ class RestSettingsControllerPro {
 			'enabled'              => ! empty( $body['enabled'] ),
 			'auto_create_contacts' => ! empty( $body['auto_create_contacts'] ),
 			'sync_sent'            => ! empty( $body['sync_sent'] ),
-			'excluded_domains'     => array_values( array_unique( array_filter( array_map(
-				function ( $domain ) {
-					return strtolower( trim( sanitize_text_field( $domain ) ) );
-				},
-				(array) ( $body['excluded_domains'] ?? array() )
-			) ) ) ),
-			'from_email'                 => $from_email,
-			'from_name'                  => sanitize_text_field( $body['from_name'] ?? '' ),
-			'reply_to'                   => sanitize_email( $body['reply_to'] ?? '' ),
-			'imap_provider'              => $resolved['imap_provider'],
-			'smtp_gmail_account'    => $resolved['smtp_gmail_account'],
-			'smtp_outlook_account'  => $resolved['smtp_outlook_account'],
+			'excluded_domains'     => array_values(
+				array_unique(
+					array_filter(
+						array_map(
+							function ( $domain ) {
+								return strtolower( trim( sanitize_text_field( $domain ) ) );
+							},
+							(array) ( $body['excluded_domains'] ?? array() )
+						)
+					)
+				)
+			),
+			'from_email'           => $from_email,
+			'from_name'            => sanitize_text_field( $body['from_name'] ?? '' ),
+			'reply_to'             => sanitize_email( $body['reply_to'] ?? '' ),
+			'imap_provider'        => $resolved['imap_provider'],
+			'smtp_gmail_account'   => $resolved['smtp_gmail_account'],
+			'smtp_outlook_account' => $resolved['smtp_outlook_account'],
 			'imap'                 => array(
 				'host'        => sanitize_text_field( $body['imap']['host'] ?? '' ),
 				'port'        => absint( $body['imap']['port'] ?? 993 ),
@@ -569,7 +574,7 @@ class RestSettingsControllerPro {
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => __( 'Inbox settings saved.', 'doublescale'),
+				'message' => __( 'Inbox settings saved.', 'doublescale' ),
 			),
 			200
 		);
@@ -634,7 +639,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Please provide host, username, and password.', 'doublescale'),
+					'message' => __( 'Please provide host, username, and password.', 'doublescale' ),
 				),
 				200
 			);
@@ -651,7 +656,7 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: %d: number of unseen emails */
-						__( 'Connected successfully. Found %d unseen email(s) in INBOX.', 'doublescale'),
+						__( 'Connected successfully. Found %d unseen email(s) in INBOX.', 'doublescale' ),
 						$unseen_count
 					),
 					'unseen_count' => $unseen_count,
@@ -682,7 +687,7 @@ class RestSettingsControllerPro {
 					'success' => false,
 					'message' => sprintf(
 						/* translators: %s: OAuth provider name */
-						__( '%s is not connected. Please authorize first.', 'doublescale'),
+						__( '%s is not connected. Please authorize first.', 'doublescale' ),
 						ucfirst( $provider )
 					),
 				),
@@ -697,7 +702,7 @@ class RestSettingsControllerPro {
 					'success' => false,
 					'message' => sprintf(
 						/* translators: %s: OAuth provider name */
-						__( 'Failed to get %s IMAP configuration. Token may have expired — try reconnecting.', 'doublescale'),
+						__( 'Failed to get %s IMAP configuration. Token may have expired — try reconnecting.', 'doublescale' ),
 						ucfirst( $provider )
 					),
 				),
@@ -723,7 +728,7 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: 1: provider name, 2: number of unseen emails */
-						__( '%1$s connected successfully. Found %2$d unseen email(s) in INBOX.', 'doublescale'),
+						__( '%1$s connected successfully. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
 						ucfirst( $provider ),
 						$unseen_count
 					),
@@ -758,7 +763,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'smtp Gmail connection not available. Ensure Gmail is configured in smtp with valid OAuth credentials.', 'doublescale'),
+					'message' => __( 'smtp Gmail connection not available. Ensure Gmail is configured in smtp with valid OAuth credentials.', 'doublescale' ),
 				),
 				200
 			);
@@ -782,7 +787,7 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: 1: email address, 2: number of unseen emails */
-						__( 'Gmail (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale'),
+						__( 'Gmail (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
 						$config['username'],
 						$unseen_count
 					),
@@ -817,7 +822,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'smtp Outlook connection not available. Ensure Outlook is configured in smtp with valid OAuth credentials.', 'doublescale'),
+					'message' => __( 'smtp Outlook connection not available. Ensure Outlook is configured in smtp with valid OAuth credentials.', 'doublescale' ),
 				),
 				200
 			);
@@ -841,7 +846,7 @@ class RestSettingsControllerPro {
 					'success'      => true,
 					'message'      => sprintf(
 						/* translators: 1: email address, 2: number of unseen emails */
-						__( 'Outlook (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale'),
+						__( 'Outlook (%1$s) connected via smtp. Found %2$d unseen email(s) in INBOX.', 'doublescale' ),
 						$config['username'],
 						$unseen_count
 					),
@@ -878,7 +883,7 @@ class RestSettingsControllerPro {
 		$provider = sanitize_text_field( $body['provider'] ?? '' );
 
 		if ( ! in_array( $provider, array( 'gmail', 'outlook' ), true ) ) {
-			return new WP_Error( 'invalid_provider', __( 'Invalid OAuth provider.', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_provider', __( 'Invalid OAuth provider.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		// Uses centralized admin-configured credentials from email_oauth_apps.
@@ -912,7 +917,7 @@ class RestSettingsControllerPro {
 		$provider = sanitize_text_field( $body['provider'] ?? '' );
 
 		if ( ! in_array( $provider, array( 'gmail', 'outlook' ), true ) ) {
-			return new WP_Error( 'invalid_provider', __( 'Invalid OAuth provider.', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_provider', __( 'Invalid OAuth provider.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		EmailOauth::disconnect( $provider );
@@ -922,7 +927,7 @@ class RestSettingsControllerPro {
 				'success' => true,
 				'message' => sprintf(
 					/* translators: %s: OAuth provider name */
-					__( '%s disconnected successfully.', 'doublescale'),
+					__( '%s disconnected successfully.', 'doublescale' ),
 					ucfirst( $provider )
 				),
 			),
@@ -945,7 +950,7 @@ class RestSettingsControllerPro {
 		}
 		$result = array();
 		foreach ( array( 'gmail', 'outlook' ) as $provider ) {
-			$creds = EmailOauth::get_oauth_app_credentials( $provider );
+			$creds     = EmailOauth::get_oauth_app_credentials( $provider );
 			$has_creds = ! empty( $creds['client_id'] ) && ! empty( $creds['client_secret'] );
 
 			$result[ $provider ] = array(
@@ -975,12 +980,12 @@ class RestSettingsControllerPro {
 			return self::pro_mailbox_unavailable_error();
 		}
 		if ( ! EmailOauth::smtp_oauth_storage_available() ) {
-			return new WP_Error( 'smtp_required', __( 'SMTP storage backend is unavailable; cannot save email credentials.', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'smtp_required', __( 'SMTP storage backend is unavailable; cannot save email credentials.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$body = $request->get_json_params();
 		if ( empty( $body ) ) {
-			return new WP_Error( 'invalid_data', __( 'No settings provided.', 'doublescale'), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_data', __( 'No settings provided.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$warnings           = array();
@@ -1000,7 +1005,7 @@ class RestSettingsControllerPro {
 					'missing_credentials',
 					sprintf(
 						/* translators: %s: provider name */
-						__( 'Both Client ID and Client Secret are required for %s.', 'doublescale'),
+						__( 'Both Client ID and Client Secret are required for %s.', 'doublescale' ),
 						ucfirst( $provider )
 					),
 					array( 'status' => 400 )
@@ -1008,7 +1013,7 @@ class RestSettingsControllerPro {
 			}
 
 			// Read existing from smtp for change detection.
-			$existing = EmailOauth::get_oauth_app_credentials( $provider );
+			$existing          = EmailOauth::get_oauth_app_credentials( $provider );
 			$old_client_id     = $existing['client_id'] ?? '';
 			$old_client_secret = $existing['client_secret'] ?? '';
 
@@ -1033,13 +1038,13 @@ class RestSettingsControllerPro {
 
 			// If credentials changed, disconnect all CRM-managed users for this provider.
 			if ( $credentials_changed ) {
-				$disconnected = self::disconnect_all_users_for_provider( $provider );
+				$disconnected        = self::disconnect_all_users_for_provider( $provider );
 				$total_disconnected += $disconnected;
 
 				if ( $disconnected > 0 ) {
 					$warnings[] = sprintf(
 						/* translators: 1: provider name, 2: number of disconnected users */
-						__( '%1$s credentials changed. %2$d user(s) have been disconnected and will need to re-connect.', 'doublescale'),
+						__( '%1$s credentials changed. %2$d user(s) have been disconnected and will need to re-connect.', 'doublescale' ),
 						ucfirst( $provider ),
 						$disconnected
 					);
@@ -1049,11 +1054,11 @@ class RestSettingsControllerPro {
 
 		$response = array(
 			'success' => true,
-			'message' => __( 'OAuth app credentials saved.', 'doublescale'),
+			'message' => __( 'OAuth app credentials saved.', 'doublescale' ),
 		);
 
 		if ( ! empty( $warnings ) ) {
-			$response['warnings']    = $warnings;
+			$response['warnings']     = $warnings;
 			$response['disconnected'] = $total_disconnected;
 		}
 
@@ -1071,7 +1076,7 @@ class RestSettingsControllerPro {
 	 * @return int Number of users disconnected.
 	 */
 	private static function disconnect_all_users_for_provider( $provider ) {
-		$mailer_slug = $provider;
+		$mailer_slug        = $provider;
 		$disconnected_count = 0;
 
 		// 1. Remove CRM-managed accounts from the active SMTP backend.
@@ -1081,7 +1086,7 @@ class RestSettingsControllerPro {
 			$retries  = 0;
 			while ( get_transient( $lock_key ) && $retries < 5 ) {
 				usleep( 500000 );
-				$retries++;
+				++$retries;
 			}
 			set_transient( $lock_key, true, 30 );
 
@@ -1167,11 +1172,11 @@ class RestSettingsControllerPro {
 
 			// Clear tokens AND auto-disable to prevent poller errors.
 			$account['oauth'][ $provider ] = array();
-			$account['enabled']    = false;
-			$account['from_email'] = '';
+			$account['enabled']            = false;
+			$account['from_email']         = '';
 
 			update_user_meta( $uid, 'doublescale_user_email_account', $account );
-			$disconnected_count++;
+			++$disconnected_count;
 		}
 
 		// Clear scheduler flag if no enabled users remain.
@@ -1212,7 +1217,7 @@ class RestSettingsControllerPro {
 	 */
 	public static function resolve_imap_provider_for_email( $from_email ) {
 		$result = array(
-			'imap_provider'             => 'custom',
+			'imap_provider'        => 'custom',
 			'smtp_gmail_account'   => '',
 			'smtp_outlook_account' => '',
 		);
@@ -1232,7 +1237,7 @@ class RestSettingsControllerPro {
 			}
 			$account_email = strtolower( $account_data['name'] ?? '' );
 			if ( $account_email === $normalized ) {
-				$result['imap_provider']           = 'smtp_gmail';
+				$result['imap_provider']      = 'smtp_gmail';
 				$result['smtp_gmail_account'] = $account_id;
 				return $result;
 			}
@@ -1247,8 +1252,8 @@ class RestSettingsControllerPro {
 			}
 			$account_email = strtolower( $account_data['name'] ?? '' );
 			if ( $account_email === $normalized ) {
-				$result['imap_provider']              = 'smtp_outlook';
-				$result['smtp_outlook_account']  = $account_id;
+				$result['imap_provider']        = 'smtp_outlook';
+				$result['smtp_outlook_account'] = $account_id;
 				return $result;
 			}
 		}
@@ -1281,7 +1286,7 @@ class RestSettingsControllerPro {
 	 */
 	public static function detect_smtp_configuration() {
 		$result = array(
-			'has_smtp'      => EmailOauth::smtp_oauth_storage_available(),
+			'has_smtp'           => EmailOauth::smtp_oauth_storage_available(),
 			'from_emails'        => array(),
 			'gmail_detected'     => false,
 			'gmail_accounts'     => array(),
@@ -1320,8 +1325,8 @@ class RestSettingsControllerPro {
 				$has_tokens = ! empty( $creds['access_token'] ) && ! empty( $creds['refresh_token'] );
 
 				if ( $has_tokens ) {
-					$result['gmail_detected']    = true;
-					$result['gmail_app']         = array(
+					$result['gmail_detected']   = true;
+					$result['gmail_app']        = array(
 						'client_id'  => $gmail_app['client_id'],
 						'has_secret' => true,
 					);
@@ -1346,8 +1351,8 @@ class RestSettingsControllerPro {
 				$has_tokens = ! empty( $creds['access_token'] ) && ! empty( $creds['refresh_token'] );
 
 				if ( $has_tokens ) {
-					$result['outlook_detected']    = true;
-					$result['outlook_app']         = array(
+					$result['outlook_detected']   = true;
+					$result['outlook_app']        = array(
 						'client_id'  => $outlook_app['client_id'],
 						'has_secret' => true,
 					);
@@ -1363,7 +1368,12 @@ class RestSettingsControllerPro {
 		// Gmail and Outlook are handled above via dedicated OAuth integration.
 		// Transactional-only providers (SendGrid, Mailgun, Postmark, etc.) have no IMAP.
 		$mailer_to_imap_map = array(
-			'zoho' => array( 'host' => 'imap.zoho.com', 'port' => 993, 'encryption' => 'ssl', 'provider' => 'Zoho Mail' ),
+			'zoho' => array(
+				'host'       => 'imap.zoho.com',
+				'port'       => 993,
+				'encryption' => 'ssl',
+				'provider'   => 'Zoho Mail',
+			),
 		);
 
 		$seen_emails = array();
@@ -1381,7 +1391,7 @@ class RestSettingsControllerPro {
 			}
 
 			if ( isset( $mailer_to_imap_map[ $mailer ] ) ) {
-				$imap_config = $mailer_to_imap_map[ $mailer ];
+				$imap_config                    = $mailer_to_imap_map[ $mailer ];
 				$result['detected_providers'][] = array(
 					'email'      => $from_email,
 					'provider'   => $imap_config['provider'],
@@ -1389,7 +1399,7 @@ class RestSettingsControllerPro {
 					'imap_port'  => $imap_config['port'],
 					'encryption' => $imap_config['encryption'],
 				);
-				$seen_emails[ $from_email ] = true;
+				$seen_emails[ $from_email ]     = true;
 			}
 		}
 
@@ -1451,7 +1461,7 @@ class RestSettingsControllerPro {
 			}
 			$token_string = $access_token['access_token'] ?? '';
 		} else {
-			$token_string = $access_token;
+			$token_string  = $access_token;
 			$needs_refresh = true;
 		}
 
@@ -1476,12 +1486,14 @@ class RestSettingsControllerPro {
 					'https://oauth2.googleapis.com/token',
 					array(
 						'headers' => array( 'Content-Type' => 'application/x-www-form-urlencoded' ),
-						'body'    => http_build_query( array(
-							'grant_type'    => 'refresh_token',
-							'refresh_token' => $refresh_token,
-							'client_id'     => $client_id,
-							'client_secret' => $client_secret,
-						) ),
+						'body'    => http_build_query(
+							array(
+								'grant_type'    => 'refresh_token',
+								'refresh_token' => $refresh_token,
+								'client_id'     => $client_id,
+								'client_secret' => $client_secret,
+							)
+						),
 						'timeout' => 30,
 					)
 				);
@@ -1503,11 +1515,11 @@ class RestSettingsControllerPro {
 							'token_type'   => $data['token_type'] ?? 'Bearer',
 						);
 						if ( ! empty( $data['refresh_token'] ) ) {
-							$new_token['refresh_token'] = $data['refresh_token'];
+							$new_token['refresh_token']                                    = $data['refresh_token'];
 							$gmail_accounts[ $account_id ]['credentials']['refresh_token'] = $data['refresh_token'];
 						}
 						$gmail_accounts[ $account_id ]['credentials']['access_token'] = $new_token;
-						$gmail_settings['accounts'] = $gmail_accounts;
+						$gmail_settings['accounts']                                   = $gmail_accounts;
 						update_option( $gmail_option, $gmail_settings );
 					}
 				}
@@ -1609,13 +1621,15 @@ class RestSettingsControllerPro {
 					'https://login.microsoftonline.com/common/oauth2/v2.0/token',
 					array(
 						'headers' => array( 'Content-Type' => 'application/x-www-form-urlencoded' ),
-						'body'    => http_build_query( array(
-							'grant_type'    => 'refresh_token',
-							'refresh_token' => $refresh_token,
-							'client_id'     => $client_id,
-							'client_secret' => $client_secret,
-							'scope'         => 'https://outlook.office365.com/IMAP.AccessAsUser.All offline_access openid email',
-						) ),
+						'body'    => http_build_query(
+							array(
+								'grant_type'    => 'refresh_token',
+								'refresh_token' => $refresh_token,
+								'client_id'     => $client_id,
+								'client_secret' => $client_secret,
+								'scope'         => 'https://outlook.office365.com/IMAP.AccessAsUser.All offline_access openid email',
+							)
+						),
 						'timeout' => 30,
 					)
 				);
@@ -1637,11 +1651,11 @@ class RestSettingsControllerPro {
 							'token_type'   => $data['token_type'] ?? 'Bearer',
 						);
 						if ( ! empty( $data['refresh_token'] ) ) {
-							$new_token['refresh_token'] = $data['refresh_token'];
+							$new_token['refresh_token']                                      = $data['refresh_token'];
 							$outlook_accounts[ $account_id ]['credentials']['refresh_token'] = $data['refresh_token'];
 						}
 						$outlook_accounts[ $account_id ]['credentials']['access_token'] = $new_token;
-						$outlook_settings['accounts'] = $outlook_accounts;
+						$outlook_settings['accounts']                                   = $outlook_accounts;
 						update_option( $outlook_option, $outlook_settings );
 					}
 				}
@@ -1679,11 +1693,11 @@ class RestSettingsControllerPro {
 		if ( ! self::has_notifications_push_layer() ) {
 			return new WP_REST_Response(
 				array(
-					'enabled'                 => false,
-					'configured'              => false,
-					'credentials_available'   => false,
-					'project_id'              => '',
-					'configured_at'           => '',
+					'enabled'               => false,
+					'configured'            => false,
+					'credentials_available' => false,
+					'project_id'            => '',
+					'configured_at'         => '',
 				),
 				200
 			);
@@ -1761,7 +1775,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Push notification credentials could not be provisioned. Please contact support.', 'doublescale'),
+					'message' => __( 'Push notification credentials could not be provisioned. Please contact support.', 'doublescale' ),
 				),
 				200
 			);
@@ -1772,7 +1786,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Failed to decrypt push notification credentials. This may happen after migrating your site. Please deactivate and reactivate the plugin.', 'doublescale'),
+					'message' => __( 'Failed to decrypt push notification credentials. This may happen after migrating your site. Please deactivate and reactivate the plugin.', 'doublescale' ),
 				),
 				200
 			);
@@ -1783,7 +1797,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Service account data is corrupted. Please re-upload.', 'doublescale'),
+					'message' => __( 'Service account data is corrupted. Please re-upload.', 'doublescale' ),
 				),
 				200
 			);
@@ -1805,10 +1819,12 @@ class RestSettingsControllerPro {
 			'https://oauth2.googleapis.com/token',
 			array(
 				'headers' => array( 'Content-Type' => 'application/x-www-form-urlencoded' ),
-				'body'    => http_build_query( array(
-					'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-					'assertion'  => $jwt,
-				) ),
+				'body'    => http_build_query(
+					array(
+						'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+						'assertion'  => $jwt,
+					)
+				),
 				'timeout' => 15,
 			)
 		);
@@ -1831,7 +1847,7 @@ class RestSettingsControllerPro {
 					'success'    => true,
 					'message'    => sprintf(
 						/* translators: %s: project ID */
-						__( 'Connected successfully to Firebase project: %s', 'doublescale'),
+						__( 'Connected successfully to Firebase project: %s', 'doublescale' ),
 						$config['project_id']
 					),
 					'project_id' => $config['project_id'],
@@ -1843,7 +1859,7 @@ class RestSettingsControllerPro {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => $data['error_description'] ?? __( 'Failed to obtain access token.', 'doublescale'),
+				'message' => $data['error_description'] ?? __( 'Failed to obtain access token.', 'doublescale' ),
 			),
 			200
 		);
@@ -1873,7 +1889,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Push notifications are disabled site-wide.', 'doublescale'),
+					'message' => __( 'Push notifications are disabled site-wide.', 'doublescale' ),
 				),
 				200
 			);
@@ -1886,7 +1902,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'No mobile devices registered. Open the Plugin mobile app and log in to register your device.', 'doublescale'),
+					'message' => __( 'No mobile devices registered. Open the Plugin mobile app and log in to register your device.', 'doublescale' ),
 				),
 				200
 			);
@@ -1899,7 +1915,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Push notification credentials are not configured.', 'doublescale'),
+					'message' => __( 'Push notification credentials are not configured.', 'doublescale' ),
 				),
 				200
 			);
@@ -1910,7 +1926,7 @@ class RestSettingsControllerPro {
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => __( 'Failed to authenticate with Firebase. Please test the connection first.', 'doublescale'),
+					'message' => __( 'Failed to authenticate with Firebase. Please test the connection first.', 'doublescale' ),
 				),
 				200
 			);
@@ -1918,8 +1934,8 @@ class RestSettingsControllerPro {
 
 		$push_data = (object) array(
 			'id'          => 0,
-			'title'       => __( 'Test Notification', 'doublescale'),
-			'message'     => __( 'Push notifications are working! This is a test from your Plugin settings.', 'doublescale'),
+			'title'       => __( 'Test Notification', 'doublescale' ),
+			'message'     => __( 'Push notifications are working! This is a test from your Plugin settings.', 'doublescale' ),
 			'mobile_link' => '',
 			'subcategory' => '',
 		);
@@ -1936,12 +1952,12 @@ class RestSettingsControllerPro {
 						'title' => $push_data->title,
 						'body'  => $push_data->message,
 					),
-					'data' => array(
+					'data'         => array(
 						'notification_id' => '0',
 						'mobile_link'     => '',
 						'subcategory'     => '',
 					),
-					'android' => array(
+					'android'      => array(
 						'priority'     => 'high',
 						'notification' => array( 'channel_id' => 'doublescale' ),
 					),
@@ -1958,7 +1974,7 @@ class RestSettingsControllerPro {
 					'timeout' => 15,
 				)
 			);
-			$code = (int) wp_remote_retrieve_response_code( $response );
+			$code     = (int) wp_remote_retrieve_response_code( $response );
 			if ( $code >= 200 && $code < 300 ) {
 				++$sent;
 			} else {
@@ -1988,7 +2004,7 @@ class RestSettingsControllerPro {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => __( 'Failed to deliver the test notification. Your device token may be expired — try logging out and back in on the mobile app.', 'doublescale'),
+				'message' => __( 'Failed to deliver the test notification. Your device token may be expired — try logging out and back in on the mobile app.', 'doublescale' ),
 			),
 			200
 		);

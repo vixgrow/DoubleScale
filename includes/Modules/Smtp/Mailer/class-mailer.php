@@ -105,5 +105,4 @@ class Mailer {
 			new static::$classes['rest']( $this );
 		}
 	}
-
 }

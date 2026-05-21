@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Traits;
 
-
 defined( 'ABSPATH' ) || exit;
 
 trait SmtpModuleActive {

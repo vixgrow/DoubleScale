@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Triggers\Woocommerce\Wishlist;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
@@ -18,7 +17,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
  */
 class WishlistReminder extends TriggerPro {
 
-/**
+	/**
 	 * Tasks instance for scheduling cron jobs
 	 *
 	 * @var \DoubleScale\Core\Tasks

@@ -55,10 +55,10 @@ class MetaTemplateSaver {
 			doublescale_get_logger()->debug(
 				'Meta WhatsApp template already exists in database',
 				array(
-					'template_id'  => $existing->id,
-					'name'         => $existing->name,
-					'external_id'  => $external_id,
-					'code'         => 'meta_whatsapp_template_exists',
+					'template_id' => $existing->id,
+					'name'        => $existing->name,
+					'external_id' => $external_id,
+					'code'        => 'meta_whatsapp_template_exists',
 				)
 			);
 			return $existing;
@@ -122,7 +122,7 @@ class MetaTemplateSaver {
 	 * Update variable mappings for a template
 	 *
 	 * @param TemplateModel $template          Template model.
-	 * @param array          $variable_mappings Variable mappings {"1": "{{contact:first_name}}", ...}.
+	 * @param array         $variable_mappings Variable mappings {"1": "{{contact:first_name}}", ...}.
 	 *
 	 * @return TemplateModel
 	 */
@@ -170,11 +170,11 @@ class MetaTemplateSaver {
 				$settings           = array_merge( $settings, $template_data['settings'] );
 				$existing->settings = $settings;
 				$existing->save();
-				$updated++;
+				++$updated;
 			} else {
 				// Create new template
 				$this->save_on_use( $template_data );
-				$created++;
+				++$created;
 			}
 		}
 
@@ -196,8 +196,3 @@ class MetaTemplateSaver {
 		);
 	}
 }
-
-
-
-
-

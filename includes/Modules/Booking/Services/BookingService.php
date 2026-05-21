@@ -24,15 +24,15 @@ class BookingService {
 	 * Book an event slot.
 	 *
 	 * @param EventModel $event The event being booked.
-	 * @param int         $calendar_id The calendar ID.
-	 * @param \DateTime   $start_date The start date/time of the booking.
-	 * @param int         $duration The duration of the booking in minutes.
-	 * @param string      $timezone The timezone of the booking.
-	 * @param array       $invitees The invitees for the booking.
-	 * @param string      $location The location of the booking.
-	 * @param string      $status The status of the booking.
-	 * @param array       $fields Additional fields for the booking.
-	 * @param int|null    $user_id The user ID for the booking (optional).
+	 * @param int        $calendar_id The calendar ID.
+	 * @param \DateTime  $start_date The start date/time of the booking.
+	 * @param int        $duration The duration of the booking in minutes.
+	 * @param string     $timezone The timezone of the booking.
+	 * @param array      $invitees The invitees for the booking.
+	 * @param string     $location The location of the booking.
+	 * @param string     $status The status of the booking.
+	 * @param array      $fields Additional fields for the booking.
+	 * @param int|null   $user_id The user ID for the booking (optional).
 	 *
 	 * @return BookingModel
 	 * @throws \Exception If booking fails.
@@ -194,7 +194,7 @@ class BookingService {
 					throw new \Exception( esc_html__( 'Failed to book', 'doublescale' ) );
 				}
 
-				$booking              = new BookingModel();
+				$booking = new BookingModel();
 				foreach ( $booking_ref as $key => $value ) {
 					$booking->$key = $value;
 				}
@@ -300,14 +300,14 @@ class BookingService {
 	 * consume slots) and does NOT trigger payment flow.
 	 *
 	 * @param EventModel $entity     Event being booked.
-	 * @param int       $calendar_id Calendar ID.
-	 * @param \DateTime $start_date  Start datetime.
-	 * @param int       $duration    Duration in minutes.
-	 * @param string    $timezone    Booking timezone.
-	 * @param array     $invitees    Validated invitees.
-	 * @param string    $location    Location data.
-	 * @param array     $fields      Custom fields.
-	 * @param array     $host_ids    Host user IDs.
+	 * @param int        $calendar_id Calendar ID.
+	 * @param \DateTime  $start_date  Start datetime.
+	 * @param int        $duration    Duration in minutes.
+	 * @param string     $timezone    Booking timezone.
+	 * @param array      $invitees    Validated invitees.
+	 * @param string     $location    Location data.
+	 * @param array      $fields      Custom fields.
+	 * @param array      $host_ids    Host user IDs.
 	 *
 	 * @return BookingModel
 	 * @throws \Exception
@@ -329,11 +329,15 @@ class BookingService {
 			$max_people    = (int) ( $wl_settings['additional_people_limit'] ?? 0 );
 			$total_allowed = $max_people + 1;
 			if ( count( $invitees ) > $total_allowed ) {
-				throw new \Exception( esc_html( sprintf(
+				throw new \Exception(
+					esc_html(
+						sprintf(
 						/* translators: %d: maximum allowed additional people */
-						__( 'You can bring at most %d additional people when joining the waiting list', 'doublescale' ),
-						$max_people
-					) ) );
+							__( 'You can bring at most %d additional people when joining the waiting list', 'doublescale' ),
+							$max_people
+						)
+					)
+				);
 			}
 		}
 
@@ -427,8 +431,8 @@ class BookingService {
 	/**
 	 * Sanitize and validate an invitee list.
 	 *
-	 * @param array $invitee    Raw invitee array of {name, email}.
-	 * @param bool  $allow_many Whether multiple invitees are allowed.
+	 * @param array  $invitee    Raw invitee array of {name, email}.
+	 * @param bool   $allow_many Whether multiple invitees are allowed.
 	 * @param string $multi_error Error message when multiple invitees are not allowed.
 	 *
 	 * @throws \Exception
@@ -469,7 +473,7 @@ class BookingService {
 	 * Validate invitee for event bookings.
 	 *
 	 * @param EventModel $event
-	 * @param array       $invitee
+	 * @param array      $invitee
 	 *
 	 * @throws \Exception
 	 * @return array

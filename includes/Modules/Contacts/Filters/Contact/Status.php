@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -82,9 +81,9 @@ class Status extends Filter {
 	 */
 	public function get_options() {
 		return array(
-			'subscribed'   => __( 'Subscribed', 'doublescale'),
-			'unsubscribed' => __( 'Unsubscribed', 'doublescale'),
-			'bounced'      => __( 'Bounced', 'doublescale'),
+			'subscribed'   => __( 'Subscribed', 'doublescale' ),
+			'unsubscribed' => __( 'Unsubscribed', 'doublescale' ),
+			'bounced'      => __( 'Bounced', 'doublescale' ),
 		);
 	}
 }

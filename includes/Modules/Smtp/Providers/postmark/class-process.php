@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\PostMark;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -51,7 +50,7 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['From'] = $this->phpmailer->addrFormat( [ $email, $name ] );
+		$this->body['From'] = $this->phpmailer->addrFormat( array( $email, $name ) );
 	}
 
 	/**
@@ -85,7 +84,6 @@ class Process extends Abstract_Process {
 					break;
 			}
 		}
-
 	}
 
 	/**
@@ -121,12 +119,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['HtmlBody'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['TextBody'] = $content;
-			} else {
-				$this->body['HtmlBody'] = $content;
-			}
+		} else {
+			$this->body['HtmlBody'] = $content;
 		}
 	}
 
@@ -192,7 +188,7 @@ class Process extends Abstract_Process {
 		 *
 		 * @param array $headers Email headers.
 		 */
-		$headers = apply_filters( 'doublescale_smtp_postmark_mailer_get_headers', $this->body['Headers'] ?? [] );
+		$headers = apply_filters( 'doublescale_smtp_postmark_mailer_get_headers', $this->body['Headers'] ?? array() );
 
 		return $headers;
 	}
@@ -239,25 +235,25 @@ class Process extends Abstract_Process {
 			if ( ! empty( $message_stream_id ) ) {
 				$body['MessageStream'] = $message_stream_id;
 			}
-			$results = $client->sendEmailBatch( [ $body ] );
+			$results = $client->sendEmailBatch( array( $body ) );
 			if ( 'OK' === $results[0]->Message ) {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::SUCCEEDED,
-						'response' => [
+						'response' => array(
 							'message_id' => $results[0]->MessageID,
-						],
-					]
+						),
+					)
 				);
 				return true;
 			} else {
 				$this->log_result(
-					[
+					array(
 						'status'   => self::FAILED,
-						'response' => [
+						'response' => array(
 							'message' => $results[0]->Message,
-						],
-					]
+						),
+					)
 				);
 				return false;
 			}
@@ -266,20 +262,20 @@ class Process extends Abstract_Process {
 				esc_html__( 'Postmark API Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_postmark_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
 						'data'    => $e->getTraceAsString(),
-					],
+					),
 				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
-					'response' => [
+					'response' => array(
 						'message' => $e->getMessage(),
-					],
-				]
+					),
+				)
 			);
 			return false;
 		}

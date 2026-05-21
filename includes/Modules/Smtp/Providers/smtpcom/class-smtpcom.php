@@ -51,5 +51,4 @@ class SMTPcom extends Provider {
 		'settings' => Settings::class,
 		'process'  => Process::class,
 	);
-
 }

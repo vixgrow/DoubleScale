@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Settings\Rest;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
@@ -1094,7 +1093,7 @@ class RestSettingsController extends RestController {
 	 * @return int Memory limit in megabytes.
 	 */
 	private function get_memory_limit_in_mb() {
-		 $memory_limit = ini_get( 'memory_limit' );
+		$memory_limit = ini_get( 'memory_limit' );
 
 		if ( preg_match( '/^(\d+)(.)$/', $memory_limit, $matches ) ) {
 			if ( 'G' === $matches[2] ) {

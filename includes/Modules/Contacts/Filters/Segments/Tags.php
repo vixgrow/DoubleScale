@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\Filters\Segments;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Filter;
@@ -86,12 +85,12 @@ class Tags extends Filter {
 	 */
 	public function get_operators() {
 		return array(
-			'is'               => __( 'Matches', 'doublescale'),
-			'is_not'           => __( 'Does not match', 'doublescale'),
-			'contains'         => __( 'Has', 'doublescale'),
-			'does_not_contain' => __( 'Does not have', 'doublescale'),
-			'is_empty'         => __( 'Is empty', 'doublescale'),
-			'is_not_empty'     => __( 'Is not empty', 'doublescale'),
+			'is'               => __( 'Matches', 'doublescale' ),
+			'is_not'           => __( 'Does not match', 'doublescale' ),
+			'contains'         => __( 'Has', 'doublescale' ),
+			'does_not_contain' => __( 'Does not have', 'doublescale' ),
+			'is_empty'         => __( 'Is empty', 'doublescale' ),
+			'is_not_empty'     => __( 'Is not empty', 'doublescale' ),
 		);
 	}
 

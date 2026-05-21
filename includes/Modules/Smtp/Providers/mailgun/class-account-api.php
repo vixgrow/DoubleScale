@@ -80,14 +80,14 @@ class Account_API {
 	public function send( $args, $content_type = '' ) {
 		$response = wp_remote_request(
 			$this->get_api_url() . '/messages',
-			[
+			array(
 				'method'  => 'POST',
-				'headers' => [
+				'headers' => array(
 					'Authorization' => 'Basic ' . base64_encode( 'api:' . $this->api_key ),
 					'Content-Type'  => $content_type,
-				],
+				),
 				'body'    => $args,
-			]
+			)
 		);
 
 		return $this->parse_response( $response );
@@ -130,7 +130,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 1000 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue; // skip invalid emails
@@ -145,7 +145,7 @@ class Account_API {
 		// ----------------------------
 		// Build recipient variables
 		// ----------------------------
-		$recipient_variables = [];
+		$recipient_variables = array();
 
 		if ( ! empty( $batch_args['recipient_variables'] ) && is_array( $batch_args['recipient_variables'] ) ) {
 			// Use provided recipient variables
@@ -154,24 +154,24 @@ class Account_API {
 					$recipient_variables[ $email ] = $batch_args['recipient_variables'][ $email ];
 				} else {
 					// Provide empty array for recipients without variables
-					$recipient_variables[ $email ] = [];
+					$recipient_variables[ $email ] = array();
 				}
 			}
 		} else {
 			// No recipient variables provided - create empty entries
 			foreach ( $recipients as $email ) {
-				$recipient_variables[ $email ] = [];
+				$recipient_variables[ $email ] = array();
 			}
 		}
 
 		// ----------------------------
 		// Build Mailgun payload using http_build_query for proper array handling
 		// ----------------------------
-		$body_params = [
+		$body_params = array(
 			'from'                => $batch_args['from'] ?? '',
 			'subject'             => $batch_args['subject'] ?? '',
 			'recipient-variables' => wp_json_encode( $recipient_variables ),
-		];
+		);
 
 		if ( ! empty( $batch_args['html'] ) ) {
 			$body_params['html'] = $batch_args['html'];
@@ -220,14 +220,14 @@ class Account_API {
 		// ----------------------------
 		$response = wp_remote_post(
 			$this->get_api_url() . '/messages',
-			[
-				'headers' => [
+			array(
+				'headers' => array(
 					'Authorization' => 'Basic ' . base64_encode( 'api:' . $this->api_key ),
 					'Content-Type'  => 'application/x-www-form-urlencoded',
-				],
+				),
 				'body'    => $body_string,
 				'timeout' => 120,
-			]
+			)
 		);
 
 		$result = $this->parse_response( $response );
@@ -267,10 +267,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find Mailgun connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'mailgun' ) {
@@ -286,17 +286,17 @@ class Account_API {
 		$response = is_wp_error( $result ) ? $result->get_error_message() : $result;
 
 		// Log one entry for the batch (not per recipient to avoid log spam)
-		$subject     = $batch_args['subject'] ?? '';
-		$body        = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers     = $batch_args['headers'] ?? [];
-		$attachments = [];
-		$from        = $batch_args['from'] ?? '';
-		$recipients_data = [
+		$subject         = $batch_args['subject'] ?? '';
+		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
+		$headers         = $batch_args['headers'] ?? array();
+		$attachments     = array();
+		$from            = $batch_args['from'] ?? '';
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',
@@ -348,7 +348,7 @@ class Account_API {
 		$status_code = wp_remote_retrieve_response_code( $response );
 		if ( $status_code >= 400 ) {
 			$error_message = $body['message'] ?? __( 'Unknown API error.', 'doublescale' );
-			return new WP_Error( 'api_error', $error_message, [ 'status' => $status_code ] );
+			return new WP_Error( 'api_error', $error_message, array( 'status' => $status_code ) );
 		}
 
 		return $body;

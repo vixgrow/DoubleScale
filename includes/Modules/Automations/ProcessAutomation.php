@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Automations;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -54,7 +53,7 @@ class ProcessAutomation {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationModel $automation
-	 * @param array            $args
+	 * @param array           $args
 	 */
 	public function __construct( AutomationModel $automation, $args = array() ) {
 		$this->automation = $automation;
@@ -165,7 +164,7 @@ class ProcessAutomation {
 			$this->update_automation_contact_status( $automation_contact, 'completed', $step->id, 0 );
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				\__( 'Process End Automation Error', 'doublescale'),
+				\__( 'Process End Automation Error', 'doublescale' ),
 				array(
 					'code'  => 'process_end_automation',
 					'error' => array(
@@ -198,12 +197,12 @@ class ProcessAutomation {
 			} else {
 				$result = $action->process_action( $this->automation, $step, $automation_contact );
 			}
-			$next_step          = $this->get_next_step( $step );
+			$next_step = $this->get_next_step( $step );
 
 			if ( ! $result ) {
 				$this->add_automation_contact_process( $step, $automation_contact->contact_id, $automation_contact->id, 'failed' );
 				$this->update_automation_contact_status( $automation_contact, 'failed', $step->id, $next_step ? $next_step->id : 0 );
-				throw new Exception( \__( 'Action failed', 'doublescale') );
+				throw new Exception( \__( 'Action failed', 'doublescale' ) );
 			}
 
 			$status = $action->auto_enqueue ? 'completed' : 'pending';
@@ -219,7 +218,7 @@ class ProcessAutomation {
 			}
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				\__( 'Process Action Error', 'doublescale'),
+				\__( 'Process Action Error', 'doublescale' ),
 				array(
 					'code'  => 'process_action',
 					'error' => array(
@@ -271,7 +270,7 @@ class ProcessAutomation {
 			}
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				\__( 'Process Condition Error', 'doublescale'),
+				\__( 'Process Condition Error', 'doublescale' ),
 				array(
 					'code'  => 'process_condition',
 					'error' => array(
@@ -290,7 +289,7 @@ class ProcessAutomation {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object                   $step Automation Step.
+	 * @param object                 $step Automation Step.
 	 * @param AutomationContactModel $automation_contact Automation Contact.
 	 *
 	 * @return void
@@ -321,7 +320,7 @@ class ProcessAutomation {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param object                   $step Automation Step.
+	 * @param object                 $step Automation Step.
 	 * @param AutomationContactModel $automation_contact Automation Contact.
 	 *
 	 * @return void
@@ -375,7 +374,7 @@ class ProcessAutomation {
 			$this->update_automation_contact_status( $automation_contact, 'pending', $step->id, $next_step ? $next_step->id : 0 );
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
-				\__( 'Process Goal Error', 'doublescale'),
+				\__( 'Process Goal Error', 'doublescale' ),
 				array(
 					'code'  => 'process_goal',
 					'error' => array(
@@ -395,9 +394,9 @@ class ProcessAutomation {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation Contact.
-	 * @param string                   $status Status.
-	 * @param int                      $current_step Current Step.
-	 * @param int                      $next_step Next Step.
+	 * @param string                 $status Status.
+	 * @param int                    $current_step Current Step.
+	 * @param int                    $next_step Next Step.
 	 *
 	 * @return void
 	 */

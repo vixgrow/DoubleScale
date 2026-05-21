@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Automations\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -123,7 +122,7 @@ abstract class Action {
 	 * @return Action
 	 */
 	public static function instance() {
-		 $class = get_called_class();
+		$class = get_called_class();
 		if ( ! isset( self::$instances[ $class ] ) ) {
 			self::$instances[ $class ] = new static();
 		}
@@ -156,13 +155,13 @@ abstract class Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param AutomationModel         $automation Automation Model.
+	 * @param AutomationModel        $automation Automation Model.
 	 * @param AutomationStepModel    $step Automation Step Model.
 	 * @param AutomationContactModel $contact Contact Model.
 	 *
 	 * @return bool
 	 */
-	abstract public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact);
+	abstract public function process_action( AutomationModel $automation, AutomationStepModel $step, AutomationContactModel $automation_contact );
 
 	/**
 	 * Get attributes schema

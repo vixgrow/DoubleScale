@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * WhatsApp Rule
  */
-class Whatsapp extends Rule
-{
+class Whatsapp extends Rule {
+
 	/**
 	 * Merge Tag Name
 	 *
@@ -75,11 +74,10 @@ class Whatsapp extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 		return $contact->whatsapp_phone;
 	}
 }
 
-RulesManager::instance()->register(new WhatsApp());
+RulesManager::instance()->register( new WhatsApp() );

@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Automations\Triggers\Pmpro;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\TriggerPro;
@@ -18,7 +17,7 @@ use DoubleScale\Modules\Automations\Services\TriggersManager;
  */
 class MembershipExpiringSoon extends TriggerPro {
 
-/**
+	/**
 	 * Trigger Name
 	 *
 	 * @var string

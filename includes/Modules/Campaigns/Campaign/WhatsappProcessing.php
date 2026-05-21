@@ -4,13 +4,11 @@
  * WhatsApp Campaign Processing
  * This class is responsible for handling WhatsApp campaign processing
  *
- *
  * @since 1.0.0
  * @package DoubleScale\Pro
  */
 
 namespace DoubleScale\Modules\Campaigns\Campaign;
-
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,8 +27,8 @@ use DoubleScale\Core\Validators\PhoneValidator;
 /**
  * WhatsApp Campaign Processing class
  */
-class WhatsappProcessing extends AbstractCampaignProcessing
-{
+class WhatsappProcessing extends AbstractCampaignProcessing {
+
 
 	/**
 	 * Communication channel
@@ -44,8 +42,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * @return void
 	 */
-	public function add_hooks()
-	{
+	public function add_hooks() {
 		$this->register_campaign_processing_hooks();
 	}
 
@@ -54,8 +51,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * @return int
 	 */
-	public function get_message_mode()
-	{
+	public function get_message_mode() {
 		return CommunicationTrackingModel::MODE_WHATSAPP;
 	}
 
@@ -64,8 +60,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * @return string
 	 */
-	public function get_channel_context()
-	{
+	public function get_channel_context() {
 		return CampaignChannel::STR_WHATSAPP;
 	}
 
@@ -78,30 +73,29 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * Note: Twilio WhatsApp support has been disabled. Only Meta WhatsApp is supported.
 	 *
-	 * @param TemplateModel                                          $template                      Template model.
+	 * @param TemplateModel                                                               $template                      Template model.
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model.
-	 * @param CommunicationTrackingModel                            $campaign_message              Campaign tracking record.
+	 * @param CommunicationTrackingModel                                                  $campaign_message              Campaign tracking record.
 	 * @return array Message data array with template name/language and ContentVariables.
 	 * @throws \Exception If template is missing required data.
 	 */
-	protected function prepare_message_content( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message )
-	{
+	protected function prepare_message_content( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ) {
 		// Set channel context for merge tags
-		add_filter('doublescale_active_channel_context', array($this, 'get_channel_context'), 10);
+		add_filter( 'doublescale_active_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		// Check if template has a ContentSid/external_id
 		$content_sid = $template->get_whatsapp_content_sid();
 
 		// For templates without ContentSid, require approved business template
 		if ( empty( $content_sid ) && ! $template->is_whatsapp_business_template() ) {
-			throw new \Exception( esc_html__( 'Whatsapp messages require an approved business template. Please create and approve a WhatsApp template in Meta Business Suite, then import it via Settings > WhatsApp Templates.', 'doublescale') );
+			throw new \Exception( esc_html__( 'Whatsapp messages require an approved business template. Please create and approve a WhatsApp template in Meta Business Suite, then import it via Settings > WhatsApp Templates.', 'doublescale' ) );
 		}
 
 		// Prepare template message with ContentSid and variables
 		$message_data = $this->prepare_template_message( $template, $contact_or_automation_contact, $campaign_message );
 
 		// Remove filter to prevent pollution
-		remove_filter('doublescale_active_channel_context', array($this, 'get_channel_context'), 10);
+		remove_filter( 'doublescale_active_channel_context', array( $this, 'get_channel_context' ), 10 );
 
 		return $message_data;
 	}
@@ -112,9 +106,9 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 * Adds campaign-specific handling for automation variable overrides on top of
 	 * the base prepare_whatsapp_template_data() flow.
 	 *
-	 * @param TemplateModel                                          $template                      Template model.
+	 * @param TemplateModel                                                               $template                      Template model.
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model.
-	 * @param CommunicationTrackingModel                            $campaign_message              Campaign tracking record.
+	 * @param CommunicationTrackingModel                                                  $campaign_message              Campaign tracking record.
 	 * @return array Message data with template fields.
 	 */
 	protected function prepare_template_message( TemplateModel $template, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ): array {
@@ -126,7 +120,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		$content_sid = $template->get_whatsapp_content_sid();
 
 		if ( empty( $content_sid ) ) {
-			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale') );
+			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale' ) );
 		}
 
 		// Get variable mappings from template settings
@@ -184,9 +178,9 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * Note: Twilio WhatsApp/sandbox support has been disabled. Only Meta WhatsApp is supported.
 	 *
-	 * @param array                                                   $message_data Prepared message data
+	 * @param array                                                                       $message_data Prepared message data
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model
-	 * @param CommunicationTrackingModel                            $campaign_message Campaign tracking record
+	 * @param CommunicationTrackingModel                                                  $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
 	protected function send_via_provider( $message_data, $contact_or_automation_contact, CommunicationTrackingModel $campaign_message ) {
@@ -198,19 +192,19 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 			// Get message provider
 			$provider = $this->get_message_provider();
 			if ( ! $provider ) {
-				throw new \Exception( esc_html__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale') );
+				throw new \Exception( esc_html__( 'Meta WhatsApp not configured. Please configure Meta WhatsApp in Settings > Integrations.', 'doublescale' ) );
 			}
 
 			// Validate provider is configured
 			if ( ! $provider->is_configured() ) {
-				throw new \Exception( esc_html__( 'Meta WhatsApp is not configured. Please configure it in Settings > Integrations.', 'doublescale') );
+				throw new \Exception( esc_html__( 'Meta WhatsApp is not configured. Please configure it in Settings > Integrations.', 'doublescale' ) );
 			}
 
 			$content_sid = $message_data['ContentSid'] ?? null;
 
 			// Validate ContentSid is present
 			if ( empty( $content_sid ) ) {
-				throw new \Exception( esc_html__( 'Whatsapp message missing template ID. All WhatsApp messages must use approved Meta business templates.', 'doublescale') );
+				throw new \Exception( esc_html__( 'Whatsapp message missing template ID. All WhatsApp messages must use approved Meta business templates.', 'doublescale' ) );
 			}
 
 			// Build Api data for Meta WhatsApp
@@ -250,8 +244,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 * @param ContactModel $contact
 	 * @return string|null
 	 */
-	protected function get_recipient(ContactModel $contact)
-	{
+	protected function get_recipient( ContactModel $contact ) {
 		// WhatsApp requires the whatsapp_phone field - no fallback to phone
 		$phone = $contact->whatsapp_phone;
 
@@ -267,7 +260,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		}
 
 		// Validate E.164 format using centralized utility
-		if (! PhoneValidator::is_valid($phone)) {
+		if ( ! PhoneValidator::is_valid( $phone ) ) {
 			doublescale_get_logger()->info(
 				'Invalid WhatsApp phone number format for WhatsApp campaign',
 				array(
@@ -285,14 +278,13 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	/**
 	 * Send message - calls send_via_provider
 	 *
-	 * @param array                        $message_data Prepared message data
-	 * @param ContactModel                $contact Contact model
+	 * @param array                      $message_data Prepared message data
+	 * @param ContactModel               $contact Contact model
 	 * @param CommunicationTrackingModel $campaign_message Campaign tracking record
 	 * @return array Result array
 	 */
-	protected function send_message($message_data, ContactModel $contact, CommunicationTrackingModel $campaign_message)
-	{
-		return $this->send_via_provider($message_data, $contact, $campaign_message);
+	protected function send_message( $message_data, ContactModel $contact, CommunicationTrackingModel $campaign_message ) {
+		return $this->send_via_provider( $message_data, $contact, $campaign_message );
 	}
 
 	/**
@@ -300,8 +292,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 *
 	 * @return string
 	 */
-	protected function get_tracking_class()
-	{
+	protected function get_tracking_class() {
 		return WhatsApp::class;
 	}
 
@@ -311,7 +302,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 	 * @return string
 	 */
 	protected function get_default_campaign_content() {
-		return __( 'Hi {{contact:first_name}}, thank you for subscribing! Reply STOP to unsubscribe.', 'doublescale');
+		return __( 'Hi {{contact:first_name}}, thank you for subscribing! Reply STOP to unsubscribe.', 'doublescale' );
 	}
 
 	/**
@@ -338,7 +329,7 @@ class WhatsappProcessing extends AbstractCampaignProcessing
 		$content_sid = $template->get_whatsapp_content_sid();
 
 		if ( empty( $content_sid ) ) {
-			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale') );
+			throw new \Exception( esc_html__( 'Whatsapp Business template missing ContentSid', 'doublescale' ) );
 		}
 
 		$content_variables = $this->process_template_variables( $template_variables, $contact );

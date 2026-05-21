@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Providers\SendLayer\SendLayer;
@@ -97,7 +96,7 @@ final class Mailers {
 	 * @return \DoubleScale\Modules\Smtp\Mailer\Mailer[]
 	 */
 	public static function get_mailers() {
-		$mailers = [
+		$mailers = array(
 			'sendlayer'    => SendLayer::class,
 			'mailgun'      => Mailgun::class,
 			'smtpcom'      => SMTPcom::class,
@@ -118,7 +117,7 @@ final class Mailers {
 			'aws'          => Aws::class,
 			'mandrill'     => Mandrill::class,
 			'socketlabs'   => SocketLabs::class,
-		];
+		);
 
 		return apply_filters( 'doublescale_smtp_mailers', $mailers );
 	}

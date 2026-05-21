@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Account_Controller as Abstract_Account_Controller;
@@ -35,5 +34,4 @@ class Account_Controller extends Abstract_Account_Controller {
 
 		$this->register_gettable_route();
 	}
-
 }

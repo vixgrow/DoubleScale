@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -62,7 +61,7 @@ class Activecampaign extends Importer {
 	 * Run importer
 	 */
 	public function run() {
-		 $api = $this->get_api();
+		$api = $this->get_api();
 
 		// Cache metadata once at start to avoid repeated Api calls
 		$this->cache_metadata( $api );
@@ -81,7 +80,7 @@ class Activecampaign extends Importer {
 		$total = $api->get_contacts_count();
 		if ( ! $total['success'] ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Error fetching contacts count', 'doublescale') );
+			throw new \Exception( __( 'Error fetching contacts count', 'doublescale' ) );
 		}
 		$total = $total['data']['meta']['total'] ?? 0;
 		$total = intval( $total );
@@ -167,14 +166,14 @@ class Activecampaign extends Importer {
 				}
 			} else {
 				doublescale_get_logger()->error(
-					__( 'ActiveCampaign: Error fetching lists', 'doublescale'),
+					__( 'ActiveCampaign: Error fetching lists', 'doublescale' ),
 					array(
 						'code'     => 'activecampaign_get_lists',
 						'response' => $lists_response,
 					)
 				);
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-				throw new \Exception( __( 'Error fetching lists', 'doublescale') );
+				throw new \Exception( __( 'Error fetching lists', 'doublescale' ) );
 			}
 		}
 
@@ -187,14 +186,14 @@ class Activecampaign extends Importer {
 				}
 			} else {
 				doublescale_get_logger()->error(
-					__( 'ActiveCampaign: Error fetching tags', 'doublescale'),
+					__( 'ActiveCampaign: Error fetching tags', 'doublescale' ),
 					array(
 						'code'     => 'activecampaign_get_tags',
 						'response' => $tags_response,
 					)
 				);
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-				throw new \Exception( __( 'Error fetching tags', 'doublescale') );
+				throw new \Exception( __( 'Error fetching tags', 'doublescale' ) );
 			}
 		}
 	}
@@ -205,16 +204,16 @@ class Activecampaign extends Importer {
 	 * @return array
 	 */
 	public function get_credentials() {
-		 return array(
-			 'api_key' => array(
-				 'label' => __( 'Api Key', 'doublescale'),
-				 'type'  => 'text',
-			 ),
-			 'api_url' => array(
-				 'label' => __( 'Api URL', 'doublescale'),
-				 'type'  => 'text',
-			 ),
-		 );
+		return array(
+			'api_key' => array(
+				'label' => __( 'Api Key', 'doublescale' ),
+				'type'  => 'text',
+			),
+			'api_url' => array(
+				'label' => __( 'Api URL', 'doublescale' ),
+				'type'  => 'text',
+			),
+		);
 	}
 
 	/**
@@ -228,7 +227,7 @@ class Activecampaign extends Importer {
 			$response = $api->get_lists();
 			if ( ! $response['success'] ) {
 				doublescale_get_logger()->error(
-					__( 'ActiveCampaign: Error fetching lists', 'doublescale'),
+					__( 'ActiveCampaign: Error fetching lists', 'doublescale' ),
 					array(
 						'code'     => 'activecampaign_get_lists',
 						'response' => $response,
@@ -248,7 +247,7 @@ class Activecampaign extends Importer {
 			return $options;
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'ActiveCampaign: Exception fetching lists', 'doublescale'),
+				__( 'ActiveCampaign: Exception fetching lists', 'doublescale' ),
 				array(
 					'code'  => 'activecampaign_get_lists_exception',
 					'error' => $e->getMessage(),
@@ -269,7 +268,7 @@ class Activecampaign extends Importer {
 			$response = $api->get_tags();
 			if ( ! $response['success'] ) {
 				doublescale_get_logger()->error(
-					__( 'ActiveCampaign: Error fetching tags', 'doublescale'),
+					__( 'ActiveCampaign: Error fetching tags', 'doublescale' ),
 					array(
 						'code'     => 'activecampaign_get_tags',
 						'response' => $response,
@@ -289,7 +288,7 @@ class Activecampaign extends Importer {
 			return $options;
 		} catch ( \Exception $e ) {
 			doublescale_get_logger()->error(
-				__( 'ActiveCampaign: Exception fetching tags', 'doublescale'),
+				__( 'ActiveCampaign: Exception fetching tags', 'doublescale' ),
 				array(
 					'code'  => 'activecampaign_get_tags_exception',
 					'error' => $e->getMessage(),
@@ -308,7 +307,7 @@ class Activecampaign extends Importer {
 	public function get_api() {
 		if ( empty( $this->credentials['api_key'] ) || empty( $this->credentials['api_url'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Api Key and Api URL are required.', 'doublescale') );
+			throw new \Exception( __( 'Api Key and Api URL are required.', 'doublescale' ) );
 		}
 		return new Api( $this->credentials['api_url'], $this->credentials['api_key'] );
 	}
@@ -322,12 +321,12 @@ class Activecampaign extends Importer {
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',
-				'label'   => __( 'Lists', 'doublescale'),
+				'label'   => __( 'Lists', 'doublescale' ),
 				'options' => $this->get_lists(),
 			),
 			'tags_mapping'  => array(
 				'type'    => 'tags_mapping',
-				'label'   => __( 'Tags', 'doublescale'),
+				'label'   => __( 'Tags', 'doublescale' ),
 				'options' => $this->get_tags(),
 			),
 		);

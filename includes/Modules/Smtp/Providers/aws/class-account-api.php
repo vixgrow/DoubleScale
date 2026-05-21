@@ -116,7 +116,7 @@ class Account_API {
 			return new WP_Error( 'too_many_recipients', __( 'Maximum 50 recipients per batch.', 'doublescale' ) );
 		}
 
-		$recipients = [];
+		$recipients = array();
 		foreach ( $batch_args['to'] as $email ) {
 			if ( ! is_email( $email ) ) {
 				continue;
@@ -153,13 +153,13 @@ class Account_API {
 
 		// Create template
 		try {
-			$template_params = [
-				'Template' => [
+			$template_params = array(
+				'Template' => array(
 					'TemplateName' => $template_name,
 					'SubjectPart'  => $subject,
 					'HtmlPart'     => $html,
-				],
-			];
+				),
+			);
 
 			if ( ! empty( $text ) ) {
 				$template_params['Template']['TextPart'] = $text;
@@ -174,8 +174,8 @@ class Account_API {
 
 		// Track results
 		$sent_count  = 0;
-		$failed      = [];
-		$message_ids = [];
+		$failed      = array();
+		$message_ids = array();
 
 		// Prepare default template data and clean null values
 		$default_data = $this->get_default_template_data( $batch_args );
@@ -187,9 +187,9 @@ class Account_API {
 		);
 
 		// Build destinations array
-		$destinations = [];
+		$destinations = array();
 		foreach ( $recipients as $email ) {
-			$recipient_vars = $batch_args['recipient_variables'][ $email ] ?? [];
+			$recipient_vars = $batch_args['recipient_variables'][ $email ] ?? array();
 
 			// Clean recipient vars: convert null to empty string and cast to string
 			$clean_recipient_vars = array_map(
@@ -203,30 +203,30 @@ class Account_API {
 			// This prevents Rendering Failures when a recipient is missing some variables
 			$final_vars = array_merge( $default_data, $clean_recipient_vars );
 
-			$destinations[] = [
-				'Destination'             => [
-					'ToAddresses' => [ $email ],
-				],
+			$destinations[] = array(
+				'Destination'             => array(
+					'ToAddresses' => array( $email ),
+				),
 				'ReplacementTemplateData' => wp_json_encode( $final_vars ),
-			];
+			);
 		}
 
 		// Build bulk email params
-		$bulk_params = [
+		$bulk_params = array(
 			'Source'              => $from,
 			'Template'            => $template_name,
 			'Destinations'        => $destinations,
 			'DefaultTemplateData' => wp_json_encode( $default_data ),
-		];
+		);
 
 		// Add Reply-To
 		if ( ! empty( $batch_args['reply_to'] ) ) {
-			$bulk_params['ReplyToAddresses'] = [ $batch_args['reply_to'] ];
+			$bulk_params['ReplyToAddresses'] = array( $batch_args['reply_to'] );
 		}
 
 		// Add tags (SES supports up to 50 tags per email, each tag name must be unique)
 		if ( ! empty( $batch_args['tags'] ) && is_array( $batch_args['tags'] ) ) {
-			$bulk_params['DefaultTags'] = [];
+			$bulk_params['DefaultTags'] = array();
 			foreach ( array_slice( $batch_args['tags'], 0, 50 ) as $index => $tag ) {
 				// Tag can be "name:value" format or just a value
 				if ( strpos( $tag, ':' ) !== false ) {
@@ -236,10 +236,10 @@ class Account_API {
 					$tag_name  = 'tag_' . $index;
 					$tag_value = $tag;
 				}
-				$bulk_params['DefaultTags'][] = [
+				$bulk_params['DefaultTags'][] = array(
 					'Name'  => $tag_name,
 					'Value' => $tag_value,
-				];
+				);
 			}
 		}
 
@@ -253,33 +253,35 @@ class Account_API {
 					$recipient_email = $recipients[ $index ] ?? '';
 
 					if ( ( $status['Status'] ?? '' ) === 'Success' ) {
-						$sent_count++;
+						++$sent_count;
 						if ( ! empty( $status['MessageId'] ) ) {
 							$message_ids[] = $status['MessageId'];
 						}
 					} else {
-						$failed[] = [
+						$failed[] = array(
 							'email' => $recipient_email,
 							'error' => $status['Error'] ?? $status['Status'] ?? __( 'Unknown error', 'doublescale' ),
-						];
+						);
 					}
 				}
 			}
 		} catch ( \Exception $e ) {
 			// If bulk send fails, mark all recipients as failed
 			foreach ( $recipients as $email ) {
-				$failed[] = [
+				$failed[] = array(
 					'email' => $email,
 					'error' => $e->getMessage(),
-				];
+				);
 			}
 		}
 
 		// Clean up: delete the temporary template
 		try {
-			$client->deleteTemplate( [
-				'TemplateName' => $template_name,
-			] );
+			$client->deleteTemplate(
+				array(
+					'TemplateName' => $template_name,
+				)
+			);
 		} catch ( \Exception $e ) {
 			// Log but don't fail the operation if template deletion fails.
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional best-effort diagnostic when SES template cleanup fails; the send already succeeded.
@@ -287,7 +289,7 @@ class Account_API {
 		}
 
 		// Build result
-		$result = [
+		$result = array(
 			'id'          => ! empty( $message_ids ) ? $message_ids[0] : '',
 			'message'     => sprintf(
 				/* translators: 1: sent count, 2: total count */
@@ -298,7 +300,7 @@ class Account_API {
 			'sent_count'  => $sent_count,
 			'failed'      => $failed,
 			'message_ids' => $message_ids,
-		];
+		);
 
 		// Log the batch
 		$this->log_batch_emails( $batch_args, $recipients, $sent_count > 0 ? $result : new WP_Error( 'all_failed', __( 'All emails failed to send.', 'doublescale' ) ) );
@@ -308,7 +310,7 @@ class Account_API {
 			return new WP_Error(
 				'batch_send_failed',
 				__( 'All emails in batch failed to send.', 'doublescale' ),
-				[ 'failed' => $failed ]
+				array( 'failed' => $failed )
 			);
 		}
 
@@ -327,7 +329,7 @@ class Account_API {
 	 * @return array Default template data with empty strings for all placeholders
 	 */
 	protected function get_default_template_data( $batch_args ) {
-		$defaults = [];
+		$defaults = array();
 		$content  = ( $batch_args['subject'] ?? '' ) . ( $batch_args['html'] ?? '' ) . ( $batch_args['text'] ?? '' );
 
 		// Extract all {{key}} placeholders
@@ -392,10 +394,10 @@ class Account_API {
 		// If no connection info, try to get from settings
 		if ( empty( $connection_id ) || empty( $account_id ) ) {
 			$settings    = get_option( 'doublescale_smtp_settings', array() );
-			$connections = $settings['connections'] ?? [];
+			$connections = $settings['connections'] ?? array();
 
 			// Find AWS connection from default or fallback
-			foreach ( [ 'default_connection', 'fallback_connection' ] as $key ) {
+			foreach ( array( 'default_connection', 'fallback_connection' ) as $key ) {
 				if ( ! empty( $settings[ $key ] ) && isset( $connections[ $settings[ $key ] ] ) ) {
 					$conn = $connections[ $settings[ $key ] ];
 					if ( ( $conn['mailer'] ?? '' ) === 'aws' ) {
@@ -418,14 +420,14 @@ class Account_API {
 		// Log one entry for the batch (not per recipient to avoid log spam)
 		$subject         = $batch_args['subject'] ?? '';
 		$body            = $batch_args['html'] ?? $batch_args['text'] ?? '';
-		$headers         = $batch_args['headers'] ?? [];
-		$attachments     = [];
-		$recipients_data = [
+		$headers         = $batch_args['headers'] ?? array();
+		$attachments     = array();
+		$recipients_data = array(
 			'to'       => implode( ', ', $recipients ),
 			'cc'       => '',
 			'bcc'      => '',
 			'reply_to' => $batch_args['reply_to'] ?? '',
-		];
+		);
 
 		$smtp_outbound_log->handle(
 			$subject . ' [Batch: ' . count( $recipients ) . ' recipients]',

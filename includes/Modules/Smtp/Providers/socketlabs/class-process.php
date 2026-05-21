@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\SocketLabs;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -33,10 +32,10 @@ class Process extends Abstract_Process {
 
 		$name = sanitize_text_field( $name );
 
-		$this->headers['CustomHeaders'][] = [
+		$this->headers['CustomHeaders'][] = array(
 			'Name'  => $name,
 			'Value' => $value,
-		];
+		);
 	}
 
 	/**
@@ -53,9 +52,9 @@ class Process extends Abstract_Process {
 			return;
 		}
 
-		$this->body['From'] = [
+		$this->body['From'] = array(
 			'EmailAddress' => $email,
-		];
+		);
 
 		if ( ! empty( $name ) ) {
 			$this->body['From']['FriendlyName'] = $name;
@@ -91,27 +90,26 @@ class Process extends Abstract_Process {
 
 				switch ( $type ) {
 					case 'to':
-						$this->body['To'][] = [
+						$this->body['To'][] = array(
 							'EmailAddress' => $email_address,
 							'FriendlyName' => $name,
-						];
+						);
 						break;
 					case 'cc':
-						$this->body['CC'][] = [
+						$this->body['CC'][] = array(
 							'EmailAddress' => $email_address,
 							'FriendlyName' => $name,
-						];
+						);
 						break;
 					case 'bcc':
-						$this->body['BCC'][] = [
+						$this->body['BCC'][] = array(
 							'EmailAddress' => $email_address,
 							'FriendlyName' => $name,
-						];
+						);
 						break;
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -147,12 +145,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['HtmlBody'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['TextBody'] = $content;
-			} else {
-				$this->body['HtmlBody'] = $content;
-			}
+		} else {
+			$this->body['HtmlBody'] = $content;
 		}
 	}
 
@@ -177,10 +173,10 @@ class Process extends Abstract_Process {
 				continue;
 			}
 
-			$this->body['ReplyTo'] = [
+			$this->body['ReplyTo'] = array(
 				'EmailAddress' => $email_address,
 				'FriendlyName' => $name,
-			];
+			);
 		}
 	}
 
@@ -299,10 +295,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'SocketLabs Send Email Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_socketlabs_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 			$this->log_result(
@@ -313,6 +309,5 @@ class Process extends Abstract_Process {
 			);
 			return false;
 		}
-
 	}
 }

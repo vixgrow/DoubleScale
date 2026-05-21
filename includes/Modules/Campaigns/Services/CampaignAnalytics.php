@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Campaigns\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Utils\Utils;
@@ -295,10 +294,10 @@ class CampaignAnalytics {
 
 			$stats['opened']  = (int) $result->total_opened;
 			$stats['clicked'] = (int) $result->total_clicked;
-			
+
 			// Get unsubscribe count from dedicated table (use mode integer)
 			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
-			
+
 			$stats = $this->calculate_email_rates( $stats );
 
 		} elseif ( $type_int === CampaignChannel::CHANNEL_SMS ) {
@@ -313,10 +312,10 @@ class CampaignAnalytics {
 
 			$stats['clicked']   = (int) $result->total_clicked;
 			$stats['delivered'] = (int) $result->delivered;
-			
+
 			// Get unsubscribe count from dedicated table (use mode integer)
 			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
-			
+
 			$stats = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type_int === CampaignChannel::CHANNEL_WHATSAPP ) {
@@ -333,10 +332,10 @@ class CampaignAnalytics {
 			$stats['clicked']   = (int) $result->total_clicked;
 			$stats['delivered'] = (int) $result->delivered;
 			$stats['read']      = (int) $result->total_read;
-			
+
 			// Get unsubscribe count from dedicated table (use mode integer)
 			$stats['unsubscribed'] = $this->get_unsubscribe_count( $campaign_id, $type_int );
-			
+
 			$stats = $this->calculate_whatsapp_rates( $stats );
 		}
 

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Emails\Bulkmailers\AbstractBulkMailer;
@@ -125,7 +124,7 @@ class BulkEmailSender {
 		$mailer_slug = self::get_active_mailer_slug( $from_email );
 
 		if ( ! $mailer_slug || ! isset( self::$mailer_classes[ $mailer_slug ] ) ) {
-			self::$mailer_instance     = null;
+			self::$mailer_instance    = null;
 			self::$cached_mailer_slug = null;
 			return null;
 		}
@@ -137,8 +136,8 @@ class BulkEmailSender {
 			return self::$mailer_instance;
 		}
 
-		$mailer_class              = self::$mailer_classes[ $mailer_slug ];
-		self::$mailer_instance     = new $mailer_class();
+		$mailer_class             = self::$mailer_classes[ $mailer_slug ];
+		self::$mailer_instance    = new $mailer_class();
 		self::$cached_mailer_slug = $mailer_slug;
 
 		if ( $from_email !== null ) {
@@ -253,7 +252,7 @@ class BulkEmailSender {
 		if ( ! $mailer ) {
 			return new WP_Error(
 				'no_bulk_mailer',
-				__( 'No bulk-capable mailer is configured in the SMTP module for this sender.', 'doublescale')
+				__( 'No bulk-capable mailer is configured in the SMTP module for this sender.', 'doublescale' )
 			);
 		}
 
@@ -262,7 +261,7 @@ class BulkEmailSender {
 				'mailer_not_available',
 				sprintf(
 					/* translators: %s: mailer name */
-					__( '%s is not properly configured.', 'doublescale'),
+					__( '%s is not properly configured.', 'doublescale' ),
 					ucfirst( $mailer->get_slug() )
 				)
 			);
@@ -315,7 +314,7 @@ class BulkEmailSender {
 	 * @since 1.0.0
 	 */
 	public static function reset() {
-		self::$mailer_instance     = null;
+		self::$mailer_instance    = null;
 		self::$cached_mailer_slug = null;
 	}
 }

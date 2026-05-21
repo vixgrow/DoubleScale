@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -86,7 +85,7 @@ class Pipedrive extends Importer {
 	 * Run importer using cursor-based pagination for v2 Api
 	 */
 	public function run() {
-		 $api = $this->get_api();
+		$api = $this->get_api();
 
 		// Cache metadata once at start to avoid repeated Api calls
 		$this->cache_metadata( $api );
@@ -101,18 +100,18 @@ class Pipedrive extends Importer {
 		$first_page_response = $api->get_persons_first_page();
 
 		if ( empty( $first_page_response['success'] ) || $first_page_response['success'] !== true ) {
-			$error_message = __( 'Pipedrive: Error fetching persons', 'doublescale');
+			$error_message = __( 'Pipedrive: Error fetching persons', 'doublescale' );
 			$response_code = $first_page_response['code'] ?? 0;
 
 			// Provide more specific error messages based on response code
 			if ( $response_code === 401 ) {
-				$error_message = __( 'Pipedrive Api Token is invalid or expired. Please verify your credentials.', 'doublescale');
+				$error_message = __( 'Pipedrive Api Token is invalid or expired. Please verify your credentials.', 'doublescale' );
 			} elseif ( $response_code === 403 ) {
-				$error_message = __( 'Pipedrive Api access denied. Please check your token permissions.', 'doublescale');
+				$error_message = __( 'Pipedrive Api access denied. Please check your token permissions.', 'doublescale' );
 			} elseif ( $response_code === 404 ) {
-				$error_message = __( 'Pipedrive Api endpoint not found. Please verify your domain format.', 'doublescale');
+				$error_message = __( 'Pipedrive Api endpoint not found. Please verify your domain format.', 'doublescale' );
 			} elseif ( in_array( $response_code, array( 0, 500, 502, 503, 504 ) ) ) {
-				$error_message = __( 'Pipedrive Api connection failed. Please check your domain and try again.', 'doublescale');
+				$error_message = __( 'Pipedrive Api connection failed. Please check your domain and try again.', 'doublescale' );
 			}
 
 			$error_details = array(
@@ -179,7 +178,7 @@ class Pipedrive extends Importer {
 			} else {
 				$this->cached_person_fields = array();
 				doublescale_get_logger()->info(
-					__( 'Pipedrive: Could not fetch person fields', 'doublescale'),
+					__( 'Pipedrive: Could not fetch person fields', 'doublescale' ),
 					array(
 						'code'     => 'pipedrive_get_person_fields',
 						'response' => $fields_response,
@@ -411,19 +410,19 @@ class Pipedrive extends Importer {
 	 * @return array
 	 */
 	public function get_credentials() {
-		 return array(
-			 'api_domain' => array(
-				 'label'       => __( 'Api Domain', 'doublescale'),
-				 'type'        => 'text',
-				 'description' => __( 'Your Pipedrive company domain (e.g., yourcompany.pipedrive.com)', 'doublescale'),
-				 'placeholder' => 'yourcompany.pipedrive.com',
-			 ),
-			 'api_token'  => array(
-				 'label'       => __( 'Api Token', 'doublescale'),
-				 'type'        => 'text',
-				 'description' => __( 'Your Pipedrive Api token from Settings > Personal preferences > Api', 'doublescale'),
-			 ),
-		 );
+		return array(
+			'api_domain' => array(
+				'label'       => __( 'Api Domain', 'doublescale' ),
+				'type'        => 'text',
+				'description' => __( 'Your Pipedrive company domain (e.g., yourcompany.pipedrive.com)', 'doublescale' ),
+				'placeholder' => 'yourcompany.pipedrive.com',
+			),
+			'api_token'  => array(
+				'label'       => __( 'Api Token', 'doublescale' ),
+				'type'        => 'text',
+				'description' => __( 'Your Pipedrive Api token from Settings > Personal preferences > Api', 'doublescale' ),
+			),
+		);
 	}
 
 	/**
@@ -436,7 +435,7 @@ class Pipedrive extends Importer {
 	public function get_api() {
 		if ( empty( $this->credentials['api_domain'] ) || empty( $this->credentials['api_token'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Pipedrive Api Domain and Api Token are required.', 'doublescale') );
+			throw new \Exception( __( 'Pipedrive Api Domain and Api Token are required.', 'doublescale' ) );
 		}
 
 		$api_domain = trim( $this->credentials['api_domain'] );
@@ -449,13 +448,13 @@ class Pipedrive extends Importer {
 		// Basic validation for domain format
 		if ( ! preg_match( '/^[a-zA-Z0-9.-]+\.(pipedrive\.com|pipedrivecdn\.com)$/', $api_domain ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Pipedrive Api Domain format appears to be invalid. Please use format: yourcompany.pipedrive.com', 'doublescale') );
+			throw new \Exception( __( 'Pipedrive Api Domain format appears to be invalid. Please use format: yourcompany.pipedrive.com', 'doublescale' ) );
 		}
 
 		// Basic validation for Api token
 		if ( strlen( $api_token ) < 30 ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception message, not direct output.
-			throw new \Exception( __( 'Pipedrive Api Token appears to be invalid. Please verify your token.', 'doublescale') );
+			throw new \Exception( __( 'Pipedrive Api Token appears to be invalid. Please verify your token.', 'doublescale' ) );
 		}
 
 		return new Api( $api_domain, $api_token );
@@ -473,7 +472,7 @@ class Pipedrive extends Importer {
 			$test_response = $api->get_persons_first_page();
 
 			if ( empty( $test_response['success'] ) || $test_response['success'] !== true ) {
-				throw new \Exception( __( 'Invalid Pipedrive credentials. Please verify your Api Domain and Token.', 'doublescale') );
+				throw new \Exception( __( 'Invalid Pipedrive credentials. Please verify your Api Domain and Token.', 'doublescale' ) );
 			}
 		} catch ( \Exception $e ) {
 			// Re-throw the exception so the REST Api catches it and returns error

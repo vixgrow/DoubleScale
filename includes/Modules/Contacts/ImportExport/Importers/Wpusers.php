@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Contacts\ImportExport\Importers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Abstracts\Importer;
@@ -56,7 +55,7 @@ class Wpusers extends Importer {
 		$result = $this->import_with_offset(
 			$total,
 			$this->offset,
-			function( $offset ) {
+			function ( $offset ) {
 				return UserModel::offset( $offset )->limit( 20 )->get();
 			},
 			$mapping

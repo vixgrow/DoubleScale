@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Abstracts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
@@ -288,7 +287,7 @@ abstract class RestTaxonomyController extends RestController {
 				$query->where(
 					function ( $q ) use ( $keyword ) {
 						$q->where( 'name', 'LIKE', '%' . $keyword . '%' )
-						  ->orWhere( 'description', 'LIKE', '%' . $keyword . '%' );
+							->orWhere( 'description', 'LIKE', '%' . $keyword . '%' );
 					}
 				);
 			}

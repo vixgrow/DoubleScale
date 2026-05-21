@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails\Layouts;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -137,7 +136,7 @@ class GridLayoutHandler extends AbstractGridLayoutHandler {
 	 */
 	public function can_handle( array $block ): bool {
 		return isset( $block['props']['inlineLayout'] ) && $block['props']['inlineLayout'] &&
-			   isset( $block['props']['containerId'] ) && $block['props']['containerId'] === $this->container_id;
+				isset( $block['props']['containerId'] ) && $block['props']['containerId'] === $this->container_id;
 	}
 
 	/**
@@ -182,4 +181,3 @@ class GridLayoutHandler extends AbstractGridLayoutHandler {
 		return array_keys( self::$grid_configs );
 	}
 }
-

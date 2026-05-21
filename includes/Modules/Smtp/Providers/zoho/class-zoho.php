@@ -71,5 +71,4 @@ class Zoho extends Provider {
 
 		$this->app = new App( $this );
 	}
-
 }

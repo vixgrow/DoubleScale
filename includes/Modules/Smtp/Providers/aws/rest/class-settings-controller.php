@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Aws\REST;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\REST\Settings_Controller as Abstract_Settings_Controller;
@@ -102,42 +101,42 @@ class Settings_Controller extends Abstract_Settings_Controller {
 			if ( is_wp_error( $account_api ) ) {
 				throw new Exception( $account_api->get_error_message() );
 			}
-			$result     = [];
+			$result     = array();
 			$client     = $account_api->get_client();
 			$emails     = $client->listIdentities(
-				[
+				array(
 					'IdentityType' => 'EmailAddress',
-				]
+				)
 			);
 			$emails     = $emails->get( 'Identities' );
 			$domains    = $client->listIdentities(
-				[
+				array(
 					'IdentityType' => 'Domain',
-				]
+				)
 			);
 			$domains    = $domains->get( 'Identities' );
 			$attributes = $client->getIdentityVerificationAttributes(
-				[
+				array(
 					'Identities' => array_merge( $emails, $domains ),
-				]
+				)
 			);
 			$attributes = $attributes->get( 'VerificationAttributes' );
 			$dkim       = $client->getIdentityDkimAttributes(
-				[
+				array(
 					'Identities' => array_merge( $emails, $domains ),
-				]
+				)
 			);
 			$dkim       = $dkim->get( 'DkimAttributes' );
 			$identities = array_merge( $emails, $domains );
 
 			foreach ( $identities as $identity ) {
-				$result[] = [
+				$result[] = array(
 					'type'       => in_array( $identity, $emails, true ) ? 'email' : 'domain',
 					'identity'   => $identity,
 					'status'     => $attributes[ $identity ]['VerificationStatus'],
 					'attributes' => $attributes[ $identity ],
 					'dkim'       => $dkim[ $identity ],
-				];
+				);
 			}
 			return new WP_REST_Response( $result, 200 );
 		} catch ( Exception $e ) {
@@ -145,10 +144,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Aws Get Identities Error', 'doublescale' ),
 				array(
 					'code'  => 'aws_get_identities_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 
@@ -189,15 +188,15 @@ class Settings_Controller extends Abstract_Settings_Controller {
 
 			if ( 'domain' === $type ) {
 				$result = $client->verifyDomainIdentity(
-					[
+					array(
 						'Domain' => $request->get_param( 'identity' ),
-					]
+					)
 				);
 			} else {
 				$result = $client->verifyEmailIdentity(
-					[
+					array(
 						'EmailAddress' => $request->get_param( 'identity' ),
-					]
+					)
 				);
 			}
 
@@ -207,10 +206,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Aws Verify Identity Error', 'doublescale' ),
 				array(
 					'code'  => 'aws_verify_identity_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 
@@ -251,15 +250,15 @@ class Settings_Controller extends Abstract_Settings_Controller {
 
 			if ( 'domain' === $type ) {
 				$result = $client->deleteIdentity(
-					[
+					array(
 						'Identity' => $request->get_param( 'identity' ),
-					]
+					)
 				);
 			} else {
 				$result = $client->deleteIdentity(
-					[
+					array(
 						'Identity' => $request->get_param( 'identity' ),
-					]
+					)
 				);
 			}
 
@@ -269,10 +268,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Aws Delete Identity Error', 'doublescale' ),
 				array(
 					'code'  => 'aws_delete_identity_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 
@@ -311,9 +310,9 @@ class Settings_Controller extends Abstract_Settings_Controller {
 			$client = $account_api->get_client();
 
 			$result = $client->verifyEmailIdentity(
-				[
+				array(
 					'EmailAddress' => $request->get_param( 'identity' ),
-				]
+				)
 			);
 
 			return new WP_REST_Response( $result, 200 );
@@ -322,10 +321,10 @@ class Settings_Controller extends Abstract_Settings_Controller {
 				esc_html__( 'Aws Resend Verification Email Error', 'doublescale' ),
 				array(
 					'code'  => 'aws_resend_verification_email_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
+					),
 				)
 			);
 

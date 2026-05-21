@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Goals;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -92,7 +91,7 @@ class TagRemoved extends Goal {
 	 * @since 1.0.0
 	 *
 	 * @param ContactModel $contact
-	 * @param array         $tags
+	 * @param array        $tags
 	 *
 	 * @return void
 	 */
@@ -110,7 +109,7 @@ class TagRemoved extends Goal {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Automation Contact Model.
-	 * @param array                    $data Data.
+	 * @param array                  $data Data.
 	 *
 	 * @return bool
 	 */
@@ -138,7 +137,7 @@ class TagRemoved extends Goal {
 	public function get_fields() {
 		return array(
 			'tags' => array(
-				'label'    => __( 'Tags', 'doublescale'),
+				'label'    => __( 'Tags', 'doublescale' ),
 				'type'     => 'tags',
 				'multiple' => true,
 			),

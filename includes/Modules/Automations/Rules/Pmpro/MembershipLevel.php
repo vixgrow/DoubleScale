@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Pmpro;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Membership Level class
  */
-class MembershipLevel extends Rule
-{
+class MembershipLevel extends Rule {
+
 	/**
 	 * Name
 	 *
@@ -74,11 +73,10 @@ class MembershipLevel extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_operators()
-	{
+	public function get_operators() {
 		return array(
-			'is'     => __('Is', 'doublescale'),
-			'is_not' => __('Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -89,17 +87,16 @@ class MembershipLevel extends Rule
 	 *
 	 * @return array
 	 */
-	public function get_options()
-	{
-		if (! defined('PMPRO_VERSION') || ! function_exists('pmpro_getAllLevels')) {
+	public function get_options() {
+		if ( ! defined( 'PMPRO_VERSION' ) || ! function_exists( 'pmpro_getAllLevels' ) ) {
 			return array();
 		}
 
-		$levels  = pmpro_getAllLevels(true, true);
+		$levels  = pmpro_getAllLevels( true, true );
 		$options = array();
 
-		foreach ($levels as $level) {
-			$options[ (int) $level->id ] = esc_html($level->name);
+		foreach ( $levels as $level ) {
+			$options[ (int) $level->id ] = esc_html( $level->name );
 		}
 
 		return $options;
@@ -114,9 +111,8 @@ class MembershipLevel extends Rule
 	 *
 	 * @return string
 	 */
-	public function get_value($automation_contact)
-	{
-		$membership_id = $automation_contact->get_data('membership_id');
+	public function get_value( $automation_contact ) {
+		$membership_id = $automation_contact->get_data( 'membership_id' );
 		return $membership_id ? (string) $membership_id : '';
 	}
 }
@@ -124,8 +120,8 @@ class MembershipLevel extends Rule
 add_action(
 	'init',
 	function () {
-		if (defined('PMPRO_VERSION')) {
-			RulesManager::instance()->register(new MembershipLevel());
+		if ( defined( 'PMPRO_VERSION' ) ) {
+			RulesManager::instance()->register( new MembershipLevel() );
 		}
 	},
 	99

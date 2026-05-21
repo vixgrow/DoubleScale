@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
@@ -77,35 +76,35 @@ class RestSmtpSettingsController extends RestController {
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => array(
-				'default_connection'      => array(
+				'default_connection'    => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'fallback_connection'     => array(
+				'fallback_connection'   => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'connections'             => array(
+				'connections'           => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,
 					'default'              => array(),
 				),
-				'disable_summary_email'   => array(
+				'disable_summary_email' => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),
-				'alerts_settings'         => array(
+				'alerts_settings'       => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,
 					'default'              => array(),
 				),
 			),
 			'default'              => array(
-				'default_connection'      => '',
-				'fallback_connection'     => '',
-				'connections'             => array(),
-				'disable_summary_email'   => false,
-				'alerts_settings'         => array(),
+				'default_connection'    => '',
+				'fallback_connection'   => '',
+				'connections'           => array(),
+				'disable_summary_email' => false,
+				'alerts_settings'       => array(),
 			),
 		);
 
@@ -198,5 +197,4 @@ class RestSmtpSettingsController extends RestController {
 	public function update_permissions_check( $request ) {
 		return Settings::user_can_manage_smtp_rest();
 	}
-
 }

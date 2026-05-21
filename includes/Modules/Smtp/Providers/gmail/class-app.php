@@ -8,7 +8,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -98,7 +97,7 @@ class App {
 		// produce `redirect_uri_mismatch` — Google compares the *decoded* value to
 		// the URI list configured on the OAuth client.
 		$auth_url = add_query_arg(
-			[
+			array(
 				'response_type' => 'code',
 				'access_type'   => 'offline',
 				'client_id'     => $app_credentials['client_id'],
@@ -106,7 +105,7 @@ class App {
 				'state'         => 'smtp-gmail',
 				'scope'         => $this->get_oauth_scope_string(),
 				'prompt'        => 'consent',
-			],
+			),
 			'https://accounts.google.com/o/oauth2/auth'
 		);
 		\doublescale_safe_redirect( $auth_url );
@@ -141,17 +140,17 @@ class App {
 
 		// get account tokens.
 		$tokens = $this->get_tokens(
-			[
+			array(
 				'grant_type'    => 'authorization_code',
 				'code'          => $code,
 				'client_id'     => $app_credentials['client_id'],
 				'client_secret' => $app_credentials['client_secret'],
 				'redirect_uri'  => $this->get_redirect_uri(),
-			]
+			)
 		);
 
 		if ( empty( $tokens ) ) {
-			$last = get_transient( 'doublescale_smtp_gmail_oauth_last_error' );
+			$last   = get_transient( 'doublescale_smtp_gmail_oauth_last_error' );
 			$detail = is_array( $last ) ? $last : array();
 			?>
 			<!DOCTYPE html>
@@ -175,16 +174,16 @@ class App {
 		}
 
 		// get account details.
-		$account_api       = new Account_API( $this, '', [ 'credentials' => $tokens ] );
+		$account_api       = new Account_API( $this, '', array( 'credentials' => $tokens ) );
 		$accounts_response = $account_api->get_profile();
 
 		if ( is_wp_error( $accounts_response ) ) {
 			doublescale_get_logger()->error(
 				'Cannot get profile details',
-				[
+				array(
 					'code'  => 'cannot_get_profile',
 					'error' => $accounts_response,
-				]
+				)
 			);
 			echo esc_html__( 'Error, Cannot get profile details!', 'doublescale' );
 			exit;
@@ -194,10 +193,10 @@ class App {
 		$account_name = $account->emailAddress;
 		$account_id   = str_replace( '@gmail.com', '', $account->emailAddress );
 
-		$account_data = [
+		$account_data = array(
 			'name'        => $account_name,
 			'credentials' => $tokens,
-		];
+		);
 
 		// check account existence.
 		if ( in_array( $account_id, array_keys( $this->provider->accounts->get_accounts() ), true ) ) {
@@ -229,7 +228,7 @@ class App {
 			<?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML response for OAuth popup that messages the opener via window.opener and closes itself; outside WP page lifecycle, wp_enqueue cannot run here. ?>
 			<script>
 				if ( typeof window.opener.add_new_gmail_account === 'function' ) {
-					window.opener.add_new_gmail_account( '<?php echo  esc_attr( $account_id ); ?>', '<?php echo esc_attr( $account_name ); ?>' );
+					window.opener.add_new_gmail_account( '<?php echo esc_attr( $account_id ); ?>', '<?php echo esc_attr( $account_name ); ?>' );
 					window.close();
 				}
 			</script>
@@ -248,10 +247,10 @@ class App {
 	public function get_tokens( $query ) {
 		$response = wp_remote_post(
 			'https://accounts.google.com/o/oauth2/token',
-			[
+			array(
 				'body'    => $query,
 				'timeout' => 30,
-			]
+			)
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -309,7 +308,7 @@ class App {
 	 */
 	public function refresh_tokens( $account_id, $refresh_token = null ) {
 		if ( empty( $refresh_token ) ) {
-			$accounts     = $this->provider->accounts->get_accounts( [ 'credentials' ] );
+			$accounts      = $this->provider->accounts->get_accounts( array( 'credentials' ) );
 			$refresh_token = $accounts[ $account_id ]['credentials']['refresh_token'] ?? '';
 		}
 
@@ -323,12 +322,12 @@ class App {
 		}
 
 		$tokens = $this->get_tokens(
-			[
+			array(
 				'grant_type'    => 'refresh_token',
 				'refresh_token' => $refresh_token,
 				'client_id'     => $app_credentials['client_id'],
 				'client_secret' => $app_credentials['client_secret'],
-			]
+			)
 		);
 
 		if ( empty( $tokens ) ) {
@@ -342,7 +341,7 @@ class App {
 
 		$updated = $this->provider->accounts->update_account(
 			$account_id,
-			[ 'credentials' => $tokens ],
+			array( 'credentials' => $tokens ),
 			false
 		);
 		if ( empty( $updated ) || is_wp_error( $updated ) ) {
@@ -358,7 +357,7 @@ class App {
 	 * @return array|false Array of client_id & client_secret. false on failure.
 	 */
 	public function get_app_credentials() {
-		$app_settings = $this->provider->settings->get( 'app' ) ?? [];
+		$app_settings = $this->provider->settings->get( 'app' ) ?? array();
 		if ( empty( $app_settings['client_id'] ) || empty( $app_settings['client_secret'] ) ) {
 			return false;
 		} else {
@@ -374,5 +373,4 @@ class App {
 	public function get_redirect_uri() {
 		return admin_url( 'admin.php' );
 	}
-
 }

@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Contacts\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -71,7 +70,7 @@ class RestImportExportController extends RestController {
 							'additionalProperties' => true,
 						),
 						'filters' => array(
-							'description' => __( 'Filters to apply.', 'doublescale'),
+							'description' => __( 'Filters to apply.', 'doublescale' ),
 							'type'        => 'array',
 						),
 					),
@@ -144,25 +143,25 @@ class RestImportExportController extends RestController {
 							'required' => false,
 							'type'     => 'string',
 						),
-					'update_existing'       => array(
-						'required' => false,
-						'type'     => 'boolean',
-					),
-					'send_double_optin'     => array(
-						'required' => false,
-						'type'     => 'boolean',
-					),
-					'credentials'           => array(
-						'required' => false,
-						'type'     => 'object',
-					),
-					'membership_filter'     => array(
-						'required' => false,
-						'type'     => 'array',
-						'items'    => array(
-							'type' => 'string',
+						'update_existing'       => array(
+							'required' => false,
+							'type'     => 'boolean',
 						),
-					),
+						'send_double_optin'     => array(
+							'required' => false,
+							'type'     => 'boolean',
+						),
+						'credentials'           => array(
+							'required' => false,
+							'type'     => 'object',
+						),
+						'membership_filter'     => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'string',
+							),
+						),
 					),
 				),
 			)
@@ -346,7 +345,7 @@ class RestImportExportController extends RestController {
 			default:
 				return new WP_Error(
 					'invalid_provider',
-					__( 'Invalid OAuth provider', 'doublescale'),
+					__( 'Invalid OAuth provider', 'doublescale' ),
 					array( 'status' => 400 )
 				);
 		}
@@ -433,8 +432,8 @@ class RestImportExportController extends RestController {
 					array(
 						'success' => $result,
 						'message' => $result
-							? __( 'GoHighLevel connection cleared', 'doublescale')
-							: __( 'No connection to clear', 'doublescale'),
+							? __( 'GoHighLevel connection cleared', 'doublescale' )
+							: __( 'No connection to clear', 'doublescale' ),
 					),
 					200
 				);
@@ -509,7 +508,7 @@ class RestImportExportController extends RestController {
 		if ( ! class_exists( 'DoubleScale\Modules\Contacts\ImportExport\Export' ) ) {
 			return new WP_Error(
 				'pro_feature',
-				__( 'Contact export is a Pro feature. Please upgrade to Plugin Pro.', 'doublescale'),
+				__( 'Contact export is a Pro feature. Please upgrade to Plugin Pro.', 'doublescale' ),
 				array( 'status' => 403 )
 			);
 		}

@@ -2,12 +2,11 @@
 
 /**
  * Template Renderer Factory
- * 
+ *
  * Creates appropriate renderer instances
  */
 
 namespace DoubleScale\Modules\Booking\Renderer;
-
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,22 +23,22 @@ class TemplateRendererFactory {
 		return new CalendarPageRenderer( $calendarModelClass );
 	}
 
-	public function create_booking_renderer( 
-		string $calendarModelClass, 
-		string $eventModelClass, 
-		string $globalSettingsClass 
+	public function create_booking_renderer(
+		string $calendarModelClass,
+		string $eventModelClass,
+		string $globalSettingsClass
 	): BookingPageRenderer {
-		return new BookingPageRenderer( 
-			$calendarModelClass, 
-			$eventModelClass, 
-			$globalSettingsClass 
+		return new BookingPageRenderer(
+			$calendarModelClass,
+			$eventModelClass,
+			$globalSettingsClass
 		);
 	}
 
 	public function create_action_renderer(
-		string $type, 
-		string $eventModelClass, 
-		string $bookingValidatorClass, 
+		string $type,
+		string $eventModelClass,
+		string $bookingValidatorClass,
 		string $globalSettingsClass,
 		string $calendarModelClass
 	) {
@@ -49,10 +48,10 @@ class TemplateRendererFactory {
 			case 'confirm':
 				return new ConfirmPageRenderer( $eventModelClass );
 			case 'reschedule':
-				return new ReschedulePageRenderer( 
-					$eventModelClass, 
-					$bookingValidatorClass, 
-					$globalSettingsClass, 
+				return new ReschedulePageRenderer(
+					$eventModelClass,
+					$bookingValidatorClass,
+					$globalSettingsClass,
 					$calendarModelClass
 				);
 			case 'claim_waitlist':

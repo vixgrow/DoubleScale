@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\Contact;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -22,8 +21,8 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 /**
  * Country class
  */
-class Country extends Rule
-{
+class Country extends Rule {
+
 
 	/**
 	 * Name
@@ -80,11 +79,10 @@ class Country extends Rule
 	 *
 	 * @return mixed
 	 */
-	public function get_value($automation_contact)
-	{
+	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
 		return $contact->country;
 	}
 }
 
-RulesManager::instance()->register(new Country());
+RulesManager::instance()->register( new Country() );

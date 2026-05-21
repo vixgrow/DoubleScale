@@ -44,7 +44,7 @@ abstract class AbstractTracking {
 	 * @return static
 	 */
 	public static function instance() {
-		 $class = get_called_class();
+		$class = get_called_class();
 		if ( ! isset( self::$instances[ $class ] ) ) {
 			self::$instances[ $class ] = new static();
 		}
@@ -55,7 +55,7 @@ abstract class AbstractTracking {
 	 * Constructor
 	 */
 	public function __construct() {
-		 add_action( 'init', array( $this, 'handle_tracking' ) );
+		add_action( 'init', array( $this, 'handle_tracking' ) );
 		add_action( 'doublescale_ready', array( $this, 'add_hooks' ) );
 	}
 
@@ -132,7 +132,7 @@ abstract class AbstractTracking {
 		$action   = sanitize_text_field( wp_unslash( $_GET['doublescale'] ) );
 		$hash_key = sanitize_text_field( wp_unslash( $_GET['hash_key'] ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		$type     = $this->channel;
+		$type = $this->channel;
 
 		switch ( $action ) {
 			case "{$type}_click":
@@ -151,7 +151,7 @@ abstract class AbstractTracking {
 	 * @return void
 	 */
 	protected function process_provider_webhook() {
-		 // Handle Meta webhook verification challenge (GET request)
+		// Handle Meta webhook verification challenge (GET request)
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' === $_SERVER['REQUEST_METHOD'] && isset( $_GET['hub_mode'] ) ) {
 			$this->handle_meta_verification_challenge();
@@ -591,8 +591,8 @@ abstract class AbstractTracking {
 				$tracking_url = add_query_arg(
 					array(
 						'doublescale' => static::get_tracking_action(),
-						'hash_key' => $hash_key,
-						'original' => urlencode( $original_url ),
+						'hash_key'    => $hash_key,
+						'original'    => urlencode( $original_url ),
 					),
 					home_url()
 				);
@@ -615,7 +615,7 @@ abstract class AbstractTracking {
 		$unsubscribe_url = add_query_arg(
 			array(
 				'doublescale' => static::get_unsubscribe_action(),
-				'hash_key' => $hash_key,
+				'hash_key'    => $hash_key,
 			),
 			home_url()
 		);

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Booking\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -338,7 +337,7 @@ class EventModel extends Model {
 	 * @return array
 	 */
 	public function getTeamMembersAttribute() {
-		 return $this->get_meta( 'team_members', array() );
+		return $this->get_meta( 'team_members', array() );
 	}
 
 	/**
@@ -520,7 +519,7 @@ class EventModel extends Model {
 	 * @return bool
 	 */
 	public function getDynamicDurationAttribute() {
-		 return $this->get_meta( 'dynamic_duration', false );
+		return $this->get_meta( 'dynamic_duration', false );
 	}
 
 	/**
@@ -649,7 +648,7 @@ class EventModel extends Model {
 				if ( $this->calendar->type === 'team' ) {
 					$calendar = CalendarModel::where( 'user_id', $member_or_calendar_id )->where( 'type', 'host' )->first();
 					if ( ! $calendar ) {
-						$all_connected       = false;
+						$all_connected      = false;
 						$team_members_setup = false;
 						continue;
 					}
@@ -797,7 +796,7 @@ class EventModel extends Model {
 	 * @return void
 	 */
 	public function setSystemFields() {
-		 $event_location = $this->location ?? null;
+		$event_location = $this->location ?? null;
 
 		if ( ! $event_location || ! is_array( $event_location ) ) {
 			throw new \Exception( esc_html__( 'Invalid location', 'doublescale' ) );
@@ -1057,11 +1056,11 @@ class EventModel extends Model {
 	/**
 	 * Fetch available slots based on provided parameters.
 	 *
-	 * @param string $start_date         Date string accepted by DateTime (e.g. `Y-m-d` or `Y-m-d H:i:s`). Numeric timestamps are NOT accepted.
-	 * @param string $timezone           Timezone identifier.
-	 * @param int    $duration           Duration of each slot in minutes.
+	 * @param string   $start_date         Date string accepted by DateTime (e.g. `Y-m-d` or `Y-m-d H:i:s`). Numeric timestamps are NOT accepted.
+	 * @param string   $timezone           Timezone identifier.
+	 * @param int      $duration           Duration of each slot in minutes.
 	 * @param int|null $user_id          Optional host user ID; defaults to the event's own user(s).
-	 * @param bool   $include_full_slots Optional. Include fully-booked slots (e.g. for waiting-list rendering). Default false.
+	 * @param bool     $include_full_slots Optional. Include fully-booked slots (e.g. for waiting-list rendering). Default false.
 	 * @return array<string,array<int,array>> Slots grouped by date key (Y-m-d).
 	 */
 	public function get_available_slots( $start_date, $timezone, $duration, $user_id = null, $include_full_slots = false ) {
@@ -1257,7 +1256,7 @@ class EventModel extends Model {
 						// Replace the collected availabilities with the filtered
 						// set so downstream consumers (users_availability,
 						// merge helpers, slot loops) only see the targeted host.
-						$availabilities = $filtered;
+						$availabilities               = $filtered;
 						$first                        = $filtered[0];
 						$availability['weekly_hours'] = $first['weekly_hours'];
 						$availability['override']     = $first['override'];
@@ -1309,17 +1308,15 @@ class EventModel extends Model {
 				$availability['is_common']          = true;
 				$availability['users_availability'] = array();
 			}
-		} else {
-			if ( $type === 'existing' ) {
+		} elseif ( $type === 'existing' ) {
 				$availability = Availabilities::get_availability( $this->availability_id );
-			} elseif ( $type === 'custom' ) {
-				$availability = array(
-					'name'         => $this->availability_meta['custom_availability']['name'] ?? '',
-					'weekly_hours' => $this->availability_meta['custom_availability']['value']['weekly_hours'] ?? array(),
-					'override'     => $this->availability_meta['custom_availability']['value']['override'] ?? array(),
-					'timezone'     => $this->calendar->get_meta( 'timezone' ) ?? 'UTC',
-				);
-			}
+		} elseif ( $type === 'custom' ) {
+			$availability = array(
+				'name'         => $this->availability_meta['custom_availability']['name'] ?? '',
+				'weekly_hours' => $this->availability_meta['custom_availability']['value']['weekly_hours'] ?? array(),
+				'override'     => $this->availability_meta['custom_availability']['value']['override'] ?? array(),
+				'timezone'     => $this->calendar->get_meta( 'timezone' ) ?? 'UTC',
+			);
 		}
 		return $availability;
 	}
@@ -1464,7 +1461,7 @@ class EventModel extends Model {
 				continue;
 			}
 
-			$common = $this->findCommonTimeBlocks( $user_blocks_arrays );
+			$common                         = $this->findCommonTimeBlocks( $user_blocks_arrays );
 			$merged['weekly_hours'][ $day ] = array(
 				'times' => array_map(
 					function ( $b ) {
@@ -1873,7 +1870,11 @@ class EventModel extends Model {
 	 * @return string Broadest unit.
 	 */
 	private function widen_limit_unit( $current, $candidate ) {
-		$rank = array( 'days' => 1, 'weeks' => 2, 'months' => 3 );
+		$rank = array(
+			'days'   => 1,
+			'weeks'  => 2,
+			'months' => 3,
+		);
 		if ( ! isset( $rank[ $candidate ] ) ) {
 			return $current ?? $candidate;
 		}
@@ -2043,10 +2044,10 @@ class EventModel extends Model {
 			// Frequency / duration limits are window-level (day / week / month).
 			// Check once per day using the day's reference time, then act on
 			// the broadest exhausted unit:
-			//   - 'days'   → skip remaining time-blocks of THIS day only.
-			//   - 'weeks'  → skip ahead to next week (every remaining day in
-			//                the current week is also full).
-			//   - 'months' → skip ahead to next month.
+			// - 'days'   → skip remaining time-blocks of THIS day only.
+			// - 'weeks'  → skip ahead to next week (every remaining day in
+			// the current week is also full).
+			// - 'months' → skip ahead to next month.
 			// The previous implementation threw inside the time-block loop
 			// and only `continue`d, which silently checked the same window
 			// once per block and wasted queries.
@@ -2094,8 +2095,8 @@ class EventModel extends Model {
 	 * @return int Adjusted cursor — the next `+1 day` step lands in the next window.
 	 */
 	private function advance_past_limit_window( $current_ts, $unit, $timezone ) {
-		$tz  = new \DateTimeZone( $timezone );
-		$dt  = ( new \DateTime( '@' . $current_ts ) )->setTimezone( $tz );
+		$tz = new \DateTimeZone( $timezone );
+		$dt = ( new \DateTime( '@' . $current_ts ) )->setTimezone( $tz );
 
 		if ( 'months' === $unit ) {
 			$dt->modify( 'last day of this month' );
@@ -2105,7 +2106,15 @@ class EventModel extends Model {
 		// 'weeks' — jump to the last day of the configured week (Sun by default).
 		$settings   = get_option( 'doublescale_booking_settings', array() );
 		$start_from = isset( $settings['general']['start_from'] ) ? ucfirst( strtolower( $settings['general']['start_from'] ) ) : 'Monday';
-		$day_map    = array( 'Sunday' => 0, 'Monday' => 1, 'Tuesday' => 2, 'Wednesday' => 3, 'Thursday' => 4, 'Friday' => 5, 'Saturday' => 6 );
+		$day_map    = array(
+			'Sunday'    => 0,
+			'Monday'    => 1,
+			'Tuesday'   => 2,
+			'Wednesday' => 3,
+			'Thursday'  => 4,
+			'Friday'    => 5,
+			'Saturday'  => 6,
+		);
 		$start_num  = $day_map[ $start_from ] ?? 1;
 		$cur_num    = (int) $dt->format( 'w' );
 		$offset     = ( $cur_num - $start_num + 7 ) % 7;
@@ -2303,15 +2312,15 @@ class EventModel extends Model {
 						// Check if this synthetic slot is available
 						$available_slots = $this->check_available_slots( $synthetic_slot_start, $synthetic_slot_end, $user_id );
 
-					if ( $available_slots['slots'] > 0 || $include_full_slots ) {
-						// Mark this as a synthetic slot
-						$synthetic_slot = array(
-							'start'     => $synthetic_slot_start->format( 'Y-m-d H:i:s' ),
-							'end'       => $synthetic_slot_end->format( 'Y-m-d H:i:s' ),
-							'remaining' => $available_slots['slots'],
-							'hosts_ids' => $available_slots['hosts_ids'],
-							'synthetic' => true,
-						);
+						if ( $available_slots['slots'] > 0 || $include_full_slots ) {
+							// Mark this as a synthetic slot
+							$synthetic_slot = array(
+								'start'     => $synthetic_slot_start->format( 'Y-m-d H:i:s' ),
+								'end'       => $synthetic_slot_end->format( 'Y-m-d H:i:s' ),
+								'remaining' => $available_slots['slots'],
+								'hosts_ids' => $available_slots['hosts_ids'],
+								'synthetic' => true,
+							);
 
 							if ( ! isset( $slots[ $day ] ) ) {
 								$slots[ $day ] = array();
@@ -2566,7 +2575,7 @@ class EventModel extends Model {
 				$available_hosts_ids = array();
 				foreach ( $team_members as $team_member_id ) {
 					if ( $this->is_team_member_available_for_slot( $team_member_id, $day_start, $day_end, $buffer_before, $buffer_after ) ) {
-						$available_members++;
+						++$available_members;
 						$available_hosts_ids[] = $team_member_id;
 					}
 				}
@@ -2836,7 +2845,7 @@ class EventModel extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		parent::boot();
 
 		static::creating(
 			function ( $event ) {

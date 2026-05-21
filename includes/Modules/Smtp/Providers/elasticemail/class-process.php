@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\ElasticEmail;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Exception;
@@ -94,7 +93,7 @@ class Process extends Abstract_Process {
 				continue;
 			}
 
-			$type_address = [];
+			$type_address = array();
 			foreach ( $emails as $user ) {
 				$email_address = isset( $user[0] ) ? $user[0] : false;
 				$name          = isset( $user[1] ) ? $user[1] : false;
@@ -103,7 +102,7 @@ class Process extends Abstract_Process {
 					continue;
 				}
 
-				$type_address[] = $this->phpmailer->addrFormat( [ $email_address, $name ] );
+				$type_address[] = $this->phpmailer->addrFormat( array( $email_address, $name ) );
 			}
 
 			if ( ! empty( $type_address ) ) {
@@ -154,12 +153,10 @@ class Process extends Abstract_Process {
 			if ( ! empty( $content['html'] ) ) {
 				$this->body['bodyHtml'] = $content['html'];
 			}
-		} else {
-			if ( $this->phpmailer->ContentType === 'text/plain' ) {
+		} elseif ( $this->phpmailer->ContentType === 'text/plain' ) {
 				$this->body['bodyText'] = $content;
-			} else {
-				$this->body['bodyHtml'] = $content;
-			}
+		} else {
+			$this->body['bodyHtml'] = $content;
 		}
 	}
 
@@ -206,7 +203,7 @@ class Process extends Abstract_Process {
 		}
 
 		$payload = '';
-		$data    = [];
+		$data    = array();
 
 		foreach ( $attachments as $attachment ) {
 			$filepath = isset( $attachment[0] ) ? $attachment[0] : false;
@@ -217,10 +214,10 @@ class Process extends Abstract_Process {
 				continue;
 			}
 
-			$data[] = [
+			$data[] = array(
 				'content' => $file,
 				'name'    => $filename,
-			];
+			);
 		}
 
 		if ( ! empty( $data ) ) {
@@ -349,28 +346,28 @@ class Process extends Abstract_Process {
 			}
 
 			$this->log_result(
-				[
+				array(
 					'status'   => self::SUCCEEDED,
 					'response' => $send_email,
-				]
+				)
 			);
 			return true;
 		} catch ( Exception $e ) {
 			doublescale_get_logger()->error(
 				esc_html__( 'ElasticEmail API Error', 'doublescale' ),
-				[
+				array(
 					'code'  => 'doublescale_smtp_elasticemail_send_error',
-					'error' => [
+					'error' => array(
 						'message' => $e->getMessage(),
 						'code'    => $e->getCode(),
-					],
-				]
+					),
+				)
 			);
 			$this->log_result(
-				[
+				array(
 					'status'   => self::FAILED,
 					'response' => $e->getMessage(),
-				]
+				)
 			);
 			return false;
 		}

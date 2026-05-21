@@ -10,8 +10,6 @@
 
 namespace DoubleScale\Modules\Activities\Migrations;
 
-
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Database\Migration;
@@ -39,19 +37,19 @@ class ActivityAssociationsTable extends Migration {
 	 */
 	public function get_query() {
 		/**
-		  * Unified Activity Associations Table Fields:
-		  *
-		  * id: BIGINT(20) NOT NULL AUTO_INCREMENT
-		  * activity_id: BIGINT(20) NOT NULL COMMENT "FK to activities table"
-		  * entity_type: TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Deal, 2=Campaign"
-		  * entity_id: BIGINT(20) NOT NULL COMMENT "FK to deals, campaigns table"
-		  * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		  * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-		  *
-		  * Entity types:
-		  * 1 = Deal
-		  * 2 = Campaign
-		  */
+		 * Unified Activity Associations Table Fields:
+		 *
+		 * id: BIGINT(20) NOT NULL AUTO_INCREMENT
+		 * activity_id: BIGINT(20) NOT NULL COMMENT "FK to activities table"
+		 * entity_type: TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Deal, 2=Campaign"
+		 * entity_id: BIGINT(20) NOT NULL COMMENT "FK to deals, campaigns table"
+		 * created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		 * updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		 *
+		 * Entity types:
+		 * 1 = Deal
+		 * 2 = Campaign
+		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             activity_id BIGINT(20) NOT NULL COMMENT "FK to activities table",
             entity_type TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Deal, 2=Campaign", 

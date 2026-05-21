@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;

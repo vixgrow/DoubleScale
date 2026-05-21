@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Tasks;
@@ -52,7 +51,7 @@ class BookingJobs {
 	 * Constructor
 	 */
 	public function __construct() {
-		 $this->tasks           = new Tasks( self::PAYMENT_TASK_GROUP );
+		$this->tasks            = new Tasks( self::PAYMENT_TASK_GROUP );
 		$this->completion_tasks = new Tasks( self::COMPLETION_TASK_GROUP );
 
 		// Register callback for checking payment status
@@ -65,7 +64,7 @@ class BookingJobs {
 		add_action( 'doublescale_booking_payment_status', array( $this, 'schedule_payment_check' ), 10, 1 );
 
 		// Hook into booking creation and other relevant events to schedule completion check
-		add_action( 'doublescale_booking_created',     array( $this, 'schedule_completion_check' ), 10, 2 );
+		add_action( 'doublescale_booking_created', array( $this, 'schedule_completion_check' ), 10, 2 );
 		add_action( 'doublescale_booking_rescheduled', array( $this, 'schedule_completion_check' ), 10, 2 );
 	}
 
@@ -117,7 +116,7 @@ class BookingJobs {
 				'type'   => 'system',
 				'reason' => 'payment_timeout',
 			);
-			$booking->status = 'cancelled';
+			$booking->status       = 'cancelled';
 			$booking->save();
 
 			$booking->logs()->create(
@@ -128,7 +127,14 @@ class BookingJobs {
 				)
 			);
 
-			BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'system', 'reason' => 'payment_timeout' ) );
+			BookingEvents::emit(
+				'cancelled',
+				(int) $booking->id,
+				array(
+					'actor'  => 'system',
+					'reason' => 'payment_timeout',
+				)
+			);
 		}
 	}
 

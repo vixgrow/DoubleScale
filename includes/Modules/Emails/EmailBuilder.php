@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**

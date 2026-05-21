@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Emails;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Contacts\Models\ContactModel;
@@ -28,7 +27,7 @@ class EmailTrackingHelper {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string                       $body Email body.
+	 * @param string                     $body Email body.
 	 * @param CommunicationTrackingModel $tracking_entry Tracking entry.
 	 * @return string Email with tracking pixel only
 	 */
@@ -44,10 +43,10 @@ class EmailTrackingHelper {
 	/**
 	 * Add tracking pixel and footer to email body
 	 *
-	 * @param string                       $body Email body.
+	 * @param string                     $body Email body.
 	 * @param CommunicationTrackingModel $tracking_entry Tracking entry.
-	 * @param ContactModel                $contact Contact model.
-	 * @param array                        $settings Optional email settings.
+	 * @param ContactModel               $contact Contact model.
+	 * @param array                      $settings Optional email settings.
 	 * @return string Complete email with footer
 	 */
 	public static function add_footer_and_tracking( $body, CommunicationTrackingModel $tracking_entry, ContactModel $contact, $settings = array() ) {
@@ -78,8 +77,8 @@ class EmailTrackingHelper {
 	/**
 	 * Add click tracking to all links in email
 	 *
-	 * @param string         $message Email message.
-	 * @param string         $hash_key Tracking hash key.
+	 * @param string        $message Email message.
+	 * @param string        $hash_key Tracking hash key.
 	 * @param ContactModel  $contact Contact model.
 	 * @param TemplateModel $template Optional template for UTM parameters.
 	 * @return string Email with tracked links
@@ -137,8 +136,8 @@ class EmailTrackingHelper {
 			$click_url = add_query_arg(
 				array(
 					'doublescale' => 'email_click',
-					'hash_key' => $hash_key,
-					'original' => urlencode( $original_url ),
+					'hash_key'    => $hash_key,
+					'original'    => urlencode( $original_url ),
 				),
 				home_url()
 			);
@@ -192,7 +191,7 @@ class EmailTrackingHelper {
 	/**
 	 * Add UTM parameters to URL
 	 *
-	 * @param string         $url Original URL.
+	 * @param string        $url Original URL.
 	 * @param TemplateModel $template Template with UTM settings.
 	 * @return string URL with UTM parameters
 	 */
@@ -225,9 +224,9 @@ class EmailTrackingHelper {
 	/**
 	 * Configure link trigger URL with tracking parameters and optional auto-login
 	 *
-	 * @param object        $link_trigger Link trigger model.
+	 * @param object       $link_trigger Link trigger model.
 	 * @param ContactModel $contact      Contact model.
-	 * @param string        $hash_key     Tracking hash key.
+	 * @param string       $hash_key     Tracking hash key.
 	 * @return string Configured link trigger URL
 	 */
 	protected static function configure_link_trigger_url( $link_trigger, ContactModel $contact, $hash_key ) {

@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Modules\Automations\Rules\WoocommerceSubscription;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Automations\Abstracts\Rule;
@@ -83,8 +82,8 @@ class SubscriptionHasStatus extends Rule {
 	 */
 	public function get_operators() {
 		return array(
-			'is'     => __( 'Is', 'doublescale'),
-			'is_not' => __( 'Is not', 'doublescale'),
+			'is'     => __( 'Is', 'doublescale' ),
+			'is_not' => __( 'Is not', 'doublescale' ),
 		);
 	}
 
@@ -143,7 +142,7 @@ class SubscriptionHasStatus extends Rule {
 	 * @since 1.0.0
 	 *
 	 * @param AutomationContactModel $automation_contact Contact Model.
-	 * @param array                    $rule Rule.
+	 * @param array                  $rule Rule.
 	 *
 	 * @return bool
 	 */
@@ -163,7 +162,7 @@ class SubscriptionHasStatus extends Rule {
 				return ! in_array( $value, $rule_value, true );
 			default:
 				return false;
-		};
+		}
 	}
 }
 

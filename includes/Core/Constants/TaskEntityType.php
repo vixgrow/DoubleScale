@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Core\Constants;
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -37,8 +36,8 @@ class TaskEntityType {
 	 */
 	public static function get_all() {
 		return array(
-			self::CONTACT => __( 'Contact', 'doublescale'),
-			self::DEAL    => __( 'Deal', 'doublescale'),
+			self::CONTACT => __( 'Contact', 'doublescale' ),
+			self::DEAL    => __( 'Deal', 'doublescale' ),
 		);
 	}
 
@@ -50,7 +49,7 @@ class TaskEntityType {
 	 */
 	public static function get_label( $type ) {
 		$types = self::get_all();
-		return $types[ $type ] ?? __( 'Unknown', 'doublescale');
+		return $types[ $type ] ?? __( 'Unknown', 'doublescale' );
 	}
 
 	/**

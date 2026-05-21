@@ -7,7 +7,6 @@
 
 namespace DoubleScale\Modules\Smtp;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Providers\Mailers;
@@ -159,10 +158,10 @@ class SmtpConnectionValidator {
 					'doublescale_smtp_oauth_incomplete',
 					__( 'Gmail account is missing OAuth tokens. Connect the account again with Google.', 'doublescale' ),
 					array(
-						'status'         => 400,
-						'connection_id'  => $connection_id,
-						'account_id'     => $account_id,
-						'mailer'         => $mailer_slug,
+						'status'        => 400,
+						'connection_id' => $connection_id,
+						'account_id'    => $account_id,
+						'mailer'        => $mailer_slug,
 					)
 				);
 			}
@@ -181,10 +180,10 @@ class SmtpConnectionValidator {
 						'outlook' === $mailer_slug ? __( 'Microsoft Outlook', 'doublescale' ) : __( 'Zoho', 'doublescale' )
 					),
 					array(
-						'status'         => 400,
-						'connection_id'  => $connection_id,
-						'account_id'     => $account_id,
-						'mailer'         => $mailer_slug,
+						'status'        => 400,
+						'connection_id' => $connection_id,
+						'account_id'    => $account_id,
+						'mailer'        => $mailer_slug,
 					)
 				);
 			}

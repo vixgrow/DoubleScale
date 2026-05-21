@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Booking\Services;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Services\BookingValidator;
@@ -279,9 +278,9 @@ class BookingAjax {
 					foreach ( $response['slots'] as $date_key => &$day_slots ) {
 						foreach ( $day_slots as &$slot ) {
 							if ( isset( $slot['remaining'] ) && 0 === (int) $slot['remaining'] ) {
-								$start_utc = ( new \DateTime( $slot['start'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
-								$end_utc   = ( new \DateTime( $slot['end'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
-								$wl_count  = BookingModel::where( 'status', 'waiting' )
+								$start_utc                     = ( new \DateTime( $slot['start'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
+								$end_utc                       = ( new \DateTime( $slot['end'], $user_tz ) )->setTimezone( $utc_tz )->format( 'Y-m-d H:i:s' );
+								$wl_count                      = BookingModel::where( 'status', 'waiting' )
 									->where( 'event_id', $event->id )
 									->where( 'start_time', $start_utc )
 									->where( 'end_time', $end_utc )
@@ -500,5 +499,4 @@ class BookingAjax {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 	}
-
 }

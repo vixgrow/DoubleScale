@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\MergeTags\Booking;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Booking\Abstracts\MergeTag;
@@ -45,12 +44,12 @@ class BookingDetailsUrl extends MergeTag {
 	 * Get Value
 	 *
 	 * @param BookingModel $booking Booking model.
-	 * @param array         $options Options.
+	 * @param array        $options Options.
 	 *
 	 * @return string
 	 */
 	public function get_value( $booking, $options = array() ) {
-		if (! ($booking instanceof BookingModel) || ! method_exists($booking, 'getDetailsUrl')) {
+		if ( ! ( $booking instanceof BookingModel ) || ! method_exists( $booking, 'getDetailsUrl' ) ) {
 			return '';
 		}
 		return $booking->getDetailsUrl();

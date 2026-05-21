@@ -9,7 +9,6 @@
 
 namespace DoubleScale\Modules\Booking\PaymentGateway;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
@@ -72,7 +71,7 @@ abstract class PaymentService {
 	 * @since 1.0.0
 	 *
 	 * @param BookingModel $this->booking Booking model.
-	 * @param array         $args    Arguments.
+	 * @param array        $args    Arguments.
 	 *
 	 * @return void
 	 */

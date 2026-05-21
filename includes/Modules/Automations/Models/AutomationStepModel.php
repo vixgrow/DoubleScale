@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Models;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use WPEloquent\Eloquent\Model;
@@ -125,7 +124,7 @@ class AutomationStepModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function parent() {
-		return $this->belongsTo( AutomationStepModel::class, 'parent_id', 'id' );
+		return $this->belongsTo( self::class, 'parent_id', 'id' );
 	}
 
 	/**
@@ -136,7 +135,7 @@ class AutomationStepModel extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function children() {
-		return $this->hasMany( AutomationStepModel::class, 'parent_id', 'id' );
+		return $this->hasMany( self::class, 'parent_id', 'id' );
 	}
 
 	/**
@@ -425,11 +424,11 @@ class AutomationStepModel extends Model {
 			doublescale_get_logger()->error(
 				'Automation step: Exception during template creation',
 				array(
-					'step_id'   => $step->id ?? 'new',
-					'action'    => $step->action,
-					'error'     => $e->getMessage(),
-					'trace'     => $e->getTraceAsString(),
-					'code'      => 'automation_step_template_create_exception',
+					'step_id' => $step->id ?? 'new',
+					'action'  => $step->action,
+					'error'   => $e->getMessage(),
+					'trace'   => $e->getTraceAsString(),
+					'code'    => 'automation_step_template_create_exception',
 				)
 			);
 		}

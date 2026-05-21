@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Outlook;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
@@ -117,10 +116,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Outlook Send Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_outlook_send_error',
-					'error' => [
+					'error' => array(
 						'code'  => $e->getCode(),
 						'error' => $e->getMessage(),
-					],
+					),
 				)
 			);
 			$this->log_result(

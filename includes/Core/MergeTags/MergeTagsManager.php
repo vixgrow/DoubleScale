@@ -12,7 +12,6 @@
 
 namespace DoubleScale\Core\MergeTags;
 
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -242,44 +241,44 @@ final class MergeTagsManager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'name'      => __( 'Contact', 'doublescale'),
+				'name'      => __( 'Contact', 'doublescale' ),
 				'mergeTags' => array(),
 			),
 			'general'        => array(
-				'name'      => __( 'General', 'doublescale'),
+				'name'      => __( 'General', 'doublescale' ),
 				'mergeTags' => array(),
 			),
 			'order'          => array(
-				'name'        => __( 'Order', 'doublescale'),
+				'name'        => __( 'Order', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed', 'wc_cart_recovered' ),
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'abandoned_cart' => array(
-				'name'        => __( 'Abandoned Cart', 'doublescale'),
+				'name'        => __( 'Abandoned Cart', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_abandoned_cart_created' ),
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'edd_customer'   => array(
-				'name'        => __( 'Easy Digital Downloads Customer', 'doublescale'),
+				'name'        => __( 'Easy Digital Downloads Customer', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'edd_new_order_success' ),
 				'is_disabled' => ! defined( 'EDD_PLUGIN_FILE' ),
 			),
 			'edd_order'      => array(
-				'name'        => __( 'Easy Digital Downloads Order', 'doublescale'),
+				'name'        => __( 'Easy Digital Downloads Order', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'edd_new_order_success' ),
 				'is_disabled' => ! defined( 'EDD_PLUGIN_FILE' ),
 			),
 			'learndash'      => array(
-				'name'        => __( 'LearnDash', 'doublescale'),
+				'name'        => __( 'LearnDash', 'doublescale' ),
 				'mergeTags'   => array(),
 				'is_disabled' => ! doublescale_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 			'memberpress'    => array(
-				'name'        => __( 'MemberPress', 'doublescale'),
+				'name'        => __( 'MemberPress', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array(
 					'memberpress_membership_enrolled',
@@ -295,7 +294,7 @@ final class MergeTagsManager {
 				'is_disabled' => ! defined( 'MEPR_PLUGIN_NAME' ),
 			),
 			'pmpro'          => array(
-				'name'        => __( 'Paid Memberships Pro', 'doublescale'),
+				'name'        => __( 'Paid Memberships Pro', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array(
 					'pmpro_checkout_completed',
@@ -309,19 +308,19 @@ final class MergeTagsManager {
 				'is_disabled' => ! defined( 'PMPRO_VERSION' ),
 			),
 			'membership'     => array(
-				'name'        => __( 'Membership', 'doublescale'),
+				'name'        => __( 'Membership', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_membership_created', 'wc_membership_status_changed' ),
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 			),
 			'wishlist'       => array(
-				'name'        => __( 'Wishlist', 'doublescale'),
+				'name'        => __( 'Wishlist', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
 			),
 			'subscription'   => array(
-				'name'        => __( 'Subscription', 'doublescale'),
+				'name'        => __( 'Subscription', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array(
 					'wc_subscription_created',
@@ -337,23 +336,23 @@ final class MergeTagsManager {
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 			),
 			'review'         => array(
-				'name'        => __( 'Review', 'doublescale'),
+				'name'        => __( 'Review', 'doublescale' ),
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_review_received' ),
 				'is_disabled' => ! doublescale_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'coupon'         => array(
-				'name'        => __( 'Coupon', 'doublescale'),
+				'name'        => __( 'Coupon', 'doublescale' ),
 				'mergeTags'   => array(),
 				'is_disabled' => true,
 			),
 			'deal'           => array(
-				'name'      => __( 'Deal', 'doublescale'),
+				'name'      => __( 'Deal', 'doublescale' ),
 				'mergeTags' => array(),
 				'triggers'  => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
 			'last_post'      => array(
-				'name'      => __( 'Last Post', 'doublescale'),
+				'name'      => __( 'Last Post', 'doublescale' ),
 				'mergeTags' => array(),
 				'triggers'  => array( 'post_published' ),
 			),
@@ -401,7 +400,7 @@ final class MergeTagsManager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string                                      $content Content.
+	 * @param string                                   $content Content.
 	 * @param AutomationContactModel|ContactModel|null $automation_contact Contact Model.
 	 *
 	 * @return string
@@ -483,7 +482,7 @@ final class MergeTagsManager {
 	/**
 	 * Get values for specific merge tag keys using contact
 	 *
-	 * @param array                                                       $merge_tag_keys Array of merge tag keys to get values for
+	 * @param array                                                                       $merge_tag_keys Array of merge tag keys to get values for
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model
 	 * @return array Array of merge tag keys and their values
 	 */
@@ -511,7 +510,7 @@ final class MergeTagsManager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array                                                       $merge_tag_keys Array of merge tag keys (format: "group:slug")
+	 * @param array                                                                       $merge_tag_keys Array of merge tag keys (format: "group:slug")
 	 * @param ContactModel|\DoubleScale\Modules\Automations\Models\AutomationContactModel $contact_or_automation_contact Contact or Automation Contact model
 	 * @return array Array of slug-only keys and their values (e.g., ["first_name" => "John"])
 	 */

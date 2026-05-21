@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Modules\Smtp\Providers\Gmail;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Modules\Smtp\Mailer\Provider\Process as Abstract_Process;
@@ -78,10 +77,10 @@ class Process extends Abstract_Process {
 				esc_html__( 'Gmail Send Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_gmail_send_error',
-					'error' => [
+					'error' => array(
 						'code'  => $e->getCode(),
 						'error' => $e->getMessage(),
-					],
+					),
 				)
 			);
 			// Still set From from the connection / PHPMailer so the MIME "From" matches the
@@ -163,8 +162,8 @@ class Process extends Abstract_Process {
 			}
 
 			$base64 = str_replace(
-				[ '+', '/', '=' ],
-				[ '-', '_', '' ],
+				array( '+', '/', '=' ),
+				array( '-', '_', '' ),
 				base64_encode( $this->phpmailer->getSentMIMEMessage() ) //phpcs:ignore
 			);
 
@@ -200,16 +199,16 @@ class Process extends Abstract_Process {
 			);
 			return true;
 		} catch ( \Throwable $e ) {
-			$detail = $e->getMessage();
+			$detail                     = $e->getMessage();
 			$this->phpmailer->ErrorInfo = $detail;
 			doublescale_get_logger()->error(
 				esc_html__( 'Gmail Send Error', 'doublescale' ),
 				array(
 					'code'  => 'doublescale_smtp_gmail_send_error',
-					'error' => [
+					'error' => array(
 						'code'  => $e->getCode(),
 						'error' => $detail,
-					],
+					),
 				)
 			);
 			$this->log_result(

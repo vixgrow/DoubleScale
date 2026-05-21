@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Core\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -104,10 +103,10 @@ class RestGeneralController extends RestController {
 	 * @return WP_REST_Response
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
-		$total_contacts        = 0;
-		$total_tags            = 0;
-		$total_lists           = 0;
-		$recent_contacts       = array();
+		$total_contacts               = 0;
+		$total_tags                   = 0;
+		$total_lists                  = 0;
+		$recent_contacts              = array();
 		$recent_unsubscribed_contacts = array();
 
 		if ( $this->dashboard_aggregate_allowed( 'contacts' ) ) {
@@ -184,10 +183,10 @@ class RestGeneralController extends RestController {
 			&& $this->dashboard_aggregate_allowed( 'automations' )
 			&& class_exists( AbandonedCartModel::class )
 		) {
-			$total_orders            = AbandonedCartModel::where( 'order_id', '>', 0 )->count();
-			$total_revenue           = AbandonedCartModel::where( 'order_id', '>', 0 )->sum( 'total' );
-			$recent_abandoned_carts  = AbandonedCartModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
-			$recent_recoverd_carts   = AbandonedCartModel::where( 'status', 'recovered' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
+			$total_orders           = AbandonedCartModel::where( 'order_id', '>', 0 )->count();
+			$total_revenue          = AbandonedCartModel::where( 'order_id', '>', 0 )->sum( 'total' );
+			$recent_abandoned_carts = AbandonedCartModel::orderBy( 'id', 'desc' )->limit( 5 )->get();
+			$recent_recoverd_carts  = AbandonedCartModel::where( 'status', 'recovered' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 
 			$response['total_orders']           = $total_orders;
 			$response['total_revenue']          = $total_revenue;

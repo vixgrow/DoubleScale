@@ -11,7 +11,6 @@
 
 namespace DoubleScale\Modules\Automations\Rest\Controllers;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\UserRoles\Permissions;
@@ -87,58 +86,58 @@ class RestAutomationContactController extends RestController {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		 return array(
-			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
-			 'title'      => 'automation_contact',
-			 'type'       => 'object',
-			 'properties' => array(
-				 'id'             => array(
-					 'description' => __( 'Unique identifier for the object.', 'doublescale'),
-					 'type'        => 'integer',
-					 'readonly'    => true,
-				 ),
-				 'contact_id'     => array(
-					 'description' => __( 'The ID of the contact.', 'doublescale'),
-					 'type'        => 'integer',
-					 'required'    => true,
-				 ),
-				 'automation_id'  => array(
-					 'description' => __( 'The ID of the automation.', 'doublescale'),
-					 'type'        => 'integer',
-					 'required'    => true,
-				 ),
-				 'execution_time' => array(
-					 'description' => __( 'The time the automation should be executed.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-				 ),
-				 'event'          => array(
-					 'description' => __( 'The event that triggered the automation.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-				 ),
-				 'status'         => array(
-					 'description' => __( 'The status of the automation.', 'doublescale'),
-					 'type'        => 'string',
-					 'required'    => true,
-				 ),
-				 'step_id'        => array(
-					 'description' => __( 'The ID of the step.', 'doublescale'),
-					 'type'        => 'integer',
-					 'required'    => true,
-				 ),
-				 'created_at'     => array(
-					 'description' => __( 'The date the contact was created.', 'doublescale'),
-					 'type'        => 'string',
-					 'readonly'    => true,
-				 ),
-				 'updated_at'     => array(
-					 'description' => __( 'The date the contact was last updated.', 'doublescale'),
-					 'type'        => 'string',
-					 'readonly'    => true,
-				 ),
-			 ),
-		 );
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'automation_contact',
+			'type'       => 'object',
+			'properties' => array(
+				'id'             => array(
+					'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
+				'contact_id'     => array(
+					'description' => __( 'The ID of the contact.', 'doublescale' ),
+					'type'        => 'integer',
+					'required'    => true,
+				),
+				'automation_id'  => array(
+					'description' => __( 'The ID of the automation.', 'doublescale' ),
+					'type'        => 'integer',
+					'required'    => true,
+				),
+				'execution_time' => array(
+					'description' => __( 'The time the automation should be executed.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+				),
+				'event'          => array(
+					'description' => __( 'The event that triggered the automation.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+				),
+				'status'         => array(
+					'description' => __( 'The status of the automation.', 'doublescale' ),
+					'type'        => 'string',
+					'required'    => true,
+				),
+				'step_id'        => array(
+					'description' => __( 'The ID of the step.', 'doublescale' ),
+					'type'        => 'integer',
+					'required'    => true,
+				),
+				'created_at'     => array(
+					'description' => __( 'The date the contact was created.', 'doublescale' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'updated_at'     => array(
+					'description' => __( 'The date the contact was last updated.', 'doublescale' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+			),
+		);
 	}
 
 	/**
@@ -179,7 +178,7 @@ class RestAutomationContactController extends RestController {
 			$automation_contact = AutomationContactModel::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$automation_contact->load( 'processes.step', 'current_step', 'next_step' );
@@ -204,7 +203,7 @@ class RestAutomationContactController extends RestController {
 			$automation_contact = AutomationContactModel::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$data = $this->prepare_contact( $request );
@@ -231,7 +230,7 @@ class RestAutomationContactController extends RestController {
 			$automation_contact = AutomationContactModel::find( $request->get_param( 'id' ) );
 
 			if ( ! $automation_contact ) {
-				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale'), array( 'status' => 404 ) );
+				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
 			$automation_contact->delete();

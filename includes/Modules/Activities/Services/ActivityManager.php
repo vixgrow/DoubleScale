@@ -978,12 +978,12 @@ final class ActivityManager {
 				return array(
 					'data' => array(),
 					'meta' => array(
-					'total'        => 0,
-					'per_page'     => $per_page,
-					'current_page' => $page,
-					'total_pages'  => 0,
-					'pro_active'   => $pro_active,
-					'error'        => $deal_access,
+						'total'        => 0,
+						'per_page'     => $per_page,
+						'current_page' => $page,
+						'total_pages'  => 0,
+						'pro_active'   => $pro_active,
+						'error'        => $deal_access,
 					),
 				);
 			}
@@ -1039,11 +1039,11 @@ final class ActivityManager {
 			return array(
 				'data' => array(),
 				'meta' => array(
-				'total'        => 0,
-				'per_page'     => $per_page,
-				'current_page' => $page,
-				'total_pages'  => 0,
-				'pro_active'   => $pro_active,
+					'total'        => 0,
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'total_pages'  => 0,
+					'pro_active'   => $pro_active,
 				),
 			);
 		}
@@ -1097,11 +1097,11 @@ final class ActivityManager {
 		return array(
 			'data' => $data,
 			'meta' => array(
-			'total'        => $total,
-			'per_page'     => $per_page,
-			'current_page' => $page,
-			'total_pages'  => (int) ceil( $total / $per_page ),
-			'pro_active'   => $pro_active,
+				'total'        => $total,
+				'per_page'     => $per_page,
+				'current_page' => $page,
+				'total_pages'  => (int) ceil( $total / $per_page ),
+				'pro_active'   => $pro_active,
 			),
 		);
 	}
@@ -1172,8 +1172,8 @@ final class ActivityManager {
 		$deal_entity_type = \DoubleScale\Modules\Activities\Models\ActivityAssociationModel::ENTITY_TYPE_DEAL;
 		$join_clauses[]   = "LEFT JOIN {$associations_table} deal_assoc ON a.id = deal_assoc.activity_id AND deal_assoc.entity_type = {$deal_entity_type}";
 
-		$where_sql  = implode( ' AND ', $where_clauses );
-		$joins_sql  = implode( ' ', $join_clauses );
+		$where_sql = implode( ' AND ', $where_clauses );
+		$joins_sql = implode( ' ', $join_clauses );
 
 		// Select query - normalized columns for UNION.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1452,12 +1452,12 @@ final class ActivityManager {
 		if ( ActivityTypes::EMAIL_RECEIVED === $type ) {
 			$from_email = $data['from_email'] ?? '';
 			$subject    = $data['subject'] ?? '';
-			$sender     = ! empty( $from_email ) ? $from_email : __( 'a contact', 'doublescale');
+			$sender     = ! empty( $from_email ) ? $from_email : __( 'a contact', 'doublescale' );
 			/* translators: %s: sender name or email */
-			$message    = sprintf( __( '%s sent a reply', 'doublescale'), $sender );
+			$message = sprintf( __( '%s sent a reply', 'doublescale' ), $sender );
 			if ( ! empty( $subject ) ) {
 				/* translators: %s: email subject line */
-				$message .= sprintf( __( ' with subject "%s"', 'doublescale'), $subject );
+				$message .= sprintf( __( ' with subject "%s"', 'doublescale' ), $subject );
 			}
 			return $message;
 		}
@@ -1465,21 +1465,21 @@ final class ActivityManager {
 		if ( ActivityTypes::EMAIL_SENT === $type ) {
 			if ( null === $user_name ) {
 				$from_email = $data['from_email'] ?? '';
-				$user_name  = ! empty( $from_email ) ? $from_email : __( 'Unknown User', 'doublescale');
+				$user_name  = ! empty( $from_email ) ? $from_email : __( 'Unknown User', 'doublescale' );
 			}
 			$subject = $data['subject'] ?? '';
 			/* translators: %s: user name */
-			$message = sprintf( __( '%s sent an email', 'doublescale'), $user_name );
+			$message = sprintf( __( '%s sent an email', 'doublescale' ), $user_name );
 			if ( ! empty( $subject ) ) {
 				/* translators: %s: email subject line */
-				$message .= sprintf( __( ' with subject "%s"', 'doublescale'), $subject );
+				$message .= sprintf( __( ' with subject "%s"', 'doublescale' ), $subject );
 			}
 			$contact_email = $data['contact_email'] ?? '';
 			$contact_name  = $data['contact_name'] ?? '';
 			if ( ! empty( $contact_email ) ) {
 				$recipient = ! empty( $contact_name ) ? $contact_name : $contact_email;
 				/* translators: %s: recipient name or email */
-				$message  .= sprintf( __( ' to %s', 'doublescale'), $recipient );
+				$message .= sprintf( __( ' to %s', 'doublescale' ), $recipient );
 			}
 			return $message;
 		}
@@ -1740,47 +1740,47 @@ final class ActivityManager {
 	 */
 	private function format_tracking_message( string $type, array $data ): string {
 		$campaign_name = ! empty( $data['campaign_name'] ) ? $data['campaign_name'] : '';
-		$contact_name  = ! empty( $data['contact_name'] ) ? $data['contact_name'] : __( 'Contact', 'doublescale');
+		$contact_name  = ! empty( $data['contact_name'] ) ? $data['contact_name'] : __( 'Contact', 'doublescale' );
 
 		switch ( $type ) {
 			case 'email_opened':
 				/* translators: %s: contact name */
-				$message = sprintf( __( '%s opened an email', 'doublescale'), $contact_name );
+				$message = sprintf( __( '%s opened an email', 'doublescale' ), $contact_name );
 				if ( ! empty( $campaign_name ) ) {
 					/* translators: %s: campaign name */
-					$message .= sprintf( __( ' from campaign "%s"', 'doublescale'), $campaign_name );
+					$message .= sprintf( __( ' from campaign "%s"', 'doublescale' ), $campaign_name );
 				}
 				return $message;
 
 			case 'email_clicked':
 				/* translators: %s: contact name */
-				$message = sprintf( __( '%s clicked a link in an email', 'doublescale'), $contact_name );
+				$message = sprintf( __( '%s clicked a link in an email', 'doublescale' ), $contact_name );
 				if ( ! empty( $campaign_name ) ) {
 					/* translators: %s: campaign name */
-					$message .= sprintf( __( ' from campaign "%s"', 'doublescale'), $campaign_name );
+					$message .= sprintf( __( ' from campaign "%s"', 'doublescale' ), $campaign_name );
 				}
 				return $message;
 
 			case 'sms_clicked':
 				/* translators: %s: contact name */
-				return sprintf( __( '%s clicked a link in an Sms', 'doublescale'), $contact_name );
+				return sprintf( __( '%s clicked a link in an Sms', 'doublescale' ), $contact_name );
 
 			case 'whatsapp_clicked':
 				/* translators: %s: contact name */
-				return sprintf( __( '%s clicked a link in a WhatsApp message', 'doublescale'), $contact_name );
+				return sprintf( __( '%s clicked a link in a WhatsApp message', 'doublescale' ), $contact_name );
 
 			case 'page_visited':
-				$path = $data['path'] ?? '/';
+				$path    = $data['path'] ?? '/';
 				$message = sprintf(
 					/* translators: 1: contact name, 2: page path */
-					__( '%1$s visited %2$s', 'doublescale'),
+					__( '%1$s visited %2$s', 'doublescale' ),
 					$contact_name,
 					$path
 				);
 				return $message;
 
 			default:
-				return __( 'Tracking event', 'doublescale');
+				return __( 'Tracking event', 'doublescale' );
 		}
 	}
 

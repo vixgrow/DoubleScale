@@ -10,7 +10,6 @@
 
 namespace DoubleScale\Website;
 
-
 defined( 'ABSPATH' ) || exit;
 
 use Automatic_Upgrader_Skin;

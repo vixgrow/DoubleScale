@@ -130,9 +130,9 @@ function doublescale_collect_rest_controller_fqcn_map( string $plugin_root ): ar
 			if ( '' === $token ) {
 				continue;
 			}
-			$fqcn  = doublescale_rest_resolve_fqcn_token( $ns, $token );
-			$slash = strrpos( $fqcn, '\\' );
-			$short = false !== $slash ? substr( $fqcn, $slash + 1 ) : $fqcn;
+			$fqcn          = doublescale_rest_resolve_fqcn_token( $ns, $token );
+			$slash         = strrpos( $fqcn, '\\' );
+			$short         = false !== $slash ? substr( $fqcn, $slash + 1 ) : $fqcn;
 			$map[ $short ] = $fqcn;
 		}
 	}

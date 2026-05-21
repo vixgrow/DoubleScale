@@ -22,6 +22,7 @@ use DoubleScale\Modules\Booking\Models\AvailabilityModel;
 use DoubleScale\Modules\Booking\Models\BookedSlotModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
+use DoubleScale\Modules\Booking\Managers\LocationsManager;
 use Illuminate\Support\Arr;
 
 
@@ -104,6 +105,20 @@ class BookingAjax {
 			$location     = is_array( $location_raw ) ? map_deep( $location_raw, 'sanitize_text_field' ) : null;
 			if ( ! $location ) {
 				throw new \Exception( __( 'Invalid location', 'doublescale' ) );
+			}
+
+			// Conferencing locations (Google Meet / Zoom / MS Teams) require the
+			// Pro add-on. Reject stale renderer pages that try to book with one
+			// after Pro was deactivated.
+			$selected_type = isset( $location['type'] ) ? (string) $location['type'] : '';
+			if ( LocationsManager::is_pro_conferencing_type( $selected_type ) && ! LocationsManager::is_pro_active() ) {
+				throw new \Exception(
+					sprintf(
+						/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
+						__( '%s requires the Pro add-on and is not available.', 'doublescale' ),
+						LocationsManager::get_conferencing_label( $selected_type )
+					)
+				);
 			}
 
 			// Validate invitees if needed

@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
@@ -7,6 +7,15 @@ import { Input } from '@doublescale/shared/ui/input';
 import { BookingFormItem } from '../inputs/form-bridge';
 import BookingRadioCards from '../booking-radio-cards';
 import DynamicLocationFields from '../dynamic-location-field';
+
+const CONFERENCING_LABELS: Record<string, string> = {
+	'google-meet': 'Google Meet',
+	'zoom': 'Zoom Video',
+	'ms-teams': 'MS Teams',
+};
+
+const isConferencingType = (value: string): boolean =>
+	value === 'google-meet' || value === 'zoom' || value === 'ms-teams';
 
 interface Field {
 	label: string;
@@ -40,15 +49,36 @@ const RadioFieldBridge = ({
 	value,
 	onChange,
 	options,
-}: BridgeProps & { options: Option[] }) => (
-	<BookingRadioCards
-		value={(value as string | undefined) ?? ''}
-		onChange={(next) => onChange?.(next)}
-		options={options}
-		idPrefix="location"
-		layout="vertical"
-	/>
-);
+}: BridgeProps & { options: Option[] }) => {
+	const proActive =
+		(window as any).doublescale?.booking_pro_active === true;
+
+	const enrichedOptions = options.map((option) => {
+		if (!proActive && isConferencingType(option.value)) {
+			const label = CONFERENCING_LABELS[option.value] || option.label;
+			return {
+				...option,
+				disabled: true,
+				hint: sprintf(
+					/* translators: %s: e.g. Google Meet, Zoom Video, MS Teams */
+					__('Upgrade to Pro to use %s.', 'doublescale'),
+					label
+				),
+			};
+		}
+		return option;
+	});
+
+	return (
+		<BookingRadioCards
+			value={(value as string | undefined) ?? ''}
+			onChange={(next) => onChange?.(next)}
+			options={enrichedOptions}
+			idPrefix="location"
+			layout="vertical"
+		/>
+	);
+};
 
 const TextBridge = ({
 	value,

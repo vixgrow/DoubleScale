@@ -71,6 +71,79 @@ class LocationsManager extends \DoubleScale\Modules\Booking\Abstracts\Manager {
 		return $this->get_items();
 	}
 
+	/**
+	 * Conferencing location types that require the Pro add-on.
+	 *
+	 * Keep this list in sync with the front-end conferencing section
+	 * (Google Meet / Zoom / MS Teams).
+	 *
+	 * @return string[]
+	 */
+	public static function get_pro_conferencing_types() {
+		return array( 'google-meet', 'zoom', 'ms-teams' );
+	}
+
+	/**
+	 * Whether the Pro add-on is required for the given location type.
+	 *
+	 * @param string $type Location type slug.
+	 * @return bool
+	 */
+	public static function is_pro_conferencing_type( $type ) {
+		return in_array( (string) $type, self::get_pro_conferencing_types(), true );
+	}
+
+	/**
+	 * Whether the Pro add-on is currently active.
+	 *
+	 * @return bool
+	 */
+	public static function is_pro_active() {
+		return function_exists( 'doublescale_is_pro_addon_active' )
+			&& doublescale_is_pro_addon_active();
+	}
+
+	/**
+	 * Find the first Pro-only conferencing location in a list and return
+	 * its type. Useful for building a precise validation message.
+	 *
+	 * @param array $locations Array of location entries with a `type` key.
+	 * @return string|null
+	 */
+	public static function find_pro_conferencing_type( $locations ) {
+		if ( ! is_array( $locations ) ) {
+			return null;
+		}
+
+		foreach ( $locations as $location ) {
+			$type = is_array( $location ) ? ( $location['type'] ?? null ) : null;
+			if ( $type && self::is_pro_conferencing_type( $type ) ) {
+				return $type;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Human-readable label for a conferencing type.
+	 *
+	 * @param string $type
+	 * @return string
+	 */
+	public static function get_conferencing_label( $type ) {
+		switch ( $type ) {
+			case 'google-meet':
+				return __( 'Google Meet', 'doublescale' );
+			case 'zoom':
+				return __( 'Zoom Video', 'doublescale' );
+			case 'ms-teams':
+				return __( 'MS Teams', 'doublescale' );
+			default:
+				return (string) $type;
+		}
+	}
+
 	public function get_location_label( $location ) {
 
 		if ( ! $location ) {

@@ -7,6 +7,8 @@ import {
 export type BookingRadioOption = {
 	value: string;
 	label: string;
+	hint?: React.ReactNode;
+	disabled?: boolean;
 };
 
 type BookingRadioCardsProps = {
@@ -44,15 +46,29 @@ const BookingRadioCards = ({
 						key={option.value}
 						htmlFor={id}
 						className={cn(
-							'doublescale-radio-card flex items-center gap-2 border rounded-lg p-3 font-semibold cursor-pointer transition-all duration-300 text-[#3F4254]',
+							'doublescale-radio-card flex flex-col gap-1 border rounded-lg p-3 font-semibold transition-all duration-300 text-[#3F4254]',
 							isHorizontal ? 'w-1/2' : 'w-full',
+							option.disabled
+								? 'opacity-60 cursor-not-allowed'
+								: 'cursor-pointer',
 							selected
 								? 'bg-secondary border-primary'
 								: 'border-border'
 						)}
 					>
-						<RadioGroupItem value={option.value} id={id} />
-						{option.label}
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value={option.value}
+								id={id}
+								disabled={option.disabled}
+							/>
+							{option.label}
+						</div>
+						{option.hint && (
+							<div className="text-[12px] italic font-normal text-[#458DC7] pl-6">
+								{option.hint}
+							</div>
+						)}
 					</label>
 				);
 			})}

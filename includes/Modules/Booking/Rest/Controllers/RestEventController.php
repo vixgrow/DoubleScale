@@ -1026,6 +1026,9 @@ class RestEventController extends RestController {
 			$group_settings      = $request->get_param( 'group_settings' );
 			$event_range         = $request->get_param( 'event_range' );
 			$advanced_settings   = $request->get_param( 'advanced_settings' );
+			if ( is_array( $advanced_settings ) ) {
+				$advanced_settings = $this->sanitize_advanced_settings( $advanced_settings );
+			}
 			$email_notifications = $request->get_param( 'email_notifications' );
 			$sms_notifications   = $request->get_param( 'sms_notifications' );
 			$payments_settings   = $request->get_param( 'payments_settings' );
@@ -1505,6 +1508,14 @@ class RestEventController extends RestController {
 				return new WP_Error( 'rest_event_error', __( 'Meta not found', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
+			// For advanced_settings, merge with defaults so legacy events (or events
+			// missing keys added in newer versions) return the full expected shape
+			// instead of an empty/partial object that crashes the React form.
+			if ( 'advanced_settings' === $key ) {
+				$defaults = EventFields::instance()->get_default_advanced_settings();
+				$meta     = is_array( $meta ) ? array_merge( $defaults, $meta ) : $defaults;
+			}
+
 			return new WP_REST_Response( $meta, 200 );
 		} catch ( Exception $e ) {
 					doublescale_get_logger()->error(
@@ -1561,6 +1572,50 @@ class RestEventController extends RestController {
 					);
 			return new WP_Error( 'rest_event_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Sanitize advanced_settings payload before persisting.
+	 *
+	 * Coerces time values to positive integers (DateTime::modify breaks on
+	 * zero/negative durations) and locks enum-like fields to known values.
+	 */
+	private function sanitize_advanced_settings( array $settings ) {
+		$allowed_units = array( 'minutes', 'hours', 'days' );
+
+		foreach ( array( 'cannot_cancel_time_value', 'cannot_reschedule_time_value', 'confirmation_time_value' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) ) {
+				$value             = (int) $settings[ $key ];
+				$settings[ $key ] = $value > 0 ? $value : 1;
+			}
+		}
+
+		foreach ( array( 'cannot_cancel_time_unit', 'cannot_reschedule_time_unit', 'confirmation_time_unit' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) && ! in_array( $settings[ $key ], $allowed_units, true ) ) {
+				$settings[ $key ] = 'hours';
+			}
+		}
+
+		foreach ( array( 'cannot_cancel_time', 'cannot_reschedule_time' ) as $key ) {
+			if ( array_key_exists( $key, $settings ) && ! in_array( $settings[ $key ], array( 'event_start', 'less_than' ), true ) ) {
+				$settings[ $key ] = 'event_start';
+			}
+		}
+
+		// If redirect is disabled, scrub URL + query string so a stale value
+		// can't leak back via getAdvancedSettings() on the next booking.
+		// Only clear keys that the client actually sent so the stored shape
+		// doesn't grow with synthetic '' values on every save.
+		if ( array_key_exists( 'redirect_after_submit', $settings ) && empty( $settings['redirect_after_submit'] ) ) {
+			if ( array_key_exists( 'redirect_url', $settings ) ) {
+				$settings['redirect_url'] = '';
+			}
+			if ( array_key_exists( 'redirect_query_string', $settings ) ) {
+				$settings['redirect_query_string'] = '';
+			}
+		}
+
+		return $settings;
 	}
 
 	// Update event availability

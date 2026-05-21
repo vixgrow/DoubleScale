@@ -201,25 +201,24 @@ class BookingAjax {
 				)
 			);
 
-			// resolve
-			/*
-				redirect_query_string
-				:
-				"{{booking:additional_guests}}{{guest:email}}"
-				redirect_url
-				:
-				"https://www.google.com/"
-			*/
-			$advanced_settings     = $booking->getAdvancedSettings();
-			$redirect_query_string = isset( $advanced_settings['redirect_query_string'] ) ? $advanced_settings['redirect_query_string'] : null;
-			$merge_tags_manager    = \DoubleScale\Modules\Booking\Managers\MergeTagsManager::instance();
-			$result                = $merge_tags_manager->process_merge_tags( $redirect_query_string, $booking );
-			$redirect_query_string = $result;
+			$advanced_settings = $booking->getAdvancedSettings();
+			$redirect_enabled  = ! empty( $advanced_settings['redirect_after_submit'] );
+			$redirect_url      = isset( $advanced_settings['redirect_url'] ) ? trim( (string) $advanced_settings['redirect_url'] ) : '';
 
-			$redirect_url = isset( $advanced_settings['redirect_url'] ) ? $advanced_settings['redirect_url'] : null;
-			// add query string to redirect url
-			$redirect_url                  = $redirect_url . '?' . $redirect_query_string;
-			$booking->booking_redirect_url = $redirect_url;
+			if ( $redirect_enabled && '' !== $redirect_url ) {
+				$redirect_query_string = isset( $advanced_settings['redirect_query_string'] ) ? (string) $advanced_settings['redirect_query_string'] : '';
+				if ( '' !== $redirect_query_string ) {
+					$merge_tags_manager    = \DoubleScale\Modules\Booking\Managers\MergeTagsManager::instance();
+					$redirect_query_string = (string) $merge_tags_manager->process_merge_tags( $redirect_query_string, $booking );
+				}
+
+				if ( '' !== $redirect_query_string ) {
+					$separator    = ( false === strpos( $redirect_url, '?' ) ) ? '?' : '&';
+					$redirect_url = $redirect_url . $separator . ltrim( $redirect_query_string, '?&' );
+				}
+
+				$booking->booking_redirect_url = $redirect_url;
+			}
 			wp_send_json_success( array( 'booking' => $booking ) );
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );

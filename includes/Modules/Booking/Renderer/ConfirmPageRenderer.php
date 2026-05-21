@@ -42,12 +42,14 @@ class ConfirmPageRenderer extends BaseTemplateRenderer {
 		return $this->render_template_page(
 			$template_path,
 			array(
-				'booking_array'         => $booking_array,
-				'title'                 => $booking->getBookableName() ?: __( 'Booking Confirmation', 'doublescale' ),
-				'can_cancel'            => $cancel_permissions['can_cancel'],
-				'can_reschedule'        => $reschedule_permissions['can_reschedule'],
-				'is_waiting'            => $is_waiting,
-				'waiting_list_position' => $waiting_list_position,
+				'booking_array'             => $booking_array,
+				'title'                     => $booking->getBookableName() ?: __( 'Booking Confirmation', 'doublescale' ),
+				'can_cancel'                => $cancel_permissions['can_cancel'],
+				'cancel_denied_message'     => $cancel_permissions['message'],
+				'can_reschedule'            => $reschedule_permissions['can_reschedule'],
+				'reschedule_denied_message' => $reschedule_permissions['message'],
+				'is_waiting'                => $is_waiting,
+				'waiting_list_position'     => $waiting_list_position,
 			)
 		);
 	}

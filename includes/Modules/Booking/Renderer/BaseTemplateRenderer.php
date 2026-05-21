@@ -334,15 +334,24 @@ abstract class BaseTemplateRenderer {
 
 		// Check if attendee cannot cancel at event start
 		if ( ! empty( $advanced_settings['attendee_cannot_cancel'] ) && $advanced_settings['attendee_cannot_cancel'] ) {
-			if ( $advanced_settings['cannot_cancel_time'] === 'event_start' ) {
+			// Default restriction is 'event_start' so legacy events (which may
+			// have `attendee_cannot_cancel=true` without an explicit time key)
+			// behave like the UI's default radio selection instead of silently
+			// allowing cancellation.
+			$cancel_time_restriction = $advanced_settings['cannot_cancel_time'] ?? 'event_start';
 
+			if ( 'event_start' === $cancel_time_restriction ) {
 				$can_cancel            = false;
 				$cancel_denied_message = $cancel_denied_message ?: __( 'You do not have permission to cancel this booking.', 'doublescale' );
 			} else {
-				// Check time-based cancellation restrictions
-				$cancel_time_restriction = $advanced_settings['cannot_cancel_time'] ?? '';
-				$cancel_time_value       = $advanced_settings['cannot_cancel_time_value'] ?? 24;
-				$cancel_time_unit        = $advanced_settings['cannot_cancel_time_unit'] ?? 'hours';
+				$cancel_time_value = (int) ( $advanced_settings['cannot_cancel_time_value'] ?? 24 );
+				$cancel_time_unit  = $advanced_settings['cannot_cancel_time_unit'] ?? 'hours';
+				if ( $cancel_time_value <= 0 ) {
+					$cancel_time_value = 24;
+				}
+				if ( ! in_array( $cancel_time_unit, array( 'minutes', 'hours', 'days' ), true ) ) {
+					$cancel_time_unit = 'hours';
+				}
 
 				if ( $cancel_time_restriction === 'less_than' ) {
 					try {
@@ -398,19 +407,24 @@ abstract class BaseTemplateRenderer {
 		);
 
 		if ( ! empty( $advanced_settings['attendee_cannot_reschedule'] ) && $advanced_settings['attendee_cannot_reschedule'] ) {
+			// Same defaulting logic as cancellation: legacy events without
+			// `cannot_reschedule_time` are treated as 'event_start'.
+			$reschedule_time_restriction = $advanced_settings['cannot_reschedule_time'] ?? 'event_start';
 
-			// Check if attendee cannot reschedule at event start
-			if ( $advanced_settings['cannot_reschedule_time'] === 'event_start' ) {
-
+			if ( 'event_start' === $reschedule_time_restriction ) {
 				$can_reschedule            = false;
 				$reschedule_denied_message = $reschedule_denied_message ?: __( 'You do not have permission to reschedule this booking.', 'doublescale' );
 			} else {
-				// Check time-based reschedule restrictions
-				$reschedule_time_restriction = $advanced_settings['cannot_reschedule_time'] ?? '';
-				$reschedule_time_value       = $advanced_settings['cannot_reschedule_time_value'] ?? 24;
-				$reschedule_time_unit        = $advanced_settings['cannot_reschedule_time_unit'] ?? 'hours';
+				$reschedule_time_value = (int) ( $advanced_settings['cannot_reschedule_time_value'] ?? 24 );
+				$reschedule_time_unit  = $advanced_settings['cannot_reschedule_time_unit'] ?? 'hours';
+				if ( $reschedule_time_value <= 0 ) {
+					$reschedule_time_value = 24;
+				}
+				if ( ! in_array( $reschedule_time_unit, array( 'minutes', 'hours', 'days' ), true ) ) {
+					$reschedule_time_unit = 'hours';
+				}
 
-				if ( $reschedule_time_restriction === 'event_start' || $reschedule_time_restriction === 'less_than' ) {
+				if ( $reschedule_time_restriction === 'less_than' ) {
 					try {
 						$start_time = $booking_array['start_time'] ?? '';
 						$start_dt   = new \DateTime( $start_time, new \DateTimeZone( 'UTC' ) );

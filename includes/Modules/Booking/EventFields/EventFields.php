@@ -808,7 +808,7 @@ class EventFields {
 			'allow_multiple_bookings'      => false,
 			'maximum_bookings'             => 1,
 			'attendee_cannot_cancel'       => false,
-			'cannot_canel_time'            => 'event_start',
+			'cannot_cancel_time'           => 'event_start',
 			'cannot_cancel_time_value'     => 24,
 			'cannot_cancel_time_unit'      => 'hours',
 			'permission_denied_message'    => __( 'You do not have permission to view this page.', 'doublescale' ),

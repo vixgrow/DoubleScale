@@ -251,7 +251,7 @@ class Ses_Query_Client {
 				$ens = $xml->children();
 			}
 			if ( isset( $ens->Error->Code, $ens->Error->Message ) ) {
-				throw new Ses_Exception( esc_html( (string) $ens->Error->Message, (string) $ens->Error->Code ) );
+				throw new Ses_Exception( esc_html( (string) $ens->Error->Code . ': ' . (string) $ens->Error->Message ) );
 			}
 			throw new Ses_Exception( esc_html( 'SES ErrorResponse without detail.' ) );
 		}

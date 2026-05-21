@@ -326,7 +326,7 @@ class RestSiteVerificationController extends RestController {
 	private function login_attempt_key( WP_REST_Request $request ): string {
 		$ip = '';
 		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = (string) $_SERVER['REMOTE_ADDR'];
+			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		return 'doublescale_login_attempts_' . md5( $ip );
 	}

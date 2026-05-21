@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -191,6 +192,7 @@ const EmailTemplatesStep: React.FC = () => {
 		useCampaignStep();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { createNotice } = useDispatch('doublescale/core');
 
 	const showBackToBuilder =
 		campaign?.id &&
@@ -318,7 +320,13 @@ const EmailTemplatesStep: React.FC = () => {
 	};
 
 	const handleExportUserTemplate = (template: EmailTemplate) => {
-		if (!template.body) return;
+		if (!template.body) {
+			createNotice({
+				type: 'error',
+				message: __('This template has no content to export.', 'doublescale'),
+			});
+			return;
+		}
 		try {
 			const bodyData =
 				typeof template.body === 'string'
@@ -340,8 +348,16 @@ const EmailTemplatesStep: React.FC = () => {
 			a.click();
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
+			createNotice({
+				type: 'success',
+				message: __('Template exported successfully.', 'doublescale'),
+			});
 		} catch (error) {
 			console.error('Error exporting template:', error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to export template.', 'doublescale'),
+			});
 		}
 	};
 
@@ -587,7 +603,10 @@ const EmailTemplatesStep: React.FC = () => {
 					}
 				}}
 			>
-				<DialogContent className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden z-[100000]">
+				<DialogContent
+					className="flex max-h-[90vh] max-w-4xl flex-col overflow-hidden z-[150300]"
+					overlayClassName="z-[150300]"
+				>
 					<DialogHeader>
 						<DialogTitle className="text-center">
 							{__('Preview template', 'doublescale')}

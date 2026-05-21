@@ -1,9 +1,9 @@
 {
 	"//": "Shared editor config for DoubleScale. Install the recommended extensions (see .vscode/extensions.json) to get fix-on-save for PHP via PHPCBF and TypeScript/SCSS via Prettier.",
 
-	"phpsab.executablePathCS": "${workspaceFolder}/vendor/bin/phpcs",
-	"phpsab.executablePathCBF": "${workspaceFolder}/vendor/bin/phpcbf",
-	"phpsab.standard": "${workspaceFolder}/phpcs.xml.dist",
+	"phpsab.executablePathCS": "/var/www/html/site/wp-content/plugins/doublescale/vendor/bin/phpcs",
+	"phpsab.executablePathCBF": "/var/www/html/site/wp-content/plugins/doublescale/vendor/bin/phpcbf",
+	"phpsab.standard": "/var/www/html/site/wp-content/plugins/doublescale/phpcs.xml.dist",
 	"phpsab.fixerEnable": true,
 	"phpsab.snifferEnable": true,
 	"phpsab.snifferMode": "onSave",
@@ -13,7 +13,7 @@
 
 	"editor.formatOnSave": true,
 	"[php]": {
-		"editor.defaultFormatter": "ValeryanM.vscode-phpsab",
+		"editor.defaultFormatter": "valeryanm.vscode-phpsab",
 		"editor.formatOnSave": true,
 		"editor.insertSpaces": false,
 		"editor.tabSize": 4

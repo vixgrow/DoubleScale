@@ -235,13 +235,13 @@ class Ses_Query_Client {
 	private function parse_response( $xml_body, $action ) {
 		$xml_body = trim( (string) $xml_body );
 		if ( $xml_body === '' ) {
-			throw new Ses_Exception( esc_html( 'Empty SES response body.' ) );
+			throw new Ses_Exception( esc_html__( 'Empty SES response body.', 'doublescale' ) );
 		}
 
 		libxml_use_internal_errors( true );
 		$xml = simplexml_load_string( $xml_body );
 		if ( false === $xml ) {
-			throw new Ses_Exception( esc_html( 'Invalid SES XML response.' ) );
+			throw new Ses_Exception( esc_html__( 'Invalid SES XML response.', 'doublescale' ) );
 		}
 
 		$root_name = $xml->getName();
@@ -253,7 +253,7 @@ class Ses_Query_Client {
 			if ( isset( $ens->Error->Code, $ens->Error->Message ) ) {
 				throw new Ses_Exception( esc_html( (string) $ens->Error->Code . ': ' . (string) $ens->Error->Message ) );
 			}
-			throw new Ses_Exception( esc_html( 'SES ErrorResponse without detail.' ) );
+			throw new Ses_Exception( esc_html__( 'SES ErrorResponse without detail.', 'doublescale' ) );
 		}
 
 		$ns = $xml->children( self::SES_NS );

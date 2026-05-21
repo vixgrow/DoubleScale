@@ -26,10 +26,6 @@
 	flex-shrink: 0;
 }
 
-.import-modal-content--wizard {
-	min-height: 0;
-}
-
 .import-modal__flow-bar-top {
 	flex-shrink: 0;
 }
@@ -114,16 +110,6 @@
 	justify-content: center;
 }
 
-.import-modal-wizard__layout {
-	align-items: flex-start;
-	min-height: 0;
-	flex: 1;
-}
-
-.import-modal-wizard__main {
-	min-height: 0;
-}
-
 .import-modal-content--natural-height {
 	flex: none;
 	flex-grow: 0;
@@ -137,6 +123,8 @@
 }
 
 .import-modal-wizard__layout--natural {
+	display: flex;
+	align-items: flex-start;
 	flex: none;
 	flex-grow: 0;
 	flex-shrink: 0;
@@ -149,7 +137,7 @@
 }
 
 .import-modal-wizard__main--natural {
-	flex: 1 1 0%;
+	flex: 1 1 auto;
 	min-width: 0;
 	max-width: 100%;
 	min-height: auto;

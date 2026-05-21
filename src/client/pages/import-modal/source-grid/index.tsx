@@ -1,20 +1,20 @@
 /**
  * wordpress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
 /**
  * internal dependencies
  */
 import { Button } from '@/components/ui/button';
 import { InstallIcon } from '@doublescale/components';
+import CheckTrue from '@doublescale/shared/icons/checkTrue';
 import { cn } from '@/lib/utils';
-import { useImportContext } from '../contexts';
 import ConfigAPI from '@doublescale/config';
+import { useImportContext } from '../contexts';
 import {
 	buildImporterSourcesList,
 	getImporterDisabledInstallPath,
@@ -33,7 +33,7 @@ const DisabledImporterInstallButton: React.FC<{ slug: string }> = ({
 		<Button
 			size="sm"
 			variant="secondary"
-			className="h-8 shrink-0 rounded-lg px-2.5 text-[10px] font-semibold uppercase tracking-wide"
+			className="mt-2 h-8 shrink-0 rounded-lg px-2.5 text-[10px] font-semibold uppercase tracking-wide"
 			onClick={(e) => {
 				e.stopPropagation();
 				const base = ConfigAPI.getAdminUrl() || '';
@@ -68,113 +68,60 @@ const SourceGrid: React.FC = () => {
 		}
 	};
 
-	const handleContinue = () => {
-		if (!source || importing) return;
-		dispatch({ type: 'SET_WIZARD_STEP', payload: 2 });
-		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
-	};
-
 	return (
-		<div className="flex min-h-0 flex-1 flex-col">
-			<div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-4 sm:px-8 sm:pb-6 sm:pt-5">
-				<div className="mx-auto max-w-5xl">
-					<p className="mb-5 text-sm leading-relaxed text-muted-foreground sm:mb-6 sm:text-left">
-						{__(
-							'Select a platform. CSV and API-connected sources use three steps (source → connect or upload → map). Other sources use two steps.',
-							'doublescale'
-						)}
-					</p>
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-						{sources.map((s: ImporterSourceItem) => {
-							const isSelected = source === s.value;
-							const isLocked = importing && !isSelected;
-							return (
-								<div
-									key={s.value}
-									role="button"
-									tabIndex={s.disabled || importing ? -1 : 0}
-									onClick={() =>
-										!s.disabled && !importing && applySource(s.value)
-									}
-									onKeyDown={(e) => {
-										if (
-											(e.key === 'Enter' || e.key === ' ') &&
-											!s.disabled &&
-											!importing
-										) {
-											e.preventDefault();
-											applySource(s.value);
-										}
-									}}
-									className={cn(
-										'group relative flex flex-col rounded-xl border border-border/80 bg-card p-4 text-left shadow-sm transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-5',
-										isSelected &&
-											'border-primary shadow-md ring-2 ring-primary/25',
+		<div className="import-modal__sources-panel shrink-0">
+			<div className="import-modal__sources-grid">
+					{sources.map((s: ImporterSourceItem) => {
+						const isSelected = source === s.value;
+						const isLocked = importing && !isSelected;
+						return (
+							<div
+								key={s.value}
+								role="button"
+								tabIndex={s.disabled || importing ? -1 : 0}
+								onClick={() =>
+									!s.disabled && !importing && applySource(s.value)
+								}
+								onKeyDown={(e) => {
+									if (
+										(e.key === 'Enter' || e.key === ' ') &&
 										!s.disabled &&
-											!isLocked &&
-											'cursor-pointer',
-										!isSelected &&
-											!s.disabled &&
-											!isLocked &&
-											'hover:border-primary/40 hover:shadow-md',
-										s.disabled &&
-											'cursor-not-allowed border-dashed border-muted-foreground/30 bg-muted/15 opacity-[0.72]',
-										isLocked && 'cursor-not-allowed opacity-50'
-									)}
-								>
-									<div className="mb-4 flex items-start justify-between gap-2">
-										<div
-											className={cn(
-												'flex h-14 w-14 items-center justify-center rounded-xl border bg-muted/40 transition-colors sm:h-16 sm:w-16',
-												isSelected &&
-													'border-primary/30 bg-primary/[0.08]'
-											)}
-										>
-											{s.icon}
-										</div>
-										{s.disabled && (
-											<DisabledImporterInstallButton slug={s.value} />
-										)}
-									</div>
-									<h3 className="text-base font-semibold leading-snug text-foreground">
-										{s.label}
-									</h3>
-									<p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-										{getSourceSubtitle(s)}
-									</p>
-									{isSelected && (
-										<div className="pointer-events-none absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-primary shadow-sm ring-2 ring-background" />
-									)}
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			</div>
-
-			<div className="shrink-0 border-t border-border/60 bg-muted/10 px-4 py-4 sm:px-8 sm:py-5">
-				<div className="mx-auto flex max-w-5xl flex-col items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
-					<p className="flex-1 text-left text-sm leading-snug text-muted-foreground">
-						{!source
-							? __('Pick a source above to enable continue.', 'doublescale')
-							: sprintf(
-									/* translators: %s: selected importer name */
-									__('Selected: %s', 'doublescale'),
-									sources.find((x) => x.value === source)?.label ?? source
+										!importing
+									) {
+										e.preventDefault();
+										applySource(s.value);
+									}
+								}}
+								className={cn(
+									'import-modal__source-card group relative',
+									isSelected && 'is-selected',
+									s.disabled && 'is-disabled',
+									isLocked && 'is-locked cursor-not-allowed opacity-50',
+									!s.disabled &&
+										!isLocked &&
+										'cursor-pointer'
 								)}
-					</p>
-					<Button
-						type="button"
-						variant="default"
-						size="lg"
-						className="min-w-[200px] shrink-0 gap-2 sm:min-w-[220px]"
-						disabled={!source || importing}
-						onClick={handleContinue}
-					>
-						{__('Continue', 'doublescale')}
-						<ArrowRight className="h-4 w-4" />
-					</Button>
-				</div>
+							>
+								{isSelected && (
+									<span className="import-modal__selected-badge">
+										<CheckTrue width={22} height={22} />
+									</span>
+								)}
+								<div className="import-modal__source-icon">
+									{s.icon}
+								</div>
+								<h3 className="text-base font-semibold leading-7 text-foreground">
+									{s.label}
+								</h3>
+								<p className=" line-clamp-2 text-base leading-7 text-muted-foreground">
+									{getSourceSubtitle(s)}
+								</p>
+								{s.disabled && (
+									<DisabledImporterInstallButton slug={s.value} />
+								)}
+							</div>
+						);
+				})}
 			</div>
 		</div>
 	);

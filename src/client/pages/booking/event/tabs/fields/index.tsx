@@ -24,11 +24,62 @@ import {
 import { EventTabHandle, EventTabProps, Fields } from '@/types/booking';
 import Question from './question';
 import { applyFilters } from '@wordpress/hooks';
-import { Link } from 'react-router-dom';
+import { ACTIVE_PRO_URL } from '@/constants/booking';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+const FIELDS_UPSELL_Z_INDEX = 150310;
+
+/** Rendered beside Event Setup (not inside it) so the modal is visible and clickable. */
+export const FieldsProUpsellOverlay = ({
+	open,
+	onClose,
+}: {
+	open: boolean;
+	onClose: () => void;
+}) => (
+	<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+		<DialogContent
+			data-doublescale-stacked-overlay
+			className="max-w-[800px] pointer-events-auto"
+			style={{ zIndex: FIELDS_UPSELL_Z_INDEX + 1 }}
+			overlayClassName="pointer-events-auto"
+			overlayStyle={{ zIndex: FIELDS_UPSELL_Z_INDEX }}
+		>
+			<div className="flex flex-col items-center text-center py-10 ">
+				<div className="bg-secondary rounded-full p-4 mb-6 flex items-center justify-center">
+					<ProIcon width={72} height={72} />
+				</div>
+				<div>
+					<h2 className="text-base font-semibold mb-2 text-foreground">
+						{__(
+							'Add another Questions feature is available in Pro Version',
+							'doublescale'
+						)}
+					</h2>
+					<p className="text-muted-foreground  text-sm">
+						{__(
+							'Please upgrade to get all the advanced features.',
+							'doublescale'
+						)}
+					</p>
+					<div className="mt-6">
+						<a
+							className="bg-primary h-10 text-primary-foreground hover:!text-white rounded-lg py-3 px-4 font-medium"
+							href={ACTIVE_PRO_URL}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{__('Upgrade To Pro Now', 'doublescale')}
+						</a>
+					</div>
+				</div>
+			</div>
+		</DialogContent>
+	</Dialog>
+);
 
 const LoadingSkeleton = () => (
 	<Card><CardContent>
@@ -59,7 +110,6 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
 		const { callApi: saveApi } = useApi();
 		const { errorNotice } = useNotice();
 		const [fields, setFields] = useState<Fields | null>(null);
-		const [showModal, setShowModal] = useState(false);
 
 		useImperativeHandle(ref, () => ({
 			saveSettings: async () => {
@@ -261,7 +311,10 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
                                         'doublescale_booking_event_fields_add_field_component',
                                         <div
                                             className="w-full text-center border border-primary text-primary rounded-lg py-4 border-dashed bg-secondary font-bold cursor-pointer hover:bg-primary hover:text-white transition-all duration-200 ease-in-out mt-2"
-                                            onClick={() => setShowModal(true)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                props.onOpenFieldsUpsell?.();
+                                            }}
                                         >
                                             <div className="flex items-center justify-center gap-2">
                                                 <PlusOutlined />
@@ -304,40 +357,6 @@ const EventFieldsTab = forwardRef<EventTabHandle, EventTabProps>(
                                 </>
                             </CardContent></Card>
                     </CardContent></Card>
-                <Dialog
-                    open={showModal}
-                    onOpenChange={open => {
-                        if (!open)
-                            (() => setShowModal(false))();
-                    }}><DialogContent className='max-w-[800px]'>
-                        <div className="flex flex-col items-center text-center py-10">
-                            <div className="bg-secondary rounded-full p-4 mb-2 flex items-center justify-center">
-                                <ProIcon width={72} height={72} />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-semibold my-1 text-[#3F4254]">
-                                    {__(
-                                        'Add another Questions feature is available in Pro Version',
-                                        'doublescale'
-                                    )}
-                                </h2>
-                                <p className="text-[#9197A4] mb-4 text-xs">
-                                    {__(
-                                        'Please upgrade to get all the advanced features.',
-                                        'doublescale'
-                                    )}
-                                </p>
-                                <div className="mt-5">
-                                    <Link
-                                        className="bg-primary text-primary-foreground rounded-lg py-3 px-4 font-medium"
-                                        to="/admin.php?page=doublescale&path=settings/modules"
-                                    >
-                                        {__('Upgrade To Pro Now', 'doublescale')}
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </DialogContent></Dialog>
             </>
         );
 	}

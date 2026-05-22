@@ -34,11 +34,12 @@ const DialogContent = React.forwardRef<
 		hideCloseButton?: boolean;
 		/** Merged into `DialogOverlay` (e.g. `z-[160010]` when opening over fullscreen shells). */
 		overlayClassName?: string;
+		overlayStyle?: React.CSSProperties;
 	}
->(({ className, children, removePortal, hideCloseButton, overlayClassName, ...props }, ref) => {
+>(({ className, children, removePortal, hideCloseButton, overlayClassName, overlayStyle, ...props }, ref) => {
 	const content = (
 		<>
-			<DialogOverlay className={overlayClassName} />
+			<DialogOverlay className={overlayClassName} style={overlayStyle} />
 			<DialogPrimitive.Content
 				ref={ref}
 				aria-describedby={undefined}

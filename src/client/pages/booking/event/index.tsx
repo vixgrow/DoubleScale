@@ -44,7 +44,9 @@ import {
 	SmsNotificationTab,
 	AvailabilityLimits,
 } from './tabs';
-import EventFieldsTab from './tabs/fields';
+import EventFieldsTab, {
+	FieldsProUpsellOverlay,
+} from './tabs/fields';
 import WaitingListSettings from './tabs/waiting-list';
 
 import { Button } from '@/components/ui/button';
@@ -84,6 +86,7 @@ const Event: React.FC = () => {
 
 	const [open, setOpen] = useState(!!id);
 	const [modalShareId, setModalShareId] = useState<string | null>(null);
+	const [fieldsUpsellOpen, setFieldsUpsellOpen] = useState(false);
 	const [saveDisabled, setSaveDisabled] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const location = useLocation();
@@ -367,6 +370,7 @@ const Event: React.FC = () => {
 					ref={childRef}
 					disabled={saveDisabled}
 					setDisabled={setSaveDisabled}
+					onOpenFieldsUpsell={() => setFieldsUpsellOpen(true)}
 				/>
 			),
 			icon: <QuestionIcon />,
@@ -459,6 +463,48 @@ const Event: React.FC = () => {
 		return false;
 	};
 
+	const allowStackedOverlayInteraction = (target: EventTarget | null) => {
+		const el = target as HTMLElement | null;
+		if (!el) {
+			return false;
+		}
+		if (el.closest('[data-doublescale-stacked-overlay]')) {
+			return true;
+		}
+		const nestedDialog = el.closest('[data-radix-dialog-content]');
+		return (
+			!!nestedDialog &&
+			!nestedDialog.classList.contains('doublescale-event-setup-dialog')
+		);
+	};
+
+	const eventDialogOutsideProps = {
+		onPointerDownOutside: (e: {
+			target: EventTarget | null;
+			preventDefault: () => void;
+		}) => {
+			if (allowStackedOverlayInteraction(e.target)) {
+				e.preventDefault();
+			}
+		},
+		onInteractOutside: (e: {
+			target: EventTarget | null;
+			preventDefault: () => void;
+		}) => {
+			if (allowStackedOverlayInteraction(e.target)) {
+				e.preventDefault();
+			}
+		},
+		onFocusOutside: (e: {
+			target: EventTarget | null;
+			preventDefault: () => void;
+		}) => {
+			if (allowStackedOverlayInteraction(e.target)) {
+				e.preventDefault();
+			}
+		},
+	};
+
 	const handleTabChange = (newValue: string) => {
 		if (!calendarId || !id) {
 			console.error('Missing calendar ID or event ID');
@@ -478,7 +524,8 @@ const Event: React.FC = () => {
 		return (
             <Dialog open={true}><DialogContent
                     hideCloseButton
-                    className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'>
+                    className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'
+                    {...eventDialogOutsideProps}>
                     <div className="flex items-center justify-center h-full">
                         <div>Loading event...</div>
                     </div>
@@ -487,7 +534,7 @@ const Event: React.FC = () => {
 	}
 
 	return (
-        // No need for Provider wrapper anymore - using global store
+        <>
         <Dialog
             open={open}
             onOpenChange={open => {
@@ -495,7 +542,8 @@ const Event: React.FC = () => {
                     handleClose();
             }}><DialogContent
                 hideCloseButton
-                className='fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'>
+                className='doublescale-event-setup-dialog fixed inset-0 max-w-none w-full h-full translate-x-0 translate-y-0 left-0 top-0 rounded-none p-0 z-[150201] overflow-auto grid-rows-[auto_minmax(0,1fr)] gap-0'
+                {...eventDialogOutsideProps}>
                 <div className="border-b px-4 py-2">
                     <div className='flex justify-between items-center'>
                         <div className='flex gap-2.5 items-center'>
@@ -631,6 +679,11 @@ const Event: React.FC = () => {
                     </div>
                 </div>
             </DialogContent></Dialog>
+        <FieldsProUpsellOverlay
+            open={fieldsUpsellOpen}
+            onClose={() => setFieldsUpsellOpen(false)}
+        />
+        </>
     );
 };
 

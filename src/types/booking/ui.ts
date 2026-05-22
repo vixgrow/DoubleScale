@@ -7,6 +7,8 @@ export interface EventTabHandle {
 export interface EventTabProps {
   disabled: boolean;
   setDisabled: (disabled: boolean) => void;
+  /** Opens the Pro upsell when "Add New Question" is clicked (free plan). */
+  onOpenFieldsUpsell?: () => void;
 }
 
 export interface LimitBaseProps {

@@ -7,6 +7,7 @@ namespace DoubleScale\Modules\Booking\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Booking\Helpers\IntegrationsHelper;
 use DoubleScale\Modules\Booking\Models\BookingHostsModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
@@ -38,6 +39,23 @@ class BookingService {
 	 * @throws \Exception If booking fails.
 	 */
 	public function book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $invitees, $location, $status = 'scheduled', $fields = array(), $user_id = null, $skip_availability_check = false ) {
+		// Collective bookings issue the meeting link from the team owner's
+		// integrated calendar (see Integration::get_integration_host_calendar_for_booking).
+		// Without a connected integration on the owner there is no calendar
+		// to write the event to and no provider to mint the meeting URL, so
+		// reject the booking up-front rather than leaving an orphan record.
+		if ( 'collective' === $event->type ) {
+			$booking_calendar = CalendarModel::find( $calendar_id );
+			if ( $booking_calendar && 'team' === $booking_calendar->type ) {
+				$owner_host_calendar = CalendarModel::where( 'user_id', (int) $booking_calendar->user_id )
+					->where( 'type', 'host' )
+					->first();
+				if ( ! IntegrationsHelper::host_has_any_calendar_integration( $owner_host_calendar ) ) {
+					throw new \Exception( esc_html__( 'This event can\'t be booked yet — the team owner needs to connect a calendar integration (Google, Outlook, or Apple) before collective meetings can be scheduled.', 'doublescale' ) );
+				}
+			}
+		}
+
 		$end_date = clone $start_date;
 		$end_date->modify( "+{$duration} minutes" );
 

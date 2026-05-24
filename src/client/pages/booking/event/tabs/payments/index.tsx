@@ -18,13 +18,13 @@ const Payments = forwardRef<EventPaymentsHandle, EventPaymentsProps>(
 			<ProFeatureNotice
 				featureName={__('Paid Bookings', 'doublescale')}
 				description={__(
-					'Charge for appointments with built-in payment gateways. Configure pricing models, accept deposits, and require payment before a booking is confirmed.',
+					'Charge for appointments with Stripe. Configure pricing models and require payment before a booking is confirmed.',
 					'doublescale'
 				)}
 				features={[
-					__('Stripe and PayPal integration', 'doublescale'),
-					__('Per-event pricing and deposits', 'doublescale'),
-					__('WooCommerce checkout support', 'doublescale'),
+					__('Stripe payments', 'doublescale'),
+					__('Per-event pricing', 'doublescale'),
+					__('Multiple duration pricing', 'doublescale'),
 				]}
 			/>,
 			props,

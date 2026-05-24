@@ -56,16 +56,6 @@ abstract class PaymentGateway {
 	public $option_name;
 
 	/**
-	 * Class names
-	 *
-	 * @var array
-	 */
-	protected static $classes = array(
-		// + classes.
-		// 'rest_api' => REST_API::class,
-	);
-
-	/**
 	 * Subclasses instances.
 	 *
 	 * @var array
@@ -110,10 +100,6 @@ abstract class PaymentGateway {
 	 * @return void
 	 */
 	public function init() {
-		if ( ! empty( static::$classes['rest_api'] ) ) {
-			new static::$classes['rest_api']( $this );
-		}
-
 		$this->option_name = 'doublescale_booking_' . $this->slug . '_settings';
 	}
 
@@ -211,15 +197,16 @@ abstract class PaymentGateway {
 	}
 
 	/**
-	 * validate the integration
+	 * Validate the integration. Concrete gateways override to validate their
+	 * settings payload; default permits anything.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $settings
+	 * @param array $settings Candidate settings payload.
 	 *
 	 * @return bool
 	 */
-	public function validate( $settings ) {
+	public function validate( $settings ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Default no-op for subclasses to override.
 		return true;
 	}
 

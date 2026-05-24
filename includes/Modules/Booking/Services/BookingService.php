@@ -349,8 +349,9 @@ class BookingService {
 				->where( 'event_id', $entity->id );
 
 			$current_waiting = $position_query->count();
+			$batch_size      = count( $invitees );
 
-			if ( $current_waiting >= $wl_capacity ) {
+			if ( $current_waiting + $batch_size > $wl_capacity ) {
 				$wpdb->query( 'ROLLBACK' );
 				throw new \Exception( esc_html__( 'The waiting list for this time slot is full', 'doublescale' ) );
 			}

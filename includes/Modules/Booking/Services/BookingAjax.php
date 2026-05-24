@@ -23,6 +23,7 @@ use DoubleScale\Modules\Booking\Models\BookedSlotModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
 use DoubleScale\Modules\Booking\Managers\LocationsManager;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 use Illuminate\Support\Arr;
 
 
@@ -158,6 +159,35 @@ class BookingAjax {
 			if ( ! $available_slots || $available_slots < count( $validate_invitee ) ) {
 				$wl_settings = $event->waiting_list_settings;
 				if ( ! empty( $wl_settings['enabled'] ) ) {
+					// Dedupe — if any submitted email already holds a `waiting`
+					// row for this slot, return that existing booking instead
+					// of inserting a duplicate (otherwise one user can stack
+					// consecutive positions).
+					$utc       = new \DateTimeZone( 'UTC' );
+					$start_utc = ( clone $start_date )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+					$emails    = array_filter( array_column( $validate_invitee, 'email' ) );
+					if ( ! empty( $emails ) ) {
+						$existing_contact_ids = ContactModel::whereIn( 'email', $emails )->pluck( 'id' )->toArray();
+						if ( ! empty( $existing_contact_ids ) ) {
+							$existing_waiter = BookingModel::where( 'status', 'waiting' )
+								->where( 'event_id', $event->id )
+								->where( 'start_time', $start_utc )
+								->whereIn( 'contact_id', $existing_contact_ids )
+								->first();
+							if ( $existing_waiter ) {
+								wp_send_json_success(
+									array(
+										'booking'        => $existing_waiter,
+										'waiting_list'   => true,
+										'position'       => $existing_waiter->get_meta( 'waiting_list_position' ),
+										'already_joined' => true,
+									)
+								);
+								return;
+							}
+						}
+					}
+
 					$wl_host_ids = is_array( $host_id )
 						? $host_id
 						: array( $host_id ?? $event->user_id ?? get_current_user_id() );
@@ -319,6 +349,7 @@ class BookingAjax {
 				$booking->update_meta( 'cancellation_reason', $cancellation_reason );
 			}
 
+			$was_waiting           = ( 'waiting' === $booking->status );
 			$booking->cancelled_by = 'attendee';
 			$booking->status       = 'cancelled';
 			$booking->save();
@@ -334,6 +365,10 @@ class BookingAjax {
 			);
 
 			BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'attendee' ) );
+
+			if ( $was_waiting ) {
+				BookingModel::rebalanceWaitingListPositions( $booking );
+			}
 
 			wp_send_json_success( array( 'message' => __( 'Booking cancelled', 'doublescale' ) ) );
 		} catch ( \Exception $e ) {

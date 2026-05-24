@@ -700,6 +700,9 @@ class RestBookingController extends RestController {
 					)
 				);
 				BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'organizer' ) );
+				if ( 'waiting' === $old_status ) {
+					BookingModel::rebalanceWaitingListPositions( $booking );
+				}
 			} elseif ( $time_changed ) {
 				$booking->logs()->create(
 					array(
@@ -801,6 +804,8 @@ class RestBookingController extends RestController {
 		// Promotion from waiting list is semantically a confirmation of an
 		// already-existing booking, not a brand-new creation.
 		BookingEvents::emit( 'confirmed', (int) $booking->id, array( 'actor' => 'organizer' ) );
+
+		BookingModel::rebalanceWaitingListPositions( $booking );
 
 		return new WP_REST_Response( $booking, 200 );
 	}

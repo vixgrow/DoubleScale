@@ -5,11 +5,6 @@ import { addFilter } from '@wordpress/hooks';
 import { createRoot } from '@wordpress/element';
 
 /**
- * External dependencies
- */
-import { ConfigProvider } from 'antd';
-
-/**
  * Internal dependencies — align entry CSS with DoubleScale Pro (Tailwind + globals).
  */
 import './style.scss';
@@ -49,25 +44,6 @@ const appRoot = document.getElementById( 'doublescale-admin-root' );
 
 if (appRoot) {
 	setTimeout(() => {
-		createRoot(appRoot).render(
-			<ConfigProvider
-				theme={{
-					token: {
-						colorPrimary: '#6d78d8',
-					},
-					components: {
-						Button: {
-							algorithm: false,
-						},
-						Input: {
-							paddingBlock: 14,
-							paddingInline: 14,
-						},
-					},
-				}}
-			>
-				<PageLayout />
-			</ConfigProvider>
-		)
+		createRoot(appRoot).render(<PageLayout />);
 	}, 1500);
 }

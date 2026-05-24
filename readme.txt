@@ -2,7 +2,7 @@
 Contributors: vixgrowy
 Tags:  marketing automation, booking, email campaigns, helpdesk
 Requires at least: 5.8
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
@@ -342,6 +342,30 @@ Each SMTP provider is selectable per connection. When you configure one, DoubleS
 * Data sent: Booking amount, currency, and the payer email for receipts.
 * Endpoint: `https://api.stripe.com`
 * Terms: https://stripe.com/legal · Privacy: https://stripe.com/privacy
+
+= Plugin-specific services =
+
+**DoubleScale (doublescale.io)**
+* Purpose: License validation, Pro add-on store, and update checks. This is the plugin's own service.
+* Data sent: Your site URL, environment type (e.g. `production`/`staging`), and — only when you initiate a license or add-on action — the license key, the add-on identifier you selected, and your DoubleScale account credentials. No CRM, contact, or campaign data is sent.
+* When it fires: Only on explicit user actions — activating a Pro license, browsing the Pro add-on store from the admin, or running an update check. Not on every page load.
+* Endpoint: `https://doublescale.io`
+* Terms: https://doublescale.io/terms · Privacy: https://doublescale.io/privacy
+
+**UI Avatars (ui-avatars.com)** (Gravatar fallback)
+* Purpose: Provides a generated initials-based avatar image for contacts whose email address has no Gravatar. DoubleScale outputs a standard Gravatar URL in the contact metabox; Gravatar itself redirects to UI Avatars when no Gravatar exists for the email, so the user's browser — not the plugin server — loads the fallback image.
+* Data sent: Only the contact's display name (passed in the URL path so an initials-based image can be generated). The plugin does not POST or contact UI Avatars directly.
+* When it fires: When an admin views the contact metabox and the contact has no Gravatar.
+* Endpoint: `https://ui-avatars.com/api/`
+* Terms: https://ui-avatars.com/terms · Privacy: https://ui-avatars.com/privacy
+
+= AI provider endpoints (optional, bring-your-own-key) =
+
+The AI settings page lets you point DoubleScale at any OpenAI-compatible endpoint by entering its base URL and your own API key. Suggested endpoints (Groq, OpenRouter) appear as labels in the provider dropdown but are **not** contacted unless you save credentials for them. If you configure an AI provider, you are responsible for that provider's terms and privacy policy.
+
+* OpenRouter — `https://openrouter.ai/api/v1` · Terms: https://openrouter.ai/terms · Privacy: https://openrouter.ai/privacy
+* Groq — `https://api.groq.com/openai/v1` · Terms: https://groq.com/terms-of-use · Privacy: https://groq.com/privacy-policy
+* Any other OpenAI-compatible endpoint you supply manually.
 
 = Disabling =
 

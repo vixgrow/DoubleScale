@@ -5,7 +5,7 @@
  * Description:       DoubleScale | All-In-One Business Growth Platform
  * Version:           1.0.0
  * Author:            vixgrowy
- * Author URI:        https://www.vixgrowy.com
+ * Author URI:        https://www.vixgrow.com
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       doublescale

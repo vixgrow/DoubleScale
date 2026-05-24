@@ -543,7 +543,12 @@ class BookingService {
 			$type   = $entity ? $entity->type : null;
 
 			if ( in_array( $type, array( 'round-robin', 'collective' ), true ) ) {
-				$host_ids = $booking->hosts->pluck( 'user_id' )->toArray();
+				// `$booking->hosts` is a hasManyThrough to UserModel (primary key `ID`),
+				// not the `booking_hosts` join row, so we pluck `ID` here. Plucking
+				// `user_id` returns a column of nulls and silently disables the
+				// per-host overlap guard — letting reschedules collide with
+				// existing bookings for the same host.
+				$host_ids = $booking->hosts->pluck( 'ID' )->toArray();
 				foreach ( $host_ids as $host_id ) {
 					if ( $this->host_has_overlap_excluding( (int) $host_id, $start_utc, $end_utc, (int) $booking->id ) ) {
 						throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );

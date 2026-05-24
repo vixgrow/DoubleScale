@@ -87,7 +87,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	};
 
 	const emitContent = (html: string) => {
-		onChange(stripRichTextChromeColors(html));
+		onChange(stripRichTextChromeColors(html, { blockColor: bodyColor }));
 	};
 	const [selectedColor, setSelectedColor] = useState(bodyColor);
 	useEffect(() => {

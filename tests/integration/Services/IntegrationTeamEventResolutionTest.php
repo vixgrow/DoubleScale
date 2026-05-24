@@ -125,7 +125,7 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 		return (int) $wpdb->insert_id;
 	}
 
-	private function make_event_for( int $calendar_id ): int {
+	private function make_event_for( int $calendar_id, string $type = 'one-to-one' ): int {
 		global $wpdb;
 		$wpdb->insert(
 			$wpdb->prefix . 'doublescale_booking_events',
@@ -136,7 +136,7 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 				'name'              => 'Stub Event',
 				'slug'              => 'stub-' . wp_generate_password( 6, false, false ),
 				'status'            => 'active',
-				'type'              => 'one-to-one',
+				'type'              => $type,
 				'is_disabled'       => 0,
 				'duration'          => 30,
 				'color'             => '#0099ff',
@@ -149,12 +149,12 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 		return (int) $wpdb->insert_id;
 	}
 
-	private function place_booking_on( int $calendar_id, array $host_ids ): BookingModel {
+	private function place_booking_on( int $calendar_id, array $host_ids, string $event_type = 'one-to-one' ): BookingModel {
 		$start = ( new \DateTime( '+1 day', new \DateTimeZone( 'UTC' ) ) )->setTime( 10, 0 );
 		$end   = ( clone $start )->modify( '+30 minutes' );
 
 		$booking              = new BookingModel();
-		$booking->event_id    = $this->make_event_for( $calendar_id );
+		$booking->event_id    = $this->make_event_for( $calendar_id, $event_type );
 		$booking->calendar_id = $calendar_id;
 		$booking->contact_id  = $this->make_contact();
 		$booking->start_time  = $start->format( 'Y-m-d H:i:s' );
@@ -214,22 +214,21 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 	}
 
 	/* -----------------------------------------------------------------
-	 *  Round-robin: ALWAYS routes to the team OWNER's host calendar,
-	 *  regardless of which host was actually picked for this booking.
+	 *  Round-robin: routes to the SELECTED host's calendar so the
+	 *  third-party meeting lands on the host who is actually attending.
 	 * --------------------------------------------------------------- */
 
 	public function test_round_robin_booking_assigned_to_owner_routes_to_owner_host_calendar(): void {
-		$booking  = $this->place_booking_on( $this->team_calendar_id, array( $this->owner_id ) );
+		$booking  = $this->place_booking_on( $this->team_calendar_id, array( $this->owner_id ), 'round-robin' );
 		$resolved = $this->resolve_integration_host( $booking );
 
 		$this->assertNotNull( $resolved );
-		$this->assertSame( $this->owner_host_calendar_id, (int) $resolved->id, 'Owner host calendar should be the integration target' );
+		$this->assertSame( $this->owner_host_calendar_id, (int) $resolved->id, 'Owner host calendar should be the integration target when owner is the picked host' );
 	}
 
-	public function test_round_robin_booking_assigned_to_non_owner_still_routes_to_owner_host_calendar(): void {
-		$booking = $this->place_booking_on( $this->team_calendar_id, array( $this->host_b ) );
+	public function test_round_robin_booking_assigned_to_non_owner_routes_to_that_hosts_calendar(): void {
+		$booking = $this->place_booking_on( $this->team_calendar_id, array( $this->host_b ), 'round-robin' );
 
-		// Sanity: this booking is assigned to host B only.
 		$attached_hosts = $booking->hosts->pluck( 'ID' )->toArray();
 		$this->assertSame( array( $this->host_b ), array_map( 'intval', $attached_hosts ) );
 
@@ -237,14 +236,28 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 
 		$this->assertNotNull( $resolved );
 		$this->assertSame(
-			$this->owner_host_calendar_id,
-			(int) $resolved->id,
-			'Team RR routes to the OWNER\'s host calendar — NOT to host B\'s host calendar.'
-		);
-		$this->assertNotSame(
 			$this->host_b_calendar_id,
 			(int) $resolved->id,
-			'Confirms the known limitation: host B\'s Google/Outlook account is never targeted for this booking.'
+			'Round-robin must route to the selected host\'s host calendar so the meeting lands on their remote calendar.'
+		);
+	}
+
+	public function test_round_robin_falls_back_to_owner_when_picked_host_lacks_host_calendar(): void {
+		global $wpdb;
+		// Delete host B's personal host calendar, then assign a booking to host B.
+		$wpdb->delete(
+			$wpdb->prefix . 'doublescale_booking_calendars',
+			array( 'id' => $this->host_b_calendar_id )
+		);
+
+		$booking  = $this->place_booking_on( $this->team_calendar_id, array( $this->host_b ), 'round-robin' );
+		$resolved = $this->resolve_integration_host( $booking );
+
+		$this->assertNotNull( $resolved );
+		$this->assertSame(
+			$this->owner_host_calendar_id,
+			(int) $resolved->id,
+			'When the selected host has no host calendar, fall back to the team owner so writes still go somewhere.'
 		);
 	}
 
@@ -255,7 +268,8 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 	public function test_collective_booking_routes_only_to_owner_host_calendar(): void {
 		$booking = $this->place_booking_on(
 			$this->team_calendar_id,
-			array( $this->owner_id, $this->host_b, $this->host_c )
+			array( $this->owner_id, $this->host_b, $this->host_c ),
+			'collective'
 		);
 
 		$this->assertCount( 3, $booking->hosts, 'Booking should reference all three team members' );
@@ -279,13 +293,14 @@ final class IntegrationTeamEventResolutionTest extends IntegrationTestCase {
 			array( 'id' => $this->owner_host_calendar_id )
 		);
 
-		$booking = $this->place_booking_on( $this->team_calendar_id, array( $this->host_b ) );
+		// Use a collective booking so the per-host RR fallback doesn't kick in.
+		$booking = $this->place_booking_on( $this->team_calendar_id, array( $this->host_b ), 'collective' );
 
 		$resolved = $this->resolve_integration_host( $booking );
 
 		$this->assertNull(
 			$resolved,
-			'When team OWNER has no host calendar, resolver MUST return null — integrations skip the write rather than falling back to host B'
+			'Collective bookings always route to the OWNER. When the owner has no host calendar, resolver MUST return null.'
 		);
 	}
 

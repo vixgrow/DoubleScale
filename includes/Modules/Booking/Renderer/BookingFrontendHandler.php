@@ -12,6 +12,8 @@ namespace DoubleScale\Modules\Booking\Renderer;
 defined( 'ABSPATH' ) || exit;
 
 use Illuminate\Support\Arr;
+use DoubleScale\Modules\Booking\Exceptions\BookingNotFoundException;
+use DoubleScale\Modules\Booking\Exceptions\InvalidBookingHashException;
 use DoubleScale\Modules\Booking\Models\CalendarModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
 use DoubleScale\Modules\Booking\Services\BookingValidator;
@@ -179,7 +181,7 @@ class BookingFrontendHandler {
 			return $this->render_calendar_page( $calendar_slug );
 		}
 
-		if ( $hash && $this->is_valid_page_type( $type ) ) {
+		if ( $this->is_valid_page_type( $type ) ) {
 			return $this->render_action_page( $hash, $type );
 		}
 
@@ -229,9 +231,30 @@ class BookingFrontendHandler {
 			);
 
 			return $renderer->render( $booking );
+		} catch ( InvalidBookingHashException $e ) {
+			return $this->render_error_page(
+				__( 'Missing booking identifier', 'doublescale' ),
+				__( 'This link is missing the booking identifier, so we can\'t look it up.', 'doublescale' ),
+				__( 'Check that you opened the full link from your email — some clients trim long URLs.', 'doublescale' )
+			);
+		} catch ( BookingNotFoundException $e ) {
+			return $this->render_error_page(
+				__( 'Booking not found', 'doublescale' ),
+				__( 'We couldn\'t find this booking. It may have been deleted, or the link has expired.', 'doublescale' ),
+				__( 'If you believe this is a mistake, please contact the person who scheduled the booking.', 'doublescale' )
+			);
 		} catch ( \Exception $e ) {
-			wp_die( esc_html__( 'Invalid or expired booking link.', 'doublescale' ) );
+			return $this->render_error_page(
+				__( 'Something went wrong', 'doublescale' ),
+				__( 'We hit an unexpected error loading this booking. Please try again in a moment.', 'doublescale' ),
+				''
+			);
 		}
+	}
+
+	private function render_error_page( string $heading, string $message, string $detail = '' ) {
+		$renderer = new ErrorPageRenderer();
+		return $renderer->render( $heading, $message, $detail );
 	}
 
 	private function is_valid_page_type( string $type ): bool {

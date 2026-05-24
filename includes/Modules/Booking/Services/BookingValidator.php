@@ -9,6 +9,8 @@ namespace DoubleScale\Modules\Booking\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Booking\Exceptions\BookingNotFoundException;
+use DoubleScale\Modules\Booking\Exceptions\InvalidBookingHashException;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
 use DateTime;
@@ -21,17 +23,18 @@ class BookingValidator {
 	 * @param mixed  $id         Booking hash ID.
 	 * @param string $modelClass The Booking Model class name to use.
 	 * @return BookingModel
-	 * @throws Exception If the booking is invalid.
+	 * @throws InvalidBookingHashException If the hash id is missing/empty.
+	 * @throws BookingNotFoundException If no booking matches the hash id.
 	 */
 	public static function validate_booking( $id, string $modelClass = BookingModel::class ) {
 		if ( empty( $id ) ) {
-			throw new Exception( esc_html__( 'Invalid booking ID.', 'doublescale' ) );
+			throw new InvalidBookingHashException( esc_html__( 'Invalid booking ID.', 'doublescale' ) );
 		}
 
 		$booking = call_user_func( array( $modelClass, 'getByHashId' ), $id );
 
 		if ( ! $booking ) {
-			throw new Exception( esc_html__( 'Invalid booking.', 'doublescale' ) );
+			throw new BookingNotFoundException( esc_html__( 'Invalid booking.', 'doublescale' ) );
 		}
 
 		return $booking;

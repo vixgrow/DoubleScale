@@ -142,7 +142,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 			}}
 		>
 			<DialogOverlay />
-			<DialogContent className="top-[39%]">
+			<DialogContent className="bg-white">
 				<CustomDialogHeader
 					title={__('Save as Template', 'doublescale')}
 					subtitle={__(
@@ -183,7 +183,10 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 								htmlFor="save-update"
 								className="font-normal cursor-pointer"
 							>
-								{__('Update an existing template', 'doublescale')}
+								{__(
+									'Update an existing template',
+									'doublescale'
+								)}
 							</Label>
 						</div>
 					</RadioGroup>
@@ -222,7 +225,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 
 							{/* Thumbnail Upload */}
 							{/* Thumbnail upload — dark panel so dropzone matches builder theme */}
-							<div className="rounded-xl bg-[#1a1d29] p-4 ring-1 ring-white/10">
+							<div className="rounded-xl bg-gradient-to-r from-primary to-[#1B1145] p-4">
 								<ImageUploadControl
 									label={__(
 										'Template Thumbnail (Optional)',

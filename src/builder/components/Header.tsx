@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
-import { RedoIcon, UndoIcon } from '@/components/icons';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { RedoIcon, UndoIcon } from '@doublescale/shared/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -12,6 +18,7 @@ import { useTemplateActions } from '@doublescale/hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
 import { BuilderData } from '../index';
+import ArrowIcon from '@doublescale/shared/icons/dropdown-header';
 
 interface HeaderProps {
 	onSave?: (data: BuilderData) => Promise<void>;
@@ -31,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({
 	handleNavigate,
 }) => {
 	const dispatch = useDispatch();
-	const navigate = handleNavigate ? handleNavigate : useNavigate();
+	const navigateFromRouter = useNavigate();
 	const { createNotice } = useDispatch('doublescale/core');
 	const campaign = useSelect(
 		(select: any) => select('doublescale/campaign').getCampaign(),
@@ -92,9 +99,20 @@ const Header: React.FC<HeaderProps> = ({
 
 		const { success } = await save();
 		if (success && campaign) {
+			const path = `campaigns/${campaign.id}/contacts`;
 			handleNavigate
-				? handleNavigate(`campaigns/${campaign.id}/contacts`)
-				: navigate(getToLink(`campaigns/${campaign.id}/contacts`));
+				? handleNavigate(path)
+				: navigateFromRouter(getToLink(path));
+		}
+	};
+
+	const handleChangeTemplate = () => {
+		if (!campaign) return;
+		const path = `campaigns/${campaign.id}/email-templates`;
+		if (handleNavigate) {
+			handleNavigate(path);
+		} else {
+			navigateFromRouter(getToLink(path) + '&changeTemplate=1');
 		}
 	};
 
@@ -154,17 +172,40 @@ const Header: React.FC<HeaderProps> = ({
 					<RedoIcon />
 				</Button>
 				<div className="h-6 w-px bg-border" />
-				{campaign && (
+				{campaign && !onSave && (
 					<>
-						<Button
-							variant="secondary"
-							className="px-3"
-							onClick={() => setIsTemplateDialogOpen(true)}
-							disabled={isSavingTemplate || isBuilderEmpty}
-							title={__('Save as template', 'doublescale')}
-						>
-							{__('Save as Template', 'doublescale')}
-						</Button>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="secondary"
+									className="px-3"
+									disabled={
+										isSavingTemplate || isBuilderEmpty
+									}
+									title={__('Template options', 'doublescale')}
+								>
+									{__('Save as template', 'doublescale')}
+									<ArrowIcon />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<DropdownMenuItem
+									onClick={() =>
+										setIsTemplateDialogOpen(true)
+									}
+									disabled={
+										isSavingTemplate || isBuilderEmpty
+									}
+								>
+									{__('Save as template', 'doublescale')}
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={handleChangeTemplate}
+								>
+									{__('Change template', 'doublescale')}
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 
 						<Button
 							variant="default"

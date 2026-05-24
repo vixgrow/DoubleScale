@@ -716,11 +716,41 @@ class RestBookingController extends RestController {
 
 			if ( $status && $status !== $old_status ) {
 				if ( 'pending' === $old_status && 'scheduled' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking confirmed', 'doublescale' ),
+							'details' => __( 'Booking confirmed by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'confirmed', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				} elseif ( 'completed' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking marked as completed', 'doublescale' ),
+							'details' => __( 'Booking marked as completed by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'completed', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				} elseif ( 'rejected' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking rejected', 'doublescale' ),
+							'details' => __( 'Booking rejected by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'rejected', (int) $booking->id, array( 'actor' => 'organizer' ) );
+				} elseif ( 'no-show' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking marked as no-show', 'doublescale' ),
+							'details' => __( 'Booking marked as no-show by Host', 'doublescale' ),
+						)
+					);
+					BookingEvents::emit( 'no_show', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				}
 			}
 
@@ -901,17 +931,35 @@ class RestBookingController extends RestController {
 
 	/**
 	 * Apply user filter to booking query.
-	 * Uses the calendar relationship.
+	 *
+	 * "My Meetings" means meetings the user will actually attend as host.
+	 * On personal calendars (calendar.type = 'host'), the calendar owner IS the
+	 * host; on team calendars (round-robin / collective), the actual host is
+	 * stored per booking in booking_hosts and is not necessarily the team
+	 * calendar owner. Match accordingly so:
+	 *   - Personal-calendar owners see their own bookings.
+	 *   - Team-event hosts see bookings they were assigned to host.
+	 *   - Team-calendar owners do NOT see bookings they aren't hosting.
 	 *
 	 * @param mixed $query The Booking query object
 	 * @param int   $user_id User ID to filter by
 	 * @return void
 	 */
 	protected function apply_user_filter( $query, $user_id ) {
-		$query->whereHas(
-			'calendar',
+		$query->where(
 			function ( $query ) use ( $user_id ) {
-				$query->where( 'user_id', $user_id );
+				$query->whereHas(
+					'calendar',
+					function ( $q ) use ( $user_id ) {
+						$q->where( 'type', 'host' )->where( 'user_id', $user_id );
+					}
+				)->orWhereHas(
+					'hosts',
+					function ( $q ) use ( $user_id ) {
+						global $wpdb;
+						$q->where( $wpdb->users . '.ID', $user_id );
+					}
+				);
 			}
 		);
 	}

@@ -351,6 +351,42 @@ final class MergeTagsManager {
 				'mergeTags' => array(),
 				'triggers'  => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
+			'booking'        => array(
+				'name'        => __( 'Booking', 'doublescale' ),
+				'mergeTags'   => array(),
+				'triggers'    => array(
+					'booking_created',
+					'booking_confirmed',
+					'booking_cancelled',
+					'booking_rescheduled',
+					'booking_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'booking' ),
+			),
+			'guest'          => array(
+				'name'        => __( 'Booking Guest', 'doublescale' ),
+				'mergeTags'   => array(),
+				'triggers'    => array(
+					'booking_created',
+					'booking_confirmed',
+					'booking_cancelled',
+					'booking_rescheduled',
+					'booking_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'booking' ),
+			),
+			'host'           => array(
+				'name'        => __( 'Booking Host', 'doublescale' ),
+				'mergeTags'   => array(),
+				'triggers'    => array(
+					'booking_created',
+					'booking_confirmed',
+					'booking_cancelled',
+					'booking_rescheduled',
+					'booking_completed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' ) || ! doublescale_is_module_active( 'booking' ),
+			),
 			'last_post'      => array(
 				'name'      => __( 'Last Post', 'doublescale' ),
 				'mergeTags' => array(),

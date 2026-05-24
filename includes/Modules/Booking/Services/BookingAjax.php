@@ -474,6 +474,7 @@ class BookingAjax {
 	 * @return void
 	 */
 	public function ajax_process_payment() {
+		$this->verify_booking_nonce();
 		try {
 			$booking_hash_id = isset( $_POST['booking_hash_id'] ) ? sanitize_text_field( wp_unslash( $_POST['booking_hash_id'] ) ) : null;
 			if ( ! $booking_hash_id ) {

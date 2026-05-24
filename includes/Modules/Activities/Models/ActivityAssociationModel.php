@@ -75,6 +75,7 @@ class ActivityAssociationModel extends Model {
 	 */
 	const ENTITY_TYPE_DEAL     = 1;
 	const ENTITY_TYPE_CAMPAIGN = 2;
+	const ENTITY_TYPE_TICKET   = 3;
 
 	/**
 	 * Validation rules
@@ -85,7 +86,7 @@ class ActivityAssociationModel extends Model {
 	 */
 	public $rules = array(
 		'activity_id' => 'required|integer',
-		'entity_type' => 'required|integer|in:1,2',
+		'entity_type' => 'required|integer|in:1,2,3',
 		'entity_id'   => 'required|integer',
 	);
 
@@ -99,7 +100,7 @@ class ActivityAssociationModel extends Model {
 	public $messages = array(
 		'activity_id.required' => 'Activity ID is required.',
 		'entity_type.required' => 'Entity type is required.',
-		'entity_type.in'       => 'Entity type must be 1 (Deal) or 2 (Campaign).',
+		'entity_type.in'       => 'Entity type must be 1 (Deal), 2 (Campaign), or 3 (Ticket).',
 		'entity_id.required'   => 'Entity ID is required.',
 	);
 
@@ -212,9 +213,21 @@ class ActivityAssociationModel extends Model {
 	}
 
 	/**
+	 * Scope: Filter by ticket
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 * @param int                                   $ticket_id Support ticket ID.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeForTicket( $query, $ticket_id ) {
+		return $query->where( 'entity_type', self::ENTITY_TYPE_TICKET )->where( 'entity_id', $ticket_id );
+	}
+
+	/**
 	 * Convert a REST-facing entity-type string to its internal integer constant.
 	 *
-	 * @param string $entity_type_string Entity type string ('deal', 'campaign').
+	 * @param string $entity_type_string Entity type string ('deal', 'campaign', 'ticket').
 	 *
 	 * @return int|null Entity type integer or null if invalid.
 	 */
@@ -222,6 +235,7 @@ class ActivityAssociationModel extends Model {
 		$map = array(
 			'deal'     => self::ENTITY_TYPE_DEAL,
 			'campaign' => self::ENTITY_TYPE_CAMPAIGN,
+			'ticket'   => self::ENTITY_TYPE_TICKET,
 		);
 
 		return $map[ strtolower( $entity_type_string ) ] ?? null;
@@ -238,6 +252,7 @@ class ActivityAssociationModel extends Model {
 		$map = array(
 			self::ENTITY_TYPE_DEAL     => 'deal',
 			self::ENTITY_TYPE_CAMPAIGN => 'campaign',
+			self::ENTITY_TYPE_TICKET   => 'ticket',
 		);
 
 		return $map[ $entity_type_int ] ?? null;
@@ -261,8 +276,8 @@ class ActivityAssociationModel extends Model {
 					$association->entity_type = self::string_to_entity_type( $association->entity_type );
 				}
 
-				if ( ! in_array( $association->entity_type, array( self::ENTITY_TYPE_DEAL, self::ENTITY_TYPE_CAMPAIGN ), true ) ) {
-					throw new \Exception( 'Invalid entity type. Must be 1 (Deal) or 2 (Campaign).' );
+				if ( ! in_array( $association->entity_type, array( self::ENTITY_TYPE_DEAL, self::ENTITY_TYPE_CAMPAIGN, self::ENTITY_TYPE_TICKET ), true ) ) {
+					throw new \Exception( 'Invalid entity type. Must be 1 (Deal), 2 (Campaign), or 3 (Ticket).' );
 				}
 			}
 		);

@@ -35,6 +35,14 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const selectedSectionId = useSelect(
+		(select) => select(STORE_KEY).getSelectedSectionId(),
+		[]
+	);
+	const selectedColumnId = useSelect(
+		(select) => select(STORE_KEY).getSelectedColumnId(),
+		[]
+	);
 
 	// Check if this section is a template (contains template blocks)
 	const isThisTemplateSection = isSectionTemplate(sectionId, sections);
@@ -42,6 +50,21 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	// Ready-made email templates set hideAddBlockButton on section styles
 	const section = sections.find((s) => s.id === sectionId);
 	const hideAddButton = section?.styles?.hideAddBlockButton === true;
+
+	const isColumnSelected =
+		selectedSectionId === sectionId && selectedColumnId === column.id;
+
+	const handleColumnClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		dispatch(STORE_KEY).selectColumn(sectionId, column.id);
+	};
+
+	const columnCount = section?.columns?.length ?? 1;
+	const columnStyle: React.CSSProperties = {
+		flex: columnCount === 2 ? `0 0 ${column.width ?? 50}%` : 1,
+		padding: '10px 10px',
+		...(column.styles || {}),
+	};
 
 	const { isOver, setNodeRef } = useDroppable({
 		id: `column-${column.id}`,
@@ -72,14 +95,14 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	return (
 		<div
 			ref={setNodeRef}
+			onClick={handleColumnClick}
 			className={`
 				min-h-24
 				${isOver && !isThisTemplateSection ? 'bg-blue-50' : ''}
+				cursor-pointer transition-colors
+				${isColumnSelected ? 'ring-2 ring-blue-500 ring-inset' : ''}
 			`}
-			style={{
-				width: `${column.width}%`,
-				padding: '10px 10px',
-			}}
+			style={columnStyle}
 		>
 			<SortableContext
 				items={column.blocks.map((b) => b.id)}

@@ -61,8 +61,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		// All sections should open LayoutSettings when clicked, just like template sections
-		dispatch(STORE_KEY).selectBlock(null, section.id);
+		dispatch(STORE_KEY).selectSection(section.id);
 	};
 
 	const handleDeleteSection = (e: React.MouseEvent) => {
@@ -107,8 +106,8 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 			}}
 			{...attributes}
 			className={`
-				relative border-2 border-transparent transition-colors
-				${!isSelected ? 'hover:border-blue-300' : ''}
+				relative border-2 hover:border-blue-300 transition-colors
+				${isSelected ? 'border-blue-500' : 'border-none'}
 			`}
 			onClick={handleSectionClick}
 		>
@@ -118,7 +117,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 			{/* Conditional Section Badge */}
 			{hasConditions && (
 				<div className="absolute top-2 right-2 bg-secondary text-primary text-xs px-2 py-1 rounded-lg shadow-sm z-10 flex items-center gap-1">
-					<ContactsIcon width={16} height={16}/>
+					<ContactsIcon width={16} height={16} />
 					{__('Conditional', 'doublescale')}
 				</div>
 			)}

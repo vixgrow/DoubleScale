@@ -81,11 +81,13 @@ final class Module extends AbstractModule {
 		);
 	}
 
-	public function restControllers(): array {
-		// Phase 2 will populate this list. Empty in Phase 1 so module boot
-		// stays side-effect-free until the controllers exist.
-		return array();
-	}
+	// `restControllers()` is intentionally NOT overridden in Phase 1. The
+	// AbstractModule default returns an empty array, which is what we want
+	// until Phase 2 introduces real controllers. The static manifest parser
+	// in `phpunit/RestControllerManifestUtil.php` only inspects modules that
+	// override this method; leaving the inheritance in place keeps that test
+	// happy without a stub. Phase 2 will replace this comment with the
+	// concrete `return array( RestTicketController::class, ... );` block.
 
 	public function boot( Container $container ): void {
 		parent::boot( $container );

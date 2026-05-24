@@ -926,17 +926,35 @@ class RestBookingController extends RestController {
 
 	/**
 	 * Apply user filter to booking query.
-	 * Uses the calendar relationship.
+	 *
+	 * "My Meetings" means meetings the user will actually attend as host.
+	 * On personal calendars (calendar.type = 'host'), the calendar owner IS the
+	 * host; on team calendars (round-robin / collective), the actual host is
+	 * stored per booking in booking_hosts and is not necessarily the team
+	 * calendar owner. Match accordingly so:
+	 *   - Personal-calendar owners see their own bookings.
+	 *   - Team-event hosts see bookings they were assigned to host.
+	 *   - Team-calendar owners do NOT see bookings they aren't hosting.
 	 *
 	 * @param mixed $query The Booking query object
 	 * @param int   $user_id User ID to filter by
 	 * @return void
 	 */
 	protected function apply_user_filter( $query, $user_id ) {
-		$query->whereHas(
-			'calendar',
+		$query->where(
 			function ( $query ) use ( $user_id ) {
-				$query->where( 'user_id', $user_id );
+				$query->whereHas(
+					'calendar',
+					function ( $q ) use ( $user_id ) {
+						$q->where( 'type', 'host' )->where( 'user_id', $user_id );
+					}
+				)->orWhereHas(
+					'hosts',
+					function ( $q ) use ( $user_id ) {
+						global $wpdb;
+						$q->where( $wpdb->users . '.ID', $user_id );
+					}
+				);
 			}
 		);
 	}

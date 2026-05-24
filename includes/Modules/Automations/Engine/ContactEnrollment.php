@@ -45,12 +45,24 @@ final class ContactEnrollment {
 			return false;
 		}
 
+		$data = $this->args['data'] ?? array();
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		if ( isset( $this->args['booking'] ) && $this->args['booking'] instanceof \DoubleScale\Modules\Booking\Models\BookingModel ) {
+			$data['booking_id'] = (int) $this->args['booking']->id;
+			if ( isset( $this->args['context'] ) && is_array( $this->args['context'] ) ) {
+				$data['booking_context'] = $this->args['context'];
+			}
+		}
+
 		$automation_contact = AutomationContactModel::create(
 			array(
 				'automation_id' => $this->automation->id,
 				'contact_id'    => $contact->id,
 				'status'        => 'active',
-				'data'          => $this->args['data'] ?? array(),
+				'data'          => $data,
 			)
 		);
 

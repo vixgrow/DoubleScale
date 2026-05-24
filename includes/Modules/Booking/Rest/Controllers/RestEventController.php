@@ -1143,7 +1143,13 @@ class RestEventController extends RestController {
 			}
 
 			$waiting_list = $request->get_param( 'waiting_list' );
-			if ( isset( $waiting_list ) ) {
+			if ( isset( $waiting_list ) && is_array( $waiting_list ) ) {
+				if ( isset( $waiting_list['capacity'] ) ) {
+					$waiting_list['capacity'] = max( 1, (int) $waiting_list['capacity'] );
+				}
+				if ( isset( $waiting_list['additional_people_limit'] ) ) {
+					$waiting_list['additional_people_limit'] = max( 0, (int) $waiting_list['additional_people_limit'] );
+				}
 				$event->waiting_list_settings = $waiting_list;
 			}
 

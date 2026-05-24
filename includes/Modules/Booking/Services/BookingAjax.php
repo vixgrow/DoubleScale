@@ -23,6 +23,7 @@ use DoubleScale\Modules\Booking\Models\BookedSlotModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
 use DoubleScale\Modules\Booking\Managers\LocationsManager;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 use Illuminate\Support\Arr;
 
 
@@ -158,6 +159,35 @@ class BookingAjax {
 			if ( ! $available_slots || $available_slots < count( $validate_invitee ) ) {
 				$wl_settings = $event->waiting_list_settings;
 				if ( ! empty( $wl_settings['enabled'] ) ) {
+					// Dedupe — if any submitted email already holds a `waiting`
+					// row for this slot, return that existing booking instead
+					// of inserting a duplicate (otherwise one user can stack
+					// consecutive positions).
+					$utc       = new \DateTimeZone( 'UTC' );
+					$start_utc = ( clone $start_date )->setTimezone( $utc )->format( 'Y-m-d H:i:s' );
+					$emails    = array_filter( array_column( $validate_invitee, 'email' ) );
+					if ( ! empty( $emails ) ) {
+						$existing_contact_ids = ContactModel::whereIn( 'email', $emails )->pluck( 'id' )->toArray();
+						if ( ! empty( $existing_contact_ids ) ) {
+							$existing_waiter = BookingModel::where( 'status', 'waiting' )
+								->where( 'event_id', $event->id )
+								->where( 'start_time', $start_utc )
+								->whereIn( 'contact_id', $existing_contact_ids )
+								->first();
+							if ( $existing_waiter ) {
+								wp_send_json_success(
+									array(
+										'booking'        => $existing_waiter,
+										'waiting_list'   => true,
+										'position'       => $existing_waiter->get_meta( 'waiting_list_position' ),
+										'already_joined' => true,
+									)
+								);
+								return;
+							}
+						}
+					}
+
 					$wl_host_ids = is_array( $host_id )
 						? $host_id
 						: array( $host_id ?? $event->user_id ?? get_current_user_id() );
@@ -319,6 +349,7 @@ class BookingAjax {
 				$booking->update_meta( 'cancellation_reason', $cancellation_reason );
 			}
 
+			$was_waiting           = ( 'waiting' === $booking->status );
 			$booking->cancelled_by = 'attendee';
 			$booking->status       = 'cancelled';
 			$booking->save();
@@ -334,6 +365,10 @@ class BookingAjax {
 			);
 
 			BookingEvents::emit( 'cancelled', (int) $booking->id, array( 'actor' => 'attendee' ) );
+
+			if ( $was_waiting ) {
+				BookingModel::rebalanceWaitingListPositions( $booking );
+			}
 
 			wp_send_json_success( array( 'message' => __( 'Booking cancelled', 'doublescale' ) ) );
 		} catch ( \Exception $e ) {
@@ -430,6 +465,12 @@ class BookingAjax {
 	/**
 	 * Ajax Process Payment
 	 *
+	 * The configured payment gateway (Stripe, in Pro) hooks
+	 * `doublescale_booking_process_payment` and is expected to call
+	 * `wp_send_json_*` / `wp_die` itself after it creates the payment intent.
+	 * If we reach the code after `do_action(...)`, it means no gateway claimed
+	 * the request — the only honest response is "no gateway available".
+	 *
 	 * @return void
 	 */
 	public function ajax_process_payment() {
@@ -464,16 +505,6 @@ class BookingAjax {
 				throw new \Exception( __( 'Selected payment method is not available', 'doublescale' ) );
 			}
 
-			// Process the payment through the payment gateway
-			do_action(
-				'doublescale_booking_process_payment',
-				$booking,
-				array(
-					'payment_method' => $payment_method,
-				)
-			);
-
-			// Log the payment attempt
 			$booking->logs()->create(
 				array(
 					'type'    => 'info',
@@ -483,12 +514,18 @@ class BookingAjax {
 				)
 			);
 
-			wp_send_json_success(
+			// Gateway listeners (Pro Stripe) end the request with their own JSON.
+			do_action(
+				'doublescale_booking_process_payment',
+				$booking,
 				array(
-					'booking' => $booking,
-					'message' => __( 'Payment processing initiated', 'doublescale' ),
+					'payment_method' => $payment_method,
 				)
 			);
+
+			// Reaching here means no gateway accepted the call — Stripe gateway
+			// (Pro) is required; the free build can't process payments alone.
+			throw new \Exception( __( 'No payment gateway is available to process this booking. The Pro add-on with a configured Stripe integration is required.', 'doublescale' ) );
 		} catch ( \Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}

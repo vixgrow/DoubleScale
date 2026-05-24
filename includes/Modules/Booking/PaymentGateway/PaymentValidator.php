@@ -58,17 +58,29 @@ class PaymentValidator {
 			}
 		}
 
-		// At least one gateway must be enabled.
-		$payment_gateways = (array) apply_filters( 'doublescale_booking_payment_gateways', array() );
-		$payment_methods  = Arr::get( $payments_settings, 'payment_methods', array() );
-
-		if ( ! empty( $payment_methods ) ) {
-			return true;
+		// At least one registered gateway must be enabled. We collect known
+		// slugs from the `doublescale_booking_payment_gateways` filter, then
+		// check both the `payment_methods` array and the per-gateway
+		// `enable_<slug>` flag against it. A `payment_methods` entry for an
+		// unknown gateway (e.g. legacy `paypal` data) is rejected, not
+		// silently accepted.
+		$registered_slugs = array();
+		foreach ( (array) apply_filters( 'doublescale_booking_payment_gateways', array() ) as $gateway ) {
+			$slug = is_object( $gateway ) ? ( $gateway->slug ?? '' ) : ( $gateway['slug'] ?? '' );
+			if ( '' !== $slug ) {
+				$registered_slugs[] = $slug;
+			}
 		}
 
-		foreach ( $payment_gateways as $gateway ) {
-			$slug = is_object( $gateway ) ? ( $gateway->slug ?? '' ) : ( $gateway['slug'] ?? '' );
-			if ( $slug && Arr::get( $payments_settings, 'enable_' . $slug, false ) ) {
+		$payment_methods = (array) Arr::get( $payments_settings, 'payment_methods', array() );
+		foreach ( $payment_methods as $method ) {
+			if ( in_array( $method, $registered_slugs, true ) ) {
+				return true;
+			}
+		}
+
+		foreach ( $registered_slugs as $slug ) {
+			if ( Arr::get( $payments_settings, 'enable_' . $slug, false ) ) {
 				return true;
 			}
 		}

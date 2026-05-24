@@ -115,6 +115,8 @@ class ClaimWaitlistPageRenderer extends BaseTemplateRenderer {
 
 		BookingEvents::emit( 'created', (int) $booking->id, array( 'actor' => 'attendee' ) );
 
+		BookingModel::rebalanceWaitingListPositions( $booking );
+
 		return true;
 	}
 

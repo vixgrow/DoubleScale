@@ -112,10 +112,22 @@ const BookingsTabs: React.FC<BookingsTabsProps> = ({
 	}));
 
 	return (
-        <Select
-            value={period}
-            onValueChange={(value) => setPeriod(value as BookingsTabsTypes)} />
-    );
+		<Select
+			value={period}
+			onValueChange={(value) => setPeriod(value as BookingsTabsTypes)}
+		>
+			<SelectTrigger className="w-[260px]">
+				<SelectValue />
+			</SelectTrigger>
+			<SelectContent>
+				{options.map((opt) => (
+					<SelectItem key={opt.value} value={opt.value}>
+						{opt.label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+	);
 };
 
 export default BookingsTabs;

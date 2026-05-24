@@ -251,6 +251,7 @@ class Ses_Query_Client {
 				$ens = $xml->children();
 			}
 			if ( isset( $ens->Error->Code, $ens->Error->Message ) ) {
+				// phpcs:ignore WordPress.CodeAnalysis.EscapedNotTranslated.Found -- Runtime values returned by the AWS SES XML response (error code + message). Not a translatable string literal; escape only.
 				throw new Ses_Exception( esc_html( (string) $ens->Error->Code . ': ' . (string) $ens->Error->Message ) );
 			}
 			throw new Ses_Exception( esc_html__( 'SES ErrorResponse without detail.', 'doublescale' ) );

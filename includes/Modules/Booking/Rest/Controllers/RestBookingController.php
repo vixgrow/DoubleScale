@@ -713,11 +713,41 @@ class RestBookingController extends RestController {
 
 			if ( $status && $status !== $old_status ) {
 				if ( 'pending' === $old_status && 'scheduled' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking confirmed', 'doublescale' ),
+							'details' => __( 'Booking confirmed by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'confirmed', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				} elseif ( 'completed' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking marked as completed', 'doublescale' ),
+							'details' => __( 'Booking marked as completed by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'completed', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				} elseif ( 'rejected' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking rejected', 'doublescale' ),
+							'details' => __( 'Booking rejected by Host', 'doublescale' ),
+						)
+					);
 					BookingEvents::emit( 'rejected', (int) $booking->id, array( 'actor' => 'organizer' ) );
+				} elseif ( 'no-show' === $status ) {
+					$booking->logs()->create(
+						array(
+							'type'    => 'info',
+							'message' => __( 'Booking marked as no-show', 'doublescale' ),
+							'details' => __( 'Booking marked as no-show by Host', 'doublescale' ),
+						)
+					);
+					BookingEvents::emit( 'no_show', (int) $booking->id, array( 'actor' => 'organizer' ) );
 				}
 			}
 

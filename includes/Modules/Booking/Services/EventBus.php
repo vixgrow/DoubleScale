@@ -229,6 +229,19 @@ class EventBus {
 			'booking.pending'     => array(
 				'notify_pending' => array( __CLASS__, 'handle_notify_pending' ),
 			),
+			'booking.completed'   => array(
+				'notify_completed' => array( __CLASS__, 'handle_notify_completed' ),
+				'fire_webhooks'    => array( __CLASS__, 'handle_webhooks' ),
+			),
+			'booking.rejected'    => array(
+				'release_slot'    => array( __CLASS__, 'handle_release_slot' ),
+				'notify_rejected' => array( __CLASS__, 'handle_notify_rejected' ),
+				'fire_webhooks'   => array( __CLASS__, 'handle_webhooks' ),
+			),
+			'booking.no_show'     => array(
+				'notify_no_show' => array( __CLASS__, 'handle_notify_no_show' ),
+				'fire_webhooks'  => array( __CLASS__, 'handle_webhooks' ),
+			),
 		);
 
 		return isset( $map[ $event_name ] ) ? $map[ $event_name ] : array();
@@ -271,6 +284,21 @@ class EventBus {
 
 	public static function handle_notify_pending( $booking, $context = array() ) {
 		do_action( 'doublescale_workflow_notify_pending', $booking, $context );
+		return true;
+	}
+
+	public static function handle_notify_completed( $booking, $context = array() ) {
+		do_action( 'doublescale_workflow_notify_completed', $booking, $context );
+		return true;
+	}
+
+	public static function handle_notify_rejected( $booking, $context = array() ) {
+		do_action( 'doublescale_workflow_notify_rejected', $booking, $context );
+		return true;
+	}
+
+	public static function handle_notify_no_show( $booking, $context = array() ) {
+		do_action( 'doublescale_workflow_notify_no_show', $booking, $context );
 		return true;
 	}
 }

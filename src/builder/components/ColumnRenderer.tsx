@@ -39,7 +39,10 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	// Check if this section is a template (contains template blocks)
 	const isThisTemplateSection = isSectionTemplate(sectionId, sections);
 
-	// Only make droppable if it's NOT a template section
+	// Ready-made email templates set hideAddBlockButton on section styles
+	const section = sections.find((s) => s.id === sectionId);
+	const hideAddButton = section?.styles?.hideAddBlockButton === true;
+
 	const { isOver, setNodeRef } = useDroppable({
 		id: `column-${column.id}`,
 		data: {
@@ -48,7 +51,6 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 			sectionId: sectionId,
 			isTemplateSection: isThisTemplateSection,
 		},
-		disabled: isThisTemplateSection, // Disable drops on template sections
 	});
 
 	const addTextBlock = () => {
@@ -998,8 +1000,8 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 							return renderedBlocks;
 						})()}
 
-						{/* Add Block Button - Only show for non-template sections */}
-						{!isThisTemplateSection && (
+						{/* Add Block Button - hidden for template sections and ready-made email templates */}
+						{!isThisTemplateSection && !hideAddButton && (
 							<div className="px-10 py-2">
 								<div className="relative w-full rounded-lg">
 									<svg

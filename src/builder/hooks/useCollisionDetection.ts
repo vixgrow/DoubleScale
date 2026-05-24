@@ -128,8 +128,7 @@ export const useCollisionDetection = (): CollisionDetection => {
       const columnContainers = Array.from(
         droppableContainers.values()
       ).filter((container) =>
-        container.data?.current?.type === 'column' &&
-        !container.data?.current?.isTemplateSection // Exclude template sections
+        container.data?.current?.type === 'column'
       );
 
       const blockContainers = Array.from(
@@ -165,8 +164,7 @@ export const useCollisionDetection = (): CollisionDetection => {
       const columnContainers = Array.from(
         droppableContainers.values()
       ).filter((container) =>
-        container.data?.current?.type === 'column' &&
-        !container.data?.current?.isTemplateSection // Exclude template sections
+        container.data?.current?.type === 'column'
       );
 
       return closestCenter({

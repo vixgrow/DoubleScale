@@ -87,6 +87,11 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		[]
 	);
 
+	const campaignLoading = useSelect(
+		(select: any) => select('doublescale/campaign').isLoading(),
+		[]
+	);
+
 	useButtonSettings();
 
 	const customCollisionDetection = useCollisionDetection();
@@ -104,6 +109,30 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		dispatch(STORE_KEY).clearSelection();
 	};
 
+	const hydrateBuilder = useCallback(
+		(data: BuilderData) => {
+			dispatch(STORE_KEY).setLoading(true);
+			dispatch(STORE_KEY).resetBuilder();
+
+			const { sections, globalSettings, buttonSettings } = data;
+
+			if (sections?.length) {
+				dispatch(STORE_KEY).setBuilderState(sections);
+			}
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+			if (buttonSettings) {
+				Object.entries(buttonSettings).forEach(([type, settings]) => {
+					dispatch(STORE_KEY).updateButtonSettings(type, settings);
+				});
+			}
+
+			setTimeout(() => dispatch(STORE_KEY).setLoading(false), 100);
+		},
+		[dispatch]
+	);
+
 	// Load template once: session (email-templates step) → parent initialData → campaign template API
 	const loadTemplateData = useCallback(async () => {
 		if (hasLoadedTemplateRef.current) {
@@ -120,23 +149,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 
 		if (pendingData) {
 			try {
-				const data = JSON.parse(pendingData);
+				const data = JSON.parse(pendingData) as BuilderData;
 				sessionStorage.removeItem(storageKey!);
-				dispatch(STORE_KEY).setLoading(true);
-				dispatch(STORE_KEY).resetBuilder();
-				const { sections, globalSettings, buttonSettings } = data;
-				if (sections?.length) {
-					dispatch(STORE_KEY).setBuilderState(sections);
-				}
-				if (globalSettings) {
-					dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
-				}
-				if (buttonSettings) {
-					Object.entries(buttonSettings).forEach(([type, settings]) => {
-						dispatch(STORE_KEY).updateButtonSettings(type, settings);
-					});
-				}
-				setTimeout(() => dispatch(STORE_KEY).setLoading(false), 100);
+				hydrateBuilder(data);
 				hasLoadedTemplateRef.current = true;
 				return;
 			} catch (e) {
@@ -144,34 +159,26 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			}
 		}
 
-		if (initialData) {
-			dispatch(STORE_KEY).setLoading(true);
-			dispatch(STORE_KEY).resetBuilder();
-
-			const { sections, globalSettings, buttonSettings } = initialData;
-
-			if (sections?.length) {
-				dispatch(STORE_KEY).setBuilderState(sections);
-			}
-			if (globalSettings) {
-				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
-			}
-			if (buttonSettings) {
-				Object.entries(buttonSettings).forEach(([type, settings]) => {
-					dispatch(STORE_KEY).updateButtonSettings(type, settings);
-				});
-			}
-
-			setTimeout(() => {
-				dispatch(STORE_KEY).setLoading(false);
-			}, 100);
+		if (initialData?.sections?.length) {
+			hydrateBuilder(initialData);
 			hasLoadedTemplateRef.current = true;
 			return;
 		}
 
-		if (!existingTemplateData?.template_id) {
-			dispatch(STORE_KEY).resetBuilder();
-			hasLoadedTemplateRef.current = true;
+		const templateId =
+			campaign?.settings?.template_ids?.[0] ??
+			existingTemplateData?.template_id;
+
+		// Wait until campaign fetch finishes so we don't reset to empty on refresh.
+		if (campaignId && campaignLoading) {
+			return;
+		}
+
+		if (!templateId) {
+			if (campaignId && campaign) {
+				dispatch(STORE_KEY).resetBuilder();
+				hasLoadedTemplateRef.current = true;
+			}
 			return;
 		}
 
@@ -181,9 +188,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			try {
 				dispatch(STORE_KEY).setLoading(true);
 				const { getTemplate } = await import('./api/templates');
-				const template = await getTemplate(
-					existingTemplateData.template_id
-				);
+				const template = await getTemplate(templateId);
 
 				if (getButtonSettingsVersion() !== versionBeforeFetch) {
 					return;
@@ -195,29 +200,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						: template.body;
 
 				if (body?.type === 'builder' && body.value) {
-					dispatch(STORE_KEY).resetBuilder();
-
-					const { sections, globalSettings, buttonSettings } =
-						body.value;
-
-					if (sections?.length) {
-						dispatch(STORE_KEY).setBuilderState(sections);
-					}
-					if (globalSettings) {
-						dispatch(STORE_KEY).updateGlobalSettings(
-							globalSettings
-						);
-					}
-					if (buttonSettings) {
-						Object.entries(buttonSettings).forEach(
-							([type, settings]) => {
-								dispatch(STORE_KEY).updateButtonSettings(
-									type,
-									settings
-								);
-							}
-						);
-					}
+					hydrateBuilder(body.value as BuilderData);
 				} else {
 					dispatch(STORE_KEY).resetBuilder();
 				}
@@ -234,9 +217,25 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	}, [
 		initialData,
 		existingTemplateData?.template_id,
+		campaign,
 		campaign?.id,
+		campaign?.settings?.template_ids,
+		campaignLoading,
 		dispatch,
+		hydrateBuilder,
 	]);
+
+	// Parent may pass initialData after async fetch (e.g. refresh on builder tab).
+	useEffect(() => {
+		if (hasLoadedTemplateRef.current) {
+			return;
+		}
+		if (!initialData?.sections?.length) {
+			return;
+		}
+		hydrateBuilder(initialData);
+		hasLoadedTemplateRef.current = true;
+	}, [initialData, hydrateBuilder]);
 
 	// Initial load
 	useEffect(() => {

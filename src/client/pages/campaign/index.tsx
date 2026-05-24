@@ -144,8 +144,6 @@ const Campaign: React.FC = () => {
 		const load = async () => {
 			if (tab !== 'builder' || !id) return;
 
-			setBuilderInitialData(undefined);
-
 			// Refresh campaign first to get latest template_id from server
 			const refreshedCampaign = await refreshCampaign(id);
 			if (!isMounted) return;

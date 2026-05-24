@@ -30,7 +30,7 @@ import {
 	TEMPLATE_CATEGORIES,
 	type TemplateItemConfig,
 } from './templatesConfig';
-import { getUserTemplates, renderTemplate } from '@/builder/api/templates';
+import { getUserTemplates, renderTemplate, saveTemplate } from '@/builder/api/templates';
 import type { EmailTemplate } from '@doublescale/client';
 import configApi from '@doublescale/config';
 import {
@@ -241,11 +241,35 @@ const EmailTemplatesStep: React.FC = () => {
 				buttonSettings?: Record<string, unknown>;
 			};
 
+			const existingTemplateId = campaign.settings?.template_ids?.[0];
+			const savedTemplate = await saveTemplate({
+				...(existingTemplateId ? { id: existingTemplateId } : {}),
+				name:
+					(campaign.name && String(campaign.name).trim()) ||
+					template.title,
+				type: 'email',
+				body: JSON.stringify({
+					type: 'builder',
+					value: resolved,
+				}),
+				campaign_id: campaign.id,
+				hidden: true,
+			} as Parameters<typeof saveTemplate>[0]);
+
+			if (!savedTemplate?.id) {
+				throw new Error(
+					__('Could not save email template for this campaign.', 'doublescale')
+				);
+			}
+
 			sessionStorage.setItem(
 				`${BUILDER_INITIAL_KEY}_${campaign.id}`,
 				JSON.stringify(resolved)
 			);
-			const ok = await saveCampaignStep('email-templates', {});
+
+			const ok = await saveCampaignStep('email-templates', {
+				template_id: savedTemplate.id,
+			});
 			if (!ok) {
 				sessionStorage.removeItem(`${BUILDER_INITIAL_KEY}_${campaign.id}`);
 				return;

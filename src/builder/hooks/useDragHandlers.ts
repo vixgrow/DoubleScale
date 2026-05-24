@@ -237,7 +237,11 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
         const { sectionId, columnId } = overData;
 
         const targetSection = sections.find((s) => s.id === sectionId);
-        if (targetSection && isTemplateSection(targetSection)) {
+        if (
+          targetSection &&
+          isTemplateSection(targetSection) &&
+          blockType !== 'text'
+        ) {
           return;
         }
 

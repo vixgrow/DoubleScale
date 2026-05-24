@@ -31,8 +31,10 @@ final class BookingSettings {
 			'general'  => array(
 				'start_from'              => 'Monday',
 				'time_format'             => '12',
+				// Minutes (UI populates this in minutes; consumers in
+				// `BookingJobs` multiply by MINUTE_IN_SECONDS at point of use).
 				'auto_cancel_after'       => 30,
-				'auto_complete_after'     => 30,
+				'auto_complete_after'     => 60,
 				'default_country_code'    => 'us',
 				'default_time_slot_step'  => 15,
 				'enable_summary_email'    => false,

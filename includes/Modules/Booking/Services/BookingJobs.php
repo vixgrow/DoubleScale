@@ -84,8 +84,12 @@ class BookingJobs {
 		if ( 'pending' !== $booking->status ) {
 			return;
 		}
-		$settings     = BookingSettings::all();
-		$time_to_wait = $settings['general']['auto_cancel_after'] ?? 1800; // Default to 30 minutes if not set
+		$settings = BookingSettings::all();
+		// `auto_cancel_after` is stored as minutes (the admin UI populates the
+		// option with values like `10`, `60`, `1440` for "10 min", "1 hour",
+		// "1 day"). Convert to seconds before adding to `time()`.
+		$minutes      = $settings['general']['auto_cancel_after'] ?? 30;
+		$time_to_wait = (int) $minutes * MINUTE_IN_SECONDS;
 		$timestamp    = time() + $time_to_wait;
 		$this->tasks->schedule_single( $timestamp, 'check_payment_status', $booking->id );
 	}
@@ -160,14 +164,16 @@ class BookingJobs {
 			return;
 		}
 
-		// Calculate the timestamp for when the booking should be marked as completed
-		// This is based on the end time of the booking
+		// Calculate the timestamp for when the booking should be marked as completed.
+		// Like `auto_cancel_after`, the option is stored as minutes — convert to
+		// seconds before adding to the end-time epoch.
 		$end_time     = new \DateTime( $booking->end_time );
 		$settings     = BookingSettings::all();
-		$time_to_wait = $settings['general']['auto_complete_after'] ?? 3600;
+		$minutes      = $settings['general']['auto_complete_after'] ?? 60;
+		$time_to_wait = (int) $minutes * MINUTE_IN_SECONDS;
 
 		// Calculate when to run the completion check
-		$end_timestamp        = $end_time->format( 'U' );
+		$end_timestamp        = (int) $end_time->format( 'U' );
 		$completion_timestamp = $end_timestamp + $time_to_wait;
 
 		// Schedule the task to run at the calculated time

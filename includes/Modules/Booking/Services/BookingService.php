@@ -7,6 +7,7 @@ namespace DoubleScale\Modules\Booking\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Booking\Helpers\IntegrationsHelper;
 use DoubleScale\Modules\Booking\Models\BookingHostsModel;
 use DoubleScale\Modules\Booking\Models\BookingModel;
 use DoubleScale\Modules\Booking\Models\EventModel;
@@ -38,6 +39,23 @@ class BookingService {
 	 * @throws \Exception If booking fails.
 	 */
 	public function book_event_slot( $event, $calendar_id, $start_date, $duration, $timezone, $invitees, $location, $status = 'scheduled', $fields = array(), $user_id = null, $skip_availability_check = false ) {
+		// Collective bookings issue the meeting link from the team owner's
+		// integrated calendar (see Integration::get_integration_host_calendar_for_booking).
+		// Without a connected integration on the owner there is no calendar
+		// to write the event to and no provider to mint the meeting URL, so
+		// reject the booking up-front rather than leaving an orphan record.
+		if ( 'collective' === $event->type ) {
+			$booking_calendar = CalendarModel::find( $calendar_id );
+			if ( $booking_calendar && 'team' === $booking_calendar->type ) {
+				$owner_host_calendar = CalendarModel::where( 'user_id', (int) $booking_calendar->user_id )
+					->where( 'type', 'host' )
+					->first();
+				if ( ! IntegrationsHelper::host_has_any_calendar_integration( $owner_host_calendar ) ) {
+					throw new \Exception( esc_html__( 'This event can\'t be booked yet — the team owner needs to connect a calendar integration (Google, Outlook, or Apple) before collective meetings can be scheduled.', 'doublescale' ) );
+				}
+			}
+		}
+
 		$end_date = clone $start_date;
 		$end_date->modify( "+{$duration} minutes" );
 
@@ -349,8 +367,9 @@ class BookingService {
 				->where( 'event_id', $entity->id );
 
 			$current_waiting = $position_query->count();
+			$batch_size      = count( $invitees );
 
-			if ( $current_waiting >= $wl_capacity ) {
+			if ( $current_waiting + $batch_size > $wl_capacity ) {
 				$wpdb->query( 'ROLLBACK' );
 				throw new \Exception( esc_html__( 'The waiting list for this time slot is full', 'doublescale' ) );
 			}
@@ -543,7 +562,12 @@ class BookingService {
 			$type   = $entity ? $entity->type : null;
 
 			if ( in_array( $type, array( 'round-robin', 'collective' ), true ) ) {
-				$host_ids = $booking->hosts->pluck( 'user_id' )->toArray();
+				// `$booking->hosts` is a hasManyThrough to UserModel (primary key `ID`),
+				// not the `booking_hosts` join row, so we pluck `ID` here. Plucking
+				// `user_id` returns a column of nulls and silently disables the
+				// per-host overlap guard — letting reschedules collide with
+				// existing bookings for the same host.
+				$host_ids = $booking->hosts->pluck( 'ID' )->toArray();
 				foreach ( $host_ids as $host_id ) {
 					if ( $this->host_has_overlap_excluding( (int) $host_id, $start_utc, $end_utc, (int) $booking->id ) ) {
 						throw new \Exception( esc_html__( 'This time slot has just been booked. Please choose another.', 'doublescale' ) );

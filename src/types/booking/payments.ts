@@ -2,8 +2,6 @@ export interface PaymentItem {
   item?: string;
   price?: number;
   duration?: string;
-  /** @deprecated retained for legacy WC-payment-gateway data; not used in new code. */
-  woo_product?: number;
 }
 
 export interface GroupPricingSettings {
@@ -31,10 +29,6 @@ export interface PaymentsSettings {
   };
   payment_methods?: string[];
   enable_stripe: boolean;
-  /** @deprecated retained for legacy data shape. */
-  enable_paypal?: boolean;
-  /** @deprecated retained for legacy data shape. */
-  woo_product?: number | null;
   currency?: string;
   group_pricing?: GroupPricingSettings;
 }

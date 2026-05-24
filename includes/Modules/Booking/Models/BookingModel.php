@@ -279,6 +279,42 @@ class BookingModel extends Model {
 		return $this->get_meta( 'waiting_list_position', null );
 	}
 
+	/**
+	 * Recompute `waiting_list_position` meta for everyone still waiting on a
+	 * given slot after one booking has just left the queue (cancel / promote /
+	 * claim). Best-effort: a logged warning on failure is preferred over
+	 * aborting the parent operation, since FIFO order is preserved by
+	 * `created_at` and only the displayed position drifts.
+	 *
+	 * @param self $left The booking that just transitioned out of `waiting`.
+	 */
+	public static function rebalanceWaitingListPositions( self $left ): void {
+		if ( empty( $left->event_id ) ) {
+			return;
+		}
+		try {
+			$waiting = self::where( 'status', 'waiting' )
+				->where( 'event_id', $left->event_id )
+				->where( 'start_time', $left->start_time )
+				->where( 'end_time', $left->end_time )
+				->orderBy( 'created_at', 'asc' )
+				->get();
+			foreach ( $waiting as $i => $wl ) {
+				$wl->update_meta( 'waiting_list_position', $i + 1 );
+			}
+		} catch ( \Throwable $e ) {
+			doublescale_get_logger()->warning(
+				'Failed to rebalance waiting list positions',
+				array(
+					'source'     => 'booking-waitlist',
+					'booking_id' => (int) $left->id,
+					'event_id'   => (int) $left->event_id,
+					'error'      => $e->getMessage(),
+				)
+			);
+		}
+	}
+
 	public function getCancelUrl() {
 		return add_query_arg(
 			array(

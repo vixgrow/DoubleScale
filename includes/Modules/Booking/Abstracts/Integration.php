@@ -396,7 +396,14 @@ abstract class Integration {
 	}
 
 	/**
-	 * Host calendar row whose integration accounts apply for this booking (not every assigned host).
+	 * Host calendar row whose integration accounts apply for this booking.
+	 *
+	 * For team calendars with round-robin events, the booking has been assigned
+	 * to a specific host via booking_hosts — integration writes (Google/Outlook/
+	 * Apple) must target that host's third-party account so the meeting lands on
+	 * the actual attendee's remote calendar. Collective and other multi-host
+	 * team modes still route to the team owner because there is no single
+	 * "selected" host. Personal calendars are a trivial passthrough.
 	 *
 	 * @param BookingModel $booking Booking model.
 	 * @return CalendarModel|null
@@ -410,6 +417,18 @@ abstract class Integration {
 			return $booking_calendar;
 		}
 		if ( 'team' === $booking_calendar->type ) {
+			$event = $booking->event;
+			if ( $event && 'round-robin' === $event->type ) {
+				$hosts = $booking->hosts;
+				if ( $hosts && count( $hosts ) ) {
+					foreach ( $hosts as $user ) {
+						$host_cal = CalendarModel::where( 'user_id', $user->ID )->where( 'type', 'host' )->first();
+						if ( $host_cal ) {
+							return $host_cal;
+						}
+					}
+				}
+			}
 			$owner_id = (int) $booking_calendar->user_id;
 			return CalendarModel::where( 'user_id', $owner_id )->where( 'type', 'host' )->first();
 		}

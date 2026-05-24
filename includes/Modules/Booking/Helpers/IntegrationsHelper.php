@@ -11,6 +11,8 @@ namespace DoubleScale\Modules\Booking\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Booking\Managers\IntegrationsManager;
+use DoubleScale\Modules\Booking\Models\CalendarModel;
 use Illuminate\Support\Arr;
 
 /**
@@ -34,6 +36,41 @@ class IntegrationsHelper {
 	 */
 	public static function has_integrations() {
 		return true;
+	}
+
+	/**
+	 * Whether the given host calendar has at least one calendar integration
+	 * connected (Google / Outlook / Apple / etc.).
+	 *
+	 * Used by collective events to gate booking creation: a collective meeting
+	 * is created on the team owner's integrated calendar — without one, the
+	 * meeting link can't be issued, so we block the booking up-front rather
+	 * than leaving an orphan record with no remote event.
+	 *
+	 * @param CalendarModel|null $host_calendar Host (`type=host`) calendar whose meta is checked.
+	 * @return bool
+	 */
+	public static function host_has_any_calendar_integration( $host_calendar ): bool {
+		if ( ! $host_calendar ) {
+			return false;
+		}
+		$integrations = IntegrationsManager::instance()->get_items();
+		if ( ! is_array( $integrations ) || empty( $integrations ) ) {
+			return false;
+		}
+		foreach ( $integrations as $integration ) {
+			if ( ! is_object( $integration ) || empty( $integration->meta_key ) ) {
+				continue;
+			}
+			if ( method_exists( $integration, 'is_calendar' ) && ! $integration->is_calendar() ) {
+				continue;
+			}
+			$accounts = $host_calendar->get_meta( $integration->meta_key, array() );
+			if ( self::calendar_meta_has_integration_accounts( $accounts ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

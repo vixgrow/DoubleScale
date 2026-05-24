@@ -100,17 +100,28 @@ abstract class Goal {
 		if ( $this->is_pro ) {
 			return;
 		}
+		if ( ! $contact instanceof ContactModel || empty( $contact->id ) ) {
+			return;
+		}
 		try {
-			$steps = AutomationStepModel::where( 'type', 'goal' )->where( 'action', $this->slug )->get();
-			if ( ! $steps ) {
+			$steps = AutomationStepModel::where( 'type', 'goal' )
+				->where( 'action', $this->slug )
+				->get();
+			if ( $steps->isEmpty() ) {
 				return;
 			}
 
 			foreach ( $steps as $step ) {
-				// Find all automation contacts waiting at this goal step
-				$automation_contacts = $step->automation->contacts()
-					->where( 'contact_id', $contact->id )
-					->where( 'current_step', $step->id )
+				$automation_id = (int) ( $step->automation_id ?? 0 );
+				if ( $automation_id <= 0 ) {
+					continue;
+				}
+
+				// Query by automation_id so orphan goal steps (deleted automation) cannot fatal.
+				$automation_contacts = AutomationContactModel::query()
+					->where( 'automation_id', $automation_id )
+					->where( 'contact_id', (int) $contact->id )
+					->where( 'current_step', (int) $step->id )
 					->where( 'status', 'pending' )
 					->get();
 

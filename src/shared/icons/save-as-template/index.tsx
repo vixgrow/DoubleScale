@@ -52,8 +52,8 @@ const SaveAsTemplateIcon: React.FC<IconProps> = ({
 					y2="12"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3A3A99" />
+					<stop offset="1" stop-color="#251D45" />
 				</linearGradient>
 				<linearGradient
 					id="paint1_linear_31444_190763"
@@ -63,8 +63,8 @@ const SaveAsTemplateIcon: React.FC<IconProps> = ({
 					y2="11.7249"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3A3A99" />
+					<stop offset="1" stop-color="#251D45" />
 				</linearGradient>
 				<linearGradient
 					id="paint2_linear_31444_190763"
@@ -74,8 +74,8 @@ const SaveAsTemplateIcon: React.FC<IconProps> = ({
 					y2="18.7653"
 					gradientUnits="userSpaceOnUse"
 				>
-					<stop offset="0.610577" stop-color="#1E3A8A" />
-					<stop offset="1" stop-color="#3B82F6" />
+					<stop offset="0.610577" stop-color="#3A3A99" />
+					<stop offset="1" stop-color="#251D45" />
 				</linearGradient>
 				<clipPath id="clip0_31444_190763">
 					<rect width="24" height="24" fill="white" />

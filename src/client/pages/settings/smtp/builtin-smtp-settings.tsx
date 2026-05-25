@@ -81,7 +81,8 @@ import type {
 import config from '@doublescale/config';
 import { cn } from '@/lib/utils';
 import AwsIdentitiesPanel from './aws-identities-panel';
-import { SettingsIcon } from '@doublescale/components';
+import { SettingsIcon, NoticeBanner } from '@doublescale/components';
+import type { NoticeMessage } from '@doublescale/client';
 
 /** Match routing selects + account name (rounded-lg, light border) for API key, From email, etc. */
 const SMTP_CONNECTION_INPUT_CLASS =
@@ -562,6 +563,8 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	/** Detailed messages when saving a connection (validation, REST, or success summary). */
 	const [connectionSaveFeedback, setConnectionSaveFeedback] = useState<{
 		variant: 'error' | 'success';
@@ -657,6 +660,23 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 	useEffect(() => {
 		void reload();
 	}, [reload]);
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const connectionIds = useMemo(() => {
 		const c = settings?.connections || {};
@@ -1263,17 +1283,18 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 		setSaving(true);
 		setError(null);
 		setSuccess(null);
+		closeNotice();
 		try {
 			await saveSmtpSettings(next as Record<string, unknown>);
 			setSettings(next);
-			setSuccess(__('Saved.', 'doublescale'));
-			setTimeout(() => setSuccess(null), 2500);
+			showNotice('success', __('Settings saved successfully.', 'doublescale'));
+			setTimeout(() => closeNotice(), 3000);
 		} catch (e: unknown) {
-			setError(
-				e instanceof Error
-					? e.message
-					: __('Save failed.', 'doublescale')
-			);
+			const errorMessage = e instanceof Error
+				? e.message
+				: __('Save failed.', 'doublescale');
+			setError(errorMessage);
+			showNotice('error', errorMessage);
 		} finally {
 			setSaving(false);
 		}
@@ -1804,13 +1825,16 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 
 	return (
 		<div className="space-y-6 builtin-smtp-settings">
-			{error && (
+			{notice && (
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+			)}
+			{error && !notice && (
 				<Alert variant="destructive">
 					<AlertTitle>{__('Error', 'doublescale')}</AlertTitle>
 					<AlertDescription>{error}</AlertDescription>
 				</Alert>
 			)}
-			{success && (
+			{success && !notice && (
 				<Alert>
 					<AlertTitle>{__('Success', 'doublescale')}</AlertTitle>
 					<AlertDescription>{success}</AlertDescription>
@@ -1921,19 +1945,6 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 							</Select>
 						)}
 					</div>
-					<div className="flex justify-end ">
-						<Button
-							type="button"
-							variant="outline"
-							disabled={saving}
-							className=" border-brandPrimary text-brandPrimary hover:bg-[#fff]"
-							onClick={() => void saveGeneral()}
-						>
-							{saving
-								? __('Saving…', 'doublescale')
-								: __('Save routing', 'doublescale')}
-						</Button>
-					</div>
 					<div className="flex items-start justify-between gap-4 ">
 						<div className="min-w-0 flex-1">
 							<Label
@@ -1954,6 +1965,19 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 							}
 						/>
 					</div>
+					<div className="flex justify-end ">
+						<Button
+							type="button"
+							variant="outline"
+							disabled={saving}
+							className=" border-brandPrimary text-brandPrimary hover:bg-[#fff]"
+							onClick={() => void saveGeneral()}
+						>
+							{saving
+								? __('Saving…', 'doublescale')
+								: __('Save settings', 'doublescale')}
+						</Button>
+					</div>
 				</div>
 
 				<div
@@ -1965,12 +1989,13 @@ const BuiltinSmtpSettings: React.FC<BuiltinSmtpSettingsProps> = ({
 					)}
 				>
 
-					<SmtpConnectionsPanel
-						connectionsView={connectionsView}
-						connections={settings.connections}
-						onEdit={openEdit}
-						onRequestDelete={(id) => void deleteConnection(id)}
-					/>
+				<SmtpConnectionsPanel
+					connectionsView={connectionsView}
+					connections={settings.connections}
+					onEdit={openEdit}
+					onRequestDelete={(id) => void deleteConnection(id)}
+					onAdd={openAdd}
+				/>
 				</div>
 
 			</div>

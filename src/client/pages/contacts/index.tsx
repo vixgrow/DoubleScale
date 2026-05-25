@@ -30,7 +30,7 @@ const ContactsList: React.FC = () => {
 					label: __('Export Contact', 'doublescale'),
 					onClick: () =>
 						allContactsRef.current?.openExportModal(),
-					variant: 'outline' as const,
+					variant: 'secondaryDeepBlue' as const,
 					icon: <ArrowUpIcon />,
 				},
 				{

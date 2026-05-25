@@ -162,14 +162,14 @@ abstract class RestTaxonomyController extends RestController {
 				'type'        => 'integer',
 			),
 			'from'       => array(
-				'description' => __( 'Start date for filtering (created_at >= from).', 'doublescale' ),
+				'description' => __( 'Start date for filtering (created_at >= from). Format: YYYY-MM-DD.', 'doublescale' ),
 				'type'        => 'string',
-				'format'      => 'date-time',
+				'format'      => 'date',
 			),
 			'to'         => array(
-				'description' => __( 'End date for filtering (created_at <= to).', 'doublescale' ),
+				'description' => __( 'End date for filtering (created_at <= to). Format: YYYY-MM-DD.', 'doublescale' ),
 				'type'        => 'string',
-				'format'      => 'date-time',
+				'format'      => 'date',
 			),
 		);
 	}

@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarIcon } from '@doublescale/components';
+import { __ } from '@wordpress/i18n';
+import { CalendarDays, ChevronDownIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -111,21 +112,68 @@ export function DatePicker({
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
+						variant="outline"
 						className={cn(
-							'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
+							'group relative h-10 w-[220px] justify-start gap-2.5 rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150',
+							!inputValue &&
+								'border-input bg-white text-muted-foreground shadow-sm hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.02]',
+							inputValue &&
+								'border-brandPrimary/25 bg-brandPrimary/[0.04] text-foreground shadow-sm hover:border-brandPrimary/60 hover:bg-brandPrimary/[0.08]',
+							'data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] data-[state=open]:ring-2 data-[state=open]:ring-brandPrimary/20',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/30 focus-visible:ring-offset-1',
 							buttonClassName
 						)}
 						style={style}
 					>
-						{inputValue ? inputValue : placeholder}
-						<CalendarIcon />
+						{/* Icon chip */}
+						<span
+							className={cn(
+								'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-colors',
+								inputValue
+									? 'bg-brandPrimary text-white shadow-sm'
+									: 'bg-brandPrimary/10 text-brandPrimary group-hover:bg-brandPrimary/15'
+							)}
+						>
+							<CalendarDays className="!h-3.5 !w-3.5" />
+						</span>
+
+						{/* Label */}
+						<span className="flex flex-1 flex-col items-start overflow-hidden text-left">
+							{inputValue && (
+								<span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 leading-none">
+									{__('Date', 'doublescale')}
+								</span>
+							)}
+							<span className="w-full truncate text-sm font-medium leading-tight">
+								{inputValue || placeholder}
+							</span>
+						</span>
+
+						{/* Right affordance: clear or chevron */}
+						{inputValue ? (
+							<span
+								role="button"
+								tabIndex={-1}
+								aria-label={__('Clear date', 'doublescale')}
+								onClick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									handleDateSelect(undefined);
+								}}
+								className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-brandPrimary/15 hover:text-brandPrimary"
+							>
+								<X className="!h-3 !w-3" />
+							</span>
+						) : (
+							<ChevronDownIcon className="!h-4 !w-4 flex-shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+						)}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent
-					className="w-auto overflow-hidden p-0"
+					className="w-auto overflow-hidden rounded-xl border border-border bg-white p-0 shadow-xl"
 					align="end"
 					alignOffset={-8}
-					sideOffset={10}
+					sideOffset={8}
 				>
 					<Calendar
 						mode="single"

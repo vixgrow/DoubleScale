@@ -77,32 +77,53 @@ class ClaimWaitlistPageRenderer extends BaseTemplateRenderer {
 		$start  = $booking->start_time;
 		$end    = $booking->end_time;
 
-		if ( $booking->event_id && $entity ) {
-			$slot_available = $this->check_event_availability( $entity, $booking, $start, $end );
-			if ( is_wp_error( $slot_available ) ) {
-				return $slot_available;
-			}
+		// Serialize claims on the same slot via a MySQL named lock so two
+		// concurrent requests can't both pass the availability check before
+		// either acquires the slot. The lock is released in finally to keep
+		// the transaction commit/rollback path tight.
+		$lock_token = 'ds_claim_' . substr(
+			md5( $booking->calendar_id . '|' . $start . '|' . $end ),
+			0,
+			52
+		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$got_lock = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_token ) );
+		if ( 1 !== $got_lock ) {
+			return new \WP_Error( 'slot_busy', __( 'Sorry, this spot is being claimed by another customer.', 'doublescale' ) );
 		}
 
-		$wpdb->query( 'START TRANSACTION' );
 		try {
-			BookedSlotModel::acquire(
-				$booking->calendar_id,
-				$booking->start_time,
-				$booking->end_time,
-				$booking->id,
-				$booking->event_id
-			);
+			$wpdb->query( 'START TRANSACTION' );
+			try {
+				if ( $booking->event_id && $entity ) {
+					$slot_available = $this->check_event_availability( $entity, $booking, $start, $end );
+					if ( is_wp_error( $slot_available ) ) {
+						$wpdb->query( 'ROLLBACK' );
+						return $slot_available;
+					}
+				}
 
-			$booking->update( array( 'status' => 'scheduled' ) );
-			BookingHostsModel::where( 'booking_id', $booking->id )
-				->update( array( 'status' => 'scheduled' ) );
-			$booking->refresh();
+				BookedSlotModel::acquire(
+					$booking->calendar_id,
+					$booking->start_time,
+					$booking->end_time,
+					$booking->id,
+					$booking->event_id
+				);
 
-			$wpdb->query( 'COMMIT' );
-		} catch ( \Exception $e ) {
-			$wpdb->query( 'ROLLBACK' );
-			return new \WP_Error( 'slot_taken', __( 'Sorry, this spot has already been claimed by another customer.', 'doublescale' ) );
+				$booking->update( array( 'status' => 'scheduled' ) );
+				BookingHostsModel::where( 'booking_id', $booking->id )
+					->update( array( 'status' => 'scheduled' ) );
+				$booking->refresh();
+
+				$wpdb->query( 'COMMIT' );
+			} catch ( \Exception $e ) {
+				$wpdb->query( 'ROLLBACK' );
+				return new \WP_Error( 'slot_taken', __( 'Sorry, this spot has already been claimed by another customer.', 'doublescale' ) );
+			}
+		} finally {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_token ) );
 		}
 
 		$booking->logs()->create(

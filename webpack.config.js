@@ -260,4 +260,44 @@ const bookingRendererConfig = {
 	},
 };
 
-module.exports = [adminClientConfig, bookingRendererConfig];
+/**
+ * Public support portal renderer build. Mirrors `bookingRendererConfig` but
+ * outputs to `build/renderer/support/` (where `PortalFrontendHandler.php`
+ * expects `index.js` + `style.css` + `index.asset.php`). Separate target so
+ * we can ship a lean bundle to public pages without dragging the admin SPA's
+ * weight onto storefront pages — only the shortcode page pays this cost.
+ */
+const supportRendererConfig = {
+	...defaultConfig,
+	name: 'support-renderer',
+	entry: {
+		index: path.resolve(__dirname, 'src/renderer/support/index.tsx'),
+	},
+	module: {
+		...defaultConfig.module,
+	},
+	optimization: {
+		...defaultConfig.optimization,
+		splitChunks: false,
+	},
+	resolve: {
+		...defaultConfig.resolve,
+		extensions: ['.tsx', '.ts', '.js'],
+		alias: sharedAlias,
+		fallback: sharedFallback,
+	},
+	plugins: [
+		...buildPlugins(
+			() => 'style.css',
+			() => 'style-rtl.css'
+		),
+		sharedDefinePlugin,
+	],
+	output: {
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'build/renderer/support'),
+		filename: '[name].js',
+	},
+};
+
+module.exports = [adminClientConfig, bookingRendererConfig, supportRendererConfig];

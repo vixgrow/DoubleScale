@@ -8,14 +8,17 @@
 
 import React, { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Trash2 } from 'lucide-react';
 
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
+import { Button } from '@/components/ui/button';
 import {
 	useTicket,
 	useConversation,
 	addReply,
 	addNote,
 	updateTicket,
+	deleteTicket,
 } from '@/hooks/support';
 import {
 	StatusPill,
@@ -119,6 +122,11 @@ const SupportTicketDetail: React.FC = () => {
 	const [content, setContent] = useState('');
 	const [sending, setSending] = useState(false);
 	const [feedback, setFeedback] = useState<string | null>(null);
+	// Optimistic queue: items appended client-side BEFORE the server confirms.
+	// On refetch the real activity replaces these. Negative ids guarantee they
+	// won't collide with real activity row ids.
+	const [pendingItems, setPendingItems] = useState<ConversationItem[]>([]);
+	const [deleting, setDeleting] = useState(false);
 
 	if (!ticketId) {
 		return (
@@ -141,20 +149,59 @@ const SupportTicketDetail: React.FC = () => {
 		}
 		setSending(true);
 		setFeedback(null);
+
+		const optimistic: ConversationItem = {
+			id: -Date.now(), // negative + millisecond-unique, guaranteed not to collide
+			kind: tab,
+			type: tab === 'reply' ? 'support_reply' : 'support_note',
+			contact_id: null,
+			user_id: null,
+			data: { content, source: 'web' },
+			created_at: new Date().toISOString().replace('T', ' ').split('.')[0],
+			updated_at: null,
+			user: null,
+		};
+		setPendingItems((prev) => [...prev, optimistic]);
+		const draftContent = content;
+		setContent('');
+
 		try {
 			if (tab === 'reply') {
-				await addReply(ticketId, content);
+				await addReply(ticketId, draftContent);
 			} else {
-				await addNote(ticketId, content);
+				await addNote(ticketId, draftContent);
 			}
-			setContent('');
+			// Real activity arrives via refetch — clear the placeholder.
 			refetchConversation();
 			refetchTicket();
+			setPendingItems((prev) => prev.filter((p) => p.id !== optimistic.id));
 		} catch (err) {
 			const msg = (err as { message?: string })?.message ?? 'Send failed';
 			setFeedback(msg);
+			// Roll back the optimistic insertion and restore the draft.
+			setPendingItems((prev) => prev.filter((p) => p.id !== optimistic.id));
+			setContent(draftContent);
 		} finally {
 			setSending(false);
+		}
+	};
+
+	const handleDelete = async () => {
+		// Native confirm intentionally — the SPA doesn't have a confirm-dialog
+		// primitive in shared/ui yet, and this matches what Booking uses for
+		// destructive calendar deletes.
+		// eslint-disable-next-line no-alert
+		if (!confirm(__('Delete this ticket? This cannot be undone.', 'doublescale'))) {
+			return;
+		}
+		setDeleting(true);
+		try {
+			await deleteTicket(ticketId);
+			navigate(getToLink('support'));
+		} catch (err) {
+			const msg = (err as { message?: string })?.message ?? 'Delete failed';
+			setFeedback(msg);
+			setDeleting(false);
 		}
 	};
 
@@ -172,13 +219,26 @@ const SupportTicketDetail: React.FC = () => {
 
 	return (
 		<div className="doublescale-support-ticket p-6 max-w-5xl">
-			<button
-				type="button"
-				className="text-sm text-blue-600 hover:underline mb-4"
-				onClick={() => navigate(getToLink('support'))}
-			>
-				&larr; {__('Back to inbox', 'doublescale')}
-			</button>
+			<div className="flex items-center justify-between mb-4">
+				<button
+					type="button"
+					className="text-sm text-blue-600 hover:underline"
+					onClick={() => navigate(getToLink('support'))}
+				>
+					&larr; {__('Back to inbox', 'doublescale')}
+				</button>
+				<Button
+					variant="destructive"
+					size="sm"
+					onClick={handleDelete}
+					disabled={deleting}
+				>
+					<Trash2 />
+					{deleting
+						? __('Deleting…', 'doublescale')
+						: __('Delete ticket', 'doublescale')}
+				</Button>
+			</div>
 
 			{/* Ticket header */}
 			<div className="bg-white rounded shadow-sm border p-5 mb-6">
@@ -297,6 +357,11 @@ const SupportTicketDetail: React.FC = () => {
 				<div className="space-y-3">
 					{conversation?.data.map((item) => (
 						<ConversationBubble key={item.id} item={item} />
+					))}
+					{pendingItems.map((item) => (
+						<div key={item.id} className="opacity-60 transition-opacity">
+							<ConversationBubble item={item} />
+						</div>
 					))}
 				</div>
 			</div>

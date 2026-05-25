@@ -17,6 +17,7 @@
     "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
+    "RestPortalController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestPortalController",
     "RestReplyController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestReplyController",
     "RestSettingsController": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsController",
     "RestSettingsControllerPro": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsControllerPro",

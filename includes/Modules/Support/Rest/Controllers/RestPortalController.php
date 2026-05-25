@@ -1,0 +1,581 @@
+<?php
+/**
+ * REST controller for the customer-facing portal (logged-in users only).
+ *
+ * Auth model (per product owner direction 2026-05-25):
+ * - Every endpoint requires `is_user_logged_in()`. Logged-out callers get
+ *   401 — there is no anonymous portal surface.
+ * - The customer's `doublescale_contacts` row is resolved by EMAIL MATCH:
+ *   `ContactModel::where('email', wp_get_current_user()->user_email)->first()`.
+ *   If no contact exists, the portal shows an empty state on the frontend —
+ *   this controller returns an empty list (NOT a 404) so the React layer can
+ *   render "no tickets yet, submit one" without special-casing the API call.
+ * - Submission lazily creates the contact on first ticket — we don't pre-create
+ *   on portal visit. That keeps the contact table free of WP users who never
+ *   actually file a ticket.
+ * - Every read/write also performs an ownership check: the ticket's
+ *   `contact_id` must equal the logged-in user's matched contact id. Prevents
+ *   `?id=N` enumeration by URL-tampering.
+ *
+ * Routes registered (namespace `doublescale/v1`):
+ *
+ *   GET    /support/portal/mailboxes                       List active mailboxes (slug, name, email).
+ *   GET    /support/portal/tickets                         Logged-in user's tickets, paginated.
+ *   POST   /support/portal/tickets                         Open a new ticket as the logged-in user.
+ *   GET    /support/portal/tickets/{id}                    Read one (ownership-gated).
+ *   GET    /support/portal/tickets/{id}/conversation       Thread (notes excluded).
+ *   POST   /support/portal/tickets/{id}/replies            Customer reply on own ticket.
+ *
+ * @since 1.0.0
+ * @package DoubleScale\Modules\Support
+ */
+
+namespace DoubleScale\Modules\Support\Rest\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\Constants\ActivityTypes;
+use DoubleScale\Modules\Activities\Models\ActivityModel;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
+use DoubleScale\Modules\Support\Models\MailboxModel;
+use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\ContactResolver;
+use DoubleScale\Modules\Support\Services\TicketService;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+/**
+ * RestPortalController class.
+ */
+class RestPortalController extends RestController {
+
+	/**
+	 * Route base. Routes live under `doublescale/v1/support/portal/...`.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'support/portal';
+
+	/**
+	 * Register routes.
+	 *
+	 * @return void
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/mailboxes',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_mailboxes' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/tickets',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_tickets' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_ticket' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/tickets/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_ticket' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/tickets/(?P<id>[\d]+)/conversation',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_conversation' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/tickets/(?P<id>[\d]+)/replies',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_reply' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+	}
+
+	// ---------------------------------------------------------------------
+	// Endpoints
+	// ---------------------------------------------------------------------
+
+	/**
+	 * Mailbox list (slug + name + email only — no IMAP creds).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_mailboxes( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$rows = MailboxModel::orderBy( 'is_default', 'desc' )
+			->orderBy( 'slug', 'asc' )
+			->get();
+
+		$data = array();
+		foreach ( $rows as $mailbox ) {
+			$data[] = array(
+				'id'         => (int) $mailbox->id,
+				'slug'       => (string) $mailbox->slug,
+				'email'      => (string) $mailbox->email,
+				'name'       => (string) $mailbox->name,
+				'is_default' => (bool) $mailbox->is_default,
+			);
+		}
+
+		return new WP_REST_Response( array( 'data' => $data ), 200 );
+	}
+
+	/**
+	 * Logged-in user's tickets.
+	 *
+	 * Returns an empty result set if the user has no matching contact — the
+	 * portal frontend renders "no tickets yet" in that case rather than 404.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_tickets( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contact = $this->lookup_contact_for_current_user();
+		if ( ! $contact ) {
+			return new WP_REST_Response(
+				array(
+					'data' => array(),
+					'meta' => array(
+						'total'        => 0,
+						'per_page'     => 20,
+						'current_page' => 1,
+						'last_page'    => 1,
+					),
+				),
+				200
+			);
+		}
+
+		$query = TicketModel::query()
+			->where( 'contact_id', $contact->id )
+			->with( array( 'mailbox' ) );
+
+		// Filter: status (single or comma-separated).
+		$status = $request->get_param( 'status' );
+		if ( is_string( $status ) && '' !== $status ) {
+			$valid    = array( 'open', 'pending', 'resolved', 'closed' );
+			$selected = array_intersect(
+				array_filter( array_map( 'trim', explode( ',', $status ) ) ),
+				$valid
+			);
+			if ( ! empty( $selected ) ) {
+				$query->whereIn( 'status', array_values( $selected ) );
+			}
+		}
+
+		// Filter: search title contains.
+		$search = $request->get_param( 'search' );
+		if ( is_string( $search ) && '' !== trim( $search ) ) {
+			$needle = '%' . str_replace(
+				array( '%', '_' ),
+				array( '\\%', '\\_' ),
+				$search
+			) . '%';
+			$query->where( 'title', 'LIKE', $needle );
+		}
+
+		$query->orderBy( 'updated_at', 'desc' );
+
+		$per_page_raw = (int) $request->get_param( 'per_page' );
+		$per_page     = max( 1, min( 50, $per_page_raw > 0 ? $per_page_raw : 20 ) );
+		$page_raw     = (int) $request->get_param( 'page' );
+		$page         = max( 1, $page_raw > 0 ? $page_raw : 1 );
+
+		$paginator = $query->paginate( $per_page, array( '*' ), 'page', $page );
+
+		$data = array();
+		foreach ( $paginator->items() as $ticket ) {
+			$data[] = $this->shape_portal_ticket( $ticket );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => $data,
+				'meta' => array(
+					'total'        => $paginator->total(),
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'last_page'    => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
+				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Read one ticket (ownership-gated).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_ticket( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$ticket = $this->resolve_own_ticket( $request );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		return new WP_REST_Response( $this->shape_portal_ticket( $ticket ), 200 );
+	}
+
+	/**
+	 * Read the conversation for a ticket (notes excluded).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_conversation( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$ticket = $this->resolve_own_ticket( $request );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		// Notes are agent-internal; never show them to a customer.
+		$allowed = array(
+			ActivityTypes::SUPPORT_REPLY,
+			ActivityTypes::SUPPORT_EVENT,
+		);
+
+		$activities = ActivityModel::forTicket( $ticket->id )
+			->whereIn( 'activity_type', $allowed )
+			->with( 'user' )
+			->get();
+
+		$data = array();
+		foreach ( $activities as $activity ) {
+			$data[] = $this->shape_portal_activity( $activity );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'data' => $data,
+				'meta' => array(
+					'total'     => count( $data ),
+					'ticket_id' => (int) $ticket->id,
+				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Create a new ticket as the logged-in user.
+	 *
+	 * Lazily creates the matching `doublescale_contacts` row if one does not
+	 * yet exist for this user's email — that's the "first interaction"
+	 * onboarding path.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function create_ticket( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$user = wp_get_current_user();
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$title = isset( $params['title'] ) ? trim( wp_strip_all_tags( (string) $params['title'] ) ) : '';
+		if ( '' === $title ) {
+			return new WP_Error(
+				'missing_title',
+				__( 'Please provide a short title.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$content = isset( $params['content'] ) ? wp_kses_post( (string) $params['content'] ) : '';
+		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
+			return new WP_Error(
+				'missing_content',
+				__( 'Please describe what you need help with.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$create_data = array(
+			'email'      => $user->user_email,
+			'first_name' => $user->first_name ?: null,
+			'last_name'  => $user->last_name ?: null,
+			'title'      => $title,
+			'content'    => $content,
+			'source'     => 'web',
+		);
+
+		if ( isset( $params['mailbox_id'] ) ) {
+			$create_data['mailbox_id'] = (int) $params['mailbox_id'];
+		}
+
+		$ticket = $this->service()->create_ticket( $create_data );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		return new WP_REST_Response( $this->shape_portal_ticket( $ticket ), 201 );
+	}
+
+	/**
+	 * Customer reply on their own ticket.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function add_reply( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$ticket = $this->resolve_own_ticket( $request );
+		if ( is_wp_error( $ticket ) ) {
+			return $ticket;
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$content = isset( $params['content'] ) ? wp_kses_post( (string) $params['content'] ) : '';
+		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
+			return new WP_Error(
+				'missing_content',
+				__( 'Please type a reply first.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Force `author_user_id = null` — customer replies are never attributed
+		// to an agent even if the WP user happens to also have an agent role.
+		$activity = $this->service()->add_reply(
+			$ticket,
+			array(
+				'content'        => $content,
+				'source'         => 'web',
+				'author_user_id' => null,
+			)
+		);
+		if ( is_wp_error( $activity ) ) {
+			return $activity;
+		}
+
+		// Customer replying to a closed/resolved ticket re-opens it so the
+		// agent inbox sees the new message. Matches the QuillSupport behaviour.
+		if ( in_array( $ticket->status, array( 'resolved', 'closed' ), true ) ) {
+			$this->service()->update_ticket( $ticket, array( 'status' => 'open' ) );
+		}
+
+		return new WP_REST_Response( $this->shape_portal_activity( $activity ), 201 );
+	}
+
+	// ---------------------------------------------------------------------
+	// Permissions
+	// ---------------------------------------------------------------------
+
+	/**
+	 * Shared portal gate: must be logged in. WP REST adds the `X-WP-Nonce`
+	 * for cookie-auth automatically; `apiFetch` on the frontend forwards it.
+	 *
+	 * @param WP_REST_Request $request Unused — present for the framework contract.
+	 * @return bool|WP_Error
+	 */
+	public function permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'You must be logged in to access the support portal.', 'doublescale' ),
+				array( 'status' => 401 )
+			);
+		}
+		return true;
+	}
+
+	// ---------------------------------------------------------------------
+	// Internals
+	// ---------------------------------------------------------------------
+
+	/**
+	 * Look up the `doublescale_contacts` row matching the logged-in user.
+	 *
+	 * @return ContactModel|null
+	 */
+	private function lookup_contact_for_current_user(): ?ContactModel {
+		$user = wp_get_current_user();
+		if ( ! $user || empty( $user->user_email ) ) {
+			return null;
+		}
+		$contact = ContactModel::where( 'email', strtolower( $user->user_email ) )->first();
+		return $contact instanceof ContactModel ? $contact : null;
+	}
+
+	/**
+	 * Resolve the `{id}` route param to a ticket that the current user owns.
+	 *
+	 * Returns 404 (not 403) when ownership fails — telling an enumerating
+	 * attacker that "ticket N exists but isn't yours" leaks information.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return TicketModel|WP_Error
+	 */
+	private function resolve_own_ticket( WP_REST_Request $request ) {
+		$contact = $this->lookup_contact_for_current_user();
+		if ( ! $contact ) {
+			return new WP_Error(
+				'not_found',
+				__( 'Ticket not found.', 'doublescale' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$id     = (int) $request->get_param( 'id' );
+		$ticket = TicketModel::with( array( 'mailbox' ) )
+			->where( 'id', $id )
+			->where( 'contact_id', $contact->id )
+			->first();
+
+		if ( ! $ticket ) {
+			return new WP_Error(
+				'not_found',
+				__( 'Ticket not found.', 'doublescale' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return $ticket;
+	}
+
+	/**
+	 * Shape a TicketModel into the portal payload. Strips agent identity and
+	 * mailbox email — operators may not want those exposed customer-side.
+	 *
+	 * @param TicketModel $ticket Ticket model.
+	 * @return array
+	 */
+	private function shape_portal_ticket( TicketModel $ticket ): array {
+		return array(
+			'id'             => (int) $ticket->id,
+			'title'          => (string) $ticket->title,
+			'status'         => (string) $ticket->status,
+			'priority'       => (string) $ticket->priority,
+			'response_count' => (int) $ticket->response_count,
+			'mailbox'        => $ticket->mailbox ? array(
+				'name' => $ticket->mailbox->name,
+			) : null,
+			'created_at'     => $ticket->created_at ? (string) $ticket->created_at : null,
+			'updated_at'     => $ticket->updated_at ? (string) $ticket->updated_at : null,
+		);
+	}
+
+	/**
+	 * Shape an activity row for the portal conversation view.
+	 *
+	 * @param ActivityModel $activity Activity row.
+	 * @return array
+	 */
+	private function shape_portal_activity( ActivityModel $activity ): array {
+		$kind_map = array(
+			ActivityTypes::SUPPORT_REPLY => 'reply',
+			ActivityTypes::SUPPORT_EVENT => 'event',
+		);
+		$kind     = $kind_map[ $activity->activity_type ] ?? 'event';
+		$data     = is_array( $activity->data ) ? $activity->data : array();
+
+		$author = null;
+		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
+			$author = array(
+				'display_name' => $activity->user->display_name,
+			);
+		} elseif ( null === $activity->user_id ) {
+			// Customer-authored — explicit "you" marker so the React layer can
+			// label the bubble accordingly without resolving the contact_id.
+			$author = array( 'is_self' => true );
+		}
+
+		return array(
+			'id'         => (int) $activity->id,
+			'kind'       => $kind,
+			'data'       => $data,
+			'author'     => $author,
+			'created_at' => $activity->created_at ? (string) $activity->created_at : null,
+		);
+	}
+
+	/**
+	 * Lazy TicketService accessor — mirrors {@see RestTicketController::service()}.
+	 *
+	 * @return TicketService
+	 */
+	private function service(): TicketService {
+		/** This filter is documented in RestTicketController::service(). */
+		$override = apply_filters( 'doublescale_support_ticket_service_instance', null );
+		if ( $override instanceof TicketService ) {
+			return $override;
+		}
+		return new TicketService( new ContactResolver() );
+	}
+}

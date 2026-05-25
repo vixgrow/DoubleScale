@@ -30,6 +30,7 @@ use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
+use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
 use DoubleScale\Modules\Support\Services\ContactResolver;
 use DoubleScale\Modules\Support\Services\TicketService;
@@ -102,6 +103,15 @@ final class Module extends AbstractModule {
 			ActivityLogger::class,
 			static fn( $app ) => new ActivityLogger( $app->make( TicketService::class ) )
 		);
+
+		// Public-facing portal renderer. Resolving this binding in boot()
+		// is what wires `add_shortcode()` + `wp_enqueue_scripts`, so it
+		// MUST stay a singleton — second-resolves would double-register
+		// the shortcode handler.
+		$container->singleton(
+			PortalFrontendHandler::class,
+			static fn() => new PortalFrontendHandler()
+		);
 	}
 
 	public function restControllers(): array {
@@ -109,6 +119,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestTicketController::class,
 			Rest\Controllers\RestReplyController::class,
 			Rest\Controllers\RestMailboxController::class,
+			Rest\Controllers\RestPortalController::class,
 		);
 	}
 
@@ -124,6 +135,12 @@ final class Module extends AbstractModule {
 		// so the WP hook system is guaranteed to be available — register()
 		// runs before WP is fully initialised in some bootstrap orderings.
 		$container->get( ActivityLogger::class )->register();
+
+		// Resolve the portal frontend handler. Its constructor wires the
+		// `[doublescale_support_portal]` shortcode and the `wp_enqueue_scripts`
+		// listener that conditionally ships the renderer bundle to pages
+		// containing the shortcode (and only for logged-in visitors).
+		$container->get( PortalFrontendHandler::class );
 
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools

@@ -8,8 +8,10 @@
 
 import React, { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Plus, RefreshCw, Inbox as InboxEmptyIcon } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import { Button } from '@/components/ui/button';
 import { useTickets, useMailboxes } from '@/hooks/support';
 import {
 	StatusPill,
@@ -21,6 +23,7 @@ import {
 	type TicketPriority,
 } from '@/constants/support';
 import type { Ticket, TicketFilters } from '@/types/support';
+import NewTicketModal from './new-ticket-modal';
 
 const formatDate = (raw: string | null): string => {
 	if (!raw) {
@@ -54,10 +57,14 @@ const SupportInbox: React.FC = () => {
 	});
 	const { data, loading, error, refetch } = useTickets(filters);
 	const { data: mailboxes } = useMailboxes();
+	const [showNewModal, setShowNewModal] = useState(false);
 
 	const updateFilter = (patch: Partial<TicketFilters>) => {
 		setFilters((prev) => ({ ...prev, ...patch, page: 1 }));
 	};
+
+	const hasNoMailboxes = mailboxes.length === 0;
+	const hasNoTickets = !loading && data?.data.length === 0 && !filters.search && !filters.status && !filters.priority && !filters.mailbox_id;
 
 	return (
 		<div className="doublescale-support-inbox p-6">
@@ -73,13 +80,28 @@ const SupportInbox: React.FC = () => {
 						)}
 					</p>
 				</div>
-				<button
-					type="button"
-					onClick={() => refetch()}
-					className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded"
-				>
-					{__('Refresh', 'doublescale')}
-				</button>
+				<div className="flex items-center gap-2">
+					<Button variant="outline" size="sm" onClick={() => refetch()}>
+						<RefreshCw />
+						{__('Refresh', 'doublescale')}
+					</Button>
+					<Button
+						size="sm"
+						onClick={() => setShowNewModal(true)}
+						disabled={hasNoMailboxes}
+						title={
+							hasNoMailboxes
+								? __(
+										'Create a mailbox before opening tickets.',
+										'doublescale'
+								  )
+								: undefined
+						}
+					>
+						<Plus />
+						{__('New ticket', 'doublescale')}
+					</Button>
+				</div>
 			</div>
 
 			{/* Filter row */}
@@ -208,11 +230,53 @@ const SupportInbox: React.FC = () => {
 						)}
 						{!loading && data?.data.length === 0 && (
 							<tr>
-								<td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-									{__(
-										'No tickets match the current filters.',
-										'doublescale'
-									)}
+								<td colSpan={7} className="px-4 py-16 text-center">
+									<div className="flex flex-col items-center gap-3">
+										<InboxEmptyIcon
+											width={48}
+											height={48}
+											className="text-gray-300"
+										/>
+										{hasNoTickets ? (
+											<>
+												<div className="text-base font-medium text-gray-700">
+													{__('No tickets yet', 'doublescale')}
+												</div>
+												<div className="text-sm text-gray-500 max-w-md">
+													{hasNoMailboxes
+														? __(
+																'Create a mailbox first, then open a ticket or wait for one to come in via the public portal.',
+																'doublescale'
+														  )
+														: __(
+																'When customers submit through the portal or email, their tickets will appear here.',
+																'doublescale'
+														  )}
+												</div>
+												{!hasNoMailboxes && (
+													<Button
+														size="sm"
+														onClick={() => setShowNewModal(true)}
+													>
+														<Plus />
+														{__('Open the first ticket', 'doublescale')}
+													</Button>
+												)}
+											</>
+										) : (
+											<>
+												<div className="text-base font-medium text-gray-700">
+													{__('No tickets match these filters', 'doublescale')}
+												</div>
+												<div className="text-sm text-gray-500">
+													{__(
+														'Try clearing the search or status filters.',
+														'doublescale'
+													)}
+												</div>
+											</>
+										)}
+									</div>
 								</td>
 							</tr>
 						)}
@@ -251,6 +315,17 @@ const SupportInbox: React.FC = () => {
 					</tbody>
 				</table>
 			</div>
+
+			{showNewModal && (
+				<NewTicketModal
+					mailboxes={mailboxes}
+					onClose={() => setShowNewModal(false)}
+					onCreated={(ticketId) => {
+						setShowNewModal(false);
+						navigate(getToLink(`support/ticket/${ticketId}`));
+					}}
+				/>
+			)}
 
 			{/* Pagination */}
 			{data && data.meta.last_page > 1 && (

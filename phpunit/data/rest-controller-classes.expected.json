@@ -17,6 +17,7 @@
     "RestMailboxController",
     "RestModulesController",
     "RestPluginsController",
+    "RestPortalController",
     "RestReplyController",
     "RestSettingsController",
     "RestSettingsControllerPro",

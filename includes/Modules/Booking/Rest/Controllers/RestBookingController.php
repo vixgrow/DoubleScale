@@ -774,53 +774,75 @@ class RestBookingController extends RestController {
 		$start  = $booking->start_time;
 		$end    = $booking->end_time;
 
-		if ( $booking->event_id && $entity ) {
-			switch ( $entity->type ) {
-				case 'one-to-one':
-					if ( BookedSlotModel::has_overlap( $booking->calendar_id, $start, $end ) ) {
-						return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
-					}
-					break;
-
-				case 'round-robin':
-				case 'collective':
-					$host_ids = $booking->hosts->pluck( 'ID' )->toArray();
-					foreach ( $host_ids as $host_id ) {
-						if ( BookingService::host_has_overlap( (int) $host_id, $start, $end ) ) {
-							return new WP_Error( 'slot_taken', __( 'Host is no longer available', 'doublescale' ), array( 'status' => 409 ) );
-						}
-					}
-					break;
-
-				case 'group':
-					$max      = Arr::get( $entity->group_settings, 'max_invites', 2 );
-					$overlaps = BookedSlotModel::count_overlaps( $booking->calendar_id, $start, $end );
-					if ( $overlaps >= $max ) {
-						return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
-					}
-					break;
-			}
+		// Same race shape as ClaimWaitlistPageRenderer: an attendee claim and
+		// an admin promote can hit the same slot concurrently. Serialize on a
+		// named lock keyed by (calendar, start, end) so only one wins.
+		$lock_token = 'ds_claim_' . substr(
+			md5( $booking->calendar_id . '|' . $start . '|' . $end ),
+			0,
+			52
+		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$got_lock = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_token ) );
+		if ( 1 !== $got_lock ) {
+			return new WP_Error( 'slot_busy', __( 'Slot is being claimed by another request, please retry', 'doublescale' ), array( 'status' => 409 ) );
 		}
 
-		$wpdb->query( 'START TRANSACTION' );
 		try {
-			BookedSlotModel::acquire(
-				$booking->calendar_id,
-				$booking->start_time,
-				$booking->end_time,
-				$booking->id,
-				$booking->event_id
-			);
+			$wpdb->query( 'START TRANSACTION' );
+			try {
+				if ( $booking->event_id && $entity ) {
+					switch ( $entity->type ) {
+						case 'one-to-one':
+							if ( BookedSlotModel::has_overlap( $booking->calendar_id, $start, $end ) ) {
+								$wpdb->query( 'ROLLBACK' );
+								return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
+							}
+							break;
 
-			$booking->update( array( 'status' => 'scheduled' ) );
-			BookingHostsModel::where( 'booking_id', $booking->id )
-				->update( array( 'status' => 'scheduled' ) );
-			$booking->refresh();
+						case 'round-robin':
+						case 'collective':
+							$host_ids = $booking->hosts->pluck( 'ID' )->toArray();
+							foreach ( $host_ids as $host_id ) {
+								if ( BookingService::host_has_overlap( (int) $host_id, $start, $end ) ) {
+									$wpdb->query( 'ROLLBACK' );
+									return new WP_Error( 'slot_taken', __( 'Host is no longer available', 'doublescale' ), array( 'status' => 409 ) );
+								}
+							}
+							break;
 
-			$wpdb->query( 'COMMIT' );
-		} catch ( \Exception $e ) {
-			$wpdb->query( 'ROLLBACK' );
-			return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
+						case 'group':
+							$max      = Arr::get( $entity->group_settings, 'max_invites', 2 );
+							$overlaps = BookedSlotModel::count_overlaps( $booking->calendar_id, $start, $end );
+							if ( $overlaps >= $max ) {
+								$wpdb->query( 'ROLLBACK' );
+								return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
+							}
+							break;
+					}
+				}
+
+				BookedSlotModel::acquire(
+					$booking->calendar_id,
+					$booking->start_time,
+					$booking->end_time,
+					$booking->id,
+					$booking->event_id
+				);
+
+				$booking->update( array( 'status' => 'scheduled' ) );
+				BookingHostsModel::where( 'booking_id', $booking->id )
+					->update( array( 'status' => 'scheduled' ) );
+				$booking->refresh();
+
+				$wpdb->query( 'COMMIT' );
+			} catch ( \Exception $e ) {
+				$wpdb->query( 'ROLLBACK' );
+				return new WP_Error( 'slot_taken', __( 'Slot is no longer available', 'doublescale' ), array( 'status' => 409 ) );
+			}
+		} finally {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_token ) );
 		}
 
 		$booking->logs()->create(

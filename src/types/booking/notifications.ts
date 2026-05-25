@@ -1,7 +1,8 @@
 export type NotificationType = {
   label: string;
   type: string;
-  default: boolean;
+  default?: boolean;
+  enabled?: boolean;
   template: {
     subject: string;
     message: string;

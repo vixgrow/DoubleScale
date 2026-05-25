@@ -65,6 +65,53 @@ class EventFields {
 	}
 
 	/**
+	 * Default template for a phone field added on demand by the SMS Notification
+	 * tab's "Add phone question" button. Mirrors the shape of `system.name` /
+	 * `system.email` so existing field-renderer code handles it without changes.
+	 *
+	 * @return array
+	 */
+	public function get_phone_field_template() {
+		return array(
+			'label'          => __( 'Your Phone', 'doublescale' ),
+			'type'           => 'phone',
+			'required'       => true,
+			'group'          => 'system',
+			'event_location' => 'all',
+			'placeholder'    => __( 'Enter your phone number', 'doublescale' ),
+			'order'          => 99,
+			'enabled'        => true,
+		);
+	}
+
+	/**
+	 * Determine whether an event's `fields` meta already contains a phone-type
+	 * field. Used to gate the "Add phone question" button on the SMS Notification
+	 * tab (and the related warning notice that prompts the admin to click it).
+	 *
+	 * Walks both system fields and any custom fields, looking for `type === 'phone'`.
+	 *
+	 * @param array|null $fields The event's `fields` meta value.
+	 * @return bool
+	 */
+	public function has_phone_field( $fields ) {
+		if ( ! is_array( $fields ) ) {
+			return false;
+		}
+		foreach ( $fields as $group_key => $group ) {
+			if ( ! is_array( $group ) ) {
+				continue;
+			}
+			foreach ( $group as $field ) {
+				if ( is_array( $field ) && ( $field['type'] ?? '' ) === 'phone' ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Get other fields
 	 *
 	 * @return array

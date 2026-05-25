@@ -218,6 +218,74 @@ class RestEventController extends RestController {
 			)
 		);
 
+		// SMS organizer phone status — does the configured fallback chain resolve a
+		// phone for this event's organizer? Free returns `{resolved:false, source:null}`;
+		// Pro hooks the `doublescale_booking_sms_organizer_phone_status` filter to
+		// return the real resolution outcome from `BookingSmsNotifier::resolve_organizer_phone()`.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/sms-organizer-phone-status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sms_organizer_phone_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// Phone-question status — does this event's form collect a phone number?
+		// Used by the SMS Notification tab to decide whether to render the
+		// "Your form doesn't collect a phone number" warning + the one-click
+		// "Add phone question" button below.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/phone-question-status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_phone_question_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// One-click: inject a required phone field into this event's `fields` meta.
+		// Idempotent — if a phone-type field already exists, the existing fields
+		// array is returned unchanged.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/add-phone-question',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_phone_question' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Unique identifier for the object.', 'doublescale' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
 		// hande event disable status
 		register_rest_route(
 			$this->namespace,
@@ -1538,6 +1606,104 @@ class RestEventController extends RestController {
 		}
 	}
 
+
+	/**
+	 * Report whether the organizer SMS fallback chain resolves a phone for this event.
+	 *
+	 * Free returns `{resolved:false, source:null}` (no organizer phone resolution
+	 * happens without Pro). Pro hooks `doublescale_booking_sms_organizer_phone_status`
+	 * to swap in the real outcome from {@see BookingSmsNotifier::resolve_organizer_phone}.
+	 *
+	 * The SMS Notification tab calls this to decide whether to render a warning
+	 * banner when an organizer-bound template is enabled but no phone can be found.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_sms_organizer_phone_status( $request ) {
+		$id    = (int) $request->get_param( 'id' );
+		$event = EventModel::find( $id );
+		if ( ! $event ) {
+			return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$payload = array(
+			'resolved' => false,
+			'source'   => null,
+		);
+
+		/**
+		 * Filter the organizer SMS phone resolution payload.
+		 *
+		 * Pro tier replaces with the real outcome of the organizer phone fallback chain.
+		 *
+		 * @param array     $payload Default {resolved:false, source:null}.
+		 * @param EventModel $event   The event whose organizer is being resolved.
+		 */
+		$payload = (array) apply_filters( 'doublescale_booking_sms_organizer_phone_status', $payload, $event );
+
+		return rest_ensure_response( $payload );
+	}
+
+	/**
+	 * Report whether this event's `fields` meta already collects a phone number.
+	 *
+	 * Drives the SMS Notification tab's "Add phone question" prompt: if the
+	 * form has no phone field and attendee SMS is enabled, the UI shows a
+	 * warning + one-click button that POSTs to `/add-phone-question`.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_phone_question_status( $request ) {
+		$id    = (int) $request->get_param( 'id' );
+		$event = EventModel::find( $id );
+		if ( ! $event ) {
+			return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
+		}
+		$fields    = $event->get_meta( 'fields' );
+		$has_phone = EventFields::instance()->has_phone_field( $fields );
+		return rest_ensure_response( array( 'has_phone' => (bool) $has_phone ) );
+	}
+
+	/**
+	 * Inject a required phone field into this event's `fields` meta and return
+	 * the updated fields array. Idempotent — calling twice does not add two
+	 * fields; the second call is a no-op and returns the existing fields.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function add_phone_question( $request ) {
+		$id    = (int) $request->get_param( 'id' );
+		$event = EventModel::find( $id );
+		if ( ! $event ) {
+			return new WP_Error( 'rest_event_error', __( 'Event not found', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$fields = $event->get_meta( 'fields' );
+		if ( ! is_array( $fields ) ) {
+			$fields = array();
+		}
+		if ( ! isset( $fields['system'] ) || ! is_array( $fields['system'] ) ) {
+			$fields['system'] = array();
+		}
+
+		if ( EventFields::instance()->has_phone_field( $fields ) ) {
+			return rest_ensure_response( array(
+				'fields'  => $fields,
+				'changed' => false,
+			) );
+		}
+
+		$fields['system']['phone'] = EventFields::instance()->get_phone_field_template();
+		$event->update_meta( 'fields', $fields );
+
+		return rest_ensure_response( array(
+			'fields'  => $fields,
+			'changed' => true,
+		) );
+	}
 
 	/**
 	 * Disable item

@@ -412,6 +412,7 @@ const Templates: React.FC = () => {
 														});
 													}}
 													className={cn(
+														'!rounded-lg !border-border',
 														validationErrors.reply_to &&
 														'!border-destructive focus-visible:!ring-destructive/20 !bg-white'
 													)}

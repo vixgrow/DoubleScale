@@ -1,7 +1,9 @@
 import { __ } from '@wordpress/i18n';
-import { Breadcrumb } from '@doublescale/components';
+import Breadcrumb from '../breadcrumb';
+import CloseIcon from '@doublescale/shared/icons/close';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { getToLink, useNavigate } from '@doublescale/navigation';
 import ArrowLeft from '@doublescale/shared/icons/arrow-left';
 import ArrowRightWhite from '@doublescale/shared/icons/arrow-right-white';
 
@@ -27,6 +29,10 @@ interface PanelLayoutProps {
 	showProgressBar?: boolean;
 	/** When true, the bottom nav is not rendered here (caller places it inside page content, e.g. form wizard). */
 	hideFooter?: boolean;
+	/** Closes the full-screen panel (defaults to campaigns list when type is campaign). */
+	onClosePanel?: () => void;
+	/** Show header close control; defaults to true when type is `campaign`. */
+	showPanelClose?: boolean;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -46,12 +52,25 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	handleNavigate,
 	showProgressBar = true,
 	hideFooter = false,
+	onClosePanel,
+	showPanelClose,
 }) => {
+	const navigate = useNavigate();
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
 	const showBar = showProgressBar && !!totalSteps;
 	const footerInnerPad =
 		type === 'form' ? 'px-6 md:px-8' : 'px-8';
+	const shouldShowPanelClose = showPanelClose ?? type === 'campaign';
+	const handleClosePanel =
+		onClosePanel ??
+		(() => {
+			if (handleNavigate) {
+				handleNavigate('campaigns');
+				return;
+			}
+			navigate(getToLink('campaigns'));
+		});
 
 	return (
 		<div className="fixed inset-0 z-[150000] flex h-full w-full flex-col overflow-y-auto bg-white">
@@ -59,14 +78,29 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			<div
 				className={`flex-none bg-white p-4 px-6 md:px-8 ${type === 'campaign' ? 'z-10' : ''}`}
 			>
-				<div className="flex justify-between items-center">
+				<div className="flex items-center justify-between gap-4">
 					<Breadcrumb items={items} handleNavigate={handleNavigate} />
 
-					{panelbtns.map((btn, index) => (
-						<div key={index} className="mx-2">
-							{btn}
-						</div>
-					))}
+					<div className="flex shrink-0 items-center gap-2">
+						{panelbtns.map((btn, index) => (
+							<div key={index}>{btn}</div>
+						))}
+						{shouldShowPanelClose && (
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								onClick={handleClosePanel}
+								className="h-10 w-10 shrink-0 rounded-lg"
+								aria-label={__(
+									'Close campaign panel',
+									'doublescale'
+								)}
+							>
+								<CloseIcon width={48} height={48} color="#000" />
+							</Button>
+						)}
+					</div>
 				</div>
 			</div>
 

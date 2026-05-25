@@ -545,23 +545,36 @@ class RestPortalController extends RestController {
 		$kind     = $kind_map[ $activity->activity_type ] ?? 'event';
 		$data     = is_array( $activity->data ) ? $activity->data : array();
 
-		$author = null;
+		// Match the admin RestReplyController shape so the renderer can reuse
+		// the same `ConversationItem` type. Portal-specific additions: strip
+		// `contact_id` (agent-internal) and add `is_self` so the renderer can
+		// right-align the customer's own bubbles.
+		//
+		// "Self" is determined by comparing the activity's user_id to the
+		// currently-logged-in user. In the logged-in portal model the customer
+		// IS a WP user, so their replies DO have a user_id — the marker comes
+		// from identity match, not from the user_id being NULL.
+		$current_user_id = (int) get_current_user_id();
+		$is_self         = $current_user_id > 0 && (int) $activity->user_id === $current_user_id;
+
+		$user = null;
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {
-			$author = array(
-				'display_name' => $activity->user->display_name,
+			$user = array(
+				'id'           => (int) $activity->user->ID,
+				'display_name' => (string) $activity->user->display_name,
 			);
-		} elseif ( null === $activity->user_id ) {
-			// Customer-authored — explicit "you" marker so the React layer can
-			// label the bubble accordingly without resolving the contact_id.
-			$author = array( 'is_self' => true );
 		}
 
 		return array(
 			'id'         => (int) $activity->id,
 			'kind'       => $kind,
+			'type'       => $activity->activity_type,
+			'user_id'    => $activity->user_id ? (int) $activity->user_id : null,
 			'data'       => $data,
-			'author'     => $author,
+			'is_self'    => $is_self,
+			'user'       => $user,
 			'created_at' => $activity->created_at ? (string) $activity->created_at : null,
+			'updated_at' => $activity->updated_at ? (string) $activity->updated_at : null,
 		);
 	}
 

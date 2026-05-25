@@ -15,6 +15,7 @@ export const OPTIONAL_MARKETING_MODULE_SLUGS = [
 	'tasks',
 	'campaigns',
 	'booking',
+	'support',
 ] as const;
 
 /**
@@ -105,6 +106,14 @@ function placeholderFor(
 				label: __('Booking', 'doublescale'),
 				description: __(
 					'Let visitors book meetings and services with calendars, availability, and reminders.',
+					'doublescale'
+				),
+			};
+		case 'support':
+			return {
+				label: __('Support', 'doublescale'),
+				description: __(
+					'Ticket-based customer support with mailbox channels, email piping, and a customer portal.',
 					'doublescale'
 				),
 			};

@@ -196,7 +196,17 @@ const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
 					</span>
 					<span>{formatDate(item.created_at)}</span>
 				</div>
-				<div className="whitespace-pre-wrap text-foreground">{content}</div>
+				{/*
+				 * Content is stored as wp_kses_post()-filtered HTML
+				 * (whitelisted post-content tags only — no <script>, no <iframe>).
+				 * Rendering as text would show literal `<p>` tags to the user;
+				 * dangerouslySetInnerHTML is safe here because of the server-side
+				 * filter applied at write time in TicketService::add_reply().
+				 */}
+				<div
+					className="prose prose-sm max-w-none text-foreground"
+					dangerouslySetInnerHTML={{ __html: content }}
+				/>
 			</div>
 		</li>
 	);

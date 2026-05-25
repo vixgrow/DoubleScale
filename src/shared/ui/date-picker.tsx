@@ -112,7 +112,7 @@ export function DatePicker({
 				<PopoverTrigger asChild>
 					<Button
 						className={cn(
-							'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
+							'justify-between text-left w-[200px] h-12 rounded-lg px-2 py-[20px] bg-white border border-border text-foreground font-semibold',
 							buttonClassName
 						)}
 						style={style}

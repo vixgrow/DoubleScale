@@ -94,12 +94,19 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		}
 	};
 
+	// Margin as padding in the builder so it stays inside the canvas (margin collapses when unselected).
+	const sectionStyles = section.styles ?? {};
+	const {
+		margin: sectionMargin,
+		hideAddBlockButton: _hideAddBlockButton,
+		...contentStyles
+	} = sectionStyles;
+
 	return (
 		<div
 			ref={setNodeRef}
 			style={{
 				...style,
-				...section.styles,
 				...(isSelected
 					? { boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)' }
 					: {}),
@@ -184,15 +191,24 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 				</div>
 			)}
 
-			{/* Section Content */}
-			<div className="flex">
-				{section.columns.map((column) => (
-					<ColumnRenderer
-						key={column.id}
-						column={column}
-						sectionId={section.id}
-					/>
-				))}
+			<div
+				style={
+					sectionMargin
+						? { padding: sectionMargin, boxSizing: 'border-box' }
+						: undefined
+				}
+			>
+				<div style={contentStyles}>
+					<div className="flex">
+						{section.columns.map((column) => (
+							<ColumnRenderer
+								key={column.id}
+								column={column}
+								sectionId={section.id}
+							/>
+						))}
+					</div>
+				</div>
 			</div>
 
 			{/* Conditional Section Modal - Gated by Pro */}

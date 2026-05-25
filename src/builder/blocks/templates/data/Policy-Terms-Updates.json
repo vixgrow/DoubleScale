@@ -109,7 +109,7 @@
                     "textAlign": "left",
                     "listType": "none",
                     "headingStyle": "p",
-                    "padding": { "top": 240, "right": 120, "bottom": 20, "left": 8 }
+                    "padding": { "top": 350, "right": 120, "bottom": 0, "left": 8 }
                   }
                 }
               ]
@@ -199,7 +199,7 @@
           ],
           "styles": {
             "backgroundColor": "#0E164D",
-            "padding": "40px 32px 24px 32px",
+            "padding": "40px 32px 0px 32px",
             "hideAddBlockButton": true
           }
         },

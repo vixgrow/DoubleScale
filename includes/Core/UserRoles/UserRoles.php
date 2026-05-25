@@ -150,6 +150,15 @@ final class UserRoles {
 				'doublescale_view_deals',       // View deals
 				'doublescale_view_activities',  // View activities
 				'read',                     // For Wordpress
+				// Allow CRM users into wp-admin without granting post-editing or
+				// WooCommerce store-manager privileges. WooCommerce's
+				// `prevent_admin_access()` (see WC `class-wc-admin.php::prevent_admin_access`)
+				// redirects any logged-in user that lacks `edit_posts`,
+				// `manage_woocommerce`, or `view_admin_dashboard` to the My
+				// Account frontend page — where Coming Soon mode then shows
+				// "Pardon our dust! ...". Granting `view_admin_dashboard` is
+				// the least-privileged bypass.
+				'view_admin_dashboard',
 			),
 			self::SALES_REP     => array(
 				'doublescale_edit_own_deals',     // Edit own deals

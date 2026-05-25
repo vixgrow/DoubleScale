@@ -79,6 +79,7 @@ final class CoreModule extends AbstractModule {
 		\DoubleScale\Modules\Contacts\CustomMetabox::get_instance();
 		\DoubleScale\Core\UserRoles\UserRoles::instance();
 		\DoubleScale\Core\UserRoles\LoginRedirect::instance();
+		\DoubleScale\Core\UserRoles\WooCommerceCompat::instance();
 		\DoubleScale\Database\Install::init();
 		\DoubleScale\Website\Site::instance();
 

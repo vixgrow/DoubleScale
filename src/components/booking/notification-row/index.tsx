@@ -49,7 +49,7 @@ const NotificationRow: React.FC<NotificationRowProps> = ({
                                 <h5 className="text-[#09090B] text-[20px] font-[500] m-0">
                                     {notification.label}
                                 </h5>
-                                {notification.default && (
+                                {(notification.enabled ?? notification.default) && (
                                     <span className="bg-primary text-white rounded-lg text-[11px] pt-[3px] px-2 h-[22px] mt-[7px]">
                                         {__('ENABLED', 'doublescale')}
                                     </span>

@@ -49,7 +49,7 @@ const Rule: React.FC<RuleProps> = ({
 								onChange('operator', value)
 							}
 						>
-							<SelectTrigger className="h-12 w-full min-w-0 border-border">
+							<SelectTrigger className="h-12 w-full min-w-0 !border-border !rounded-lg">
 								<SelectValue placeholder="Select operator" />
 							</SelectTrigger>
 							<SelectContent className="max-h-[200px] overflow-y-auto">
@@ -75,7 +75,6 @@ const Rule: React.FC<RuleProps> = ({
 						compact
 						type={ruleSettings.type}
 						value={rule.value}
-						
 						onChange={(value) => onChange('value', value)}
 						options={map(
 							ruleSettings.options || [],
@@ -84,7 +83,7 @@ const Rule: React.FC<RuleProps> = ({
 								value: key,
 							})
 						)}
-						className="w-full min-w-0 [&_input]:w-full [&_textarea]:w-full"
+						className="w-full min-w-0 h-12 !border-border !rounded-lg [&_input]:w-full [&_textarea]:w-full"
 					/>
 				</div>
 				{onRemove && (

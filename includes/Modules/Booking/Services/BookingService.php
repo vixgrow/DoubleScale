@@ -361,6 +361,25 @@ class BookingService {
 
 		$wpdb->query( 'START TRANSACTION' );
 		try {
+			// Serialize concurrent joins on the same (event, slot) using a
+			// MySQL named lock. Without this, the count() below is racy: two
+			// parallel requests can both read N waiters and both insert,
+			// blowing past the configured capacity.
+			//
+			// Lock name is 63 bytes max in MySQL — hash the composite key to
+			// stay under the limit regardless of datetime formatting.
+			$lock_token = 'ds_wl_' . substr(
+				md5( $entity->id . '|' . $start_utc_string . '|' . $end_utc_string ),
+				0,
+				56
+			);
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$got_lock = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', $lock_token ) );
+			if ( 1 !== $got_lock ) {
+				$wpdb->query( 'ROLLBACK' );
+				throw new \Exception( esc_html__( 'Waiting list is busy, please retry', 'doublescale' ) );
+			}
+
 			$position_query = BookingModel::where( 'status', 'waiting' )
 				->where( 'start_time', $start_utc_string )
 				->where( 'end_time', $end_utc_string )
@@ -370,6 +389,8 @@ class BookingService {
 			$batch_size      = count( $invitees );
 
 			if ( $current_waiting + $batch_size > $wl_capacity ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+				$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_token ) );
 				$wpdb->query( 'ROLLBACK' );
 				throw new \Exception( esc_html__( 'The waiting list for this time slot is full', 'doublescale' ) );
 			}
@@ -435,6 +456,8 @@ class BookingService {
 			}
 
 			$wpdb->query( 'COMMIT' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_token ) );
 
 			if ( $last_booking ) {
 				BookingEvents::emit( 'waiting_list_joined', (int) $last_booking->id );
@@ -443,6 +466,10 @@ class BookingService {
 			return $last_booking;
 		} catch ( \Exception $e ) {
 			$wpdb->query( 'ROLLBACK' );
+			if ( isset( $lock_token ) ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+				$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_token ) );
+			}
 			throw $e;
 		}
 	}

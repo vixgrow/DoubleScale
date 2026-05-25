@@ -201,7 +201,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			data-block-id={block.id}
 			data-block-type={block.type}
 			className={`
-				relative mb-4 group cursor-pointer border
+				relative group cursor-pointer border
 				hover:border-primary transition-colors
 				${isSelected ? 'border-primary' : 'border-transparent'}
 			`}

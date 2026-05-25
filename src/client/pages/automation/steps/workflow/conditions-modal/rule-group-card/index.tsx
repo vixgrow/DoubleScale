@@ -110,7 +110,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 						>
 							<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl"></div>
 							<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full">
-								{__('And', 'doublescale')}
+								{__('AND', 'doublescale')}
 							</span>
 						</div>
 					)}
@@ -304,7 +304,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 						className=""
 					>
 						<PlusIcon />
-						{__('Add another condition (And)', 'doublescale')}
+						{__('AND', 'doublescale')}
 					</Button>
 				</div>
 			</CardContent>

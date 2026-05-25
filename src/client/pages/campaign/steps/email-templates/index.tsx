@@ -13,11 +13,13 @@ import { useCampaignStep } from '../shared';
 import {
 	AiIcon,
 	MyTemplatesSidebarIcon,
+	PremiumIcon,
 	ReadyToUseIcon,
 	PanelLayout,
 	PlayIcon,
-	ThreeDotsIcon
+	ThreeDotsIcon,
 } from '@doublescale/components';
+import { useProUpgrade } from '@doublescale/hooks/use-pro-upgrade';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -49,6 +51,15 @@ import PreviewEyeIcon from '@doublescale/shared/icons/preview-eye';
 
 const BUILDER_INITIAL_KEY = 'doublescale_campaign_builder_initial';
 
+const TemplatePremiumBadge = () => (
+	<div
+		className="rounded-full bg-white p-1 shrink-0"
+		title={__('Pro feature', 'doublescale')}
+	>
+		<PremiumIcon width={20} height={20} />
+	</div>
+);
+
 const resolveAssetUrls = (obj: unknown): unknown => {
 	// Template images live in the free plugin `assets/` (see `@doublescale/assets` in webpack).
 	const baseUrl =
@@ -57,7 +68,14 @@ const resolveAssetUrls = (obj: unknown): unknown => {
 	return JSON.parse(json.replace(/\{\{ASSETS_URL\}\}/g, baseUrl));
 };
 
-interface ReadyToUseTemplateCardProps {
+interface TemplateCardProGateProps {
+	isProActive: boolean;
+	onUpgrade: () => void;
+	upgradeLabel: string;
+	upgradeDisabled: boolean;
+}
+
+interface ReadyToUseTemplateCardProps extends TemplateCardProGateProps {
 	template: TemplateItemConfig;
 	onUseTemplate: (template: TemplateItemConfig) => void;
 	onPreview: (template: TemplateItemConfig) => void;
@@ -67,6 +85,10 @@ const ReadyToUseTemplateCard = ({
 	template,
 	onUseTemplate,
 	onPreview,
+	isProActive,
+	onUpgrade,
+	upgradeLabel,
+	upgradeDisabled,
 }: ReadyToUseTemplateCardProps) => (
 	<div className="flex flex-col gap-3 rounded-lg border border-border bg-[#F7F8FA] p-4">
 		<div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted">
@@ -81,7 +103,8 @@ const ReadyToUseTemplateCard = ({
 					{template.title}
 				</div>
 			)}
-			<div className="absolute right-2 top-2 z-10">
+			<div className="absolute right-2 top-2 z-10 flex items-center gap-1.5">
+				{!isProActive && <TemplatePremiumBadge />}
 				<Button
 					type="button"
 					variant="secondary"
@@ -101,16 +124,21 @@ const ReadyToUseTemplateCard = ({
 			<Button
 				size="sm"
 				variant="secondary"
-				onClick={() => onUseTemplate(template)}
+				onClick={() =>
+					isProActive ? onUseTemplate(template) : onUpgrade()
+				}
+				disabled={!isProActive && upgradeDisabled}
 				className="shrink-0 rounded-md bg-white text-sm font-medium"
 			>
-				{__('Use template', 'doublescale')}
+				{isProActive
+					? __('Use template', 'doublescale')
+					: upgradeLabel}
 			</Button>
 		</div>
 	</div>
 );
 
-interface MyTemplateCardProps {
+interface MyTemplateCardProps extends TemplateCardProGateProps {
 	template: EmailTemplate;
 	onUseTemplate: (template: EmailTemplate) => void;
 	onPreview: (template: EmailTemplate) => void;
@@ -122,6 +150,10 @@ const MyTemplateCard = ({
 	onUseTemplate,
 	onPreview,
 	onExport,
+	isProActive,
+	onUpgrade,
+	upgradeLabel,
+	upgradeDisabled,
 }: MyTemplateCardProps) => (
 	<div className="flex flex-col gap-3 rounded-lg border border-border bg-[#F7F8FA] p-4">
 		<div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted border border-border">
@@ -136,7 +168,8 @@ const MyTemplateCard = ({
 					{template.name}
 				</div>
 			)}
-			<div className="absolute right-2 top-2 z-10">
+			<div className="absolute right-2 top-2 z-10 flex items-center gap-1.5">
+				{!isProActive && <TemplatePremiumBadge />}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
@@ -175,10 +208,15 @@ const MyTemplateCard = ({
 			<Button
 				size="sm"
 				variant="secondary"
-				onClick={() => onUseTemplate(template)}
+				onClick={() =>
+					isProActive ? onUseTemplate(template) : onUpgrade()
+				}
+				disabled={!isProActive && upgradeDisabled}
 				className="shrink-0 rounded-md bg-white text-sm font-medium"
 			>
-				{__('Use template', 'doublescale')}
+				{isProActive
+					? __('Use template', 'doublescale')
+					: upgradeLabel}
 			</Button>
 		</div>
 	</div>
@@ -190,6 +228,16 @@ const EmailTemplatesStep: React.FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { createNotice } = useDispatch('doublescale/core');
+	const {
+		isProActive,
+		isInstalling,
+		isActivating,
+		handleUpgradeClick,
+		getUpgradeButtonText,
+	} = useProUpgrade();
+	const upgradeLabel = getUpgradeButtonText();
+	const upgradeDisabled = isInstalling || isActivating;
+	const handleTemplateUpgrade = () => handleUpgradeClick();
 
 	const showBackToBuilder =
 		campaign?.id &&
@@ -541,6 +589,14 @@ const EmailTemplatesStep: React.FC = () => {
 												<MyTemplateCard
 													key={template.id}
 													template={template}
+													isProActive={isProActive}
+													onUpgrade={
+														handleTemplateUpgrade
+													}
+													upgradeLabel={upgradeLabel}
+													upgradeDisabled={
+														upgradeDisabled
+													}
 													onUseTemplate={
 														handleUseUserTemplate
 													}
@@ -599,6 +655,16 @@ const EmailTemplatesStep: React.FC = () => {
 													<ReadyToUseTemplateCard
 														key={template.id}
 														template={template}
+														isProActive={isProActive}
+														onUpgrade={
+															handleTemplateUpgrade
+														}
+														upgradeLabel={
+															upgradeLabel
+														}
+														upgradeDisabled={
+															upgradeDisabled
+														}
 														onUseTemplate={
 															handleUseBuiltInTemplate
 														}

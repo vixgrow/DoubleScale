@@ -475,10 +475,18 @@ const PaginatedSelect = ({
 									),
 									minWidth: '100%',
 									backgroundColor: '#ffffff',
+									borderColor: '#D3D4D6',
+									borderRadius: '8px',
+									height: '48px',
+									paddingBlock: '0',
 								}),
 								input: (base) => ({
 									...base,
 									outline: 'none',
+									borderColor: '#D3D4D6',
+									borderRadius: '8px',
+									height: '40px',
+									paddingBlock: '0',
 								}),
 								menuList: (base) => ({
 									...base,

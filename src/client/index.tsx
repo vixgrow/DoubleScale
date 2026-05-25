@@ -22,6 +22,12 @@ if (config.isModuleEnabled('booking')) {
 	require('./pages/booking');
 }
 
+// Support module pages — same side-effect pattern as booking.
+if (config.isModuleEnabled('support')) {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+	require('./pages/support');
+}
+
 /**
  * When PHP marks the install as Pro (`doublescalePro.isPro`), treat Pro as active for
  * sidebar and feature gates even if the Pro client bundle did not register first.

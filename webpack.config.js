@@ -35,6 +35,13 @@ const sharedAlias = {
 	'@/constants/booking': path.resolve(__dirname, 'src/constants/booking.ts'),
 	'@/renderer/booking': path.resolve(__dirname, 'src/renderer/booking'),
 
+	// Support-scoped aliases — same ordering rule as booking (must precede the
+	// generic `@/<type>/*` fallbacks below).
+	'@/types/support': path.resolve(__dirname, 'src/types/support'),
+	'@/hooks/support': path.resolve(__dirname, 'src/hooks/support'),
+	'@/components/support': path.resolve(__dirname, 'src/components/support'),
+	'@/constants/support': path.resolve(__dirname, 'src/constants/support.ts'),
+
 	'@doublescale/email-sequences-page': path.resolve(
 		__dirname,
 		'src/client/pages/email-sequences-upgrade/index.tsx'

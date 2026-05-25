@@ -1,0 +1,376 @@
+/**
+ * Support ticket detail — conversation thread + reply / note composer.
+ *
+ * Layout: header card (status, priority, assignee, mailbox) + chronological
+ * conversation thread + composer at the bottom with a tab switcher between
+ * "Reply" (customer-visible) and "Note" (internal only).
+ */
+
+import React, { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
+import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
+import {
+	useTicket,
+	useConversation,
+	addReply,
+	addNote,
+	updateTicket,
+} from '@/hooks/support';
+import {
+	StatusPill,
+	PriorityPill,
+	NoteIcon,
+	ReplyIcon,
+	ConversationIcon,
+} from '@/components/support';
+import {
+	TICKET_STATUSES,
+	TICKET_PRIORITIES,
+	type TicketPriority,
+	type TicketStatus,
+} from '@/constants/support';
+import type { ConversationItem } from '@/types/support';
+
+const formatDate = (raw: string | null): string => {
+	if (!raw) {
+		return '';
+	}
+	try {
+		return new Date(raw + 'Z').toLocaleString();
+	} catch {
+		return raw;
+	}
+};
+
+const eventDescription = (item: ConversationItem): string => {
+	const key = item.data.event_key ?? 'unknown';
+	const from = item.data.from ?? null;
+	const to = item.data.to ?? null;
+	const label = key.replace(/_/g, ' ');
+	if (from !== null && to !== null) {
+		return `${label}: ${String(from)} → ${String(to)}`;
+	}
+	return label;
+};
+
+const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
+	if (item.kind === 'event') {
+		return (
+			<div className="flex items-center gap-2 text-xs text-gray-500 py-2 px-3">
+				<span className="h-px flex-1 bg-gray-200" />
+				<span className="italic">{eventDescription(item)}</span>
+				<span className="h-px flex-1 bg-gray-200" />
+			</div>
+		);
+	}
+
+	const isNote = item.kind === 'note';
+	const authorLabel = item.user
+		? item.user.display_name
+		: __('Customer', 'doublescale');
+
+	return (
+		<div
+			className={`rounded-lg border p-4 ${
+				isNote
+					? 'bg-yellow-50 border-yellow-200'
+					: 'bg-white border-gray-200'
+			}`}
+		>
+			<div className="flex items-center justify-between mb-2">
+				<div className="flex items-center gap-2">
+					<span className="text-sm font-medium text-gray-900">
+						{authorLabel}
+					</span>
+					{isNote && (
+						<span className="inline-flex items-center gap-1 text-xs bg-yellow-200 text-yellow-800 px-1.5 py-0.5 rounded">
+							<NoteIcon width={10} height={10} />
+							{__('Internal', 'doublescale')}
+						</span>
+					)}
+				</div>
+				<span className="text-xs text-gray-500">
+					{formatDate(item.created_at)}
+				</span>
+			</div>
+			<div
+				className="prose prose-sm max-w-none text-gray-800"
+				/* eslint-disable-next-line react/no-danger -- WP REST already sanitizes via wp_kses_post; we trust the structured content field. */
+				dangerouslySetInnerHTML={{
+					__html: typeof item.data.content === 'string' ? item.data.content : '',
+				}}
+			/>
+		</div>
+	);
+};
+
+const SupportTicketDetail: React.FC = () => {
+	const navigate = useNavigate();
+	const params = useParams<{ id: string }>();
+	const ticketId = params.id ? Number(params.id) : null;
+
+	const { data: ticket, loading: ticketLoading, refetch: refetchTicket } =
+		useTicket(ticketId);
+	const { data: conversation, refetch: refetchConversation } =
+		useConversation(ticketId);
+
+	const [tab, setTab] = useState<'reply' | 'note'>('reply');
+	const [content, setContent] = useState('');
+	const [sending, setSending] = useState(false);
+	const [feedback, setFeedback] = useState<string | null>(null);
+
+	if (!ticketId) {
+		return (
+			<div className="p-6 text-gray-600">
+				{__('No ticket selected.', 'doublescale')}
+			</div>
+		);
+	}
+
+	if (ticketLoading || !ticket) {
+		return (
+			<div className="p-6 text-gray-600">{__('Loading ticket…', 'doublescale')}</div>
+		);
+	}
+
+	const handleSend = async () => {
+		if (!content.trim()) {
+			setFeedback(__('Please type something first.', 'doublescale'));
+			return;
+		}
+		setSending(true);
+		setFeedback(null);
+		try {
+			if (tab === 'reply') {
+				await addReply(ticketId, content);
+			} else {
+				await addNote(ticketId, content);
+			}
+			setContent('');
+			refetchConversation();
+			refetchTicket();
+		} catch (err) {
+			const msg = (err as { message?: string })?.message ?? 'Send failed';
+			setFeedback(msg);
+		} finally {
+			setSending(false);
+		}
+	};
+
+	const handleStatusChange = async (status: TicketStatus) => {
+		await updateTicket(ticketId, { status });
+		refetchTicket();
+		refetchConversation();
+	};
+
+	const handlePriorityChange = async (priority: TicketPriority) => {
+		await updateTicket(ticketId, { priority });
+		refetchTicket();
+		refetchConversation();
+	};
+
+	return (
+		<div className="doublescale-support-ticket p-6 max-w-5xl">
+			<button
+				type="button"
+				className="text-sm text-blue-600 hover:underline mb-4"
+				onClick={() => navigate(getToLink('support'))}
+			>
+				&larr; {__('Back to inbox', 'doublescale')}
+			</button>
+
+			{/* Ticket header */}
+			<div className="bg-white rounded shadow-sm border p-5 mb-6">
+				<div className="flex items-start justify-between">
+					<div>
+						<h1 className="text-xl font-semibold text-gray-900 mb-1">
+							{ticket.title}
+						</h1>
+						<div className="text-sm text-gray-500">
+							{__('Ticket', 'doublescale')} #{ticket.id} ·{' '}
+							{__('Opened', 'doublescale')} {formatDate(ticket.created_at)}
+						</div>
+					</div>
+					<div className="flex items-center gap-2">
+						<StatusPill status={ticket.status} />
+						<PriorityPill priority={ticket.priority} />
+					</div>
+				</div>
+
+				<div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+					<div>
+						<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+							{__('Customer', 'doublescale')}
+						</div>
+						<div className="text-gray-900">
+							{ticket.contact ? (
+								<>
+									<div>
+										{ticket.contact.first_name} {ticket.contact.last_name}
+									</div>
+									<div className="text-gray-500">{ticket.contact.email}</div>
+								</>
+							) : (
+								<span className="text-gray-500">
+									#{ticket.contact_id}
+								</span>
+							)}
+						</div>
+					</div>
+					<div>
+						<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+							{__('Mailbox', 'doublescale')}
+						</div>
+						<div className="text-gray-900">
+							{ticket.mailbox?.name || ticket.mailbox?.slug || (
+								<span className="text-gray-500">
+									{__('(none)', 'doublescale')}
+								</span>
+							)}
+						</div>
+					</div>
+					<div>
+						<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+							{__('Agent', 'doublescale')}
+						</div>
+						<div className="text-gray-900">
+							{ticket.agent ? (
+								ticket.agent.display_name
+							) : (
+								<span className="text-gray-500">
+									{__('Unassigned', 'doublescale')}
+								</span>
+							)}
+						</div>
+					</div>
+				</div>
+
+				{/* Quick actions row */}
+				<div className="mt-4 flex gap-3 items-center text-sm">
+					<label className="flex items-center gap-1">
+						<span className="text-gray-600">{__('Status:', 'doublescale')}</span>
+						<select
+							value={ticket.status}
+							onChange={(e) =>
+								handleStatusChange(e.target.value as TicketStatus)
+							}
+							className="border rounded px-2 py-1"
+						>
+							{TICKET_STATUSES.map((s) => (
+								<option key={s} value={s}>
+									{s}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex items-center gap-1">
+						<span className="text-gray-600">{__('Priority:', 'doublescale')}</span>
+						<select
+							value={ticket.priority}
+							onChange={(e) =>
+								handlePriorityChange(e.target.value as TicketPriority)
+							}
+							className="border rounded px-2 py-1"
+						>
+							{TICKET_PRIORITIES.map((p) => (
+								<option key={p} value={p}>
+									{p}
+								</option>
+							))}
+						</select>
+					</label>
+				</div>
+			</div>
+
+			{/* Conversation thread */}
+			<div className="mb-6">
+				<div className="flex items-center gap-2 mb-3 text-sm font-medium text-gray-700">
+					<ConversationIcon width={16} height={16} />
+					{__('Conversation', 'doublescale')}
+					{conversation && (
+						<span className="text-gray-400 font-normal">
+							({conversation.meta.total})
+						</span>
+					)}
+				</div>
+				<div className="space-y-3">
+					{conversation?.data.map((item) => (
+						<ConversationBubble key={item.id} item={item} />
+					))}
+				</div>
+			</div>
+
+			{/* Composer */}
+			<div className="bg-white rounded shadow-sm border">
+				<div className="flex border-b">
+					<button
+						type="button"
+						className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${
+							tab === 'reply'
+								? 'border-b-2 border-blue-600 text-blue-700'
+								: 'text-gray-600 hover:text-gray-900'
+						}`}
+						onClick={() => setTab('reply')}
+					>
+						<ReplyIcon width={14} height={14} />
+						{__('Reply', 'doublescale')}
+					</button>
+					<button
+						type="button"
+						className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${
+							tab === 'note'
+								? 'border-b-2 border-yellow-500 text-yellow-800 bg-yellow-50'
+								: 'text-gray-600 hover:text-gray-900'
+						}`}
+						onClick={() => setTab('note')}
+					>
+						<NoteIcon width={14} height={14} />
+						{__('Internal note', 'doublescale')}
+					</button>
+				</div>
+				<div className="p-4">
+					<textarea
+						className="w-full border rounded p-3 text-sm min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+						placeholder={
+							tab === 'reply'
+								? __(
+										'Write a reply visible to the customer…',
+										'doublescale'
+								  )
+								: __(
+										'Write a note visible only to your team…',
+										'doublescale'
+								  )
+						}
+						value={content}
+						onChange={(e) => setContent(e.target.value)}
+					/>
+					{feedback && (
+						<div className="mt-2 text-sm text-red-600">{feedback}</div>
+					)}
+					<div className="mt-3 flex justify-end">
+						<button
+							type="button"
+							onClick={handleSend}
+							disabled={sending || !content.trim()}
+							className={`px-4 py-2 text-sm font-medium text-white rounded ${
+								tab === 'reply'
+									? 'bg-blue-600 hover:bg-blue-700'
+									: 'bg-yellow-600 hover:bg-yellow-700'
+							} disabled:opacity-50`}
+						>
+							{sending
+								? __('Sending…', 'doublescale')
+								: tab === 'reply'
+								? __('Send reply', 'doublescale')
+								: __('Add note', 'doublescale')}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default SupportTicketDetail;

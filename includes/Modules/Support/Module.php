@@ -26,6 +26,8 @@ namespace DoubleScale\Modules\Support;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Admin\AdminLoader;
+use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
@@ -122,5 +124,24 @@ final class Module extends AbstractModule {
 		// so the WP hook system is guaranteed to be available — register()
 		// runs before WP is fully initialised in some bootstrap orderings.
 		$container->get( ActivityLogger::class )->register();
+
+		// Sidebar entry inside the DoubleScale top-level menu. Position 46
+		// places Support immediately after Booking (45) so agent-facing tools
+		// cluster visually. `group: 'sales'` matches the existing agent-tool
+		// bucket (Pipelines / Booking) — Support is also an agent workflow,
+		// not a setting. `requires_module: 'support'` makes the row disappear
+		// the moment the module is toggled off via Settings → Modules.
+		MenuRegistry::add(
+			array(
+				'page_title'      => __( 'Support', 'doublescale' ),
+				'menu_title'      => __( 'Support', 'doublescale' ),
+				'capability'      => 'doublescale_access',
+				'slug'            => 'doublescale&path=support',
+				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
+				'position'        => 46,
+				'group'           => 'sales',
+				'requires_module' => 'support',
+			)
+		);
 	}
 }

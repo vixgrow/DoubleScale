@@ -86,6 +86,7 @@ const PATH_TO_SECTION: Record<string, string> = {
 	contacts: 'crm',
 	'sales-pipeline': 'crm',
 	booking: 'crm',
+	support: 'crm',
 	tasks: 'crm',
 	campaigns: 'marketing',
 	'sms-campaigns': 'marketing',
@@ -121,6 +122,7 @@ const FREE_OPTIONAL_SIDEBAR_PAGE_MODULE: Record<string, string> = {
 	'sales-pipeline': 'deals',
 	tasks: 'tasks',
 	forms: 'forms',
+	support: 'support',
 };
 
 /**
@@ -138,6 +140,8 @@ const PATH_TO_MODULE: Record<string, string> = {
 	'email-sequences': 'campaigns',
 	'analytics-and-reports': 'analytics',
 	booking: 'booking',
+	support: 'support',
+	'support/ticket/:id': 'support',
 	'abandoned-carts': 'campaigns',
 	extensions: 'integrations',
 };

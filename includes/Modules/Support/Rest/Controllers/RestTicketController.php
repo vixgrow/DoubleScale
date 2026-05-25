@@ -242,9 +242,13 @@ class RestTicketController extends RestController {
 
 		$paginator = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
+		// Always emit the contact / agent / mailbox relation summaries — the
+		// query above already eager-loaded them via `->with(...)`, so this is
+		// free. Without this, the inbox column for "Customer" / "Mailbox" /
+		// "Agent" can only render a numeric id, which is unhelpful at a glance.
 		$data = array();
 		foreach ( $paginator->items() as $ticket ) {
-			$data[] = $this->shape_ticket( $ticket );
+			$data[] = $this->shape_ticket( $ticket, true );
 		}
 
 		return new WP_REST_Response(

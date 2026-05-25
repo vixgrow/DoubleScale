@@ -31,7 +31,6 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Support\Constants\TicketPriority;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
-use Illuminate\Database\Capsule\Manager as Capsule;
 use WP_Error;
 
 /**
@@ -125,28 +124,26 @@ class TicketService {
 		$author_user_id = $this->resolve_author_user_id( $data, $source );
 
 		try {
-			$ticket = Capsule::transaction(
-				function () use ( $ticket_attrs, $content, $author_user_id, $source ) {
-					$ticket = TicketModel::create( $ticket_attrs );
+			$ticket = TicketModel::create( $ticket_attrs );
 
-					// Opening message — always attributed to whoever wrote it.
-					// For email source with no agent SENT match, author is NULL
-					// (the customer wrote it; we don't fall back to the assigned
-					// agent because the agent didn't author this message). For
-					// web source, the logged-in user (typically an agent filing
-					// on behalf of a customer) is credited.
-					$this->record_conversation_activity(
-						$ticket,
-						ActivityTypes::SUPPORT_REPLY,
-						array(
-							'content' => $content,
-							'source'  => $source,
-						),
-						$author_user_id
-					);
-
-					return $ticket;
-				}
+			// Opening message — always attributed to whoever wrote it. For email
+			// source with no agent SENT match, author is NULL (the customer wrote
+			// it; we don't fall back to the assigned agent because the agent
+			// didn't author this message). For web source, the logged-in user
+			// (typically an agent filing on behalf of a customer) is credited.
+			//
+			// No wrapping transaction — the rest of the CRM avoids Eloquent
+			// transactions for connector compatibility. The orphan-row failure
+			// mode (ticket without opening message) is identical in shape to
+			// Booking's multi-table flows and is logged via the catch block.
+			$this->record_conversation_activity(
+				$ticket,
+				ActivityTypes::SUPPORT_REPLY,
+				array(
+					'content' => $content,
+					'source'  => $source,
+				),
+				$author_user_id
 			);
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
@@ -219,23 +216,17 @@ class TicketService {
 		}
 
 		try {
-			$activity = Capsule::transaction(
-				function () use ( $ticket, $activity_data, $author ) {
-					$activity = $this->record_conversation_activity(
-						$ticket,
-						ActivityTypes::SUPPORT_REPLY,
-						$activity_data,
-						$author
-					);
-
-					// Replies AFTER the opening message bump the counter; the
-					// opening message goes through `record_conversation_activity`
-					// from `create_ticket()` without this call.
-					$ticket->increment( 'response_count' );
-
-					return $activity;
-				}
+			$activity = $this->record_conversation_activity(
+				$ticket,
+				ActivityTypes::SUPPORT_REPLY,
+				$activity_data,
+				$author
 			);
+
+			// Replies AFTER the opening message bump the counter; the opening
+			// message goes through `record_conversation_activity` from
+			// `create_ticket()` without this call.
+			$ticket->increment( 'response_count' );
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
 				'Support reply creation failed',

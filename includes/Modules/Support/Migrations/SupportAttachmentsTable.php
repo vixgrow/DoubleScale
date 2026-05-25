@@ -45,18 +45,18 @@ class SupportAttachmentsTable extends Migration {
 	 * @return string
 	 */
 	public function get_query() {
-		return 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-			ticket_id BIGINT(20) UNSIGNED NULL COMMENT "FK to doublescale_support_tickets",
-			activity_id BIGINT(20) UNSIGNED NULL COMMENT "FK to doublescale_activities; NULL during temp phase",
-			user_id BIGINT(20) UNSIGNED NULL COMMENT "Uploader WP user (agents)",
-			contact_id BIGINT(20) UNSIGNED NULL COMMENT "Uploader contact (customer via portal)",
-			file_name VARCHAR(255) NOT NULL COMMENT "Original filename as uploaded",
-			file_path VARCHAR(500) NOT NULL COMMENT "Relative path under uploads/doublescale-support/",
-			file_type VARCHAR(100) NOT NULL COMMENT "MIME type",
+		return "id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			ticket_id BIGINT(20) UNSIGNED NULL COMMENT 'FK to doublescale_support_tickets',
+			activity_id BIGINT(20) UNSIGNED NULL COMMENT 'FK to doublescale_activities, NULL during temp phase',
+			user_id BIGINT(20) UNSIGNED NULL COMMENT 'Uploader WP user (agents)',
+			contact_id BIGINT(20) UNSIGNED NULL COMMENT 'Uploader contact (customer via portal)',
+			file_name VARCHAR(255) NOT NULL COMMENT 'Original filename as uploaded',
+			file_path VARCHAR(500) NOT NULL COMMENT 'Relative path under uploads/doublescale-support/',
+			file_type VARCHAR(100) NOT NULL COMMENT 'MIME type',
 			file_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
-			file_hash VARCHAR(64) NOT NULL COMMENT "Random hash for signed download URLs",
-			driver VARCHAR(50) NOT NULL DEFAULT "local",
-			status VARCHAR(20) NOT NULL DEFAULT "active" COMMENT "active|temp",
+			file_hash VARCHAR(64) NOT NULL COMMENT 'Random hash for signed download URLs',
+			driver VARCHAR(50) NOT NULL DEFAULT 'local',
+			status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active|temp',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
@@ -65,6 +65,6 @@ class SupportAttachmentsTable extends Migration {
 			KEY idx_activity (activity_id),
 			KEY idx_user (user_id),
 			KEY idx_contact (contact_id),
-			KEY idx_status (status)';
+			KEY idx_status (status)";
 	}
 }

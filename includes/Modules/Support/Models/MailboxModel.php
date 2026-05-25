@@ -10,7 +10,6 @@ namespace DoubleScale\Modules\Support\Models;
 
 defined( 'ABSPATH' ) || exit;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
 use WPEloquent\Eloquent\Model;
 
 /**
@@ -171,13 +170,12 @@ class MailboxModel extends Model {
 		static::saving(
 			function ( $mailbox ) {
 				if ( $mailbox->is_default ) {
-					Capsule::transaction(
-						function () use ( $mailbox ) {
-							self::where( 'id', '!=', $mailbox->id ?? 0 )
-								->where( 'is_default', 1 )
-								->update( array( 'is_default' => 0 ) );
-						}
-					);
+					// Single UPDATE — MySQL already provides per-statement atomicity,
+					// so no wrapping transaction is needed (and the rest of the CRM
+					// avoids Eloquent transactions for compatibility reasons).
+					self::where( 'id', '!=', $mailbox->id ?? 0 )
+						->where( 'is_default', 1 )
+						->update( array( 'is_default' => 0 ) );
 				}
 			}
 		);

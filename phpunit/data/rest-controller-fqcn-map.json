@@ -14,6 +14,7 @@
     "RestImportExportController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestImportExportController",
     "RestListController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestListController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
+    "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
     "RestReplyController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestReplyController",

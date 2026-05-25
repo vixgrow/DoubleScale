@@ -106,6 +106,7 @@ final class Module extends AbstractModule {
 		return array(
 			Rest\Controllers\RestTicketController::class,
 			Rest\Controllers\RestReplyController::class,
+			Rest\Controllers\RestMailboxController::class,
 		);
 	}
 

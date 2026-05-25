@@ -26,6 +26,27 @@ use DoubleScale\Modules\Support\Constants\TicketStatus;
 
 /**
  * TicketModel class.
+ *
+ * @property int                                                                 $id
+ * @property string                                                              $hash
+ * @property string                                                              $title
+ * @property string                                                              $status
+ * @property string                                                              $priority
+ * @property int|null                                                            $mailbox_id
+ * @property int                                                                 $contact_id
+ * @property int|null                                                            $agent_user_id
+ * @property string|null                                                         $product
+ * @property string|null                                                         $message_id
+ * @property string|null                                                         $content_hash
+ * @property int                                                                 $response_count
+ * @property array<int, int>|null                                                $tag_ids
+ * @property array<string, mixed>|null                                           $custom_data
+ * @property string                                                              $created_at
+ * @property string                                                              $updated_at
+ * @property \DoubleScale\Modules\Contacts\Models\ContactModel|null              $contact
+ * @property \DoubleScale\Core\Models\UserModel|null                             $agent
+ * @property MailboxModel|null                                                   $mailbox
+ * @property \Illuminate\Database\Eloquent\Collection<int, AttachmentModel>      $attachments
  */
 class TicketModel extends Model {
 

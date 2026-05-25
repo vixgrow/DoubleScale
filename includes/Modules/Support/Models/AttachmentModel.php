@@ -158,8 +158,9 @@ class AttachmentModel extends Model {
 		static::deleting(
 			function ( $attachment ) {
 				$absolute = self::resolve_absolute_path( (string) $attachment->file_path );
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- WP_Filesystem is unavailable inside a model event; the file is owned by this plugin's private uploads dir.
 				if ( '' !== $absolute && is_file( $absolute ) && is_writable( $absolute ) ) {
-					// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Direct unlink: WP_Filesystem is unavailable during model events and the file is owned by this plugin's private uploads dir.
+					// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink,WordPress.PHP.NoSilencedErrors.Discouraged -- Direct unlink with @ suppression: unlink can race with another delete path and emit a warning we cannot meaningfully recover from inside a model event.
 					@unlink( $absolute );
 				}
 			}

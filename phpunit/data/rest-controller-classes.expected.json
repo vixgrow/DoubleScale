@@ -16,6 +16,7 @@
     "RestLogController",
     "RestModulesController",
     "RestPluginsController",
+    "RestReplyController",
     "RestSettingsController",
     "RestSettingsControllerPro",
     "RestSiteVerificationController",
@@ -25,5 +26,6 @@
     "RestSmtpSettingsController",
     "RestTagController",
     "RestTemplateController",
+    "RestTicketController",
     "RestUserManagementController"
 ]

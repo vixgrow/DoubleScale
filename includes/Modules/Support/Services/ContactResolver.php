@@ -35,6 +35,7 @@ class ContactResolver {
 	 * @return ContactModel
 	 *
 	 * @throws \InvalidArgumentException When the email is not parseable.
+	 * @throws \Illuminate\Database\QueryException When the post-race lookup after a UNIQUE-violation also fails.
 	 */
 	public function find_or_create( $email, $first_name = null, $last_name = null ) {
 		$email = strtolower( trim( (string) $email ) );

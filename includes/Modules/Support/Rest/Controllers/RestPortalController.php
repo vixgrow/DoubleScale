@@ -360,8 +360,8 @@ class RestPortalController extends RestController {
 
 		$create_data = array(
 			'email'      => $user->user_email,
-			'first_name' => $user->first_name ?: null,
-			'last_name'  => $user->last_name ?: null,
+			'first_name' => ! empty( $user->first_name ) ? $user->first_name : null,
+			'last_name'  => ! empty( $user->last_name ) ? $user->last_name : null,
 			'title'      => $title,
 			'content'    => $content,
 			'source'     => 'web',

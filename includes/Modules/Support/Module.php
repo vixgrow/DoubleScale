@@ -30,9 +30,11 @@ use DoubleScale\Admin\AdminLoader;
 use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
+use DoubleScale\Modules\Support\Models\MailboxModel;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
 use DoubleScale\Modules\Support\Services\ContactResolver;
+use DoubleScale\Modules\Support\Services\EmailNotifications;
 use DoubleScale\Modules\Support\Services\TicketService;
 
 final class Module extends AbstractModule {
@@ -112,6 +114,14 @@ final class Module extends AbstractModule {
 			PortalFrontendHandler::class,
 			static fn() => new PortalFrontendHandler()
 		);
+
+		// Outbound email notifications. Resolving in boot() wires the
+		// ticket-lifecycle hook listeners, so it MUST stay a singleton —
+		// a second resolve would double-subscribe and send duplicate mail.
+		$container->singleton(
+			EmailNotifications::class,
+			static fn() => new EmailNotifications()
+		);
 	}
 
 	public function restControllers(): array {
@@ -142,6 +152,16 @@ final class Module extends AbstractModule {
 		// containing the shortcode (and only for logged-in visitors).
 		$container->get( PortalFrontendHandler::class );
 
+		// Resolve the outbound email notifier so its constructor subscribes to
+		// the ticket-lifecycle hooks (reply / created / status-change → customer).
+		$container->get( EmailNotifications::class );
+
+		// One-time: ensure a single shared "General" mailbox exists so the
+		// agent inbox's "New ticket" action and the portal are usable the
+		// moment support is enabled (otherwise `hasNoMailboxes` disables the
+		// button and the portal mailbox list comes back empty).
+		$this->maybe_seed_default_mailbox();
+
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools
 		// cluster visually. `group: 'sales'` matches the existing agent-tool
@@ -160,5 +180,64 @@ final class Module extends AbstractModule {
 				'requires_module' => 'support',
 			)
 		);
+	}
+
+	/**
+	 * Seed a single shared "General" mailbox the first time support boots so
+	 * the agent inbox and customer portal are usable immediately.
+	 *
+	 * This is module-scoped (one row, site-wide) — NOT per-user. A support
+	 * mailbox is a shared routing channel; there is no per-agent mailbox.
+	 *
+	 * Idempotency mirrors {@see \\DoubleScale\\Modules\\Booking\\Module::register_provisioner_hooks()}:
+	 * the `doublescale_support_default_mailbox_seeded` option flag stops the
+	 * check on every boot, BUT we also re-seed when the table is empty even if
+	 * the flag is set. The flag lives in `wp_options` while mailboxes live in a
+	 * plugin table, so the "drop plugin tables + reactivate" dev workflow (and a
+	 * tester who deletes every mailbox) would otherwise leave the two out of
+	 * sync — flag set, zero rows, "New ticket" button stuck disabled.
+	 *
+	 * @return void
+	 */
+	private function maybe_seed_default_mailbox(): void {
+		$already_flagged = (bool) get_option( 'doublescale_support_default_mailbox_seeded' );
+		$has_mailbox     = MailboxModel::query()->exists();
+
+		// Nothing to do only when BOTH the flag is set AND a row exists.
+		if ( $already_flagged && $has_mailbox ) {
+			return;
+		}
+
+		// A mailbox already exists (admin created one via REST before this ran,
+		// or a prior seed succeeded): don't insert a duplicate, just flip the
+		// flag so we stop checking.
+		if ( $has_mailbox ) {
+			update_option( 'doublescale_support_default_mailbox_seeded', true );
+			return;
+		}
+
+		try {
+			$mailbox             = new MailboxModel();
+			$mailbox->slug       = 'general';
+			$mailbox->email      = (string) get_option( 'admin_email' );
+			$mailbox->box_type   = 'web';
+			$mailbox->is_default = true;
+			$mailbox->data       = array( 'name' => __( 'General', 'doublescale' ) );
+			$mailbox->save();
+
+			update_option( 'doublescale_support_default_mailbox_seeded', true );
+		} catch ( \Throwable $e ) {
+			// A broken seed must never abort module boot. The inbox's existing
+			// "create a mailbox" empty state is the fallback UX.
+			doublescale_get_logger()->error(
+				'Failed to seed the default support mailbox.',
+				array(
+					'source' => 'support-module',
+					'error'  => $e->getMessage(),
+					'file'   => $e->getFile(),
+					'line'   => $e->getLine(),
+				)
+			);
+		}
 	}
 }

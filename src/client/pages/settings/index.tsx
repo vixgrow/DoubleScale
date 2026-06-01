@@ -46,6 +46,8 @@ import BusinessSettings from './business';
 import EmailSettings from './email';
 import SMTPSettings from './smtp';
 import MailboxSettings from './mailbox';
+import SupportSettings from './support';
+import config from '@doublescale/config';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,6 +90,7 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'debugging',
 	'notifications',
 	'mailbox',
+	'support',
 	'mobile_app',
 	'modules',
 ];
@@ -284,6 +287,8 @@ const SettingsPage: React.FC = () => {
 				return <SMTPSettings />;
 			case 'mailbox':
 				return <MailboxSettings />;
+			case 'support':
+				return <SupportSettings />;
 			case 'sms':
 				const SMSComponent = applyFilters(
 					'doublescale_settings_sms_settings',
@@ -485,6 +490,16 @@ const SettingsPage: React.FC = () => {
 			label: 'Mailbox',
 			icon: <Inbox size={24} />,
 		},
+		// Support tab only appears when the support module is enabled.
+		...(config.isModuleEnabled('support')
+			? [
+					{
+						value: 'support',
+						label: 'Support',
+						icon: <Inbox size={24} />,
+					},
+				]
+			: []),
 		{
 			value: 'sms',
 			label: 'SMS',

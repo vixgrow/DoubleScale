@@ -365,6 +365,22 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					];
 				}
 
+				if (item.path === 'support') {
+					// Unlike `booking` (whose parent path only redirects), the
+					// `support` parent path IS the inbox, so the first child
+					// links back to it explicitly — the group reads Inbox /
+					// Settings. `support/settings` is capability-gated at the
+					// route, so agents without `doublescale_crm_manager` simply
+					// land on the inbox if they deep-link it.
+					navItem.subMenu = [
+						{ path: 'support', label: __('Inbox', 'doublescale') },
+						{
+							path: 'support/settings',
+							label: __('Settings', 'doublescale'),
+						},
+					];
+				}
+
 				if (navItem.subMenu) {
 					const filtered = filterSubMenuByModules(
 						navItem.subMenu,

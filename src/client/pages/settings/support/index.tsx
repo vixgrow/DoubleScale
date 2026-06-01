@@ -5,8 +5,11 @@
  *  - Mailboxes: CRUD over the support mailbox REST controller
  *    (`/doublescale/v1/support/mailboxes`). A mailbox is a shared routing
  *    channel (department) — there is no per-user mailbox. `box_type='web'`
- *    needs no email setup; `box_type='email'` (IMAP intake) is a Pro feature,
- *    so its connection fields are gated behind a ProFeatureNotice.
+ *    needs no email setup; the `box_type='email'` (IMAP intake) UI is rendered
+ *    through the `doublescale_support_mailbox_email_channel` filter slot — Free
+ *    supplies a ProFeatureNotice default, and Pro's support-pro bundle swaps in
+ *    the real box_type toggle + connection picker (the engine reuses the CRM's
+ *    inbound poll via `doublescale_email_received`, not a Support-side poller).
  *  - Notifications: outbound email toggles consumed by the PHP
  *    `Support\Services\EmailNotifications` listener.
  *
@@ -17,6 +20,7 @@
 
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useCallback } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
 import {
 	Inbox,
@@ -284,16 +288,32 @@ const MailboxesPanel: React.FC = () => {
 							</span>
 						</div>
 
-						<ProFeatureNotice
-							featureName={__(
-								'Email channel (IMAP intake)',
-								'doublescale'
-							)}
-							description={__(
-								'Turn a mailbox into an email channel so tickets are created from incoming email via IMAP polling. Reuses your SMTP Gmail/Outlook connection. Available in DoubleScale Pro.',
-								'doublescale'
-							)}
-						/>
+						{
+							/*
+							 * Email-channel (IMAP intake) slot. Free renders the
+							 * upsell; Pro's support-pro bundle replaces it via
+							 * `addFilter('doublescale_support_mailbox_email_channel', …)`
+							 * with the real box_type toggle + connection picker.
+							 * The default value below is what shows when Pro is
+							 * absent, so Free standalone is unchanged. `editing` /
+							 * `setEditing` let the Pro component read & mutate the
+							 * mailbox row currently being edited.
+							 */
+							applyFilters(
+								'doublescale_support_mailbox_email_channel',
+								<ProFeatureNotice
+									featureName={__(
+										'Email channel (IMAP intake)',
+										'doublescale'
+									)}
+									description={__(
+										'Turn a mailbox into an email channel so tickets are created from incoming email via IMAP polling. Reuses your SMTP Gmail/Outlook connection. Available in DoubleScale Pro.',
+										'doublescale'
+									)}
+								/>,
+								{ editing, setEditing }
+							) as React.ReactNode
+						}
 
 						<div className="flex justify-end gap-3">
 							<Button

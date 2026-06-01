@@ -30,6 +30,7 @@ use DoubleScale\Modules\Activities\Models\ActivityAssociationModel;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Support\Constants\TicketPriority;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
+use DoubleScale\Modules\Support\Models\MailboxModel;
 use DoubleScale\Modules\Support\Models\TicketModel;
 use WP_Error;
 
@@ -110,7 +111,7 @@ class TicketService {
 			'title'         => $this->sanitize_title( $data['title'] ),
 			'status'        => $this->normalize_status( $data['status'] ?? TicketStatus::OPEN ),
 			'priority'      => $this->normalize_priority( $data['priority'] ?? TicketPriority::NORMAL ),
-			'mailbox_id'    => isset( $data['mailbox_id'] ) ? (int) $data['mailbox_id'] : null,
+			'mailbox_id'    => $this->resolve_mailbox_id( $data ),
 			'contact_id'    => $contact->id,
 			'agent_user_id' => isset( $data['agent_user_id'] ) ? (int) $data['agent_user_id'] : null,
 			'product'       => isset( $data['product'] ) ? $this->sanitize_short_string( $data['product'] ) : null,
@@ -506,6 +507,42 @@ class TicketService {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_email', $e->getMessage(), array( 'status' => 400 ) );
 		}
+	}
+
+	/**
+	 * Decide the ticket's mailbox.
+	 *
+	 * Precedence:
+	 *   1. An explicit `mailbox_id` from the caller always wins (agent picked a
+	 *      channel, or the IMAP/portal path resolved one).
+	 *   2. No explicit mailbox AND exactly one mailbox exists on the install →
+	 *      auto-route to it. On a single-mailbox site "which channel?" has only
+	 *      one answer, so leaving the ticket channel-less just loses the inbox
+	 *      mailbox filter and the outbound From-identity for no benefit. This
+	 *      mirrors the portal's own UX, which hides the mailbox picker entirely
+	 *      when `mailboxes.length <= 1` (src/renderer/support/views/new-ticket-modal.tsx).
+	 *   3. No explicit mailbox AND zero-or-multiple mailboxes → NULL ("direct
+	 *      ticket, no channel"). With multiple mailboxes auto-picking one would
+	 *      be a guess that could attribute the ticket (and its customer emails)
+	 *      to the wrong team, so we keep the explicit-NULL semantics there.
+	 *
+	 * @param array<string, mixed> $data Create payload.
+	 * @return int|null Mailbox id, or null for a direct/no-channel ticket.
+	 */
+	private function resolve_mailbox_id( array $data ): ?int {
+		if ( isset( $data['mailbox_id'] ) ) {
+			return (int) $data['mailbox_id'];
+		}
+
+		// Only auto-route when the install has exactly one mailbox — see (2) above.
+		if ( 1 === MailboxModel::count() ) {
+			$only = MailboxModel::first();
+			if ( $only ) {
+				return (int) $only->id;
+			}
+		}
+
+		return null;
 	}
 
 	private function resolve_ticket( $ticket ) {

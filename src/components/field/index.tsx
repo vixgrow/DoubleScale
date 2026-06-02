@@ -131,7 +131,14 @@ const Field: React.FC<FieldProps> = ({
 	const renderLabelWithTooltip = () => {
 		return (
 			<span className="flex items-center gap-2">
-				<span>{label}</span>
+				<span>
+					{label}
+					{required && (
+						<span className="text-destructive ml-0.5" aria-hidden>
+							*
+						</span>
+					)}
+				</span>
 				{tooltip && (
 					<TooltipProvider>
 						<Tooltip>

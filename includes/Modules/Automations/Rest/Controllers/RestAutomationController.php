@@ -1160,6 +1160,12 @@ class RestAutomationController extends RestController {
 					'label'  => 'Double Scale Pro',
 				),
 			),
+			'support'     => array(
+				'support' => array(
+					'plugin' => '',
+					'label'  => 'Double Scale Pro',
+				),
+			),
 			'woocommerce' => array(
 				'order'  => array(
 					'plugin' => 'woocommerce/woocommerce.php',

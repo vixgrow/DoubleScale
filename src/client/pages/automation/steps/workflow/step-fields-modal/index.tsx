@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
@@ -64,6 +64,10 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		step.type === 'delay'
 			? step.action || 'delay'
 			: step.action;
+	const action =
+		step.type === 'action' || step.type === 'delay'
+			? getAction(actionKey)
+			: getGoal(step.action);
 	const isSmsAction = actionKey === 'send_sms';
 	const isWhatsAppAction = actionKey === 'send_whatsapp';
 	const requiresProvider = isSmsAction || isWhatsAppAction;
@@ -93,7 +97,35 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setSettings(step.settings || {});
 	}, [step.settings]);
 
+	// Keys of fields the action declares as required (data-driven from get_fields()).
+	const requiredFieldKeys = Object.entries(action?.fields || {})
+		.filter(([, field]: [string, any]) => field?.required)
+		.map(([key]) => key);
+
 	const handleSave = useCallback(async () => {
+		// Block save when any required field is empty, and surface which one.
+		const missing = requiredFieldKeys.filter((key) => {
+			const value = settings?.[key];
+			return (
+				value === undefined ||
+				value === null ||
+				(typeof value === 'string' && value.trim() === '')
+			);
+		});
+		if (missing.length > 0) {
+			const firstLabel =
+				(action?.fields?.[missing[0]]?.label as string) || missing[0];
+			createNotice({
+				type: 'error',
+				/* translators: %s: field label */
+				message: sprintf(
+					__('%s is required.', 'doublescale'),
+					__(firstLabel, 'doublescale')
+				),
+			});
+			return;
+		}
+
 		setIsSaving(true);
 
 		const newStep = {
@@ -106,7 +138,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		await saveStep(newStep);
 
 		setIsSaving(false);
-	}, [step, settings, saveStep]);
+	}, [step, settings, saveStep, requiredFieldKeys, action, createNotice]);
 
 	const handleDelete = useCallback(async () => {
 		setIsDeleting(true);
@@ -171,11 +203,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	// Check if this step supports analytics
 	const hasAnalytics = supportsAnalytics(step.action);
-	const action =
-		step.type === 'action' || step.type === 'delay'
-			? getAction(actionKey)
-			: getGoal(step.action);
-
 	// Check if this is a delay step
 	const isDelayStep = step.type === 'delay';
 
@@ -311,7 +338,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						setSettings(value);
 					}}
 					stepId={step.id}
-					
+					requiredFields={requiredFieldKeys}
 				/>
 			</div>
 

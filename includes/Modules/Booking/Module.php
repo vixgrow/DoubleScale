@@ -214,6 +214,11 @@ final class Module extends AbstractModule {
 		if ( ! get_option( 'doublescale_booking_caps_assigned' ) ) {
 			Capabilities::assign_capabilities_for_user_roles();
 			update_option( 'doublescale_booking_caps_assigned', true );
+			// The WP_User object was loaded before these caps existed on the
+			// role; re-read role capabilities so current_user_can() returns
+			// true for booking caps on this very first request (AdminConfig
+			// emits userCapabilities to the SPA).
+			wp_get_current_user()->get_role_caps();
 		}
 
 		$this->register_provisioner_hooks( $container );

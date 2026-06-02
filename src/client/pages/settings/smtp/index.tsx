@@ -13,6 +13,8 @@ import { __ } from '@wordpress/i18n';
  */
 import ConfigAPI from '@doublescale/config';
 import { AddonCard } from '@/client/pages/intergrations/addon-card';
+// @ts-ignore
+import smtpImage from '@doublescale/assets/images/smtp/smtp.svg';
 import { BounceHandler } from '@/components/bounce-handler';
 import ModuleDisabledNotice from '@/components/module-disabled-notice';
 import BuiltinSmtpSettings from './builtin-smtp-settings';
@@ -55,7 +57,7 @@ const ProSMTPSettings: React.FC = () => {
 			{showAddonCard && (
 				<AddonCard
 					addon={smtpAddon}
-					imageUrl={`${ConfigAPI.getPluginDirUrl()}assets/images/smtp/smtp.svg`}
+					imageUrl={smtpImage}
 				/>
 			)}
 

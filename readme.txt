@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,13 +34,13 @@ A drag-and-drop email builder with responsive blocks, reusable templates, A/B te
 * Per-link tracking with automation triggers, bounce handling with soft/hard classification, and full delivery logs.
 
 **4. Booking — self-service appointment scheduling**
-Built-in calendar management with availability windows, guest forms, automated confirmations, rescheduling, time-zone handling, and embeddable booking pages. No external Calendly — bookings land directly on the contact record and can trigger automations.
+A full scheduling system inside WordPress — no Calendly needed. Create **single events** for one-on-one meetings (consultations, demos, coaching sessions) or **team events** where multiple staff members share availability and bookings are assigned via round-robin or manual selection. Configure slot durations, buffer times between appointments, and per-day availability windows. Guests pick a time from an embeddable booking page, fill out a customizable intake form, and receive automated email/SMS confirmations and reminders. Supports Stripe payment collection for paid bookings, waiting lists when slots fill up, rescheduling and cancellation flows, and automatic time-zone detection. Every booking lands on the contact record and can trigger automations (e.g., tag the contact, create a deal, send a follow-up sequence).
 
 **5. Tasks — team task management**
 Create, assign, schedule, and track tasks. Link them to contacts and deals. Due dates, reminders, status workflows. Stop running a separate ClickUp or Asana when 80% of your tasks are about customers anyway.
 
 **6. SMTP — multi-provider email routing**
-A complete `wp_mail()` replacement with **20+ provider integrations** (SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and more). Smart provider selection, automatic failover, full delivery logs, and email tests — your transactional and marketing email runs through the same hardened pipeline.
+A complete `wp_mail()` replacement built into the CRM — no separate SMTP plugin required. Connect one or more of **20+ providers**: SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, SMTP2GO, Gmail (OAuth), Outlook (OAuth), Zoho (OAuth), MailerSend, Mailjet, Mandrill, Brevo (Sendinblue), Elastic Email, SendLayer, SocketLabs, Loops, and generic SMTP relay. Set up multiple connections with routing rules so transactional mail goes through one provider while marketing campaigns use another. OAuth authentication for Gmail, Outlook, and Zoho — no app passwords needed. Includes full email delivery logs, bounce handling with soft/hard classification, provider health checks, email test sending, and automatic failover when a provider is down.
 
 **7. Inbox — unified helpdesk across email, SMS, and WhatsApp**
 A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox. Inbound WhatsApp and SMS messages can also fire automations — auto-tag, route to a teammate, open a deal, or kick off a follow-up sequence.

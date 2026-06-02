@@ -103,12 +103,23 @@ class RestUserManagementController extends RestController {
 					'callback'            => array( $this, 'assign_crm_role' ),
 					'permission_callback' => array( $this, 'check_admin_permissions' ),
 					'args'                => array(
-						'id'   => array(
+						'id'    => array(
 							'required' => true,
 							'type'     => 'integer',
 						),
-						'role' => array(
-							'required' => true,
+						// Accepts an array of roles (checkbox UI — a user can hold
+						// several CRM roles). The legacy single `role` string is
+						// still accepted for back-compat; see assign_crm_role().
+						'roles' => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'string',
+								'enum' => UserRoles::get_assignable_role_slugs(),
+							),
+						),
+						'role'  => array(
+							'required' => false,
 							'type'     => 'string',
 							'enum'     => array_merge( UserRoles::get_assignable_role_slugs(), array( UserRoles::NONE ) ),
 						),
@@ -191,8 +202,10 @@ class RestUserManagementController extends RestController {
 				'email'      => $user->user_email,
 				'user_login' => $user->user_login,
 				'role'       => '',
-				'crm_role'   => reset( $user_crm_roles ),
-				'roles'      => $user->roles,
+				// Effective role = the highest-priority one the user holds, so a
+				// user with CRM Manager + Sales Rep reports as CRM Manager.
+				'crm_role'   => UserRoles::get_highest_role( $user_crm_roles ),
+				'roles'      => $user_crm_roles,
 			);
 		}
 
@@ -331,7 +344,9 @@ class RestUserManagementController extends RestController {
 					'name'     => $user->display_name,
 					'email'    => $user->user_email,
 					'role'     => '',
-					'crm_role' => reset( $assigned_crm_roles ),
+					// Effective role = highest-priority of the assigned set.
+					'crm_role' => UserRoles::get_highest_role( $assigned_crm_roles ),
+					'roles'    => $assigned_crm_roles,
 				),
 			),
 			201
@@ -346,7 +361,13 @@ class RestUserManagementController extends RestController {
 	 */
 	public function assign_crm_role( $request ) {
 		$user_id = $request->get_param( 'id' );
-		$role    = $request->get_param( 'role' );
+		$roles   = $request->get_param( 'roles' );
+
+		// Back-compat: accept a single `role` string when `roles[]` is absent.
+		if ( ! is_array( $roles ) ) {
+			$single = $request->get_param( 'role' );
+			$roles  = ( $single && UserRoles::NONE !== $single ) ? array( $single ) : array();
+		}
 
 		$user = get_user_by( 'ID', $user_id );
 		if ( ! $user ) {
@@ -355,19 +376,28 @@ class RestUserManagementController extends RestController {
 
 		$crm_roles = UserRoles::get_assignable_role_slugs();
 
-		// Add the new CRM role FIRST so listeners on `doublescale_user_role_revoked`
+		// Keep only valid assignable roles from the request.
+		$target_roles = array_values( array_intersect( (array) $roles, $crm_roles ) );
+
+		if ( empty( $target_roles ) ) {
+			return new WP_Error( 'invalid_roles', 'Invalid roles provided.', array( 'status' => 400 ) );
+		}
+
+		// Add the new CRM roles FIRST so listeners on `doublescale_user_role_revoked`
 		// observing "user still has a booking-eligible role" don't see a transient
 		// zero-roles state during the revoke loop. Otherwise the booking module's
 		// purge_host_data() listener triggers mid-swap and deletes the host's
 		// calendar+availability before the new role is added.
-		if ( in_array( $role, $crm_roles, true ) && ! in_array( $role, (array) $user->roles, true ) ) {
-			$user->add_role( $role );
-			do_action( 'doublescale_user_role_assigned', $user->ID, $role );
+		foreach ( $target_roles as $role ) {
+			if ( ! in_array( $role, (array) $user->roles, true ) ) {
+				$user->add_role( $role );
+				do_action( 'doublescale_user_role_assigned', $user->ID, $role );
+			}
 		}
 
-		// Remove the OTHER CRM roles (skip the just-added one).
+		// Remove any CRM roles the user had that aren't in the new target set.
 		foreach ( $crm_roles as $crm_role ) {
-			if ( $crm_role === $role ) {
+			if ( in_array( $crm_role, $target_roles, true ) ) {
 				continue;
 			}
 			if ( in_array( $crm_role, (array) $user->roles, true ) ) {
@@ -384,7 +414,9 @@ class RestUserManagementController extends RestController {
 				'message' => 'User role updated successfully.',
 				'user'    => array(
 					'id'       => $user->ID,
-					'crm_role' => reset( $assigned_crm_roles ),
+					// Effective role = highest-priority of the assigned set.
+					'crm_role' => UserRoles::get_highest_role( $assigned_crm_roles ),
+					'roles'    => $assigned_crm_roles,
 				),
 			),
 			200

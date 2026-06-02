@@ -46,17 +46,36 @@ export const getManagerColumns = ({
         },
         {
             accessorKey: 'crm_role',
-            header: () => __('Role', 'doublescale'),
-            cell: ({ row }) => (
-                <div
-                    className={`inline-flex items-center text-xs font-medium py-0.5 px-2.5 rounded-full capitalize border w-fit ${row.original.crm_role === 'doublescale_crm_manager' || row.original.crm_role === 'ds_crm_manager'
-                        ? 'bg-primary/10 text-primary border-primary/20'
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        }`}
-                >
-                    {ManagerRoleLabels[row.original.crm_role]}
-                </div>
-            ),
+            header: () => __('Roles', 'doublescale'),
+            cell: ({ row }) => {
+                // Show every assigned role; the highest-priority (effective)
+                // role — `crm_role` — is highlighted in primary color.
+                const roles =
+                    Array.isArray(row.original.roles) && row.original.roles.length > 0
+                        ? row.original.roles
+                        : row.original.crm_role
+                          ? [row.original.crm_role]
+                          : [];
+                return (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {roles.map((role) => {
+                            const isEffective = role === row.original.crm_role;
+                            return (
+                                <div
+                                    key={role}
+                                    className={`inline-flex items-center text-xs font-medium py-0.5 px-2.5 rounded-full capitalize border w-fit ${
+                                        isEffective
+                                            ? 'bg-primary/10 text-primary border-primary/20'
+                                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    }`}
+                                >
+                                    {ManagerRoleLabels[role]}
+                                </div>
+                            );
+                        })}
+                    </div>
+                );
+            },
         },
         {
             id: 'actions',

@@ -385,9 +385,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							path: 'support/settings',
 							label: __('Settings', 'doublescale'),
 							requiredCapability: [
-								'doublescale_crm_manager',
-								'doublescale_support_manager',
-								'doublescale_support_agent',
+								'doublescale_manage_support_settings',
 							],
 						},
 					].filter((sub) =>

@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { CRMUser } from '@doublescale/services/user-management';
 import { ManagerRole, ManagerRoleOptions } from './types';
@@ -47,7 +47,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	const [selectedUser, setSelectedUser] = useState<WordPressUser | null>(
 		null
 	);
-	const [selectedRole, setSelectedRole] = useState<ManagerRole | ''>('');
+	const [selectedRoles, setSelectedRoles] = useState<ManagerRole[]>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string>('');
 
@@ -67,19 +67,33 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 				email: manager.email,
 				username: manager.user_login || '',
 			});
-			setSelectedRole(manager.crm_role);
+			// Prefill with every CRM role the user currently holds. Fall back to
+			// the single effective `crm_role` for rows that predate multi-role.
+			const existing =
+				Array.isArray(manager.roles) && manager.roles.length > 0
+					? manager.roles
+					: manager.crm_role
+						? [manager.crm_role]
+						: [];
+			setSelectedRoles(existing);
 		} else if (!isEditMode) {
 			// Reset for add mode
 			setEmail('');
 			setSelectedUserId(null);
 			setSelectedUser(null);
-			setSelectedRole('');
+			setSelectedRoles([]);
 		}
 	}, [manager, mode, isEditMode]);
 
-	const handleRoleChange = (roleId: string) => {
-		setSelectedRole(roleId as ManagerRole);
-		if (error) setError(''); // Clear error when user changes role
+	const handleRoleToggle = (roleId: ManagerRole, checked: boolean) => {
+		setSelectedRoles((prev) =>
+			checked
+				? prev.includes(roleId)
+					? prev
+					: [...prev, roleId]
+				: prev.filter((r) => r !== roleId)
+		);
+		if (error) setError(''); // Clear error when user changes roles
 	};
 
 	const handleUserChange = (
@@ -104,8 +118,8 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			return;
 		}
 
-		if (!selectedRole) {
-			setError(__('Please select a role', 'doublescale'));
+		if (selectedRoles.length === 0) {
+			setError(__('Please select at least one role', 'doublescale'));
 			return;
 		}
 
@@ -122,7 +136,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 			const formData: ManagerFormData = {
 				email: emailToSubmit,
-				roles: [selectedRole as ManagerRole],
+				roles: selectedRoles,
 			};
 
 			if (isEditMode && manager) {
@@ -136,7 +150,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 				setEmail('');
 				setSelectedUserId(null);
 				setSelectedUser(null);
-				setSelectedRole('');
+				setSelectedRoles([]);
 			}
 		} catch (error: any) {
 			console.error(
@@ -161,7 +175,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 		setEmail('');
 		setSelectedUserId(null);
 		setSelectedUser(null);
-		setSelectedRole('');
+		setSelectedRoles([]);
 		setError('');
 		onClose();
 	};
@@ -265,24 +279,30 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					{/* Roles Section */}
 					<div className="">
 						<div className="text-foreground font-normal text-base">
-							{isEditMode
-								? __('Role', 'doublescale')
-								: __('Roles', 'doublescale')}
+							{__('Roles', 'doublescale')}
 						</div>
+						<p className="text-xs text-gray-500 mb-2">
+							{__(
+								'Select one or more roles. The highest-priority role takes precedence (CRM Manager → Sales Manager → Sales Rep → Support Manager → Support Agent).',
+								'doublescale'
+							)}
+						</p>
 
-						<RadioGroup
-							value={selectedRole}
-							onValueChange={handleRoleChange}
-							className=""
-						>
+						<div className="space-y-2">
 							{availableRoles.map((role) => (
 								<div
 									key={role.id}
 									className="flex items-center space-x-3"
 								>
-									<RadioGroupItem
-										value={role.id}
+									<Checkbox
 										id={role.id}
+										checked={selectedRoles.includes(role.id)}
+										onCheckedChange={(checked) =>
+											handleRoleToggle(
+												role.id,
+												checked === true
+											)
+										}
 										className="h-5 w-5"
 									/>
 									<Label
@@ -293,7 +313,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 									</Label>
 								</div>
 							))}
-						</RadioGroup>
+						</div>
 					</div>
 
 					{/* Action Buttons */}
@@ -304,9 +324,9 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 							type="submit"
 							disabled={
 								isEditMode
-									? !selectedRole || isSubmitting
+									? selectedRoles.length === 0 || isSubmitting
 									: !selectedUserId ||
-										!selectedRole ||
+										selectedRoles.length === 0 ||
 										isSubmitting
 							}
 							className="w-full"

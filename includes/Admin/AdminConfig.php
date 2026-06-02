@@ -23,6 +23,7 @@ use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Contacts\ImportExport\Importers\Manager as Importers_Manager;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\UserRoles;
 use DoubleScale\Website\License;
 
 /**
@@ -57,14 +58,20 @@ final class AdminConfig {
 		// {@see BookingCapabilities::get_all_capabilities()} resolved via
 		// WP's `current_user_can()`. Lets `requiredCapability:` arrays in
 		// `registerAdminPage` reference booking caps directly.
+		// Support role flags use role MEMBERSHIP (not the single highest role)
+		// so capabilities merge: a user who is e.g. Sales Rep + Support Manager
+		// still gets the Support Manager flags (settings access, manage-all
+		// tickets) on top of their sales permissions.
 		$user_capabilities = array(
-			'doublescale_crm_manager'         => Permissions::is_crm_manager(),
-			'doublescale_sales_manager'       => Permissions::is_sales_manager(),
-			'doublescale_sales_rep'           => Permissions::is_sales_rep(),
-			'doublescale_support_manager'     => Permissions::is_support_manager(),
-			'doublescale_support_agent'       => Permissions::is_support_agent(),
-			'doublescale_view_support'        => Permissions::has_support_access(),
-			'doublescale_manage_all_tickets'  => Permissions::can_manage_all_tickets(),
+			'doublescale_crm_manager'              => Permissions::is_crm_manager(),
+			'doublescale_sales_manager'            => Permissions::is_sales_manager(),
+			'doublescale_sales_rep'                => Permissions::is_sales_rep(),
+			'doublescale_support_manager'          => Permissions::user_has_role( UserRoles::SUPPORT_MANAGER ),
+			'doublescale_support_agent'            => Permissions::user_has_role( UserRoles::SUPPORT_AGENT ),
+			'doublescale_view_support'             => Permissions::has_support_access(),
+			'doublescale_manage_all_tickets'       => Permissions::can_manage_all_tickets(),
+			// Settings gate: support roles + admins (NOT CRM/Sales roles).
+			'doublescale_manage_support_settings'  => Permissions::can_access_support_settings(),
 		);
 
 		if ( class_exists( \DoubleScale\Modules\Booking\Capabilities::class ) ) {

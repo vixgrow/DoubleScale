@@ -112,8 +112,25 @@ final class UserRoles {
 				add_role( $role, $label, $capabilities );
 			} else {
 				$role_obj = get_role( $role );
+
+				// Add the caps this role should currently have.
 				foreach ( $capabilities as $cap => $grant ) {
 					$role_obj->add_cap( $cap, $grant );
+				}
+
+				// SYNC: strip any DoubleScale cap the role still carries but is
+				// no longer in its definition. Without this, removing a cap from
+				// get_capabilities() would never take effect for already-
+				// provisioned roles (add_cap is additive). Scoped to our own
+				// `doublescale_` caps so we never touch WP/WC core capabilities
+				// (e.g. `list_users`, `read`) the role legitimately holds.
+				foreach ( self::all_capabilities() as $known_cap ) {
+					if ( 0 !== strpos( $known_cap, self::PREFIX ) ) {
+						continue; // Skip non-DoubleScale caps (read, list_users, …).
+					}
+					if ( ! isset( $capabilities[ $known_cap ] ) && $role_obj->has_cap( $known_cap ) ) {
+						$role_obj->remove_cap( $known_cap );
+					}
 				}
 			}
 		}
@@ -175,7 +192,12 @@ final class UserRoles {
 				'doublescale_view_contacts',    // View contacts
 				'doublescale_view_deals',       // View deals
 				'doublescale_view_activities',  // View activities
-				'doublescale_view_support',     // View support tickets (own-scope by default)
+				// NOTE: Support is intentionally NOT granted to CRM roles.
+				// Support access (view_support / manage_all_tickets /
+				// reply_own_tickets) is exclusive to the dedicated support
+				// roles. A CRM user (CRM Manager / Sales Manager / Sales Rep)
+				// only sees the Support module if an admin ALSO assigns them a
+				// support role. See get_capabilities() support_* entries.
 			),
 			'support_common'      => array(
 				'doublescale_view_support',     // View support tickets (own-scope by default)
@@ -186,7 +208,7 @@ final class UserRoles {
 				'doublescale_edit_own_contacts',  // Edit own contacts
 				'doublescale_create_contacts',    // Create new contacts
 				'doublescale_create_activities',  // Create activities
-				'doublescale_reply_own_tickets',  // Reply on tickets assigned to self
+				// Support caps removed — granted only by support roles.
 			),
 			self::SALES_MANAGER   => array(
 				'doublescale_manage_deals',       // Manage all deals (CRUD for all deals)
@@ -195,7 +217,7 @@ final class UserRoles {
 				'doublescale_manage_contacts',    // Manage all contacts (create, edit, delete)
 				'doublescale_import_data',        // Import data
 				'doublescale_export_data',        // Export data
-				'doublescale_manage_all_tickets', // See and manage every support ticket
+				// Support caps removed — granted only by support roles.
 			),
 			self::CRM_MANAGER     => array(
 				'doublescale_manage',             // Full CRM management
@@ -209,7 +231,7 @@ final class UserRoles {
 				'doublescale_view_reports',       // View reports
 				'doublescale_export_data',        // Export data
 				'doublescale_import_data',        // Import data
-				'doublescale_manage_all_tickets', // See and manage every support ticket
+				// Support caps removed — granted only by support roles.
 				'list_users',                  // For Wordpress List users
 			),
 			self::SUPPORT_AGENT   => array(
@@ -275,6 +297,28 @@ final class UserRoles {
 	 */
 	public static function get_assignable_role_slugs(): array {
 		return array_keys( self::get_roles() );
+	}
+
+	/**
+	 * Pick the highest-priority assignable role from a set of role slugs.
+	 *
+	 * Priority follows {@see get_roles()} order (highest → lowest):
+	 * CRM Manager > Sales Manager > Sales Rep > Support Manager > Support Agent.
+	 * When a user holds several DoubleScale roles (e.g. CRM Manager AND Sales
+	 * Rep), this returns the one that should drive their effective permissions
+	 * (CRM Manager). Administrator is intentionally NOT considered here — it is
+	 * a WP role handled separately by {@see Permissions::get_user_role()}.
+	 *
+	 * @param array<int, string> $roles Role slugs to choose from (e.g. a user's roles).
+	 * @return string|null The highest-priority assignable role, or null if none match.
+	 */
+	public static function get_highest_role( array $roles ): ?string {
+		foreach ( self::get_assignable_role_slugs() as $role ) {
+			if ( in_array( $role, $roles, true ) ) {
+				return $role;
+			}
+		}
+		return null;
 	}
 
 	/**

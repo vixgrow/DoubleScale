@@ -90,21 +90,30 @@ final class Permissions {
 
 	/**
 	 * Check if the user may open the Support Settings page (mailboxes, SMTP
-	 * identities, notification toggles). Granted to Administrators, CRM
-	 * Managers, and the support roles (Support Manager / Support Agent).
+	 * identities, notification toggles). Granted ONLY to Administrators and the
+	 * dedicated support roles (Support Manager / Support Agent).
 	 *
-	 * Deliberately EXCLUDES Sales Manager / Sales Rep: support configuration is
-	 * not a sales concern, even though those roles otherwise have support
-	 * access. Mirrors the frontend route gate in
+	 * Support is fully decoupled from the CRM roles: CRM Manager / Sales Manager
+	 * / Sales Rep get NO support access unless an admin ALSO assigns them a
+	 * support role. Mirrors the frontend route gate in
 	 * `src/client/pages/support/index.tsx`.
 	 *
 	 * @param int|null $user_id User ID (null for current user)
 	 * @return bool
 	 */
 	public static function can_access_support_settings( $user_id = null ) {
-		return self::is_crm_manager( $user_id )
-			|| self::is_support_manager( $user_id )
-			|| self::is_support_agent( $user_id );
+		$user_id = self::set_current_user_id( $user_id );
+
+		// Administrators always have full support access.
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		// Role-membership checks (NOT single-highest-role): a user who is e.g.
+		// Sales Rep + Support Manager still gets settings access from the
+		// Support Manager role. Capabilities merge across roles.
+		return self::user_has_role( UserRoles::SUPPORT_MANAGER, $user_id )
+			|| self::user_has_role( UserRoles::SUPPORT_AGENT, $user_id );
 	}
 
 	/**
@@ -379,5 +388,35 @@ final class Permissions {
 		}
 
 		return UserRoles::NONE;
+	}
+
+	/**
+	 * Check whether the user actually HOLDS a given role — looking at ALL of
+	 * their roles, not just the single highest one ({@see get_user_role()}).
+	 *
+	 * This is what makes capabilities merge across roles: a user who is both
+	 * Sales Rep AND Support Manager returns true for BOTH
+	 * `user_has_role(SALES_REP)` and `user_has_role(SUPPORT_MANAGER)`, so each
+	 * role's permissions apply independently. Use this (not `is_*`/`get_user_role`)
+	 * whenever a permission should be granted by the mere presence of a role.
+	 *
+	 * @param string   $role    Role slug to look for.
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function user_has_role( $role, $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+
+		// Multisite super admins implicitly hold the administrator role.
+		if ( UserRoles::ADMINISTRATOR === $role && is_multisite() && is_super_admin( $user_id ) ) {
+			return true;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		return in_array( $role, (array) $user->roles, true );
 	}
 }

@@ -64,6 +64,10 @@ registerAdminPage('support', {
 	component: wrap(Inbox),
 	label: __('Support', 'doublescale'),
 	icon: <SupportIcon width={24} height={24} />,
+	// Support is decoupled from CRM roles: only users with `view_support`
+	// (the dedicated support roles + admins) reach the inbox. A CRM Manager /
+	// Sales Manager / Sales Rep without a support role sees nothing here.
+	requiredCapability: ['doublescale_view_support'],
 	requiresModule: 'support',
 });
 
@@ -73,6 +77,7 @@ registerAdminPage('support-ticket', {
 	label: __('Ticket', 'doublescale'),
 	hidden: true,
 	icon: <SupportIcon width={24} height={24} />,
+	requiredCapability: ['doublescale_view_support'],
 	requiresModule: 'support',
 });
 
@@ -85,14 +90,10 @@ registerAdminPage('support-settings', {
 	// exactly like `booking/settings`.
 	hidden: true,
 	icon: <SupportIcon width={24} height={24} />,
-	// Visible to Administrators / CRM Managers and the support roles (Support
-	// Manager / Support Agent) only. Sales Manager / Sales Rep are deliberately
-	// excluded — support config is not a sales concern. `requiredCapability`
-	// is OR-matched, so any one of these caps grants access.
-	requiredCapability: [
-		'doublescale_crm_manager',
-		'doublescale_support_manager',
-		'doublescale_support_agent',
-	],
+	// Support config is exclusive to the support roles (Support Manager /
+	// Support Agent) and admins. CRM Manager / Sales roles get NO access unless
+	// an admin also gives them a support role. The single flag below already
+	// folds in the admin (manage_options) check — see AdminConfig.
+	requiredCapability: ['doublescale_manage_support_settings'],
 	requiresModule: 'support',
 });

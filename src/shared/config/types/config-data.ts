@@ -98,6 +98,7 @@ export type UserCapabilities = {
 	doublescale_support_agent?: boolean;
 	doublescale_view_support?: boolean;
 	doublescale_manage_all_tickets?: boolean;
+	doublescale_manage_support_settings?: boolean;
 };
 
 export type DefaultStage = {

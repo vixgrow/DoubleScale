@@ -186,10 +186,12 @@ final class Lifecycle {
 
 	/**
 	 * Multisite network activation.
+	 *
+	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 */
-	public static function on_multisite_activate(): void {
+	public static function on_multisite_activate( $network_wide = false ): void {
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
-			\DoubleScale\Database\Install::multisite_activate();
+			\DoubleScale\Database\Install::multisite_activate( $network_wide );
 		}
 	}
 

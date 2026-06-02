@@ -179,6 +179,10 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.0.2 = 3 Jun 2026
+- Fix booking issue
+- Fix assets issue
+- Fix templates issue while creating a new campaign
 
 = 1.0.0 =
 * All-in-one launch — nine first-class modules in one plugin:

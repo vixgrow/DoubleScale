@@ -73,7 +73,11 @@ interface NoticeState {
 	message: string;
 }
 
-const NOTIFICATION_TOGGLES: Array<{ key: string; label: string; help: string }> = [
+const NOTIFICATION_TOGGLES: Array<{
+	key: string;
+	label: string;
+	help: string;
+}> = [
 	{
 		key: 'ticket_created_to_customer',
 		label: __('Ticket received confirmation', 'doublescale'),
@@ -128,15 +132,15 @@ const MailboxesPanel: React.FC = () => {
 			// Hoist the sending identity out of the `data` blob to the top level
 			// so the editor (which sets `editing` straight from a row) can read
 			// `editing.identity` without digging into `data`.
-			const rows: Mailbox[] = (Array.isArray(res?.data) ? res.data : []).map(
-				(mb: any) => ({
-					...mb,
-					identity:
-						mb?.data && typeof mb.data === 'object'
-							? mb.data.identity
-							: undefined,
-				})
-			);
+			const rows: Mailbox[] = (
+				Array.isArray(res?.data) ? res.data : []
+			).map((mb: any) => ({
+				...mb,
+				identity:
+					mb?.data && typeof mb.data === 'object'
+						? mb.data.identity
+						: undefined,
+			}));
 			setMailboxes(rows);
 			// Sending identities this user may bind, delivered alongside the
 			// list (capability-scoped on the server). Drives the picker below.
@@ -296,7 +300,10 @@ const MailboxesPanel: React.FC = () => {
 								<Input
 									type="text"
 									value={editing.name || ''}
-									placeholder={__('e.g. Sales', 'doublescale')}
+									placeholder={__(
+										'e.g. Sales',
+										'doublescale'
+									)}
 									onChange={(e) =>
 										setEditing((prev) => ({
 											...prev,
@@ -346,7 +353,8 @@ const MailboxesPanel: React.FC = () => {
 									<select
 										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 										value={
-											editing.identity?.connection_id || ''
+											editing.identity?.connection_id ||
+											''
 										}
 										onChange={(e) =>
 											setEditing((prev) => ({

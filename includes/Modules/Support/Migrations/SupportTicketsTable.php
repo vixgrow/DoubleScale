@@ -57,7 +57,7 @@ class SupportTicketsTable extends Migration {
 			product VARCHAR(100) NULL COMMENT 'Free-text product label',
 			message_id VARCHAR(191) NULL COMMENT 'Email Message-ID of the thread root',
 			content_hash VARCHAR(32) NULL COMMENT 'MD5 of opening message body for inbound dedupe',
-			response_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Denormalized counter; incremented by TicketService::add_reply',
+			response_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Denormalized counter, incremented by TicketService::add_reply',
 			tag_ids JSON NULL COMMENT 'Array of doublescale_tags.id',
 			custom_data JSON NULL COMMENT 'Per-ticket custom field values',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -8,7 +8,7 @@ Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native CRM, deals & pipelines, email/SMS/WhatsApp campaigns, sequences, booking, helpdesk, tasks, SMTP, and visual automations — in one plugin.
+WordPress-native CRM, deals & pipelines, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
 
 == Description ==
 
@@ -238,155 +238,62 @@ For every service below:
 
 = SMTP / email providers =
 
-Each SMTP provider is selectable per connection. When you configure one, DoubleScale sends outgoing mail (email content, recipient addresses, headers) to that provider's API; nothing is sent until you save credentials.
+Each provider is selectable per connection. DoubleScale sends outgoing mail to that provider's API only after you save credentials.
 
-**SendGrid**
-* Endpoint: `https://api.sendgrid.com`
-* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
-
-**Mailgun**
-* Endpoint: `https://api.mailgun.net`
-* Terms: https://www.mailgun.com/terms · Privacy: https://www.mailgun.com/privacy-policy
-
-**Postmark**
-* Endpoint: `https://api.postmarkapp.com`
-* Terms: https://postmarkapp.com/terms-of-service · Privacy: https://postmarkapp.com/privacy-policy
-
-**SparkPost**
-* Endpoint: `https://api.sparkpost.com`
-* Terms: https://www.sparkpost.com/legal/terms-of-use · Privacy: https://bird.com/en/legal/privacy
-
-**SMTP.com**
-* Endpoint: `https://api.smtp.com`
-* Terms: https://smtp.com/terms-of-service · Privacy: https://smtp.com/privacy-policy
-
-**SMTP2GO**
-* Endpoint: `https://api.smtp2go.com`
-* Terms: https://www.smtp2go.com/terms/ · Privacy: https://www.smtp2go.com/privacy/
-
-**MailerSend**
-* Endpoint: `https://api.mailersend.com`
-* Terms: https://www.mailersend.com/legal/terms-of-use · Privacy: https://www.mailersend.com/legal/privacy-policy
-
-**Mailjet**
-* Endpoint: `https://api.mailjet.com`
-* Terms: https://www.mailjet.com/legal/terms · Privacy: https://www.mailjet.com/privacy-policy/
-
-**Brevo (formerly Sendinblue)**
-* Endpoint: `https://api.brevo.com`
-* Terms: https://www.brevo.com/legal/termsofuse/ · Privacy: https://www.brevo.com/legal/privacypolicy/
-
-**Mandrill**
-* Endpoint: `https://mandrillapp.com/api`
-* Terms: https://mailchimp.com/legal/terms/ · Privacy: https://mailchimp.com/legal/privacy/
-
-**ElasticEmail**
-* Endpoint: `https://api.elasticemail.com`
-* Terms: https://elasticemail.com/resources/usage-policies/terms-of-use/ · Privacy: https://elasticemail.com/resources/usage-policies/privacy-policy/
-
-**SendLayer**
-* Endpoint: `https://console.sendlayer.com/api`
-* Terms: https://sendlayer.com/terms-of-service/ · Privacy: https://sendlayer.com/privacy-policy/
-
-**SocketLabs**
-* Endpoint: `https://inject.socketlabs.com`
-* Terms: https://www.socketlabs.com/terms-of-use · Privacy: https://www.socketlabs.com/privacy-policy/
-
-**Loops**
-* Endpoint: `https://app.loops.so/api`
-* Terms: https://loops.so/terms · Privacy: https://loops.so/privacy
-
-**Amazon SES**
-* Endpoint: AWS regional endpoints (e.g., `https://email.us-east-1.amazonaws.com`)
-* Terms: https://aws.amazon.com/service-terms/ · Privacy: https://aws.amazon.com/privacy/
+* **SendGrid** — `https://api.sendgrid.com` · [Terms](https://www.twilio.com/legal/tos) · [Privacy](https://www.twilio.com/legal/privacy)
+* **Mailgun** — `https://api.mailgun.net` · [Terms](https://www.mailgun.com/terms) · [Privacy](https://www.mailgun.com/privacy-policy)
+* **Postmark** — `https://api.postmarkapp.com` · [Terms](https://postmarkapp.com/terms-of-service) · [Privacy](https://postmarkapp.com/privacy-policy)
+* **SparkPost** — `https://api.sparkpost.com` · [Terms](https://www.sparkpost.com/legal/terms-of-use) · [Privacy](https://bird.com/en/legal/privacy)
+* **SMTP.com** — `https://api.smtp.com` · [Terms](https://smtp.com/terms-of-service) · [Privacy](https://smtp.com/privacy-policy)
+* **SMTP2GO** — `https://api.smtp2go.com` · [Terms](https://www.smtp2go.com/terms/) · [Privacy](https://www.smtp2go.com/privacy/)
+* **MailerSend** — `https://api.mailersend.com` · [Terms](https://www.mailersend.com/legal/terms-of-use) · [Privacy](https://www.mailersend.com/legal/privacy-policy)
+* **Mailjet** — `https://api.mailjet.com` · [Terms](https://www.mailjet.com/legal/terms) · [Privacy](https://www.mailjet.com/privacy-policy/)
+* **Brevo (Sendinblue)** — `https://api.brevo.com` · [Terms](https://www.brevo.com/legal/termsofuse/) · [Privacy](https://www.brevo.com/legal/privacypolicy/)
+* **Mandrill** — `https://mandrillapp.com/api` · [Terms](https://mailchimp.com/legal/terms/) · [Privacy](https://mailchimp.com/legal/privacy/)
+* **ElasticEmail** — `https://api.elasticemail.com` · [Terms](https://elasticemail.com/resources/usage-policies/terms-of-use/) · [Privacy](https://elasticemail.com/resources/usage-policies/privacy-policy/)
+* **SendLayer** — `https://console.sendlayer.com/api` · [Terms](https://sendlayer.com/terms-of-service/) · [Privacy](https://sendlayer.com/privacy-policy/)
+* **SocketLabs** — `https://inject.socketlabs.com` · [Terms](https://www.socketlabs.com/terms-of-use) · [Privacy](https://www.socketlabs.com/privacy-policy/)
+* **Loops** — `https://app.loops.so/api` · [Terms](https://loops.so/terms) · [Privacy](https://loops.so/privacy)
+* **Amazon SES** — AWS regional endpoints (e.g. `https://email.us-east-1.amazonaws.com`) · [Terms](https://aws.amazon.com/service-terms/) · [Privacy](https://aws.amazon.com/privacy/)
 
 = OAuth-based mail providers =
 
-**Gmail / Google Workspace**
-* Purpose: Send mail through your Google account via OAuth.
-* Data sent: Outgoing email content; profile email read on connect to identify the account.
-* Endpoints: `https://www.googleapis.com/oauth2/*`, `https://gmail.googleapis.com`
-* Terms: https://policies.google.com/terms · Privacy: https://policies.google.com/privacy
+Send mail through your own account via OAuth. Outgoing email content and profile email are sent on connect.
 
-**Microsoft Outlook / 365**
-* Purpose: Send mail through your Microsoft account via OAuth.
-* Data sent: Outgoing email content; profile read on connect to identify the account.
-* Endpoints: `https://login.microsoftonline.com`, `https://graph.microsoft.com`
-* Terms: https://www.microsoft.com/legal/terms-of-use · Privacy: https://privacy.microsoft.com/privacystatement
-
-**Zoho Mail**
-* Purpose: Send mail through your Zoho account via OAuth.
-* Endpoints: `https://accounts.zoho.com`, `https://mail.zoho.com/api`
-* Terms: https://www.zoho.com/terms.html · Privacy: https://www.zoho.com/privacy.html
+* **Gmail / Google Workspace** — `https://www.googleapis.com/oauth2/*`, `https://gmail.googleapis.com` · [Terms](https://policies.google.com/terms) · [Privacy](https://policies.google.com/privacy)
+* **Microsoft Outlook / 365** — `https://login.microsoftonline.com`, `https://graph.microsoft.com` · [Terms](https://www.microsoft.com/legal/terms-of-use) · [Privacy](https://privacy.microsoft.com/privacystatement)
+* **Zoho Mail** — `https://accounts.zoho.com`, `https://mail.zoho.com/api` · [Terms](https://www.zoho.com/terms.html) · [Privacy](https://www.zoho.com/privacy.html)
 
 = CRM sync providers (Pro) =
 
-**ActiveCampaign**
-* Purpose: Two-way contact sync.
-* Data sent: Contact fields you map.
-* Endpoint: Your account's ActiveCampaign API host.
-* Terms: https://www.activecampaign.com/legal/terms-of-service · Privacy: https://www.activecampaign.com/legal/privacy-policy
+Two-way contact and deal sync. Only mapped fields are sent.
 
-**HubSpot**
-* Purpose: Two-way contact and deal sync.
-* Endpoint: `https://api.hubapi.com`
-* Terms: https://legal.hubspot.com/terms-of-service · Privacy: https://legal.hubspot.com/privacy-policy
-
-**Pipedrive**
-* Purpose: Two-way contact and deal sync.
-* Endpoint: `https://api.pipedrive.com`
-* Terms: https://www.pipedrive.com/en/terms-of-service · Privacy: https://www.pipedrive.com/en/privacy
-
-**GoHighLevel**
-* Purpose: Contact sync via OAuth.
-* Endpoints: `https://marketplace.gohighlevel.com`, `https://services.leadconnectorhq.com`
-* Terms: https://www.gohighlevel.com/terms-of-service · Privacy: https://www.gohighlevel.com/privacy-policy
+* **ActiveCampaign** — Your account's API host · [Terms](https://www.activecampaign.com/legal/terms-of-service) · [Privacy](https://www.activecampaign.com/legal/privacy-policy)
+* **HubSpot** — `https://api.hubapi.com` · [Terms](https://legal.hubspot.com/terms-of-service) · [Privacy](https://legal.hubspot.com/privacy-policy)
+* **Pipedrive** — `https://api.pipedrive.com` · [Terms](https://www.pipedrive.com/en/terms-of-service) · [Privacy](https://www.pipedrive.com/en/privacy)
+* **GoHighLevel** — `https://marketplace.gohighlevel.com`, `https://services.leadconnectorhq.com` · [Terms](https://www.gohighlevel.com/terms-of-service) · [Privacy](https://www.gohighlevel.com/privacy-policy)
 
 = Messaging providers (Pro) =
 
-**Twilio**
-* Purpose: SMS sending and inbound conversations.
-* Data sent: Phone numbers and message content.
-* Endpoint: `https://api.twilio.com`
-* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
-
-**Meta WhatsApp Business**
-* Purpose: WhatsApp sending and inbound conversations.
-* Data sent: Phone numbers and message content via the WhatsApp Business Cloud API.
-* Endpoint: `https://graph.facebook.com`
-* Terms: https://www.whatsapp.com/legal/business-terms · Privacy: https://www.whatsapp.com/legal/business-data-transfer-addendum
+* **Twilio** — SMS sending and inbound. Phone numbers and message content sent. `https://api.twilio.com` · [Terms](https://www.twilio.com/legal/tos) · [Privacy](https://www.twilio.com/legal/privacy)
+* **Meta WhatsApp Business** — WhatsApp sending and inbound via Cloud API. `https://graph.facebook.com` · [Terms](https://www.whatsapp.com/legal/business-terms) · [Privacy](https://www.whatsapp.com/legal/business-data-transfer-addendum)
 
 = Payments (Pro) =
 
-**Stripe**
-* Purpose: Process booking payments.
-* Data sent: Booking amount, currency, and the payer email for receipts.
-* Endpoint: `https://api.stripe.com`
-* Terms: https://stripe.com/legal · Privacy: https://stripe.com/privacy
+* **Stripe** — Booking payments (amount, currency, payer email). `https://api.stripe.com` · [Terms](https://stripe.com/legal) · [Privacy](https://stripe.com/privacy)
 
 = Plugin-specific services =
 
-**DoubleScale (doublescale.io)**
-* Purpose: License validation, Pro add-on store, and update checks. This is the plugin's own service.
-* Data sent: Your site URL, environment type (e.g. `production`/`staging`), and — only when you initiate a license or add-on action — the license key, the add-on identifier you selected, and your DoubleScale account credentials. No CRM, contact, or campaign data is sent.
-* When it fires: Only on explicit user actions — activating a Pro license, browsing the Pro add-on store from the admin, or running an update check. Not on every page load.
-* Endpoint: `https://doublescale.io`
-* Terms: https://doublescale.io/terms · Privacy: https://doublescale.io/privacy
-
-**UI Avatars (ui-avatars.com)** (Gravatar fallback)
-* Purpose: Provides a generated initials-based avatar image for contacts whose email address has no Gravatar. DoubleScale outputs a standard Gravatar URL in the contact metabox; Gravatar itself redirects to UI Avatars when no Gravatar exists for the email, so the user's browser — not the plugin server — loads the fallback image.
-* Data sent: Only the contact's display name (passed in the URL path so an initials-based image can be generated). The plugin does not POST or contact UI Avatars directly.
-* When it fires: When an admin views the contact metabox and the contact has no Gravatar.
-* Endpoint: `https://ui-avatars.com/api/`
-* Terms: https://ui-avatars.com/terms · Privacy: https://ui-avatars.com/privacy
+* **DoubleScale (doublescale.io)** — License validation, Pro add-on store, update checks. Sends site URL, environment type, and (on explicit action) license key / add-on ID. No CRM or contact data. `https://doublescale.io` · [Terms](https://doublescale.io/terms) · [Privacy](https://doublescale.io/privacy)
+* **UI Avatars (ui-avatars.com)** — Gravatar fallback. The browser loads an initials avatar when no Gravatar exists; only the display name is in the URL. `https://ui-avatars.com/api/` · [Terms](https://ui-avatars.com/terms) · [Privacy](https://ui-avatars.com/privacy)
 
 = AI provider endpoints (optional, bring-your-own-key) =
 
-The AI settings page lets you point DoubleScale at any OpenAI-compatible endpoint by entering its base URL and your own API key. Suggested endpoints (Groq, OpenRouter) appear as labels in the provider dropdown but are **not** contacted unless you save credentials for them. If you configure an AI provider, you are responsible for that provider's terms and privacy policy.
+Point DoubleScale at any OpenAI-compatible endpoint with your own API key. Providers are **not** contacted unless you save credentials.
 
-* OpenRouter — `https://openrouter.ai/api/v1` · Terms: https://openrouter.ai/terms · Privacy: https://openrouter.ai/privacy
-* Groq — `https://api.groq.com/openai/v1` · Terms: https://groq.com/terms-of-use · Privacy: https://groq.com/privacy-policy
-* Any other OpenAI-compatible endpoint you supply manually.
+* **OpenRouter** — `https://openrouter.ai/api/v1` · [Terms](https://openrouter.ai/terms) · [Privacy](https://openrouter.ai/privacy)
+* **Groq** — `https://api.groq.com/openai/v1` · [Terms](https://groq.com/terms-of-use) · [Privacy](https://groq.com/privacy-policy)
+* Any other OpenAI-compatible endpoint you supply.
 
 = Disabling =
 

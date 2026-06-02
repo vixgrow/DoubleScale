@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import {
 	useTicket,
 	useConversation,
+	useAgents,
 	addReply,
 	addNote,
 	updateTicket,
@@ -101,7 +102,10 @@ const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
 				className="prose prose-sm max-w-none text-gray-800"
 				/* eslint-disable-next-line react/no-danger -- WP REST already sanitizes via wp_kses_post; we trust the structured content field. */
 				dangerouslySetInnerHTML={{
-					__html: typeof item.data.content === 'string' ? item.data.content : '',
+					__html:
+						typeof item.data.content === 'string'
+							? item.data.content
+							: '',
 				}}
 			/>
 		</div>
@@ -113,10 +117,14 @@ const SupportTicketDetail: React.FC = () => {
 	const params = useParams<{ id: string }>();
 	const ticketId = params.id ? Number(params.id) : null;
 
-	const { data: ticket, loading: ticketLoading, refetch: refetchTicket } =
-		useTicket(ticketId);
+	const {
+		data: ticket,
+		loading: ticketLoading,
+		refetch: refetchTicket,
+	} = useTicket(ticketId);
 	const { data: conversation, refetch: refetchConversation } =
 		useConversation(ticketId);
+	const { data: agents } = useAgents();
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
 	const [content, setContent] = useState('');
@@ -138,7 +146,9 @@ const SupportTicketDetail: React.FC = () => {
 
 	if (ticketLoading || !ticket) {
 		return (
-			<div className="p-6 text-gray-600">{__('Loading ticket…', 'doublescale')}</div>
+			<div className="p-6 text-gray-600">
+				{__('Loading ticket…', 'doublescale')}
+			</div>
 		);
 	}
 
@@ -157,7 +167,10 @@ const SupportTicketDetail: React.FC = () => {
 			contact_id: null,
 			user_id: null,
 			data: { content, source: 'web' },
-			created_at: new Date().toISOString().replace('T', ' ').split('.')[0],
+			created_at: new Date()
+				.toISOString()
+				.replace('T', ' ')
+				.split('.')[0],
 			updated_at: null,
 			user: null,
 		};
@@ -174,12 +187,16 @@ const SupportTicketDetail: React.FC = () => {
 			// Real activity arrives via refetch — clear the placeholder.
 			refetchConversation();
 			refetchTicket();
-			setPendingItems((prev) => prev.filter((p) => p.id !== optimistic.id));
+			setPendingItems((prev) =>
+				prev.filter((p) => p.id !== optimistic.id)
+			);
 		} catch (err) {
 			const msg = (err as { message?: string })?.message ?? 'Send failed';
 			setFeedback(msg);
 			// Roll back the optimistic insertion and restore the draft.
-			setPendingItems((prev) => prev.filter((p) => p.id !== optimistic.id));
+			setPendingItems((prev) =>
+				prev.filter((p) => p.id !== optimistic.id)
+			);
 			setContent(draftContent);
 		} finally {
 			setSending(false);
@@ -191,7 +208,11 @@ const SupportTicketDetail: React.FC = () => {
 		// primitive in shared/ui yet, and this matches what Booking uses for
 		// destructive calendar deletes.
 		// eslint-disable-next-line no-alert
-		if (!confirm(__('Delete this ticket? This cannot be undone.', 'doublescale'))) {
+		if (
+			!confirm(
+				__('Delete this ticket? This cannot be undone.', 'doublescale')
+			)
+		) {
 			return;
 		}
 		setDeleting(true);
@@ -199,7 +220,8 @@ const SupportTicketDetail: React.FC = () => {
 			await deleteTicket(ticketId);
 			navigate(getToLink('support'));
 		} catch (err) {
-			const msg = (err as { message?: string })?.message ?? 'Delete failed';
+			const msg =
+				(err as { message?: string })?.message ?? 'Delete failed';
 			setFeedback(msg);
 			setDeleting(false);
 		}
@@ -213,6 +235,16 @@ const SupportTicketDetail: React.FC = () => {
 
 	const handlePriorityChange = async (priority: TicketPriority) => {
 		await updateTicket(ticketId, { priority });
+		refetchTicket();
+		refetchConversation();
+	};
+
+	const handleAssigneeChange = async (raw: string) => {
+		// Empty selection → 0 = Unassigned. The backend whitelists agent_user_id
+		// on update and emits an `assigned` conversation event.
+		await updateTicket(ticketId, {
+			agent_user_id: raw === '' ? 0 : Number(raw),
+		});
 		refetchTicket();
 		refetchConversation();
 	};
@@ -249,7 +281,8 @@ const SupportTicketDetail: React.FC = () => {
 						</h1>
 						<div className="text-sm text-gray-500">
 							{__('Ticket', 'doublescale')} #{ticket.id} ·{' '}
-							{__('Opened', 'doublescale')} {formatDate(ticket.created_at)}
+							{__('Opened', 'doublescale')}{' '}
+							{formatDate(ticket.created_at)}
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
@@ -267,9 +300,12 @@ const SupportTicketDetail: React.FC = () => {
 							{ticket.contact ? (
 								<>
 									<div>
-										{ticket.contact.first_name} {ticket.contact.last_name}
+										{ticket.contact.first_name}{' '}
+										{ticket.contact.last_name}
 									</div>
-									<div className="text-gray-500">{ticket.contact.email}</div>
+									<div className="text-gray-500">
+										{ticket.contact.email}
+									</div>
 								</>
 							) : (
 								<span className="text-gray-500">
@@ -309,11 +345,15 @@ const SupportTicketDetail: React.FC = () => {
 				{/* Quick actions row */}
 				<div className="mt-4 flex gap-3 items-center text-sm">
 					<label className="flex items-center gap-1">
-						<span className="text-gray-600">{__('Status:', 'doublescale')}</span>
+						<span className="text-gray-600">
+							{__('Status:', 'doublescale')}
+						</span>
 						<select
 							value={ticket.status}
 							onChange={(e) =>
-								handleStatusChange(e.target.value as TicketStatus)
+								handleStatusChange(
+									e.target.value as TicketStatus
+								)
 							}
 							className="border rounded px-2 py-1"
 						>
@@ -325,17 +365,42 @@ const SupportTicketDetail: React.FC = () => {
 						</select>
 					</label>
 					<label className="flex items-center gap-1">
-						<span className="text-gray-600">{__('Priority:', 'doublescale')}</span>
+						<span className="text-gray-600">
+							{__('Priority:', 'doublescale')}
+						</span>
 						<select
 							value={ticket.priority}
 							onChange={(e) =>
-								handlePriorityChange(e.target.value as TicketPriority)
+								handlePriorityChange(
+									e.target.value as TicketPriority
+								)
 							}
 							className="border rounded px-2 py-1"
 						>
 							{TICKET_PRIORITIES.map((p) => (
 								<option key={p} value={p}>
 									{p}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="flex items-center gap-1">
+						<span className="text-gray-600">
+							{__('Assignee:', 'doublescale')}
+						</span>
+						<select
+							value={ticket.agent_user_id ?? ''}
+							onChange={(e) =>
+								handleAssigneeChange(e.target.value)
+							}
+							className="border rounded px-2 py-1"
+						>
+							<option value="">
+								{__('— Unassigned —', 'doublescale')}
+							</option>
+							{agents.map((a) => (
+								<option key={a.id} value={a.id}>
+									{a.name || a.email}
 								</option>
 							))}
 						</select>
@@ -359,7 +424,10 @@ const SupportTicketDetail: React.FC = () => {
 						<ConversationBubble key={item.id} item={item} />
 					))}
 					{pendingItems.map((item) => (
-						<div key={item.id} className="opacity-60 transition-opacity">
+						<div
+							key={item.id}
+							className="opacity-60 transition-opacity"
+						>
 							<ConversationBubble item={item} />
 						</div>
 					))}
@@ -402,17 +470,19 @@ const SupportTicketDetail: React.FC = () => {
 								? __(
 										'Write a reply visible to the customer…',
 										'doublescale'
-								  )
+									)
 								: __(
 										'Write a note visible only to your team…',
 										'doublescale'
-								  )
+									)
 						}
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 					/>
 					{feedback && (
-						<div className="mt-2 text-sm text-red-600">{feedback}</div>
+						<div className="mt-2 text-sm text-red-600">
+							{feedback}
+						</div>
 					)}
 					<div className="mt-3 flex justify-end">
 						<button
@@ -428,8 +498,8 @@ const SupportTicketDetail: React.FC = () => {
 							{sending
 								? __('Sending…', 'doublescale')
 								: tab === 'reply'
-								? __('Send reply', 'doublescale')
-								: __('Add note', 'doublescale')}
+									? __('Send reply', 'doublescale')
+									: __('Add note', 'doublescale')}
 						</button>
 					</div>
 				</div>

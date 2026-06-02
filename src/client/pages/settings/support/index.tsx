@@ -31,6 +31,8 @@ import {
 	Plus,
 	Trash2,
 	Pencil,
+	Copy,
+	Check,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -108,6 +110,68 @@ const NOTIFICATION_DEFAULTS: Record<string, boolean> = {
 	ticket_created_to_customer: true,
 	reply_to_customer: true,
 	status_change_to_customer: true,
+};
+
+// ---------------------------------------------------------------------------
+// Customer portal shortcode (informational)
+// ---------------------------------------------------------------------------
+
+const PORTAL_SHORTCODE = '[doublescale_support_portal]';
+
+// Static card telling the operator how to surface the customer portal. The
+// shortcode is rendered by PortalFrontendHandler; this is copy-only (no page
+// detection / creation — the operator pastes it onto a page themselves).
+const PortalShortcodeCard: React.FC = () => {
+	const [copied, setCopied] = useState(false);
+
+	const copy = async () => {
+		try {
+			await navigator.clipboard.writeText(PORTAL_SHORTCODE);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// Clipboard can be unavailable (insecure context); fail silently —
+			// the shortcode text is visible for manual copy regardless.
+		}
+	};
+
+	return (
+		<Card>
+			<CardContent className="p-6 space-y-3">
+				<div className="font-medium text-gray-900">
+					{__('Customer portal', 'doublescale')}
+				</div>
+				<p className="text-sm text-gray-500">
+					{__(
+						'Paste this shortcode on any page to show the customer support portal. It is visible only to logged-in customers.',
+						'doublescale'
+					)}
+				</p>
+				<div className="flex items-center gap-2">
+					<code className="flex-1 rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-gray-800">
+						{PORTAL_SHORTCODE}
+					</code>
+					<Button
+						variant="outline"
+						className="rounded-lg"
+						onClick={copy}
+					>
+						{copied ? (
+							<>
+								<Check className="w-4 h-4 mr-1" />
+								{__('Copied', 'doublescale')}
+							</>
+						) : (
+							<>
+								<Copy className="w-4 h-4 mr-1" />
+								{__('Copy', 'doublescale')}
+							</>
+						)}
+					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
 };
 
 // ---------------------------------------------------------------------------
@@ -547,6 +611,8 @@ const MailboxesPanel: React.FC = () => {
 					</CardContent>
 				</Card>
 			)}
+
+			{!editing && <PortalShortcodeCard />}
 		</div>
 	);
 };

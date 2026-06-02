@@ -107,7 +107,12 @@ export interface TicketFilters {
 
 export interface CreateTicketPayload {
 	title: string;
-	email: string;
+	// Customer: either an existing CRM contact by id, OR an email (+ optional
+	// name) which the backend find_or_creates. The server requires one of the
+	// two (see TicketService::resolve_contact); the modal sends contact_id when
+	// a contact is picked, email otherwise.
+	contact_id?: number;
+	email?: string;
 	first_name?: string;
 	last_name?: string;
 	content: string;

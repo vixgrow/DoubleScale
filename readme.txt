@@ -1,6 +1,6 @@
 === DoubleScale | All-In-One Business Growth Platform ===
 Contributors: vixgrowy
-Tags:  marketing automation, booking, email campaigns, helpdesk
+Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native campaigns, booking, SMTP, helpdesk, tasks, pipelines, analytics, and automations in one plugin.
+WordPress-native CRM, deals & pipelines, email/SMS/WhatsApp campaigns, sequences, booking, helpdesk, tasks, SMTP, and visual automations — in one plugin.
 
 == Description ==
 
@@ -18,35 +18,42 @@ You shouldn't need eight separate logins, eight billing relationships, and eight
 
 = What's inside one plugin =
 
-DoubleScale is a single install that gives you **eight first-class modules**, every one designed to feel like a dedicated product:
+DoubleScale is a single install that gives you **nine first-class modules**, every one designed to feel like a dedicated product:
 
-**1. contacts, lists, segmentation**
-A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, full activity timeline, bulk operations, and CSV / WordPress user / WooCommerce imports. Every email, SMS, deal, booking, support ticket, and form submission stitches into one timeline per contact.
+**1. CRM — contacts, lists, segmentation, activity timeline**
+A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, bulk operations, and CSV / WordPress user / WooCommerce imports. Every contact has a **full activity timeline** that stitches together emails, SMS and WhatsApp messages, deal stage changes, bookings, support threads, page visits, form submissions, link clicks, and automation runs — one chronological view per contact, no tab-switching.
 
-**2. Campaigns — email & SMS broadcasts and sequences**
-A drag-and-drop email builder with responsive blocks, reusable templates, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments. Build multi-step email sequences (drip campaigns) with delays and conditional branches. SMS campaigns share the same composer and audience. Per-link tracking with automation triggers; bounce handling with soft/hard classification.
+**2. Deals & Pipelines — sales pipeline management**
+Drag-and-drop kanban pipelines with multiple stages, weighted forecasting, win/loss reasons, and per-deal custom fields. Run separate pipelines for sales, partnerships, renewals, or onboarding. Every deal carries the full contact, activity, and email thread with it. Stage transitions can fire automations (move to "Closed Won" → send invoice + assign onboarding task + tag in CRM).
 
-**3. Booking — self-service appointment scheduling**
+**3. Campaigns — email, SMS, and WhatsApp broadcasts and sequences**
+A drag-and-drop email builder with responsive blocks, reusable templates, A/B testing, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments.
+* **Email sequences (drip campaigns)** — multi-step nurture flows with time delays, conditional branches based on opens/clicks/replies, and goal-based exit conditions.
+* **SMS campaigns** — broadcast and triggered SMS via Twilio. Shares the same composer, audience, and merge-tag system as email.
+* **WhatsApp campaigns** — send Meta-approved WhatsApp templates and trigger conversations from the same builder. Inbound replies route to the unified inbox.
+* Per-link tracking with automation triggers, bounce handling with soft/hard classification, and full delivery logs.
+
+**4. Booking — self-service appointment scheduling**
 Built-in calendar management with availability windows, guest forms, automated confirmations, rescheduling, time-zone handling, and embeddable booking pages. No external Calendly — bookings land directly on the contact record and can trigger automations.
 
-**4. Tasks — team task management**
+**5. Tasks — team task management**
 Create, assign, schedule, and track tasks. Link them to contacts and deals. Due dates, reminders, status workflows. Stop running a separate ClickUp or Asana when 80% of your tasks are about customers anyway.
 
-**5. SMTP — multi-provider email routing**
+**6. SMTP — multi-provider email routing**
 A complete `wp_mail()` replacement with **20+ provider integrations** (SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and more). Smart provider selection, automatic failover, full delivery logs, and email tests — your transactional and marketing email runs through the same hardened pipeline.
 
-**6. Helpdesk inbox — unified support across channels**
-A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox.
+**7. Inbox — unified helpdesk across email, SMS, and WhatsApp**
+A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox. Inbound WhatsApp and SMS messages can also fire automations — auto-tag, route to a teammate, open a deal, or kick off a follow-up sequence.
 
-**7. Analytics — dashboards & reports**
-A built-in reporting layer covering revenue, pipeline, campaign performance, contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting CSVs to a BI tool.
+**8. Analytics — dashboards & reports**
+A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**8. Team management — roles, ownership, collaboration**
-Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see their deals, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
+**9. Team management — roles, ownership, collaboration**
+Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see only deals they own, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
 
-= Plus: a visual automation engine that connects all eight =
+= Plus: a visual automation engine that connects all nine =
 
-Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened — flow into **multi-step automations** with conditional branches, time delays, and webhook calls. Actions include: send email, send SMS, tag, score, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
+Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened, email received, SMS received, WhatsApp received, lead score crossed, list/tag applied or removed — flow into **multi-step automations** with conditional branches, time delays, goal conditions, and webhook calls. Actions include: send email, send SMS, send WhatsApp, start or pause an email sequence, tag, score, move a deal to a new stage, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
 
 = Key capabilities =
 
@@ -114,9 +121,9 @@ You'll have a working CRM + email engine + booking page in under 10 minutes.
 
 == Frequently Asked Questions ==
 
-= Is DoubleScale really an all-in-one replacement for CRM + email + booking + tasks + SMTP + helpdesk + analytics + team management? =
+= Is DoubleScale really an all-in-one replacement for CRM + deals/pipelines + email/SMS/WhatsApp campaigns + booking + tasks + SMTP + helpdesk + analytics + team management? =
 
-Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Mailchimp, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
+Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single activity timeline, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Pipedrive/HubSpot, Mailchimp, Twilio dashboard, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
 
 = How is this different from "marketing automation" plugins like FluentCRM or Groundhogg? =
 
@@ -173,9 +180,18 @@ Documentation and setup guides: [doublescale.io](https://doublescale.io). Commun
 == Changelog ==
 
 = 1.0.0 =
-* All-in-one launch: CRM, email & SMS campaigns, booking, tasks, SMTP routing, unified helpdesk inbox, analytics, and team management — in one plugin
-* Visual automation engine with 11+ trigger types connecting every module
-* 50+ integrations across commerce, forms, LMS, SMTP, messaging, and CRM sync
+* All-in-one launch — nine first-class modules in one plugin:
+  * CRM with full activity timeline (emails, SMS, WhatsApp, deals, bookings, pageviews, form submits, automations — one chronological view)
+  * Deals & pipelines (drag-and-drop kanban, weighted forecasting, multi-pipeline)
+  * Email, SMS, and WhatsApp campaigns
+  * Email sequences (drip campaigns) with delays, conditional branches, and goal-based exits
+  * Booking (calendars, availability, embeddable pages)
+  * Tasks (team task management linked to contacts and deals)
+  * SMTP routing with 20+ providers and automatic failover
+  * Unified inbox for email, SMS, and WhatsApp
+  * Analytics, reports, and dashboards
+* Visual automation engine with 11+ trigger types — including WhatsApp received, SMS received, deal stage changed, lead score crossed, link clicked — connecting every module
+* 50+ integrations across WooCommerce, EDD, SureCart, LMS plugins, 16 form builders, SMTP providers, Twilio, Meta WhatsApp, Slack, HubSpot, Pipedrive, ActiveCampaign, and more
 
 == Upgrade Notice ==
 

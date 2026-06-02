@@ -8,13 +8,14 @@
  * pipeline — the inbound IMAP/MTA engine that creates tickets FROM email is a
  * Pro feature and lives elsewhere.
  *
- * Sender identity: support mail uses the CRM's shared identity resolver
- * ({@see EmailIdentityResolver}) — the replying agent's personal connected
- * email when they have one, else the team's shared email, else the WP admin
- * address — the SAME chain the Inbox and Booking notifiers use. The support
- * mailbox is a routing/queue construct only and does NOT supply the From
- * identity, so an operator configures the sender once (CRM mailbox / SMTP
- * settings) rather than per support channel.
+ * Sender identity: support mail sends from the TICKET'S MAILBOX sending
+ * identity (`data.identity.connection_id` → an SMTP connection's From), and
+ * ONLY that. There is no fallback to the replying agent, the shared CRM email,
+ * or the admin address (product decision 2026-06-01, matching Fluent Support
+ * where the mailbox is the sole sender). A mailbox with no resolvable identity
+ * causes the outbound email to be skipped + logged (the reply still saves) —
+ * see {@see self::dispatch()} / {@see self::sender_identity()}. Operators bind a
+ * sending identity per mailbox in Settings → Support → Mailboxes.
  *
  * Reliability: every listener is wrapped so a broken SMTP transport can never
  * abort the REST request that triggered it (an agent's reply must still be
@@ -31,7 +32,6 @@ namespace DoubleScale\Modules\Support\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Core\Communication\EmailIdentityResolver;
 use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
@@ -98,7 +98,7 @@ final class EmailNotifications {
 					)
 				);
 
-				$this->dispatch( $t, $email, $subject, $body, $this->assignee_user_id( $t ) );
+				$this->dispatch( $t, $email, $subject, $body );
 			}
 		);
 	}
@@ -139,9 +139,9 @@ final class EmailNotifications {
 				$subject = sprintf( __( 'Re: %s', 'doublescale' ), $t->title );
 				$body    = $this->wrap_body( $t, $content );
 
-				// Send AS the agent who authored the reply (personal identity),
-				// falling through to shared/admin when they have none.
-				$this->dispatch( $t, $email, $subject, $body, (int) $activity->user_id );
+				// From is the mailbox's sending identity (not the agent's) — see
+				// dispatch() / sender_identity().
+				$this->dispatch( $t, $email, $subject, $body );
 			}
 		);
 	}
@@ -190,7 +190,7 @@ final class EmailNotifications {
 					)
 				);
 
-				$this->dispatch( $t, $email, $subject, $body, $this->assignee_user_id( $t ) );
+				$this->dispatch( $t, $email, $subject, $body );
 			}
 		);
 	}
@@ -202,17 +202,38 @@ final class EmailNotifications {
 	/**
 	 * Build an {@see Emails} instance with the CRM sender identity and send.
 	 *
-	 * @param TicketModel $ticket        Ticket (for logging context).
-	 * @param string      $to            Recipient email.
-	 * @param string      $subject       Subject line.
-	 * @param string      $body          HTML body.
-	 * @param int|null    $agent_user_id WP user id whose identity to send as
-	 *                                   (the replying agent, or the assignee for
-	 *                                   system notices). NULL → shared/admin.
+	 * @param TicketModel $ticket  Ticket — supplies the mailbox sending identity and logging context.
+	 * @param string      $to      Recipient email.
+	 * @param string      $subject Subject line.
+	 * @param string      $body    HTML body.
 	 * @return void
 	 */
-	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body, ?int $agent_user_id = null ): void {
-		$identity = $this->sender_identity( $agent_user_id );
+	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body ): void {
+		$identity = $this->sender_identity( $ticket );
+
+		// No resolvable sending identity on the mailbox → do NOT send. There is
+		// no fallback to the agent / shared / admin identity (product decision
+		// 2026-06-01): a support mailbox must carry its own sending identity, so
+		// the channel's From is deterministic. The triggering reply/ticket has
+		// already been persisted; skipping the email leaves the agent's action
+		// intact and surfaces the misconfiguration in the log + the mailbox UI.
+		if ( null === $identity ) {
+			// Error level: a customer notification the operator enabled silently
+			// not going out is an operator-facing failure they need to see (the
+			// mailbox is misconfigured). error/critical/alert/emergency are the
+			// levels the shared logger persists at the default threshold, so this
+			// diagnostic actually lands without depending on a raised log_level.
+			doublescale_get_logger()->error(
+				'Support mailbox has no sending identity; outbound email skipped',
+				array(
+					'source'     => 'support-email-notifications',
+					'ticket_id'  => (int) $ticket->id,
+					'mailbox_id' => $ticket->mailbox_id ? (int) $ticket->mailbox_id : null,
+					'recipient'  => $to,
+				)
+			);
+			return;
+		}
 
 		$emails               = new Emails();
 		$emails->from_address = $identity['from_address'];
@@ -245,27 +266,48 @@ final class EmailNotifications {
 	}
 
 	/**
-	 * Resolve the From / Reply-To via the CRM's shared identity resolver.
+	 * Resolve the From / Reply-To from the TICKET'S MAILBOX sending identity.
 	 *
-	 * Delegates entirely to {@see EmailIdentityResolver::resolve()} so support
-	 * mail uses the SAME sender identity as the rest of the CRM (Inbox, Booking):
+	 * The mailbox carries `data.identity.connection_id` pointing at an SMTP
+	 * connection (configured in Settings → Support → Mailboxes). That connection
+	 * supplies the From — and it is the *only* source: there is no fallback to
+	 * the replying agent, the shared CRM email, or the admin address (product
+	 * decision 2026-06-01, matching Fluent Support, where the mailbox is the sole
+	 * sender). Every reply in a mailbox therefore sends from the channel's
+	 * address regardless of which agent replied.
 	 *
-	 *   1. The given agent's personal connected email (Settings → Mailbox →
-	 *      personal `doublescale_user_email_account`), when they have one enabled.
-	 *   2. The team's shared email (`email_inbound.from_email`).
-	 *   3. The WordPress admin email.
+	 * Returns NULL when the mailbox has no identity, or its bound connection was
+	 * deleted / has no From address. {@see dispatch()} treats NULL as "skip the
+	 * send and log" — never as "fall back to someone else's address".
 	 *
-	 * The support mailbox is a routing/queue construct only — it no longer
-	 * contributes the From identity. This keeps one consistent sender across the
-	 * whole product and means an operator configures the sender ONCE (in the CRM
-	 * mailbox / SMTP settings) rather than per support channel.
-	 *
-	 * @param int|null $agent_user_id Replying agent (or ticket assignee for
-	 *                                system notices); NULL for a pure shared send.
-	 * @return array{from_address: string, from_name: string, reply_to: string}
+	 * @param TicketModel $ticket Ticket whose mailbox identity to resolve.
+	 * @return array{from_address: string, from_name: string, reply_to: string}|null
 	 */
-	private function sender_identity( ?int $agent_user_id ): array {
-		return EmailIdentityResolver::resolve( $agent_user_id );
+	private function sender_identity( TicketModel $ticket ): ?array {
+		$mailbox = $ticket->mailbox;
+		if ( ! $mailbox ) {
+			return null;
+		}
+
+		$data          = is_array( $mailbox->data ) ? $mailbox->data : array();
+		$identity      = isset( $data['identity'] ) && is_array( $data['identity'] ) ? $data['identity'] : array();
+		$connection_id = isset( $identity['connection_id'] ) ? (string) $identity['connection_id'] : '';
+		if ( '' === $connection_id || ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return null;
+		}
+
+		$resolved = \DoubleScale\Modules\Smtp\Settings::get_identity_for_connection( $connection_id );
+		if ( null === $resolved ) {
+			return null;
+		}
+
+		$from_name = '' !== $resolved['from_name'] ? $resolved['from_name'] : get_bloginfo( 'name' );
+
+		return array(
+			'from_address' => $resolved['from_email'],
+			'from_name'    => $from_name,
+			'reply_to'     => $resolved['from_email'],
+		);
 	}
 
 	// ---------------------------------------------------------------------
@@ -289,22 +331,6 @@ final class EmailNotifications {
 			return (bool) $toggles[ $key ];
 		}
 		return self::NOTIFICATION_DEFAULTS[ $key ] ?? false;
-	}
-
-	/**
-	 * The ticket's assigned agent WP user id, or NULL when unassigned.
-	 *
-	 * Used as the sender identity for system notices (ticket created, status
-	 * change) that aren't authored by a specific agent — the assignee is the
-	 * closest "human" to send as. {@see EmailIdentityResolver} degrades to the
-	 * shared/admin identity when this is NULL.
-	 *
-	 * @param TicketModel $ticket Ticket.
-	 * @return int|null
-	 */
-	private function assignee_user_id( TicketModel $ticket ): ?int {
-		$agent_id = (int) $ticket->agent_user_id;
-		return $agent_id > 0 ? $agent_id : null;
 	}
 
 	/**

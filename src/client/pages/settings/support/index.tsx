@@ -41,6 +41,10 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 
+interface MailboxIdentity {
+	connection_id?: string;
+}
+
 interface Mailbox {
 	id: number;
 	slug: string;
@@ -48,6 +52,20 @@ interface Mailbox {
 	box_type: 'web' | 'email';
 	is_default: boolean;
 	name: string;
+	// The mailbox's chosen sending identity, stored inside the `data` blob.
+	// `connection_id` references an SMTP connection (see available_identities).
+	identity?: MailboxIdentity;
+}
+
+// A sending identity the current user may bind — an SMTP connection surfaced
+// by the list endpoint's `meta.available_identities` (capability-scoped server
+// side: managers see all, others only their own personal connection).
+interface AvailableIdentity {
+	connection_id: string;
+	name: string;
+	from_email: string;
+	from_name: string;
+	is_personal: boolean;
 }
 
 interface NoticeState {
@@ -94,6 +112,9 @@ const NOTIFICATION_DEFAULTS: Record<string, boolean> = {
 
 const MailboxesPanel: React.FC = () => {
 	const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
+	const [availableIdentities, setAvailableIdentities] = useState<
+		AvailableIdentity[]
+	>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [notice, setNotice] = useState<NoticeState | null>(null);
 	const [editing, setEditing] = useState<Partial<Mailbox> | null>(null);
@@ -104,7 +125,26 @@ const MailboxesPanel: React.FC = () => {
 			const res: any = await apiFetch({
 				path: '/doublescale/v1/support/mailboxes?per_page=100',
 			});
-			setMailboxes(Array.isArray(res?.data) ? res.data : []);
+			// Hoist the sending identity out of the `data` blob to the top level
+			// so the editor (which sets `editing` straight from a row) can read
+			// `editing.identity` without digging into `data`.
+			const rows: Mailbox[] = (Array.isArray(res?.data) ? res.data : []).map(
+				(mb: any) => ({
+					...mb,
+					identity:
+						mb?.data && typeof mb.data === 'object'
+							? mb.data.identity
+							: undefined,
+				})
+			);
+			setMailboxes(rows);
+			// Sending identities this user may bind, delivered alongside the
+			// list (capability-scoped on the server). Drives the picker below.
+			setAvailableIdentities(
+				Array.isArray(res?.meta?.available_identities)
+					? res.meta.available_identities
+					: []
+			);
 		} catch (err: any) {
 			setNotice({
 				type: 'error',
@@ -136,7 +176,20 @@ const MailboxesPanel: React.FC = () => {
 					email: editing.email,
 					box_type: editing.box_type || 'web',
 					is_default: !!editing.is_default,
-					data: { name: editing.name || '' },
+					data: {
+						name: editing.name || '',
+						// Persist the chosen sending identity inside `data`. Omit
+						// the key entirely when none is selected (mailbox then has
+						// no identity → outbound skip-sends + logs server-side).
+						...(editing.identity?.connection_id
+							? {
+									identity: {
+										connection_id:
+											editing.identity.connection_id,
+									},
+								}
+							: {}),
+					},
 				},
 			});
 			setNotice({
@@ -270,6 +323,83 @@ const MailboxesPanel: React.FC = () => {
 							</div>
 						</div>
 
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label className="text-sm font-medium">
+									{__('Support channel', 'doublescale')}
+								</Label>
+								{/*
+								 * Free shows a single, visible "Web" channel (portal /
+								 * form intake). The Email (IMAP) channel is added by
+								 * Pro through the filter slot below — absent in Free,
+								 * matching Fluent Support's free/pro tiering.
+								 */}
+								<div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-gray-700">
+									{__('Web — portal / form', 'doublescale')}
+								</div>
+							</div>
+							<div className="space-y-2">
+								<Label className="text-sm font-medium">
+									{__('Sender identity', 'doublescale')}
+								</Label>
+								{availableIdentities.length > 0 ? (
+									<select
+										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+										value={
+											editing.identity?.connection_id || ''
+										}
+										onChange={(e) =>
+											setEditing((prev) => ({
+												...prev,
+												identity: e.target.value
+													? {
+															connection_id:
+																e.target.value,
+														}
+													: undefined,
+											}))
+										}
+									>
+										<option value="">
+											{__(
+												'Select a sending identity…',
+												'doublescale'
+											)}
+										</option>
+										{availableIdentities.map((idn) => (
+											<option
+												key={idn.connection_id}
+												value={idn.connection_id}
+											>
+												{idn.from_name
+													? `${idn.from_name} <${idn.from_email}>`
+													: idn.from_email}
+												{idn.is_personal
+													? __(
+															' (personal)',
+															'doublescale'
+														)
+													: ''}
+											</option>
+										))}
+									</select>
+								) : (
+									<div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+										{__(
+											'No sending identity available. Connect an email in SMTP settings, or ask an administrator.',
+											'doublescale'
+										)}
+									</div>
+								)}
+								<p className="text-xs text-gray-500">
+									{__(
+										'Outgoing replies for this mailbox are sent from this address. Required to email customers.',
+										'doublescale'
+									)}
+								</p>
+							</div>
+						</div>
+
 						<div className="flex items-center gap-3">
 							<Switch
 								checked={!!editing.is_default}
@@ -293,11 +423,20 @@ const MailboxesPanel: React.FC = () => {
 							 * Email-channel (IMAP intake) slot. Free renders the
 							 * upsell; Pro's support-pro bundle replaces it via
 							 * `addFilter('doublescale_support_mailbox_email_channel', …)`
-							 * with the real box_type toggle + connection picker.
-							 * The default value below is what shows when Pro is
-							 * absent, so Free standalone is unchanged. `editing` /
-							 * `setEditing` let the Pro component read & mutate the
-							 * mailbox row currently being edited.
+							 * with the real box_type toggle. The default value below
+							 * is what shows when Pro is absent, so Free standalone is
+							 * unchanged.
+							 *
+							 * Context passed to Pro:
+							 *  - `editing` / `setEditing` — read & mutate the mailbox
+							 *    row currently being edited.
+							 *  - `availableIdentities` — the same capability-scoped
+							 *    connection list that backs the Sender-identity picker
+							 *    above. Pro's Email channel MIRRORS that chosen
+							 *    identity for inbound (one connection = From + inbox,
+							 *    like the global Mailbox tab), so it needs the list to
+							 *    resolve the selected `connection_id` → display email
+							 *    for its "Receiving via …" confirmation.
 							 */
 							applyFilters(
 								'doublescale_support_mailbox_email_channel',
@@ -307,11 +446,11 @@ const MailboxesPanel: React.FC = () => {
 										'doublescale'
 									)}
 									description={__(
-										'Turn a mailbox into an email channel so tickets are created from incoming email via IMAP polling. Reuses your SMTP Gmail/Outlook connection. Available in DoubleScale Pro.',
+										'Turn a mailbox into an email channel so tickets are created from incoming email via IMAP polling. Reuses the Sender-identity SMTP connection for both sending and receiving. Available in DoubleScale Pro.',
 										'doublescale'
 									)}
 								/>,
-								{ editing, setEditing }
+								{ editing, setEditing, availableIdentities }
 							) as React.ReactNode
 						}
 
@@ -327,6 +466,10 @@ const MailboxesPanel: React.FC = () => {
 								variant="gradient"
 								className="rounded-lg min-w-[120px]"
 								onClick={handleSave}
+								disabled={
+									availableIdentities.length > 0 &&
+									!editing.identity?.connection_id
+								}
 							>
 								{__('Save', 'doublescale')}
 							</Button>

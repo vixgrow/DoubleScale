@@ -199,14 +199,34 @@ class RestMailboxController extends RestController {
 			array(
 				'data' => $data,
 				'meta' => array(
-					'total'        => $paginator->total(),
-					'per_page'     => $per_page,
-					'current_page' => $page,
-					'last_page'    => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
+					'total'                => $paginator->total(),
+					'per_page'             => $per_page,
+					'current_page'         => $page,
+					'last_page'            => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
+					// Sending identities the *current* user may bind to a mailbox
+					// (capability-scoped). Sent alongside the list so the editor's
+					// "Sender identity" picker needs no extra request. The same
+					// scoping is re-applied on save (see validate()), so this is
+					// the convenience half of a two-sided check.
+					'available_identities' => $this->visible_identities_for_current_user(),
 				),
 			),
 			200
 		);
+	}
+
+	/**
+	 * The SMTP connections the current user may pick as a mailbox sending
+	 * identity. Thin wrapper over the SMTP module's single source of truth so
+	 * the picker list and the save-time validation can't drift apart.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function visible_identities_for_current_user(): array {
+		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return array();
+		}
+		return \DoubleScale\Modules\Smtp\Settings::get_visible_connections_for_user( get_current_user_id() );
 	}
 
 	/**
@@ -423,6 +443,60 @@ class RestMailboxController extends RestController {
 
 		if ( isset( $params['data'] ) && ! is_array( $params['data'] ) ) {
 			return new WP_Error( 'invalid_data', __( 'The data field must be an object.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$identity_error = $this->validate_identity( $params );
+		if ( is_wp_error( $identity_error ) ) {
+			return $identity_error;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Enforce that a submitted sending-identity `connection_id` is one the
+	 * current user is actually allowed to bind.
+	 *
+	 * This is the *enforcement* half of the picker (the list endpoint only
+	 * *offers* visible connections). Without this server-side check a Sales Rep
+	 * could POST an arbitrary `data.identity.connection_id` — e.g. a colleague's
+	 * personal address or an org address — and route a mailbox to send *as* an
+	 * identity they aren't entitled to. We re-derive the allowed set from the
+	 * same SMTP source the picker uses and reject anything outside it.
+	 *
+	 * An empty / absent identity is allowed (a mailbox may have no identity yet;
+	 * outbound then skip-sends + logs — see EmailNotifications).
+	 *
+	 * @param array $params Request body.
+	 * @return true|WP_Error
+	 */
+	private function validate_identity( array $params ) {
+		if ( ! isset( $params['data'] ) || ! is_array( $params['data'] ) ) {
+			return true;
+		}
+		$identity = $params['data']['identity'] ?? null;
+		if ( empty( $identity ) || ! is_array( $identity ) ) {
+			return true; // No identity submitted — allowed (skip-send until set).
+		}
+
+		$connection_id = isset( $identity['connection_id'] ) ? (string) $identity['connection_id'] : '';
+		if ( '' === $connection_id ) {
+			return true; // Explicitly cleared — allowed.
+		}
+
+		$allowed_ids = array();
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			foreach ( \DoubleScale\Modules\Smtp\Settings::get_visible_connections_for_user( get_current_user_id() ) as $conn ) {
+				$allowed_ids[] = (string) $conn['connection_id'];
+			}
+		}
+
+		if ( ! in_array( $connection_id, $allowed_ids, true ) ) {
+			return new WP_Error(
+				'identity_not_allowed',
+				__( 'You are not allowed to use the selected sending identity for this mailbox.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		return true;

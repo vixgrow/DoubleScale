@@ -217,12 +217,27 @@ final class Module extends AbstractModule {
 		}
 
 		try {
+			$data = array( 'name' => __( 'General', 'doublescale' ) );
+
+			// Bind the seeded mailbox to the org's default SMTP connection when
+			// one exists, so a fresh install that already has SMTP configured can
+			// email customers out of the box. With no connection yet, leave the
+			// identity unset — support replies then skip-send + log until an admin
+			// binds one in Settings → Support → Mailboxes (the seeder must not
+			// fabricate an identity that can't actually send). See EmailNotifications.
+			if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+				$default_connection_id = \DoubleScale\Modules\Smtp\Settings::get_default_connection();
+				if ( ! empty( $default_connection_id ) ) {
+					$data['identity'] = array( 'connection_id' => (string) $default_connection_id );
+				}
+			}
+
 			$mailbox             = new MailboxModel();
 			$mailbox->slug       = 'general';
 			$mailbox->email      = (string) get_option( 'admin_email' );
 			$mailbox->box_type   = 'web';
 			$mailbox->is_default = true;
-			$mailbox->data       = array( 'name' => __( 'General', 'doublescale' ) );
+			$mailbox->data       = $data;
 			$mailbox->save();
 
 			update_option( 'doublescale_support_default_mailbox_seeded', true );

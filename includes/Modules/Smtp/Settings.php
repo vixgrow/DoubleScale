@@ -362,6 +362,106 @@ class Settings {
 	}
 
 	/**
+	 * List the SMTP connections a given user may bind as a sending identity.
+	 *
+	 * Used by the Support mailbox "Sender identity" picker. Every CRM sending
+	 * identity — the shared/team email and each user's personal connected email
+	 * — is stored as an SMTP connection; a personal connection carries the owning
+	 * `user_id`, an org/shared connection does not (`0`/absent). The visibility
+	 * rule:
+	 *
+	 *   - CRM Manager / Administrator → every connection (org-shared + everyone's
+	 *     personal). They configure the whole CRM, so any identity is bindable.
+	 *   - Everyone else (Sales Manager / Sales Rep) → only connections they own
+	 *     (`connection['user_id'] === $user_id`). A rep can route a mailbox only
+	 *     through their *own* address, never an org address or a colleague's.
+	 *
+	 * This is the single source of truth for both the picker list and the
+	 * save-time validation in {@see RestMailboxController}, so the two can never
+	 * disagree (a user can only persist a connection_id this method would show
+	 * them).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $user_id WP user whose visibility to compute.
+	 * @return array<int, array{connection_id:string, name:string, from_email:string, from_name:string, is_personal:bool}>
+	 *               Zero-indexed list of bindable connections (id + display fields).
+	 */
+	public static function get_visible_connections_for_user( $user_id ) {
+		$user_id     = (int) $user_id;
+		$connections = self::get( 'connections', array() );
+		if ( ! is_array( $connections ) || empty( $connections ) ) {
+			return array();
+		}
+
+		$is_manager = \DoubleScale\Core\UserRoles\Permissions::has_crm_manager_access( $user_id );
+
+		$out = array();
+		foreach ( $connections as $connection_id => $connection ) {
+			if ( ! is_array( $connection ) ) {
+				continue;
+			}
+
+			$owner_id    = (int) ( $connection['user_id'] ?? 0 );
+			$is_personal = $owner_id > 0;
+
+			// Non-managers only see connections they personally own.
+			if ( ! $is_manager && $owner_id !== $user_id ) {
+				continue;
+			}
+
+			$from_email = trim( (string) ( $connection['from_email'] ?? '' ) );
+			if ( '' === $from_email ) {
+				continue; // A connection with no From address can't be a sending identity.
+			}
+
+			$out[] = array(
+				'connection_id' => (string) $connection_id,
+				'name'          => (string) ( $connection['name'] ?? $connection['connection_name'] ?? $from_email ),
+				'from_email'    => $from_email,
+				'from_name'     => (string) ( $connection['from_name'] ?? '' ),
+				'is_personal'   => $is_personal,
+			);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Resolve a connection id to its sending-identity fields, regardless of who
+	 * is asking (no capability filter — this is the *send-time* lookup, where the
+	 * mailbox already holds a validated connection_id).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $connection_id Connection id stored on the mailbox.
+	 * @return array{from_email:string, from_name:string}|null Identity, or null
+	 *               when the id no longer maps to a connection with a From address.
+	 */
+	public static function get_identity_for_connection( $connection_id ) {
+		$connection_id = (string) $connection_id;
+		if ( '' === $connection_id ) {
+			return null;
+		}
+
+		$connections = self::get( 'connections', array() );
+		if ( ! is_array( $connections ) || ! isset( $connections[ $connection_id ] ) || ! is_array( $connections[ $connection_id ] ) ) {
+			return null;
+		}
+
+		$connection = $connections[ $connection_id ];
+		$from_email = trim( (string) ( $connection['from_email'] ?? '' ) );
+		if ( '' === $from_email ) {
+			return null;
+		}
+
+		return array(
+			'from_email' => $from_email,
+			'from_name'  => (string) ( $connection['from_name'] ?? '' ),
+		);
+	}
+
+	/**
 	 * Whether the current user may access built-in SMTP REST routes (settings, logs, tests).
 	 *
 	 * @return bool

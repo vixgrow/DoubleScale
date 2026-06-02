@@ -4,7 +4,7 @@ Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,7 @@ Underneath every module is one workflow builder. **11+ trigger types** — form 
 
 = Key capabilities =
 
+* **AI-powered writing and assistance** — Connect your own API key from OpenAI, Google Gemini, Groq, OpenRouter, or any OpenAI-compatible provider. AI-assisted email composition, smart template generation, subject line suggestions, and content rewriting are built right into the campaign builder and email editor. Bring your own key, pick your provider, and keep full control over cost and data.
 * One contact record shared across every module — campaigns, bookings, tasks, helpdesk threads, and deals all attach to the same contact.
 * Unlimited contacts and custom fields with no per-contact or per-seat fees.
 * Self-hosted: all records live in your own WordPress database; no third-party cloud, no vendor lock-in.

@@ -187,6 +187,29 @@ const MailboxesPanel: React.FC = () => {
 	const [notice, setNotice] = useState<NoticeState | null>(null);
 	const [editing, setEditing] = useState<Partial<Mailbox> | null>(null);
 
+	// Support-channel options for the selector. Both choices always render
+	// (Fluent-style upsell). "Web Based" = portal/form only (always enabled). The
+	// second option is ADDITIVE — "Web and Email Based" keeps the web portal AND
+	// adds email intake on top (box_type='email' is "web + email", never
+	// email-only). Free ships it disabled; Pro flips it to enabled via this filter
+	// (see support-pro registration). So a Free user SEES the email channel exists
+	// but can't select it until Pro.
+	const channelOptions = applyFilters(
+		'doublescale_support_mailbox_channel_options',
+		[
+			{
+				value: 'web',
+				label: __('Web Based', 'doublescale'),
+				disabled: false,
+			},
+			{
+				value: 'email',
+				label: __('Web and Email Based (MailBox) — Pro', 'doublescale'),
+				disabled: true,
+			},
+		]
+	) as Array<{ value: string; label: string; disabled?: boolean }>;
+
 	const fetchMailboxes = useCallback(async () => {
 		setIsLoading(true);
 		try {
@@ -400,14 +423,36 @@ const MailboxesPanel: React.FC = () => {
 									{__('Support channel', 'doublescale')}
 								</Label>
 								{/*
-								 * Free shows a single, visible "Web" channel (portal /
-								 * form intake). The Email (IMAP) channel is added by
-								 * Pro through the filter slot below — absent in Free,
-								 * matching Fluent Support's free/pro tiering.
+								 * Real channel selector driven by `box_type`. Free
+								 * always offers "Web" (portal / form intake, no
+								 * credentials). Pro appends the "Email" option via
+								 * the `doublescale_support_mailbox_channel_options`
+								 * filter (see channelOptions above) — absent in Free,
+								 * matching Fluent Support's free/pro tiering. The
+								 * inbound detail for the email channel renders in the
+								 * Pro slot below when `box_type === 'email'`.
 								 */}
-								<div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-gray-700">
-									{__('Web — portal / form', 'doublescale')}
-								</div>
+								<select
+									className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+									value={editing.box_type || 'web'}
+									onChange={(e) =>
+										setEditing((prev) => ({
+											...prev,
+											box_type: e.target
+												.value as Mailbox['box_type'],
+										}))
+									}
+								>
+									{channelOptions.map((opt) => (
+										<option
+											key={opt.value}
+											value={opt.value}
+											disabled={opt.disabled}
+										>
+											{opt.label}
+										</option>
+									))}
+								</select>
 							</div>
 							<div className="space-y-2">
 								<Label className="text-sm font-medium">
@@ -492,12 +537,14 @@ const MailboxesPanel: React.FC = () => {
 
 						{
 							/*
-							 * Email-channel (IMAP intake) slot. Free renders the
-							 * upsell; Pro's support-pro bundle replaces it via
-							 * `addFilter('doublescale_support_mailbox_email_channel', …)`
-							 * with the real box_type toggle. The default value below
-							 * is what shows when Pro is absent, so Free standalone is
-							 * unchanged.
+							 * Email-channel inbound-detail slot. The channel *type*
+							 * is now chosen in the "Support channel" select above
+							 * (box_type). This slot only renders the inbound detail
+							 * for the email channel: Pro replaces the default below
+							 * via `addFilter('doublescale_support_mailbox_email_channel', …)`
+							 * with the "Receiving via …" confirmation (shown when
+							 * box_type === 'email'). When Pro is absent the user can't
+							 * pick Email at all, so the default is a soft upsell.
 							 *
 							 * Context passed to Pro:
 							 *  - `editing` / `setEditing` — read & mutate the mailbox

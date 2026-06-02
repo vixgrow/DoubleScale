@@ -35,7 +35,10 @@ class SupportTicketsTable extends Migration {
 	 * - `hash`           — 32-char public identifier for portal URLs; UNIQUE.
 	 * - `contact_id`     — FK to `doublescale_contacts` (the customer).
 	 * - `agent_user_id`  — FK to `wp_users.ID` (the assigned agent). No agent persons table.
-	 * - `mailbox_id`     — FK to `doublescale_support_mailboxes`. NULL = direct ticket (no channel).
+	 * - `mailbox_id`     — FK to `doublescale_support_mailboxes`. NOT NULL: every ticket
+	 *                      belongs to a mailbox. The seeder guarantees a default mailbox
+	 *                      exists, and `TicketService::resolve_mailbox_id()` falls back to
+	 *                      it when a create omits one, so there is no "no channel" state.
 	 * - `message_id`     — Email Message-ID of the thread root; indexed for inbound matching.
 	 * - `content_hash`   — MD5 of the opening message body; used for inbound dedupe.
 	 * - `response_count` — Denormalized counter maintained by ActivityModel::created event.
@@ -58,7 +61,7 @@ class SupportTicketsTable extends Migration {
 			title VARCHAR(255) NOT NULL,
 			status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'open|pending|resolved|closed',
 			priority VARCHAR(20) NOT NULL DEFAULT 'normal' COMMENT 'low|normal|high|urgent',
-			mailbox_id BIGINT(20) UNSIGNED NULL COMMENT 'FK to doublescale_support_mailboxes',
+			mailbox_id BIGINT(20) UNSIGNED NOT NULL COMMENT 'FK to doublescale_support_mailboxes (required; defaults to the default mailbox)',
 			contact_id BIGINT(20) UNSIGNED NOT NULL COMMENT 'FK to doublescale_contacts (customer)',
 			agent_user_id BIGINT(20) UNSIGNED NULL COMMENT 'FK to wp_users.ID (assigned agent)',
 			product VARCHAR(100) NULL COMMENT 'Free-text product label',

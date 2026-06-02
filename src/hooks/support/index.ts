@@ -97,7 +97,10 @@ export const useTickets = (filters: TicketFilters = {}) => {
 	const refetch = useCallback(() => {
 		setLoading(true);
 		setError(null);
-		const url = addQueryArgs(`${NAMESPACE}/tickets`, filters as Record<string, unknown>);
+		const url = addQueryArgs(
+			`${NAMESPACE}/tickets`,
+			filters as Record<string, unknown>
+		);
 		apiFetch<PaginatedResponse<Ticket>>({ path: url })
 			.then((response) => {
 				setData(response);
@@ -108,9 +111,9 @@ export const useTickets = (filters: TicketFilters = {}) => {
 			.finally(() => {
 				setLoading(false);
 			});
-	// filterKey is the serialized form of filters; including the object directly
-	// would cause infinite re-renders since callers usually pass a new instance.
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// filterKey is the serialized form of filters; including the object directly
+		// would cause infinite re-renders since callers usually pass a new instance.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [filterKey]);
 
 	useEffect(() => {
@@ -163,9 +166,8 @@ export const useConversation = (
 	ticketId: number | null,
 	kinds?: Array<'reply' | 'note' | 'event'>
 ) => {
-	const [data, setData] = useState<PaginatedResponse<ConversationItem> | null>(
-		null
-	);
+	const [data, setData] =
+		useState<PaginatedResponse<ConversationItem> | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const kindsKey = kinds ? kinds.join(',') : '';
@@ -178,10 +180,13 @@ export const useConversation = (
 		}
 		setLoading(true);
 		setError(null);
-		const url = addQueryArgs(`${NAMESPACE}/tickets/${ticketId}/conversation`, {
-			per_page: 100,
-			kinds: kindsKey || undefined,
-		});
+		const url = addQueryArgs(
+			`${NAMESPACE}/tickets/${ticketId}/conversation`,
+			{
+				per_page: 100,
+				kinds: kindsKey || undefined,
+			}
+		);
 		apiFetch<PaginatedResponse<ConversationItem>>({ path: url })
 			.then((response) => {
 				setData(response);
@@ -217,6 +222,47 @@ export const useMailboxes = () => {
 		})
 			.then((response) => {
 				setData(response.data);
+			})
+			.catch((err) => {
+				setError(formatRestError(err));
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, []);
+
+	return { data, loading, error };
+};
+
+/**
+ * A CRM user who can be assigned a ticket. Shape matches the flat array returned
+ * by `/doublescale/v1/user-management/users` (the same source the Team page uses)
+ * — NOT the support NAMESPACE, and NOT paginated.
+ */
+export interface AssignableAgent {
+	id: number;
+	name: string;
+	email: string;
+	role?: string;
+	crm_role?: string;
+}
+
+/**
+ * Fetch the CRM users that can be assigned as a ticket's agent. Read once and
+ * cached in component state; the list is small (managers + reps).
+ */
+export const useAgents = () => {
+	const [data, setData] = useState<AssignableAgent[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		setLoading(true);
+		apiFetch<AssignableAgent[]>({
+			path: '/doublescale/v1/user-management/users?per_page=100',
+		})
+			.then((response) => {
+				setData(Array.isArray(response) ? response : []);
 			})
 			.catch((err) => {
 				setError(formatRestError(err));

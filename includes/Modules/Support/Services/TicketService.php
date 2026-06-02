@@ -107,11 +107,24 @@ class TicketService {
 			return $contact;
 		}
 
+		// Mailbox is mandatory (NOT NULL). resolve_mailbox_id() falls back to the
+		// default mailbox, so 0 only happens if the install has no mailboxes at all
+		// (the seeder should prevent this) — surface that as a clear error rather
+		// than writing an invalid 0 FK.
+		$mailbox_id = $this->resolve_mailbox_id( $data );
+		if ( 0 === $mailbox_id ) {
+			return new WP_Error(
+				'no_mailbox_available',
+				__( 'No support mailbox is configured. Create a mailbox in Settings → Support before opening tickets.', 'doublescale' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$ticket_attrs = array(
 			'title'         => $this->sanitize_title( $data['title'] ),
 			'status'        => $this->normalize_status( $data['status'] ?? TicketStatus::OPEN ),
 			'priority'      => $this->normalize_priority( $data['priority'] ?? TicketPriority::NORMAL ),
-			'mailbox_id'    => $this->resolve_mailbox_id( $data ),
+			'mailbox_id'    => $mailbox_id,
 			'contact_id'    => $contact->id,
 			'agent_user_id' => isset( $data['agent_user_id'] ) ? (int) $data['agent_user_id'] : null,
 			'product'       => isset( $data['product'] ) ? $this->sanitize_short_string( $data['product'] ) : null,
@@ -510,39 +523,42 @@ class TicketService {
 	}
 
 	/**
-	 * Decide the ticket's mailbox.
+	 * Decide the ticket's mailbox. Every ticket belongs to a mailbox (the column
+	 * is NOT NULL), so this never returns a "no channel" value.
 	 *
 	 * Precedence:
 	 *   1. An explicit `mailbox_id` from the caller always wins (agent picked a
 	 *      channel, or the IMAP/portal path resolved one).
-	 *   2. No explicit mailbox AND exactly one mailbox exists on the install →
-	 *      auto-route to it. On a single-mailbox site "which channel?" has only
-	 *      one answer, so leaving the ticket channel-less just loses the inbox
-	 *      mailbox filter and the outbound From-identity for no benefit. This
-	 *      mirrors the portal's own UX, which hides the mailbox picker entirely
-	 *      when `mailboxes.length <= 1` (src/renderer/support/views/new-ticket-modal.tsx).
-	 *   3. No explicit mailbox AND zero-or-multiple mailboxes → NULL ("direct
-	 *      ticket, no channel"). With multiple mailboxes auto-picking one would
-	 *      be a guess that could attribute the ticket (and its customer emails)
-	 *      to the wrong team, so we keep the explicit-NULL semantics there.
+	 *   2. Otherwise fall back to the default mailbox ({@see MailboxModel::get_default()}),
+	 *      then to the first mailbox if no default flag is set. The seeder
+	 *      guarantees a default mailbox exists, so this branch resolves on any
+	 *      normal install — a create that omits `mailbox_id` still lands in the
+	 *      default channel rather than being channel-less.
+	 *   3. `0` only if the install somehow has zero mailboxes (seeder failed). The
+	 *      caller turns that into a clear error instead of writing a 0 FK.
 	 *
 	 * @param array<string, mixed> $data Create payload.
-	 * @return int|null Mailbox id, or null for a direct/no-channel ticket.
+	 * @return int Mailbox id, or 0 when no mailbox exists at all.
 	 */
-	private function resolve_mailbox_id( array $data ): ?int {
+	private function resolve_mailbox_id( array $data ): int {
 		if ( isset( $data['mailbox_id'] ) ) {
 			return (int) $data['mailbox_id'];
 		}
 
-		// Only auto-route when the install has exactly one mailbox — see (2) above.
-		if ( 1 === MailboxModel::count() ) {
-			$only = MailboxModel::first();
-			if ( $only ) {
-				return (int) $only->id;
-			}
+		$default = MailboxModel::get_default();
+		if ( $default ) {
+			return (int) $default->id;
 		}
 
-		return null;
+		// No default flagged — fall back to any mailbox so the ticket still has one.
+		$first = MailboxModel::first();
+		if ( $first ) {
+			return (int) $first->id;
+		}
+
+		// Zero mailboxes on the install (seeder failed). Signal "unresolvable" — the
+		// caller rejects rather than violating the NOT NULL / FK constraint.
+		return 0;
 	}
 
 	private function resolve_ticket( $ticket ) {

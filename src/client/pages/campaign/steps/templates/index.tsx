@@ -228,13 +228,14 @@ const Templates: React.FC = () => {
 						? JSON.stringify(rawBody)
 						: '{"type":"rich-text","value":""}';
 
-			const templateData: Partial<EmailTemplate> & {
-				campaign_id?: number;
-			} = {
-				...template,
-				body: bodyStr,
-				campaign_id: campaign?.id,
-			};
+		const templateData: Partial<EmailTemplate> & {
+			campaign_id?: number;
+		} = {
+			...template,
+			body: bodyStr,
+			campaign_id: campaign?.id,
+			hidden: true,
+		};
 
 			const savedTemplate = await saveTemplate(templateData);
 

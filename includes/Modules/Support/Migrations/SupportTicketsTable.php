@@ -46,8 +46,15 @@ class SupportTicketsTable extends Migration {
 	 * @return string
 	 */
 	public function get_query() {
+		// NOTE: No inline column COMMENT clauses. dbDelta() splits the column
+		// list on commas to parse each field; a COMMENT whose text contains a
+		// comma or semicolon (e.g. 'open|pending', 'Denormalized counter; ...')
+		// corrupts that tokenizer and the CREATE TABLE fails — yet dbDelta still
+		// reports "Created table", so MigrationRunner records the migration as
+		// done while the table never exists. Column semantics are documented in
+		// the class docblock above instead. See git history for the original bug.
 		return "id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-			hash VARCHAR(32) NOT NULL COMMENT 'Public identifier for portal URLs',
+			hash VARCHAR(32) NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'open|pending|resolved|closed',
 			priority VARCHAR(20) NOT NULL DEFAULT 'normal' COMMENT 'low|normal|high|urgent',

@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import { Plus, RefreshCw, Inbox as InboxEmptyIcon } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { Button } from '@/components/ui/button';
 import { useTickets, useMailboxes } from '@/hooks/support';
 import {
@@ -58,6 +59,7 @@ const SupportInbox: React.FC = () => {
 	const { data, loading, error, refetch } = useTickets(filters);
 	const { data: mailboxes } = useMailboxes();
 	const [showNewModal, setShowNewModal] = useState(false);
+	const canManageAllTickets = useCapabilities().canManageAllTickets();
 
 	const updateFilter = (patch: Partial<TicketFilters>) => {
 		setFilters((prev) => ({ ...prev, ...patch, page: 1 }));
@@ -85,22 +87,24 @@ const SupportInbox: React.FC = () => {
 						<RefreshCw />
 						{__('Refresh', 'doublescale')}
 					</Button>
-					<Button
-						size="sm"
-						onClick={() => setShowNewModal(true)}
-						disabled={hasNoMailboxes}
-						title={
-							hasNoMailboxes
-								? __(
-										'Create a mailbox before opening tickets.',
-										'doublescale'
-								  )
-								: undefined
-						}
-					>
-						<Plus />
-						{__('New ticket', 'doublescale')}
-					</Button>
+					{canManageAllTickets && (
+						<Button
+							size="sm"
+							onClick={() => setShowNewModal(true)}
+							disabled={hasNoMailboxes}
+							title={
+								hasNoMailboxes
+									? __(
+											'Create a mailbox before opening tickets.',
+											'doublescale'
+									  )
+									: undefined
+							}
+						>
+							<Plus />
+							{__('New ticket', 'doublescale')}
+						</Button>
+					)}
 				</div>
 			</div>
 
@@ -214,6 +218,7 @@ const SupportInbox: React.FC = () => {
 							<th className="px-4 py-2">{__('Title', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Customer', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Mailbox', 'doublescale')}</th>
+							<th className="px-4 py-2">{__('Assigned to', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Status', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Priority', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Replies', 'doublescale')}</th>
@@ -223,14 +228,14 @@ const SupportInbox: React.FC = () => {
 					<tbody>
 						{loading && (
 							<tr>
-								<td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+								<td colSpan={8} className="px-4 py-8 text-center text-gray-500">
 									{__('Loading tickets…', 'doublescale')}
 								</td>
 							</tr>
 						)}
 						{!loading && data?.data.length === 0 && (
 							<tr>
-								<td colSpan={7} className="px-4 py-16 text-center">
+								<td colSpan={8} className="px-4 py-16 text-center">
 									<div className="flex flex-col items-center gap-3">
 										<InboxEmptyIcon
 											width={48}
@@ -297,6 +302,13 @@ const SupportInbox: React.FC = () => {
 									</td>
 									<td className="px-4 py-3 text-gray-600">
 										{ticket.mailbox?.name || ticket.mailbox?.slug || '—'}
+									</td>
+									<td className="px-4 py-3 text-gray-700">
+										{ticket.agent?.display_name || (
+											<span className="text-gray-400">
+												{__('Unassigned', 'doublescale')}
+											</span>
+										)}
 									</td>
 									<td className="px-4 py-3">
 										<StatusPill status={ticket.status} />

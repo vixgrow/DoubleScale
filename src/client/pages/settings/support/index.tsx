@@ -559,10 +559,8 @@ const NotificationsPanel: React.FC = () => {
 	const [toggles, setToggles] = useState<Record<string, boolean>>(
 		NOTIFICATION_DEFAULTS
 	);
-	// Hold the full `support` settings object so saving notifications does not
-	// clobber sibling keys — the backend merges at the top level only
-	// (`array_replace`), so we read-modify-write the whole `support` blob.
-	const [supportBlob, setSupportBlob] = useState<Record<string, any>>({});
+	// The `/support/settings` endpoint merges notifications into the support
+	// blob server-side, so the panel only needs to hold the toggle map.
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const [notice, setNotice] = useState<NoticeState | null>(null);
@@ -570,15 +568,13 @@ const NotificationsPanel: React.FC = () => {
 	const fetchSettings = useCallback(async () => {
 		setIsLoading(true);
 		try {
+			// Dedicated, support-scoped endpoint (gated on `doublescale_view_support`)
+			// so every support role can read these toggles without touching the
+			// global `/settings` blob, which stays CRM-manager-only.
 			const res: any = await apiFetch({
-				path: '/doublescale/v1/settings',
+				path: '/doublescale/v1/support/settings',
 			});
-			const support =
-				res?.support && typeof res.support === 'object'
-					? res.support
-					: {};
-			setSupportBlob(support);
-			const stored = support?.notifications || {};
+			const stored = res?.notifications || {};
 			setToggles({ ...NOTIFICATION_DEFAULTS, ...stored });
 		} catch (err: any) {
 			setNotice({
@@ -601,9 +597,9 @@ const NotificationsPanel: React.FC = () => {
 		setNotice(null);
 		try {
 			await apiFetch({
-				path: '/doublescale/v1/settings',
+				path: '/doublescale/v1/support/settings',
 				method: 'POST',
-				data: { support: { ...supportBlob, notifications: toggles } },
+				data: { notifications: toggles },
 			});
 			setNotice({
 				type: 'success',

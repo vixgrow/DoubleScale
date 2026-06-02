@@ -53,6 +53,12 @@ import { useModulesConfigTick } from '@doublescale/hooks/use-module-enabled';
 interface SubMenuItem {
 	path: string;
 	label: string;
+	/**
+	 * Optional capability gate (OR-matched). When set, the item is hidden from
+	 * the sidebar unless the current user holds one of these capabilities.
+	 * Mirrors the route-level `requiredCapability` so the link and the page agree.
+	 */
+	requiredCapability?: string[];
 }
 
 interface NavigationItem {
@@ -369,16 +375,24 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					// Unlike `booking` (whose parent path only redirects), the
 					// `support` parent path IS the inbox, so the first child
 					// links back to it explicitly — the group reads Inbox /
-					// Settings. `support/settings` is capability-gated at the
-					// route, so agents without `doublescale_crm_manager` simply
-					// land on the inbox if they deep-link it.
+					// Settings. The Settings link carries its own capability
+					// gate (matching the `support/settings` route) so it's
+					// hidden from Sales Manager / Sales Rep instead of showing a
+					// link that lands on Access Denied.
 					navItem.subMenu = [
 						{ path: 'support', label: __('Inbox', 'doublescale') },
 						{
 							path: 'support/settings',
 							label: __('Settings', 'doublescale'),
+							requiredCapability: [
+								'doublescale_crm_manager',
+								'doublescale_support_manager',
+								'doublescale_support_agent',
+							],
 						},
-					];
+					].filter((sub) =>
+						hasRequiredCapability(sub.requiredCapability)
+					);
 				}
 
 				if (navItem.subMenu) {

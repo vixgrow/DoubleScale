@@ -110,7 +110,7 @@ class RestUserManagementController extends RestController {
 						'role' => array(
 							'required' => true,
 							'type'     => 'string',
-							'enum'     => array( UserRoles::CRM_MANAGER, UserRoles::SALES_MANAGER, UserRoles::SALES_REP, UserRoles::NONE ),
+							'enum'     => array_merge( UserRoles::get_assignable_role_slugs(), array( UserRoles::NONE ) ),
 						),
 					),
 				),
@@ -137,7 +137,7 @@ class RestUserManagementController extends RestController {
 							'type'     => 'array',
 							'items'    => array(
 								'type' => 'string',
-								'enum' => array( UserRoles::CRM_MANAGER, UserRoles::SALES_MANAGER, UserRoles::SALES_REP ),
+								'enum' => UserRoles::get_assignable_role_slugs(),
 							),
 						),
 					),
@@ -172,11 +172,7 @@ class RestUserManagementController extends RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_crm_users( $request ) {
-		$crm_roles = array(
-			UserRoles::CRM_MANAGER,
-			UserRoles::SALES_MANAGER,
-			UserRoles::SALES_REP,
-		);
+		$crm_roles = UserRoles::get_assignable_role_slugs();
 
 		$users = get_users(
 			array(
@@ -231,7 +227,7 @@ class RestUserManagementController extends RestController {
 		}
 
 		if ( $filter_crm_users ) {
-			$user_args['role__in'] = array( UserRoles::CRM_MANAGER, UserRoles::SALES_MANAGER, UserRoles::SALES_REP, UserRoles::ADMINISTRATOR );
+			$user_args['role__in'] = array_merge( UserRoles::get_assignable_role_slugs(), array( UserRoles::ADMINISTRATOR ) );
 		}
 
 		$users = get_users( $user_args );
@@ -301,11 +297,7 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_already_has_crm_role', 'User already has a CRM role.', array( 'status' => 400 ) );
 		}
 
-		$crm_roles = array(
-			UserRoles::CRM_MANAGER,
-			UserRoles::SALES_MANAGER,
-			UserRoles::SALES_REP,
-		);
+		$crm_roles = UserRoles::get_assignable_role_slugs();
 
 		// Add new CRM roles FIRST so listeners on doublescale_user_role_revoked
 		// don't observe a transient zero-roles state if any of the existing roles
@@ -361,11 +353,7 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		$crm_roles = array(
-			UserRoles::CRM_MANAGER,
-			UserRoles::SALES_MANAGER,
-			UserRoles::SALES_REP,
-		);
+		$crm_roles = UserRoles::get_assignable_role_slugs();
 
 		// Add the new CRM role FIRST so listeners on `doublescale_user_role_revoked`
 		// observing "user still has a booking-eligible role" don't see a transient
@@ -417,11 +405,7 @@ class RestUserManagementController extends RestController {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		$crm_roles = array(
-			UserRoles::CRM_MANAGER,
-			UserRoles::SALES_MANAGER,
-			UserRoles::SALES_REP,
-		);
+		$crm_roles = UserRoles::get_assignable_role_slugs();
 
 		foreach ( $crm_roles as $crm_role ) {
 			if ( in_array( $crm_role, $user->roles, true ) ) {

@@ -13,7 +13,7 @@ import { __ } from '@wordpress/i18n';
 import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { createTicket } from '@/hooks/support';
+import { createTicket, useAssignableAgents } from '@/hooks/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
 import type { Mailbox } from '@/types/support';
 
@@ -35,8 +35,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		defaultMailbox?.id ?? ''
 	);
 	const [priority, setPriority] = useState<TicketPriority>('normal');
+	const [agentUserId, setAgentUserId] = useState<number | ''>('');
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const { data: assignableAgents } = useAssignableAgents();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -57,6 +59,8 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 				content,
 				mailbox_id: mailboxId === '' ? undefined : Number(mailboxId),
 				priority,
+				agent_user_id:
+					agentUserId === '' ? undefined : Number(agentUserId),
 			});
 			onCreated(ticket.id);
 		} catch (err) {
@@ -213,6 +217,34 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 								))}
 							</select>
 						</div>
+					</div>
+
+					<div>
+						<label
+							htmlFor="ds-new-ticket-agent"
+							className="block text-sm font-medium text-gray-700 mb-1"
+						>
+							{__('Assign to', 'doublescale')}
+						</label>
+						<select
+							id="ds-new-ticket-agent"
+							className="w-full border rounded px-3 py-2 text-sm"
+							value={agentUserId}
+							onChange={(e) =>
+								setAgentUserId(
+									e.target.value === '' ? '' : Number(e.target.value)
+								)
+							}
+						>
+							<option value="">
+								{__('— Unassigned —', 'doublescale')}
+							</option>
+							{assignableAgents.map((agent) => (
+								<option key={agent.id} value={agent.id}>
+									{agent.display_name}
+								</option>
+							))}
+						</select>
 					</div>
 
 					<div>

@@ -37,6 +37,7 @@ defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Core\UserRoles\UserRoles;
 use DoubleScale\Modules\Support\Constants\TicketPriority;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
@@ -112,6 +113,19 @@ class RestTicketController extends RestController {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item_by_hash' ),
 				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+			)
+		);
+
+		// Assignable agents for the "Assign to" picker. Managers receive every
+		// support-capable user; agents/reps receive only themselves (they may
+		// only ever assign tickets to themselves).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/agents',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_assignable_agents' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 			)
 		);
 	}
@@ -219,6 +233,13 @@ class RestTicketController extends RestController {
 			}
 		}
 
+		// Ownership scope: users without `doublescale_manage_all_tickets`
+		// (Support Agents, Sales Reps) only ever see tickets assigned to them.
+		// This overrides any `agent_user_id` filter the client may have sent.
+		if ( ! Permissions::can_manage_all_tickets() ) {
+			$query->where( 'agent_user_id', get_current_user_id() );
+		}
+
 		$tag_id = $request->get_param( 'tag_id' );
 		if ( null !== $tag_id && '' !== $tag_id ) {
 			$query->withTag( (int) $tag_id );
@@ -283,6 +304,11 @@ class RestTicketController extends RestController {
 			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
+		$forbidden = $this->require_ticket_ownership( $ticket );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
 		return new WP_REST_Response( $this->shape_ticket( $ticket, true ), 200 );
 	}
 
@@ -307,6 +333,59 @@ class RestTicketController extends RestController {
 		}
 
 		return new WP_REST_Response( $this->shape_ticket( $ticket, true ), 200 );
+	}
+
+	/**
+	 * List the agents the current user may assign a ticket to.
+	 *
+	 * Managers (`doublescale_manage_all_tickets`) get every support-capable
+	 * user — anyone who can be assigned and work tickets. Non-managers
+	 * (Support Agents, Sales Reps) get a single-entry list: themselves. This
+	 * mirrors the server-side assignment guard in {@see update_item()} so the
+	 * UI can only ever offer choices the API would actually accept.
+	 *
+	 * @param WP_REST_Request $request Unused — present for the framework contract. // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_assignable_agents( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		if ( ! Permissions::can_manage_all_tickets() ) {
+			$self = wp_get_current_user();
+			return new WP_REST_Response( array( $this->shape_agent( $self ) ), 200 );
+		}
+
+		// Every support-capable role: Administrators plus the DoubleScale roles
+		// (CRM Manager, Sales Manager, Sales Rep, Support Manager, Support
+		// Agent). We query by role rather than capability because WP_User_Query
+		// has no capability filter, then keep only users who actually hold
+		// `doublescale_view_support` (covers custom role tweaks / multiple roles
+		// cleanly). Administrators are included explicitly because the role slug
+		// list omits them, but they're granted every support cap on activation.
+		$roles = array_merge(
+			array( UserRoles::ADMINISTRATOR ),
+			UserRoles::get_assignable_role_slugs()
+		);
+
+		$users = get_users(
+			array(
+				'role__in' => $roles,
+				'orderby'  => 'display_name',
+				'order'    => 'ASC',
+			)
+		);
+
+		$agents = array();
+		foreach ( $users as $user ) {
+			if ( Permissions::has_support_access( $user->ID ) ) {
+				$agents[] = $this->shape_agent( $user );
+			}
+		}
+
+		return new WP_REST_Response( $agents, 200 );
 	}
 
 	/**
@@ -347,12 +426,38 @@ class RestTicketController extends RestController {
 		}
 
 		$id     = (int) $request->get_param( 'id' );
+		$ticket = TicketModel::find( $id );
+		if ( ! $ticket ) {
+			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$forbidden = $this->require_ticket_ownership( $ticket );
+		if ( $forbidden ) {
+			return $forbidden;
+		}
+
 		$params = $request->get_json_params();
 		if ( ! is_array( $params ) ) {
 			$params = $request->get_params();
 		}
 		// Drop URL-only parameters so they're not treated as updates.
 		unset( $params['id'] );
+
+		// Assignment rules:
+		//  - Managers (`doublescale_manage_all_tickets`) may assign to anyone.
+		//  - Non-managers (Support Agents, Sales Reps) may only assign to
+		//    themselves; any attempt to assign someone else is rejected so the
+		//    UI and API agree. Sending their own id (or omitting the field) is
+		//    fine and passes through unchanged.
+		if ( ! Permissions::can_manage_all_tickets() && array_key_exists( 'agent_user_id', $params ) ) {
+			if ( (int) $params['agent_user_id'] !== (int) get_current_user_id() ) {
+				return new WP_Error(
+					'not_allowed',
+					__( 'You can only assign tickets to yourself.', 'doublescale' ),
+					array( 'status' => 403 )
+				);
+			}
+		}
 
 		$result = $this->service()->update_ticket( $id, (array) $params );
 		if ( is_wp_error( $result ) ) {
@@ -374,6 +479,16 @@ class RestTicketController extends RestController {
 		$disabled = $this->require_module( 'support' );
 		if ( $disabled ) {
 			return $disabled;
+		}
+
+		// Only Support Managers / Sales Managers / CRM Managers / Admins can
+		// delete tickets. Agents are limited to reply / status changes.
+		if ( ! Permissions::can_manage_all_tickets() ) {
+			return new WP_Error(
+				'not_allowed',
+				__( 'Only Support Managers can delete tickets.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		$id     = (int) $request->get_param( 'id' );
@@ -398,7 +513,7 @@ class RestTicketController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_access();
 	}
 
 	/**
@@ -406,15 +521,26 @@ class RestTicketController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_access();
 	}
 
 	/**
+	 * Ticket creation is a manager-only action: assigning an `agent_user_id`
+	 * to a new ticket is part of the create payload, so we don't let agents
+	 * create unassigned tickets and avoid sales reps spinning up support work.
+	 *
 	 * @param WP_REST_Request $request Unused — see {@see get_items_permissions_check()}.
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		if ( Permissions::can_manage_all_tickets() ) {
+			return true;
+		}
+		return new WP_Error(
+			'not_allowed',
+			__( 'Only Support Managers can create tickets.', 'doublescale' ),
+			array( 'status' => 403 )
+		);
 	}
 
 	/**
@@ -422,7 +548,7 @@ class RestTicketController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_access();
 	}
 
 	/**
@@ -430,7 +556,7 @@ class RestTicketController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_access();
 	}
 
 	// ---------------------------------------------------------------------
@@ -511,15 +637,56 @@ class RestTicketController extends RestController {
 	}
 
 	/**
-	 * Baseline access guard. Future: gate by `support_agent` cap once UserRoles
-	 * adds the role; for now sales-rep parity matches the other CRM controllers.
+	 * Shape a WP_User into the agent summary used by the "Assign to" picker.
+	 * Matches the `agent` shape emitted by {@see shape_ticket()} so the client
+	 * can reuse the same `AgentSummary` type.
+	 *
+	 * @param \WP_User $user User to shape.
+	 * @return array
+	 */
+	private function shape_agent( \WP_User $user ): array {
+		return array(
+			'id'           => (int) $user->ID,
+			'display_name' => $user->display_name,
+			'email'        => $user->user_email,
+		);
+	}
+
+	/**
+	 * Baseline access guard. Anyone with `doublescale_view_support` can hit
+	 * support endpoints; ownership filtering is applied separately on
+	 * collection / per-item callbacks via {@see require_ticket_ownership()}
+	 * and the list-scope `where('agent_user_id', current_user_id)` clause.
 	 *
 	 * @return bool|WP_Error
 	 */
-	private function require_sales_rep() {
-		if ( Permissions::has_sales_rep_access() ) {
+	private function require_support_access() {
+		if ( Permissions::has_support_access() ) {
 			return true;
 		}
 		return new WP_Error( 'not_allowed', __( 'You do not have permission to access support tickets.', 'doublescale' ), array( 'status' => 403 ) );
+	}
+
+	/**
+	 * Per-ticket ownership guard. Returns null when the current user is
+	 * allowed (manager-of-all-tickets OR the assigned agent), or a 403
+	 * WP_Error otherwise. Returning null (not true) makes the call site
+	 * read cleanly: `if ( $err = $this->require_...() ) return $err;`.
+	 *
+	 * @param TicketModel $ticket The ticket model to authorize against.
+	 * @return WP_Error|null
+	 */
+	private function require_ticket_ownership( TicketModel $ticket ) {
+		if ( Permissions::can_manage_all_tickets() ) {
+			return null;
+		}
+		if ( (int) $ticket->agent_user_id === (int) get_current_user_id() ) {
+			return null;
+		}
+		return new WP_Error(
+			'not_allowed',
+			__( 'You can only access tickets assigned to you.', 'doublescale' ),
+			array( 'status' => 403 )
+		);
 	}
 }

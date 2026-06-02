@@ -11,10 +11,12 @@ import { __ } from '@wordpress/i18n';
 import { Trash2 } from 'lucide-react';
 
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
+import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { Button } from '@/components/ui/button';
 import {
 	useTicket,
 	useConversation,
+	useAssignableAgents,
 	addReply,
 	addNote,
 	updateTicket,
@@ -117,6 +119,8 @@ const SupportTicketDetail: React.FC = () => {
 		useTicket(ticketId);
 	const { data: conversation, refetch: refetchConversation } =
 		useConversation(ticketId);
+	const { data: assignableAgents } = useAssignableAgents();
+	const canManageAllTickets = useCapabilities().canManageAllTickets();
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
 	const [content, setContent] = useState('');
@@ -217,6 +221,13 @@ const SupportTicketDetail: React.FC = () => {
 		refetchConversation();
 	};
 
+	const handleAssigneeChange = async (rawValue: string) => {
+		const agent_user_id = rawValue === '' ? null : Number(rawValue);
+		await updateTicket(ticketId, { agent_user_id });
+		refetchTicket();
+		refetchConversation();
+	};
+
 	return (
 		<div className="doublescale-support-ticket p-6 max-w-5xl">
 			<div className="flex items-center justify-between mb-4">
@@ -227,17 +238,19 @@ const SupportTicketDetail: React.FC = () => {
 				>
 					&larr; {__('Back to inbox', 'doublescale')}
 				</button>
-				<Button
-					variant="destructive"
-					size="sm"
-					onClick={handleDelete}
-					disabled={deleting}
-				>
-					<Trash2 />
-					{deleting
-						? __('Deleting…', 'doublescale')
-						: __('Delete ticket', 'doublescale')}
-				</Button>
+				{canManageAllTickets && (
+					<Button
+						variant="destructive"
+						size="sm"
+						onClick={handleDelete}
+						disabled={deleting}
+					>
+						<Trash2 />
+						{deleting
+							? __('Deleting…', 'doublescale')
+							: __('Delete ticket', 'doublescale')}
+					</Button>
+				)}
 			</div>
 
 			{/* Ticket header */}
@@ -292,16 +305,34 @@ const SupportTicketDetail: React.FC = () => {
 					</div>
 					<div>
 						<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-							{__('Agent', 'doublescale')}
+							{__('Assigned to', 'doublescale')}
 						</div>
 						<div className="text-gray-900">
-							{ticket.agent ? (
-								ticket.agent.display_name
-							) : (
-								<span className="text-gray-500">
+							<select
+								value={ticket.agent_user_id ?? ''}
+								onChange={(e) => handleAssigneeChange(e.target.value)}
+								className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]"
+							>
+								<option value="">
 									{__('Unassigned', 'doublescale')}
-								</span>
-							)}
+								</option>
+								{/* Keep the current assignee selectable even if it's
+								    not in the assignable list (e.g. a manager-only
+								    user the API didn't return for an agent). */}
+								{ticket.agent &&
+									!assignableAgents.some(
+										(a) => a.id === ticket.agent?.id
+									) && (
+										<option value={ticket.agent.id}>
+											{ticket.agent.display_name}
+										</option>
+									)}
+								{assignableAgents.map((agent) => (
+									<option key={agent.id} value={agent.id}>
+										{agent.display_name}
+									</option>
+								))}
+							</select>
 						</div>
 					</div>
 				</div>

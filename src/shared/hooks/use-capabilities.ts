@@ -59,12 +59,24 @@ export const useCapabilities = () => {
         return userCapabilities.doublescale_crm_manager || false;
     }, []);
 
+    /**
+     * Check if current user can see and manage every support ticket.
+     * Granted to administrators, CRM Managers, Sales Managers, and Support
+     * Managers. Used to hide reassign/delete UI from Support Agents and
+     * Sales Reps (who only see tickets assigned to them).
+     */
+    const canManageAllTickets = useCallback((): boolean => {
+        const userCapabilities = Config.getUserCapabilities();
+        return userCapabilities.doublescale_manage_all_tickets || false;
+    }, []);
+
     return {
         hasRequiredCapability,
         isSalesRep,
         isSalesManager,
         canManageAllDeals,
         isCrmManager,
+        canManageAllTickets,
     };
 };
 

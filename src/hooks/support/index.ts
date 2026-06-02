@@ -17,6 +17,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { NAMESPACE } from '@/constants/support';
 import type {
+	AgentSummary,
 	ConversationItem,
 	CreateTicketPayload,
 	Mailbox,
@@ -216,6 +217,36 @@ export const useMailboxes = () => {
 		})
 			.then((response) => {
 				setData(response.data);
+			})
+			.catch((err) => {
+				setError(formatRestError(err));
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	}, []);
+
+	return { data, loading, error };
+};
+
+/**
+ * Fetch the agents the current user may assign tickets to.
+ *
+ * The endpoint already scopes the list server-side: managers receive every
+ * support-capable user, while Support Agents / Sales Reps receive only
+ * themselves. The UI can therefore render whatever comes back without
+ * re-deriving permissions.
+ */
+export const useAssignableAgents = () => {
+	const [data, setData] = useState<AgentSummary[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		setLoading(true);
+		apiFetch<AgentSummary[]>({ path: `${NAMESPACE}/tickets/agents` })
+			.then((response) => {
+				setData(response);
 			})
 			.catch((err) => {
 				setError(formatRestError(err));

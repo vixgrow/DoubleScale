@@ -85,8 +85,14 @@ registerAdminPage('support-settings', {
 	// exactly like `booking/settings`.
 	hidden: true,
 	icon: <SupportIcon width={24} height={24} />,
-	// Mailbox + notification config is an admin/manager concern, matching
-	// `booking-settings`. Agents (support-only roles) don't see it.
-	requiredCapability: ['doublescale_crm_manager'],
+	// Visible to Administrators / CRM Managers and the support roles (Support
+	// Manager / Support Agent) only. Sales Manager / Sales Rep are deliberately
+	// excluded — support config is not a sales concern. `requiredCapability`
+	// is OR-matched, so any one of these caps grants access.
+	requiredCapability: [
+		'doublescale_crm_manager',
+		'doublescale_support_manager',
+		'doublescale_support_agent',
+	],
 	requiresModule: 'support',
 });

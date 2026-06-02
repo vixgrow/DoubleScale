@@ -31,6 +31,7 @@ use DoubleScale\Admin\MenuRegistry;
 use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
 use DoubleScale\Modules\Support\Models\MailboxModel;
+use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
 use DoubleScale\Modules\Support\Services\ContactResolver;
@@ -130,6 +131,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestReplyController::class,
 			Rest\Controllers\RestMailboxController::class,
 			Rest\Controllers\RestPortalController::class,
+			Rest\Controllers\RestSupportSettingsController::class,
 		);
 	}
 
@@ -172,7 +174,7 @@ final class Module extends AbstractModule {
 			array(
 				'page_title'      => __( 'Support', 'doublescale' ),
 				'menu_title'      => __( 'Support', 'doublescale' ),
-				'capability'      => 'doublescale_access',
+				'capability'      => 'doublescale_view_support',
 				'slug'            => 'doublescale&path=support',
 				'callback'        => array( AdminLoader::class, 'page_wrapper' ),
 				'position'        => 46,
@@ -180,6 +182,44 @@ final class Module extends AbstractModule {
 				'requires_module' => 'support',
 			)
 		);
+
+		// For users whose only DoubleScale role is Support Agent / Support
+		// Manager, strip every non-Support submenu from the DoubleScale
+		// top-level menu. Priority 9999 ensures we run after every other
+		// module has finished registering its own submenu entries.
+		add_action( 'admin_menu', array( self::class, 'scope_menu_for_support_only_users' ), 9999 );
+	}
+
+	/**
+	 * Remove every DoubleScale submenu except Support for users whose only
+	 * DoubleScale roles are the support ones. Administrators and CRM roles
+	 * are untouched.
+	 *
+	 * @return void
+	 */
+	public static function scope_menu_for_support_only_users(): void {
+		if ( ! Permissions::is_support_only() ) {
+			return;
+		}
+
+		$menu_slug = apply_filters( 'doublescale_admin_menu_slug', 'doublescale' );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- intentional submenu trimming
+		global $submenu;
+		if ( empty( $submenu[ $menu_slug ] ) || ! is_array( $submenu[ $menu_slug ] ) ) {
+			return;
+		}
+
+		foreach ( $submenu[ $menu_slug ] as $key => $item ) {
+			// Each submenu item is [ title, capability, slug, page_title? ].
+			$slug = isset( $item[2] ) ? (string) $item[2] : '';
+			if ( false === strpos( $slug, 'path=support' ) ) {
+				unset( $submenu[ $menu_slug ][ $key ] );
+			}
+		}
+
+		// Re-index so WP's menu renderer doesn't choke on gaps.
+		$submenu[ $menu_slug ] = array_values( $submenu[ $menu_slug ] );
 	}
 
 	/**

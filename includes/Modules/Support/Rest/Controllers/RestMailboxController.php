@@ -372,7 +372,7 @@ class RestMailboxController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_settings_access();
 	}
 
 	/**
@@ -380,7 +380,7 @@ class RestMailboxController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_settings_access();
 	}
 
 	/**
@@ -388,7 +388,7 @@ class RestMailboxController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_settings_access();
 	}
 
 	/**
@@ -396,7 +396,7 @@ class RestMailboxController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_settings_access();
 	}
 
 	/**
@@ -404,7 +404,7 @@ class RestMailboxController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->require_sales_rep();
+		return $this->require_support_settings_access();
 	}
 
 	// ---------------------------------------------------------------------
@@ -561,12 +561,15 @@ class RestMailboxController extends RestController {
 	}
 
 	/**
-	 * Baseline access guard — mirrors {@see RestTicketController::require_sales_rep()}.
+	 * Baseline access guard. Mailboxes are managed from the Support Settings
+	 * page, so this mirrors that page's gate: Administrators, CRM Managers, and
+	 * the support roles (Support Manager / Support Agent). Sales Manager / Sales
+	 * Rep are excluded — mailbox configuration is not a sales concern.
 	 *
 	 * @return bool|WP_Error
 	 */
-	private function require_sales_rep() {
-		if ( Permissions::has_sales_rep_access() ) {
+	private function require_support_settings_access() {
+		if ( Permissions::can_access_support_settings() ) {
 			return true;
 		}
 		return new WP_Error( 'not_allowed', __( 'You do not have permission to access support mailboxes.', 'doublescale' ), array( 'status' => 403 ) );

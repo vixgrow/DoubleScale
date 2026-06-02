@@ -66,6 +66,107 @@ final class Permissions {
 		return in_array( $user_role, array( UserRoles::SALES_REP ) ) ? true : false;
 	}
 
+	/**
+	 * Check if user is a Support Manager
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_support_manager( $user_id = null ) {
+		$user_role = self::get_user_role( $user_id );
+		return UserRoles::SUPPORT_MANAGER === $user_role;
+	}
+
+	/**
+	 * Check if user is a Support Agent
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_support_agent( $user_id = null ) {
+		$user_role = self::get_user_role( $user_id );
+		return UserRoles::SUPPORT_AGENT === $user_role;
+	}
+
+	/**
+	 * Check if the user may open the Support Settings page (mailboxes, SMTP
+	 * identities, notification toggles). Granted to Administrators, CRM
+	 * Managers, and the support roles (Support Manager / Support Agent).
+	 *
+	 * Deliberately EXCLUDES Sales Manager / Sales Rep: support configuration is
+	 * not a sales concern, even though those roles otherwise have support
+	 * access. Mirrors the frontend route gate in
+	 * `src/client/pages/support/index.tsx`.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function can_access_support_settings( $user_id = null ) {
+		return self::is_crm_manager( $user_id )
+			|| self::is_support_manager( $user_id )
+			|| self::is_support_agent( $user_id );
+	}
+
+	/**
+	 * Check if the user can see and manage every support ticket (not just
+	 * tickets assigned to them). Granted to administrators, CRM Managers,
+	 * Sales Managers, and Support Managers.
+	 *
+	 * Bypasses the `agent_user_id` ownership filter on Support REST routes.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function can_manage_all_tickets( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		return user_can( $user_id, 'doublescale_manage_all_tickets' );
+	}
+
+	/**
+	 * Check if the user can access the support module at all (read and reply
+	 * to at least their own tickets). Granted to every CRM/Support role.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function has_support_access( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		return user_can( $user_id, 'doublescale_view_support' );
+	}
+
+	/**
+	 * Check if the user's ONLY DoubleScale roles are support roles (no CRM
+	 * Manager / Sales Manager / Sales Rep / Administrator). Used to scope the
+	 * admin menu down to only the Support submenu for dedicated support staff.
+	 *
+	 * @param int|null $user_id User ID (null for current user)
+	 * @return bool
+	 */
+	public static function is_support_only( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		$user    = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return false; // Administrators / super-admins never get scoped down.
+		}
+
+		$roles               = (array) $user->roles;
+		$broader_crm_roles   = array(
+			UserRoles::CRM_MANAGER,
+			UserRoles::SALES_MANAGER,
+			UserRoles::SALES_REP,
+		);
+		if ( array_intersect( $broader_crm_roles, $roles ) ) {
+			return false;
+		}
+
+		$support_roles = array( UserRoles::SUPPORT_MANAGER, UserRoles::SUPPORT_AGENT );
+		return (bool) array_intersect( $support_roles, $roles );
+	}
+
 
 	/**
 	 * Check if user has basic CRM access
@@ -121,7 +222,7 @@ final class Permissions {
 	 */
 	public static function check_user_has_role( $user_id ) {
 		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( UserRoles::CRM_MANAGER, UserRoles::SALES_MANAGER, UserRoles::SALES_REP ) ) ? true : false;
+		return in_array( $user_role, UserRoles::get_assignable_role_slugs(), true );
 	}
 
 
@@ -261,12 +362,14 @@ final class Permissions {
 
 		$roles = (array) $user->roles;
 
-		// Priority order: Administrator > CRM Manager > Sales Manager > Sales Rep
+		// Priority order: Administrator > CRM Manager > Sales Manager > Sales Rep > Support Manager > Support Agent
 		$priority = array(
 			UserRoles::ADMINISTRATOR,
 			UserRoles::CRM_MANAGER,
 			UserRoles::SALES_MANAGER,
 			UserRoles::SALES_REP,
+			UserRoles::SUPPORT_MANAGER,
+			UserRoles::SUPPORT_AGENT,
 		);
 
 		foreach ( $priority as $role ) {

@@ -236,7 +236,7 @@ class RestReplyController extends RestController {
 	 * @return bool|WP_Error
 	 */
 	public function permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		if ( Permissions::has_sales_rep_access() ) {
+		if ( Permissions::has_support_access() ) {
 			return true;
 		}
 		return new WP_Error( 'not_allowed', __( 'You do not have permission to access support tickets.', 'doublescale' ), array( 'status' => 403 ) );
@@ -255,6 +255,19 @@ class RestReplyController extends RestController {
 		if ( ! $ticket ) {
 			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
+
+		// Ownership: users without `doublescale_manage_all_tickets` can only
+		// read/reply on tickets where they are the assigned agent.
+		if ( ! Permissions::can_manage_all_tickets()
+			&& (int) $ticket->agent_user_id !== (int) get_current_user_id()
+		) {
+			return new WP_Error(
+				'not_allowed',
+				__( 'You can only access tickets assigned to you.', 'doublescale' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		return $ticket;
 	}
 

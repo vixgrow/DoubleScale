@@ -58,9 +58,13 @@ final class AdminConfig {
 		// WP's `current_user_can()`. Lets `requiredCapability:` arrays in
 		// `registerAdminPage` reference booking caps directly.
 		$user_capabilities = array(
-			'doublescale_crm_manager'   => Permissions::is_crm_manager(),
-			'doublescale_sales_manager' => Permissions::is_sales_manager(),
-			'doublescale_sales_rep'     => Permissions::is_sales_rep(),
+			'doublescale_crm_manager'         => Permissions::is_crm_manager(),
+			'doublescale_sales_manager'       => Permissions::is_sales_manager(),
+			'doublescale_sales_rep'           => Permissions::is_sales_rep(),
+			'doublescale_support_manager'     => Permissions::is_support_manager(),
+			'doublescale_support_agent'       => Permissions::is_support_agent(),
+			'doublescale_view_support'        => Permissions::has_support_access(),
+			'doublescale_manage_all_tickets'  => Permissions::can_manage_all_tickets(),
 		);
 
 		if ( class_exists( \DoubleScale\Modules\Booking\Capabilities::class ) ) {

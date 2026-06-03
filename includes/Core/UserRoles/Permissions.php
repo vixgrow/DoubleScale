@@ -90,12 +90,13 @@ final class Permissions {
 
 	/**
 	 * Check if the user may open the Support Settings page (mailboxes, SMTP
-	 * identities, notification toggles). Granted ONLY to Administrators and the
-	 * dedicated support roles (Support Manager / Support Agent).
+	 * identities, notification toggles). Granted to:
+	 *   - Administrators (manage_options),
+	 *   - CRM Managers (treated like an admin for Support),
+	 *   - the dedicated support roles (Support Manager / Support Agent).
 	 *
-	 * Support is fully decoupled from the CRM roles: CRM Manager / Sales Manager
-	 * / Sales Rep get NO support access unless an admin ALSO assigns them a
-	 * support role. Mirrors the frontend route gate in
+	 * Sales Manager / Sales Rep get NO support access unless an admin ALSO
+	 * assigns them a support role. Mirrors the frontend route gate in
 	 * `src/client/pages/support/index.tsx`.
 	 *
 	 * @param int|null $user_id User ID (null for current user)
@@ -104,8 +105,8 @@ final class Permissions {
 	public static function can_access_support_settings( $user_id = null ) {
 		$user_id = self::set_current_user_id( $user_id );
 
-		// Administrators always have full support access.
-		if ( user_can( $user_id, 'manage_options' ) ) {
+		// Administrators and CRM Managers always have full support access.
+		if ( user_can( $user_id, 'manage_options' ) || self::is_crm_manager( $user_id ) ) {
 			return true;
 		}
 

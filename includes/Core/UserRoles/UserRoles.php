@@ -231,7 +231,13 @@ final class UserRoles {
 				'doublescale_view_reports',       // View reports
 				'doublescale_export_data',        // Export data
 				'doublescale_import_data',        // Import data
-				// Support caps removed — granted only by support roles.
+				// CRM Manager is the org admin of the CRM — treated like a WP
+				// admin for Support: full access (inbox, all tickets, settings)
+				// WITHOUT needing a separate support role. Sales Manager / Sales
+				// Rep do NOT get this; they still need an explicit support role.
+				'doublescale_view_support',       // See the Support module
+				'doublescale_manage_all_tickets', // See and manage every ticket
+				'doublescale_reply_own_tickets',  // Reply on tickets
 				'list_users',                  // For Wordpress List users
 			),
 			self::SUPPORT_AGENT   => array(

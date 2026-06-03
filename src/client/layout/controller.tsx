@@ -590,6 +590,7 @@ registerAdminPage('analytics-and-reports', {
 	icon: <AnalyticsReportsIcon />,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager', 'doublescale_sales_rep'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('deals-analytics', {
@@ -599,6 +600,7 @@ registerAdminPage('deals-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('sales-rep-analytics', {
@@ -610,6 +612,7 @@ registerAdminPage('sales-rep-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('pipeline-analytics', {
@@ -621,6 +624,7 @@ registerAdminPage('pipeline-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager', 'doublescale_sales_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('my-reports', {
@@ -632,6 +636,7 @@ registerAdminPage('my-reports', {
 	hidden: true,
 	requiredCapability: ['doublescale_sales_rep', 'doublescale_sales_manager', 'doublescale_crm_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('cart-analytics', {
@@ -643,6 +648,7 @@ registerAdminPage('cart-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 const ContactAnalyticsWrapper = () => {
@@ -662,6 +668,7 @@ registerAdminPage('contacts-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 registerAdminPage('emails-analytics', {
@@ -671,6 +678,7 @@ registerAdminPage('emails-analytics', {
 	hidden: true,
 	requiredCapability: ['doublescale_crm_manager'],
 	requiresModule: 'analytics',
+	alwaysRegister: true,
 });
 
 // registerAdminPage('tools', {

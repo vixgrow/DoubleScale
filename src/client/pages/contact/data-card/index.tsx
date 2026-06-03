@@ -47,6 +47,7 @@ import Activities from '../activities';
 import UpcomingActivities from '../upcoming-activities';
 import WhatsAppIcon from '@doublescale/shared/icons/whatsapp-icon';
 import { Trophy } from 'lucide-react';
+import { ProFeatureNotice } from '@doublescale/components';
 
 interface DataCardProps {
 	navigate: (path: string) => void;
@@ -132,15 +133,11 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 			icon: <PhoneIcon width={24} height={24} />,
 		},
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
-		...(WhatsApp
-			? [
-					{
-						value: 'whatsapp',
-						label: 'WhatsApp',
-						icon: <WhatsAppIcon width={24} height={24} />,
-					},
-				]
-			: []),
+		{
+			value: 'whatsapp',
+			label: 'WhatsApp',
+			icon: <WhatsAppIcon width={24} height={24} />,
+		},
 		...(isDealsModuleEnabled
 			? [{ value: 'deals', label: 'Deals', icon: <DealsIcon /> }]
 			: []),
@@ -241,21 +238,27 @@ const DataCard: React.FC<DataCardProps> = ({ navigate, initialTab }) => {
 				</CardContent>
 			),
 		},
-		...(WhatsApp
-			? [
-					{
-						value: 'whatsapp',
-						children: (
-							<CardContent className="pt-6">
-								<WhatsApp
-									contact_id={contact.id}
-									navigate={navigate}
-								/>
-							</CardContent>
-						),
-					},
-				]
-			: []),
+		{
+			value: 'whatsapp',
+			children: (
+				<CardContent className="pt-6">
+					{WhatsApp ? (
+						<WhatsApp
+							contact_id={contact.id}
+							navigate={navigate}
+						/>
+					) : (
+						<ProFeatureNotice
+							featureName={__('WhatsApp', 'doublescale')}
+							description={__(
+								'Send and receive WhatsApp messages directly from your contact details with DoubleScale Pro.',
+								'doublescale'
+							)}
+						/>
+					)}
+				</CardContent>
+			),
+		},
 		...(isDealsModuleEnabled
 			? [
 					{

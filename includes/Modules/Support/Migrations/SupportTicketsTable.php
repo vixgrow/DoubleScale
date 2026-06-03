@@ -40,7 +40,8 @@ class SupportTicketsTable extends Migration {
 	 *                      exists, and `TicketService::resolve_mailbox_id()` falls back to
 	 *                      it when a create omits one, so there is no "no channel" state.
 	 * - `message_id`     — Email Message-ID of the thread root; indexed for inbound matching.
-	 * - `content_hash`   — MD5 of the opening message body; used for inbound dedupe.
+	 *                      Inbound dedup is done on this (InboundTicketFactory) plus IMAP
+	 *                      seen-tracking — there is no content-hash column.
 	 * - `response_count` — Denormalized counter maintained by ActivityModel::created event.
 	 * - `tag_ids`        — JSON array of `doublescale_tags.id`. Filtered via JSON_CONTAINS.
 	 * - `custom_data`    — JSON map of per-ticket custom-field values
@@ -66,7 +67,6 @@ class SupportTicketsTable extends Migration {
 			agent_user_id BIGINT(20) UNSIGNED NULL COMMENT 'FK to wp_users.ID (assigned agent)',
 			product VARCHAR(100) NULL COMMENT 'Free-text product label',
 			message_id VARCHAR(191) NULL COMMENT 'Email Message-ID of the thread root',
-			content_hash VARCHAR(32) NULL COMMENT 'MD5 of opening message body for inbound dedupe',
 			response_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Denormalized counter, incremented by TicketService::add_reply',
 			tag_ids JSON NULL COMMENT 'Array of doublescale_tags.id',
 			custom_data JSON NULL COMMENT 'Per-ticket custom field values',

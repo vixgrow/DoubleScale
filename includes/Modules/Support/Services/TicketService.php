@@ -84,7 +84,6 @@ class TicketService {
 	 *   - `agent_user_id`    int     Initial agent assignment.
 	 *   - `product`          string  Free-text product label.
 	 *   - `message_id`       string  Email Message-ID (set by IMAP path; web path leaves NULL).
-	 *   - `content_hash`     string  MD5 of body (set by IMAP path for dedupe; web path leaves NULL).
 	 *   - `source`           string  Where the opening message came from: 'web'|'email'. Default 'web'.
 	 *   - `tag_ids`          int[]   Tag IDs.
 	 *   - `custom_data`      array   Per-ticket custom field values.
@@ -129,7 +128,6 @@ class TicketService {
 			'agent_user_id' => isset( $data['agent_user_id'] ) ? (int) $data['agent_user_id'] : null,
 			'product'       => isset( $data['product'] ) ? $this->sanitize_short_string( $data['product'] ) : null,
 			'message_id'    => isset( $data['message_id'] ) ? (string) $data['message_id'] : null,
-			'content_hash'  => isset( $data['content_hash'] ) ? (string) $data['content_hash'] : null,
 			'tag_ids'       => $this->normalize_tag_ids( $data['tag_ids'] ?? null ),
 			'custom_data'   => isset( $data['custom_data'] ) && is_array( $data['custom_data'] ) ? $data['custom_data'] : null,
 		);
@@ -198,7 +196,6 @@ class TicketService {
 	 *   - `source`         string  'web' (default) | 'email'.
 	 *   - `message_id`     string  Outbound Message-ID for email pipeline.
 	 *   - `in_reply_to`    string  Parent Message-ID (for email threading).
-	 *   - `content_hash`   string  Set by IMAP path for inbound dedupe.
 	 *   - `author_user_id` int     Agent posting. Defaults to current user.
 	 *
 	 * @param TicketModel|int      $ticket Ticket model or id.
@@ -223,7 +220,7 @@ class TicketService {
 			'content' => $content,
 			'source'  => $source,
 		);
-		foreach ( array( 'message_id', 'in_reply_to', 'content_hash' ) as $key ) {
+		foreach ( array( 'message_id', 'in_reply_to' ) as $key ) {
 			if ( ! empty( $data[ $key ] ) ) {
 				$activity_data[ $key ] = (string) $data[ $key ];
 			}

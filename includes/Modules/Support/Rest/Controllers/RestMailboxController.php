@@ -565,9 +565,9 @@ class RestMailboxController extends RestController {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * Mailbox configuration is admin-tier — same gate as the ticket controller.
-	 * Future hardening can split read vs. write caps once UserRoles ships the
-	 * dedicated `support_agent` / `support_admin` roles.
+	 * Mailbox configuration is manager-tier: Administrators, CRM Managers, and
+	 * Support Managers only. Support Agents are excluded — they work their
+	 * assigned tickets, not channel configuration.
 	 *
 	 * @param WP_REST_Request $request Unused — present for the WP REST contract.
 	 * @return bool|WP_Error
@@ -896,7 +896,7 @@ class RestMailboxController extends RestController {
 	/**
 	 * Baseline access guard. Mailboxes are managed from the Support Settings
 	 * page, so this mirrors that page's gate: Administrators, CRM Managers, and
-	 * the support roles (Support Manager / Support Agent). Sales Manager / Sales
+	 * Support Managers. Support Agents and Sales Manager / Sales
 	 * Rep are excluded — mailbox configuration is not a sales concern.
 	 *
 	 * @return bool|WP_Error

@@ -93,7 +93,11 @@ final class Permissions {
 	 * identities, notification toggles). Granted to:
 	 *   - Administrators (manage_options),
 	 *   - CRM Managers (treated like an admin for Support),
-	 *   - the dedicated support roles (Support Manager / Support Agent).
+	 *   - the Support Manager role.
+	 *
+	 * Support AGENTS are intentionally excluded: managing mailboxes (create /
+	 * delete, SMTP sending identity, bulk ticket re-routing) is a manager-tier
+	 * action. Agents are scoped to working their assigned tickets.
 	 *
 	 * Sales Manager / Sales Rep get NO support access unless an admin ALSO
 	 * assigns them a support role. Mirrors the frontend route gate in
@@ -110,17 +114,19 @@ final class Permissions {
 			return true;
 		}
 
-		// Role-membership checks (NOT single-highest-role): a user who is e.g.
+		// Role-membership check (NOT single-highest-role): a user who is e.g.
 		// Sales Rep + Support Manager still gets settings access from the
-		// Support Manager role. Capabilities merge across roles.
-		return self::user_has_role( UserRoles::SUPPORT_MANAGER, $user_id )
-			|| self::user_has_role( UserRoles::SUPPORT_AGENT, $user_id );
+		// Support Manager role. Capabilities merge across roles. Support AGENTS
+		// are deliberately NOT included here — mailbox/channel configuration is
+		// manager-tier (see method docblock).
+		return self::user_has_role( UserRoles::SUPPORT_MANAGER, $user_id );
 	}
 
 	/**
 	 * Check if the user can see and manage every support ticket (not just
-	 * tickets assigned to them). Granted to administrators, CRM Managers,
-	 * Sales Managers, and Support Managers.
+	 * tickets assigned to them). Granted to administrators, CRM Managers, and
+	 * Support Managers (NOT Sales Managers — support is exclusive to the support
+	 * roles plus the CRM Manager / admin tier).
 	 *
 	 * Bypasses the `agent_user_id` ownership filter on Support REST routes.
 	 *
@@ -163,8 +169,8 @@ final class Permissions {
 			return false; // Administrators / super-admins never get scoped down.
 		}
 
-		$roles               = (array) $user->roles;
-		$broader_crm_roles   = array(
+		$roles             = (array) $user->roles;
+		$broader_crm_roles = array(
 			UserRoles::CRM_MANAGER,
 			UserRoles::SALES_MANAGER,
 			UserRoles::SALES_REP,

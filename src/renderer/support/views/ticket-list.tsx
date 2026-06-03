@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { StatusPill, PriorityPill, InboxIcon } from '@/components/support';
 import { TICKET_STATUSES } from '@/constants/support';
 import type { TicketStatus } from '@/constants/support';
+import type { TicketFilters } from '@/types/support';
 
 import { usePortalTickets } from '../api';
 import type { PortalConfig, PortalTicket } from '../types';
@@ -35,7 +36,11 @@ interface Props {
 const TicketList = ({ config, onOpenTicket, onCompose }: Props) => {
 	const [statusFilter, setStatusFilter] = useState<'all' | TicketStatus>('all');
 
-	const filters = statusFilter === 'all' ? {} : { status: statusFilter };
+	const filters: TicketFilters = {
+		...(statusFilter === 'all' ? {} : { status: statusFilter }),
+		// A shortcode-scoped portal (box_id) shows only that mailbox's tickets.
+		...(config.box_id ? { mailbox_id: config.box_id } : {}),
+	};
 	const { data, loading, error, refetch } = usePortalTickets(filters);
 
 	return (

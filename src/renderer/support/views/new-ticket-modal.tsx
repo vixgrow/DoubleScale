@@ -19,13 +19,20 @@ import type { PortalTicket } from '../types';
 interface Props {
 	onClose: () => void;
 	onCreated: (ticket: PortalTicket) => void;
+	// When the portal is scoped to one mailbox via the shortcode's `box_id`,
+	// new tickets are locked to it: the department picker is hidden and this
+	// id is sent as `mailbox_id`.
+	boxId?: number;
 }
 
-const NewTicketModal = ({ onClose, onCreated }: Props) => {
+const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const mailboxes = usePortalMailboxes();
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
-	const [mailboxId, setMailboxId] = useState<number | undefined>(undefined);
+	// Default to the shortcode-scoped mailbox when present so the locked portal
+	// routes the ticket there; otherwise let the customer choose (or the server
+	// auto-select).
+	const [mailboxId, setMailboxId] = useState<number | undefined>(boxId);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -51,9 +58,9 @@ const NewTicketModal = ({ onClose, onCreated }: Props) => {
 		}
 	};
 
-	// If only one mailbox exists, the API will pick it as default — no need
-	// to render a single-option selector that gives the user a non-choice.
-	const showMailboxSelect = mailboxes.data.length > 1;
+	// Hide the picker when the portal is locked to one mailbox (box_id) or when
+	// only one mailbox exists - neither case gives the user a real choice.
+	const showMailboxSelect = !boxId && mailboxes.data.length > 1;
 
 	return (
 		<div

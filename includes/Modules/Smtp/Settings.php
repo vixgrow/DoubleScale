@@ -462,6 +462,250 @@ class Settings {
 	}
 
 	/**
+	 * List every SMTP connection bindable as a *support* mailbox identity.
+	 *
+	 * Same display shape as {@see get_visible_connections_for_user()} but WITHOUT
+	 * the personal-ownership gate: support mailbox configuration is admin-tier
+	 * (only roles that pass {@see \DoubleScale\Core\UserRoles\Permissions::can_access_support_settings()}
+	 * reach it), so every org/shared/personal connection that has a From address
+	 * is bindable. Each row is annotated with `is_receivable` so the mailbox
+	 * editor can gate the `email` (inbound IMAP) box type to receive-capable
+	 * connections without a second round-trip.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<int, array{connection_id:string, name:string, from_email:string, from_name:string, is_personal:bool, is_receivable:bool}>
+	 *               Zero-indexed list of bindable connections.
+	 */
+	public static function get_connections_for_support() {
+		$connections = self::get( 'connections', array() );
+		if ( ! is_array( $connections ) || empty( $connections ) ) {
+			return array();
+		}
+
+		$out = array();
+		foreach ( $connections as $connection_id => $connection ) {
+			if ( ! is_array( $connection ) ) {
+				continue;
+			}
+
+			$from_email = trim( (string) ( $connection['from_email'] ?? '' ) );
+			if ( '' === $from_email ) {
+				continue; // A connection with no From address can't be a sending identity.
+			}
+
+			$out[] = array(
+				'connection_id' => (string) $connection_id,
+				'name'          => (string) ( $connection['name'] ?? $connection['connection_name'] ?? $from_email ),
+				'from_email'    => $from_email,
+				'from_name'     => (string) ( $connection['from_name'] ?? '' ),
+				'is_personal'   => (int) ( $connection['user_id'] ?? 0 ) > 0,
+				// Cheap (pure option reads, no network) — see is_from_email_receivable().
+				'is_receivable' => self::is_from_email_receivable( $from_email ),
+			);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Whether a support mailbox bound to this connection can RECEIVE over IMAP.
+	 *
+	 * Cheap and side-effect-free: it resolves the connection's `from_email`
+	 * through {@see \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::resolve_imap_provider_for_email()}
+	 * — pure `get_option()` reads that only confirm a Gmail/Outlook OAuth account
+	 * with both access + refresh tokens exists for that address. It does **no**
+	 * network I/O and never refreshes a token, so it is safe on hot read paths
+	 * (it is reached on every Support settings load via the available-identities
+	 * annotation). The "does the IMAP config actually materialize right now"
+	 * question — which DOES hit the network — is a separate, poll-time concern;
+	 * see {@see get_support_imap_config()}.
+	 *
+	 * This is the single source of truth for both the UI gate and the REST gate
+	 * that restrict `box_type='email'` to receive-capable connections.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $connection_id Connection id stored on the mailbox.
+	 * @return bool True when the bound address maps to a Gmail/Outlook OAuth account.
+	 */
+	public static function is_connection_receivable( $connection_id ) {
+		$identity = self::get_identity_for_connection( $connection_id );
+		if ( null === $identity ) {
+			return false;
+		}
+		return self::is_from_email_receivable( $identity['from_email'] );
+	}
+
+	/**
+	 * Cheap receivability check for a raw From address — the single source of
+	 * truth for both the mailbox-editor gate and the REST gate that restrict
+	 * `box_type='email'` (inbound IMAP) to receive-capable addresses, and for the
+	 * `receivable_emails` annotation in {@see get_connections_for_support()}.
+	 *
+	 * Side-effect-free: resolves `$from_email` through
+	 * `RestSettingsControllerPro::resolve_imap_provider_for_email()` (pure option
+	 * reads confirming a Gmail/Outlook OAuth account with access + refresh tokens
+	 * exists for the address). No network I/O and no token refresh, so it is safe
+	 * on hot read paths. The "does the IMAP config materialize right now" question
+	 * — which DOES hit the network — is poll-time only; see
+	 * {@see get_support_imap_config_for_email()}.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $from_email Sending-identity address.
+	 * @return bool True when the address maps to a Gmail/Outlook OAuth account.
+	 */
+	public static function is_from_email_receivable( $from_email ) {
+		$from_email = (string) $from_email;
+		if ( '' === $from_email || ! class_exists( '\DoubleScale\Core\Settings\Rest\RestSettingsControllerPro' ) ) {
+			return false;
+		}
+
+		$resolved = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::resolve_imap_provider_for_email( $from_email );
+		$provider = is_array( $resolved ) && isset( $resolved['imap_provider'] ) ? (string) $resolved['imap_provider'] : 'custom';
+
+		return 'smtp_gmail' === $provider || 'smtp_outlook' === $provider;
+	}
+
+	/**
+	 * Build a ready-to-poll IMAP config for a support mailbox's connection.
+	 *
+	 * Poll-time materialization ONLY — unlike {@see is_connection_receivable()}
+	 * this DOES hit the network: it delegates to
+	 * `RestSettingsControllerPro::get_smtp_{gmail,outlook}_imap_config()`, which
+	 * refreshes the OAuth access token when it is near expiry. Call it from the
+	 * Pro per-mailbox poller, never from a REST/list path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $connection_id Connection id stored on the mailbox.
+	 * @return array<string, mixed>|null IMAP config (host/port/username/password/encryption/authentication),
+	 *               or null for a send-only connection or when the OAuth refresh fails.
+	 */
+	public static function get_support_imap_config( $connection_id ) {
+		if ( ! class_exists( '\DoubleScale\Core\Settings\Rest\RestSettingsControllerPro' ) ) {
+			return null;
+		}
+
+		$identity = self::get_identity_for_connection( $connection_id );
+		if ( null === $identity ) {
+			return null;
+		}
+
+		$resolved = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::resolve_imap_provider_for_email( $identity['from_email'] );
+		$provider = is_array( $resolved ) && isset( $resolved['imap_provider'] ) ? (string) $resolved['imap_provider'] : 'custom';
+
+		if ( 'smtp_gmail' === $provider ) {
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_gmail_imap_config(
+				(string) ( $resolved['smtp_gmail_account'] ?? '' )
+			);
+		} elseif ( 'smtp_outlook' === $provider ) {
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_imap_config(
+				(string) ( $resolved['smtp_outlook_account'] ?? '' )
+			);
+		} else {
+			return null;
+		}
+
+		return is_array( $config ) ? $config : null;
+	}
+
+	/**
+	 * Build a ready-to-poll IMAP config directly from a support mailbox's From
+	 * address — the `from_email`-keyed counterpart to {@see get_support_imap_config()}.
+	 *
+	 * A support mailbox stores its sending identity as `from_email` (not a
+	 * connection id), so the Pro per-mailbox poller resolves IMAP straight from
+	 * the address. Poll-time materialization ONLY: this DOES hit the network
+	 * (refreshes the OAuth access token via
+	 * `RestSettingsControllerPro::get_smtp_{gmail,outlook}_imap_config()`) — call
+	 * it from the poller, never from a REST/list path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $from_email Mailbox sending-identity address.
+	 * @return array<string, mixed>|null IMAP config (host/port/username/password/encryption/authentication),
+	 *               or null for a send-only address or when the OAuth refresh fails.
+	 */
+	public static function get_support_imap_config_for_email( $from_email ) {
+		$from_email = (string) $from_email;
+		if ( '' === $from_email || ! class_exists( '\DoubleScale\Core\Settings\Rest\RestSettingsControllerPro' ) ) {
+			return null;
+		}
+
+		$resolved = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::resolve_imap_provider_for_email( $from_email );
+		$provider = is_array( $resolved ) && isset( $resolved['imap_provider'] ) ? (string) $resolved['imap_provider'] : 'custom';
+
+		if ( 'smtp_gmail' === $provider ) {
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_gmail_imap_config(
+				(string) ( $resolved['smtp_gmail_account'] ?? '' )
+			);
+		} elseif ( 'smtp_outlook' === $provider ) {
+			$config = \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::get_smtp_outlook_imap_config(
+				(string) ( $resolved['smtp_outlook_account'] ?? '' )
+			);
+		} else {
+			return null;
+		}
+
+		return is_array( $config ) ? $config : null;
+	}
+
+	/**
+	 * Resolve a From address to the SMTP connection id that sends from it, so a
+	 * support notification can pin delivery to that exact connection (the
+	 * `doublescale_smtp_explicit_connection` route in
+	 * {@see \DoubleScale\Modules\Support\Services\EmailNotifications}).
+	 *
+	 * Returns the first connection whose `from_email` matches (case-insensitively),
+	 * or '' when none does — the caller treats '' as "no deterministic route" and
+	 * skips the send rather than risk an SPF/DKIM-misaligned default route. Logs a
+	 * warning when more than one connection shares the address (the pick is then
+	 * ambiguous but still deterministic — first match wins).
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $from_email Mailbox sending-identity address.
+	 * @return string Connection id, or '' when no connection sends from this address.
+	 */
+	public static function get_connection_id_for_from_email( $from_email ) {
+		$needle = strtolower( trim( (string) $from_email ) );
+		if ( '' === $needle ) {
+			return '';
+		}
+
+		$connections = self::get( 'connections', array() );
+		if ( ! is_array( $connections ) ) {
+			return '';
+		}
+
+		$matches = array();
+		foreach ( $connections as $connection_id => $connection ) {
+			if ( ! is_array( $connection ) ) {
+				continue;
+			}
+			$candidate = strtolower( trim( (string) ( $connection['from_email'] ?? '' ) ) );
+			if ( '' !== $candidate && $candidate === $needle ) {
+				$matches[] = (string) $connection_id;
+			}
+		}
+
+		if ( count( $matches ) > 1 && function_exists( 'doublescale_get_logger' ) ) {
+			doublescale_get_logger()->warning(
+				'Multiple SMTP connections share a From address; support transport pin is ambiguous (first match used).',
+				array(
+					'source'     => 'support-email-notifications',
+					'from_email' => $needle,
+					'matches'    => $matches,
+				)
+			);
+		}
+
+		return isset( $matches[0] ) ? $matches[0] : '';
+	}
+
+	/**
 	 * Whether the current user may access built-in SMTP REST routes (settings, logs, tests).
 	 *
 	 * @return bool

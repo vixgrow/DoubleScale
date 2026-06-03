@@ -9,17 +9,19 @@
  *   POST   /support/mailboxes           Create a mailbox.
  *   GET    /support/mailboxes/{id}      Read one (with `data` JSON decoded).
  *   PUT    /support/mailboxes/{id}      Update mutable fields.
- *   DELETE /support/mailboxes/{id}      Delete (NULLs tickets.mailbox_id via FK behaviour at the app layer).
+ *   DELETE /support/mailboxes/{id}      Delete (requires fallback_id; re-points tickets first).
+ *   POST   /support/mailboxes/{id}/move-tickets  Bulk-move tickets to another mailbox.
  *
- * Mailboxes are pure-CRUD storage — no domain events, no service layer.
- * {@see MailboxModel::boot()} already enforces the two model invariants:
- * unique slug auto-generated from name/email on create, and the "only one
- * default at a time" rule on save. So this controller is thin: parse, validate,
- * persist, shape.
+ * {@see MailboxModel::boot()} enforces the model invariants: unique slug
+ * auto-generated from name on create, the "only one default at a time" rule,
+ * and deriving the inbound `email` from the sending identity for web boxes. So
+ * the controller stays thin: parse, validate, persist, shape — with the
+ * exception of delete/move, which must re-point tickets (mailbox_id is NOT
+ * NULL) before a row can be removed.
  *
- * The `data` LONGTEXT blob carries IMAP credentials and per-mailbox config.
- * Accessor/mutator on the model handle encode/decode, so the controller
- * receives/returns plain associative arrays.
+ * The `data` LONGTEXT blob carries the display name and the sending-identity
+ * `from_email`. Accessor/mutator on the model handle encode/decode, so the
+ * controller receives/returns plain associative arrays.
  *
  * @since 1.0.0
  * @package DoubleScale\Modules\Support
@@ -32,6 +34,8 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Core\Abstracts\RestController;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Support\Models\MailboxModel;
+use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\EmailNotifications;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -55,13 +59,19 @@ class RestMailboxController extends RestController {
 	 * model boot event when omitted, but the operator can supply one explicitly
 	 * (validated client-side as URL-safe — the model retries on UNIQUE collision).
 	 *
+	 * `email` is intentionally NOT writable: a mailbox IS its SMTP connection, so
+	 * the model mirrors `email` from `data.identity.from_email` on every
+	 * save (see {@see MailboxModel::populate_email_from_identity()}). The client
+	 * never sends it for any box type.
+	 *
 	 * @var string[]
 	 */
-	private const WRITABLE_FIELDS = array( 'slug', 'email', 'box_type', 'is_default', 'data' );
+	private const WRITABLE_FIELDS = array( 'slug', 'box_type', 'is_default', 'data' );
 
 	/**
-	 * Allowed `box_type` values. `web` mailboxes accept tickets via portal/forms;
-	 * `email` mailboxes are IMAP-polled by Phase 3's EmailHandler.
+	 * Allowed `box_type` values. `web` accepts tickets via portal/forms only;
+	 * `email` is the "web + email" superset that additionally accepts inbound
+	 * email (Pro's InboundTicketRouter matches `to_email` against `email`).
 	 *
 	 * @var string[]
 	 */
@@ -108,6 +118,18 @@ class RestMailboxController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/move-tickets',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'move_tickets' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				),
 			)
@@ -162,7 +184,9 @@ class RestMailboxController extends RestController {
 			return $disabled;
 		}
 
-		$query = MailboxModel::query();
+		// withCount adds a `tickets_count` subquery per row (one query, no N+1) so
+		// the list can show how many tickets each mailbox holds.
+		$query = MailboxModel::query()->withCount( 'tickets' );
 
 		$box_type = $request->get_param( 'box_type' );
 		if ( is_string( $box_type ) && in_array( $box_type, self::BOX_TYPES, true ) ) {
@@ -199,16 +223,20 @@ class RestMailboxController extends RestController {
 			array(
 				'data' => $data,
 				'meta' => array(
-					'total'                => $paginator->total(),
-					'per_page'             => $per_page,
-					'current_page'         => $page,
-					'last_page'            => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
-					// Sending identities the *current* user may bind to a mailbox
-					// (capability-scoped). Sent alongside the list so the editor's
-					// "Sender identity" picker needs no extra request. The same
-					// scoping is re-applied on save (see validate()), so this is
-					// the convenience half of a two-sided check.
-					'available_identities' => $this->visible_identities_for_current_user(),
+					'total'                 => $paginator->total(),
+					'per_page'              => $per_page,
+					'current_page'          => $page,
+					'last_page'             => max( 1, (int) ceil( $paginator->total() / $per_page ) ),
+					// Editor metadata, sent with the list so the mailbox editor needs no
+					// extra requests: `smtp_senders` is every SMTP connection's From address
+					// for the sending-identity picker (admin-tier, NOT per-user scoped),
+					// `receivable_emails` is the subset that can receive over IMAP (drives
+					// the email-box gate), and `notification_defaults` is the built-in
+					// template copy the per-mailbox editor pre-fills. The chosen address is
+					// re-validated on save (validate_identity()).
+					'smtp_senders'          => $this->smtp_senders(),
+					'receivable_emails'     => $this->receivable_emails(),
+					'notification_defaults' => EmailNotifications::default_templates(),
 				),
 			),
 			200
@@ -216,17 +244,47 @@ class RestMailboxController extends RestController {
 	}
 
 	/**
-	 * The SMTP connections the current user may pick as a mailbox sending
-	 * identity. Thin wrapper over the SMTP module's single source of truth so
-	 * the picker list and the save-time validation can't drift apart.
+	 * SMTP connections offered in the From-address combobox. No ownership gate:
+	 * support mailbox config is admin-tier ({@see \DoubleScale\Core\UserRoles\Permissions::can_access_support_settings()}),
+	 * so every org/shared/personal connection with a From address is selectable.
+	 * Shaped for the frontend `FromEmailSelector` (connection_id / email / name).
 	 *
-	 * @return array<int, array<string, mixed>>
+	 * @return array<int, array{connection_id:string, email:string, name:string}>
 	 */
-	private function visible_identities_for_current_user(): array {
+	private function smtp_senders(): array {
 		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
 			return array();
 		}
-		return \DoubleScale\Modules\Smtp\Settings::get_visible_connections_for_user( get_current_user_id() );
+		$out = array();
+		foreach ( \DoubleScale\Modules\Smtp\Settings::get_connections_for_support() as $conn ) {
+			$out[] = array(
+				'connection_id' => (string) $conn['connection_id'],
+				'email'         => (string) $conn['from_email'],
+				'name'          => (string) $conn['from_name'],
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Lower-cased From addresses that can RECEIVE over IMAP (Gmail/Outlook OAuth):
+	 * the subset of {@see smtp_senders()} an `email` (inbound) box may bind. The
+	 * editor cross-references the chosen From address against this list to gate the
+	 * IMAP toggle; the same rule is enforced server-side in {@see validate_receivability()}.
+	 *
+	 * @return array<int, string>
+	 */
+	private function receivable_emails(): array {
+		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( \DoubleScale\Modules\Smtp\Settings::get_connections_for_support() as $conn ) {
+			if ( ! empty( $conn['is_receivable'] ) ) {
+				$out[] = strtolower( trim( (string) $conn['from_email'] ) );
+			}
+		}
+		return array_values( array_unique( $out ) );
 	}
 
 	/**
@@ -252,8 +310,10 @@ class RestMailboxController extends RestController {
 	/**
 	 * Create a mailbox.
 	 *
-	 * `email` is required; everything else is optional. Slug auto-generates from
-	 * `data.name` (falls back to email) via the model's `creating` boot event.
+	 * A sending identity (`data.identity.from_email`) is required. `email` is
+	 * required only for `email` boxes (the inbound address); for `web` boxes the
+	 * model derives it from the identity. Slug auto-generates from `data.name`
+	 * via the model's `creating` boot event.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
@@ -315,7 +375,7 @@ class RestMailboxController extends RestController {
 		}
 		unset( $params['id'] );
 
-		$validation = $this->validate( $params, false );
+		$validation = $this->validate( $params, false, $mailbox );
 		if ( is_wp_error( $validation ) ) {
 			return $validation;
 		}
@@ -335,11 +395,19 @@ class RestMailboxController extends RestController {
 	}
 
 	/**
-	 * Delete a mailbox.
+	 * Delete a mailbox, re-pointing its tickets to an operator-chosen fallback.
 	 *
-	 * Tickets that point at this mailbox keep their `mailbox_id` value (no app-
-	 * level cascade). The Phase 5 admin UI surfaces orphan tickets via a
-	 * "Mailbox: (deleted)" badge so operators can re-route manually.
+	 * `mailbox_id` is NOT NULL, so a mailbox can only be removed once nothing
+	 * references it. The caller MUST supply a `fallback_id`: we
+	 * move every ticket on the deleted mailbox to the fallback FIRST, then
+	 * delete. The last remaining mailbox cannot be deleted (a ticket must always
+	 * have a home).
+	 *
+	 * The re-point uses a bulk `Builder::update()`, which writes straight to the
+	 * DB and bypasses {@see \DoubleScale\Modules\Support\Services\TicketService::update_ticket()}
+	 * — and therefore the `doublescale_support_ticket_updated` action — so no
+	 * per-ticket `mailbox_changed` audit row is logged for what is an
+	 * administrative bulk move (do NOT route this through TicketService).
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
@@ -350,13 +418,146 @@ class RestMailboxController extends RestController {
 			return $disabled;
 		}
 
-		$mailbox = MailboxModel::find( (int) $request->get_param( 'id' ) );
+		$id      = (int) $request->get_param( 'id' );
+		$mailbox = MailboxModel::find( $id );
 		if ( ! $mailbox ) {
 			return new WP_Error( 'not_found', __( 'Mailbox not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
-		$mailbox->delete();
+		// A ticket must always have a mailbox — refuse to delete the last one.
+		if ( MailboxModel::query()->count() <= 1 ) {
+			return new WP_Error(
+				'cannot_delete_last_mailbox',
+				__( 'You cannot delete the only mailbox. Create another mailbox first.', 'doublescale' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$params      = $request->get_json_params();
+		$fallback_id = is_array( $params ) && isset( $params['fallback_id'] ) ? (int) $params['fallback_id'] : 0;
+		if ( $fallback_id <= 0 ) {
+			return new WP_Error(
+				'fallback_required',
+				__( 'A fallback mailbox is required so existing tickets can be re-routed before deletion.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+		if ( $fallback_id === $id ) {
+			return new WP_Error(
+				'invalid_fallback',
+				__( 'The fallback mailbox must be different from the one being deleted.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$fallback = MailboxModel::find( $fallback_id );
+		if ( ! $fallback ) {
+			return new WP_Error( 'invalid_fallback', __( 'The fallback mailbox does not exist.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$was_default = (bool) $mailbox->is_default;
+
+		try {
+			// Re-point tickets BEFORE delete (bulk update — see method docblock).
+			$moved = TicketModel::where( 'mailbox_id', $id )->update( array( 'mailbox_id' => $fallback_id ) );
+
+			// The deleted mailbox was the default — promote the fallback so the
+			// "default mailbox for new tickets" invariant survives.
+			if ( $was_default ) {
+				$fallback->is_default = true;
+				$fallback->save();
+			}
+
+			$mailbox->delete();
+		} catch ( \Throwable $e ) {
+			return new WP_Error( 'mailbox_delete_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after a mailbox is deleted and its tickets re-pointed.
+		 *
+		 * @param int          $id       The id of the deleted mailbox.
+		 * @param MailboxModel $fallback The mailbox tickets were moved to.
+		 */
+		do_action( 'doublescale_support_mailbox_deleted', $id, $fallback );
+
+		doublescale_get_logger()->info(
+			'Support mailbox deleted and tickets re-pointed.',
+			array(
+				'source'      => 'support-mailbox-rest',
+				'mailbox_id'  => $id,
+				'fallback_id' => $fallback_id,
+				'moved'       => (int) $moved,
+			)
+		);
+
 		return new WP_REST_Response( null, 204 );
+	}
+
+	/**
+	 * Move tickets off a mailbox onto another, without deleting the source.
+	 *
+	 * Intent is derived from `ticket_ids`: present and non-empty moves only that
+	 * subset (scoped with `where('mailbox_id', $id)` so a caller cannot move
+	 * another mailbox's tickets); absent moves ALL of the source mailbox's
+	 * tickets. Same bulk-`Builder::update()` reasoning as {@see delete_item()} —
+	 * no per-ticket `mailbox_changed` audit rows for an administrative move.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function move_tickets( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$id      = (int) $request->get_param( 'id' );
+		$mailbox = MailboxModel::find( $id );
+		if ( ! $mailbox ) {
+			return new WP_Error( 'not_found', __( 'Mailbox not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$params     = $request->get_json_params();
+		$params     = is_array( $params ) ? $params : array();
+		$new_box_id = isset( $params['new_box_id'] ) ? (int) $params['new_box_id'] : 0;
+		if ( $new_box_id <= 0 || $new_box_id === $id ) {
+			return new WP_Error(
+				'invalid_destination',
+				__( 'A destination mailbox different from the source is required.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+		if ( ! MailboxModel::find( $new_box_id ) ) {
+			return new WP_Error( 'invalid_destination', __( 'The destination mailbox does not exist.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$query = TicketModel::where( 'mailbox_id', $id );
+
+		// Subset move: only the named tickets, and only if they live on this box.
+		$ticket_ids = isset( $params['ticket_ids'] ) && is_array( $params['ticket_ids'] )
+			? array_values( array_filter( array_map( 'intval', $params['ticket_ids'] ) ) )
+			: array();
+		if ( ! empty( $ticket_ids ) ) {
+			$query->whereIn( 'id', $ticket_ids );
+		}
+
+		try {
+			$moved = $query->update( array( 'mailbox_id' => $new_box_id ) );
+		} catch ( \Throwable $e ) {
+			return new WP_Error( 'mailbox_move_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires after tickets are bulk-moved between mailboxes.
+		 *
+		 * @param int $id         Source mailbox id.
+		 * @param int $new_box_id Destination mailbox id.
+		 * @param int $moved      Number of tickets moved.
+		 */
+		do_action( 'doublescale_support_tickets_moved', $id, $new_box_id, (int) $moved );
+
+		return new WP_REST_Response( array( 'moved' => (int) $moved ), 200 );
 	}
 
 	// ---------------------------------------------------------------------
@@ -414,24 +615,26 @@ class RestMailboxController extends RestController {
 	/**
 	 * Validate a request payload.
 	 *
-	 * `$is_create` flips two behaviours: (a) `email` becomes mandatory, since the
-	 * model can't auto-generate it, and (b) we tolerate the absence of every
-	 * other field. Updates allow partial bodies — only validate keys that are
-	 * actually present.
+	 * A support mailbox IS an SMTP connection, so validation is about the bound
+	 * identity, not a typed address:
+	 *   - A sending identity (`data.identity.from_email`) is REQUIRED on
+	 *     create and may not be cleared on update — it is the source of both the
+	 *     outbound From and the derived `email`. The client never sends `email`;
+	 *     the model derives it on save (see {@see MailboxModel}).
+	 *   - `box_type='email'` (inbound IMAP) additionally requires a
+	 *     *receive-capable* connection (Gmail/Outlook OAuth); a send-only
+	 *     connection is rejected with `connection_not_receivable`.
 	 *
-	 * @param array $params    Request body.
-	 * @param bool  $is_create True for POST, false for PUT.
+	 * Updates allow partial bodies — only keys actually present are validated; the
+	 * effective box_type / connection for the receivability gate fall back to the
+	 * existing row when the payload omits them.
+	 *
+	 * @param array             $params    Request body.
+	 * @param bool              $is_create True for POST, false for PUT.
+	 * @param MailboxModel|null $existing  Row being updated (PUT), for effective-value fallback.
 	 * @return true|WP_Error
 	 */
-	private function validate( array $params, bool $is_create ) {
-		if ( $is_create ) {
-			if ( empty( $params['email'] ) || ! is_email( (string) $params['email'] ) ) {
-				return new WP_Error( 'invalid_email', __( 'A valid mailbox email is required.', 'doublescale' ), array( 'status' => 400 ) );
-			}
-		} elseif ( isset( $params['email'] ) && ! is_email( (string) $params['email'] ) ) {
-			return new WP_Error( 'invalid_email', __( 'Provided email is not valid.', 'doublescale' ), array( 'status' => 400 ) );
-		}
-
+	private function validate( array $params, bool $is_create, ?MailboxModel $existing = null ) {
 		if ( isset( $params['box_type'] ) && ! in_array( $params['box_type'], self::BOX_TYPES, true ) ) {
 			return new WP_Error(
 				'invalid_box_type',
@@ -445,57 +648,121 @@ class RestMailboxController extends RestController {
 			return new WP_Error( 'invalid_data', __( 'The data field must be an object.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$identity_error = $this->validate_identity( $params );
+		$identity_error = $this->validate_identity( $params, $is_create );
 		if ( is_wp_error( $identity_error ) ) {
 			return $identity_error;
+		}
+
+		// Inbound (email) boxes require a receive-capable (Gmail/Outlook OAuth)
+		// connection — there is no IMAP credential to poll otherwise.
+		$receivable_error = $this->validate_receivability( $params, $existing );
+		if ( is_wp_error( $receivable_error ) ) {
+			return $receivable_error;
 		}
 
 		return true;
 	}
 
 	/**
-	 * Enforce that a submitted sending-identity `connection_id` is one the
-	 * current user is actually allowed to bind.
+	 * Reject a `box_type='email'` mailbox bound to a send-only connection.
 	 *
-	 * This is the *enforcement* half of the picker (the list endpoint only
-	 * *offers* visible connections). Without this server-side check a Sales Rep
-	 * could POST an arbitrary `data.identity.connection_id` — e.g. a colleague's
-	 * personal address or an org address — and route a mailbox to send *as* an
-	 * identity they aren't entitled to. We re-derive the allowed set from the
-	 * same SMTP source the picker uses and reject anything outside it.
+	 * Inbound is polled over IMAP using the connection's own OAuth credentials
+	 * (Pro's MailboxImapPoller), so only Gmail/Outlook-connected accounts can
+	 * receive. The effective box_type and from_email fall back to the existing
+	 * row for partial updates, so flipping a web box to email — or re-pointing an
+	 * email box at a send-only connection — is caught even with a partial body.
 	 *
-	 * An empty / absent identity is allowed (a mailbox may have no identity yet;
-	 * outbound then skip-sends + logs — see EmailNotifications).
-	 *
-	 * @param array $params Request body.
+	 * @param array             $params   Request body.
+	 * @param MailboxModel|null $existing Row being updated (null on create).
 	 * @return true|WP_Error
 	 */
-	private function validate_identity( array $params ) {
-		if ( ! isset( $params['data'] ) || ! is_array( $params['data'] ) ) {
+	private function validate_receivability( array $params, ?MailboxModel $existing ) {
+		$box_type = isset( $params['box_type'] )
+			? (string) $params['box_type']
+			: ( $existing ? (string) $existing->box_type : 'web' );
+
+		if ( 'email' !== $box_type ) {
 			return true;
 		}
-		$identity = $params['data']['identity'] ?? null;
-		if ( empty( $identity ) || ! is_array( $identity ) ) {
-			return true; // No identity submitted — allowed (skip-send until set).
+
+		$from_email = '';
+		if ( isset( $params['data']['identity']['from_email'] ) ) {
+			$from_email = (string) $params['data']['identity']['from_email'];
+		} elseif ( $existing ) {
+			$existing_data = is_array( $existing->data ) ? $existing->data : array();
+			$from_email    = isset( $existing_data['identity']['from_email'] )
+				? (string) $existing_data['identity']['from_email']
+				: '';
 		}
 
-		$connection_id = isset( $identity['connection_id'] ) ? (string) $identity['connection_id'] : '';
-		if ( '' === $connection_id ) {
-			return true; // Explicitly cleared — allowed.
-		}
-
-		$allowed_ids = array();
-		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
-			foreach ( \DoubleScale\Modules\Smtp\Settings::get_visible_connections_for_user( get_current_user_id() ) as $conn ) {
-				$allowed_ids[] = (string) $conn['connection_id'];
-			}
-		}
-
-		if ( ! in_array( $connection_id, $allowed_ids, true ) ) {
+		if ( '' === $from_email || ! $this->from_email_is_receivable( $from_email ) ) {
 			return new WP_Error(
-				'identity_not_allowed',
-				__( 'You are not allowed to use the selected sending identity for this mailbox.', 'doublescale' ),
-				array( 'status' => 403 )
+				'connection_not_receivable',
+				__( 'Email channels receive over IMAP, which requires a Gmail or Outlook–connected account. Choose a receive-capable From address, or use a Web channel.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether a From address can receive over IMAP (cheap, no network I/O).
+	 * Single source of truth shared with the editor's email-box gate.
+	 *
+	 * @param string $from_email Mailbox sending-identity address.
+	 * @return bool
+	 */
+	private function from_email_is_receivable( string $from_email ): bool {
+		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return false;
+		}
+		return \DoubleScale\Modules\Smtp\Settings::is_from_email_receivable( $from_email );
+	}
+
+	/**
+	 * Validate the submitted sending identity — the mailbox's From address
+	 * (`data.identity.from_email`).
+	 *
+	 * Identity is REQUIRED on create (it is the only From source) and may not be
+	 * cleared on update: a PUT that doesn't touch identity is fine, but one that
+	 * submits an empty/invalid `from_email` is rejected. Any syntactically valid
+	 * email is accepted (the combobox suggests configured SMTP senders, but a
+	 * free-typed address is allowed); whether it can RECEIVE is a separate,
+	 * box_type='email'-only check ({@see validate_receivability()}).
+	 *
+	 * @param array $params    Request body.
+	 * @param bool  $is_create True for POST, false for PUT.
+	 * @return true|WP_Error
+	 */
+	private function validate_identity( array $params, bool $is_create ) {
+		$has_data = isset( $params['data'] ) && is_array( $params['data'] );
+		$identity = $has_data ? ( $params['data']['identity'] ?? null ) : null;
+
+		// On update, a body that doesn't mention identity at all leaves the
+		// existing one untouched — allowed. (A `data` blob WITHOUT an identity
+		// key is treated the same way, so partial PUTs that only change e.g. the
+		// name don't have to re-send the identity.)
+		$identity_present = is_array( $identity ) && array_key_exists( 'from_email', $identity );
+		if ( ! $identity_present ) {
+			if ( $is_create ) {
+				return new WP_Error(
+					'identity_required',
+					__( 'A sending identity is required. Choose a From address in the Sending identity field.', 'doublescale' ),
+					array( 'status' => 400 )
+				);
+			}
+			return true; // Update with no identity change — leave it as-is.
+		}
+
+		$from_email = sanitize_email( (string) $identity['from_email'] );
+		if ( '' === $from_email || ! is_email( $from_email ) ) {
+			// Identity submitted but empty/invalid — never allowed: a mailbox must
+			// keep a valid From address (create) and may not have it cleared (update).
+			return new WP_Error(
+				'identity_required',
+				__( 'A valid From address is required for the sending identity.', 'doublescale' ),
+				array( 'status' => 400 )
 			);
 		}
 
@@ -520,14 +787,76 @@ class RestMailboxController extends RestController {
 		if ( isset( $out['is_default'] ) ) {
 			$out['is_default'] = (bool) $out['is_default'] ? 1 : 0;
 		}
-		if ( isset( $out['email'] ) ) {
-			$out['email'] = strtolower( trim( (string) $out['email'] ) );
-		}
 		if ( isset( $out['slug'] ) ) {
 			$out['slug'] = sanitize_title( (string) $out['slug'] );
 		}
+		// `data` is a JSON blob — sanitise its known keys (name, identity,
+		// per-event notification templates). Unknown/Pro keys pass through
+		// untouched. `email` is intentionally absent: the model mirrors it from
+		// `identity.from_email`, it is never client-supplied.
+		if ( isset( $out['data'] ) && is_array( $out['data'] ) ) {
+			$out['data'] = $this->sanitize_data( $out['data'] );
+		}
 
 		return $out;
+	}
+
+	/**
+	 * Sanitise the `data` JSON blob. Known keys are cleaned to their expected
+	 * types; any other top-level key (e.g. Pro-added channel detail) passes
+	 * through untouched, so this never strips forward/Pro data:
+	 *
+	 *   - name                  → text
+	 *   - identity.from_email   → email (the only identity sub-key kept; From
+	 *                             Name / Reply-To are derived at send, not stored)
+	 *   - notifications.<event> → { enabled:bool, subject:text, body:wp_kses_post }
+	 *
+	 * @param array $data Decoded `data` from the request.
+	 * @return array
+	 */
+	private function sanitize_data( array $data ): array {
+		$out = $data;
+
+		if ( isset( $out['name'] ) ) {
+			$out['name'] = sanitize_text_field( (string) $out['name'] );
+		}
+
+		if ( isset( $out['identity'] ) && is_array( $out['identity'] ) ) {
+			$out['identity'] = array(
+				'from_email' => isset( $out['identity']['from_email'] )
+					? sanitize_email( (string) $out['identity']['from_email'] )
+					: '',
+			);
+		}
+
+		if ( isset( $out['notifications'] ) && is_array( $out['notifications'] ) ) {
+			$out['notifications'] = $this->sanitize_notifications( $out['notifications'] );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Sanitise the per-mailbox notification template map:
+	 * `<event> => { enabled:bool, subject:text, body:wp_kses_post }`.
+	 *
+	 * @param array $notifications Raw notifications map from `data`.
+	 * @return array<string, array{enabled:bool, subject:string, body:string}>
+	 */
+	private function sanitize_notifications( array $notifications ): array {
+		$clean = array();
+		foreach ( $notifications as $event => $template ) {
+			$event = sanitize_key( (string) $event );
+			if ( '' === $event || ! is_array( $template ) ) {
+				continue;
+			}
+			$clean[ $event ] = array(
+				'enabled' => ! empty( $template['enabled'] ),
+				'subject' => isset( $template['subject'] ) ? sanitize_text_field( (string) $template['subject'] ) : '',
+				'body'    => isset( $template['body'] ) ? wp_kses_post( (string) $template['body'] ) : '',
+			);
+		}
+		return $clean;
 	}
 
 	/**
@@ -548,15 +877,19 @@ class RestMailboxController extends RestController {
 		}
 
 		return array(
-			'id'         => (int) $mailbox->id,
-			'slug'       => (string) $mailbox->slug,
-			'email'      => (string) $mailbox->email,
-			'box_type'   => (string) $mailbox->box_type,
-			'is_default' => (bool) $mailbox->is_default,
-			'name'       => (string) $mailbox->name,
-			'data'       => empty( $data ) ? new \stdClass() : $data,
-			'created_at' => $mailbox->created_at ? (string) $mailbox->created_at : null,
-			'updated_at' => $mailbox->updated_at ? (string) $mailbox->updated_at : null,
+			'id'           => (int) $mailbox->id,
+			'slug'         => (string) $mailbox->slug,
+			'email'        => (string) $mailbox->email,
+			'box_type'     => (string) $mailbox->box_type,
+			'is_default'   => (bool) $mailbox->is_default,
+			'name'         => (string) $mailbox->name,
+			// Present when the list query used withCount('tickets'); single-row
+			// fetches (get/create/update) fall back to a direct count so the field
+			// is always accurate.
+			'ticket_count' => (int) ( $mailbox->tickets_count ?? $mailbox->tickets()->count() ),
+			'data'         => empty( $data ) ? new \stdClass() : $data,
+			'created_at'   => $mailbox->created_at ? (string) $mailbox->created_at : null,
+			'updated_at'   => $mailbox->updated_at ? (string) $mailbox->updated_at : null,
 		);
 	}
 

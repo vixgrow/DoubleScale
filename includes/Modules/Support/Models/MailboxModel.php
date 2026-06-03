@@ -121,6 +121,10 @@ class MailboxModel extends Model {
 	 * Override save to recover from slug UNIQUE-collisions that race past the
 	 * counter loop in the boot creating event (concurrent imports, retries).
 	 *
+	 * Only `slug` is unique, so it is the only collision we retry. `email` is
+	 * intentionally NOT unique (duplicate mailboxes are allowed), so there is no
+	 * email branch here — nothing can collide on it.
+	 *
 	 * @param array $options Eloquent save options.
 	 * @return bool
 	 */
@@ -179,5 +183,47 @@ class MailboxModel extends Model {
 				}
 			}
 		);
+
+		/*
+		 * Mirror the `email` column from the mailbox's own sending identity
+		 * (`data.identity.from_email`) — the single chokepoint that keeps `email`
+		 * in sync across every caller (REST, seeder, IMAP, WP-CLI), for EVERY box
+		 * type. The from_email is the box identity used to send (From/Reply-To) and
+		 * — for `email` boxes — to match inbound mail. Runs on insert AND update
+		 * (the `saving` event precedes both `creating` and `updating`). Re-saves are
+		 * idempotent; a missing identity keeps the value the row already holds
+		 * (finally the site admin email), so the NOT NULL column is never blanked.
+		 */
+		static::saving(
+			function ( $mailbox ) {
+				self::populate_email_from_identity( $mailbox );
+			}
+		);
+	}
+
+	/**
+	 * Mirror the `email` column from the mailbox's sending identity, for EVERY
+	 * box type.
+	 *
+	 * A support mailbox stores its sending identity directly as
+	 * `data.identity.from_email` (the same shape as the CRM Inbox identity). That
+	 * address is the From/Reply-To used to send and — for `email` boxes — the
+	 * address inbound mail is matched against. When no identity is set yet we keep
+	 * whatever the row already has, finally falling back to the site admin email
+	 * so the NOT NULL column always lands a non-empty value.
+	 *
+	 * @param self $mailbox Mailbox being saved.
+	 * @return void
+	 */
+	private static function populate_email_from_identity( self $mailbox ): void {
+		$data       = is_array( $mailbox->data ) ? $mailbox->data : array();
+		$from_email = isset( $data['identity']['from_email'] ) ? (string) $data['identity']['from_email'] : '';
+
+		if ( '' === $from_email ) {
+			// Keep an already-set address; otherwise fall back so NOT NULL holds.
+			$from_email = ! empty( $mailbox->email ) ? (string) $mailbox->email : (string) get_option( 'admin_email' );
+		}
+
+		$mailbox->email = strtolower( trim( $from_email ) );
 	}
 }

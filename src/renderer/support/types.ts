@@ -31,6 +31,10 @@ export interface PortalConfig {
 	};
 	lang: string;
 	mount_id: string;
+	// Optional mailbox scope from the shortcode's `box_id` attribute (0/absent
+	// = unscoped). Set in index.tsx from the mount node's data-box-id; locks
+	// new tickets and filters the list to this mailbox.
+	box_id?: number;
 }
 
 declare global {

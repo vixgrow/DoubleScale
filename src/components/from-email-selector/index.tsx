@@ -74,6 +74,15 @@ interface FromEmailSelectorProps {
 	required?: boolean;
 	className?: string;
 	placeholder?: string;
+	/**
+	 * When provided, these senders REPLACE the component's internal SMTP
+	 * fetch. Pass a server-supplied list (the Support mailbox editor forwards
+	 * `meta.smtp_senders`) so roles without CRM-manager access still get the
+	 * picker - the gated SMTP GET would 403 for them. An empty array means
+	 * "no senders" (free-type input, no picker); omit the prop to keep the
+	 * default self-fetch behavior.
+	 */
+	senders?: VerifiedSender[];
 }
 
 export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
@@ -83,6 +92,7 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	required = true,
 	className,
 	placeholder,
+	senders,
 }) => {
 	const [open, setOpen] = useState(false);
 	const navigate = useNavigate();
@@ -90,8 +100,12 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 	const modulesTick = useModulesConfigTick();
 	const smtpModuleOn = config.isModuleToggleEnabled('smtp');
 
+	// Parent-supplied senders take over completely - skip the internal SMTP
+	// fetch (it is CRM-manager-gated and 403s for support-only roles).
+	const sendersOverride = senders ?? null;
+
 	useEffect(() => {
-		if (!smtpModuleOn) {
+		if (sendersOverride || !smtpModuleOn) {
 			setLiveSmtp(null);
 			return;
 		}
@@ -118,16 +132,25 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [smtpModuleOn, modulesTick]);
+	}, [smtpModuleOn, modulesTick, sendersOverride]);
 
-	const smtpInfo: DoubleScaleInfo = liveSmtp ?? readSmtpInfoFromConfig();
+	const overrideInfo: DoubleScaleInfo | null = sendersOverride
+		? {
+				configured: sendersOverride.length > 0,
+				verified_senders: sendersOverride,
+		  }
+		: null;
+	const smtpInfo: DoubleScaleInfo =
+		overrideInfo ?? liveSmtp ?? readSmtpInfoFromConfig();
 
-	// Check if we have verified senders
-	const hasVerifiedSenders =
-		smtpModuleOn &&
+	// Check if we have verified senders. A parent override bypasses the
+	// `smtpModuleOn` gate - the server already vouched for these senders.
+	const hasVerifiedSenders = !!(
+		(sendersOverride || smtpModuleOn) &&
 		smtpInfo?.configured &&
 		smtpInfo?.verified_senders &&
-		smtpInfo.verified_senders.length > 0;
+		smtpInfo.verified_senders.length > 0
+	);
 
 	// Handle selection from dropdown
 	const handleSelect = (selectedEmail: string) => {

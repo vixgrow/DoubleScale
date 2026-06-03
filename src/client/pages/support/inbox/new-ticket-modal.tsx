@@ -8,7 +8,7 @@
  * themselves so it appears in the conversation timeline.
  *
  * Customer selection (Q1): a typeahead over existing CRM contacts
- * (`/doublescale/v1/contacts?search=`). Picking a contact binds it by
+ * (`/doublescale/v1/contacts?keywords=`). Picking a contact binds it by
  * `contact_id` (exact, no dup risk); if the customer is new, the operator
  * switches to "new email" and the backend find_or_creates from email + name.
  */
@@ -84,7 +84,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		}
 		setSearching(true);
 		apiFetch<{ data: ContactHit[] }>({
-			path: `/doublescale/v1/contacts?search=${encodeURIComponent(
+			path: `/doublescale/v1/contacts?keywords=${encodeURIComponent(
 				term.trim()
 			)}&per_page=8`,
 		})

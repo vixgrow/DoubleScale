@@ -32,7 +32,7 @@ use DoubleScale\Modules\Support\Constants\TicketStatus;
  * @property string                                                              $title
  * @property string                                                              $status
  * @property string                                                              $priority
- * @property int|null                                                            $mailbox_id
+ * @property int                                                                 $mailbox_id
  * @property int                                                                 $contact_id
  * @property int|null                                                            $agent_user_id
  * @property string|null                                                         $product
@@ -121,7 +121,12 @@ class TicketModel extends Model {
 	}
 
 	/**
-	 * Mailbox the ticket arrived through (NULL = no channel).
+	 * Mailbox (channel/department) the ticket belongs to. The `mailbox_id`
+	 * column is NOT NULL — every ticket has a mailbox. {@see TicketService::resolve_mailbox_id()}
+	 * falls back to the default mailbox when a create omits one, and deleting a
+	 * mailbox re-points its tickets to an operator-chosen fallback before the
+	 * row is removed (see RestMailboxController::delete_item), so there is no
+	 * "no channel" / orphaned-ticket state.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */

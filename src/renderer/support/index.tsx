@@ -13,9 +13,21 @@ import type { PortalConfig } from './types';
 import PortalApp from './app';
 import './style.scss';
 
-const config = window.doublescale_support_portal_config as PortalConfig | undefined;
-const mount = config?.mount_id ? document.getElementById(config.mount_id) : null;
+const baseConfig = window.doublescale_support_portal_config as
+	| PortalConfig
+	| undefined;
+const mount = baseConfig?.mount_id
+	? document.getElementById(baseConfig.mount_id)
+	: null;
 
-if (mount && config) {
+if (mount && baseConfig) {
+	// The shortcode can scope the portal to one mailbox via `box_id` on the
+	// mount node (e.g. [doublescale_support_portal box_id="3"]). 0/absent means
+	// unscoped: the customer sees and picks across all mailboxes.
+	const rawBoxId = parseInt(mount.getAttribute('data-box-id') || '0', 10);
+	const config: PortalConfig = {
+		...baseConfig,
+		box_id: Number.isFinite(rawBoxId) && rawBoxId > 0 ? rawBoxId : undefined,
+	};
 	createRoot(mount).render(<PortalApp config={config} />);
 }

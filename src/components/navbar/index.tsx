@@ -374,16 +374,16 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				if (item.path === 'support') {
 					// Unlike `booking` (whose parent path only redirects), the
 					// `support` parent path IS the inbox, so the first child
-					// links back to it explicitly — the group reads Inbox /
-					// Settings. The Settings link carries its own capability
-					// gate (matching the `support/settings` route) so it's
+					// links back to it explicitly. The group reads Inbox /
+					// Mailboxes. The Mailboxes link carries its own capability
+					// gate (matching the `support/mailboxes` route) so it's
 					// hidden from Sales Manager / Sales Rep instead of showing a
 					// link that lands on Access Denied.
 					navItem.subMenu = [
 						{ path: 'support', label: __('Inbox', 'doublescale') },
 						{
-							path: 'support/settings',
-							label: __('Settings', 'doublescale'),
+							path: 'support/mailboxes',
+							label: __('Mailboxes', 'doublescale'),
 							requiredCapability: [
 								'doublescale_manage_support_settings',
 							],

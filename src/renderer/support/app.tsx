@@ -65,6 +65,7 @@ const PortalApp = ({ config }: Props) => {
 
 			{showCompose && (
 				<NewTicketModal
+					boxId={config.box_id}
 					onClose={() => setShowCompose(false)}
 					onCreated={(ticket) => {
 						setShowCompose(false);

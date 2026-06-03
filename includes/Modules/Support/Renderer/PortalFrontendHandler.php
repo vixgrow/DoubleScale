@@ -58,21 +58,32 @@ final class PortalFrontendHandler {
 	/**
 	 * Shortcode callback.
 	 *
-	 * Returns the mount markup for logged-in users; nothing for guests.
+	 * Returns the mount markup for logged-in users; nothing for guests. The
+	 * optional `box_id` attribute scopes the portal to one support mailbox:
+	 * `[doublescale_support_portal box_id="3"]` makes tickets created here route
+	 * to mailbox 3 (and the customer sees only that mailbox's tickets). The
+	 * default `box_id="0"` leaves the portal unscoped. The id rides on the mount
+	 * node as `data-box-id`, so multiple scoped portals can coexist on one page.
+	 *
 	 * We enqueue from `wp_enqueue_scripts` (not here) so the bundle is
 	 * available even if the shortcode lives below content that hasn't
 	 * been parsed yet by the time scripts are decided.
 	 *
+	 * @param array<string, mixed>|string $atts Shortcode attributes; `box_id` (int) optional.
 	 * @return string HTML mount node, or empty string for guests.
 	 */
-	public function render_shortcode(): string {
+	public function render_shortcode( $atts = array() ): string {
 		if ( ! is_user_logged_in() ) {
 			return '';
 		}
 
+		$atts   = shortcode_atts( array( 'box_id' => 0 ), $atts, self::SHORTCODE );
+		$box_id = max( 0, (int) $atts['box_id'] );
+
 		return sprintf(
-			'<div id="%s"></div>',
-			esc_attr( self::MOUNT_ID )
+			'<div id="%s" data-box-id="%d"></div>',
+			esc_attr( self::MOUNT_ID ),
+			$box_id
 		);
 	}
 

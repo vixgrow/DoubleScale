@@ -5,24 +5,31 @@
  * Subscribes to the ticket-lifecycle hooks emitted by {@see TicketService} and
  * sends the matching customer-facing email through {@see Emails::send()} (which
  * the SMTP module intercepts). This is the *outbound* half of the email
- * pipeline — the inbound IMAP/MTA engine that creates tickets FROM email is a
- * Pro feature and lives elsewhere.
+ * pipeline — the inbound IMAP engine that creates tickets FROM email is a Pro
+ * feature and lives elsewhere.
  *
- * Sender identity: support mail sends from the TICKET'S MAILBOX sending
- * identity (`data.identity.connection_id` → an SMTP connection's From), and
- * ONLY that. There is no fallback to the replying agent, the shared CRM email,
- * or the admin address (product decision 2026-06-01, matching Fluent Support
- * where the mailbox is the sole sender). A mailbox with no resolvable identity
- * causes the outbound email to be skipped + logged (the reply still saves) —
- * see {@see self::dispatch()} / {@see self::sender_identity()}. Operators bind a
- * sending identity per mailbox in Settings → Support → Mailboxes.
+ * Customer-facing ONLY: admin / agent alerts are owned by Pro's
+ * SupportNotifications. This service never emails staff.
+ *
+ * Sender identity + transport: support mail sends from the TICKET'S MAILBOX
+ * sending identity (`data.identity.from_email`), and ONLY that — there is no
+ * fallback to the replying agent, the shared CRM email, or the admin address.
+ * Delivery is additionally PINNED to the SMTP connection that sends from that
+ * address (see {@see self::dispatch()}) so a multi-connection install can't route
+ * the mail through the wrong SMTP connection. A mailbox with no sending identity
+ * — or a from_email no SMTP connection sends from — causes the outbound email to
+ * be skipped + logged (the reply still saves). Operators set the sending identity
+ * per mailbox in the Support → Mailboxes editor.
+ *
+ * Per-mailbox templates: each event's enabled-state + subject + body resolve
+ * per-mailbox override → built-in default ({@see self::default_templates()}).
+ * Operator subject/body templates support {token} placeholders (see
+ * {@see self::tokens()}).
  *
  * Reliability: every listener is wrapped so a broken SMTP transport can never
  * abort the REST request that triggered it (an agent's reply must still be
  * saved even if the notification email fails). Failures are logged through
  * `doublescale_get_logger()` with `source='support-email-notifications'`.
- *
- * Design reference: {@see \DoubleScale\Modules\Booking\Services\EmailNotifications}.
  *
  * @since 1.0.0
  * @package DoubleScale\Modules\Support
@@ -32,7 +39,6 @@ namespace DoubleScale\Modules\Support\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use DoubleScale\Core\Settings\Settings;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
@@ -43,9 +49,9 @@ use DoubleScale\Modules\Support\Models\TicketModel;
 final class EmailNotifications {
 
 	/**
-	 * Default per-event toggle state. An operator can override each key under
-	 * `doublescale_settings['support']['notifications']`; anything not present
-	 * defaults to enabled so a fresh install emails out of the box.
+	 * Built-in fallback enabled-state per event — used when a mailbox doesn't set
+	 * `enabled` for the event. Anything not present defaults to enabled so a fresh
+	 * install emails out of the box.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -75,30 +81,23 @@ final class EmailNotifications {
 	 * @return void
 	 */
 	public function on_ticket_created( $ticket ): void {
-		if ( ! $this->is_enabled( 'ticket_created_to_customer' ) ) {
-			return;
-		}
 		$this->safely(
 			$ticket,
 			function ( TicketModel $t ) {
+				$tpl = $this->resolve_template( $t, 'ticket_created_to_customer' );
+				if ( ! $tpl['enabled'] ) {
+					return;
+				}
 				$email = $this->customer_email( $t );
 				if ( '' === $email ) {
 					return;
 				}
 
-				/* translators: %s — ticket title. */
-				$subject = sprintf( __( 'We received your request: %s', 'doublescale' ), $t->title );
-				$body    = $this->wrap_body(
-					$t,
-					sprintf(
-						/* translators: 1: customer first name, 2: ticket title. */
-						__( 'Hi %1$s, thanks for reaching out. We have opened a support ticket for "%2$s" and will reply soon.', 'doublescale' ),
-						$this->customer_first_name( $t ),
-						$t->title
-					)
-				);
+				$tokens  = $this->tokens( $t );
+				$subject = $this->render( $tpl['subject'], $tokens );
+				$inner   = $this->render( $tpl['body'], $tokens );
 
-				$this->dispatch( $t, $email, $subject, $body );
+				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ) );
 			}
 		);
 	}
@@ -116,9 +115,6 @@ final class EmailNotifications {
 	 * @return void
 	 */
 	public function on_reply_created( $activity, $ticket ): void {
-		if ( ! $this->is_enabled( 'reply_to_customer' ) ) {
-			return;
-		}
 		// Customer-authored reply (no agent user_id) — nothing to send outward.
 		if ( ! is_object( $activity ) || empty( $activity->user_id ) ) {
 			return;
@@ -127,6 +123,10 @@ final class EmailNotifications {
 		$this->safely(
 			$ticket,
 			function ( TicketModel $t ) use ( $activity ) {
+				$tpl = $this->resolve_template( $t, 'reply_to_customer' );
+				if ( ! $tpl['enabled'] ) {
+					return;
+				}
 				$email = $this->customer_email( $t );
 				if ( '' === $email ) {
 					return;
@@ -135,13 +135,16 @@ final class EmailNotifications {
 				$data    = is_array( $activity->data ) ? $activity->data : array();
 				$content = isset( $data['content'] ) ? (string) $data['content'] : '';
 
-				/* translators: %s — ticket title. */
-				$subject = sprintf( __( 'Re: %s', 'doublescale' ), $t->title );
-				$body    = $this->wrap_body( $t, $content );
+				$tokens  = $this->tokens( $t, array( 'reply_content' => $content ) );
+				$subject = $this->render( $tpl['subject'], $tokens );
+				// The body default is the {reply_content} token, so with no operator
+				// override the customer receives the agent's message verbatim; an
+				// override can wrap or augment it.
+				$inner = $this->render( $tpl['body'], $tokens );
 
 				// From is the mailbox's sending identity (not the agent's) — see
 				// dispatch() / sender_identity().
-				$this->dispatch( $t, $email, $subject, $body );
+				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ) );
 			}
 		);
 	}
@@ -158,9 +161,6 @@ final class EmailNotifications {
 	 * @return void
 	 */
 	public function on_ticket_updated( $ticket, $effective, $before ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- $before is required by the 3-arg hook signature; only the new value ($effective) is needed here.
-		if ( ! $this->is_enabled( 'status_change_to_customer' ) ) {
-			return;
-		}
 		if ( ! is_array( $effective ) || ! array_key_exists( 'status', $effective ) ) {
 			return;
 		}
@@ -172,25 +172,21 @@ final class EmailNotifications {
 		$this->safely(
 			$ticket,
 			function ( TicketModel $t ) use ( $new_status ) {
+				$tpl = $this->resolve_template( $t, 'status_change_to_customer' );
+				if ( ! $tpl['enabled'] ) {
+					return;
+				}
 				$email = $this->customer_email( $t );
 				if ( '' === $email ) {
 					return;
 				}
 
-				$label = TicketStatus::get_label( $new_status );
-				/* translators: 1: ticket title, 2: status label (Resolved/Closed). */
-				$subject = sprintf( __( 'Your ticket "%1$s" was marked %2$s', 'doublescale' ), $t->title, $label );
-				$body    = $this->wrap_body(
-					$t,
-					sprintf(
-						/* translators: 1: customer first name, 2: status label. */
-						__( 'Hi %1$s, your support ticket has been marked %2$s. Reply to this email if you still need help and we will re-open it.', 'doublescale' ),
-						$this->customer_first_name( $t ),
-						$label
-					)
-				);
+				$label   = TicketStatus::get_label( $new_status );
+				$tokens  = $this->tokens( $t, array( 'ticket_status' => $label ) );
+				$subject = $this->render( $tpl['subject'], $tokens );
+				$inner   = $this->render( $tpl['body'], $tokens );
 
-				$this->dispatch( $t, $email, $subject, $body );
+				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ) );
 			}
 		);
 	}
@@ -200,7 +196,8 @@ final class EmailNotifications {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * Build an {@see Emails} instance with the CRM sender identity and send.
+	 * Build an {@see Emails} instance with the mailbox sender identity and send,
+	 * pinning delivery to that mailbox's own SMTP connection.
 	 *
 	 * @param TicketModel $ticket  Ticket — supplies the mailbox sending identity and logging context.
 	 * @param string      $to      Recipient email.
@@ -211,12 +208,12 @@ final class EmailNotifications {
 	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body ): void {
 		$identity = $this->sender_identity( $ticket );
 
-		// No resolvable sending identity on the mailbox → do NOT send. There is
-		// no fallback to the agent / shared / admin identity (product decision
-		// 2026-06-01): a support mailbox must carry its own sending identity, so
-		// the channel's From is deterministic. The triggering reply/ticket has
-		// already been persisted; skipping the email leaves the agent's action
-		// intact and surfaces the misconfiguration in the log + the mailbox UI.
+		// No resolvable sending identity on the mailbox → do NOT send. A support
+		// mailbox must carry its own sending identity so the channel's From is
+		// deterministic; there is no fallback to the agent / shared / admin
+		// identity. The triggering reply/ticket has already been persisted, so
+		// skipping the email leaves the agent's action intact and surfaces the
+		// misconfiguration in the log + the mailbox UI.
 		if ( null === $identity ) {
 			// Error level: a customer notification the operator enabled silently
 			// not going out is an operator-facing failure they need to see (the
@@ -235,12 +232,42 @@ final class EmailNotifications {
 			return;
 		}
 
+		if ( '' === $identity['connection_id'] ) {
+			// Identity set, but no SMTP connection sends from this address. We do
+			// NOT fall through to the global default route (it would deliver under a
+			// right-looking From with misaligned SPF/DKIM) — skip + log instead.
+			doublescale_get_logger()->error(
+				'No SMTP connection sends from the support mailbox address; outbound email skipped',
+				array(
+					'source'       => 'support-email-notifications',
+					'ticket_id'    => (int) $ticket->id,
+					'mailbox_id'   => $ticket->mailbox_id ? (int) $ticket->mailbox_id : null,
+					'from_address' => $identity['from_address'],
+					'recipient'    => $to,
+				)
+			);
+			return;
+		}
+
 		$emails               = new Emails();
 		$emails->from_address = $identity['from_address'];
 		$emails->from_name    = $identity['from_name'];
 		$emails->reply_to     = $identity['reply_to'];
 
-		$result = $emails->send( $to, $subject, $body );
+		// Pin delivery to the mailbox's OWN connection. Emails::send() routes
+		// through the SMTP module's PHPMailerOverride, which reads this filter via
+		// get_smart_route() inside wp_mail(); the one-shot add/remove scopes the
+		// override to exactly this send so a later mail isn't mis-routed.
+		$connection_id = $identity['connection_id'];
+		$pin           = static function () use ( $connection_id ) {
+			return $connection_id;
+		};
+		add_filter( 'doublescale_smtp_explicit_connection', $pin );
+		try {
+			$result = $emails->send( $to, $subject, $body );
+		} finally {
+			remove_filter( 'doublescale_smtp_explicit_connection', $pin );
+		}
 
 		if ( $result ) {
 			doublescale_get_logger()->info(
@@ -266,22 +293,24 @@ final class EmailNotifications {
 	}
 
 	/**
-	 * Resolve the From / Reply-To from the TICKET'S MAILBOX sending identity.
+	 * Resolve the From / Reply-To (and the SMTP connection to pin) from the
+	 * TICKET'S MAILBOX sending identity.
 	 *
-	 * The mailbox carries `data.identity.connection_id` pointing at an SMTP
-	 * connection (configured in Settings → Support → Mailboxes). That connection
-	 * supplies the From — and it is the *only* source: there is no fallback to
-	 * the replying agent, the shared CRM email, or the admin address (product
-	 * decision 2026-06-01, matching Fluent Support, where the mailbox is the sole
-	 * sender). Every reply in a mailbox therefore sends from the channel's
-	 * address regardless of which agent replied.
+	 * The mailbox stores ONLY its From address (`data.identity.from_email`), set in
+	 * the Support → Mailboxes editor. That address is the sole From source — there
+	 * is no fallback to the replying agent, the shared CRM email, or the admin
+	 * address — so every reply in a mailbox sends from the channel's address
+	 * regardless of which agent replied. From-name and Reply-To are derived, not
+	 * stored: the From name comes from the SMTP connection that sends from this
+	 * address (falling back to the site name), and Reply-To is the From address.
+	 * `connection_id` is that same connection ({@see \DoubleScale\Modules\Smtp\Settings::get_connection_id_for_from_email()})
+	 * so {@see dispatch()} can pin transport; it is '' when no connection sends from
+	 * the address, which dispatch() treats as "skip + log".
 	 *
-	 * Returns NULL when the mailbox has no identity, or its bound connection was
-	 * deleted / has no From address. {@see dispatch()} treats NULL as "skip the
-	 * send and log" — never as "fall back to someone else's address".
+	 * Returns NULL only when the mailbox has no from_email at all.
 	 *
 	 * @param TicketModel $ticket Ticket whose mailbox identity to resolve.
-	 * @return array{from_address: string, from_name: string, reply_to: string}|null
+	 * @return array{connection_id: string, from_address: string, from_name: string, reply_to: string}|null
 	 */
 	private function sender_identity( TicketModel $ticket ): ?array {
 		$mailbox = $ticket->mailbox;
@@ -289,49 +318,180 @@ final class EmailNotifications {
 			return null;
 		}
 
-		$data          = is_array( $mailbox->data ) ? $mailbox->data : array();
-		$identity      = isset( $data['identity'] ) && is_array( $data['identity'] ) ? $data['identity'] : array();
-		$connection_id = isset( $identity['connection_id'] ) ? (string) $identity['connection_id'] : '';
-		if ( '' === $connection_id || ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+		$data       = is_array( $mailbox->data ) ? $mailbox->data : array();
+		$identity   = isset( $data['identity'] ) && is_array( $data['identity'] ) ? $data['identity'] : array();
+		$from_email = isset( $identity['from_email'] ) ? sanitize_email( (string) $identity['from_email'] ) : '';
+		if ( '' === $from_email ) {
 			return null;
 		}
 
-		$resolved = \DoubleScale\Modules\Smtp\Settings::get_identity_for_connection( $connection_id );
-		if ( null === $resolved ) {
-			return null;
+		// The mailbox stores only the From address; the SMTP connection that sends
+		// from it supplies the From name (and is what we pin transport to). No
+		// matching connection → '' → dispatch() skips + logs.
+		$connection_id = '';
+		$from_name     = '';
+		if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			$connection_id = \DoubleScale\Modules\Smtp\Settings::get_connection_id_for_from_email( $from_email );
+			if ( '' !== $connection_id ) {
+				$resolved = \DoubleScale\Modules\Smtp\Settings::get_identity_for_connection( $connection_id );
+				if ( is_array( $resolved ) && ! empty( $resolved['from_name'] ) ) {
+					$from_name = (string) $resolved['from_name'];
+				}
+			}
 		}
-
-		$from_name = '' !== $resolved['from_name'] ? $resolved['from_name'] : get_bloginfo( 'name' );
+		if ( '' === $from_name ) {
+			$from_name = (string) get_bloginfo( 'name' );
+		}
 
 		return array(
-			'from_address' => $resolved['from_email'],
-			'from_name'    => $from_name,
-			'reply_to'     => $resolved['from_email'],
+			'connection_id' => $connection_id,
+			'from_address'  => $from_email,
+			'from_name'     => $from_name,
+			'reply_to'      => $from_email,
 		);
+	}
+
+	// ---------------------------------------------------------------------
+	// Template resolution
+	// ---------------------------------------------------------------------
+
+	/**
+	 * Resolve a notification event to its effective `{enabled, subject, body}`: the
+	 * built-in default ({@see self::default_templates()}) overlaid by the mailbox's
+	 * own override. A non-empty override subject/body wins; an empty one leaves the
+	 * built-in copy in place, so the returned subject/body are always render-ready.
+	 * `enabled` defaults from {@see self::NOTIFICATION_DEFAULTS} and is overridden
+	 * by the mailbox. The override tolerates the legacy flat-bool toggle shape (a
+	 * bare bool = enabled-state only).
+	 *
+	 * @param TicketModel $ticket Ticket (supplies the mailbox).
+	 * @param string      $event  Event key.
+	 * @return array{enabled:bool, subject:string, body:string}
+	 */
+	private function resolve_template( TicketModel $ticket, string $event ): array {
+		$defaults = self::default_templates();
+		$default  = isset( $defaults[ $event ] ) ? $defaults[ $event ] : array(
+			'subject' => '',
+			'body'    => '',
+		);
+
+		$enabled = self::NOTIFICATION_DEFAULTS[ $event ] ?? false;
+		$subject = (string) $default['subject'];
+		$body    = (string) $default['body'];
+
+		$overrides = $this->mailbox_templates( $ticket );
+		if ( array_key_exists( $event, $overrides ) ) {
+			$tpl = $overrides[ $event ];
+
+			// Legacy flat toggle: a bare bool only carries the enabled state.
+			if ( is_bool( $tpl ) ) {
+				$enabled = $tpl;
+			} elseif ( is_array( $tpl ) ) {
+				if ( array_key_exists( 'enabled', $tpl ) ) {
+					$enabled = (bool) $tpl['enabled'];
+				}
+				if ( isset( $tpl['subject'] ) && '' !== trim( (string) $tpl['subject'] ) ) {
+					$subject = (string) $tpl['subject'];
+				}
+				if ( isset( $tpl['body'] ) && '' !== trim( (string) $tpl['body'] ) ) {
+					$body = (string) $tpl['body'];
+				}
+			}
+		}
+
+		return array(
+			'enabled' => $enabled,
+			'subject' => $subject,
+			'body'    => $body,
+		);
+	}
+
+	/**
+	 * The built-in default customer-email templates — the canonical copy that
+	 * seeds every mailbox and is the final fallback when a mailbox leaves a
+	 * subject/body blank. Subjects/bodies use {token} placeholders rendered by
+	 * {@see self::render()} ({@see self::tokens()} for the token set). This is also
+	 * the source the mailbox editor reads (via the REST list `meta`) so the default
+	 * copy is visible and editable in the UI.
+	 *
+	 * @return array<string, array{subject:string, body:string}>
+	 */
+	public static function default_templates(): array {
+		return array(
+			'ticket_created_to_customer' => array(
+				'subject' => __( 'We received your request: {ticket_title}', 'doublescale' ),
+				'body'    => __( 'Hi {customer_first_name}, thanks for reaching out. We have opened a support ticket for "{ticket_title}" and will reply soon.', 'doublescale' ),
+			),
+			'reply_to_customer'          => array(
+				'subject' => __( 'Re: {ticket_title}', 'doublescale' ),
+				'body'    => '{reply_content}',
+			),
+			'status_change_to_customer'  => array(
+				'subject' => __( 'Your ticket "{ticket_title}" was marked {ticket_status}', 'doublescale' ),
+				'body'    => __( 'Hi {customer_first_name}, your support ticket has been marked {ticket_status}. Reply to this email if you still need help and we will re-open it.', 'doublescale' ),
+			),
+		);
+	}
+
+	/**
+	 * Per-mailbox notification template overrides for a ticket's mailbox.
+	 *
+	 * @param TicketModel $ticket Ticket.
+	 * @return array<string, mixed>
+	 */
+	private function mailbox_templates( TicketModel $ticket ): array {
+		$mailbox = $ticket->mailbox;
+		if ( ! $mailbox ) {
+			return array();
+		}
+		$data = is_array( $mailbox->data ) ? $mailbox->data : array();
+		return isset( $data['notifications'] ) && is_array( $data['notifications'] )
+			? $data['notifications']
+			: array();
+	}
+
+	/**
+	 * The {token} → value map an operator subject/body template may reference.
+	 * `$extra` lets a listener add event-specific tokens (e.g. `reply_content`,
+	 * a resolved `ticket_status` label).
+	 *
+	 * @param TicketModel $ticket Ticket.
+	 * @param array       $extra  Event-specific overrides merged over the base set.
+	 * @return array<string, string>
+	 */
+	private function tokens( TicketModel $ticket, array $extra = array() ): array {
+		$base = array(
+			'customer_first_name' => $this->customer_first_name( $ticket ),
+			'customer_email'      => $this->customer_email( $ticket ),
+			'ticket_title'        => (string) $ticket->title,
+			'ticket_id'           => (string) $ticket->id,
+			'ticket_status'       => TicketStatus::get_label( (string) $ticket->status ),
+			'site_name'           => (string) get_bloginfo( 'name' ),
+			'reply_content'       => '',
+		);
+		return array_merge( $base, $extra );
+	}
+
+	/**
+	 * Substitute `{token}` placeholders in an operator template.
+	 *
+	 * @param string                $template Subject or body template.
+	 * @param array<string, string> $tokens   Token map from {@see tokens()}.
+	 * @return string
+	 */
+	private function render( string $template, array $tokens ): string {
+		$search  = array();
+		$replace = array();
+		foreach ( $tokens as $key => $value ) {
+			$search[]  = '{' . $key . '}';
+			$replace[] = (string) $value;
+		}
+		return str_replace( $search, $replace, $template );
 	}
 
 	// ---------------------------------------------------------------------
 	// Helpers
 	// ---------------------------------------------------------------------
-
-	/**
-	 * Whether a given notification event is enabled.
-	 *
-	 * @param string $key Event key (see NOTIFICATION_DEFAULTS).
-	 * @return bool
-	 */
-	private function is_enabled( string $key ): bool {
-		$support = Settings::get( 'support', array() );
-		$support = is_array( $support ) ? $support : array();
-		$toggles = isset( $support['notifications'] ) && is_array( $support['notifications'] )
-			? $support['notifications']
-			: array();
-
-		if ( array_key_exists( $key, $toggles ) ) {
-			return (bool) $toggles[ $key ];
-		}
-		return self::NOTIFICATION_DEFAULTS[ $key ] ?? false;
-	}
 
 	/**
 	 * The ticket customer's email, or '' when unresolvable.
@@ -364,7 +524,8 @@ final class EmailNotifications {
 	 *
 	 * Kept intentionally simple — the booking module renders richer templated
 	 * emails; support's outbound is plain so it reads well in any client. The
-	 * content is already `wp_kses_post`-sanitised upstream by TicketService.
+	 * content is already `wp_kses_post`-sanitised upstream by TicketService (or
+	 * by the notification-template sanitiser for operator bodies).
 	 *
 	 * @param TicketModel $ticket Ticket (reserved for future templating / footer).
 	 * @param string      $inner  Inner HTML/body content.

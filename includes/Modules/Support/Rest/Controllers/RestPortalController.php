@@ -224,6 +224,14 @@ class RestPortalController extends RestController {
 			$query->where( 'title', 'LIKE', $needle );
 		}
 
+		// Filter: mailbox scope. A per-mailbox portal (the shortcode's `box_id`)
+		// narrows the customer's own tickets to that one mailbox, matching the
+		// scoped create path so a scoped portal shows only its mailbox's tickets.
+		$mailbox_id = (int) $request->get_param( 'mailbox_id' );
+		if ( $mailbox_id > 0 ) {
+			$query->where( 'mailbox_id', $mailbox_id );
+		}
+
 		$query->orderBy( 'updated_at', 'desc' );
 
 		$per_page_raw = (int) $request->get_param( 'per_page' );
@@ -367,8 +375,16 @@ class RestPortalController extends RestController {
 			'source'     => 'web',
 		);
 
+		// Honor the client's mailbox choice only if it names a real mailbox (any
+		// type — both web and email boxes are portal channels). An unknown id is
+		// dropped silently so TicketService::resolve_mailbox_id() falls back to
+		// the default channel, rather than surfacing a routing error to the
+		// customer or writing an invalid FK.
 		if ( isset( $params['mailbox_id'] ) ) {
-			$create_data['mailbox_id'] = (int) $params['mailbox_id'];
+			$requested_mailbox_id = (int) $params['mailbox_id'];
+			if ( $requested_mailbox_id > 0 && MailboxModel::where( 'id', $requested_mailbox_id )->exists() ) {
+				$create_data['mailbox_id'] = $requested_mailbox_id;
+			}
 		}
 
 		$ticket = $this->service()->create_ticket( $create_data );

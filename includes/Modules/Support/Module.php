@@ -131,7 +131,6 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestReplyController::class,
 			Rest\Controllers\RestMailboxController::class,
 			Rest\Controllers\RestPortalController::class,
-			Rest\Controllers\RestSupportSettingsController::class,
 		);
 	}
 
@@ -158,11 +157,13 @@ final class Module extends AbstractModule {
 		// the ticket-lifecycle hooks (reply / created / status-change → customer).
 		$container->get( EmailNotifications::class );
 
-		// One-time: ensure a single shared "General" mailbox exists so the
-		// agent inbox's "New ticket" action and the portal are usable the
-		// moment support is enabled (otherwise `hasNoMailboxes` disables the
-		// button and the portal mailbox list comes back empty).
+		// Ensure a single shared "General" mailbox exists so the agent inbox's
+		// "New ticket" action and the portal are usable the moment support is
+		// enabled. This now DEFERS until an SMTP connection exists (identity is
+		// mandatory): the boot call below is the "SMTP already configured" path,
+		// and the listener seeds the moment the first connection is saved.
 		$this->maybe_seed_default_mailbox();
+		add_action( 'doublescale_smtp_connections_updated', array( $this, 'maybe_seed_default_mailbox' ), 10, 0 );
 
 		// Sidebar entry inside the DoubleScale top-level menu. Position 46
 		// places Support immediately after Booking (45) so agent-facing tools
@@ -219,6 +220,7 @@ final class Module extends AbstractModule {
 		}
 
 		// Re-index so WP's menu renderer doesn't choke on gaps.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- intentional submenu trimming (re-indexing the same global filtered above).
 		$submenu[ $menu_slug ] = array_values( $submenu[ $menu_slug ] );
 	}
 
@@ -237,11 +239,25 @@ final class Module extends AbstractModule {
 	 * tester who deletes every mailbox) would otherwise leave the two out of
 	 * sync — flag set, zero rows, "New ticket" button stuck disabled.
 	 *
+	 * Public (not private) because it is also a `doublescale_smtp_connections_updated`
+	 * listener — WP invokes the callback from outside the class. Safe to call
+	 * repeatedly: it no-ops once a mailbox exists, and defers while no SMTP
+	 * connection is configured.
+	 *
 	 * @return void
 	 */
-	private function maybe_seed_default_mailbox(): void {
+	public function maybe_seed_default_mailbox(): void {
 		$already_flagged = (bool) get_option( 'doublescale_support_default_mailbox_seeded' );
-		$has_mailbox     = MailboxModel::query()->exists();
+
+		// Probe the table defensively. This runs on every `plugins_loaded`, so a
+		// transiently-missing table (mid-migration, partial install, a dev who
+		// dropped it) must NOT fatal the whole site — degrade to "defer" and let
+		// the next boot (after migrations run) try again.
+		try {
+			$has_mailbox = MailboxModel::query()->exists();
+		} catch ( \Throwable $e ) {
+			return;
+		}
 
 		// Nothing to do only when BOTH the flag is set AND a row exists.
 		if ( $already_flagged && $has_mailbox ) {
@@ -256,28 +272,38 @@ final class Module extends AbstractModule {
 			return;
 		}
 
+		// Identity is mandatory on every mailbox (its from_email is the only From
+		// source), so a default mailbox can only be seeded once an SMTP connection
+		// with a From address exists. With none yet we DEFER: the settings UI shows
+		// an empty state, and the `doublescale_smtp_connections_updated` listener
+		// re-runs this the moment the first connection is saved. (Booting again
+		// later also retries via the guarded fallback in boot().)
+		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return;
+		}
+		$default_connection_id = \DoubleScale\Modules\Smtp\Settings::get_default_connection();
+		if ( empty( $default_connection_id ) ) {
+			return;
+		}
+		$default_identity   = \DoubleScale\Modules\Smtp\Settings::get_identity_for_connection( $default_connection_id );
+		$default_from_email = is_array( $default_identity ) ? (string) ( $default_identity['from_email'] ?? '' ) : '';
+		if ( '' === $default_from_email ) {
+			// Connection exists but has no From address yet: nothing to send as.
+			return;
+		}
+
 		try {
-			$data = array( 'name' => __( 'General', 'doublescale' ) );
-
-			// Bind the seeded mailbox to the org's default SMTP connection when
-			// one exists, so a fresh install that already has SMTP configured can
-			// email customers out of the box. With no connection yet, leave the
-			// identity unset — support replies then skip-send + log until an admin
-			// binds one in Settings → Support → Mailboxes (the seeder must not
-			// fabricate an identity that can't actually send). See EmailNotifications.
-			if ( class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
-				$default_connection_id = \DoubleScale\Modules\Smtp\Settings::get_default_connection();
-				if ( ! empty( $default_connection_id ) ) {
-					$data['identity'] = array( 'connection_id' => (string) $default_connection_id );
-				}
-			}
-
+			// Seed the mailbox's sending identity from the default SMTP connection's
+			// From address. The `email` column is NOT set here: the model's `saving`
+			// event mirrors it from `data.identity.from_email`.
 			$mailbox             = new MailboxModel();
 			$mailbox->slug       = 'general';
-			$mailbox->email      = (string) get_option( 'admin_email' );
 			$mailbox->box_type   = 'web';
 			$mailbox->is_default = true;
-			$mailbox->data       = $data;
+			$mailbox->data       = array(
+				'name'     => __( 'General', 'doublescale' ),
+				'identity' => array( 'from_email' => $default_from_email ),
+			);
 			$mailbox->save();
 
 			update_option( 'doublescale_support_default_mailbox_seeded', true );

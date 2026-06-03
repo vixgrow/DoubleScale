@@ -768,13 +768,16 @@ class RestAutomationController extends RestController {
 		if ( ! empty( $automation->trigger ) ) {
 			$trigger = TriggersManager::instance()->get_trigger( $automation->trigger );
 
-			$update_trigger_settings = function ( $label, $warning = false ) use ( &$automation ) {
+			$update_trigger_settings = function ( $label, $warning = false, $warning_message = '' ) use ( &$automation ) {
 				$settings                   = $automation->settings ?: array();
 				$settings['_trigger_label'] = $label;
 				if ( $warning ) {
 					$settings['_trigger_warning'] = true;
+					if ( '' !== $warning_message ) {
+						$settings['_trigger_warning_message'] = $warning_message;
+					}
 				} else {
-					unset( $settings['_trigger_warning'] );
+					unset( $settings['_trigger_warning'], $settings['_trigger_warning_message'] );
 				}
 				$automation->settings = $settings;
 			};
@@ -786,20 +789,22 @@ class RestAutomationController extends RestController {
 
 				if ( ! empty( $form ) && ! empty( $form->is_pro ) && $form->is_pro ) {
 					$has_warnings = true;
-					$warnings[]   = array(
+					$form_pro_message = __( 'Form trigger requires Plugin Pro to be installed and activated.', 'doublescale' );
+					$warnings[]       = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Form trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
+						'message' => $form_pro_message,
 					);
-					$update_trigger_settings( $automation->trigger, true );
+					$update_trigger_settings( $automation->trigger, true, $form_pro_message );
 				} elseif ( empty( $form ) || ! $form->is_enabled() ) {
-					$has_warnings = true;
-					$warnings[]   = array(
+					$form_inactive_message = __( 'Trigger requires a plugin that is not currently active.', 'doublescale' );
+					$has_warnings          = true;
+					$warnings[]            = array(
 						'type'    => 'trigger',
 						'slug'    => $automation->trigger,
-						'message' => __( 'Trigger requires a plugin that is not currently active.', 'doublescale' ),
+						'message' => $form_inactive_message,
 					);
-					$update_trigger_settings( $automation->trigger, true );
+					$update_trigger_settings( $automation->trigger, true, $form_inactive_message );
 				} else {
 					$update_trigger_settings( $form->name, false );
 				}
@@ -814,7 +819,7 @@ class RestAutomationController extends RestController {
 						'message'      => $trigger_plugin_check['message'],
 						'plugin_label' => $trigger_plugin_check['plugin_label'],
 					);
-					$update_trigger_settings( $trigger->name, true );
+					$update_trigger_settings( $trigger->name, true, $trigger_plugin_check['message'] );
 				} else {
 					$update_trigger_settings( $trigger->name, false );
 				}
@@ -1048,6 +1053,12 @@ class RestAutomationController extends RestController {
 					'label'  => 'Booking',
 				),
 			),
+			'support'     => array(
+				'support' => array(
+					'module' => 'support',
+					'label'  => 'Support',
+				),
+			),
 			'pmpro'       => array(
 				'pmpro' => array(
 					'plugin' => 'paid-memberships-pro/paid-memberships-pro.php',
@@ -1071,24 +1082,38 @@ class RestAutomationController extends RestController {
 		if ( ! empty( $trigger->source ) && ! empty( $trigger->group ) ) {
 			if ( isset( $plugin_dependencies[ $trigger->source ][ $trigger->group ] ) ) {
 				$dependency = $plugin_dependencies[ $trigger->source ][ $trigger->group ];
+				$is_pro     = isset( $trigger->is_pro ) && $trigger->is_pro;
+
+				// Module-off wins over Pro/plugin checks (mirrors {@see check_action_plugin_dependency()}).
 				if ( ! empty( $dependency['module'] ) ) {
-					$is_active = function_exists( 'doublescale_is_module_active' )
+					$module_active = function_exists( 'doublescale_is_module_active' )
 						&& doublescale_is_module_active( (string) $dependency['module'] );
-				} elseif ( empty( $dependency['plugin'] ) ) {
+					if ( ! $module_active ) {
+						$module_label = $this->get_action_module_label( (string) $dependency['module'] );
+						return array(
+							'is_active'    => false,
+							'is_pro'       => false,
+							'message'      => sprintf(
+								/* translators: %s: module name (e.g. Support, Booking) */
+								__( 'This trigger requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
+								$module_label
+							),
+							'plugin_label' => $module_label,
+						);
+					}
+				}
+
+				if ( empty( $dependency['plugin'] ) ) {
 					$is_active = true;
 				} else {
 					$is_active = doublescale_is_plugin_active( $dependency['plugin'] );
 				}
-				$is_pro = isset( $trigger->is_pro ) && $trigger->is_pro;
 
 				if ( $is_pro ) {
 					return array(
 						'is_active'    => $is_active,
 						'is_pro'       => true,
-						'message'      => sprintf(
-							__( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
-							$dependency['label']
-						),
+						'message'      => __( 'This trigger requires Plugin Pro to be installed and activated.', 'doublescale' ),
 						'plugin_label' => $dependency['label'],
 					);
 				}
@@ -1311,6 +1336,8 @@ class RestAutomationController extends RestController {
 		$labels = array(
 			'support' => __( 'Support', 'doublescale' ),
 			'deals'   => __( 'Pipelines & Deals', 'doublescale' ),
+			'booking' => __( 'Booking', 'doublescale' ),
+			'forms'   => __( 'Forms', 'doublescale' ),
 		);
 
 		return $labels[ $module ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $module ) );

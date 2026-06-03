@@ -444,6 +444,29 @@ export const hasTriggerWarning = (automation: any): boolean => {
 };
 
 /**
+ * Get trigger warning message from automation (uses backend-provided message).
+ * @param automation - The automation object
+ * @returns The trigger warning message
+ */
+export const getTriggerWarningMessage = (automation: any): string => {
+	if (automation?.settings?._trigger_warning_message) {
+		return automation.settings._trigger_warning_message;
+	}
+
+	const triggerWarning = automation?._warnings?.find(
+		(w: { type?: string }) => w.type === 'trigger'
+	);
+	if (triggerWarning?.message) {
+		return triggerWarning.message;
+	}
+
+	return __(
+		'This trigger requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+		'doublescale'
+	);
+};
+
+/**
  * Get action label from step (uses backend-provided label)
  * @param step - The automation step object
  * @returns The action label

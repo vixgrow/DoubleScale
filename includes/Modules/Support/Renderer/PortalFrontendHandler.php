@@ -27,13 +27,32 @@ defined( 'ABSPATH' ) || exit;
 
 final class PortalFrontendHandler {
 
-	private const SHORTCODE = 'doublescale_support_portal';
+	public const SHORTCODE_NAME = 'doublescale_support_portal';
+
+	private const SHORTCODE = self::SHORTCODE_NAME;
 	private const MOUNT_ID  = 'doublescale-support-portal';
 	private const HANDLE    = 'doublescale-support-renderer';
 
 	public function __construct() {
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue' ) );
+		add_action( 'save_post_page', array( self::class, 'maybe_flush_portal_url_cache' ), 10, 1 );
+	}
+
+	/**
+	 * Invalidate the cached portal permalink when a page containing the shortcode is saved.
+	 *
+	 * @param int $post_id Saved post ID.
+	 * @return void
+	 */
+	public static function maybe_flush_portal_url_cache( $post_id ): void {
+		$post = get_post( $post_id );
+		if ( ! $post || 'page' !== $post->post_type || empty( $post->post_content ) ) {
+			return;
+		}
+		if ( has_shortcode( $post->post_content, self::SHORTCODE_NAME ) ) {
+			\DoubleScale\Modules\Support\Services\PortalUrl::flush_cache();
+		}
 	}
 
 	/**

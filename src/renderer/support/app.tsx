@@ -17,12 +17,28 @@ type ViewState =
 	| { kind: 'list' }
 	| { kind: 'detail'; ticketId: number };
 
+const TICKET_QUERY_ARG = 'ds_support_ticket';
+
+const readInitialView = (): ViewState => {
+	if (typeof window === 'undefined') {
+		return { kind: 'list' };
+	}
+	const raw = new URLSearchParams(window.location.search).get(
+		TICKET_QUERY_ARG
+	);
+	const ticketId = raw ? Number.parseInt(raw, 10) : 0;
+	if (ticketId > 0) {
+		return { kind: 'detail', ticketId };
+	}
+	return { kind: 'list' };
+};
+
 interface Props {
 	config: PortalConfig;
 }
 
 const PortalApp = ({ config }: Props) => {
-	const [view, setView] = useState<ViewState>({ kind: 'list' });
+	const [view, setView] = useState<ViewState>(readInitialView);
 	const [showCompose, setShowCompose] = useState(false);
 	// Bumping this key causes the list view to re-fetch (used after a new
 	// ticket is created and we navigate back to the list).

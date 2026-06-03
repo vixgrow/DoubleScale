@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -98,9 +98,19 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	}, [step.settings]);
 
 	// Keys of fields the action declares as required (data-driven from get_fields()).
-	const requiredFieldKeys = Object.entries(action?.fields || {})
-		.filter(([, field]: [string, any]) => field?.required)
-		.map(([key]) => key);
+	// Memoized so the reference stays stable across renders — an unstable array
+	// here would cascade into handleSave -> the footer effect -> an infinite
+	// setState loop (React #185).
+	const requiredFieldKeys = useMemo(
+		() =>
+			Object.entries(action?.fields || {})
+				.filter(([, field]: [string, any]) => field?.required)
+				.map(([key]) => key),
+		// Keyed on the action slug (a stable string) rather than the action
+		// object, whose reference can change between renders.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[actionKey]
+	);
 
 	const handleSave = useCallback(async () => {
 		// Block save when any required field is empty, and surface which one.
@@ -138,7 +148,10 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		await saveStep(newStep);
 
 		setIsSaving(false);
-	}, [step, settings, saveStep, requiredFieldKeys, action, createNotice]);
+		// `action` is read for the error label only and is intentionally omitted
+		// to keep handleSave's identity stable (it feeds the footer effect).
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [step, settings, saveStep, requiredFieldKeys, createNotice]);
 
 	const handleDelete = useCallback(async () => {
 		setIsDeleting(true);

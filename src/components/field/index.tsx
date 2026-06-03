@@ -819,9 +819,6 @@ const Field: React.FC<FieldProps> = ({
 			{label && (
 				<div className="doublescale-field-label text-primaryText font-medium leading-6 text-sm flex flex-wrap items-center gap-x-1">
 					{renderLabelWithTooltip()}
-					{required ? (
-						<span className="text-destructive leading-none">*</span>
-					) : null}
 				</div>
 			)}
 			<div className="doublescale-field-input w-full min-w-0">

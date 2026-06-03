@@ -1153,6 +1153,7 @@ class RestAutomationController extends RestController {
 			'crm'         => array(
 				'deal'  => array(
 					'plugin' => '',
+					'module' => 'deals',
 					'label'  => 'Double Scale Pro',
 				),
 				'delay' => array(
@@ -1163,6 +1164,7 @@ class RestAutomationController extends RestController {
 			'support'     => array(
 				'support' => array(
 					'plugin' => '',
+					'module' => 'support',
 					'label'  => 'Double Scale Pro',
 				),
 			),
@@ -1237,6 +1239,27 @@ class RestAutomationController extends RestController {
 			if ( isset( $plugin_dependencies[ $action->source ][ $action->group ] ) ) {
 				$dependency = $plugin_dependencies[ $action->source ][ $action->group ];
 				$is_pro     = isset( $action->is_pro ) && $action->is_pro;
+
+				// A turned-off module wins over Pro/plugin checks: the action's
+				// feature is unavailable regardless of whether Pro is active, so
+				// surface the "enable the module" guidance first.
+				if ( ! empty( $dependency['module'] ) ) {
+					$module_active = function_exists( 'doublescale_is_module_active' )
+						&& doublescale_is_module_active( (string) $dependency['module'] );
+					if ( ! $module_active ) {
+						return array(
+							'is_active'    => false,
+							'is_pro'       => false,
+							'message'      => sprintf(
+								/* translators: %s: module name (e.g. Support, Deals) */
+								__( 'This action requires the %s module to be enabled under Settings → Modules.', 'doublescale' ),
+								$this->get_action_module_label( (string) $dependency['module'] )
+							),
+							'plugin_label' => $dependency['label'],
+						);
+					}
+				}
+
 				if ( empty( $dependency['plugin'] ) ) {
 					$is_active = true;
 				} else {
@@ -1274,6 +1297,23 @@ class RestAutomationController extends RestController {
 			'message'      => '',
 			'plugin_label' => '',
 		);
+	}
+
+	/**
+	 * Human-readable label for a module slug used in action dependency warnings.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @param string $module Module slug (e.g. 'support', 'deals').
+	 * @return string Display label, falling back to a title-cased slug.
+	 */
+	private function get_action_module_label( $module ) {
+		$labels = array(
+			'support' => __( 'Support', 'doublescale' ),
+			'deals'   => __( 'Pipelines & Deals', 'doublescale' ),
+		);
+
+		return $labels[ $module ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $module ) );
 	}
 
 	/**

@@ -171,21 +171,53 @@ class AutomationStepModel extends Model {
 			}
 		);
 
-		// If step type is action, and action not found, make status as draft.
+		// Guard against inserting a step *after* the end_automation step.
+		//
+		// The end_automation step must always remain the last step in its context.
+		// When a new step is requested at (or past) the end_automation's position we
+		// transparently insert it right before the end_automation instead of throwing
+		// an error: the new step takes the end_automation's order and the
+		// end_automation is pushed one slot down. A step whose requested order is
+		// genuinely before the end_automation is left untouched so the controller's
+		// own re-ordering (update_orders) stays authoritative.
 		static::creating(
 			function ( $step ) {
-				if ( isset( $step->parent_id ) && 0 !== $step->parent_id ) {
-					$condition = $step->condition;
-					$last_step = $step->where( 'automation_id', $step->automation_id )->where( 'condition', $condition )->where( 'parent_id', $step->parent_id )->where( 'status', '!=', 'deleted' )->where( 'order', '<', $step->order )->orderBy( 'order', 'asc' )->first();
-					if ( $last_step && 'end_automation' === $last_step->type ) {
-						throw new \Exception( 'You can not add any step after end automation' );
-					}
-				} else {
-					$last_step = $step->where( 'automation_id', $step->automation_id )->where( 'parent_id', 0 )->where( 'status', '!=', 'deleted' )->where( 'order', '<', $step->order )->orderBy( 'order', 'desc' )->first();
-					if ( $last_step && 'end_automation' === $last_step->type ) {
-						throw new \Exception( 'You can not add any step after end automation 2' );
-					}
+				// An end_automation step is itself allowed to be last; nothing to do.
+				if ( 'end_automation' === $step->type ) {
+					return;
 				}
+
+				$parent_id = $step->parent_id ?? 0;
+
+				$query = $step->newQuery()
+					->where( 'automation_id', $step->automation_id )
+					->where( 'parent_id', $parent_id )
+					->where( 'status', '!=', 'deleted' )
+					->where( 'type', 'end_automation' );
+
+				if ( $parent_id ) {
+					$query->where( 'condition', $step->condition );
+				}
+
+				$end_step = $query->first();
+
+				// No end_automation in this context, or the new step is already placed
+				// before it: keep the requested order untouched.
+				if ( ! $end_step || $step->order < $end_step->order ) {
+					return;
+				}
+
+				// The new step would land at/after the end_automation. Slot it into the
+				// end_automation's position and push the end_automation down so it stays
+				// last. Saved without events to avoid recursion / unrelated side effects.
+				$step->order = $end_step->order;
+
+				self::withoutEvents(
+					function () use ( $end_step ) {
+						$end_step->order = $end_step->order + 1;
+						$end_step->save();
+					}
+				);
 			}
 		);
 

@@ -53,9 +53,13 @@ final class FreeProDetectionTest extends TestCase {
 		require_once \DOUBLESCALE_PLUGIN_DIR . 'includes/Core/functions.php';
 		update_option( 'active_plugins', array() );
 
+		// Use a CRM group that is gated purely by Pro (no module dependency).
+		// `deal` would short-circuit on the module-off check, which intentionally
+		// wins over the Pro check (see check_trigger_plugin_dependency), so it
+		// would never exercise the is_pro branch this test asserts.
 		$trigger        = new \stdClass();
 		$trigger->source = 'crm';
-		$trigger->group  = 'deal';
+		$trigger->group  = 'contact';
 		$trigger->is_pro = true;
 
 		$ref  = new ReflectionClass( RestAutomationController::class );

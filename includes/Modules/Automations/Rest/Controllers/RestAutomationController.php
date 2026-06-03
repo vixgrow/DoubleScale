@@ -26,6 +26,7 @@ use DoubleScale\Modules\Automations\Services\ActionsManager;
 use DoubleScale\Core\MergeTags\MergeTagsManager;
 use DoubleScale\Modules\Automations\Services\RulesManager;
 use DoubleScale\Modules\Automations\Services\GoalsManager;
+use DoubleScale\Modules\Automations\Services\VersionManager;
 use DoubleScale\Core\UserRoles\Permissions;
 
 /**
@@ -114,6 +115,55 @@ class RestAutomationController extends RestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_steps' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
+
+		// Version history (undo / redo) for an automation.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/versions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_versions' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/undo',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'undo' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/redo',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'redo' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/restore/(?P<version>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'restore_version' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 			)
 		);
@@ -598,6 +648,11 @@ class RestAutomationController extends RestController {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
 			}
 
+			// Capture a baseline version (the state the editor opens in) so the
+			// very first edit can be undone. No-op once any version exists, and
+			// guaranteed before any step mutation regardless of frontend timing.
+			VersionManager::instance()->ensure_baseline( $id );
+
 			// Check plugin dependencies and add warnings
 			$automation = $this->check_and_mark_dependencies( $automation );
 
@@ -605,6 +660,156 @@ class RestAutomationController extends RestController {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Get the version history (undo / redo state) for an automation.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_versions( $request ) {
+		try {
+			$id         = $request->get_param( 'id' );
+			$automation = AutomationModel::find( $id );
+
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$manager = VersionManager::instance();
+			$manager->ensure_baseline( $id );
+
+			return new WP_REST_Response( $manager->get_history( $id ), 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Undo the last change to an automation.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function undo( $request ) {
+		return $this->step_history( $request, 'undo' );
+	}
+
+	/**
+	 * Redo the next change to an automation.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function redo( $request ) {
+		return $this->step_history( $request, 'redo' );
+	}
+
+	/**
+	 * Restore an automation to a specific version.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function restore_version( $request ) {
+		try {
+			$id      = $request->get_param( 'id' );
+			$version = $request->get_param( 'version' );
+
+			$automation = AutomationModel::find( $id );
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			if ( ! VersionManager::instance()->restore( $id, $version ) ) {
+				return new WP_Error( 'restore_failed', __( 'Could not restore this version.', 'doublescale' ), array( 'status' => 400 ) );
+			}
+
+			return $this->history_response( $id );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Shared undo / redo handler.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request   Request object.
+	 * @param string          $direction 'undo' or 'redo'.
+	 *
+	 * @return WP_REST_Response
+	 */
+	private function step_history( $request, $direction ) {
+		try {
+			$id         = $request->get_param( 'id' );
+			$automation = AutomationModel::find( $id );
+
+			if ( ! $automation ) {
+				return new WP_Error( 'not_found', __( 'Automation not found.', 'doublescale' ), array( 'status' => 404 ) );
+			}
+
+			$manager = VersionManager::instance();
+			$manager->ensure_baseline( $id );
+
+			$moved = 'undo' === $direction ? $manager->undo( $id ) : $manager->redo( $id );
+
+			if ( ! $moved ) {
+				$message = 'undo' === $direction
+					? __( 'Nothing to undo.', 'doublescale' )
+					: __( 'Nothing to redo.', 'doublescale' );
+				return new WP_Error( 'history_unavailable', $message, array( 'status' => 400 ) );
+			}
+
+			return $this->history_response( $id );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Build the response returned after a successful undo / redo / restore:
+	 * the refreshed automation (with active steps loaded) plus undo / redo flags,
+	 * so the client can re-render and update its buttons in one round-trip.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $id Automation ID.
+	 *
+	 * @return WP_REST_Response
+	 */
+	private function history_response( $id ) {
+		$automation = AutomationModel::with(
+			array(
+				'steps' => function ( $query ) {
+					$query->where( 'status', 'active' );
+				},
+			)
+		)->find( $id );
+
+		$automation = $this->check_and_mark_dependencies( $automation );
+
+		$history                = VersionManager::instance()->get_history( $id );
+		$data                   = $automation->toArray();
+		$data['version_cursor'] = $history['cursor'];
+		$data['can_undo']       = $history['can_undo'];
+		$data['can_redo']       = $history['can_redo'];
+
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**
@@ -679,6 +884,9 @@ class RestAutomationController extends RestController {
 			if ( isset( $automation_data['status'] ) && 'paused' === $automation_data['status'] && 'paused' !== $old_status ) {
 				do_action( 'doublescale_automation_paused', $automation, 'manual' );
 			}
+
+			// Capture a version for undo / redo (skipped while restoring).
+			VersionManager::instance()->snapshot( $automation->id, __( 'Updated automation', 'doublescale' ) );
 
 			$automation->load(
 				array(

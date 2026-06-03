@@ -62,6 +62,11 @@ final class Module extends AbstractModule {
 			Services\RulesManager::class,
 			static fn() => Services\RulesManager::instance()
 		);
+
+		$container->singleton(
+			Services\VersionManager::class,
+			static fn() => Services\VersionManager::instance()
+		);
 	}
 
 	public function restControllers(): array {

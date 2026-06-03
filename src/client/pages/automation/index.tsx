@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useReducer, useRef } from 'react';
+import { useMemo, useReducer, useRef } from 'react';
 /**
  * Internal dependencies
  */
@@ -31,7 +31,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { ChevronRight, Pencil, X } from 'lucide-react';
+import { ChevronRight, Pencil, Redo2, Undo2, X } from 'lucide-react';
 import {
 	WorkflowIcon,
 	AutomationContactsIcon,
@@ -81,6 +81,9 @@ const Automation: React.FC = () => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [analyticsData, setAnalyticsData] = useState<any[]>([]);
 	const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
+	const [canUndo, setCanUndo] = useState<boolean>(false);
+	const [canRedo, setCanRedo] = useState<boolean>(false);
+	const [isVersioning, setIsVersioning] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('doublescale/core');
 
@@ -120,9 +123,10 @@ const Automation: React.FC = () => {
 			setAutomation(normalized);
 			setSteps(Array.isArray(normalized.steps) ? normalized.steps : []);
 
-			// Fetch analytics data once when automation loads
+			// Fetch analytics + version history once when automation loads
 			if (!skipLoading) {
 				fetchAnalyticsData(normalized.id);
+				void refreshVersions(normalized.id);
 			}
 
 			return normalized;
@@ -238,6 +242,137 @@ const Automation: React.FC = () => {
 		}
 	};
 
+	const refreshVersions = async (automationId?: number) => {
+		const targetId = automationId ?? automation?.id;
+		if (!targetId) {
+			return;
+		}
+
+		try {
+			const response = (await moduleFetch<{
+				can_undo: boolean;
+				can_redo: boolean;
+			}>('automations', {
+				path: `/doublescale/v1/automations/${targetId}/versions`,
+			})) as { can_undo: boolean; can_redo: boolean } | null;
+
+			if (response) {
+				setCanUndo(!!response.can_undo);
+				setCanRedo(!!response.can_redo);
+			}
+		} catch (error) {
+			// History is non-critical; leave button state untouched on failure.
+		}
+	};
+
+	const stepHistory = async (direction: 'undo' | 'redo') => {
+		const targetId = automation?.id;
+		if (!targetId || isVersioning) {
+			return;
+		}
+
+		setIsVersioning(true);
+		try {
+			const response = (await moduleFetch<
+				AutomationType & {
+					can_undo?: boolean;
+					can_redo?: boolean;
+				}
+			>('automations', {
+				path: `/doublescale/v1/automations/${targetId}/${direction}`,
+				method: 'POST',
+			})) as
+				| (AutomationType & { can_undo?: boolean; can_redo?: boolean })
+				| null;
+
+			if (!response) {
+				createNotice({
+					type: 'error',
+					message: getModuleFetchBlockedNotice('automations'),
+				});
+				return;
+			}
+
+			const normalized = normalizeAutomationPayload(response);
+			if (!normalized) {
+				createNotice({
+					type: 'error',
+					message: __(
+						'Invalid automation response from the server.',
+						'doublescale'
+					),
+				});
+				return;
+			}
+
+			setAutomation(normalized);
+			setSteps(Array.isArray(normalized.steps) ? normalized.steps : []);
+			setCanUndo(!!response.can_undo);
+			setCanRedo(!!response.can_redo);
+		} catch (error) {
+			const err = error as { message?: string };
+			createNotice({
+				type: 'error',
+				message:
+					err?.message ||
+					(direction === 'undo'
+						? __('Nothing to undo.', 'doublescale')
+						: __('Nothing to redo.', 'doublescale')),
+			});
+		} finally {
+			setIsVersioning(false);
+		}
+	};
+
+	const undo = () => stepHistory('undo');
+	const redo = () => stepHistory('redo');
+
+	// Step mutations (add / edit / delete / reorder) are dispatched from many
+	// places in the workflow builder and each persists server-side, creating a
+	// new version. Rather than thread a refresh through every call site, watch a
+	// signature of the steps and refresh the undo / redo button state when it
+	// changes. The signature also covers the automation row (name / status /
+	// settings) so automation-level saves are reflected too.
+	const versionSignature = useMemo(
+		() =>
+			JSON.stringify({
+				a: automation
+					? {
+							name: automation.name,
+							status: automation.status,
+							settings: automation.settings,
+					  }
+					: null,
+				s: steps.map(
+					(s) => `${s.id}:${s.order}:${s.status}:${s.updated_at}`
+				),
+			}),
+		[automation, steps]
+	);
+	const prevVersionSignature = useRef<string | null>(null);
+
+	useEffect(() => {
+		// Skip the first run (initial load already fetches version state) and
+		// any change driven by an in-flight undo / redo (handled inline there).
+		if (prevVersionSignature.current === null) {
+			prevVersionSignature.current = versionSignature;
+			return;
+		}
+		if (prevVersionSignature.current === versionSignature) {
+			return;
+		}
+		prevVersionSignature.current = versionSignature;
+
+		if (isVersioning || !automation?.id) {
+			return;
+		}
+
+		const timer = setTimeout(() => {
+			void refreshVersions(automation.id);
+		}, 400);
+		return () => clearTimeout(timer);
+	}, [versionSignature]);
+
 	const [activeTab, setActiveTab] = useState<
 		'workflow' | 'contacts' | 'reports'
 	>('workflow');
@@ -320,10 +455,16 @@ const Automation: React.FC = () => {
 				updatedSteps,
 				isLoading: loading,
 				isSaving,
+				canUndo,
+				canRedo,
+				isVersioning,
 				setIsLoading: setLoading,
 				setIsSaving: setIsSaving,
 				saveAutomation,
 				refetchAutomation: () => fetchAutomation(true),
+				undo,
+				redo,
+				refreshVersions: () => refreshVersions(),
 				...$actions,
 			}}
 		>
@@ -520,6 +661,30 @@ const Automation: React.FC = () => {
 									</div>
 
 									<div className="flex flex-shrink-0 items-center justify-end justify-self-end gap-3">
+										<div className="flex items-center gap-1">
+											<button
+												type="button"
+												onClick={() => void undo()}
+												disabled={!canUndo || isVersioning || isSaving}
+												className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[#344054] transition-colors hover:bg-[#F9FAFB] hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40"
+												aria-label={__('Undo', 'doublescale')}
+												title={__('Undo', 'doublescale')}
+											>
+												<Undo2 className="h-5 w-5" />
+											</button>
+											<button
+												type="button"
+												onClick={() => void redo()}
+												disabled={!canRedo || isVersioning || isSaving}
+												className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[#344054] transition-colors hover:bg-[#F9FAFB] hover:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40"
+												aria-label={__('Redo', 'doublescale')}
+												title={__('Redo', 'doublescale')}
+											>
+												<Redo2 className="h-5 w-5" />
+											</button>
+										</div>
+										{/* divider */}
+										<div className="h-6 w-px bg-[#D0D0D0]"></div>
 										<label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#344054]">
 											<span>{__('Active', 'doublescale')}</span>
 											<Switch

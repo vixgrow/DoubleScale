@@ -37,7 +37,6 @@ use DoubleScale\Modules\Support\Constants\TicketStatus;
  * @property int|null                                                            $agent_user_id
  * @property string|null                                                         $product
  * @property string|null                                                         $message_id
- * @property string|null                                                         $content_hash
  * @property int                                                                 $response_count
  * @property array<int, int>|null                                                $tag_ids
  * @property array<string, mixed>|null                                           $custom_data
@@ -79,7 +78,6 @@ class TicketModel extends Model {
 		'agent_user_id',
 		'product',
 		'message_id',
-		'content_hash',
 		'response_count',
 		'tag_ids',
 		'custom_data',

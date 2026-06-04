@@ -100,7 +100,22 @@ const HostSelect: React.FC<HostSelectProps> = ({
 						setHosts((prevHosts) => [...prevHosts, ...newHosts]);
 					}
 
-					let mappedHosts = map(response.data, (host) => ({
+					// Collapse to one option per user. An install can still
+					// carry duplicate host calendars for a single user (the
+					// backend dedupe runs on boot but historical data may
+					// linger), and since the option value is the user_id those
+					// rows would otherwise render as identical repeated
+					// entries in the dropdown.
+					const seenUserIds = new Set<number>();
+					const uniqueHosts = response.data.filter((host) => {
+						if (seenUserIds.has(host.user_id)) {
+							return false;
+						}
+						seenUserIds.add(host.user_id);
+						return true;
+					});
+
+					let mappedHosts = map(uniqueHosts, (host) => ({
 						value: host.user_id,
 						label: host.user?.display_name || host.name,
 						disabled: exclude?.includes(host.id),

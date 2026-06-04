@@ -179,13 +179,13 @@ class RestBookingSettingsController extends RestController {
 						),
 						'auto_cancel_after'       => array(
 							'type'        => 'integer',
-							'description' => __( 'Auto cancel after', 'doublescale' ),
+							'description' => __( 'Auto-cancel unpaid bookings after N minutes.', 'doublescale' ),
 							'default'     => 30,
 						),
 						'auto_complete_after'     => array(
 							'type'        => 'integer',
-							'description' => __( 'Auto complete after', 'doublescale' ),
-							'default'     => 30,
+							'description' => __( 'Mark a booking completed N minutes after its end time.', 'doublescale' ),
+							'default'     => 60,
 						),
 						'default_country_code'    => array(
 							'type'        => 'string',

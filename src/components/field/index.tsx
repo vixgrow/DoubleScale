@@ -313,8 +313,9 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					type={type === 'phone' ? 'tel' : type}
 					className={cn(
+						'!rounded-lg !border-border h-12',
 						status === 'error' &&
-						'border-destructive focus-visible:ring-destructive/20',
+							'border-destructive focus-visible:ring-destructive/20',
 						disabled && 'bg-muted cursor-not-allowed opacity-70',
 						className
 					)}
@@ -331,8 +332,9 @@ const Field: React.FC<FieldProps> = ({
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					className={cn(
+						'!rounded-lg !border-border',
 						status === 'error' &&
-						'border-destructive focus-visible:ring-destructive/20',
+							'border-destructive focus-visible:ring-destructive/20',
 						className
 					)}
 					placeholder={placeholder}
@@ -348,8 +350,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -364,6 +366,8 @@ const Field: React.FC<FieldProps> = ({
 						control: (styles) => ({
 							...styles,
 							borderRadius: '8px',
+							height: '48px',
+							borderColor: '#D3D4D6',
 						}),
 						menu: (base: any) => ({
 							...base,
@@ -395,8 +399,7 @@ const Field: React.FC<FieldProps> = ({
 					}
 					onChange={(next) => onChange(next)}
 					placeholder={
-						placeholder ||
-						__('Search and add…', 'doublescale')
+						placeholder || __('Search and add…', 'doublescale')
 					}
 					apiEndpoint={ep}
 					apiParams={ims?.apiParams}
@@ -743,7 +746,9 @@ const Field: React.FC<FieldProps> = ({
 							{renderLabelWithTooltip()}
 						</div>
 					)}
-					<div className="doublescale-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">
+						{fieldContent}
+					</div>
 				</div>
 				{helperText && renderHelperText(helperText)}
 			</div>
@@ -755,7 +760,9 @@ const Field: React.FC<FieldProps> = ({
 		return (
 			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center gap-3">
-					<div className="doublescale-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">
+						{fieldContent}
+					</div>
 					{label && (
 						<div className="doublescale-field-label text-foreground font-normal text-sm">
 							{renderLabelWithTooltip()}
@@ -772,7 +779,9 @@ const Field: React.FC<FieldProps> = ({
 		return (
 			<div className="doublescale-field" style={style || {}}>
 				<div className="flex items-center gap-3">
-					<div className="doublescale-field-input">{fieldContent}</div>
+					<div className="doublescale-field-input">
+						{fieldContent}
+					</div>
 					{label && (
 						<div className="doublescale-field-label text-foreground font-normal text-sm">
 							{renderLabelWithTooltip()}
@@ -799,7 +808,13 @@ const Field: React.FC<FieldProps> = ({
 	// Compact layout for complex fields or when compact prop is true
 	if (isComplexField || compact) {
 		return (
-			<div className={cn('doublescale-field doublescale-field-compact', compact && 'doublescale-field-compact-mode')} style={style || {}}>
+			<div
+				className={cn(
+					'doublescale-field doublescale-field-compact',
+					compact && 'doublescale-field-compact-mode'
+				)}
+				style={style || {}}
+			>
 				{label && !compact && (
 					<div className="doublescale-field-label text-foreground font-normal text-sm flex items-center justify-between mb-2">
 						{renderLabelWithTooltip()}

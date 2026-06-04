@@ -170,7 +170,11 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					placeholder={placeholder || __('name@gmail.com', 'doublescale')}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-				className={cn(error && '!border-destructive focus-visible:!ring-destructive/20')}
+				className={cn(
+					'!rounded-lg !border-border',
+					error &&
+						'!border-destructive focus-visible:!ring-destructive/20'
+				)}
 				required={required}
 				/>
 			{!smtpModuleOn && (

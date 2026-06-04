@@ -5,10 +5,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 /**
  * internal dependencies
  */
+import { ChevronDownIcon, CalendarDays, X } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +17,6 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
-import { CalendarIcon, OutlinedCalendarIcon } from '@doublescale/components';
 import { cn } from '@/lib/utils';
 
 interface DateRangePickerProps {
@@ -26,6 +26,18 @@ interface DateRangePickerProps {
 	className?: string;
 }
 
+interface Preset {
+	label: string;
+	getRange: () => { from: Date; to: Date };
+}
+
+const formatShort = (date: Date) =>
+	date.toLocaleDateString(undefined, {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+	});
+
 export function DateRangePicker({
 	value,
 	onChange,
@@ -33,54 +45,117 @@ export function DateRangePicker({
 	className,
 }: DateRangePickerProps) {
 	const [open, setOpen] = useState(false);
-	// Internal state to manage the selection without triggering parent re-renders
 	const [internalRange, setInternalRange] = useState<{
 		from: Date | null;
 		to: Date | null;
 	}>(value);
 
-	// Update internal state when the external value changes (e.g., when filters are cleared)
 	useEffect(() => {
 		setInternalRange(value);
 	}, [value]);
 
-	const formatDateRange = () => {
+	const presets = useMemo<Preset[]>(
+		() => [
+			{
+				label: __('Today', 'doublescale'),
+				getRange: () => {
+					const t = new Date();
+					return { from: t, to: t };
+				},
+			},
+			{
+				label: __('Yesterday', 'doublescale'),
+				getRange: () => {
+					const t = new Date();
+					t.setDate(t.getDate() - 1);
+					return { from: t, to: t };
+				},
+			},
+			{
+				label: __('Last 7 days', 'doublescale'),
+				getRange: () => {
+					const to = new Date();
+					const from = new Date();
+					from.setDate(from.getDate() - 6);
+					return { from, to };
+				},
+			},
+			{
+				label: __('Last 30 days', 'doublescale'),
+				getRange: () => {
+					const to = new Date();
+					const from = new Date();
+					from.setDate(from.getDate() - 29);
+					return { from, to };
+				},
+			},
+			{
+				label: __('This month', 'doublescale'),
+				getRange: () => {
+					const now = new Date();
+					const from = new Date(now.getFullYear(), now.getMonth(), 1);
+					return { from, to: now };
+				},
+			},
+			{
+				label: __('Last month', 'doublescale'),
+				getRange: () => {
+					const now = new Date();
+					const from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+					const to = new Date(now.getFullYear(), now.getMonth(), 0);
+					return { from, to };
+				},
+			},
+		],
+		[]
+	);
+
+	const formatTriggerLabel = () => {
 		if (!internalRange.from)
 			return placeholder || __('Date Range', 'doublescale');
 
-		const fromDate = internalRange.from.toLocaleDateString();
-		const toDate = internalRange.to
-			? internalRange.to.toLocaleDateString()
-			: '';
-
 		if (internalRange.to) {
-			return `${fromDate} - ${toDate}`;
+			const sameDay =
+				internalRange.from.toDateString() ===
+				internalRange.to.toDateString();
+			return sameDay
+				? formatShort(internalRange.from)
+				: `${formatShort(internalRange.from)} – ${formatShort(internalRange.to)}`;
 		}
-		return fromDate;
+		return formatShort(internalRange.from);
 	};
 
 	const handleDateSelect = (range: any) => {
-		// const newRange = range || { from: null, to: null };
-		let newRange = { from: range.from, to: range.to };
+		let newRange = {
+			from: range?.from ?? null,
+			to: range?.to ?? null,
+		};
 
-	     if (newRange.from && newRange.to && newRange.from > newRange.to) {
-		newRange = { from: newRange.to, to: newRange.from };
-	}
+		if (newRange.from && newRange.to && newRange.from > newRange.to) {
+			newRange = { from: newRange.to, to: newRange.from };
+		}
 
-
-		// Update internal state immediately for UI feedback
 		setInternalRange(newRange);
 
-		// Only call onChange (which triggers parent re-render) when:
-		// 1. Both dates are selected (complete range, including same-day)
-		// 2. Range is cleared (both null)
-		const isCompleteRange = newRange.from && newRange.to;
+		// react-day-picker v9 fires the first click in mode="range" as
+		// { from: X, to: X }. Treating that as a complete same-day range
+		// (and auto-closing) would make picking an actual range impossible.
+		// Only auto-close on a distinct two-day range or when cleared.
+		const isDistinctRange =
+			newRange.from &&
+			newRange.to &&
+			newRange.from.getTime() !== newRange.to.getTime();
 		const isCleared = !newRange.from && !newRange.to;
 
-		if (isCompleteRange || isCleared) {
+		if (isDistinctRange || isCleared) {
 			onChange(newRange);
 			setOpen(false);
 		}
+	};
+
+	const applyDateRange = () => {
+		onChange(internalRange);
+		setOpen(false);
 	};
 
 	const clearDateRange = () => {
@@ -90,48 +165,143 @@ export function DateRangePicker({
 		setOpen(false);
 	};
 
+	const applyPreset = (preset: Preset) => {
+		const range = preset.getRange();
+		setInternalRange(range);
+		onChange(range);
+		setOpen(false);
+	};
+
+	const hasSelection = Boolean(internalRange.from);
+
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					variant="outline"
 					className={cn(
+						// Base layout
+						'group relative h-10 w-auto justify-start gap-2.5 rounded-lg pl-2 pr-3 text-sm font-medium transition-all duration-150',
+						// Empty state
+						!hasSelection &&
+							'border-input bg-white text-muted-foreground shadow-sm hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.02]',
+						// Filled state — subtle brand-tinted background so it reads as "active"
+						hasSelection &&
+							'border-brandPrimary/25 bg-brandPrimary/[0.04] text-foreground shadow-sm hover:border-brandPrimary/60 hover:bg-brandPrimary/[0.08]',
+						// Open state (Radix sets data-state="open" on the trigger)
+						'data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08] data-[state=open]:ring-2 data-[state=open]:ring-brandPrimary/20',
+						// Focus ring
+						'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandPrimary/30 focus-visible:ring-offset-1',
 						className
 					)}
-					variant="outline"
-					
 				>
-					<CalendarIcon width={32} height={32} />
-					{formatDateRange()}
+					{/* Icon chip */}
+					<span
+						className={cn(
+							'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-colors',
+							hasSelection
+								? 'bg-brandPrimary text-white shadow-sm'
+								: 'bg-brandPrimary/10 text-brandPrimary group-hover:bg-brandPrimary/15'
+						)}
+					>
+						<CalendarDays className="!h-3.5 !w-3.5" />
+					</span>
+
+					{/* Label */}
+					<span className="flex flex-1 flex-col items-start overflow-hidden text-left">
+						{hasSelection && (
+							<span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 leading-none">
+								{__('Date range', 'doublescale')}
+							</span>
+						)}
+						<span className="w-full truncate text-sm font-medium leading-tight">
+							{formatTriggerLabel()}
+						</span>
+					</span>
+
+					{/* Right-side affordance: clear (if filled) or chevron */}
+					{hasSelection ? (
+						<span
+							role="button"
+							tabIndex={-1}
+							aria-label={__('Clear date range', 'doublescale')}
+							onClick={(e) => {
+								e.stopPropagation();
+								e.preventDefault();
+								clearDateRange();
+							}}
+							className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-brandPrimary/15 hover:text-brandPrimary"
+						>
+							<X className="!h-3 !w-3" />
+						</span>
+					) : (
+						<ChevronDownIcon className="!h-4 !w-4 flex-shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+					)}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent
-				className="w-auto p-0 max-h-[300px] overflow-y-auto z-[9999]"
+				className="z-[9999] w-auto overflow-hidden rounded-xl border border-border bg-white p-0 shadow-xl"
 				align="start"
 				side="bottom"
-				sideOffset={5}
+				sideOffset={8}
 			>
-				<div className="p-3">
-					<Calendar
-						mode="range"
-						selected={{
-							from: internalRange.from ?? undefined,
-							to: internalRange.to ?? undefined,
-						}}
-						onSelect={handleDateSelect}
-						numberOfMonths={1}
-						autoFocus
-					/>
-					<div className="flex justify-between mt-3 pt-3 border-t">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={clearDateRange}
-						>
-							{__('Clear', 'doublescale')}
-						</Button>
-						<Button size="sm" onClick={() => setOpen(false)}>
-							{__('Close', 'doublescale')}
-						</Button>
+				<div className="flex flex-col sm:flex-row">
+					{/* Quick-preset rail */}
+					<div className="flex w-full flex-col gap-1 border-b border-border bg-muted/30 p-3 sm:w-[160px] sm:border-b-0 sm:border-r">
+						<p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+							{__('Quick select', 'doublescale')}
+						</p>
+						{presets.map((preset) => (
+							<button
+								key={preset.label}
+								type="button"
+								onClick={() => applyPreset(preset)}
+								className="rounded-md px-2 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-brandPrimary/10 hover:text-brandPrimary"
+							>
+								{preset.label}
+							</button>
+						))}
+					</div>
+
+					{/* Calendar + footer */}
+					<div className="flex flex-col">
+						<div className="p-3">
+							<Calendar
+								mode="range"
+								selected={{
+									from: internalRange.from ?? undefined,
+									to: internalRange.to ?? undefined,
+								}}
+								onSelect={handleDateSelect}
+								numberOfMonths={2}
+								autoFocus
+							/>
+						</div>
+
+						<div className="flex items-center justify-between gap-3 border-t border-border bg-muted/20 px-4 py-3">
+							<div className="text-xs text-muted-foreground">
+								{hasSelection
+									? formatTriggerLabel()
+									: __('No date selected', 'doublescale')}
+							</div>
+							<div className="flex gap-2">
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={clearDateRange}
+									disabled={!hasSelection}
+								>
+									{__('Clear', 'doublescale')}
+								</Button>
+								<Button
+									size="sm"
+									onClick={applyDateRange}
+									disabled={!internalRange.from}
+								>
+									{__('Apply', 'doublescale')}
+								</Button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</PopoverContent>

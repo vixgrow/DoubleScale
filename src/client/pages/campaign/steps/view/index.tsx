@@ -8,7 +8,6 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { X } from 'lucide-react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -226,18 +225,6 @@ const View: React.FC = () => {
 		[campaign?.name]
 	);
 
-	const panelButtons = [
-		<Button
-			key="close"
-			variant="ghost"
-			size="icon"
-			onClick={handleClose}
-			aria-label={__('Close view', 'doublescale')}
-		>
-			<X className="h-12 w-12" />
-		</Button>,
-	];
-
 	const templateSettings: Record<string, any> =
 		(template as any)?.settings ?? {};
 
@@ -281,8 +268,8 @@ const View: React.FC = () => {
 		<>
 			<PanelLayout
 				items={breadcrumbItems}
-				panelbtns={panelButtons}
 				type="campaign"
+				onClosePanel={handleClose}
 			>
 				{campaign ? (
 					<div className="flex gap-6 items-start">

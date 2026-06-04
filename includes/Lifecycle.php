@@ -38,7 +38,7 @@ final class Lifecycle {
 	private static function define_constants( string $plugin_file ): void {
 		$defaults = array(
 			'DOUBLESCALE_PLUGIN_FILE'   => $plugin_file,
-			'DOUBLESCALE_VERSION'       => '1.0.1',
+			'DOUBLESCALE_VERSION'       => '1.0.2',
 			'DOUBLESCALE_PLUGIN_DIR'    => plugin_dir_path( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_URL'    => plugin_dir_url( $plugin_file ),
 			'DOUBLESCALE_PLUGIN_PATH'   => plugin_basename( $plugin_file ),
@@ -186,10 +186,12 @@ final class Lifecycle {
 
 	/**
 	 * Multisite network activation.
+	 *
+	 * @param bool $network_wide Whether the plugin is being activated network-wide.
 	 */
-	public static function on_multisite_activate(): void {
+	public static function on_multisite_activate( $network_wide = false ): void {
 		if ( class_exists( \DoubleScale\Database\Install::class ) ) {
-			\DoubleScale\Database\Install::multisite_activate();
+			\DoubleScale\Database\Install::multisite_activate( $network_wide );
 		}
 	}
 

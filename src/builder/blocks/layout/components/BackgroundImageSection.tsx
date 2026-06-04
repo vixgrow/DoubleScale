@@ -66,14 +66,19 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 			{backgroundImage && (
 				<div className="space-y-4">
 					<div className="space-y-2">
-						<label className="text-sm text-[#333333]">
+						<label className="text-sm text-white">
 							{__('Background Repeat', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundRepeat}
 							onValueChange={onBackgroundRepeatChange}
 						>
-							<SelectTrigger className="w-full rounded-lg bg-white h-10">
+							<SelectTrigger
+								className="h-11 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white"
+								style={{
+									backgroundColor: 'rgba(255,255,255,0.05)',
+								}}
+							>
 								<SelectValue
 									placeholder={__(
 										'Background Repeat',
@@ -99,14 +104,18 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-sm text-[#333333]">
+						<label className="text-sm text-white">
 							{__('Background Size', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundSize}
 							onValueChange={onBackgroundSizeChange}
 						>
-							<SelectTrigger className="w-full rounded-lg bg-white h-10">
+							<SelectTrigger className="h-11 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white"
+							style={{
+								backgroundColor: 'rgba(255,255,255,0.05)',
+							}}
+							>
 								<SelectValue
 									placeholder={__(
 										'Background Size',
@@ -129,14 +138,18 @@ export const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-sm text-[#333333]">
+						<label className="text-sm text-white">
 							{__('Background Position', 'doublescale')}
 						</label>
 						<Select
 							value={backgroundPosition}
 							onValueChange={onBackgroundPositionChange}
 						>
-							<SelectTrigger className="w-full rounded-lg bg-white h-10">
+							<SelectTrigger className="h-11 w-full rounded-lg !border-none !ring-0 !ring-offset-0 !text-white"
+							style={{
+								backgroundColor: 'rgba(255,255,255,0.05)',
+							}}
+							>
 								<SelectValue
 									placeholder={__(
 										'Background Position',

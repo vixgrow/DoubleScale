@@ -13,8 +13,9 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { EditIcon } from '@doublescale/components';
+import { EditIcon, NoData } from '@doublescale/components';
 import TrashIcon from '@doublescale/shared/icons/trash';
+import BadConnectionIcon from '@doublescale/shared/icons/bad-connection';
 import { Calendar } from 'lucide-react';
 import {
 	getSmtpMailerLogoUrl,
@@ -86,6 +87,7 @@ export type SmtpConnectionsPanelProps = {
 	connections: Record<string, SmtpConnection> | undefined;
 	onEdit: (id: string) => void;
 	onRequestDelete: (id: string) => void;
+	onAdd?: () => void;
 };
 
 function SmtpConnectionsPanelInner({
@@ -93,6 +95,7 @@ function SmtpConnectionsPanelInner({
 	connections,
 	onEdit,
 	onRequestDelete,
+	onAdd,
 }: SmtpConnectionsPanelProps) {
 	const connectionIds = useMemo(
 		() => Object.keys(connections || {}),
@@ -101,12 +104,16 @@ function SmtpConnectionsPanelInner({
 
 	if (connectionIds.length === 0) {
 		return (
-			<p className="text-sm text-muted-foreground py-4">
-				{__(
-					'No connections yet. Add a connection to start routing mail.',
+			<NoData
+				icon={<BadConnectionIcon width={32} height={32} />}
+				title={__('No connections yet', 'doublescale')}
+				subtitle={__(
+					'Get started by adding your first SMTP connection to enable reliable email delivery for your site.',
 					'doublescale'
 				)}
-			</p>
+				onClick={onAdd}
+				buttonLabel={__('Add Connection', 'doublescale')}
+			/>
 		);
 	}
 

@@ -68,7 +68,9 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 			cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
 			cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
 			cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
-			return stripRichTextChromeColors(cleanContent);
+			return stripRichTextChromeColors(cleanContent, {
+				blockColor: textColor,
+			});
 		}
 
 		// If no HTML formatting, remove font-size and font-family to use props
@@ -96,7 +98,9 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*""/gi, '');
 		cleanContent = cleanContent.replace(/\s*style\s*=\s*''/gi, '');
 
-		return stripRichTextChromeColors(cleanContent);
+		return stripRichTextChromeColors(cleanContent, {
+			blockColor: textColor,
+		});
 	};
 
 	// Check if HTML content has formatting that should override props
@@ -128,6 +132,16 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		return `<p style="color:${textColor}">${escapeHtml(raw)}</p>`;
 	};
 
+	const syncCanvasEditorColors = (root: HTMLElement) => {
+		root.style.color = textColor;
+		root.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((node) => {
+			const el = node as HTMLElement;
+			if (!el.style.color?.trim()) {
+				el.style.color = textColor;
+			}
+		});
+	};
+
 	useLayoutEffect(() => {
 		if (
 			!canvasEditable ||
@@ -141,7 +155,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 		if (editRef.current.innerHTML !== next) {
 			editRef.current.innerHTML = next;
 		}
-	}, [canvasEditable, onCanvasContentChange, props.content]); // sync store → canvas when not actively typing
+		syncCanvasEditorColors(editRef.current);
+	}, [canvasEditable, onCanvasContentChange, props.content, textColor]); // sync store → canvas when not actively typing
 
 	const content = (
 		<>
@@ -202,10 +217,28 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 					color: ${linkColorResolved};
 					text-decoration: underline !important;
 				}
-				/* Plain blocks inherit block color (WebKit otherwise paints white on new lines). */
+				/* Selected / contentEditable: headings must inherit block color (UA defaults are dark). */
+				.${rendererId} [data-text-canvas-editor="true"] {
+					color: ${textColor} !important;
+					caret-color: ${textColor};
+				}
+				.${rendererId} [data-text-canvas-editor="true"] h1,
+				.${rendererId} [data-text-canvas-editor="true"] h2,
+				.${rendererId} [data-text-canvas-editor="true"] h3,
+				.${rendererId} [data-text-canvas-editor="true"] h4,
+				.${rendererId} [data-text-canvas-editor="true"] h5,
+				.${rendererId} [data-text-canvas-editor="true"] h6,
+				.${rendererId} [data-text-canvas-editor="true"] strong,
+				.${rendererId} [data-text-canvas-editor="true"] em,
 				.${rendererId} [data-text-canvas-editor="true"] p,
 				.${rendererId} [data-text-canvas-editor="true"] li,
 				.${rendererId} [data-text-canvas-editor="true"] div,
+				.${rendererId} .text-block-html-root h1,
+				.${rendererId} .text-block-html-root h2,
+				.${rendererId} .text-block-html-root h3,
+				.${rendererId} .text-block-html-root h4,
+				.${rendererId} .text-block-html-root h5,
+				.${rendererId} .text-block-html-root h6,
 				.${rendererId} .text-block-html-root p,
 				.${rendererId} .text-block-html-root li,
 				.${rendererId} .text-block-html-root div {
@@ -297,17 +330,23 @@ export const TextRenderer: React.FC<TextRendererProps> = ({
 							fontSize: 'inherit',
 							fontFamily: 'inherit',
 							color: textColor,
+							caretColor: textColor,
 							lineHeight: 'inherit',
 							letterSpacing: 'inherit',
 						}}
 						onFocus={() => {
 							editingRef.current = true;
+							if (editRef.current) {
+								syncCanvasEditorColors(editRef.current);
+							}
 						}}
 						onBlur={() => {
 							editingRef.current = false;
 							const html = editRef.current?.innerHTML ?? '';
 							onCanvasContentChange(
-								stripRichTextChromeColors(html)
+								stripRichTextChromeColors(html, {
+									blockColor: textColor,
+								})
 							);
 						}}
 						onKeyDown={(e) => {

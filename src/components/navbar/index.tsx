@@ -118,6 +118,7 @@ const FREE_CORE_PAGE_IDS = new Set([
 	'smtp',
 	'team-managers',
 	'integrations',
+	'analytics-and-reports',
 ]);
 
 /**
@@ -230,6 +231,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 				) as boolean;
 				if (!show) {
 					return false;
+				}
+				if (!isProActive && FREE_CORE_PAGE_IDS.has(pageId)) {
+					return true;
 				}
 				const moduleSlug =
 					item.requiresModule ?? PATH_TO_MODULE[item.path];

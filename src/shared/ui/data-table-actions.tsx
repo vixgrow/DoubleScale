@@ -181,7 +181,7 @@ export function DataTableActions<TData>({
 	};
 
 	return (
-		<div className="flex gap-6 items-center">
+		<div className="flex flex-wrap items-center gap-3">
 			{config.dateRange?.enabled && (
 				<DateRangePicker
 					value={config.dateRange?.value}
@@ -192,6 +192,7 @@ export function DataTableActions<TData>({
 						}
 					}}
 					placeholder={config.dateRange?.placeholder}
+					className="ml-2"
 				/>
 			)}
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
@@ -236,10 +237,17 @@ export function DataTableActions<TData>({
 							<Button
 								variant="outline"
 								onClick={handleCampaignFiltersDialogOpen}
-
+								className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
 							>
-								<FiltersIcon width={32} height={32} />
-								{__('Filters', 'doublescale')}
+								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
+									<FiltersIcon
+										width={14}
+										height={14}
+									/>
+								</span>
+								<span className="text-foreground">
+									{__('Filters', 'doublescale')}
+								</span>
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="sm:max-w-[800px]">
@@ -301,14 +309,20 @@ export function DataTableActions<TData>({
 						<DialogTrigger asChild>
 							<Button
 								variant="outline"
-								// className={`font-semibold px-4 text-[#3B82F6] ${!isProActive ? 'relative' : ''
-								// 	}`}
 								onClick={handleAdvancedFiltersDialogOpen}
+								className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
 							>
-								<FiltersIcon />
-								{__('Advanced Filters', 'doublescale')}
+								<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
+									<FiltersIcon
+										width={14}
+										height={14}
+									/>
+								</span>
+								<span className="text-foreground">
+									{__('Advanced Filters', 'doublescale')}
+								</span>
 								{!isProActive && (
-									<Lock className="h-4 w-4 text-orange-500 ml-2" />
+									<Lock className="!h-3.5 !w-3.5 text-amber-500" />
 								)}
 							</Button>
 						</DialogTrigger>
@@ -371,11 +385,19 @@ export function DataTableActions<TData>({
 				>
 					<DialogTrigger asChild>
 						<Button
-							variant="secondaryDeepBlue"
+							variant="outline"
 							onClick={handleDialogOpen}
+							className="group h-10 gap-2.5 rounded-lg border-input bg-white pl-2 pr-3 text-sm font-medium shadow-sm transition-all duration-150 hover:border-brandPrimary/40 hover:bg-brandPrimary/[0.04] data-[state=open]:border-brandPrimary data-[state=open]:bg-brandPrimary/[0.08]"
 						>
-							<ColumnsIcon />
-							{__('Manage Columns', 'doublescale')}
+							<span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-brandPrimary/10 text-brandPrimary transition-colors group-hover:bg-brandPrimary/15">
+								<ColumnsIcon
+									width={14}
+									height={14}
+								/>
+							</span>
+							<span className="text-foreground">
+								{__('Manage Columns', 'doublescale')}
+							</span>
 						</Button>
 					</DialogTrigger>
 

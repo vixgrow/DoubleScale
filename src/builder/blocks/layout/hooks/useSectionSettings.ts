@@ -1,205 +1,216 @@
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from 'react';
 import { STORE_KEY } from '../../../../stores/email-builder/constants';
-import { EmailSection } from '../../../../stores/email-builder/types';
+import {
+	EmailSection,
+	EmailColumn,
+} from '../../../../stores/email-builder/types';
 import { PaddingValue } from '../../basic/shared';
 
 interface BackgroundImage {
-  id: number;
-  name: string;
-  url: string;
-  size: number;
+	id: number;
+	name: string;
+	url: string;
+	size: number;
 }
 
 export interface LayoutSettingsData {
-  backgroundColor: string;
-  backgroundImage: BackgroundImage | null;
-  backgroundRepeat: string;
-  backgroundSize: string;
-  backgroundPosition: string;
-  padding: PaddingValue;
+	backgroundColor: string;
+	backgroundImage: BackgroundImage | null;
+	backgroundRepeat: string;
+	backgroundSize: string;
+	backgroundPosition: string;
+	padding: PaddingValue;
+	margin: PaddingValue;
 }
 
 interface UseSectionSettingsOptions {
-  onSettingsChange?: (settings: LayoutSettingsData) => void;
-  initialSettings?: Partial<LayoutSettingsData>;
-  sectionId?: string;
+	onSettingsChange?: (settings: LayoutSettingsData) => void;
+	initialSettings?: Partial<LayoutSettingsData>;
+	sectionId?: string;
+	columnId?: string;
 }
 
+const parseSpacing = (value: string, fallback = 0) => {
+	const defaults = {
+		top: fallback,
+		right: fallback,
+		bottom: fallback,
+		left: fallback,
+	};
+	const parts = value
+		.split(' ')
+		.map((p) => parseInt(p.replace('px', '')) || 0);
+	if (parts.length === 1) {
+		return { top: parts[0], right: parts[0], bottom: parts[0], left: parts[0] };
+	}
+	if (parts.length === 2) {
+		return { top: parts[0], right: parts[1], bottom: parts[0], left: parts[1] };
+	}
+	if (parts.length === 4) {
+		return { top: parts[0], right: parts[1], bottom: parts[2], left: parts[3] };
+	}
+	return defaults;
+};
+
+const parsePadding = (padding: string) => parseSpacing(padding, 40);
+
+const parseBackgroundImage = (bgImage: string): BackgroundImage | null => {
+	if (!bgImage || bgImage === 'none') {
+		return null;
+	}
+	const urlMatch = bgImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+	if (urlMatch) {
+		return { id: 0, name: 'Background Image', url: urlMatch[1], size: 0 };
+	}
+	return null;
+};
+
 const convertSectionStylesToSettings = (
-  section: EmailSection
+	section: EmailSection
 ): Partial<LayoutSettingsData> => {
-  if (!section?.styles) return {};
+	if (!section?.styles) {
+		return {};
+	}
+	const styles = section.styles;
+	return {
+		backgroundColor: styles.backgroundColor || 'transparent',
+		backgroundImage: parseBackgroundImage(styles.backgroundImage),
+		backgroundRepeat: styles.backgroundRepeat || 'no-repeat',
+		backgroundSize: styles.backgroundSize || 'cover',
+		backgroundPosition: styles.backgroundPosition || 'center',
+		padding: parsePadding(styles.padding || '40px'),
+		margin: parseSpacing(styles.margin || '0px'),
+	};
+};
 
-  const styles = section.styles;
-  const padding = styles.padding || '40px';
-
-  let paddingValues = { top: 40, right: 40, bottom: 40, left: 40 };
-  if (typeof padding === 'string') {
-    const paddingArray = padding
-      .split(' ')
-      .map((p) => parseInt(p.replace('px', '')) || 0);
-    if (paddingArray.length === 1) {
-      paddingValues = {
-        top: paddingArray[0],
-        right: paddingArray[0],
-        bottom: paddingArray[0],
-        left: paddingArray[0],
-      };
-    } else if (paddingArray.length === 2) {
-      paddingValues = {
-        top: paddingArray[0],
-        right: paddingArray[1],
-        bottom: paddingArray[0],
-        left: paddingArray[1],
-      };
-    } else if (paddingArray.length === 4) {
-      paddingValues = {
-        top: paddingArray[0],
-        right: paddingArray[1],
-        bottom: paddingArray[2],
-        left: paddingArray[3],
-      };
-    }
-  }
-
-  let backgroundImage: BackgroundImage | null = null;
-  if (styles.backgroundImage && styles.backgroundImage !== 'none') {
-    const urlMatch = styles.backgroundImage.match(
-      /url\(['"]?([^'"]+)['"]?\)/
-    );
-    if (urlMatch) {
-      backgroundImage = {
-        id: 0,
-        name: 'Background Image',
-        url: urlMatch[1],
-        size: 0,
-      };
-    }
-  }
-
-  return {
-    backgroundColor: styles.backgroundColor || '#ffffff',
-    backgroundImage,
-    backgroundRepeat: styles.backgroundRepeat || 'no-repeat',
-    backgroundSize: styles.backgroundSize || 'cover',
-    backgroundPosition: styles.backgroundPosition || 'center',
-    padding: paddingValues,
-  };
+const convertColumnStylesToSettings = (
+	column: EmailColumn
+): Partial<LayoutSettingsData> => {
+	if (!column?.styles) {
+		return {};
+	}
+	const styles = column.styles;
+	return {
+		backgroundColor: styles.backgroundColor || 'transparent',
+		backgroundImage: parseBackgroundImage(styles.backgroundImage),
+		backgroundRepeat: styles.backgroundRepeat || 'no-repeat',
+		backgroundSize: styles.backgroundSize || 'cover',
+		backgroundPosition: styles.backgroundPosition || 'center',
+		padding: parsePadding(styles.padding || '0px'),
+		margin: parseSpacing(styles.margin || '0px'),
+	};
 };
 
 export const useSectionSettings = ({
-  onSettingsChange,
-  initialSettings = {},
-  sectionId,
+	onSettingsChange,
+	initialSettings = {},
+	sectionId,
+	columnId,
 }: UseSectionSettingsOptions) => {
-  const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-  const currentSection = sectionId
-    ? sections.find((s) => s.id === sectionId)
-    : null;
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const currentSection = sectionId
+		? sections.find((s) => s.id === sectionId)
+		: null;
+	const currentColumn =
+		currentSection && columnId
+			? currentSection.columns.find((c) => c.id === columnId)
+			: null;
 
-  // Track previous sectionId to only sync when switching sections
-  const previousSectionIdRef = useRef<string | undefined>(sectionId);
+	const syncSource = columnId ? currentColumn : currentSection;
+	const convertStyles = columnId
+		? convertColumnStylesToSettings
+		: convertSectionStylesToSettings;
 
-  const [settings, setSettings] = useState<LayoutSettingsData>(() => {
-    const defaultSettings: LayoutSettingsData = {
-      backgroundColor: '#ffffff',
-      backgroundImage: null,
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      padding: {
-        top: 40,
-        right: 40,
-        bottom: 40,
-        left: 40,
-      },
-    };
+	const previousKeyRef = useRef<string>(`${sectionId ?? ''}-${columnId ?? ''}`);
 
-    if (currentSection) {
-      const sectionSettings =
-        convertSectionStylesToSettings(currentSection);
-      return { ...defaultSettings, ...sectionSettings };
-    }
+	const defaultPadding = columnId
+		? { top: 0, right: 0, bottom: 0, left: 0 }
+		: { top: 40, right: 40, bottom: 40, left: 40 };
+	const defaultMargin = { top: 0, right: 0, bottom: 0, left: 0 };
 
-    return { ...defaultSettings, ...initialSettings };
-  });
+	const [settings, setSettings] = useState<LayoutSettingsData>(() => {
+		const defaultSettings: LayoutSettingsData = {
+			backgroundColor: 'transparent',
+			backgroundImage: null,
+			backgroundRepeat: 'no-repeat',
+			backgroundSize: 'cover',
+			backgroundPosition: 'center',
+			padding: defaultPadding,
+			margin: defaultMargin,
+		};
 
-  // Only sync from store when sectionId changes (switching sections), 
-  // not when section data changes (which would overwrite user changes)
-  useEffect(() => {
-    // Only sync if sectionId actually changed
-    if (previousSectionIdRef.current !== sectionId) {
-      previousSectionIdRef.current = sectionId;
-      
-      // Get the current section at the time of the effect
-      // Using sections from closure - it will have the latest value when sectionId changes
-      const sectionToSync = sectionId
-        ? sections.find((s) => s.id === sectionId)
-        : null;
-      
-      if (sectionToSync) {
-        const sectionSettings =
-          convertSectionStylesToSettings(sectionToSync);
-        setSettings((prev) => {
-          const defaultSettings: LayoutSettingsData = {
-            backgroundColor: '#ffffff',
-            backgroundImage: null,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            padding: {
-              top: 40,
-              right: 40,
-              bottom: 40,
-              left: 40,
-            },
-          };
-          return { ...defaultSettings, ...sectionSettings };
-        });
-      } else if (initialSettings && Object.keys(initialSettings).length > 0) {
-        setSettings((prev) => {
-          const defaultSettings: LayoutSettingsData = {
-            backgroundColor: '#ffffff',
-            backgroundImage: null,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            padding: {
-              top: 40,
-              right: 40,
-              bottom: 40,
-              left: 40,
-            },
-          };
-          return { ...defaultSettings, ...initialSettings };
-        });
-      }
-    }
-    // Only depend on sectionId, not sections or currentSection, to avoid overwriting user changes
-    // When sectionId changes, sections will have the latest value from the closure
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionId]);
+		if (syncSource) {
+			const sourceSettings = convertStyles(
+				syncSource as EmailSection & EmailColumn
+			);
+			return { ...defaultSettings, ...sourceSettings };
+		}
 
-  const handleInputChange = (
-    field: keyof LayoutSettingsData,
-    value: any
-  ) => {
-    const newSettings = { ...settings, [field]: value };
-    setSettings(newSettings);
-    onSettingsChange?.(newSettings);
-  };
+		return { ...defaultSettings, ...initialSettings };
+	});
 
-  const handlePaddingChange = (padding: PaddingValue) => {
-    const newSettings = { ...settings, padding };
-    setSettings(newSettings);
-    onSettingsChange?.(newSettings);
-  };
+	useEffect(() => {
+		const currentKey = `${sectionId ?? ''}-${columnId ?? ''}`;
+		if (previousKeyRef.current !== currentKey) {
+			previousKeyRef.current = currentKey;
 
-  return {
-    settings,
-    handleInputChange,
-    handlePaddingChange,
-  };
+			const sectionToSync = sectionId
+				? sections.find((s) => s.id === sectionId)
+				: null;
+			const columnToSync =
+				sectionToSync && columnId
+					? sectionToSync.columns.find((c) => c.id === columnId)
+					: null;
+			const sourceToSync = columnId ? columnToSync : sectionToSync;
+
+			const syncDefaultSettings: LayoutSettingsData = {
+				backgroundColor: 'transparent',
+				backgroundImage: null,
+				backgroundRepeat: 'no-repeat',
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+				padding: defaultPadding,
+				margin: defaultMargin,
+			};
+
+			if (sourceToSync) {
+				const sourceSettings = convertStyles(
+					sourceToSync as EmailSection & EmailColumn
+				);
+				setSettings(() => ({ ...syncDefaultSettings, ...sourceSettings }));
+			} else if (initialSettings && Object.keys(initialSettings).length > 0) {
+				setSettings(() => ({ ...syncDefaultSettings, ...initialSettings }));
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [sectionId, columnId]);
+
+	const handleInputChange = (
+		field: keyof LayoutSettingsData,
+		value: unknown
+	) => {
+		const newSettings = { ...settings, [field]: value };
+		setSettings(newSettings);
+		onSettingsChange?.(newSettings);
+	};
+
+	const handlePaddingChange = (padding: PaddingValue) => {
+		const newSettings = { ...settings, padding };
+		setSettings(newSettings);
+		onSettingsChange?.(newSettings);
+	};
+
+	const handleMarginChange = (margin: PaddingValue) => {
+		const newSettings = { ...settings, margin };
+		setSettings(newSettings);
+		onSettingsChange?.(newSettings);
+	};
+
+	return {
+		settings,
+		handleInputChange,
+		handlePaddingChange,
+		handleMarginChange,
+	};
 };
-

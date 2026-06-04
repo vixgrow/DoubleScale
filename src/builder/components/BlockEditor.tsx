@@ -21,7 +21,9 @@ import {
 	LayoutSettingsIcon,
 } from '@doublescale/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
-import LayoutSettings from '../blocks/layout/LayoutSettings';
+import LayoutSettings, {
+	type LayoutSettingsData,
+} from '../blocks/layout/LayoutSettings';
 
 interface BlockEditorProps {
 	/**
@@ -67,6 +69,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 		[]
 	);
 
+	const selectedColumnId = useSelect(
+		(select) => select(STORE_KEY).getSelectedColumnId(),
+		[]
+	);
+
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
 			dispatch(STORE_KEY).updateBlock(selectedBlock.id, newProps);
@@ -74,7 +81,38 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 	};
 
 	const isBlockSelected = !!selectedBlockId;
-	const isSectionSelected = !!selectedSectionId;
+	const isColumnSelected =
+		!!selectedColumnId && !!selectedSectionId && !selectedBlockId;
+	const isSectionSelected =
+		!!selectedSectionId && !selectedColumnId && !selectedBlockId;
+
+	const layoutStylesFromSettings = (settings: LayoutSettingsData) => ({
+		backgroundColor: settings.backgroundColor,
+		backgroundImage: settings.backgroundImage
+			? `url(${settings.backgroundImage.url})`
+			: undefined,
+		backgroundRepeat: settings.backgroundRepeat,
+		backgroundSize: settings.backgroundSize,
+		backgroundPosition: settings.backgroundPosition,
+		padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+		margin: `${settings.margin.top}px ${settings.margin.right}px ${settings.margin.bottom}px ${settings.margin.left}px`,
+	});
+
+	const handleLayoutSettingsChange = (settings: LayoutSettingsData) => {
+		if (isColumnSelected && selectedSectionId && selectedColumnId) {
+			dispatch(STORE_KEY).updateColumn(
+				selectedSectionId,
+				selectedColumnId,
+				{ styles: layoutStylesFromSettings(settings) }
+			);
+			return;
+		}
+		if (isSectionSelected && selectedSectionId) {
+			dispatch(STORE_KEY).updateSection(selectedSectionId, {
+				styles: layoutStylesFromSettings(settings),
+			});
+		}
+	};
 
 	const {
 		block: blockDefinition,
@@ -103,7 +141,8 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 		inline &&
 		!usePanelHeader &&
 		!isBlockSelected &&
-		!isSectionSelected;
+		!isSectionSelected &&
+		!isColumnSelected;
 
 	const containerClass = cn(
 		'h-full flex flex-col overflow-hidden rounded-lg',
@@ -149,15 +188,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 								<h3 className="min-w-0 flex-1 text-base font-semibold text-white">
 									{isBlockSelected && blockDefinition?.name
 										? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
-										: isSectionSelected
-											? __(
-												'Layout Settings',
-												'doublescale'
-											)
-											: __(
-												'Global Email Settings',
-												'doublescale'
-											)}
+										: isColumnSelected
+											? __('Column Settings', 'doublescale')
+											: isSectionSelected
+												? __('Layout Settings', 'doublescale')
+												: __('Global Email Settings', 'doublescale')}
 								</h3>
 							)
 						) : (
@@ -173,7 +208,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 									{isBlockSelected &&
 										blockDefinition?.icon ? (
 										<blockDefinition.icon />
-									) : isSectionSelected ? (
+									) : isSectionSelected || isColumnSelected ? (
 										<LayoutSettingsIcon />
 									) : (
 										<GlobalEmailSettingsIcon />
@@ -187,18 +222,13 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 											: 'text-primary'
 									)}
 								>
-									{isBlockSelected &&
-										blockDefinition?.name
+									{isBlockSelected && blockDefinition?.name
 										? `${blockDefinition.name} ${__('Settings', 'doublescale')}`
-										: isSectionSelected
-											? __(
-												'Layout Settings',
-												'doublescale'
-											)
-											: __(
-												'Global Email Settings',
-												'doublescale'
-											)}
+										: isColumnSelected
+											? __('Column Settings', 'doublescale')
+											: isSectionSelected
+												? __('Layout Settings', 'doublescale')
+												: __('Global Email Settings', 'doublescale')}
 								</h3>
 							</div>
 						)}
@@ -242,32 +272,16 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 											)}
 										</p>
 									)
+								) : isColumnSelected ? (
+									<LayoutSettings
+										sectionId={selectedSectionId!}
+										columnId={selectedColumnId!}
+										onSettingsChange={handleLayoutSettingsChange}
+									/>
 								) : isSectionSelected ? (
 									<LayoutSettings
 										sectionId={selectedSectionId}
-										onSettingsChange={(settings) => {
-											const sectionStyles = {
-												backgroundColor:
-													settings.backgroundColor,
-												backgroundImage:
-													settings.backgroundImage
-														? `url(${settings.backgroundImage.url})`
-														: undefined,
-												backgroundRepeat:
-													settings.backgroundRepeat,
-												backgroundSize:
-													settings.backgroundSize,
-												backgroundPosition:
-													settings.backgroundPosition,
-												padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
-											};
-											dispatch(
-												STORE_KEY
-											).updateSection(
-												selectedSectionId,
-												{ styles: sectionStyles }
-											);
-										}}
+										onSettingsChange={handleLayoutSettingsChange}
 									/>
 								) : (
 									<GlobalEmailSettings />
@@ -302,30 +316,16 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 										)}
 									</p>
 								)
+							) : isColumnSelected ? (
+								<LayoutSettings
+									sectionId={selectedSectionId!}
+									columnId={selectedColumnId!}
+									onSettingsChange={handleLayoutSettingsChange}
+								/>
 							) : isSectionSelected ? (
 								<LayoutSettings
 									sectionId={selectedSectionId}
-									onSettingsChange={(settings) => {
-										const sectionStyles = {
-											backgroundColor:
-												settings.backgroundColor,
-											backgroundImage:
-												settings.backgroundImage
-													? `url(${settings.backgroundImage.url})`
-													: undefined,
-											backgroundRepeat:
-												settings.backgroundRepeat,
-											backgroundSize:
-												settings.backgroundSize,
-											backgroundPosition:
-												settings.backgroundPosition,
-											padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
-										};
-										dispatch(STORE_KEY).updateSection(
-											selectedSectionId,
-											{ styles: sectionStyles }
-										);
-									}}
+									onSettingsChange={handleLayoutSettingsChange}
 								/>
 							) : (
 								<GlobalEmailSettings />

@@ -27,28 +27,30 @@ interface LayoutSettingsProps {
 	onSettingsChange?: (settings: LayoutSettingsData) => void;
 	initialSettings?: Partial<LayoutSettingsData>;
 	sectionId?: string;
+	columnId?: string;
 }
 
 const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 	onSettingsChange,
 	initialSettings = {},
 	sectionId,
+	columnId,
 }) => {
-	const { settings, handleInputChange, handlePaddingChange } =
+	const { settings, handleInputChange, handlePaddingChange, handleMarginChange } =
 		useSectionSettings({
 			onSettingsChange,
 			initialSettings,
 			sectionId,
+			columnId,
 		});
 
 	const [showConditionsModal, setShowConditionsModal] = useState(false);
 
-	// Get section to check if it has conditions
 	const section = useSelect(
 		(select) => {
 			const sections = select(STORE_KEY).getSections();
 			return sectionId
-				? sections.find((s: any) => s.id === sectionId)
+				? sections.find((s: { id: string }) => s.id === sectionId)
 				: null;
 		},
 		[sectionId]
@@ -56,7 +58,6 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 
 	const hasConditions = section?.conditions && section.conditions.length > 0;
 
-	// Check if Pro is active for conditional sections
 	const isProActive = applyFilters(
 		'doublescale_is_pro_active',
 		false
@@ -89,7 +90,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 					handleInputChange('backgroundColor', value)
 				}
 				label={__('Background Color', 'doublescale')}
-				id="layout-bg-color"
+				id={columnId ? 'column-bg-color' : 'layout-bg-color'}
 			/>
 
 			<PaddingControl
@@ -97,8 +98,13 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 				onChange={handlePaddingChange}
 			/>
 
-			{/* Conditional Section Button - Pro Feature */}
-			{sectionId && (
+			<PaddingControl
+				value={settings.margin}
+				onChange={handleMarginChange}
+				label={__('Margin', 'doublescale')}
+			/>
+
+			{sectionId && !columnId && (
 				<div className="border-t pt-4">
 					<button
 						type="button"
@@ -147,8 +153,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({
 				</div>
 			)}
 
-			{/* Conditional Section Modal - Gated by Pro */}
-			{sectionId && (
+			{sectionId && !columnId && (
 				<ConditionalSectionGate
 					sectionId={sectionId}
 					visible={showConditionsModal}

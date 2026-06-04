@@ -3,10 +3,46 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import ConfigAPI from '@doublescale/config';
+// @ts-ignore – webpack asset imports
+import phpLogo from '@doublescale/assets/images/mailers/php.svg';
+// @ts-ignore
+import smtpLogo from '@doublescale/assets/images/mailers/smtp.svg';
+// @ts-ignore
+import sendgridLogo from '@doublescale/assets/images/mailers/sendgrid.svg';
+// @ts-ignore
+import mailgunLogo from '@doublescale/assets/images/mailers/mailgun.svg';
+// @ts-ignore
+import awsLogo from '@doublescale/assets/images/mailers/aws.svg';
+// @ts-ignore
+import gmailLogo from '@doublescale/assets/images/mailers/gmail.svg';
+// @ts-ignore
+import postmarkLogo from '@doublescale/assets/images/mailers/postmark.svg';
+// @ts-ignore
+import sendinblueLogo from '@doublescale/assets/images/mailers/sendinblue.svg';
+// @ts-ignore
+import loopsLogo from '@doublescale/assets/images/mailers/loops.png';
+// @ts-ignore
+import mailersendLogo from '@doublescale/assets/images/mailers/mailersend.svg';
+// @ts-ignore
+import mailjetLogo from '@doublescale/assets/images/mailers/mailjet.png';
+// @ts-ignore
+import mandrillLogo from '@doublescale/assets/images/mailers/mandrill.png';
+// @ts-ignore
+import sparkpostLogo from '@doublescale/assets/images/mailers/sparkpost.svg';
+// @ts-ignore
+import sendlayerLogo from '@doublescale/assets/images/mailers/sendlayer.png';
+// @ts-ignore
+import smtp2goLogo from '@doublescale/assets/images/mailers/smtp2go.png';
+// @ts-ignore
+import smtpcomLogo from '@doublescale/assets/images/mailers/smtpcom.svg';
+// @ts-ignore
+import elasticemailLogo from '@doublescale/assets/images/mailers/elasticemail.svg';
+// @ts-ignore
+import outlookLogo from '@doublescale/assets/images/mailers/outlook.svg';
+// @ts-ignore
+import zohoLogo from '@doublescale/assets/images/mailers/zoho.svg';
+// @ts-ignore
+import socketlabsLogo from '@doublescale/assets/images/mailers/socketlabs.svg';
 
 /**
  * Mailers that send via provider OAuth/API (not plain SMTP credentials in this form).
@@ -46,43 +82,36 @@ export const SMTP_MAILER_OPTIONS: { value: string; label: string }[] = [
 ];
 
 /**
- * Logo filenames under `assets/images/mailers/` (mailer slug → file).
+ * Webpack-resolved logo URLs keyed by mailer slug.
  */
-export const SMTP_MAILER_LOGO_FILES: Record<string, string> = {
-	phpmailer: 'php.svg',
-	smtp: 'smtp.svg',
-	sendgrid: 'sendgrid.svg',
-	mailgun: 'mailgun.svg',
-	aws: 'aws.svg',
-	gmail: 'gmail.svg',
-	postmark: 'postmark.svg',
-	sendinblue: 'sendinblue.svg',
-	loops: 'loops.svg',
-	mailersend: 'mailersend.svg',
-	mailjet: 'mailjet.svg',
-	mandrill: 'mandrill.svg',
-	sparkpost: 'sparkpost.svg',
-	sendlayer: 'sendlayer.svg',
-	smtp2go: 'smtp2go.svg',
-	smtpcom: 'smtpcom.svg',
-	elasticemail: 'elasticemail.svg',
-	outlook: 'outlook.svg',
-	zoho: 'zoho.svg',
-	socketlabs: 'socketlabs.svg',
+const SMTP_MAILER_LOGOS: Record<string, string> = {
+	phpmailer: phpLogo,
+	smtp: smtpLogo,
+	sendgrid: sendgridLogo,
+	mailgun: mailgunLogo,
+	aws: awsLogo,
+	gmail: gmailLogo,
+	postmark: postmarkLogo,
+	sendinblue: sendinblueLogo,
+	loops: loopsLogo,
+	mailersend: mailersendLogo,
+	mailjet: mailjetLogo,
+	mandrill: mandrillLogo,
+	sparkpost: sparkpostLogo,
+	sendlayer: sendlayerLogo,
+	smtp2go: smtp2goLogo,
+	smtpcom: smtpcomLogo,
+	elasticemail: elasticemailLogo,
+	outlook: outlookLogo,
+	zoho: zohoLogo,
+	socketlabs: socketlabsLogo,
 };
 
 /**
  * Absolute URL to the bundled logo for a mailer slug, if present.
- * Logos ship with the core plugin under `assets/images/mailers/`.
  */
 export function getSmtpMailerLogoUrl(mailerSlug: string): string | undefined {
-	const file = SMTP_MAILER_LOGO_FILES[mailerSlug];
-	if (!file) {
-		return undefined;
-	}
-	const base = ConfigAPI.getPluginDirUrl();
-	const sep = base.endsWith('/') ? '' : '/';
-	return `${base}${sep}assets/images/mailers/${file}`;
+	return SMTP_MAILER_LOGOS[mailerSlug];
 }
 
 /** Wizard grouping for the provider picker (step 2). */

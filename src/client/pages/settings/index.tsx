@@ -34,17 +34,15 @@ import {
 	ToolsIcon,
 	TotalSMSIcon,
 	LicenseIcon,
-	ProcessingEmailsIcon,
 	LinkTriggersIcon,
 	WhatsAppIcon,
 	WebsiteIcon,
 } from '@doublescale/components';
-import { Bell, Blocks, Inbox, Smartphone, Sparkles } from 'lucide-react';
+import { Bell, Blocks, Inbox, Sparkles } from 'lucide-react';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import BusinessSettings from './business';
 import EmailSettings from './email';
-import SMTPSettings from './smtp';
 import MailboxSettings from './mailbox';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -53,7 +51,6 @@ import CurrenciesSettings from './currencies';
 import ModulesSettings from './modules';
 import SystemSettings from './system';
 import License from './license';
-import MobileAppSettings from './mobile-app';
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
 // import CartSettings from './cart'; // Moved to Pro
 
@@ -83,12 +80,10 @@ const TABS_WITHOUT_SAVE_BUTTON_LIST = [
 	'link_triggers',
 	'system',
 	'license',
-	'smtp',
 	'whatsapp',
 	'debugging',
 	'notifications',
 	'mailbox',
-	'mobile_app',
 	'modules',
 ];
 
@@ -280,8 +275,6 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'smtp':
-				return <SMTPSettings />;
 			case 'mailbox':
 				return <MailboxSettings />;
 			case 'sms':
@@ -435,8 +428,6 @@ const SettingsPage: React.FC = () => {
 				);
 	case 'modules':
 			return <ModulesSettings />;
-	case 'mobile_app':
-			return <MobileAppSettings />;
 	case 'notifications':
 			const NotificationsComponent = applyFilters(
 				'doublescale_settings_notifications_settings',
@@ -474,11 +465,6 @@ const SettingsPage: React.FC = () => {
 			value: 'email',
 			label: 'Email',
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
-		},
-		{
-			value: 'smtp',
-			label: 'SMTP',
-			icon: <ProcessingEmailsIcon width={24} height={24} />,
 		},
 		{
 			value: 'mailbox',
@@ -539,11 +525,6 @@ const SettingsPage: React.FC = () => {
 			value: 'ai',
 			label: 'AI',
 			icon: <Sparkles size={24} />,
-		},
-		{
-			value: 'mobile_app',
-			label: 'Mobile App',
-			icon: <Smartphone size={24} />,
 		},
 		{
 			value: 'notifications',

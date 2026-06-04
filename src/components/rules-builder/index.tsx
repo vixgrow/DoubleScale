@@ -141,7 +141,7 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 						className=""
 					>
 						<PlusIcon />
-						{__('Add another condition (Or)', 'doublescale')}
+						{__('OR', 'doublescale')}
 					</Button>
 				</div>
 			</div>

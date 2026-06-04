@@ -16,6 +16,8 @@ interface ProtectedRouteProps {
 		requiredCapability?: string[];
 		/** When set, user is redirected away unless this module is enabled in admin config. */
 		requiresModule?: string;
+		/** When true, skip the module-gate redirect so the component can render its own Pro notice. */
+		alwaysRegister?: boolean;
 		component?: React.ComponentType;
 	};
 	children?: React.ReactNode;
@@ -47,14 +49,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	useEffect(() => {
 		if (
 			page.requiresModule &&
+			!page.alwaysRegister &&
 			!config.isModuleToggleEnabled(page.requiresModule)
 		) {
 			navigate(getToLink('/'), { replace: true });
 		}
-	}, [page.requiresModule, navigate, moduleGateEpoch]);
+	}, [page.requiresModule, page.alwaysRegister, navigate, moduleGateEpoch]);
 
 	if (
 		page.requiresModule &&
+		!page.alwaysRegister &&
 		!config.isModuleToggleEnabled(page.requiresModule)
 	) {
 		return null;

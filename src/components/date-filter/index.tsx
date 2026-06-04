@@ -85,24 +85,24 @@ const DateFilter: React.FC<DateFilterProps> = ({
 	};
 
 	return (
-		<div className="flex items-end gap-[10px]">
-			<div>
-				<Select
-					value={interval}
-					onValueChange={(value) => onIntervalChange(value)}
+		<div className="flex items-center gap-2">
+			<Select
+				value={interval}
+				onValueChange={(value) => onIntervalChange(value)}
+			>
+				<SelectTrigger
+					className="h-10 min-w-[180px] gap-2 rounded-lg border-brandPrimary bg-white px-3 text-sm font-medium text-brandPrimary shadow-sm transition-colors hover:bg-brandPrimary/5 focus:ring-2 focus:ring-brandPrimary/30"
 				>
-					<SelectTrigger className="w-full bg-[#fff] text-[#6549CA] border border-[#6549CA] rounded-md py-0 px-2">
-						<SelectValue placeholder="Select interval" />
-					</SelectTrigger>
-					<SelectContent>
-						{intervalOptions.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</div>
+					<SelectValue placeholder={__('Select interval', 'doublescale')} />
+				</SelectTrigger>
+				<SelectContent>
+					{intervalOptions.map((option) => (
+						<SelectItem key={option.value} value={option.value}>
+							{option.label}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
 			{interval === 'custom' && (
 				<DateRangePicker
 					value={{
@@ -111,7 +111,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 					}}
 					onChange={handleDateRangeChange}
 					placeholder={__('Select date range', 'doublescale')}
-					className="bg-[#FFFFFF80] text-[#2E2C2F] px-2 py-0 rounded-md"
+					className="h-10 gap-2 rounded-lg border-brandPrimary bg-white px-3 text-sm font-medium text-brandPrimary shadow-sm hover:bg-brandPrimary/5"
 				/>
 			)}
 		</div>

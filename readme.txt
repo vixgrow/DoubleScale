@@ -1,14 +1,14 @@
 === DoubleScale | All-In-One Business Growth Platform ===
 Contributors: vixgrowy
-Tags:  marketing automation, booking, email campaigns, helpdesk
+Tags:  crm, marketing automation, email campaigns, booking, pipelines
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress-native campaigns, booking, SMTP, helpdesk, tasks, pipelines, analytics, and automations in one plugin.
+WordPress-native CRM, deals & pipelines, email/SMS/WhatsApp campaigns, booking, helpdesk, tasks, SMTP, and automations — one plugin.
 
 == Description ==
 
@@ -18,38 +18,46 @@ You shouldn't need eight separate logins, eight billing relationships, and eight
 
 = What's inside one plugin =
 
-DoubleScale is a single install that gives you **eight first-class modules**, every one designed to feel like a dedicated product:
+DoubleScale is a single install that gives you **nine first-class modules**, every one designed to feel like a dedicated product:
 
-**1. contacts, lists, segmentation**
-A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, full activity timeline, bulk operations, and CSV / WordPress user / WooCommerce imports. Every email, SMS, deal, booking, support ticket, and form submission stitches into one timeline per contact.
+**1. CRM — contacts, lists, segmentation, activity timeline**
+A complete contact database. Unlimited records, unlimited custom fields. Tag-based and rule-based segmentation, bulk operations, and CSV / WordPress user / WooCommerce imports. Every contact has a **full activity timeline** that stitches together emails, SMS and WhatsApp messages, deal stage changes, bookings, support threads, page visits, form submissions, link clicks, and automation runs — one chronological view per contact, no tab-switching.
 
-**2. Campaigns — email & SMS broadcasts and sequences**
-A drag-and-drop email builder with responsive blocks, reusable templates, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments. Build multi-step email sequences (drip campaigns) with delays and conditional branches. SMS campaigns share the same composer and audience. Per-link tracking with automation triggers; bounce handling with soft/hard classification.
+**2. Deals & Pipelines — sales pipeline management**
+Drag-and-drop kanban pipelines with multiple stages, weighted forecasting, win/loss reasons, and per-deal custom fields. Run separate pipelines for sales, partnerships, renewals, or onboarding. Every deal carries the full contact, activity, and email thread with it. Stage transitions can fire automations (move to "Closed Won" → send invoice + assign onboarding task + tag in CRM).
 
-**3. Booking — self-service appointment scheduling**
-Built-in calendar management with availability windows, guest forms, automated confirmations, rescheduling, time-zone handling, and embeddable booking pages. No external Calendly — bookings land directly on the contact record and can trigger automations.
+**3. Campaigns — email, SMS, and WhatsApp broadcasts and sequences**
+A drag-and-drop email builder with responsive blocks, reusable templates, A/B testing, and merge tags for any custom field. Broadcast to lists, tags, or rule-based segments.
+* **Email sequences (drip campaigns)** — multi-step nurture flows with time delays, conditional branches based on opens/clicks/replies, and goal-based exit conditions.
+* **SMS campaigns** — broadcast and triggered SMS via Twilio. Shares the same composer, audience, and merge-tag system as email.
+* **WhatsApp campaigns** — send Meta-approved WhatsApp templates and trigger conversations from the same builder. Inbound replies route to the unified inbox.
+* Per-link tracking with automation triggers, bounce handling with soft/hard classification, and full delivery logs.
 
-**4. Tasks — team task management**
+**4. Booking — self-service appointment scheduling**
+A full scheduling system inside WordPress — no Calendly needed. Create **single events** for one-on-one meetings (consultations, demos, coaching sessions) or **team events** where multiple staff members share availability and bookings are assigned via round-robin or manual selection. Configure slot durations, buffer times between appointments, and per-day availability windows. Guests pick a time from an embeddable booking page, fill out a customizable intake form, and receive automated email/SMS confirmations and reminders. Supports Stripe payment collection for paid bookings, waiting lists when slots fill up, rescheduling and cancellation flows, and automatic time-zone detection. Every booking lands on the contact record and can trigger automations (e.g., tag the contact, create a deal, send a follow-up sequence).
+
+**5. Tasks — team task management**
 Create, assign, schedule, and track tasks. Link them to contacts and deals. Due dates, reminders, status workflows. Stop running a separate ClickUp or Asana when 80% of your tasks are about customers anyway.
 
-**5. SMTP — multi-provider email routing**
-A complete `wp_mail()` replacement with **20+ provider integrations** (SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, Gmail, MailerSend, Mailjet, Mandrill, Brevo, and more). Smart provider selection, automatic failover, full delivery logs, and email tests — your transactional and marketing email runs through the same hardened pipeline.
+**6. SMTP — multi-provider email routing**
+A complete `wp_mail()` replacement built into the CRM — no separate SMTP plugin required. Connect one or more of **20+ providers**: SendGrid, Amazon SES, Mailgun, Postmark, SparkPost, SMTP.com, SMTP2GO, Gmail (OAuth), Outlook (OAuth), Zoho (OAuth), MailerSend, Mailjet, Mandrill, Brevo (Sendinblue), Elastic Email, SendLayer, SocketLabs, Loops, and generic SMTP relay. Set up multiple connections with routing rules so transactional mail goes through one provider while marketing campaigns use another. OAuth authentication for Gmail, Outlook, and Zoho — no app passwords needed. Includes full email delivery logs, bounce handling with soft/hard classification, provider health checks, email test sending, and automatic failover when a provider is down.
 
-**6. Helpdesk inbox — unified support across channels**
-A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox.
+**7. Inbox — unified helpdesk across email, SMS, and WhatsApp**
+A shared inbox for email, SMS, and WhatsApp conversations. Threads stay attached to the contact record. Assign threads to teammates, mark as read/unread, archive, and reply without leaving WordPress. IMAP polling brings inbound email replies straight into the inbox. Inbound WhatsApp and SMS messages can also fire automations — auto-tag, route to a teammate, open a deal, or kick off a follow-up sequence.
 
-**7. Analytics — dashboards & reports**
-A built-in reporting layer covering revenue, pipeline, campaign performance, contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting CSVs to a BI tool.
+**8. Analytics — dashboards & reports**
+A built-in reporting layer covering revenue, pipeline forecasts, campaign performance (opens, clicks, conversions per send), contact growth, automation execution, and email deliverability. Visual charts, KPI cards, custom date ranges, CSV exports. The numbers your founder, marketer, and ops lead all need — without exporting to a BI tool.
 
-**8. Team management — roles, ownership, collaboration**
-Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see their deals, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
+**9. Team management — roles, ownership, collaboration**
+Multiple team members can work in DoubleScale at once. WordPress roles map to access patterns: sales reps see only deals they own, CRM managers see everything, support agents see the inbox. Activity is attributed by user. Notifications keep the team in sync.
 
-= Plus: a visual automation engine that connects all eight =
+= Plus: a visual automation engine that connects all nine =
 
-Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened — flow into **multi-step automations** with conditional branches, time delays, and webhook calls. Actions include: send email, send SMS, tag, score, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
+Underneath every module is one workflow builder. **11+ trigger types** — form submitted, page visited, deal stage changed, link clicked, tag added, booking made, support thread opened, email received, SMS received, WhatsApp received, lead score crossed, list/tag applied or removed — flow into **multi-step automations** with conditional branches, time delays, goal conditions, and webhook calls. Actions include: send email, send SMS, send WhatsApp, start or pause an email sequence, tag, score, move a deal to a new stage, create a deal, assign a task, post to Slack, hit a webhook. This is the connective tissue that makes "all-in-one" actually mean something.
 
 = Key capabilities =
 
+* **AI-powered writing and assistance** — Connect your own API key from OpenAI, Google Gemini, Groq, OpenRouter, or any OpenAI-compatible provider. AI-assisted email composition, smart template generation, subject line suggestions, and content rewriting are built right into the campaign builder and email editor. Bring your own key, pick your provider, and keep full control over cost and data.
 * One contact record shared across every module — campaigns, bookings, tasks, helpdesk threads, and deals all attach to the same contact.
 * Unlimited contacts and custom fields with no per-contact or per-seat fees.
 * Self-hosted: all records live in your own WordPress database; no third-party cloud, no vendor lock-in.
@@ -114,9 +122,9 @@ You'll have a working CRM + email engine + booking page in under 10 minutes.
 
 == Frequently Asked Questions ==
 
-= Is DoubleScale really an all-in-one replacement for CRM + email + booking + tasks + SMTP + helpdesk + analytics + team management? =
+= Is DoubleScale really an all-in-one replacement for CRM + deals/pipelines + email/SMS/WhatsApp campaigns + booking + tasks + SMTP + helpdesk + analytics + team management? =
 
-Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Mailchimp, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
+Yes — that's exactly the design. Each module is built to feel like a dedicated product, but they share a single contact record, a single activity timeline, a single automation engine, a single reporting layer, and a single user model. You can install DoubleScale and turn off your CRM, Pipedrive/HubSpot, Mailchimp, Twilio dashboard, Calendly, SMTP plugin, helpdesk, and reporting tool on the same day.
 
 = How is this different from "marketing automation" plugins like FluentCRM or Groundhogg? =
 
@@ -171,11 +179,24 @@ Yes. Multiple users can work simultaneously, with role-based access, ownership-a
 Documentation and setup guides: [doublescale.io](https://doublescale.io). Community support via WordPress.org. Pro tiers include email and priority support.
 
 == Changelog ==
+= 1.0.2 = 3 Jun 2026
+- Fix booking issue
+- Fix assets issue
+- Fix templates issue while creating a new campaign
 
 = 1.0.0 =
-* All-in-one launch: CRM, email & SMS campaigns, booking, tasks, SMTP routing, unified helpdesk inbox, analytics, and team management — in one plugin
-* Visual automation engine with 11+ trigger types connecting every module
-* 50+ integrations across commerce, forms, LMS, SMTP, messaging, and CRM sync
+* All-in-one launch — nine first-class modules in one plugin:
+  * CRM with full activity timeline (emails, SMS, WhatsApp, deals, bookings, pageviews, form submits, automations — one chronological view)
+  * Deals & pipelines (drag-and-drop kanban, weighted forecasting, multi-pipeline)
+  * Email, SMS, and WhatsApp campaigns
+  * Email sequences (drip campaigns) with delays, conditional branches, and goal-based exits
+  * Booking (calendars, availability, embeddable pages)
+  * Tasks (team task management linked to contacts and deals)
+  * SMTP routing with 20+ providers and automatic failover
+  * Unified inbox for email, SMS, and WhatsApp
+  * Analytics, reports, and dashboards
+* Visual automation engine with 11+ trigger types — including WhatsApp received, SMS received, deal stage changed, lead score crossed, link clicked — connecting every module
+* 50+ integrations across WooCommerce, EDD, SureCart, LMS plugins, 16 form builders, SMTP providers, Twilio, Meta WhatsApp, Slack, HubSpot, Pipedrive, ActiveCampaign, and more
 
 == Upgrade Notice ==
 
@@ -217,155 +238,62 @@ For every service below:
 
 = SMTP / email providers =
 
-Each SMTP provider is selectable per connection. When you configure one, DoubleScale sends outgoing mail (email content, recipient addresses, headers) to that provider's API; nothing is sent until you save credentials.
+Each provider is selectable per connection. DoubleScale sends outgoing mail to that provider's API only after you save credentials.
 
-**SendGrid**
-* Endpoint: `https://api.sendgrid.com`
-* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
-
-**Mailgun**
-* Endpoint: `https://api.mailgun.net`
-* Terms: https://www.mailgun.com/terms · Privacy: https://www.mailgun.com/privacy-policy
-
-**Postmark**
-* Endpoint: `https://api.postmarkapp.com`
-* Terms: https://postmarkapp.com/terms-of-service · Privacy: https://postmarkapp.com/privacy-policy
-
-**SparkPost**
-* Endpoint: `https://api.sparkpost.com`
-* Terms: https://www.sparkpost.com/legal/terms-of-use · Privacy: https://bird.com/en/legal/privacy
-
-**SMTP.com**
-* Endpoint: `https://api.smtp.com`
-* Terms: https://smtp.com/terms-of-service · Privacy: https://smtp.com/privacy-policy
-
-**SMTP2GO**
-* Endpoint: `https://api.smtp2go.com`
-* Terms: https://www.smtp2go.com/terms/ · Privacy: https://www.smtp2go.com/privacy/
-
-**MailerSend**
-* Endpoint: `https://api.mailersend.com`
-* Terms: https://www.mailersend.com/legal/terms-of-use · Privacy: https://www.mailersend.com/legal/privacy-policy
-
-**Mailjet**
-* Endpoint: `https://api.mailjet.com`
-* Terms: https://www.mailjet.com/legal/terms · Privacy: https://www.mailjet.com/privacy-policy/
-
-**Brevo (formerly Sendinblue)**
-* Endpoint: `https://api.brevo.com`
-* Terms: https://www.brevo.com/legal/termsofuse/ · Privacy: https://www.brevo.com/legal/privacypolicy/
-
-**Mandrill**
-* Endpoint: `https://mandrillapp.com/api`
-* Terms: https://mailchimp.com/legal/terms/ · Privacy: https://mailchimp.com/legal/privacy/
-
-**ElasticEmail**
-* Endpoint: `https://api.elasticemail.com`
-* Terms: https://elasticemail.com/resources/usage-policies/terms-of-use/ · Privacy: https://elasticemail.com/resources/usage-policies/privacy-policy/
-
-**SendLayer**
-* Endpoint: `https://console.sendlayer.com/api`
-* Terms: https://sendlayer.com/terms-of-service/ · Privacy: https://sendlayer.com/privacy-policy/
-
-**SocketLabs**
-* Endpoint: `https://inject.socketlabs.com`
-* Terms: https://www.socketlabs.com/terms-of-use · Privacy: https://www.socketlabs.com/privacy-policy/
-
-**Loops**
-* Endpoint: `https://app.loops.so/api`
-* Terms: https://loops.so/terms · Privacy: https://loops.so/privacy
-
-**Amazon SES**
-* Endpoint: AWS regional endpoints (e.g., `https://email.us-east-1.amazonaws.com`)
-* Terms: https://aws.amazon.com/service-terms/ · Privacy: https://aws.amazon.com/privacy/
+* **SendGrid** — `https://api.sendgrid.com` · [Terms](https://www.twilio.com/legal/tos) · [Privacy](https://www.twilio.com/legal/privacy)
+* **Mailgun** — `https://api.mailgun.net` · [Terms](https://www.mailgun.com/terms) · [Privacy](https://www.mailgun.com/privacy-policy)
+* **Postmark** — `https://api.postmarkapp.com` · [Terms](https://postmarkapp.com/terms-of-service) · [Privacy](https://postmarkapp.com/privacy-policy)
+* **SparkPost** — `https://api.sparkpost.com` · [Terms](https://www.sparkpost.com/legal/terms-of-use) · [Privacy](https://bird.com/en/legal/privacy)
+* **SMTP.com** — `https://api.smtp.com` · [Terms](https://smtp.com/terms-of-service) · [Privacy](https://smtp.com/privacy-policy)
+* **SMTP2GO** — `https://api.smtp2go.com` · [Terms](https://www.smtp2go.com/terms/) · [Privacy](https://www.smtp2go.com/privacy/)
+* **MailerSend** — `https://api.mailersend.com` · [Terms](https://www.mailersend.com/legal/terms-of-use) · [Privacy](https://www.mailersend.com/legal/privacy-policy)
+* **Mailjet** — `https://api.mailjet.com` · [Terms](https://www.mailjet.com/legal/terms) · [Privacy](https://www.mailjet.com/privacy-policy/)
+* **Brevo (Sendinblue)** — `https://api.brevo.com` · [Terms](https://www.brevo.com/legal/termsofuse/) · [Privacy](https://www.brevo.com/legal/privacypolicy/)
+* **Mandrill** — `https://mandrillapp.com/api` · [Terms](https://mailchimp.com/legal/terms/) · [Privacy](https://mailchimp.com/legal/privacy/)
+* **ElasticEmail** — `https://api.elasticemail.com` · [Terms](https://elasticemail.com/resources/usage-policies/terms-of-use/) · [Privacy](https://elasticemail.com/resources/usage-policies/privacy-policy/)
+* **SendLayer** — `https://console.sendlayer.com/api` · [Terms](https://sendlayer.com/terms-of-service/) · [Privacy](https://sendlayer.com/privacy-policy/)
+* **SocketLabs** — `https://inject.socketlabs.com` · [Terms](https://www.socketlabs.com/terms-of-use) · [Privacy](https://www.socketlabs.com/privacy-policy/)
+* **Loops** — `https://app.loops.so/api` · [Terms](https://loops.so/terms) · [Privacy](https://loops.so/privacy)
+* **Amazon SES** — AWS regional endpoints (e.g. `https://email.us-east-1.amazonaws.com`) · [Terms](https://aws.amazon.com/service-terms/) · [Privacy](https://aws.amazon.com/privacy/)
 
 = OAuth-based mail providers =
 
-**Gmail / Google Workspace**
-* Purpose: Send mail through your Google account via OAuth.
-* Data sent: Outgoing email content; profile email read on connect to identify the account.
-* Endpoints: `https://www.googleapis.com/oauth2/*`, `https://gmail.googleapis.com`
-* Terms: https://policies.google.com/terms · Privacy: https://policies.google.com/privacy
+Send mail through your own account via OAuth. Outgoing email content and profile email are sent on connect.
 
-**Microsoft Outlook / 365**
-* Purpose: Send mail through your Microsoft account via OAuth.
-* Data sent: Outgoing email content; profile read on connect to identify the account.
-* Endpoints: `https://login.microsoftonline.com`, `https://graph.microsoft.com`
-* Terms: https://www.microsoft.com/legal/terms-of-use · Privacy: https://privacy.microsoft.com/privacystatement
-
-**Zoho Mail**
-* Purpose: Send mail through your Zoho account via OAuth.
-* Endpoints: `https://accounts.zoho.com`, `https://mail.zoho.com/api`
-* Terms: https://www.zoho.com/terms.html · Privacy: https://www.zoho.com/privacy.html
+* **Gmail / Google Workspace** — `https://www.googleapis.com/oauth2/*`, `https://gmail.googleapis.com` · [Terms](https://policies.google.com/terms) · [Privacy](https://policies.google.com/privacy)
+* **Microsoft Outlook / 365** — `https://login.microsoftonline.com`, `https://graph.microsoft.com` · [Terms](https://www.microsoft.com/legal/terms-of-use) · [Privacy](https://privacy.microsoft.com/privacystatement)
+* **Zoho Mail** — `https://accounts.zoho.com`, `https://mail.zoho.com/api` · [Terms](https://www.zoho.com/terms.html) · [Privacy](https://www.zoho.com/privacy.html)
 
 = CRM sync providers (Pro) =
 
-**ActiveCampaign**
-* Purpose: Two-way contact sync.
-* Data sent: Contact fields you map.
-* Endpoint: Your account's ActiveCampaign API host.
-* Terms: https://www.activecampaign.com/legal/terms-of-service · Privacy: https://www.activecampaign.com/legal/privacy-policy
+Two-way contact and deal sync. Only mapped fields are sent.
 
-**HubSpot**
-* Purpose: Two-way contact and deal sync.
-* Endpoint: `https://api.hubapi.com`
-* Terms: https://legal.hubspot.com/terms-of-service · Privacy: https://legal.hubspot.com/privacy-policy
-
-**Pipedrive**
-* Purpose: Two-way contact and deal sync.
-* Endpoint: `https://api.pipedrive.com`
-* Terms: https://www.pipedrive.com/en/terms-of-service · Privacy: https://www.pipedrive.com/en/privacy
-
-**GoHighLevel**
-* Purpose: Contact sync via OAuth.
-* Endpoints: `https://marketplace.gohighlevel.com`, `https://services.leadconnectorhq.com`
-* Terms: https://www.gohighlevel.com/terms-of-service · Privacy: https://www.gohighlevel.com/privacy-policy
+* **ActiveCampaign** — Your account's API host · [Terms](https://www.activecampaign.com/legal/terms-of-service) · [Privacy](https://www.activecampaign.com/legal/privacy-policy)
+* **HubSpot** — `https://api.hubapi.com` · [Terms](https://legal.hubspot.com/terms-of-service) · [Privacy](https://legal.hubspot.com/privacy-policy)
+* **Pipedrive** — `https://api.pipedrive.com` · [Terms](https://www.pipedrive.com/en/terms-of-service) · [Privacy](https://www.pipedrive.com/en/privacy)
+* **GoHighLevel** — `https://marketplace.gohighlevel.com`, `https://services.leadconnectorhq.com` · [Terms](https://www.gohighlevel.com/terms-of-service) · [Privacy](https://www.gohighlevel.com/privacy-policy)
 
 = Messaging providers (Pro) =
 
-**Twilio**
-* Purpose: SMS sending and inbound conversations.
-* Data sent: Phone numbers and message content.
-* Endpoint: `https://api.twilio.com`
-* Terms: https://www.twilio.com/legal/tos · Privacy: https://www.twilio.com/legal/privacy
-
-**Meta WhatsApp Business**
-* Purpose: WhatsApp sending and inbound conversations.
-* Data sent: Phone numbers and message content via the WhatsApp Business Cloud API.
-* Endpoint: `https://graph.facebook.com`
-* Terms: https://www.whatsapp.com/legal/business-terms · Privacy: https://www.whatsapp.com/legal/business-data-transfer-addendum
+* **Twilio** — SMS sending and inbound. Phone numbers and message content sent. `https://api.twilio.com` · [Terms](https://www.twilio.com/legal/tos) · [Privacy](https://www.twilio.com/legal/privacy)
+* **Meta WhatsApp Business** — WhatsApp sending and inbound via Cloud API. `https://graph.facebook.com` · [Terms](https://www.whatsapp.com/legal/business-terms) · [Privacy](https://www.whatsapp.com/legal/business-data-transfer-addendum)
 
 = Payments (Pro) =
 
-**Stripe**
-* Purpose: Process booking payments.
-* Data sent: Booking amount, currency, and the payer email for receipts.
-* Endpoint: `https://api.stripe.com`
-* Terms: https://stripe.com/legal · Privacy: https://stripe.com/privacy
+* **Stripe** — Booking payments (amount, currency, payer email). `https://api.stripe.com` · [Terms](https://stripe.com/legal) · [Privacy](https://stripe.com/privacy)
 
 = Plugin-specific services =
 
-**DoubleScale (doublescale.io)**
-* Purpose: License validation, Pro add-on store, and update checks. This is the plugin's own service.
-* Data sent: Your site URL, environment type (e.g. `production`/`staging`), and — only when you initiate a license or add-on action — the license key, the add-on identifier you selected, and your DoubleScale account credentials. No CRM, contact, or campaign data is sent.
-* When it fires: Only on explicit user actions — activating a Pro license, browsing the Pro add-on store from the admin, or running an update check. Not on every page load.
-* Endpoint: `https://doublescale.io`
-* Terms: https://doublescale.io/terms · Privacy: https://doublescale.io/privacy
-
-**UI Avatars (ui-avatars.com)** (Gravatar fallback)
-* Purpose: Provides a generated initials-based avatar image for contacts whose email address has no Gravatar. DoubleScale outputs a standard Gravatar URL in the contact metabox; Gravatar itself redirects to UI Avatars when no Gravatar exists for the email, so the user's browser — not the plugin server — loads the fallback image.
-* Data sent: Only the contact's display name (passed in the URL path so an initials-based image can be generated). The plugin does not POST or contact UI Avatars directly.
-* When it fires: When an admin views the contact metabox and the contact has no Gravatar.
-* Endpoint: `https://ui-avatars.com/api/`
-* Terms: https://ui-avatars.com/terms · Privacy: https://ui-avatars.com/privacy
+* **DoubleScale (doublescale.io)** — License validation, Pro add-on store, update checks. Sends site URL, environment type, and (on explicit action) license key / add-on ID. No CRM or contact data. `https://doublescale.io` · [Terms](https://doublescale.io/terms) · [Privacy](https://doublescale.io/privacy)
+* **UI Avatars (ui-avatars.com)** — Gravatar fallback. The browser loads an initials avatar when no Gravatar exists; only the display name is in the URL. `https://ui-avatars.com/api/` · [Terms](https://ui-avatars.com/terms) · [Privacy](https://ui-avatars.com/privacy)
 
 = AI provider endpoints (optional, bring-your-own-key) =
 
-The AI settings page lets you point DoubleScale at any OpenAI-compatible endpoint by entering its base URL and your own API key. Suggested endpoints (Groq, OpenRouter) appear as labels in the provider dropdown but are **not** contacted unless you save credentials for them. If you configure an AI provider, you are responsible for that provider's terms and privacy policy.
+Point DoubleScale at any OpenAI-compatible endpoint with your own API key. Providers are **not** contacted unless you save credentials.
 
-* OpenRouter — `https://openrouter.ai/api/v1` · Terms: https://openrouter.ai/terms · Privacy: https://openrouter.ai/privacy
-* Groq — `https://api.groq.com/openai/v1` · Terms: https://groq.com/terms-of-use · Privacy: https://groq.com/privacy-policy
-* Any other OpenAI-compatible endpoint you supply manually.
+* **OpenRouter** — `https://openrouter.ai/api/v1` · [Terms](https://openrouter.ai/terms) · [Privacy](https://openrouter.ai/privacy)
+* **Groq** — `https://api.groq.com/openai/v1` · [Terms](https://groq.com/terms-of-use) · [Privacy](https://groq.com/privacy-policy)
+* Any other OpenAI-compatible endpoint you supply.
 
 = Disabling =
 

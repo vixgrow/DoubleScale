@@ -25,7 +25,15 @@ import { IntegrationCard } from './integration-card';
 import { AddonCard } from './addon-card';
 import './style.scss';
 
-const basePluginUrl = ConfigAPI.getPluginDirUrl();
+// @ts-ignore
+import slackImg from '@doublescale/assets/images/slack/slack.png';
+// @ts-ignore
+import twilioImg from '@doublescale/assets/images/twilio/twilio.png';
+// @ts-ignore
+import stripeImg from '@doublescale/assets/images/stripe/stripe.png';
+// @ts-ignore
+import metaWhatsappImg from '@doublescale/assets/images/meta-whatsapp/meta-whatsapp.svg';
+
 const proPluginUrl =
 	(typeof window !== 'undefined' &&
 		(
@@ -33,13 +41,13 @@ const proPluginUrl =
 				doublescalePro?: { proPluginUrl?: string };
 			}
 		).doublescalePro?.proPluginUrl) ||
-	basePluginUrl;
+	ConfigAPI.getPluginDirUrl();
 
 const integrationImages: Record<string, string> = {
-	slack: `${basePluginUrl}assets/images/slack/slack.png`,
-	twilio: `${basePluginUrl}assets/images/twilio/twilio.png`,
-	stripe: `${proPluginUrl}assets/images/stripe/stripe.png`,
-	'meta-whatsapp': `${basePluginUrl}assets/images/meta-whatsapp/meta-whatsapp.svg`,
+	slack: slackImg,
+	twilio: twilioImg,
+	stripe: stripeImg,
+	'meta-whatsapp': metaWhatsappImg,
 	zapier: `${proPluginUrl}assets/images/zapier/zapier.svg`,
 	make: `${proPluginUrl}assets/images/make/make.svg`,
 };

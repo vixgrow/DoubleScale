@@ -81,6 +81,7 @@ final class CoreModule extends AbstractModule {
 		\DoubleScale\Core\UserRoles\UserRoles::register_woocommerce_bypass();
 		\DoubleScale\Core\UserRoles\UserRoles::ensure_provisioned();
 		\DoubleScale\Core\UserRoles\LoginRedirect::instance();
+		\DoubleScale\Core\UserRoles\WooCommerceCompat::instance();
 		\DoubleScale\Database\Install::init();
 		\DoubleScale\Website\Site::instance();
 

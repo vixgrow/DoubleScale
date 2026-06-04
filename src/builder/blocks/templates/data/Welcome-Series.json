@@ -1,759 +1,927 @@
 {
-  "name": "Welcome Series",
-  "type": "email",
-  "body": {
-    "type": "builder",
-    "value": {
-      "sections": [
-        {
-          "id": "section-1",
-          "columns": [
-            {
-              "id": "column-1",
-              "width": 50,
-              "blocks": [
-                {
-                  "id": "block-1",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
-                    "alt": "Sparkle",
-                    "width": "auto",
-                    "height": "auto",
-                    "align": "left",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 24, "right": 0, "bottom": 0, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                }
-              ]
-            },
-            {
-              "id": "column-2",
-              "width": 50,
-              "blocks": [
-                {
-                  "id": "block-2",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
-                    "alt": "Sparkle",
-                    "width": "auto",
-                    "height": "auto",
-                    "align": "right",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 24, "right": 0, "bottom": 0, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundColor": "#F7F3EC",
-            "padding": "18px 24px 0px 24px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-2",
-          "columns": [
-            {
-              "id": "column-3",
-              "width": 100,
-              "blocks": [
-                {
-                  "id": "block-3",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img10.png",
-                    "alt": "Welcome On Board",
-                    "width": "75%",
-                    "height": "auto",
-                    "align": "center",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 10, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                },
-                {
-                  "id": "block-4",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img6.png",
-                    "alt": "Rocket",
-                    "width": "50%",
-                    "height": "auto",
-                    "align": "center",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 14, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                },
-                {
-                  "id": "block-5",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"text-align:center;\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor.</p>",
-                    "hyperlink": "",
-                    "fontSize": 14,
-                    "color": "#121212",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.6",
-                    "letterSpacing": "1px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#333333",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 0, "right": 0, "bottom": 8, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundColor": "#F7F3EC",
-            "padding": "0px 24px 18px 24px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-3",
-          "columns": [
-            {
-              "id": "column-4",
-              "width": 100,
-              "blocks": [
-                {
-                  "id": "block-6",
-                  "type": "text",
-                  "props": {
-                    "content": "<h1 style=\"text-align:center; color:#FFFFFF;\"><strong>📌 Our Benefits 📌</strong></h1>",
-                    "hyperlink": "",
-                    "fontSize": 34,
-                    "color": "#FFFFFF",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": true,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.4",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "h2",
-                    "padding": { "top": 22, "right": 0, "bottom": 6, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg1.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "cover",
-            "backgroundPosition": "top",
-            "padding": "0px 20px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-4",
-          "columns": [
-            {
-              "id": "column-5",
-              "width": 45,
-              "blocks": [
-                {
-                  "id": "block-7",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img7.png",
-                    "alt": "Benefits person",
-                    "width": "100%",
-                    "height": "auto",
-                    "align": "left",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                }
-              ]
-            },
-            {
-              "id": "column-6",
-              "width": 55,
-              "blocks": [
-                {
-                  "id": "block-8",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit One</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Two</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Three</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p>",
-                    "hyperlink": "",
-                    "fontSize": 14,
-                    "color": "#FFFFFF",
-                    "align": "left",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "2",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "left",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px 24px 40px 24px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-5",
-          "columns": [
-            {
-              "id": "column-7",
-              "width": 100,
-              "blocks": [
-                {
-                  "id": "block-9",
-                  "type": "divider",
-                  "props": {
-                    "height": "1",
-                    "color": "#A9B6DF",
-                    "backgroundColor": "transparent",
-                    "style": "solid",
-                    "padding": { "top": 0, "right": 0, "bottom": 54, "left": 0 },
-                    "align": "center",
-                    "width": "100",
-                    "borderRadius": "0px",
-                    "opacity": 1
-                  }
-                },
-                {
-                  "id": "block-10",
-                  "type": "text",
-                  "props": {
-                    "content": "<h2 style=\"text-align:center; color:#FFFFFF;\">📌 A Small Gift for a Great Start 📌</h2>",
-                    "hyperlink": "",
-                    "fontSize": 34,
-                    "color": "#FFFFFF",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": true,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.4",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "h2",
-                    "padding": { "top": 0, "right": 0, "bottom": 8, "left": 0 }
-                  }
-                },
-                {
-                  "id": "block-11",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"text-align:center; color:#DDE6FF;\">Use this code for a discount <strong style=\"color:#FFFFFF; font-style: italic;\">10% Off</strong> on everything in our platform.</p>",
-                    "hyperlink": "",
-                    "fontSize": 21,
-                    "color": "#FFFFFF",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.6",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 0, "right": 0, "bottom": 10, "left": 0 }
-                  }
-                },
-                {
-                  "id": "block-12",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img8.png",
-                    "alt": "Gift",
-                    "width": "130px",
-                    "height": "auto",
-                    "align": "center",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 14, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px 24px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-6",
-          "columns": [
-            {
-              "id": "column-8",
-              "width": 100,
-              "styles": {
-                "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg2.png)",
-                "backgroundRepeat": "no-repeat",
-                "backgroundSize": "100% 100%",
-                "backgroundPosition": "center",
-                "padding": "0px 14px",
-                "margin": "0px 24px"
-              },
-              "blocks": [
-                {
-                  "id": "block-13",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"text-align:center; color:#FFFFFF; font-size: 36px;\">Code: <strong style=\"font-style: italic;\">WELCOME10</strong></p>",
-                    "hyperlink": "",
-                    "fontSize": 36,
-                    "color": "#FFFFFF",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.2",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 20, "right": 0, "bottom": 20, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-7",
-          "columns": [
-            {
-              "id": "column-9",
-              "width": 100,
-              "blocks": [
-                {
-                  "id": "block-14",
-                  "type": "button",
-                  "props": {
-                    "text": "Click Here",
-                    "url": "#",
-                    "containerPadding": { "top": 10, "right": 0, "bottom": 14, "left": 0 },
-                    "containerBackgroundColor": "transparent",
-                    "align": "center",
-                    "buttonStyle": "primary"
-                  }
-                },
-                {
-                  "id": "block-15",
-                  "type": "divider",
-                  "props": {
-                    "height": "1",
-                    "color": "#A9B6DF",
-                    "backgroundColor": "transparent",
-                    "style": "solid",
-                    "padding": { "top": 40, "right": 0, "bottom": 20, "left": 0 },
-                    "align": "center",
-                    "width": "100",
-                    "borderRadius": "0px",
-                    "opacity": 1
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px 24px 8px 24px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-8",
-          "columns": [
-            {
-              "id": "column-10",
-              "width": 34,
-              "blocks": [
-                {
-                  "id": "block-16",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/img9.png",
-                    "alt": "Logo",
-                    "width": "auto",
-                    "height": "auto",
-                    "align": "left",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 8, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                },
-                {
-                  "id": "block-17",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"color:#DDE6FF;\">{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
-                    "hyperlink": "",
-                    "fontSize": 14,
-                    "color": "#DDE6FF",
-                    "align": "left",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "2",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#DDE6FF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "left",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
-                  }
-                }
-              ]
-            },
-            {
-              "id": "column-11",
-              "width": 33,
-              "styles": {
-                "padding": "10px 0px 0px 48px"
-              },
-              "blocks": [
-                {
-                  "id": "block-18",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"color:#DDE6FF;\"><strong>LINKS</strong></p>",
-                    "hyperlink": "",
-                    "fontSize": 16,
-                    "color": "#DDE6FF",
-                    "align": "left",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.5",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "left",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 12, "right": 0, "bottom": 2, "left": 0 }
-                  }
-                },
-                {
-                  "id": "block-19",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"color:#DDE6FF;\">Services</p><p style=\"color:#DDE6FF;\">Policy</p><p style=\"color:#DDE6FF;\">Guidance</p><p style=\"color:#DDE6FF;\"><a style=\"color: #DDE6FF;\" href=\"{{contact:unsubscribe_link}}\" target=\"_blank\">Unsubscribe</a></p>",
-                    "hyperlink": "",
-                    "fontSize": 14,
-                    "color": "#DDE6FF",
-                    "align": "left",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "2",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#DDE6FF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "left",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 16, "right": 0, "bottom": 0, "left": 0 }
-                  }
-                }
-              ]
-            },
-            {
-              "id": "column-12",
-              "width": 33,
-              "blocks": [
-                {
-                  "id": "block-20",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"color:#DDE6FF;\"><strong>FOLLOW US</strong></p>",
-                    "hyperlink": "",
-                    "fontSize": 16,
-                    "color": "#DDE6FF",
-                    "align": "left",
-                    "fontFamily": "Arial",
-                    "bold": false,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.5",
-                    "letterSpacing": "0px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#FFFFFF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "left",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 12, "right": 0, "bottom": 2, "left": 0 }
-                  }
-                },
-                {
-                  "id": "block-21",
-                  "type": "social_media",
-                  "props": {
-                    "platforms": {
-                      "instagram": { "enabled": true, "link": "https://instagram.com" },
-                      "tiktok": { "enabled": true, "link": "https://tiktok.com" },
-                      "linkedin": { "enabled": true, "link": "https://linkedin.com" },
-                      "x": { "enabled": true, "link": "https://x.com" },
-                      "youtube": { "enabled": false, "link": "" },
-                      "facebook": { "enabled": true, "link": "https://facebook.com" },
-                      "threads": { "enabled": false, "link": "" },
-                      "pinterest": { "enabled": false, "link": "" },
-                      "snapchat": { "enabled": false, "link": "" },
-                      "soundcloud": { "enabled": false, "link": "" },
-                      "mail": { "enabled": false, "link": "" },
-                      "website": { "enabled": false, "link": "" },
-                      "vimeo": { "enabled": false, "link": "" },
-                      "medium": { "enabled": false, "link": "" },
-                      "spotify": { "enabled": false, "link": "" },
-                      "discord": { "enabled": false, "link": "" }
-                    },
-                    "iconSize": "small",
-                    "align": "left",
-                    "shape": "rounded",
-                    "colorMode": "colored",
-                    "color": "transparent",
-                    "padding": { "top": 16, "right": 0, "bottom": 0, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px 24px",
-            "margin": "0px",
-            "hideAddBlockButton": true
-          }
-        },
-        {
-          "id": "section-9",
-          "columns": [
-            {
-              "id": "column-13",
-              "width": 100,
-              "blocks": [
-                {
-                  "id": "block-22",
-                  "type": "image",
-                  "props": {
-                    "src": "{{ASSETS_URL}}templates-images/greetings/Divider.png",
-                    "alt": "Divider",
-                    "width": "100%",
-                    "height": "auto",
-                    "align": "center",
-                    "backgroundColor": "transparent",
-                    "padding": { "top": 0, "right": 0, "bottom": 8, "left": 0 },
-                    "link": "",
-                    "borderRadius": "0",
-                    "shape": "rectangle"
-                  }
-                },
-                {
-                  "id": "block-23",
-                  "type": "text",
-                  "props": {
-                    "content": "<p style=\"text-align:center; color:#FFFFFF;\">© 2026 BRAND NAME - ALL RIGHTS RESERVED.</p>",
-                    "hyperlink": "",
-                    "fontSize": 18,
-                    "color": "#FFFFFF",
-                    "align": "center",
-                    "fontFamily": "Arial",
-                    "bold": true,
-                    "italic": false,
-                    "underline": false,
-                    "line-through": false,
-                    "lineHeight": "1.5",
-                    "letterSpacing": "1px",
-                    "borderRadius": "0px",
-                    "borderWidth": "0px",
-                    "linkColor": "#DDE6FF",
-                    "backgroundColor": "transparent",
-                    "textAlign": "center",
-                    "listType": "none",
-                    "headingStyle": "p",
-                    "padding": { "top": 10, "right": 0, "bottom": 0, "left": 0 }
-                  }
-                }
-              ]
-            }
-          ],
-          "styles": {
-            "backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
-            "backgroundRepeat": "no-repeat",
-            "backgroundSize": "100% 100%",
-            "backgroundPosition": "center",
-            "padding": "0px 24px 26px 24px",
-            "margin": "0px 0px 12px 0px",
-            "hideAddBlockButton": true
-          }
-        }
-      ],
-      "globalSettings": {
-        "canvasColor": "#F7F3EC",
-        "backgroundImage": null,
-        "backgroundRepeat": "no-repeat",
-        "backgroundSize": "cover",
-        "backgroundPosition": "center",
-        "canvasWidth": 900
-      },
-      "buttonSettings": {
-        "primary": {
-          "font": "Arial, sans-serif",
-          "size": 20,
-          "letterSpacing": "0px",
-          "borderRadius": 999,
-          "textColor": "#0B1B4D",
-          "backgroundColor": "#8FA5F2",
-          "borderWidth": 1,
-          "borderColor": "#8FA5F2",
-          "padding": { "top": 24, "right": 124, "bottom": 24, "left": 124 },
-          "bold": true,
-          "italic": false,
-          "underline": false,
-          "strikethrough": false
-        },
-        "secondary": {
-          "font": "Arial, sans-serif",
-          "size": 16,
-          "letterSpacing": "0px",
-          "borderRadius": 4,
-          "textColor": "#1e398a",
-          "backgroundColor": "transparent",
-          "borderWidth": 1,
-          "borderColor": "#1e398a",
-          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
-          "bold": false,
-          "italic": false,
-          "underline": false,
-          "strikethrough": false
-        },
-        "tertiary": {
-          "font": "Arial, sans-serif",
-          "size": 16,
-          "letterSpacing": "0px",
-          "borderRadius": 0,
-          "textColor": "#1e398a",
-          "backgroundColor": "#ffffff",
-          "borderWidth": 0,
-          "borderColor": "transparent",
-          "padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
-          "bold": false,
-          "italic": false,
-          "underline": false,
-          "strikethrough": false
-        }
-      }
-    }
-  }
+	"name": "Welcome Series",
+	"type": "email",
+	"body": {
+		"type": "builder",
+		"value": {
+			"sections": [
+				{
+					"id": "section-1",
+					"columns": [
+						{
+							"id": "column-1",
+							"width": 50,
+							"blocks": [
+								{
+									"id": "block-1",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
+										"alt": "Sparkle",
+										"width": "auto",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 24,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						},
+						{
+							"id": "column-2",
+							"width": 50,
+							"blocks": [
+								{
+									"id": "block-2",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img5.png",
+										"alt": "Sparkle",
+										"width": "auto",
+										"height": "auto",
+										"align": "right",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 24,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#F7F3EC",
+						"padding": "18px 24px 0px 24px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-2",
+					"columns": [
+						{
+							"id": "column-3",
+							"width": 100,
+							"blocks": [
+								{
+									"id": "block-3",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img10.png",
+										"alt": "Welcome On Board",
+										"width": "75%",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 10,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-4",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img6.png",
+										"alt": "Rocket",
+										"width": "50%",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 14,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-5",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center;\">Pellentesque sit amet enim venenatis, vulputate libero at, tincidunt odio. Aliquam vitae hendrerit tortor. Suspendisse potenti. Integer commodo eget risus eget tempor.</p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#121212",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "1px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#333333",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundColor": "#F7F3EC",
+						"padding": "0px 24px 18px 24px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-3",
+					"columns": [
+						{
+							"id": "column-4",
+							"width": 100,
+							"blocks": [
+								{
+									"id": "block-6",
+									"type": "text",
+									"props": {
+										"content": "<h1 style=\"text-align:center; color:#FFFFFF;\"><strong>📌 Our Benefits 📌</strong></h1>",
+										"hyperlink": "",
+										"fontSize": 34,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.4",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "h2",
+										"padding": {
+											"top": 22,
+											"right": 0,
+											"bottom": 6,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg1.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "cover",
+						"backgroundPosition": "top",
+						"padding": "0px 20px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-4",
+					"columns": [
+						{
+							"id": "column-5",
+							"width": 45,
+							"blocks": [
+								{
+									"id": "block-7",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img7.png",
+										"alt": "Benefits person",
+										"width": "100%",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						},
+						{
+							"id": "column-6",
+							"width": 55,
+							"blocks": [
+								{
+									"id": "block-8",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit One</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Two</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p><br/><p style=\"color:#FFFFFF;\"><strong style=\"font-size: 16px;\">✦ Benefit Three</strong></p><p style=\"color:#DDE6FF;\">Lorem ipsum is simply dummy text of the printing &amp; typesetting.</p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#FFFFFF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "2",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 72,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px 24px 40px 24px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-5",
+					"columns": [
+						{
+							"id": "column-7",
+							"width": 100,
+							"blocks": [
+								{
+									"id": "block-9",
+									"type": "divider",
+									"props": {
+										"height": "1",
+										"color": "#A9B6DF",
+										"backgroundColor": "transparent",
+										"style": "solid",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 54,
+											"left": 0
+										},
+										"align": "center",
+										"width": "100",
+										"borderRadius": "0px",
+										"opacity": 1
+									}
+								},
+								{
+									"id": "block-10",
+									"type": "text",
+									"props": {
+										"content": "<h2 style=\"text-align:center; color:#FFFFFF;\"><strong>📌 A Small Gift for a Great Start 📌</strong></h2>",
+										"hyperlink": "",
+										"fontSize": 34,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.4",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "h2",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-11",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center; color:#DDE6FF;\">Use this code for a discount <strong style=\"color:#FFFFFF; font-style: italic;\">10% Off</strong> on everything in our platform.</p>",
+										"hyperlink": "",
+										"fontSize": 21,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.6",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 10,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-12",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img8.png",
+										"alt": "Gift",
+										"width": "130px",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 14,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px 24px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-6",
+					"columns": [
+						{
+							"id": "column-8",
+							"width": 100,
+							"styles": {
+								"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg2.png)",
+								"backgroundRepeat": "no-repeat",
+								"backgroundSize": "100% 100%",
+								"backgroundPosition": "center",
+								"padding": "0px 14px",
+								"margin": "0px 24px"
+							},
+							"blocks": [
+								{
+									"id": "block-13",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center; color:#FFFFFF; font-size: 36px;\">Code: <strong style=\"font-style: italic;\">WELCOME10</strong></p>",
+										"hyperlink": "",
+										"fontSize": 36,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.2",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 20,
+											"right": 0,
+											"bottom": 20,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-7",
+					"columns": [
+						{
+							"id": "column-9",
+							"width": 100,
+							"blocks": [
+								{
+									"id": "block-14",
+									"type": "button",
+									"props": {
+										"text": "Click Here",
+										"url": "#",
+										"containerPadding": {
+											"top": 10,
+											"right": 0,
+											"bottom": 14,
+											"left": 0
+										},
+										"containerBackgroundColor": "transparent",
+										"align": "center",
+										"buttonStyle": "primary"
+									}
+								},
+								{
+									"id": "block-15",
+									"type": "divider",
+									"props": {
+										"height": "1",
+										"color": "#A9B6DF",
+										"backgroundColor": "transparent",
+										"style": "solid",
+										"padding": {
+											"top": 32,
+											"right": 0,
+											"bottom": 20,
+											"left": 0
+										},
+										"align": "center",
+										"width": "100",
+										"borderRadius": "0px",
+										"opacity": 1
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px 24px 8px 24px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-8",
+					"columns": [
+						{
+							"id": "column-10",
+							"width": 34,
+							"blocks": [
+								{
+									"id": "block-16",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/img9.png",
+										"alt": "Logo",
+										"width": "auto",
+										"height": "auto",
+										"align": "left",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-17",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"color:#DDE6FF;\">{{general:business_name}}<br>{{general:business_address}}<br>{{Company-Phone Number}}<br>{{general:admin_email}}</p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#DDE6FF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "2",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#DDE6FF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": "column-11",
+							"width": 33,
+							"styles": {
+								"padding": "10px 0px 0px 48px"
+							},
+							"blocks": [
+								{
+									"id": "block-18",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"color:#DDE6FF;\"><strong>LINKS</strong></p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#DDE6FF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.5",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 12,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-19",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"color:#DDE6FF;\">Services</p><p style=\"color:#DDE6FF;\">Policy</p><p style=\"color:#DDE6FF;\">Guidance</p><p style=\"color:#DDE6FF;\"><a style=\"color: #DDE6FF;\" href=\"{{contact:unsubscribe_link}}\" target=\"_blank\">Unsubscribe</a></p>",
+										"hyperlink": "",
+										"fontSize": 14,
+										"color": "#DDE6FF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "2",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#DDE6FF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 16,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						},
+						{
+							"id": "column-12",
+							"width": 33,
+							"blocks": [
+								{
+									"id": "block-20",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"color:#DDE6FF;\"><strong>FOLLOW US</strong></p>",
+										"hyperlink": "",
+										"fontSize": 16,
+										"color": "#DDE6FF",
+										"align": "left",
+										"fontFamily": "Arial",
+										"bold": false,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.5",
+										"letterSpacing": "0px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#FFFFFF",
+										"backgroundColor": "transparent",
+										"textAlign": "left",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 12,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								},
+								{
+									"id": "block-21",
+									"type": "social_media",
+									"props": {
+										"platforms": {
+											"instagram": {
+												"enabled": true,
+												"link": "https://instagram.com"
+											},
+											"tiktok": {
+												"enabled": true,
+												"link": "https://tiktok.com"
+											},
+											"linkedin": {
+												"enabled": true,
+												"link": "https://linkedin.com"
+											},
+											"x": {
+												"enabled": true,
+												"link": "https://x.com"
+											},
+											"youtube": {
+												"enabled": false,
+												"link": ""
+											},
+											"facebook": {
+												"enabled": true,
+												"link": "https://facebook.com"
+											},
+											"threads": {
+												"enabled": false,
+												"link": ""
+											},
+											"pinterest": {
+												"enabled": false,
+												"link": ""
+											},
+											"snapchat": {
+												"enabled": false,
+												"link": ""
+											},
+											"soundcloud": {
+												"enabled": false,
+												"link": ""
+											},
+											"mail": {
+												"enabled": false,
+												"link": ""
+											},
+											"website": {
+												"enabled": false,
+												"link": ""
+											},
+											"vimeo": {
+												"enabled": false,
+												"link": ""
+											},
+											"medium": {
+												"enabled": false,
+												"link": ""
+											},
+											"spotify": {
+												"enabled": false,
+												"link": ""
+											},
+											"discord": {
+												"enabled": false,
+												"link": ""
+											}
+										},
+										"iconSize": "small",
+										"align": "left",
+										"shape": "rounded",
+										"colorMode": "colored",
+										"color": "transparent",
+										"padding": {
+											"top": 16,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px 24px",
+						"margin": "0px",
+						"hideAddBlockButton": true
+					}
+				},
+				{
+					"id": "section-9",
+					"columns": [
+						{
+							"id": "column-13",
+							"width": 100,
+							"blocks": [
+								{
+									"id": "block-22",
+									"type": "image",
+									"props": {
+										"src": "{{ASSETS_URL}}templates-images/greetings/Divider.png",
+										"alt": "Divider",
+										"width": "100%",
+										"height": "auto",
+										"align": "center",
+										"backgroundColor": "transparent",
+										"padding": {
+											"top": 0,
+											"right": 0,
+											"bottom": 8,
+											"left": 0
+										},
+										"link": "",
+										"borderRadius": "0",
+										"shape": "rectangle"
+									}
+								},
+								{
+									"id": "block-23",
+									"type": "text",
+									"props": {
+										"content": "<p style=\"text-align:center; color:#FFFFFF;\">© 2026 BRAND NAME - ALL RIGHTS RESERVED.</p>",
+										"hyperlink": "",
+										"fontSize": 18,
+										"color": "#FFFFFF",
+										"align": "center",
+										"fontFamily": "Arial",
+										"bold": true,
+										"italic": false,
+										"underline": false,
+										"line-through": false,
+										"lineHeight": "1.5",
+										"letterSpacing": "1px",
+										"borderRadius": "0px",
+										"borderWidth": "0px",
+										"linkColor": "#DDE6FF",
+										"backgroundColor": "transparent",
+										"textAlign": "center",
+										"listType": "none",
+										"headingStyle": "p",
+										"padding": {
+											"top": 10,
+											"right": 0,
+											"bottom": 0,
+											"left": 0
+										}
+									}
+								}
+							]
+						}
+					],
+					"styles": {
+						"backgroundImage": "url({{ASSETS_URL}}templates-images/greetings/bg3.png)",
+						"backgroundRepeat": "no-repeat",
+						"backgroundSize": "100% 100%",
+						"backgroundPosition": "center",
+						"padding": "0px 24px 26px 24px",
+						"margin": "0px 0px 12px 0px",
+						"hideAddBlockButton": true
+					}
+				}
+			],
+			"globalSettings": {
+				"canvasColor": "#F7F3EC",
+				"backgroundImage": null,
+				"backgroundRepeat": "no-repeat",
+				"backgroundSize": "cover",
+				"backgroundPosition": "center",
+				"canvasWidth": 900
+			},
+			"buttonSettings": {
+				"primary": {
+					"font": "Arial, sans-serif",
+					"size": 20,
+					"letterSpacing": "0px",
+					"borderRadius": 999,
+					"textColor": "#0B1B4D",
+					"backgroundColor": "#8FA5F2",
+					"borderWidth": 1,
+					"borderColor": "#8FA5F2",
+					"padding": {
+						"top": 24,
+						"right": 124,
+						"bottom": 24,
+						"left": 124
+					},
+					"bold": true,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				},
+				"secondary": {
+					"font": "Arial, sans-serif",
+					"size": 16,
+					"letterSpacing": "0px",
+					"borderRadius": 4,
+					"textColor": "#1e398a",
+					"backgroundColor": "transparent",
+					"borderWidth": 1,
+					"borderColor": "#1e398a",
+					"padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+					"bold": false,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				},
+				"tertiary": {
+					"font": "Arial, sans-serif",
+					"size": 16,
+					"letterSpacing": "0px",
+					"borderRadius": 0,
+					"textColor": "#1e398a",
+					"backgroundColor": "#ffffff",
+					"borderWidth": 0,
+					"borderColor": "transparent",
+					"padding": { "top": 6, "right": 8, "bottom": 6, "left": 8 },
+					"bold": false,
+					"italic": false,
+					"underline": false,
+					"strikethrough": false
+				}
+			}
+		}
+	}
 }

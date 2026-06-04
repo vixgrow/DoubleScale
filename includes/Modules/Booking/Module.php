@@ -282,6 +282,26 @@ final class Module extends AbstractModule {
 			update_option( 'doublescale_booking_provisioned', true );
 		}
 
+		// One-shot cleanup for installs that accumulated duplicate host calendars
+		// before ensure_host_calendar() became dedupe-aware. Merges each user's
+		// duplicate host calendars down to a single canonical row. Gated by its
+		// own option so it runs exactly once per install.
+		if ( ! get_option( 'doublescale_booking_host_calendars_deduped' ) ) {
+			$provisioner = $container->get( Services\BookingProvisioner::class );
+
+			$duplicate_user_ids = Models\CalendarModel::query()
+				->where( 'type', 'host' )
+				->groupBy( 'user_id' )
+				->havingRaw( 'COUNT(*) > 1' )
+				->pluck( 'user_id' );
+
+			foreach ( $duplicate_user_ids as $user_id ) {
+				$provisioner->dedupe_host_calendars( (int) $user_id );
+			}
+
+			update_option( 'doublescale_booking_host_calendars_deduped', true );
+		}
+
 		$resolve = static function () use ( $container ): Services\BookingProvisioner {
 			return $container->get( Services\BookingProvisioner::class );
 		};

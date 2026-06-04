@@ -285,10 +285,20 @@ class ImapClient {
 	 * Processes up to $limit emails per call to avoid PHP timeouts
 	 * when the mailbox contains many unread messages.
 	 *
-	 * @param int $limit Maximum number of emails to fetch per batch. Default 20.
+	 * When $since_date is given, the IMAP search is narrowed to unseen messages
+	 * whose arrival date is on/after that date (`UNSEEN SINCE "d-M-Y"`). This
+	 * lets a caller ignore the backlog of old unread mail that predates a
+	 * mailbox's connection. NOTE: IMAP SINCE is date-only (one-day granularity)
+	 * and filters on the server's internal/arrival date — for an exact
+	 * timestamp boundary the caller should additionally compare each message's
+	 * `date` to its cutoff.
+	 *
+	 * @param int         $limit      Maximum number of emails to fetch per batch. Default 20.
+	 * @param string|null $since_date Optional date string parseable by strtotime
+	 *                                (e.g. a mailbox `created_at`). Null = no date floor.
 	 * @return array Array of normalized email data arrays.
 	 */
-	public function fetch_unseen( $limit = 20 ) {
+	public function fetch_unseen( $limit = 20, $since_date = null ) {
 		if ( ! $this->connection ) {
 			return array();
 		}
@@ -299,7 +309,17 @@ class ImapClient {
 		// php-imap2 has bugs with FT_UID/SE_UID in several functions
 		// (fetchbody, msgno, fetch_overview), so we work with message
 		// numbers throughout and only resolve UIDs via imap2_uid().
-		$msgnos = imap2_search( $this->connection, 'UNSEEN' );
+		// Optionally add a SINCE floor so old unread backlog is excluded
+		// server-side (IMAP SINCE is date-only: d-M-Y).
+		$criteria = 'UNSEEN';
+		if ( null !== $since_date && '' !== (string) $since_date ) {
+			$timestamp = strtotime( (string) $since_date );
+			if ( false !== $timestamp ) {
+				$criteria .= ' SINCE "' . gmdate( 'd-M-Y', $timestamp ) . '"';
+			}
+		}
+
+		$msgnos = imap2_search( $this->connection, $criteria );
 
 		if ( ! $msgnos || ! is_array( $msgnos ) ) {
 			return array();
@@ -564,16 +584,35 @@ class ImapClient {
 	/**
 	 * Count unseen (unread) emails in the mailbox
 	 *
+	 * When $since_date is given, only unseen messages whose arrival date is
+	 * on/after that date are counted (`UNSEEN SINCE "d-M-Y"`). This matters for
+	 * accounts (e.g. Gmail) whose INBOX carries a large historical backlog of
+	 * messages that were read on the web but never had their IMAP `\Seen` flag
+	 * set — a raw UNSEEN count there can be thousands and is misleading, since
+	 * the poller only ever ingests mail newer than the mailbox's connection
+	 * date. Pass that connection date here for a count that reflects what will
+	 * actually be processed.
+	 *
+	 * @param string|null $since_date Optional date string parseable by strtotime.
+	 *                                Null = count all unseen (original behaviour).
 	 * @return int Number of unseen emails.
 	 */
-	public function count_unseen() {
+	public function count_unseen( $since_date = null ) {
 		if ( ! $this->connection ) {
 			return 0;
 		}
 
 		// Use message numbers (not SE_UID) for consistency with fetch_unseen(),
 		// as php-imap2 has known bugs with UID-based flags.
-		$msgnos = imap2_search( $this->connection, 'UNSEEN' );
+		$criteria = 'UNSEEN';
+		if ( null !== $since_date && '' !== (string) $since_date ) {
+			$timestamp = strtotime( (string) $since_date );
+			if ( false !== $timestamp ) {
+				$criteria .= ' SINCE "' . gmdate( 'd-M-Y', $timestamp ) . '"';
+			}
+		}
+
+		$msgnos = imap2_search( $this->connection, $criteria );
 
 		return $msgnos && is_array( $msgnos ) ? count( $msgnos ) : 0;
 	}

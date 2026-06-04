@@ -1018,24 +1018,56 @@ class RestCalendarController extends RestController {
 	 */
 	private function validate_team_calendar( $members ) {
 		if ( empty( $members ) ) {
-			doublescale_get_logger()->warning(
+			doublescale_get_logger()->error(
 				'Team members are required for team calendar',
 				array( 'source' => 'booking-calendar-rest' )
 			);
 			throw new Exception( esc_html__( 'Team members are required', 'doublescale' ), 400 );
 		}
 
-		$valid_members = CalendarModel::whereIn( 'user_id', $members )
-			->where( 'type', 'host' )
-			->pluck( 'ID' );
+		// Normalize the incoming selection. The host dropdown sends user IDs; cast
+		// to int and de-duplicate so a repeated selection (or "0" placeholders from
+		// the "All Hosts" option) does not skew the comparison below. Without this,
+		// a payload like [2, 2] is rejected even though it is a valid single member.
+		$members = array_values(
+			array_unique(
+				array_filter(
+					array_map( 'intval', (array) $members ),
+					static function ( $member_id ) {
+						return $member_id > 0;
+					}
+				)
+			)
+		);
 
-		if ( count( $valid_members ) !== count( $members ) ) {
-			doublescale_get_logger()->warning(
+		if ( empty( $members ) ) {
+			doublescale_get_logger()->error(
+				'Team members are required for team calendar',
+				array( 'source' => 'booking-calendar-rest' )
+			);
+			throw new Exception( esc_html__( 'Team members are required', 'doublescale' ), 400 );
+		}
+
+		// Each member must map to an existing host calendar. Compare the set of
+		// submitted user IDs against the user IDs that actually own a host calendar,
+		// so we can report exactly which selections are invalid instead of relying
+		// on a fragile count comparison.
+		$valid_member_ids = CalendarModel::whereIn( 'user_id', $members )
+			->where( 'type', 'host' )
+			->pluck( 'user_id' )
+			->map( 'intval' )
+			->all();
+
+		$invalid_members = array_values( array_diff( $members, $valid_member_ids ) );
+
+		if ( ! empty( $invalid_members ) ) {
+			doublescale_get_logger()->error(
 				'Invalid team member selection',
 				array(
-					'source'   => 'booking-calendar-rest',
-					'expected' => count( $members ),
-					'found'    => count( $valid_members ),
+					'source'    => 'booking-calendar-rest',
+					'submitted' => $members,
+					'valid'     => array_values( $valid_member_ids ),
+					'invalid'   => $invalid_members,
 				)
 			);
 			throw new Exception( esc_html__( 'Invalid team member selection', 'doublescale' ), 400 );

@@ -1237,33 +1237,39 @@ class RestSettingsControllerPro {
 
 		$normalized = strtolower( $from_email );
 
-		// 1. Check SMTP Gmail accounts (preferred — handles token refresh).
-		$gmail_accounts = get_option( EmailOauth::mailer_settings_option_name( 'gmail' ), array() )['accounts'] ?? array();
-		foreach ( $gmail_accounts as $account_id => $account_data ) {
-			$creds = $account_data['credentials'] ?? array();
-			if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
-				continue;
+		// Steps 1 & 2 read smtp's OAuth account store via EmailOauth, a Pro class.
+		// Guard the whole block so free-only installs (Pro disabled) skip straight
+		// to the standalone-OAuth fallback below instead of fataling on the missing
+		// symbol — see has_email_oauth_layer().
+		if ( self::has_email_oauth_layer() ) {
+			// 1. Check SMTP Gmail accounts (preferred — handles token refresh).
+			$gmail_accounts = get_option( EmailOauth::mailer_settings_option_name( 'gmail' ), array() )['accounts'] ?? array();
+			foreach ( $gmail_accounts as $account_id => $account_data ) {
+				$creds = $account_data['credentials'] ?? array();
+				if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
+					continue;
+				}
+				$account_email = strtolower( $account_data['name'] ?? '' );
+				if ( $account_email === $normalized ) {
+					$result['imap_provider']      = 'smtp_gmail';
+					$result['smtp_gmail_account'] = $account_id;
+					return $result;
+				}
 			}
-			$account_email = strtolower( $account_data['name'] ?? '' );
-			if ( $account_email === $normalized ) {
-				$result['imap_provider']      = 'smtp_gmail';
-				$result['smtp_gmail_account'] = $account_id;
-				return $result;
-			}
-		}
 
-		// 2. Check SMTP Outlook accounts.
-		$outlook_accounts = get_option( EmailOauth::mailer_settings_option_name( 'outlook' ), array() )['accounts'] ?? array();
-		foreach ( $outlook_accounts as $account_id => $account_data ) {
-			$creds = $account_data['credentials'] ?? array();
-			if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
-				continue;
-			}
-			$account_email = strtolower( $account_data['name'] ?? '' );
-			if ( $account_email === $normalized ) {
-				$result['imap_provider']        = 'smtp_outlook';
-				$result['smtp_outlook_account'] = $account_id;
-				return $result;
+			// 2. Check SMTP Outlook accounts.
+			$outlook_accounts = get_option( EmailOauth::mailer_settings_option_name( 'outlook' ), array() )['accounts'] ?? array();
+			foreach ( $outlook_accounts as $account_id => $account_data ) {
+				$creds = $account_data['credentials'] ?? array();
+				if ( empty( $creds['access_token'] ) || empty( $creds['refresh_token'] ) ) {
+					continue;
+				}
+				$account_email = strtolower( $account_data['name'] ?? '' );
+				if ( $account_email === $normalized ) {
+					$result['imap_provider']        = 'smtp_outlook';
+					$result['smtp_outlook_account'] = $account_id;
+					return $result;
+				}
 			}
 		}
 

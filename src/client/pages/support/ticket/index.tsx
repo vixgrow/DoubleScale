@@ -87,7 +87,10 @@ const AttachmentLinks: React.FC<{ attachments?: ConversationAttachment[] }> = ({
 	);
 };
 
-const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
+const ConversationBubble: React.FC<{
+	item: ConversationItem;
+	customerName?: string;
+}> = ({ item, customerName }) => {
 	if (item.kind === 'event') {
 		return (
 			<div className="flex items-center gap-2 text-xs text-gray-500 py-2 px-3">
@@ -99,9 +102,11 @@ const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
 	}
 
 	const isNote = item.kind === 'note';
+	// Agent replies carry a `user`; customer (email/portal) replies don't, so
+	// fall back to the ticket's contact name instead of a generic "Customer".
 	const authorLabel = item.user
 		? item.user.display_name
-		: __('Customer', 'doublescale');
+		: customerName || __('Customer', 'doublescale');
 
 	return (
 		<div
@@ -186,6 +191,16 @@ const SupportTicketDetail: React.FC = () => {
 			</div>
 		);
 	}
+
+	// All conversation replies on a support ticket belong to its single contact,
+	// so customer-authored (user-less) replies are labelled with this name.
+	const customerName =
+		[ticket.contact?.first_name, ticket.contact?.last_name]
+			.filter(Boolean)
+			.join(' ')
+			.trim() ||
+		ticket.contact?.email ||
+		__('Customer', 'doublescale');
 
 	const handleSend = async () => {
 		if (!content.trim()) {
@@ -483,7 +498,11 @@ const SupportTicketDetail: React.FC = () => {
 				</div>
 				<div className="space-y-3">
 					{conversation?.data.map((item) => (
-						<ConversationBubble key={item.id} item={item} />
+						<ConversationBubble
+							key={item.id}
+							item={item}
+							customerName={customerName}
+						/>
 					))}
 					{pendingItems.map((item) => (
 						<div

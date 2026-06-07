@@ -29,6 +29,7 @@ use DoubleScale\Core\Constants\ActivityTypes;
 use DoubleScale\Core\UserRoles\Permissions;
 use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\AttachmentService;
 use DoubleScale\Modules\Support\Services\ContactResolver;
 use DoubleScale\Modules\Support\Services\TicketService;
 use WP_Error;
@@ -142,9 +143,18 @@ class RestReplyController extends RestController {
 
 		$paginator = $query->paginate( $per_page, array( '*' ), 'page', $page );
 
+		$items           = $paginator->items();
+		$activity_ids    = array_map(
+			static function ( $activity ) {
+				return (int) $activity->id;
+			},
+			$items
+		);
+		$attachments_map = ( new AttachmentService() )->map_for_activities( $activity_ids );
+
 		$data = array();
-		foreach ( $paginator->items() as $activity ) {
-			$data[] = $this->shape_activity( $activity );
+		foreach ( $items as $activity ) {
+			$data[] = $this->shape_activity( $activity, $attachments_map );
 		}
 
 		return new WP_REST_Response(
@@ -190,7 +200,8 @@ class RestReplyController extends RestController {
 			return $activity;
 		}
 
-		return new WP_REST_Response( $this->shape_activity( $activity ), 201 );
+		$attachments_map = ( new AttachmentService() )->map_for_activities( array( (int) $activity->id ) );
+		return new WP_REST_Response( $this->shape_activity( $activity, $attachments_map ), 201 );
 	}
 
 	/**
@@ -221,7 +232,8 @@ class RestReplyController extends RestController {
 			return $activity;
 		}
 
-		return new WP_REST_Response( $this->shape_activity( $activity ), 201 );
+		$attachments_map = ( new AttachmentService() )->map_for_activities( array( (int) $activity->id ) );
+		return new WP_REST_Response( $this->shape_activity( $activity, $attachments_map ), 201 );
 	}
 
 	// ---------------------------------------------------------------------
@@ -303,10 +315,11 @@ class RestReplyController extends RestController {
 	 * `support_reply` → `'reply'`, etc., so frontend renderers can switch on a
 	 * short stable token without knowing the underlying activity type names.
 	 *
-	 * @param ActivityModel $activity Activity row.
+	 * @param ActivityModel                             $activity Activity row.
+	 * @param array<int, array<int, array<string, mixed>>> $attachments_map Attachments keyed by activity id.
 	 * @return array
 	 */
-	private function shape_activity( ActivityModel $activity ): array {
+	private function shape_activity( ActivityModel $activity, array $attachments_map = array() ): array {
 		$data = is_array( $activity->data ) ? $activity->data : array();
 
 		$kind_map = array(
@@ -336,6 +349,9 @@ class RestReplyController extends RestController {
 		} else {
 			$payload['user'] = null;
 		}
+
+		$aid = (int) $activity->id;
+		$payload['attachments'] = isset( $attachments_map[ $aid ] ) ? $attachments_map[ $aid ] : array();
 
 		return $payload;
 	}

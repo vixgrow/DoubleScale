@@ -62,6 +62,13 @@ export interface Ticket {
 
 export type ConversationKind = 'reply' | 'note' | 'event';
 
+export interface ConversationAttachment {
+	file_name: string;
+	file_size: number;
+	file_type: string;
+	url: string;
+}
+
 export interface ConversationItem {
 	id: number;
 	kind: ConversationKind;
@@ -78,6 +85,7 @@ export interface ConversationItem {
 	created_at: string | null;
 	updated_at: string | null;
 	user: AgentSummary | null;
+	attachments?: ConversationAttachment[];
 }
 
 export interface PaginatedResponse<T> {
@@ -105,6 +113,13 @@ export interface TicketFilters {
 	page?: number;
 }
 
+export interface AttachmentUploadResult {
+	file_hash: string;
+	file_name: string;
+	file_size: number;
+	file_type: string;
+}
+
 export interface CreateTicketPayload {
 	title: string;
 	// Customer: either an existing CRM contact by id, OR an email (+ optional
@@ -122,6 +137,7 @@ export interface CreateTicketPayload {
 	agent_user_id?: number;
 	custom_data?: Record<string, unknown>;
 	tag_ids?: number[];
+	attachment_hashes?: string[];
 }
 
 export interface UpdateTicketPayload {

@@ -32,8 +32,10 @@ use DoubleScale\Core\AbstractModule;
 use DoubleScale\Core\Container;
 use DoubleScale\Modules\Support\Models\MailboxModel;
 use DoubleScale\Core\UserRoles\Permissions;
+use DoubleScale\Modules\Support\Renderer\AttachmentServeHandler;
 use DoubleScale\Modules\Support\Renderer\PortalFrontendHandler;
 use DoubleScale\Modules\Support\Services\ActivityLogger;
+use DoubleScale\Modules\Support\Services\AttachmentService;
 use DoubleScale\Modules\Support\Services\ContactResolver;
 use DoubleScale\Modules\Support\Services\EmailNotifications;
 use DoubleScale\Modules\Support\Services\TicketService;
@@ -79,6 +81,7 @@ final class Module extends AbstractModule {
 	public function scheduledHooks(): array {
 		return array(
 			array( 'doublescale_support', 'doublescale_support_email_inbound' ),
+			array( 'doublescale_support', 'doublescale_support_attachment_cleanup' ),
 		);
 	}
 
@@ -123,6 +126,16 @@ final class Module extends AbstractModule {
 			EmailNotifications::class,
 			static fn() => new EmailNotifications()
 		);
+
+		$container->singleton(
+			AttachmentService::class,
+			static fn() => new AttachmentService()
+		);
+
+		$container->singleton(
+			AttachmentServeHandler::class,
+			static fn() => new AttachmentServeHandler()
+		);
 	}
 
 	public function restControllers(): array {
@@ -131,6 +144,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestReplyController::class,
 			Rest\Controllers\RestMailboxController::class,
 			Rest\Controllers\RestPortalController::class,
+			Rest\Controllers\RestAttachmentController::class,
 		);
 	}
 
@@ -156,6 +170,10 @@ final class Module extends AbstractModule {
 		// Resolve the outbound email notifier so its constructor subscribes to
 		// the ticket-lifecycle hooks (reply / created / status-change → customer).
 		$container->get( EmailNotifications::class );
+
+		$container->get( AttachmentServeHandler::class );
+
+		add_action( 'init', array( $this, 'register_attachment_cleanup_schedule' ) );
 
 		// Ensure a single shared "General" mailbox exists so the agent inbox's
 		// "New ticket" action and the portal are usable the moment support is
@@ -246,6 +264,25 @@ final class Module extends AbstractModule {
 	 *
 	 * @return void
 	 */
+	public function register_attachment_cleanup_schedule(): void {
+		if ( get_transient( 'doublescale_register_tasks_lock_support_attachments' ) ) {
+			return;
+		}
+		set_transient( 'doublescale_register_tasks_lock_support_attachments', 1, MINUTE_IN_SECONDS );
+
+		$tasks = new \DoubleScale\Core\Tasks( 'doublescale_support' );
+		$tasks->register_callback(
+			'doublescale_support_attachment_cleanup',
+			static function () {
+				( new AttachmentService() )->cleanup_stale_temp();
+			}
+		);
+
+		if ( false === $tasks->get_next_timestamp( 'doublescale_support_attachment_cleanup' ) ) {
+			$tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'doublescale_support_attachment_cleanup' );
+		}
+	}
+
 	public function maybe_seed_default_mailbox(): void {
 		$already_flagged = (bool) get_option( 'doublescale_support_default_mailbox_seeded' );
 

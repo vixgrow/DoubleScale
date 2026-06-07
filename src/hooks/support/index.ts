@@ -18,6 +18,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { NAMESPACE } from '@/constants/support';
 import type {
 	AgentSummary,
+	AttachmentUploadResult,
 	ConversationItem,
 	CreateTicketPayload,
 	Mailbox,
@@ -328,16 +329,55 @@ export const deleteTicket = (id: number) =>
 		method: 'DELETE',
 	});
 
-export const addReply = (ticketId: number, content: string) =>
-	apiFetch<ConversationItem>({
+export interface ReplyPayload {
+	content: string;
+	attachment_hashes?: string[];
+}
+
+export const uploadAttachment = async (
+	ticketId: number,
+	file: File
+): Promise<AttachmentUploadResult> => {
+	const formData = new FormData();
+	formData.append('file', file);
+
+	const response = await fetch(
+		`/wp-json/doublescale/v1/support/tickets/${ticketId}/attachments`,
+		{
+			method: 'POST',
+			body: formData,
+			credentials: 'same-origin',
+			headers: {
+				'X-WP-Nonce': (window as { wpApiSettings?: { nonce?: string } })
+					.wpApiSettings?.nonce as string,
+			},
+		}
+	);
+
+	if (!response.ok) {
+		const err = (await response.json()) as { message?: string };
+		throw new Error(err.message || 'Upload failed');
+	}
+
+	return response.json() as Promise<AttachmentUploadResult>;
+};
+
+export const addReply = (ticketId: number, payload: ReplyPayload | string) => {
+	const data =
+		typeof payload === 'string' ? { content: payload } : payload;
+	return apiFetch<ConversationItem>({
 		path: `${NAMESPACE}/tickets/${ticketId}/replies`,
 		method: 'POST',
-		data: { content },
+		data,
 	});
+};
 
-export const addNote = (ticketId: number, content: string) =>
-	apiFetch<ConversationItem>({
+export const addNote = (ticketId: number, payload: ReplyPayload | string) => {
+	const data =
+		typeof payload === 'string' ? { content: payload } : payload;
+	return apiFetch<ConversationItem>({
 		path: `${NAMESPACE}/tickets/${ticketId}/notes`,
 		method: 'POST',
-		data: { content },
+		data,
 	});
+};

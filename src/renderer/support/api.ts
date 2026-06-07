@@ -13,7 +13,11 @@ import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
-import type { PaginatedResponse, TicketFilters } from '@/types/support';
+import type {
+	AttachmentUploadResult,
+	PaginatedResponse,
+	TicketFilters,
+} from '@/types/support';
 import type { PortalConfig, PortalConversationItem, PortalTicket } from './types';
 
 const config = window.doublescale_support_portal_config as PortalConfig | undefined;
@@ -135,7 +139,35 @@ export interface CreatePortalTicketPayload {
 	title: string;
 	content: string;
 	mailbox_id?: number;
+	attachment_hashes?: string[];
 }
+
+export const uploadPortalAttachment = async (
+	ticketId: number,
+	file: File
+): Promise<AttachmentUploadResult> => {
+	const formData = new FormData();
+	formData.append('file', file);
+
+	const response = await fetch(
+		`/wp-json/doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
+		{
+			method: 'POST',
+			body: formData,
+			credentials: 'same-origin',
+			headers: {
+				'X-WP-Nonce': config?.nonce || '',
+			},
+		}
+	);
+
+	if (!response.ok) {
+		const err = (await response.json()) as { message?: string };
+		throw new Error(err.message || 'Upload failed');
+	}
+
+	return response.json() as Promise<AttachmentUploadResult>;
+};
 
 export const createPortalTicket = (payload: CreatePortalTicketPayload) =>
 	apiFetch<PortalTicket>({
@@ -144,11 +176,15 @@ export const createPortalTicket = (payload: CreatePortalTicketPayload) =>
 		data: payload as unknown as Record<string, unknown>,
 	});
 
-export const addPortalReply = (ticketId: number, content: string) =>
+export const addPortalReply = (
+	ticketId: number,
+	content: string,
+	attachment_hashes?: string[]
+) =>
 	apiFetch<PortalConversationItem>({
 		path: `${PORTAL}/tickets/${ticketId}/replies`,
 		method: 'POST',
-		data: { content },
+		data: { content, attachment_hashes },
 	});
 
 export interface PortalMailbox {

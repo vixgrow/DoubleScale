@@ -21,6 +21,7 @@ import {
 	addNote,
 	updateTicket,
 	deleteTicket,
+	uploadAttachment,
 } from '@/hooks/support';
 import {
 	StatusPill,
@@ -28,6 +29,9 @@ import {
 	NoteIcon,
 	ReplyIcon,
 	ConversationIcon,
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
 } from '@/components/support';
 import {
 	TICKET_STATUSES,
@@ -35,7 +39,7 @@ import {
 	type TicketPriority,
 	type TicketStatus,
 } from '@/constants/support';
-import type { ConversationItem } from '@/types/support';
+import type { ConversationAttachment, ConversationItem } from '@/types/support';
 
 const formatDate = (raw: string | null): string => {
 	if (!raw) {
@@ -57,6 +61,30 @@ const eventDescription = (item: ConversationItem): string => {
 		return `${label}: ${String(from)} → ${String(to)}`;
 	}
 	return label;
+};
+
+const AttachmentLinks: React.FC<{ attachments?: ConversationAttachment[] }> = ({
+	attachments,
+}) => {
+	if (!attachments?.length) {
+		return null;
+	}
+	return (
+		<ul className="mt-2 space-y-1">
+			{attachments.map((att) => (
+				<li key={att.url}>
+					<a
+						href={att.url}
+						className="text-sm text-blue-600 hover:underline"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{att.file_name}
+					</a>
+				</li>
+			))}
+		</ul>
+	);
 };
 
 const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
@@ -109,6 +137,7 @@ const ConversationBubble: React.FC<{ item: ConversationItem }> = ({ item }) => {
 							: '',
 				}}
 			/>
+			<AttachmentLinks attachments={item.attachments} />
 		</div>
 	);
 };
@@ -131,6 +160,10 @@ const SupportTicketDetail: React.FC = () => {
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
 	const [content, setContent] = useState('');
 	const [sending, setSending] = useState(false);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
 	const [feedback, setFeedback] = useState<string | null>(null);
 	// Optimistic queue: items appended client-side BEFORE the server confirms.
 	// On refetch the real activity replaces these. Negative ids guarantee they
@@ -178,13 +211,20 @@ const SupportTicketDetail: React.FC = () => {
 		};
 		setPendingItems((prev) => [...prev, optimistic]);
 		const draftContent = content;
+		const attachmentHashes = pendingAttachments.map((a) => a.file_hash);
 		setContent('');
+		setPendingAttachments([]);
 
 		try {
+			const payload = {
+				content: draftContent,
+				attachment_hashes:
+					attachmentHashes.length > 0 ? attachmentHashes : undefined,
+			};
 			if (tab === 'reply') {
-				await addReply(ticketId, draftContent);
+				await addReply(ticketId, payload);
 			} else {
-				await addNote(ticketId, draftContent);
+				await addNote(ticketId, payload);
 			}
 			// Real activity arrives via refetch — clear the placeholder.
 			refetchConversation();
@@ -200,8 +240,32 @@ const SupportTicketDetail: React.FC = () => {
 				prev.filter((p) => p.id !== optimistic.id)
 			);
 			setContent(draftContent);
+			setPendingAttachments(
+				attachmentHashes.map((hash, i) => ({
+					file_hash: hash,
+					file_name: pendingAttachments[i]?.file_name || hash,
+				}))
+			);
 		} finally {
 			setSending(false);
+		}
+	};
+
+	const handleAttachmentSelect = async (file: File) => {
+		setUploading(true);
+		setFeedback(null);
+		try {
+			const result = await uploadAttachment(ticketId, file);
+			setPendingAttachments((prev) => [
+				...prev,
+				toPendingAttachment(result),
+			]);
+		} catch (err) {
+			const msg =
+				(err as { message?: string })?.message ?? 'Upload failed';
+			setFeedback(msg);
+		} finally {
+			setUploading(false);
 		}
 	};
 
@@ -476,6 +540,17 @@ const SupportTicketDetail: React.FC = () => {
 						}
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
+					/>
+					<AttachmentUploader
+						pending={pendingAttachments}
+						uploading={uploading}
+						onSelect={handleAttachmentSelect}
+						onRemove={(hash) =>
+							setPendingAttachments((prev) =>
+								prev.filter((p) => p.file_hash !== hash)
+							)
+						}
+						disabled={sending}
 					/>
 					{feedback && (
 						<div className="mt-2 text-sm text-red-600">

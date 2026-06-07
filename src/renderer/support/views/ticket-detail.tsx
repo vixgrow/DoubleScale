@@ -14,7 +14,17 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusPill, PriorityPill } from '@/components/support';
 
-import { addPortalReply, usePortalConversation, usePortalTicket } from '../api';
+import {
+	addPortalReply,
+	uploadPortalAttachment,
+	usePortalConversation,
+	usePortalTicket,
+} from '../api';
+import {
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
+} from '@/components/support';
 import type { PortalConfig, PortalConversationItem } from '../types';
 
 interface Props {
@@ -28,6 +38,10 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 	const conv = usePortalConversation(ticketId);
 	const [draft, setDraft] = useState('');
 	const [sending, setSending] = useState(false);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
 	const [sendError, setSendError] = useState<string | null>(null);
 
 	const handleSend = async () => {
@@ -38,8 +52,14 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 		setSending(true);
 		setSendError(null);
 		try {
-			await addPortalReply(ticketId, content);
+			const hashes = pendingAttachments.map((a) => a.file_hash);
+			await addPortalReply(
+				ticketId,
+				content,
+				hashes.length > 0 ? hashes : undefined
+			);
 			setDraft('');
+			setPendingAttachments([]);
 			conv.refetch();
 			ticket.refetch();
 		} catch (e) {
@@ -145,6 +165,37 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 					)}
 					className="block w-full rounded-md border border-input bg-background p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 				/>
+				<AttachmentUploader
+					pending={pendingAttachments}
+					uploading={uploading}
+					disabled={sending}
+					onSelect={async (file) => {
+						setUploading(true);
+						try {
+							const result = await uploadPortalAttachment(
+								ticketId,
+								file
+							);
+							setPendingAttachments((prev) => [
+								...prev,
+								toPendingAttachment(result),
+							]);
+						} catch (e) {
+							setSendError(
+								e instanceof Error
+									? e.message
+									: __('Upload failed.', 'doublescale')
+							);
+						} finally {
+							setUploading(false);
+						}
+					}}
+					onRemove={(hash) =>
+						setPendingAttachments((prev) =>
+							prev.filter((p) => p.file_hash !== hash)
+						)
+					}
+				/>
 				{sendError && (
 					<p className="mt-2 text-sm text-destructive">{sendError}</p>
 				)}
@@ -207,6 +258,22 @@ const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
 					className="prose prose-sm max-w-none text-foreground"
 					dangerouslySetInnerHTML={{ __html: content }}
 				/>
+				{item.attachments && item.attachments.length > 0 && (
+					<ul className="mt-2 space-y-1">
+						{item.attachments.map((att) => (
+							<li key={att.url}>
+								<a
+									href={att.url}
+									className="text-sm text-primary hover:underline"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									{att.file_name}
+								</a>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 		</li>
 	);

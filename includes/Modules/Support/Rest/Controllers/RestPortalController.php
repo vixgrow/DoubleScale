@@ -40,6 +40,7 @@ use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Contacts\Models\ContactModel;
 use DoubleScale\Modules\Support\Models\MailboxModel;
 use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\AttachmentService;
 use DoubleScale\Modules\Support\Services\ContactResolver;
 use DoubleScale\Modules\Support\Services\TicketService;
 use WP_Error;
@@ -125,6 +126,18 @@ class RestPortalController extends RestController {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'add_reply' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/tickets/(?P<ticket_id>[\d]+)/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload_attachment' ),
 					'permission_callback' => array( $this, 'permissions_check' ),
 				),
 			)
@@ -308,9 +321,17 @@ class RestPortalController extends RestController {
 			->with( 'user' )
 			->get();
 
+		$activity_ids    = array_map(
+			static function ( $activity ) {
+				return (int) $activity->id;
+			},
+			$activities->all()
+		);
+		$attachments_map = ( new AttachmentService() )->map_for_activities( $activity_ids );
+
 		$data = array();
 		foreach ( $activities as $activity ) {
-			$data[] = $this->shape_portal_activity( $activity );
+			$data[] = $this->shape_portal_activity( $activity, $attachments_map );
 		}
 
 		return new WP_REST_Response(
@@ -387,6 +408,10 @@ class RestPortalController extends RestController {
 			}
 		}
 
+		if ( ! empty( $params['attachment_hashes'] ) && is_array( $params['attachment_hashes'] ) ) {
+			$create_data['attachment_hashes'] = $params['attachment_hashes'];
+		}
+
 		$ticket = $this->service()->create_ticket( $create_data );
 		if ( is_wp_error( $ticket ) ) {
 			return $ticket;
@@ -428,14 +453,16 @@ class RestPortalController extends RestController {
 
 		// Force `author_user_id = null` — customer replies are never attributed
 		// to an agent even if the WP user happens to also have an agent role.
-		$activity = $this->service()->add_reply(
-			$ticket,
-			array(
-				'content'        => $content,
-				'source'         => 'web',
-				'author_user_id' => null,
-			)
+		$reply_data = array(
+			'content'        => $content,
+			'source'         => 'web',
+			'author_user_id' => null,
 		);
+		if ( ! empty( $params['attachment_hashes'] ) && is_array( $params['attachment_hashes'] ) ) {
+			$reply_data['attachment_hashes'] = $params['attachment_hashes'];
+		}
+
+		$activity = $this->service()->add_reply( $ticket, $reply_data );
 		if ( is_wp_error( $activity ) ) {
 			return $activity;
 		}
@@ -446,7 +473,59 @@ class RestPortalController extends RestController {
 			$this->service()->update_ticket( $ticket, array( 'status' => 'open' ) );
 		}
 
-		return new WP_REST_Response( $this->shape_portal_activity( $activity ), 201 );
+		$attachments_map = ( new AttachmentService() )->map_for_activities( array( (int) $activity->id ) );
+		return new WP_REST_Response( $this->shape_portal_activity( $activity, $attachments_map ), 201 );
+	}
+
+	/**
+	 * Customer upload on an owned ticket.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function upload_attachment( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$contact = $this->lookup_contact_for_current_user();
+		if ( ! $contact ) {
+			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$ticket_id = (int) $request->get_param( 'ticket_id' );
+		$ticket    = TicketModel::where( 'id', $ticket_id )
+			->where( 'contact_id', $contact->id )
+			->first();
+		if ( ! $ticket ) {
+			return new WP_Error( 'not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
+		}
+
+		$files = $request->get_file_params();
+		$file  = isset( $files['file'] ) && is_array( $files['file'] ) ? $files['file'] : null;
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$attachment = ( new AttachmentService() )->store_upload(
+			$file,
+			(int) $ticket->id,
+			array( 'contact_id' => (int) $contact->id )
+		);
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		return new WP_REST_Response(
+			array(
+				'file_hash' => (string) $attachment->file_hash,
+				'file_name' => (string) $attachment->file_name,
+				'file_size' => (int) $attachment->file_size,
+				'file_type' => (string) $attachment->file_type,
+			),
+			201
+		);
 	}
 
 	// ---------------------------------------------------------------------
@@ -550,10 +629,11 @@ class RestPortalController extends RestController {
 	/**
 	 * Shape an activity row for the portal conversation view.
 	 *
-	 * @param ActivityModel $activity Activity row.
+	 * @param ActivityModel                             $activity Activity row.
+	 * @param array<int, array<int, array<string, mixed>>> $attachments_map Attachments keyed by activity id.
 	 * @return array
 	 */
-	private function shape_portal_activity( ActivityModel $activity ): array {
+	private function shape_portal_activity( ActivityModel $activity, array $attachments_map = array() ): array {
 		$kind_map = array(
 			ActivityTypes::SUPPORT_REPLY => 'reply',
 			ActivityTypes::SUPPORT_EVENT => 'event',
@@ -581,16 +661,19 @@ class RestPortalController extends RestController {
 			);
 		}
 
+		$aid = (int) $activity->id;
+
 		return array(
-			'id'         => (int) $activity->id,
-			'kind'       => $kind,
-			'type'       => $activity->activity_type,
-			'user_id'    => $activity->user_id ? (int) $activity->user_id : null,
-			'data'       => $data,
-			'is_self'    => $is_self,
-			'user'       => $user,
-			'created_at' => $activity->created_at ? (string) $activity->created_at : null,
-			'updated_at' => $activity->updated_at ? (string) $activity->updated_at : null,
+			'id'          => $aid,
+			'kind'        => $kind,
+			'type'        => $activity->activity_type,
+			'user_id'     => $activity->user_id ? (int) $activity->user_id : null,
+			'data'        => $data,
+			'is_self'     => $is_self,
+			'user'        => $user,
+			'attachments' => isset( $attachments_map[ $aid ] ) ? $attachments_map[ $aid ] : array(),
+			'created_at'  => $activity->created_at ? (string) $activity->created_at : null,
+			'updated_at'  => $activity->updated_at ? (string) $activity->updated_at : null,
 		);
 	}
 

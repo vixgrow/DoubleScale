@@ -148,7 +148,7 @@ class TicketService {
 			// transactions for connector compatibility. The orphan-row failure
 			// mode (ticket without opening message) is identical in shape to
 			// Booking's multi-table flows and is logged via the catch block.
-			$this->record_conversation_activity(
+			$activity = $this->record_conversation_activity(
 				$ticket,
 				ActivityTypes::SUPPORT_REPLY,
 				array(
@@ -157,6 +157,10 @@ class TicketService {
 				),
 				$author_user_id
 			);
+
+			if ( ! empty( $data['attachment_hashes'] ) && is_array( $data['attachment_hashes'] ) ) {
+				$this->attachments()->link_to_activity( (int) $activity->id, (int) $ticket->id, $data['attachment_hashes'] );
+			}
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
 				'Support ticket creation failed',
@@ -234,6 +238,10 @@ class TicketService {
 				$author
 			);
 
+			if ( ! empty( $data['attachment_hashes'] ) && is_array( $data['attachment_hashes'] ) ) {
+				$this->attachments()->link_to_activity( (int) $activity->id, (int) $ticket->id, $data['attachment_hashes'] );
+			}
+
 			// Replies AFTER the opening message bump the counter; the opening
 			// message goes through `record_conversation_activity` from
 			// `create_ticket()` without this call.
@@ -297,6 +305,10 @@ class TicketService {
 				),
 				$author
 			);
+
+			if ( ! empty( $data['attachment_hashes'] ) && is_array( $data['attachment_hashes'] ) ) {
+				$this->attachments()->link_to_activity( (int) $activity->id, (int) $ticket->id, $data['attachment_hashes'] );
+			}
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
 				'Support note creation failed',
@@ -666,5 +678,12 @@ class TicketService {
 		}
 		$id = (int) get_current_user_id();
 		return $id > 0 ? $id : null;
+	}
+
+	/**
+	 * @return AttachmentService
+	 */
+	private function attachments(): AttachmentService {
+		return new AttachmentService();
 	}
 }

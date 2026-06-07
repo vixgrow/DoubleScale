@@ -42,6 +42,7 @@ defined( 'ABSPATH' ) || exit;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
+use DoubleScale\Modules\Support\Services\AttachmentService;
 
 /**
  * EmailNotifications class.
@@ -142,9 +143,14 @@ final class EmailNotifications {
 				// override can wrap or augment it.
 				$inner = $this->render( $tpl['body'], $tokens );
 
+				$attachments = array();
+				if ( is_object( $activity ) && ! empty( $activity->id ) ) {
+					$attachments = ( new AttachmentService() )->absolute_paths_for_activity( (int) $activity->id );
+				}
+
 				// From is the mailbox's sending identity (not the agent's) — see
 				// dispatch() / sender_identity().
-				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ) );
+				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ), $attachments );
 			}
 		);
 	}
@@ -205,7 +211,7 @@ final class EmailNotifications {
 	 * @param string      $body    HTML body.
 	 * @return void
 	 */
-	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body ): void {
+	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body, array $attachments = array() ): void {
 		$identity = $this->sender_identity( $ticket );
 
 		// No resolvable sending identity on the mailbox → do NOT send. A support
@@ -264,7 +270,7 @@ final class EmailNotifications {
 		};
 		add_filter( 'doublescale_smtp_explicit_connection', $pin );
 		try {
-			$result = $emails->send( $to, $subject, $body );
+			$result = $emails->send( $to, $subject, $body, $attachments );
 		} finally {
 			remove_filter( 'doublescale_smtp_explicit_connection', $pin );
 		}

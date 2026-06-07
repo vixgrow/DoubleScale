@@ -174,7 +174,7 @@ class AttachmentModel extends Model {
 	 * @param string $relative_path Stored relative path.
 	 * @return string Absolute path or '' if the uploads dir is unavailable.
 	 */
-	private static function resolve_absolute_path( $relative_path ) {
+	public static function resolve_absolute_path( $relative_path ) {
 		if ( '' === $relative_path ) {
 			return '';
 		}

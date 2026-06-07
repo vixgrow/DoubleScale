@@ -39,6 +39,8 @@ namespace DoubleScale\Modules\Support\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Core\Constants\ActivityTypes;
+use DoubleScale\Modules\Activities\Models\ActivityModel;
 use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
@@ -269,6 +271,22 @@ final class EmailNotifications {
 		$host               = wp_parse_url( home_url(), PHP_URL_HOST );
 		$emails->message_id = ReplyAddressing::build_message_id( (int) $ticket->id, is_string( $host ) ? $host : '' );
 
+		// In-Reply-To / References make THIS message nest inside the existing
+		// conversation in the CUSTOMER'S inbox. We point at the customer's last
+		// inbound message (or their opening email) — a Message-ID that already
+		// exists in their thread. This is purely cosmetic on the customer side;
+		// our own inbound threading relies on the Reply-To plus-address above, not
+		// on this header. Empty for web/portal-opened tickets with no inbound id.
+		$parent_message_id = $this->thread_parent_message_id( $ticket );
+		if ( '' !== $parent_message_id ) {
+			$emails->in_reply_to = $parent_message_id;
+		}
+
+		// Stamp [Ticket #N] on the subject so the inbound subject-tag matcher
+		// (the last-ditch fallback) has something to read when every header and
+		// the plus-address have been stripped by an intermediary.
+		$subject = $this->ensure_ticket_tag( $subject, (int) $ticket->id );
+
 		// Pin delivery to the mailbox's OWN connection. Emails::send() routes
 		// through the SMTP module's PHPMailerOverride, which reads this filter via
 		// get_smart_route() inside wp_mail(); the one-shot add/remove scopes the
@@ -364,6 +382,59 @@ final class EmailNotifications {
 			'from_name'     => $from_name,
 			'reply_to'      => $from_email,
 		);
+	}
+
+	/**
+	 * The Message-ID our outbound mail should thread under in the customer's
+	 * inbox: the most recent INBOUND (customer-authored) reply we recorded a
+	 * Message-ID for, falling back to the opening email's Message-ID stored on
+	 * the ticket. Agent replies never carry a Message-ID in their activity data,
+	 * so the JSON filter already isolates customer mail; the `user_id IS NULL`
+	 * clause is belt-and-braces. Best-effort: any failure yields '' (no header).
+	 *
+	 * @param TicketModel $ticket Ticket whose latest inbound id to resolve.
+	 * @return string Parent Message-ID (with angle brackets), or '' when none.
+	 */
+	private function thread_parent_message_id( TicketModel $ticket ): string {
+		try {
+			$activity = ActivityModel::forTicket( (int) $ticket->id )
+				->where( 'activity_type', ActivityTypes::SUPPORT_REPLY )
+				->whereNull( 'user_id' )
+				->whereRaw( "JSON_UNQUOTE(JSON_EXTRACT(data, '\$.message_id')) <> ''" )
+				->orderBy( 'id', 'desc' )
+				->first();
+
+			if ( $activity ) {
+				$data = is_array( $activity->data ) ? $activity->data : array();
+				if ( ! empty( $data['message_id'] ) ) {
+					return (string) $data['message_id'];
+				}
+			}
+		} catch ( \Throwable $e ) {
+			// Threading is best-effort and must never block the send.
+			unset( $e );
+		}
+
+		return isset( $ticket->message_id ) ? (string) $ticket->message_id : '';
+	}
+
+	/**
+	 * Ensure the subject carries a `[Ticket #N]` tag (idempotent). Skips when a
+	 * tag is already present so an operator template or a customer's quoted
+	 * subject isn't double-stamped.
+	 *
+	 * @param string $subject   Rendered subject.
+	 * @param int    $ticket_id Ticket id.
+	 * @return string Subject guaranteed to contain a ticket tag.
+	 */
+	private function ensure_ticket_tag( string $subject, int $ticket_id ): string {
+		if ( $ticket_id <= 0 ) {
+			return $subject;
+		}
+		if ( preg_match( '/\[\s*Ticket\s*#\d+\s*\]/i', $subject ) ) {
+			return $subject;
+		}
+		return trim( $subject ) . ' [Ticket #' . $ticket_id . ']';
 	}
 
 	// ---------------------------------------------------------------------

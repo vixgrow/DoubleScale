@@ -658,12 +658,17 @@ class RestPortalController extends RestController {
 		// `contact_id` (agent-internal) and add `is_self` so the renderer can
 		// right-align the customer's own bubbles.
 		//
-		// "Self" is determined by comparing the activity's user_id to the
-		// currently-logged-in user. In the logged-in portal model the customer
-		// IS a WP user, so their replies DO have a user_id — the marker comes
-		// from identity match, not from the user_id being NULL.
-		$current_user_id = (int) get_current_user_id();
-		$is_self         = $current_user_id > 0 && (int) $activity->user_id === $current_user_id;
+		// "Self" = the message was authored by the customer, not an agent.
+		// Customer replies are deliberately written with `user_id = NULL` (see
+		// add_reply(): `author_user_id = null`), and so is the customer-authored
+		// opening message. An agent reply always carries the agent's `user_id`.
+		// Because the portal only ever returns tickets the current user OWNS
+		// (resolve_own_ticket / contact_id gate), any reply with no agent
+		// `user_id` on this ticket is the customer's own — so NULL author IS the
+		// self marker. (Comparing user_id to get_current_user_id() would never
+		// match, since the customer's replies have no user_id, which is exactly
+		// why every customer message was mislabeled "Support team".)
+		$is_self = empty( $activity->user_id ) && ActivityTypes::SUPPORT_REPLY === $activity->activity_type;
 
 		$user = null;
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {

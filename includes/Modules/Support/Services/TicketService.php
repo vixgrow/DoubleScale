@@ -270,6 +270,38 @@ class TicketService {
 	}
 
 	/**
+	 * Whether a customer reply carrying this email Message-ID has already been
+	 * recorded on a ticket.
+	 *
+	 * Inbound email ingestion (Pro) calls this so a reply is appended exactly
+	 * once even when BOTH inbound engines — the per-mailbox IMAP poller and the
+	 * CRM-inbox router — see the same physical message (which happens when one
+	 * Gmail/Outlook account is wired as both the CRM inbox and a support
+	 * mailbox). Scoped to SUPPORT_REPLY activities on purpose: the CRM logs the
+	 * same email as an `email_received` activity that ALSO stores this Message-ID,
+	 * and that contact-timeline row must not be mistaken for an already-ingested
+	 * support reply.
+	 *
+	 * Opening messages are deduped separately on the indexed
+	 * `support_tickets.message_id` column (the opening activity is stored without
+	 * a `message_id` in its data), so this method intentionally covers the reply
+	 * case only.
+	 *
+	 * @param string $message_id Raw Message-ID header value (with angle brackets).
+	 * @return bool
+	 */
+	public function reply_exists_by_message_id( string $message_id ): bool {
+		$message_id = trim( $message_id );
+		if ( '' === $message_id ) {
+			return false;
+		}
+
+		return ActivityModel::where( 'activity_type', ActivityTypes::SUPPORT_REPLY )
+			->whereRaw( "JSON_UNQUOTE(JSON_EXTRACT(data, '\$.message_id')) = ?", array( $message_id ) )
+			->exists();
+	}
+
+	/**
 	 * Add an internal-only note to a ticket. Not visible to the customer.
 	 *
 	 * Required keys in $data:

@@ -258,7 +258,16 @@ final class EmailNotifications {
 		$emails               = new Emails();
 		$emails->from_address = $identity['from_address'];
 		$emails->from_name    = $identity['from_name'];
-		$emails->reply_to     = $identity['reply_to'];
+
+		// Thread inbound replies back to THIS ticket. The Reply-To carries a
+		// plus-addressed ticket token the inbound parser reads off the recipient —
+		// this survives providers that rewrite the Message-ID on relay (Gmail/
+		// Outlook). The structured Message-ID is the secondary signal for providers
+		// that preserve it. {@see ReplyAddressing} owns the format; Pro's inbound
+		// factory parses it with the same class.
+		$emails->reply_to   = ReplyAddressing::build_reply_to( $identity['reply_to'], (int) $ticket->id, (string) $ticket->hash );
+		$host               = wp_parse_url( home_url(), PHP_URL_HOST );
+		$emails->message_id = ReplyAddressing::build_message_id( (int) $ticket->id, is_string( $host ) ? $host : '' );
 
 		// Pin delivery to the mailbox's OWN connection. Emails::send() routes
 		// through the SMTP module's PHPMailerOverride, which reads this filter via

@@ -1,5 +1,6 @@
 {
     "RestActivityController": "DoubleScale\\Modules\\Activities\\Rest\\Controllers\\RestActivityController",
+    "RestAttachmentController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestAttachmentController",
     "RestAutomationContactController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationContactController",
     "RestAutomationController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationController",
     "RestAutomationStepController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationStepController",

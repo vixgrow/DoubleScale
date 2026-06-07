@@ -15,6 +15,7 @@ namespace DoubleScale\Core\UserRoles;
 defined( 'ABSPATH' ) || exit;
 
 use DoubleScale\Core\Settings\Settings;
+use DoubleScale\Modules\Contacts\Models\ContactModel;
 
 /**
  * Permissions class
@@ -148,6 +149,33 @@ final class Permissions {
 	public static function has_support_access( $user_id = null ) {
 		$user_id = self::set_current_user_id( $user_id );
 		return user_can( $user_id, 'doublescale_view_support' );
+	}
+
+	/**
+	 * Whether a logged-in support-capable user should be turned away from the
+	 * customer portal shortcode (staff redirect instead of the SPA).
+	 *
+	 * Mirrors Fluent Support: agents without a customer identity are blocked,
+	 * but a WP user whose email matches a CRM contact is treated as a customer
+	 * and may use the portal even when they also hold support capabilities.
+	 *
+	 * @param int|null $user_id User ID (null for current user).
+	 * @return bool
+	 */
+	public static function should_block_customer_portal( $user_id = null ) {
+		$user_id = self::set_current_user_id( $user_id );
+		if ( $user_id <= 0 || ! self::has_support_access( $user_id ) ) {
+			return false;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user || empty( $user->user_email ) || ! is_email( $user->user_email ) ) {
+			return true;
+		}
+
+		$email = strtolower( trim( (string) $user->user_email ) );
+
+		return ! ContactModel::where( 'email', $email )->exists();
 	}
 
 	/**

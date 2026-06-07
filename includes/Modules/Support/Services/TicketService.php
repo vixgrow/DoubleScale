@@ -125,6 +125,25 @@ class TicketService {
 			);
 		}
 
+		$custom_data = null;
+		if ( isset( $data['custom_data'] ) && is_array( $data['custom_data'] ) ) {
+			$service = self::custom_fields_service();
+			if ( $service ) {
+				$scope   = isset( $data['custom_fields_scope'] ) && 'portal' === $data['custom_fields_scope'] ? 'portal' : 'admin';
+				$context = array(
+					'ticket_title'    => (string) ( $data['title'] ?? '' ),
+					'ticket_content'  => $content,
+					'ticket_priority' => (string) ( $data['priority'] ?? TicketPriority::NORMAL ),
+					'product'         => (string) ( $data['product'] ?? '' ),
+				);
+				$validated = $service->validate( $data['custom_data'], $scope, $context );
+				if ( is_wp_error( $validated ) ) {
+					return $validated;
+				}
+				$custom_data = $validated;
+			}
+		}
+
 		$ticket_attrs = array(
 			'title'         => $this->sanitize_title( $data['title'] ),
 			'status'        => $this->normalize_status( $data['status'] ?? TicketStatus::OPEN ),
@@ -135,7 +154,7 @@ class TicketService {
 			'product'       => isset( $data['product'] ) ? $this->sanitize_short_string( $data['product'] ) : null,
 			'message_id'    => isset( $data['message_id'] ) ? (string) $data['message_id'] : null,
 			'tag_ids'       => $this->normalize_tag_ids( $data['tag_ids'] ?? null ),
-			'custom_data'   => isset( $data['custom_data'] ) && is_array( $data['custom_data'] ) ? $data['custom_data'] : null,
+			'custom_data'   => $custom_data,
 		);
 
 		$source         = $this->normalize_source( $data['source'] ?? 'web' );
@@ -406,6 +425,24 @@ class TicketService {
 		foreach ( $updates as $key => $value ) {
 			if ( ! in_array( $key, self::UPDATABLE_COLUMNS, true ) ) {
 				continue;
+			}
+			if ( 'custom_data' === $key && is_array( $value ) ) {
+				$stored_custom = is_array( $ticket->custom_data ) ? $ticket->custom_data : array();
+				$context       = array(
+					'ticket_title'    => (string) $ticket->title,
+					'ticket_content'  => '',
+					'ticket_priority' => (string) $ticket->priority,
+					'product'         => (string) ( $ticket->product ?? '' ),
+					'custom_data'     => array_merge( $stored_custom, $value ),
+				);
+				$service = self::custom_fields_service();
+				if ( $service ) {
+					$prepared = $service->prepare_for_save( $value, 'admin', $context, $stored_custom );
+					if ( is_wp_error( $prepared ) ) {
+						return $prepared;
+					}
+					$value = $prepared;
+				}
 			}
 			$normalized = $this->normalize_update_value( $key, $value );
 			$current    = $ticket->{$key};
@@ -801,7 +838,7 @@ class TicketService {
 
 	/**
 	 * Pick a sensible WP user id to credit on an activity:
-	 *  - Web source: prefer explicit `author_user_id` → current logged-in user → NULL.
+	 *  - Web source: explicit `author_user_id` (including null) → current user → NULL.
 	 *  - Email source: caller (IMAP handler) sets `author_user_id` only when the
 	 *    inbound is from an agent's SENT folder; otherwise NULL (customer reply).
 	 *
@@ -810,8 +847,14 @@ class TicketService {
 	 * @return int|null
 	 */
 	private function resolve_author_user_id( array $data, $source ) {
-		if ( ! empty( $data['author_user_id'] ) ) {
-			return (int) $data['author_user_id'];
+		// Explicit null (portal / guest hash replies) must stay customer-authored
+		// even when a support agent happens to be logged into WordPress.
+		if ( array_key_exists( 'author_user_id', $data ) ) {
+			$explicit = $data['author_user_id'];
+			if ( null === $explicit || '' === $explicit || 0 === (int) $explicit ) {
+				return null;
+			}
+			return (int) $explicit;
 		}
 		if ( 'web' === $source ) {
 			return $this->current_user_id_or_null();
@@ -832,5 +875,18 @@ class TicketService {
 	 */
 	private function attachments(): AttachmentService {
 		return new AttachmentService();
+	}
+
+	/**
+	 * Pro support custom fields service, when the Pro add-on is active.
+	 *
+	 * @return object|null
+	 */
+	private static function custom_fields_service() {
+		$class = '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService';
+		if ( ! class_exists( $class ) ) {
+			return null;
+		}
+		return new $class();
 	}
 }

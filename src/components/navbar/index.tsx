@@ -379,15 +379,19 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					// Unlike `booking` (whose parent path only redirects), the
 					// `support` parent path IS the inbox, so the first child
 					// links back to it explicitly. The group reads Inbox /
-					// Mailboxes. The Mailboxes link carries its own capability
-					// gate (matching the `support/mailboxes` route) so it's
-					// hidden from Sales Manager / Sales Rep instead of showing a
-					// link that lands on Access Denied.
+					// Mailboxes / Custom fields (Pro replaces the page; free upsells).
 					navItem.subMenu = [
 						{ path: 'support', label: __('Inbox', 'doublescale') },
 						{
 							path: 'support/mailboxes',
 							label: __('Mailboxes', 'doublescale'),
+							requiredCapability: [
+								'doublescale_manage_support_settings',
+							],
+						},
+						{
+							path: 'support/custom-fields',
+							label: __('Custom fields', 'doublescale'),
 							requiredCapability: [
 								'doublescale_manage_support_settings',
 							],

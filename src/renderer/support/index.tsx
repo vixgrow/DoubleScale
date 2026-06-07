@@ -25,9 +25,12 @@ if (mount && baseConfig) {
 	// mount node (e.g. [doublescale_support_portal box_id="3"]). 0/absent means
 	// unscoped: the customer sees and picks across all mailboxes.
 	const rawBoxId = parseInt(mount.getAttribute('data-box-id') || '0', 10);
+	const guestHash = mount.getAttribute('data-guest-hash') || '';
 	const config: PortalConfig = {
 		...baseConfig,
 		box_id: Number.isFinite(rawBoxId) && rawBoxId > 0 ? rawBoxId : undefined,
+		is_guest: baseConfig.is_guest || Boolean(guestHash),
+		guest_hash: guestHash || baseConfig.guest_hash || '',
 	};
 	createRoot(mount).render(<PortalApp config={config} />);
 }

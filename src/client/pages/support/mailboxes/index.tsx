@@ -177,7 +177,7 @@ const seedTemplateMap = (
 };
 
 const TOKENS_HINT = __(
-	'Tokens: {customer_first_name}, {ticket_title}, {ticket_id}, {ticket_status}, {site_name}, {reply_content}.',
+	'Tokens: {customer_full_name}, {customer_first_name}, {ticket_title}, {ticket_id}, {ticket_status}, {ticket_public_url}, {site_name}, {reply_content}. {ticket_public_url} needs a published WordPress page containing the [doublescale_support_portal] shortcode.',
 	'doublescale'
 );
 

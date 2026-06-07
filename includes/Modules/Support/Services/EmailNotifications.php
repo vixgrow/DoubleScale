@@ -45,6 +45,7 @@ use DoubleScale\Modules\Emails\Emails;
 use DoubleScale\Modules\Support\Constants\TicketStatus;
 use DoubleScale\Modules\Support\Models\TicketModel;
 use DoubleScale\Modules\Support\Services\AttachmentService;
+use DoubleScale\Modules\Support\Services\PortalUrl;
 
 /**
  * EmailNotifications class.
@@ -97,6 +98,15 @@ final class EmailNotifications {
 				}
 
 				$tokens  = $this->tokens( $t );
+				if ( '' === $tokens['ticket_public_url'] && str_contains( $tpl['body'], '{ticket_public_url}' ) ) {
+					doublescale_get_logger()->warning(
+						'{ticket_public_url} is empty — publish a page with the [doublescale_support_portal] shortcode.',
+						array(
+							'source'    => 'support-email-notifications',
+							'ticket_id' => (int) $t->id,
+						)
+					);
+				}
 				$subject = $this->render( $tpl['subject'], $tokens );
 				$inner   = $this->render( $tpl['body'], $tokens );
 
@@ -140,9 +150,8 @@ final class EmailNotifications {
 
 				$tokens  = $this->tokens( $t, array( 'reply_content' => $content ) );
 				$subject = $this->render( $tpl['subject'], $tokens );
-				// The body default is the {reply_content} token, so with no operator
-				// override the customer receives the agent's message verbatim; an
-				// override can wrap or augment it.
+				// Default body links to the portal; operators can add {reply_content}
+				// to include the agent message inline.
 				$inner = $this->render( $tpl['body'], $tokens );
 
 				$attachments = array();
@@ -520,15 +529,30 @@ final class EmailNotifications {
 		return array(
 			'ticket_created_to_customer' => array(
 				'subject' => __( 'We received your request: {ticket_title}', 'doublescale' ),
-				'body'    => __( 'Hi {customer_first_name}, thanks for reaching out. We have opened a support ticket for "{ticket_title}" and will reply soon.', 'doublescale' ),
+				'body'    => '<p>Hi <strong>{customer_full_name}</strong>,</p>'
+					. '<p>Your request (<a href="{ticket_public_url}">#{ticket_id}</a>) has been received, and is being reviewed by our support staff.</p>'
+					. '<p>To add additional comments, follow the link below:</p>'
+					. '<h4><a href="{ticket_public_url}">View Ticket</a></h4>'
+					. '<p>&nbsp;</p>'
+					. '<p>or follow this link: {ticket_public_url}</p>'
+					. '<hr />'
+					. '<p>{site_name}</p>',
 			),
 			'reply_to_customer'          => array(
 				'subject' => __( 'Re: {ticket_title}', 'doublescale' ),
-				'body'    => '{reply_content}',
+				'body'    => '<p>Hi <strong>{customer_full_name}</strong>,</p>'
+					. '<p>An agent just replied to your ticket "<strong>{ticket_title}</strong>" (<a href="{ticket_public_url}">#{ticket_id}</a>). To view his reply or add additional comments, click the button below:</p>'
+					. '<h4><a href="{ticket_public_url}">View Ticket</a></h4>'
+					. '<p>or follow this link: {ticket_public_url}</p>'
+					. '<hr />'
+					. '<p>Regards,<br />{site_name}</p>',
 			),
 			'status_change_to_customer'  => array(
 				'subject' => __( 'Your ticket "{ticket_title}" was marked {ticket_status}', 'doublescale' ),
-				'body'    => __( 'Hi {customer_first_name}, your support ticket has been marked {ticket_status}. Reply to this email if you still need help and we will re-open it.', 'doublescale' ),
+				'body'    => '<p>Hi <strong>{customer_full_name}</strong>,</p>'
+					. '<p>Your ticket - {ticket_title}</p>'
+					. '<p>We hope that the ticket was resolved to your satisfaction. If you feel that the ticket should not be closed or if the ticket has not been resolved, please reopen the ticket (<a href="{ticket_public_url}">#{ticket_id}</a>)</p>'
+					. '<p>Regards,<br />{site_name}</p>',
 			),
 		);
 	}
@@ -562,10 +586,12 @@ final class EmailNotifications {
 	private function tokens( TicketModel $ticket, array $extra = array() ): array {
 		$base = array(
 			'customer_first_name' => $this->customer_first_name( $ticket ),
+			'customer_full_name'  => $this->customer_full_name( $ticket ),
 			'customer_email'      => $this->customer_email( $ticket ),
 			'ticket_title'        => (string) $ticket->title,
 			'ticket_id'           => (string) $ticket->id,
 			'ticket_status'       => TicketStatus::get_label( (string) $ticket->status ),
+			'ticket_public_url'   => PortalUrl::get_public_ticket_url( $ticket ),
 			'site_name'           => (string) get_bloginfo( 'name' ),
 			'reply_content'       => '',
 		);
@@ -617,6 +643,30 @@ final class EmailNotifications {
 		$contact = $ticket->contact;
 		$first   = $contact ? trim( (string) $contact->first_name ) : '';
 		return '' !== $first ? $first : __( 'there', 'doublescale' );
+	}
+
+	/**
+	 * The customer's full name (first + last), with sensible fallbacks.
+	 *
+	 * @param TicketModel $ticket Ticket.
+	 * @return string
+	 */
+	private function customer_full_name( TicketModel $ticket ): string {
+		$contact = $ticket->contact;
+		if ( ! $contact ) {
+			return __( 'there', 'doublescale' );
+		}
+
+		$name = trim( (string) ( $contact->first_name ?? '' ) . ' ' . (string) ( $contact->last_name ?? '' ) );
+		if ( '' !== $name ) {
+			return $name;
+		}
+
+		if ( ! empty( $contact->email ) ) {
+			return (string) $contact->email;
+		}
+
+		return __( 'there', 'doublescale' );
 	}
 
 	/**

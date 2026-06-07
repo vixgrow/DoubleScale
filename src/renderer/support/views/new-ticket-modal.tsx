@@ -13,8 +13,18 @@ import { X, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
+import {
+	PortalNewTicketCustomFieldsBlock,
+	preparePortalNewTicketCustomData,
+} from '@doublescale-pro/support-portal-custom-fields';
+
 import { createPortalTicket, usePortalMailboxes } from '../api';
-import type { PortalTicket } from '../types';
+import type { PortalConfig, PortalTicket } from '../types';
+import type { SupportCustomFieldDefinition } from '@/types/support';
+
+const portalConfig = window.doublescale_support_portal_config as
+	| PortalConfig
+	| undefined;
 
 interface Props {
 	onClose: () => void;
@@ -27,8 +37,15 @@ interface Props {
 
 const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const mailboxes = usePortalMailboxes();
+	const [customFieldDefs, setCustomFieldDefs] = useState<
+		SupportCustomFieldDefinition[]
+	>([]);
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
+	const [customData, setCustomData] = useState<Record<string, unknown>>({});
+	const [customFieldsErrors, setCustomFieldsErrors] = useState<
+		Record<string, string>
+	>({});
 	// Default to the shortcode-scoped mailbox when present so the locked portal
 	// routes the ticket there; otherwise let the customer choose (or the server
 	// auto-select).
@@ -41,6 +58,28 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 			setError(__('Please fill in both title and message.', 'doublescale'));
 			return;
 		}
+
+		const { payload: customDataPayload, errors: customFieldValidationErrors } =
+			preparePortalNewTicketCustomData(
+				'portal',
+				customFieldDefs,
+				customData,
+				{
+					ticket_title: title,
+					ticket_content: content,
+				}
+			);
+		if (Object.keys(customFieldValidationErrors).length > 0) {
+			setCustomFieldsErrors(customFieldValidationErrors);
+			setError(
+				__(
+					'Please fill in all required custom fields.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
 		setSubmitting(true);
 		setError(null);
 		try {
@@ -48,6 +87,10 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 				title: title.trim(),
 				content: content.trim(),
 				mailbox_id: mailboxId,
+				custom_data:
+					Object.keys(customDataPayload).length > 0
+						? customDataPayload
+						: undefined,
 			});
 			onCreated(ticket);
 		} catch (e) {
@@ -138,6 +181,21 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 								))}
 							</select>
 						</div>
+					)}
+
+					{portalConfig?.custom_fields_enabled && (
+						<PortalNewTicketCustomFieldsBlock
+							scope="portal"
+							context={{
+								title,
+								content,
+							}}
+							customData={customData}
+							onCustomDataChange={setCustomData}
+							errors={customFieldsErrors}
+							onErrorsChange={setCustomFieldsErrors}
+							onDefinitionsChange={setCustomFieldDefs}
+						/>
 					)}
 
 					<div>

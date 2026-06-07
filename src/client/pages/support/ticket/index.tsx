@@ -8,6 +8,7 @@
 
 import React, { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { Trash2 } from 'lucide-react';
 
 import { useNavigate, getToLink, useParams } from '@doublescale/navigation';
@@ -17,6 +18,7 @@ import {
 	useTicket,
 	useConversation,
 	useAssignableAgents,
+	useMailboxes,
 	addReply,
 	addNote,
 	updateTicket,
@@ -160,6 +162,7 @@ const SupportTicketDetail: React.FC = () => {
 	const { data: conversation, refetch: refetchConversation } =
 		useConversation(ticketId);
 	const { data: assignableAgents } = useAssignableAgents();
+	const { data: mailboxes } = useMailboxes();
 	const canManageAllTickets = useCapabilities().canManageAllTickets();
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
@@ -175,7 +178,6 @@ const SupportTicketDetail: React.FC = () => {
 	// won't collide with real activity row ids.
 	const [pendingItems, setPendingItems] = useState<ConversationItem[]>([]);
 	const [deleting, setDeleting] = useState(false);
-
 	if (!ticketId) {
 		return (
 			<div className="p-6 text-gray-600">
@@ -327,6 +329,13 @@ const SupportTicketDetail: React.FC = () => {
 		refetchConversation();
 	};
 
+	const handleMailboxChange = async (rawValue: string) => {
+		const mailbox_id = rawValue === '' ? null : Number(rawValue);
+		await updateTicket(ticketId, { mailbox_id });
+		refetchTicket();
+		refetchConversation();
+	};
+
 	return (
 		<div className="doublescale-support-ticket p-6 max-w-5xl">
 			<div className="flex items-center justify-between mb-4">
@@ -399,11 +408,17 @@ const SupportTicketDetail: React.FC = () => {
 							{__('Mailbox', 'doublescale')}
 						</div>
 						<div className="text-gray-900">
-							{ticket.mailbox?.name || ticket.mailbox?.slug || (
-								<span className="text-gray-500">
-									{__('(none)', 'doublescale')}
-								</span>
-							)}
+							<select
+								value={ticket.mailbox_id ?? ''}
+								onChange={(e) => handleMailboxChange(e.target.value)}
+								className="border rounded px-2 py-1 text-sm w-full max-w-[12rem]"
+							>
+								{mailboxes.map((mailbox) => (
+									<option key={mailbox.id} value={mailbox.id}>
+										{mailbox.name || mailbox.slug}
+									</option>
+								))}
+							</select>
 						</div>
 					</div>
 					<div>
@@ -483,6 +498,20 @@ const SupportTicketDetail: React.FC = () => {
 						</select>
 					</label>
 				</div>
+
+				{
+					applyFilters(
+						'doublescale_support_ticket_detail_custom_fields',
+						null,
+						{
+							ticketId,
+							ticket,
+							onSaved: () => {
+								refetchTicket();
+							},
+						}
+					) as React.ReactNode
+				}
 			</div>
 
 			{/* Conversation thread */}

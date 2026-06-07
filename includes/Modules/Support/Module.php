@@ -145,6 +145,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestMailboxController::class,
 			Rest\Controllers\RestPortalController::class,
 			Rest\Controllers\RestAttachmentController::class,
+			Rest\Controllers\RestGuestController::class,
 		);
 	}
 

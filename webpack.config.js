@@ -6,8 +6,22 @@ const RtlCssPlugin = require('rtlcss-webpack-plugin');
 
 const webpack = require('webpack');
 
+const fs = require('fs');
 const path = require('path');
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+
+const proSupportPortalCustomFields = path.resolve(
+	__dirname,
+	'../doublescale-pro/src/renderer/support/portal-new-ticket-custom-fields.tsx'
+);
+const supportPortalCustomFieldsAlias = fs.existsSync(
+	proSupportPortalCustomFields
+)
+	? proSupportPortalCustomFields
+	: path.resolve(
+			__dirname,
+			'src/renderer/support/portal-custom-fields-stub.ts'
+		);
 
 /**
  * Aliases used by both the admin SPA build and the public booking renderer.
@@ -283,7 +297,15 @@ const supportRendererConfig = {
 	resolve: {
 		...defaultConfig.resolve,
 		extensions: ['.tsx', '.ts', '.js'],
-		alias: sharedAlias,
+		alias: {
+			...sharedAlias,
+			'@doublescale-pro/support-portal-custom-fields':
+				supportPortalCustomFieldsAlias,
+			'@pro/client': path.resolve(
+				__dirname,
+				'../doublescale-pro/src/client'
+			),
+		},
 		fallback: sharedFallback,
 	},
 	plugins: [

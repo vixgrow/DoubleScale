@@ -2,9 +2,10 @@
  * Support module page registration.
  *
  * Mirrors `src/client/pages/booking/index.tsx`. Three pages today:
- *   - support               → inbox (list view)
- *   - support/ticket/:id    → ticket detail (hidden in sidebar; routed via row click)
- *   - support/mailboxes     → mailbox channels and per-mailbox notifications
+ *   - support                  → inbox (list view)
+ *   - support/ticket/:id       → ticket detail (hidden in sidebar; routed via row click)
+ *   - support/mailboxes        → mailbox channels and per-mailbox notifications
+ *   - support/custom-fields    → ticket custom fields (Pro; free shows upsell)
  *
  * All pages are gated by `requiresModule: 'support'` so they disappear from
  * the registry the moment the module is toggled off via Settings → Modules.
@@ -30,6 +31,7 @@ const TicketDetail = lazy(() => import('./ticket'));
 // The Mailboxes page lives under the Support tree as a `support/*` route. Lazy
 // so it only loads when an admin opens Support / Mailboxes.
 const Mailboxes = lazy(() => import('./mailboxes'));
+const CustomFields = lazy(() => import('./custom-fields'));
 
 const SupportPageSkeleton: React.FC = () => (
 	<div className="p-6 space-y-4">
@@ -93,6 +95,16 @@ registerAdminPage('support-mailboxes', {
 	// Support Agent) and admins. CRM Manager / Sales roles get NO access unless
 	// an admin also gives them a support role. The single flag below already
 	// folds in the admin (manage_options) check — see AdminConfig.
+	requiredCapability: ['doublescale_manage_support_settings'],
+	requiresModule: 'support',
+});
+
+registerAdminPage('support-custom-fields', {
+	path: 'support/custom-fields',
+	component: wrap(CustomFields),
+	label: __('Custom fields', 'doublescale'),
+	hidden: true,
+	icon: <SupportIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_manage_support_settings'],
 	requiresModule: 'support',
 });

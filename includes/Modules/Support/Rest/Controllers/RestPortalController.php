@@ -408,6 +408,10 @@ class RestPortalController extends RestController {
 			}
 		}
 
+		if ( ! empty( $params['custom_data'] ) && is_array( $params['custom_data'] ) ) {
+			$create_data['custom_data']         = $params['custom_data'];
+			$create_data['custom_fields_scope'] = 'portal';
+		}
 		if ( ! empty( $params['attachment_hashes'] ) && is_array( $params['attachment_hashes'] ) ) {
 			$create_data['attachment_hashes'] = $params['attachment_hashes'];
 		}
@@ -617,12 +621,15 @@ class RestPortalController extends RestController {
 	 * @return array
 	 */
 	private function shape_portal_ticket( TicketModel $ticket ): array {
+		$custom_data = is_array( $ticket->custom_data ) ? $ticket->custom_data : array();
 		return array(
 			'id'             => (int) $ticket->id,
 			'title'          => (string) $ticket->title,
 			'status'         => (string) $ticket->status,
 			'priority'       => (string) $ticket->priority,
 			'response_count' => (int) $ticket->response_count,
+			'custom_data'    => $custom_data,
+			'custom_fields'  => self::render_custom_fields( $custom_data ),
 			'mailbox'        => $ticket->mailbox ? array(
 				'name' => $ticket->mailbox->name,
 			) : null,
@@ -694,5 +701,17 @@ class RestPortalController extends RestController {
 			return $override;
 		}
 		return new TicketService( new ContactResolver() );
+	}
+
+	/**
+	 * @param array<string, mixed> $custom_data Stored ticket custom_data.
+	 * @return array<string, mixed>
+	 */
+	private static function render_custom_fields( array $custom_data ): array {
+		$class = '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService';
+		if ( ! class_exists( $class ) ) {
+			return array();
+		}
+		return ( new $class() )->render( $custom_data );
 	}
 }

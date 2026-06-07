@@ -653,6 +653,86 @@ class Settings {
 	}
 
 	/**
+	 * Whether a support mailbox carries a usable custom-IMAP block.
+	 *
+	 * The custom-IMAP counterpart to {@see is_from_email_receivable()}: where that
+	 * answers "is the From address a Gmail/Outlook OAuth account?", this answers
+	 * "did the operator supply manual IMAP credentials on this mailbox?". Together
+	 * they decide whether a `box_type='email'` mailbox is receive-capable.
+	 *
+	 * Cheap and side-effect-free — pure presence check on the decoded `data` blob,
+	 * no network and no decrypt (it never touches the password's plaintext, only
+	 * that a non-empty value exists). Safe on the hot Support settings read path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Decoded mailbox `data` blob (the MailboxModel data accessor output).
+	 * @return bool True when host, username, and password are all present under `data.imap`.
+	 */
+	public static function mailbox_has_custom_imap( $data ) {
+		$imap = ( is_array( $data ) && isset( $data['imap'] ) && is_array( $data['imap'] ) ) ? $data['imap'] : array();
+
+		return '' !== trim( (string) ( $imap['host'] ?? '' ) )
+			&& '' !== trim( (string) ( $imap['username'] ?? '' ) )
+			&& '' !== (string) ( $imap['password'] ?? '' );
+	}
+
+	/**
+	 * Build a ready-to-poll IMAP config from a support mailbox's custom-IMAP block.
+	 *
+	 * The manual-credentials counterpart to {@see get_support_imap_config_for_email()}:
+	 * used by the Pro per-mailbox poller as the FALLBACK when the From address does
+	 * not resolve to a Gmail/Outlook OAuth account. Reads `data.imap`
+	 * (host/port/encryption/username/password) and returns the same six-key shape
+	 * the OAuth path returns, but with `authentication='login'` (basic IMAP auth,
+	 * not XOAUTH2) — the exact shape {@see \DoubleScale\Modules\Tracking\ImapClient}
+	 * expects, mirroring the Inbox module's custom path
+	 * ({@see \DoubleScale\Pro\Modules\Inbox\Oauth\UserEmailPoller::create_imap_client_for_user()}).
+	 *
+	 * The stored password is encrypted at rest ({@see \DoubleScale\Core\Settings\Settings::encrypt_value()});
+	 * this DECRYPTS it for the poll. `decrypt_value()` returns its input unchanged
+	 * on failure (e.g. SECURE_AUTH_KEY rotated), so a corrupt secret surfaces as an
+	 * IMAP login failure the caller already guards and logs — never a fatal here.
+	 * Call from the poll path only, never from a REST/list path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Decoded mailbox `data` blob.
+	 * @return array<string, mixed>|null Config (host/port/username/password/encryption/authentication),
+	 *               or null when the custom-IMAP block is incomplete.
+	 */
+	public static function build_custom_imap_config( $data ) {
+		if ( ! self::mailbox_has_custom_imap( $data ) ) {
+			return null;
+		}
+
+		$imap     = $data['imap'];
+		$password = (string) $imap['password'];
+		if ( class_exists( '\DoubleScale\Core\Settings\Settings' ) ) {
+			$password = \DoubleScale\Core\Settings\Settings::decrypt_value( $password );
+		}
+
+		$encryption = strtolower( trim( (string) ( $imap['encryption'] ?? 'ssl' ) ) );
+		if ( ! in_array( $encryption, array( 'ssl', 'tls', 'none' ), true ) ) {
+			$encryption = 'ssl';
+		}
+
+		$port = (int) ( $imap['port'] ?? 0 );
+		if ( $port <= 0 ) {
+			$port = 993;
+		}
+
+		return array(
+			'host'           => trim( (string) $imap['host'] ),
+			'port'           => $port,
+			'username'       => trim( (string) $imap['username'] ),
+			'password'       => $password,
+			'encryption'     => $encryption,
+			'authentication' => 'login',
+		);
+	}
+
+	/**
 	 * Resolve a From address to the SMTP connection id that sends from it, so a
 	 * support notification can pin delivery to that exact connection (the
 	 * `doublescale_smtp_explicit_connection` route in

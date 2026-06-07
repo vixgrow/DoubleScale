@@ -150,9 +150,14 @@ final class EmailNotifications {
 					$attachments = ( new AttachmentService() )->absolute_paths_for_activity( (int) $activity->id );
 				}
 
+				// CC the recipients the agent added on THIS reply. The list was
+				// validated and stored on the activity by TicketService::add_reply;
+				// dispatch() puts it on the outbound Cc: header.
+				$cc = isset( $data['cc'] ) && is_array( $data['cc'] ) ? $data['cc'] : array();
+
 				// From is the mailbox's sending identity (not the agent's) — see
 				// dispatch() / sender_identity().
-				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ), $attachments );
+				$this->dispatch( $t, $email, $subject, $this->wrap_body( $t, $inner ), $attachments, $cc );
 			}
 		);
 	}
@@ -207,13 +212,15 @@ final class EmailNotifications {
 	 * Build an {@see Emails} instance with the mailbox sender identity and send,
 	 * pinning delivery to that mailbox's own SMTP connection.
 	 *
-	 * @param TicketModel $ticket  Ticket — supplies the mailbox sending identity and logging context.
-	 * @param string      $to      Recipient email.
-	 * @param string      $subject Subject line.
-	 * @param string      $body    HTML body.
+	 * @param TicketModel $ticket      Ticket — supplies the mailbox sending identity and logging context.
+	 * @param string      $to          Recipient email.
+	 * @param string      $subject     Subject line.
+	 * @param string      $body        HTML body.
+	 * @param array       $attachments Absolute file paths to attach.
+	 * @param string[]    $cc          CC recipients for this message (already validated upstream).
 	 * @return void
 	 */
-	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body, array $attachments = array() ): void {
+	private function dispatch( TicketModel $ticket, string $to, string $subject, string $body, array $attachments = array(), array $cc = array() ): void {
 		$identity = $this->sender_identity( $ticket );
 
 		// No resolvable sending identity on the mailbox → do NOT send. A support
@@ -286,6 +293,13 @@ final class EmailNotifications {
 		// (the last-ditch fallback) has something to read when every header and
 		// the plus-address have been stripped by an intermediary.
 		$subject = $this->ensure_ticket_tag( $subject, (int) $ticket->id );
+
+		// CC recipients for this message. Emails::get_cc() validates each address
+		// again and builds the Cc: header; an empty list leaves $emails->cc at its
+		// `false` default so no header is emitted.
+		if ( ! empty( $cc ) ) {
+			$emails->cc = implode( ',', $cc );
+		}
 
 		// Pin delivery to the mailbox's OWN connection. Emails::send() routes
 		// through the SMTP module's PHPMailerOverride, which reads this filter via
@@ -610,8 +624,9 @@ final class EmailNotifications {
 	 *
 	 * Kept intentionally simple — the booking module renders richer templated
 	 * emails; support's outbound is plain so it reads well in any client. The
-	 * content is already `wp_kses_post`-sanitised upstream by TicketService (or
-	 * by the notification-template sanitiser for operator bodies).
+	 * content is already `wp_kses_post`-sanitised at write time by
+	 * {@see TicketService::sanitize_content()} (or, for operator bodies, by the
+	 * notification-template sanitiser).
 	 *
 	 * @param TicketModel $ticket Ticket (reserved for future templating / footer).
 	 * @param string      $inner  Inner HTML/body content.

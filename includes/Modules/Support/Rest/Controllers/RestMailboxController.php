@@ -71,7 +71,10 @@ class RestMailboxController extends RestController {
 	/**
 	 * Allowed `box_type` values. `web` accepts tickets via portal/forms only;
 	 * `email` is the "web + email" superset that additionally accepts inbound
-	 * email (Pro's InboundTicketRouter matches `to_email` against `email`).
+	 * email. Inbound is polled per-mailbox over IMAP (Pro's MailboxImapPoller)
+	 * using either the From address's Gmail/Outlook OAuth credentials OR the
+	 * mailbox's own custom-IMAP block; forwarded mail into the CRM inbox
+	 * (InboundTicketRouter matching `to_email` against `email`) remains a fallback.
 	 *
 	 * @var string[]
 	 */
@@ -131,6 +134,21 @@ class RestMailboxController extends RestController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'move_tickets' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Custom-IMAP connection test for the email-channel editor. No {id} in the
+		// path: the editor tests credentials being typed BEFORE the mailbox is
+		// saved (an `id` may be supplied in the body to resolve a masked password).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/test-imap',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'test_imap_connection' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				),
 			)
 		);
@@ -334,7 +352,7 @@ class RestMailboxController extends RestController {
 			return $validation;
 		}
 
-		$attributes = $this->extract_writable( $params );
+		$attributes = $this->extract_writable( $params, null );
 
 		try {
 			$mailbox = new MailboxModel();
@@ -380,7 +398,7 @@ class RestMailboxController extends RestController {
 			return $validation;
 		}
 
-		$attributes = $this->extract_writable( $params );
+		$attributes = $this->extract_writable( $params, $mailbox );
 
 		try {
 			foreach ( $attributes as $key => $value ) {
@@ -560,6 +578,123 @@ class RestMailboxController extends RestController {
 		return new WP_REST_Response( array( 'moved' => (int) $moved ), 200 );
 	}
 
+	/**
+	 * Test a custom-IMAP connection for the email-channel editor.
+	 *
+	 * Mirrors {@see \DoubleScale\Core\Settings\Rest\RestSettingsControllerPro::test_custom_imap_connection()}:
+	 * opens a `login`-auth {@see \DoubleScale\Modules\Tracking\ImapClient}, counts
+	 * recent unseen mail (today onward — a full UNSEEN count is misleading on inboxes
+	 * with a large read-but-unflagged backlog), and disconnects. Always returns HTTP
+	 * 200 with `{ success, message, unseen_count }` so the editor can render the
+	 * outcome inline (a failed connection is a 200 with `success:false`, not a 5xx).
+	 *
+	 * The password follows the masked-credential convention: '********' with an `id`
+	 * in the body resolves (and decrypts) the stored password for that mailbox, so
+	 * the operator can re-test a saved box without re-typing the secret.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function test_imap_connection( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		if ( ! class_exists( '\DoubleScale\Modules\Tracking\ImapClient' ) ) {
+			// ImapClient ships in the Tracking module (bundled with Pro). Without it
+			// there is no transport to test against.
+			return new WP_Error(
+				'imap_client_unavailable',
+				__( 'IMAP testing requires DoubleScale Pro.', 'doublescale' ),
+				array( 'status' => 501 )
+			);
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$host       = sanitize_text_field( (string) ( $params['host'] ?? '' ) );
+		$username   = sanitize_text_field( (string) ( $params['username'] ?? '' ) );
+		$encryption = strtolower( trim( (string) ( $params['encryption'] ?? 'ssl' ) ) );
+		if ( ! in_array( $encryption, array( 'ssl', 'tls', 'none' ), true ) ) {
+			$encryption = 'ssl';
+		}
+		$port = (int) ( $params['port'] ?? 0 );
+		if ( $port <= 0 ) {
+			$port = 993;
+		}
+
+		// Resolve the password: '********' + id → decrypt the stored value; otherwise
+		// use the submitted plaintext as-is.
+		$password = (string) ( $params['password'] ?? '' );
+		if ( '********' === $password ) {
+			$password = $this->stored_imap_password( isset( $params['id'] ) ? (int) $params['id'] : 0 );
+		}
+
+		if ( '' === $host || '' === $username || '' === $password ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'Please provide host, username, and password.', 'doublescale' ),
+				),
+				200
+			);
+		}
+
+		try {
+			$client = new \DoubleScale\Modules\Tracking\ImapClient( $host, $port, $username, $password, $encryption, 'login' );
+			$client->connect();
+			$unseen_count = $client->count_unseen( gmdate( 'Y-m-d' ) );
+			$client->disconnect();
+
+			return new WP_REST_Response(
+				array(
+					'success'      => true,
+					'message'      => sprintf(
+						/* translators: %d: number of recent unseen emails */
+						__( 'Connected successfully. Found %d new unseen email(s) today.', 'doublescale' ),
+						$unseen_count
+					),
+					'unseen_count' => $unseen_count,
+				),
+				200
+			);
+		} catch ( \Throwable $e ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => $e->getMessage(),
+				),
+				200
+			);
+		}
+	}
+
+	/**
+	 * Resolve and decrypt a mailbox's stored custom-IMAP password (for masked
+	 * re-tests). Returns '' when the id is unknown or no password is stored.
+	 *
+	 * @param int $mailbox_id Mailbox id from the test request body.
+	 * @return string Decrypted password, or ''.
+	 */
+	private function stored_imap_password( int $mailbox_id ): string {
+		if ( $mailbox_id <= 0 ) {
+			return '';
+		}
+		$mailbox = MailboxModel::find( $mailbox_id );
+		if ( ! $mailbox || ! is_array( $mailbox->data ) || ! isset( $mailbox->data['imap']['password'] ) ) {
+			return '';
+		}
+		$stored = (string) $mailbox->data['imap']['password'];
+		if ( '' === $stored || ! class_exists( '\DoubleScale\Core\Settings\Settings' ) ) {
+			return $stored;
+		}
+		return \DoubleScale\Core\Settings\Settings::decrypt_value( $stored );
+	}
+
 	// ---------------------------------------------------------------------
 	// Permission checks
 	// ---------------------------------------------------------------------
@@ -664,13 +799,21 @@ class RestMailboxController extends RestController {
 	}
 
 	/**
-	 * Reject a `box_type='email'` mailbox bound to a send-only connection.
+	 * Reject a `box_type='email'` mailbox that has no way to receive.
 	 *
-	 * Inbound is polled over IMAP using the connection's own OAuth credentials
-	 * (Pro's MailboxImapPoller), so only Gmail/Outlook-connected accounts can
-	 * receive. The effective box_type and from_email fall back to the existing
-	 * row for partial updates, so flipping a web box to email — or re-pointing an
-	 * email box at a send-only connection — is caught even with a partial body.
+	 * Inbound is polled over IMAP (Pro's MailboxImapPoller) by one of two routes,
+	 * either is enough to make a box receive-capable:
+	 *   1. the From address is a Gmail/Outlook OAuth account (polled via its own
+	 *      OAuth credentials); OR
+	 *   2. the mailbox carries a complete custom-IMAP block
+	 *      (`data.imap.host`/`username`/`password`) polled with basic `login` auth.
+	 *
+	 * Effective box_type and the custom-IMAP block fall back to the existing row
+	 * for partial updates, so flipping a web box to email — or clearing the IMAP
+	 * block on an email box bound to a non-OAuth address — is caught even with a
+	 * partial body. The merged `data` (existing overlaid with the payload) is what
+	 * we test, so a PUT that only sends `data.imap.password` still validates against
+	 * the host/username already stored.
 	 *
 	 * @param array             $params   Request body.
 	 * @param MailboxModel|null $existing Row being updated (null on create).
@@ -695,15 +838,56 @@ class RestMailboxController extends RestController {
 				: '';
 		}
 
-		if ( '' === $from_email || ! $this->from_email_is_receivable( $from_email ) ) {
-			return new WP_Error(
-				'connection_not_receivable',
-				__( 'Email channels receive over IMAP, which requires a Gmail or Outlook–connected account. Choose a receive-capable From address, or use a Web channel.', 'doublescale' ),
-				array( 'status' => 400 )
-			);
+		// Route 1: a receive-capable (Gmail/Outlook OAuth) From address.
+		if ( '' !== $from_email && $this->from_email_is_receivable( $from_email ) ) {
+			return true;
 		}
 
-		return true;
+		// Route 2: a complete custom-IMAP block. Merge the existing row's data with
+		// the payload so a partial update is judged on the EFFECTIVE block.
+		if ( $this->effective_data_has_custom_imap( $params, $existing ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'connection_not_receivable',
+			__( 'Email channels receive over IMAP. Use a Gmail or Outlook–connected From address, enter custom IMAP details below, or use a Web channel instead.', 'doublescale' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * Whether the EFFECTIVE mailbox data (existing row overlaid with the request
+	 * body) carries a usable custom-IMAP block. Lets a partial PUT that only
+	 * touches one IMAP sub-field still validate against the rest of the stored
+	 * block. Delegates the presence rule to the single source of truth in
+	 * {@see \DoubleScale\Modules\Smtp\Settings::mailbox_has_custom_imap()}.
+	 *
+	 * @param array             $params   Request body.
+	 * @param MailboxModel|null $existing Row being updated (null on create).
+	 * @return bool
+	 */
+	private function effective_data_has_custom_imap( array $params, ?MailboxModel $existing ): bool {
+		if ( ! class_exists( '\DoubleScale\Modules\Smtp\Settings' ) ) {
+			return false;
+		}
+
+		$existing_data = ( $existing && is_array( $existing->data ) ) ? $existing->data : array();
+		$payload_data  = isset( $params['data'] ) && is_array( $params['data'] ) ? $params['data'] : array();
+
+		$existing_imap = isset( $existing_data['imap'] ) && is_array( $existing_data['imap'] ) ? $existing_data['imap'] : array();
+		$payload_imap  = isset( $payload_data['imap'] ) && is_array( $payload_data['imap'] ) ? $payload_data['imap'] : array();
+
+		// A masked password in the payload means "keep the stored one" — substitute
+		// a non-empty marker so the presence check passes (the real value is resolved
+		// at save time in sanitize_imap()).
+		if ( isset( $payload_imap['password'] ) && '********' === (string) $payload_imap['password'] ) {
+			$payload_imap['password'] = isset( $existing_imap['password'] ) ? $existing_imap['password'] : '';
+		}
+
+		$effective = array( 'imap' => array_merge( $existing_imap, $payload_imap ) );
+
+		return \DoubleScale\Modules\Smtp\Settings::mailbox_has_custom_imap( $effective );
 	}
 
 	/**
@@ -773,10 +957,12 @@ class RestMailboxController extends RestController {
 	 * Filter a request body down to writable columns. Anything else is dropped
 	 * — defends against mass-assignment of timestamps / id / etc.
 	 *
-	 * @param array $params Raw request body.
+	 * @param array             $params   Raw request body.
+	 * @param MailboxModel|null $existing Row being updated (null on create), so the
+	 *                                    `data.imap` sanitiser can preserve a masked password.
 	 * @return array
 	 */
-	private function extract_writable( array $params ): array {
+	private function extract_writable( array $params, ?MailboxModel $existing ): array {
 		$out = array();
 		foreach ( self::WRITABLE_FIELDS as $field ) {
 			if ( array_key_exists( $field, $params ) ) {
@@ -791,11 +977,11 @@ class RestMailboxController extends RestController {
 			$out['slug'] = sanitize_title( (string) $out['slug'] );
 		}
 		// `data` is a JSON blob — sanitise its known keys (name, identity,
-		// per-event notification templates). Unknown/Pro keys pass through
-		// untouched. `email` is intentionally absent: the model mirrors it from
-		// `identity.from_email`, it is never client-supplied.
+		// per-event notification templates, custom IMAP). Unknown/Pro keys pass
+		// through untouched. `email` is intentionally absent: the model mirrors it
+		// from `identity.from_email`, it is never client-supplied.
 		if ( isset( $out['data'] ) && is_array( $out['data'] ) ) {
-			$out['data'] = $this->sanitize_data( $out['data'] );
+			$out['data'] = $this->sanitize_data( $out['data'], $existing );
 		}
 
 		return $out;
@@ -810,11 +996,14 @@ class RestMailboxController extends RestController {
 	 *   - identity.from_email   → email (the only identity sub-key kept; From
 	 *                             Name / Reply-To are derived at send, not stored)
 	 *   - notifications.<event> → { enabled:bool, subject:text, body:wp_kses_post }
+	 *   - imap                  → { host, port, encryption, username, password }
+	 *                             password ENCRYPTED at rest (see sanitize_imap())
 	 *
-	 * @param array $data Decoded `data` from the request.
+	 * @param array             $data     Decoded `data` from the request.
+	 * @param MailboxModel|null $existing Row being updated (null on create).
 	 * @return array
 	 */
-	private function sanitize_data( array $data ): array {
+	private function sanitize_data( array $data, ?MailboxModel $existing = null ): array {
 		$out = $data;
 
 		if ( isset( $out['name'] ) ) {
@@ -833,7 +1022,82 @@ class RestMailboxController extends RestController {
 			$out['notifications'] = $this->sanitize_notifications( $out['notifications'] );
 		}
 
+		// Custom-IMAP credentials. Explicitly sanitised (not left to the
+		// pass-through rule) because the blob carries a password: it must be
+		// type-cleaned, encrypted at rest, and never echoed back (see
+		// shape_mailbox()). An empty/blank block is dropped so a web box doesn't
+		// keep dangling IMAP keys.
+		if ( array_key_exists( 'imap', $out ) ) {
+			$clean_imap = $this->sanitize_imap( is_array( $out['imap'] ) ? $out['imap'] : array(), $existing );
+			if ( array() === $clean_imap ) {
+				unset( $out['imap'] );
+			} else {
+				$out['imap'] = $clean_imap;
+			}
+		}
+
 		return $out;
+	}
+
+	/**
+	 * Sanitise the custom-IMAP block and ENCRYPT the password at rest.
+	 *
+	 *   - host       → text
+	 *   - port       → int (default 993)
+	 *   - encryption → whitelist ssl|tls|none (default ssl)
+	 *   - username   → text
+	 *   - password   → encrypted via {@see \DoubleScale\Core\Settings\Settings::encrypt_value()}.
+	 *                  The sentinel '********' means "keep the stored value": we copy
+	 *                  the existing row's already-encrypted password unchanged. A
+	 *                  blank password drops to '' (the box then fails the receivability
+	 *                  gate, which is the intended signal that it isn't pollable).
+	 *
+	 * Returns array() for an entirely empty block so the caller can drop the key.
+	 *
+	 * @param array             $imap     Raw IMAP block from `data`.
+	 * @param MailboxModel|null $existing Row being updated (for masked-password preservation).
+	 * @return array{host:string,port:int,encryption:string,username:string,password:string}|array{}
+	 */
+	private function sanitize_imap( array $imap, ?MailboxModel $existing ): array {
+		$host       = sanitize_text_field( (string) ( $imap['host'] ?? '' ) );
+		$username   = sanitize_text_field( (string) ( $imap['username'] ?? '' ) );
+		$encryption = strtolower( trim( (string) ( $imap['encryption'] ?? 'ssl' ) ) );
+		if ( ! in_array( $encryption, array( 'ssl', 'tls', 'none' ), true ) ) {
+			$encryption = 'ssl';
+		}
+		$port = (int) ( $imap['port'] ?? 0 );
+		if ( $port <= 0 ) {
+			$port = 993;
+		}
+
+		// Resolve the password. '********' (or absent) preserves the stored
+		// (already-encrypted) value; anything else is new plaintext we encrypt now.
+		$existing_encrypted = '';
+		if ( $existing && is_array( $existing->data ) && isset( $existing->data['imap']['password'] ) ) {
+			$existing_encrypted = (string) $existing->data['imap']['password'];
+		}
+
+		$submitted = array_key_exists( 'password', $imap ) ? (string) $imap['password'] : '********';
+		if ( '********' === $submitted || '' === $submitted ) {
+			$password = '' === $submitted ? '' : $existing_encrypted;
+		} elseif ( class_exists( '\DoubleScale\Core\Settings\Settings' ) ) {
+			$password = \DoubleScale\Core\Settings\Settings::encrypt_value( $submitted );
+		} else {
+			$password = $submitted;
+		}
+
+		// Entirely empty block (no host/username/password) → drop it.
+		if ( '' === $host && '' === $username && '' === $password ) {
+			return array();
+		}
+
+		return array(
+			'host'       => $host,
+			'port'       => $port,
+			'encryption' => $encryption,
+			'username'   => $username,
+			'password'   => $password,
+		);
 	}
 
 	/**
@@ -874,6 +1138,14 @@ class RestMailboxController extends RestController {
 		$data = $mailbox->data;
 		if ( ! is_array( $data ) ) {
 			$data = array();
+		}
+
+		// Never expose the IMAP password (stored encrypted). Replace any stored
+		// value with the '********' sentinel the editor recognises as "unchanged";
+		// emit '' when no password is set so the field renders empty. Operate on the
+		// copy ($data), not the model, so nothing mutates in memory.
+		if ( isset( $data['imap'] ) && is_array( $data['imap'] ) ) {
+			$data['imap']['password'] = '' !== (string) ( $data['imap']['password'] ?? '' ) ? '********' : '';
 		}
 
 		return array(

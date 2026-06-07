@@ -195,6 +195,10 @@ class RestReplyController extends RestController {
 		}
 		unset( $params['ticket_id'] );
 
+		// Content + `cc` are sanitized/validated inside the service
+		// ({@see TicketService::sanitize_content()} / `sanitize_cc_list()`), which is
+		// the single choke point shared with the portal and inbound paths — do not
+		// re-sanitize here. The full param bag (including `cc`) is forwarded as-is.
 		$activity = $this->service()->add_reply( $ticket, (array) $params );
 		if ( is_wp_error( $activity ) ) {
 			return $activity;
@@ -315,7 +319,7 @@ class RestReplyController extends RestController {
 	 * `support_reply` → `'reply'`, etc., so frontend renderers can switch on a
 	 * short stable token without knowing the underlying activity type names.
 	 *
-	 * @param ActivityModel                             $activity Activity row.
+	 * @param ActivityModel                                $activity Activity row.
 	 * @param array<int, array<int, array<string, mixed>>> $attachments_map Attachments keyed by activity id.
 	 * @return array
 	 */
@@ -336,6 +340,10 @@ class RestReplyController extends RestController {
 			'contact_id' => $activity->contact_id ? (int) $activity->contact_id : null,
 			'user_id'    => $activity->user_id ? (int) $activity->user_id : null,
 			'data'       => $data,
+			// CC recipients on this reply (also present in `data.cc`); surfaced at
+			// the top level so the client renders the per-message Cc line without
+			// reaching into `data`.
+			'cc'         => isset( $data['cc'] ) && is_array( $data['cc'] ) ? array_values( $data['cc'] ) : array(),
 			'created_at' => $activity->created_at ? (string) $activity->created_at : null,
 			'updated_at' => $activity->updated_at ? (string) $activity->updated_at : null,
 		);
@@ -350,7 +358,7 @@ class RestReplyController extends RestController {
 			$payload['user'] = null;
 		}
 
-		$aid = (int) $activity->id;
+		$aid                    = (int) $activity->id;
 		$payload['attachments'] = isset( $attachments_map[ $aid ] ) ? $attachments_map[ $aid ] : array();
 
 		return $payload;

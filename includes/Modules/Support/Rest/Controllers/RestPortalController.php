@@ -442,6 +442,9 @@ class RestPortalController extends RestController {
 			$params = $request->get_params();
 		}
 
+		// TicketService::sanitize_content() is the authoritative sanitizer; this
+		// pass is a harmless second kses (it is idempotent) that lets the portal
+		// return a customer-friendly 400 for empty content before the service runs.
 		$content = isset( $params['content'] ) ? wp_kses_post( (string) $params['content'] ) : '';
 		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
 			return new WP_Error(
@@ -453,6 +456,8 @@ class RestPortalController extends RestController {
 
 		// Force `author_user_id = null` — customer replies are never attributed
 		// to an agent even if the WP user happens to also have an agent role.
+		// CC is intentionally NOT accepted from the portal: a customer-set Cc list
+		// is a spam/abuse vector. Outbound CC is an agent-only action (admin REST).
 		$reply_data = array(
 			'content'        => $content,
 			'source'         => 'web',
@@ -629,7 +634,7 @@ class RestPortalController extends RestController {
 	/**
 	 * Shape an activity row for the portal conversation view.
 	 *
-	 * @param ActivityModel                             $activity Activity row.
+	 * @param ActivityModel                                $activity Activity row.
 	 * @param array<int, array<int, array<string, mixed>>> $attachments_map Attachments keyed by activity id.
 	 * @return array
 	 */

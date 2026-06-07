@@ -68,6 +68,18 @@ interface MailboxIdentity {
 	from_email?: string;
 }
 
+// Custom-IMAP receive credentials for an email channel whose From address is NOT
+// a Gmail/Outlook OAuth account. Stored under `data.imap`; the password is
+// encrypted server-side and only ever arrives here masked as '********'. Hoisted
+// to a top-level `editing.imap` on load (like `identity`) and re-nested on save.
+interface MailboxImap {
+	host?: string;
+	port?: number;
+	encryption?: 'ssl' | 'tls' | 'none';
+	username?: string;
+	password?: string;
+}
+
 interface Mailbox {
 	id: number;
 	slug: string;
@@ -82,6 +94,7 @@ interface Mailbox {
 	// them flat.
 	identity?: MailboxIdentity;
 	notifications?: NotificationMap;
+	imap?: MailboxImap;
 }
 
 // meta.notification_defaults: event key → the built-in default { subject, body }.
@@ -387,6 +400,15 @@ const SupportMailboxes: React.FC = () => {
 					mb?.data && typeof mb.data === 'object'
 						? mb.data.identity
 						: undefined,
+				// Hoist custom-IMAP creds flat (password arrives masked). Same
+				// pattern as identity; re-nested under `data` on save.
+				imap:
+					mb?.data &&
+					typeof mb.data === 'object' &&
+					mb.data.imap &&
+					typeof mb.data.imap === 'object'
+						? mb.data.imap
+						: undefined,
 				notifications: seedTemplateMap(
 					mb?.data && typeof mb.data === 'object'
 						? mb.data.notifications
@@ -445,10 +467,21 @@ const SupportMailboxes: React.FC = () => {
 	);
 	const fromEmailIsKnownSender =
 		senderEmails.includes(fromEmail.toLowerCase()) || fromEmailReceivable;
+	// An email box can receive either via an OAuth From address OR via a complete
+	// custom-IMAP block (host + username + password). Mirrors the server-side
+	// receivability gate. The password may be the masked '********' sentinel for a
+	// saved box, which still counts as "present".
+	const hasCustomImap =
+		!!editing?.imap &&
+		String(editing.imap.host || '').trim() !== '' &&
+		String(editing.imap.username || '').trim() !== '' &&
+		String(editing.imap.password || '').trim() !== '';
 	// Identity (from_email) is the only From source, so it is required for every
-	// box. Email (IMAP) boxes additionally require a receive-capable address —
-	// mirror the server-side gate, case-insensitively.
-	const saveDisabled = !fromEmailValid || (isEmailBox && !fromEmailReceivable);
+	// box. Email (IMAP) boxes additionally require a receivable address OR custom
+	// IMAP credentials — mirror the server-side gate, case-insensitively.
+	const saveDisabled =
+		!fromEmailValid ||
+		(isEmailBox && !fromEmailReceivable && !hasCustomImap);
 
 	const handleSave = async () => {
 		if (!editing) {
@@ -471,6 +504,12 @@ const SupportMailboxes: React.FC = () => {
 						name: editing.name || '',
 						identity: { from_email: fromEmail },
 						notifications: editing.notifications || {},
+						// Re-nest the hoisted custom-IMAP block. Only sent for an
+						// email box that actually has one; a masked password rides
+						// through unchanged ('********' = keep stored, server-side).
+						...(boxType === 'email' && editing.imap
+							? { imap: editing.imap }
+							: {}),
 					},
 				},
 			});
@@ -836,7 +875,7 @@ const SupportMailboxes: React.FC = () => {
 													'doublescale'
 												)}
 												description={__(
-													"Create tickets from incoming email. Inbound is polled over IMAP using the From address's own credentials (a Gmail or Outlook-connected account). Available in DoubleScale Pro.",
+													'Create tickets from incoming email. Inbound is polled over IMAP using a Gmail or Outlook-connected account, or any mailbox via custom IMAP credentials. Available in DoubleScale Pro.',
 													'doublescale'
 												)}
 											/>,

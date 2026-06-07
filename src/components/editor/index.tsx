@@ -97,9 +97,22 @@ const theme = {
 interface EditorProps {
 	message: string;
 	onChange: (html: string) => void;
+	/**
+	 * Toolbar variant: `email` (default) is the full email-builder toolbar;
+	 * `support` is the slim text/link/list toolbar that pulls no admin-tree code,
+	 * safe for the public support portal bundle.
+	 */
+	variant?: 'email' | 'support';
+	/** Placeholder shown when the editor is empty. */
+	placeholder?: string;
 }
 
-function Editor({ message, onChange }: EditorProps) {
+function Editor({
+	message,
+	onChange,
+	variant = 'email',
+	placeholder = 'Enter content here...',
+}: EditorProps) {
 	const [editorActive, setEditorActive] = useState(false);
 	const [wordCount, setWordCount] = useState(0);
 	const initialLoadRef = useRef(true);
@@ -170,7 +183,7 @@ function Editor({ message, onChange }: EditorProps) {
 		<div className="email-body-editor">
 			<LexicalComposer initialConfig={initialConfig}>
 				<div className="editor-container">
-					<ToolbarPlugin />
+					<ToolbarPlugin variant={variant} />
 					<div className="editor-inner">
 						<RichTextPlugin
 							contentEditable={
@@ -182,7 +195,7 @@ function Editor({ message, onChange }: EditorProps) {
 							}
 							placeholder={
 								<div className="editor-placeholder">
-									Enter content here...
+									{placeholder}
 								</div>
 							}
 							ErrorBoundary={() => (

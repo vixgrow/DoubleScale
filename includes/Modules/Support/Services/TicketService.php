@@ -58,6 +58,12 @@ class TicketService {
 	);
 
 	/**
+	 * Maximum number of CC recipients accepted on a single reply. Caps the
+	 * outbound `Cc:` header length and bounds the accumulated ticket list.
+	 */
+	private const MAX_CC = 10;
+
+	/**
 	 * @var ContactResolver
 	 */
 	private $contact_resolver;
@@ -96,7 +102,7 @@ class TicketService {
 		if ( empty( $data['title'] ) || ! is_string( $data['title'] ) ) {
 			return new WP_Error( 'missing_title', __( 'Ticket title is required.', 'doublescale' ), array( 'status' => 400 ) );
 		}
-		$content = isset( $data['content'] ) ? (string) $data['content'] : '';
+		$content = $this->sanitize_content( $data['content'] ?? '' );
 		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
 			return new WP_Error( 'missing_content', __( 'Opening message content is required.', 'doublescale' ), array( 'status' => 400 ) );
 		}
@@ -212,7 +218,7 @@ class TicketService {
 			return $ticket;
 		}
 
-		$content = isset( $data['content'] ) ? (string) $data['content'] : '';
+		$content = $this->sanitize_content( $data['content'] ?? '' );
 		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
 			return new WP_Error( 'missing_content', __( 'Reply content is required.', 'doublescale' ), array( 'status' => 400 ) );
 		}
@@ -220,10 +226,19 @@ class TicketService {
 		$source = $this->normalize_source( $data['source'] ?? 'web' );
 		$author = $this->resolve_author_user_id( $data, $source );
 
+		// Per-reply CC: validated email list stored on the reply activity itself.
+		// Set BEFORE record_conversation_activity() so it is persisted in the
+		// activity's data before the doublescale_support_reply_created hook fires —
+		// EmailNotifications reads it off the activity to build the Cc: header.
+		$cc = $this->sanitize_cc_list( $data['cc'] ?? array() );
+
 		$activity_data = array(
 			'content' => $content,
 			'source'  => $source,
 		);
+		if ( ! empty( $cc ) ) {
+			$activity_data['cc'] = $cc;
+		}
 		foreach ( array( 'message_id', 'in_reply_to' ) as $key ) {
 			if ( ! empty( $data[ $key ] ) ) {
 				$activity_data[ $key ] = (string) $data[ $key ];
@@ -246,6 +261,13 @@ class TicketService {
 			// message goes through `record_conversation_activity` from
 			// `create_ticket()` without this call.
 			$ticket->increment( 'response_count' );
+
+			// Accumulate the union of every CC ever used on this ticket so the UI
+			// can show the full participant list. Only writes when this reply adds
+			// a new address — a CC-less reply (the common case) is a no-op.
+			if ( ! empty( $cc ) ) {
+				$this->accumulate_ticket_cc( $ticket, $cc );
+			}
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
 				'Support reply creation failed',
@@ -320,7 +342,7 @@ class TicketService {
 			return $ticket;
 		}
 
-		$content = isset( $data['content'] ) ? (string) $data['content'] : '';
+		$content = $this->sanitize_content( $data['content'] ?? '' );
 		if ( '' === trim( wp_strip_all_tags( $content ) ) ) {
 			return new WP_Error( 'missing_content', __( 'Note content is required.', 'doublescale' ), array( 'status' => 400 ) );
 		}
@@ -497,6 +519,99 @@ class TicketService {
 	// ---------------------------------------------------------------------
 	// Internals
 	// ---------------------------------------------------------------------
+
+	/**
+	 * Sanitize conversation body HTML for storage. This is the single choke point
+	 * for every path that writes a reply / note / opening message (admin REST,
+	 * customer portal REST, inbound email, CLI), so content is consistently run
+	 * through the WordPress post-content allow-list ({@see wp_kses_post()}) before
+	 * it is persisted and later rendered.
+	 *
+	 * `wp_unslash()` runs first: REST JSON bodies arrive already-unslashed (a
+	 * no-op here), but the form-encoded / CLI fallback paths are slashed, and
+	 * `wp_kses_post()` would otherwise double-encode pre-slashed entities. The
+	 * combination is idempotent, so a controller that already sanitized (the
+	 * portal) is unaffected.
+	 *
+	 * @param mixed $raw Raw content from the caller.
+	 * @return string Sanitized HTML.
+	 */
+	private function sanitize_content( $raw ): string {
+		return wp_kses_post( wp_unslash( (string) $raw ) );
+	}
+
+	/**
+	 * Validate + normalize a CC recipient list: keep only deliverable email
+	 * addresses, de-duplicate case-insensitively, and cap at {@see self::MAX_CC}.
+	 *
+	 * `sanitize_email()` strips characters not permitted in an address — including
+	 * CR/LF — so this is the primary guard against header injection through the
+	 * outbound `Cc:` line; {@see \DoubleScale\Modules\Emails\Emails::get_cc()}
+	 * re-validates each address as belt-and-braces.
+	 *
+	 * @param mixed $raw Raw value from the caller (expected array of strings).
+	 * @return string[] Clean, unique, capped list of email addresses.
+	 */
+	private function sanitize_cc_list( $raw ): array {
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $raw as $addr ) {
+			$clean = sanitize_email( (string) $addr );
+			if ( '' !== $clean && is_email( $clean ) ) {
+				// Key by lowercase form to de-dupe case-insensitively while
+				// preserving the first-seen casing as the stored value.
+				$key = strtolower( $clean );
+				if ( ! isset( $out[ $key ] ) ) {
+					$out[ $key ] = $clean;
+				}
+			}
+		}
+		return array_slice( array_values( $out ), 0, self::MAX_CC );
+	}
+
+	/**
+	 * Merge a reply's CC addresses into the ticket-level accumulated list
+	 * (`custom_data.cc_recipients`) — the union of everyone ever CC'd on the
+	 * ticket. Saves only when the union actually grows, so a repeated CC set is a
+	 * no-op write. Case-insensitive de-dupe; the result is re-capped at
+	 * {@see self::MAX_CC}.
+	 *
+	 * @param TicketModel $ticket Ticket to update.
+	 * @param string[]    $cc     Already-sanitized CC list from the reply.
+	 * @return void
+	 */
+	private function accumulate_ticket_cc( TicketModel $ticket, array $cc ): void {
+		$custom  = is_array( $ticket->custom_data ) ? $ticket->custom_data : array();
+		$current = isset( $custom['cc_recipients'] ) && is_array( $custom['cc_recipients'] )
+			? $custom['cc_recipients']
+			: array();
+
+		$merged = array();
+		foreach ( array_merge( $current, $cc ) as $addr ) {
+			$clean = sanitize_email( (string) $addr );
+			if ( '' === $clean ) {
+				continue;
+			}
+			$key = strtolower( $clean );
+			if ( ! isset( $merged[ $key ] ) ) {
+				$merged[ $key ] = $clean;
+			}
+		}
+		$merged = array_slice( array_values( $merged ), 0, self::MAX_CC );
+
+		// No new address → nothing to persist.
+		if ( count( $merged ) === count( $current )
+			&& array_map( 'strtolower', $merged ) === array_map( 'strtolower', $current )
+		) {
+			return;
+		}
+
+		$custom['cc_recipients'] = $merged;
+		$ticket->custom_data     = $custom;
+		$ticket->save();
+	}
 
 	/**
 	 * Persist the activity row + the ticket↔activity association in one place

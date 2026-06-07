@@ -444,11 +444,11 @@ class RestTicketController extends RestController {
 		unset( $params['id'] );
 
 		// Assignment rules:
-		//  - Managers (`doublescale_manage_all_tickets`) may assign to anyone.
-		//  - Non-managers (Support Agents, Sales Reps) may only assign to
-		//    themselves; any attempt to assign someone else is rejected so the
-		//    UI and API agree. Sending their own id (or omitting the field) is
-		//    fine and passes through unchanged.
+		// - Managers (`doublescale_manage_all_tickets`) may assign to anyone.
+		// - Non-managers (Support Agents, Sales Reps) may only assign to
+		// themselves; any attempt to assign someone else is rejected so the
+		// UI and API agree. Sending their own id (or omitting the field) is
+		// fine and passes through unchanged.
 		if ( ! Permissions::can_manage_all_tickets() && array_key_exists( 'agent_user_id', $params ) ) {
 			if ( (int) $params['agent_user_id'] !== (int) get_current_user_id() ) {
 				return new WP_Error(
@@ -609,6 +609,12 @@ class RestTicketController extends RestController {
 			'response_count' => (int) $ticket->response_count,
 			'tag_ids'        => is_array( $ticket->tag_ids ) ? array_values( array_map( 'intval', $ticket->tag_ids ) ) : array(),
 			'custom_data'    => is_array( $ticket->custom_data ) ? $ticket->custom_data : new \stdClass(),
+			// Accumulated union of every CC recipient ever used on this ticket.
+			// Lives inside custom_data; surfaced as a top-level array so the client
+			// has a stable contract without reaching into custom_data.
+			'cc_recipients'  => ( is_array( $ticket->custom_data ) && isset( $ticket->custom_data['cc_recipients'] ) && is_array( $ticket->custom_data['cc_recipients'] ) )
+				? array_values( $ticket->custom_data['cc_recipients'] )
+				: array(),
 			'created_at'     => $ticket->created_at ? (string) $ticket->created_at : null,
 			'updated_at'     => $ticket->updated_at ? (string) $ticket->updated_at : null,
 		);

@@ -33,15 +33,30 @@ import { Input } from '@/components/ui/input';
  * Internal dependencies
  */
 import { INSERT_IMAGE_COMMAND } from '../../../plugins/image-plugin';
-import { MergeTagsModal, MergeTagsIcon } from '@doublescale/components';
 
 interface AttachmentsProps {
 	activeEditor: any;
+	/**
+	 * Show the "insert image from media library" button. Off for the support
+	 * variant (no inline images in support replies).
+	 */
+	showImage?: boolean;
+	/**
+	 * Optional slot rendered inside the link dialog, to the right of the URL
+	 * input — used by the email variant to inject the merge-tags trigger. Kept as
+	 * an injected slot (rather than a static import) so the support variant never
+	 * pulls `@doublescale/components` into the public portal bundle. Receives a
+	 * setter to append the chosen value onto the current link URL.
+	 */
+	renderLinkUrlExtra?: ( appendToUrl: ( value: string ) => void ) => React.ReactNode;
 }
 
-export default function Attachments({ activeEditor }: AttachmentsProps) {
+export default function Attachments({
+	activeEditor,
+	showImage = true,
+	renderLinkUrlExtra,
+}: AttachmentsProps) {
 	const [linkModalOpen, setLinkModalOpen] = useState(false);
-	const [mergeTagModalVisible, setMergeTagModalVisible] = useState(false);
 	const [linkUrl, setLinkUrl] = useState('');
 	const [linkText, setLinkText] = useState('');
 	const [selectedText, setSelectedText] = useState('');
@@ -206,9 +221,11 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 		}
 	}, [activeEditor]);
 
-	const handleMergeTagClick = useCallback((tagValue: string) => {
-		setLinkUrl((prev) => prev + tagValue);
-		setMergeTagModalVisible(false);
+	// Appends a value (e.g. a merge tag) onto the link URL. Passed to the
+	// injected link-extra slot so the email variant's merge-tags trigger can
+	// reuse it without this file importing the merge-tags UI.
+	const appendToLinkUrl = useCallback((value: string) => {
+		setLinkUrl((prev) => prev + value);
 	}, []);
 
 	const openLinkModal = useCallback((e?: React.MouseEvent) => {
@@ -337,15 +354,17 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 						className={`w-5 h-5 hover:text-primary ${isLinkActive ? 'text-primary' : 'text-[#52525B]'}`}
 					/>
 				</Button>
-				<Button
-					onClick={openMediaLibrary}
-					title="Insert Image from Media Library"
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 p-0"
-				>
-					<Image className="w-5 h-5 text-[#52525B] hover:text-primary" />
-				</Button>
+				{showImage && (
+					<Button
+						onClick={openMediaLibrary}
+						title="Insert Image from Media Library"
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 p-0"
+					>
+						<Image className="w-5 h-5 text-[#52525B] hover:text-primary" />
+					</Button>
+				)}
 			</div>
 
 			<Dialog open={linkModalOpen} onOpenChange={(open) => { if (!open) closeLinkModal(); }}>
@@ -378,20 +397,10 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 											setLinkUrl(e.target.value)
 										}
 										placeholder="https://example.com"
-										className="h-12 pr-12"
+										className={`h-12 ${renderLinkUrlExtra ? 'pr-12' : ''}`}
 										autoFocus
 									/>
-									<button
-										type="button"
-										title="Add Merge Tags"
-										aria-label="Add Merge Tags"
-										className="absolute right-0 top-0 h-full px-3 bg-[#EEEEEE] rounded-r-lg cursor-pointer hover:bg-[#E0E0E0] flex items-center"
-										onClick={() =>
-											setMergeTagModalVisible(true)
-										}
-									>
-										<MergeTagsIcon width={20} height={20} />
-									</button>
+									{renderLinkUrlExtra?.(appendToLinkUrl)}
 								</div>
 							</div>
 						</div>
@@ -410,12 +419,6 @@ export default function Attachments({ activeEditor }: AttachmentsProps) {
 					</DialogContent>
 				</DialogPortal>
 			</Dialog>
-
-			<MergeTagsModal
-				visible={mergeTagModalVisible}
-				onClose={() => setMergeTagModalVisible(false)}
-				onInsertTag={handleMergeTagClick}
-			/>
 		</>
 	);
 }

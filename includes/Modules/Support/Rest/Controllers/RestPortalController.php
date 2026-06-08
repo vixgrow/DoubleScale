@@ -396,6 +396,10 @@ class RestPortalController extends RestController {
 			'source'     => 'web',
 		);
 
+		if ( isset( $params['priority'] ) ) {
+			$create_data['priority'] = (string) $params['priority'];
+		}
+
 		// Honor the client's mailbox choice only if it names a real mailbox (any
 		// type — both web and email boxes are portal channels). An unknown id is
 		// dropped silently so TicketService::resolve_mailbox_id() falls back to

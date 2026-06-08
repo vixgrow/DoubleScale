@@ -8,7 +8,6 @@ export interface PortalNewTicketCustomFieldsContext {
 	title: string;
 	content: string;
 	priority?: TicketPriority | string;
-	product?: string;
 }
 
 export interface PortalNewTicketCustomFieldsBlockProps {

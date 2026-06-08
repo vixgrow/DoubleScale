@@ -139,6 +139,7 @@ export interface CreatePortalTicketPayload {
 	title: string;
 	content: string;
 	mailbox_id?: number;
+	priority?: string;
 	custom_data?: Record<string, unknown>;
 	attachment_hashes?: string[];
 }

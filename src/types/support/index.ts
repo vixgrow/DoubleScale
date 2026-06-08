@@ -102,7 +102,6 @@ export type CustomFieldConditionSource =
 	| 'ticket_title'
 	| 'ticket_content'
 	| 'ticket_priority'
-	| 'product'
 	| 'custom_field';
 
 export type CustomFieldConditionOperator =

@@ -108,6 +108,7 @@ class AttachmentService {
 		$subdir     = 'doublescale-support/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
 		$target_dir = trailingslashit( $upload_dir['basedir'] ) . $subdir;
 		if ( ! wp_mkdir_p( $target_dir ) ) {
+			$this->log_storage_failure( 'Could not create the support upload directory', $target_dir );
 			return new WP_Error( 'mkdir_failed', __( 'Could not create upload directory.', 'doublescale' ), array( 'status' => 500 ) );
 		}
 		$this->ensure_protected_dir( (string) $upload_dir['basedir'] );
@@ -118,6 +119,11 @@ class AttachmentService {
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_uploaded_file,WordPress.WP.AlternativeFunctions.file_system_operations_move_uploaded_file -- validated via is_uploaded_file above.
 		if ( ! move_uploaded_file( $file['tmp_name'], $absolute ) ) {
+			// Almost always a permissions problem: the web-server user can't write
+			// into the target dir (e.g. the dir was created by a different user).
+			// Log the dir + its writability so it's diagnosable from the logger
+			// table rather than only PHP's debug.log.
+			$this->log_storage_failure( 'Failed to move the uploaded support file into place', $target_dir );
 			return new WP_Error( 'move_failed', __( 'Failed to store the uploaded file.', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
@@ -204,14 +210,62 @@ class AttachmentService {
 		$filename = (string) $attachment->file_name;
 		$mime     = (string) $attachment->file_type;
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- streaming a verified local file.
+		// Images are served inline so the conversation thread can render them as
+		// <img src="signed-url"> thumbnails/previews; every other type is forced
+		// to download. `X-Content-Type-Options: nosniff` below stops the browser
+		// from re-interpreting a non-image as something executable, so serving a
+		// validated image inline is safe.
+		$disposition = $this->is_inline_displayable( $mime ) ? 'inline' : 'attachment';
+
 		header( 'Content-Type: ' . $mime );
-		header( 'Content-Disposition: attachment; filename="' . rawurlencode( $filename ) . '"' );
+		header( 'Content-Disposition: ' . $disposition . '; filename="' . rawurlencode( $filename ) . '"' );
 		header( 'Content-Length: ' . (string) filesize( $absolute ) );
 		header( 'X-Content-Type-Options: nosniff' );
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
-		readfile( $absolute );
+		$this->stream_file_chunked( $absolute );
 		exit;
+	}
+
+	/**
+	 * Stream a file to the browser in 1 MB chunks.
+	 *
+	 * Reading the whole file into memory (`readfile()` buffers internally on some
+	 * SAPIs) can exhaust `memory_limit` on a large attachment. Chunked `fread` +
+	 * `flush` keeps the footprint flat regardless of file size, so a 50 MB upload
+	 * downloads fine on a memory-constrained host. Caller is responsible for
+	 * headers and for having validated the path.
+	 *
+	 * @param string $absolute Absolute path to a verified, existing file.
+	 * @return void
+	 */
+	private function stream_file_chunked( string $absolute ): void {
+		$chunk_size = 1024 * 1024;
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- streaming a verified local file to the browser; WP_Filesystem cannot stream.
+		$handle = fopen( $absolute, 'rb' );
+		if ( false === $handle ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- fallback for the rare case fopen fails.
+			readfile( $absolute );
+			return;
+		}
+
+		// Drop any buffering so chunks flush straight to the client rather than
+		// re-accumulating in an output buffer (which would defeat the point).
+		while ( ob_get_level() > 0 ) {
+			ob_end_flush();
+		}
+
+		while ( ! feof( $handle ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- streaming a verified local file to the browser.
+			$buffer = fread( $handle, $chunk_size );
+			if ( false === $buffer ) {
+				break;
+			}
+			echo $buffer; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- raw binary file bytes; escaping would corrupt the download.
+			flush();
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- closing the stream handle opened above.
+		fclose( $handle );
 	}
 
 	/**
@@ -351,6 +405,48 @@ class AttachmentService {
 	}
 
 	/**
+	 * Log a file-storage failure with the directory and its writability.
+	 *
+	 * The common cause is a permissions/ownership mismatch — the web-server user
+	 * cannot write into `uploads/doublescale-support/...` (e.g. the dir was first
+	 * created by a CLI/other user). Recording `dir_exists` / `dir_writable` makes
+	 * that obvious without shelling into the box.
+	 *
+	 * @param string $message    Human-readable summary.
+	 * @param string $target_dir Absolute target directory.
+	 * @return void
+	 */
+	private function log_storage_failure( string $message, string $target_dir ): void {
+		if ( ! function_exists( 'doublescale_get_logger' ) ) {
+			return;
+		}
+		doublescale_get_logger()->error(
+			$message,
+			array(
+				'source'       => 'support-attachment-service',
+				'target_dir'   => $target_dir,
+				'dir_exists'   => is_dir( $target_dir ),
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- read-only diagnostic for the log; WP_Filesystem is unavailable on the REST/IMAP path and adds no value for a writability probe.
+				'dir_writable' => is_writable( $target_dir ),
+			)
+		);
+	}
+
+	/**
+	 * Whether a MIME type is safe to serve with `Content-Disposition: inline`
+	 * (i.e. the browser should render it in-place rather than download it). Only
+	 * raster image types the conversation UI previews as thumbnails — paired with
+	 * `X-Content-Type-Options: nosniff` so a mislabeled file can't be reinterpreted.
+	 *
+	 * @param string $mime MIME type from the stored attachment row.
+	 * @return bool
+	 */
+	private function is_inline_displayable( string $mime ): bool {
+		$inline = array( 'image/jpeg', 'image/png', 'image/gif', 'image/webp' );
+		return in_array( strtolower( $mime ), $inline, true );
+	}
+
+	/**
 	 * @param string $path         Temp file path.
 	 * @param string $declared_mime Declared MIME from the client.
 	 * @return string
@@ -439,7 +535,7 @@ class AttachmentService {
 	 * way as a web upload; anything not allowed is skipped (returns WP_Error) so a
 	 * hostile attachment can't be stored.
 	 *
-	 * @param array<string, mixed> $file        `filename`, `mime`, `content` (decoded bytes).
+	 * @param array<string, mixed> $file        `filename`, `mime`, `content` (decoded bytes), optional `content_id` (inline images).
 	 * @param int                  $ticket_id   Parent ticket id.
 	 * @param int                  $activity_id Conversation activity id to link to.
 	 * @param array<string, mixed> $uploader    Optional `user_id`/`contact_id` (empty for customer email).
@@ -468,6 +564,7 @@ class AttachmentService {
 		$subdir     = 'doublescale-support/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
 		$target_dir = trailingslashit( $upload_dir['basedir'] ) . $subdir;
 		if ( ! wp_mkdir_p( $target_dir ) ) {
+			$this->log_storage_failure( 'Could not create the support upload directory (email attachment)', $target_dir );
 			return new WP_Error( 'mkdir_failed', __( 'Could not create upload directory.', 'doublescale' ), array( 'status' => 500 ) );
 		}
 		$this->ensure_protected_dir( (string) $upload_dir['basedir'] );
@@ -478,6 +575,7 @@ class AttachmentService {
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- WP_Filesystem is unavailable on the IMAP poll path; writing decoded email-attachment bytes into this plugin's private uploads dir.
 		if ( false === file_put_contents( $absolute, $content ) ) {
+			$this->log_storage_failure( 'Failed to write the email attachment to disk', $target_dir );
 			return new WP_Error( 'write_failed', __( 'Failed to store the email attachment.', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
@@ -499,9 +597,72 @@ class AttachmentService {
 				'file_path'   => $relative,
 				'file_type'   => $mime,
 				'file_size'   => strlen( $content ),
+				'content_id'  => isset( $file['content_id'] ) && '' !== (string) $file['content_id']
+					? trim( (string) $file['content_id'], " <>\t\r\n" )
+					: null,
 				'driver'      => 'local',
 				'status'      => 'active',
 			)
+		);
+	}
+
+	/**
+	 * Rewrite inline-image references in an email body to served attachment URLs.
+	 *
+	 * An inbound HTML email references its inline images by Content-ID, e.g.
+	 * `<img src="cid:ii_abc123">`. The matching bytes are stored as `active`
+	 * attachments carrying that `content_id`. This swaps each `cid:` (or the bare
+	 * Content-ID that {@see wp_kses_post()} leaves behind once it strips the
+	 * unknown `cid:` scheme) for the attachment's signed download URL so the image
+	 * renders in the conversation thread instead of breaking.
+	 *
+	 * Returns the body unchanged when the activity has no Content-ID-bearing
+	 * attachments (the common case), so it is cheap to call on every inbound
+	 * message.
+	 *
+	 * @param string $body        Email body HTML (already sanitized or raw).
+	 * @param int    $activity_id Conversation activity the attachments are linked to.
+	 * @return string Body with inline image src attributes rewritten.
+	 */
+	public function rewrite_inline_image_srcs( string $body, int $activity_id ): string {
+		if ( '' === $body || $activity_id <= 0 ) {
+			return $body;
+		}
+
+		$rows = AttachmentModel::query()
+			->where( 'activity_id', $activity_id )
+			->where( 'status', 'active' )
+			->whereNotNull( 'content_id' )
+			->get();
+
+		if ( $rows->isEmpty() ) {
+			return $body;
+		}
+
+		$map = array();
+		foreach ( $rows as $attachment ) {
+			$cid = trim( (string) $attachment->content_id, " <>\t\r\n" );
+			if ( '' !== $cid ) {
+				$map[ $cid ] = $this->signed_url( $attachment );
+			}
+		}
+		if ( empty( $map ) ) {
+			return $body;
+		}
+
+		// Match the `src` value of an <img> whether it still carries the `cid:`
+		// scheme (raw inbound HTML) or just the bare Content-ID (after kses has
+		// stripped the unknown scheme). Capture the quote char so we re-emit it.
+		return (string) preg_replace_callback(
+			'/(<img\b[^>]*?\bsrc=)(["\'])(?:cid:)?([^"\']+)\2/i',
+			static function ( $matches ) use ( $map ) {
+				$ref = trim( $matches[3], " <>\t\r\n" );
+				if ( isset( $map[ $ref ] ) ) {
+					return $matches[1] . $matches[2] . esc_url( $map[ $ref ] ) . $matches[2];
+				}
+				return $matches[0];
+			},
+			$body
 		);
 	}
 }

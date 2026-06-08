@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { StatusPill, PriorityPill } from '@/components/support';
+import { StatusPill, PriorityPill, AttachmentList } from '@/components/support';
 
 import {
 	addPublicReply,
@@ -162,22 +162,7 @@ const ConversationBubble = ({
 				className="prose prose-sm max-w-none"
 				dangerouslySetInnerHTML={{ __html: content }}
 			/>
-			{item.attachments && item.attachments.length > 0 && (
-				<ul className="mt-2 space-y-1">
-					{item.attachments.map((att) => (
-						<li key={att.url}>
-							<a
-								href={att.url}
-								className="text-blue-600 hover:underline"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								{att.file_name}
-							</a>
-						</li>
-					))}
-				</ul>
-			)}
+<AttachmentList attachments={item.attachments} />
 		</li>
 	);
 };

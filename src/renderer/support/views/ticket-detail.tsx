@@ -24,7 +24,10 @@ import {
 } from '../api';
 import {
 	AttachmentUploader,
+	AttachmentList,
 	toPendingAttachment,
+	revokePendingPreviews,
+	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
 import type { PortalConfig, PortalConversationItem } from '../types';
@@ -60,6 +63,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 				hashes.length > 0 ? hashes : undefined
 			);
 			setDraft('');
+			revokePendingPreviews(pendingAttachments);
 			setPendingAttachments([]);
 			conv.refetch();
 			ticket.refetch();
@@ -170,7 +174,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 							);
 							setPendingAttachments((prev) => [
 								...prev,
-								toPendingAttachment(result),
+								toPendingAttachment(result, file),
 							]);
 						} catch (e) {
 							setSendError(
@@ -184,7 +188,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 					}}
 					onRemove={(hash) =>
 						setPendingAttachments((prev) =>
-							prev.filter((p) => p.file_hash !== hash)
+							removePendingByHash(prev, hash)
 						)
 					}
 				/>
@@ -252,22 +256,10 @@ const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
 					className="prose prose-sm max-w-none text-foreground"
 					dangerouslySetInnerHTML={{ __html: content }}
 				/>
-				{item.attachments && item.attachments.length > 0 && (
-					<ul className="mt-2 space-y-1">
-						{item.attachments.map((att) => (
-							<li key={att.url}>
-								<a
-									href={att.url}
-									className="text-sm text-primary hover:underline"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									{att.file_name}
-								</a>
-							</li>
-						))}
-					</ul>
-				)}
+<AttachmentList
+	attachments={item.attachments}
+	accentClassName="text-primary"
+/>
 			</div>
 		</li>
 	);

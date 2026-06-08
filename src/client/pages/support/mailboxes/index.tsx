@@ -37,6 +37,9 @@ import {
 	Check,
 	Settings as SettingsIcon,
 	Mail,
+	MoreVertical,
+	Info,
+	FolderCheck,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -45,6 +48,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { ProFeatureNotice } from '@doublescale/components/pro-feature-notice';
 import ConfigAPI from '@doublescale/config';
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -377,6 +400,14 @@ const SupportMailboxes: React.FC = () => {
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const [fallbackId, setFallbackId] = useState<number | null>(null);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [movingId, setMovingId] = useState<number | null>(null);
+	const [moveDestinationId, setMoveDestinationId] = useState<number | null>(
+		null
+	);
+	const [isMoving, setIsMoving] = useState(false);
+	const [settingDefaultId, setSettingDefaultId] = useState<number | null>(
+		null
+	);
 
 	const fetchMailboxes = useCallback(async () => {
 		setIsLoading(true);
@@ -534,6 +565,10 @@ const SupportMailboxes: React.FC = () => {
 	// Open the delete picker for a mailbox, defaulting the destination to the
 	// first OTHER mailbox so the operator can confirm in one click.
 	const openDelete = (id: number) => {
+		const target = mailboxes.find((m) => m.id === id);
+		if (target?.is_default || mailboxes.length <= 1) {
+			return;
+		}
 		setNotice(null);
 		const others = mailboxes.filter((m) => m.id !== id);
 		// Default the destination to the default mailbox (the natural home for
@@ -578,6 +613,87 @@ const SupportMailboxes: React.FC = () => {
 			});
 		} finally {
 			setIsDeleting(false);
+		}
+	};
+
+	const handleSetAsDefault = async (id: number) => {
+		setNotice(null);
+		setSettingDefaultId(id);
+		try {
+			await apiFetch({
+				path: `/doublescale/v1/support/mailboxes/${id}`,
+				method: 'PUT',
+				data: { is_default: true },
+			});
+			setNotice({
+				type: 'success',
+				message: __(
+					'Mailbox set as default for new tickets.',
+					'doublescale'
+				),
+			});
+			fetchMailboxes();
+		} catch (err: any) {
+			setNotice({
+				type: 'error',
+				message:
+					err?.message ||
+					__('Failed to set default mailbox.', 'doublescale'),
+			});
+		} finally {
+			setSettingDefaultId(null);
+		}
+	};
+
+	const openMoveTickets = (id: number) => {
+		setNotice(null);
+		const others = mailboxes.filter((m) => m.id !== id);
+		const preferred = others.find((m) => m.is_default) ?? others[0] ?? null;
+		setMovingId(id);
+		setMoveDestinationId(preferred ? preferred.id : null);
+	};
+
+	const cancelMoveTickets = () => {
+		setMovingId(null);
+		setMoveDestinationId(null);
+	};
+
+	const confirmMoveTickets = async () => {
+		if (movingId === null || moveDestinationId === null) {
+			return;
+		}
+		setIsMoving(true);
+		try {
+			const res: any = await apiFetch({
+				path: `/doublescale/v1/support/mailboxes/${movingId}/move-tickets`,
+				method: 'POST',
+				data: { new_box_id: moveDestinationId },
+			});
+			const moved = Number(res?.moved ?? 0);
+			setNotice({
+				type: 'success',
+				message: sprintf(
+					/* translators: %d: number of tickets moved. */
+					_n(
+						'%d ticket moved to the selected mailbox.',
+						'%d tickets moved to the selected mailbox.',
+						moved,
+						'doublescale'
+					),
+					moved
+				),
+			});
+			cancelMoveTickets();
+			fetchMailboxes();
+		} catch (err: any) {
+			setNotice({
+				type: 'error',
+				message:
+					err?.message ||
+					__('Failed to move tickets.', 'doublescale'),
+			});
+		} finally {
+			setIsMoving(false);
 		}
 	};
 
@@ -636,90 +752,252 @@ const SupportMailboxes: React.FC = () => {
 				</Alert>
 			)}
 
-			{deletingId !== null &&
-				(() => {
-					const target = mailboxes.find((m) => m.id === deletingId);
-					const others = mailboxes.filter((m) => m.id !== deletingId);
-					return (
-						<Card>
-							<CardContent className="p-6 space-y-5">
-								<div className="space-y-1">
-									<div className="font-semibold text-gray-900">
-										{__('Delete mailbox', 'doublescale')}
-										{target
-											? ` — ${target.name || target.slug}`
-											: ''}
-									</div>
-									<p className="text-sm text-gray-500">
-										{__(
-											"This mailbox's tickets must be moved to another mailbox before it can be deleted.",
-											'doublescale'
-										)}
-									</p>
-								</div>
-
-								<div className="space-y-2">
-									<Label className="text-sm font-medium">
-										{__('Move tickets to', 'doublescale')}
-									</Label>
-									<select
-										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-										value={fallbackId ?? ''}
-										onChange={(e) =>
-											setFallbackId(
-												e.target.value
-													? Number(e.target.value)
-													: null
-											)
-										}
-									>
-										{others.map((m) => (
-											<option key={m.id} value={m.id}>
-												{m.name || m.slug}
-											</option>
-										))}
-									</select>
-									{target?.is_default && (
-										<p className="text-xs text-amber-700">
+			<Dialog
+				open={deletingId !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						cancelDelete();
+					}
+				}}
+			>
+				<DialogContent className="max-w-lg rounded-xl">
+					{deletingId !== null &&
+						(() => {
+							const target = mailboxes.find(
+								(m) => m.id === deletingId
+							);
+							const others = mailboxes.filter(
+								(m) => m.id !== deletingId
+							);
+							return (
+								<>
+									<DialogHeader>
+										<DialogTitle>
 											{__(
-												'This is the default mailbox — the mailbox you choose will become the new default for new tickets.',
+												'Are You Sure? You can not undo this action.',
+												'doublescale'
+											)}
+										</DialogTitle>
+									</DialogHeader>
+
+									<div className="space-y-2">
+										<Label className="text-sm font-medium inline-flex items-center gap-1.5">
+											{__(
+												'Move existing tickets to',
+												'doublescale'
+											)}
+											<span
+												className="text-muted-foreground"
+												title={__(
+													'Please select the mailbox where the existing tickets will be transferred.',
+													'doublescale'
+												)}
+											>
+												<Info className="w-3.5 h-3.5" />
+											</span>
+										</Label>
+										<Select
+											value={
+												fallbackId !== null
+													? String(fallbackId)
+													: undefined
+											}
+											onValueChange={(value) =>
+												setFallbackId(Number(value))
+											}
+										>
+											<SelectTrigger>
+												<SelectValue
+													placeholder={__(
+														'Select mailbox',
+														'doublescale'
+													)}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{others.map((m) => (
+													<SelectItem
+														key={m.id}
+														value={String(m.id)}
+													>
+														{m.name || m.slug}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<p className="text-xs text-muted-foreground">
+											{__(
+												'Please select the mailbox where the existing tickets will be transferred.',
 												'doublescale'
 											)}
 										</p>
-									)}
-								</div>
+									</div>
 
-								<div className="flex justify-end gap-3">
-									<Button
-										variant="outline"
-										className="rounded-lg"
-										onClick={cancelDelete}
-										disabled={isDeleting}
-									>
-										{__('Cancel', 'doublescale')}
-									</Button>
-									<Button
-										variant="destructive"
-										className="rounded-lg min-w-[120px]"
-										onClick={confirmDelete}
-										disabled={
-											isDeleting || fallbackId === null
-										}
-									>
-										{isDeleting ? (
-											<>
-												<Loader2 className="w-4 h-4 animate-spin mr-2" />
-												{__('Deleting…', 'doublescale')}
-											</>
-										) : (
-											__('Delete mailbox', 'doublescale')
-										)}
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					);
-				})()}
+									<DialogFooter className="gap-2 sm:gap-0">
+										<Button
+											variant="outline"
+											className="rounded-lg"
+											onClick={cancelDelete}
+											disabled={isDeleting}
+										>
+											{__('Cancel', 'doublescale')}
+										</Button>
+										<Button
+											variant="destructive"
+											className="rounded-lg"
+											onClick={confirmDelete}
+											disabled={
+												isDeleting ||
+												fallbackId === null
+											}
+										>
+											{isDeleting ? (
+												<>
+													<Loader2 className="w-4 h-4 animate-spin mr-2" />
+													{__(
+														'Deleting…',
+														'doublescale'
+													)}
+												</>
+											) : (
+												sprintf(
+													/* translators: %s: mailbox name. */
+													__(
+														'Confirm Delete %s',
+														'doublescale'
+													),
+													target?.name ||
+														target?.slug ||
+														__('Mailbox', 'doublescale')
+												)
+											)}
+										</Button>
+									</DialogFooter>
+								</>
+							);
+						})()}
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={movingId !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						cancelMoveTickets();
+					}
+				}}
+			>
+				<DialogContent className="max-w-lg rounded-xl">
+					{movingId !== null &&
+						(() => {
+							const source = mailboxes.find(
+								(m) => m.id === movingId
+							);
+							const others = mailboxes.filter(
+								(m) => m.id !== movingId
+							);
+							return (
+								<>
+									<DialogHeader>
+										<DialogTitle>
+											{__('Move tickets', 'doublescale')}
+											{source
+												? ` — ${source.name || source.slug}`
+												: ''}
+										</DialogTitle>
+									</DialogHeader>
+
+									<div className="space-y-2">
+										<Label className="text-sm font-medium">
+											{__(
+												'Move tickets to',
+												'doublescale'
+											)}
+										</Label>
+										<Select
+											value={
+												moveDestinationId !== null
+													? String(moveDestinationId)
+													: undefined
+											}
+											onValueChange={(value) =>
+												setMoveDestinationId(
+													Number(value)
+												)
+											}
+										>
+											<SelectTrigger>
+												<SelectValue
+													placeholder={__(
+														'Select mailbox',
+														'doublescale'
+													)}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{others.map((m) => (
+													<SelectItem
+														key={m.id}
+														value={String(m.id)}
+													>
+														{m.name || m.slug}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{source?.ticket_count !== undefined &&
+											source.ticket_count > 0 && (
+												<p className="text-xs text-muted-foreground">
+													{sprintf(
+														/* translators: %d: number of tickets. */
+														_n(
+															'%d ticket will be moved.',
+															'%d tickets will be moved.',
+															source.ticket_count,
+															'doublescale'
+														),
+														source.ticket_count
+													)}
+												</p>
+											)}
+									</div>
+
+									<DialogFooter className="gap-2 sm:gap-0">
+										<Button
+											variant="outline"
+											className="rounded-lg"
+											onClick={cancelMoveTickets}
+											disabled={isMoving}
+										>
+											{__('Cancel', 'doublescale')}
+										</Button>
+										<Button
+											variant="gradient"
+											className="rounded-lg"
+											onClick={confirmMoveTickets}
+											disabled={
+												isMoving ||
+												moveDestinationId === null
+											}
+										>
+											{isMoving ? (
+												<>
+													<Loader2 className="w-4 h-4 animate-spin mr-2" />
+													{__(
+														'Moving…',
+														'doublescale'
+													)}
+												</>
+											) : (
+												__('Move tickets', 'doublescale')
+											)}
+										</Button>
+									</DialogFooter>
+								</>
+							);
+						})()}
+				</DialogContent>
+			</Dialog>
 
 			{editing && (
 				<Card>
@@ -823,22 +1101,38 @@ const SupportMailboxes: React.FC = () => {
 									<AddConnectionHint forEmailBox={isEmailBox} />
 								</div>
 
-								<div className="flex items-center gap-3">
-									<Switch
-										checked={!!editing.is_default}
-										onCheckedChange={(checked: boolean) =>
-											setEditing((prev) => ({
-												...prev,
-												is_default: checked,
-											}))
-										}
-									/>
-									<span className="text-sm text-gray-700">
-										{__(
-											'Default mailbox for new tickets',
-											'doublescale'
-										)}
-									</span>
+								<div className="space-y-1">
+									<div className="flex items-center gap-3">
+										<Switch
+											checked={!!editing.is_default}
+											disabled={
+												!!editing.id &&
+												!!editing.is_default
+											}
+											onCheckedChange={(
+												checked: boolean
+											) =>
+												setEditing((prev) => ({
+													...prev,
+													is_default: checked,
+												}))
+											}
+										/>
+										<span className="text-sm text-gray-700">
+											{__(
+												'Default mailbox for new tickets',
+												'doublescale'
+											)}
+										</span>
+									</div>
+									{!!editing.id && !!editing.is_default && (
+										<p className="text-xs text-muted-foreground pl-11">
+											{__(
+												'Set another mailbox as default before unsetting this one.',
+												'doublescale'
+											)}
+										</p>
+									)}
 								</div>
 
 								{/*
@@ -1007,35 +1301,99 @@ const SupportMailboxes: React.FC = () => {
 												)}
 											</div>
 										</div>
-										<div className="flex items-center gap-2">
+										<div className="flex items-center gap-1">
 											<Button
-												variant="ghost"
-												size="sm"
+												variant="outline"
+												size="icon"
+												className="h-9 w-9 rounded-lg"
 												onClick={() => setEditing(mb)}
+												aria-label={__(
+													'Edit mailbox',
+													'doublescale'
+												)}
 											>
-												<Pencil className="w-4 h-4" />
+												<SettingsIcon className="w-4 h-4" />
 											</Button>
-											<Button
-												variant="ghost"
-												size="sm"
-												disabled={mailboxes.length <= 1}
-												title={
-													mailboxes.length <= 1
-														? __(
-																'You cannot delete the only mailbox.',
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-9 w-9"
+														aria-label={__(
+															'More options',
+															'doublescale'
+														)}
+													>
+														<MoreVertical className="w-4 h-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent
+													align="end"
+													className="min-w-[10rem]"
+												>
+													{!mb.is_default && (
+														<DropdownMenuItem
+															className="cursor-pointer gap-2"
+															onSelect={() =>
+																handleSetAsDefault(
+																	mb.id
+																)
+															}
+															disabled={
+																settingDefaultId ===
+																mb.id
+															}
+														>
+															{settingDefaultId ===
+															mb.id ? (
+																<Loader2 className="w-4 h-4 animate-spin" />
+															) : (
+																<FolderCheck className="w-4 h-4" />
+															)}
+															{__(
+																'Set as Default',
 																'doublescale'
+															)}
+														</DropdownMenuItem>
+													)}
+													<DropdownMenuItem
+														className="cursor-pointer gap-2"
+														onSelect={() =>
+															openMoveTickets(
+																mb.id
 															)
-														: __(
-																'Delete mailbox',
-																'doublescale'
-															)
-												}
-												onClick={() =>
-													openDelete(mb.id)
-												}
-											>
-												<Trash2 className="w-4 h-4 text-red-500" />
-											</Button>
+														}
+														disabled={
+															mailboxes.length <=
+															1
+														}
+													>
+														<Pencil className="w-4 h-4" />
+														{__(
+															'Move Tickets',
+															'doublescale'
+														)}
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														className="cursor-pointer gap-2 text-red-600 focus:text-red-600"
+														onSelect={() =>
+															openDelete(mb.id)
+														}
+														disabled={
+															mb.is_default ||
+															mailboxes.length <=
+																1
+														}
+													>
+														<Trash2 className="w-4 h-4" />
+														{__(
+															'Delete',
+															'doublescale'
+														)}
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
 										</div>
 									</li>
 								))}

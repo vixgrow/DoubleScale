@@ -536,7 +536,13 @@ class RestPortalController extends RestController {
 			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$attachment = ( new AttachmentService() )->store_upload(
+		$service  = new AttachmentService();
+		$too_many = $service->guard_file_count( (int) $request->get_param( 'pending_count' ) );
+		if ( $too_many ) {
+			return $too_many;
+		}
+
+		$attachment = $service->store_upload(
 			$file,
 			(int) $ticket->id,
 			array( 'contact_id' => (int) $contact->id )
@@ -580,7 +586,13 @@ class RestPortalController extends RestController {
 		$contact  = $this->lookup_contact_for_current_user();
 		$uploader = $contact ? array( 'contact_id' => (int) $contact->id ) : array();
 
-		$attachment = ( new AttachmentService() )->store_upload( $file, 0, $uploader );
+		$service  = new AttachmentService();
+		$too_many = $service->guard_file_count( (int) $request->get_param( 'pending_count' ) );
+		if ( $too_many ) {
+			return $too_many;
+		}
+
+		$attachment = $service->store_upload( $file, 0, $uploader );
 		if ( is_wp_error( $attachment ) ) {
 			return $attachment;
 		}

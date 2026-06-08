@@ -49,6 +49,41 @@ class AttachmentService {
 	}
 
 	/**
+	 * Reject an upload that would exceed the configured per-message file count.
+	 *
+	 * The caller passes how many files are already staged on the current draft
+	 * (the frontend's pending count). Adding one more must not push the total past
+	 * {@see AttachmentSettings::max_file_count()}. Returns a `WP_Error` to short-
+	 * circuit the upload, or null when the upload is within the limit.
+	 *
+	 * This is the server-side backstop for the client-side count guard, so the
+	 * cap holds even when the REST endpoint is called directly.
+	 *
+	 * @param int $already_staged Count of files already attached to this draft.
+	 * @return WP_Error|null
+	 */
+	public function guard_file_count( int $already_staged ): ?WP_Error {
+		$max = AttachmentSettings::max_file_count();
+		if ( $already_staged >= $max ) {
+			return new WP_Error(
+				'too_many_files',
+				sprintf(
+					/* translators: %d: maximum number of files allowed per message */
+					_n(
+						'You can attach at most %d file.',
+						'You can attach at most %d files.',
+						$max,
+						'doublescale'
+					),
+					$max
+				),
+				array( 'status' => 400 )
+			);
+		}
+		return null;
+	}
+
+	/**
 	 * Store an uploaded file as a temp attachment row.
 	 *
 	 * `$ticket_id` may be 0 to upload before the ticket exists (the
@@ -71,7 +106,9 @@ class AttachmentService {
 			return new WP_Error( 'ticket_not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
-		$max_size  = wp_max_upload_size();
+		// The effective cap is the smaller of the admin-configured limit and the
+		// server's own `upload_max_filesize`/`post_max_size` ceiling.
+		$max_size  = AttachmentSettings::max_file_size_bytes();
 		$file_size = isset( $file['size'] ) ? (int) $file['size'] : 0;
 		if ( $max_size > 0 && $file_size > $max_size ) {
 			return new WP_Error(

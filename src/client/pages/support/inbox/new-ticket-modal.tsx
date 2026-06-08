@@ -31,6 +31,7 @@ import {
 	createTicket,
 	uploadAttachmentTemp,
 	useAssignableAgents,
+	useAttachmentLimits,
 } from '@/hooks/support';
 import {
 	AttachmentUploader,
@@ -85,6 +86,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	const [pendingAttachments, setPendingAttachments] = useState<
 		PendingAttachment[]
 	>([]);
+	const { limits: attachmentLimits } = useAttachmentLimits();
 
 	// --- Customer selection (Q1) ---------------------------------------------
 	// Two mutually-exclusive modes: pick an existing contact (binds contact_id),
@@ -143,7 +145,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		setUploading(true);
 		setError(null);
 		try {
-			const result = await uploadAttachmentTemp(file);
+			const result = await uploadAttachmentTemp(
+				file,
+				pendingAttachments.length
+			);
 			setPendingAttachments((prev) => [
 				...prev,
 				toPendingAttachment(result, file),
@@ -548,6 +553,11 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							pending={pendingAttachments}
 							uploading={uploading}
 							disabled={submitting}
+							maxFileCount={attachmentLimits?.max_file_count}
+							maxFileSizeBytes={
+								attachmentLimits?.max_file_size_bytes
+							}
+							onValidationError={setError}
 							onSelect={handleAttachmentSelect}
 							onRemove={(hash) =>
 								setPendingAttachments((prev) =>

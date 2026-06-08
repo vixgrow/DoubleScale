@@ -203,6 +203,18 @@ export interface AttachmentUploadResult {
 	file_type: string;
 }
 
+/**
+ * Admin-configurable attachment limits, surfaced to every composer so it can
+ * pre-validate uploads and show the caps. `max_file_size_bytes` is the effective
+ * cap (the configured MB value clamped to the server's upload limit).
+ */
+export interface AttachmentLimits {
+	max_file_size_mb: number;
+	max_file_size_bytes: number;
+	max_file_count: number;
+	accepted_mimes: string[];
+}
+
 export interface CreateTicketPayload {
 	title: string;
 	// Customer: either an existing CRM contact by id, OR an email (+ optional

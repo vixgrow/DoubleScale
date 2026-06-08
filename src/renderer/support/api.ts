@@ -159,10 +159,13 @@ const restRoot = (): string => {
 
 const postPortalAttachment = async (
 	route: string,
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
+	// Server-side count guard: how many files are already staged on this draft.
+	formData.append('pending_count', String(pendingCount));
 
 	const response = await fetch(`${restRoot()}${route}`, {
 		method: 'POST',
@@ -183,11 +186,13 @@ const postPortalAttachment = async (
 
 export const uploadPortalAttachment = (
 	ticketId: number,
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> =>
 	postPortalAttachment(
 		`doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
-		file
+		file,
+		pendingCount
 	);
 
 /**
@@ -195,11 +200,13 @@ export const uploadPortalAttachment = (
  * Returns a hash passed as `attachment_hashes` to `createPortalTicket`.
  */
 export const uploadPortalAttachmentTemp = (
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> =>
 	postPortalAttachment(
 		'doublescale/v1/support/portal/attachments',
-		file
+		file,
+		pendingCount
 	);
 
 export const createPortalTicket = (payload: CreatePortalTicketPayload) =>

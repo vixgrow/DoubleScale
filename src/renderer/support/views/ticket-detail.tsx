@@ -38,7 +38,8 @@ interface Props {
 	onBack: () => void;
 }
 
-const TicketDetail = ({ ticketId, onBack }: Props) => {
+const TicketDetail = ({ ticketId, config, onBack }: Props) => {
+	const limits = config.attachment_limits;
 	const ticket = usePortalTicket(ticketId);
 	const conv = usePortalConversation(ticketId);
 	const [draft, setDraft] = useState('');
@@ -165,12 +166,16 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 					pending={pendingAttachments}
 					uploading={uploading}
 					disabled={sending}
+					maxFileCount={limits?.max_file_count}
+					maxFileSizeBytes={limits?.max_file_size_bytes}
+					onValidationError={setSendError}
 					onSelect={async (file) => {
 						setUploading(true);
 						try {
 							const result = await uploadPortalAttachment(
 								ticketId,
-								file
+								file,
+								pendingAttachments.length
 							);
 							setPendingAttachments((prev) => [
 								...prev,

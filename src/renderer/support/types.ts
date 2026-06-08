@@ -10,6 +10,7 @@
  */
 
 import type {
+	AttachmentLimits,
 	ConversationItem,
 	Ticket as AdminTicket,
 } from '@/types/support';
@@ -55,6 +56,8 @@ export interface PortalConfig {
 	box_id?: number;
 	/** Ticket custom fields (DoubleScale Pro). */
 	custom_fields_enabled?: boolean;
+	/** Admin-configurable attachment limits (size + count). */
+	attachment_limits?: AttachmentLimits;
 }
 
 declare global {

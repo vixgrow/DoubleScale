@@ -79,7 +79,10 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 		setUploading(true);
 		setError(null);
 		try {
-			const result = await uploadPortalAttachmentTemp(file);
+			const result = await uploadPortalAttachmentTemp(
+				file,
+				pendingAttachments.length
+			);
 			setPendingAttachments((prev) => [
 				...prev,
 				toPendingAttachment(result, file),
@@ -288,6 +291,14 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 							pending={pendingAttachments}
 							uploading={uploading}
 							disabled={submitting}
+							maxFileCount={
+								portalConfig?.attachment_limits?.max_file_count
+							}
+							maxFileSizeBytes={
+								portalConfig?.attachment_limits
+									?.max_file_size_bytes
+							}
+							onValidationError={setError}
 							onSelect={handleAttachmentSelect}
 							onRemove={(hash) =>
 								setPendingAttachments((prev) =>

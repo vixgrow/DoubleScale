@@ -86,7 +86,13 @@ class RestAttachmentController extends RestController {
 			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$attachment = $this->attachments()->store_upload(
+		$service  = $this->attachments();
+		$too_many = $service->guard_file_count( (int) $request->get_param( 'pending_count' ) );
+		if ( $too_many ) {
+			return $too_many;
+		}
+
+		$attachment = $service->store_upload(
 			$file,
 			(int) $ticket->id,
 			array( 'user_id' => get_current_user_id() )
@@ -125,7 +131,13 @@ class RestAttachmentController extends RestController {
 			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$attachment = $this->attachments()->store_upload(
+		$service  = $this->attachments();
+		$too_many = $service->guard_file_count( (int) $request->get_param( 'pending_count' ) );
+		if ( $too_many ) {
+			return $too_many;
+		}
+
+		$attachment = $service->store_upload(
 			$file,
 			0,
 			array( 'user_id' => get_current_user_id() )

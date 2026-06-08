@@ -19,6 +19,7 @@ import {
 	useConversation,
 	useAssignableAgents,
 	useMailboxes,
+	useAttachmentLimits,
 	addReply,
 	addNote,
 	updateTicket,
@@ -187,6 +188,7 @@ const SupportTicketDetail: React.FC = () => {
 		useConversation(ticketId);
 	const { data: assignableAgents } = useAssignableAgents();
 	const { data: mailboxes } = useMailboxes();
+	const { limits: attachmentLimits } = useAttachmentLimits();
 	const canManageAllTickets = useCapabilities().canManageAllTickets();
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
@@ -309,7 +311,11 @@ const SupportTicketDetail: React.FC = () => {
 		setUploading(true);
 		setFeedback(null);
 		try {
-			const result = await uploadAttachment(ticketId, file);
+			const result = await uploadAttachment(
+				ticketId,
+				file,
+				pendingAttachments.length
+			);
 			setPendingAttachments((prev) => [
 				...prev,
 				toPendingAttachment(result, file),
@@ -700,6 +706,9 @@ const SupportTicketDetail: React.FC = () => {
 							)
 						}
 						disabled={sending}
+						maxFileCount={attachmentLimits?.max_file_count}
+						maxFileSizeBytes={attachmentLimits?.max_file_size_bytes}
+						onValidationError={setFeedback}
 					/>
 					{feedback && (
 						<div className="mt-2 text-sm text-red-600">

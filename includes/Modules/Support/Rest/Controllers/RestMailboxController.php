@@ -152,6 +152,31 @@ class RestMailboxController extends RestController {
 				),
 			)
 		);
+
+		// Save the attachment limits (max file size + max file count). The current
+		// values are returned with the mailbox list `meta.attachment_limits`, so a
+		// read-only route is unnecessary.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/attachment-settings',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_attachment_settings' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'max_file_size_mb' => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+						'max_file_count'   => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -255,6 +280,10 @@ class RestMailboxController extends RestController {
 					'smtp_senders'          => $this->smtp_senders(),
 					'receivable_emails'     => $this->receivable_emails(),
 					'notification_defaults' => EmailNotifications::default_templates(),
+					// Attachment limits (admin-configurable) so the Mailboxes page can
+					// render the "Attachment limits" card and the ticket composer can
+					// pre-validate uploads without an extra request.
+					'attachment_limits'     => \DoubleScale\Modules\Support\Services\AttachmentSettings::to_payload(),
 				),
 			),
 			200
@@ -679,6 +708,44 @@ class RestMailboxController extends RestController {
 				200
 			);
 		}
+	}
+
+	/**
+	 * Save the attachment limits (max file size + max file count).
+	 *
+	 * Values are sanitized/clamped in {@see AttachmentSettings::save()}; the
+	 * stored, clamped values are echoed back (alongside the derived byte cap) so
+	 * the UI reflects any clamping immediately.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_attachment_settings( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		\DoubleScale\Modules\Support\Services\AttachmentSettings::save(
+			array(
+				'max_file_size_mb' => $params['max_file_size_mb'] ?? null,
+				'max_file_count'   => $params['max_file_count'] ?? null,
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'success'           => true,
+				'message'           => __( 'Attachment limits saved.', 'doublescale' ),
+				'attachment_limits' => \DoubleScale\Modules\Support\Services\AttachmentSettings::to_payload(),
+			),
+			200
+		);
 	}
 
 	/**

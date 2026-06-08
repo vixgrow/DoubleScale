@@ -57,6 +57,7 @@ function _doublescale_tests_enable_all_modules() {
 			'emails'      => true,
 			'smtp'        => true,
 			'tracking'    => true,
+			'support'     => true,
 		)
 	);
 }

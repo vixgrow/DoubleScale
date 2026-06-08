@@ -21,11 +21,26 @@ import {
 } from '@/components/support';
 
 import {
+	PortalNewTicketCustomFieldsBlock,
+	preparePortalNewTicketCustomData,
+} from '@doublescale-pro/support-portal-custom-fields';
+
+import {
 	createPortalTicket,
 	uploadPortalAttachmentTemp,
 	usePortalMailboxes,
 } from '../api';
-import type { PortalTicket } from '../types';
+import {
+	PRIORITY_LABELS,
+	TICKET_PRIORITIES,
+	type TicketPriority,
+} from '@/constants/support';
+import type { PortalConfig, PortalTicket } from '../types';
+import type { SupportCustomFieldDefinition } from '@/types/support';
+
+const portalConfig = window.doublescale_support_portal_config as
+	| PortalConfig
+	| undefined;
 
 interface Props {
 	onClose: () => void;
@@ -38,8 +53,16 @@ interface Props {
 
 const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const mailboxes = usePortalMailboxes();
+	const [customFieldDefs, setCustomFieldDefs] = useState<
+		SupportCustomFieldDefinition[]
+	>([]);
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
+	const [priority, setPriority] = useState<TicketPriority>('normal');
+	const [customData, setCustomData] = useState<Record<string, unknown>>({});
+	const [customFieldsErrors, setCustomFieldsErrors] = useState<
+		Record<string, string>
+	>({});
 	// Default to the shortcode-scoped mailbox when present so the locked portal
 	// routes the ticket there; otherwise let the customer choose (or the server
 	// auto-select).
@@ -76,6 +99,29 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 			setError(__('Please fill in both title and message.', 'doublescale'));
 			return;
 		}
+
+		const { payload: customDataPayload, errors: customFieldValidationErrors } =
+			preparePortalNewTicketCustomData(
+				'portal',
+				customFieldDefs,
+				customData,
+				{
+					ticket_title: title,
+					ticket_content: content,
+					ticket_priority: priority,
+				}
+			);
+		if (Object.keys(customFieldValidationErrors).length > 0) {
+			setCustomFieldsErrors(customFieldValidationErrors);
+			setError(
+				__(
+					'Please fill in all required custom fields.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
 		setSubmitting(true);
 		setError(null);
 		try {
@@ -84,8 +130,13 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 				title: title.trim(),
 				content,
 				mailbox_id: mailboxId,
+				priority,
 				attachment_hashes:
 					attachmentHashes.length > 0 ? attachmentHashes : undefined,
+				custom_data:
+					Object.keys(customDataPayload).length > 0
+						? customDataPayload
+						: undefined,
 			});
 			onCreated(ticket);
 		} catch (e) {
@@ -179,9 +230,51 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 					)}
 
 					<div>
-						<span className="m-0 mb-1 block text-sm font-medium">
+						<label
+							htmlFor="doublescale-portal-priority"
+							className="m-0 mb-1 block text-sm font-medium"
+						>
+							{__('Priority', 'doublescale')}
+						</label>
+						<select
+							id="doublescale-portal-priority"
+							value={priority}
+							onChange={(e) =>
+								setPriority(e.target.value as TicketPriority)
+							}
+							className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						>
+							{TICKET_PRIORITIES.map((p) => (
+								<option key={p} value={p}>
+									{PRIORITY_LABELS[p]}
+								</option>
+							))}
+						</select>
+					</div>
+
+					{portalConfig?.custom_fields_enabled && (
+						<PortalNewTicketCustomFieldsBlock
+							scope="portal"
+							context={{
+								title,
+								content,
+								priority,
+							}}
+							customData={customData}
+							onCustomDataChange={setCustomData}
+							errors={customFieldsErrors}
+							onErrorsChange={setCustomFieldsErrors}
+							onDefinitionsChange={setCustomFieldDefs}
+						/>
+					)}
+
+					<div>
+						<label
+							htmlFor="doublescale-portal-content"
+							className="m-0 mb-1 block text-sm font-medium"
+						>
 							{__('Message', 'doublescale')}
-						</span>
+						</label>
 						<SupportRichText
 							message={content}
 							onChange={setContent}

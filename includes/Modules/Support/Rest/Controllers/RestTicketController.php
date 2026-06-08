@@ -637,6 +637,9 @@ class RestTicketController extends RestController {
 				'email' => $ticket->mailbox->email,
 				'name'  => $ticket->mailbox->name,
 			) : null;
+
+			$custom_data = is_array( $ticket->custom_data ) ? $ticket->custom_data : array();
+			$payload['custom_fields'] = self::render_custom_fields( $custom_data );
 		}
 
 		return $payload;
@@ -694,5 +697,17 @@ class RestTicketController extends RestController {
 			__( 'You can only access tickets assigned to you.', 'doublescale' ),
 			array( 'status' => 403 )
 		);
+	}
+
+	/**
+	 * @param array<string, mixed> $custom_data Stored ticket custom_data.
+	 * @return array<string, mixed>
+	 */
+	private static function render_custom_fields( array $custom_data ): array {
+		$class = '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService';
+		if ( ! class_exists( $class ) ) {
+			return array();
+		}
+		return ( new $class() )->render( $custom_data );
 	}
 }

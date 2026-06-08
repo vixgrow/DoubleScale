@@ -58,6 +58,7 @@ export interface Ticket {
 	 * (surfaced from `custom_data.cc_recipients` for a stable contract).
 	 */
 	cc_recipients?: string[];
+	custom_fields?: Record<string, RenderedCustomField>;
 	created_at: string | null;
 	updated_at: string | null;
 	contact?: ContactSummary | null;
@@ -94,6 +95,73 @@ export interface ConversationItem {
 	updated_at: string | null;
 	user: AgentSummary | null;
 	attachments?: ConversationAttachment[];
+}
+
+export type SupportCustomFieldType =
+	| 'text'
+	| 'textarea'
+	| 'number'
+	| 'select'
+	| 'radio'
+	| 'checkbox'
+	| 'date';
+
+export type CustomFieldConditionSource =
+	| 'ticket_title'
+	| 'ticket_content'
+	| 'ticket_priority'
+	| 'custom_field';
+
+export type CustomFieldConditionOperator =
+	| 'contains'
+	| 'not_contains'
+	| 'equals'
+	| 'not_equals'
+	| 'starts_with'
+	| 'ends_with';
+
+export interface CustomFieldCondition {
+	source: CustomFieldConditionSource;
+	operator: CustomFieldConditionOperator;
+	value: string;
+	field_key?: string;
+}
+
+export interface CustomFieldConditionalLogic {
+	enabled: boolean;
+	/** @deprecated Use `groups` for OR/AND nesting. Kept for legacy payloads. */
+	match: 'all' | 'any';
+	/** Flat list of conditions (legacy). Prefer `groups` when present. */
+	conditions: CustomFieldCondition[];
+	/** OR groups of AND conditions (Advanced Filters UI). */
+	groups?: CustomFieldCondition[][];
+}
+
+export interface SupportCustomFieldTypeMeta {
+	label: string;
+	group: 'standard' | 'integration' | string;
+	has_options: boolean;
+}
+
+export interface SupportCustomFieldDefinition {
+	key: string;
+	public_label: string;
+	admin_label?: string;
+	/** @deprecated Use public_label */
+	label?: string;
+	placeholder?: string;
+	type: SupportCustomFieldType | string;
+	options?: string[];
+	required?: boolean;
+	scope: 'admin' | 'portal' | 'both';
+	agent_only?: boolean;
+	conditional_logic?: CustomFieldConditionalLogic;
+}
+
+export interface RenderedCustomField {
+	label: string;
+	type: SupportCustomFieldType;
+	value: string | string[];
 }
 
 export interface PaginatedResponse<T> {

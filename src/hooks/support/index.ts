@@ -36,10 +36,19 @@ interface ApiOptions<TData> {
 	onError?: (error: string) => void;
 }
 
-const formatRestError = (err: unknown): string => {
-	const e = err as { message?: string };
+export const formatRestError = (err: unknown): string => {
+	if (err instanceof Error && err.message.trim()) {
+		return err.message.trim();
+	}
+	const e = err as {
+		message?: string;
+		data?: { message?: string };
+	};
 	if (typeof e?.message === 'string' && e.message.trim()) {
 		return e.message.trim();
+	}
+	if (typeof e?.data?.message === 'string' && e.data.message.trim()) {
+		return e.data.message.trim();
 	}
 	return __('Something went wrong. Please try again.', 'doublescale');
 };

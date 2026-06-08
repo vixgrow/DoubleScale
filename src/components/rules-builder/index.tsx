@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useLayoutEffect, useRef, useState } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -14,6 +14,8 @@ import { map } from 'lodash';
  */
 import { PlusIcon } from '@doublescale/components';
 import { Button } from '@/components/ui/button';
+import LogicConnector from '@/components/logic-connector';
+import { useLogicBracketStyleFromList } from '@/hooks/use-logic-bracket-style';
 import RuleGroupCard from '../../client/pages/automation/steps/workflow/conditions-modal/rule-group-card';
 
 export interface RuleItem {
@@ -46,48 +48,12 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 }) => {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-	const [orBracketStyle, setOrBracketStyle] = useState<{
-		top: number;
-		height: number;
-	}>({ top: 0, height: 0 });
-
-	// Compute OR bracket across groups
-	useLayoutEffect(() => {
-		const updateBracket = () => {
-			if (
-				rules.length <= 1 ||
-				!containerRef.current ||
-				!cardRefs.current[0] ||
-				!cardRefs.current[rules.length - 1]
-			) {
-				setOrBracketStyle({ top: 0, height: 0 });
-				return;
-			}
-			const containerRect = containerRef.current.getBoundingClientRect();
-			const firstCard = cardRefs.current[0];
-			const lastCard = cardRefs.current[rules.length - 1];
-			if (firstCard && lastCard) {
-				const firstRect = firstCard.getBoundingClientRect();
-				const lastRect = lastCard.getBoundingClientRect();
-				const firstMid =
-					firstRect.top - containerRect.top + firstRect.height / 2;
-				const lastMid =
-					lastRect.top - containerRect.top + lastRect.height / 2;
-				const height = Math.max(0, lastMid - firstMid);
-				setOrBracketStyle({ top: firstMid, height });
-			}
-		};
-
-		updateBracket();
-		const id1 = setTimeout(updateBracket, 0);
-		const id2 = setTimeout(updateBracket, 50);
-		window.addEventListener('resize', updateBracket);
-		return () => {
-			clearTimeout(id1);
-			clearTimeout(id2);
-			window.removeEventListener('resize', updateBracket);
-		};
-	}, [rules]);
+	const orBracketStyle = useLogicBracketStyleFromList(
+		rules.length > 1,
+		containerRef,
+		cardRefs,
+		rules.length
+	);
 
 	const addOrGroup = () => {
 		const firstGroup = Object.keys(rulesGroups)[0];
@@ -106,20 +72,11 @@ const RulesBuilder: React.FC<RulesBuilderProps> = ({
 	return (
 		<div className={className}>
 			<div ref={containerRef} className="flex flex-col gap-4 relative">
-				{rules.length > 1 && orBracketStyle.height > 0 && (
-					<div
-						className="absolute left-[10px]"
-						style={{
-							top: `${orBracketStyle.top}px`,
-							height: `${orBracketStyle.height}px`,
-						}}
-					>
-						<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl"></div>
-						<span className="absolute -left-5 top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full">
-							{__('OR', 'doublescale')}
-						</span>
-					</div>
-				)}
+				<LogicConnector
+					label={__('OR', 'doublescale')}
+					style={orBracketStyle}
+					variant="or"
+				/>
 				{map(rules, (ruleGroup, groupIndex) => (
 					<div
 						key={groupIndex}

@@ -20,6 +20,7 @@ import React, {
 	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import apiFetch from '@wordpress/api-fetch';
 import { X, Search, UserPlus } from 'lucide-react';
 
@@ -37,7 +38,7 @@ import {
 	type PendingAttachment,
 } from '@/components/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
-import type { Mailbox } from '@/types/support';
+import type { Mailbox, SupportCustomFieldDefinition } from '@/types/support';
 
 interface Props {
 	mailboxes: Mailbox[];
@@ -62,6 +63,13 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	const defaultMailbox =
 		mailboxes.find((m) => m.is_default) ?? mailboxes[0] ?? null;
 	const { data: assignableAgents } = useAssignableAgents();
+	const [customFieldDefs, setCustomFieldDefs] = useState<
+		SupportCustomFieldDefinition[]
+	>([]);
+	const [customData, setCustomData] = useState<Record<string, unknown>>({});
+	const [customFieldsErrors, setCustomFieldsErrors] = useState<
+		Record<string, string>
+	>({});
 
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
@@ -171,6 +179,35 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 			return;
 		}
 
+		const { payload: customDataPayload, errors: customFieldValidationErrors } =
+			applyFilters(
+				'doublescale_support_prepare_new_ticket_custom_data',
+				{ payload: {}, errors: {} },
+				{
+					scope: 'admin' as const,
+					form: {
+						title,
+						content,
+						priority,
+					},
+					customData,
+					definitions: customFieldDefs,
+				}
+			) as {
+				payload: Record<string, unknown>;
+				errors: Record<string, string>;
+			};
+		if (Object.keys(customFieldValidationErrors).length > 0) {
+			setCustomFieldsErrors(customFieldValidationErrors);
+			setError(
+				__(
+					'Please fill in all required custom fields.',
+					'doublescale'
+				)
+			);
+			return;
+		}
+
 		setSubmitting(true);
 		try {
 			const attachmentHashes = pendingAttachments.map(
@@ -185,6 +222,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 					agentUserId === '' ? undefined : Number(agentUserId),
 				attachment_hashes:
 					attachmentHashes.length > 0 ? attachmentHashes : undefined,
+				custom_data:
+					Object.keys(customDataPayload).length > 0
+						? customDataPayload
+						: undefined,
 				...(hasContact
 					? { contact_id: picked.id }
 					: {
@@ -465,6 +506,26 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							</select>
 						</div>
 					</div>
+
+					{
+						applyFilters(
+							'doublescale_support_new_ticket_custom_fields',
+							null,
+							{
+								scope: 'admin',
+								form: {
+									title,
+									content,
+									priority,
+								},
+								customData,
+								onCustomDataChange: setCustomData,
+								errors: customFieldsErrors,
+								onErrorsChange: setCustomFieldsErrors,
+								onDefinitionsChange: setCustomFieldDefs,
+							}
+						) as React.ReactNode
+					}
 
 					<div>
 						<label

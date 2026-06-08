@@ -451,6 +451,14 @@ class RestMailboxController extends RestController {
 			);
 		}
 
+		if ( $mailbox->is_default ) {
+			return new WP_Error(
+				'cannot_delete_default_mailbox',
+				__( 'You cannot delete the default mailbox. Set another mailbox as default first.', 'doublescale' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$params      = $request->get_json_params();
 		$fallback_id = is_array( $params ) && isset( $params['fallback_id'] ) ? (int) $params['fallback_id'] : 0;
 		if ( $fallback_id <= 0 ) {
@@ -793,6 +801,19 @@ class RestMailboxController extends RestController {
 		$receivable_error = $this->validate_receivability( $params, $existing );
 		if ( is_wp_error( $receivable_error ) ) {
 			return $receivable_error;
+		}
+
+		if (
+			$existing
+			&& $existing->is_default
+			&& isset( $params['is_default'] )
+			&& ! (bool) $params['is_default']
+		) {
+			return new WP_Error(
+				'cannot_unset_default_mailbox',
+				__( 'The default mailbox cannot be unset. Set another mailbox as default first.', 'doublescale' ),
+				array( 'status' => 400 )
+			);
 		}
 
 		return true;

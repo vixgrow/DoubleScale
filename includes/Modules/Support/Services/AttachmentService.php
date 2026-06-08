@@ -288,20 +288,37 @@ class AttachmentService {
 	/**
 	 * Shape attachments for REST conversation payloads.
 	 *
+	 * `is_inline` tells the client this attachment is already embedded in the
+	 * message body (an email inline image whose `cid:` was rewritten to its
+	 * signed URL by {@see rewrite_inline_image_srcs()}). The conversation UI
+	 * hides inline attachments from the separate attachment row so the same image
+	 * is not shown twice — once in the body and again as a thumbnail card.
+	 *
 	 * @param AttachmentModel $attachment Attachment model.
-	 * @return array{file_name: string, file_size: int, file_type: string, url: string}
+	 * @param bool            $is_inline  Whether the attachment is rendered inline in the body.
+	 * @return array{file_name: string, file_size: int, file_type: string, url: string, is_inline: bool}
 	 */
-	public function shape_for_api( AttachmentModel $attachment ): array {
+	public function shape_for_api( AttachmentModel $attachment, bool $is_inline = false ): array {
 		return array(
 			'file_name' => (string) $attachment->file_name,
 			'file_size' => (int) $attachment->file_size,
 			'file_type' => (string) $attachment->file_type,
 			'url'       => $this->signed_url( $attachment ),
+			'is_inline' => $is_inline,
 		);
 	}
 
 	/**
 	 * Eager-load active attachments keyed by activity id.
+	 *
+	 * Each attachment is flagged `is_inline` when it carries a `content_id` that
+	 * is actually referenced as an `<img src>` in its activity's body — i.e. it
+	 * was an inline email image and {@see rewrite_inline_image_srcs()} has already
+	 * embedded it in the rendered message. The conversation UI uses the flag to
+	 * exclude such images from the separate attachment row (avoiding the
+	 * "image shown twice" duplication). A `content_id`-bearing image whose cid is
+	 * NOT found in the body is left un-flagged so it still surfaces in the list as
+	 * a fallback rather than vanishing.
 	 *
 	 * @param int[] $activity_ids Activity ids.
 	 * @return array<int, array<int, array<string, mixed>>>
@@ -317,15 +334,92 @@ class AttachmentService {
 			->where( 'status', 'active' )
 			->get();
 
+		// Only load activity bodies when at least one attachment has a Content-ID
+		// (the inline-image case). The vast majority of activities carry plain
+		// uploads with no `content_id`, so this query is skipped on the hot path.
+		$bodies = $this->activity_bodies_for_inline( $rows, $ids );
+
 		$map = array();
 		foreach ( $rows as $attachment ) {
 			$aid = (int) $attachment->activity_id;
 			if ( ! isset( $map[ $aid ] ) ) {
 				$map[ $aid ] = array();
 			}
-			$map[ $aid ][] = $this->shape_for_api( $attachment );
+
+			$cid       = trim( (string) $attachment->content_id, " <>\t\r\n" );
+			$is_inline = '' !== $cid
+				&& isset( $bodies[ $aid ] )
+				&& $this->body_references_inline_image( $bodies[ $aid ], $attachment, $cid );
+
+			$map[ $aid ][] = $this->shape_for_api( $attachment, $is_inline );
 		}
 		return $map;
+	}
+
+	/**
+	 * Fetch the rendered body of each activity that owns a Content-ID attachment.
+	 *
+	 * Returns an empty map (and runs no query) when none of the supplied
+	 * attachments carry a `content_id`, keeping the common all-plain-uploads case
+	 * free of an extra DB round-trip.
+	 *
+	 * @param iterable $attachments  Active attachment models for the activities.
+	 * @param int[]    $activity_ids Activity ids in this batch.
+	 * @return array<int, string> activity id => body content.
+	 */
+	private function activity_bodies_for_inline( $attachments, array $activity_ids ): array {
+		$inline_activity_ids = array();
+		foreach ( $attachments as $attachment ) {
+			if ( '' !== trim( (string) $attachment->content_id, " <>\t\r\n" ) ) {
+				$inline_activity_ids[ (int) $attachment->activity_id ] = true;
+			}
+		}
+		if ( empty( $inline_activity_ids ) ) {
+			return array();
+		}
+
+		$wanted     = array_values( array_intersect( $activity_ids, array_keys( $inline_activity_ids ) ) );
+		$bodies     = array();
+		$activities = \DoubleScale\Modules\Activities\Models\ActivityModel::query()
+			->whereIn( 'id', $wanted )
+			->get();
+
+		foreach ( $activities as $activity ) {
+			$data                          = is_array( $activity->data ) ? $activity->data : array();
+			$bodies[ (int) $activity->id ] = isset( $data['content'] ) ? (string) $data['content'] : '';
+		}
+		return $bodies;
+	}
+
+	/**
+	 * Whether an HTML body embeds this attachment as an inline image.
+	 *
+	 * Two ways the image can appear in the body, both treated as "inline":
+	 *   1. Post-rewrite (the normal rendered state): {@see rewrite_inline_image_srcs()}
+	 *      has swapped `cid:` for the signed URL, which carries
+	 *      `ds_support_file={file_hash}`. We match on the file hash.
+	 *   2. Pre-rewrite / rewrite-skipped: the body still has `cid:{content_id}` or
+	 *      the bare Content-ID left behind after {@see wp_kses_post()} strips the
+	 *      unknown scheme. We match on the cid.
+	 *
+	 * @param string          $body       Rendered activity body HTML.
+	 * @param AttachmentModel $attachment The attachment under test.
+	 * @param string          $cid        Trimmed Content-ID of the attachment.
+	 * @return bool
+	 */
+	private function body_references_inline_image( string $body, AttachmentModel $attachment, string $cid ): bool {
+		if ( '' === $body ) {
+			return false;
+		}
+
+		$file_hash = (string) $attachment->file_hash;
+		if ( '' !== $file_hash && false !== stripos( $body, 'ds_support_file=' . $file_hash ) ) {
+			return true;
+		}
+
+		return false !== stripos( $body, 'cid:' . $cid )
+			|| false !== stripos( $body, '"' . $cid . '"' )
+			|| false !== stripos( $body, "'" . $cid . "'" );
 	}
 
 	/**

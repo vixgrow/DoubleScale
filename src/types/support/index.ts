@@ -73,6 +73,13 @@ export interface ConversationAttachment {
 	file_size: number;
 	file_type: string;
 	url: string;
+	/**
+	 * True when this attachment is an inline email image already embedded in the
+	 * message body (its `cid:` was rewritten to the signed URL). The conversation
+	 * UI hides these from the separate attachment row to avoid showing the same
+	 * image twice. Optional for backward-compat with cached/older payloads.
+	 */
+	is_inline?: boolean;
 }
 
 export interface ConversationItem {

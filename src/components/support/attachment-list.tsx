@@ -75,8 +75,16 @@ const AttachmentList: React.FC<AttachmentListProps> = ({
 		return null;
 	}
 
-	const images = attachments.filter((att) => isImage(att.file_type));
-	const files = attachments.filter((att) => !isImage(att.file_type));
+	// Inline email images are already embedded in the message body (their `cid:`
+	// was rewritten to a signed URL). Excluding them here prevents the same image
+	// from appearing twice — once in the body and again as a thumbnail card.
+	const visible = attachments.filter((att) => !att.is_inline);
+	if (!visible.length) {
+		return null;
+	}
+
+	const images = visible.filter((att) => isImage(att.file_type));
+	const files = visible.filter((att) => !isImage(att.file_type));
 
 	return (
 		<div className="mt-2 space-y-2">

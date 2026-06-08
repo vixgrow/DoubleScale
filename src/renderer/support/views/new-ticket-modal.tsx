@@ -17,6 +17,7 @@ import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import {
 	AttachmentUploader,
 	toPendingAttachment,
+	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
 
@@ -81,7 +82,7 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 			const result = await uploadPortalAttachmentTemp(file);
 			setPendingAttachments((prev) => [
 				...prev,
-				toPendingAttachment(result),
+				toPendingAttachment(result, file),
 			]);
 		} catch (e) {
 			setError(
@@ -290,7 +291,7 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 							onSelect={handleAttachmentSelect}
 							onRemove={(hash) =>
 								setPendingAttachments((prev) =>
-									prev.filter((p) => p.file_hash !== hash)
+									removePendingByHash(prev, hash)
 								)
 							}
 						/>

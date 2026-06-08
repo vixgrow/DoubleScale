@@ -35,6 +35,7 @@ import {
 import {
 	AttachmentUploader,
 	toPendingAttachment,
+	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
@@ -145,7 +146,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 			const result = await uploadAttachmentTemp(file);
 			setPendingAttachments((prev) => [
 				...prev,
-				toPendingAttachment(result),
+				toPendingAttachment(result, file),
 			]);
 		} catch (err) {
 			setError(
@@ -550,7 +551,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							onSelect={handleAttachmentSelect}
 							onRemove={(hash) =>
 								setPendingAttachments((prev) =>
-									prev.filter((p) => p.file_hash !== hash)
+									removePendingByHash(prev, hash)
 								)
 							}
 						/>

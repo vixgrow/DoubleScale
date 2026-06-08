@@ -348,14 +348,29 @@ export interface ReplyPayload {
 	cc?: string[];
 }
 
+/**
+ * Resolve the WordPress REST API root for raw `fetch()` uploads. File uploads
+ * send `multipart/form-data`, which `apiFetch` can't carry, so we build the
+ * absolute URL ourselves. Reading `wpApiSettings.root` (set by WP core in the
+ * admin) is what makes this work on sub-directory installs — a hardcoded
+ * `/wp-json/` would resolve against the document root, not the WP install path,
+ * and return the site's 404 HTML (the `Unexpected token '<'` JSON error).
+ */
+const restRoot = (): string => {
+	const settings = (window as { wpApiSettings?: { root?: string } })
+		.wpApiSettings;
+	const root = settings?.root || '/wp-json/';
+	return root.endsWith('/') ? root : `${root}/`;
+};
+
 const postAttachment = async (
-	path: string,
+	route: string,
 	file: File
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
 
-	const response = await fetch(path, {
+	const response = await fetch(`${restRoot()}${route}`, {
 		method: 'POST',
 		body: formData,
 		credentials: 'same-origin',
@@ -378,7 +393,7 @@ export const uploadAttachment = (
 	file: File
 ): Promise<AttachmentUploadResult> =>
 	postAttachment(
-		`/wp-json/doublescale/v1/support/tickets/${ticketId}/attachments`,
+		`doublescale/v1/support/tickets/${ticketId}/attachments`,
 		file
 	);
 
@@ -389,7 +404,7 @@ export const uploadAttachment = (
 export const uploadAttachmentTemp = (
 	file: File
 ): Promise<AttachmentUploadResult> =>
-	postAttachment('/wp-json/doublescale/v1/support/attachments', file);
+	postAttachment('doublescale/v1/support/attachments', file);
 
 export const addReply = (ticketId: number, payload: ReplyPayload | string) => {
 	const data =

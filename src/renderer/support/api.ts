@@ -144,14 +144,27 @@ export interface CreatePortalTicketPayload {
 	attachment_hashes?: string[];
 }
 
+/**
+ * Resolve the WordPress REST API root for raw `fetch()` uploads. File uploads
+ * send `multipart/form-data`, which `apiFetch` can't carry, so we build the
+ * absolute URL from the `rest_root` the portal handler localized (it comes from
+ * `rest_url()`, so it already includes any sub-directory install path). A
+ * hardcoded `/wp-json/` would resolve against the document root and return the
+ * site's 404 HTML (the `Unexpected token '<'` JSON error).
+ */
+const restRoot = (): string => {
+	const root = config?.rest_root || '/wp-json/';
+	return root.endsWith('/') ? root : `${root}/`;
+};
+
 const postPortalAttachment = async (
-	path: string,
+	route: string,
 	file: File
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
 
-	const response = await fetch(path, {
+	const response = await fetch(`${restRoot()}${route}`, {
 		method: 'POST',
 		body: formData,
 		credentials: 'same-origin',
@@ -173,7 +186,7 @@ export const uploadPortalAttachment = (
 	file: File
 ): Promise<AttachmentUploadResult> =>
 	postPortalAttachment(
-		`/wp-json/doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
+		`doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
 		file
 	);
 
@@ -185,7 +198,7 @@ export const uploadPortalAttachmentTemp = (
 	file: File
 ): Promise<AttachmentUploadResult> =>
 	postPortalAttachment(
-		'/wp-json/doublescale/v1/support/portal/attachments',
+		'doublescale/v1/support/portal/attachments',
 		file
 	);
 

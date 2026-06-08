@@ -121,8 +121,12 @@ export interface CustomFieldCondition {
 
 export interface CustomFieldConditionalLogic {
 	enabled: boolean;
+	/** @deprecated Use `groups` for OR/AND nesting. Kept for legacy payloads. */
 	match: 'all' | 'any';
+	/** Flat list of conditions (legacy). Prefer `groups` when present. */
 	conditions: CustomFieldCondition[];
+	/** OR groups of AND conditions (Advanced Filters UI). */
+	groups?: CustomFieldCondition[][];
 }
 
 export interface SupportCustomFieldTypeMeta {

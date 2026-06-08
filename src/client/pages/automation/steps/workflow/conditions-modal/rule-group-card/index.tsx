@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useLayoutEffect, useRef, useState } from '@wordpress/element';
+import { useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -15,6 +15,8 @@ import { AlertTriangle } from 'lucide-react';
  */
 import { Rule, PlusIcon } from '@doublescale/components';
 import { getRuleBySlug } from '@doublescale/utils';
+import LogicConnector from '@/components/logic-connector';
+import { useLogicBracketStyle } from '@/hooks/use-logic-bracket-style';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,35 +65,13 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const firstRowRef = useRef<HTMLDivElement | null>(null);
 	const lastRowRef = useRef<HTMLDivElement | null>(null);
-	const [bracketStyle, setBracketStyle] = useState<{
-		top: number;
-		height: number;
-	}>({ top: 0, height: 0 });
-
-	useLayoutEffect(() => {
-		const update = () => {
-			if (
-				!wrapperRef.current ||
-				!firstRowRef.current ||
-				!lastRowRef.current
-			)
-				return;
-			const containerRect = wrapperRef.current.getBoundingClientRect();
-			const firstRect = firstRowRef.current.getBoundingClientRect();
-			const lastRect = lastRowRef.current.getBoundingClientRect();
-			const firstMid =
-				firstRect.top - containerRect.top + firstRect.height / 2;
-			const lastMid =
-				lastRect.top - containerRect.top + lastRect.height / 2;
-			setBracketStyle({
-				top: firstMid,
-				height: Math.max(0, lastMid - firstMid),
-			});
-		};
-		update();
-		window.addEventListener('resize', update);
-		return () => window.removeEventListener('resize', update);
-	}, [ruleGroup.length]);
+	const bracketStyle = useLogicBracketStyle(
+		ruleGroup.length > 1,
+		wrapperRef,
+		firstRowRef,
+		lastRowRef,
+		[ruleGroup.length]
+	);
 
 	return (
 		<Card
@@ -99,21 +79,11 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 		>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">
-					{ruleGroup.length > 1 && (
-						<div
-							className="absolute"
-							style={{
-								left: 8,
-								top: bracketStyle.top,
-								height: bracketStyle.height,
-							}}
-						>
-							<div className="h-full w-6 border border-dashed border-primary border-r-0 rounded-l-2xl"></div>
-							<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-semibold text-primary bg-secondary px-2 py-1 rounded-full">
-								{__('AND', 'doublescale')}
-							</span>
-						</div>
-					)}
+					<LogicConnector
+						label={__('AND', 'doublescale')}
+						style={bracketStyle}
+						variant="and"
+					/>
 					<div
 						ref={containerRef}
 						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'pl-8' : ''}`}

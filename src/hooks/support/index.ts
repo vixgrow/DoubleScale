@@ -332,6 +332,11 @@ export const deleteTicket = (id: number) =>
 export interface ReplyPayload {
 	content: string;
 	attachment_hashes?: string[];
+	/**
+	 * CC recipients for this reply (agent-only). Forwarded as-is; the server
+	 * validates/dedupes via TicketService::sanitize_cc_list. Notes ignore it.
+	 */
+	cc?: string[];
 }
 
 export const uploadAttachment = async (

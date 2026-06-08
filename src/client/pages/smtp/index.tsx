@@ -43,17 +43,7 @@ import EmailTestIcon from '../../../components/icons/email-test';
 import SendIcon from '../../../components/icons/send';
 import TrashIcon from '@doublescale/shared/icons/trash';
 import Editor from '@/components/editor';
-
-/** True when Lexical HTML has visible text (not only empty blocks). */
-function htmlEditorHasMeaningfulContent(html: string): boolean {
-    if (!html || !html.trim()) {
-        return false;
-    }
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    const text = (div.textContent || '').replace(/\u00a0/g, ' ').trim();
-    return text.length > 0;
-}
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 
 function escapeHtmlForEditor(text: string): string {
     return text

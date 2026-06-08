@@ -13,6 +13,8 @@ import { ArrowLeft, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { StatusPill, PriorityPill } from '@/components/support';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 
 import {
 	addPortalReply,
@@ -45,8 +47,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 	const [sendError, setSendError] = useState<string | null>(null);
 
 	const handleSend = async () => {
-		const content = draft.trim();
-		if (!content) {
+		if (!htmlEditorHasMeaningfulContent(draft)) {
 			return;
 		}
 		setSending(true);
@@ -55,7 +56,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 			const hashes = pendingAttachments.map((a) => a.file_hash);
 			await addPortalReply(
 				ticketId,
-				content,
+				draft,
 				hashes.length > 0 ? hashes : undefined
 			);
 			setDraft('');
@@ -148,22 +149,13 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 			)}
 
 			<section>
-				<label
-					htmlFor="doublescale-portal-reply"
-					className="m-0 mb-2 block text-sm font-semibold"
-				>
+				<span className="m-0 mb-2 block text-sm font-semibold">
 					{__('Add a reply', 'doublescale')}
-				</label>
-				<textarea
-					id="doublescale-portal-reply"
-					value={draft}
-					onChange={(e) => setDraft(e.target.value)}
-					rows={5}
-					placeholder={__(
-						'Type your reply here…',
-						'doublescale'
-					)}
-					className="block w-full rounded-md border border-input bg-background p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+				</span>
+				<SupportRichText
+					message={draft}
+					onChange={setDraft}
+					placeholder={__('Type your reply here…', 'doublescale')}
 				/>
 				<AttachmentUploader
 					pending={pendingAttachments}
@@ -202,7 +194,9 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 				<div className="mt-3 flex justify-end">
 					<Button
 						onClick={handleSend}
-						disabled={sending || !draft.trim()}
+						disabled={
+							sending || !htmlEditorHasMeaningfulContent(draft)
+						}
 					>
 						<Send width={14} height={14} className="mr-1" />
 						{sending
@@ -252,7 +246,7 @@ const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
 				 * (whitelisted post-content tags only — no <script>, no <iframe>).
 				 * Rendering as text would show literal `<p>` tags to the user;
 				 * dangerouslySetInnerHTML is safe here because of the server-side
-				 * filter applied at write time in TicketService::add_reply().
+				 * filter applied at write time in TicketService::sanitize_content().
 				 */}
 				<div
 					className="prose prose-sm max-w-none text-foreground"

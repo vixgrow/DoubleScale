@@ -30,9 +30,13 @@ import {
 	ReplyIcon,
 	ConversationIcon,
 	AttachmentUploader,
+	CcRecipientsInput,
 	toPendingAttachment,
 	type PendingAttachment,
 } from '@/components/support';
+import { Badge } from '@/components/ui/badge';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import {
 	TICKET_STATUSES,
 	TICKET_PRIORITIES,
@@ -134,7 +138,7 @@ const ConversationBubble: React.FC<{
 			</div>
 			<div
 				className="prose prose-sm max-w-none text-gray-800"
-				/* eslint-disable-next-line react/no-danger -- WP REST already sanitizes via wp_kses_post; we trust the structured content field. */
+				/* eslint-disable-next-line react/no-danger -- content is sanitized at write time in TicketService::sanitize_content() (wp_kses_post). */
 				dangerouslySetInnerHTML={{
 					__html:
 						typeof item.data.content === 'string'
@@ -142,6 +146,14 @@ const ConversationBubble: React.FC<{
 							: '',
 				}}
 			/>
+			{!isNote && item.cc && item.cc.length > 0 && (
+				<div className="mt-2 text-xs text-gray-500">
+					<span className="font-medium">
+						{__('Cc:', 'doublescale')}
+					</span>{' '}
+					{item.cc.join(', ')}
+				</div>
+			)}
 			<AttachmentLinks attachments={item.attachments} />
 		</div>
 	);
@@ -164,6 +176,10 @@ const SupportTicketDetail: React.FC = () => {
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
 	const [content, setContent] = useState('');
+	// Per-reply CC (agent-only). `showCc` toggles the chip input ("Apply CC" /
+	// "Discard CC"); notes are internal so CC never applies there.
+	const [cc, setCc] = useState<string[]>([]);
+	const [showCc, setShowCc] = useState(false);
 	const [sending, setSending] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const [pendingAttachments, setPendingAttachments] = useState<
@@ -203,12 +219,15 @@ const SupportTicketDetail: React.FC = () => {
 		__('Customer', 'doublescale');
 
 	const handleSend = async () => {
-		if (!content.trim()) {
+		if (!htmlEditorHasMeaningfulContent(content)) {
 			setFeedback(__('Please type something first.', 'doublescale'));
 			return;
 		}
 		setSending(true);
 		setFeedback(null);
+
+		// CC only rides on replies (notes are internal). Empty → omit entirely.
+		const replyCc = tab === 'reply' && cc.length > 0 ? cc : undefined;
 
 		const optimistic: ConversationItem = {
 			id: -Date.now(), // negative + millisecond-unique, guaranteed not to collide
@@ -216,7 +235,8 @@ const SupportTicketDetail: React.FC = () => {
 			type: tab === 'reply' ? 'support_reply' : 'support_note',
 			contact_id: null,
 			user_id: null,
-			data: { content, source: 'web' },
+			data: { content, source: 'web', ...(replyCc ? { cc: replyCc } : {}) },
+			cc: replyCc,
 			created_at: new Date()
 				.toISOString()
 				.replace('T', ' ')
@@ -226,8 +246,11 @@ const SupportTicketDetail: React.FC = () => {
 		};
 		setPendingItems((prev) => [...prev, optimistic]);
 		const draftContent = content;
+		const draftCc = cc;
 		const attachmentHashes = pendingAttachments.map((a) => a.file_hash);
 		setContent('');
+		setCc([]);
+		setShowCc(false);
 		setPendingAttachments([]);
 
 		try {
@@ -235,6 +258,7 @@ const SupportTicketDetail: React.FC = () => {
 				content: draftContent,
 				attachment_hashes:
 					attachmentHashes.length > 0 ? attachmentHashes : undefined,
+				...(replyCc ? { cc: replyCc } : {}),
 			};
 			if (tab === 'reply') {
 				await addReply(ticketId, payload);
@@ -250,11 +274,15 @@ const SupportTicketDetail: React.FC = () => {
 		} catch (err) {
 			const msg = (err as { message?: string })?.message ?? 'Send failed';
 			setFeedback(msg);
-			// Roll back the optimistic insertion and restore the draft.
+			// Roll back the optimistic insertion and restore the draft (+ CC).
 			setPendingItems((prev) =>
 				prev.filter((p) => p.id !== optimistic.id)
 			);
 			setContent(draftContent);
+			if (draftCc.length > 0) {
+				setCc(draftCc);
+				setShowCc(true);
+			}
 			setPendingAttachments(
 				attachmentHashes.map((hash, i) => ({
 					file_hash: hash,
@@ -483,6 +511,20 @@ const SupportTicketDetail: React.FC = () => {
 						</select>
 					</label>
 				</div>
+
+				{/* Accumulated CC participants across all replies on this ticket. */}
+				{ticket.cc_recipients && ticket.cc_recipients.length > 0 && (
+					<div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+						<span className="text-xs uppercase tracking-wide text-gray-500">
+							{__('CC on this ticket', 'doublescale')}
+						</span>
+						{ticket.cc_recipients.map((addr) => (
+							<Badge key={addr} variant="secondary">
+								{addr}
+							</Badge>
+						))}
+					</div>
+				)}
 			</div>
 
 			{/* Conversation thread */}
@@ -544,8 +586,9 @@ const SupportTicketDetail: React.FC = () => {
 					</button>
 				</div>
 				<div className="p-4">
-					<textarea
-						className="w-full border rounded p-3 text-sm min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+					<SupportRichText
+						message={content}
+						onChange={setContent}
 						placeholder={
 							tab === 'reply'
 								? __(
@@ -557,9 +600,43 @@ const SupportTicketDetail: React.FC = () => {
 										'doublescale'
 									)
 						}
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
 					/>
+					{tab === 'reply' && (
+						<div className="mt-3">
+							{showCc ? (
+								<div className="rounded border border-gray-200 bg-gray-50 p-3">
+									<div className="flex items-center justify-between">
+										<span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+											{__('CC recipients', 'doublescale')}
+										</span>
+										<button
+											type="button"
+											className="text-xs text-gray-500 hover:text-gray-700"
+											onClick={() => {
+												setShowCc(false);
+												setCc([]);
+											}}
+										>
+											{__('Discard CC', 'doublescale')}
+										</button>
+									</div>
+									<CcRecipientsInput
+										value={cc}
+										onChange={setCc}
+										disabled={sending}
+									/>
+								</div>
+							) : (
+								<button
+									type="button"
+									className="text-sm text-blue-600 hover:underline"
+									onClick={() => setShowCc(true)}
+								>
+									{__('Apply CC', 'doublescale')}
+								</button>
+							)}
+						</div>
+					)}
 					<AttachmentUploader
 						pending={pendingAttachments}
 						uploading={uploading}
@@ -580,7 +657,10 @@ const SupportTicketDetail: React.FC = () => {
 						<button
 							type="button"
 							onClick={handleSend}
-							disabled={sending || !content.trim()}
+							disabled={
+								sending ||
+								!htmlEditorHasMeaningfulContent(content)
+							}
 							className={`px-4 py-2 text-sm font-medium text-white rounded ${
 								tab === 'reply'
 									? 'bg-blue-600 hover:bg-blue-700'

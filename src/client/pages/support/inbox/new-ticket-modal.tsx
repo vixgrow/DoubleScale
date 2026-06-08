@@ -24,6 +24,8 @@ import apiFetch from '@wordpress/api-fetch';
 import { X, Search, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 import { createTicket, useAssignableAgents } from '@/hooks/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
 import type { Mailbox } from '@/types/support';
@@ -119,7 +121,7 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!title.trim() || !content.trim()) {
+		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
 			setError(
 				__('Title and opening message are required.', 'doublescale')
 			);
@@ -434,11 +436,9 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							{__('Opening message', 'doublescale')}{' '}
 							<span className="text-red-500">*</span>
 						</label>
-						<textarea
-							id="ds-new-ticket-content"
-							className="w-full border rounded px-3 py-2 text-sm min-h-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
+						<SupportRichText
+							message={content}
+							onChange={setContent}
 							placeholder={__(
 								'What is the customer reporting?',
 								'doublescale'

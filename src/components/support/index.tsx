@@ -97,6 +97,7 @@ export {
 	toPendingAttachment,
 } from './attachment-uploader';
 export type { PendingAttachment } from './attachment-uploader';
+export { default as CcRecipientsInput } from './cc-recipients-input';
 
 export const PriorityPill: React.FC<{ priority: TicketPriority }> = ({
 	priority,

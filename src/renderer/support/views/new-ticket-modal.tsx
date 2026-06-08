@@ -12,6 +12,8 @@ import { __ } from '@wordpress/i18n';
 import { X, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
 
 import { createPortalTicket, usePortalMailboxes } from '../api';
 import type { PortalTicket } from '../types';
@@ -37,7 +39,7 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const handleSubmit = async () => {
-		if (!title.trim() || !content.trim()) {
+		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
 			setError(__('Please fill in both title and message.', 'doublescale'));
 			return;
 		}
@@ -46,7 +48,7 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 		try {
 			const ticket = await createPortalTicket({
 				title: title.trim(),
-				content: content.trim(),
+				content,
 				mailbox_id: mailboxId,
 			});
 			onCreated(ticket);
@@ -141,18 +143,12 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 					)}
 
 					<div>
-						<label
-							htmlFor="doublescale-portal-content"
-							className="m-0 mb-1 block text-sm font-medium"
-						>
+						<span className="m-0 mb-1 block text-sm font-medium">
 							{__('Message', 'doublescale')}
-						</label>
-						<textarea
-							id="doublescale-portal-content"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
-							rows={6}
-							className="block w-full rounded-md border border-input bg-background p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						</span>
+						<SupportRichText
+							message={content}
+							onChange={setContent}
 							placeholder={__(
 								'Tell us what we can help with…',
 								'doublescale'

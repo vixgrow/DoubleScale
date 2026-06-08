@@ -4,10 +4,11 @@
  * lists, and alignment.
  *
  * This composition imports the merge-tags pieces (`AddingShortCode`,
- * `LinkMergeTagsTrigger`), which in turn import `@doublescale/components`. It is
- * loaded by {@see ToolbarPlugin} via `React.lazy()` so it lands in a SEPARATE
- * async chunk; the support variant never requests it. Do not import this file
- * statically from a file that the public portal bundle reaches.
+ * `LinkMergeTagsTrigger`), which in turn import `@doublescale/components` (the
+ * admin SPA tree). It is imported ONLY by the email {@see Editor}; the support
+ * composer ({@see SupportRichText}) imports {@see SupportToolbar} instead, so
+ * the public portal bundle never reaches this file or the admin tree. Do not
+ * import this file from any module the support/renderer bundle can reach.
  */
 
 /**

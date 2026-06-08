@@ -25,7 +25,18 @@ import apiFetch from '@wordpress/api-fetch';
 import { X, Search, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { createTicket, useAssignableAgents } from '@/hooks/support';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import {
+	createTicket,
+	uploadAttachmentTemp,
+	useAssignableAgents,
+} from '@/hooks/support';
+import {
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
+} from '@/components/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
 import type { Mailbox, SupportCustomFieldDefinition } from '@/types/support';
 
@@ -69,6 +80,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	const [agentUserId, setAgentUserId] = useState<number | ''>('');
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
 
 	// --- Customer selection (Q1) ---------------------------------------------
 	// Two mutually-exclusive modes: pick an existing contact (binds contact_id),
@@ -123,11 +138,31 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		};
 	}, [query, mode, picked, runSearch]);
 
+	const handleAttachmentSelect = async (file: File) => {
+		setUploading(true);
+		setError(null);
+		try {
+			const result = await uploadAttachmentTemp(file);
+			setPendingAttachments((prev) => [
+				...prev,
+				toPendingAttachment(result),
+			]);
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: __('Upload failed.', 'doublescale')
+			);
+		} finally {
+			setUploading(false);
+		}
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
 
-		if (!title.trim() || !content.trim()) {
+		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
 			setError(
 				__('Title and opening message are required.', 'doublescale')
 			);
@@ -175,6 +210,9 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 
 		setSubmitting(true);
 		try {
+			const attachmentHashes = pendingAttachments.map(
+				(a) => a.file_hash
+			);
 			const ticket = await createTicket({
 				title: title.trim(),
 				content,
@@ -182,6 +220,8 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 				priority,
 				agent_user_id:
 					agentUserId === '' ? undefined : Number(agentUserId),
+				attachment_hashes:
+					attachmentHashes.length > 0 ? attachmentHashes : undefined,
 				custom_data:
 					Object.keys(customDataPayload).length > 0
 						? customDataPayload
@@ -495,15 +535,24 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 							{__('Opening message', 'doublescale')}{' '}
 							<span className="text-red-500">*</span>
 						</label>
-						<textarea
-							id="ds-new-ticket-content"
-							className="w-full border rounded px-3 py-2 text-sm min-h-[140px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
+						<SupportRichText
+							message={content}
+							onChange={setContent}
 							placeholder={__(
 								'What is the customer reporting?',
 								'doublescale'
 							)}
+						/>
+						<AttachmentUploader
+							pending={pendingAttachments}
+							uploading={uploading}
+							disabled={submitting}
+							onSelect={handleAttachmentSelect}
+							onRemove={(hash) =>
+								setPendingAttachments((prev) =>
+									prev.filter((p) => p.file_hash !== hash)
+								)
+							}
 						/>
 					</div>
 

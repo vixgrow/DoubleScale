@@ -142,6 +142,21 @@ class RestPortalController extends RestController {
 				),
 			)
 		);
+
+		// Ticketless upload for a customer composing their FIRST ticket (no ticket
+		// to scope to yet). A literal segment on the portal base — WP resolves it
+		// ahead of the `tickets/(?P<ticket_id>…)` pattern above. Linked at create.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload_attachment_unticketed' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
 	}
 
 	// ---------------------------------------------------------------------
@@ -526,6 +541,46 @@ class RestPortalController extends RestController {
 			(int) $ticket->id,
 			array( 'contact_id' => (int) $contact->id )
 		);
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		return new WP_REST_Response(
+			array(
+				'file_hash' => (string) $attachment->file_hash,
+				'file_name' => (string) $attachment->file_name,
+				'file_size' => (int) $attachment->file_size,
+				'file_type' => (string) $attachment->file_type,
+			),
+			201
+		);
+	}
+
+	/**
+	 * Customer upload BEFORE the ticket exists (first-ticket composer). Stores an
+	 * unticketed temp row tagged with the customer's contact when one already
+	 * exists (a returning customer); a brand-new customer has no contact row yet,
+	 * so the row is uploaded contact-less and linked at create time by its hash.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function upload_attachment_unticketed( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$files = $request->get_file_params();
+		$file  = isset( $files['file'] ) && is_array( $files['file'] ) ? $files['file'] : null;
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$contact  = $this->lookup_contact_for_current_user();
+		$uploader = $contact ? array( 'contact_id' => (int) $contact->id ) : array();
+
+		$attachment = ( new AttachmentService() )->store_upload( $file, 0, $uploader );
 		if ( is_wp_error( $attachment ) ) {
 			return $attachment;
 		}

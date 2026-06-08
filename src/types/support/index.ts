@@ -53,6 +53,11 @@ export interface Ticket {
 	response_count: number;
 	tag_ids: number[];
 	custom_data: Record<string, unknown>;
+	/**
+	 * Accumulated union of every CC recipient ever used on this ticket
+	 * (surfaced from `custom_data.cc_recipients` for a stable contract).
+	 */
+	cc_recipients?: string[];
 	custom_fields?: Record<string, RenderedCustomField>;
 	created_at: string | null;
 	updated_at: string | null;
@@ -81,8 +86,11 @@ export interface ConversationItem {
 		event_key?: string;
 		from?: string | number | null;
 		to?: string | number | null;
+		cc?: string[];
 		[key: string]: unknown;
 	};
+	/** CC recipients on this reply (also present in `data.cc`). */
+	cc?: string[];
 	created_at: string | null;
 	updated_at: string | null;
 	user: AgentSummary | null;

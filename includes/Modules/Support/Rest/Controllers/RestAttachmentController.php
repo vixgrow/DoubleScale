@@ -46,6 +46,21 @@ class RestAttachmentController extends RestController {
 				),
 			)
 		);
+
+		// Ticketless upload for the "compose a new ticket" flow — the file is
+		// staged before the ticket exists and linked at create time by its hash.
+		// A sibling path (not nested under /tickets) since there is no ticket yet.
+		register_rest_route(
+			$this->namespace,
+			'/support/attachments',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload_unticketed' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -74,6 +89,45 @@ class RestAttachmentController extends RestController {
 		$attachment = $this->attachments()->store_upload(
 			$file,
 			(int) $ticket->id,
+			array( 'user_id' => get_current_user_id() )
+		);
+		if ( is_wp_error( $attachment ) ) {
+			return $attachment;
+		}
+
+		return new WP_REST_Response(
+			array(
+				'file_hash' => (string) $attachment->file_hash,
+				'file_name' => (string) $attachment->file_name,
+				'file_size' => (int) $attachment->file_size,
+				'file_type' => (string) $attachment->file_type,
+			),
+			201
+		);
+	}
+
+	/**
+	 * Upload a file BEFORE a ticket exists (new-ticket composer). Stores an
+	 * unticketed temp row and returns its hash; the create call links it.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function upload_unticketed( $request ) {
+		$disabled = $this->require_module( 'support' );
+		if ( $disabled ) {
+			return $disabled;
+		}
+
+		$files = $request->get_file_params();
+		$file  = isset( $files['file'] ) && is_array( $files['file'] ) ? $files['file'] : null;
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$attachment = $this->attachments()->store_upload(
+			$file,
+			0,
 			array( 'user_id' => get_current_user_id() )
 		);
 		if ( is_wp_error( $attachment ) ) {

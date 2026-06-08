@@ -341,27 +341,29 @@ export const deleteTicket = (id: number) =>
 export interface ReplyPayload {
 	content: string;
 	attachment_hashes?: string[];
+	/**
+	 * CC recipients for this reply (agent-only). Forwarded as-is; the server
+	 * validates/dedupes via TicketService::sanitize_cc_list. Notes ignore it.
+	 */
+	cc?: string[];
 }
 
-export const uploadAttachment = async (
-	ticketId: number,
+const postAttachment = async (
+	path: string,
 	file: File
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
 
-	const response = await fetch(
-		`/wp-json/doublescale/v1/support/tickets/${ticketId}/attachments`,
-		{
-			method: 'POST',
-			body: formData,
-			credentials: 'same-origin',
-			headers: {
-				'X-WP-Nonce': (window as { wpApiSettings?: { nonce?: string } })
-					.wpApiSettings?.nonce as string,
-			},
-		}
-	);
+	const response = await fetch(path, {
+		method: 'POST',
+		body: formData,
+		credentials: 'same-origin',
+		headers: {
+			'X-WP-Nonce': (window as { wpApiSettings?: { nonce?: string } })
+				.wpApiSettings?.nonce as string,
+		},
+	});
 
 	if (!response.ok) {
 		const err = (await response.json()) as { message?: string };
@@ -370,6 +372,24 @@ export const uploadAttachment = async (
 
 	return response.json() as Promise<AttachmentUploadResult>;
 };
+
+export const uploadAttachment = (
+	ticketId: number,
+	file: File
+): Promise<AttachmentUploadResult> =>
+	postAttachment(
+		`/wp-json/doublescale/v1/support/tickets/${ticketId}/attachments`,
+		file
+	);
+
+/**
+ * Upload a file BEFORE a ticket exists (new-ticket composer). Returns a hash
+ * the caller passes as `attachment_hashes` to `createTicket`, which links it.
+ */
+export const uploadAttachmentTemp = (
+	file: File
+): Promise<AttachmentUploadResult> =>
+	postAttachment('/wp-json/doublescale/v1/support/attachments', file);
 
 export const addReply = (ticketId: number, payload: ReplyPayload | string) => {
 	const data =

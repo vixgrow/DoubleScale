@@ -12,13 +12,24 @@ import { __ } from '@wordpress/i18n';
 import { X, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import SupportRichText from '@/components/editor/support-rich-text';
+import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import {
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
+} from '@/components/support';
 
 import {
 	PortalNewTicketCustomFieldsBlock,
 	preparePortalNewTicketCustomData,
 } from '@doublescale-pro/support-portal-custom-fields';
 
-import { createPortalTicket, usePortalMailboxes } from '../api';
+import {
+	createPortalTicket,
+	uploadPortalAttachmentTemp,
+	usePortalMailboxes,
+} from '../api';
 import {
 	PRIORITY_LABELS,
 	TICKET_PRIORITIES,
@@ -58,9 +69,33 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const [mailboxId, setMailboxId] = useState<number | undefined>(boxId);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
+
+	const handleAttachmentSelect = async (file: File) => {
+		setUploading(true);
+		setError(null);
+		try {
+			const result = await uploadPortalAttachmentTemp(file);
+			setPendingAttachments((prev) => [
+				...prev,
+				toPendingAttachment(result),
+			]);
+		} catch (e) {
+			setError(
+				e instanceof Error
+					? e.message
+					: __('Upload failed.', 'doublescale')
+			);
+		} finally {
+			setUploading(false);
+		}
+	};
 
 	const handleSubmit = async () => {
-		if (!title.trim() || !content.trim()) {
+		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
 			setError(__('Please fill in both title and message.', 'doublescale'));
 			return;
 		}
@@ -90,11 +125,14 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 		setSubmitting(true);
 		setError(null);
 		try {
+			const attachmentHashes = pendingAttachments.map((a) => a.file_hash);
 			const ticket = await createPortalTicket({
 				title: title.trim(),
-				content: content.trim(),
+				content,
 				mailbox_id: mailboxId,
 				priority,
+				attachment_hashes:
+					attachmentHashes.length > 0 ? attachmentHashes : undefined,
 				custom_data:
 					Object.keys(customDataPayload).length > 0
 						? customDataPayload
@@ -237,16 +275,24 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 						>
 							{__('Message', 'doublescale')}
 						</label>
-						<textarea
-							id="doublescale-portal-content"
-							value={content}
-							onChange={(e) => setContent(e.target.value)}
-							rows={6}
-							className="block w-full rounded-md border border-input bg-background p-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						<SupportRichText
+							message={content}
+							onChange={setContent}
 							placeholder={__(
 								'Tell us what we can help with…',
 								'doublescale'
 							)}
+						/>
+						<AttachmentUploader
+							pending={pendingAttachments}
+							uploading={uploading}
+							disabled={submitting}
+							onSelect={handleAttachmentSelect}
+							onRemove={(hash) =>
+								setPendingAttachments((prev) =>
+									prev.filter((p) => p.file_hash !== hash)
+								)
+							}
 						/>
 					</div>
 

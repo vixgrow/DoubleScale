@@ -22,6 +22,11 @@ interface FontEditingProps {
 	paragraphFormat: string;
 	handleFormatChange: (value: string) => void;
 	updateToolbar: () => void;
+	/**
+	 * Show the paragraph/heading/quote block-format dropdown. Off for the support
+	 * variant, which keeps only the inline text-format buttons (B / I / U / S).
+	 */
+	showBlockFormat?: boolean;
 }
 
 export default function FontEditing({
@@ -29,6 +34,7 @@ export default function FontEditing({
 	paragraphFormat,
 	handleFormatChange,
 	updateToolbar,
+	showBlockFormat = true,
 }: FontEditingProps) {
 	const [isBold, setIsBold] = useState(false);
 	const [isItalic, setIsItalic] = useState(false);
@@ -60,20 +66,22 @@ export default function FontEditing({
 	return (
 		<>
 			{/* Paragraph format & Font family */}
-			<div className="flex gap-2.5 border-r pr-5">
-				<Select value={paragraphFormat} onValueChange={handleFormatChange}>
-					<SelectTrigger className="w-fit rounded-md border-none outline-none px-2 bg-[#F1F1F2] cursor-pointer">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="paragraph">Paragraph Text</SelectItem>
-						<SelectItem value="heading-1">Heading 1</SelectItem>
-						<SelectItem value="heading-2">Heading 2</SelectItem>
-						<SelectItem value="heading-3">Heading 3</SelectItem>
-						<SelectItem value="quote">Quote</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
+			{showBlockFormat && (
+				<div className="flex gap-2.5 border-r pr-5">
+					<Select value={paragraphFormat} onValueChange={handleFormatChange}>
+						<SelectTrigger className="w-fit rounded-md border-none outline-none px-2 bg-[#F1F1F2] cursor-pointer">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="paragraph">Paragraph Text</SelectItem>
+							<SelectItem value="heading-1">Heading 1</SelectItem>
+							<SelectItem value="heading-2">Heading 2</SelectItem>
+							<SelectItem value="heading-3">Heading 3</SelectItem>
+							<SelectItem value="quote">Quote</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+			)}
 
 			{/* Text formatting */}
 			<div className="flex gap-2.5 border-r pr-5">

@@ -59,6 +59,18 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 				'doublescale'
 			);
 		}
+		if (groupLabel === 'Booking') {
+			return __(
+				'The Booking module is turned off. Enable it under Settings → Modules to use these actions.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Ticket' || groupLabel === 'Support') {
+			return __(
+				'The Support module is turned off. Enable it under Settings → Modules to use these actions.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these actions.',
@@ -108,7 +120,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 			);
 		}
 		return __(
-			'This integration is not available. Please install the required plugin.',
+			'This integration is not available. Enable the required module under Settings → Modules, or install the required plugin.',
 			'doublescale'
 		);
 	};
@@ -120,7 +132,15 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		}));
 	};
 
-	const handleActionClick = (actionKey: string, action: any) => {
+	const handleActionClick = (
+		actionKey: string,
+		action: any,
+		groupDisabled: boolean
+	) => {
+		if (groupDisabled) {
+			return;
+		}
+
 		// Check if this is a Pro feature AND Pro plugin is not active
 		const isProFeatureLockedOut = action.is_pro && !isProActive;
 
@@ -137,14 +157,11 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 		setSelectedProAction(null);
 	};
 
-	// Unavailable integrations (not connected / module off) are omitted from the API;
-	// keep a client-side guard for stale config and unnamed placeholder groups.
+	// Hide unnamed placeholder groups only; disabled integrations stay visible with a tooltip.
 	const visibleGroups = pickBy(
 		groups,
 		(group) =>
-			!group.is_disabled &&
-			typeof group.label === 'string' &&
-			group.label.trim() !== ''
+			typeof group.label === 'string' && group.label.trim() !== ''
 	);
 
 	return (
@@ -213,13 +230,13 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 													onClick={() =>
 														handleActionClick(
 															actionKey,
-															action
+															action,
+															!!group.is_disabled
 														)
 													}
 													disabled={
-														!action.is_pro &&
-														(group.is_disabled ||
-															isSaving)
+														group.is_disabled ||
+														isSaving
 													}
 													className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === actionKey ? 'border-2 border-primary' : 'border'}`}
 												>
@@ -237,10 +254,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({
 											</div>
 										);
 
-										if (
-											!action.is_pro &&
-											group.is_disabled
-										) {
+										if (group.is_disabled) {
 											return (
 												<TooltipProvider
 													key={actionKey}

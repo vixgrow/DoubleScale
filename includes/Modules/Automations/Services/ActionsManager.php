@@ -216,6 +216,17 @@ final class ActionsManager {
 					),
 				),
 			),
+			'support'     => array(
+				'label'  => __( 'Support', 'doublescale' ),
+				'groups' => array(
+					'support' => array(
+						'label'       => __( 'Ticket', 'doublescale' ),
+						'actions'     => array(),
+						'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+							|| ! doublescale_is_module_active( 'support' ),
+					),
+				),
+			),
 			'woocommerce' => array(
 				'label'  => __( 'WooCommerce', 'doublescale' ),
 				'groups' => array(
@@ -382,10 +393,13 @@ final class ActionsManager {
 	/**
 	 * Get sources
 	 *
+	 * Disabled groups (module off, plugin missing) stay in the payload so the
+	 * builder can show them with an enable/install tooltip — same as triggers.
+	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->filter_unavailable_action_groups( $this->sources );
+		return $this->sources;
 	}
 
 	/**
@@ -439,25 +453,4 @@ final class ActionsManager {
 		return ucwords( str_replace( array( '_', '-' ), ' ', $group_slug ) );
 	}
 
-	/**
-	 * Remove disabled / unavailable groups from the action library payload.
-	 *
-	 * @param array $sources Raw sources tree.
-	 * @return array
-	 */
-	private function filter_unavailable_action_groups( array $sources ) {
-		foreach ( $sources as $source_key => &$source ) {
-			if ( empty( $source['groups'] ) || ! is_array( $source['groups'] ) ) {
-				continue;
-			}
-			foreach ( $source['groups'] as $group_key => $group ) {
-				if ( ! empty( $group['is_disabled'] ) ) {
-					unset( $source['groups'][ $group_key ] );
-				}
-			}
-		}
-		unset( $source );
-
-		return $sources;
-	}
 }

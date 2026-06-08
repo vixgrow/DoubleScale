@@ -99,6 +99,24 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 
 	// Helper function to get tooltip message for disabled goals
 	const getDisabledTooltip = (groupLabel: string) => {
+		if (groupLabel === 'Support') {
+			return __(
+				'The Support module is turned off. Enable it under Settings → Modules to use these goals.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Booking') {
+			return __(
+				'The Booking module is turned off. Enable it under Settings → Modules to use these goals.',
+				'doublescale'
+			);
+		}
+		if (groupLabel === 'Deal') {
+			return __(
+				'The Pipelines & Deals module is turned off. Enable it under Settings → Modules to use these goals.',
+				'doublescale'
+			);
+		}
 		if (groupLabel === 'WooCommerce') {
 			return __(
 				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these goals.',
@@ -130,7 +148,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 			);
 		}
 		return __(
-			'This integration is not available. Please install the required plugin.',
+			'This integration is not available. Enable the required module under Settings → Modules, or install the required plugin.',
 			'doublescale'
 		);
 	};

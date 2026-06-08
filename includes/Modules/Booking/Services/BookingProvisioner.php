@@ -33,9 +33,20 @@ final class BookingProvisioner {
 			return null;
 		}
 
-		$calendar = CalendarModel::where( 'user_id', $user_id )
-			->where( 'type', 'host' )
-			->first();
+		// Collapse any pre-existing duplicate host calendars for this user down to
+		// a single canonical row before doing anything else. Historically the
+		// check-then-create below was not atomic (and bulk provisioning could
+		// re-run), so some installs accumulated 2-3 host calendars per user. We
+		// keep the canonical one and re-point its data here so the rest of this
+		// method — and the whole app — can safely assume one host per user.
+		$calendar = $this->dedupe_host_calendars( $user_id );
+
+		if ( ! $calendar ) {
+			$calendar = CalendarModel::where( 'user_id', $user_id )
+				->where( 'type', 'host' )
+				->orderBy( 'id' )
+				->first();
+		}
 
 		if ( $calendar ) {
 			if ( 'active' !== $calendar->status ) {
@@ -68,6 +79,80 @@ final class BookingProvisioner {
 		self::ensure_default_availability( $user_id );
 
 		return $calendar;
+	}
+
+	/**
+	 * Collapse duplicate host calendars for a user into a single canonical row.
+	 *
+	 * Picks the calendar with the most bookings (ties broken by lowest id) as the
+	 * survivor, re-points events / bookings / meta from the duplicates onto it,
+	 * then deletes the now-empty duplicates. A no-op (returning the single
+	 * calendar, or null) when there is 0 or 1 host calendar.
+	 *
+	 * @param int $user_id WP user id.
+	 * @return CalendarModel|null The surviving host calendar, or null if none exist.
+	 */
+	public function dedupe_host_calendars( int $user_id ): ?CalendarModel {
+		if ( $user_id <= 0 ) {
+			return null;
+		}
+
+		$calendars = CalendarModel::where( 'user_id', $user_id )
+			->where( 'type', 'host' )
+			->withCount( 'bookings' )
+			->orderByDesc( 'bookings_count' )
+			->orderBy( 'id' )
+			->get();
+
+		if ( $calendars->count() <= 1 ) {
+			return $calendars->first();
+		}
+
+		$survivor    = $calendars->first();
+		$survivor_id = (int) $survivor->id;
+
+		global $wpdb;
+		$wpdb->query( 'START TRANSACTION' );
+		try {
+			foreach ( $calendars as $duplicate ) {
+				if ( (int) $duplicate->id === $survivor_id ) {
+					continue;
+				}
+
+				$duplicate_id = (int) $duplicate->id;
+
+				// Re-point child rows onto the survivor.
+				$duplicate->events()->update( array( 'calendar_id' => $survivor_id ) );
+				$duplicate->bookings()->update( array( 'calendar_id' => $survivor_id ) );
+
+				// Meta is keyed by (calendar_id, meta_key); only migrate keys the
+				// survivor does not already own to avoid duplicate-key rows, then
+				// drop the rest.
+				$survivor_meta_keys = $survivor->meta()->pluck( 'meta_key' )->all();
+				$duplicate->meta()
+					->whereNotIn( 'meta_key', $survivor_meta_keys )
+					->update( array( 'calendar_id' => $survivor_id ) );
+				$duplicate->meta()->delete();
+
+				$duplicate->delete();
+			}
+
+			$wpdb->query( 'COMMIT' );
+		} catch ( \Throwable $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			doublescale_get_logger()->error(
+				'Failed to dedupe host calendars',
+				array(
+					'source'  => 'booking-provisioner',
+					'user_id' => $user_id,
+					'error'   => $e->getMessage(),
+				)
+			);
+			// Fall back to the survivor regardless; the duplicates are harmless
+			// extra rows and a later run can retry the merge.
+		}
+
+		return $survivor->fresh();
 	}
 
 	/**

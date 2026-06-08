@@ -1,9 +1,15 @@
 /**
- *  Wordpress dependencies
+ * Shared toolbar state + behaviors used by both the email and support toolbar
+ * compositions: the active Lexical editor, the current block format, the image
+ * insertion command registration, and the block-format change handler.
+ *
+ * Extracted so the two toolbar variants ({@see EmailToolbar} / {@see SupportToolbar})
+ * share this logic without either one importing the other's UI — keeping the
+ * support variant free of `@doublescale/components`.
  */
-import { __ } from '@wordpress/i18n';
+
 /**
- *  External dependencies
+ * External dependencies
  */
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useCallback, useEffect, useState } from 'react';
@@ -19,23 +25,20 @@ import {
 	$createQuoteNode,
 	HeadingTagType,
 } from '@lexical/rich-text';
+
 /**
- *  Internal dependencies
+ * Internal dependencies
  */
 import { $createImageNode } from '../../nodes/img-node';
 import { INSERT_IMAGE_COMMAND } from '../../plugins/image-plugin';
-import ListStyles from './list-styles';
-import FontEditing from './font-editing';
-import AlignmentStyles from './alignment-styles';
-import Attachments from './attachments';
-import AddingShortCode from './adding-shortcode';
 
-export const ToolbarPlugin = () => {
+export function useToolbarState() {
 	const [editor] = useLexicalComposerContext();
 	const [activeEditor] = useState(editor);
 	const [paragraphFormat, setParagraphFormat] = useState('paragraph');
 
-	// Register image insertion command
+	// Register image insertion command (no-op for variants that hide the image
+	// button — registering is harmless and keeps the hook variant-agnostic).
 	useEffect(() => {
 		if (!activeEditor) {
 			return;
@@ -46,20 +49,17 @@ export const ToolbarPlugin = () => {
 			(payload) => {
 				const { src, altText, width, height, id } = payload;
 
-				// Make sure we have a valid src before proceeding
 				if (!src) {
 					console.error('Image source is undefined or empty');
 					return false;
 				}
 
-				// Focus the editor to ensure we have a valid selection
 				activeEditor.focus();
 
 				try {
 					activeEditor.update(() => {
 						const selection = $getSelection();
 						if ($isRangeSelection(selection)) {
-							// Create an ImageNode with the media info
 							const imageNode = $createImageNode({
 								src,
 								altText: altText || 'Image',
@@ -67,11 +67,8 @@ export const ToolbarPlugin = () => {
 								height: height || 'auto',
 								id: id || undefined,
 							});
-
-							// Insert the node at the current selection
 							selection.insertNodes([imageNode]);
 						} else {
-							// If no selection, insert at the end of the document
 							const root = $getRoot();
 							const lastChild = root.getLastChild();
 							if (lastChild) {
@@ -96,11 +93,10 @@ export const ToolbarPlugin = () => {
 		);
 	}, [activeEditor]);
 
-	// Update format states based on selection
+	// Reflect the selection's block format into the dropdown state.
 	const updateToolbar = useCallback(() => {
 		const selection = $getSelection();
 		if ($isRangeSelection(selection)) {
-			// Block format states
 			const anchorNode = selection.anchor.getNode();
 			const element =
 				anchorNode.getKey() === 'root'
@@ -110,7 +106,6 @@ export const ToolbarPlugin = () => {
 			const elementKey = element.getKey();
 			const elementDOM = activeEditor.getElementByKey(elementKey);
 
-			// Check element type and update block format state
 			if (elementDOM) {
 				if (elementDOM.tagName === 'P') {
 					setParagraphFormat('paragraph');
@@ -162,31 +157,10 @@ export const ToolbarPlugin = () => {
 		[activeEditor]
 	);
 
-	return (
-		<div className="toolbar bg-white text-[#52525B] flex gap-4 items-center flex-wrap border-b border-b-[#e0e0e0] p-4 justify-center">
-			<div className="flex gap-4 items-center">
-				{/* Paragraph format & Font family */}
-				<FontEditing
-					activeEditor={activeEditor}
-					paragraphFormat={paragraphFormat}
-					handleFormatChange={handleFormatChange}
-					updateToolbar={updateToolbar}
-				/>
-
-				{/* Link and Image */}
-				<Attachments activeEditor={activeEditor} />
-			</div>
-
-			<div className="flex gap-4 items-center">
-				{/* Add Shortcodes Button - Positioned to the right */}
-				<AddingShortCode activeEditor={activeEditor} />
-
-				{/* Lists */}
-				<ListStyles activeEditor={activeEditor} />
-
-				{/* Alignment */}
-				<AlignmentStyles activeEditor={activeEditor} />
-			</div>
-		</div>
-	);
-};
+	return {
+		activeEditor,
+		paragraphFormat,
+		handleFormatChange,
+		updateToolbar,
+	};
+}

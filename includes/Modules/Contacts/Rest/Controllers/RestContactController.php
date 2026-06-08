@@ -70,7 +70,7 @@ class RestContactController extends RestController {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
-						'keyword'            => array(
+						'keywords'           => array(
 							'description' => __( 'Keyword to search.', 'doublescale' ),
 							'type'        => 'string',
 						),

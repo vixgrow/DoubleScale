@@ -48,6 +48,10 @@ final class MigrationsTest extends IntegrationTestCase {
 				'doublescale_automations',
 				array( 'id', 'name', 'trigger', 'status', 'created_at', 'updated_at' ),
 			),
+			'automation_versions' => array(
+				'doublescale_automation_versions',
+				array( 'id', 'automation_id', 'version', 'label', 'snapshot', 'created_by', 'created_at' ),
+			),
 			'bookings'        => array(
 				'doublescale_bookings',
 				array(

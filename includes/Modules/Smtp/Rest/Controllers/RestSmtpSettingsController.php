@@ -181,6 +181,18 @@ class RestSmtpSettingsController extends RestController {
 
 		if ( isset( $settings['connections'] ) || isset( $settings['default_connection'] ) ) {
 			Settings::sync_oauth_apps_from_bundle( Settings::get_all() );
+
+			/**
+			 * Fires when SMTP connections (or the default connection) change.
+			 *
+			 * Gated to connection-touching saves only — not every SMTP settings
+			 * write — so listeners (e.g. Support's default-mailbox seeder, which
+			 * needs a connection before it can bind a sending identity) don't run
+			 * on unrelated saves such as alerts or logging config.
+			 *
+			 * @param array $connections The post-save connection bundle.
+			 */
+			do_action( 'doublescale_smtp_connections_updated', Settings::get( 'connections', array() ) );
 		}
 
 		return new WP_REST_Response( array( 'success' => true ), 200 );

@@ -15,7 +15,11 @@ import { useState } from 'react';
  * Internal dependencies
  */
 import type { Automation } from '@doublescale/client';
-import { getTriggerLabel, hasTriggerWarning } from '@doublescale/utils';
+import {
+	getTriggerLabel,
+	getTriggerWarningMessage,
+	hasTriggerWarning,
+} from '@doublescale/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import {
@@ -199,10 +203,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 								{__('Plugin Required', 'doublescale')}
 							</p>
 							<p className="text-xs mt-1">
-								{__(
-									'This trigger requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-									'doublescale'
-								)}
+								{getTriggerWarningMessage(automation)}
 							</p>
 						</TooltipContent>
 					</Tooltip>

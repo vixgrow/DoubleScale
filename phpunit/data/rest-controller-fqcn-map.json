@@ -1,5 +1,6 @@
 {
     "RestActivityController": "DoubleScale\\Modules\\Activities\\Rest\\Controllers\\RestActivityController",
+    "RestAttachmentController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestAttachmentController",
     "RestAutomationContactController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationContactController",
     "RestAutomationController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationController",
     "RestAutomationStepController": "DoubleScale\\Modules\\Automations\\Rest\\Controllers\\RestAutomationStepController",
@@ -14,8 +15,11 @@
     "RestImportExportController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestImportExportController",
     "RestListController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestListController",
     "RestLogController": "DoubleScale\\Core\\Logger\\Rest\\RestLogController",
+    "RestMailboxController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestMailboxController",
     "RestModulesController": "DoubleScale\\Core\\Rest\\Controllers\\RestModulesController",
     "RestPluginsController": "DoubleScale\\Core\\Rest\\Controllers\\RestPluginsController",
+    "RestPortalController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestPortalController",
+    "RestReplyController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestReplyController",
     "RestSettingsController": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsController",
     "RestSettingsControllerPro": "DoubleScale\\Core\\Settings\\Rest\\RestSettingsControllerPro",
     "RestSiteVerificationController": "DoubleScale\\Core\\Rest\\Controllers\\RestSiteVerificationController",
@@ -25,5 +29,6 @@
     "RestSmtpSettingsController": "DoubleScale\\Modules\\Smtp\\Rest\\Controllers\\RestSmtpSettingsController",
     "RestTagController": "DoubleScale\\Modules\\Contacts\\Rest\\Controllers\\RestTagController",
     "RestTemplateController": "DoubleScale\\Modules\\Campaigns\\Rest\\Controllers\\RestTemplateController",
+    "RestTicketController": "DoubleScale\\Modules\\Support\\Rest\\Controllers\\RestTicketController",
     "RestUserManagementController": "DoubleScale\\Core\\UserRoles\\Rest\\RestUserManagementController"
 }

@@ -259,6 +259,22 @@ final class RulesManager {
 				'rules'    => array(),
 				'triggers' => array( 'deal_owner_change', 'deal_value_change', 'deal_status_change', 'deal_stage_change' ),
 			),
+			'support'                   => array(
+				'name'        => __( 'Support', 'doublescale' ),
+				'key'         => 'support',
+				'rules'       => array(),
+				'triggers'    => array(
+					'ticket_created',
+					'ticket_reply_added',
+					'ticket_note_added',
+					'ticket_status_changed',
+					'ticket_priority_changed',
+					'ticket_agent_assigned',
+					'ticket_closed',
+				),
+				'is_disabled' => ! function_exists( 'doublescale_is_module_active' )
+					|| ! doublescale_is_module_active( 'support' ),
+			),
 		);
 
 		if ( class_exists( '\DoubleScale\Pro\Modules\Forms\Services\FormsManager' ) ) {

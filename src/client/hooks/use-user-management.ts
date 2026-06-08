@@ -16,7 +16,7 @@ interface UseUserManagementReturn {
     isDeleting: boolean;
     refreshUsers: () => Promise<void>;
     addUser: (data: AddUserRequest) => Promise<CRMUser | null>;
-    updateUserRole: (userId: number, role: ManagerRole) => Promise<boolean>;
+    updateUserRole: (userId: number, roles: ManagerRole[]) => Promise<boolean>;
     removeUser: (userId: number) => Promise<boolean>;
 }
 
@@ -92,11 +92,11 @@ export const useUserManagement = (): UseUserManagementReturn => {
      */
     const updateUserRole = async (
         userId: number,
-        role: ManagerRole
+        roles: ManagerRole[]
     ): Promise<boolean> => {
         setIsUpdating(true);
         try {
-            const response = await UserManagementAPI.updateUserRole(userId, { role });
+            const response = await UserManagementAPI.updateUserRole(userId, { roles });
 
             if (response.success) {
                 createNotice({
@@ -104,12 +104,14 @@ export const useUserManagement = (): UseUserManagementReturn => {
                     message: response.message || __('User role updated successfully', 'doublescale'),
                 });
 
-                // Update user in local state
+                // Update user in local state. `crm_role` is the effective
+                // (highest-priority) role; `roles` is the full assigned set.
                 setUsers(prev => prev.map(user => {
                     if (user.id === userId) {
                         return {
                             ...user,
                             crm_role: response.user.crm_role,
+                            roles: response.user.roles ?? user.roles,
                             role: ManagerRoleLabels[response.user.crm_role]
                         };
                     }

@@ -92,9 +92,9 @@ const Managers: React.FC = () => {
 
 	const handleEditManagerSuccess = async (
 		managerId: number,
-		role: ManagerRole
+		roles: ManagerRole[]
 	) => {
-		const result = await updateUserRole(managerId, role);
+		const result = await updateUserRole(managerId, roles);
 		if (result) {
 			setIsEditModalOpen(false);
 			setManagerToEdit(null);

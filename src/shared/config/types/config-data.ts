@@ -94,6 +94,11 @@ export type UserCapabilities = {
 	doublescale_crm_manager: boolean;
 	doublescale_sales_manager: boolean;
 	doublescale_sales_rep: boolean;
+	doublescale_support_manager?: boolean;
+	doublescale_support_agent?: boolean;
+	doublescale_view_support?: boolean;
+	doublescale_manage_all_tickets?: boolean;
+	doublescale_manage_support_settings?: boolean;
 };
 
 export type DefaultStage = {

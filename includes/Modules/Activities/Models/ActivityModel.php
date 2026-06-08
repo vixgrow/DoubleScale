@@ -225,6 +225,17 @@ class ActivityModel extends Model {
 	}
 
 	/**
+	 * Get ticket associations for this activity
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function ticketAssociations() {
+		return $this->associationsByType( ActivityAssociationModel::ENTITY_TYPE_TICKET );
+	}
+
+	/**
 	 * Convenience accessor: first associated deal's ID, or null.
 	 *
 	 * Activities may be associated with multiple entities; REST callers that
@@ -272,6 +283,28 @@ class ActivityModel extends Model {
 					->where( 'entity_id', $deal_id );
 			}
 		)->orderBy( 'created_at', 'desc' );
+	}
+
+	/**
+	 * Scope: Filter by support ticket using activity_associations table.
+	 *
+	 * Returns the conversation log for a ticket — replies, internal notes, and
+	 * system events — in chronological order (oldest first) so the ticket
+	 * detail view can render the thread top-down.
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query Query builder.
+	 * @param int                                   $ticket_id Ticket ID.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeForTicket( $query, $ticket_id ) {
+		return $query->whereHas(
+			'associations',
+			function ( $q ) use ( $ticket_id ) {
+				$q->where( 'entity_type', ActivityAssociationModel::ENTITY_TYPE_TICKET )
+					->where( 'entity_id', $ticket_id );
+			}
+		)->orderBy( 'created_at', 'asc' );
 	}
 
 	/**

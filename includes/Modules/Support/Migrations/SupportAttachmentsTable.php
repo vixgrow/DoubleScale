@@ -56,7 +56,7 @@ class SupportAttachmentsTable extends Migration {
 			file_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			file_hash VARCHAR(64) NOT NULL COMMENT 'Random hash for signed download URLs',
 			driver VARCHAR(50) NOT NULL DEFAULT 'local',
-			status VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active|temp',
+			status VARCHAR(20) NOT NULL DEFAULT 'temp' COMMENT 'active|temp',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),

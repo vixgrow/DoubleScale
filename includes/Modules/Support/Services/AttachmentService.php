@@ -51,8 +51,12 @@ class AttachmentService {
 	/**
 	 * Store an uploaded file as a temp attachment row.
 	 *
+	 * `$ticket_id` may be 0 to upload before the ticket exists (the
+	 * compose-a-new-ticket flow). The row is then created with `ticket_id = NULL`
+	 * and back-filled when {@see link_to_activity()} runs at ticket-create time.
+	 *
 	 * @param array<string, mixed> $file      PHP upload array (`name`, `tmp_name`, `size`, `type`).
-	 * @param int                  $ticket_id Parent ticket id.
+	 * @param int                  $ticket_id Parent ticket id, or 0 for a ticketless temp upload.
 	 * @param array<string, mixed> $uploader  `user_id` and/or `contact_id`.
 	 * @return AttachmentModel|WP_Error
 	 */
@@ -61,12 +65,13 @@ class AttachmentService {
 			return new WP_Error( 'invalid_upload', __( 'No file was uploaded.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
-		$ticket = TicketModel::find( $ticket_id );
-		if ( ! $ticket ) {
+		// A ticket id of 0 means "uploaded before the ticket exists" — the row is
+		// created unticketed and linked at create time. A non-zero id must resolve.
+		if ( $ticket_id > 0 && ! TicketModel::find( $ticket_id ) ) {
 			return new WP_Error( 'ticket_not_found', __( 'Ticket not found.', 'doublescale' ), array( 'status' => 404 ) );
 		}
 
-		$max_size = wp_max_upload_size();
+		$max_size  = wp_max_upload_size();
 		$file_size = isset( $file['size'] ) ? (int) $file['size'] : 0;
 		if ( $max_size > 0 && $file_size > $max_size ) {
 			return new WP_Error(
@@ -80,9 +85,19 @@ class AttachmentService {
 			);
 		}
 
+		$original_name = sanitize_file_name( (string) ( $file['name'] ?? 'file' ) );
+
 		$mime = $this->detect_mime( (string) $file['tmp_name'], (string) ( $file['type'] ?? '' ) );
 		if ( ! in_array( $mime, self::accepted_mimes(), true ) ) {
 			return new WP_Error( 'invalid_mime', __( 'This file type is not allowed.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		// Belt-and-braces over the MIME check: reject a file whose extension is not
+		// one WordPress maps to an accepted MIME (e.g. a `.php` renamed to sneak
+		// past content sniffing). Serve-side `X-Content-Type-Options: nosniff` is
+		// the second line; this is the first.
+		if ( ! $this->extension_is_allowed( $original_name ) ) {
+			return new WP_Error( 'invalid_extension', __( 'This file type is not allowed.', 'doublescale' ), array( 'status' => 400 ) );
 		}
 
 		$upload_dir = wp_upload_dir( null, false, false );
@@ -90,16 +105,16 @@ class AttachmentService {
 			return new WP_Error( 'upload_dir_unavailable', __( 'Upload directory is unavailable.', 'doublescale' ), array( 'status' => 500 ) );
 		}
 
-		$subdir    = 'doublescale-support/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
+		$subdir     = 'doublescale-support/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
 		$target_dir = trailingslashit( $upload_dir['basedir'] ) . $subdir;
 		if ( ! wp_mkdir_p( $target_dir ) ) {
 			return new WP_Error( 'mkdir_failed', __( 'Could not create upload directory.', 'doublescale' ), array( 'status' => 500 ) );
 		}
+		$this->ensure_protected_dir( (string) $upload_dir['basedir'] );
 
-		$original_name = sanitize_file_name( (string) ( $file['name'] ?? 'file' ) );
-		$stored_name   = wp_unique_filename( $target_dir, $original_name );
-		$absolute      = trailingslashit( $target_dir ) . $stored_name;
-		$relative      = $subdir . '/' . $stored_name;
+		$stored_name = wp_unique_filename( $target_dir, $original_name );
+		$absolute    = trailingslashit( $target_dir ) . $stored_name;
+		$relative    = $subdir . '/' . $stored_name;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_uploaded_file,WordPress.WP.AlternativeFunctions.file_system_operations_move_uploaded_file -- validated via is_uploaded_file above.
 		if ( ! move_uploaded_file( $file['tmp_name'], $absolute ) ) {
@@ -108,7 +123,7 @@ class AttachmentService {
 
 		$attachment = AttachmentModel::create(
 			array(
-				'ticket_id'   => $ticket_id,
+				'ticket_id'   => $ticket_id > 0 ? $ticket_id : null,
 				'activity_id' => null,
 				'user_id'     => ! empty( $uploader['user_id'] ) ? (int) $uploader['user_id'] : null,
 				'contact_id'  => ! empty( $uploader['contact_id'] ) ? (int) $uploader['contact_id'] : null,
@@ -138,15 +153,24 @@ class AttachmentService {
 			return;
 		}
 
+		// Accept rows that were uploaded against this ticket (reply composer) OR
+		// uploaded before any ticket existed (compose-a-new-ticket flow, where the
+		// temp row carries `ticket_id = NULL`). The nested closure keeps the OR
+		// scoped to the ticket clause so it can't widen past the status/hash guards.
 		$rows = AttachmentModel::query()
-			->where( 'ticket_id', $ticket_id )
 			->where( 'status', 'temp' )
 			->whereIn( 'file_hash', $hashes )
+			->where(
+				function ( $query ) use ( $ticket_id ) {
+					$query->where( 'ticket_id', $ticket_id )->orWhereNull( 'ticket_id' );
+				}
+			)
 			->get();
 
 		foreach ( $rows as $attachment ) {
+			$attachment->ticket_id   = $ticket_id;
 			$attachment->activity_id = $activity_id;
-			$attachment->status        = 'active';
+			$attachment->status      = 'active';
 			$attachment->save();
 		}
 	}
@@ -293,6 +317,13 @@ class AttachmentService {
 	}
 
 	/**
+	 * Verify a download signature against the current OR previous hour bucket.
+	 *
+	 * The signature embeds `gmdate('YmdH')`, so it rotates hourly. Accepting the
+	 * previous bucket too gives a download link emailed to a customer a grace
+	 * window across the hour boundary — without it, a link clicked at 11:01 that
+	 * was signed at 10:59 would 403.
+	 *
 	 * @param int    $attachment_id Attachment row id.
 	 * @param string $sign          Client-provided signature.
 	 * @return bool
@@ -301,16 +332,22 @@ class AttachmentService {
 		if ( '' === $sign ) {
 			return false;
 		}
-		$expected = $this->generate_signature( $attachment_id );
-		return hash_equals( $expected, $sign );
+		foreach ( array( gmdate( 'YmdH' ), gmdate( 'YmdH', time() - HOUR_IN_SECONDS ) ) as $bucket ) {
+			if ( hash_equals( $this->generate_signature( $attachment_id, $bucket ), $sign ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
-	 * @param int $attachment_id Attachment row id.
+	 * @param int         $attachment_id Attachment row id.
+	 * @param string|null $bucket        Hour bucket (`YmdH`); defaults to the current hour.
 	 * @return string
 	 */
-	private function generate_signature( int $attachment_id ): string {
-		return hash_hmac( 'sha256', $attachment_id . '|' . gmdate( 'YmdH' ), wp_salt( 'secure_auth' ) );
+	private function generate_signature( int $attachment_id, ?string $bucket = null ): string {
+		$bucket = null === $bucket ? gmdate( 'YmdH' ) : $bucket;
+		return hash_hmac( 'sha256', $attachment_id . '|' . $bucket, wp_salt( 'secure_auth' ) );
 	}
 
 	/**
@@ -333,5 +370,138 @@ class AttachmentService {
 			$detected = sanitize_mime_type( $declared_mime );
 		}
 		return $detected;
+	}
+
+	/**
+	 * Whether a filename's extension maps (via WordPress) to one of the accepted
+	 * MIME types. Extension-less names are allowed (the MIME check still gates
+	 * them); a name WHOSE extension WP knows but isn't in our accepted set is
+	 * rejected.
+	 *
+	 * @param string $file_name Original (sanitized) filename.
+	 * @return bool
+	 */
+	private function extension_is_allowed( string $file_name ): bool {
+		$check = wp_check_filetype( $file_name );
+		$type  = isset( $check['type'] ) ? (string) $check['type'] : '';
+		if ( '' === $type ) {
+			// WP doesn't recognise the extension (or there is none). Let the MIME
+			// detection in store_upload() be the gate rather than blocking outright.
+			return true;
+		}
+		return in_array( $type, self::accepted_mimes(), true );
+	}
+
+	/**
+	 * Drop a `.htaccess` (deny + no PHP execution) and an `index.html` into the
+	 * support uploads BASE dir so the private files cannot be fetched directly by
+	 * guessing the path (which would bypass the signed-URL handler) on Apache, and
+	 * the directory cannot be listed. Idempotent — skips when the files exist.
+	 *
+	 * @param string $basedir WordPress uploads basedir (absolute).
+	 * @return void
+	 */
+	private function ensure_protected_dir( string $basedir ): void {
+		if ( '' === $basedir ) {
+			return;
+		}
+		$base = trailingslashit( $basedir ) . 'doublescale-support';
+		if ( ! is_dir( $base ) ) {
+			return;
+		}
+
+		$htaccess = $base . '/.htaccess';
+		if ( ! file_exists( $htaccess ) ) {
+			$rules = "# Generated by DoubleScale Support. Do not edit.\n"
+				. "Deny from all\n"
+				. "Options -Indexes\n"
+				. "<IfModule mod_php5.c>\n  php_flag engine off\n</IfModule>\n"
+				. "<IfModule mod_php7.c>\n  php_flag engine off\n</IfModule>\n"
+				. "<Files *>\n  SetHandler none\n  RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .pl .py .cgi\n</Files>\n";
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,WordPress.PHP.NoSilencedErrors.Discouraged -- WP_Filesystem is unavailable on this REST/IMAP path; writing one hardening file into this plugin's own private uploads dir.
+			@file_put_contents( $htaccess, $rules );
+		}
+
+		$index = $base . '/index.html';
+		if ( ! file_exists( $index ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents,WordPress.PHP.NoSilencedErrors.Discouraged -- see above; a blank directory-listing guard.
+			@file_put_contents( $index, '' );
+		}
+	}
+
+	/**
+	 * Store an email attachment (raw bytes, not a `$_FILES` upload) and link it to
+	 * an existing conversation activity in one step.
+	 *
+	 * Used by the inbound email pipeline: by the time a message is parsed the
+	 * ticket and its opening/reply activity already exist, so the file is written
+	 * straight as `active` (no temp phase). MIME + extension are validated the same
+	 * way as a web upload; anything not allowed is skipped (returns WP_Error) so a
+	 * hostile attachment can't be stored.
+	 *
+	 * @param array<string, mixed> $file        `filename`, `mime`, `content` (decoded bytes).
+	 * @param int                  $ticket_id   Parent ticket id.
+	 * @param int                  $activity_id Conversation activity id to link to.
+	 * @param array<string, mixed> $uploader    Optional `user_id`/`contact_id` (empty for customer email).
+	 * @return AttachmentModel|WP_Error
+	 */
+	public function store_email_attachment( array $file, int $ticket_id, int $activity_id, array $uploader = array() ) {
+		$content = isset( $file['content'] ) ? (string) $file['content'] : '';
+		if ( '' === $content ) {
+			return new WP_Error( 'empty_attachment', __( 'Empty attachment.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$original_name = sanitize_file_name( (string) ( $file['filename'] ?? 'file' ) );
+		if ( '' === $original_name ) {
+			$original_name = 'file';
+		}
+
+		if ( ! $this->extension_is_allowed( $original_name ) ) {
+			return new WP_Error( 'invalid_extension', __( 'This file type is not allowed.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		$upload_dir = wp_upload_dir( null, false, false );
+		if ( ! is_array( $upload_dir ) || empty( $upload_dir['basedir'] ) ) {
+			return new WP_Error( 'upload_dir_unavailable', __( 'Upload directory is unavailable.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+
+		$subdir     = 'doublescale-support/' . gmdate( 'Y' ) . '/' . gmdate( 'm' );
+		$target_dir = trailingslashit( $upload_dir['basedir'] ) . $subdir;
+		if ( ! wp_mkdir_p( $target_dir ) ) {
+			return new WP_Error( 'mkdir_failed', __( 'Could not create upload directory.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+		$this->ensure_protected_dir( (string) $upload_dir['basedir'] );
+
+		$stored_name = wp_unique_filename( $target_dir, $original_name );
+		$absolute    = trailingslashit( $target_dir ) . $stored_name;
+		$relative    = $subdir . '/' . $stored_name;
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- WP_Filesystem is unavailable on the IMAP poll path; writing decoded email-attachment bytes into this plugin's private uploads dir.
+		if ( false === file_put_contents( $absolute, $content ) ) {
+			return new WP_Error( 'write_failed', __( 'Failed to store the email attachment.', 'doublescale' ), array( 'status' => 500 ) );
+		}
+
+		// Validate the MIME from the bytes now on disk (don't trust the header).
+		$mime = $this->detect_mime( $absolute, isset( $file['mime'] ) ? (string) $file['mime'] : '' );
+		if ( ! in_array( $mime, self::accepted_mimes(), true ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink,WordPress.PHP.NoSilencedErrors.Discouraged -- clean up the rejected file we just wrote.
+			@unlink( $absolute );
+			return new WP_Error( 'invalid_mime', __( 'This file type is not allowed.', 'doublescale' ), array( 'status' => 400 ) );
+		}
+
+		return AttachmentModel::create(
+			array(
+				'ticket_id'   => $ticket_id,
+				'activity_id' => $activity_id,
+				'user_id'     => ! empty( $uploader['user_id'] ) ? (int) $uploader['user_id'] : null,
+				'contact_id'  => ! empty( $uploader['contact_id'] ) ? (int) $uploader['contact_id'] : null,
+				'file_name'   => $original_name,
+				'file_path'   => $relative,
+				'file_type'   => $mime,
+				'file_size'   => strlen( $content ),
+				'driver'      => 'local',
+				'status'      => 'active',
+			)
+		);
 	}
 }

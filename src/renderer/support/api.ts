@@ -142,24 +142,21 @@ export interface CreatePortalTicketPayload {
 	attachment_hashes?: string[];
 }
 
-export const uploadPortalAttachment = async (
-	ticketId: number,
+const postPortalAttachment = async (
+	path: string,
 	file: File
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
 
-	const response = await fetch(
-		`/wp-json/doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
-		{
-			method: 'POST',
-			body: formData,
-			credentials: 'same-origin',
-			headers: {
-				'X-WP-Nonce': config?.nonce || '',
-			},
-		}
-	);
+	const response = await fetch(path, {
+		method: 'POST',
+		body: formData,
+		credentials: 'same-origin',
+		headers: {
+			'X-WP-Nonce': config?.nonce || '',
+		},
+	});
 
 	if (!response.ok) {
 		const err = (await response.json()) as { message?: string };
@@ -168,6 +165,27 @@ export const uploadPortalAttachment = async (
 
 	return response.json() as Promise<AttachmentUploadResult>;
 };
+
+export const uploadPortalAttachment = (
+	ticketId: number,
+	file: File
+): Promise<AttachmentUploadResult> =>
+	postPortalAttachment(
+		`/wp-json/doublescale/v1/support/portal/tickets/${ticketId}/attachments`,
+		file
+	);
+
+/**
+ * Upload a file BEFORE the customer's ticket exists (first-ticket composer).
+ * Returns a hash passed as `attachment_hashes` to `createPortalTicket`.
+ */
+export const uploadPortalAttachmentTemp = (
+	file: File
+): Promise<AttachmentUploadResult> =>
+	postPortalAttachment(
+		'/wp-json/doublescale/v1/support/portal/attachments',
+		file
+	);
 
 export const createPortalTicket = (payload: CreatePortalTicketPayload) =>
 	apiFetch<PortalTicket>({

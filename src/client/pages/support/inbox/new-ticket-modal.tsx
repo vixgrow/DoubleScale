@@ -26,7 +26,16 @@ import { X, Search, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
-import { createTicket, useAssignableAgents } from '@/hooks/support';
+import {
+	createTicket,
+	uploadAttachmentTemp,
+	useAssignableAgents,
+} from '@/hooks/support';
+import {
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
+} from '@/components/support';
 import { TICKET_PRIORITIES, type TicketPriority } from '@/constants/support';
 import type { Mailbox } from '@/types/support';
 
@@ -63,6 +72,10 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 	const [agentUserId, setAgentUserId] = useState<number | ''>('');
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
 
 	// --- Customer selection (Q1) ---------------------------------------------
 	// Two mutually-exclusive modes: pick an existing contact (binds contact_id),
@@ -117,6 +130,26 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 		};
 	}, [query, mode, picked, runSearch]);
 
+	const handleAttachmentSelect = async (file: File) => {
+		setUploading(true);
+		setError(null);
+		try {
+			const result = await uploadAttachmentTemp(file);
+			setPendingAttachments((prev) => [
+				...prev,
+				toPendingAttachment(result),
+			]);
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: __('Upload failed.', 'doublescale')
+			);
+		} finally {
+			setUploading(false);
+		}
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
@@ -140,6 +173,9 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 
 		setSubmitting(true);
 		try {
+			const attachmentHashes = pendingAttachments.map(
+				(a) => a.file_hash
+			);
 			const ticket = await createTicket({
 				title: title.trim(),
 				content,
@@ -147,6 +183,8 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 				priority,
 				agent_user_id:
 					agentUserId === '' ? undefined : Number(agentUserId),
+				attachment_hashes:
+					attachmentHashes.length > 0 ? attachmentHashes : undefined,
 				...(hasContact
 					? { contact_id: picked.id }
 					: {
@@ -443,6 +481,17 @@ const NewTicketModal: React.FC<Props> = ({ mailboxes, onClose, onCreated }) => {
 								'What is the customer reporting?',
 								'doublescale'
 							)}
+						/>
+						<AttachmentUploader
+							pending={pendingAttachments}
+							uploading={uploading}
+							disabled={submitting}
+							onSelect={handleAttachmentSelect}
+							onRemove={(hash) =>
+								setPendingAttachments((prev) =>
+									prev.filter((p) => p.file_hash !== hash)
+								)
+							}
 						/>
 					</div>
 

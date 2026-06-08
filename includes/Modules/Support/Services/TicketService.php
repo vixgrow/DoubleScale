@@ -167,6 +167,12 @@ class TicketService {
 			if ( ! empty( $data['attachment_hashes'] ) && is_array( $data['attachment_hashes'] ) ) {
 				$this->attachments()->link_to_activity( (int) $activity->id, (int) $ticket->id, $data['attachment_hashes'] );
 			}
+
+			// Raw-bytes attachments (inbound email): persisted + linked directly as
+			// active. Kept here so every linking path runs in this one try-block.
+			if ( ! empty( $data['attachment_files'] ) && is_array( $data['attachment_files'] ) ) {
+				$this->store_email_attachments( (int) $ticket->id, (int) $activity->id, $data['attachment_files'] );
+			}
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
 				'Support ticket creation failed',
@@ -255,6 +261,12 @@ class TicketService {
 
 			if ( ! empty( $data['attachment_hashes'] ) && is_array( $data['attachment_hashes'] ) ) {
 				$this->attachments()->link_to_activity( (int) $activity->id, (int) $ticket->id, $data['attachment_hashes'] );
+			}
+
+			// Raw-bytes attachments (inbound email reply): persisted + linked
+			// directly as active, alongside the hash-based path above.
+			if ( ! empty( $data['attachment_files'] ) && is_array( $data['attachment_files'] ) ) {
+				$this->store_email_attachments( (int) $ticket->id, (int) $activity->id, $data['attachment_files'] );
 			}
 
 			// Replies AFTER the opening message bump the counter; the opening
@@ -832,5 +844,35 @@ class TicketService {
 	 */
 	private function attachments(): AttachmentService {
 		return new AttachmentService();
+	}
+
+	/**
+	 * Persist raw-bytes attachments (from inbound email) and link them to an
+	 * activity. A single bad attachment is logged and skipped — it must never
+	 * abort the surrounding ticket/reply write.
+	 *
+	 * @param int                                                                $ticket_id   Parent ticket id.
+	 * @param int                                                                $activity_id Conversation activity id.
+	 * @param array<int, array{filename?:string, mime?:string, content?:string}> $files Decoded email attachments.
+	 * @return void
+	 */
+	private function store_email_attachments( int $ticket_id, int $activity_id, array $files ): void {
+		foreach ( $files as $file ) {
+			if ( ! is_array( $file ) ) {
+				continue;
+			}
+			$stored = $this->attachments()->store_email_attachment( $file, $ticket_id, $activity_id );
+			if ( is_wp_error( $stored ) ) {
+				doublescale_get_logger()->warning(
+					'Skipped an inbound email attachment',
+					array(
+						'source'    => 'support-attachment',
+						'ticket_id' => $ticket_id,
+						'reason'    => $stored->get_error_code(),
+						'filename'  => isset( $file['filename'] ) ? (string) $file['filename'] : '',
+					)
+				);
+			}
+		}
 	}
 }

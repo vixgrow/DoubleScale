@@ -472,6 +472,11 @@ class ImapClient {
 		// Parse date.
 		$date = isset( $header_info->date ) ? $header_info->date : '';
 
+		// Collect file attachments (consumers that don't need them simply ignore
+		// the key). Done as a separate structure walk so the body extraction above
+		// stays single-purpose.
+		$attachments = $this->get_email_attachments( $msgno );
+
 		return array(
 			'uid'            => $uid,
 			'from_email'     => $from_email,
@@ -484,6 +489,7 @@ class ImapClient {
 			'in_reply_to'    => $in_reply_to,
 			'date'           => $date,
 			'crm_sent'       => $crm_sent,
+			'attachments'    => $attachments,
 		);
 	}
 
@@ -579,6 +585,137 @@ class ImapClient {
 			default:
 				return $body;
 		}
+	}
+
+	/**
+	 * Extract file attachments from a message.
+	 *
+	 * Walks the MIME structure (same section-numbering scheme as
+	 * {@see walk_parts()}) and returns every part that is an attachment — either by
+	 * Content-Disposition (`attachment`/`inline`) or by carrying a filename in its
+	 * (d)parameters. Each part's bytes are fetched and decoded via the existing
+	 * {@see decode_body()}. Parts larger than the WordPress max upload size are
+	 * skipped so a single oversized message can't exhaust memory during a poll.
+	 *
+	 * @param int $msgno IMAP message number.
+	 * @return array<int, array{filename:string, mime:string, content:string}>
+	 */
+	private function get_email_attachments( $msgno ) {
+		$structure = imap2_fetchstructure( $this->connection, $msgno );
+		if ( ! $structure || empty( $structure->parts ) ) {
+			return array();
+		}
+
+		$attachments = array();
+		$max_size    = function_exists( 'wp_max_upload_size' ) ? (int) wp_max_upload_size() : 0;
+		$this->collect_attachment_parts( $msgno, $structure->parts, '', $attachments, $max_size );
+		return $attachments;
+	}
+
+	/**
+	 * Recursively gather attachment parts. Mirrors {@see walk_parts()}'s section
+	 * numbering so nested multipart containers resolve to the right fetch section.
+	 *
+	 * @param int    $msgno        IMAP message number.
+	 * @param array  $parts        MIME part objects.
+	 * @param string $prefix       Section prefix for nested parts.
+	 * @param array  $attachments  Collected attachments (by reference).
+	 * @param int    $max_size     Per-file byte cap (0 = no cap).
+	 * @return void
+	 */
+	private function collect_attachment_parts( $msgno, $parts, $prefix, &$attachments, $max_size ) {
+		foreach ( $parts as $index => $part ) {
+			$section = $prefix ? $prefix . '.' . ( $index + 1 ) : (string) ( $index + 1 );
+
+			// Recurse into multipart containers.
+			if ( 1 === ( $part->type ?? 0 ) && ! empty( $part->parts ) ) {
+				$this->collect_attachment_parts( $msgno, $part->parts, $section, $attachments, $max_size );
+				continue;
+			}
+
+			$filename = $this->part_filename( $part );
+			if ( '' === $filename && ! $this->part_is_attachment_disposition( $part ) ) {
+				continue;
+			}
+
+			// Skip parts whose declared size exceeds the cap to protect the poll.
+			$bytes = isset( $part->bytes ) ? (int) $part->bytes : 0;
+			if ( $max_size > 0 && $bytes > $max_size ) {
+				continue;
+			}
+
+			$raw     = imap2_fetchbody( $this->connection, $msgno, $section );
+			$content = $this->decode_body( $raw, $part->encoding ?? 0 );
+			if ( '' === $content ) {
+				continue;
+			}
+
+			$primary = $this->mime_primary_type_word( $part->type ?? 7 );
+			$subtype = strtolower( (string) ( $part->subtype ?? 'octet-stream' ) );
+
+			$attachments[] = array(
+				'filename' => '' !== $filename ? $filename : 'attachment',
+				'mime'     => $primary . '/' . $subtype,
+				'content'  => $content,
+			);
+		}
+	}
+
+	/**
+	 * Resolve a MIME part's filename from its disposition parameters
+	 * (`filename`) or content-type parameters (`name`), MIME-decoded. '' if none.
+	 *
+	 * @param object $part MIME part object.
+	 * @return string
+	 */
+	private function part_filename( $part ) {
+		$candidates = array();
+		if ( ! empty( $part->ifdparameters ) && ! empty( $part->dparameters ) ) {
+			$candidates = array_merge( $candidates, (array) $part->dparameters );
+		}
+		if ( ! empty( $part->ifparameters ) && ! empty( $part->parameters ) ) {
+			$candidates = array_merge( $candidates, (array) $part->parameters );
+		}
+		foreach ( $candidates as $param ) {
+			$attr = isset( $param->attribute ) ? strtolower( (string) $param->attribute ) : '';
+			if ( ( 'filename' === $attr || 'name' === $attr ) && ! empty( $param->value ) ) {
+				return sanitize_file_name( $this->decode_mime_header( (string) $param->value ) );
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Whether a part's Content-Disposition marks it as an attachment/inline file.
+	 *
+	 * @param object $part MIME part object.
+	 * @return bool
+	 */
+	private function part_is_attachment_disposition( $part ) {
+		if ( empty( $part->ifdisposition ) || empty( $part->disposition ) ) {
+			return false;
+		}
+		return in_array( strtoupper( (string) $part->disposition ), array( 'ATTACHMENT', 'INLINE' ), true );
+	}
+
+	/**
+	 * Map an IMAP primary type integer to its MIME type word.
+	 *
+	 * @param int $type IMAP type constant (0=text,1=multipart,2=message,3=application,4=audio,5=image,6=video,7=other).
+	 * @return string
+	 */
+	private function mime_primary_type_word( $type ) {
+		$map = array(
+			0 => 'text',
+			1 => 'multipart',
+			2 => 'message',
+			3 => 'application',
+			4 => 'audio',
+			5 => 'image',
+			6 => 'video',
+			7 => 'application',
+		);
+		return isset( $map[ (int) $type ] ) ? $map[ (int) $type ] : 'application';
 	}
 
 	/**

@@ -14,8 +14,17 @@ import { X, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import {
+	AttachmentUploader,
+	toPendingAttachment,
+	type PendingAttachment,
+} from '@/components/support';
 
-import { createPortalTicket, usePortalMailboxes } from '../api';
+import {
+	createPortalTicket,
+	uploadPortalAttachmentTemp,
+	usePortalMailboxes,
+} from '../api';
 import type { PortalTicket } from '../types';
 
 interface Props {
@@ -37,6 +46,30 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 	const [mailboxId, setMailboxId] = useState<number | undefined>(boxId);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [pendingAttachments, setPendingAttachments] = useState<
+		PendingAttachment[]
+	>([]);
+
+	const handleAttachmentSelect = async (file: File) => {
+		setUploading(true);
+		setError(null);
+		try {
+			const result = await uploadPortalAttachmentTemp(file);
+			setPendingAttachments((prev) => [
+				...prev,
+				toPendingAttachment(result),
+			]);
+		} catch (e) {
+			setError(
+				e instanceof Error
+					? e.message
+					: __('Upload failed.', 'doublescale')
+			);
+		} finally {
+			setUploading(false);
+		}
+	};
 
 	const handleSubmit = async () => {
 		if (!title.trim() || !htmlEditorHasMeaningfulContent(content)) {
@@ -46,10 +79,13 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 		setSubmitting(true);
 		setError(null);
 		try {
+			const attachmentHashes = pendingAttachments.map((a) => a.file_hash);
 			const ticket = await createPortalTicket({
 				title: title.trim(),
 				content,
 				mailbox_id: mailboxId,
+				attachment_hashes:
+					attachmentHashes.length > 0 ? attachmentHashes : undefined,
 			});
 			onCreated(ticket);
 		} catch (e) {
@@ -153,6 +189,17 @@ const NewTicketModal = ({ onClose, onCreated, boxId }: Props) => {
 								'Tell us what we can help with…',
 								'doublescale'
 							)}
+						/>
+						<AttachmentUploader
+							pending={pendingAttachments}
+							uploading={uploading}
+							disabled={submitting}
+							onSelect={handleAttachmentSelect}
+							onRemove={(hash) =>
+								setPendingAttachments((prev) =>
+									prev.filter((p) => p.file_hash !== hash)
+								)
+							}
 						/>
 					</div>
 

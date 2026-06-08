@@ -6,8 +6,9 @@
  * deep-linkable filter state can come in a follow-up.
  */
 
-import React, { useState } from '@wordpress/element';
+import React, { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Plus, RefreshCw, Inbox as InboxEmptyIcon } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
@@ -59,14 +60,34 @@ const SupportInbox: React.FC = () => {
 	const { data, loading, error, refetch } = useTickets(filters);
 	const { data: mailboxes } = useMailboxes();
 	const [showNewModal, setShowNewModal] = useState(false);
+	const [tags, setTags] = useState<Array<{ id: number; name: string }>>([]);
 	const canManageAllTickets = useCapabilities().canManageAllTickets();
+
+	useEffect(() => {
+		apiFetch<{ data?: Array<{ id: number; name: string }> }>({
+			path: '/doublescale/v1/tags?per_page=100',
+		})
+			.then((res) => {
+				setTags(Array.isArray(res?.data) ? res.data : []);
+			})
+			.catch(() => {
+				setTags([]);
+			});
+	}, []);
 
 	const updateFilter = (patch: Partial<TicketFilters>) => {
 		setFilters((prev) => ({ ...prev, ...patch, page: 1 }));
 	};
 
 	const hasNoMailboxes = mailboxes.length === 0;
-	const hasNoTickets = !loading && data?.data.length === 0 && !filters.search && !filters.status && !filters.priority && !filters.mailbox_id;
+	const hasNoTickets =
+		!loading &&
+		data?.data.length === 0 &&
+		!filters.search &&
+		!filters.status &&
+		!filters.priority &&
+		!filters.mailbox_id &&
+		!filters.tag_id;
 
 	return (
 		<div className="doublescale-support-inbox p-6">
@@ -199,6 +220,33 @@ const SupportInbox: React.FC = () => {
 						{mailboxes.map((m) => (
 							<option key={m.id} value={m.id}>
 								{m.name || m.slug}
+							</option>
+						))}
+					</select>
+				</div>
+				<div>
+					<label
+						htmlFor="ds-support-tag"
+						className="block text-xs font-medium text-gray-700 mb-1"
+					>
+						{__('Tag', 'doublescale')}
+					</label>
+					<select
+						id="ds-support-tag"
+						className="border rounded px-2 py-1.5 text-sm"
+						value={filters.tag_id ?? ''}
+						onChange={(e) =>
+							updateFilter({
+								tag_id: e.target.value
+									? Number(e.target.value)
+									: undefined,
+							})
+						}
+					>
+						<option value="">{__('All', 'doublescale')}</option>
+						{tags.map((tag) => (
+							<option key={tag.id} value={tag.id}>
+								{tag.name}
 							</option>
 						))}
 					</select>

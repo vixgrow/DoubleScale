@@ -6,15 +6,26 @@
  * deep-linkable filter state can come in a follow-up.
  */
 
-import React, { useState, useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import React, { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { Plus, RefreshCw, Inbox as InboxEmptyIcon } from 'lucide-react';
 
 import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
+import { useServerSideTable } from '@doublescale/hooks/use-serverSideTable';
 import { Button } from '@/components/ui/button';
-import { useTickets, useMailboxes } from '@/hooks/support';
+import { Checkbox } from '@/components/ui/checkbox';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import {
+	useTickets,
+	useMailboxes,
+	useAssignableAgents,
+	updateTicket,
+	deleteTicket,
+	addReply,
+} from '@/hooks/support';
 import {
 	StatusPill,
 	PriorityPill,
@@ -26,6 +37,15 @@ import {
 } from '@/constants/support';
 import type { Ticket, TicketFilters } from '@/types/support';
 import NewTicketModal from './new-ticket-modal';
+import BulkActionBar from './bulk-action-bar';
+import {
+	AssignAgentModal,
+	AssignMailboxModal,
+	AssignTagsModal,
+	BulkReplyModal,
+} from './bulk-action-modals';
+
+type BulkModal = 'reply' | 'agent' | 'mailbox' | 'tags' | null;
 
 const formatDate = (raw: string | null): string => {
 	if (!raw) {
@@ -51,6 +71,7 @@ const contactName = (ticket: Ticket): string => {
 
 const SupportInbox: React.FC = () => {
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('doublescale/core');
 	const [filters, setFilters] = useState<TicketFilters>({
 		per_page: 20,
 		page: 1,
@@ -59,9 +80,53 @@ const SupportInbox: React.FC = () => {
 	});
 	const { data, loading, error, refetch } = useTickets(filters);
 	const { data: mailboxes } = useMailboxes();
+	const { data: assignableAgents } = useAssignableAgents();
 	const [showNewModal, setShowNewModal] = useState(false);
 	const [tags, setTags] = useState<Array<{ id: number; name: string }>>([]);
+	const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+	const [bulkModal, setBulkModal] = useState<BulkModal>(null);
+	const [bulkBusy, setBulkBusy] = useState(false);
 	const canManageAllTickets = useCapabilities().canManageAllTickets();
+	const filterKey = JSON.stringify(filters);
+	const page = filters.page ?? 1;
+	const perPage = filters.per_page ?? 20;
+	const totalRecords = data?.meta.total ?? 0;
+
+	const setPage = useCallback((nextPage: number) => {
+		setFilters((prev) => ({ ...prev, page: nextPage }));
+	}, []);
+
+	const setPerPage = useCallback((nextPerPage: number) => {
+		setFilters((prev) => ({ ...prev, per_page: nextPerPage, page: 1 }));
+	}, []);
+
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
+	const ticketsById = useMemo(() => {
+		const map = new Map<number, Ticket>();
+		data?.data.forEach((ticket) => {
+			map.set(ticket.id, ticket);
+		});
+		return map;
+	}, [data?.data]);
+
+	const pageTicketIds = data?.data.map((ticket) => ticket.id) ?? [];
+	const selectedCount = selectedIds.size;
+	const allPageSelected =
+		pageTicketIds.length > 0 &&
+		pageTicketIds.every((id) => selectedIds.has(id));
+	const somePageSelected =
+		pageTicketIds.some((id) => selectedIds.has(id)) && !allPageSelected;
+
+	useEffect(() => {
+		setSelectedIds(new Set());
+	}, [filterKey, data?.meta.current_page]);
 
 	useEffect(() => {
 		apiFetch<{ data?: Array<{ id: number; name: string }> }>({
@@ -79,6 +144,130 @@ const SupportInbox: React.FC = () => {
 		setFilters((prev) => ({ ...prev, ...patch, page: 1 }));
 	};
 
+	const toggleSelectAll = () => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (allPageSelected) {
+				pageTicketIds.forEach((id) => next.delete(id));
+			} else {
+				pageTicketIds.forEach((id) => next.add(id));
+			}
+			return next;
+		});
+	};
+
+	const toggleSelect = (ticketId: number) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (next.has(ticketId)) {
+				next.delete(ticketId);
+			} else {
+				next.add(ticketId);
+			}
+			return next;
+		});
+	};
+
+	const selectedIdList = useMemo(
+		() => Array.from(selectedIds),
+		[selectedIds]
+	);
+
+	const runBulk = async (
+		action: () => Promise<void>,
+		successMessage: string
+	) => {
+		setBulkBusy(true);
+		try {
+			await action();
+			createNotice({ type: 'success', message: successMessage });
+			setSelectedIds(new Set());
+			refetch();
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error && err.message
+					? err.message
+					: __('Bulk action failed.', 'doublescale');
+			createNotice({ type: 'error', message });
+		} finally {
+			setBulkBusy(false);
+		}
+	};
+
+	const handleBulkClose = () => {
+		runBulk(async () => {
+			await Promise.all(
+				selectedIdList.map((id) =>
+					updateTicket(id, { status: 'closed' })
+				)
+			);
+		}, __('Selected tickets closed.', 'doublescale'));
+	};
+
+	const handleBulkDelete = () => {
+		if (
+			!window.confirm(
+				selectedCount === 1
+					? __('Delete the selected ticket?', 'doublescale')
+					: sprintf(
+							/* translators: %d: number of selected tickets */
+							__(
+								'Delete %d selected tickets? This cannot be undone.',
+								'doublescale'
+							),
+							selectedCount
+					  )
+			)
+		) {
+			return;
+		}
+
+		runBulk(async () => {
+			await Promise.all(selectedIdList.map((id) => deleteTicket(id)));
+		}, __('Selected tickets deleted.', 'doublescale'));
+	};
+
+	const handleBulkAssignAgent = async (agentUserId: number | null) => {
+		await runBulk(async () => {
+			await Promise.all(
+				selectedIdList.map((id) =>
+					updateTicket(id, { agent_user_id: agentUserId })
+				)
+			);
+		}, __('Agent assigned.', 'doublescale'));
+	};
+
+	const handleBulkAssignMailbox = async (mailboxId: number) => {
+		await runBulk(async () => {
+			await Promise.all(
+				selectedIdList.map((id) =>
+					updateTicket(id, { mailbox_id: mailboxId })
+				)
+			);
+		}, __('Tickets moved.', 'doublescale'));
+	};
+
+	const handleBulkAssignTags = async (tagIds: number[]) => {
+		await runBulk(async () => {
+			await Promise.all(
+				selectedIdList.map((id) => {
+					const ticket = ticketsById.get(id);
+					const existing = ticket?.tag_ids ?? [];
+					const merged = Array.from(new Set([...existing, ...tagIds]));
+					return updateTicket(id, { tag_ids: merged });
+				})
+			);
+		}, __('Tags applied.', 'doublescale'));
+	};
+
+	const handleBulkReply = async (content: string) => {
+		await runBulk(async () => {
+			await Promise.all(
+				selectedIdList.map((id) => addReply(id, content))
+			);
+		}, __('Replies sent.', 'doublescale'));
+	};
+
 	const hasNoMailboxes = mailboxes.length === 0;
 	const hasNoTickets =
 		!loading &&
@@ -91,6 +280,19 @@ const SupportInbox: React.FC = () => {
 
 	return (
 		<div className="doublescale-support-inbox p-6">
+			<BulkActionBar
+				selectedCount={selectedCount}
+				onReply={() => setBulkModal('reply')}
+				onAssignAgent={() => setBulkModal('agent')}
+				onAssignMailbox={() => setBulkModal('mailbox')}
+				onAssignTags={() => setBulkModal('tags')}
+				onClose={handleBulkClose}
+				onDelete={handleBulkDelete}
+				onClear={() => setSelectedIds(new Set())}
+				busy={bulkBusy}
+				canDelete={canManageAllTickets}
+			/>
+
 			<div className="mb-6 flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-semibold text-gray-900">
@@ -263,6 +465,20 @@ const SupportInbox: React.FC = () => {
 				<table className="w-full text-sm">
 					<thead className="bg-gray-50">
 						<tr className="text-left text-xs uppercase tracking-wide text-gray-500">
+							<th className="w-10 px-4 py-2">
+								<Checkbox
+									checked={
+										allPageSelected
+											? true
+											: somePageSelected
+											  ? 'indeterminate'
+											  : false
+									}
+									onCheckedChange={toggleSelectAll}
+									disabled={loading || pageTicketIds.length === 0}
+									aria-label={__('Select all on this page', 'doublescale')}
+								/>
+							</th>
 							<th className="px-4 py-2">{__('Title', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Customer', 'doublescale')}</th>
 							<th className="px-4 py-2">{__('Mailbox', 'doublescale')}</th>
@@ -276,14 +492,14 @@ const SupportInbox: React.FC = () => {
 					<tbody>
 						{loading && (
 							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+								<td colSpan={9} className="px-4 py-8 text-center text-gray-500">
 									{__('Loading tickets…', 'doublescale')}
 								</td>
 							</tr>
 						)}
 						{!loading && data?.data.length === 0 && (
 							<tr>
-								<td colSpan={8} className="px-4 py-16 text-center">
+								<td colSpan={9} className="px-4 py-16 text-center">
 									<div className="flex flex-col items-center gap-3">
 										<InboxEmptyIcon
 											width={48}
@@ -337,11 +553,26 @@ const SupportInbox: React.FC = () => {
 							data?.data.map((ticket) => (
 								<tr
 									key={ticket.id}
-									className="border-t hover:bg-gray-50 cursor-pointer"
+									className={`border-t hover:bg-gray-50 cursor-pointer ${
+										selectedIds.has(ticket.id) ? 'bg-blue-50/60' : ''
+									}`}
 									onClick={() =>
 										navigate(getToLink(`support/ticket/${ticket.id}`))
 									}
 								>
+									<td
+										className="px-4 py-3"
+										onClick={(e) => e.stopPropagation()}
+									>
+										<Checkbox
+											checked={selectedIds.has(ticket.id)}
+											onCheckedChange={() => toggleSelect(ticket.id)}
+											aria-label={__(
+												'Select ticket',
+												'doublescale'
+											)}
+										/>
+									</td>
 									<td className="px-4 py-3 font-medium text-gray-900 max-w-md truncate">
 										{ticket.title}
 									</td>
@@ -387,42 +618,40 @@ const SupportInbox: React.FC = () => {
 				/>
 			)}
 
-			{/* Pagination */}
-			{data && data.meta.last_page > 1 && (
-				<div className="mt-4 flex items-center justify-between text-sm">
-					<div className="text-gray-600">
-						{__('Page', 'doublescale')} {data.meta.current_page}{' '}
-						{__('of', 'doublescale')} {data.meta.last_page} ·{' '}
-						{data.meta.total} {__('tickets', 'doublescale')}
-					</div>
-					<div className="flex gap-2">
-						<button
-							type="button"
-							disabled={data.meta.current_page <= 1}
-							onClick={() =>
-								setFilters((prev) => ({
-									...prev,
-									page: (prev.page ?? 1) - 1,
-								}))
-							}
-							className="px-3 py-1 rounded border bg-white hover:bg-gray-50 disabled:opacity-40"
-						>
-							{__('Previous', 'doublescale')}
-						</button>
-						<button
-							type="button"
-							disabled={data.meta.current_page >= data.meta.last_page}
-							onClick={() =>
-								setFilters((prev) => ({
-									...prev,
-									page: (prev.page ?? 1) + 1,
-								}))
-							}
-							className="px-3 py-1 rounded border bg-white hover:bg-gray-50 disabled:opacity-40"
-						>
-							{__('Next', 'doublescale')}
-						</button>
-					</div>
+			{bulkModal === 'reply' && (
+				<BulkReplyModal
+					selectedCount={selectedCount}
+					onClose={() => setBulkModal(null)}
+					onSubmit={handleBulkReply}
+				/>
+			)}
+			{bulkModal === 'agent' && (
+				<AssignAgentModal
+					selectedCount={selectedCount}
+					agents={assignableAgents}
+					onClose={() => setBulkModal(null)}
+					onSubmit={handleBulkAssignAgent}
+				/>
+			)}
+			{bulkModal === 'mailbox' && (
+				<AssignMailboxModal
+					selectedCount={selectedCount}
+					mailboxes={mailboxes}
+					onClose={() => setBulkModal(null)}
+					onSubmit={handleBulkAssignMailbox}
+				/>
+			)}
+			{bulkModal === 'tags' && (
+				<AssignTagsModal
+					selectedCount={selectedCount}
+					onClose={() => setBulkModal(null)}
+					onSubmit={handleBulkAssignTags}
+				/>
+			)}
+
+			{data && totalRecords > 0 && (
+				<div className="mt-4 bg-white rounded shadow-sm border">
+					<DataTablePagination table={serverSideTable} />
 				</div>
 			)}
 		</div>

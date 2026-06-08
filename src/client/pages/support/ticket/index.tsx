@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { Trash2 } from 'lucide-react';
 
@@ -39,6 +39,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import SupportRichText from '@/components/editor/support-rich-text';
 import { htmlEditorHasMeaningfulContent } from '@/components/editor/utils';
+import { TagField } from '@doublescale/components';
 import {
 	TICKET_STATUSES,
 	TICKET_PRIORITIES,
@@ -60,6 +61,38 @@ const formatDate = (raw: string | null): string => {
 
 const eventDescription = (item: ConversationItem): string => {
 	const key = item.data.event_key ?? 'unknown';
+	if (key === 'tags_changed') {
+		const added = Array.isArray(item.data.added) ? item.data.added : [];
+		const removed = Array.isArray(item.data.removed)
+			? item.data.removed
+			: [];
+		if (added.length && removed.length) {
+			return sprintf(
+				/* translators: 1: comma-separated added tag names, 2: comma-separated removed tag names. */
+				__(
+					'Tags updated: added %1$s, removed %2$s',
+					'doublescale'
+				),
+				added.join(', '),
+				removed.join(', ')
+			);
+		}
+		if (added.length) {
+			return sprintf(
+				/* translators: %s: comma-separated tag names. */
+				__('Tags added: %s', 'doublescale'),
+				added.join(', ')
+			);
+		}
+		if (removed.length) {
+			return sprintf(
+				/* translators: %s: comma-separated tag names. */
+				__('Tags removed: %s', 'doublescale'),
+				removed.join(', ')
+			);
+		}
+		return __('Tags updated', 'doublescale');
+	}
 	const from = item.data.from ?? null;
 	const to = item.data.to ?? null;
 	const label = key.replace(/_/g, ' ');
@@ -364,6 +397,12 @@ const SupportTicketDetail: React.FC = () => {
 		refetchConversation();
 	};
 
+	const handleTagsChange = async (tagIds: number[]) => {
+		await updateTicket(ticketId, { tag_ids: tagIds });
+		refetchTicket();
+		refetchConversation();
+	};
+
 	return (
 		<div className="doublescale-support-ticket p-6 max-w-5xl">
 			<div className="flex items-center justify-between mb-4">
@@ -481,6 +520,16 @@ const SupportTicketDetail: React.FC = () => {
 							</select>
 						</div>
 					</div>
+				</div>
+
+				<div className="mt-4">
+					<div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+						{__('Tags', 'doublescale')}
+					</div>
+					<TagField
+						value={ticket.tag_ids ?? []}
+						onChange={handleTagsChange}
+					/>
 				</div>
 
 				{/* Quick actions row */}

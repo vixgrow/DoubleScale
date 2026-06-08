@@ -38,6 +38,7 @@ namespace DoubleScale\Modules\Support\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use DoubleScale\Modules\Contacts\Models\TagModel;
 use DoubleScale\Modules\Support\Models\TicketModel;
 
 /**
@@ -124,23 +125,30 @@ class ActivityLogger {
 				continue; // We don't log every column — only workflow-meaningful ones.
 			}
 
-			$this->tickets->log_event(
-				$ticket,
-				$event_key,
-				array(
-					'field' => $field,
-					'from'  => array_key_exists( $field, $before ) ? $before[ $field ] : null,
-					'to'    => $new_value,
-				)
+			$payload = array(
+				'field' => $field,
+				'from'  => array_key_exists( $field, $before ) ? $before[ $field ] : null,
+				'to'    => $new_value,
 			);
+
+			if ( 'tag_ids' === $field ) {
+				$payload = array_merge(
+					$payload,
+					$this->tag_change_summary(
+						$payload['from'],
+						$payload['to']
+					)
+				);
+			}
+
+			$this->tickets->log_event( $ticket, $event_key, $payload );
 		}
 	}
 
 	/**
 	 * Map a ticket column to a stable `event_key` we want to record on the
-	 * timeline. Columns not in this map (`tag_ids`, `custom_data`, `product`)
-	 * are too noisy or too freeform to deserve their own timeline row — UIs
-	 * that care about tag changes can subscribe to a separate hook later.
+	 * timeline. Columns not in this map (`custom_data`, `product`) are too
+	 * freeform to deserve their own timeline row.
 	 *
 	 * `mailbox_id` IS logged: a department transfer is one of the
 	 * highest-signal moves in a helpdesk workflow (changes who sees the
@@ -161,8 +169,47 @@ class ActivityLogger {
 				return 'mailbox_changed';
 			case 'title':
 				return 'title_changed';
+			case 'tag_ids':
+				return 'tags_changed';
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Build a concise added/removed tag summary for a `tags_changed` event.
+	 *
+	 * @param mixed $from Previous `tag_ids` value.
+	 * @param mixed $to   New `tag_ids` value.
+	 * @return array{added: string[], removed: string[]}
+	 */
+	private function tag_change_summary( $from, $to ): array {
+		$from_ids = is_array( $from ) ? array_values( array_map( 'intval', $from ) ) : array();
+		$to_ids   = is_array( $to ) ? array_values( array_map( 'intval', $to ) ) : array();
+
+		$added_ids   = array_values( array_diff( $to_ids, $from_ids ) );
+		$removed_ids = array_values( array_diff( $from_ids, $to_ids ) );
+		$lookup_ids  = array_values( array_unique( array_merge( $added_ids, $removed_ids ) ) );
+
+		$names_by_id = array();
+		if ( ! empty( $lookup_ids ) ) {
+			$names_by_id = TagModel::query()
+				->whereIn( 'id', $lookup_ids )
+				->pluck( 'name', 'id' )
+				->all();
+		}
+
+		$resolve = static function ( array $ids ) use ( $names_by_id ): array {
+			$labels = array();
+			foreach ( $ids as $id ) {
+				$labels[] = isset( $names_by_id[ $id ] ) ? (string) $names_by_id[ $id ] : (string) $id;
+			}
+			return $labels;
+		};
+
+		return array(
+			'added'   => $resolve( $added_ids ),
+			'removed' => $resolve( $removed_ids ),
+		);
 	}
 }

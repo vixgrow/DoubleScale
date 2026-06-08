@@ -19,6 +19,7 @@ import {
 	useConversation,
 	useAssignableAgents,
 	useMailboxes,
+	useAttachmentLimits,
 	addReply,
 	addNote,
 	updateTicket,
@@ -32,8 +33,11 @@ import {
 	ReplyIcon,
 	ConversationIcon,
 	AttachmentUploader,
+	AttachmentList,
 	CcRecipientsInput,
 	toPendingAttachment,
+	revokePendingPreviews,
+	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
 import { Badge } from '@/components/ui/badge';
@@ -46,7 +50,7 @@ import {
 	type TicketPriority,
 	type TicketStatus,
 } from '@/constants/support';
-import type { ConversationAttachment, ConversationItem } from '@/types/support';
+import type { ConversationItem } from '@/types/support';
 
 const formatDate = (raw: string | null): string => {
 	if (!raw) {
@@ -100,30 +104,6 @@ const eventDescription = (item: ConversationItem): string => {
 		return `${label}: ${String(from)} → ${String(to)}`;
 	}
 	return label;
-};
-
-const AttachmentLinks: React.FC<{ attachments?: ConversationAttachment[] }> = ({
-	attachments,
-}) => {
-	if (!attachments?.length) {
-		return null;
-	}
-	return (
-		<ul className="mt-2 space-y-1">
-			{attachments.map((att) => (
-				<li key={att.url}>
-					<a
-						href={att.url}
-						className="text-sm text-blue-600 hover:underline"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{att.file_name}
-					</a>
-				</li>
-			))}
-		</ul>
-	);
 };
 
 const ConversationBubble: React.FC<{
@@ -189,7 +169,7 @@ const ConversationBubble: React.FC<{
 					{item.cc.join(', ')}
 				</div>
 			)}
-			<AttachmentLinks attachments={item.attachments} />
+			<AttachmentList attachments={item.attachments} />
 		</div>
 	);
 };
@@ -208,6 +188,7 @@ const SupportTicketDetail: React.FC = () => {
 		useConversation(ticketId);
 	const { data: assignableAgents } = useAssignableAgents();
 	const { data: mailboxes } = useMailboxes();
+	const { limits: attachmentLimits } = useAttachmentLimits();
 	const canManageAllTickets = useCapabilities().canManageAllTickets();
 
 	const [tab, setTab] = useState<'reply' | 'note'>('reply');
@@ -282,6 +263,7 @@ const SupportTicketDetail: React.FC = () => {
 		setPendingItems((prev) => [...prev, optimistic]);
 		const draftContent = content;
 		const draftCc = cc;
+		const sentAttachments = pendingAttachments;
 		const attachmentHashes = pendingAttachments.map((a) => a.file_hash);
 		setContent('');
 		setCc([]);
@@ -303,6 +285,7 @@ const SupportTicketDetail: React.FC = () => {
 			// Real activity arrives via refetch — clear the placeholder.
 			refetchConversation();
 			refetchTicket();
+			revokePendingPreviews(sentAttachments);
 			setPendingItems((prev) =>
 				prev.filter((p) => p.id !== optimistic.id)
 			);
@@ -318,12 +301,7 @@ const SupportTicketDetail: React.FC = () => {
 				setCc(draftCc);
 				setShowCc(true);
 			}
-			setPendingAttachments(
-				attachmentHashes.map((hash, i) => ({
-					file_hash: hash,
-					file_name: pendingAttachments[i]?.file_name || hash,
-				}))
-			);
+			setPendingAttachments(sentAttachments);
 		} finally {
 			setSending(false);
 		}
@@ -333,10 +311,14 @@ const SupportTicketDetail: React.FC = () => {
 		setUploading(true);
 		setFeedback(null);
 		try {
-			const result = await uploadAttachment(ticketId, file);
+			const result = await uploadAttachment(
+				ticketId,
+				file,
+				pendingAttachments.length
+			);
 			setPendingAttachments((prev) => [
 				...prev,
-				toPendingAttachment(result),
+				toPendingAttachment(result, file),
 			]);
 		} catch (err) {
 			const msg =
@@ -720,10 +702,13 @@ const SupportTicketDetail: React.FC = () => {
 						onSelect={handleAttachmentSelect}
 						onRemove={(hash) =>
 							setPendingAttachments((prev) =>
-								prev.filter((p) => p.file_hash !== hash)
+								removePendingByHash(prev, hash)
 							)
 						}
 						disabled={sending}
+						maxFileCount={attachmentLimits?.max_file_count}
+						maxFileSizeBytes={attachmentLimits?.max_file_size_bytes}
+						onValidationError={setFeedback}
 					/>
 					{feedback && (
 						<div className="mt-2 text-sm text-red-600">

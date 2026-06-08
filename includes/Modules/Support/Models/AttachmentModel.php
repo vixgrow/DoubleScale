@@ -54,6 +54,7 @@ class AttachmentModel extends Model {
 		'file_type',
 		'file_size',
 		'file_hash',
+		'content_id',
 		'driver',
 		'status',
 	);

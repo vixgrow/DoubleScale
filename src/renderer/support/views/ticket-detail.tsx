@@ -24,7 +24,10 @@ import {
 } from '../api';
 import {
 	AttachmentUploader,
+	AttachmentList,
 	toPendingAttachment,
+	revokePendingPreviews,
+	removePendingByHash,
 	type PendingAttachment,
 } from '@/components/support';
 import type { PortalConfig, PortalConversationItem } from '../types';
@@ -35,7 +38,8 @@ interface Props {
 	onBack: () => void;
 }
 
-const TicketDetail = ({ ticketId, onBack }: Props) => {
+const TicketDetail = ({ ticketId, config, onBack }: Props) => {
+	const limits = config.attachment_limits;
 	const ticket = usePortalTicket(ticketId);
 	const conv = usePortalConversation(ticketId);
 	const [draft, setDraft] = useState('');
@@ -60,6 +64,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 				hashes.length > 0 ? hashes : undefined
 			);
 			setDraft('');
+			revokePendingPreviews(pendingAttachments);
 			setPendingAttachments([]);
 			conv.refetch();
 			ticket.refetch();
@@ -161,16 +166,20 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 					pending={pendingAttachments}
 					uploading={uploading}
 					disabled={sending}
+					maxFileCount={limits?.max_file_count}
+					maxFileSizeBytes={limits?.max_file_size_bytes}
+					onValidationError={setSendError}
 					onSelect={async (file) => {
 						setUploading(true);
 						try {
 							const result = await uploadPortalAttachment(
 								ticketId,
-								file
+								file,
+								pendingAttachments.length
 							);
 							setPendingAttachments((prev) => [
 								...prev,
-								toPendingAttachment(result),
+								toPendingAttachment(result, file),
 							]);
 						} catch (e) {
 							setSendError(
@@ -184,7 +193,7 @@ const TicketDetail = ({ ticketId, onBack }: Props) => {
 					}}
 					onRemove={(hash) =>
 						setPendingAttachments((prev) =>
-							prev.filter((p) => p.file_hash !== hash)
+							removePendingByHash(prev, hash)
 						)
 					}
 				/>
@@ -252,22 +261,10 @@ const ConversationBubble = ({ item }: { item: PortalConversationItem }) => {
 					className="prose prose-sm max-w-none text-foreground"
 					dangerouslySetInnerHTML={{ __html: content }}
 				/>
-				{item.attachments && item.attachments.length > 0 && (
-					<ul className="mt-2 space-y-1">
-						{item.attachments.map((att) => (
-							<li key={att.url}>
-								<a
-									href={att.url}
-									className="text-sm text-primary hover:underline"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									{att.file_name}
-								</a>
-							</li>
-						))}
-					</ul>
-				)}
+<AttachmentList
+	attachments={item.attachments}
+	accentClassName="text-primary"
+/>
 			</div>
 		</li>
 	);

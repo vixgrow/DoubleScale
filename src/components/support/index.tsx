@@ -95,9 +95,12 @@ const PRIORITY_STYLES: Record<
 export {
 	default as AttachmentUploader,
 	toPendingAttachment,
+	revokePendingPreviews,
+	removePendingByHash,
 } from './attachment-uploader';
 export type { PendingAttachment } from './attachment-uploader';
 export { default as CcRecipientsInput } from './cc-recipients-input';
+export { default as AttachmentList } from './attachment-list';
 
 export const PriorityPill: React.FC<{ priority: TicketPriority }> = ({
 	priority,

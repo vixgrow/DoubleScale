@@ -180,23 +180,26 @@ final class PortalFrontendHandler {
 			$ver
 		);
 
-		$user       = wp_get_current_user();
-		$is_guest   = ! is_user_logged_in() && '' !== $guest_hash;
-		$config     = array(
-			'rest_url'        => esc_url_raw( rest_url( 'doublescale/v1/support/portal' ) ),
-			'public_rest_url' => esc_url_raw( rest_url( 'doublescale/v1/support/public' ) ),
-			'rest_root'       => esc_url_raw( rest_url() ),
-			'nonce'           => wp_create_nonce( 'wp_rest' ),
-			'user'            => array(
+		$user     = wp_get_current_user();
+		$is_guest = ! is_user_logged_in() && '' !== $guest_hash;
+		$config   = array(
+			'rest_url'              => esc_url_raw( rest_url( 'doublescale/v1/support/portal' ) ),
+			'public_rest_url'       => esc_url_raw( rest_url( 'doublescale/v1/support/public' ) ),
+			'rest_root'             => esc_url_raw( rest_url() ),
+			'nonce'                 => wp_create_nonce( 'wp_rest' ),
+			'user'                  => array(
 				'id'           => (int) $user->ID,
 				'email'        => sanitize_email( $user->user_email ),
 				'display_name' => $user->display_name ? sanitize_text_field( $user->display_name ) : '',
 			),
-			'lang'            => get_locale(),
-			'mount_id'        => self::MOUNT_ID,
-			'is_guest'                => $is_guest,
-			'guest_hash'              => $is_guest ? $guest_hash : '',
-			'custom_fields_enabled'   => class_exists( '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService' ),
+			'lang'                  => get_locale(),
+			'mount_id'              => self::MOUNT_ID,
+			'is_guest'              => $is_guest,
+			'guest_hash'            => $is_guest ? $guest_hash : '',
+			'custom_fields_enabled' => class_exists( '\\DoubleScale\\Pro\\Modules\\Support\\Services\\CustomFieldsService' ),
+			// Attachment limits so the portal/guest uploader can show the caps and
+			// pre-validate before sending a file.
+			'attachment_limits'     => \DoubleScale\Modules\Support\Services\AttachmentSettings::to_payload(),
 		);
 
 		wp_localize_script(

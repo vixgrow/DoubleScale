@@ -74,6 +74,7 @@ import { useNavigate, getToLink } from '@doublescale/navigation';
 import { useCapabilities } from '@doublescale/hooks/use-capabilities';
 import { FromEmailSelector } from '@/components/from-email-selector';
 import type { VerifiedSender } from '@/shared/config/types/config-data';
+import AttachmentLimitsCard from './attachment-limits-card';
 
 // One customer-facing notification template.
 interface NotificationTemplate {
@@ -1402,6 +1403,8 @@ const SupportMailboxes: React.FC = () => {
 					</CardContent>
 				</Card>
 			)}
+
+			{!editing && <AttachmentLimitsCard onNotice={setNotice} />}
 		</div>
 	);
 };

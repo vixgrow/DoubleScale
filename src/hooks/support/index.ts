@@ -18,6 +18,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { NAMESPACE } from '@/constants/support';
 import type {
 	AgentSummary,
+	AttachmentLimits,
 	AttachmentUploadResult,
 	ConversationItem,
 	CreateTicketPayload,
@@ -371,10 +372,13 @@ const restRoot = (): string => {
 
 const postAttachment = async (
 	route: string,
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> => {
 	const formData = new FormData();
 	formData.append('file', file);
+	// Server-side count guard: how many files are already staged on this draft.
+	formData.append('pending_count', String(pendingCount));
 
 	const response = await fetch(`${restRoot()}${route}`, {
 		method: 'POST',
@@ -396,11 +400,13 @@ const postAttachment = async (
 
 export const uploadAttachment = (
 	ticketId: number,
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> =>
 	postAttachment(
 		`doublescale/v1/support/tickets/${ticketId}/attachments`,
-		file
+		file,
+		pendingCount
 	);
 
 /**
@@ -408,9 +414,67 @@ export const uploadAttachment = (
  * the caller passes as `attachment_hashes` to `createTicket`, which links it.
  */
 export const uploadAttachmentTemp = (
-	file: File
+	file: File,
+	pendingCount = 0
 ): Promise<AttachmentUploadResult> =>
-	postAttachment('doublescale/v1/support/attachments', file);
+	postAttachment('doublescale/v1/support/attachments', file, pendingCount);
+
+/**
+ * Fetch the admin-configurable attachment limits (size + count). Sourced from
+ * the mailbox-list `meta.attachment_limits` so no dedicated read endpoint is
+ * needed. `refresh` lets the settings UI re-pull after a save.
+ */
+export const useAttachmentLimits = (): {
+	limits: AttachmentLimits | null;
+	loading: boolean;
+	refresh: () => void;
+} => {
+	const [limits, setLimits] = useState<AttachmentLimits | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [tick, setTick] = useState(0);
+
+	useEffect(() => {
+		let active = true;
+		setLoading(true);
+		apiFetch<{ meta?: { attachment_limits?: AttachmentLimits } }>({
+			path: `${NAMESPACE}/mailboxes?per_page=1`,
+		})
+			.then((res) => {
+				if (active) {
+					setLimits(res?.meta?.attachment_limits ?? null);
+				}
+			})
+			.catch(() => {
+				if (active) {
+					setLimits(null);
+				}
+			})
+			.finally(() => {
+				if (active) {
+					setLoading(false);
+				}
+			});
+		return () => {
+			active = false;
+		};
+	}, [tick]);
+
+	return { limits, loading, refresh: () => setTick((t) => t + 1) };
+};
+
+/**
+ * Persist the attachment limits. Returns the stored (clamped) limits so the UI
+ * can reflect any server-side clamping immediately.
+ */
+export const saveAttachmentLimits = (input: {
+	max_file_size_mb: number;
+	max_file_count: number;
+}): Promise<{ attachment_limits: AttachmentLimits }> =>
+	apiFetch<{ attachment_limits: AttachmentLimits }>({
+		path: `${NAMESPACE}/mailboxes/attachment-settings`,
+		method: 'POST',
+		data: input,
+	});
 
 export const addReply = (ticketId: number, payload: ReplyPayload | string) => {
 	const data =

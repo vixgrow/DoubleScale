@@ -129,8 +129,8 @@ class TicketService {
 		if ( isset( $data['custom_data'] ) && is_array( $data['custom_data'] ) ) {
 			$service = self::custom_fields_service();
 			if ( $service ) {
-				$scope   = isset( $data['custom_fields_scope'] ) && 'portal' === $data['custom_fields_scope'] ? 'portal' : 'admin';
-				$context = array(
+				$scope     = isset( $data['custom_fields_scope'] ) && 'portal' === $data['custom_fields_scope'] ? 'portal' : 'admin';
+				$context   = array(
 					'ticket_title'    => (string) ( $data['title'] ?? '' ),
 					'ticket_content'  => $content,
 					'ticket_priority' => (string) ( $data['priority'] ?? TicketPriority::NORMAL ),
@@ -190,7 +190,7 @@ class TicketService {
 			// Raw-bytes attachments (inbound email): persisted + linked directly as
 			// active. Kept here so every linking path runs in this one try-block.
 			if ( ! empty( $data['attachment_files'] ) && is_array( $data['attachment_files'] ) ) {
-				$this->store_email_attachments( (int) $ticket->id, (int) $activity->id, $data['attachment_files'] );
+				$this->store_email_attachments( $activity, $data['attachment_files'] );
 			}
 		} catch ( \Throwable $e ) {
 			doublescale_get_logger()->error(
@@ -285,7 +285,7 @@ class TicketService {
 			// Raw-bytes attachments (inbound email reply): persisted + linked
 			// directly as active, alongside the hash-based path above.
 			if ( ! empty( $data['attachment_files'] ) && is_array( $data['attachment_files'] ) ) {
-				$this->store_email_attachments( (int) $ticket->id, (int) $activity->id, $data['attachment_files'] );
+				$this->store_email_attachments( $activity, $data['attachment_files'] );
 			}
 
 			// Replies AFTER the opening message bump the counter; the opening
@@ -447,7 +447,7 @@ class TicketService {
 					'product'         => (string) ( $ticket->product ?? '' ),
 					'custom_data'     => array_merge( $stored_custom, $value ),
 				);
-				$service = self::custom_fields_service();
+				$service       = self::custom_fields_service();
 				if ( $service ) {
 					$prepared = $service->prepare_for_save( $value, 'admin', $context, $stored_custom );
 					if ( is_wp_error( $prepared ) ) {
@@ -894,12 +894,20 @@ class TicketService {
 	 * activity. A single bad attachment is logged and skipped — it must never
 	 * abort the surrounding ticket/reply write.
 	 *
-	 * @param int                                                                $ticket_id   Parent ticket id.
-	 * @param int                                                                $activity_id Conversation activity id.
-	 * @param array<int, array{filename?:string, mime?:string, content?:string}> $files Decoded email attachments.
+	 * After storing, rewrite any inline-image references in the activity body
+	 * (`<img src="cid:…">`, or the bare Content-ID that `wp_kses_post()` leaves
+	 * once it strips the `cid:` scheme) to the served attachment URL, so inline
+	 * images render in the thread instead of breaking. Re-saves the activity only
+	 * when the body actually changed.
+	 *
+	 * @param ActivityModel                                                                          $activity Conversation activity.
+	 * @param array<int, array{filename?:string, mime?:string, content?:string, content_id?:string}> $files Decoded email attachments.
 	 * @return void
 	 */
-	private function store_email_attachments( int $ticket_id, int $activity_id, array $files ): void {
+	private function store_email_attachments( ActivityModel $activity, array $files ): void {
+		$ticket_id   = isset( $activity->data['ticket_id'] ) ? (int) $activity->data['ticket_id'] : 0;
+		$activity_id = (int) $activity->id;
+
 		foreach ( $files as $file ) {
 			if ( ! is_array( $file ) ) {
 				continue;
@@ -916,6 +924,17 @@ class TicketService {
 					)
 				);
 			}
+		}
+
+		// Swap inline cid: image references for served URLs now that the
+		// attachments (with their Content-IDs) exist for this activity.
+		$data           = is_array( $activity->data ) ? $activity->data : array();
+		$original_body  = isset( $data['content'] ) ? (string) $data['content'] : '';
+		$rewritten_body = $this->attachments()->rewrite_inline_image_srcs( $original_body, $activity_id );
+		if ( $rewritten_body !== $original_body ) {
+			$data['content'] = $rewritten_body;
+			$activity->data  = $data;
+			$activity->save();
 		}
 	}
 

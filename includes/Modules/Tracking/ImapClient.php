@@ -598,7 +598,7 @@ class ImapClient {
 	 * skipped so a single oversized message can't exhaust memory during a poll.
 	 *
 	 * @param int $msgno IMAP message number.
-	 * @return array<int, array{filename:string, mime:string, content:string}>
+	 * @return array<int, array{filename:string, mime:string, content:string, content_id:string}>
 	 */
 	private function get_email_attachments( $msgno ) {
 		$structure = imap2_fetchstructure( $this->connection, $msgno );
@@ -654,11 +654,30 @@ class ImapClient {
 			$subtype = strtolower( (string) ( $part->subtype ?? 'octet-stream' ) );
 
 			$attachments[] = array(
-				'filename' => '' !== $filename ? $filename : 'attachment',
-				'mime'     => $primary . '/' . $subtype,
-				'content'  => $content,
+				'filename'   => '' !== $filename ? $filename : 'attachment',
+				'mime'       => $primary . '/' . $subtype,
+				'content'    => $content,
+				// Content-ID for inline images (`<img src="cid:...">`). Stored so
+				// the support pipeline can rewrite cid: refs in the body to the
+				// served attachment URL. Empty for ordinary (non-inline) parts.
+				'content_id' => $this->part_content_id( $part ),
 			);
 		}
+	}
+
+	/**
+	 * Resolve a MIME part's Content-ID (the value an inline `<img src="cid:…">`
+	 * references), with the surrounding angle brackets stripped. '' when the part
+	 * has no Content-ID.
+	 *
+	 * @param object $part MIME part object.
+	 * @return string
+	 */
+	private function part_content_id( $part ) {
+		if ( empty( $part->ifid ) || empty( $part->id ) ) {
+			return '';
+		}
+		return trim( (string) $part->id, " <>\t\r\n" );
 	}
 
 	/**

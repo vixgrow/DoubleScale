@@ -382,6 +382,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					// Mailboxes / Custom fields (Pro replaces the page; free upsells).
 					navItem.subMenu = [
 						{ path: 'support', label: __('Inbox', 'doublescale') },
+						{ path: 'support/reports', label: __('Reports', 'doublescale') },
 						{
 							path: 'support/mailboxes',
 							label: __('Mailboxes', 'doublescale'),

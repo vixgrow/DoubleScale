@@ -32,6 +32,7 @@ const TicketDetail = lazy(() => import('./ticket'));
 // so it only loads when an admin opens Support / Mailboxes.
 const Mailboxes = lazy(() => import('./mailboxes'));
 const CustomFields = lazy(() => import('./custom-fields'));
+const Reports = lazy(() => import('./reports'));
 
 const SupportPageSkeleton: React.FC = () => (
 	<div className="p-6 space-y-4">
@@ -96,6 +97,16 @@ registerAdminPage('support-mailboxes', {
 	// an admin also gives them a support role. The single flag below already
 	// folds in the admin (manage_options) check — see AdminConfig.
 	requiredCapability: ['doublescale_manage_support_settings'],
+	requiresModule: 'support',
+});
+
+registerAdminPage('support-reports', {
+	path: 'support/reports',
+	component: wrap(Reports),
+	label: __('Reports', 'doublescale'),
+	hidden: true,
+	icon: <SupportIcon width={24} height={24} />,
+	requiredCapability: ['doublescale_view_support'],
 	requiresModule: 'support',
 });
 

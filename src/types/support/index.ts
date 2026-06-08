@@ -226,3 +226,59 @@ export interface UpdateTicketPayload {
 	tag_ids?: number[];
 	custom_data?: Record<string, unknown>;
 }
+
+export interface ReportFilters {
+	from: string;
+	to: string;
+	mailbox_id?: number;
+	agent_user_id?: number;
+}
+
+export interface ReportSummary {
+	new: number;
+	open: number;
+	resolved: number;
+	closed: number;
+	total_responses: number;
+}
+
+export interface TimeSeriesPoint {
+	date: string;
+	created: number;
+	resolved: number;
+}
+
+export interface TicketsOverTimeReport {
+	bucket: 'daily' | 'weekly' | 'monthly';
+	series: TimeSeriesPoint[];
+}
+
+export interface BreakdownBucket {
+	key: string;
+	label: string;
+	count: number;
+}
+
+export interface ReportBreakdown {
+	by_status: BreakdownBucket[];
+	by_priority: BreakdownBucket[];
+}
+
+export interface AgentReportRow {
+	agent: AgentSummary;
+	assigned: number;
+	resolved: number;
+	responses: number;
+}
+
+export interface MailboxReportRow {
+	mailbox: {
+		id: number;
+		slug: string;
+		name: string;
+	};
+	total: number;
+	open: number;
+	resolved: number;
+	closed: number;
+}

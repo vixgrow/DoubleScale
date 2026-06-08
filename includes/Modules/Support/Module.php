@@ -146,6 +146,7 @@ final class Module extends AbstractModule {
 			Rest\Controllers\RestPortalController::class,
 			Rest\Controllers\RestAttachmentController::class,
 			Rest\Controllers\RestGuestController::class,
+			Rest\Controllers\RestReportController::class,
 		);
 	}
 

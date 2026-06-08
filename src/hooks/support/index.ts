@@ -23,9 +23,15 @@ import type {
 	CreateTicketPayload,
 	Mailbox,
 	PaginatedResponse,
+	ReportBreakdown,
+	ReportFilters,
+	ReportSummary,
 	Ticket,
 	TicketFilters,
+	TicketsOverTimeReport,
 	UpdateTicketPayload,
+	AgentReportRow,
+	MailboxReportRow,
 } from '@/types/support';
 
 interface ApiOptions<TData> {
@@ -425,3 +431,55 @@ export const addNote = (ticketId: number, payload: ReplyPayload | string) => {
 		data,
 	});
 };
+
+const useReportEndpoint = <T>(
+	pathSuffix: string,
+	filters: ReportFilters,
+	extra?: Record<string, unknown>
+) => {
+	const [data, setData] = useState<T | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const filterKey = JSON.stringify({ filters, extra });
+
+	const refetch = useCallback(() => {
+		setLoading(true);
+		setError(null);
+		const queryPath = addQueryArgs(`${NAMESPACE}/reports/${pathSuffix}`, {
+			...filters,
+			...extra,
+		} as Record<string, unknown>);
+		apiFetch<T>({ path: queryPath })
+			.then((response) => {
+				setData(response);
+			})
+			.catch((err) => {
+				setError(formatRestError(err));
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filterKey]);
+
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
+
+	return { data, loading, error, refetch };
+};
+
+export const useReportSummary = (filters: ReportFilters) =>
+	useReportEndpoint<ReportSummary>('summary', filters);
+
+export const useTicketsOverTime = (filters: ReportFilters) =>
+	useReportEndpoint<TicketsOverTimeReport>('tickets-over-time', filters, { bucket: 'auto' });
+
+export const useReportBreakdown = (filters: ReportFilters) =>
+	useReportEndpoint<ReportBreakdown>('breakdown', filters);
+
+export const useAgentReport = (filters: ReportFilters) =>
+	useReportEndpoint<{ data: AgentReportRow[] }>('agents', filters);
+
+export const useMailboxReport = (filters: ReportFilters) =>
+	useReportEndpoint<{ data: MailboxReportRow[] }>('mailboxes', filters);

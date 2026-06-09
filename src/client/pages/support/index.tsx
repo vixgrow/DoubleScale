@@ -32,6 +32,7 @@ const TicketDetail = lazy(() => import('./ticket'));
 // so it only loads when an admin opens Support / Mailboxes.
 const Mailboxes = lazy(() => import('./mailboxes'));
 const CustomFields = lazy(() => import('./custom-fields'));
+const IncomingWebhook = lazy(() => import('./incoming-webhook'));
 const Reports = lazy(() => import('./reports'));
 
 const SupportPageSkeleton: React.FC = () => (
@@ -114,6 +115,16 @@ registerAdminPage('support-custom-fields', {
 	path: 'support/custom-fields',
 	component: wrap(CustomFields),
 	label: __('Custom fields', 'doublescale'),
+	hidden: true,
+	icon: <SupportIcon width={24} height={24} />,
+	requiredCapability: ['doublescale_manage_support_settings'],
+	requiresModule: 'support',
+});
+
+registerAdminPage('support-incoming-webhook', {
+	path: 'support/incoming-webhook',
+	component: wrap(IncomingWebhook),
+	label: __('Incoming Webhook', 'doublescale'),
 	hidden: true,
 	icon: <SupportIcon width={24} height={24} />,
 	requiredCapability: ['doublescale_manage_support_settings'],

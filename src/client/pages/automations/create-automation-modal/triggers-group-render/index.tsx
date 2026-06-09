@@ -43,8 +43,8 @@ import { cn } from '@/lib/utils';
 
 type GroupIconComponent = React.FC<IconProps>;
 
-function getGroupIcon(label: string): GroupIconComponent {
-	const l = label.toLowerCase();
+function getGroupIcon(label: string | undefined): GroupIconComponent {
+	const l = (label ?? '').toLowerCase();
 	if (
 		l.includes('contact') ||
 		l.includes('subscriber') ||

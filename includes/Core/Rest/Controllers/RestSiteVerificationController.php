@@ -17,6 +17,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Application_Passwords;
 use DoubleScale\Core\Abstracts\RestController;
+use DoubleScale\Core\ModuleManager;
 
 class RestSiteVerificationController extends RestController {
 	protected $rest_base = 'site';
@@ -116,6 +117,42 @@ class RestSiteVerificationController extends RestController {
 				),
 			)
 		);
+
+		// Module status (mobile app).
+		//
+		// Public by design: enabled/disabled flags are site configuration the
+		// mobile app needs before login to build navigation. Read-only; no
+		// user data. Admin toggling remains on POST /modules.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/modules/(?P<slug>[a-z0-9_-]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_module_status' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'slug' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_key',
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/modules',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_modules_status' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
 	}
 
 	/**
@@ -131,6 +168,52 @@ class RestSiteVerificationController extends RestController {
 				'auth'    => array(
 					'application_passwords' => $this->is_application_password_available(),
 				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * List all modules with enabled state (mobile app).
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_modules_status() {
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'modules' => $this->build_mobile_modules_payload(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Check whether a single module is enabled (mobile app).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_module_status( WP_REST_Request $request ) {
+		$slug = (string) $request->get_param( 'slug' );
+
+		if ( ! $this->is_known_module_slug( $slug ) ) {
+			return new WP_Error(
+				'module_not_found',
+				sprintf(
+					/* translators: %s: module slug */
+					__( 'Module "%s" was not found.', 'doublescale' ),
+					$slug
+				),
+				array( 'status' => 404 )
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'slug'    => $slug,
+				'enabled' => ModuleManager::isEnabled( $slug ),
 			),
 			200
 		);
@@ -308,6 +391,38 @@ class RestSiteVerificationController extends RestController {
 	private function is_application_password_available() {
 		return function_exists( 'wp_is_application_passwords_available' )
 			&& wp_is_application_passwords_available();
+	}
+
+	/**
+	 * @return array<int, array{slug: string, label: string, enabled: bool}>
+	 */
+	private function build_mobile_modules_payload(): array {
+		$rows = doublescale_build_modules_list_payload( ModuleManager::all() );
+
+		return array_map(
+			static function ( array $row ): array {
+				return array(
+					'slug'    => (string) $row['slug'],
+					'label'   => (string) $row['label'],
+					'enabled' => (bool) $row['enabled'],
+				);
+			},
+			$rows
+		);
+	}
+
+	private function is_known_module_slug( string $slug ): bool {
+		if ( ModuleManager::getModule( $slug ) ) {
+			return true;
+		}
+
+		if ( ! function_exists( 'doublescale_is_phantom_module_toggle_slug' )
+			|| ! doublescale_is_phantom_module_toggle_slug( $slug ) ) {
+			return false;
+		}
+
+		return function_exists( 'doublescale_phantom_module_admin_meta' )
+			&& null !== doublescale_phantom_module_admin_meta( $slug );
 	}
 
 	/**
